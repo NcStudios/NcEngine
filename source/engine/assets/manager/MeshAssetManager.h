@@ -1,19 +1,21 @@
 #pragma once
 
-#include "AssetService.h"
-#include "assets/AssetData.h"
-#include "graphics/meshes/Vertex.h"
+#include "assets/AssetService.h"
 #include "utility/Signal.h"
+
+#include "ncasset/AssetsFwd.h"
 
 #include <string>
 #include <unordered_map>
 
 namespace nc
 {
+struct MeshBufferData;
+
 class MeshAssetManager : public IAssetService<MeshView, std::string>
 {
     public:
-        MeshAssetManager(const std::string& assetDirectory);
+        explicit MeshAssetManager(const std::string& assetDirectory);
         ~MeshAssetManager() noexcept;
 
         bool Load(const std::string& path, bool isExternal) override;
@@ -25,10 +27,12 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         auto OnUpdate() -> Signal<const MeshBufferData&>*;
 
     private:
-        std::vector<Vertex> m_vertexData;
-        std::vector<uint32_t> m_indexData; 
+        std::vector<asset::MeshVertex> m_vertexData;
+        std::vector<uint32_t> m_indexData;
         std::unordered_map<std::string, MeshView> m_accessors;
         std::string m_assetDirectory;
         Signal<const MeshBufferData&> m_onUpdate;
+
+        void AddMeshView(const std::string& path, bool isExternal);
 };
 } // namespace nc

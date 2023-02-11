@@ -1,14 +1,14 @@
 #include "gtest/gtest.h"
-#include "assets/MeshAssetManager.h"
+#include "assets/manager/MeshAssetManager.h"
 
 #include <array>
 #include <string>
 
 using namespace nc;
 
-const auto MeshPath_3Vertices = "mesh3Verts.nca";
-const auto MeshPath_6Vertices = "mesh6Verts.nca";
-const auto MeshPath_9Vertices = "mesh9Verts.nca";
+const auto meshPath1 = "mesh1.nca";
+const auto meshPath2 = "mesh2.nca";
+const auto meshPath3 = "mesh3.nca";
 
 class MeshAssetManager_tests : public ::testing::Test
 {
@@ -29,14 +29,14 @@ class MeshAssetManager_tests : public ::testing::Test
 
 TEST_F(MeshAssetManager_tests, Load_NotLoaded_ReturnsTrue)
 {
-    auto actual = assetManager->Load(MeshPath_3Vertices, false);
+    auto actual = assetManager->Load(meshPath1, false);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(MeshAssetManager_tests, Load_IsLoaded_ReturnsFalse)
 {
-    assetManager->Load(MeshPath_3Vertices, false);
-    auto actual = assetManager->Load(MeshPath_3Vertices, false);
+    assetManager->Load(meshPath1, false);
+    auto actual = assetManager->Load(meshPath1, false);
     EXPECT_FALSE(actual);
 }
 
@@ -47,68 +47,62 @@ TEST_F(MeshAssetManager_tests, Load_BadPath_Throws)
 
 TEST_F(MeshAssetManager_tests, Load_Collection_ReturnsTrue)
 {
-    std::array<std::string, 3u> paths {MeshPath_3Vertices, MeshPath_6Vertices, MeshPath_9Vertices};
+    const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     auto actual = assetManager->Load(paths, false);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(MeshAssetManager_tests, Load_Collection_OffsetsAccessors)
 {
-    std::array<std::string, 3u> paths {MeshPath_3Vertices, MeshPath_6Vertices, MeshPath_9Vertices};
+    const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     assetManager->Load(paths, false);
 
-    auto view3 = assetManager->Acquire(MeshPath_3Vertices);
-    auto view6 = assetManager->Acquire(MeshPath_6Vertices);
-    auto view9 = assetManager->Acquire(MeshPath_9Vertices);
+    auto view1 = assetManager->Acquire(meshPath1);
+    auto view2 = assetManager->Acquire(meshPath2);
+    auto view3 = assetManager->Acquire(meshPath3);
 
-    EXPECT_EQ(view3.firstIndex, 0u);
-    EXPECT_EQ(view3.vertexCount, 3u);
-    EXPECT_EQ(view3.firstVertex, 0u);
-    EXPECT_EQ(view3.indexCount, 3u);
-    EXPECT_EQ(view6.firstIndex, 3u);
-    EXPECT_EQ(view6.vertexCount, 6u);
-    EXPECT_EQ(view6.firstVertex, 3u);
-    EXPECT_EQ(view6.indexCount, 6u);
-    EXPECT_EQ(view9.firstIndex, 9u);
-    EXPECT_EQ(view9.vertexCount, 9u);
-    EXPECT_EQ(view9.firstVertex, 9u);
-    EXPECT_EQ(view9.indexCount, 9u);
+    EXPECT_EQ(view1.firstIndex, 0u);
+    EXPECT_EQ(view1.firstIndex, 0u);
+    EXPECT_EQ(view2.firstVertex, view1.vertexCount);
+    EXPECT_EQ(view2.firstIndex, view1.indexCount);
+    EXPECT_EQ(view3.firstVertex, view1.vertexCount + view2.vertexCount);
+    EXPECT_EQ(view3.firstIndex, view1.indexCount + view2.indexCount);
 }
 
 TEST_F(MeshAssetManager_tests, Unload_Loaded_ReturnsTrue)
 {
-    assetManager->Load(MeshPath_3Vertices, false);
-    auto actual = assetManager->Unload(MeshPath_3Vertices);
+    assetManager->Load(meshPath1, false);
+    auto actual = assetManager->Unload(meshPath1);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(MeshAssetManager_tests, Unload_NotLoaded_ReturnsFalse)
 {
-    auto actual = assetManager->Unload(MeshPath_3Vertices);
+    auto actual = assetManager->Unload(meshPath1);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(MeshAssetManager_tests, IsLoaded_Loaded_ReturnsTrue)
 {
-    assetManager->Load(MeshPath_3Vertices, false);
-    auto actual = assetManager->IsLoaded(MeshPath_3Vertices);
+    assetManager->Load(meshPath1, false);
+    auto actual = assetManager->IsLoaded(meshPath1);
     EXPECT_TRUE(actual);
 }
 
 TEST_F(MeshAssetManager_tests, IsLoaded_NotLoaded_ReturnsFalse)
 {
-    auto actual = assetManager->IsLoaded(MeshPath_3Vertices);
+    auto actual = assetManager->IsLoaded(meshPath1);
     EXPECT_FALSE(actual);
 }
 
 TEST_F(MeshAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
-    std::array<std::string, 3u> paths {MeshPath_3Vertices, MeshPath_6Vertices, MeshPath_9Vertices};
+    const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     assetManager->Load(paths, false);
     assetManager->UnloadAll();
-    EXPECT_FALSE(assetManager->IsLoaded(MeshPath_3Vertices));
-    EXPECT_FALSE(assetManager->IsLoaded(MeshPath_6Vertices));
-    EXPECT_FALSE(assetManager->IsLoaded(MeshPath_9Vertices));
+    EXPECT_FALSE(assetManager->IsLoaded(meshPath1));
+    EXPECT_FALSE(assetManager->IsLoaded(meshPath2));
+    EXPECT_FALSE(assetManager->IsLoaded(meshPath3));
 }
 
 TEST_F(MeshAssetManager_tests, UnloadAll_Empty_Completes)
@@ -118,53 +112,39 @@ TEST_F(MeshAssetManager_tests, UnloadAll_Empty_Completes)
 
 TEST_F(MeshAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)
 {
-    std::array<std::string, 3u> paths {MeshPath_3Vertices, MeshPath_6Vertices, MeshPath_9Vertices};
+    const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     assetManager->Load(paths, false);
-    assetManager->Unload(MeshPath_3Vertices);
-    auto view6 = assetManager->Acquire(MeshPath_6Vertices);
-    auto view9 = assetManager->Acquire(MeshPath_9Vertices);
-    EXPECT_EQ(view6.firstIndex, 0u);
-    EXPECT_EQ(view6.firstVertex, 0u);
-    EXPECT_EQ(view6.indexCount, 6u);
-    EXPECT_EQ(view9.firstIndex, 6u);
-    EXPECT_EQ(view9.firstVertex, 6u);
-    EXPECT_EQ(view9.indexCount, 9u);
+    assetManager->Unload(meshPath1);
+    const auto view2 = assetManager->Acquire(meshPath2);
+    const auto view3 = assetManager->Acquire(meshPath3);
+    EXPECT_EQ(view2.firstIndex, 0u);
+    EXPECT_EQ(view2.firstVertex, 0u);
+    EXPECT_EQ(view3.firstIndex, view2.indexCount);
+    EXPECT_EQ(view3.firstVertex, view2.vertexCount);
 }
 
 TEST_F(MeshAssetManager_tests, Unload_FromMiddle_UpdatesAccesors)
 {
-    std::array<std::string, 3u> paths {MeshPath_3Vertices, MeshPath_6Vertices, MeshPath_9Vertices};
+    const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     assetManager->Load(paths, false);
-    assetManager->Unload(MeshPath_6Vertices);
-    auto view3 = assetManager->Acquire(MeshPath_3Vertices);
-    auto view9 = assetManager->Acquire(MeshPath_9Vertices);
-    EXPECT_EQ(view3.firstVertex, 0u);
-    EXPECT_EQ(view3.vertexCount, 3u);
-    EXPECT_EQ(view3.firstIndex, 0u);
-    EXPECT_EQ(view3.indexCount, 3u);
-    EXPECT_EQ(view9.firstVertex, 3u);
-    EXPECT_EQ(view9.vertexCount, 9u);
-    EXPECT_EQ(view9.firstIndex, 3u);
-    EXPECT_EQ(view9.indexCount, 9u);
+    assetManager->Unload(meshPath2);
+    const auto view1 = assetManager->Acquire(meshPath1);
+    const auto view3 = assetManager->Acquire(meshPath3);
+    EXPECT_EQ(view1.firstVertex, 0u);
+    EXPECT_EQ(view1.firstIndex, 0u);
+    EXPECT_EQ(view3.firstVertex, view1.vertexCount);
+    EXPECT_EQ(view3.firstIndex, view1.indexCount);
 }
 
 TEST_F(MeshAssetManager_tests, Unload_FromEnd_UpdatesAccesors)
 {
-    std::array<std::string, 3u> paths {MeshPath_3Vertices, MeshPath_6Vertices, MeshPath_9Vertices};
+    const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     assetManager->Load(paths, false);
-    assetManager->Unload(MeshPath_9Vertices);
-    auto view3 = assetManager->Acquire(MeshPath_3Vertices);
-    auto view6 = assetManager->Acquire(MeshPath_6Vertices);
-    EXPECT_EQ(view3.firstIndex, 0u);
-    EXPECT_EQ(view3.firstVertex, 0u);
-    EXPECT_EQ(view3.indexCount, 3u);
-    EXPECT_EQ(view6.firstIndex, 3u);
-    EXPECT_EQ(view6.firstVertex, 3u);
-    EXPECT_EQ(view6.indexCount, 6u);
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    assetManager->Unload(meshPath3);
+    const auto view1 = assetManager->Acquire(meshPath1);
+    const auto view2 = assetManager->Acquire(meshPath2);
+    EXPECT_EQ(view1.firstIndex, 0u);
+    EXPECT_EQ(view1.firstVertex, 0u);
+    EXPECT_EQ(view2.firstIndex, view1.indexCount);
+    EXPECT_EQ(view2.firstVertex, view1.vertexCount);
 }

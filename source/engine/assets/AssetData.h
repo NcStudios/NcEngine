@@ -1,7 +1,8 @@
 #pragma once
 
-#include "graphics/meshes/Vertex.h"
 #include "utility/Memory.h"
+
+#include "ncasset/Assets.h"
 
 #include <array>
 #include <cstdlib>
@@ -21,16 +22,13 @@ enum class UpdateAction : uint8_t
 
 struct MeshBufferData
 {
-    std::span<const Vertex> vertices;
+    std::span<const asset::MeshVertex> vertices;
     std::span<const uint32_t> indices;
 };
 
 struct TextureData
 {
-    TextureData(unsigned char* pixels_, int width_, int height_, std::string id_);
-    unique_c_ptr<unsigned char[]> pixels;
-    int width;
-    int height;
+    asset::Texture texture;
     std::string id;
 };
 
@@ -44,11 +42,7 @@ struct TextureBufferData
 
 struct CubeMapData
 {
-    CubeMapData(const std::array<unsigned char*, 6>& pixels, int width_, int height_, int size_, std::string id_);
-    std::array<unique_c_ptr<unsigned char[]>, 6> pixelArray;
-    int width;
-    int height;
-    int size;
+    asset::CubeMap cubeMap;
     std::string id;
 };
 

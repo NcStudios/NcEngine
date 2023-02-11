@@ -116,7 +116,7 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    auto GpuAllocator::CreateTexture(unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
     {
         const auto imageSize = width * height * 4u;
         auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
@@ -135,26 +135,18 @@ namespace nc::graphics
         return imageAllocation;
     }
 
-    auto GpuAllocator::CreateCubeMapTexture(const std::array<unique_c_ptr<unsigned char[]>, 6>& pixels, uint32_t width, uint32_t height, uint32_t cubeMapSize) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength) -> GpuAllocation<vk::Image>
     {
         auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
-
         auto* mappedData = Map(stagingBuffer.Allocation());
-
-        const uint32_t imageSize = width * height * 4u;
-
-        for(uint32_t layer = 0u; layer < 6u; ++layer)
-        {
-            char* destination = static_cast<char*>(mappedData) + imageSize * layer;
-            std::memcpy(destination, pixels[layer].get(), imageSize);
-        }
+        std::memcpy(mappedData, pixels, cubeMapSize);
 
         Unmap(stagingBuffer.Allocation());
-        auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
+        auto dimensions = Vector2{static_cast<float>(sideLength), static_cast<float>(sideLength)};
         auto imageBuffer = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, vk::SampleCountFlagBits::e1);
 
         TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
-        CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), width, height, 6);
+        CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), sideLength, sideLength, 6);
         TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
 
         stagingBuffer.Release();

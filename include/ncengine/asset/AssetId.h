@@ -2,20 +2,11 @@
 
 #include "ncutility/Hash.h"
 
+#include "ncasset/AssetType.h"
+
 namespace nc
 {
-enum class AssetType
-{
-    AudioClip,
-    ConcaveCollider,
-    HullCollider,
-    Mesh,
-    Shader,
-    Skybox,
-    Texture
-};
-
-template<AssetType T>
+template<asset::AssetType T>
 class AssetId
 {
     public:
@@ -33,13 +24,13 @@ class AssetId
         utility::StringHash m_hash;
 };
 
-template<AssetType T>
+template<asset::AssetType T>
 constexpr bool operator==(AssetId<T> lhs, AssetId<T> rhs)
 {
     return lhs.Id() == rhs.Id();
 }
 
-template<AssetType T>
+template<asset::AssetType T>
 constexpr bool operator!=(AssetId<T> lhs, AssetId<T> rhs)
 {
     return !(lhs == rhs);
