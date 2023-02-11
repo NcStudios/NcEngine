@@ -1,13 +1,15 @@
 #include "gtest/gtest.h"
-#include "assets/AudioClipAssetManager.h"
+#include "assets/manager/AudioClipAssetManager.h"
+
+#include "ncasset/Assets.h"
 
 #include <array>
 #include <string>
 
 using namespace nc;
 
-const auto SoundPath1 = "sound1.wav";
-const auto SoundPath2 = "sound2.wav";
+const auto SoundPath1 = "sound1.nca";
+const auto SoundPath2 = "sound2.nca";
 
 class AudioClipAssetManager_tests : public ::testing::Test
 {
@@ -103,10 +105,4 @@ TEST_F(AudioClipAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 TEST_F(AudioClipAssetManager_tests, UnloadAll_Empty_Completes)
 {
     assetManager->UnloadAll();
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

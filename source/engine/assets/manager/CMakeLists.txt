@@ -1,0 +1,10 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        AudioClipAssetManager.cpp
+        ConcaveColliderAssetManager.cpp
+        CubeMapAssetManager.cpp
+        HullColliderAssetManager.cpp
+        MeshAssetManager.cpp
+        ShaderAssetManager.cpp
+        TextureAssetManager.cpp
+)

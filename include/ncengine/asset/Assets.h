@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AssetId.h"
 #include "ncengine/utility/EnumUtilities.h"
 
 #include "ncmath/Geometry.h"
@@ -56,7 +55,6 @@ namespace nc
     /** Supported file types: .png 
     *  @note Unloading textures invalidates all CubeMapViews. It is intended
     *  to be done on scene change. */
-    struct CubeMapFaces;
     bool LoadCubeMapAsset(const std::string& path, bool isExternal = false);
     bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal = false);
     bool UnloadCubeMapAsset(const std::string& paths);
@@ -106,16 +104,6 @@ namespace nc
     {
         CubeMapUsage usage;
         uint32_t index;
-    };
-
-    struct CubeMapFaces
-    {
-        std::string frontPath;
-        std::string backPath;
-        std::string upPath;
-        std::string downPath;
-        std::string rightPath;
-        std::string leftPath;
     };
 
     enum class DescriptorType : uint8_t

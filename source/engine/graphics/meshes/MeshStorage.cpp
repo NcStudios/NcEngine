@@ -13,7 +13,7 @@ MeshStorage::MeshStorage(GpuAllocator* allocator, const nc::GpuAccessorSignals& 
 }
 
 VertexBuffer::VertexBuffer(GpuAllocator* allocator)
-    : vertices{std::vector<nc::Vertex>{nc::Vertex()}},
+    : vertices{std::vector<asset::MeshVertex>{asset::MeshVertex()}},
       buffer{ImmutableBuffer(allocator, vertices)}
 {
 }
@@ -34,7 +34,7 @@ const IndexBuffer& MeshStorage::GetIndexData() const noexcept
     return m_indexBuffer;
 }
 
-void MeshStorage::UpdateBuffer(const MeshBufferData& meshBufferData)	
+void MeshStorage::UpdateBuffer(const MeshBufferData& meshBufferData)
 {
     m_vertexBuffer.buffer.Clear();
     m_vertexBuffer.buffer = ImmutableBuffer(m_allocator, meshBufferData.vertices);

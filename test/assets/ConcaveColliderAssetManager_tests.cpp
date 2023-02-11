@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
-#include "assets/ConcaveColliderAssetManager.h"
+#include "assets/manager/ConcaveColliderAssetManager.h"
+
+#include "ncasset/Assets.h"
 
 #include <array>
 #include <string>
@@ -103,10 +105,4 @@ TEST_F(ConcaveColliderAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 TEST_F(ConcaveColliderAssetManager_tests, UnloadAll_Empty_Completes)
 {
     assetManager->UnloadAll();
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

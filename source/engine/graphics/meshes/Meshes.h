@@ -9,7 +9,7 @@ class GpuAllocator;
 struct VertexBuffer
 {
     VertexBuffer(GpuAllocator* allocator);
-    std::span<const nc::Vertex> vertices;
+    std::span<const asset::MeshVertex> vertices;
     ImmutableBuffer buffer;
 };
 

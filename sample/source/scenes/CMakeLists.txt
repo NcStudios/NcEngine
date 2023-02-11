@@ -7,6 +7,5 @@ target_sources(${NC_SAMPLE_EXE}
         JointsTest.cpp
         RenderingBenchmark.cpp
         SpawnTest.cpp
-        SolarSystem.cpp
         Worms.cpp
 )
