@@ -100,7 +100,7 @@ void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
     auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
     registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
-    nc::LoadCubeMapAsset("DefaultSkybox/DefaultSkybox.nca");
-    modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox/DefaultSkybox.nca");
+    nc::LoadCubeMapAsset("DefaultSkybox.nca");
+    modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
 }
 } // namespace nc::sample

@@ -1,5 +1,7 @@
 #include "ImmutableBuffer.h"
 
+#include "ncasset/Assets.h"
+
 namespace
 {
     template<class T>
@@ -12,7 +14,7 @@ namespace
     }
 
     template<>
-    auto UsageFlags<nc::Vertex>() -> vk::BufferUsageFlags
+    auto UsageFlags<nc::asset::MeshVertex>() -> vk::BufferUsageFlags
     {
         return vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
     }
@@ -55,7 +57,7 @@ namespace nc::graphics
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(GpuAllocator* allocator, std::span<const nc::Vertex> data)
+    ImmutableBuffer::ImmutableBuffer(GpuAllocator* allocator, std::span<const asset::MeshVertex> data)
         : m_buffer{CreateBuffer(allocator, data)}
     {
     }

@@ -12,8 +12,7 @@
 #include <memory>
 #include <mutex>
 
-namespace nc { struct AssetServices; class Registry; }
-
+namespace nc {class Registry;}
 namespace nc::graphics
 {
     class GpuOptions;
@@ -57,7 +56,6 @@ namespace nc::graphics
             std::unique_ptr<GpuAllocator> m_allocator;
             std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;
             std::unique_ptr<ShaderResources> m_shaderResources;
-            std::unique_ptr<AssetServices> m_assetServices;
             std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
             std::unique_ptr<RenderGraph> m_renderGraph;
             std::unique_ptr<Imgui> m_imgui;

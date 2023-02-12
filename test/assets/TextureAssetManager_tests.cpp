@@ -1,14 +1,15 @@
 #include "gtest/gtest.h"
-#include "assets/TextureAssetManager.h"
+#include "assets/AssetData.h"
+#include "assets/manager/TextureAssetManager.h"
 
 #include <array>
 #include <string>
 
 using namespace nc;
 
-const auto Texture_base = "texture_base.png";
-const auto Texture_normal = "texture_normal.png";
-const auto Texture_roughness = "texture_roughness.png";
+const auto Texture_base = "texture_base.nca";
+const auto Texture_normal = "texture_normal.nca";
+const auto Texture_roughness = "texture_roughness.nca";
 const uint32_t MaxTextures = 100;
 
 class TextureAssetManager_tests : public ::testing::Test
@@ -139,10 +140,4 @@ TEST_F(TextureAssetManager_tests, Unload_FromEnd_AccessorsNotUpdated)
     auto view2 = assetManager->Acquire(Texture_normal);
     EXPECT_EQ(view1.index, 0u);
     EXPECT_EQ(view2.index, 1u);
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

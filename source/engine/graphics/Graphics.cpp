@@ -1,5 +1,5 @@
 #include "Graphics.h"
-#include "assets/AssetServices.h"
+#include "GpuOptions.h"
 #include "Commands.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
@@ -32,7 +32,6 @@ namespace nc::graphics
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
           m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_core->logicalDevice.get())},
           m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_shaderDescriptorSets.get(), registry, m_allocator.get(), config::GetMemorySettings(), dimensions)},
-          m_assetServices{ std::make_unique<AssetServices>(config::GetAssetSettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
           m_renderGraph{std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
           m_imgui{ std::make_unique<Imgui>(m_core->logicalDevice.get())},

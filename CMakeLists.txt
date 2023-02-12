@@ -43,20 +43,32 @@ include(FetchContent)
 
 FetchContent_Declare(NcCommon
                      GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
-                     GIT_TAG        39ff59b4027854ad236a046446ecfbb5d91aec5f # origin/release
+                     GIT_TAG        f30ac63ac9b55d6b8f413217dfa05401f27e22fb # origin/release
+                     GIT_SHALLOW    TRUE
 )
 
+set(NC_TOOLS_BUILD_CONVERTER OFF)
+set(NC_TOOLS_BUILD_TESTS OFF)
 FetchContent_Declare(nc-tools
-                     URL      https://github.com/NcStudios/NcTools/releases/download/v0.1.1/nc-tools.zip
-                     URL_HASH SHA256=97BD697A4A3C6CF01713E984CF497DDCB1E2C8D09B0F6FC25E1FD6017F372671
+                     GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
+                     GIT_TAG             v1.0.0
+                     GIT_SHALLOW         TRUE
+)
+
+# Get pre-built nc-convert.exe from NcTools so we don't have to build it and its dependencies
+FetchContent_Declare(nc-convert
+                     URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.0/nc-convert.exe
+                     URL_HASH            SHA256=281FA6A37D6A72111EF8586F4A8A415F3C9D52CA44B956E143911813A5759A3F
+                     DOWNLOAD_NO_EXTRACT TRUE
 )
 
 FetchContent_Declare(taskflow
                      GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
                      GIT_TAG        ab6c1b6cd2651d4a4b1a3204b2e1b95f75d06a56 # origin/master
+                     GIT_SHALLOW    TRUE
 )
 
-FetchContent_MakeAvailable(NcCommon nc-tools taskflow)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow)
 
 # Add source
 add_subdirectory(source)
@@ -69,21 +81,20 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install nc-tools
-install(FILES       ${nc-tools_SOURCE_DIR}/nc-tools.exe
+# Install nc-convert executable
+install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
         DESTINATION bin
 )
 
 # Install Default Assets
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
         DESTINATION    resources/assets
-        FILES_MATCHING REGEX ".*\.(nca)|(spv)|(png)|(jpg)"
+        FILES_MATCHING REGEX ".*\.(nca)|(spv)"
 )
 
 # Install External Files
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/enet
                     ${PROJECT_SOURCE_DIR}/source/external/imgui
-                    ${PROJECT_SOURCE_DIR}/source/external/vulkan
         DESTINATION include
         PATTERN     "src" EXCLUDE
 )

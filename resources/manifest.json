@@ -1,0 +1,63 @@
+{
+    "globalOptions": {
+        "outputDirectory": ".\\nca"
+    },
+    "concave-collider": [
+        {
+            "sourcePath": "raw\\model\\plane.fbx",
+            "assetName": "concave_colliders\\plane"
+        }
+    ],
+    "cube-map": [
+        {
+            "sourcePath": "raw\\image\\DefaultSkybox.png",
+            "assetName": "cube_maps\\DefaultSkybox.png"
+        }
+    ],
+    "hull-collider": [
+        {
+            "sourcePath": "raw\\model\\cube.fbx",
+            "assetName": "hull_colliders\\cube"
+        }
+    ],
+    "mesh": [
+        {
+            "sourcePath": "raw\\model\\capsule.fbx",
+            "assetName": "meshes\\capsule"
+        },
+        {
+            "sourcePath": "raw\\model\\cube.fbx",
+            "assetName": "meshes\\cube"
+        },
+        {
+            "sourcePath": "raw\\model\\plane.fbx",
+            "assetName": "meshes\\plane"
+        },
+        {
+            "sourcePath": "raw\\model\\cube.fbx",
+            "assetName": "meshes\\skybox"
+        },
+        {
+            "sourcePath": "raw\\model\\sphere.fbx",
+            "assetName": "meshes\\sphere"
+        }
+    ],
+    "texture": [
+        {
+            "sourcePath": "raw\\image\\DefaultBaseColor.png",
+            "assetName": "texture\\DefaultBaseColor"
+        },
+        {
+            "sourcePath": "raw\\image\\DefaultMetallic.png",
+            "assetName": "texture\\DefaultMetallic"
+        },
+        {
+            "sourcePath": "raw\\image\\DefaultNormal.png",
+            "assetName": "texture\\DefaultNormal"
+        },
+        {
+            "sourcePath": "raw\\image\\DefaultParticle.png",
+            "assetName": "texture\\DefaultParticle"
+        }
+    ]
+}

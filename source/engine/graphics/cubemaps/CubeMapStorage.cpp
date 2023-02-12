@@ -41,7 +41,7 @@ void CubeMapStorage::LoadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferDat
     for (auto i = 0u; i < cubeMapBufferData.ids.size(); ++i)
     {
         const auto& cubeMapData = cubeMapBufferData.data[i];
-        m_cubeMaps.emplace_back(m_device, m_allocator, cubeMapData.pixelArray, cubeMapData.width, cubeMapData.height, cubeMapData.size, cubeMapData.id);
+        m_cubeMaps.emplace_back(m_device, m_allocator, cubeMapData);
     }
 
     graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);

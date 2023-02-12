@@ -1,9 +1,8 @@
+#include "gtest/gtest.h"
+#include "assets/manager/ShaderAssetManager.h"
+
 #include <array>
 #include <filesystem>
-
-#include "gtest/gtest.h"
-
-#include "assets/ShaderAssetManager.h"
 
 using namespace nc;
 
@@ -69,10 +68,4 @@ TEST_F(ShaderAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
     assetManager->UnloadAll();
     EXPECT_FALSE(assetManager->IsLoaded("shader1"));
     EXPECT_FALSE(assetManager->IsLoaded("shader2"));
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

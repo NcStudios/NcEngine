@@ -41,6 +41,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         wmcodecdspuuid
         #enet add for project requiring networking
     PUBLIC
+        NcAsset
         NcMath
         NcUtility
         Vulkan::Vulkan
@@ -68,7 +69,7 @@ target_include_directories(${NC_ENGINE_LIB}
 )
 
 # Install
-install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} ${ENET_LIB} NcMath NcUtility
+install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} ${ENET_LIB} NcMath NcUtility NcAsset
         EXPORT      NcEngine-export
         DESTINATION lib
 )
