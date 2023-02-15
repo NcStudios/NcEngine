@@ -1,9 +1,9 @@
 #include "RenderGraph.h"
 #include "graphics/GpuAllocator.h"
 #include "graphics/GpuOptions.h"
-#include "graphics/meshes/Meshes.h"
 #include "graphics/PerFrameGpuContext.h"
 #include "graphics/Swapchain.h"
+#include "graphics/meshes/Meshes.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
 #include "graphics/techniques/ParticleTechnique.h"
 #include "graphics/techniques/PbrTechnique.h"
@@ -15,7 +15,6 @@
 
 #include "optick/optick.h"
 
-#include <iostream>
 #include <string>
 
 namespace
@@ -37,7 +36,7 @@ void BeginRenderPass(nc::graphics::RenderPass* renderPass, vk::CommandBuffer* cm
     const auto renderPassInfo = vk::RenderPassBeginInfo
     {
         renderPass->renderPass.get(), 
-        GetFrameBuffer(renderPass, attachmentIndex)->frameBuffer.get(),
+        nc::graphics::GetFrameBuffer(renderPass, attachmentIndex)->frameBuffer.get(),
         vk::Rect2D{vk::Offset2D{0, 0}, 
         renderPass->attachmentSize.extent},
         static_cast<uint32_t>(clearValues.size()),
@@ -67,6 +66,45 @@ void SetViewportAndScissor(vk::CommandBuffer* commandBuffer, nc::Vector2 dimensi
     commandBuffer->setViewport(0, 1, &viewport);
     commandBuffer->setScissor(0, 1, &scissor);
 }
+
+auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator *allocator, nc::graphics::GpuOptions *gpuOptions, nc::graphics::Swapchain *swapchain, nc::Vector2 dimensions) -> std::unique_ptr<nc::graphics::RenderPass>
+{
+    using namespace nc::graphics;
+
+    auto numSamples = gpuOptions->GetMaxSamplesCount();
+
+    std::vector<AttachmentSlot> litAttachmentSlots{
+        AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, numSamples},
+        AttachmentSlot{1, AttachmentType::Depth, gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
+        AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}};
+
+    std::vector<Subpass> litSubpasses{
+        Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}};
+
+    std::vector<std::unique_ptr<Attachment>> attachments;
+    attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, true, numSamples, gpuOptions->GetDepthFormat())); // Depth Stencil
+    attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
+
+    const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
+    auto renderPass = std::make_unique<RenderPass>(device, 1u, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+
+    auto &colorImageViews = swapchain->GetColorImageViews();
+    auto &depthImageView = renderPass->attachments[0]->view;
+    auto &colorResolveView = renderPass->attachments[1]->view;
+
+    uint32_t index = 0;
+    for (auto &imageView : colorImageViews)
+    {
+        std::vector<vk::ImageView> imageViews
+        {
+            colorResolveView.get(), // Color Resolve View
+            depthImageView.get(), // Depth View
+            imageView.get()
+        };
+        RegisterAttachments(device, renderPass.get(), imageViews, dimensions, index++);
+    }
+    return std::move(renderPass);
+}
 }
 
 namespace nc::graphics
@@ -77,10 +115,9 @@ RenderGraph::RenderGraph(vk::Device device, Swapchain* swapchain, GpuOptions* gp
       m_gpuOptions{gpuOptions},
       m_gpuAllocator{gpuAllocator},
       m_descriptorSets{descriptorSets},
-      m_renderPasses{},
       m_dimensions{dimensions}
 {
-    Add(CreateLitPass(device, gpuAllocator, gpuOptions, swapchain, m_dimensions));
+    Add(CreateLitPass(m_device, m_gpuAllocator, m_gpuOptions, m_swapchain, m_dimensions));
 
     #ifdef NC_EDITOR_ENABLED
     RegisterTechnique<WireframeTechnique>(LitPassId);
@@ -97,19 +134,19 @@ RenderGraph::~RenderGraph() noexcept
     m_renderPasses.clear();
 }
 
-void RenderGraph::Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage& meshStorage, uint32_t frameBufferIndex, Vector2 dimensions)
+void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, Vector2 dimensions) const
 {
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
-    auto cmd = currentFrame->CommandBuffer();
+    const auto cmd = currentFrame->CommandBuffer();
     SetViewportAndScissor(cmd, dimensions);
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
-    uint32_t bufferIndex = 0u;
-    for (auto& renderPass : m_renderPasses)
+    auto bufferIndex = 0u;
+    for (auto &renderPass : m_renderPasses)
     {
         BeginRenderPass(renderPass.get(), cmd, frameBufferIndex);
-        for (auto& technique : renderPass->techniques)
+        for (const auto &technique : renderPass->techniques)
         {
             if (!technique->CanBind(frameData)) continue;
 
@@ -126,7 +163,7 @@ void RenderGraph::Execute(PerFrameGpuContext* currentFrame, const PerFrameRender
 
 RenderPass* RenderGraph::Acquire(const std::string& uid)
 {
-    auto renderPassPos = std::ranges::find_if(m_renderPasses, [uid](auto& renderPass) { return (renderPass->uid == uid); });
+    const auto renderPassPos = std::ranges::find_if(m_renderPasses, [uid](auto& renderPass) { return (renderPass->uid == uid); });
     if (renderPassPos == m_renderPasses.end()) throw NcError("RenderGraph::Acquire - Render pass does not exist.");
     return (*renderPassPos).get();
 }
@@ -134,16 +171,18 @@ RenderPass* RenderGraph::Acquire(const std::string& uid)
 void RenderGraph::Add(std::unique_ptr<RenderPass> renderPass)
 {
     m_renderPasses.push_back(std::move(renderPass));
-    std::sort(m_renderPasses.begin(), m_renderPasses.end(), [](const auto& renderPassA, const auto& renderPassB) {return renderPassA->priority < renderPassB->priority;});
+    std::ranges::sort(m_renderPasses, [](const auto &renderPassA, const auto &renderPassB)
+    {
+        return renderPassA->priority < renderPassB->priority;
+    });
 }
 
 void RenderGraph::Remove(const std::string& uid)
 {
-    const auto it = std::find_if(m_renderPasses.begin(), m_renderPasses.end(), ([uid](const auto& pass){return pass->uid == uid;}));
-    if(it == m_renderPasses.end()) throw NcError("RenderGraph::Remove - Render pass does not exist: " + uid);
-
-    *it = std::move(m_renderPasses.back());
-    m_renderPasses.pop_back();
+    std::erase_if(m_renderPasses, [uid](const auto &pass)
+    {
+        return pass->uid == uid;
+    });
 }
 
 void RenderGraph::RegisterShadowMappingTechnique(const std::string& uid, uint32_t shadowCasterIndex)
@@ -159,8 +198,6 @@ void RenderGraph::Resize(Swapchain* swapchain, const Vector2& dimensions)
     m_dimensions = dimensions;
     m_swapchain = swapchain;
     Add(CreateLitPass(m_device, m_gpuAllocator, m_gpuOptions, m_swapchain, m_dimensions));
-    // ResizeLitPass(Acquire(LitPassId), m_swapchain, m_gpuAllocator, m_gpuOptions, m_dimensions)
-
 
     #ifdef NC_EDITOR_ENABLED
     RegisterTechnique<WireframeTechnique>(LitPassId);

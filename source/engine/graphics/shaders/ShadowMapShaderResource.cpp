@@ -7,23 +7,25 @@ namespace
 {
 vk::UniqueSampler CreateShadowMapSampler(vk::Device device)
 {
-    vk::SamplerCreateInfo samplerInfo = {};
-    samplerInfo.setMagFilter(vk::Filter::eNearest);
-    samplerInfo.setMinFilter(vk::Filter::eNearest);
-    samplerInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
-    samplerInfo.setAddressModeU(vk::SamplerAddressMode::eClampToBorder);
-    samplerInfo.setAddressModeV(vk::SamplerAddressMode::eClampToBorder);
-    samplerInfo.setAddressModeW(vk::SamplerAddressMode::eClampToBorder);
-    samplerInfo.setAnisotropyEnable(VK_TRUE);
-    samplerInfo.setMaxAnisotropy(1.0f);
-    samplerInfo.setBorderColor(vk::BorderColor::eFloatOpaqueWhite);
-    samplerInfo.setUnnormalizedCoordinates(VK_FALSE);
-    samplerInfo.setCompareEnable(VK_FALSE);
-    samplerInfo.setCompareOp(vk::CompareOp::eAlways);
-    samplerInfo.setMipLodBias(0.0f);
-    samplerInfo.setMinLod(0.0f);
-    samplerInfo.setMaxLod(1.0f);
-
+    constexpr auto samplerInfo = vk::SamplerCreateInfo
+    {
+        vk::SamplerCreateFlags(),               // SamplerCreateFlags
+        vk::Filter::eNearest,                   // MagFilter
+        vk::Filter::eNearest,                   // MinFilter
+        vk::SamplerMipmapMode::eLinear,         // MipMapMode
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeU
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeV
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeW
+        0.0f,                                   // MipLodBias
+        VK_TRUE,                                // AnisotropyEnable
+        1.0f,                                   // MaxAnisotropy
+        VK_FALSE,                               // CompareEnable
+        vk::CompareOp::eAlways,                 // CompareOp
+        0.0f,                                   // MinLod
+        1.0f,                                   // MaxLod
+        vk::BorderColor::eFloatOpaqueWhite,     // BorderColor
+        VK_FALSE                                // UnnormalizedCoordinates
+    };
     return device.createSamplerUnique(samplerInfo);
 }
 }
@@ -32,7 +34,6 @@ namespace nc::graphics
     ShadowMapShaderResource::ShadowMapShaderResource(uint32_t bindingSlot, vk::Device device, ShaderDescriptorSets* descriptors, uint32_t maxShadows)
     : m_descriptors{ descriptors },
       m_sampler{CreateShadowMapSampler(device)},
-      m_imageInfos{},
       m_bindingSlot{bindingSlot},
       m_maxShadows{maxShadows}
     {

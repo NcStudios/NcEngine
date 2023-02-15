@@ -3,13 +3,10 @@
 #include "graphics/techniques/ITechnique.h"
 #include "ncmath/Vector.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
-#include <array>
 #include <memory>
 #include <span>
 #include <vector>
-
-/** @todo As more stuff gets pulled into here, consider splitting this up into multiple files. */
+#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {
@@ -37,8 +34,8 @@ enum class AttachmentType : uint8_t
 
 struct FrameBuffer
 {
-    uint32_t index;
-    std::span<const vk::ImageView> attachmentHandles;
+    uint32_t index{};
+    std::span<const vk::ImageView> attachmentHandles{};
     vk::UniqueFramebuffer frameBuffer;
 };
 
@@ -51,9 +48,7 @@ struct Attachment
 
 struct AttachmentSlot
 {
-    AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp,
-                   vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
-
+    AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
     vk::AttachmentDescription description;
     vk::AttachmentReference reference;
     AttachmentType type;
@@ -61,10 +56,10 @@ struct AttachmentSlot
 
 struct Subpass
 {
-    Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment);
-    Subpass(const AttachmentSlot& depthAttachment);
+    Subpass(const AttachmentSlot &colorAttachment, const AttachmentSlot &depthAttachment, const AttachmentSlot &resolveAttachment);
+    explicit Subpass(const AttachmentSlot &depthAttachment);
     vk::SubpassDescription description;
-    std::vector<vk::SubpassDependency> dependencies;
+    std::vector<vk::SubpassDependency> dependencies{};
 };
 
 struct AttachmentSize
@@ -88,17 +83,11 @@ struct RenderPass
     vk::UniqueRenderPass renderPass;
     AttachmentSize attachmentSize;
     ClearValueFlags_t clearFlags;
-    std::vector<std::unique_ptr<ITechnique>> techniques;
-    std::vector<std::unique_ptr<Attachment>> attachments;
-    std::vector<std::unique_ptr<FrameBuffer>> frameBuffers;
-
+    std::vector<std::unique_ptr<ITechnique>> techniques{};
+    std::vector<std::unique_ptr<Attachment>> attachments{};
+    std::vector<std::unique_ptr<FrameBuffer>> frameBuffers{};
 };
 
-inline static const std::string LitPassId = "Lit Pass";
-inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
-
-auto CreateLitPass(vk::Device device, GpuAllocator* allocator, GpuOptions* gpuOptions, Swapchain* swapchain, Vector2 dimensions) -> std::unique_ptr<RenderPass>;
-auto CreateShadowMappingPass(vk::Device device, GpuAllocator* allocator, GpuOptions* gpuOptions, Swapchain* swapchain, nc::Vector2 dimensions, uint32_t index) -> std::unique_ptr<RenderPass>;
-auto CreateFrameBuffer(vk::Device device, vk::RenderPass renderPass, std::span<const vk::ImageView> attachmentHandles, uint32_t width, uint32_t height) -> vk::UniqueFramebuffer;
-auto GetFrameBuffer(nc::graphics::RenderPass* renderPass, uint32_t index) -> FrameBuffer*;
+auto GetFrameBuffer(nc::graphics::RenderPass *renderPass, uint32_t index) -> nc::graphics::FrameBuffer*;
+void RegisterAttachments(vk::Device device, nc::graphics::RenderPass *renderPass, std::span<const vk::ImageView> attachmentHandles, const nc::Vector2 &dimensions, uint32_t index);
 } // namespace nc::graphics

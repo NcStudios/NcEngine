@@ -1,16 +1,14 @@
 #pragma once
 
-#include "ecs/Registry.h"
 #include "graphics/renderpasses/RenderPass.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResourceService.h"
-#include "utility/Signal.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {
-    class GpuAllocator; class PointLight;
+    class GpuAllocator;
 
     struct ShadowMap
     {

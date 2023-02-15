@@ -16,6 +16,8 @@ class PerFrameGpuContext;
 class ShaderDescriptorSets;
 class Swapchain;
 
+inline static const std::string LitPassId = "Lit Pass";
+
 class RenderGraph
 {
     public:
@@ -24,7 +26,7 @@ class RenderGraph
 
         RenderPass* Acquire(const std::string& uid);
         void Add(std::unique_ptr<RenderPass> renderPass);
-        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage& meshStorage, uint32_t frameBufferIndex, Vector2 dimensions);
+        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage& meshStorage, uint32_t frameBufferIndex, Vector2 dimensions) const;
         void Remove(const std::string& uid);
         void Resize(Swapchain* swapchain, const Vector2& dimensions);
 
@@ -42,7 +44,7 @@ class RenderGraph
         GpuOptions* m_gpuOptions;
         GpuAllocator* m_gpuAllocator;
         ShaderDescriptorSets* m_descriptorSets;
-        std::vector<std::unique_ptr<RenderPass>> m_renderPasses;
+        std::vector<std::unique_ptr<RenderPass>> m_renderPasses{};
         Vector2& m_dimensions;
 };
 

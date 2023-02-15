@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ncmath/Vector.h"
+
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
@@ -26,10 +27,11 @@ namespace nc::graphics
             // Swap chain
             void Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid);
             void Cleanup() noexcept;
-            const vk::Extent2D& GetExtent() const noexcept;
-            const vk::Format& GetFormat() const noexcept;
-            const std::vector<vk::UniqueImageView>& GetColorImageViews() const noexcept;
-            void Resize(const Vector2& dimensions);
+            void Resize(const Vector2 &dimensions);
+
+            auto GetExtent() const noexcept -> const vk::Extent2D &;
+            auto GetFormat() const noexcept -> const vk::Format&;
+            auto GetColorImageViews() const noexcept -> const std::vector<vk::UniqueImageView> &;
 
             // Image synchronization
             bool GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex);

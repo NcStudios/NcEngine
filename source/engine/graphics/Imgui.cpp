@@ -1,32 +1,26 @@
 #include "Imgui.h"
+#include "graphics/PerFrameRenderState.h"
+
 #include "imgui/imgui_impl_vulkan.h"
-#include "optick/optick.h"
-#include "PerFrameRenderState.h"
-#include "Core.h"
-#include "PerFrameGpuContext.h"
-
-
-#include <span>
 
 namespace
 {
-/** @todo: Move this to a different place */
-vk::UniqueDescriptorPool CreateImguiDescriptorPool(vk::Device device)
+auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 {
     // Create descriptor pool for IMGUI
-    std::array<vk::DescriptorPoolSize, 11> imguiPoolSizes =
+    const std::array<vk::DescriptorPoolSize, 11> imguiPoolSizes =
     {
-        vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eStorageImage, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eUniformTexelBuffer, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eStorageTexelBuffer, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eUniformBufferDynamic, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eStorageBufferDynamic, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eInputAttachment, 1000 }
+        vk::DescriptorPoolSize{vk::DescriptorType::eSampler, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eCombinedImageSampler, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eSampledImage, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eStorageImage, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eUniformTexelBuffer, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eStorageTexelBuffer, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eUniformBuffer, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eStorageBuffer, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eUniformBufferDynamic, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eStorageBufferDynamic, 1000},
+        vk::DescriptorPoolSize{vk::DescriptorType::eInputAttachment, 1000}
     };
 
     vk::DescriptorPoolCreateInfo imguiDescriptorPoolInfo = {};

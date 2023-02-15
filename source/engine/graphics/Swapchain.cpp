@@ -1,12 +1,10 @@
 #include "Swapchain.h"
-#include "Initializers.h"
-#include "PerFrameGpuContext.h"
-#include "QueueFamily.h"
+#include "graphics/Initializers.h"
+#include "graphics/PerFrameGpuContext.h"
+#include "graphics/QueueFamily.h"
 #include "ncutility/NcError.h"
 
 #include <algorithm>
-#include <iostream>
-
 
 namespace nc::graphics
 {
@@ -55,12 +53,7 @@ namespace nc::graphics
         : m_device{ device },
           m_physicalDevice{physicalDevice},
           m_surface{surface},
-          m_swapChain{},
-          m_swapChainImages{},
-          m_swapChainImageFormat{},
-          m_swapChainExtent{},
-          m_swapChainImageViews{},
-          m_imagesInFlightFences{}
+          m_swapChainImageFormat{}
     {
         Create(physicalDevice, surface, dimensions);
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
@@ -84,18 +77,20 @@ namespace nc::graphics
 
     void Swapchain::Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
     {
-        vk::PresentInfoKHR presentInfo{};
-        presentInfo.setWaitSemaphoreCount(1);
-        auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
-        presentInfo.setPWaitSemaphores(&waitSemaphore); // Wait on this semaphore before presenting.
-
+        const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
-        presentInfo.setSwapchainCount(1);
-        presentInfo.setPSwapchains(swapChains); // Sets the swapchain(s) to present to
-        presentInfo.setPImageIndices(&imageIndex); //  Sets the index of the image for each swapchain.
-        presentInfo.setPResults(nullptr);
 
-        auto result = queue.presentKHR(&presentInfo);
+        const auto presentInfo = vk::PresentInfoKHR
+        (
+            1u,             // WaitSemaphoreCount
+            &waitSemaphore, // WaitSemaphore
+            1u,             // Swapchain Count
+            swapChains,     // PSwapchains
+            &imageIndex,    // PImageIndices
+            nullptr         // PResults
+        );
+
+        const auto result = queue.presentKHR(&presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
             isSwapChainValid = false;
@@ -128,33 +123,26 @@ namespace nc::graphics
 
     void Swapchain::Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions)
     {
-        auto swapChainSupport = QuerySwapChainSupport(physicalDevice, surface);
+        auto [capabilities, formats, presentModes] = QuerySwapChainSupport(physicalDevice, surface);
 
-        auto surfaceFormat = swapChainSupport.formats[0];
-        for (const auto& availableFormat : swapChainSupport.formats)
+        auto surfaceFormat = formats[0];
+        const auto surfaceFormatPos = std::ranges::find_if(formats, [](const auto &availableFormat)
         {
-            if (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
-            {
-                surfaceFormat = availableFormat;
-                break;
-            }
-        }
+            return (availableFormat.format == vk::Format::eB8G8R8A8Srgb && availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear);
+        });
+        if (surfaceFormatPos != formats.end()) surfaceFormat = *surfaceFormatPos;
 
         auto presentMode = vk::PresentModeKHR::eFifo;
-        for (const auto& availablePresentMode : swapChainSupport.presentModes)
+        const auto presentModePos = std::ranges::find_if(presentModes, [](const auto &availablePresentMode)
         {
-            // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkPresentModeKHR.html
-            if (availablePresentMode == vk::PresentModeKHR::eMailbox)
-            {
-                presentMode = availablePresentMode;
-                break;
-            }
-        }
+            return availablePresentMode == vk::PresentModeKHR::eMailbox;
+        });
+        if (presentModePos != presentModes.end()) presentMode = *presentModePos;
 
         vk::Extent2D extent;
-        if (swapChainSupport.capabilities.currentExtent.width != UINT32_MAX)
+        if (capabilities.currentExtent.width != UINT32_MAX)
         {
-            extent = swapChainSupport.capabilities.currentExtent;
+            extent = capabilities.currentExtent;
         }
         else
         {
@@ -164,50 +152,39 @@ namespace nc::graphics
                 static_cast<uint32_t>(dimensions.y)
             };
 
-            actualExtent.width = std::max(swapChainSupport.capabilities.minImageExtent.width, std::min(swapChainSupport.capabilities.maxImageExtent.width, actualExtent.width));
-            actualExtent.height = std::max(swapChainSupport.capabilities.minImageExtent.height, std::min(swapChainSupport.capabilities.maxImageExtent.height, actualExtent.height));
-
+            actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+            actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
             extent = actualExtent;
         }
 
-        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
+        auto imageCount = capabilities.minImageCount + 1;
+        if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
         {
-            imageCount = swapChainSupport.capabilities.maxImageCount;
+            imageCount = capabilities.maxImageCount;
         }
 
-        vk::SwapchainCreateInfoKHR createInfo{};
-        createInfo.setSurface(surface);
-        createInfo.setMinImageCount(imageCount);
-        createInfo.setImageFormat(surfaceFormat.format);
-        createInfo.setImageColorSpace(surfaceFormat.colorSpace);
-        createInfo.setImageExtent(extent);
-        createInfo.setImageArrayLayers(1);
-        createInfo.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
+        const auto queueFamilies = QueueFamilyIndices(physicalDevice, surface);
+        const uint32_t queueFamilyIndices[] = {queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily)};
 
-        auto queueFamilies = QueueFamilyIndices(physicalDevice, surface);
-        uint32_t queueFamilyIndices[] = { queueFamilies.GetQueueFamilyIndex(QueueFamilyType::GraphicsFamily), queueFamilies.GetQueueFamilyIndex(QueueFamilyType::PresentFamily) };
-
-        if (queueFamilies.IsSeparatePresentQueue())
+        m_swapChain = m_device.createSwapchainKHRUnique(
+        vk::SwapchainCreateInfoKHR
         {
-            createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-            createInfo.queueFamilyIndexCount = 2;
-            createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        }
-        else
-        {
-            createInfo.imageSharingMode = vk::SharingMode::eExclusive;
-            createInfo.queueFamilyIndexCount = 0;
-            createInfo.pQueueFamilyIndices = nullptr;
-        }
-
-        createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-        createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
-        createInfo.presentMode = presentMode;
-        createInfo.clipped = VK_TRUE;
-        createInfo.oldSwapchain = nullptr;
-
-        m_swapChain = m_device.createSwapchainKHRUnique(createInfo);
+            vk::SwapchainCreateFlagsKHR(), // SwapchainCreateFlagsKHR
+            surface,                       // Surface
+            imageCount,                    // MinImageCount
+            surfaceFormat.format,          // ImageFormat
+            surfaceFormat.colorSpace,      // ImageColorSpace
+            extent,                        // ImageExtent
+            1u,                            // ImageArrayLayers
+            vk::ImageUsageFlagBits::eColorAttachment,         // ImageUsage
+            queueFamilies.IsSeparatePresentQueue() ? vk::SharingMode::eConcurrent : vk::SharingMode::eExclusive, // ImageSharingMode
+            queueFamilies.IsSeparatePresentQueue() ? 2u : 0u,                                                    // QueueFamilyIndexCount
+            queueFamilies.IsSeparatePresentQueue() ? queueFamilyIndices : nullptr,                               // PQueueFamilyIndices
+            capabilities.currentTransform,          // PreTransform
+            vk::CompositeAlphaFlagBitsKHR::eOpaque, // CompositeAlpha
+            presentMode,                            // PresentMode
+            VK_TRUE                                 // Clipped
+        });
 
         // Set swapchain images        
         uint32_t swapChainImageCount;
@@ -224,33 +201,32 @@ namespace nc::graphics
 
         m_swapChainImageFormat = surfaceFormat.format;
         m_swapChainExtent = extent;
-
-        auto swapChainComponents = vk::ComponentMapping{};
-        swapChainComponents.setR(vk::ComponentSwizzle::eIdentity);
-        swapChainComponents.setG(vk::ComponentSwizzle::eIdentity);
-        swapChainComponents.setB(vk::ComponentSwizzle::eIdentity);
-        swapChainComponents.setA(vk::ComponentSwizzle::eIdentity);
-
-        auto swapChainSubresourceRange = vk::ImageSubresourceRange{};
-        swapChainSubresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        swapChainSubresourceRange.setBaseMipLevel(0);
-        swapChainSubresourceRange.setLevelCount(1);
-        swapChainSubresourceRange.setBaseArrayLayer(0);
-        swapChainSubresourceRange.setLayerCount(1);
-
-        // Create image views
         m_swapChainImageViews.reserve(m_swapChainImages.size());
 
-        for (size_t i = 0; i < m_swapChainImages.size(); ++i)
+        for (auto &swapChainImage : m_swapChainImages)
         {
-            vk::ImageViewCreateInfo imageViewCreateInfo{};
-            imageViewCreateInfo.setImage(m_swapChainImages[i]);
-            imageViewCreateInfo.setViewType(vk::ImageViewType::e2D);
-            imageViewCreateInfo.setFormat(m_swapChainImageFormat);
-            imageViewCreateInfo.setComponents(swapChainComponents);
-            imageViewCreateInfo.setSubresourceRange(swapChainSubresourceRange);
-
-            m_swapChainImageViews.emplace_back(m_device.createImageViewUnique(imageViewCreateInfo));
+            m_swapChainImageViews.emplace_back(m_device.createImageViewUnique(
+            {
+                vk::ImageViewCreateFlags(), // ImageViewCreateFlags
+                swapChainImage,             // Image
+                vk::ImageViewType::e2D,     // ViewType
+                m_swapChainImageFormat,     // Format
+                vk::ComponentMapping        // Components
+                {
+                    vk::ComponentSwizzle::eIdentity, // R
+                    vk::ComponentSwizzle::eIdentity, // G
+                    vk::ComponentSwizzle::eIdentity, // B
+                    vk::ComponentSwizzle::eIdentity  // A
+                },
+                vk::ImageSubresourceRange // SubresourceRange
+                {
+                    vk::ImageAspectFlagBits::eColor, // AspectMask
+                    0u, // BaseMipLevel
+                    0u, // LevelCount
+                    0u, // BaseArrayLayer
+                    1u  // LayerCount
+                }
+            }));
         }
     }
 
@@ -266,18 +242,9 @@ namespace nc::graphics
 
     bool Swapchain::GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex)
     {
-        try
-        {
-            auto [result, index] = m_device.acquireNextImageKHR(m_swapChain.get(), UINT64_MAX, currentFrame->ImageAvailableSemaphore());
-            *imageIndex = index;
-        }
-        catch (vk::SystemError& error)
-        {
-            std::cout << error.what();
-            return false;
-        }
-
-        return true;
+        auto [result, index] = m_device.acquireNextImageKHR(m_swapChain.get(), UINT64_MAX, currentFrame->ImageAvailableSemaphore());
+        *imageIndex = index;
+        return result != vk::Result::eErrorOutOfDateKHR;
     }
 
     void Swapchain::Resize(const Vector2& dimensions)

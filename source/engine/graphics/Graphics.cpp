@@ -1,22 +1,22 @@
 #include "Graphics.h"
-#include "GpuOptions.h"
-#include "Commands.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "FrameManager.h"
-#include "GpuOptions.h"
 #include "graphics/Camera.h"
+#include "graphics/Commands.h"
+#include "graphics/Core.h"
+#include "graphics/FrameManager.h"
+#include "graphics/GpuAllocator.h"
 #include "graphics/GpuAssetsStorage.h"
+#include "graphics/GpuOptions.h"
 #include "graphics/Imgui.h"
 #include "graphics/Lighting.h"
 #include "graphics/RenderGraph.h"
-#include "optick/optick.h"
-#include "shaders/ShaderDescriptorSets.h"
-#include "shaders/ShaderResources.h"
-#include "utility/Log.h"
+#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "graphics/shaders/ShaderResources.h"
+#include "graphics/Swapchain.h"
 #include "ncutility/NcError.h"
-#include "Core.h"
-#include "Swapchain.h"
+#include "optick/optick.h"
+#include "utility/Log.h"
 
 #include <iostream>
 
@@ -37,12 +37,10 @@ namespace nc::graphics
           m_imgui{ std::make_unique<Imgui>(m_core->logicalDevice.get())},
           m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_lighting{std::make_unique<Lighting>(registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
-          m_resizingMutex{},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false }
     {
-
     }
 
     Graphics::~Graphics() noexcept
@@ -51,7 +49,7 @@ namespace nc::graphics
         {
             Clear();
         }
-        catch(const std::runtime_error& e)
+        catch (const std::runtime_error &e)
         {
             NC_LOG_EXCEPTION(e);
         }
@@ -72,11 +70,10 @@ namespace nc::graphics
         m_swapchain->Resize(dimensions);
         m_renderGraph.reset();
         m_renderGraph = std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), m_dimensions);
-        m_lighting.reset();
-        m_lighting = std::make_unique<Lighting>(m_registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), m_dimensions);
+        m_lighting->Resize(m_renderGraph.get(), dimensions);
     }
 
-    void Graphics::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    void Graphics::OnResize(float width, float height, float nearZ, float farZ, const WPARAM windowArg)
     {
         m_dimensions = Vector2{ width, height };
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
@@ -85,7 +82,7 @@ namespace nc::graphics
         InitializeUI();
     }
 
-    void Graphics::Clear()
+    void Graphics::Clear() const
     {
         m_core->logicalDevice.get().waitIdle();
         m_lighting->Clear();
@@ -95,7 +92,7 @@ namespace nc::graphics
         ShaderResourceService<EnvironmentData>::Get()->Reset();
     }
 
-    void Graphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
+    void Graphics::InitializeUI() const /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
     {
         m_imgui->InitializeImgui(m_core->instance.get(), m_core->physicalDevice, m_core->logicalDevice.get(), (m_renderGraph->Acquire(LitPassId))->renderPass.get(), m_commands.get(), static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
     }
@@ -109,7 +106,6 @@ namespace nc::graphics
         if(!m_swapchain->GetNextRenderReadyImageIndex(m_frameManager->CurrentFrameContext(), &m_imageIndex))
         {
             Resize(m_dimensions);
-            // return false;
         }
 
         m_frameManager->Begin();
@@ -126,6 +122,7 @@ namespace nc::graphics
         auto* currentFrame = m_frameManager->CurrentFrameContext();
         if (m_isMinimized) return;
 
+        // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
         m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions);
 
         // Executes the command buffer to render to the image

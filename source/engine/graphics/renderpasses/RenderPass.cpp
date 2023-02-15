@@ -1,7 +1,5 @@
 #include "RenderPass.h"
 #include "graphics/GpuAllocator.h"
-#include "graphics/GpuOptions.h"
-#include "graphics/Swapchain.h"
 
 #include <algorithm>
 
@@ -181,67 +179,6 @@ auto CreateRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSl
 
     return device.createRenderPassUnique(renderPassInfo);
 }
-
-void RegisterAttachments(vk::Device device, nc::graphics::RenderPass* renderPass, std::span<const vk::ImageView> attachmentHandles, const nc::Vector2& dimensions, uint32_t index)
-{
-    auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto& frameBuffer)
-    {
-        return (frameBuffer->index == index);
-    });
-
-    if (frameBufferPos != renderPass->frameBuffers.end())
-    {
-        *frameBufferPos = std::move(renderPass->frameBuffers.back());
-        renderPass->frameBuffers.pop_back();
-    }
-
-    auto frameBuffer = std::make_unique<nc::graphics::FrameBuffer>();
-
-    frameBuffer->attachmentHandles = std::move(attachmentHandles);
-    frameBuffer->index = index;
-
-    vk::FramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.setRenderPass(renderPass->renderPass.get());
-    framebufferInfo.setAttachmentCount(static_cast<uint32_t>(frameBuffer->attachmentHandles.size()));
-    framebufferInfo.setPAttachments(frameBuffer->attachmentHandles.data());
-    framebufferInfo.setWidth(static_cast<uint32_t>(dimensions.x));
-    framebufferInfo.setHeight(static_cast<uint32_t>(dimensions.y));
-    framebufferInfo.setLayers(1);
-
-    frameBuffer->frameBuffer = device.createFramebufferUnique(framebufferInfo);
-    renderPass->frameBuffers.push_back(std::move(frameBuffer));
-}
-
-void RegisterAttachment(vk::Device device, nc::graphics::RenderPass* renderPass, vk::ImageView attachmentHandle, const nc::Vector2& dimensions, uint32_t index)
-{
-    auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto& frameBuffer)
-    {
-        return (frameBuffer->index == index);
-    });
-
-    if (frameBufferPos != renderPass->frameBuffers.end())
-    {
-        *frameBufferPos = std::move(renderPass->frameBuffers.back());
-        renderPass->frameBuffers.pop_back();
-    }
-
-    auto frameBuffer = std::make_unique<nc::graphics::FrameBuffer>();
-
-    auto handles = std::vector<vk::ImageView>{attachmentHandle};
-    frameBuffer->attachmentHandles = handles;
-    frameBuffer->index = index;
-
-    vk::FramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.setRenderPass(renderPass->renderPass.get());
-    framebufferInfo.setAttachmentCount(1);
-    framebufferInfo.setPAttachments(frameBuffer->attachmentHandles.data());
-    framebufferInfo.setWidth(static_cast<uint32_t>(dimensions.x));
-    framebufferInfo.setHeight(static_cast<uint32_t>(dimensions.y));
-    framebufferInfo.setLayers(1);
-
-    frameBuffer->frameBuffer = device.createFramebufferUnique(framebufferInfo);
-    renderPass->frameBuffers.push_back(std::move(frameBuffer));
-}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -266,7 +203,7 @@ Subpass::Subpass(const AttachmentSlot& depthAttachment)
 {
 }
 
-auto CreateImage(GpuAllocator* allocator, vk::Format format, Vector2 dimensions, vk::SampleCountFlagBits numSamples, bool isDepthStencil) -> nc::graphics::GpuAllocation<vk::Image>
+auto CreateAttachmentImage(GpuAllocator* allocator, vk::Format format, Vector2 dimensions, vk::SampleCountFlagBits numSamples, bool isDepthStencil) -> nc::graphics::GpuAllocation<vk::Image>
 {
     constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
     constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
@@ -274,7 +211,7 @@ auto CreateImage(GpuAllocator* allocator, vk::Format format, Vector2 dimensions,
     return allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, numSamples);
 }
 
-auto CreateImageView(vk::Device device, vk::Format format, vk::Image image,bool isDepthStencil) -> vk::UniqueImageView
+auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image image,bool isDepthStencil) -> vk::UniqueImageView
 {
     const auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
 
@@ -300,9 +237,8 @@ auto CreateImageView(vk::Device device, vk::Format format, vk::Image image,bool 
 }
 
 Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format)
-    : image{CreateImage(allocator, format, dimensions, numSamples, isDepthStencil)},
-      view{CreateImageView(device, format, image, isDepthStencil)}
-    {}
+    : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, isDepthStencil)},
+      view{CreateAttachmentImageView(device, format, image, isDepthStencil)}{}
 
 RenderPass::RenderPass(vk::Device device,
                        uint8_t priority_,
@@ -317,17 +253,12 @@ RenderPass::RenderPass(vk::Device device,
       renderPass{std::move(CreateRenderPass(attachmentSlots, subpasses, device))},
       attachmentSize{size},
       clearFlags{clearFlags_},
-      techniques{},
-      attachments{std::move(attachments_)},
-      frameBuffers{}
-{};
+      attachments{std::move(attachments_)}{}
 
-nc::graphics::FrameBuffer* GetFrameBuffer(nc::graphics::RenderPass* renderPass, uint32_t index)
+auto GetFrameBuffer(nc::graphics::RenderPass *renderPass, uint32_t index) -> nc::graphics::FrameBuffer *
 {
-    auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto& frameBuffer)
-    {
-        return (frameBuffer->index == index);
-    });
+    const auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto &frameBuffer)
+                                                     { return (frameBuffer->index == index); });
 
     if (frameBufferPos == renderPass->frameBuffers.end())
     {
@@ -337,109 +268,32 @@ nc::graphics::FrameBuffer* GetFrameBuffer(nc::graphics::RenderPass* renderPass, 
     return frameBufferPos->get();
 }
 
-auto CreateFrameBuffer(vk::Device device, vk::RenderPass renderPass, std::span<const vk::ImageView> attachmentHandles, uint32_t width, uint32_t height) -> vk::UniqueFramebuffer
+void RegisterAttachments(vk::Device device, nc::graphics::RenderPass *renderPass, std::span<const vk::ImageView> attachmentHandles, const nc::Vector2 &dimensions, uint32_t index)
 {
-    vk::FramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.setRenderPass(renderPass);
-    framebufferInfo.setAttachmentCount(static_cast<uint32_t>(attachmentHandles.size()));
-    framebufferInfo.setPAttachments(attachmentHandles.data());
-    framebufferInfo.setWidth(width);
-    framebufferInfo.setHeight(height);
-    framebufferInfo.setLayers(1);
-    return device.createFramebufferUnique(framebufferInfo);
-}
-
-auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::graphics::Swapchain* swapchain, nc::Vector2 dimensions) -> std::unique_ptr<nc::graphics::RenderPass>
-{
-    using namespace nc::graphics;
-
-    auto numSamples = gpuOptions->GetMaxSamplesCount();
-
-    std::vector<AttachmentSlot> litAttachmentSlots
+    if (const auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto &frameBuffer)
+                                                         { return (frameBuffer->index == index); });
+        frameBufferPos != renderPass->frameBuffers.end())
     {
-        AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, numSamples},
-        AttachmentSlot{1, AttachmentType::Depth, gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
-        AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
-    };
-
-    std::vector<Subpass> litSubpasses
-    {
-        Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
-    };
-
-    std::vector<std::unique_ptr<Attachment>> attachments;
-    attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, true, numSamples, gpuOptions->GetDepthFormat())); // Depth Stencil
-    attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
-    
-    const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = std::make_unique<RenderPass>(device, 1u, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size,  ClearValueFlags::Depth | ClearValueFlags::Color);
-
-    auto& colorImageViews = swapchain->GetColorImageViews();
-    auto& depthImageView = renderPass->attachments[0]->view;
-    auto& colorResolveView = renderPass->attachments[1]->view;
-
-    uint32_t index = 0;
-    for (auto& imageView : colorImageViews) 
-    {
-        std::vector<vk::ImageView> imageViews
-        {
-            colorResolveView.get(), // Color Resolve View
-            depthImageView.get(), // Depth View
-            imageView.get()
-        };
-        RegisterAttachments(device, renderPass.get(), imageViews, dimensions, index++); 
+        *frameBufferPos = std::move(renderPass->frameBuffers.back());
+        renderPass->frameBuffers.pop_back();
     }
-    return std::move(renderPass);
-}
-
-// void ResizeLitPass(nc::graphics::RenderPass* renderPass, nc::graphics::Swapchain* swapchain, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::Vector2 dimensions)
-// {
-//     renderPass->attachments.clear();
-
-//     std::vector<std::unique_ptr<Attachment>> attachments;
-//     renderPass->attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, true, numSamples, gpuOptions->GetDepthFormat())); // Depth Stencil
-//     renderPass->attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
-
-//     auto& colorImageViews = swapchain->GetColorImageViews();
-//     auto& depthImageView = renderPass->attachments[0]->view;
-//     auto& colorResolveView = renderPass->attachments[1]->view;
-
-//     uint32_t index = 0;
-//     for (auto& imageView : colorImageViews) 
-//     {
-//         std::vector<vk::ImageView> imageViews
-//         {
-//             colorResolveView.get(), // Color Resolve View
-//             depthImageView.get(), // Depth View
-//             imageView.get()
-//         };
-//         RegisterAttachments(device, renderPass, imageViews, dimensions, index++); 
-//     }
-// }
-
-auto CreateShadowMappingPass(vk::Device device, nc::graphics::GpuAllocator* allocator, nc::graphics::GpuOptions* gpuOptions, nc::graphics::Swapchain* swapchain, nc::Vector2 dimensions, uint32_t index) -> std::unique_ptr<nc::graphics::RenderPass>
-{
-    using namespace nc::graphics;
-    auto id = ShadowMappingPassId + std::to_string(index);
-
-    std::vector<AttachmentSlot> shadowAttachmentSlots
-    {
-        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
-    };
-
-    std::vector<Subpass> shadowSubpasses
-    {
-        Subpass{shadowAttachmentSlots[0]}
-    };
-
-    std::vector<std::unique_ptr<Attachment>> attachments;
-    attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
     
-    const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = std::make_unique<RenderPass>(device, 0u, id, shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
-
-    RegisterAttachment(device, renderPass.get(), renderPass->attachments[0]->view.get(), dimensions, 0);
-
-    return std::move(renderPass);
-   }
+    auto frameBuffer = std::make_unique<FrameBuffer>();
+    frameBuffer->attachmentHandles = std::move(attachmentHandles);
+    frameBuffer->index = index;
+    
+    const auto framebufferInfo = vk::FramebufferCreateInfo
+    {
+        vk::FramebufferCreateFlags(),                                 // FramebufferCreateFlags
+        renderPass->renderPass.get(),                                 // RenderPass
+        static_cast<uint32_t>(frameBuffer->attachmentHandles.size()), // AttachmentCount
+        frameBuffer->attachmentHandles.data(),                        // PAttachments
+        static_cast<uint32_t>(dimensions.x),                          // Width
+        static_cast<uint32_t>(dimensions.y),                          // Height
+        1                                                             // Layers
+    };
+    
+    frameBuffer->frameBuffer = device.createFramebufferUnique(framebufferInfo);
+    renderPass->frameBuffers.push_back(std::move(frameBuffer));
+}
 } // namespace nc::graphics

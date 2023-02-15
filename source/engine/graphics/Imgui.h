@@ -1,11 +1,8 @@
 #pragma once
 
-#include "graphics/GpuAssetsStorage.h"
-#include "graphics/Initializers.h"
 #include "ecs/Registry.h"
+#include "graphics/GpuAssetsStorage.h"
 
-#include <functional>
-#include <unordered_map>
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
@@ -13,11 +10,12 @@ namespace nc::graphics
 class Imgui
 {
     public:
-        Imgui(vk::Device device);
+        explicit Imgui(vk::Device device);
 
-        void InitializeImgui(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::RenderPass renderPass, Commands* commands, uint32_t maxSamplesCount); /** @todo: Where should Imgui stuff live? */
+        /* @todo: Move contents into constructor and remove this method during fix of imgui bug.*/
+        void InitializeImgui(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::RenderPass renderPass, Commands *commands, uint32_t maxSamplesCount);
 
     private:
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
-};
+    };
 } // namespace nc::graphics

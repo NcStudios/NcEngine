@@ -15,6 +15,8 @@ namespace nc::graphics
     struct ShaderResources;
     class Swapchain;
 
+    inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
+
     class Lighting
     {
         public:
@@ -27,7 +29,7 @@ namespace nc::graphics
                      ShaderDescriptorSets* shaderDescriptorSets,
                      ShaderResources* shaderResources,
                      Vector2 dimensions);
-            void Resize(const Vector2& dimensions);
+            void Resize(RenderGraph *renderGraph, const Vector2 &dimensions);
             void Clear();
 
         private:

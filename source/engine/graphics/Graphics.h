@@ -3,12 +3,9 @@
 #include "assets/AssetManagers.h"
 #include "camera/MainCamera.h"
 #include "ecs/Registry.h"
-#include "GpuAllocator.h"
 #include "ncmath/Vector.h"
 #include "platform/win32/NcWin32.h"
-#include "DirectXMath.h"
 
-#include <array>
 #include <memory>
 #include <mutex>
 
@@ -19,6 +16,7 @@ namespace nc::graphics
     class Commands;
     struct Core;
     class FrameManager;
+    class GpuAllocator;
     struct GpuAssetsStorage;
     class Lighting;
     struct PerFrameRenderState;
@@ -29,18 +27,17 @@ namespace nc::graphics
     class ShaderDescriptorSets;
     struct ShaderResources;
 
-    /** @todo: Plan is to have Graphics header be general enough to be implemented by Vulkan or DX, and eventually have a Vulkan (and potentially DX) version of Renderer, FrameManager, etc. Slowly working towards that. */
     class Graphics
     {
         public:
             Graphics(camera::MainCamera* mainCamera, Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
             ~Graphics() noexcept;
 
-            void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
-            void Clear();
-            void InitializeUI();
+            void OnResize(float width, float height, float nearZ, float farZ, const WPARAM windowArg);
+            void Clear() const;
+            void InitializeUI() const;
 
-            bool FrameBegin();
+            auto FrameBegin() -> bool;
             void Draw(const PerFrameRenderState& state);
             void FrameEnd();
 
