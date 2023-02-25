@@ -122,7 +122,7 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        pushConstants.lightViewProjection = frameData.pointLightVPs[m_shadowCasterIndex];
+        pushConstants.lightViewProjection = frameData.pointLightVPs.at(m_shadowCasterIndex);
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 

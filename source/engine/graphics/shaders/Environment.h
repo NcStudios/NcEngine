@@ -10,8 +10,8 @@ const std::string SkyboxMeshPath = "skybox.nca";
 
 struct EnvironmentData
 {
-    Vector3 cameraWorldPosition;
-    uint32_t skyboxTextureIndex;
+    Vector3 cameraWorldPosition = Vector3(0.0f, 0.0f, 0.0f);
+    uint32_t skyboxTextureIndex = 0u;
 };
 
 class Environment

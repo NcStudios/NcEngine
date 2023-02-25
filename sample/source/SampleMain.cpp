@@ -23,8 +23,8 @@ int main()
     }
     catch(...)
     {
-        NC_LOG_ERROR("SampleMain.cpp - unkown exception");
-        std::cerr << "SampleMain.cpp - unkown exception\n";
+        NC_LOG_ERROR("SampleMain.cpp - unknown exception");
+        std::cerr << "SampleMain.cpp - unknown exception\n";
     }
 
     return 0;

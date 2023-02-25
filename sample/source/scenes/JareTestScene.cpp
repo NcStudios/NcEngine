@@ -63,24 +63,17 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
 
     //Lights
-    auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
+    auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
     registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{
         .ambient = Vector3(0.1f, 0.1f, 0.1f),
         .diffuseColor = Vector3(0.4f, 0.4f, 0.8f),
         .diffuseIntensity = 88.0f
     });
 
-    auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, 4.4f}, .tag = "Point Light 2"});
+    auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
     registry->Add<graphics::PointLight>(lvHandle2, graphics::PointLightInfo{
         .ambient = Vector3(0.1f, 0.1f, 0.1f),
         .diffuseColor = Vector3(0.4f, 0.8f, 0.4f),
-        .diffuseIntensity = 88.0f
-    });
-
-    auto lvHandle3 = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, 9.4f}, .tag = "Point Light 3"});
-    registry->Add<graphics::PointLight>(lvHandle3, graphics::PointLightInfo{
-        .ambient = Vector3(0.1f, 0.1f, 0.1f),
-        .diffuseColor = Vector3(0.8f, 0.0f, 0.0f),
         .diffuseIntensity = 88.0f
     });
 

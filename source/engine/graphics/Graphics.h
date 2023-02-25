@@ -2,7 +2,6 @@
 
 #include "assets/AssetManagers.h"
 #include "camera/MainCamera.h"
-#include "ecs/Registry.h"
 #include "ncmath/Vector.h"
 #include "platform/win32/NcWin32.h"
 
@@ -34,7 +33,7 @@ namespace nc::graphics
             ~Graphics() noexcept;
 
             void OnResize(float width, float height, float nearZ, float farZ, const WPARAM windowArg);
-            void Clear() const;
+            void Clear();
             void InitializeUI() const;
 
             auto FrameBegin() -> bool;

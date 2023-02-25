@@ -1,128 +1,17 @@
 #include "RenderPass.h"
-#include "graphics/GpuAllocator.h"
-
-#include <algorithm>
+#include "graphics/techniques/ShadowMappingTechnique.h"
 
 namespace
 {
-/** Sequence our early frag write after previous (external) frag read. */
-constexpr auto earlyFragStencilWriteAfterFragRead = vk::SubpassDependency
+constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
+
+auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {
-    VK_SUBPASS_EXTERNAL,
-    0,
-    vk::PipelineStageFlagBits::eFragmentShader,
-    vk::PipelineStageFlagBits::eEarlyFragmentTests,
-    vk::AccessFlagBits::eShaderRead,
-    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-    vk::DependencyFlagBits::eByRegion
-};
+    std::vector<vk::ClearValue> clearValues;
 
-/** Sequence next (external) frag read after current late frag write. */
-constexpr auto lateFragStencilWriteBeforeFragRead = vk::SubpassDependency
-{
-    0,
-    VK_SUBPASS_EXTERNAL,
-    vk::PipelineStageFlagBits::eLateFragmentTests,
-    vk::PipelineStageFlagBits::eFragmentShader,
-    vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-    vk::AccessFlagBits::eShaderRead,
-    vk::DependencyFlagBits::eByRegion
-};
-
-/** Sequence color and stencil writes after previous frame color and early frag. */
-constexpr auto colorAndDepthWriteAfterPrevious = vk::SubpassDependency
-{
-    VK_SUBPASS_EXTERNAL,
-    0,
-    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-    vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-    vk::AccessFlags(),
-    vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
-};
-
-auto CreateAttachmentDescription(nc::graphics::AttachmentType type,
-                                 vk::Format format,
-                                 vk::SampleCountFlagBits numSamples,
-                                 vk::AttachmentLoadOp loadOp,
-                                 vk::AttachmentStoreOp storeOp) -> vk::AttachmentDescription
-{
-    using nc::graphics::AttachmentType;
-    const auto stencilLoadOp = type == AttachmentType::Depth ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eDontCare;
-    const auto finalLayout = [](nc::graphics::AttachmentType attachmentType)
-    {
-        switch (attachmentType)
-        {
-            case AttachmentType::Color:       return vk::ImageLayout::eColorAttachmentOptimal;
-            case AttachmentType::Resolve:     return vk::ImageLayout::ePresentSrcKHR;
-            case AttachmentType::Depth:       return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-            case AttachmentType::ShadowDepth: return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
-        }
-
-        throw nc::NcError("Unknown AttachmentType");
-    }(type);
-
-    return vk::AttachmentDescription
-    {
-        vk::AttachmentDescriptionFlags{}, // flags
-        format,                           // format
-        numSamples,                       // samples
-        loadOp,                           // loadOp
-        storeOp,                          // storeOp
-        stencilLoadOp,                    // stencilLoadOp
-        vk::AttachmentStoreOp::eDontCare, // stencilStoreOp
-        vk::ImageLayout::eUndefined,      // initialLayout
-        finalLayout                       // finalLayout
-    };
-}
-
-auto CreateAttachmentReference(nc::graphics::AttachmentType type, uint32_t attachmentIndex) -> vk::AttachmentReference
-{
-    using nc::graphics::AttachmentType;
-    const auto layout = [](AttachmentType attachmentType)
-    {
-        switch (attachmentType)
-        {
-            case AttachmentType::Resolve:     [[fallthrough]];
-            case AttachmentType::Color:       return vk::ImageLayout::eColorAttachmentOptimal;
-            case AttachmentType::Depth:       [[fallthrough]];
-            case AttachmentType::ShadowDepth: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-        }
-        throw nc::NcError("Unknown AttachmentType");
-    }(type);
-
-    return vk::AttachmentReference{attachmentIndex, layout};
-}
-
-auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& colorAttachment,
-                              const nc::graphics::AttachmentSlot& depthAttachment,
-                              const nc::graphics::AttachmentSlot& resolveAttachment) -> vk::SubpassDescription
-{
-    return vk::SubpassDescription
-    {
-        vk::SubpassDescriptionFlags{},
-        vk::PipelineBindPoint::eGraphics,
-        0u,
-        nullptr,
-        1u,
-        &colorAttachment.reference,
-        &resolveAttachment.reference,
-        &depthAttachment.reference
-    };
-}
-
-auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& depthAttachment) -> vk::SubpassDescription
-{
-    return vk::SubpassDescription
-    {
-        vk::SubpassDescriptionFlags{},
-        vk::PipelineBindPoint::eGraphics,
-        0u,
-        nullptr,
-        0u,
-        nullptr,
-        nullptr,
-        &depthAttachment.reference
-    };
+    if (clearFlags & nc::graphics::ClearValueFlags::Color) clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
+    if (clearFlags & nc::graphics::ClearValueFlags::Depth) clearValues.push_back(vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}});
+    return clearValues;
 }
 
 auto GetAttachmentDescriptions(std::span<const nc::graphics::AttachmentSlot> slots) -> std::vector<vk::AttachmentDescription>
@@ -130,11 +19,12 @@ auto GetAttachmentDescriptions(std::span<const nc::graphics::AttachmentSlot> slo
     auto descriptions = std::vector<vk::AttachmentDescription>{};
     descriptions.reserve(slots.size());
     std::ranges::transform(slots, std::back_inserter(descriptions),
-                           [](const auto& slot){ return slot.description; });
+                           [](const auto& slot)
+                           { return slot.description; });
     return descriptions;
 }
 
-auto GetSubpassDescriptions(std::span<const nc::graphics::Subpass> subpasses, size_t* dependencyCountOut) -> std::vector<vk::SubpassDescription>
+auto GetSubpassDescriptions(std::span<const nc::graphics::Subpass> subpasses, size_t *dependencyCountOut) -> std::vector<vk::SubpassDescription>
 {
     auto depCount = size_t{0ull};
     auto descriptions = std::vector<vk::SubpassDescription>{};
@@ -161,7 +51,7 @@ auto GetSubpassDependencies(std::span<const nc::graphics::Subpass> subpasses, si
     return dependencies;
 }
 
-auto CreateRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSlots,
+auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSlots,
                       std::span<const nc::graphics::Subpass> subpasses,
                       vk::Device device) -> vk::UniqueRenderPass
 {
@@ -183,117 +73,118 @@ auto CreateRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSl
 
 namespace nc::graphics
 {
-AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp,
-                               vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples)
-    : description{CreateAttachmentDescription(type, format, numSamples, loadOp, storeOp)},
-      reference{CreateAttachmentReference(type, attachmentIndex)},
-      type{type}
-{
-}
-
-Subpass::Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment)
-    : description{CreateSubpassDescription(colorAttachment, depthAttachment, resolveAttachment)},
-      dependencies{::colorAndDepthWriteAfterPrevious}
-{
-}
-
-Subpass::Subpass(const AttachmentSlot& depthAttachment)
-    : description{CreateSubpassDescription(depthAttachment)},
-      dependencies{::earlyFragStencilWriteAfterFragRead, ::lateFragStencilWriteBeforeFragRead}
-{
-}
-
-auto CreateAttachmentImage(GpuAllocator* allocator, vk::Format format, Vector2 dimensions, vk::SampleCountFlagBits numSamples, bool isDepthStencil) -> nc::graphics::GpuAllocation<vk::Image>
-{
-    constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
-    constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
-    const auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
-    return allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, numSamples);
-}
-
-auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image image,bool isDepthStencil) -> vk::UniqueImageView
-{
-    const auto aspectMask = isDepthStencil ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
-
-    vk::ImageSubresourceRange imageSubresourceRange{};
-    imageSubresourceRange.setBaseMipLevel(0);
-    imageSubresourceRange.setLevelCount(1);
-    imageSubresourceRange.setBaseArrayLayer(0);
-    imageSubresourceRange.setLayerCount(1);
-    imageSubresourceRange.setAspectMask(aspectMask);
-
-    if (format >= vk::Format::eD16UnormS8Uint && isDepthStencil)
-    {
-        imageSubresourceRange.aspectMask |= vk::ImageAspectFlagBits::eStencil;
-    }
-
-    vk::ImageViewCreateInfo imageViewInfo{};
-    imageViewInfo.setViewType(vk::ImageViewType::e2D);
-    imageViewInfo.setImage(image);
-    imageViewInfo.setFormat(format);
-    imageViewInfo.setSubresourceRange(imageSubresourceRange);
-
-    return device.createImageViewUnique(imageViewInfo);
-}
-
-Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format)
-    : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, isDepthStencil)},
-      view{CreateAttachmentImageView(device, format, image, isDepthStencil)}{}
-
 RenderPass::RenderPass(vk::Device device,
-                       uint8_t priority_,
-                       std::string uid_,
+                       uint8_t priority,
+                       std::string uid,
                        std::vector<AttachmentSlot> attachmentSlots,
                        std::vector<Subpass> subpasses,
-                       std::vector<std::unique_ptr<Attachment>> attachments_,
-                       const AttachmentSize& size,
-                       ClearValueFlags_t clearFlags_)
-    : priority{priority_},
-      uid{std::move(uid_)},
-      renderPass{std::move(CreateRenderPass(attachmentSlots, subpasses, device))},
-      attachmentSize{size},
-      clearFlags{clearFlags_},
-      attachments{std::move(attachments_)}{}
+                       std::vector<Attachment> attachments,
+                       const AttachmentSize &size,
+                       ClearValueFlags_t clearFlags)
+    : m_device{device},
+      m_priority{priority},
+      m_uid{std::move(uid)},
+      m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
+      m_attachmentSize{size},
+      m_clearFlags{clearFlags},
+      m_attachments{std::move(attachments)} {}
 
-auto GetFrameBuffer(nc::graphics::RenderPass *renderPass, uint32_t index) -> nc::graphics::FrameBuffer *
+void RenderPass::RegisterShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
 {
-    const auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto &frameBuffer)
-                                                     { return (frameBuffer->index == index); });
-
-    if (frameBufferPos == renderPass->frameBuffers.end())
-    {
-        return renderPass->frameBuffers[0].get();
-    }
-
-    return frameBufferPos->get();
+    RenderPass::UnregisterTechnique<ShadowMappingTechnique>();
+    m_techniques.push_back(std::make_unique<ShadowMappingTechnique>(device, gpuOptions, descriptorSets, m_renderPass.get(), shadowCasterIndex));
 }
 
-void RegisterAttachments(vk::Device device, nc::graphics::RenderPass *renderPass, std::span<const vk::ImageView> attachmentHandles, const nc::Vector2 &dimensions, uint32_t index)
+void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
 {
-    if (const auto frameBufferPos = std::ranges::find_if(renderPass->frameBuffers, [index](const auto &frameBuffer)
-                                                         { return (frameBuffer->index == index); });
-        frameBufferPos != renderPass->frameBuffers.end())
+    const auto clearValues = CreateClearValues(m_clearFlags);
+    const auto renderPassInfo = vk::RenderPassBeginInfo
     {
-        *frameBufferPos = std::move(renderPass->frameBuffers.back());
-        renderPass->frameBuffers.pop_back();
+        m_renderPass.get(),
+        GetFrameBuffer(attachmentIndex),
+        vk::Rect2D{vk::Offset2D{0, 0}, m_attachmentSize.extent},
+        static_cast<uint32_t>(clearValues.size()),
+        clearValues.data()
+    };
+    cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+}
+
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const
+{
+    for (const auto &technique : m_techniques)
+    {
+        if (!technique->CanBind(frameData)) continue;
+        technique->Bind(cmd);
+
+        if (!technique->CanRecord(frameData)) continue;
+        technique->Record(cmd, frameData);
     }
-    
-    auto frameBuffer = std::make_unique<FrameBuffer>();
-    frameBuffer->attachmentHandles = std::move(attachmentHandles);
-    frameBuffer->index = index;
-    
+}
+
+void RenderPass::End(vk::CommandBuffer *cmd)
+{
+    cmd->endRenderPass();
+}
+
+auto RenderPass::GetPriority() const -> uint32_t
+{
+    return m_priority;
+}
+
+auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
+{
+    return m_attachments[index].view.get();
+}
+
+auto RenderPass::GetUid() const -> std::string
+{
+    return m_uid;
+}
+
+auto RenderPass::GetVkPass() const ->vk::RenderPass
+{
+    return m_renderPass.get();
+}
+
+void RenderPass::RegisterAttachmentViews(std::vector<vk::ImageView> views, Vector2 dimensions, uint32_t index)
+{
+    std::erase_if(m_frameBuffers, [index](const auto &frameBuffer)
+    {
+        return frameBuffer.index == index;
+    });
+
+    auto frameBuffer = FrameBuffer
+    {
+        .index = index,
+        .attachmentViews = std::move(views)
+    };
+
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
-        vk::FramebufferCreateFlags(),                                 // FramebufferCreateFlags
-        renderPass->renderPass.get(),                                 // RenderPass
-        static_cast<uint32_t>(frameBuffer->attachmentHandles.size()), // AttachmentCount
-        frameBuffer->attachmentHandles.data(),                        // PAttachments
-        static_cast<uint32_t>(dimensions.x),                          // Width
-        static_cast<uint32_t>(dimensions.y),                          // Height
-        1                                                             // Layers
+        vk::FramebufferCreateFlags(),           // FramebufferCreateFlags
+        m_renderPass.get(),                     // RenderPass
+        static_cast<uint32_t>(frameBuffer.attachmentViews.size()), // AttachmentCount
+        frameBuffer.attachmentViews.data(),     // PAttachments
+        static_cast<uint32_t>(dimensions.x),    // Width
+        static_cast<uint32_t>(dimensions.y),    // Height
+        1                                       // Layers
     };
-    
-    frameBuffer->frameBuffer = device.createFramebufferUnique(framebufferInfo);
-    renderPass->frameBuffers.push_back(std::move(frameBuffer));
+
+    frameBuffer.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
+    m_frameBuffers.push_back(std::move(frameBuffer));
+}
+
+auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer
+{
+    const auto frameBufferPos = std::ranges::find_if(m_frameBuffers, [index](const auto &frameBuffer)
+    {
+        return (frameBuffer.index == index);
+    });
+
+    if (frameBufferPos == m_frameBuffers.end())
+    {
+        return m_frameBuffers.at(0).frameBuffer.get();
+    }
+    return frameBufferPos->frameBuffer.get();
 }
 } // namespace nc::graphics

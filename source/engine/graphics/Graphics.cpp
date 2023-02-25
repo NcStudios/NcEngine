@@ -31,10 +31,10 @@ namespace nc::graphics
           m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
           m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
           m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_core->logicalDevice.get())},
-          m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_shaderDescriptorSets.get(), registry, m_allocator.get(), config::GetMemorySettings(), dimensions)},
+          m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
           m_renderGraph{std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
-          m_imgui{ std::make_unique<Imgui>(m_core->logicalDevice.get())},
+          m_imgui{std::make_unique<Imgui>(m_core->logicalDevice.get())},
           m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
           m_lighting{std::make_unique<Lighting>(registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
           m_imageIndex{UINT32_MAX},
@@ -68,9 +68,8 @@ namespace nc::graphics
         m_core->logicalDevice.get().waitIdle();
 
         m_swapchain->Resize(dimensions);
-        m_renderGraph.reset();
-        m_renderGraph = std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), m_dimensions);
-        m_lighting->Resize(m_renderGraph.get(), dimensions);
+        m_renderGraph->Resize(dimensions);
+        m_lighting->Resize(dimensions);
     }
 
     void Graphics::OnResize(float width, float height, float nearZ, float farZ, const WPARAM windowArg)
@@ -79,10 +78,9 @@ namespace nc::graphics
         m_mainCamera->Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_isMinimized = windowArg == 1;
         Resize(m_dimensions);
-        InitializeUI();
     }
 
-    void Graphics::Clear() const
+    void Graphics::Clear()
     {
         m_core->logicalDevice.get().waitIdle();
         m_lighting->Clear();
@@ -94,7 +92,7 @@ namespace nc::graphics
 
     void Graphics::InitializeUI() const /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
     {
-        m_imgui->InitializeImgui(m_core->instance.get(), m_core->physicalDevice, m_core->logicalDevice.get(), (m_renderGraph->Acquire(LitPassId))->renderPass.get(), m_commands.get(), static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
+        m_imgui->InitializeImgui(m_core->instance.get(), m_core->physicalDevice, m_core->logicalDevice.get(), (m_renderGraph->GetRenderPass(LitPassId)).GetVkPass(), m_commands.get(), static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
     }
 
     bool Graphics::FrameBegin()
@@ -109,7 +107,6 @@ namespace nc::graphics
         }
 
         m_frameManager->Begin();
-
         return true;
     }
 

@@ -7,47 +7,45 @@
 
 namespace nc::graphics
 {
-    class GpuAllocator;
-    class GpuOptions;
-    class PointLight;
-    class RenderGraph;
-    class ShaderDescriptorSets;
-    struct ShaderResources;
-    class Swapchain;
+class GpuAllocator;
+class PointLight;
+class RenderGraph;
+class ShaderDescriptorSets;
+struct ShaderResources;
+class Swapchain;
 
-    inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
+class Lighting
+{
+    public:
+        Lighting(Registry* registry, 
+                 vk::Device device, 
+                 GpuAllocator* allocator, 
+                 GpuOptions* gpuOptions,
+                 Swapchain* swapchain,
+                 RenderGraph* renderGraph,
+                 ShaderDescriptorSets* shaderDescriptorSets,
+                 ShaderResources* shaderResources,
+                 Vector2 dimensions);
+        void Resize(const Vector2& dimensions);
+        void Clear();
 
-    class Lighting
-    {
-        public:
-            Lighting(Registry* registry, 
-                     vk::Device device, 
-                     GpuAllocator* allocator, 
-                     GpuOptions* gpuOptions, 
-                     Swapchain* swapchain,
-                     RenderGraph* renderGraph,
-                     ShaderDescriptorSets* shaderDescriptorSets,
-                     ShaderResources* shaderResources,
-                     Vector2 dimensions);
-            void Resize(RenderGraph *renderGraph, const Vector2 &dimensions);
-            void Clear();
+    private:
+        void OnAddPointLightConnection();
+        void OnRemovePointLightConnection();
+        auto CreateShadowMappingPass(nc::Vector2 dimensions, uint32_t index) -> nc::graphics::RenderPass;
 
-        private:
-            void OnAddPointLightConnection();
-            void OnRemovePointLightConnection();
-
-            Registry* m_registry;
-            vk::Device m_device;
-            GpuAllocator* m_allocator;
-            GpuOptions* m_gpuOptions;
-            Swapchain* m_swapchain;
-            RenderGraph* m_renderGraph;
-            ShaderDescriptorSets* m_shaderDescriptorSets;
-            ShaderResources* m_shaderResources;
-            Vector2 m_dimensions;
-            Connection<PointLight&> m_onAddPointLightConnection;
-            Connection<Entity> m_onRemovePointLightConnection;
-            uint32_t m_numShadowCasters;
-            std::vector<std::unique_ptr<Attachment>> m_depthStencils;
-    };
+        Registry* m_registry;
+        vk::Device m_device;
+        GpuAllocator* m_allocator;
+        GpuOptions* m_gpuOptions;
+        Swapchain* m_swapchain;
+        RenderGraph* m_renderGraph;
+        ShaderDescriptorSets* m_shaderDescriptorSets;
+        ShaderResources* m_shaderResources;
+        Vector2 m_dimensions;
+        Connection<PointLight&> m_onAddPointLightConnection;
+        Connection<Entity> m_onRemovePointLightConnection;
+        uint32_t m_numShadowCasters;
+        std::vector<std::string> m_ids;
+};
 }

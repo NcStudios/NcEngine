@@ -222,7 +222,7 @@ namespace nc::graphics
                 {
                     vk::ImageAspectFlagBits::eColor, // AspectMask
                     0u, // BaseMipLevel
-                    0u, // LevelCount
+                    1u, // LevelCount
                     0u, // BaseArrayLayer
                     1u  // LayerCount
                 }

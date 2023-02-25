@@ -1,5 +1,6 @@
 #include "Lighting.h"
 #include "ecs/Registry.h"
+#include "graphics/FrameManager.h"
 #include "graphics/GpuAllocator.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/RenderGraph.h"
@@ -10,36 +11,15 @@
 
 namespace
 {
-auto CreateShadowMappingPass(vk::Device device, nc::graphics::GpuAllocator *allocator, nc::graphics::GpuOptions *gpuOptions, nc::graphics::Swapchain *swapchain, nc::Vector2 dimensions, uint32_t index) -> std::unique_ptr<nc::graphics::RenderPass>
-{
-    using namespace nc::graphics;
-    auto id = ShadowMappingPassId + std::to_string(index);
-
-    std::vector<AttachmentSlot> shadowAttachmentSlots{
-        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}};
-
-    std::vector<Subpass> shadowSubpasses{
-        Subpass{shadowAttachmentSlots[0]}};
-
-    std::vector<std::unique_ptr<Attachment>> attachments;
-    attachments.push_back(std::make_unique<Attachment>(device, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
-
-    const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = std::make_unique<RenderPass>(device, 0u, id, shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
-
-    auto handles = std::vector<vk::ImageView>{renderPass->attachments[0]->view.get()};
-    RegisterAttachments(device, renderPass.get(), std::move(handles), dimensions, 0);
-
-    return std::move(renderPass);
-}
+inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
 }
 
 namespace nc::graphics
 {
-Lighting::Lighting(Registry* registry, 
-                   vk::Device device, 
-                   GpuAllocator* allocator, 
-                   GpuOptions* gpuOptions, 
+Lighting::Lighting(Registry* registry,
+                   vk::Device device,
+                   GpuAllocator* allocator,
+                   GpuOptions* gpuOptions,
                    Swapchain* swapchain,
                    RenderGraph* renderGraph,
                    ShaderDescriptorSets* shaderDescriptorSets,
@@ -67,13 +47,11 @@ void Lighting::Clear()
     {
         OnRemovePointLightConnection();
     }
-
     m_numShadowCasters = 0u;
 }
 
-void Lighting::Resize(RenderGraph* renderGraph, const Vector2& dimensions)
+void Lighting::Resize(const Vector2& dimensions)
 {
-    m_renderGraph = renderGraph;
     m_dimensions = dimensions;
 
     const auto countBeforeClearing = m_numShadowCasters;
@@ -86,16 +64,13 @@ void Lighting::Resize(RenderGraph* renderGraph, const Vector2& dimensions)
 
 void Lighting::OnAddPointLightConnection()
 {
-    const auto id = ShadowMappingPassId + std::to_string(m_numShadowCasters);
-    m_renderGraph->Add(CreateShadowMappingPass(m_device, m_allocator, m_gpuOptions, m_swapchain, m_dimensions, m_numShadowCasters));
-    m_renderGraph->RegisterShadowMappingTechnique(id, m_numShadowCasters);
+    m_renderGraph->AddRenderPass(CreateShadowMappingPass(m_dimensions, m_numShadowCasters));
 
     std::vector<ShadowMap> shadowMaps;
     shadowMaps.reserve(m_numShadowCasters + 1);
     for (auto i = 0u; i < m_numShadowCasters + 1; ++i)
     {
-        auto currentPassId = ShadowMappingPassId + std::to_string(i);
-        shadowMaps.push_back(ShadowMap{m_renderGraph->Acquire(currentPassId)->attachments[0]->view.get()});
+        shadowMaps.push_back(ShadowMap{ m_renderGraph->GetRenderPass(m_ids.at(i)).GetAttachmentView(0) });
     }
     m_shaderResources->shadowMapShaderResource.Update(std::vector<ShadowMap>{shadowMaps});
     m_numShadowCasters++;
@@ -104,8 +79,41 @@ void Lighting::OnAddPointLightConnection()
 void Lighting::OnRemovePointLightConnection()
 {
     m_numShadowCasters--;
-    const auto id = ShadowMappingPassId + std::to_string(m_numShadowCasters);
-    m_renderGraph->UnregisterTechnique<ShadowMappingTechnique>(id);
-    m_renderGraph->Remove(id);
+    m_renderGraph->RemoveRenderPass(m_ids.back());
+    m_ids.pop_back();
+}
+
+auto Lighting::CreateShadowMappingPass(nc::Vector2 dimensions, uint32_t index) -> nc::graphics::RenderPass
+{
+    using namespace nc::graphics;
+    m_ids.emplace_back(ShadowMappingPassId + std::to_string(index));
+
+    std::vector<AttachmentSlot> shadowAttachmentSlots
+    {
+        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+    };
+
+    std::vector<Subpass> shadowSubpasses
+    {
+        Subpass{shadowAttachmentSlots[0]}
+    };
+
+    std::vector<Attachment> attachments;
+    const auto numConcurrentAttachments = m_swapchain->GetColorImageViews().size();
+    for (auto i = 0u; i < numConcurrentAttachments; i++)
+    {
+        attachments.push_back(Attachment(m_device, m_allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
+    }
+
+    const auto size = AttachmentSize{dimensions, m_swapchain->GetExtent()};
+    auto renderPass = RenderPass(m_device, 0u, m_ids.back(), std::move(shadowAttachmentSlots), std::move(shadowSubpasses), std::move(attachments), size, ClearValueFlags::Depth);
+
+    for (auto i = 0u; i < numConcurrentAttachments; i++)
+    {
+        renderPass.RegisterAttachmentViews(std::vector<vk::ImageView>{renderPass.GetAttachmentView(i)}, dimensions, i);
+    }
+
+    renderPass.RegisterShadowMappingTechnique(m_device, m_gpuOptions, m_shaderDescriptorSets, index);
+    return renderPass;
 }
 }

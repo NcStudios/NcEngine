@@ -50,15 +50,16 @@ namespace nc::graphics
         m_imageInfos.clear();
         m_imageInfos.reserve(data.size());
 
-        for (uint32_t i = 0; i < static_cast<uint32_t>(data.size()); ++i)
+        std::ranges::transform(data, std::back_inserter(m_imageInfos), [this](auto &dataItem)
         {
-            m_imageInfos.push_back(CreateDescriptorImageInfo(m_sampler.get(), data[i].imageView, vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal));
-        }
+            return CreateDescriptorImageInfo(m_sampler.get(), dataItem.imageView, vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+        });
 
         m_descriptors->UpdateImage
-        (   BindFrequency::per_frame,
+        (   
+            BindFrequency::per_frame,
             m_imageInfos,
-            static_cast<uint32_t>(data.size()),
+            static_cast<uint32_t>(m_imageInfos.size()),
             vk::DescriptorType::eCombinedImageSampler,
             m_bindingSlot
         );
