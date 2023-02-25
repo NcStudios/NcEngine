@@ -69,6 +69,14 @@ namespace graphics
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
 
+            template<class T>
+            auto GetAllocationInfo(const GpuAllocation<T>& allocation) const -> vma::AllocationInfo
+            {
+                auto info = vma::AllocationInfo{};
+                m_allocator.getAllocationInfo(allocation.Allocation(), &info);
+                return info;
+            }
+
         private:
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
@@ -141,9 +149,7 @@ namespace graphics
     template<class T>
     auto GpuAllocation<T>::GetInfo() const -> vma::AllocationInfo
     {
-        auto info = vma::AllocationInfo{};
-        m_allocator->GetAllocationInfo(m_allocation, &info);
-        return info;
+        return m_allocator->GetAllocationInfo(*this);
     }
 } // namespace graphics
 } // namespace nc
