@@ -9,7 +9,7 @@ Environment::Environment()
     m_useSkybox{false}
 {
     m_environmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
-    m_environmentData.skyboxTextureIndex = -1;
+    m_environmentData.skyboxTextureIndex = 0u;
 }
 
 void Environment::SetSkybox(const std::string& path)

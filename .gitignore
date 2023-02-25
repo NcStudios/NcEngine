@@ -27,3 +27,7 @@ imgui.ini
 #external libs
 !nc/lib/libOptickCore.dll
 !nc/lib/libOptickCore.dll.a
+/.clang-format
+/Folder.DotSettings.user
+/.editorconfig
+/CMakeSettings.json

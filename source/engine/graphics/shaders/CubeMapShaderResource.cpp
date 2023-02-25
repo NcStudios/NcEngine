@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-CubeMapShaderResource::CubeMapShaderResource(vk::Device device, uint32_t bindingSlot, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
+CubeMapShaderResource::CubeMapShaderResource(uint32_t bindingSlot, vk::Device device, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps)
     : m_device{device},
       m_descriptors{descriptors},
       m_imageInfos{},

@@ -68,7 +68,8 @@ namespace nc::graphics
     NcGraphicsImpl::NcGraphicsImpl(Registry* registry, GraphicsInitInfo info, window::WindowImpl* window)
         : m_registry{ registry },
           // TODO #341: Instead of constructing here, pass in from BuildGraphicsModule
-          m_graphics{ info.gpuAccessorSignals,
+          m_graphics{ registry,
+                      info.gpuAccessorSignals,
                       info.appName,
                       info.appVersion,
                       ::ToVulkanApi(info.api),

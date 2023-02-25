@@ -18,7 +18,7 @@ namespace nc::graphics
     class ShadowMappingTechnique : public ITechnique
     {
         public:
-            ShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+            ShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex);
             ~ShadowMappingTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -32,5 +32,6 @@ namespace nc::graphics
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
             bool m_enabled;
+            uint32_t m_shadowCasterIndex;
     };
 }

@@ -1,13 +1,18 @@
 #include "Graphics.h"
 #include "FrameManager.h"
+#include "GpuAllocator.h"
 #include "GpuAssetsStorage.h"
 #include "GpuOptions.h"
-#include "Renderer.h"
+#include "Imgui.h"
+#include "Lighting.h"
+#include "RenderGraph.h"
 #include "Swapchain.h"
 #include "core/Device.h"
 #include "core/Instance.h"
+#include "shaders/ShaderDescriptorSets.h"
 #include "shaders/ShaderResources.h"
 #include "config/Config.h"
+#include "ecs/Registry.h"
 #include "graphics/Camera.h"
 #include "utility/Log.h"
 
@@ -21,7 +26,7 @@ constexpr auto g_requiredDeviceExtensions = std::array<const char*, 1>{VK_KHR_SW
 
 namespace nc::graphics
 {
-    Graphics::Graphics(const nc::GpuAccessorSignals& gpuAccessorSignals,
+    Graphics::Graphics(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals,
                        const std::string& appName, uint32_t appVersion, uint32_t apiVersion,
                        bool useValidationLayers, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
         : m_instance{std::make_unique<Instance>(appName, appVersion, apiVersion, useValidationLayers)},
@@ -30,14 +35,38 @@ namespace nc::graphics
           m_gpuOptions{ std::make_unique<GpuOptions>(m_device->VkPhysicalDevice()) },
           m_swapchain{ std::make_unique<Swapchain>(m_device->VkDevice(), m_device->VkPhysicalDevice(), m_surface.get(), dimensions) },
           m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
-          m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_allocator.get(), config::GetMemorySettings(), dimensions)},
+          m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings())},
           m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), gpuAccessorSignals) },
-          m_renderer{ std::make_unique<Renderer>(m_device->VkDevice(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
+
+          m_renderGraph{std::make_unique<RenderGraph>(m_device->VkDevice(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
+          m_imgui{std::make_unique<Imgui>(*m_device)},
+          //m_renderer{ std::make_unique<Renderer>(m_device->VkDevice(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions) },
+          
           m_frameManager{std::make_unique<FrameManager>(m_device->VkDevice(), m_device->VkPhysicalDevice(), m_surface.get())},
-          m_resizingMutex{},
+          
+          m_lighting{std::make_unique<Lighting>(registry, m_device->VkDevice(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
           m_imageIndex{UINT32_MAX},
           m_dimensions{ dimensions },
           m_isMinimized{ false }
+          
+        //   m_resizingMutex{},
+    // Graphics::Graphics(camera::MainCamera* mainCamera, Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+    //     : m_mainCamera{mainCamera},
+    //       m_core{std::make_unique<Core>(hwnd, hinstance)},
+    //       m_gpuOptions{ std::make_unique<GpuOptions>(m_core->physicalDevice) },
+    //       m_swapchain{ std::make_unique<Swapchain>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), dimensions) },
+    //       m_commands{ std::make_unique<Commands>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get(), m_swapchain.get()) },
+    //       m_allocator{ std::make_unique<GpuAllocator>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->instance.get(), m_commands.get())},
+    //       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_core->logicalDevice.get())},
+    //       m_shaderResources{ std::make_unique<ShaderResources>(m_core->logicalDevice.get(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings())},
+    //       m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_core->logicalDevice.get(), m_allocator.get(), gpuAccessorSignals) },
+    //       m_renderGraph{std::make_unique<RenderGraph>(m_core->logicalDevice.get(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
+    //       m_imgui{std::make_unique<Imgui>(m_core->logicalDevice.get())},
+    //       m_frameManager{std::make_unique<FrameManager>(m_core->logicalDevice.get(), m_core->physicalDevice, m_core->surface.get())},
+    //       m_lighting{std::make_unique<Lighting>(registry, m_core->logicalDevice.get(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
+    //       m_imageIndex{UINT32_MAX},
+    //       m_dimensions{ dimensions },
+    //       m_isMinimized{ false }
     {
     }
 
@@ -47,13 +76,13 @@ namespace nc::graphics
         {
             Clear();
         }
-        catch(const std::runtime_error& e)
+        catch (const std::runtime_error &e)
         {
             NC_LOG_EXCEPTION(e);
         }
     }
 
-    void Graphics::RecreateSwapchain(Vector2 dimensions)
+    void Graphics::Resize(const Vector2& dimensions)
     {
         if (m_isMinimized)
         {
@@ -66,43 +95,39 @@ namespace nc::graphics
         m_device->VkDevice().waitIdle();
 
         m_dimensions = dimensions;
-        m_renderer.reset();
-        m_swapchain.reset();
 
-        // Recreate swapchain and resources
-        auto shadowMap = ShadowMap { .dimensions = m_dimensions };
-        m_shaderResources.get()->GetShadowMapShaderResource().Update(std::vector<ShadowMap>{shadowMap});
-        m_swapchain = std::make_unique<Swapchain>(m_device->VkDevice(), m_device->VkPhysicalDevice(), m_surface.get(), m_dimensions);
-        m_renderer = std::make_unique<Renderer>(m_device->VkDevice(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderResources.get(), dimensions);
+        m_swapchain->Resize(dimensions);
+        m_renderGraph->Resize(dimensions);
+        m_lighting->Resize(dimensions);
     }
 
-    void Graphics::OnResize(float width, float height, WPARAM windowArg)
+    void Graphics::OnResize(float width, float height, const WPARAM windowArg)
     {
         m_dimensions = Vector2{ width, height };
         m_isMinimized = windowArg == 1;
-
-        if (m_isMinimized)
-        {
-            return;
-        }
-
-        RecreateSwapchain(m_dimensions);
-        InitializeUI();
+        Resize(m_dimensions);
     }
 
     void Graphics::Clear()
     {
         m_device->VkDevice().waitIdle();
-        m_renderer->Clear();
+        m_lighting->Clear();
         ShaderResourceService<ObjectData>::Get()->Reset();
         ShaderResourceService<PointLightInfo>::Get()->Reset();
         ShaderResourceService<ShadowMap>::Get()->Reset();
         ShaderResourceService<EnvironmentData>::Get()->Reset();
     }
 
-    void Graphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
+    void Graphics::InitializeUI() const /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
     {
-        m_renderer->InitializeImgui(*m_instance, *m_device, static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
+        // m_renderer->InitializeImgui(*m_instance, *m_device, static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
+
+
+
+        m_imgui->InitializeImgui(*m_instance, *m_device,
+            m_renderGraph->GetRenderPass(LitPassId).GetVkPass(),
+            static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount())
+        );
     }
 
     bool Graphics::FrameBegin()
@@ -113,11 +138,10 @@ namespace nc::graphics
         // Gets the next image in the swapchain
         if(!m_swapchain->GetNextRenderReadyImageIndex(m_frameManager->CurrentFrameContext(), &m_imageIndex))
         {
-            RecreateSwapchain(m_dimensions);
+            Resize(m_dimensions);
         }
 
         m_frameManager->Begin();
-
         return true;
     }
 
@@ -130,7 +154,8 @@ namespace nc::graphics
         auto* currentFrame = m_frameManager->CurrentFrameContext();
         if (m_isMinimized) return;
 
-        m_renderer->Record(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex);
+        // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
+        m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions);
 
         // Executes the command buffer to render to the image
         m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
@@ -142,8 +167,7 @@ namespace nc::graphics
 
         if (!isSwapChainValid)
         {
-            RecreateSwapchain(m_dimensions);
-            return;
+            Resize(m_dimensions);
         }
     }
 

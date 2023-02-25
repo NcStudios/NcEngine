@@ -63,10 +63,17 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
 
     //Lights
-    auto lvHandle = registry->Add<Entity>({.position = Vector3{-1.1f, 4.0f, -1.4f}, .tag = "Point Light 1"});
+    auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
     registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{
-        .ambient = Vector3(0.4f, 0.4f, 0.4f),
-        .diffuseColor = Vector3(0.8f, 0.8f, 0.8f),
+        .ambient = Vector3(0.1f, 0.1f, 0.1f),
+        .diffuseColor = Vector3(0.4f, 0.4f, 0.8f),
+        .diffuseIntensity = 88.0f
+    });
+
+    auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
+    registry->Add<graphics::PointLight>(lvHandle2, graphics::PointLightInfo{
+        .ambient = Vector3(0.1f, 0.1f, 0.1f),
+        .diffuseColor = Vector3(0.4f, 0.8f, 0.4f),
         .diffuseIntensity = 88.0f
     });
 
@@ -78,7 +85,6 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     });
 
     registry->Add<graphics::MeshRenderer>(floor, "plane.nca", floorMaterial);
-
     auto blueSphere = registry->Add<Entity>({
         .position = Vector3{0.0f, 1.0f, 2.0f},
         .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
