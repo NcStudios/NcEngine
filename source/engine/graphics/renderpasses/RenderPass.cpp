@@ -148,30 +148,25 @@ auto RenderPass::GetVkPass() const ->vk::RenderPass
 
 void RenderPass::RegisterAttachmentViews(std::vector<vk::ImageView> views, Vector2 dimensions, uint32_t index)
 {
-    std::erase_if(m_frameBuffers, [index](const auto &frameBuffer)
+    std::erase_if(m_frameBuffers, [index](const auto& frameBuffer)
     {
         return frameBuffer.index == index;
     });
-
-    auto frameBuffer = FrameBuffer
-    {
-        .index = index,
-        .attachmentViews = std::move(views)
-    };
 
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
         vk::FramebufferCreateFlags(),           // FramebufferCreateFlags
         m_renderPass.get(),                     // RenderPass
-        static_cast<uint32_t>(frameBuffer.attachmentViews.size()), // AttachmentCount
-        frameBuffer.attachmentViews.data(),     // PAttachments
+        static_cast<uint32_t>(views.size()),    // AttachmentCount
+        views.data(),                           // PAttachments
         static_cast<uint32_t>(dimensions.x),    // Width
         static_cast<uint32_t>(dimensions.y),    // Height
         1                                       // Layers
     };
 
-    frameBuffer.frameBuffer = m_device.createFramebufferUnique(framebufferInfo);
-    m_frameBuffers.push_back(std::move(frameBuffer));
+    m_frameBuffers.emplace_back(
+        index, std::move(views), m_device.createFramebufferUnique(framebufferInfo)
+    );
 }
 
 auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer
