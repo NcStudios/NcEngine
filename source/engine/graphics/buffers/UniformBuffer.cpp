@@ -43,9 +43,8 @@ namespace nc::graphics
 
     void UniformBuffer::Bind(const void* data, uint32_t size)
     {
-        auto paddedSize = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
         void* mappedData = m_allocator->Map(m_buffer.Allocation());
-        memcpy(mappedData, data, paddedSize);
+        memcpy(mappedData, data, size);
         m_allocator->Unmap(m_buffer.Allocation());
     }
 }
