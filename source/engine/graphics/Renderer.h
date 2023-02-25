@@ -19,6 +19,8 @@ class ParticleRenderer;
 
 namespace graphics
 {
+class Device;
+class Instance;
 class Swapchain;
 class GpuOptions;
 struct PerFrameRenderState;
@@ -26,6 +28,8 @@ class PerFrameGpuContext;
 class RenderPassManager;
 class RenderTarget;
 class ShaderResources;
+
+
 
 class Renderer
 {
@@ -35,7 +39,7 @@ class Renderer
 
         void Record(PerFrameGpuContext* currentFrame, const PerFrameRenderState& state, const MeshStorage& meshStorage, uint32_t currentSwapChainImageIndex);
         void Clear() noexcept;
-        void InitializeImgui(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, Commands* commands, uint32_t maxSamplesCount); /** @todo: Where should Imgui stuff live? */
+        void InitializeImgui(const Instance& instance, const Device& device, uint32_t maxSamplesCount); /** @todo: Where should Imgui stuff live? */
 
     private:
         void BindMeshBuffers(vk::CommandBuffer* cmd, const VertexBuffer& vertexData, const IndexBuffer& indexData);

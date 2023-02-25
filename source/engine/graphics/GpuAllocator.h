@@ -14,8 +14,9 @@ namespace nc
 {
 namespace graphics
 {
-    class Commands;
+    class Device;
     class GpuAllocator;
+    class Instance;
 
     /** @todo Add create image view (used in RenderTarget) */
     auto CreateTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
@@ -47,7 +48,7 @@ namespace graphics
     class GpuAllocator
     {
         public:
-            GpuAllocator( vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance, Commands* commands);
+            GpuAllocator(const Device* device, const Instance& instance);
             ~GpuAllocator() noexcept;
             GpuAllocator(const GpuAllocator&) = delete;
             GpuAllocator(GpuAllocator&&) = delete;
@@ -72,7 +73,7 @@ namespace graphics
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);
-            Commands* m_commands;
+            const Device* m_device;
             vma::Allocator m_allocator;
             vk::PhysicalDeviceProperties m_deviceProperties;
     };

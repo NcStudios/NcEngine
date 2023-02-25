@@ -37,27 +37,42 @@ namespace
         nc::graphics::DebugRenderer debugRenderer;
         #endif
     };
+
+    auto ToVulkanApi(nc::graphics::GraphicsApi api) -> uint32_t
+    {
+        switch(api)
+        {
+            case nc::graphics::GraphicsApi::Vulkan_1_0: return VK_API_VERSION_1_0;
+            case nc::graphics::GraphicsApi::Vulkan_1_1: return VK_API_VERSION_1_1;
+            case nc::graphics::GraphicsApi::Vulkan_1_2: return VK_API_VERSION_1_2;
+        }
+
+        throw nc::NcError{"Unknown GraphicsApi"};
+    }
 } // anonymous namespace
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
+    auto BuildGraphicsModule(bool enableModule, Registry* registry, GraphicsInitInfo info, window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
         if (enableModule)
         {
             NC_LOG_TRACE("Creating NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(reg, gpuAccessorSignals, window);
+            return std::make_unique<NcGraphicsImpl>(registry, std::move(info), window);
         }
 
         NC_LOG_TRACE("Creating NcGraphics module stub");
-        return std::make_unique<NcGraphicsStub>(reg);
+        return std::make_unique<NcGraphicsStub>(registry);
     }
 
-    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window)
+    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, GraphicsInitInfo info, window::WindowImpl* window)
         : m_registry{ registry },
-          m_camera{},
-          m_graphics{ &m_camera,
-                      gpuAccessorSignals,
+          // TODO #341: Instead of constructing here, pass in from BuildGraphicsModule
+          m_graphics{ info.gpuAccessorSignals,
+                      info.appName,
+                      info.appVersion,
+                      ::ToVulkanApi(info.api),
+                      info.useValidationLayers,
                       window->GetHWND(),
                       window->GetHINSTANCE(),
                       window->GetDimensions() },
@@ -67,7 +82,7 @@ namespace nc::graphics
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
         m_graphics.InitializeUI();
-        window->BindGraphicsOnResizeCallback(std::bind_front(&Graphics::OnResize, &m_graphics));
+        window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
         window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
@@ -129,6 +144,11 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
         auto* camera = m_camera.Get();
+        if (!camera)
+        {
+            return;
+        }
+
         camera->UpdateViewMatrix();
 
         if(!m_graphics.FrameBegin())
@@ -155,5 +175,11 @@ namespace nc::graphics
         #endif
 
         m_graphics.FrameEnd();
+    }
+
+    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    {
+        m_camera.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
+        m_graphics.OnResize(width, height, windowArg);
     }
 } // namespace nc::graphics

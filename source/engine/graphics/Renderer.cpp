@@ -6,8 +6,9 @@
 #include "graphics/MeshRenderer.h"
 
 #include "graphics/GpuOptions.h"
-#include "graphics/Commands.h"
 #include "graphics/Graphics.h"
+#include "graphics/core/Device.h"
+#include "graphics/core/Instance.h"
 #include "graphics/renderpasses/RenderPassManager.h"
 #include "graphics/renderpasses/RenderTarget.h"
 #include "graphics/shaders/ShaderResources.h"
@@ -20,8 +21,8 @@
 #include "imgui/imgui_impl_vulkan.h"
 #include "optick/optick.h"
 #include "PerFrameRenderState.h"
-#include "Core.h"
 #include "PerFrameGpuContext.h"
+
 
 #ifdef NC_EDITOR_ENABLED
 #include "graphics/techniques/WireframeTechnique.h"
@@ -109,20 +110,20 @@ void Renderer::Record(PerFrameGpuContext* currentFrame, const PerFrameRenderStat
     cmd->end();
 }
 
-void Renderer::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, Commands* commands, uint32_t maxSamplesCount)
+void Renderer::InitializeImgui(const Instance& instance, const Device& device, uint32_t maxSamplesCount)
 {
     ImGui_ImplVulkan_InitInfo initInfo{};
-    initInfo.Instance = instance;
-    initInfo.PhysicalDevice = physicalDevice;
-    initInfo.Device = logicalDevice;
-    initInfo.Queue = commands->GetCommandQueue(QueueFamilyType::GraphicsFamily);
+    initInfo.Instance = instance.VkInstance();
+    initInfo.PhysicalDevice = device.VkPhysicalDevice();
+    initInfo.Device = device.VkDevice();
+    initInfo.Queue = device.VkGraphicsQueue();
     initInfo.DescriptorPool = m_imguiDescriptorPool.get();
     initInfo.MinImageCount = 3;
     initInfo.ImageCount = 3;
     initInfo.MSAASamples = VkSampleCountFlagBits(maxSamplesCount);
 
     ImGui_ImplVulkan_Init(&initInfo, m_renderPasses->Acquire(RenderPassManager::LitShadingPass).renderpass.get());
-    commands->ExecuteCommand([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
+    device.ExecuteCommand([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
