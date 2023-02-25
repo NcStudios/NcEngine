@@ -1,7 +1,7 @@
 #version 460
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_EXT_nonuniform_qualifier : enable
-
+ 
 struct ObjectData
 {
     // N MVP matrices
@@ -52,19 +52,11 @@ layout (location = 2) out vec3 outNormal;
 layout (location = 3) out vec2 outUV;
 layout (location = 4) out mat3 outTBN;
 layout (location = 7) out int  outObjectInstance;
-layout (location = 8) out vec4 outLightSpacePos;
-layout (location = 9) out vec3 outUVW;
+layout (location = 8) out vec3 outUVW;
 
 out gl_PerVertex {
 	vec4 gl_Position;
 };
-
-const mat4 biasMat = mat4( 
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 
-);
 
 void main() 
 {
@@ -79,14 +71,5 @@ void main()
     outUV = inUV;
     outObjectInstance = gl_BaseInstance;
     outUVW = inPos;
-
-    if (pointLights.lights[0].castShadows == 1)
-    {
-        outLightSpacePos = biasMat * pointLights.lights[0].lightViewProj * vec4(outFragPosition, 1.0);
-    }
-    else
-    {
-        outLightSpacePos = vec4(1.0);
-    }
     gl_Position = object.viewProjection * object.model * vec4(inPos, 1.0);
 }

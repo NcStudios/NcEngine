@@ -57,6 +57,7 @@ namespace nc::graphics
         : m_registry{ registry },
           m_camera{},
           m_graphics{ &m_camera,
+                      registry,
                       gpuAccessorSignals,
                       window->GetHWND(),
                       window->GetHINSTANCE(),

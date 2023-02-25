@@ -8,12 +8,14 @@ target_sources(${NC_ENGINE_LIB}
         GpuAssetsStorage.cpp
         GpuOptions.cpp
         Graphics.cpp
+        Imgui.cpp
         Initializers.cpp
+        Lighting.cpp
         NcGraphicsImpl.cpp
         PerFrameGpuContext.cpp
         PerFrameRenderState.cpp
         QueueFamily.cpp
-        Renderer.cpp
+        RenderGraph.cpp
         Swapchain.cpp
         vma.cpp
 )

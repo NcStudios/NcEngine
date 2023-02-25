@@ -2,7 +2,6 @@
 #include "assets/AssetService.h"
 #include "ecs/Registry.h"
 #include "graphics/DebugWidget.h"
-#include "graphics/Renderer.h"
 #include "ncutility/NcError.h"
 
 #ifdef NC_EDITOR_ENABLED

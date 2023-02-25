@@ -17,7 +17,7 @@ namespace graphics
     class Commands;
     class GpuAllocator;
 
-    /** @todo Add create image view (used in RenderTarget) */
+    /** @todo Add create image view (used in Attachment) */
     auto CreateTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
     auto CreateCubeMapTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
 
@@ -36,6 +36,7 @@ namespace graphics
             operator T() const noexcept { return m_data; }
             auto Data() const noexcept -> T { return m_data; }
             auto Allocation() const noexcept -> vma::Allocation { return m_allocation; }
+            auto GetInfo() const -> vma::AllocationInfo;
             void Release() noexcept;
 
         private:
@@ -67,6 +68,14 @@ namespace graphics
 
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
+
+            template<class T>
+            auto GetAllocationInfo(const GpuAllocation<T>& allocation) const -> vma::AllocationInfo
+            {
+                auto info = vma::AllocationInfo{};
+                m_allocator.getAllocationInfo(allocation.Allocation(), &info);
+                return info;
+            }
 
         private:
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
@@ -135,6 +144,12 @@ namespace graphics
         m_data = T{};
         m_allocation = vma::Allocation{};
         m_allocator = nullptr;
+    }
+
+    template<class T>
+    auto GpuAllocation<T>::GetInfo() const -> vma::AllocationInfo
+    {
+        return m_allocator->GetAllocationInfo(*this);
     }
 } // namespace graphics
 } // namespace nc

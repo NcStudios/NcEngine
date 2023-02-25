@@ -1,72 +1,70 @@
 #pragma once
 
-#include "graphics/techniques/ITechnique.h"
-#include "ncmath/Vector.h"
-
-#include "vulkan/vk_mem_alloc.hpp"
-#include <array>
-#include <memory>
-#include <span>
-#include <vector>
-
-/** @todo As more stuff gets pulled into here, consider splitting this up into multiple files. */
+#include "graphics/renderpasses/Attachment.h"
 
 namespace nc::graphics
 {
-using ClearValueFlags_t = uint8_t;
-
-struct ClearValueFlags
+class RenderPass
 {
-    static constexpr ClearValueFlags_t None = 0;
-    static constexpr ClearValueFlags_t Color = 1 << 1;
-    static constexpr ClearValueFlags_t Depth = 1 << 2;
+    public:
+        RenderPass(vk::Device device,
+                   uint8_t priority,
+                   std::string uid,
+                   std::vector<AttachmentSlot> attachmentSlots,
+                   std::vector<Subpass> subpasses,
+                   std::vector<Attachment> attachments,
+                   const AttachmentSize &size,
+                   ClearValueFlags_t clearFlags);
+
+        void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex);
+        void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const;
+        void End(vk::CommandBuffer *cmd);
+
+        auto GetPriority() const -> uint32_t;
+        auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
+        auto GetUid() const -> std::string;
+        auto GetVkPass() const -> vk::RenderPass;
+
+        void RegisterAttachmentViews(std::vector<vk::ImageView>, Vector2 dimensions, uint32_t index);
+
+        template <std::derived_from<ITechnique> T>
+        void RegisterTechnique(vk::Device device, GpuOptions *gpuOptions, ShaderDescriptorSets *descriptorSets);
+        void RegisterShadowMappingTechnique(vk::Device device, GpuOptions *gpuOptions, ShaderDescriptorSets *descriptorSets, uint32_t shadowCasterIndex);
+
+        template <std::derived_from<ITechnique> T>
+        void UnregisterTechnique();
+
+    private:
+        auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;
+        vk::Device m_device;
+        uint8_t m_priority;
+        std::string m_uid;
+        vk::UniqueRenderPass m_renderPass;
+        AttachmentSize m_attachmentSize;
+        ClearValueFlags_t m_clearFlags;
+        std::vector<std::unique_ptr<ITechnique>> m_techniques;
+        std::vector<Attachment> m_attachments;
+        std::vector<FrameBuffer> m_frameBuffers;
 };
 
-enum class AttachmentType : uint8_t
+template <std::derived_from<ITechnique> T>
+void RenderPass::RegisterTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets)
 {
-    Color,
-    Depth,
-    ShadowDepth,
-    Resolve
-};
+    UnregisterTechnique<T>();
+    m_techniques.push_back(std::make_unique<T>(device, gpuOptions, descriptorSets, &m_renderPass.get()));
+}
 
-struct AttachmentSlot
+template <std::derived_from<ITechnique> T>
+void RenderPass::UnregisterTechnique()
 {
-    AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp,
-                   vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
+    const auto &techniqueType = typeid(T);
+    auto techniquePos = std::ranges::find_if(m_techniques, [&techniqueType](const auto &foundTechnique)
+                                             { return (typeid(foundTechnique) == techniqueType); });
 
-    vk::AttachmentDescription description;
-    vk::AttachmentReference reference;
-    AttachmentType type;
-};
-
-struct Subpass
-{
-    /** Create lit subpass */
-    Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment, const AttachmentSlot& resolveAttachment);
-
-    /** Create shadow mapping subpass */
-    Subpass(const AttachmentSlot& depthAttachment);
-
-    vk::SubpassDescription description;
-    std::vector<vk::SubpassDependency> dependencies;
-};
-
-struct RenderTargetSize
-{
-    Vector2 dimensions;
-    vk::Extent2D extent;
-};
-
-struct RenderPass
-{
-    RenderPass(std::span<const AttachmentSlot> attachmentSlots, std::span<const Subpass> subpasses,
-               vk::Device device, const RenderTargetSize& size, std::string uid, ClearValueFlags_t clearFlags);
-
-    vk::UniqueRenderPass renderpass;
-    std::vector<std::unique_ptr<ITechnique>> techniques;
-    RenderTargetSize renderTargetSize;
-    std::string uid;
-    ClearValueFlags_t clearFlags;
-};
-} // namespace nc::graphics
+    if (techniquePos != m_techniques.end())
+    {
+        *techniquePos = std::move(m_techniques.back());
+        m_techniques.pop_back();
+    }
+}
+}
