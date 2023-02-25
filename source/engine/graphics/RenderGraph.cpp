@@ -4,7 +4,6 @@
 #include "graphics/GpuOptions.h"
 #include "graphics/PerFrameGpuContext.h"
 #include "graphics/Swapchain.h"
-#include "graphics/meshes/Meshes.h"
 #include "graphics/techniques/EnvironmentTechnique.h"
 #include "graphics/techniques/ParticleTechnique.h"
 #include "graphics/techniques/PbrTechnique.h"
@@ -20,12 +19,12 @@
 
 namespace
 {
-void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::VertexBuffer& vertexData, const nc::graphics::IndexBuffer& indexData)
+void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer& vertexData, const nc::graphics::ImmutableBuffer& indexData)
 {
     vk::DeviceSize offsets[] = { 0 };
-    auto vertexBuffer = vertexData.buffer.GetBuffer();
+    auto vertexBuffer = vertexData.GetBuffer();
     cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
-    cmd->bindIndexBuffer(indexData.buffer.GetBuffer(), 0, vk::IndexType::eUint32);
+    cmd->bindIndexBuffer(indexData.GetBuffer(), 0, vk::IndexType::eUint32);
 }
 
 void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions)
