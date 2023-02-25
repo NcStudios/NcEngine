@@ -36,6 +36,7 @@ namespace graphics
             operator T() const noexcept { return m_data; }
             auto Data() const noexcept -> T { return m_data; }
             auto Allocation() const noexcept -> vma::Allocation { return m_allocation; }
+            auto GetInfo() const -> vma::AllocationInfo;
             void Release() noexcept;
 
         private:
@@ -135,6 +136,14 @@ namespace graphics
         m_data = T{};
         m_allocation = vma::Allocation{};
         m_allocator = nullptr;
+    }
+
+    template<class T>
+    auto GpuAllocation<T>::GetInfo() const -> vma::AllocationInfo
+    {
+        auto info = vma::AllocationInfo{};
+        m_allocator->GetAllocationInfo(m_allocation, &info);
+        return info;
     }
 } // namespace graphics
 } // namespace nc
