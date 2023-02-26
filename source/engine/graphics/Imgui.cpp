@@ -1,5 +1,6 @@
 #include "Imgui.h"
-#include "graphics/PerFrameRenderState.h"
+#include "core/Device.h"
+#include "core/Instance.h"
 
 #include "imgui/imgui_impl_vulkan.h"
 
@@ -35,25 +36,25 @@ auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 
 namespace nc::graphics
 {
-Imgui::Imgui(vk::Device device)
-    : m_imguiDescriptorPool{CreateImguiDescriptorPool(device)}
+Imgui::Imgui(const Device& device)
+    : m_imguiDescriptorPool{CreateImguiDescriptorPool(device.VkDevice())}
 {
 }
 
-void Imgui::InitializeImgui(vk::Instance instance, vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::RenderPass renderPass, Commands* commands, uint32_t maxSamplesCount)
+void Imgui::InitializeImgui(const Instance& instance, const Device& device, vk::RenderPass renderPass, uint32_t maxSamplesCount)
 {
     ImGui_ImplVulkan_InitInfo initInfo{};
-    initInfo.Instance = instance;
-    initInfo.PhysicalDevice = physicalDevice;
-    initInfo.Device = logicalDevice;
-    initInfo.Queue = commands->GetCommandQueue(QueueFamilyType::GraphicsFamily);
+    initInfo.Instance = instance.VkInstance();
+    initInfo.PhysicalDevice = device.VkPhysicalDevice();
+    initInfo.Device = device.VkDevice();
+    initInfo.Queue = device.VkGraphicsQueue();
     initInfo.DescriptorPool = m_imguiDescriptorPool.get();
     initInfo.MinImageCount = 3;
     initInfo.ImageCount = 3;
     initInfo.MSAASamples = VkSampleCountFlagBits(maxSamplesCount);
 
     ImGui_ImplVulkan_Init(&initInfo, renderPass);
-    commands->ExecuteCommand([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
+    device.ExecuteCommand([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 } // namespace nc::graphics

@@ -27,8 +27,6 @@ class RenderGraph
         void AddRenderPass(RenderPass renderPass);
         void RemoveRenderPass(const std::string& uid);
 
-        
-
     private:
         vk::Device m_device;
         Swapchain* m_swapchain;
