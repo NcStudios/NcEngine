@@ -97,10 +97,6 @@ namespace nc::graphics
 
     void Graphics::InitializeUI() const /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
     {
-        // m_renderer->InitializeImgui(*m_instance, *m_device, static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount()));
-
-
-
         m_imgui->InitializeImgui(*m_instance, *m_device,
             m_renderGraph->GetRenderPass(LitPassId).GetVkPass(),
             static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount())

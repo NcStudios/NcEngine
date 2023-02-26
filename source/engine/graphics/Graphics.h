@@ -29,9 +29,9 @@ namespace nc::graphics
     class Graphics
     {
         public:
-            Graphics(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, const std::string& appName,
-                     uint32_t appVersion, uint32_t apiVersion, bool useValidationLayers,
-                     HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals,
+                     const std::string& appName, uint32_t appVersion, uint32_t apiVersion,
+                     bool useValidationLayers, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
 
             ~Graphics() noexcept;
 
