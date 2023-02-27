@@ -43,7 +43,7 @@ include(FetchContent)
 
 FetchContent_Declare(NcCommon
                      GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
-                     GIT_TAG        f30ac63ac9b55d6b8f413217dfa05401f27e22fb # origin/release
+                     GIT_TAG        origin/release
                      GIT_SHALLOW    TRUE
 )
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "assets/AssetManagers.h"
-#include "camera/MainCamera.h"
+#include "GpuAllocator.h"
 #include "ncmath/Vector.h"
 #include "platform/win32/NcWin32.h"
 
@@ -11,9 +11,9 @@
 namespace nc {class Registry;}
 namespace nc::graphics
 {
+    class Device;
     class GpuOptions;
-    class Commands;
-    struct Core;
+    class Instance;
     class FrameManager;
     class GpuAllocator;
     struct GpuAssetsStorage;
@@ -29,10 +29,13 @@ namespace nc::graphics
     class Graphics
     {
         public:
-            Graphics(camera::MainCamera* mainCamera, Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+            Graphics(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals,
+                     const std::string& appName, uint32_t appVersion, uint32_t apiVersion,
+                     bool useValidationLayers, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+
             ~Graphics() noexcept;
 
-            void OnResize(float width, float height, float nearZ, float farZ, const WPARAM windowArg);
+            void OnResize(float width, float height, const WPARAM windowArg);
             void Clear();
             void InitializeUI() const;
 
@@ -43,12 +46,11 @@ namespace nc::graphics
         private:
             void Resize(const Vector2& dimensions);
 
-            camera::MainCamera* m_mainCamera;
-            Registry* m_registry;
-            std::unique_ptr<Core> m_core;
+            std::unique_ptr<Instance> m_instance;
+            vk::UniqueSurfaceKHR m_surface;
+            std::unique_ptr<Device> m_device;
             std::unique_ptr<GpuOptions> m_gpuOptions;
             std::unique_ptr<Swapchain> m_swapchain;
-            std::unique_ptr<Commands> m_commands;
             std::unique_ptr<GpuAllocator> m_allocator;
             std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;
             std::unique_ptr<ShaderResources> m_shaderResources;

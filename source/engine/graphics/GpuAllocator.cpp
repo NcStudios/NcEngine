@@ -1,5 +1,7 @@
 #include "GpuAllocator.h"
-#include "Commands.h"
+#include "core/Device.h"
+#include "core/Instance.h"
+
 #include "ncutility/NcError.h"
 
 namespace
@@ -16,10 +18,10 @@ namespace
 
 namespace nc::graphics
 {
-    GpuAllocator::GpuAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance, Commands* commands)
-        : m_commands{commands},
-          m_allocator{CreateAllocator(logicalDevice, physicalDevice, instance)},
-          m_deviceProperties{physicalDevice.getProperties()}
+    GpuAllocator::GpuAllocator(const Device* device, const Instance& instance)
+        : m_device{device},
+          m_allocator{::CreateAllocator(device->VkDevice(), device->VkPhysicalDevice(), instance.VkInstance())},
+          m_deviceProperties{device->VkPhysicalDevice().getProperties()}
     {
     }
 
@@ -62,7 +64,7 @@ namespace nc::graphics
 
     void GpuAllocator::CopyBuffer(const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size)
     {
-        m_commands->ExecuteCommand([sourceBuffer, destinationBuffer, size](vk::CommandBuffer cmd)
+        m_device->ExecuteCommand([sourceBuffer, destinationBuffer, size](vk::CommandBuffer cmd)
         {
             vk::BufferCopy copyRegion{};
             copyRegion.setSize(size);
@@ -177,7 +179,7 @@ namespace nc::graphics
 
     void GpuAllocator::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height)
     {
-        m_commands->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         {
             vk::BufferImageCopy region{};
             region.setBufferOffset(0);
@@ -200,7 +202,7 @@ namespace nc::graphics
 
     void GpuAllocator::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount)
     {
-        m_commands->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         {
             vk::BufferImageCopy region{};
             region.setBufferOffset(0);
@@ -223,7 +225,7 @@ namespace nc::graphics
 
     void GpuAllocator::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout)
     {
-        m_commands->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         { 
             vk::ImageMemoryBarrier barrier{};
             barrier.setOldLayout(oldLayout);

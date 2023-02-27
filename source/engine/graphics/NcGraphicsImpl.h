@@ -16,12 +16,30 @@ namespace nc::window { class WindowImpl; }
 
 namespace nc::graphics
 {
-auto BuildGraphicsModule(bool enableModule, Registry* reg, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
+enum class GraphicsApi
+{
+    Vulkan_1_0 = 10,
+    Vulkan_1_1 = 11,
+    Vulkan_1_2 = 12
+};
+
+struct GraphicsInitInfo
+{
+    GpuAccessorSignals gpuAccessorSignals;
+    std::string appName;
+    uint32_t appVersion;
+    GraphicsApi api;
+    bool useValidationLayers;
+};
+
+// TODO #340: Window should be moved inside graphics instead of being passed here
+auto BuildGraphicsModule(bool enableModule, Registry* registry, GraphicsInitInfo info, window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
 
 class NcGraphicsImpl : public NcGraphics
 {
     public:
-        NcGraphicsImpl(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals, window::WindowImpl* window);
+        // TODO #341: Graphics api should be injected as unqiue_ptr<IGraphics> to remove Vulkan dependency
+        NcGraphicsImpl(Registry* registry, GraphicsInitInfo info, window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
@@ -32,6 +50,8 @@ class NcGraphicsImpl : public NcGraphics
         auto BuildWorkload()->std::vector<task::Job> override;
         void Clear() noexcept override;
         void Run();
+
+        void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
 
     private:
         Registry* m_registry;
