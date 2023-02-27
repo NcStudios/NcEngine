@@ -37,6 +37,7 @@ struct MemorySettings
 
 struct GraphicsSettings
 {
+    bool enabled = true;
     bool useNativeResolution = false;
     bool launchInFullscreen = false;
     unsigned screenWidth = 1000;
@@ -51,8 +52,14 @@ struct GraphicsSettings
 
 struct PhysicsSettings
 {
+    bool enabled = true;
     float fixedUpdateInterval = 0.01667f;
     float worldspaceExtent = 1000.0f;
+};
+
+struct AudioSettings
+{
+    bool enabled = true;
 };
 
 struct Config
@@ -62,6 +69,7 @@ struct Config
     MemorySettings memorySettings;
     GraphicsSettings graphicsSettings;
     PhysicsSettings physicsSettings;
+    AudioSettings audioSettings;
 };
 
 [[nodiscard]] auto GetProjectSettings() -> const ProjectSettings&;
@@ -69,6 +77,7 @@ struct Config
 [[nodiscard]] auto GetMemorySettings() -> const MemorySettings&;
 [[nodiscard]] auto GetGraphicsSettings() -> const GraphicsSettings&;
 [[nodiscard]] auto GetPhysicsSettings() -> const PhysicsSettings&;
+[[nodiscard]] auto GetAudioSettings() -> const AudioSettings&;
 [[nodiscard]] auto Load(std::string_view iniPath) -> Config;
 [[nodiscard]] bool Validate(const Config& config);
 void Save(std::string_view path, const Config& config);
