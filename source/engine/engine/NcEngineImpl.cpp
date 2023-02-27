@@ -15,29 +15,15 @@ namespace
 auto BuildModuleRegistry(nc::Registry* reg,
                          nc::window::WindowImpl* window,
                          const nc::GpuAccessorSignals& gpuAccessorSignals,
-                         const nc::config::Config& config,
-                         nc::EngineInitFlags flags) -> nc::ModuleRegistry
+                         const nc::config::Config& config) -> nc::ModuleRegistry
 {
     NC_LOG_INFO("Building module registry");
-    const bool enableGraphics = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoGraphics);
-    const bool enablePhysics = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoPhysics);
-    const bool enableAudio = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
     auto moduleRegistry = nc::ModuleRegistry{};
-
-    auto graphicsInitInfo = nc::graphics::GraphicsInitInfo
-    {
-        gpuAccessorSignals,
-        config.projectSettings.projectName,
-        1,
-        nc::graphics::GraphicsApi::Vulkan_1_2,
-        config.graphicsSettings.useValidationLayers
-    };
-
-    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(enableGraphics, reg, std::move(graphicsInitInfo), window));
-    moduleRegistry.Register(nc::physics::BuildPhysicsModule(enablePhysics, reg));
-    moduleRegistry.Register(nc::audio::BuildAudioModule(enableAudio, reg));
+    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings, config.graphicsSettings, gpuAccessorSignals, reg, window));
+    moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, reg));
+    moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, reg));
     moduleRegistry.Register(nc::time::BuildTimeModule());
-    moduleRegistry.Register(std::make_unique<nc::ecs::LogicModule>(reg));
+    moduleRegistry.Register(nc::ecs::BuildLogicModule(reg));
     moduleRegistry.Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }
@@ -45,23 +31,19 @@ auto BuildModuleRegistry(nc::Registry* reg,
 
 namespace nc
 {
-auto InitializeNcEngine(const config::Config& config, EngineInitFlags flags) -> std::unique_ptr<NcEngine>
+auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngine>
 {
     config::SetConfig(config);
     utility::detail::InitializeLog(config.projectSettings.logFilePath);
     NC_LOG_INFO("Creating NcEngine instance");
-    NC_LOG_INFO_FMT(R"(EngineInitFlags\n\tDisable Audio: {}\n\tDisable Graphics: {}\n\tDisable Physics: {})",
-                    static_cast<int>(flags & nc::EngineInitFlags::NoAudio),
-                    static_cast<int>(flags & nc::EngineInitFlags::NoGraphics),
-                    static_cast<int>(flags & nc::EngineInitFlags::NoPhysics));
-    return std::make_unique<NcEngineImpl>(config, flags);
+    return std::make_unique<NcEngineImpl>(config);
 }
 
-NcEngineImpl::NcEngineImpl(const config::Config& config, EngineInitFlags flags)
+NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{config.memorySettings.maxTransforms},
       m_assets{config.assetSettings, config.memorySettings},
-      m_modules{BuildModuleRegistry(&m_registry, &m_window, m_assets.CreateGpuAccessorSignals(), config, flags)},
+      m_modules{BuildModuleRegistry(&m_registry, &m_window, m_assets.CreateGpuAccessorSignals(), config)},
       m_executor{},
       m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},
       m_isRunning{false}

@@ -5,7 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
         GpuOptions.cpp
-        Graphics.cpp
+        IGraphics.cpp
         Imgui.cpp
         Initializers.cpp
         Lighting.cpp
@@ -18,6 +18,7 @@ target_sources(${NC_ENGINE_LIB}
         vma.cpp
 )
 
+add_subdirectory(api/vulkan)
 add_subdirectory(buffers)
 add_subdirectory(components)
 add_subdirectory(core)

@@ -1,7 +1,9 @@
 #include "NcGraphicsImpl.h"
-#include "assets/AssetManagers.h"
-#include "ecs/View.h"
 #include "PerFrameRenderState.h"
+#include "assets/AssetManagers.h"
+#include "config/Config.h"
+#include "ecs/View.h"
+#include "task/Job.h"
 #include "utility/Log.h"
 #include "window/WindowImpl.h"
 
@@ -37,52 +39,38 @@ namespace
         nc::graphics::DebugRenderer debugRenderer;
         #endif
     };
-
-    auto ToVulkanApi(nc::graphics::GraphicsApi api) -> uint32_t
-    {
-        switch(api)
-        {
-            case nc::graphics::GraphicsApi::Vulkan_1_0: return VK_API_VERSION_1_0;
-            case nc::graphics::GraphicsApi::Vulkan_1_1: return VK_API_VERSION_1_1;
-            case nc::graphics::GraphicsApi::Vulkan_1_2: return VK_API_VERSION_1_2;
-        }
-
-        throw nc::NcError{"Unknown GraphicsApi"};
-    }
 } // anonymous namespace
 
 namespace nc::graphics
 {
-    auto BuildGraphicsModule(bool enableModule, Registry* registry, GraphicsInitInfo info, window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
+    auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                             const config::GraphicsSettings& graphicsSettings,
+                             const GpuAccessorSignals& gpuAccessorSignals,
+                             Registry* registry,
+                             window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
-        if (enableModule)
+        if (graphicsSettings.enabled)
         {
+            NC_LOG_TRACE("Selecting Graphics API");
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, registry, window);
+
             NC_LOG_TRACE("Creating NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(registry, std::move(info), window);
+            return std::make_unique<NcGraphicsImpl>(registry, std::move(graphicsApi), window);
         }
 
-        NC_LOG_TRACE("Creating NcGraphics module stub");
+        NC_LOG_TRACE("Graphics disabled - creating NcGraphics stub");
         return std::make_unique<NcGraphicsStub>(registry);
     }
 
-    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, GraphicsInitInfo info, window::WindowImpl* window)
+    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, std::unique_ptr<IGraphics> graphics, window::WindowImpl* window)
         : m_registry{ registry },
-          // TODO #341: Instead of constructing here, pass in from BuildGraphicsModule
-          m_graphics{ registry,
-                      info.gpuAccessorSignals,
-                      info.appName,
-                      info.appVersion,
-                      ::ToVulkanApi(info.api),
-                      info.useValidationLayers,
-                      window->GetHWND(),
-                      window->GetHINSTANCE(),
-                      window->GetDimensions() },
+          m_graphics{ std::move(graphics) },
           m_ui{ window->GetHWND() },
           m_environment{},
           m_pointLightSystem{ registry },
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
-        m_graphics.InitializeUI();
+        m_graphics->InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
         window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
@@ -124,7 +112,7 @@ namespace nc::graphics
     {
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
-        m_graphics.Clear();
+        m_graphics->Clear();
         m_environment.Clear();
         m_pointLightSystem.Clear();
         m_particleEmitterSystem.Clear();
@@ -152,7 +140,7 @@ namespace nc::graphics
 
         camera->UpdateViewMatrix();
 
-        if(!m_graphics.FrameBegin())
+        if(!m_graphics->FrameBegin())
             return;
 
         m_ui.FrameBegin();
@@ -169,18 +157,18 @@ namespace nc::graphics
         auto areLightsDirty = m_pointLightSystem.CheckDirtyAndReset();
         auto state = PerFrameRenderState{ m_registry, camera, areLightsDirty, &m_environment, m_particleEmitterSystem.GetParticles() };
         MapPerFrameRenderState(state);
-        m_graphics.Draw(state);
+        m_graphics->Draw(state);
 
         #ifdef NC_EDITOR_ENABLED
         for(auto& collider : View<physics::Collider>{m_registry}) collider.SetEditorSelection(false);
         #endif
 
-        m_graphics.FrameEnd();
+        m_graphics->FrameEnd();
     }
 
     void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
         m_camera.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
-        m_graphics.OnResize(width, height, windowArg);
+        m_graphics->OnResize(width, height, windowArg);
     }
 } // namespace nc::graphics
