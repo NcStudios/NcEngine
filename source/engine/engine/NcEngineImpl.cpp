@@ -24,7 +24,8 @@ auto BuildModuleRegistry(nc::Registry* reg,
     const bool enableAudio = nc::EngineInitFlags::None == (flags & nc::EngineInitFlags::NoAudio);
     auto moduleRegistry = nc::ModuleRegistry{};
 
-    auto graphicsInitInfo = nc::graphics::GraphicsInitInfo{
+    auto graphicsInitInfo = nc::graphics::GraphicsInitInfo
+    {
         gpuAccessorSignals,
         config.projectSettings.projectName,
         1,

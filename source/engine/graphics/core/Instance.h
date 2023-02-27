@@ -27,7 +27,6 @@ class Instance
         }
 
         auto CreateSurface(HWND hwnd, HINSTANCE hinstance) const -> vk::UniqueSurfaceKHR;
-
         auto GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>;
 
     private:
