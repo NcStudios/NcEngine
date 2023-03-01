@@ -3,6 +3,9 @@
 #include "platform/win32/NcWin32.h"
 #include "ncmath/Vector.h"
 
+#define GLFW_INCLUDE_NONE
+#include "GLFW/glfw3.h"
+
 #include <functional>
 #include <vector>
 
@@ -44,6 +47,7 @@ namespace nc::window
             WNDCLASS m_wndClass;
             HINSTANCE m_hInstance;
             Vector2 m_dimensions;
+            GLFWwindow* m_window;
 
             std::function<void(float,float,float,float,WPARAM)> GraphicsOnResizeCallback;
             std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> UIWndMessageCallback;

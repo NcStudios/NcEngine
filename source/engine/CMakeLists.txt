@@ -46,6 +46,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         NcUtility
         Vulkan::Vulkan
         Taskflow
+        glfw
 )
 
 # Note - OptickCore.dll still needs to be copied to the executable's directory

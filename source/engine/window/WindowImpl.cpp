@@ -46,6 +46,10 @@ namespace nc::window
           UIWndMessageCallback{nullptr},
           EngineDisableRunningCallback{std::move(onQuit)}
     {
+        glfwInit();
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
         g_instance = this;
         GetModuleHandleExA(0, NULL, &m_hInstance);
 
@@ -102,6 +106,7 @@ namespace nc::window
             clientRect.top = 0;
         }
 
+        m_window = glfwCreateWindow(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, "Vulkan", nullptr, nullptr);
         m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
                                 projectSettings.projectName.c_str(),
                                 WndStyleFlags,
@@ -119,6 +124,8 @@ namespace nc::window
     WindowImpl::~WindowImpl() noexcept
     {
         DestroyWindow(m_hwnd);
+        glfwDestroyWindow(m_window);
+        glfwTerminate();
     }
 
     HWND WindowImpl::GetHWND() const noexcept
