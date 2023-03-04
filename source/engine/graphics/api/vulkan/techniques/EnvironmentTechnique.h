@@ -11,14 +11,15 @@
 
 namespace nc::graphics
 {
-class GpuOptions; class ShaderDescriptorSets;
+class Device;
+class ShaderDescriptorSets;
 
 class EnvironmentTechnique : public ITechnique
 {
     public:
-        EnvironmentTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+        EnvironmentTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
         ~EnvironmentTechnique() noexcept;
-        
+
         bool CanBind(const PerFrameRenderState& frameData) override;
         void Bind(vk::CommandBuffer* cmd) override;
 
@@ -32,4 +33,4 @@ class EnvironmentTechnique : public ITechnique
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };
-}
+} // namespace nc::graphics

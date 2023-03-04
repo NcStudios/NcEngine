@@ -1,7 +1,8 @@
 #include "TextureStorage.h"
+#include "TextureBuffer.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/shaders/TextureShaderResource.h"
+#include "graphics/shader_resource/ShaderResourceService.h"
 
 namespace nc::graphics
 {

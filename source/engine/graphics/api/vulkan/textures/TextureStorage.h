@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Textures.h"
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
+
+#include <vulkan/vulkan.hpp>
 
 namespace nc::graphics
 {
 class GpuAllocator;
+struct TextureBuffer;
 
 class TextureStorage
 {

@@ -63,20 +63,8 @@ vk::SampleCountFlagBits QueryMaxSamplesCount(vk::PhysicalDeviceProperties gpuPro
 namespace nc::graphics
 {
 GpuOptions::GpuOptions(vk::PhysicalDevice physicalDevice)
-    : m_physicalDevice{physicalDevice},
-      m_depthFormat{QueryDepthFormatSupport(m_physicalDevice)},
-      m_gpuProperties{physicalDevice.getProperties()},
-      m_samplesCount{QueryMaxSamplesCount(m_gpuProperties)}
+    :  m_depthFormat{QueryDepthFormatSupport(physicalDevice)},
+       m_samplesCount{QueryMaxSamplesCount(physicalDevice.getProperties())}
 {
-}
-
-vk::SampleCountFlagBits GpuOptions::GetMaxSamplesCount() const noexcept
-{
-    return m_samplesCount;
-}
-
-vk::Format GpuOptions::GetDepthFormat() const noexcept
-{
-    return m_depthFormat;
 }
 }  // namespace nc::graphics

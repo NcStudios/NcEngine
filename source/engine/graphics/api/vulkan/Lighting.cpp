@@ -1,9 +1,9 @@
 #include "Lighting.h"
 #include "FrameManager.h"
 #include "GpuAllocator.h"
-#include "GpuOptions.h"
 #include "RenderGraph.h"
 #include "Swapchain.h"
+#include "core/GpuOptions.h"
 #include "ecs/Registry.h"
 #include "renderpasses/RenderPass.h"
 #include "shaders/ShaderDescriptorSets.h"
@@ -19,7 +19,6 @@ namespace nc::graphics
 Lighting::Lighting(Registry* registry,
                    vk::Device device,
                    GpuAllocator* allocator,
-                   GpuOptions* gpuOptions,
                    Swapchain* swapchain,
                    RenderGraph* renderGraph,
                    ShaderDescriptorSets* shaderDescriptorSets,
@@ -28,7 +27,6 @@ Lighting::Lighting(Registry* registry,
     : m_registry{registry}, 
       m_device{device}, 
       m_allocator{allocator},
-      m_gpuOptions{gpuOptions},
       m_swapchain{swapchain},
       m_renderGraph{renderGraph},
       m_shaderDescriptorSets{shaderDescriptorSets},
@@ -113,7 +111,7 @@ auto Lighting::CreateShadowMappingPass(nc::Vector2 dimensions, uint32_t index) -
         renderPass.RegisterAttachmentViews(std::vector<vk::ImageView>{renderPass.GetAttachmentView(i)}, dimensions, i);
     }
 
-    renderPass.RegisterShadowMappingTechnique(m_device, m_gpuOptions, m_shaderDescriptorSets, index);
+    renderPass.RegisterShadowMappingTechnique(m_device, m_shaderDescriptorSets, index);
     return renderPass;
 }
 }

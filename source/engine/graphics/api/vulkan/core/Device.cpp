@@ -70,7 +70,8 @@ Device::Device(vk::PhysicalDevice physicalDevice,
       m_device{::CreateLogicalDevice(physicalDevice, queueIndices, enabledExtensions)},
       m_queueIndices{queueIndices},
       m_graphicsQueue{m_device->getQueue(m_queueIndices.GraphicsFamilyIndex(), 0)},
-      m_presentQueue{m_device->getQueue(m_queueIndices.PresentFamilyIndex(), 0)}
+      m_presentQueue{m_device->getQueue(m_queueIndices.PresentFamilyIndex(), 0)},
+      m_gpuOptions{m_physicalDevice}
 {
 }
 

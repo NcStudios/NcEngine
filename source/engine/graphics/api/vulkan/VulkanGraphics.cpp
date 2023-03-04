@@ -2,7 +2,6 @@
 #include "FrameManager.h"
 #include "GpuAllocator.h"
 #include "GpuAssetsStorage.h"
-#include "GpuOptions.h"
 #include "Imgui.h"
 #include "Lighting.h"
 #include "RenderGraph.h"
@@ -35,16 +34,16 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
       m_surface{m_instance->CreateSurface(hwnd, hinstance)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
-      m_gpuOptions{ std::make_unique<GpuOptions>(m_device->VkPhysicalDevice()) },
+    //   m_gpuOptions{ std::make_unique<GpuOptions>(m_device->VkPhysicalDevice()) },
       m_swapchain{ std::make_unique<Swapchain>(m_device->VkDevice(), m_device->VkPhysicalDevice(), m_surface.get(), dimensions)},
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings())},
       m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), gpuAccessorSignals) },
-      m_renderGraph{std::make_unique<RenderGraph>(m_device->VkDevice(), m_swapchain.get(), m_gpuOptions.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
+      m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device)},
       m_frameManager{std::make_unique<FrameManager>(m_device->VkDevice(), m_device->VkPhysicalDevice(), m_surface.get())},
-      m_lighting{std::make_unique<Lighting>(registry, m_device->VkDevice(), m_allocator.get(), m_gpuOptions.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
+      m_lighting{std::make_unique<Lighting>(registry, m_device->VkDevice(), m_allocator.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
       m_dimensions{ dimensions },
@@ -77,7 +76,7 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
     m_device->VkDevice().waitIdle();
     m_dimensions = dimensions;
     m_swapchain->Resize(dimensions);
-    m_renderGraph->Resize(dimensions);
+    m_renderGraph->Resize(*m_device, dimensions);
     m_lighting->Resize(dimensions);
 }
 
@@ -102,7 +101,7 @@ void VulkanGraphics::InitializeUI() /** @todo: I hate this whole implementation 
 {
     m_imgui->InitializeImgui(*m_instance, *m_device,
         m_renderGraph->GetRenderPass(LitPassId).GetVkPass(),
-        static_cast<uint32_t>(m_gpuOptions->GetMaxSamplesCount())
+        static_cast<uint32_t>(m_device->GetGpuOptions().GetMaxSamplesCount())
     );
 }
 

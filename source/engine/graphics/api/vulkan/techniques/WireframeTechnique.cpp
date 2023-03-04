@@ -3,7 +3,7 @@
 #include "assets/AssetService.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "graphics/api/vulkan/GpuOptions.h"
+#include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/meshes/VertexDescriptions.h"
 #include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
@@ -13,7 +13,7 @@
 
 namespace nc::graphics
 {
-    WireframeTechnique::WireframeTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+    WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
         : m_meshPath{"cube.nca"},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
@@ -21,13 +21,15 @@ namespace nc::graphics
           ,m_debugRenderer{}
           #endif
     {
+        const auto vkDevice = device.VkDevice();
+
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
         auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
 
-        auto vertexShaderModule = CreateShaderModule(device, vertexShaderByteCode);
-        auto fragmentShaderModule = CreateShaderModule(device, fragmentShaderByteCode);
+        auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
+        auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
 
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
@@ -37,7 +39,7 @@ namespace nc::graphics
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
-        m_pipelineLayout = device.createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
@@ -58,7 +60,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPViewportState(&viewportState);
         auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine, 2.0f);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
-        auto multisampling = CreateMultisampleCreateInfo(gpuOptions->GetMaxSamplesCount());
+        auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
@@ -72,9 +74,9 @@ namespace nc::graphics
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        device.destroyShaderModule(vertexShaderModule, nullptr);
-        device.destroyShaderModule(fragmentShaderModule, nullptr);
+        m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
+        vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 
         LoadMeshAsset(m_meshPath);
     }

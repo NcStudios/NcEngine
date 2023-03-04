@@ -20,7 +20,6 @@ class Lighting
         Lighting(Registry* registry, 
                  vk::Device device, 
                  GpuAllocator* allocator, 
-                 GpuOptions* gpuOptions,
                  Swapchain* swapchain,
                  RenderGraph* renderGraph,
                  ShaderDescriptorSets* shaderDescriptorSets,
@@ -37,7 +36,6 @@ class Lighting
         Registry* m_registry;
         vk::Device m_device;
         GpuAllocator* m_allocator;
-        GpuOptions* m_gpuOptions;
         Swapchain* m_swapchain;
         RenderGraph* m_renderGraph;
         ShaderDescriptorSets* m_shaderDescriptorSets;

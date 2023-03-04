@@ -7,12 +7,13 @@
 
 namespace nc::graphics
 {
-    class GpuOptions; class ShaderDescriptorSets;
+    class Device;
+    class ShaderDescriptorSets;
 
     class PbrTechnique : public ITechnique
     {
     public:
-        PbrTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+        PbrTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
         ~PbrTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;

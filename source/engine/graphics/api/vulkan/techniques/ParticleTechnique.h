@@ -11,7 +11,8 @@
 
 namespace nc::graphics
 {
-    class GpuOptions; class ShaderDescriptorSets;
+    class Device;
+    class ShaderDescriptorSets;
 
     const auto PlaneMeshPath = std::string{ "plane.nca" };
 
@@ -30,7 +31,7 @@ namespace nc::graphics
     class ParticleTechnique : public ITechnique
     {
     public:
-        ParticleTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+        ParticleTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
         ~ParticleTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;

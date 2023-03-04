@@ -87,12 +87,14 @@ RenderPass::RenderPass(vk::Device device,
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
-      m_attachments{std::move(attachments)} {}
+      m_attachments{std::move(attachments)}
+{
+}
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
+void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
 {
     RenderPass::UnregisterTechnique<ShadowMappingTechnique>();
-    m_techniques.push_back(std::make_unique<ShadowMappingTechnique>(device, gpuOptions, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+    m_techniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
 }
 
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
@@ -133,7 +135,7 @@ auto RenderPass::GetPriority() const -> uint32_t
 
 auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
 {
-    return m_attachments[index].view.get();
+    return m_attachments.at(index).view.get();
 }
 
 auto RenderPass::GetUid() const -> std::string

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vulkan/vk_mem_alloc.hpp"
+#include <vulkan/vulkan.hpp>
 
 namespace nc::graphics
 {
@@ -10,14 +10,18 @@ class GpuOptions
     public:
         GpuOptions(vk::PhysicalDevice physicalDevice);
 
-        vk::Format GetDepthFormat() const noexcept;
-        vk::SampleCountFlagBits GetMaxSamplesCount() const noexcept;
+        auto GetDepthFormat() const noexcept -> vk::Format
+        {
+            return m_depthFormat;
+        }
+
+        auto GetMaxSamplesCount() const noexcept -> vk::SampleCountFlagBits
+        {
+            return m_samplesCount;
+        }
 
     private:
-
-        vk::PhysicalDevice m_physicalDevice;
         vk::Format m_depthFormat;
-        vk::PhysicalDeviceProperties m_gpuProperties;
         vk::SampleCountFlagBits m_samplesCount;
 };
 } // namespace nc::graphics

@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Attachment.h"
+#include "graphics/api/vulkan/techniques/ITechnique.h"
 
 namespace nc::graphics
 {
-class GpuOptions;
+class Device;
+struct PerFrameRenderState;
 class ShaderDescriptorSets;
 
 class RenderPass
@@ -31,8 +33,8 @@ class RenderPass
         void RegisterAttachmentViews(std::vector<vk::ImageView>, Vector2 dimensions, uint32_t index);
 
         template <std::derived_from<ITechnique> T>
-        void RegisterTechnique(vk::Device device, GpuOptions *gpuOptions, ShaderDescriptorSets *descriptorSets);
-        void RegisterShadowMappingTechnique(vk::Device device, GpuOptions *gpuOptions, ShaderDescriptorSets *descriptorSets, uint32_t shadowCasterIndex);
+        void RegisterTechnique(const Device& device, ShaderDescriptorSets *descriptorSets);
+        void RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets *descriptorSets, uint32_t shadowCasterIndex);
 
         template <std::derived_from<ITechnique> T>
         void UnregisterTechnique();
@@ -51,10 +53,10 @@ class RenderPass
 };
 
 template <std::derived_from<ITechnique> T>
-void RenderPass::RegisterTechnique(vk::Device device, GpuOptions* gpuOptions, ShaderDescriptorSets* descriptorSets)
+void RenderPass::RegisterTechnique(const Device& device, ShaderDescriptorSets* descriptorSets)
 {
     UnregisterTechnique<T>();
-    m_techniques.push_back(std::make_unique<T>(device, gpuOptions, descriptorSets, &m_renderPass.get()));
+    m_techniques.push_back(std::make_unique<T>(device, descriptorSets, &m_renderPass.get()));
 }
 
 template <std::derived_from<ITechnique> T>

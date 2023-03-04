@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GpuOptions.h"
 #include "graphics/api/vulkan/QueueFamily.h"
 
 #include <functional>
@@ -46,6 +47,11 @@ class Device
             return m_presentQueue;
         }
 
+        auto GetGpuOptions() const noexcept -> const GpuOptions&
+        {
+            return m_gpuOptions;
+        }
+
         void ExecuteCommand(std::function<void(vk::CommandBuffer)>&& function) const;
 
     private:
@@ -55,5 +61,7 @@ class Device
         QueueFamilyIndices m_queueIndices;
         vk::Queue m_graphicsQueue;
         vk::Queue m_presentQueue;
+
+        GpuOptions m_gpuOptions;
 };
 } // namespace nc::graphics

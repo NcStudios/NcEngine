@@ -1,7 +1,6 @@
 #include "TextureShaderResource.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/textures/ImmutableImage.h"
-#include "graphics/api/vulkan/textures/Textures.h"
+#include "graphics/api/vulkan/textures/TextureBuffer.h"
 
 #include "ncutility/NcError.h"
 

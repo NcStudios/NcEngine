@@ -1,9 +1,9 @@
 #include "RenderGraph.h"
 #include "FrameManager.h"
 #include "GpuAllocator.h"
-#include "GpuOptions.h"
 #include "PerFrameGpuContext.h"
 #include "Swapchain.h"
+#include "core/Device.h"
 #include "techniques/EnvironmentTechnique.h"
 #include "techniques/ParticleTechnique.h"
 #include "techniques/PbrTechnique.h"
@@ -36,26 +36,29 @@ void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions)
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator *allocator, nc::graphics::GpuOptions *gpuOptions, nc::graphics::Swapchain *swapchain, nc::Vector2 dimensions) -> nc::graphics::RenderPass
+auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocator *allocator, nc::graphics::Swapchain *swapchain, nc::Vector2 dimensions) -> nc::graphics::RenderPass
 {
     using namespace nc::graphics;
 
-    auto numSamples = gpuOptions->GetMaxSamplesCount();
+    const auto vkDevice = device.VkDevice();
+    const auto& gpuOptions = device.GetGpuOptions();
+
+    auto numSamples = gpuOptions.GetMaxSamplesCount();
 
     std::vector<AttachmentSlot> litAttachmentSlots{
         AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, numSamples},
-        AttachmentSlot{1, AttachmentType::Depth, gpuOptions->GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
+        AttachmentSlot{1, AttachmentType::Depth, gpuOptions.GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
         AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}};
 
     std::vector<Subpass> litSubpasses{
         Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}};
 
     std::vector<Attachment> attachments;
-    attachments.push_back(Attachment(device, allocator, dimensions, true, numSamples, gpuOptions->GetDepthFormat())); // Depth Stencil
-    attachments.push_back(Attachment(device, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, numSamples, gpuOptions.GetDepthFormat())); // Depth Stencil
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(device, 1u, LitPassId, std::move(litAttachmentSlots), std::move(litSubpasses), std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+    auto renderPass = RenderPass(vkDevice, 1u, LitPassId, std::move(litAttachmentSlots), std::move(litSubpasses), std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
     auto &colorImageViews = swapchain->GetColorImageViews();
     auto depthImageView = renderPass.GetAttachmentView(0);
@@ -78,24 +81,22 @@ auto CreateLitPass(vk::Device device, nc::graphics::GpuAllocator *allocator, nc:
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(vk::Device device, Swapchain* swapchain, GpuOptions* gpuOptions, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
-    : m_device{device},
-      m_swapchain{swapchain},
-      m_gpuOptions{gpuOptions},
+RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
+    : m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
       m_descriptorSets{descriptorSets},
       m_dimensions{dimensions}
 {
-    auto litPass = CreateLitPass(m_device, m_gpuAllocator, m_gpuOptions, m_swapchain, m_dimensions);
+    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, m_dimensions);
 
     #ifdef NC_EDITOR_ENABLED
-    litPass.RegisterTechnique<WireframeTechnique>(m_device, m_gpuOptions, m_descriptorSets);
+    litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);
     #endif
 
-    litPass.RegisterTechnique<EnvironmentTechnique>(m_device, m_gpuOptions, m_descriptorSets);
-    litPass.RegisterTechnique<PbrTechnique>(m_device, m_gpuOptions, m_descriptorSets);
-    litPass.RegisterTechnique<ParticleTechnique>(m_device, m_gpuOptions, m_descriptorSets);
-    litPass.RegisterTechnique<UiTechnique>(m_device, m_gpuOptions, m_descriptorSets);
+    litPass.RegisterTechnique<EnvironmentTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<PbrTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<ParticleTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<UiTechnique>(device, m_descriptorSets);
     AddRenderPass(std::move(litPass));
 }
 
@@ -144,21 +145,21 @@ void RenderGraph::RemoveRenderPass(const std::string& uid)
     });
 }
 
-void RenderGraph::Resize(const Vector2& dimensions)
+void RenderGraph::Resize(const Device& device, const Vector2& dimensions)
 {
     m_renderPasses.clear();
     m_dimensions = dimensions;
 
-    auto litPass = CreateLitPass(m_device, m_gpuAllocator, m_gpuOptions, m_swapchain, m_dimensions);
+    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, m_dimensions);
 
     #ifdef NC_EDITOR_ENABLED
-    litPass.RegisterTechnique<WireframeTechnique>(m_device, m_gpuOptions, m_descriptorSets);
+    litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);
     #endif
 
-    litPass.RegisterTechnique<EnvironmentTechnique>(m_device, m_gpuOptions, m_descriptorSets);
-    litPass.RegisterTechnique<PbrTechnique>(m_device, m_gpuOptions, m_descriptorSets);
-    litPass.RegisterTechnique<ParticleTechnique>(m_device, m_gpuOptions, m_descriptorSets);
-    litPass.RegisterTechnique<UiTechnique>(m_device, m_gpuOptions, m_descriptorSets);
+    litPass.RegisterTechnique<EnvironmentTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<PbrTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<ParticleTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<UiTechnique>(device, m_descriptorSets);
     AddRenderPass(std::move(litPass));
 }
 }
