@@ -1,5 +1,5 @@
 #include "ShadowMapShaderResource.h"
-#include "graphics/Initializers.h"
+#include "graphics/api/vulkan/Initializers.h"
 
 #include <vector>
 

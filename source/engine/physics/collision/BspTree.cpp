@@ -1,6 +1,6 @@
 #include "BspTree.h"
 #include "assets/AssetService.h"
-#include "graphics/DebugRenderer.h"
+#include "graphics/debug/DebugRenderer.h"
 
 #include <iostream>
 

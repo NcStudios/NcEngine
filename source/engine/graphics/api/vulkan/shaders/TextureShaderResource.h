@@ -1,12 +1,14 @@
 #pragma once
 
-#include "graphics/shaders/ShaderResourceService.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
+#include "ShaderDescriptorSets.h"
+#include "graphics/shader_resource/ShaderResourceService.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {
+struct TextureBuffer;
+
 class TextureShaderResource : public IShaderResource<TextureBuffer>
 {
     public:

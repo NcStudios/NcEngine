@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/GpuAllocator.h"
+#include "graphics/api/vulkan/GpuAllocator.h"
 
 #include "ncasset/AssetsFwd.h"
 

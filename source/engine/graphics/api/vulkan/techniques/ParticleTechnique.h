@@ -1,11 +1,12 @@
 #pragma once
 
-#include "DirectXMath.h"
+#include "ITechnique.h"
 #include "ecs/Component.h"
 #include "particle/EmitterState.h"
-#include "ITechnique.h"
 
+#include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
+
 #include <vector>
 
 namespace nc::graphics

@@ -1,13 +1,13 @@
 #pragma once
 
+#include "CubeMapShaderResource.h"
+#include "EnvironmentDataShaderResource.h"
+#include "ObjectDataShaderResource.h"
+#include "PointLightShaderResource.h"
+#include "ShaderDescriptorSets.h"
+#include "ShadowMapShaderResource.h"
+#include "TextureShaderResource.h"
 #include "config/Config.h"
-#include "graphics/shaders/CubeMapShaderResource.h"
-#include "graphics/shaders/EnvironmentDataShaderResource.h"
-#include "graphics/shaders/ObjectDataShaderResource.h"
-#include "graphics/shaders/PointLightShaderResource.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShadowMapShaderResource.h"
-#include "graphics/shaders/TextureShaderResource.h"
 
 namespace nc::graphics
 {

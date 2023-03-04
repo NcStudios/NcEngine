@@ -1,5 +1,5 @@
 #include "PointLightShaderResource.h"
-#include "graphics/Initializers.h"
+#include "graphics/api/vulkan/Initializers.h"
 
 namespace nc::graphics
 {

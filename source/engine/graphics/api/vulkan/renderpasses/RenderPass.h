@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/renderpasses/Attachment.h"
+#include "Attachment.h"
 
 namespace nc::graphics
 {

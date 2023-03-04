@@ -1,4 +1,25 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        FrameManager.cpp
+        GpuAllocator.cpp
+        GpuAssetsStorage.cpp
+        GpuOptions.cpp
+        Imgui.cpp
+        Initializers.cpp
+        Lighting.cpp
+        PerFrameGpuContext.cpp
+        QueueFamily.cpp
+        RenderGraph.cpp
+        Swapchain.cpp
+        vma.cpp
         VulkanGraphics.cpp
 )
+
+add_subdirectory(buffers)
+add_subdirectory(core)
+add_subdirectory(cubemaps)
+add_subdirectory(meshes)
+add_subdirectory(renderpasses)
+add_subdirectory(shaders)
+add_subdirectory(techniques)
+add_subdirectory(textures)

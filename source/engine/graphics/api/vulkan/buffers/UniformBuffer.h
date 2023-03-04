@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/GpuAllocator.h"
+#include "graphics/api/vulkan/GpuAllocator.h"
 
 namespace nc::graphics
 {

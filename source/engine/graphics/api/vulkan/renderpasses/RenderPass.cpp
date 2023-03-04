@@ -1,5 +1,5 @@
 #include "RenderPass.h"
-#include "graphics/techniques/ShadowMappingTechnique.h"
+#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
 namespace
 {

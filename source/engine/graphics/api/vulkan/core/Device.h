@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/QueueFamily.h"
+#include "graphics/api/vulkan/QueueFamily.h"
 
 #include <functional>
 #include <memory>

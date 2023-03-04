@@ -1,8 +1,8 @@
 #pragma once
 
-#include "graphics/renderpasses/RenderPass.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShaderResourceService.h"
+#include "ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/renderpasses/RenderPass.h"
+#include "graphics/shader_resource/ShaderResourceService.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 

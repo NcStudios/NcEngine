@@ -3,13 +3,13 @@
 #include "assets/AssetService.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "graphics/DebugRenderer.h"
-#include "graphics/GpuOptions.h"
-#include "graphics/Initializers.h"
+#include "graphics/api/vulkan/GpuOptions.h"
+#include "graphics/api/vulkan/Initializers.h"
+#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
+#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/debug/DebugRenderer.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/meshes/VertexDescriptions.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShaderUtilities.h"
 
 namespace nc::graphics
 {

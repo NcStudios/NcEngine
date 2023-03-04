@@ -7,7 +7,7 @@
 #include "ITechnique.h"
 
 #ifdef NC_DEBUG_RENDERING_ENABLED
-#include "graphics/DebugRenderer.h"
+#include "graphics/debug/DebugRenderer.h"
 #endif
 
 #include "vulkan/vk_mem_alloc.hpp"

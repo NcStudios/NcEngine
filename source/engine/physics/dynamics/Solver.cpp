@@ -1,7 +1,7 @@
 #include "Solver.h"
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
-#include "graphics/DebugRenderer.h"
+#include "graphics/debug/DebugRenderer.h"
 
 #include <cassert>
 

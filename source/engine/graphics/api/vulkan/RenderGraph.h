@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/GpuAssetsStorage.h"
-#include "graphics/renderpasses/RenderPass.h"
+#include "GpuAssetsStorage.h"
+#include "renderpasses/RenderPass.h"
 
 #include <string>
 

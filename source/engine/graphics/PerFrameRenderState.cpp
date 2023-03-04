@@ -6,7 +6,7 @@
 #include "graphics/Camera.h"
 #include "graphics/MeshRenderer.h"
 #include "physics/collision/IntersectionQueries.h"
-#include "shaders/ShaderResourceService.h"
+#include "shader_resource/ShaderResourceService.h"
 
 #include "optick/optick.h"
 

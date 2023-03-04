@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/buffers/ImmutableBuffer.h"
+#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
 #include "utility/Signal.h"
 
 namespace nc

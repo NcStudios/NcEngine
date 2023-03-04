@@ -1,5 +1,5 @@
 #include "PhysicalDevice.h"
-#include "graphics/Swapchain.h"
+#include "graphics/api/vulkan/Swapchain.h"
 
 #include "ncutility/NcError.h"
 

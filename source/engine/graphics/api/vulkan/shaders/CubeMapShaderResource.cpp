@@ -1,5 +1,6 @@
 #include "CubeMapShaderResource.h"
-#include "graphics/Initializers.h"
+#include "graphics/api/vulkan/Initializers.h"
+
 #include "ncutility/NcError.h"
 
 #include <array>

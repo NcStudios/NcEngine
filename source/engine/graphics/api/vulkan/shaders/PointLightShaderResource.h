@@ -1,9 +1,9 @@
 #pragma once
 
-#include "graphics/buffers/WriteableBuffer.h"
+#include "ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/buffers/WriteableBuffer.h"
 #include "graphics/PointLight.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShaderResourceService.h"
+#include "graphics/shader_resource/ShaderResourceService.h"
 
 namespace nc::graphics
 {

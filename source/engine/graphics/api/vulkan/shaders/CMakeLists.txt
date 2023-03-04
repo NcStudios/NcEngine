@@ -3,7 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         CubeMapShaderResource.cpp
         EnvironmentDataShaderResource.cpp
         ObjectDataShaderResource.cpp
-        PointLight.cpp
         PointLightShaderResource.cpp
         ShaderDescriptorSets.cpp
         ShaderUtilities.cpp

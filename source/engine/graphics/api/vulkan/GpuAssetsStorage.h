@@ -1,9 +1,9 @@
 #pragma once
 
 #include "assets/AssetManagers.h"
-#include "graphics/cubemaps/CubeMapStorage.h"
-#include "graphics/textures/TextureStorage.h"
-#include "graphics/meshes/MeshStorage.h"
+#include "cubemaps/CubeMapStorage.h"
+#include "textures/TextureStorage.h"
+#include "meshes/MeshStorage.h"
 
 namespace nc::graphics
 {

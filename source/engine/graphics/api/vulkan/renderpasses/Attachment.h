@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/GpuAllocator.h"
-#include "graphics/techniques/ITechnique.h"
+#include "graphics/api/vulkan/GpuAllocator.h"
+#include "graphics/api/vulkan/techniques/ITechnique.h"
 
 #include "ncmath/Vector.h"
 

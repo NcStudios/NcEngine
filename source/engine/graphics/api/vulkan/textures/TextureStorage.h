@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Textures.h"
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
-#include "graphics/textures/Textures.h"
 
 namespace nc::graphics
 {

@@ -1,4 +1,6 @@
-#include "graphics/textures/ImmutableImage.h"
+#pragma once
+
+#include "ImmutableImage.h"
 
 #include <string>
 

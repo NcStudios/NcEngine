@@ -1,14 +1,15 @@
 #include "PbrTechnique.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
-#include "graphics/buffers/ImmutableBuffer.h"
-#include "graphics/GpuOptions.h"
-#include "graphics/Initializers.h"
+#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
+#include "graphics/api/vulkan/GpuOptions.h"
+#include "graphics/api/vulkan/Initializers.h"
+#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
+#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/shaders/ShaderResources.h"
+#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/meshes/VertexDescriptions.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShaderResources.h"
-#include "graphics/shaders/ShaderUtilities.h"
+
 #include "optick/optick.h"
 
 namespace nc::graphics

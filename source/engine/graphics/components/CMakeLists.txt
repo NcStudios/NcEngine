@@ -3,5 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         Camera.cpp
         MeshRenderer.cpp
         ParticleEmitter.cpp
+        PointLight.cpp
         SceneNavigationCamera.cpp
 )

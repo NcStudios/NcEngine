@@ -1,8 +1,8 @@
 #pragma once
 
+#include "CubeMap.h"
 #include "assets/AssetData.h"
 #include "assets/AssetManagers.h"
-#include "graphics/cubemaps/CubeMap.h"
 
 namespace nc::graphics
 {

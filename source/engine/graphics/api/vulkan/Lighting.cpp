@@ -1,13 +1,13 @@
 #include "Lighting.h"
+#include "FrameManager.h"
+#include "GpuAllocator.h"
+#include "GpuOptions.h"
+#include "RenderGraph.h"
+#include "Swapchain.h"
 #include "ecs/Registry.h"
-#include "graphics/FrameManager.h"
-#include "graphics/GpuAllocator.h"
-#include "graphics/GpuOptions.h"
-#include "graphics/RenderGraph.h"
-#include "graphics/Swapchain.h"
-#include "graphics/renderpasses/RenderPass.h"
-#include "graphics/shaders/ShaderDescriptorSets.h"
-#include "graphics/shaders/ShaderResources.h"
+#include "renderpasses/RenderPass.h"
+#include "shaders/ShaderDescriptorSets.h"
+#include "shaders/ShaderResources.h"
 
 namespace
 {

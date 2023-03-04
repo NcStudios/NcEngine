@@ -1,13 +1,13 @@
+#include "graphics/PointLight.h"
 #include "config/Config.h"
 #include "ecs/Transform.h"
 #include "ecs/Registry.h"
-#include "graphics/PointLight.h"
 
 #ifdef NC_EDITOR_ENABLED
+#include "debug/Serialize.h"
 #include "ui/editor/Widgets.h"
 #include <iostream>
 #include <fstream>
-#include <debug/Serialize.h>
 #endif
 
 #include <cassert>

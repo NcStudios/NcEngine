@@ -1,6 +1,6 @@
 #include "EnvironmentDataShaderResource.h"
-#include "graphics/Environment.h"
-#include "graphics/Initializers.h"
+#include "graphics/api/vulkan/Initializers.h"
+#include "graphics/shader_resource/EnvironmentData.h"
 
 namespace nc::graphics
 {

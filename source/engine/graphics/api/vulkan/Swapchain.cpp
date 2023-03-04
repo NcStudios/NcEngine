@@ -1,7 +1,8 @@
 #include "Swapchain.h"
-#include "graphics/Initializers.h"
-#include "graphics/PerFrameGpuContext.h"
-#include "graphics/QueueFamily.h"
+#include "Initializers.h"
+#include "PerFrameGpuContext.h"
+#include "QueueFamily.h"
+
 #include "ncutility/NcError.h"
 
 #include <algorithm>

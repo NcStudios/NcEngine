@@ -1,16 +1,16 @@
 #include "RenderGraph.h"
-#include "graphics/FrameManager.h"
-#include "graphics/GpuAllocator.h"
-#include "graphics/GpuOptions.h"
-#include "graphics/PerFrameGpuContext.h"
-#include "graphics/Swapchain.h"
-#include "graphics/techniques/EnvironmentTechnique.h"
-#include "graphics/techniques/ParticleTechnique.h"
-#include "graphics/techniques/PbrTechnique.h"
-#include "graphics/techniques/UiTechnique.h"
+#include "FrameManager.h"
+#include "GpuAllocator.h"
+#include "GpuOptions.h"
+#include "PerFrameGpuContext.h"
+#include "Swapchain.h"
+#include "techniques/EnvironmentTechnique.h"
+#include "techniques/ParticleTechnique.h"
+#include "techniques/PbrTechnique.h"
+#include "techniques/UiTechnique.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "graphics/techniques/WireframeTechnique.h"
+#include "techniques/WireframeTechnique.h"
 #endif
 
 #include "optick/optick.h"

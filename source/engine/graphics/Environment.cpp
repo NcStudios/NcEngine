@@ -1,6 +1,6 @@
 #include "Environment.h"
 #include "assets/AssetService.h"
-#include "graphics/shaders/ShaderResourceService.h"
+#include "shader_resource/ShaderResourceService.h"
 
 namespace nc::graphics
 {
