@@ -54,11 +54,11 @@ namespace nc::graphics
             NC_LOG_TRACE("Selecting Graphics API");
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, registry, window);
 
-            NC_LOG_TRACE("Creating NcGraphics module");
+            NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(registry, std::move(graphicsApi), window);
         }
 
-        NC_LOG_TRACE("Graphics disabled - creating NcGraphics stub");
+        NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
         return std::make_unique<NcGraphicsStub>(registry);
     }
 

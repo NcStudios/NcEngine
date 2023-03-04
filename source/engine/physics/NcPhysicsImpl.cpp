@@ -47,11 +47,11 @@ auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* regis
 {
     if(settings.enabled)
     {
-        NC_LOG_TRACE("Creating NcPhysics module");
+        NC_LOG_TRACE("Building NcPhysics module");
         return std::make_unique<NcPhysicsImpl>(settings, registry);
     }
 
-    NC_LOG_TRACE("Physics disabled - creating NcPhysics stub");
+    NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
     return std::make_unique<NcPhysicsStub>(registry);
 }
 

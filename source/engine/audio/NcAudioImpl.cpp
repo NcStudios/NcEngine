@@ -43,11 +43,11 @@ auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> s
 {
     if(settings.enabled)
     {
-        NC_LOG_TRACE("Creating NcAudio module");
+        NC_LOG_TRACE("Building NcAudio module");
         return std::make_unique<NcAudioImpl>(reg);
     }
 
-    NC_LOG_TRACE("Audio disabled - creating NcAudio stub");
+    NC_LOG_TRACE("Audio disabled - building NcAudio stub");
     return std::make_unique<NcAudioStub>();
 }
 
