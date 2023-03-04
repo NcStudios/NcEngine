@@ -1,6 +1,8 @@
 #pragma once
 
+#include "graphics/GpuAllocator.h"
 #include "graphics/techniques/ITechnique.h"
+
 #include "ncmath/Vector.h"
 
 #include <memory>
@@ -10,11 +12,6 @@
 
 namespace nc::graphics
 {
-
-class GpuAllocator;
-class GpuOptions;
-class Swapchain;
-
 using ClearValueFlags_t = uint8_t;
 
 struct ClearValueFlags

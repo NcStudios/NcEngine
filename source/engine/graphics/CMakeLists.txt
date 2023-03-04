@@ -1,6 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         DebugWidget.cpp
+        Environment.cpp
         FrameManager.cpp
         GpuAllocator.cpp
         GpuAssetsStorage.cpp

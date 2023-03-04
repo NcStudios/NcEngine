@@ -6,6 +6,7 @@
 #include "graphics/DebugRenderer.h"
 #include "graphics/GpuOptions.h"
 #include "graphics/Initializers.h"
+#include "graphics/PerFrameRenderState.h"
 #include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderUtilities.h"

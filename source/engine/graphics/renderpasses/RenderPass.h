@@ -4,6 +4,9 @@
 
 namespace nc::graphics
 {
+class GpuOptions;
+class ShaderDescriptorSets;
+
 class RenderPass
 {
     public:

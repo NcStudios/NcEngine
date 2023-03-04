@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Environment.h"
 #include "IGraphics.h"
 #include "camera/MainCamera.h"
 #include "ecs/PointLightSystem.h"
 #include "ecs/ParticleEmitterSystem.h"
 #include "graphics/NcGraphics.h"
-#include "shaders/Environment.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>

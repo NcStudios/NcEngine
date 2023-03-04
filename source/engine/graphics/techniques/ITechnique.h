@@ -1,18 +1,20 @@
 #pragma once
 
-#include "graphics/PerFrameRenderState.h"
+#include <vulkan/vulkan.hpp>
 
 namespace nc::graphics
 {
-    class ITechnique
-    {
-        public:
-            virtual ~ITechnique() = default;
+struct PerFrameRenderState;
 
-            virtual bool CanBind(const PerFrameRenderState& frameData) = 0;
-            virtual void Bind(vk::CommandBuffer* cmd) = 0;
+class ITechnique
+{
+    public:
+        virtual ~ITechnique() = default;
 
-            virtual bool CanRecord(const PerFrameRenderState& frameData) = 0;
-            virtual void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) = 0;
-    };
-}
+        virtual bool CanBind(const PerFrameRenderState& frameData) = 0;
+        virtual void Bind(vk::CommandBuffer* cmd) = 0;
+
+        virtual bool CanRecord(const PerFrameRenderState& frameData) = 0;
+        virtual void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) = 0;
+};
+} // namespace nc::graphics

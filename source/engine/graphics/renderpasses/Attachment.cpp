@@ -1,6 +1,8 @@
 #include "Attachment.h"
 #include "graphics/GpuAllocator.h"
 
+#include "ncutility/NcError.h"
+
 #include <algorithm>
 
 namespace

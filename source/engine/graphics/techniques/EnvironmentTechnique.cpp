@@ -2,16 +2,17 @@
 #include "asset/Assets.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "graphics/buffers/ImmutableBuffer.h"
+#include "graphics/Environment.h"
 #include "graphics/Initializers.h"
 #include "graphics/GpuOptions.h"
+#include "graphics/buffers/ImmutableBuffer.h"
 #include "graphics/meshes/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/shaders/Environment.h"
 #include "graphics/shaders/ShaderDescriptorSets.h"
 #include "graphics/shaders/ShaderResources.h"
 #include "graphics/shaders/ShaderUtilities.h"
 #include "graphics/Swapchain.h"
+
 #include "optick/optick.h"
 
 namespace nc::graphics
