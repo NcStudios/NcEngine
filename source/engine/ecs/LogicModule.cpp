@@ -4,11 +4,18 @@
 #include "ecs/View.h"
 #include "task/Job.h"
 #include "time/Time.h"
+#include "utility/Log.h"
 
 #include "optick/optick.h"
 
 namespace nc::ecs
 {
+auto BuildLogicModule(Registry* registry) -> std::unique_ptr<LogicModule>
+{
+    NC_LOG_TRACE("Creating Logic module");
+    return std::make_unique<LogicModule>(registry);
+}
+
 LogicModule::LogicModule(Registry* registry) noexcept
     : m_registry{registry}
 {
@@ -16,6 +23,7 @@ LogicModule::LogicModule(Registry* registry) noexcept
 
 auto LogicModule::BuildWorkload() -> std::vector<task::Job>
 {
+    NC_LOG_TRACE("Building Logic workload");
     return std::vector<task::Job>
     {
         task::Job{ [this]{Run();}, "LogicModule", task::ExecutionPhase::Logic }

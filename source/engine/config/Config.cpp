@@ -37,10 +37,12 @@ namespace
     constexpr auto MaxTexturesKey = "max_textures"sv;
 
     // physics
+    constexpr auto PhysicsEnabledKey = "physics_enabled"sv;
     constexpr auto FixedUpdateIntervalKey = "fixed_update_interval"sv;
     constexpr auto WorldspaceExtentKey = "worldspace_extent"sv;
 
     // graphics
+    constexpr auto GraphicsEnabledKey = "graphics_enabled"sv;
     constexpr auto UseNativeResolutionKey = "use_native_resolution"sv;
     constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
     constexpr auto ScreenWidthKey = "screen_width"sv;
@@ -51,6 +53,9 @@ namespace
     constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
     constexpr auto AntialiasingKey = "antialiasing"sv;
     constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
+
+    // audio
+    constexpr auto AudioEnabledKey = "audio_enabled"sv;
 
     void MapKeyValue(const std::string& key, const std::string& value, nc::config::Config* out)
     {
@@ -95,12 +100,16 @@ namespace
             out->memorySettings.maxTextures = std::stoi(value);
 
         // physics
+        else if (key == PhysicsEnabledKey)
+            out->physicsSettings.enabled = static_cast<bool>(std::stoi(value));
         else if (key == FixedUpdateIntervalKey)
             out->physicsSettings.fixedUpdateInterval = std::stof(value);
         else if (key == WorldspaceExtentKey)
             out->physicsSettings.worldspaceExtent = std::stof(value);
 
         // graphics
+        else if (key == GraphicsEnabledKey)
+            out->graphicsSettings.enabled = static_cast<bool>(std::stoi(value));
         else if (key == UseNativeResolutionKey)
             out->graphicsSettings.useNativeResolution = std::stoi(value);
         else if (key == LaunchInFullscreenKey)
@@ -121,6 +130,10 @@ namespace
             out->graphicsSettings.antialiasing = std::stoi(value);
         else if (key == UseValidationLayersKey)
             out->graphicsSettings.useValidationLayers = std::stoi(value);
+
+        // audio
+        else if (key == AudioEnabledKey)
+            out->audioSettings.enabled = static_cast<bool>(std::stoi(value));
         else
             throw nc::NcError(std::string{"Unknown config key: "} + key);
     };
@@ -152,6 +165,11 @@ namespace nc::config
     const PhysicsSettings& GetPhysicsSettings()
     {
         return g_config.physicsSettings;
+    }
+
+    const AudioSettings& GetAudioSettings()
+    {
+        return g_config.audioSettings;
     }
 
     auto Load(std::string_view path) -> Config
@@ -191,9 +209,11 @@ namespace nc::config
              << MaxTransformsKey         << '=' << config.memorySettings.maxTransforms         << '\n'
              << MaxTexturesKey           << '=' << config.memorySettings.maxTextures           << '\n'
              << "[physics]\n"
+             << PhysicsEnabledKey        << '=' << config.physicsSettings.enabled              << '\n'
              << FixedUpdateIntervalKey   << '=' << config.physicsSettings.fixedUpdateInterval  << '\n'
              << WorldspaceExtentKey      << '=' << config.physicsSettings.worldspaceExtent     << '\n'
              << "[graphics]\n"
+             << GraphicsEnabledKey       << '=' << config.graphicsSettings.enabled             << '\n'
              << UseNativeResolutionKey   << '=' << config.graphicsSettings.useNativeResolution << '\n'
              << LaunchInFullscreenKey    << '=' << config.graphicsSettings.launchInFullscreen  << '\n'
              << ScreenWidthKey           << '=' << config.graphicsSettings.screenWidth         << '\n'
@@ -203,7 +223,9 @@ namespace nc::config
              << FarClipKey               << '=' << config.graphicsSettings.farClip             << '\n'
              << UseShadowsKey            << '=' << config.graphicsSettings.useShadows          << '\n'
              << AntialiasingKey          << '=' << config.graphicsSettings.antialiasing        << '\n'
-             << UseValidationLayersKey   << '=' << config.graphicsSettings.useValidationLayers;
+             << UseValidationLayersKey   << '=' << config.graphicsSettings.useValidationLayers << '\n'
+             << "[audio]\n"
+             << AudioEnabledKey          << '=' << config.audioSettings.enabled                << '\n';
     }
 
     bool Validate(const Config& config)

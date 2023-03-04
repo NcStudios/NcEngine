@@ -13,7 +13,7 @@ namespace nc
     class NcEngineImpl : public NcEngine
     {
         public:
-            NcEngineImpl(const config::Config& config, EngineInitFlags flags);
+            NcEngineImpl(const config::Config& config);
             ~NcEngineImpl() noexcept;
             void Start(std::unique_ptr<Scene> initialScene) override;
             void Stop() noexcept override;

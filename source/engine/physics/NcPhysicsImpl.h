@@ -7,10 +7,12 @@
 #include "proxy/PerFrameProxyCache.h"
 #include "task/Job.h"
 
+namespace nc::config { struct PhysicsSettings; }
+
 namespace nc::physics
 {
 /** @brief Factor for creating a physics module instance */
-auto BuildPhysicsModule(bool enableModule, Registry* registry) -> std::unique_ptr<NcPhysics>;
+auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry) -> std::unique_ptr<NcPhysics>;
 
 /** @brief Physics module implementation.
  * 
@@ -27,7 +29,7 @@ class NcPhysicsImpl final : public NcPhysics
     };
 
     public:
-        NcPhysicsImpl(Registry* registry);
+        NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry);
 
         void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
         void RemoveJoint(Entity entityA, Entity entityB) override;

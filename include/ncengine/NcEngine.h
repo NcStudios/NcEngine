@@ -4,7 +4,6 @@
 #include "ecs/Registry.h"
 #include "module/ModuleRegistry.h"
 #include "scene/Scene.h"
-#include "utility/EnumUtilities.h"
 
 namespace nc
 {
@@ -57,29 +56,11 @@ class NcEngine
         virtual void RebuildTaskGraph() = 0;
 };
 
-/** @brief Flags controlling initialization of engine modules. */
-enum class EngineInitFlags : uint8_t
-{
-    /** Standard initialization. */
-    None = 0,
-
-    /** Disable the graphics module. */
-    NoGraphics = 1,
-
-    /** Disable the physics module. */
-    NoPhysics = 1 << 1,
-
-    /** Disable the audio module. */
-    NoAudio = 1 << 2
-
-}; DEFINE_BITWISE_OPERATORS(EngineInitFlags)
-
 /**
  * @brief Create an NcEngine instance and initialize engine-side modules.
  * 
  * @param config Configuration object specifying engine settings.
- * @param flags Flags for controlling initialization behavior.
  * @return std::unique_ptr<NcEngine>
  */
-auto InitializeNcEngine(const config::Config& config, EngineInitFlags flags = EngineInitFlags::None) -> std::unique_ptr<NcEngine>;
+auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngine>;
 } // namespace nc

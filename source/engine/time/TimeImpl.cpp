@@ -1,6 +1,7 @@
 #include "TimeImpl.h"
 #include "task/Job.h"
 #include "time/Time.h"
+#include "utility/Log.h"
 
 #include <utility>
 
@@ -27,11 +28,13 @@ auto DeltaTime() noexcept -> float
 
 auto BuildTimeModule() -> std::unique_ptr<TimeImpl>
 {
+    NC_LOG_TRACE("Creating Time module");
     return std::make_unique<TimeImpl>();
 }
 
 auto TimeImpl::BuildWorkload() -> std::vector<task::Job>
 {
+    NC_LOG_TRACE("Building Time workload");
     return std::vector<task::Job>
     {
         task::Job

@@ -8,10 +8,12 @@
 #include <mutex>
 #include <queue>
 
+namespace nc::config { struct AudioSettings; }
+
 namespace nc::audio
 {
 /** Factor to construct an audio module instance */
-auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<NcAudio>;
+auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> std::unique_ptr<NcAudio>;
 
 /** Audio module implementation */
 class NcAudioImpl final : public NcAudio
