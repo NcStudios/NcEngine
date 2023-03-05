@@ -1,6 +1,6 @@
 #include "NcPhysicsImpl.h"
 #include "config/Config.h"
-#include "graphics/DebugRenderer.h"
+#include "graphics/debug/DebugRenderer.h"
 #include "time/Time.h"
 #include "utility/Log.h"
 

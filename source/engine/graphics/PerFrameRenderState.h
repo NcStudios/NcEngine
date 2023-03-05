@@ -3,25 +3,31 @@
 #include "asset/Assets.h"
 #include "ecs/Registry.h"
 #include "graphics/PointLight.h"
+#include "graphics/shader_resource/ObjectData.h"
+#include "particle/EmitterState.h"
+
 #ifdef NC_EDITOR_ENABLED
 #include "graphics/DebugWidget.h"
 #endif
-#include "particle/EmitterState.h"
-#include "shaders/ObjectDataShaderResource.h"
 
 #include <span>
 
 namespace nc
 {
 class Registry;
-namespace graphics { class Camera; class Environment; }
-#ifdef NC_DEBUG_RENDERING_ENABLED
-namespace physics { class PhysicsSystemImpl; }
-#endif
-}
 
-namespace nc::graphics
+#ifdef NC_DEBUG_RENDERING_ENABLED
+namespace physics
 {
+class PhysicsSystemImpl;
+}
+#endif
+
+namespace graphics
+{
+class Camera;
+class Environment;
+
 struct PerFrameRenderState
 {
     PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters);
@@ -43,4 +49,5 @@ struct PerFrameRenderState
 };
 
 void MapPerFrameRenderState(const PerFrameRenderState& state);
-}
+} // namespace graphics
+} // namespace nc

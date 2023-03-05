@@ -1,0 +1,11 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        CubeMapShaderResource.cpp
+        EnvironmentDataShaderResource.cpp
+        ObjectDataShaderResource.cpp
+        PointLightShaderResource.cpp
+        ShaderDescriptorSets.cpp
+        ShaderUtilities.cpp
+        ShadowMapShaderResource.cpp
+        TextureShaderResource.cpp
+)
