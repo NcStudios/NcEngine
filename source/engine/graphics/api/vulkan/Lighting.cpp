@@ -9,6 +9,8 @@
 #include "shaders/ShaderDescriptorSets.h"
 #include "shaders/ShaderResources.h"
 
+#include <array>
+
 namespace
 {
 inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
@@ -86,15 +88,12 @@ auto Lighting::CreateShadowMappingPass(nc::Vector2 dimensions, uint32_t index) -
     using namespace nc::graphics;
     m_ids.emplace_back(ShadowMappingPassId + std::to_string(index));
 
-    std::vector<AttachmentSlot> shadowAttachmentSlots
+    const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
     {
         AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
     };
 
-    std::vector<Subpass> shadowSubpasses
-    {
-        Subpass{shadowAttachmentSlots[0]}
-    };
+    const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
 
     std::vector<Attachment> attachments;
     const auto numConcurrentAttachments = m_swapchain->GetColorImageViews().size();
@@ -104,11 +103,12 @@ auto Lighting::CreateShadowMappingPass(nc::Vector2 dimensions, uint32_t index) -
     }
 
     const auto size = AttachmentSize{dimensions, m_swapchain->GetExtent()};
-    auto renderPass = RenderPass(m_device, 0u, m_ids.back(), std::move(shadowAttachmentSlots), std::move(shadowSubpasses), std::move(attachments), size, ClearValueFlags::Depth);
+    auto renderPass = RenderPass(m_device, 0u, m_ids.back(), shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
 
     for (auto i = 0u; i < numConcurrentAttachments; i++)
     {
-        renderPass.RegisterAttachmentViews(std::vector<vk::ImageView>{renderPass.GetAttachmentView(i)}, dimensions, i);
+        const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(i)};
+        renderPass.RegisterAttachmentViews(views, dimensions, i);
     }
 
     renderPass.RegisterShadowMappingTechnique(m_device, m_shaderDescriptorSets, index);

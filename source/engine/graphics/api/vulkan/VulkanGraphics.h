@@ -17,7 +17,6 @@ namespace graphics
 {
 class Device;
 class FrameManager;
-// class GpuOptions;
 class GpuAllocator;
 struct GpuAssetsStorage;
 class Imgui;
@@ -56,7 +55,6 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<Instance> m_instance;
         vk::UniqueSurfaceKHR m_surface;
         std::unique_ptr<Device> m_device;
-        // std::unique_ptr<GpuOptions> m_gpuOptions;
         std::unique_ptr<Swapchain> m_swapchain;
         std::unique_ptr<GpuAllocator> m_allocator;
         std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;

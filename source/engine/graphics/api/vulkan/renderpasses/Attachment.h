@@ -31,7 +31,6 @@ enum class AttachmentType : uint8_t
 struct FrameBuffer
 {
     uint32_t index;
-    std::vector<vk::ImageView> attachmentViews;
     vk::UniqueFramebuffer frameBuffer;
 };
 

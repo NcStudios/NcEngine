@@ -15,6 +15,7 @@
 
 #include "optick/optick.h"
 
+#include <array>
 #include <string>
 
 namespace
@@ -45,20 +46,24 @@ auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocato
 
     auto numSamples = gpuOptions.GetMaxSamplesCount();
 
-    std::vector<AttachmentSlot> litAttachmentSlots{
+    const auto litAttachmentSlots = std::array<AttachmentSlot, 3>
+    {
         AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, numSamples},
         AttachmentSlot{1, AttachmentType::Depth, gpuOptions.GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
-        AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}};
+        AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+    };
 
-    std::vector<Subpass> litSubpasses{
-        Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}};
+    const auto litSubpasses = std::array<Subpass, 1>
+    {
+        Subpass{litAttachmentSlots[0], litAttachmentSlots[1], litAttachmentSlots[2]}
+    };
 
     std::vector<Attachment> attachments;
     attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, numSamples, gpuOptions.GetDepthFormat())); // Depth Stencil
     attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(vkDevice, 1u, LitPassId, std::move(litAttachmentSlots), std::move(litSubpasses), std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+    auto renderPass = RenderPass(vkDevice, 1u, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
     auto &colorImageViews = swapchain->GetColorImageViews();
     auto depthImageView = renderPass.GetAttachmentView(0);
@@ -75,6 +80,7 @@ auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocato
         };
         renderPass.RegisterAttachmentViews(imageViews, dimensions, index++);
     }
+
     return renderPass;
 }
 }

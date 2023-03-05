@@ -52,8 +52,8 @@ auto GetSubpassDependencies(std::span<const nc::graphics::Subpass> subpasses, si
 }
 
 auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSlots,
-                      std::span<const nc::graphics::Subpass> subpasses,
-                      vk::Device device) -> vk::UniqueRenderPass
+                        std::span<const nc::graphics::Subpass> subpasses,
+                        vk::Device device) -> vk::UniqueRenderPass
 {
     const auto attachmentDescriptions = GetAttachmentDescriptions(attachmentSlots);
     auto subpassDependencyCount = size_t{0ull};
@@ -76,8 +76,8 @@ namespace nc::graphics
 RenderPass::RenderPass(vk::Device device,
                        uint8_t priority,
                        std::string uid,
-                       std::vector<AttachmentSlot> attachmentSlots,
-                       std::vector<Subpass> subpasses,
+                       std::span<const AttachmentSlot> attachmentSlots,
+                       std::span<const Subpass> subpasses,
                        std::vector<Attachment> attachments,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags)
@@ -148,7 +148,7 @@ auto RenderPass::GetVkPass() const ->vk::RenderPass
     return m_renderPass.get();
 }
 
-void RenderPass::RegisterAttachmentViews(std::vector<vk::ImageView> views, Vector2 dimensions, uint32_t index)
+void RenderPass::RegisterAttachmentViews(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
 {
     std::erase_if(m_frameBuffers, [index](const auto& frameBuffer)
     {
@@ -166,9 +166,7 @@ void RenderPass::RegisterAttachmentViews(std::vector<vk::ImageView> views, Vecto
         1                                       // Layers
     };
 
-    m_frameBuffers.emplace_back(
-        index, std::move(views), m_device.createFramebufferUnique(framebufferInfo)
-    );
+    m_frameBuffers.emplace_back(index, m_device.createFramebufferUnique(framebufferInfo));
 }
 
 auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer

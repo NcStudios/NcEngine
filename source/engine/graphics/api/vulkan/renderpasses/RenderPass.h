@@ -3,6 +3,9 @@
 #include "Attachment.h"
 #include "graphics/api/vulkan/techniques/ITechnique.h"
 
+#include <span>
+#include <vector>
+
 namespace nc::graphics
 {
 class Device;
@@ -15,8 +18,8 @@ class RenderPass
         RenderPass(vk::Device device,
                    uint8_t priority,
                    std::string uid,
-                   std::vector<AttachmentSlot> attachmentSlots,
-                   std::vector<Subpass> subpasses,
+                   std::span<const AttachmentSlot> attachmentSlots,
+                   std::span<const Subpass> subpasses,
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
@@ -30,7 +33,7 @@ class RenderPass
         auto GetUid() const -> std::string;
         auto GetVkPass() const -> vk::RenderPass;
 
-        void RegisterAttachmentViews(std::vector<vk::ImageView>, Vector2 dimensions, uint32_t index);
+        void RegisterAttachmentViews(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
 
         template <std::derived_from<ITechnique> T>
         void RegisterTechnique(const Device& device, ShaderDescriptorSets *descriptorSets);
