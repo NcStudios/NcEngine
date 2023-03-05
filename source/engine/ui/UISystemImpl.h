@@ -4,12 +4,14 @@
 #include "editor/Editor.h"
 #include "ui/IUI.h"
 
+#include "GLFW/glfw3.h"
+
 namespace nc::ui
 {
     class UISystemImpl final
     {
         public:
-            UISystemImpl(HWND hwnd);
+            UISystemImpl(GLFWwindow* window);
             ~UISystemImpl() noexcept;
 
             LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

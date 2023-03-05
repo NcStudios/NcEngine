@@ -51,23 +51,14 @@ namespace nc::window
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         g_instance = this;
-        GetModuleHandleExA(0, NULL, &m_hInstance);
 
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
 
-        m_wndClass.style = WndClassStyleFlags;
-        m_wndClass.lpfnWndProc = WindowImpl::WndProc;
-        m_wndClass.hInstance = m_hInstance;
-        m_wndClass.lpszClassName = TEXT(projectSettings.projectName.c_str());
+        const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-        if(!RegisterClass(&m_wndClass))
-        {
-            throw NcError("Failed to register wnd class");
-        }
-
-        auto nativeWidth = GetSystemMetrics(SM_CXFULLSCREEN);
-        auto nativeHeight = GetSystemMetrics(SM_CYFULLSCREEN);
+        auto nativeWidth = videoMode->width;
+        auto nativeHeight = videoMode->height;
 
         if(graphicsSettings.useNativeResolution)
         {
@@ -78,44 +69,12 @@ namespace nc::window
             m_dimensions = Vector2{ static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight) };
         }
 
-        auto left = Clamp((nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
-        auto top = Clamp((nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
+        auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
+        auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
 
-        auto clientRect = RECT
-        {
-            (LONG)left,
-            (LONG)top,
-            (LONG)(left + m_dimensions.x),
-            (LONG)(top + m_dimensions.y)
-        };
+        m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), nullptr, nullptr);
 
-        if(!AdjustWindowRect(&clientRect, WndStyleFlags, FALSE))
-        {
-            throw NcError("Failed to adjust client rect to window rect");
-        }
-
-        if(clientRect.left < 0)
-        {
-            clientRect.right += (-1 * clientRect.left);
-            clientRect.left = 0;
-        }
-
-        if(clientRect.top < 0)
-        {
-            clientRect.bottom += (-1 * clientRect.top);
-            clientRect.top = 0;
-        }
-
-        m_window = glfwCreateWindow(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, "Vulkan", nullptr, nullptr);
-        m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
-                                projectSettings.projectName.c_str(),
-                                WndStyleFlags,
-                                clientRect.left, clientRect.top,
-                                clientRect.right - clientRect.left,
-                                clientRect.bottom - clientRect.top,
-                                0, 0, m_hInstance, 0);
-
-        if(!m_hwnd)
+        if(!m_window)
         {
             throw NcError("CreateWindow failed");
         }
@@ -126,6 +85,11 @@ namespace nc::window
         DestroyWindow(m_hwnd);
         glfwDestroyWindow(m_window);
         glfwTerminate();
+    }
+
+    auto WindowImpl::GetGlfwWindow() -> GLFWwindow*
+    {
+        return m_window;
     }
 
     HWND WindowImpl::GetHWND() const noexcept
@@ -224,6 +188,16 @@ namespace nc::window
             }
         }
         return 0;
+    }
+
+    void WindowImpl::PollEvents()
+    {
+        if (glfwWindowShouldClose(m_window))
+        {
+            g_instance->EngineDisableRunningCallback();
+        }
+
+        glfwPollEvents();
     }
 
     void WindowImpl::ProcessSystemMessages()

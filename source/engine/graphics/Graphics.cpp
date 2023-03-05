@@ -28,9 +28,9 @@ namespace nc::graphics
 {
     Graphics::Graphics(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals,
                        const std::string& appName, uint32_t appVersion, uint32_t apiVersion,
-                       bool useValidationLayers, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions)
+                       bool useValidationLayers, GLFWwindow* window, Vector2 dimensions)
         : m_instance{std::make_unique<Instance>(appName, appVersion, apiVersion, useValidationLayers)},
-          m_surface{m_instance->CreateSurface(hwnd, hinstance)},
+          m_surface{m_instance->CreateSurface(window)},
           m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
           m_gpuOptions{ std::make_unique<GpuOptions>(m_device->VkPhysicalDevice()) },
           m_swapchain{ std::make_unique<Swapchain>(m_device->VkDevice(), m_device->VkPhysicalDevice(), m_surface.get(), dimensions) },

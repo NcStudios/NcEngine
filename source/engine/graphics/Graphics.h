@@ -3,7 +3,8 @@
 #include "assets/AssetManagers.h"
 #include "GpuAllocator.h"
 #include "ncmath/Vector.h"
-#include "platform/win32/NcWin32.h"
+
+#include "GLFW/glfw3.h"
 
 #include <memory>
 #include <mutex>
@@ -31,7 +32,7 @@ namespace nc::graphics
         public:
             Graphics(Registry* registry, const nc::GpuAccessorSignals& gpuAccessorSignals,
                      const std::string& appName, uint32_t appVersion, uint32_t apiVersion,
-                     bool useValidationLayers, HWND hwnd, HINSTANCE hinstance, Vector2 dimensions);
+                     bool useValidationLayers, GLFWwindow* window, Vector2 dimensions);
 
             ~Graphics() noexcept;
 

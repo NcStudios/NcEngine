@@ -6,27 +6,27 @@
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx11.h"
+#include "imgui/imgui_impl_glfw.h"
 
 namespace nc::ui
 {
     #ifdef NC_EDITOR_ENABLED
-    UISystemImpl::UISystemImpl(HWND hwnd)
+    UISystemImpl::UISystemImpl(GLFWwindow* window)
     : m_editor{},
       m_projectUI{nullptr}
     #else
-    UISystemImpl::UISystemImpl(HWND hwnd)
+    UISystemImpl::UISystemImpl(GLFWwindow* window)
     : m_projectUI{nullptr}
     #endif
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGui_ImplWin32_Init(hwnd);
+        ImGui_ImplGlfw_InitForVulkan(window, true);
     }
 
     UISystemImpl::~UISystemImpl() noexcept
     {
         ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();
     }
 
@@ -50,7 +50,7 @@ namespace nc::ui
     void UISystemImpl::FrameBegin()
     {
         ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplWin32_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
     }
 

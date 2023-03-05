@@ -74,10 +74,9 @@ namespace nc::graphics
                       info.appVersion,
                       ::ToVulkanApi(info.api),
                       info.useValidationLayers,
-                      window->GetHWND(),
-                      window->GetHINSTANCE(),
-                      window->GetDimensions() },
-          m_ui{ window->GetHWND() },
+                      window->GetGlfwWindow(),
+                      window->GetDimensions()},
+          m_ui{window->GetGlfwWindow()},
           m_environment{},
           m_pointLightSystem{ registry },
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }

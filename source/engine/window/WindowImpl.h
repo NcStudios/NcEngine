@@ -26,6 +26,7 @@ namespace nc::window
             WindowImpl& operator=(const WindowImpl& other) = delete;
             WindowImpl& operator=(WindowImpl&& other) = delete;
 
+            auto GetGlfwWindow() -> GLFWwindow*;
             auto GetHWND() const noexcept -> HWND;
             auto GetHINSTANCE() const noexcept -> HINSTANCE;
             auto GetDimensions() const noexcept -> Vector2;
@@ -36,7 +37,8 @@ namespace nc::window
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
             void OnResize(float width, float height, WPARAM windowArg);
-
+            
+            void PollEvents();
             void ProcessSystemMessages();
 
             static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
