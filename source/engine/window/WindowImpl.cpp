@@ -38,9 +38,6 @@ namespace nc::window
     /* WindowImpl */
     WindowImpl::WindowImpl(std::function<void()> onQuit)
         : m_onResizeReceivers{},
-          m_hwnd{nullptr},
-          m_wndClass{},
-          m_hInstance{},
           m_dimensions{},
           GraphicsOnResizeCallback{nullptr},
           UIWndMessageCallback{nullptr},
@@ -48,7 +45,6 @@ namespace nc::window
     {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         g_instance = this;
 
@@ -82,24 +78,13 @@ namespace nc::window
 
     WindowImpl::~WindowImpl() noexcept
     {
-        DestroyWindow(m_hwnd);
         glfwDestroyWindow(m_window);
         glfwTerminate();
     }
 
-    auto WindowImpl::GetGlfwWindow() -> GLFWwindow*
+    auto WindowImpl::GetWindow() -> GLFWwindow*
     {
         return m_window;
-    }
-
-    HWND WindowImpl::GetHWND() const noexcept
-    {
-        return m_hwnd;
-    }
-
-    HINSTANCE WindowImpl::GetHINSTANCE() const noexcept
-    {
-        return m_hInstance;
     }
 
     Vector2 WindowImpl::GetDimensions() const noexcept
@@ -140,6 +125,7 @@ namespace nc::window
         }
 
         m_dimensions = Vector2{width, height};
+        glfwSetWindowSize(m_window, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
         const auto& graphicsSettings = config::GetGraphicsSettings();
         GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, graphicsSettings.nearClip, graphicsSettings.farClip, windowArg);
         for(auto receiver : m_onResizeReceivers)
@@ -161,6 +147,7 @@ namespace nc::window
             case WM_SIZE:
             {
                 g_instance->OnResize(LOWORD(lParam), HIWORD(lParam), wParam);
+
                 break;
             }
             case WM_CLOSE:

@@ -26,9 +26,7 @@ namespace nc::window
             WindowImpl& operator=(const WindowImpl& other) = delete;
             WindowImpl& operator=(WindowImpl&& other) = delete;
 
-            auto GetGlfwWindow() -> GLFWwindow*;
-            auto GetHWND() const noexcept -> HWND;
-            auto GetHINSTANCE() const noexcept -> HINSTANCE;
+            auto GetWindow() -> GLFWwindow*;
             auto GetDimensions() const noexcept -> Vector2;
 
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
@@ -45,9 +43,6 @@ namespace nc::window
 
         private:
             std::vector<IOnResizeReceiver*> m_onResizeReceivers;
-            HWND m_hwnd;
-            WNDCLASS m_wndClass;
-            HINSTANCE m_hInstance;
             Vector2 m_dimensions;
             GLFWwindow* m_window;
 
