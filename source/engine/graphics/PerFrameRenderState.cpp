@@ -1,13 +1,14 @@
 #include "PerFrameRenderState.h"
+#include "Environment.h"
 #include "ecs/Registry.h"
 #include "ecs/Transform.h"
 #include "ecs/View.h"
 #include "graphics/Camera.h"
 #include "graphics/MeshRenderer.h"
-#include "graphics/shaders/Environment.h"
-#include "optick/optick.h"
 #include "physics/collision/IntersectionQueries.h"
-#include "shaders/ShaderResourceService.h"
+#include "shader_resource/ShaderResourceService.h"
+
+#include "optick/optick.h"
 
 namespace
 {

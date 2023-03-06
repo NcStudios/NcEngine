@@ -1,5 +1,6 @@
 #include "NcAudioImpl.h"
 #include "audio/AudioSource.h"
+#include "config/Config.h"
 #include "ecs/View.h"
 #include "utility/Log.h"
 
@@ -38,18 +39,16 @@ struct NcAudioStub : public nc::audio::NcAudio
 
 namespace nc::audio
 {
-auto BuildAudioModule(bool enableModule, Registry* reg) -> std::unique_ptr<NcAudio>
+auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> std::unique_ptr<NcAudio>
 {
-    if(enableModule)
+    if(settings.enabled)
     {
-        NC_LOG_TRACE("Creating NcAudio module");
+        NC_LOG_TRACE("Building NcAudio module");
         return std::make_unique<NcAudioImpl>(reg);
     }
-    else
-    {
-        NC_LOG_TRACE("Creating NcAudio module stub");
-        return std::make_unique<NcAudioStub>();
-    }
+
+    NC_LOG_TRACE("Audio disabled - building NcAudio stub");
+    return std::make_unique<NcAudioStub>();
 }
 
 NcAudioImpl::NcAudioImpl(Registry* registry)

@@ -1,6 +1,6 @@
 #include "NcPhysicsImpl.h"
 #include "config/Config.h"
-#include "graphics/DebugRenderer.h"
+#include "graphics/debug/DebugRenderer.h"
 #include "time/Time.h"
 #include "utility/Log.h"
 
@@ -43,22 +43,20 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 
 namespace nc::physics
 {
-auto BuildPhysicsModule(bool enableModule, Registry* registry) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry) -> std::unique_ptr<NcPhysics>
 {
-    if(enableModule)
+    if(settings.enabled)
     {
-        NC_LOG_TRACE("Creating NcPhysics module");
-        return std::make_unique<NcPhysicsImpl>(registry);
+        NC_LOG_TRACE("Building NcPhysics module");
+        return std::make_unique<NcPhysicsImpl>(settings, registry);
     }
-    else
-    {
-        NC_LOG_TRACE("Creating NcPhysics module stub");
-        return std::make_unique<NcPhysicsStub>(registry);
-    }
+
+    NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
+    return std::make_unique<NcPhysicsStub>(registry);
 }
 
-NcPhysicsImpl::NcPhysicsImpl(Registry* registry)
-    : m_pipeline{registry, config::GetPhysicsSettings().fixedUpdateInterval},
+NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry)
+    : m_pipeline{registry, settings.fixedUpdateInterval},
       m_clickableSystem{},
       m_accumulatedTime{0.0},
       m_currentIterations{0u}

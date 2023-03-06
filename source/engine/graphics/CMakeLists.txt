@@ -1,29 +1,12 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        DebugWidget.cpp
-        FrameManager.cpp
-        GpuAllocator.cpp
-        GpuAssetsStorage.cpp
-        GpuOptions.cpp
-        Graphics.cpp
-        Imgui.cpp
-        Initializers.cpp
-        Lighting.cpp
+        Environment.cpp
+        IGraphics.cpp
+        MeshBatcher.cpp
         NcGraphicsImpl.cpp
-        PerFrameGpuContext.cpp
         PerFrameRenderState.cpp
-        QueueFamily.cpp
-        RenderGraph.cpp
-        Swapchain.cpp
-        vma.cpp
 )
 
-add_subdirectory(buffers)
+add_subdirectory(api/vulkan)
 add_subdirectory(components)
-add_subdirectory(core)
-add_subdirectory(cubemaps)
-add_subdirectory(meshes)
-add_subdirectory(renderpasses)
-add_subdirectory(shaders)
-add_subdirectory(techniques)
-add_subdirectory(textures)
+add_subdirectory(debug)
