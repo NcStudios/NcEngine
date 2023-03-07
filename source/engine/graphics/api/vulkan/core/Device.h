@@ -47,6 +47,11 @@ class Device
             return m_presentQueue;
         }
 
+        auto GetQueueIndices() const noexcept -> const QueueFamilyIndices&
+        {
+            return m_queueIndices;
+        }
+
         auto GetGpuOptions() const noexcept -> const GpuOptions&
         {
             return m_gpuOptions;
