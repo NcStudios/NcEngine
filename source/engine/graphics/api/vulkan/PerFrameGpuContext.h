@@ -4,6 +4,8 @@
 
 namespace nc::graphics
 {
+class Device;
+
 /** This class will hold all the GPU synchronizaton and Vulkan interface data required for a single frame. (Semaphores, command buffers, etc.). 
  * The semaphores deal solely with the GPU. Since rendering to an image taken from the swapchain and returning that image back to the swap chain are both asynchronous, the semaphores below tell the GPU when either step can begin for a single image.
  * The fence synchronizes GPU - CPU and limits Vulkan to submitting only N frame-render jobs to the command queues. (where N is count of PerFrameGpuContext objects parent owns)
@@ -11,7 +13,7 @@ namespace nc::graphics
 class PerFrameGpuContext
 {
     public:
-        PerFrameGpuContext(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
+        PerFrameGpuContext(const Device& device);
 
         void WaitForSync(); // Waits until the fence has signaled
         void ResetSync() noexcept; // Resets the fence

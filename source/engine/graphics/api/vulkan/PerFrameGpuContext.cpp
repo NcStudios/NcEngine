@@ -1,37 +1,44 @@
 #include "PerFrameGpuContext.h"
-#include "QueueFamily.h"
+#include "core/Device.h"
+
 #include "ncutility/NcError.h"
 
 namespace
 {
-vk::UniqueCommandPool CreateCommandPool(vk::PhysicalDevice physicalDevice, vk::Device logicalDevice, vk::SurfaceKHR surface)
+auto CreateCommandPool(const nc::graphics::Device& device) -> vk::UniqueCommandPool
 {
-    vk::CommandPoolCreateInfo poolInfo{};
-    poolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
-    auto queueFamilies = nc::graphics::QueueFamilyIndices(physicalDevice, surface);
-    poolInfo.setQueueFamilyIndex(queueFamilies.GetQueueFamilyIndex(nc::graphics::QueueFamilyType::GraphicsFamily));
-    return logicalDevice.createCommandPoolUnique(poolInfo);
+    auto poolInfo = vk::CommandPoolCreateInfo
+    {
+        vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+        device.GetQueueIndices().GraphicsFamilyIndex()
+    };
+
+    return device.VkDevice().createCommandPoolUnique(poolInfo);
 }
 
-vk::UniqueCommandBuffer CreateCommandBuffer(vk::Device device, vk::CommandPool commandPool)
+auto CreateCommandBuffer(const nc::graphics::Device& device, vk::CommandPool commandPool) -> vk::UniqueCommandBuffer
 {
-    vk::CommandBufferAllocateInfo allocInfo{};
-    allocInfo.setCommandPool(commandPool);
-    allocInfo.setLevel(vk::CommandBufferLevel::ePrimary);
-    allocInfo.setCommandBufferCount(1);
-    return std::move(device.allocateCommandBuffersUnique(allocInfo).front());
+    auto allocInfo = vk::CommandBufferAllocateInfo
+    {
+        commandPool,
+        vk::CommandBufferLevel::ePrimary,
+        1
+    };
+
+    auto vkDevice = device.VkDevice();
+    return std::move(vkDevice.allocateCommandBuffersUnique(allocInfo).front());
 }
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
-PerFrameGpuContext::PerFrameGpuContext(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface)
-    : m_device{logicalDevice},
+PerFrameGpuContext::PerFrameGpuContext(const Device& device)
+    : m_device{device.VkDevice()},
       m_imageAvailableSemaphore{m_device.createSemaphoreUnique(vk::SemaphoreCreateInfo{})},
       m_renderFinishedSemaphore{m_device.createSemaphoreUnique(vk::SemaphoreCreateInfo{})},
       m_inFlightFence{m_device.createFenceUnique(vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled})},
-      m_commandPool{CreateCommandPool(physicalDevice, m_device, surface)},
-      m_commandBuffer{CreateCommandBuffer(m_device, m_commandPool.get())}
+      m_commandPool{::CreateCommandPool(device)},
+      m_commandBuffer{::CreateCommandBuffer(device, m_commandPool.get())}
 {
 }
 

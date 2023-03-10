@@ -15,19 +15,18 @@ namespace nc::graphics
 
     auto QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface) -> SwapChainSupportDetails;
 
+    class Device;
     class PerFrameGpuContext;
-
     class Swapchain
     {
         public:
-            Swapchain(vk::Device device, vk::PhysicalDevice physicalDevice,
-                      vk::SurfaceKHR surface, const Vector2& dimensions);
+            Swapchain(const Device& device, vk::SurfaceKHR surface, const Vector2& dimensions);
             ~Swapchain() noexcept;
 
             // Swap chain
             void Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid);
             void Cleanup() noexcept;
-            void Resize(const Vector2 &dimensions);
+            void Resize(const Device& device, const Vector2& dimensions);
 
             auto GetExtent() const noexcept -> const vk::Extent2D &;
             auto GetFormat() const noexcept -> const vk::Format&;
@@ -38,10 +37,9 @@ namespace nc::graphics
             void WaitForNextImage(PerFrameGpuContext* currentFrame, uint32_t imageIndex);
 
         private:
-            void Create(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, Vector2 dimensions);
+            void Create(const Device& device, vk::SurfaceKHR surface, Vector2 dimensions);
 
             vk::Device m_device;
-            vk::PhysicalDevice m_physicalDevice;
             vk::SurfaceKHR m_surface;
             vk::UniqueSwapchainKHR m_swapChain;
             std::vector<vk::Image> m_swapChainImages;
