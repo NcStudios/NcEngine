@@ -1,23 +1,52 @@
 #include "PointLightSystem.h"
-#include "ecs/Registry.h"
-#include "graphics/PointLight.h"
+#include "shader_resource/PointLightData.h"
+#include "shader_resource/ShaderResourceService.h"
 
-namespace nc::ecs
+namespace
 {
-    PointLightSystem::PointLightSystem(Registry* registry)
-        : m_onAddConnection{registry->OnAdd<graphics::PointLight>().Connect([this](graphics::PointLight&){ this->m_isSystemDirty = true; })},
-          m_onRemoveConnection{registry->OnRemove<graphics::PointLight>().Connect([this](Entity){ this->m_isSystemDirty = true; })},
-          m_isSystemDirty{true}
-    {
-    }
+constexpr float g_lightFieldOfView = nc::DegreesToRadians(60.0f);
+constexpr float g_nearClip = 0.25f;
+constexpr float g_farClip = 96.0f;
+const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
 
-    bool PointLightSystem::CheckDirtyAndReset()
-    {
-        return std::exchange(m_isSystemDirty, false);
-    }
-
-    void PointLightSystem::Clear()
-    {
-        m_isSystemDirty = true;
-    }
+auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix) -> DirectX::XMMATRIX
+{
+    const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
+    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * g_lightProjectionMatrix;
 }
+} // anonymous namespace
+
+namespace nc::graphics
+{
+PointLightSystem::PointLightSystem(bool useShadows)
+    : m_viewProjections{},
+      m_useShadows{useShadows}
+{
+}
+
+void PointLightSystem::Update(MultiView<PointLight, Transform> view)
+{
+    m_viewProjections.clear();
+    auto shaderBuffer = std::vector<PointLightData>{};
+    shaderBuffer.reserve(view.size_upper_bound());
+
+    for (const auto& [light, transform] : view)
+    {
+        m_viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+        shaderBuffer.emplace_back(m_viewProjections.back(),
+                                  transform->Position(),
+                                  m_useShadows,
+                                  light->GetAmbient(),
+                                  light->GetDiffuseColor(),
+                                  light->GetDiffuseIntensity());
+    }
+
+    ShaderResourceService<PointLightData>::Get()->Update(shaderBuffer);
+}
+
+void PointLightSystem::Clear() noexcept
+{
+    m_viewProjections.clear();
+    m_viewProjections.shrink_to_fit();
+}
+} // namespace nc::graphics

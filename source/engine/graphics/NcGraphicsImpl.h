@@ -2,8 +2,8 @@
 
 #include "Environment.h"
 #include "IGraphics.h"
+#include "PointLightSystem.h"
 #include "camera/MainCamera.h"
-#include "ecs/PointLightSystem.h"
 #include "ecs/ParticleEmitterSystem.h"
 #include "graphics/NcGraphics.h"
 #include "ui/UISystemImpl.h"
@@ -37,7 +37,10 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
 class NcGraphicsImpl : public NcGraphics
 {
     public:
-        NcGraphicsImpl(Registry* registry, std::unique_ptr<IGraphics> graphics, window::WindowImpl* window);
+        NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                       Registry* registry,
+                       std::unique_ptr<IGraphics> graphics,
+                       window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
@@ -57,7 +60,7 @@ class NcGraphicsImpl : public NcGraphics
         std::unique_ptr<IGraphics> m_graphics;
         ui::UISystemImpl m_ui;
         Environment m_environment;
-        ecs::PointLightSystem m_pointLightSystem;
+        PointLightSystem m_pointLightSystem;
         ecs::ParticleEmitterSystem m_particleEmitterSystem;
     };
 } // namespace graphics

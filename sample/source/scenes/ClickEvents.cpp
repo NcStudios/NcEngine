@@ -76,10 +76,10 @@ void ClickEvents::Load(Registry* registry, ModuleProvider modules)
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{-2.8f, 2.3f, -4.7f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3{0.325, 0.325, 0.325}, .diffuseColor = Vector3{0.9, 0.9, 0.9}, .diffuseIntensity = 48.0});
+    registry->Add<graphics::PointLight>(lvHandle, Vector3::Splat(0.325f), Vector3::Splat(0.9f), 48.0f);
 
     auto lvHandle2 = registry->Add<Entity>({.position = Vector3{5.1f, 3.7f, 1.6f}, .tag = "Point Light 2"});
-    registry->Add<graphics::PointLight>(lvHandle2, graphics::PointLightInfo{.ambient = Vector3{1.0, 1.0, 1.0}, .diffuseColor = Vector3{1.0, 1.0, 1.0}, .diffuseIntensity = 54.0});
+    registry->Add<graphics::PointLight>(lvHandle2, Vector3::One(), Vector3::One(), 54.0f);
 
     // Objects
     prefab::Create(registry,

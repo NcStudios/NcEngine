@@ -17,11 +17,7 @@ namespace
 {
     struct NcGraphicsStub : nc::graphics::NcGraphics
     {
-        NcGraphicsStub(nc::Registry* reg)
-            : onAddConnection{reg->OnAdd<nc::graphics::PointLight>().Connect([](nc::graphics::PointLight&){})},
-              onRemoveConnection{reg->OnRemove<nc::graphics::PointLight>().Connect([](nc::Entity){})}
-        {
-        }
+        NcGraphicsStub(nc::Registry*) {}
 
         void SetCamera(nc::graphics::Camera*) noexcept override {}
         auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
@@ -32,8 +28,6 @@ namespace
         void Clear() noexcept override {}
         auto BuildWorkload() -> std::vector<nc::task::Job> { return {}; }
 
-        nc::Connection<nc::graphics::PointLight&> onAddConnection;
-        nc::Connection<nc::Entity> onRemoveConnection;
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED
         nc::graphics::DebugRenderer debugRenderer;
@@ -55,19 +49,22 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(registry, std::move(graphicsApi), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, std::move(graphicsApi), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
         return std::make_unique<NcGraphicsStub>(registry);
     }
 
-    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, std::unique_ptr<IGraphics> graphics, window::WindowImpl* window)
+    NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                                   Registry* registry,
+                                   std::unique_ptr<IGraphics> graphics,
+                                   window::WindowImpl* window)
         : m_registry{ registry },
           m_graphics{ std::move(graphics) },
           m_ui{ window->GetHWND() },
           m_environment{},
-          m_pointLightSystem{ registry },
+          m_pointLightSystem{graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
         m_graphics->InitializeUI();
@@ -154,8 +151,8 @@ namespace nc::graphics
         m_ui.Draw();
         #endif
 
-        auto areLightsDirty = m_pointLightSystem.CheckDirtyAndReset();
-        auto state = PerFrameRenderState{ m_registry, camera, areLightsDirty, &m_environment, m_particleEmitterSystem.GetParticles() };
+        m_pointLightSystem.Update(MultiView<PointLight, Transform>{m_registry});
+        auto state = PerFrameRenderState{ m_registry, camera, &m_environment, m_pointLightSystem.GetViewProjections(), m_particleEmitterSystem.GetParticles() };
         MapPerFrameRenderState(state);
         m_graphics->Draw(state);
 

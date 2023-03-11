@@ -75,9 +75,7 @@ void RenderingBenchmark::Load(Registry* registry, ModuleProvider modules)
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3(0.3f, 0.3f, 0.3f),
-                                                                            .diffuseColor = Vector3(0.8f, 0.6f, 1.0f),
-                                                                            .diffuseIntensity = 1200.0f});
+    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.3f, 0.3f, 0.3f), Vector3(0.8f, 0.6f, 1.0f), 1200.0f);
 
     // UI Callbacks
     GetObjectCountCallback = std::bind(&Spawner::GetObjectCount, spawner);

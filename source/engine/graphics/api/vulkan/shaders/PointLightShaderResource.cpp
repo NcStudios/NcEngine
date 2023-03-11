@@ -20,11 +20,11 @@ namespace nc::graphics
 
     void PointLightShaderResource::Initialize()
     {
-        const auto bufferSize = static_cast<uint32_t>(sizeof(PointLightInfo) * m_maxPointLights);
+        const auto bufferSize = static_cast<uint32_t>(sizeof(PointLightData) * m_maxPointLights);
 
         if (m_pointLightsArrayBuffer == nullptr)
         {
-            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<PointLightInfo>>(m_allocator, bufferSize);
+            m_pointLightsArrayBuffer = std::make_unique<WriteableBuffer<PointLightData>>(m_allocator, bufferSize);
         }
 
         m_descriptors->RegisterDescriptor
@@ -48,9 +48,9 @@ namespace nc::graphics
         );
     }
 
-    void PointLightShaderResource::Update(const std::vector<PointLightInfo>& data)
+    void PointLightShaderResource::Update(const std::vector<PointLightData>& data)
     {
-        m_pointLightsArrayBuffer->Map(data, [](PointLightInfo& info)
+        m_pointLightsArrayBuffer->Map(data, [](PointLightData& info)
         {
             info.isInitialized = false;
         });

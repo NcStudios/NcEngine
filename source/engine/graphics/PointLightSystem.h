@@ -1,31 +1,34 @@
 #pragma once
 
-#include "utility/Signal.h"
+#include "ecs/Transform.h"
+#include "ecs/View.h"
+#include "graphics/PointLight.h"
 
-namespace nc
+#include "DirectXMath.h"
+
+#include <vector>
+
+namespace nc::graphics
 {
-    class Entity;
-    class Registry;
-    namespace graphics { class PointLight; }
-}
-
-namespace nc::ecs
+class PointLightSystem
 {
-    class PointLightSystem
-    {
-        public:
-            PointLightSystem(Registry* registry);
-            PointLightSystem(PointLightSystem&&) = delete;
-            PointLightSystem(const PointLightSystem&) = delete;
-            PointLightSystem& operator=(PointLightSystem&&) = delete;
-            PointLightSystem& operator=(const PointLightSystem&) = delete;
+    public:
+        PointLightSystem(bool useShadows);
+        PointLightSystem(PointLightSystem&&) = delete;
+        PointLightSystem(const PointLightSystem&) = delete;
+        PointLightSystem& operator=(PointLightSystem&&) = delete;
+        PointLightSystem& operator=(const PointLightSystem&) = delete;
 
-            bool CheckDirtyAndReset();
-            void Clear();
+        auto GetViewProjections() const noexcept -> const std::vector<DirectX::XMMATRIX>&
+        {
+            return m_viewProjections;
+        }
 
-        private:
-            Connection<graphics::PointLight&> m_onAddConnection;
-            Connection<Entity> m_onRemoveConnection;
-            bool m_isSystemDirty;
-    };
-}
+        void Update(MultiView<PointLight, Transform> view);
+        void Clear() noexcept;
+
+    private:
+        std::vector<DirectX::XMMATRIX> m_viewProjections;
+        bool m_useShadows;
+};
+} // namespace nc::graphics

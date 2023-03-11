@@ -30,18 +30,21 @@ class Environment;
 
 struct PerFrameRenderState
 {
-    PerFrameRenderState(Registry* registry, Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters);
+    PerFrameRenderState(Registry* registry,
+                        Camera* camera,
+                        Environment* environment,
+                        std::span<const DirectX::XMMATRIX> pointLightVPs,
+                        std::span<const nc::particle::EmitterState> particleEmitters);
 
     DirectX::XMMATRIX camViewMatrix;
     DirectX::XMMATRIX projectionMatrix;
     Vector3 cameraPosition;
     std::vector<ObjectData> objectData;
     std::vector<MeshView> meshes;
-    std::vector<PointLightInfo> pointLightInfos;
     #ifdef NC_EDITOR_ENABLED
     std::optional<nc::graphics::DebugWidget> colliderDebugWidget;
     #endif
-    std::vector<DirectX::XMMATRIX> pointLightVPs;
+    std::span<const DirectX::XMMATRIX> pointLightVPs;
     bool isPointLightBindRequired;
     Environment* environment;
     bool useSkybox;

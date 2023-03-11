@@ -91,7 +91,7 @@ void VulkanGraphics::Clear() noexcept
     m_device->VkDevice().waitIdle();
     m_lighting->Clear();
     ShaderResourceService<ObjectData>::Get()->Reset();
-    ShaderResourceService<PointLightInfo>::Get()->Reset();
+    ShaderResourceService<PointLightData>::Get()->Reset();
     ShaderResourceService<ShadowMap>::Get()->Reset();
     ShaderResourceService<EnvironmentData>::Get()->Reset();
 }
