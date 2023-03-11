@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <windowsx.h>
+#include "GLFW/glfw3.h"
 
 namespace nc::input
 {
@@ -14,6 +15,7 @@ namespace nc::input
         uint32_t mouseX = 0u;
         uint32_t mouseY = 0u;
         int32_t mouseWheel = 0;
+        GLFWwindow* window = nullptr;
     } g_state;
 
     uint32_t MouseX() { return g_state.mouseX; }
@@ -65,12 +67,13 @@ namespace nc::input
     bool KeyHeld(KeyCode keyCode)
     {
         //if most significant bit is 1, key is down
-        return (GetAsyncKeyState((KeyCode_t)keyCode) & (1 << 15)) == 0 ? false : true;
+        auto state =  glfwGetKey(g_state.window, (KeyCode_t)keyCode);
+        return state == GLFW_REPEAT;
     }
 
-    void SetMouseWheel(WPARAM wParam, LPARAM)
+    void SetMouseWheel(int xOffset, int yOffset)
     {
-        g_state.mouseWheel = GET_WHEEL_DELTA_WPARAM(wParam);
+        g_state.mouseWheel = yOffset * 50;
     }
 
     void ResetMouseState()
@@ -78,29 +81,26 @@ namespace nc::input
         g_state.mouseWheel = 0;
     }
 
-    void AddKeyToQueue(KeyCode_t keyCode, LPARAM lParam)
+    void AddKeyToQueue(KeyCode_t keyCode, int action)
     {
-        bool WasDown = ((lParam & (1 << 30)) != 0);
-        bool IsDown  = ((lParam & (1 << 31)) == 0);
-        
-        if (WasDown && !IsDown)
+        if (action == GLFW_RELEASE)
         {
-            g_state.upKeys.emplace_back(keyCode, lParam);
+            g_state.upKeys.emplace_back(keyCode, action);
         }
-        else if (IsDown)
+        else if (action == GLFW_PRESS)
         {
-            g_state.downKeys.emplace_back(keyCode, lParam);
+            g_state.downKeys.emplace_back(keyCode, action);
         }
     }
 
-    void AddMouseButtonDownToQueue(KeyCode_t keyCode, LPARAM lParam)
+    void AddMouseButtonDownToQueue(KeyCode_t keyCode, int action)
     {
-        g_state.downKeys.emplace_back(keyCode, lParam);
+        g_state.downKeys.emplace_back(keyCode, action);
     }
 
-    void AddMouseButtonUpToQueue(KeyCode_t keyCode, LPARAM lParam)
+    void AddMouseButtonUpToQueue(KeyCode_t keyCode, int action)
     {
-        g_state.upKeys.emplace_back(keyCode, lParam);
+        g_state.upKeys.emplace_back(keyCode, action);
     }
 
     void Flush()
@@ -110,9 +110,15 @@ namespace nc::input
         ResetMouseState();
     }
 
-    void UpdateMousePosition(LPARAM lParam)
+    void UpdateMousePosition(int mouseX, int mouseY)
     {
-        g_state.mouseX = GET_X_LPARAM(lParam); // extracted values can be negative so HI/LO WORD doesn't work
-        g_state.mouseY = GET_Y_LPARAM(lParam);
+        g_state.mouseX = mouseX;
+        g_state.mouseY = static_cast<int>(mouseY); // Convert to top-left coordinates
+        //g_state.mouseY = static_cast<int>(mouseY * 0.5 + 0.5); // Convert to top-left coordinates
+    }
+
+    void SetWindow(GLFWwindow* window)
+    {
+        g_state.window = window;
     }
 } //end namespace nc::input

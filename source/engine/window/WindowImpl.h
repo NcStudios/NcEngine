@@ -37,9 +37,10 @@ namespace nc::window
             void OnResize(float width, float height, WPARAM windowArg);
             
             void PollEvents();
-            void ProcessSystemMessages();
-
-            static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+            static void ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
+            static void ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
+            static void ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos);
+            static void ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
 
         private:
             std::vector<IOnResizeReceiver*> m_onResizeReceivers;

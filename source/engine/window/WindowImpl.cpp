@@ -7,11 +7,11 @@
 #include "window/Window.h"
 
 #include <algorithm>
-
+#include <iostream>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
 namespace
 {
-    constexpr auto WndClassStyleFlags = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    constexpr auto WndStyleFlags = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
     nc::window::WindowImpl* g_instance = nullptr;
 }
 
@@ -74,6 +74,11 @@ namespace nc::window
         {
             throw NcError("CreateWindow failed");
         }
+
+        glfwSetKeyCallback(m_window, &ProcessKeyEvent);
+        glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
+        glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
+        glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
     }
 
     WindowImpl::~WindowImpl() noexcept
@@ -99,7 +104,7 @@ namespace nc::window
 
     void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
     {
-        UIWndMessageCallback = std::move(callback);
+        //UIWndMessageCallback = std::move(callback);
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -119,7 +124,7 @@ namespace nc::window
 
     void WindowImpl::OnResize(float width, float height, WPARAM windowArg)
     {
-        if(!(GraphicsOnResizeCallback))
+        if(!GraphicsOnResizeCallback)
         {
             return;
         }
@@ -134,49 +139,6 @@ namespace nc::window
         }
     }
 
-    LRESULT CALLBACK WindowImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        if(g_instance->UIWndMessageCallback &&
-           g_instance->UIWndMessageCallback(hwnd, message, wParam, lParam))
-        {
-            return true;
-        }
-
-        switch(message)
-        {
-            case WM_SIZE:
-            {
-                g_instance->OnResize(LOWORD(lParam), HIWORD(lParam), wParam);
-
-                break;
-            }
-            case WM_CLOSE:
-            {
-                g_instance->EngineDisableRunningCallback();
-                break;
-            }
-            case WM_DESTROY:
-            {
-                PostQuitMessage(0);
-                break;
-            }
-            case WM_QUIT:
-            {
-                break;
-            }
-            case WM_MOUSEWHEEL:
-            {
-                input::SetMouseWheel(wParam, lParam);
-                break;
-            }
-            default:
-            {
-                return DefWindowProc(hwnd, message, wParam, lParam);
-            }
-        }
-        return 0;
-    }
-
     void WindowImpl::PollEvents()
     {
         if (glfwWindowShouldClose(m_window))
@@ -187,65 +149,70 @@ namespace nc::window
         glfwPollEvents();
     }
 
-    void WindowImpl::ProcessSystemMessages()
+    void WindowImpl::ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        nc::input::AddKeyToQueue(static_cast<nc::input::KeyCode_t>(key), action);
+    }
+
+    void WindowImpl::ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos)
+    {
+        int windowFrameHeight;
+        int windowFrameWidth;
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.MousePos = ImVec2(static_cast<float>(xPos), static_cast<float>(yPos));
+        glfwGetWindowSize(window, &windowFrameWidth, &windowFrameHeight);
+        nc::input::UpdateMousePosition(static_cast<int>(xPos), static_cast<int>(yPos)); // windowFrameHeight - static_cast<int>(yPos) - 1);
+    }
+
+    void WindowImpl::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods)
     {
         using namespace nc::input;
+        KeyCode_t mouseButton;
+        int imguiMouseButton;
+        ImGuiIO& io = ImGui::GetIO();
 
-        MSG message;
-        while(PeekMessage(&message, 0, 0, 0, PM_REMOVE))
+        if (button == GLFW_MOUSE_BUTTON_LEFT)
         {
-            switch (message.message)
-            {
-                case WM_QUIT:
-                {
-                    break;
-                }
-                case WM_MOUSEMOVE:
-                {
-                    UpdateMousePosition(message.lParam);
-                    break;
-                }
-                case WM_LBUTTONDOWN:
-                {
-                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::LeftButton, message.lParam);
-                    break;
-                }
-                case WM_LBUTTONUP:
-                {
-                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::LeftButton, message.lParam);
-                    break;
-                }
-                case WM_MBUTTONDOWN:
-                {
-                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
-                    break;
-                }
-                case WM_MBUTTONUP:
-                {
-                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
-                    break;
-                }
-                case WM_RBUTTONDOWN:
-                {
-                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::RightButton, message.lParam);
-                    break;
-                }
-                case WM_RBUTTONUP:
-                {
-                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::RightButton, message.lParam);
-                    break;
-                }
-                case WM_SYSKEYDOWN:
-                case WM_SYSKEYUP:
-                case WM_KEYDOWN:
-                case WM_KEYUP:
-                {
-                    AddKeyToQueue(static_cast<KeyCode_t>(message.wParam), message.lParam);
-                    break;
-                }
-            }
-            TranslateMessage(&message);
-            DispatchMessage(&message);
+            mouseButton = (KeyCode_t)KeyCode::LeftButton;
+            imguiMouseButton = 0;
+        }
+        else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+        {
+            mouseButton = (KeyCode_t)KeyCode::RightButton;
+            imguiMouseButton = 1;
+        }
+        else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+        {
+            mouseButton = (KeyCode_t)KeyCode::MiddleButton;
+            imguiMouseButton = 2;
+        }
+        else
+        {
+            throw NcError(std::string{"Invalid mouse button pressed."});
+        }
+
+        if (action == GLFW_PRESS)
+        {
+            AddMouseButtonDownToQueue(mouseButton, action);
+            io.MouseClicked[imguiMouseButton] = true;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            AddMouseButtonUpToQueue(mouseButton, action);
+            io.MouseReleased[imguiMouseButton] = true;
+        }
+        else
+        {
+            throw NcError(std::string{"Invalid mouse button action selected."});
         }
     }
+
+    void WindowImpl::ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        io.MouseWheel = static_cast<float>(yOffset);
+        input::SetMouseWheel(static_cast<int>(xOffset), static_cast<int>(yOffset));
+    }
+
 } // end namespace nc::window
