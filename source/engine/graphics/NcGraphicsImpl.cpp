@@ -165,7 +165,6 @@ namespace nc::graphics
 
         auto state = PerFrameRenderState
         {
-            m_registry,
             std::move(cameraState),
             std::move(environmentState),
             std::move(objectState),

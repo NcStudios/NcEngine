@@ -23,9 +23,9 @@ PointLightSystem::PointLightSystem(Signal<const std::vector<PointLightData>&>&& 
 {
 }
 
-auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> LightingFrontendState
+auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> LightingState
 {
-    auto state = LightingFrontendState{};
+    auto state = LightingState{};
     state.viewProjections.clear();
     auto shaderBuffer = std::vector<PointLightData>{};
     shaderBuffer.reserve(view.size_upper_bound());

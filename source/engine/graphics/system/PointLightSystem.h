@@ -13,7 +13,7 @@ namespace nc::graphics
 {
 struct PointLightData;
 
-struct LightingFrontendState
+struct LightingState
 {
     std::vector<DirectX::XMMATRIX> viewProjections;
 };
@@ -27,7 +27,7 @@ class PointLightSystem
         PointLightSystem& operator=(PointLightSystem&&) = delete;
         PointLightSystem& operator=(const PointLightSystem&) = delete;
 
-        auto Execute(MultiView<PointLight, Transform> view) -> LightingFrontendState;
+        auto Execute(MultiView<PointLight, Transform> view) -> LightingState;
 
     private:
         Signal<const std::vector<PointLightData>&> m_backendChannel;

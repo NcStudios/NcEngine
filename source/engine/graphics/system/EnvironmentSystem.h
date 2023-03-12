@@ -5,9 +5,9 @@
 
 namespace nc::graphics
 {
-struct CameraFrontendState;
+struct CameraState;
 
-struct EnvironmentFrontendState
+struct EnvironmentState
 {
     bool useSkybox;
 };
@@ -20,7 +20,7 @@ class EnvironmentSystem
         void SetSkybox(const std::string& path);
         void Clear();
 
-        auto Execute(const CameraFrontendState& cameraState) -> EnvironmentFrontendState;
+        auto Execute(const CameraState& cameraState) -> EnvironmentState;
 
     private:
         Signal<const EnvironmentData&> m_backendChannel;

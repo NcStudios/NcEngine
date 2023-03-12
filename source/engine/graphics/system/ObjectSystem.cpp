@@ -20,13 +20,13 @@ bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRende
 namespace nc::graphics
 {
 auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> gameState,
-                           const CameraFrontendState& cameraState,
-                           EnvironmentFrontendState& environmentState) -> ObjectFrontendState
+                           const CameraState& cameraState,
+                           EnvironmentState& environmentState) -> ObjectState
 {
     const auto viewProjection = cameraState.view * cameraState.projection;
     auto objectData = std::vector<ObjectData>{};
     objectData.reserve(gameState.size_upper_bound());
-    auto frontendState = ObjectFrontendState{};
+    auto frontendState = ObjectState{};
     frontendState.meshes.reserve(gameState.size_upper_bound());
 
     for (const auto& [renderer, transform] : gameState)

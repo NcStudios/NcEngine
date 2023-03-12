@@ -4,17 +4,17 @@
 
 namespace nc::graphics
 {
-auto CameraSystem::Execute(Registry* registry) -> CameraFrontendState
+auto CameraSystem::Execute(Registry* registry) -> CameraState
 {
     if (!m_mainCamera)
     {
-        return CameraFrontendState{};
+        return CameraState{};
     }
 
     m_mainCamera->UpdateViewMatrix();
     const auto& transform = registry->Get<Transform>(m_mainCamera->ParentEntity());
 
-    return CameraFrontendState
+    return CameraState
     {
         .view = m_mainCamera->ViewMatrix(),
         .projection = m_mainCamera->ProjectionMatrix(),

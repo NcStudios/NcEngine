@@ -12,7 +12,7 @@ namespace graphics
 {
 class Camera;
 
-struct CameraFrontendState
+struct CameraState
 {
     DirectX::XMMATRIX view;
     DirectX::XMMATRIX projection;
@@ -34,7 +34,7 @@ class CameraSystem final
             return m_mainCamera;
         }
 
-        auto Execute(Registry* registry) -> CameraFrontendState;
+        auto Execute(Registry* registry) -> CameraState;
 
     private:
         Camera* m_mainCamera = nullptr;

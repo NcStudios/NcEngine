@@ -16,11 +16,10 @@
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry,
-                                             CameraFrontendState&& cameraState,
-                                             EnvironmentFrontendState&& environmentState,
-                                             ObjectFrontendState&& objectState,
-                                             LightingFrontendState&& lightingState,
+    PerFrameRenderState::PerFrameRenderState(CameraState&& cameraState,
+                                             EnvironmentState&& environmentState,
+                                             ObjectState&& objectState,
+                                             LightingState&& lightingState,
                                              WidgetSystemState&& widgetState,
                                              std::span<const nc::particle::EmitterState> particleEmitters)
         : camViewMatrix{ cameraState.view },

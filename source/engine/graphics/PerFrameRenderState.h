@@ -26,19 +26,18 @@ class PhysicsSystemImpl;
 namespace graphics
 {
 
-struct CameraFrontendState;
-struct EnvironmentFrontendState;
-struct LightingFrontendState;
-struct ObjectFrontendState;
+struct CameraState;
+struct EnvironmentState;
+struct LightingState;
+struct ObjectState;
 struct WidgetSystemState;
 
 struct PerFrameRenderState
 {
-    PerFrameRenderState(Registry* registry,
-                        CameraFrontendState&& cameraState,
-                        EnvironmentFrontendState&& environmentState,
-                        ObjectFrontendState&& objectState,
-                        LightingFrontendState&& lightingState,
+    PerFrameRenderState(CameraState&& cameraState,
+                        EnvironmentState&& environmentState,
+                        ObjectState&& objectState,
+                        LightingState&& lightingState,
                         WidgetSystemState&& widgetState,
                         std::span<const nc::particle::EmitterState> particleEmitters);
 

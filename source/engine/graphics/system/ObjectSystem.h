@@ -10,11 +10,11 @@
 
 namespace nc::graphics
 {
-struct CameraFrontendState;
-struct EnvironmentFrontendState;
+struct CameraState;
+struct EnvironmentState;
 struct ObjectData;
 
-struct ObjectFrontendState
+struct ObjectState
 {
     std::vector<MeshView> meshes;
     // optional?
@@ -30,8 +30,8 @@ class ObjectSystem
         }
 
         auto Execute(MultiView<MeshRenderer, Transform> gameState,
-                     const CameraFrontendState& cameraState,
-                     EnvironmentFrontendState& environmentState) -> ObjectFrontendState;
+                     const CameraState& cameraState,
+                     EnvironmentState& environmentState) -> ObjectState;
 
     private:
         Signal<const std::vector<ObjectData>&> m_backendPort;

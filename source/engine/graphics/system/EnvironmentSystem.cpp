@@ -26,7 +26,7 @@ void EnvironmentSystem::SetSkybox(const std::string& path)
     m_environmentData.skyboxTextureIndex = skyboxView.index;
 }
 
-auto EnvironmentSystem::Execute(const CameraFrontendState& cameraState) -> EnvironmentFrontendState
+auto EnvironmentSystem::Execute(const CameraState& cameraState) -> EnvironmentState
 {
     if (!AssetService<MeshView>::Get()->IsLoaded(SkyboxMeshPath))
     {
@@ -35,7 +35,7 @@ auto EnvironmentSystem::Execute(const CameraFrontendState& cameraState) -> Envir
 
     m_environmentData.cameraWorldPosition = cameraState.position;
     m_backendChannel.Emit(m_environmentData);
-    return EnvironmentFrontendState{m_useSkybox};
+    return EnvironmentState{m_useSkybox};
 }
 
 void EnvironmentSystem::Clear()
