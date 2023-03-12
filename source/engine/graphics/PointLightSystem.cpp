@@ -18,22 +18,23 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 
 namespace nc::graphics
 {
-PointLightSystem::PointLightSystem(bool useShadows)
-    : m_viewProjections{},
+PointLightSystem::PointLightSystem(Signal<const std::vector<PointLightData>&>&& backendChannel, bool useShadows)
+    : m_backendChannel{std::move(backendChannel)},
       m_useShadows{useShadows}
 {
 }
 
-void PointLightSystem::Update(MultiView<PointLight, Transform> view)
+auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> LightingFrontendState
 {
-    m_viewProjections.clear();
+    auto state = LightingFrontendState{};
+    state.viewProjections.clear();
     auto shaderBuffer = std::vector<PointLightData>{};
     shaderBuffer.reserve(view.size_upper_bound());
 
     for (const auto& [light, transform] : view)
     {
-        m_viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-        shaderBuffer.emplace_back(m_viewProjections.back(),
+        state.viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+        shaderBuffer.emplace_back(state.viewProjections.back(),
                                   transform->Position(),
                                   m_useShadows,
                                   light->GetAmbient(),
@@ -41,12 +42,7 @@ void PointLightSystem::Update(MultiView<PointLight, Transform> view)
                                   light->GetDiffuseIntensity());
     }
 
-    ShaderResourceService<PointLightData>::Get()->Update(shaderBuffer);
-}
-
-void PointLightSystem::Clear() noexcept
-{
-    m_viewProjections.clear();
-    m_viewProjections.shrink_to_fit();
+    m_backendChannel.Emit(shaderBuffer);
+    return state;
 }
 } // namespace nc::graphics

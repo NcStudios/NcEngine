@@ -3,6 +3,7 @@
 #include "ecs/Transform.h"
 #include "ecs/View.h"
 #include "graphics/PointLight.h"
+#include "utility/Signal.h"
 
 #include "DirectXMath.h"
 
@@ -10,25 +11,26 @@
 
 namespace nc::graphics
 {
+struct PointLightData;
+
+struct LightingFrontendState
+{
+    std::vector<DirectX::XMMATRIX> viewProjections;
+};
+
 class PointLightSystem
 {
     public:
-        PointLightSystem(bool useShadows);
+        PointLightSystem(Signal<const std::vector<PointLightData>&>&& backendChannel, bool useShadows);
         PointLightSystem(PointLightSystem&&) = delete;
         PointLightSystem(const PointLightSystem&) = delete;
         PointLightSystem& operator=(PointLightSystem&&) = delete;
         PointLightSystem& operator=(const PointLightSystem&) = delete;
 
-        auto GetViewProjections() const noexcept -> const std::vector<DirectX::XMMATRIX>&
-        {
-            return m_viewProjections;
-        }
-
-        void Update(MultiView<PointLight, Transform> view);
-        void Clear() noexcept;
+        auto Execute(MultiView<PointLight, Transform> view) -> LightingFrontendState;
 
     private:
-        std::vector<DirectX::XMMATRIX> m_viewProjections;
+        Signal<const std::vector<PointLightData>&> m_backendChannel;
         bool m_useShadows;
 };
 } // namespace nc::graphics

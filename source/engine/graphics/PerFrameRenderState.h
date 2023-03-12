@@ -25,32 +25,33 @@ class PhysicsSystemImpl;
 
 namespace graphics
 {
-class Camera;
-class Environment;
+
+struct CameraFrontendState;
+struct EnvironmentFrontendState;
+struct LightingFrontendState;
+struct ObjectFrontendState;
 
 struct PerFrameRenderState
 {
     PerFrameRenderState(Registry* registry,
-                        Camera* camera,
-                        Environment* environment,
-                        std::span<const DirectX::XMMATRIX> pointLightVPs,
+                        const CameraFrontendState& cameraState,
+                        const EnvironmentFrontendState& environmentState,
+                        const ObjectFrontendState& objectState,
+                        const LightingFrontendState& lightingState,
                         std::span<const nc::particle::EmitterState> particleEmitters);
 
     DirectX::XMMATRIX camViewMatrix;
     DirectX::XMMATRIX projectionMatrix;
     Vector3 cameraPosition;
-    std::vector<ObjectData> objectData;
     std::vector<MeshView> meshes;
     #ifdef NC_EDITOR_ENABLED
     std::optional<nc::graphics::DebugWidget> colliderDebugWidget;
     #endif
     std::span<const DirectX::XMMATRIX> pointLightVPs;
-    bool isPointLightBindRequired;
-    Environment* environment;
     bool useSkybox;
     std::span<const nc::particle::EmitterState> emitterStates;
+    uint32_t skyboxInstanceIndex = -1;
 };
 
-void MapPerFrameRenderState(const PerFrameRenderState& state);
 } // namespace graphics
 } // namespace nc

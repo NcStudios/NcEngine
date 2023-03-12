@@ -2,6 +2,7 @@
 
 #include "Environment.h"
 #include "IGraphics.h"
+#include "ObjectFrontend.h"
 #include "PointLightSystem.h"
 #include "camera/MainCamera.h"
 #include "ecs/ParticleEmitterSystem.h"
@@ -27,6 +28,8 @@ class WindowImpl;
 
 namespace graphics
 {
+struct ShaderResourceBus;
+
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
@@ -40,6 +43,7 @@ class NcGraphicsImpl : public NcGraphics
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                        Registry* registry,
                        std::unique_ptr<IGraphics> graphics,
+                       ShaderResourceBus&& shaderResourceBus,
                        window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
@@ -60,6 +64,7 @@ class NcGraphicsImpl : public NcGraphics
         std::unique_ptr<IGraphics> m_graphics;
         ui::UISystemImpl m_ui;
         Environment m_environment;
+        ObjectFrontend m_objectFrontend;
         PointLightSystem m_pointLightSystem;
         ecs::ParticleEmitterSystem m_particleEmitterSystem;
     };

@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         IGraphics.cpp
         MeshBatcher.cpp
         NcGraphicsImpl.cpp
+        ObjectFrontend.cpp
         PerFrameRenderState.cpp
         PointLightSystem.cpp
 )
