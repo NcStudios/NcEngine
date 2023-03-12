@@ -7,6 +7,7 @@
 #include "system/EnvironmentSystem.h"
 #include "system/ObjectSystem.h"
 #include "system/PointLightSystem.h"
+#include "system/WidgetSystem.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>
@@ -67,6 +68,7 @@ class NcGraphicsImpl : public NcGraphics
         ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
         ecs::ParticleEmitterSystem m_particleEmitterSystem;
+        WidgetSystem m_widgetSystem;
     };
 } // namespace graphics
 } // namespace nc

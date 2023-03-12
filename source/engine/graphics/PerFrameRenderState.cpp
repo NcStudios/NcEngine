@@ -9,6 +9,7 @@
 #include "system/EnvironmentSystem.h"
 #include "system/ObjectSystem.h"
 #include "system/PointLightSystem.h"
+#include "system/WidgetSystem.h"
 
 #include "optick/optick.h"
 
@@ -20,13 +21,14 @@ namespace nc::graphics
                                              EnvironmentFrontendState&& environmentState,
                                              ObjectFrontendState&& objectState,
                                              LightingFrontendState&& lightingState,
+                                             WidgetSystemState&& widgetState,
                                              std::span<const nc::particle::EmitterState> particleEmitters)
         : camViewMatrix{ cameraState.view },
           projectionMatrix{ cameraState.projection },
           cameraPosition{ cameraState.position },
           meshes{ std::move(objectState.meshes) },
           #ifdef NC_EDITOR_ENABLED
-          colliderDebugWidget{ std::nullopt },
+          colliderDebugWidget{ widgetState.selectedCollider },
           #endif
           pointLightVPs{std::move(lightingState.viewProjections)},
           useSkybox{ environmentState.useSkybox },
@@ -34,20 +36,5 @@ namespace nc::graphics
           skyboxInstanceIndex{ objectState.skyboxInstanceIndex }
     {
         OPTICK_CATEGORY("PerFrameRenderState", Optick::Category::Rendering);
-
-        #ifdef NC_EDITOR_ENABLED
-        auto colliderIsSelected = false;
-        for (auto& collider : View<physics::Collider>{ registry })
-        {
-            if (collider.GetEditorSelection())
-            {
-                colliderDebugWidget = collider.GetDebugWidget();
-                colliderIsSelected = true;
-            }
-        }
-
-        if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
-        #endif
     }
-
 }

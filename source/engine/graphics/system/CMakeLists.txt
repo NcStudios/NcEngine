@@ -4,4 +4,5 @@ target_sources(${NC_ENGINE_LIB}
         EnvironmentSystem.cpp
         ObjectSystem.cpp
         PointLightSystem.cpp
+        WidgetSystem.cpp
 )

@@ -30,6 +30,7 @@ struct CameraFrontendState;
 struct EnvironmentFrontendState;
 struct LightingFrontendState;
 struct ObjectFrontendState;
+struct WidgetSystemState;
 
 struct PerFrameRenderState
 {
@@ -38,6 +39,7 @@ struct PerFrameRenderState
                         EnvironmentFrontendState&& environmentState,
                         ObjectFrontendState&& objectState,
                         LightingFrontendState&& lightingState,
+                        WidgetSystemState&& widgetState,
                         std::span<const nc::particle::EmitterState> particleEmitters);
 
     DirectX::XMMATRIX camViewMatrix;

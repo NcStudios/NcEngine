@@ -73,7 +73,8 @@ namespace nc::graphics
           m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
           m_objectSystem{std::move(shaderResourceBus.objectChannel)},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
-          m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
+          m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
+          m_widgetSystem{}
     {
         m_graphics->InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
@@ -152,16 +153,14 @@ namespace nc::graphics
          *  hacking dt factor in here. */
         float dtFactor = 1.0f;
         m_ui.Draw(&dtFactor, m_registry);
+        auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         #else
         m_ui.Draw();
+        auto widgetState = WidgetSystemState{std::nullopt};
         #endif
 
         auto environmentState = m_environmentSystem.Execute(cameraState);
-
-
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, cameraState, environmentState);
-        // auto objectState = m_objectSystem.Execute(m_registry, cameraState, environmentState);
-
         auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
 
         auto state = PerFrameRenderState
@@ -171,15 +170,11 @@ namespace nc::graphics
             std::move(environmentState),
             std::move(objectState),
             std::move(lightingState),
+            std::move(widgetState),
             m_particleEmitterSystem.GetParticles()
         };
 
         m_graphics->Draw(state);
-
-        #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : View<physics::Collider>{m_registry}) collider.SetEditorSelection(false);
-        #endif
-
         m_graphics->FrameEnd();
     }
 
