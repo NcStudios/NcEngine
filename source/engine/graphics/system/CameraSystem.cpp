@@ -1,15 +1,26 @@
-#include "MainCamera.h"
+#include "CameraSystem.h"
+#include "ecs/Registry.h"
 #include "graphics/Camera.h"
 
-namespace nc::camera
+namespace nc::graphics
 {
-void MainCamera::Set(graphics::Camera* camera) noexcept
+auto CameraSystem::Execute(Registry* registry) -> CameraFrontendState
 {
-    m_camera = camera;
-}
+    if (!m_mainCamera)
+    {
+        return CameraFrontendState{};
+    }
 
-auto MainCamera::Get() noexcept -> graphics::Camera*
-{
-    return m_camera;
+    m_mainCamera->UpdateViewMatrix();
+    const auto& transform = registry->Get<Transform>(m_mainCamera->ParentEntity());
+
+    return CameraFrontendState
+    {
+        .view = m_mainCamera->ViewMatrix(),
+        .projection = m_mainCamera->ProjectionMatrix(),
+        .position = transform->Position(),
+        .frustum = m_mainCamera->CalculateFrustum(),
+        .hasCamera = true
+    };
 }
-} // namespace nc::camera
+} // namespace nc::graphics

@@ -1,24 +1,26 @@
 #pragma once
 
-#include "shader_resource\EnvironmentData.h"
+#include "graphics/shader_resource/EnvironmentData.h"
 #include "utility/Signal.h"
 
 namespace nc::graphics
 {
+struct CameraFrontendState;
+
 struct EnvironmentFrontendState
 {
     bool useSkybox;
 };
 
-class Environment
+class EnvironmentSystem
 {
     public:
-        Environment(Signal<const EnvironmentData&>&& backendChannel);
+        EnvironmentSystem(Signal<const EnvironmentData&>&& backendChannel);
 
         void SetSkybox(const std::string& path);
         void Clear();
 
-        auto Execute(const Vector3& cameraPosition) -> EnvironmentFrontendState;
+        auto Execute(const CameraFrontendState& cameraState) -> EnvironmentFrontendState;
 
     private:
         Signal<const EnvironmentData&> m_backendChannel;

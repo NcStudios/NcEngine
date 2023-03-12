@@ -5,10 +5,10 @@
 #include "shader_resource/ShaderResourceService.h"
 
 
-#include "CameraState.h"
-#include "Environment.h"
-#include "ObjectFrontend.h"
-#include "PointLightSystem.h"
+#include "system/CameraSystem.h"
+#include "system/EnvironmentSystem.h"
+#include "system/ObjectSystem.h"
+#include "system/PointLightSystem.h"
 
 #include "optick/optick.h"
 
@@ -16,19 +16,19 @@
 namespace nc::graphics
 {
     PerFrameRenderState::PerFrameRenderState(Registry* registry,
-                                            const CameraFrontendState& cameraState,
-                                            const EnvironmentFrontendState& environmentState,
-                                            const ObjectFrontendState& objectState,
-                                            const LightingFrontendState& lightingState,
+                                             CameraFrontendState&& cameraState,
+                                             EnvironmentFrontendState&& environmentState,
+                                             ObjectFrontendState&& objectState,
+                                             LightingFrontendState&& lightingState,
                                              std::span<const nc::particle::EmitterState> particleEmitters)
         : camViewMatrix{ cameraState.view },
           projectionMatrix{ cameraState.projection },
           cameraPosition{ cameraState.position },
-          meshes{ objectState.meshes },
+          meshes{ std::move(objectState.meshes) },
           #ifdef NC_EDITOR_ENABLED
           colliderDebugWidget{ std::nullopt },
           #endif
-          pointLightVPs{lightingState.viewProjections},
+          pointLightVPs{std::move(lightingState.viewProjections)},
           useSkybox{ environmentState.useSkybox },
           emitterStates{ particleEmitters },
           skyboxInstanceIndex{ objectState.skyboxInstanceIndex }

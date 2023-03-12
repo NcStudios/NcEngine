@@ -1,11 +1,12 @@
 #pragma once
 
 #include "asset/Assets.h"
+#include "ecs/View.h"
+#include "ecs/Transform.h"
+#include "graphics/MeshRenderer.h"
 #include "utility/Signal.h"
 
 #include <vector>
-
-namespace nc { class Registry; struct MeshView; }
 
 namespace nc::graphics
 {
@@ -20,19 +21,17 @@ struct ObjectFrontendState
     uint32_t skyboxInstanceIndex;
 };
 
-class ObjectFrontend
+class ObjectSystem
 {
     public:
-        ObjectFrontend(Signal<const std::vector<ObjectData>&>&& backendPort)
+        ObjectSystem(Signal<const std::vector<ObjectData>&>&& backendPort)
             : m_backendPort{std::move(backendPort)}
         {
         }
 
-        auto Execute(Registry* registry,
+        auto Execute(MultiView<MeshRenderer, Transform> gameState,
                      const CameraFrontendState& cameraState,
                      EnvironmentFrontendState& environmentState) -> ObjectFrontendState;
-
-        void Clear() noexcept;
 
     private:
         Signal<const std::vector<ObjectData>&> m_backendPort;

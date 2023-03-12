@@ -1,6 +1,5 @@
 #include "PointLightSystem.h"
-#include "shader_resource/PointLightData.h"
-#include "shader_resource/ShaderResourceService.h"
+#include "graphics/shader_resource/PointLightData.h"
 
 namespace
 {

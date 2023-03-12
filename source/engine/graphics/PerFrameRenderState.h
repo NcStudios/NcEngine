@@ -34,10 +34,10 @@ struct ObjectFrontendState;
 struct PerFrameRenderState
 {
     PerFrameRenderState(Registry* registry,
-                        const CameraFrontendState& cameraState,
-                        const EnvironmentFrontendState& environmentState,
-                        const ObjectFrontendState& objectState,
-                        const LightingFrontendState& lightingState,
+                        CameraFrontendState&& cameraState,
+                        EnvironmentFrontendState&& environmentState,
+                        ObjectFrontendState&& objectState,
+                        LightingFrontendState&& lightingState,
                         std::span<const nc::particle::EmitterState> particleEmitters);
 
     DirectX::XMMATRIX camViewMatrix;

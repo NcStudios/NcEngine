@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Environment.h"
 #include "IGraphics.h"
-#include "ObjectFrontend.h"
-#include "PointLightSystem.h"
-#include "camera/MainCamera.h"
 #include "ecs/ParticleEmitterSystem.h"
 #include "graphics/NcGraphics.h"
+#include "system/CameraSystem.h"
+#include "system/EnvironmentSystem.h"
+#include "system/ObjectSystem.h"
+#include "system/PointLightSystem.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>
@@ -60,11 +60,11 @@ class NcGraphicsImpl : public NcGraphics
 
     private:
         Registry* m_registry;
-        camera::MainCamera m_camera;
         std::unique_ptr<IGraphics> m_graphics;
         ui::UISystemImpl m_ui;
-        Environment m_environment;
-        ObjectFrontend m_objectFrontend;
+        CameraSystem m_cameraSystem;
+        EnvironmentSystem m_environmentSystem;
+        ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
         ecs::ParticleEmitterSystem m_particleEmitterSystem;
     };

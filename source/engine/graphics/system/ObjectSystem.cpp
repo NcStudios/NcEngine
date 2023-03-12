@@ -1,13 +1,9 @@
-#include "ObjectFrontend.h"
-// #include "asset/Assets.h"
-#include "ecs/Registry.h"
-#include "ecs/View.h"
+#include "ObjectSystem.h"
+#include "CameraSystem.h"
+#include "EnvironmentSystem.h"
 #include "graphics/Camera.h"
-#include "graphics/MeshRenderer.h"
 #include "graphics/shader_resource/ObjectData.h"
 #include "physics/collision/IntersectionQueries.h"
-#include "CameraState.h"
-#include "Environment.h"
 
 namespace
 {
@@ -23,34 +19,27 @@ bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRende
 
 namespace nc::graphics
 {
-auto ObjectFrontend::Execute(Registry* registry,
-                             const CameraFrontendState& cameraState,
-                             EnvironmentFrontendState& environmentState) -> ObjectFrontendState
+auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> gameState,
+                           const CameraFrontendState& cameraState,
+                           EnvironmentFrontendState& environmentState) -> ObjectFrontendState
 {
-    // const auto viewMatrix = camera->GetViewMatrix();
-    // const auto projectionMatrix = camera->GetProjectionMatrix();
     const auto viewProjection = cameraState.view * cameraState.projection;
-    // const auto frustum = camera->GetFrustum();
-    // const auto cameraPosition = registry->Get<Transform>(camera->ParentEntity())->Position();
-
-    const auto renderers = View<MeshRenderer>{registry};
-
     auto objectData = std::vector<ObjectData>{};
-    objectData.reserve(renderers.size());
-
+    objectData.reserve(gameState.size_upper_bound());
     auto frontendState = ObjectFrontendState{};
-    frontendState.meshes.reserve(renderers.size());
+    frontendState.meshes.reserve(gameState.size_upper_bound());
 
-    for (const auto& renderer : renderers)
+    for (const auto& [renderer, transform] : gameState)
     {
-        const auto& modelMatrix = registry->Get<Transform>(renderer.ParentEntity())->TransformationMatrix();
-
-        if (!IsViewedByFrustum(cameraState.frustum, renderer, modelMatrix))
+        const auto& modelMatrix = transform->TransformationMatrix();
+        if (!IsViewedByFrustum(cameraState.frustum, *renderer, modelMatrix))
+        {
             continue;
+        }
 
-        const auto [base, normal, roughness, metallic] = renderer.GetTextureIndices();
+        const auto [base, normal, roughness, metallic] = renderer->GetTextureIndices();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index);
-        frontendState.meshes.push_back(renderer.GetMesh());
+        frontendState.meshes.push_back(renderer->GetMesh());
     }
 
     if (environmentState.useSkybox)
@@ -63,10 +52,5 @@ auto ObjectFrontend::Execute(Registry* registry,
 
     m_backendPort.Emit(objectData);
     return frontendState;
-}
-
-void ObjectFrontend::Clear() noexcept
-{
-
 }
 } // namespace nc::graphics

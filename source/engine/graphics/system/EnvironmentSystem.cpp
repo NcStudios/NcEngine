@@ -1,9 +1,10 @@
-#include "Environment.h"
+#include "EnvironmentSystem.h"
 #include "assets/AssetService.h"
+#include "CameraSystem.h"
 
 namespace nc::graphics
 {
-Environment::Environment(Signal<const EnvironmentData&>&& backendChannel)
+EnvironmentSystem::EnvironmentSystem(Signal<const EnvironmentData&>&& backendChannel)
     : m_backendChannel{std::move(backendChannel)},
       m_environmentData{},
       m_useSkybox{false}
@@ -12,7 +13,7 @@ Environment::Environment(Signal<const EnvironmentData&>&& backendChannel)
     m_environmentData.skyboxTextureIndex = 0u;
 }
 
-void Environment::SetSkybox(const std::string& path)
+void EnvironmentSystem::SetSkybox(const std::string& path)
 {
     m_useSkybox = true;
 
@@ -25,24 +26,19 @@ void Environment::SetSkybox(const std::string& path)
     m_environmentData.skyboxTextureIndex = skyboxView.index;
 }
 
-// auto Environment::Get() const -> const EnvironmentData&
-// {
-//     return m_environmentData;
-// }
-
-auto Environment::Execute(const Vector3& cameraPosition) -> EnvironmentFrontendState
+auto EnvironmentSystem::Execute(const CameraFrontendState& cameraState) -> EnvironmentFrontendState
 {
     if (!AssetService<MeshView>::Get()->IsLoaded(SkyboxMeshPath))
     {
         LoadMeshAsset(SkyboxMeshPath);
     }
 
-    m_environmentData.cameraWorldPosition = cameraPosition;
+    m_environmentData.cameraWorldPosition = cameraState.position;
     m_backendChannel.Emit(m_environmentData);
     return EnvironmentFrontendState{m_useSkybox};
 }
 
-void Environment::Clear()
+void EnvironmentSystem::Clear()
 {
     m_useSkybox = false;
     m_environmentData.skyboxTextureIndex = -1;

@@ -1,5 +1,4 @@
 #include "NcGraphicsImpl.h"
-#include "CameraState.h"
 #include "PerFrameRenderState.h"
 #include "assets/AssetManagers.h"
 #include "config/Config.h"
@@ -70,8 +69,9 @@ namespace nc::graphics
         : m_registry{ registry },
           m_graphics{ std::move(graphics) },
           m_ui{ window->GetHWND() },
-          m_environment{std::move(shaderResourceBus.environmentChannel)},
-          m_objectFrontend{std::move(shaderResourceBus.objectChannel)},
+          m_cameraSystem{},
+          m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
+          m_objectSystem{std::move(shaderResourceBus.objectChannel)},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
@@ -83,12 +83,12 @@ namespace nc::graphics
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
     {
         NC_LOG_TRACE_FMT("Setting main camera to: {}", static_cast<void*>(camera));
-        m_camera.Set(camera);
+        m_cameraSystem.Set(camera);
     }
 
     auto NcGraphicsImpl::GetCamera() noexcept -> Camera*
     {
-        return m_camera.Get();
+        return m_cameraSystem.Get();
     }
 
     void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
@@ -105,12 +105,12 @@ namespace nc::graphics
     void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
         NC_LOG_TRACE_FMT("Setting skybox to {}", path);
-        m_environment.SetSkybox(path);
+        m_environmentSystem.SetSkybox(path);
     }
 
     void NcGraphicsImpl::ClearEnvironment()
     {
-        m_environment.Clear();
+        m_environmentSystem.Clear();
     }
 
     void NcGraphicsImpl::Clear() noexcept
@@ -118,7 +118,7 @@ namespace nc::graphics
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
         m_graphics->Clear();
-        m_environment.Clear();
+        m_environmentSystem.Clear();
         m_particleEmitterSystem.Clear();
     }
 
@@ -136,13 +136,11 @@ namespace nc::graphics
     void NcGraphicsImpl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
-        auto* camera = m_camera.Get();
-        if (!camera)
+        auto cameraState = m_cameraSystem.Execute(m_registry);
+        if (!cameraState.hasCamera)
         {
             return;
         }
-
-        camera->UpdateViewMatrix();
 
         if(!m_graphics->FrameBegin())
             return;
@@ -158,26 +156,23 @@ namespace nc::graphics
         m_ui.Draw();
         #endif
 
-        auto&& cameraPosition = m_registry->Get<Transform>(camera->ParentEntity())->Position();
+        auto environmentState = m_environmentSystem.Execute(cameraState);
 
 
-        const auto cameraState = CameraFrontendState
+        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, cameraState, environmentState);
+        // auto objectState = m_objectSystem.Execute(m_registry, cameraState, environmentState);
+
+        auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
+
+        auto state = PerFrameRenderState
         {
-            .view = camera->ViewMatrix(),
-            .projection = camera->ProjectionMatrix(),
-            .position = cameraPosition,
-            .frustum = camera->CalculateFrustum()
+            m_registry,
+            std::move(cameraState),
+            std::move(environmentState),
+            std::move(objectState),
+            std::move(lightingState),
+            m_particleEmitterSystem.GetParticles()
         };
-
-
-        auto environmentState = m_environment.Execute(cameraPosition);
-
-
-        const auto objectState = m_objectFrontend.Execute(m_registry, cameraState, environmentState);
-
-        const auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
-
-        auto state = PerFrameRenderState{ m_registry, cameraState, environmentState, objectState, lightingState, m_particleEmitterSystem.GetParticles() };
 
         m_graphics->Draw(state);
 
@@ -190,7 +185,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
     {
-        m_camera.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
+        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_graphics->OnResize(width, height, windowArg);
     }
 } // namespace nc::graphics
