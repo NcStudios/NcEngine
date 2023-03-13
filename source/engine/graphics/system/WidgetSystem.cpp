@@ -2,9 +2,9 @@
 
 namespace nc::graphics
 {
-auto WidgetSystem::Execute([[maybe_unused]] View<physics::Collider> colliders) -> WidgetSystemState
+auto WidgetSystem::Execute([[maybe_unused]] View<physics::Collider> colliders) -> WidgetState
 {
-    auto state = WidgetSystemState{std::nullopt};
+    auto state = WidgetState{std::nullopt};
 
 #ifdef NC_EDITOR_ENABLED
     for (auto& collider : colliders)

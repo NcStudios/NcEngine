@@ -111,10 +111,8 @@ namespace nc::graphics
     void ParticleTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("ParticleTechnique::Record", Optick::Category::Rendering);
-        const auto& viewMatrix = frameData.camViewMatrix;
-        const auto& projectionMatrix = frameData.projectionMatrix;
         auto pushConstants = ParticlePushConstants{};
-        pushConstants.viewProjection = viewMatrix * projectionMatrix;
+        pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
         const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(PlaneMeshPath);
 
         for (auto& emitterState : frameData.emitterStates)

@@ -138,13 +138,10 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        if (!cameraState.hasCamera)
+        if (!cameraState.hasCamera || !m_graphics->FrameBegin())
         {
             return;
         }
-
-        if(!m_graphics->FrameBegin())
-            return;
 
         m_ui.FrameBegin();
 
@@ -156,13 +153,12 @@ namespace nc::graphics
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         #else
         m_ui.Draw();
-        auto widgetState = WidgetSystemState{std::nullopt};
+        auto widgetState = WidgetState{std::nullopt};
         #endif
 
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, cameraState, environmentState);
         auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
-
         auto state = PerFrameRenderState
         {
             std::move(cameraState),

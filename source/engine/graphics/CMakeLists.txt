@@ -3,7 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         IGraphics.cpp
         MeshBatcher.cpp
         NcGraphicsImpl.cpp
-        PerFrameRenderState.cpp
 )
 
 add_subdirectory(api/vulkan)

@@ -92,7 +92,7 @@ EnvironmentTechnique::~EnvironmentTechnique() noexcept
 
 bool EnvironmentTechnique::CanBind(const PerFrameRenderState& frameData)
 {
-    return frameData.useSkybox;
+    return frameData.environmentState.useSkybox;
 }
 
 void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
@@ -104,19 +104,19 @@ void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
 
 bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)
 {
-    return frameData.useSkybox;
+    return frameData.environmentState.useSkybox;
 }
 
 void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
 {
     OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
-    if (!frameData.useSkybox)
+    if (!frameData.environmentState.useSkybox)
     {
         return;
     }
 
     const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(SkyboxMeshPath);
-    cmd->drawIndexed(meshAccessor.indexCount, 1u, meshAccessor.firstIndex, meshAccessor.firstVertex, frameData.skyboxInstanceIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+    cmd->drawIndexed(meshAccessor.indexCount, 1u, meshAccessor.firstIndex, meshAccessor.firstVertex, frameData.objectState.skyboxInstanceIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
 }
 
 void EnvironmentTechnique::Clear() noexcept

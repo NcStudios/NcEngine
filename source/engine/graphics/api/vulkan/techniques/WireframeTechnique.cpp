@@ -89,7 +89,7 @@ namespace nc::graphics
 
     bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.colliderDebugWidget.has_value() 
+        return frameData.widgetState.selectedCollider.has_value() 
         #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
@@ -106,7 +106,7 @@ namespace nc::graphics
 
     bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.colliderDebugWidget.has_value() 
+        return frameData.widgetState.selectedCollider.has_value() 
         #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
@@ -119,12 +119,13 @@ namespace nc::graphics
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         auto pushConstants = WireframePushConstants{};
-        pushConstants.viewProjection = frameData.camViewMatrix * frameData.projectionMatrix;
+        pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
 
-        if (frameData.colliderDebugWidget.has_value())
+        const auto& widget = frameData.widgetState.selectedCollider;
+        if (widget.has_value())
         {
-            pushConstants.model = frameData.colliderDebugWidget->transformationMatrix;
-            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(frameData.colliderDebugWidget->meshUid);
+            pushConstants.model = widget->transformationMatrix;
+            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(widget->meshUid);
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }

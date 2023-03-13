@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-struct WidgetSystemState
+struct WidgetState
 {
     std::optional<DebugWidget> selectedCollider;
 };
@@ -17,6 +17,6 @@ struct WidgetSystemState
 class WidgetSystem
 {
     public:
-        auto Execute(View<physics::Collider> colliders) -> WidgetSystemState;
+        auto Execute(View<physics::Collider> colliders) -> WidgetState;
 };
 } // namespace nc::graphics
