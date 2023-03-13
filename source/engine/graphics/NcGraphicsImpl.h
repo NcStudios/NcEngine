@@ -1,11 +1,11 @@
 #pragma once
 
 #include "IGraphics.h"
-#include "ecs/ParticleEmitterSystem.h"
 #include "graphics/NcGraphics.h"
 #include "system/CameraSystem.h"
 #include "system/EnvironmentSystem.h"
 #include "system/ObjectSystem.h"
+#include "system/ParticleEmitterSystem.h"
 #include "system/PointLightSystem.h"
 #include "system/WidgetSystem.h"
 #include "ui/UISystemImpl.h"
@@ -67,7 +67,7 @@ class NcGraphicsImpl : public NcGraphics
         EnvironmentSystem m_environmentSystem;
         ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
-        ecs::ParticleEmitterSystem m_particleEmitterSystem;
+        ParticleEmitterSystem m_particleEmitterSystem;
         WidgetSystem m_widgetSystem;
     };
 } // namespace graphics

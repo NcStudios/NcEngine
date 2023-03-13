@@ -1,6 +1,8 @@
 #include "PointLightSystem.h"
 #include "graphics/shader_resource/PointLightData.h"
 
+#include "optick/optick.h"
+
 namespace
 {
 constexpr float g_lightFieldOfView = nc::DegreesToRadians(60.0f);
@@ -25,6 +27,7 @@ PointLightSystem::PointLightSystem(Signal<const std::vector<PointLightData>&>&& 
 
 auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> LightingState
 {
+    OPTICK_CATEGORY("PointLightSystem::Execute", Optick::Category::Rendering);
     auto state = LightingState{};
     state.viewProjections.clear();
     auto shaderBuffer = std::vector<PointLightData>{};

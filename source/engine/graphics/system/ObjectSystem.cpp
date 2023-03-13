@@ -5,6 +5,8 @@
 #include "graphics/shader_resource/ObjectData.h"
 #include "physics/collision/IntersectionQueries.h"
 
+#include "optick/optick.h"
+
 namespace
 {
 bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
@@ -21,8 +23,9 @@ namespace nc::graphics
 {
 auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> gameState,
                            const CameraState& cameraState,
-                           EnvironmentState& environmentState) -> ObjectState
+                           const EnvironmentState& environmentState) -> ObjectState
 {
+    OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
     const auto viewProjection = cameraState.view * cameraState.projection;
     auto objectData = std::vector<ObjectData>{};
     objectData.reserve(gameState.size_upper_bound());

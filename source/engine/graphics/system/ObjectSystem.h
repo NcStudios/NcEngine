@@ -31,7 +31,7 @@ class ObjectSystem
 
         auto Execute(MultiView<MeshRenderer, Transform> gameState,
                      const CameraState& cameraState,
-                     EnvironmentState& environmentState) -> ObjectState;
+                     const EnvironmentState& environmentState) -> ObjectState;
 
     private:
         Signal<const std::vector<ObjectData>&> m_backendPort;
