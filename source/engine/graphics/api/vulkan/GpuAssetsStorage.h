@@ -12,9 +12,9 @@ struct GpuAssetsStorage
 {
     GpuAssetsStorage(vk::Device device,
                      GpuAllocator* allocator,
-                     Signal<const CubeMapBufferData&>& onCubeMapUpdate,
-                     Signal<const MeshBufferData&>& onMeshUpdate,
-                     Signal<const TextureBufferData&>& onTextureUpdate);
+                     Signal<const CubeMapUpdateEventData&>& onCubeMapUpdate,
+                     Signal<const MeshUpdateEventData&>& onMeshUpdate,
+                     Signal<const TextureUpdateEventData&>& onTextureUpdate);
 
     CubeMapStorage cubeMapStorage;
     MeshStorage meshStorage;

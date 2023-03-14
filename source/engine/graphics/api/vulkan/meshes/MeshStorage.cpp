@@ -3,7 +3,7 @@
 
 namespace nc::graphics
 {
-MeshStorage::MeshStorage(GpuAllocator* allocator, Signal<const MeshBufferData&>& onMeshUpdate)
+MeshStorage::MeshStorage(GpuAllocator* allocator, Signal<const MeshUpdateEventData&>& onMeshUpdate)
     : m_allocator{allocator},
       m_vertexBuffer{},
       m_indexBuffer{},
@@ -11,9 +11,9 @@ MeshStorage::MeshStorage(GpuAllocator* allocator, Signal<const MeshBufferData&>&
 {
 }
 
-void MeshStorage::UpdateBuffer(const MeshBufferData& meshBufferData)
+void MeshStorage::UpdateBuffer(const MeshUpdateEventData& eventData)
 {
-    m_vertexBuffer = ImmutableBuffer(m_allocator, meshBufferData.vertices);
-    m_indexBuffer = ImmutableBuffer(m_allocator, meshBufferData.indices);
+    m_vertexBuffer = ImmutableBuffer(m_allocator, eventData.vertices);
+    m_indexBuffer = ImmutableBuffer(m_allocator, eventData.indices);
 }
 } // namespace nc::graphics

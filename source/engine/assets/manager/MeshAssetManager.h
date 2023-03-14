@@ -10,7 +10,7 @@
 
 namespace nc
 {
-struct MeshBufferData;
+struct MeshUpdateEventData;
 
 class MeshAssetManager : public IAssetService<MeshView, std::string>
 {
@@ -24,14 +24,14 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> MeshView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const MeshBufferData&>&;
+        auto OnUpdate() -> Signal<const MeshUpdateEventData&>&;
 
     private:
         std::vector<asset::MeshVertex> m_vertexData;
         std::vector<uint32_t> m_indexData;
         std::unordered_map<std::string, MeshView> m_accessors;
         std::string m_assetDirectory;
-        Signal<const MeshBufferData&> m_onUpdate;
+        Signal<const MeshUpdateEventData&> m_onUpdate;
 
         void AddMeshView(const std::string& path, bool isExternal);
 };

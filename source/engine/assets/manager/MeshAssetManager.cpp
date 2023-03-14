@@ -51,7 +51,7 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal)
     }
 
     AddMeshView(path, isExternal);
-    m_onUpdate.Emit(MeshBufferData{m_vertexData, m_indexData});
+    m_onUpdate.Emit(MeshUpdateEventData{m_vertexData, m_indexData});
     return true;
 }
 
@@ -67,7 +67,7 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
         AddMeshView(path, isExternal);
     }
 
-    m_onUpdate.Emit(MeshBufferData{m_vertexData, m_indexData});
+    m_onUpdate.Emit(MeshUpdateEventData{m_vertexData, m_indexData});
     return true;
 }
 
@@ -103,7 +103,7 @@ bool MeshAssetManager::Unload(const std::string& path)
     {
         m_onUpdate.Emit
         (
-            MeshBufferData
+            MeshUpdateEventData
             {
                 m_vertexData,
                 m_indexData
@@ -135,7 +135,7 @@ bool MeshAssetManager::IsLoaded(const std::string& path) const
     return m_accessors.contains(path);
 }
 
-auto MeshAssetManager::OnUpdate() -> Signal<const MeshBufferData&>&
+auto MeshAssetManager::OnUpdate() -> Signal<const MeshUpdateEventData&>&
 {
     return m_onUpdate;
 }

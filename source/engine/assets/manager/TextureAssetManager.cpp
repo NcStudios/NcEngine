@@ -31,10 +31,10 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
 
-    m_onUpdate.Emit(TextureBufferData{
+    m_onUpdate.Emit(TextureUpdateEventData{
         UpdateAction::Load,
         std::vector<std::string>{path},
-        std::span<const TextureData>{&m_textureData.back(), 1}
+        std::span<const TaggedTexture>{&m_textureData.back(), 1}
     });
 
     return true;
@@ -68,10 +68,10 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
     if (!idsToLoad.empty())
     {
-        m_onUpdate.Emit(TextureBufferData{
+        m_onUpdate.Emit(TextureUpdateEventData{
             UpdateAction::Load,
             std::move(idsToLoad),
-            std::span<const TextureData>{m_textureData.begin() + newItemsIndex, m_textureData.end()}
+            std::span<const TaggedTexture>{m_textureData.begin() + newItemsIndex, m_textureData.end()}
         });
     }
 
@@ -91,10 +91,10 @@ bool TextureAssetManager::Unload(const std::string& path)
     }
 
     m_textureData.erase(pos);
-    m_onUpdate.Emit(TextureBufferData{
+    m_onUpdate.Emit(TextureUpdateEventData{
         UpdateAction::Unload,
         std::vector<std::string>{path},
-        std::span<const TextureData>{}
+        std::span<const TaggedTexture>{}
     });
 
     return true;
@@ -132,7 +132,7 @@ bool TextureAssetManager::IsLoaded(const std::string& path) const
     return (pos != m_textureData.end());
 }
 
-auto TextureAssetManager::OnUpdate() -> Signal<const TextureBufferData&>&
+auto TextureAssetManager::OnUpdate() -> Signal<const TextureUpdateEventData&>&
 {
     return m_onUpdate;
 }

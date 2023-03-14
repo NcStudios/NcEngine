@@ -4,7 +4,7 @@
 
 namespace nc
 {
-TextureBufferData::TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureData> data_)
+TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedTexture> data_)
     : ids{std::move(ids_)},
       data{data_},
       updateAction{updateAction_}
@@ -20,7 +20,7 @@ TextureBufferData::TextureBufferData(UpdateAction updateAction_, std::vector<std
     }
 }
 
-CubeMapBufferData::CubeMapBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const CubeMapData> data_)
+CubeMapUpdateEventData::CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedCubeMap> data_)
     : ids{std::move(ids_)},
       data{data_},
       updateAction{updateAction_}

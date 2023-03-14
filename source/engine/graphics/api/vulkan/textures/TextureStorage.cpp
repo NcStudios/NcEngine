@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const TextureBufferData&>& onTextureUpdate)
+TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const TextureUpdateEventData&>& onTextureUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_textureBuffers{},
@@ -26,18 +26,18 @@ TextureStorage::~TextureStorage() noexcept
     m_textureBuffers.clear();
 }
 
-void TextureStorage::UpdateBuffer(const TextureBufferData& textureBufferData)
+void TextureStorage::UpdateBuffer(const TextureUpdateEventData& eventData)
 {
-    switch (textureBufferData.updateAction)
+    switch (eventData.updateAction)
     {
         case UpdateAction::Load:
         {
-            LoadTextureBuffer(textureBufferData);
+            LoadTextureBuffer(eventData);
             break;
         }
         case UpdateAction::Unload:
         {
-            UnloadTextureBuffer(textureBufferData);
+            UnloadTextureBuffer(eventData);
             break;
         }
         case UpdateAction::UnloadAll:
@@ -48,11 +48,11 @@ void TextureStorage::UpdateBuffer(const TextureBufferData& textureBufferData)
     }
 }
 
-void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferData)
+void TextureStorage::LoadTextureBuffer(const TextureUpdateEventData& eventData)
 {
-    for (auto i = 0ull; i < textureBufferData.ids.size(); ++i)
+    for (auto i = 0ull; i < eventData.ids.size(); ++i)
     {
-        auto& textureData = textureBufferData.data[i];
+        auto& textureData = eventData.data[i];
         auto& texture = textureData.texture;
 
         TextureBuffer textureBuffer
@@ -68,9 +68,9 @@ void TextureStorage::LoadTextureBuffer(const TextureBufferData& textureBufferDat
     graphics::ShaderResourceService<graphics::TextureBuffer>::Get()->Update(m_textureBuffers);
 }
 
-void TextureStorage::UnloadTextureBuffer(const TextureBufferData& textureBufferData)
+void TextureStorage::UnloadTextureBuffer(const TextureUpdateEventData& eventData)
 {
-    const auto& id = textureBufferData.ids[0];
+    const auto& id = eventData.ids[0];
     auto pos = std::ranges::find_if(m_textureBuffers, [&id](const auto& texture)
     {
         return texture.uid == id;

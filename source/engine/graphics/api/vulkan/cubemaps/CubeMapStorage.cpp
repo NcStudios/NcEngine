@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const CubeMapBufferData&>& onCubeMapUpdate)
+CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const CubeMapUpdateEventData&>& onCubeMapUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_cubeMaps{},
@@ -15,18 +15,18 @@ CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signa
 {
 }
 
-void CubeMapStorage::UpdateBuffer(const CubeMapBufferData& CubeMapBufferData)
+void CubeMapStorage::UpdateBuffer(const CubeMapUpdateEventData& eventData)
 {
-    switch (CubeMapBufferData.updateAction)
+    switch (eventData.updateAction)
     {
         case UpdateAction::Load:
         {
-            LoadCubeMapBuffer(CubeMapBufferData);
+            LoadCubeMapBuffer(eventData);
             break;
         }
         case UpdateAction::Unload:
         {
-            UnloadCubeMapBuffer(CubeMapBufferData);
+            UnloadCubeMapBuffer(eventData);
             break;
         }
         case UpdateAction::UnloadAll:
@@ -37,20 +37,20 @@ void CubeMapStorage::UpdateBuffer(const CubeMapBufferData& CubeMapBufferData)
     }
 }
 
-void CubeMapStorage::LoadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData)
+void CubeMapStorage::LoadCubeMapBuffer(const CubeMapUpdateEventData& eventData)
 {
-    for (auto i = 0u; i < cubeMapBufferData.ids.size(); ++i)
+    for (auto i = 0u; i < eventData.ids.size(); ++i)
     {
-        const auto& cubeMapData = cubeMapBufferData.data[i];
+        const auto& cubeMapData = eventData.data[i];
         m_cubeMaps.emplace_back(m_device, m_allocator, cubeMapData);
     }
 
     graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
 }
 
-void CubeMapStorage::UnloadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData)
+void CubeMapStorage::UnloadCubeMapBuffer(const CubeMapUpdateEventData& eventData)
 {
-    const auto& id = cubeMapBufferData.ids[0];
+    const auto& id = eventData.ids[0];
     auto pos = std::ranges::find_if(m_cubeMaps, [&id](const auto& cubeMap)
     {
         return cubeMap.GetUid() == id;

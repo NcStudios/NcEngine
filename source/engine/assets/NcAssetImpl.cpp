@@ -29,17 +29,17 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
 
 NcAssetImpl::~NcAssetImpl() = default;
 
-auto NcAssetImpl::OnCubeMapUpdate() noexcept -> Signal<const CubeMapBufferData&>&
+auto NcAssetImpl::OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>&
 {
     return m_cubeMapManager->OnUpdate();
 }
 
-auto NcAssetImpl::OnTextureUpdate() noexcept -> Signal<const TextureBufferData&>&
+auto NcAssetImpl::OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>&
 {
     return m_textureManager->OnUpdate();
 }
 
-auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshBufferData&>&
+auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
 {
     return m_meshManager->OnUpdate();
 }

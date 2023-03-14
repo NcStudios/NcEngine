@@ -5,10 +5,12 @@
 #include <cstdlib>
 #include <span>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace nc
 {
+/** @brief */
 enum class UpdateAction : uint8_t
 {
     Load,
@@ -16,37 +18,40 @@ enum class UpdateAction : uint8_t
     UnloadAll
 };
 
-struct MeshBufferData
+/** @brief Event data for mesh load and unload operations. */
+struct MeshUpdateEventData
 {
     std::span<const asset::MeshVertex> vertices;
     std::span<const uint32_t> indices;
 };
 
-struct TextureData
+struct TaggedTexture
 {
     asset::Texture texture;
     std::string id;
 };
 
-struct TextureBufferData
+/** @brief Event data for texture load and unlaod operations. */
+struct TextureUpdateEventData
 {
-    TextureBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureData> data_);
+    TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedTexture> data_);
     std::vector<std::string> ids;
-    std::span<const TextureData> data;
+    std::span<const TaggedTexture> data;
     UpdateAction updateAction;
 };
 
-struct CubeMapData
+struct TaggedCubeMap
 {
     asset::CubeMap cubeMap;
     std::string id;
 };
 
-struct CubeMapBufferData
+/** @brief Event data for cubemap load and unload operations. */
+struct CubeMapUpdateEventData
 {
-    CubeMapBufferData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const CubeMapData> data_);
+    CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedCubeMap> data_);
     std::vector<std::string> ids;
-    std::span<const CubeMapData> data;
+    std::span<const TaggedCubeMap> data;
     UpdateAction updateAction;
 };
 } // namespace nc
