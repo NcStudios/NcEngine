@@ -5,6 +5,7 @@
 #include "Swapchain.h"
 #include "core/GpuOptions.h"
 #include "ecs/Registry.h"
+#include "graphics/PointLight.h"
 #include "renderpasses/RenderPass.h"
 #include "shaders/ShaderDescriptorSets.h"
 #include "shaders/ShaderResources.h"

@@ -5,6 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         MeshBatcher.cpp
         NcGraphicsImpl.cpp
         PerFrameRenderState.cpp
+        PointLightSystem.cpp
 )
 
 add_subdirectory(api/vulkan)

@@ -24,17 +24,19 @@ namespace
 
 namespace nc::graphics
 {
-    PerFrameRenderState::PerFrameRenderState(Registry* registry, graphics::Camera* camera, bool isPointLightSystemDirty, Environment* environment, std::span<const nc::particle::EmitterState> particleEmitters)
+    PerFrameRenderState::PerFrameRenderState(Registry* registry,
+                                             graphics::Camera* camera,
+                                             Environment* environment,
+                                             std::span<const DirectX::XMMATRIX> pointLightVPs,
+                                             std::span<const nc::particle::EmitterState> particleEmitters)
         : camViewMatrix{ camera->ViewMatrix() },
           projectionMatrix{ camera->ProjectionMatrix() },
           cameraPosition{ registry->Get<Transform>(camera->ParentEntity())->Position() },
           objectData{},
-          pointLightInfos{},
           #ifdef NC_EDITOR_ENABLED
           colliderDebugWidget{ std::nullopt },
           #endif
-          pointLightVPs{},
-          isPointLightBindRequired{ isPointLightSystemDirty },
+          pointLightVPs{pointLightVPs},
           environment{ environment },
           useSkybox{ environment->UseSkybox() },
           emitterStates{ particleEmitters }
@@ -79,41 +81,12 @@ namespace nc::graphics
 
         if (!colliderIsSelected) colliderDebugWidget = std::nullopt;
         #endif
-
-        auto pointLights = View<PointLight>{ registry };
-        pointLightVPs.reserve(pointLights.size());
-
-        for (auto& pointLight : pointLights)
-        {
-            auto* transform = registry->Get<Transform>(pointLight.ParentEntity());
-
-            pointLightVPs.push_back(pointLight.CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-
-            if (pointLight.Update(transform->Position(), pointLightVPs.back()))
-                isPointLightBindRequired = true;
-        }
-
-        if (isPointLightBindRequired)
-        {
-            pointLightInfos.reserve(pointLights.size());
-
-            for (const auto& pointLight : pointLights)
-            {
-                pointLightInfos.push_back(pointLight.GetInfo());
-            }
-        }
     }
 
     void MapPerFrameRenderState(const PerFrameRenderState& state)
     {
         OPTICK_CATEGORY("MapPerFrameRenderState", Optick::Category::Rendering);
         ShaderResourceService<ObjectData>::Get()->Update(state.objectData);
-
-        if (state.isPointLightBindRequired)
-        {
-            ShaderResourceService<PointLightInfo>::Get()->Update(state.pointLightInfos);
-        }
-
         auto dataVector = std::vector<EnvironmentData>{};
         dataVector.push_back(state.environment->Get());
         ShaderResourceService<EnvironmentData>::Get()->Update(dataVector);
