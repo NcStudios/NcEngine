@@ -1,14 +1,13 @@
 #include "MeshStorage.h"
-#include "assets/AssetData.h"
-#include "assets/AssetManagers.h"
+#include "asset/AssetData.h"
 
 namespace nc::graphics
 {
-MeshStorage::MeshStorage(GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+MeshStorage::MeshStorage(GpuAllocator* allocator, Signal<const MeshBufferData&>& onMeshUpdate)
     : m_allocator{allocator},
       m_vertexBuffer{},
       m_indexBuffer{},
-      m_onMeshUpdateConnection{gpuAccessorSignals.onMeshUpdate->Connect(this, &MeshStorage::UpdateBuffer)}
+      m_onMeshUpdateConnection{onMeshUpdate.Connect(this, &MeshStorage::UpdateBuffer)}
 {
 }
 

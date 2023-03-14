@@ -5,7 +5,6 @@
 
 namespace nc
 {
-struct GpuAccessorSignals;
 struct MeshBufferData;
 
 namespace graphics
@@ -15,7 +14,7 @@ class GpuAllocator;
 class MeshStorage
 {
     public:
-        MeshStorage(GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        MeshStorage(GpuAllocator* allocator, Signal<const MeshBufferData&>& onMeshUpdate);
 
         void UpdateBuffer(const MeshBufferData& meshBufferData);
 

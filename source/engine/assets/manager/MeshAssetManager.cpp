@@ -1,5 +1,5 @@
 #include "MeshAssetManager.h"
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
 #include "assets/AssetUtilities.h"
 
 #include "ncasset/Import.h"
@@ -135,8 +135,8 @@ bool MeshAssetManager::IsLoaded(const std::string& path) const
     return m_accessors.contains(path);
 }
 
-auto MeshAssetManager::OnUpdate() -> Signal<const MeshBufferData&>*
+auto MeshAssetManager::OnUpdate() -> Signal<const MeshBufferData&>&
 {
-    return &m_onUpdate;
+    return m_onUpdate;
 }
 } // namespace nc

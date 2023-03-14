@@ -1,5 +1,5 @@
 #include "CubeMapAssetManager.h"
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
 #include "assets/AssetUtilities.h"
 
 #include "ncasset/Import.h"
@@ -126,8 +126,8 @@ bool CubeMapAssetManager::IsLoaded(const std::string& path) const
     return m_cubeMapIds.cend() != std::ranges::find(m_cubeMapIds, path);
 }
 
-auto CubeMapAssetManager::OnUpdate() -> Signal<const CubeMapBufferData&>*
+auto CubeMapAssetManager::OnUpdate() -> Signal<const CubeMapBufferData&>&
 {
-    return &m_onUpdate;
+    return m_onUpdate;
 }
 }

@@ -24,7 +24,7 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> MeshView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const MeshBufferData&>*;
+        auto OnUpdate() -> Signal<const MeshBufferData&>&;
 
     private:
         std::vector<asset::MeshVertex> m_vertexData;

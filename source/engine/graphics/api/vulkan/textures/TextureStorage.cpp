@@ -1,17 +1,18 @@
 #include "TextureStorage.h"
 #include "TextureBuffer.h"
+#include "asset/AssetData.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/shader_resource/ShaderResourceService.h"
 
 namespace nc::graphics
 {
-TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const TextureBufferData&>& onTextureUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_textureBuffers{},
       m_sampler{graphics::CreateTextureSampler(device, vk::SamplerAddressMode::eRepeat)},
-      m_onTextureUpdate{gpuAccessorSignals.onTextureUpdate->Connect(this, &TextureStorage::UpdateBuffer)}
+      m_onTextureUpdate{onTextureUpdate.Connect(this, &TextureStorage::UpdateBuffer)}
 {
 }
 

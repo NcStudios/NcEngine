@@ -22,7 +22,7 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> TextureView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const TextureBufferData&>*;
+        auto OnUpdate() -> Signal<const TextureBufferData&>&;
 
     private:
         std::vector<TextureData> m_textureData;

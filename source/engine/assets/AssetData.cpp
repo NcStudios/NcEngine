@@ -1,4 +1,5 @@
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
+
 #include "ncutility/NcError.h"
 
 namespace nc

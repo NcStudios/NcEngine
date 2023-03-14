@@ -1,6 +1,5 @@
 #include "CubeMap.h"
-
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
 
 namespace nc::graphics
 {

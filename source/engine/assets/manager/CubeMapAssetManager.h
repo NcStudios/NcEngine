@@ -22,7 +22,7 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> CubeMapView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const CubeMapBufferData&>*;
+        auto OnUpdate() -> Signal<const CubeMapBufferData&>&;
 
     private:
         std::vector<std::string> m_cubeMapIds;

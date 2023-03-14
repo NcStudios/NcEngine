@@ -1,17 +1,20 @@
 #pragma once
 
 #include "CubeMap.h"
-#include "assets/AssetData.h"
-#include "assets/AssetManagers.h"
+#include "utility/Signal.h"
 
-namespace nc::graphics
+namespace nc
+{
+struct CubeMapBufferData;
+
+namespace graphics
 {
 class GpuAllocator;
 
 class CubeMapStorage
 {
     public:
-        CubeMapStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const CubeMapBufferData&>& onCubeMapUpdate);
 
         void UpdateBuffer(const CubeMapBufferData& cubeMapBufferData);
 
@@ -26,4 +29,5 @@ class CubeMapStorage
         vk::UniqueSampler m_sampler;
         nc::Connection<const CubeMapBufferData&> m_onCubeMapUpdate;
 };
-}
+} // namespace graphics
+} // namespace nc

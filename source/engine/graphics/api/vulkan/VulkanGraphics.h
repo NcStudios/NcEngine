@@ -10,8 +10,12 @@
 
 namespace nc
 {
-struct GpuAccessorSignals;
 class Registry;
+
+namespace asset
+{
+class NcAsset;
+} // namespace asset
 
 namespace graphics
 {
@@ -36,7 +40,7 @@ class VulkanGraphics : public IGraphics
     public:
         VulkanGraphics(const config::ProjectSettings& projectSettings,
                        const config::GraphicsSettings& graphicsSettings,
-                       const GpuAccessorSignals& gpuAccessorSignals,
+                       asset::NcAsset* assetModule,
                        uint32_t apiVersion, Registry* registry, HWND hwnd,
                        HINSTANCE hinstance, Vector2 dimensions);
 

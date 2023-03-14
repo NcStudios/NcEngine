@@ -1,12 +1,8 @@
 #pragma once
 
-#include "utility/Memory.h"
-
 #include "ncasset/Assets.h"
 
-#include <array>
 #include <cstdlib>
-#include <memory>
 #include <span>
 #include <string>
 #include <vector>

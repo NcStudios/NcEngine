@@ -10,7 +10,7 @@
 #include "core/Instance.h"
 #include "shaders/ShaderDescriptorSets.h"
 #include "shaders/ShaderResources.h"
-
+#include "asset/NcAsset.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "graphics/Camera.h"
@@ -28,7 +28,7 @@ namespace nc::graphics::vulkan
 {
 VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
-                               const GpuAccessorSignals& gpuAccessorSignals,
+                               asset::NcAsset* assetModule,
                                uint32_t apiVersion, Registry* registry, HWND hwnd,
                                HINSTANCE hinstance, Vector2 dimensions)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
@@ -38,7 +38,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings())},
-      m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), gpuAccessorSignals) },
+      m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
       m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device)},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},

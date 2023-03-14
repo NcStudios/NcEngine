@@ -1,6 +1,6 @@
 #include "NcGraphicsImpl.h"
 #include "PerFrameRenderState.h"
-#include "assets/AssetManagers.h"
+#include "asset/NcAsset.h"
 #include "config/Config.h"
 #include "ecs/View.h"
 #include "task/Job.h"
@@ -45,14 +45,14 @@ namespace nc::graphics
 {
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
-                             const GpuAccessorSignals& gpuAccessorSignals,
+                             asset::NcAsset* assetModule,
                              Registry* registry,
                              window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
         {
             NC_LOG_TRACE("Selecting Graphics API");
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, assetModule, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(registry, std::move(graphicsApi), window);

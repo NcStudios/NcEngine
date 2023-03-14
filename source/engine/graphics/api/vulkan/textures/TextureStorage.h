@@ -1,11 +1,15 @@
 #pragma once
 
-#include "assets/AssetData.h"
-#include "assets/AssetManagers.h"
+#include "utility/Signal.h"
 
+#include <vector>
 #include <vulkan/vulkan.hpp>
 
-namespace nc::graphics
+namespace nc
+{
+struct TextureBufferData;
+
+namespace graphics
 {
 class GpuAllocator;
 struct TextureBuffer;
@@ -13,7 +17,7 @@ struct TextureBuffer;
 class TextureStorage
 {
     public:
-        TextureStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const TextureBufferData&>& onTextureUpdate);
         ~TextureStorage() noexcept;
         void UpdateBuffer(const TextureBufferData& textureBufferData);
 
@@ -28,4 +32,5 @@ class TextureStorage
         vk::UniqueSampler m_sampler;
         nc::Connection<const TextureBufferData&> m_onTextureUpdate;
 };
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

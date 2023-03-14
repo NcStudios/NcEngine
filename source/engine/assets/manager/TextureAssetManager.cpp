@@ -1,5 +1,5 @@
 #include "TextureAssetManager.h"
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
 
 #include "ncasset/Import.h"
 
@@ -132,8 +132,8 @@ bool TextureAssetManager::IsLoaded(const std::string& path) const
     return (pos != m_textureData.end());
 }
 
-auto TextureAssetManager::OnUpdate() -> Signal<const TextureBufferData&>*
+auto TextureAssetManager::OnUpdate() -> Signal<const TextureBufferData&>&
 {
-    return &m_onUpdate;
+    return m_onUpdate;
 }
 } // namespace nc

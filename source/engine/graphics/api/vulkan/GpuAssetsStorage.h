@@ -1,6 +1,5 @@
 #pragma once
 
-#include "assets/AssetManagers.h"
 #include "cubemaps/CubeMapStorage.h"
 #include "textures/TextureStorage.h"
 #include "meshes/MeshStorage.h"
@@ -11,7 +10,12 @@ class GpuAllocator;
 
 struct GpuAssetsStorage
 {
-    GpuAssetsStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+    GpuAssetsStorage(vk::Device device,
+                     GpuAllocator* allocator,
+                     Signal<const CubeMapBufferData&>& onCubeMapUpdate,
+                     Signal<const MeshBufferData&>& onMeshUpdate,
+                     Signal<const TextureBufferData&>& onTextureUpdate);
+
     CubeMapStorage cubeMapStorage;
     MeshStorage meshStorage;
     TextureStorage textureStorage;
