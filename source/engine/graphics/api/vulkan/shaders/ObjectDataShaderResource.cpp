@@ -1,5 +1,6 @@
 #include "ObjectDataShaderResource.h"
 #include "graphics/api/vulkan/Initializers.h"
+#include "graphics/shader_resource/ObjectData.h"
 
 namespace nc::graphics
 {

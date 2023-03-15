@@ -73,9 +73,7 @@ void SpawnTest::Load(Registry* registry, ModuleProvider modules)
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 30.0f, 0.0f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.ambient = Vector3(0.275f, 0.27f, 0.27f),
-                                                                            .diffuseColor = Vector3(0.99f, 1.0f, 0.76f),
-                                                                            .diffuseIntensity = 1000.0f});
+    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.275f, 0.27f, 0.27f), Vector3(0.99f, 1.0f, 0.76f), 1000.0f);
 
     // Collider that destroys anything leaving its bounded area
     auto killBox = registry->Add<Entity>({.scale = Vector3::Splat(200.0f), .tag = "KillBox", .flags = Entity::Flags::Static});

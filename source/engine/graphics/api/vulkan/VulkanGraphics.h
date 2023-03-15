@@ -32,6 +32,7 @@ class Swapchain;
 class RenderGraph;
 class ShaderDescriptorSets;
 struct ShaderResources;
+struct ShaderResourceBus;
 
 namespace vulkan
 {
@@ -41,6 +42,7 @@ class VulkanGraphics : public IGraphics
         VulkanGraphics(const config::ProjectSettings& projectSettings,
                        const config::GraphicsSettings& graphicsSettings,
                        asset::NcAsset* assetModule,
+                       ShaderResourceBus& shaderResourceBus,
                        uint32_t apiVersion, Registry* registry, HWND hwnd,
                        HINSTANCE hinstance, Vector2 dimensions);
 

@@ -8,27 +8,29 @@
 #include "ShadowMapShaderResource.h"
 #include "TextureShaderResource.h"
 #include "config/Config.h"
+#include "utility/Signal.h"
 
 namespace nc::graphics
 {
+struct ShaderResourceBus;
+
 struct ShaderResources
 {
-    ShaderResources(vk::Device device, ShaderDescriptorSets* shaderDescriptorSets, GpuAllocator* allocator, const config::MemorySettings& memorySettings)
-        : objectDataShaderResource{0, allocator, shaderDescriptorSets, memorySettings.maxRenderers},
-          pointLightShaderResource{1, allocator, shaderDescriptorSets, memorySettings.maxPointLights},
-          textureShaderResource{2, shaderDescriptorSets, memorySettings.maxTextures},
-          shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
-          cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
-          environmentDataShaderResource{5, allocator, shaderDescriptorSets}
-    {
-        shaderDescriptorSets->CreateSet(BindFrequency::per_frame);
-    }
+    ShaderResources(vk::Device device,
+                    ShaderDescriptorSets* shaderDescriptorSets,
+                    GpuAllocator* allocator,
+                    const config::MemorySettings& memorySettings,
+                    ShaderResourceBus& resourceBus);
 
-    ObjectDataShaderResource objectDataShaderResource;          
-    PointLightShaderResource pointLightShaderResource;          
-    TextureShaderResource textureShaderResource;                
+    ObjectDataShaderResource objectDataShaderResource;
+    PointLightShaderResource pointLightShaderResource;
+    TextureShaderResource textureShaderResource;
     ShadowMapShaderResource shadowMapShaderResource;
-    CubeMapShaderResource cubeMapShaderResource;                
+    CubeMapShaderResource cubeMapShaderResource;
     EnvironmentDataShaderResource environmentDataShaderResource;
+
+    Connection<const std::vector<ObjectData>&> objectDataConnection;
+    Connection<const std::vector<PointLightData>&> pointLightDataConnection;
+    Connection<const EnvironmentData&> environmentDataConnection;
 };
 } // namespace nc::graphics

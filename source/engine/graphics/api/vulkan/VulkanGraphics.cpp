@@ -29,6 +29,7 @@ namespace nc::graphics::vulkan
 VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
                                asset::NcAsset* assetModule,
+                               ShaderResourceBus& shaderResourceBus,
                                uint32_t apiVersion, Registry* registry, HWND hwnd,
                                HINSTANCE hinstance, Vector2 dimensions)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
@@ -37,7 +38,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_swapchain{ std::make_unique<Swapchain>(*m_device, m_surface.get(), dimensions)},
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
-      m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings())},
+      m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
       m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
       m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device)},
@@ -91,7 +92,7 @@ void VulkanGraphics::Clear() noexcept
     m_device->VkDevice().waitIdle();
     m_lighting->Clear();
     ShaderResourceService<ObjectData>::Get()->Reset();
-    ShaderResourceService<PointLightInfo>::Get()->Reset();
+    ShaderResourceService<PointLightData>::Get()->Reset();
     ShaderResourceService<ShadowMap>::Get()->Reset();
     ShaderResourceService<EnvironmentData>::Get()->Reset();
 }
