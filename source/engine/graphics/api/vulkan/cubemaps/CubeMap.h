@@ -3,14 +3,19 @@
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "utility/Memory.h"
 
-namespace nc { struct TaggedCubeMap; }
+namespace nc
+{
+namespace asset
+{
+struct TaggedCubeMap;
+} // namespace asset
 
-namespace nc::graphics
+namespace graphics
 {
     class CubeMap
     {
         public:
-            CubeMap(vk::Device device, GpuAllocator* allocator, const TaggedCubeMap& data);
+            CubeMap(vk::Device device, GpuAllocator* allocator, const asset::TaggedCubeMap& data);
             ~CubeMap() noexcept;
             CubeMap(CubeMap&&) noexcept;
             CubeMap& operator=(CubeMap&&) noexcept;
@@ -18,7 +23,7 @@ namespace nc::graphics
             CubeMap(const CubeMap&) = delete;
 
             const vk::ImageView& GetImageView() const noexcept;
-            void Bind(const TaggedCubeMap& data);
+            void Bind(const asset::TaggedCubeMap& data);
             void Clear() noexcept;
             const std::string& GetUid() const noexcept;
 
@@ -29,4 +34,5 @@ namespace nc::graphics
             vk::UniqueImageView m_cubeMapView;
             std::string m_uid;
     };
-}
+} // namespace graphics
+} // namespace nc

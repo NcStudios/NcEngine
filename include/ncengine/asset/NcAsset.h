@@ -5,19 +5,18 @@
 
 namespace nc
 {
-struct CubeMapUpdateEventData;
-struct MeshUpdateEventData;
-struct TextureUpdateEventData;
-
 namespace config
 {
 struct AssetSettings;
 struct MemorySettings;
 } // namespace config
-}
 
-namespace nc::asset
+namespace asset
 {
+struct CubeMapUpdateEventData;
+struct MeshUpdateEventData;
+struct TextureUpdateEventData;
+
 /** @brief Asset module interface. */
 class NcAsset : public Module
 {
@@ -34,4 +33,5 @@ class NcAsset : public Module
 
 auto BuildAssetModule(const config::AssetSettings& assetSettings,
                       const config::MemorySettings& memorySettings) -> std::unique_ptr<NcAsset>;
-} // namespace nc::asset
+} // namespace asset
+} // namespace nc

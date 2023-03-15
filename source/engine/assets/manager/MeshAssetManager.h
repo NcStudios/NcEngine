@@ -10,7 +10,10 @@
 
 namespace nc
 {
+namespace asset
+{
 struct MeshUpdateEventData;
+} // namespace asset
 
 class MeshAssetManager : public IAssetService<MeshView, std::string>
 {
@@ -24,14 +27,14 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> MeshView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const MeshUpdateEventData&>&;
+        auto OnUpdate() -> Signal<const asset::MeshUpdateEventData&>&;
 
     private:
         std::vector<asset::MeshVertex> m_vertexData;
         std::vector<uint32_t> m_indexData;
         std::unordered_map<std::string, MeshView> m_accessors;
         std::string m_assetDirectory;
-        Signal<const MeshUpdateEventData&> m_onUpdate;
+        Signal<const asset::MeshUpdateEventData&> m_onUpdate;
 
         void AddMeshView(const std::string& path, bool isExternal);
 };

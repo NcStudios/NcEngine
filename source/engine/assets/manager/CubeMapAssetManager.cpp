@@ -33,12 +33,12 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    const auto data = TaggedCubeMap{asset::ImportCubeMap(fullPath), path};
+    const auto data = asset::TaggedCubeMap{asset::ImportCubeMap(fullPath), path};
     m_cubeMapIds.push_back(path);
-    m_onUpdate.Emit(CubeMapUpdateEventData{
-        UpdateAction::Load,
+    m_onUpdate.Emit(asset::CubeMapUpdateEventData{
+        asset::UpdateAction::Load,
         std::vector<std::string>{path},
-        std::span<const TaggedCubeMap>{&data, 1}
+        std::span<const asset::TaggedCubeMap>{&data, 1}
     });
 
     return true;
@@ -51,7 +51,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         throw NcError("Cannot exceed max texture count.");
     }
 
-    auto loadedCubeMaps = std::vector<TaggedCubeMap>{};
+    auto loadedCubeMaps = std::vector<asset::TaggedCubeMap>{};
     auto idsToLoad = std::vector<std::string>{};
     loadedCubeMaps.reserve(paths.size());
     idsToLoad.reserve(paths.size());
@@ -69,7 +69,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         }
 
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        loadedCubeMaps.push_back(TaggedCubeMap{asset::ImportCubeMap(fullPath), path});
+        loadedCubeMaps.push_back(asset::TaggedCubeMap{asset::ImportCubeMap(fullPath), path});
         idsToLoad.push_back(path);
         m_cubeMapIds.push_back(path);
     }
@@ -79,10 +79,10 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         return false;
     }
 
-    m_onUpdate.Emit(CubeMapUpdateEventData{
-        UpdateAction::Load,
+    m_onUpdate.Emit(asset::CubeMapUpdateEventData{
+        asset::UpdateAction::Load,
         std::move(idsToLoad),
-        std::span<const TaggedCubeMap>{loadedCubeMaps}
+        std::span<const asset::TaggedCubeMap>{loadedCubeMaps}
     });
 
     return true;
@@ -93,10 +93,12 @@ bool CubeMapAssetManager::Unload(const std::string& path)
     if (const auto pos = std::ranges::find(m_cubeMapIds, path); pos != m_cubeMapIds.cend())
     {
         m_cubeMapIds.erase(pos);
-        m_onUpdate.Emit
-        (
-            CubeMapUpdateEventData(UpdateAction::Unload, std::vector<std::string>{path}, std::span<const TaggedCubeMap>{})
-        );
+        m_onUpdate.Emit(asset::CubeMapUpdateEventData
+        {
+            asset::UpdateAction::Unload,
+            std::vector<std::string>{path},
+            std::span<const asset::TaggedCubeMap>{}
+        });
 
         return true;
     }
@@ -126,7 +128,7 @@ bool CubeMapAssetManager::IsLoaded(const std::string& path) const
     return m_cubeMapIds.cend() != std::ranges::find(m_cubeMapIds, path);
 }
 
-auto CubeMapAssetManager::OnUpdate() -> Signal<const CubeMapUpdateEventData&>&
+auto CubeMapAssetManager::OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&
 {
     return m_onUpdate;
 }

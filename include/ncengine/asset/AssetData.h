@@ -8,9 +8,9 @@
 #include <variant>
 #include <vector>
 
-namespace nc
+namespace nc::asset
 {
-/** @brief */
+/** @brief Indicates the type of an asset update event. */
 enum class UpdateAction : uint8_t
 {
     Load,
@@ -25,6 +25,7 @@ struct MeshUpdateEventData
     std::span<const uint32_t> indices;
 };
 
+/** @brief A data/id pair for a loaded texture. */
 struct TaggedTexture
 {
     asset::Texture texture;
@@ -35,11 +36,13 @@ struct TaggedTexture
 struct TextureUpdateEventData
 {
     TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedTexture> data_);
+
     std::vector<std::string> ids;
     std::span<const TaggedTexture> data;
     UpdateAction updateAction;
 };
 
+/** @brief A data/id pair for a loaded CubeMap. */
 struct TaggedCubeMap
 {
     asset::CubeMap cubeMap;
@@ -50,8 +53,9 @@ struct TaggedCubeMap
 struct CubeMapUpdateEventData
 {
     CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedCubeMap> data_);
+
     std::vector<std::string> ids;
     std::span<const TaggedCubeMap> data;
     UpdateAction updateAction;
 };
-} // namespace nc
+} // namespace nc::asset

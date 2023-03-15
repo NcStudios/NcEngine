@@ -2,7 +2,7 @@
 
 #include "ncutility/NcError.h"
 
-namespace nc
+namespace nc::asset
 {
 TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedTexture> data_)
     : ids{std::move(ids_)},
@@ -35,4 +35,4 @@ CubeMapUpdateEventData::CubeMapUpdateEventData(UpdateAction updateAction_, std::
         throw NcError("Cannot unload skybox. No ID was provided.");
     }
 }
-} // namespace nc
+} // namespace nc::asset

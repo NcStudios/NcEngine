@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const TextureUpdateEventData&>& onTextureUpdate)
+TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::TextureUpdateEventData&>& onTextureUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_textureBuffers{},
@@ -26,21 +26,21 @@ TextureStorage::~TextureStorage() noexcept
     m_textureBuffers.clear();
 }
 
-void TextureStorage::UpdateBuffer(const TextureUpdateEventData& eventData)
+void TextureStorage::UpdateBuffer(const asset::TextureUpdateEventData& eventData)
 {
     switch (eventData.updateAction)
     {
-        case UpdateAction::Load:
+        case asset::UpdateAction::Load:
         {
             LoadTextureBuffer(eventData);
             break;
         }
-        case UpdateAction::Unload:
+        case asset::UpdateAction::Unload:
         {
             UnloadTextureBuffer(eventData);
             break;
         }
-        case UpdateAction::UnloadAll:
+        case asset::UpdateAction::UnloadAll:
         {
             UnloadAllTextureBuffer();
             break;
@@ -48,7 +48,7 @@ void TextureStorage::UpdateBuffer(const TextureUpdateEventData& eventData)
     }
 }
 
-void TextureStorage::LoadTextureBuffer(const TextureUpdateEventData& eventData)
+void TextureStorage::LoadTextureBuffer(const asset::TextureUpdateEventData& eventData)
 {
     for (auto i = 0ull; i < eventData.ids.size(); ++i)
     {
@@ -68,7 +68,7 @@ void TextureStorage::LoadTextureBuffer(const TextureUpdateEventData& eventData)
     graphics::ShaderResourceService<graphics::TextureBuffer>::Get()->Update(m_textureBuffers);
 }
 
-void TextureStorage::UnloadTextureBuffer(const TextureUpdateEventData& eventData)
+void TextureStorage::UnloadTextureBuffer(const asset::TextureUpdateEventData& eventData)
 {
     const auto& id = eventData.ids[0];
     auto pos = std::ranges::find_if(m_textureBuffers, [&id](const auto& texture)

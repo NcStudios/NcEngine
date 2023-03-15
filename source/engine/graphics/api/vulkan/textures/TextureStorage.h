@@ -7,7 +7,10 @@
 
 namespace nc
 {
+namespace asset
+{
 struct TextureUpdateEventData;
+} // namespace asset
 
 namespace graphics
 {
@@ -17,20 +20,21 @@ struct TextureBuffer;
 class TextureStorage
 {
     public:
-        TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const TextureUpdateEventData&>& onTextureUpdate);
+        TextureStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::TextureUpdateEventData&>& onTextureUpdate);
         ~TextureStorage() noexcept;
-        void UpdateBuffer(const TextureUpdateEventData& eventData);
+
+        void UpdateBuffer(const asset::TextureUpdateEventData& eventData);
 
     private:
-        void LoadTextureBuffer(const TextureUpdateEventData& eventData);
-        void UnloadTextureBuffer(const TextureUpdateEventData& eventData);
+        void LoadTextureBuffer(const asset::TextureUpdateEventData& eventData);
+        void UnloadTextureBuffer(const asset::TextureUpdateEventData& eventData);
         void UnloadAllTextureBuffer();
 
         vk::Device m_device;
         GpuAllocator* m_allocator;
         std::vector<TextureBuffer> m_textureBuffers;
         vk::UniqueSampler m_sampler;
-        nc::Connection<const TextureUpdateEventData&> m_onTextureUpdate;
+        nc::Connection<const asset::TextureUpdateEventData&> m_onTextureUpdate;
 };
 } // namespace graphics
 } // namespace nc

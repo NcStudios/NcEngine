@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const CubeMapUpdateEventData&>& onCubeMapUpdate)
+CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_cubeMaps{},
@@ -15,21 +15,21 @@ CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signa
 {
 }
 
-void CubeMapStorage::UpdateBuffer(const CubeMapUpdateEventData& eventData)
+void CubeMapStorage::UpdateBuffer(const asset::CubeMapUpdateEventData& eventData)
 {
     switch (eventData.updateAction)
     {
-        case UpdateAction::Load:
+        case asset::UpdateAction::Load:
         {
             LoadCubeMapBuffer(eventData);
             break;
         }
-        case UpdateAction::Unload:
+        case asset::UpdateAction::Unload:
         {
             UnloadCubeMapBuffer(eventData);
             break;
         }
-        case UpdateAction::UnloadAll:
+        case asset::UpdateAction::UnloadAll:
         {
             UnloadAllCubeMapBuffer();
             break;
@@ -37,7 +37,7 @@ void CubeMapStorage::UpdateBuffer(const CubeMapUpdateEventData& eventData)
     }
 }
 
-void CubeMapStorage::LoadCubeMapBuffer(const CubeMapUpdateEventData& eventData)
+void CubeMapStorage::LoadCubeMapBuffer(const asset::CubeMapUpdateEventData& eventData)
 {
     for (auto i = 0u; i < eventData.ids.size(); ++i)
     {
@@ -48,7 +48,7 @@ void CubeMapStorage::LoadCubeMapBuffer(const CubeMapUpdateEventData& eventData)
     graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
 }
 
-void CubeMapStorage::UnloadCubeMapBuffer(const CubeMapUpdateEventData& eventData)
+void CubeMapStorage::UnloadCubeMapBuffer(const asset::CubeMapUpdateEventData& eventData)
 {
     const auto& id = eventData.ids[0];
     auto pos = std::ranges::find_if(m_cubeMaps, [&id](const auto& cubeMap)
