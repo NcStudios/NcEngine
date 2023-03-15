@@ -5,7 +5,7 @@
 #include "optick/optick.h"
 #include <algorithm>
 
-namespace nc::ecs
+namespace nc::graphics
 {
     ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, std::function<nc::graphics::Camera* ()> getCamera)
         : m_emitterStates{},
@@ -101,4 +101,4 @@ namespace nc::ecs
         m_toRemove.clear();
         m_toRemove.shrink_to_fit();
     }
-} // namespace nc::ecs
+} // namespace nc::graphics

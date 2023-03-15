@@ -23,6 +23,7 @@ class WindowImpl;
 namespace graphics
 {
 struct PerFrameRenderState;
+struct ShaderResourceBus;
 
 class IGraphics
 {
@@ -40,6 +41,7 @@ class IGraphics
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
                      const GpuAccessorSignals& signals,
+                     ShaderResourceBus& shaderResourceBus,
                      Registry* registry,
                      window::WindowImpl* window) -> std::unique_ptr<IGraphics>;
 } // namespace graphics

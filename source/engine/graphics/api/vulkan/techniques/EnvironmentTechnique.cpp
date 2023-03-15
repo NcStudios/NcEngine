@@ -92,7 +92,7 @@ EnvironmentTechnique::~EnvironmentTechnique() noexcept
 
 bool EnvironmentTechnique::CanBind(const PerFrameRenderState& frameData)
 {
-    return frameData.useSkybox;
+    return frameData.environmentState.useSkybox;
 }
 
 void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
@@ -104,19 +104,29 @@ void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
 
 bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)
 {
-    return frameData.useSkybox;
+    return frameData.environmentState.useSkybox;
 }
 
 void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
 {
     OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
-    const auto objectCount = static_cast<uint32_t>(frameData.objectData.size());
-    if (objectCount == 0) return;
+    if (!frameData.environmentState.useSkybox)
+    {
+        return;
+    }
+
     const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(SkyboxMeshPath);
-    cmd->drawIndexed(meshAccessor.indexCount, 1u, meshAccessor.firstIndex, meshAccessor.firstVertex, objectCount - 1); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+    cmd->drawIndexed
+    (
+        meshAccessor.indexCount,                          // indexCount
+        1u,                                               // instanceCount
+        meshAccessor.firstIndex,                          // firstIndex
+        meshAccessor.firstVertex,                         // vertexOffset
+        frameData.objectState.skyboxInstanceIndex.value() // firstInstance
+    );
 }
 
 void EnvironmentTechnique::Clear() noexcept
 {
 }
-}
+} // namespace nc::graphics

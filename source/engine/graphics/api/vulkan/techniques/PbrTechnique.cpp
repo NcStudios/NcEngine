@@ -112,7 +112,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("PbrTechnique::Record", Optick::Category::Rendering);
         uint32_t objectInstance = 0;
-        for (const auto& mesh : frameData.meshes)
+        for (const auto& mesh : frameData.objectState.meshes)
         {
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             ++objectInstance;

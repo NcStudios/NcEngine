@@ -87,7 +87,6 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
 
 add_subdirectory(audio)
 add_subdirectory(assets)
-add_subdirectory(camera)
 add_subdirectory(config)
 add_subdirectory(debug)
 add_subdirectory(ecs)

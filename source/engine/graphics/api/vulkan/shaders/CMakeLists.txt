@@ -5,6 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         ObjectDataShaderResource.cpp
         PointLightShaderResource.cpp
         ShaderDescriptorSets.cpp
+        ShaderResources.cpp
         ShaderUtilities.cpp
         ShadowMapShaderResource.cpp
         TextureShaderResource.cpp

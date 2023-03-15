@@ -3,7 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         LogicModule.cpp
         Component.cpp
         FreeComponentGroup.cpp
-        ParticleEmitterSystem.cpp
         Registry.cpp
         SoA.cpp
         Transform.cpp

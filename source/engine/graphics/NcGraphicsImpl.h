@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Environment.h"
 #include "IGraphics.h"
-#include "PointLightSystem.h"
-#include "camera/MainCamera.h"
-#include "ecs/ParticleEmitterSystem.h"
 #include "graphics/NcGraphics.h"
+#include "system/CameraSystem.h"
+#include "system/EnvironmentSystem.h"
+#include "system/ObjectSystem.h"
+#include "system/ParticleEmitterSystem.h"
+#include "system/PointLightSystem.h"
+#include "system/WidgetSystem.h"
 #include "ui/UISystemImpl.h"
 
 #include <memory>
@@ -27,6 +29,8 @@ class WindowImpl;
 
 namespace graphics
 {
+struct ShaderResourceBus;
+
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
@@ -40,6 +44,7 @@ class NcGraphicsImpl : public NcGraphics
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                        Registry* registry,
                        std::unique_ptr<IGraphics> graphics,
+                       ShaderResourceBus&& shaderResourceBus,
                        window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
@@ -56,12 +61,14 @@ class NcGraphicsImpl : public NcGraphics
 
     private:
         Registry* m_registry;
-        camera::MainCamera m_camera;
         std::unique_ptr<IGraphics> m_graphics;
         ui::UISystemImpl m_ui;
-        Environment m_environment;
+        CameraSystem m_cameraSystem;
+        EnvironmentSystem m_environmentSystem;
+        ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
-        ecs::ParticleEmitterSystem m_particleEmitterSystem;
+        ParticleEmitterSystem m_particleEmitterSystem;
+        WidgetSystem m_widgetSystem;
     };
 } // namespace graphics
 } // namespace nc
