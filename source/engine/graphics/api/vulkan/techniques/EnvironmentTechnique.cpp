@@ -116,10 +116,17 @@ void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderSt
     }
 
     const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(SkyboxMeshPath);
-    cmd->drawIndexed(meshAccessor.indexCount, 1u, meshAccessor.firstIndex, meshAccessor.firstVertex, frameData.objectState.skyboxInstanceIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+    cmd->drawIndexed
+    (
+        meshAccessor.indexCount,                          // indexCount
+        1u,                                               // instanceCount
+        meshAccessor.firstIndex,                          // firstIndex
+        meshAccessor.firstVertex,                         // vertexOffset
+        frameData.objectState.skyboxInstanceIndex.value() // firstInstance
+    );
 }
 
 void EnvironmentTechnique::Clear() noexcept
 {
 }
-}
+} // namespace nc::graphics

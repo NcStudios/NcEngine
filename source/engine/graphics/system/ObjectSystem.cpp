@@ -40,7 +40,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> gameState,
             continue;
         }
 
-        const auto [base, normal, roughness, metallic] = renderer->GetTextureIndices();
+        const auto& [base, normal, roughness, metallic] = renderer->GetTextureIndices();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index);
         frontendState.meshes.push_back(renderer->GetMesh());
     }

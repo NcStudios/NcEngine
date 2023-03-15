@@ -6,6 +6,7 @@
 #include "graphics/MeshRenderer.h"
 #include "utility/Signal.h"
 
+#include <optional>
 #include <vector>
 
 namespace nc::graphics
@@ -17,8 +18,7 @@ struct ObjectData;
 struct ObjectState
 {
     std::vector<MeshView> meshes;
-    // optional?
-    uint32_t skyboxInstanceIndex;
+    std::optional<uint32_t> skyboxInstanceIndex = std::nullopt;
 };
 
 class ObjectSystem
