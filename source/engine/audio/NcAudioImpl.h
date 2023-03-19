@@ -1,8 +1,8 @@
 #pragma once
 
+#include "DeviceStream.h"
 #include "audio/NcAudio.h"
 #include "ecs/Registry.h"
-#include "rtaudio/RtAudio.h"
 #include "task/Job.h"
 
 #include <mutex>
@@ -23,20 +23,23 @@ class NcAudioImpl final : public NcAudio
         ~NcAudioImpl() noexcept;
 
         void RegisterListener(Entity listener) noexcept override;
+        auto EnumerateOutputDevices() noexcept -> std::vector<AudioDevice> override;
+        auto GetOutputDevice() const noexcept -> const AudioDevice& override;
+        auto SetOutputDevice(uint32_t deviceId) noexcept -> bool override;
+
         auto BuildWorkload() -> std::vector<task::Job> override;
         void Clear() noexcept override;
         void Run();
         auto WriteToDeviceBuffer(double* output) -> int;
-        auto ProbeDevices() -> std::vector<RtAudio::DeviceInfo>;
 
     private:
         Registry* m_registry;
-        RtAudio m_rtAudio;
+        std::vector<double> m_bufferMemory;
         std::queue<std::span<double>> m_readyBuffers;
         std::queue<std::span<double>> m_staleBuffers;
-        std::vector<double> m_bufferMemory;
         std::mutex m_readyMutex;
         std::mutex m_staleMutex;
+        DeviceStream m_deviceStream;
         Entity m_listener;
 
         void MixToBuffer(double* buffer);

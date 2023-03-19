@@ -17,7 +17,19 @@ constexpr unsigned BufferFrames = 256u;
 constexpr unsigned BufferLength = BufferFrames * OutputChannelCount;
 constexpr unsigned BufferSizeInBytes = BufferLength * sizeof(double);
 
-int AudioSystemCallback(void* outputBuffer, void*, [[maybe_unused]] unsigned nBufferFrames, double, RtAudioStreamStatus status, void* userData)
+auto BuildBufferQueue(std::span<double> bufferPool) -> std::queue<std::span<double>>
+{
+    auto queue = std::queue<std::span<double>>{};
+    for(auto i = 0ull; i < BufferCount; ++i)
+    {
+        auto begin = bufferPool.begin() + i * BufferLength;
+        queue.emplace(begin, BufferLength);
+    }
+
+    return queue;
+}
+
+int AudioSystemCallback(void* outputBuffer, void*, [[maybe_unused]] unsigned nBufferFrames, double, unsigned status, void* userData)
 {
     assert(nBufferFrames == BufferFrames);
 
@@ -31,7 +43,12 @@ int AudioSystemCallback(void* outputBuffer, void*, [[maybe_unused]] unsigned nBu
 
 struct NcAudioStub : public nc::audio::NcAudio
 {
-    void RegisterListener(nc::Entity) noexcept override {}
+    nc::audio::AudioDevice nullDevice{"NoDevice", nc::audio::InvalidDeviceId};
+
+    void RegisterListener(nc::Entity) noexcept override{}
+    auto EnumerateOutputDevices() noexcept -> std::vector<nc::audio::AudioDevice> override { return {}; }
+    auto GetOutputDevice() const noexcept -> const nc::audio::AudioDevice& override { return nullDevice; }
+    auto SetOutputDevice(uint32_t) noexcept -> bool override { return false; }
     auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
     void Clear() noexcept override {}
 };
@@ -53,77 +70,19 @@ auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> s
 
 NcAudioImpl::NcAudioImpl(Registry* registry)
     : m_registry{registry},
-        m_rtAudio{},
-        m_readyBuffers{},
-        m_staleBuffers{},
-        m_bufferMemory(BufferLength * BufferCount, 0.0),
-        m_readyMutex{},
-        m_staleMutex{},
-        m_listener{Entity::Null()}
+      m_bufferMemory(BufferLength * BufferCount, 0.0),
+      m_readyBuffers{},
+      m_staleBuffers{::BuildBufferQueue(m_bufferMemory)},
+      m_readyMutex{},
+      m_staleMutex{},
+      m_deviceStream{0u, ::AudioSystemCallback, static_cast<void*>(this)},
+      m_listener{Entity::Null()}
 {
-    for(size_t i = 0u; i < BufferCount; ++i)
-    {
-        auto begin = m_bufferMemory.begin() + i * BufferLength;
-        m_staleBuffers.emplace(begin, BufferLength);
-    }
-
-    /** @todo initializing RtAudio needs to be more robust
-     *  -should have a way to select different devices
-     *  -buffer frames should be in config
-     *  -sample rate/channels/etc should be verified for the selected device */
-
-    m_rtAudio.showWarnings(true);
-    unsigned devices = m_rtAudio.getDeviceCount();
-    if(devices < 1)
-    {
-        throw NcError("No audio devices found");
-    }
-
-    RtAudio::StreamParameters parameters
-    {
-        .deviceId = m_rtAudio.getDefaultOutputDevice(),
-        .nChannels = OutputChannelCount,
-        .firstChannel = 0
-    };
-
-    unsigned bufferFrames = BufferFrames;
-
-    try
-    {
-        m_rtAudio.openStream(&parameters,
-                                nullptr,
-                                RTAUDIO_FLOAT64,
-                                SampleRate,
-                                &bufferFrames,
-                                AudioSystemCallback,
-                                static_cast<void*>(this));
-        m_rtAudio.startStream();
-    }
-    catch(const RtAudioError& e)
-    {
-        e.printMessage();
-        throw NcError("Failure starting audio stream");
-    }
-
-    if(bufferFrames != BufferFrames)
-        throw NcError("Invalid number of buffer frames specified");
 }
 
 NcAudioImpl::~NcAudioImpl() noexcept
 {
     Clear();
-
-    try
-    {
-        m_rtAudio.stopStream();
-    }
-    catch(const RtAudioError& e)
-    {
-        e.printMessage();
-    }
-
-    if(m_rtAudio.isStreamOpen())
-        m_rtAudio.closeStream();
 }
 
 void NcAudioImpl::Clear() noexcept
@@ -151,6 +110,21 @@ void NcAudioImpl::RegisterListener(Entity listener) noexcept
 {
     NC_LOG_TRACE_FMT("Registering audio listener: {}", listener.Index());
     m_listener = listener;
+}
+
+auto NcAudioImpl::EnumerateOutputDevices() noexcept -> std::vector<AudioDevice>
+{
+    return m_deviceStream.EnumerateDevices();
+}
+
+auto NcAudioImpl::GetOutputDevice() const noexcept -> const AudioDevice&
+{
+    return m_deviceStream.GetDevice();
+}
+
+auto NcAudioImpl::SetOutputDevice(uint32_t deviceId) noexcept -> bool
+{
+    return m_deviceStream.OpenStream(deviceId, ::AudioSystemCallback, static_cast<void*>(this));
 }
 
 int NcAudioImpl::WriteToDeviceBuffer(double* output)
@@ -234,25 +208,5 @@ void NcAudioImpl::MixToBuffer(double* buffer)
             source.WriteNonSpatialSamples(buffer, BufferFrames);
         }
     }
-}
-
-auto NcAudioImpl::ProbeDevices() -> std::vector<RtAudio::DeviceInfo>
-{
-    unsigned deviceCount = m_rtAudio.getDeviceCount();
-    std::vector<RtAudio::DeviceInfo> out;
-    for(unsigned i = 0u; i < deviceCount; ++i)
-    {
-        try
-        {
-            out.push_back(m_rtAudio.getDeviceInfo(i));
-        }
-        catch(const RtAudioError& e)
-        {
-            e.printMessage();
-            break;
-        }
-    }
-
-    return out;
 }
 } // namespace nc::audio
