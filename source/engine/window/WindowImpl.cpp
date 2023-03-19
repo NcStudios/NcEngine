@@ -180,40 +180,66 @@ namespace nc::window
     void WindowImpl::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods)
     {
         using namespace nc::input;
-        ButtonCode_t mouseButton;
-        ImGuiIO& io = ImGui::GetIO();
 
-        if (button == GLFW_MOUSE_BUTTON_LEFT)
+        // TODO: could have more than 3 mouse buttons
+        static constexpr auto mouseLUT = std::array<ButtonCode_t, 3>
         {
-            mouseButton = (ButtonCode_t)MouseCode::LeftButton;
-        }
-        else if (button == GLFW_MOUSE_BUTTON_RIGHT)
-        {
-            mouseButton = (ButtonCode_t)MouseCode::RightButton;
-        }
-        else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
-        {
-            mouseButton = (ButtonCode_t)MouseCode::MiddleButton;
-        }
-        else
-        {
-            throw NcError(std::string{"Invalid mouse button pressed."});
-        }
+            (ButtonCode_t)KeyCode::LeftButton,
+            (ButtonCode_t)KeyCode::RightButton,
+            (ButtonCode_t)KeyCode::MiddleButton
+        };
 
-        if (action == GLFW_PRESS)
-        {
-            AddMouseButtonDownToQueue((ButtonCode_t)mouseButton, action);
-            io.MouseClicked[(ButtonCode_t)mouseButton] = true;
-        }
-        else if (action == GLFW_RELEASE)
-        {
-            AddMouseButtonUpToQueue((ButtonCode_t)mouseButton, action);
-            io.MouseReleased[(ButtonCode_t)mouseButton] = true;
-        }
-        else
-        {
-            throw NcError(std::string{"Invalid mouse button action selected."});
-        }
+
+        const auto mouseButton = mouseLUT.at(button);
+        // ImGuiIO& io = ImGui::GetIO();
+
+        AddKeyToQueue(mouseButton, action);
+
+
+        // if (action == GLFW_PRESS)
+        // {
+        //     io.MouseClicked[mouseButton] = true;
+        // }
+        // else if (action == GLFW_RELEASE)
+        // {
+        //     io.MouseReleased[mouseButton] = true;
+        // }
+        // else
+        // {
+        //     throw NcError(std::string{"Invalid mouse button action selected."});
+        // }
+
+        // if (button == GLFW_MOUSE_BUTTON_LEFT)
+        // {
+        //     mouseButton = (ButtonCode_t)MouseCode::LeftButton;
+        // }
+        // else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+        // {
+        //     mouseButton = (ButtonCode_t)MouseCode::RightButton;
+        // }
+        // else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+        // {
+        //     mouseButton = (ButtonCode_t)MouseCode::MiddleButton;
+        // }
+        // else
+        // {
+        //     throw NcError(std::string{"Invalid mouse button pressed."});
+        // }
+
+        // if (action == GLFW_PRESS)
+        // {
+        //     AddMouseButtonDownToQueue((ButtonCode_t)mouseButton, action);
+        //     io.MouseClicked[(ButtonCode_t)mouseButton] = true;
+        // }
+        // else if (action == GLFW_RELEASE)
+        // {
+        //     AddMouseButtonUpToQueue((ButtonCode_t)mouseButton, action);
+        //     io.MouseReleased[(ButtonCode_t)mouseButton] = true;
+        // }
+        // else
+        // {
+        //     throw NcError(std::string{"Invalid mouse button action selected."});
+        // }
     }
 
     void WindowImpl::ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset)

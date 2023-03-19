@@ -2,13 +2,15 @@
 #include "input/Input.h"
 #include "graphics/SceneNavigationCamera.h"
 
+#include <iostream>
+
 namespace
 {
 struct Button
 {
-    static constexpr auto Pan = nc::input::MouseCode::MiddleButton;
-    static constexpr auto Zoom = nc::input::MouseCode::MouseWheel;
-    static constexpr auto Look = nc::input::MouseCode::RightButton;
+    static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
+    static constexpr auto Zoom = nc::input::KeyCode::MouseWheel;
+    static constexpr auto Look = nc::input::KeyCode::RightButton;
     static constexpr auto Speed = nc::input::KeyCode::Shift;
 };
 } // anonymous namespace
@@ -43,25 +45,25 @@ void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 
 auto SceneNavigationCamera::HandlePanInput() -> bool
 {
-    if(MouseDown(Button::Pan))
+    if(KeyDown(Button::Pan))
     {
         m_slideReference = input::MousePos();
         m_unitsTraveled = 0.0f;
         return false;
     }
 
-    return MouseHeld(Button::Pan);
+    return KeyHeld(Button::Pan);
 }
 
 auto SceneNavigationCamera::HandleLookInput() -> bool
 {
-    if(MouseDown(Button::Look))
+    if(KeyDown(Button::Look))
     {
         m_pivotReference = input::MousePos();
         return false;
     }
 
-    return MouseDown(Button::Look);
+    return KeyDown(Button::Look);
 }
 
 auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3

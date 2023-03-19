@@ -6,14 +6,37 @@
 #include <windowsx.h>
 #include "GLFW/glfw3.h"
 
+#include <unordered_map>
+#include <iostream>
+
+namespace
+{
+enum class KeyState
+{
+    None,
+    Pressed,
+    Held,
+    Released
+};
+
+auto ToKeyState(int action)
+{
+    switch(action)
+    {
+        case GLFW_PRESS: return KeyState::Pressed;
+        case GLFW_RELEASE: return KeyState::Released;
+        default: return KeyState::None;
+    }
+}
+}
+
+
+
 namespace nc::input
 {
     struct
     {
-        std::vector<InputItem> downKeys = {};
-        std::vector<InputItem> upKeys = {};
-        std::vector<InputItem> downMouseButtons = {};
-        std::vector<InputItem> upMouseButtons = {};
+        std::unordered_map<KeyCode, KeyState> keyStates = {};
         uint32_t mouseX = 0u;
         uint32_t mouseY = 0u;
         int32_t mouseWheel = 0;
@@ -46,56 +69,19 @@ namespace nc::input
         return Vector2(GetXAxis(), GetYAxis());
     }
 
-    bool MouseDown(MouseCode mouseCode)
-    {
-        auto beg = g_state.downMouseButtons.cbegin();
-        auto end = g_state.downMouseButtons.cend();
-        return end != std::ranges::find_if(beg, end, [mouseCode](const auto& item)
-        {
-            return item.buttonCode == static_cast<ButtonCode_t>(mouseCode);
-        });
-    }
-
-    bool MouseUp(MouseCode mouseCode)
-    {
-        auto beg = g_state.upMouseButtons.cbegin();
-        auto end = g_state.upMouseButtons.cend();
-        return end != std::find_if(beg, end, [mouseCode](const auto& item)
-        {
-            return item.buttonCode == static_cast<ButtonCode_t>(mouseCode);
-        });
-    }
-
-    bool MouseHeld(MouseCode mouseCode)
-    {
-        auto state =  glfwGetMouseButton(g_state.window, (ButtonCode_t)mouseCode);
-        return state == GLFW_PRESS && MouseDown(mouseCode); // Was pressed last frame and is still pressed
-    }
-
     bool KeyDown(KeyCode keyCode)
     {
-        auto beg = g_state.downKeys.cbegin();
-        auto end = g_state.downKeys.cend();
-        return end != std::ranges::find_if(beg, end, [keyCode](const auto& item)
-        {
-            return item.buttonCode == static_cast<ButtonCode_t>(keyCode);
-        });
+        return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Pressed;
     }
 
     bool KeyUp(KeyCode keyCode)
     {
-        auto beg = g_state.upKeys.cbegin();
-        auto end = g_state.upKeys.cend();
-        return end != std::find_if(beg, end, [keyCode](const auto& item)
-        {
-            return item.buttonCode == static_cast<ButtonCode_t>(keyCode);
-        });
+        return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Released;
     }
 
     bool KeyHeld(KeyCode keyCode)
     {
-        auto state =  glfwGetKey(g_state.window, (ButtonCode_t)keyCode);
-        return state == GLFW_PRESS && KeyDown(keyCode); // Was pressed last frame and is still pressed
+        return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Held;
     }
 
     void SetMouseWheel(int xOffset, int yOffset)
@@ -110,32 +96,42 @@ namespace nc::input
 
     void AddKeyToQueue(ButtonCode_t keyCode, int action)
     {
-        if (action == GLFW_RELEASE)
-        {
-            g_state.upKeys.emplace_back(keyCode, action);
-        }
-        else if (action == GLFW_PRESS)
-        {
-            g_state.downKeys.emplace_back(keyCode, action);
-        }
-    }
-
-    void AddMouseButtonDownToQueue(ButtonCode_t keyCode, int action)
-    {
-        g_state.downMouseButtons.emplace_back(keyCode, action);
-    }
-
-    void AddMouseButtonUpToQueue(ButtonCode_t keyCode, int action)
-    {
-        g_state.upMouseButtons.emplace_back(keyCode, action);
+        g_state.keyStates[static_cast<KeyCode>(keyCode)] = ::ToKeyState(action);
     }
 
     void Flush()
     {
-        g_state.upMouseButtons.clear();
-        g_state.downMouseButtons.clear();
-        g_state.downKeys.clear();
-        g_state.upKeys.clear();
+        // for (auto cur = beg; cur != end; )
+        // {
+        //     if (cur->second == KeyState::Pressed)
+        //     {
+        //         cur->second = KeyState::Held;
+        //         ++cur;
+        //     }
+        //     else if (cur->second == KeyState::Released)
+        //     {
+        //         cur = g_state.keyStates.erase(cur);
+        //     }
+        // }
+
+
+        for (auto& [key, state] : g_state.keyStates)
+        {
+            if (state == KeyState::Pressed)
+            {
+                state = KeyState::Held;
+            }
+            else if (state == KeyState::Released)
+            {
+                state = KeyState::None;
+            }
+        }
+
+        std::erase_if(g_state.keyStates, [](const auto& item)
+        {
+            return item.second == KeyState::None;
+        });
+
         ResetMouseState();
     }
 

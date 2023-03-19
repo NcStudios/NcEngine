@@ -18,8 +18,8 @@ namespace nc::input
     void SetMouseWheel(int xOffset, int yOffset);
     void SetWindow(GLFWwindow* window);
     void AddKeyToQueue(ButtonCode_t buttonCode, int action);
-    void AddMouseButtonDownToQueue(ButtonCode_t buttonCode, int action);
-    void AddMouseButtonUpToQueue(ButtonCode_t buttonCode, int action);
+    // void AddMouseButtonToQueue(ButtonCode_t buttonCode, int action);
+    // void AddMouseButtonUpToQueue(ButtonCode_t buttonCode, int action);
     void ResetMouseState();
     void Flush();
 }

@@ -210,7 +210,7 @@ namespace nc::sample
 
     void ClickHandler::Run(Entity, Registry*, float)
     {
-        if(MouseDown(input::MouseCode::LeftButton))
+        if(KeyDown(input::KeyCode::LeftButton))
         {
             auto hit = m_physicsModule->RaycastToClickables(m_mask);
             if(hit)
