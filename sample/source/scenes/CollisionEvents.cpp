@@ -54,6 +54,9 @@ CollisionEvents::CollisionEvents(SampleUI* ui)
 
 void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
 {
+    // Setup
+    prefab::InitializeResources();
+
     auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
     registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.pos = Vector3::Zero(),
                                                         .ambient = Vector3{0.443f, 0.412f, 0.412f},

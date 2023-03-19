@@ -13,6 +13,11 @@
 namespace
 {
     nc::window::WindowImpl* g_instance = nullptr;
+
+    void PrintGlfwErrorCallback(int error, const char* description)
+    {
+        std::cerr << "GLFW error: " << error << " description: "<< description << std::endl;
+    }
 }
 
 namespace nc::window
@@ -69,6 +74,7 @@ namespace nc::window
         auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
 
         m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), nullptr, nullptr);
+        nc::input::SetWindow(m_window);
 
         if(!m_window)
         {
@@ -79,6 +85,7 @@ namespace nc::window
         glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
         glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
         glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
+        glfwSetErrorCallback(&PrintGlfwErrorCallback);
     }
 
     WindowImpl::~WindowImpl() noexcept
@@ -151,7 +158,12 @@ namespace nc::window
 
     void WindowImpl::ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        nc::input::AddKeyToQueue(static_cast<nc::input::KeyCode_t>(key), action);
+        nc::input::ButtonCode_t keyCode = static_cast<nc::input::ButtonCode_t>(key);
+        if (mods == GLFW_MOD_SHIFT) keyCode = static_cast<nc::input::ButtonCode_t>(nc::input::KeyCode::Shift);
+        else if (mods == GLFW_MOD_ALT) keyCode = static_cast<nc::input::ButtonCode_t>(nc::input::KeyCode::Alt);
+        else if (mods == GLFW_MOD_CONTROL) keyCode = static_cast<nc::input::ButtonCode_t>(nc::input::KeyCode::Ctrl);
+        
+        nc::input::AddKeyToQueue(keyCode, action);
     }
 
     void WindowImpl::ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos)
@@ -168,24 +180,20 @@ namespace nc::window
     void WindowImpl::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods)
     {
         using namespace nc::input;
-        KeyCode_t mouseButton;
-        int imguiMouseButton;
+        ButtonCode_t mouseButton;
         ImGuiIO& io = ImGui::GetIO();
 
         if (button == GLFW_MOUSE_BUTTON_LEFT)
         {
-            mouseButton = (KeyCode_t)KeyCode::LeftButton;
-            imguiMouseButton = 0;
+            mouseButton = (ButtonCode_t)MouseCode::LeftButton;
         }
         else if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
-            mouseButton = (KeyCode_t)KeyCode::RightButton;
-            imguiMouseButton = 1;
+            mouseButton = (ButtonCode_t)MouseCode::RightButton;
         }
         else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
         {
-            mouseButton = (KeyCode_t)KeyCode::MiddleButton;
-            imguiMouseButton = 2;
+            mouseButton = (ButtonCode_t)MouseCode::MiddleButton;
         }
         else
         {
@@ -194,13 +202,13 @@ namespace nc::window
 
         if (action == GLFW_PRESS)
         {
-            AddMouseButtonDownToQueue(mouseButton, action);
-            io.MouseClicked[imguiMouseButton] = true;
+            AddMouseButtonDownToQueue((ButtonCode_t)mouseButton, action);
+            io.MouseClicked[(ButtonCode_t)mouseButton] = true;
         }
         else if (action == GLFW_RELEASE)
         {
-            AddMouseButtonUpToQueue(mouseButton, action);
-            io.MouseReleased[imguiMouseButton] = true;
+            AddMouseButtonUpToQueue((ButtonCode_t)mouseButton, action);
+            io.MouseReleased[(ButtonCode_t)mouseButton] = true;
         }
         else
         {

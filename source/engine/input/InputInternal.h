@@ -8,18 +8,18 @@ namespace nc::input
 {
     struct InputItem
     {
-        KeyCode_t keyCode;
+        ButtonCode_t buttonCode;
         int action;
 
-        InputItem(KeyCode_t kCode, int kAction) : keyCode(kCode), action(kAction) {}
+        InputItem(ButtonCode_t bCode, int bAction) : buttonCode(bCode), action(bAction) {}
     };
 
     void UpdateMousePosition(int mouseX, int mouseY);
     void SetMouseWheel(int xOffset, int yOffset);
     void SetWindow(GLFWwindow* window);
-    void AddKeyToQueue(KeyCode_t keyCode, int action);
-    void AddMouseButtonDownToQueue(KeyCode_t keyCode, int action);
-    void AddMouseButtonUpToQueue(KeyCode_t keyCode, int action);
+    void AddKeyToQueue(ButtonCode_t buttonCode, int action);
+    void AddMouseButtonDownToQueue(ButtonCode_t buttonCode, int action);
+    void AddMouseButtonUpToQueue(ButtonCode_t buttonCode, int action);
     void ResetMouseState();
     void Flush();
 }

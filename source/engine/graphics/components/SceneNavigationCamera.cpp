@@ -4,11 +4,11 @@
 
 namespace
 {
-struct Key
+struct Button
 {
-    static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
-    static constexpr auto Zoom = nc::input::KeyCode::MouseWheel;
-    static constexpr auto Look = nc::input::KeyCode::RightButton;
+    static constexpr auto Pan = nc::input::MouseCode::MiddleButton;
+    static constexpr auto Zoom = nc::input::MouseCode::MouseWheel;
+    static constexpr auto Look = nc::input::MouseCode::RightButton;
     static constexpr auto Speed = nc::input::KeyCode::Shift;
 };
 } // anonymous namespace
@@ -24,7 +24,7 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity, const SceneCameraCon
 
 void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 {
-    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
+    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Button::Speed) ? m_coarseSpeed : m_fineSpeed;
     auto* transform = registry->Get<Transform>(self);
     auto translation = Dolly(dt, dollySpeed);
 
@@ -43,25 +43,25 @@ void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 
 auto SceneNavigationCamera::HandlePanInput() -> bool
 {
-    if(KeyDown(Key::Pan))
+    if(MouseDown(Button::Pan))
     {
         m_slideReference = input::MousePos();
         m_unitsTraveled = 0.0f;
         return false;
     }
 
-    return KeyHeld(Key::Pan);
+    return MouseHeld(Button::Pan);
 }
 
 auto SceneNavigationCamera::HandleLookInput() -> bool
 {
-    if(KeyDown(Key::Look))
+    if(MouseDown(Button::Look))
     {
         m_pivotReference = input::MousePos();
         return false;
     }
 
-    return KeyHeld(Key::Look);
+    return MouseDown(Button::Look);
 }
 
 auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3

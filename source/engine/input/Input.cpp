@@ -12,6 +12,8 @@ namespace nc::input
     {
         std::vector<InputItem> downKeys = {};
         std::vector<InputItem> upKeys = {};
+        std::vector<InputItem> downMouseButtons = {};
+        std::vector<InputItem> upMouseButtons = {};
         uint32_t mouseX = 0u;
         uint32_t mouseY = 0u;
         int32_t mouseWheel = 0;
@@ -44,13 +46,39 @@ namespace nc::input
         return Vector2(GetXAxis(), GetYAxis());
     }
 
+    bool MouseDown(MouseCode mouseCode)
+    {
+        auto beg = g_state.downMouseButtons.cbegin();
+        auto end = g_state.downMouseButtons.cend();
+        return end != std::ranges::find_if(beg, end, [mouseCode](const auto& item)
+        {
+            return item.buttonCode == static_cast<ButtonCode_t>(mouseCode);
+        });
+    }
+
+    bool MouseUp(MouseCode mouseCode)
+    {
+        auto beg = g_state.upMouseButtons.cbegin();
+        auto end = g_state.upMouseButtons.cend();
+        return end != std::find_if(beg, end, [mouseCode](const auto& item)
+        {
+            return item.buttonCode == static_cast<ButtonCode_t>(mouseCode);
+        });
+    }
+
+    bool MouseHeld(MouseCode mouseCode)
+    {
+        auto state =  glfwGetMouseButton(g_state.window, (ButtonCode_t)mouseCode);
+        return state == GLFW_PRESS && MouseDown(mouseCode); // Was pressed last frame and is still pressed
+    }
+
     bool KeyDown(KeyCode keyCode)
     {
         auto beg = g_state.downKeys.cbegin();
         auto end = g_state.downKeys.cend();
         return end != std::ranges::find_if(beg, end, [keyCode](const auto& item)
         {
-            return item.keyCode == static_cast<KeyCode_t>(keyCode);
+            return item.buttonCode == static_cast<ButtonCode_t>(keyCode);
         });
     }
 
@@ -60,15 +88,14 @@ namespace nc::input
         auto end = g_state.upKeys.cend();
         return end != std::find_if(beg, end, [keyCode](const auto& item)
         {
-            return item.keyCode == static_cast<KeyCode_t>(keyCode);
+            return item.buttonCode == static_cast<ButtonCode_t>(keyCode);
         });
     }
 
     bool KeyHeld(KeyCode keyCode)
     {
-        //if most significant bit is 1, key is down
-        auto state =  glfwGetKey(g_state.window, (KeyCode_t)keyCode);
-        return state == GLFW_REPEAT;
+        auto state =  glfwGetKey(g_state.window, (ButtonCode_t)keyCode);
+        return state == GLFW_PRESS && KeyDown(keyCode); // Was pressed last frame and is still pressed
     }
 
     void SetMouseWheel(int xOffset, int yOffset)
@@ -81,7 +108,7 @@ namespace nc::input
         g_state.mouseWheel = 0;
     }
 
-    void AddKeyToQueue(KeyCode_t keyCode, int action)
+    void AddKeyToQueue(ButtonCode_t keyCode, int action)
     {
         if (action == GLFW_RELEASE)
         {
@@ -93,18 +120,20 @@ namespace nc::input
         }
     }
 
-    void AddMouseButtonDownToQueue(KeyCode_t keyCode, int action)
+    void AddMouseButtonDownToQueue(ButtonCode_t keyCode, int action)
     {
-        g_state.downKeys.emplace_back(keyCode, action);
+        g_state.downMouseButtons.emplace_back(keyCode, action);
     }
 
-    void AddMouseButtonUpToQueue(KeyCode_t keyCode, int action)
+    void AddMouseButtonUpToQueue(ButtonCode_t keyCode, int action)
     {
-        g_state.upKeys.emplace_back(keyCode, action);
+        g_state.upMouseButtons.emplace_back(keyCode, action);
     }
 
     void Flush()
     {
+        g_state.upMouseButtons.clear();
+        g_state.downMouseButtons.clear();
         g_state.downKeys.clear();
         g_state.upKeys.clear();
         ResetMouseState();

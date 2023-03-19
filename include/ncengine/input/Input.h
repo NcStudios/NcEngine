@@ -6,8 +6,9 @@
 
 namespace nc::input
 {
-    using KeyCode_t = uint32_t;
-    enum class KeyCode : KeyCode_t;
+    using ButtonCode_t = uint32_t;
+    enum class KeyCode : ButtonCode_t;
+    enum class MouseCode : ButtonCode_t;
 
     auto MouseX() -> uint32_t;
     auto MouseY() -> uint32_t;
@@ -18,15 +19,16 @@ namespace nc::input
     auto GetYAxis() -> float;  // GetKey W & S; returns -1, 0, 1
     auto GetAxis() -> Vector2; // WASD results as a pair
 
+    auto MouseDown(MouseCode mouseCode) -> bool; // true when mouse is first clicked
+    auto MouseUp(MouseCode mouseCode) -> bool; // true when mouse is released
+    auto MouseHeld(MouseCode mouseCode) -> bool; // true while mouse is held
     auto KeyDown(KeyCode keyCode) -> bool; // true when key is first pressed
     auto KeyUp(KeyCode keyCode) -> bool;   // true when key is released
     auto KeyHeld(KeyCode keyCode) -> bool; // true while key is held
 
     // See https://www.glfw.org/docs/3.3/group__keys.html
-    enum class KeyCode : KeyCode_t
+    enum class KeyCode : ButtonCode_t
     {
-        LeftButton = 1, RightButton = 2, MiddleButton = 4, MouseWheel = 7,
-
         Zero = 48, One = 49, Two   = 50, Three = 51, Four = 52,
         Five = 53, Six = 54, Seven = 55, Eight = 56, Nine = 57,
 
@@ -43,9 +45,9 @@ namespace nc::input
 
         LeftArrow = 263, UpArrow = 265, RightArrow = 262, DownArrow = 264,
 
-        Shift = 100000, LeftShift = 340, RightShift = 344, /* @todo Mod stuff for shift, ctrl and alt  */
-        Ctrl  = 100000, LeftCtrl  = 341, RightCtrl  = 345,
-        Alt   = 100000, LeftAlt   = 342, RightAlt   = 346,
+        Shift = 336, LeftShift = 340, RightShift = 344,
+        Ctrl  = 337, LeftCtrl  = 341, RightCtrl  = 345,
+        Alt   = 338, LeftAlt   = 342, RightAlt   = 346,
 
         Space = 32,
         Escape = 256,
@@ -54,5 +56,10 @@ namespace nc::input
         Tab = 258,
         Tilde = 96,
         CapsLock = 280,
+    };
+
+    enum class MouseCode : ButtonCode_t
+    {
+        LeftButton = 1, RightButton = 2, MiddleButton = 3, MouseWheel = 7
     };
 } //end namespace nc::input
