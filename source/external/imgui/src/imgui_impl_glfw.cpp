@@ -261,11 +261,7 @@ static void ImGui_ImplGlfw_UpdateMousePosAndButtons()
     // Update mouse position
     const ImVec2 mouse_pos_backup = io.MousePos;
     io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-#ifdef __EMSCRIPTEN__
     const bool focused = true; // Emscripten
-#else
-    const bool focused = glfwGetWindowAttrib(g_Window, GLFW_FOCUSED) != 0;
-#endif
     if (focused)
     {
         if (io.WantSetMousePos)

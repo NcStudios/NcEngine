@@ -81,10 +81,10 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
     m_lighting->Resize(dimensions);
 }
 
-void VulkanGraphics::OnResize(float width, float height, const WPARAM windowArg)
+void VulkanGraphics::OnResize(float width, float height, bool isMinimized)
 {
     m_dimensions = Vector2{ width, height };
-    m_isMinimized = windowArg == 1;
+    m_isMinimized = isMinimized;
     Resize(m_dimensions);
 }
 

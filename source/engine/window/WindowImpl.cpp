@@ -13,11 +13,6 @@
 namespace
 {
     nc::window::WindowImpl* g_instance = nullptr;
-
-    void PrintGlfwErrorCallback(int error, const char* description)
-    {
-        std::cerr << "GLFW error: " << error << " description: "<< description << std::endl;
-    }
 }
 
 namespace nc::window
@@ -45,7 +40,6 @@ namespace nc::window
         : m_onResizeReceivers{},
           m_dimensions{},
           GraphicsOnResizeCallback{nullptr},
-          UIWndMessageCallback{nullptr},
           EngineDisableRunningCallback{std::move(onQuit)}
     {
         glfwInit();
@@ -55,7 +49,6 @@ namespace nc::window
 
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
-
         const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
         auto nativeWidth = videoMode->width;
@@ -85,7 +78,7 @@ namespace nc::window
         glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
         glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
         glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
-        glfwSetErrorCallback(&PrintGlfwErrorCallback);
+        glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
     }
 
     WindowImpl::~WindowImpl() noexcept
@@ -104,14 +97,15 @@ namespace nc::window
         return m_dimensions;
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept
+    void WindowImpl::SetDimensions(int width, int height) noexcept
     {
-        GraphicsOnResizeCallback = std::move(callback);
+        m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
     }
 
-    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
+
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,bool)> callback) noexcept
     {
-        //UIWndMessageCallback = std::move(callback);
+        GraphicsOnResizeCallback = std::move(callback);
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -129,21 +123,27 @@ namespace nc::window
         }
     }
 
-    void WindowImpl::OnResize(float width, float height, WPARAM windowArg)
+    void WindowImpl::InvokeResizeReceivers(GLFWwindow* window, int width, int height)
     {
-        if(!GraphicsOnResizeCallback)
-        {
-            return;
-        }
-
-        m_dimensions = Vector2{width, height};
-        glfwSetWindowSize(m_window, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
         const auto& graphicsSettings = config::GetGraphicsSettings();
-        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, graphicsSettings.nearClip, graphicsSettings.farClip, windowArg);
+        int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
+        g_instance->GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), graphicsSettings.nearClip, graphicsSettings.farClip, minimized);
         for(auto receiver : m_onResizeReceivers)
         {
             receiver->OnResize(m_dimensions);
         }
+    }
+
+    void WindowImpl::ProcessResizeEvent(GLFWwindow* window, int width, int height)
+    {
+        if(!g_instance->GraphicsOnResizeCallback)
+        {
+            return;
+        }
+
+        g_instance->SetDimensions(width, height);
+        glfwSetWindowSize(window, width, height);
+        g_instance->InvokeResizeReceivers(window, width, height);
     }
 
     void WindowImpl::PollEvents()
@@ -158,10 +158,10 @@ namespace nc::window
 
     void WindowImpl::ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-        nc::input::ButtonCode_t keyCode = static_cast<nc::input::ButtonCode_t>(key);
-        if (mods == GLFW_MOD_SHIFT) keyCode = static_cast<nc::input::ButtonCode_t>(nc::input::KeyCode::Shift);
-        else if (mods == GLFW_MOD_ALT) keyCode = static_cast<nc::input::ButtonCode_t>(nc::input::KeyCode::Alt);
-        else if (mods == GLFW_MOD_CONTROL) keyCode = static_cast<nc::input::ButtonCode_t>(nc::input::KeyCode::Ctrl);
+        nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
+        if (mods == GLFW_MOD_SHIFT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Shift);
+        else if (mods == GLFW_MOD_ALT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Alt);
+        else if (mods == GLFW_MOD_CONTROL) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Ctrl);
         
         nc::input::AddKeyToQueue(keyCode, action);
     }
@@ -182,11 +182,11 @@ namespace nc::window
         using namespace nc::input;
 
         // TODO: could have more than 3 mouse buttons
-        static constexpr auto mouseLUT = std::array<ButtonCode_t, 3>
+        static constexpr auto mouseLUT = std::array<KeyCode_t, 3>
         {
-            (ButtonCode_t)KeyCode::LeftButton,
-            (ButtonCode_t)KeyCode::RightButton,
-            (ButtonCode_t)KeyCode::MiddleButton
+            (KeyCode_t)KeyCode::LeftButton,
+            (KeyCode_t)KeyCode::RightButton,
+            (KeyCode_t)KeyCode::MiddleButton
         };
 
 
@@ -211,15 +211,15 @@ namespace nc::window
 
         // if (button == GLFW_MOUSE_BUTTON_LEFT)
         // {
-        //     mouseButton = (ButtonCode_t)MouseCode::LeftButton;
+        //     mouseButton = (KeyCode_t)MouseCode::LeftButton;
         // }
         // else if (button == GLFW_MOUSE_BUTTON_RIGHT)
         // {
-        //     mouseButton = (ButtonCode_t)MouseCode::RightButton;
+        //     mouseButton = (KeyCode_t)MouseCode::RightButton;
         // }
         // else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
         // {
-        //     mouseButton = (ButtonCode_t)MouseCode::MiddleButton;
+        //     mouseButton = (KeyCode_t)MouseCode::MiddleButton;
         // }
         // else
         // {
@@ -228,13 +228,13 @@ namespace nc::window
 
         // if (action == GLFW_PRESS)
         // {
-        //     AddMouseButtonDownToQueue((ButtonCode_t)mouseButton, action);
-        //     io.MouseClicked[(ButtonCode_t)mouseButton] = true;
+        //     AddMouseButtonDownToQueue((KeyCode_t)mouseButton, action);
+        //     io.MouseClicked[(KeyCode_t)mouseButton] = true;
         // }
         // else if (action == GLFW_RELEASE)
         // {
-        //     AddMouseButtonUpToQueue((ButtonCode_t)mouseButton, action);
-        //     io.MouseReleased[(ButtonCode_t)mouseButton] = true;
+        //     AddMouseButtonUpToQueue((KeyCode_t)mouseButton, action);
+        //     io.MouseReleased[(KeyCode_t)mouseButton] = true;
         // }
         // else
         // {

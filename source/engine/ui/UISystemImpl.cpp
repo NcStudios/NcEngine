@@ -2,8 +2,6 @@
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_vulkan.h"
-#include "imgui/imgui_impl_win32.h"
-#include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_glfw.h"
 
 namespace nc::ui
@@ -26,11 +24,6 @@ namespace nc::ui
     {
         ImGui_ImplVulkan_Shutdown();
         ImGui::DestroyContext();
-    }
-
-    LRESULT UISystemImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        return ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam);
     }
 
     void UISystemImpl::Set(IUI* ui) noexcept

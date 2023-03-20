@@ -1,6 +1,5 @@
 #pragma once
 
-#include "platform/win32/NCWin32.h"
 #include "editor/Editor.h"
 #include "ui/IUI.h"
 
@@ -13,8 +12,6 @@ namespace nc::ui
         public:
             UISystemImpl(GLFWwindow* window);
             ~UISystemImpl() noexcept;
-
-            LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
             void Set(IUI* ui) noexcept;
             bool IsHovered() const noexcept;

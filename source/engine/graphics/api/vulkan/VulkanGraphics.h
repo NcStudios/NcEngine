@@ -48,7 +48,7 @@ class VulkanGraphics : public IGraphics
         auto FrameBegin() -> bool override;
         void Draw(const PerFrameRenderState& state) override;
         void FrameEnd() override;
-        void OnResize(float width, float height, const WPARAM windowArg) override;
+        void OnResize(float width, float height, bool isMinimized) override;
         void Clear() noexcept override;
 
     private:

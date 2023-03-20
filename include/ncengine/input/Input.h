@@ -6,8 +6,8 @@
 
 namespace nc::input
 {
-    using ButtonCode_t = uint32_t;
-    enum class KeyCode : ButtonCode_t;
+    using KeyCode_t = uint32_t;
+    enum class KeyCode : KeyCode_t;
 
     auto MouseX() -> uint32_t;
     auto MouseY() -> uint32_t;
@@ -23,7 +23,7 @@ namespace nc::input
     auto KeyHeld(KeyCode keyCode) -> bool; // true while key is held
 
     // See https://www.glfw.org/docs/3.3/group__keys.html
-    enum class KeyCode : ButtonCode_t
+    enum class KeyCode : KeyCode_t
     {
         LeftButton = 0, RightButton = 1, MiddleButton = 2, MouseWheel = 7,
 

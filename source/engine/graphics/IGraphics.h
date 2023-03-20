@@ -34,7 +34,7 @@ class IGraphics
         virtual auto FrameBegin() -> bool = 0;
         virtual void Draw(const PerFrameRenderState& state) = 0;
         virtual void FrameEnd() = 0;
-        virtual void OnResize(float width, float height, const WPARAM windowArg) = 0;
+        virtual void OnResize(float width, float height, bool isMinimized) = 0;
         virtual void Clear() noexcept = 0;
 };
 

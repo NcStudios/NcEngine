@@ -72,7 +72,6 @@ namespace nc::graphics
     {
         m_graphics->InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
-        window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
@@ -166,9 +165,9 @@ namespace nc::graphics
         m_graphics->FrameEnd();
     }
 
-    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, bool isMinimized)
     {
         m_camera.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
-        m_graphics->OnResize(width, height, windowArg);
+        m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics

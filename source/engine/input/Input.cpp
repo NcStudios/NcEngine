@@ -30,8 +30,6 @@ auto ToKeyState(int action)
 }
 }
 
-
-
 namespace nc::input
 {
     struct
@@ -94,7 +92,7 @@ namespace nc::input
         g_state.mouseWheel = 0;
     }
 
-    void AddKeyToQueue(ButtonCode_t keyCode, int action)
+    void AddKeyToQueue(KeyCode_t keyCode, int action)
     {
         g_state.keyStates[static_cast<KeyCode>(keyCode)] = ::ToKeyState(action);
     }
@@ -138,7 +136,7 @@ namespace nc::input
     void UpdateMousePosition(int mouseX, int mouseY)
     {
         g_state.mouseX = mouseX;
-        g_state.mouseY = static_cast<int>(mouseY); // Convert to top-left coordinates
+        g_state.mouseY = static_cast<int>(mouseY);
         //g_state.mouseY = static_cast<int>(mouseY * 0.5 + 0.5); // Convert to top-left coordinates
     }
 
