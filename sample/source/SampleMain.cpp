@@ -1,5 +1,4 @@
 #include "scenes/Worms.h"
-#include "scenes/CollisionEvents.h"
 #include "shared/SampleUI.h"
 
 #include "ncengine/NcEngine.h"
@@ -16,7 +15,7 @@ int main()
         const auto config = nc::config::Load("config.ini");
         engine = nc::InitializeNcEngine(config);
         auto ui = nc::sample::InitializeSampleUI(engine.get());
-        engine->Start(std::make_unique<nc::sample::CollisionEvents>(ui.get()));
+        engine->Start(std::make_unique<nc::sample::Worms>(ui.get()));
 
     }
     catch(std::exception& e)

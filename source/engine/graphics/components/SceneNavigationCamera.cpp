@@ -2,11 +2,9 @@
 #include "input/Input.h"
 #include "graphics/SceneNavigationCamera.h"
 
-#include <iostream>
-
 namespace
 {
-struct Button
+struct Key
 {
     static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
     static constexpr auto Zoom = nc::input::KeyCode::MouseWheel;
@@ -26,7 +24,7 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity, const SceneCameraCon
 
 void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 {
-    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Button::Speed) ? m_coarseSpeed : m_fineSpeed;
+    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
     auto* transform = registry->Get<Transform>(self);
     auto translation = Dolly(dt, dollySpeed);
 
@@ -45,25 +43,25 @@ void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 
 auto SceneNavigationCamera::HandlePanInput() -> bool
 {
-    if(KeyDown(Button::Pan))
+    if(KeyDown(Key::Pan))
     {
         m_slideReference = input::MousePos();
         m_unitsTraveled = 0.0f;
         return false;
     }
 
-    return KeyHeld(Button::Pan);
+    return KeyHeld(Key::Pan);
 }
 
 auto SceneNavigationCamera::HandleLookInput() -> bool
 {
-    if(KeyDown(Button::Look))
+    if(KeyDown(Key::Look))
     {
         m_pivotReference = input::MousePos();
         return false;
     }
 
-    return KeyDown(Button::Look);
+    return KeyHeld(Key::Look);
 }
 
 auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3

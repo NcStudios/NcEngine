@@ -112,22 +112,17 @@ namespace nc::input
         //     }
         // }
 
-
         for (auto& [key, state] : g_state.keyStates)
         {
-            if (state == KeyState::Pressed)
+            if (state == KeyState::Pressed || state == KeyState::None)
             {
                 state = KeyState::Held;
-            }
-            else if (state == KeyState::Released)
-            {
-                state = KeyState::None;
             }
         }
 
         std::erase_if(g_state.keyStates, [](const auto& item)
         {
-            return item.second == KeyState::None;
+            return item.second == KeyState::None || item.second == KeyState::Released;
         });
 
         ResetMouseState();
@@ -137,7 +132,6 @@ namespace nc::input
     {
         g_state.mouseX = mouseX;
         g_state.mouseY = static_cast<int>(mouseY);
-        //g_state.mouseY = static_cast<int>(mouseY * 0.5 + 0.5); // Convert to top-left coordinates
     }
 
     void SetWindow(GLFWwindow* window)
