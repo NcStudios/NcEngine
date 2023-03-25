@@ -4,7 +4,7 @@
 
 namespace nc::asset
 {
-TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedTexture> data_)
+TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureWithId> data_)
     : ids{std::move(ids_)},
       data{data_},
       updateAction{updateAction_}
@@ -20,7 +20,7 @@ TextureUpdateEventData::TextureUpdateEventData(UpdateAction updateAction_, std::
     }
 }
 
-CubeMapUpdateEventData::CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedCubeMap> data_)
+CubeMapUpdateEventData::CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const CubeMapWithId> data_)
     : ids{std::move(ids_)},
       data{data_},
       updateAction{updateAction_}

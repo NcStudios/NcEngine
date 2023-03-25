@@ -26,7 +26,7 @@ struct MeshUpdateEventData
 };
 
 /** @brief A data/id pair for a loaded texture. */
-struct TaggedTexture
+struct TextureWithId
 {
     asset::Texture texture;
     std::string id;
@@ -35,15 +35,15 @@ struct TaggedTexture
 /** @brief Event data for texture load and unlaod operations. */
 struct TextureUpdateEventData
 {
-    TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedTexture> data_);
+    TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureWithId> data_);
 
     std::vector<std::string> ids;
-    std::span<const TaggedTexture> data;
+    std::span<const TextureWithId> data;
     UpdateAction updateAction;
 };
 
 /** @brief A data/id pair for a loaded CubeMap. */
-struct TaggedCubeMap
+struct CubeMapWithId
 {
     asset::CubeMap cubeMap;
     std::string id;
@@ -52,10 +52,10 @@ struct TaggedCubeMap
 /** @brief Event data for cubemap load and unload operations. */
 struct CubeMapUpdateEventData
 {
-    CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TaggedCubeMap> data_);
+    CubeMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const CubeMapWithId> data_);
 
     std::vector<std::string> ids;
-    std::span<const TaggedCubeMap> data;
+    std::span<const CubeMapWithId> data;
     UpdateAction updateAction;
 };
 } // namespace nc::asset

@@ -7,7 +7,7 @@ namespace nc
 {
 namespace asset
 {
-struct TaggedCubeMap;
+struct CubeMapWithId;
 } // namespace asset
 
 namespace graphics
@@ -15,7 +15,7 @@ namespace graphics
     class CubeMap
     {
         public:
-            CubeMap(vk::Device device, GpuAllocator* allocator, const asset::TaggedCubeMap& data);
+            CubeMap(vk::Device device, GpuAllocator* allocator, const asset::CubeMapWithId& data);
             ~CubeMap() noexcept;
             CubeMap(CubeMap&&) noexcept;
             CubeMap& operator=(CubeMap&&) noexcept;
@@ -23,7 +23,7 @@ namespace graphics
             CubeMap(const CubeMap&) = delete;
 
             const vk::ImageView& GetImageView() const noexcept;
-            void Bind(const asset::TaggedCubeMap& data);
+            void Bind(const asset::CubeMapWithId& data);
             void Clear() noexcept;
             const std::string& GetUid() const noexcept;
 

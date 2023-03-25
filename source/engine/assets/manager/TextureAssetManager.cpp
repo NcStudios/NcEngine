@@ -34,7 +34,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
         std::vector<std::string>{path},
-        std::span<const asset::TaggedTexture>{&m_textureData.back(), 1}
+        std::span<const asset::TextureWithId>{&m_textureData.back(), 1}
     });
 
     return true;
@@ -71,7 +71,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         m_onUpdate.Emit(asset::TextureUpdateEventData{
             asset::UpdateAction::Load,
             std::move(idsToLoad),
-            std::span<const asset::TaggedTexture>{m_textureData.begin() + newItemsIndex, m_textureData.end()}
+            std::span<const asset::TextureWithId>{m_textureData.begin() + newItemsIndex, m_textureData.end()}
         });
     }
 
@@ -94,7 +94,7 @@ bool TextureAssetManager::Unload(const std::string& path)
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Unload,
         std::vector<std::string>{path},
-        std::span<const asset::TaggedTexture>{}
+        std::span<const asset::TextureWithId>{}
     });
 
     return true;

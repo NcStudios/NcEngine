@@ -33,12 +33,12 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    const auto data = asset::TaggedCubeMap{asset::ImportCubeMap(fullPath), path};
+    const auto data = asset::CubeMapWithId{asset::ImportCubeMap(fullPath), path};
     m_cubeMapIds.push_back(path);
     m_onUpdate.Emit(asset::CubeMapUpdateEventData{
         asset::UpdateAction::Load,
         std::vector<std::string>{path},
-        std::span<const asset::TaggedCubeMap>{&data, 1}
+        std::span<const asset::CubeMapWithId>{&data, 1}
     });
 
     return true;
@@ -51,7 +51,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         throw NcError("Cannot exceed max texture count.");
     }
 
-    auto loadedCubeMaps = std::vector<asset::TaggedCubeMap>{};
+    auto loadedCubeMaps = std::vector<asset::CubeMapWithId>{};
     auto idsToLoad = std::vector<std::string>{};
     loadedCubeMaps.reserve(paths.size());
     idsToLoad.reserve(paths.size());
@@ -69,7 +69,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         }
 
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        loadedCubeMaps.push_back(asset::TaggedCubeMap{asset::ImportCubeMap(fullPath), path});
+        loadedCubeMaps.push_back(asset::CubeMapWithId{asset::ImportCubeMap(fullPath), path});
         idsToLoad.push_back(path);
         m_cubeMapIds.push_back(path);
     }
@@ -82,7 +82,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
     m_onUpdate.Emit(asset::CubeMapUpdateEventData{
         asset::UpdateAction::Load,
         std::move(idsToLoad),
-        std::span<const asset::TaggedCubeMap>{loadedCubeMaps}
+        std::span<const asset::CubeMapWithId>{loadedCubeMaps}
     });
 
     return true;
@@ -97,7 +97,7 @@ bool CubeMapAssetManager::Unload(const std::string& path)
         {
             asset::UpdateAction::Unload,
             std::vector<std::string>{path},
-            std::span<const asset::TaggedCubeMap>{}
+            std::span<const asset::CubeMapWithId>{}
         });
 
         return true;
