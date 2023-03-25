@@ -55,7 +55,7 @@ class VulkanGraphics : public IGraphics
         void Resize(const Vector2& dimensions);
 
         std::unique_ptr<Instance> m_instance;
-        vk::UniqueSurfaceKHR m_surface;
+        vk::SurfaceKHR m_surface;
         std::unique_ptr<Device> m_device;
         std::unique_ptr<Swapchain> m_swapchain;
         std::unique_ptr<GpuAllocator> m_allocator;

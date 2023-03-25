@@ -88,11 +88,11 @@ Instance::Instance(std::string_view appName, uint32_t appVersion,
 {
 }
 
-auto Instance::CreateSurface(GLFWwindow* window) const -> vk::UniqueSurfaceKHR
+auto Instance::CreateSurface(GLFWwindow* window) const -> vk::SurfaceKHR
 {
     VkSurfaceKHR surface;
     glfwCreateWindowSurface(m_instance.get(), window, nullptr, &surface);
-    return vk::UniqueSurfaceKHR(surface);
+    return surface;
 }
 
 auto Instance::GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>
