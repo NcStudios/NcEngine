@@ -1,5 +1,5 @@
-#include "ecs/ParticleEmitterSystem.h"
 #include "graphics/ParticleEmitter.h"
+#include "graphics/system/ParticleEmitterSystem.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
@@ -9,8 +9,8 @@ namespace nc::graphics
 {
 ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
     : ComponentBase{entity},
-        m_info{info},
-        m_emitterSystem{nullptr}
+      m_info{info},
+      m_emitterSystem{nullptr}
 {
 }
 
@@ -24,7 +24,7 @@ void ParticleEmitter::Emit(size_t count)
     m_emitterSystem->Emit(ParentEntity(), count);
 }
 
-void ParticleEmitter::RegisterSystem(ecs::ParticleEmitterSystem* system)
+void ParticleEmitter::RegisterSystem(ParticleEmitterSystem* system)
 {
     m_emitterSystem = system;
 }

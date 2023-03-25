@@ -1,21 +1,28 @@
 #include "FrameManager.h"
+#include "core/Device.h"
+
+#include <algorithm>
 
 namespace
 {
-std::vector<nc::graphics::PerFrameGpuContext> CreatePerFrameGpuContextVector(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface)
+auto CreatePerFrameGpuContextVector(const nc::graphics::Device& device) -> std::vector<nc::graphics::PerFrameGpuContext>
 {
     auto out = std::vector<nc::graphics::PerFrameGpuContext>{};
     out.reserve(nc::graphics::MaxFramesInFlight);
-    std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [logicalDevice, physicalDevice, surface](){ return nc::graphics::PerFrameGpuContext(logicalDevice, physicalDevice, surface); } );
+    std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [&device]()
+    {
+        return nc::graphics::PerFrameGpuContext(device);
+    });
+
     return out;
 }
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
-FrameManager::FrameManager(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface)
-    : m_currentFrameIndex{0},
-      m_perFrameGpuContext{CreatePerFrameGpuContextVector(logicalDevice, physicalDevice, surface)}
+FrameManager::FrameManager(const Device& device)
+    : m_perFrameGpuContext{::CreatePerFrameGpuContextVector(device)},
+      m_currentFrameIndex{0}
 {
 }
 
@@ -31,4 +38,4 @@ void FrameManager::End()
 {
     m_currentFrameIndex = (m_currentFrameIndex + 1) % MaxFramesInFlight;
 }
-}
+} // namespace nc::graphics

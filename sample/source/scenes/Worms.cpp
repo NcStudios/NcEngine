@@ -25,16 +25,8 @@ void Worms::Load(Registry* registry, ModuleProvider modules)
     modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
     // Light
-    auto lightOneProperties = graphics::PointLightInfo
-    {
-        .pos = Vector3{0.05f, 3.0f, -5.0f},
-        .ambient = Vector3{0.3f, 0.3f, 0.3f},
-        .diffuseColor = Vector3{0.3, 0.3, 0.3},
-        .diffuseIntensity = 1200.0f
-    };
-
     auto lightHandle = registry->Add<Entity>({.tag = "Point Light"});
-    registry->Add<graphics::PointLight>(lightHandle, lightOneProperties);
+    registry->Add<graphics::PointLight>(lightHandle, Vector3{0.3f, 0.3f, 0.3f}, Vector3{0.3f, 0.3f, 0.3f}, 1200.0f);
     registry->Add<FrameLogic>(lightHandle, InvokeFreeComponent<MouseFollower>{lightHandle, registry});
 
     // Worm Spawner

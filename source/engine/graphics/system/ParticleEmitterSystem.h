@@ -6,7 +6,7 @@
 #include "particle/EmitterState.h"
 #include "math/Random.h"
 
-namespace nc::ecs
+namespace nc::graphics
 {
     class ParticleEmitterSystem
     {
@@ -39,4 +39,4 @@ namespace nc::ecs
             Connection<graphics::ParticleEmitter&> m_onAddConnection;
             Connection<Entity> m_onRemoveConnection;
     };
-} // namespace nc::ecs
+} // namespace nc::graphics

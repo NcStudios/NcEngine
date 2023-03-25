@@ -2,7 +2,6 @@
 
 #include "PerFrameGpuContext.h"
 
-#include <memory>
 #include <vector>
 
 namespace nc::graphics
@@ -10,18 +9,28 @@ namespace nc::graphics
 /** How many frames can be rendered concurrently. */
 constexpr uint32_t MaxFramesInFlight = 2u;
 
+class Device;
+
 class FrameManager
 {
     public:
-        FrameManager(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
+        FrameManager(const Device& device);
 
         void Begin();
         void End();
-        uint32_t Index() const noexcept { return m_currentFrameIndex; };
-        PerFrameGpuContext* CurrentFrameContext() noexcept { return &(m_perFrameGpuContext[m_currentFrameIndex]); }
+
+        auto Index() const noexcept -> uint32_t
+        {
+            return m_currentFrameIndex;
+        };
+
+        auto CurrentFrameContext() noexcept -> PerFrameGpuContext*
+        {
+            return &(m_perFrameGpuContext[m_currentFrameIndex]);
+        }
 
     private:
-        uint32_t m_currentFrameIndex; // Used to select which PerFrameGpuContext to use. Each frame in MaxFramesInFlight requires its own PerFrameGpuContext.
         std::vector<PerFrameGpuContext> m_perFrameGpuContext;
+        uint32_t m_currentFrameIndex; // Used to select which PerFrameGpuContext to use. Each frame in MaxFramesInFlight requires its own PerFrameGpuContext.
 };
-}
+} // namespace nc::graphics

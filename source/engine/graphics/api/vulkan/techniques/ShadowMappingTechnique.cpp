@@ -95,7 +95,8 @@ namespace nc::graphics
 
     bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return m_enabled = nc::config::GetGraphicsSettings().useShadows && !frameData.pointLightVPs.empty();
+        static const auto useShadows = config::GetGraphicsSettings().useShadows;
+        return m_enabled = useShadows && !frameData.lightingState.viewProjections.empty();
     }
 
     void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
@@ -124,12 +125,13 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        pushConstants.lightViewProjection = frameData.pointLightVPs.at(m_shadowCasterIndex);
+        NC_ASSERT(m_shadowCasterIndex < frameData.lightingState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        pushConstants.lightViewProjection = frameData.lightingState.viewProjections[m_shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        for (const auto& mesh : frameData.meshes)
+        for (const auto& mesh : frameData.objectState.meshes)
         {
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             objectInstance++;

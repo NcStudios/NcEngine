@@ -28,10 +28,7 @@ void JointsTest::Load(Registry* registry, ModuleProvider modules)
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{1.20484f, 9.4f, -8.48875f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, graphics::PointLightInfo{.pos = Vector3::Zero(),
-                                                                            .ambient = Vector3{0.443f, 0.412f, 0.412f},
-                                                                            .diffuseColor = Vector3{0.4751, 0.525f, 1.0f},
-                                                                            .diffuseIntensity = 600});
+    registry->Add<graphics::PointLight>(lvHandle, Vector3{0.443f, 0.412f, 0.412f}, Vector3{0.4751f, 0.525f, 1.0f}, 600.0f);
 
     // Movable object
     {

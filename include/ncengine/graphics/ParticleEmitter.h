@@ -7,15 +7,10 @@
 
 #include <string>
 
-namespace nc
-{
-namespace ecs
+namespace nc::graphics
 {
 class ParticleEmitterSystem;
-}
 
-namespace graphics
-{
 struct ParticleEmissionInfo
 {
     unsigned maxParticleCount = 100u;
@@ -64,14 +59,16 @@ class ParticleEmitter final : public ComponentBase
         const ParticleInfo& GetInfo() const noexcept;
         void Emit(size_t count);
     
-        void RegisterSystem(ecs::ParticleEmitterSystem* system);
+        void RegisterSystem(ParticleEmitterSystem* system);
 
     private:
         ParticleInfo m_info;
-        ecs::ParticleEmitterSystem* m_emitterSystem;
+        ParticleEmitterSystem* m_emitterSystem;
 };
-} // namespace graphics
+} // namespace nc::graphics
 
+namespace nc
+{
 template<>
 struct StoragePolicy<graphics::ParticleEmitter> : DefaultStoragePolicy
 {

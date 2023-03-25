@@ -3,6 +3,10 @@
 #include "assets/AssetManagers.h"
 #include "config/Config.h"
 #include "ecs/View.h"
+
+#include "shader_resource/PointLightData.h"
+#include "shader_resource/ShaderResourceBus.h"
+
 #include "task/Job.h"
 #include "utility/Log.h"
 #include "window/WindowImpl.h"
@@ -17,11 +21,7 @@ namespace
 {
     struct NcGraphicsStub : nc::graphics::NcGraphics
     {
-        NcGraphicsStub(nc::Registry* reg)
-            : onAddConnection{reg->OnAdd<nc::graphics::PointLight>().Connect([](nc::graphics::PointLight&){})},
-              onRemoveConnection{reg->OnRemove<nc::graphics::PointLight>().Connect([](nc::Entity){})}
-        {
-        }
+        NcGraphicsStub(nc::Registry*) {}
 
         void SetCamera(nc::graphics::Camera*) noexcept override {}
         auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
@@ -32,8 +32,6 @@ namespace
         void Clear() noexcept override {}
         auto BuildWorkload() -> std::vector<nc::task::Job> { return {}; }
 
-        nc::Connection<nc::graphics::PointLight&> onAddConnection;
-        nc::Connection<nc::Entity> onRemoveConnection;
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED
         nc::graphics::DebugRenderer debugRenderer;
@@ -51,24 +49,32 @@ namespace nc::graphics
     {
         if (graphicsSettings.enabled)
         {
+            auto resourceBus = ShaderResourceBus{};
             NC_LOG_TRACE("Selecting Graphics API");
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(registry, std::move(graphicsApi), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
         return std::make_unique<NcGraphicsStub>(registry);
     }
 
-    NcGraphicsImpl::NcGraphicsImpl(Registry* registry, std::unique_ptr<IGraphics> graphics, window::WindowImpl* window)
-        : m_registry{ registry },
-          m_graphics{ std::move(graphics) },
-          m_ui{ window->GetWindow() },
-          m_environment{},
-          m_pointLightSystem{ registry },
-          m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
+    NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                                   Registry* registry,
+                                   std::unique_ptr<IGraphics> graphics,
+                                   ShaderResourceBus&& shaderResourceBus,
+                                   window::WindowImpl* window)
+        : m_registry{registry},
+          m_graphics{std::move(graphics)},
+          m_ui{window->GetWindow()},
+          m_cameraSystem{},
+          m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
+          m_objectSystem{std::move(shaderResourceBus.objectChannel)},
+          m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
+          m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
+          m_widgetSystem{}
     {
         m_graphics->InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
@@ -77,12 +83,12 @@ namespace nc::graphics
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
     {
         NC_LOG_TRACE_FMT("Setting main camera to: {}", static_cast<void*>(camera));
-        m_camera.Set(camera);
+        m_cameraSystem.Set(camera);
     }
 
     auto NcGraphicsImpl::GetCamera() noexcept -> Camera*
     {
-        return m_camera.Get();
+        return m_cameraSystem.Get();
     }
 
     void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
@@ -99,12 +105,12 @@ namespace nc::graphics
     void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
         NC_LOG_TRACE_FMT("Setting skybox to {}", path);
-        m_environment.SetSkybox(path);
+        m_environmentSystem.SetSkybox(path);
     }
 
     void NcGraphicsImpl::ClearEnvironment()
     {
-        m_environment.Clear();
+        m_environmentSystem.Clear();
     }
 
     void NcGraphicsImpl::Clear() noexcept
@@ -112,8 +118,7 @@ namespace nc::graphics
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
         m_graphics->Clear();
-        m_environment.Clear();
-        m_pointLightSystem.Clear();
+        m_environmentSystem.Clear();
         m_particleEmitterSystem.Clear();
     }
 
@@ -131,16 +136,11 @@ namespace nc::graphics
     void NcGraphicsImpl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
-        auto* camera = m_camera.Get();
-        if (!camera)
+        auto cameraState = m_cameraSystem.Execute(m_registry);
+        if (!cameraState.hasCamera || !m_graphics->FrameBegin())
         {
             return;
         }
-
-        camera->UpdateViewMatrix();
-
-        if(!m_graphics->FrameBegin())
-            return;
 
         m_ui.FrameBegin();
 
@@ -149,19 +149,26 @@ namespace nc::graphics
          *  hacking dt factor in here. */
         float dtFactor = 1.0f;
         m_ui.Draw(&dtFactor, m_registry);
+        auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         #else
         m_ui.Draw();
+        auto widgetState = WidgetState{std::nullopt};
         #endif
 
-        auto areLightsDirty = m_pointLightSystem.CheckDirtyAndReset();
-        auto state = PerFrameRenderState{ m_registry, camera, areLightsDirty, &m_environment, m_particleEmitterSystem.GetParticles() };
-        MapPerFrameRenderState(state);
+        auto environmentState = m_environmentSystem.Execute(cameraState);
+        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, cameraState, environmentState);
+        auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
+        auto state = PerFrameRenderState
+        {
+            std::move(cameraState),
+            std::move(environmentState),
+            std::move(objectState),
+            std::move(lightingState),
+            std::move(widgetState),
+            m_particleEmitterSystem.GetParticles()
+        };
+
         m_graphics->Draw(state);
-
-        #ifdef NC_EDITOR_ENABLED
-        for(auto& collider : View<physics::Collider>{m_registry}) collider.SetEditorSelection(false);
-        #endif
-
         m_graphics->FrameEnd();
     }
 
