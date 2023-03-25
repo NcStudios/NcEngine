@@ -8,13 +8,10 @@
 #include <functional>
 #include <vector>
 
-namespace nc
-{
-    namespace window { class IOnResizeReceiver; }
-}
-
 namespace nc::window
 {
+    class IOnResizeReceiver;
+
     class WindowImpl
     {
         public:
@@ -35,14 +32,14 @@ namespace nc::window
             void InvokeResizeReceivers(GLFWwindow* window, int width, int height);
             
             void PollEvents();
+
+        private:
             static void ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
             static void ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos);
             static void ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
             static void ProcessResizeEvent(GLFWwindow* window, int width, int height);
             static void ProcessWindowCloseEvent(GLFWwindow* window);
-
-        private:
             std::vector<IOnResizeReceiver*> m_onResizeReceivers;
             Vector2 m_dimensions;
             GLFWwindow* m_window;

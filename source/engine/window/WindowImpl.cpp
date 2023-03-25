@@ -84,7 +84,6 @@ namespace nc::window
 
     WindowImpl::~WindowImpl() noexcept
     {
-        glfwSetWindowShouldClose(m_window, GLFW_TRUE);
         glfwDestroyWindow(m_window);
         glfwTerminate();
     }
@@ -163,7 +162,6 @@ namespace nc::window
         if (mods == GLFW_MOD_SHIFT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Shift);
         else if (mods == GLFW_MOD_ALT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Alt);
         else if (mods == GLFW_MOD_CONTROL) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Ctrl);
-        
         nc::input::AddKeyToQueue(keyCode, action);
     }
 

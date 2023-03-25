@@ -25,6 +25,7 @@ auto ToKeyState(int action)
     {
         case GLFW_PRESS: return KeyState::Pressed;
         case GLFW_RELEASE: return KeyState::Released;
+        case GLFW_REPEAT: return KeyState::Held; // Note: 'Repeat' is not strictly the same as 'held', and we handle checking for and setting the 'held' state in Input::Flush. However, we know that if 'repeat' is true, 'held' is also true.
         default: return KeyState::None;
     }
 }
@@ -99,39 +100,26 @@ namespace nc::input
 
     void Flush()
     {
-        // for (auto cur = beg; cur != end; )
-        // {
-        //     if (cur->second == KeyState::Pressed)
-        //     {
-        //         cur->second = KeyState::Held;
-        //         ++cur;
-        //     }
-        //     else if (cur->second == KeyState::Released)
-        //     {
-        //         cur = g_state.keyStates.erase(cur);
-        //     }
-        // }
-
-        for (auto& [key, state] : g_state.keyStates)
+        for (auto cur = g_state.keyStates.begin(); cur != g_state.keyStates.end();)
         {
-            if (state == KeyState::Pressed || state == KeyState::None)
+            auto& state = cur->second;
+            if (state == KeyState::Pressed)
             {
                 state = KeyState::Held;
             }
+            else if (state == KeyState::None)
+            {
+                g_state.keyStates.erase(cur);
+            }
+            cur++;
         }
-
-        std::erase_if(g_state.keyStates, [](const auto& item)
-        {
-            return item.second == KeyState::None || item.second == KeyState::Released;
-        });
-
         ResetMouseState();
     }
 
     void UpdateMousePosition(int mouseX, int mouseY)
     {
         g_state.mouseX = mouseX;
-        g_state.mouseY = static_cast<int>(mouseY);
+        g_state.mouseY = mouseY;
     }
 
     void SetWindow(GLFWwindow* window)

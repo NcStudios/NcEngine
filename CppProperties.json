@@ -21,7 +21,7 @@
         "NC_EDITOR_ENABLED",
         "IMGUI_USER_CONFIG=ui\\DearImGuiConversion.h"
       ],
-      "intelliSenseMode": "windows-msvc-x64",
+      "intelliSenseMode": "windows-msvc-x86",
       "windowsSdkVersion": "10.0.19041.0",
       "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.31.31103/bin/Hostx64/x64/cl.exe",
       "cStandard": "c17",

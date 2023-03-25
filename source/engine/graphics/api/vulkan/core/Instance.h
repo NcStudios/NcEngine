@@ -24,7 +24,7 @@ class Instance
             return m_instance.get();
         }
 
-        auto CreateSurface(GLFWwindow* window) const -> vk::SurfaceKHR;
+        auto CreateSurface(GLFWwindow* window) const -> vk::UniqueSurfaceKHR;
         auto GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>;
 
     private:

@@ -36,8 +36,8 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                Vector2 dimensions)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
       m_surface{m_instance->CreateSurface(window)},
-      m_device{Device::Create(*m_instance, m_surface, g_requiredDeviceExtensions)},
-      m_swapchain{ std::make_unique<Swapchain>(*m_device, m_surface, dimensions)},
+      m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
+      m_swapchain{ std::make_unique<Swapchain>(*m_device, m_surface.get(), dimensions)},
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
@@ -58,8 +58,6 @@ VulkanGraphics::~VulkanGraphics() noexcept
     try
     {
         Clear();
-        m_swapchain.reset();
-        m_instance->VkInstance().destroySurfaceKHR(m_surface);
     }
     catch (const std::runtime_error &e)
     {
