@@ -79,10 +79,12 @@ namespace nc::window
         glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
         glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
         glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
+        glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
     }
 
     WindowImpl::~WindowImpl() noexcept
     {
+        glfwSetWindowShouldClose(m_window, GLFW_TRUE);
         glfwDestroyWindow(m_window);
         glfwTerminate();
     }
@@ -191,4 +193,9 @@ namespace nc::window
         input::SetMouseWheel(static_cast<int>(xOffset), static_cast<int>(yOffset));
     }
 
+    void WindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)
+    {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+        g_instance->EngineDisableRunningCallback();
+    }
 } // end namespace nc::window

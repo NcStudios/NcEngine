@@ -1,6 +1,5 @@
 #pragma once
 
-#include "platform/win32/NcWin32.h"
 #include "GLFW/glfw3.h"
 
 #include <memory>

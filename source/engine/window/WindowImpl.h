@@ -1,6 +1,5 @@
 #pragma once
 
-#include "platform/win32/NcWin32.h"
 #include "ncmath/Vector.h"
 
 #define GLFW_INCLUDE_NONE
@@ -41,6 +40,7 @@ namespace nc::window
             static void ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos);
             static void ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
             static void ProcessResizeEvent(GLFWwindow* window, int width, int height);
+            static void ProcessWindowCloseEvent(GLFWwindow* window);
 
         private:
             std::vector<IOnResizeReceiver*> m_onResizeReceivers;
