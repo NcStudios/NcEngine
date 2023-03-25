@@ -19,6 +19,8 @@
 #include "ncutility/NcError.h"
 #include "optick/optick.h"
 
+#include "GLFW/glfw3.h"
+
 namespace
 {
 constexpr auto g_requiredDeviceExtensions = std::array<const char*, 1>{VK_KHR_SWAPCHAIN_EXTENSION_NAME};

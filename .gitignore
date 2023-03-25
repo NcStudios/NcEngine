@@ -31,7 +31,3 @@ imgui.ini
 /Folder.DotSettings.user
 /.editorconfig
 /CMakeSettings.json
-
-#configuration
-CppProperties.json
-CMakePresets.json

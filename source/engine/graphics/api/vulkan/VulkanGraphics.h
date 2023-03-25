@@ -8,6 +8,8 @@
 #include <mutex>
 #include <vulkan/vulkan.hpp>
 
+struct GLFWwindow;
+
 namespace nc
 {
 struct GpuAccessorSignals;
@@ -74,7 +76,7 @@ class VulkanGraphics : public IGraphics
         Vector2 m_dimensions;
         bool m_isMinimized;
 };
-} // namespace vulkan
+} // namespace nc::graphics::vulkan
 } // namespace nc::graphics
 } // namespace nc
 

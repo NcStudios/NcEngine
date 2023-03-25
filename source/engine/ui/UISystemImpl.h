@@ -3,7 +3,7 @@
 #include "editor/Editor.h"
 #include "ui/IUI.h"
 
-#include "GLFW/glfw3.h"
+struct GLFWwindow;
 
 namespace nc::ui
 {

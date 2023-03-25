@@ -7,9 +7,7 @@
 #include "window/Window.h"
 
 #include <algorithm>
-#include <iostream>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
+
 namespace
 {
     nc::window::WindowImpl* g_instance = nullptr;
@@ -125,9 +123,15 @@ namespace nc::window
 
     void WindowImpl::InvokeResizeReceivers(GLFWwindow* window, int width, int height)
     {
+        if(!(GraphicsOnResizeCallback))
+        {
+            return;
+        }
+
         const auto& graphicsSettings = config::GetGraphicsSettings();
         int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
-        g_instance->GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), graphicsSettings.nearClip, graphicsSettings.farClip, minimized);
+        GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), graphicsSettings.nearClip, graphicsSettings.farClip, minimized);
+
         for(auto receiver : m_onResizeReceivers)
         {
             receiver->OnResize(m_dimensions);
@@ -136,11 +140,6 @@ namespace nc::window
 
     void WindowImpl::ProcessResizeEvent(GLFWwindow* window, int width, int height)
     {
-        if(!g_instance->GraphicsOnResizeCallback)
-        {
-            return;
-        }
-
         g_instance->SetDimensions(width, height);
         glfwSetWindowSize(window, width, height);
         g_instance->InvokeResizeReceivers(window, width, height);
@@ -150,13 +149,13 @@ namespace nc::window
     {
         if (glfwWindowShouldClose(m_window))
         {
-            g_instance->EngineDisableRunningCallback();
+            EngineDisableRunningCallback();
         }
 
         glfwPollEvents();
     }
 
-    void WindowImpl::ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
+    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int mods)
     {
         nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
         if (mods == GLFW_MOD_SHIFT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Shift);
@@ -165,12 +164,12 @@ namespace nc::window
         nc::input::AddKeyToQueue(keyCode, action);
     }
 
-    void WindowImpl::ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos)
+    void WindowImpl::ProcessMouseCursorPosEvent(GLFWwindow*, double xPos, double yPos)
     {
         nc::input::UpdateMousePosition(static_cast<int>(xPos), static_cast<int>(yPos));
     }
 
-    void WindowImpl::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods)
+    void WindowImpl::ProcessMouseButtonEvent(GLFWwindow*, int button, int action, int)
     {
         using namespace nc::input;
 
@@ -186,9 +185,9 @@ namespace nc::window
         AddKeyToQueue(mouseButton, action);
     }
 
-    void WindowImpl::ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset)
+    void WindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
     {
-        input::SetMouseWheel(static_cast<int>(xOffset), static_cast<int>(yOffset));
+        input::SetMouseWheel(static_cast<int>(yOffset));
     }
 
     void WindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)

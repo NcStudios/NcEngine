@@ -15,8 +15,6 @@ void WasdBasedMovement(Entity self, Registry* registry, float dt)
     auto e = KeyHeld(input::KeyCode::E);
     auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * speed * dt;
     registry->Get<Transform>(self)->Translate(Vector3{leftRight, upDown, frontBack});
-    GameLog::Log(std::string{"Left Right"} + std::to_string(leftRight));
-    GameLog::Log(std::string{"Up Down"} + std::to_string(upDown));
 }
 
 void ForceBasedMovement(Entity self, Registry* registry)

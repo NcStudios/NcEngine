@@ -16,7 +16,6 @@ int main()
         engine = nc::InitializeNcEngine(config);
         auto ui = nc::sample::InitializeSampleUI(engine.get());
         engine->Start(std::make_unique<nc::sample::Worms>(ui.get()));
-
     }
     catch(std::exception& e)
     {

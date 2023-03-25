@@ -549,7 +549,7 @@ CODE
  - 2015/06/14 (1.41) - changed Selectable() API from (label, selected, size) to (label, selected, flags, size). Size override should have been rarely be used. Sorry!
  - 2015/05/31 (1.40) - renamed GetWindowCollapsed() to IsWindowCollapsed() for consistency. Kept inline redirection function (will obsolete).
  - 2015/05/31 (1.40) - renamed IsRectClipped() to IsRectVisible() for consistency. Note that return value is opposite! Kept inline redirection function (will obsolete).
- - 2015/05/27 (1.40) - removed the third 'repeat_if_held' parameter from Key() - sorry! it was rarely used and inconsistent. Use PushButtonRepeat(true) / PopButtonRepeat() to enable repeat on desired buttons.
+ - 2015/05/27 (1.40) - removed the third 'repeat_if_held' parameter from Button() - sorry! it was rarely used and inconsistent. Use PushButtonRepeat(true) / PopButtonRepeat() to enable repeat on desired buttons.
  - 2015/05/11 (1.40) - changed BeginPopup() API, takes a string identifier instead of a bool. ImGui needs to manage the open/closed state of popups. Call OpenPopup() to actually set the "open" state of a popup. BeginPopup() returns true if the popup is opened.
  - 2015/05/03 (1.40) - removed style.AutoFitPadding, using style.WindowPadding makes more sense (the default values were already the same).
  - 2015/04/13 (1.38) - renamed IsClipped() to IsRectClipped(). Kept inline redirection function until 1.50.
@@ -637,30 +637,30 @@ CODE
 
     Dear ImGui internally need to uniquely identify UI elements.
     Elements that are typically not clickable (such as calls to the Text functions) don't need an ID.
-    Interactive widgets (such as calls to Key buttons) need a unique ID.
+    Interactive widgets (such as calls to Button buttons) need a unique ID.
     Unique ID are used internally to track active widgets and occasionally associate state to widgets.
     Unique ID are implicitly built from the hash of multiple elements that identify the "path" to the UI element.
 
    - Unique ID are often derived from a string label:
 
-       Key("OK");          // Label = "OK",     ID = hash of (..., "OK")
-       Key("Cancel");      // Label = "Cancel", ID = hash of (..., "Cancel")
+       Button("OK");          // Label = "OK",     ID = hash of (..., "OK")
+       Button("Cancel");      // Label = "Cancel", ID = hash of (..., "Cancel")
 
    - ID are uniquely scoped within windows, tree nodes, etc. which all pushes to the ID stack. Having
      two buttons labeled "OK" in different windows or different tree locations is fine.
      We used "..." above to signify whatever was already pushed to the ID stack previously:
 
        Begin("MyWindow");
-       Key("OK");          // Label = "OK",     ID = hash of ("MyWindow", "OK")
+       Button("OK");          // Label = "OK",     ID = hash of ("MyWindow", "OK")
        End();
        Begin("MyOtherWindow");
-       Key("OK");          // Label = "OK",     ID = hash of ("MyOtherWindow", "OK")
+       Button("OK");          // Label = "OK",     ID = hash of ("MyOtherWindow", "OK")
        End();
 
    - If you have a same ID twice in the same location, you'll have a conflict:
 
-       Key("OK");
-       Key("OK");          // ID collision! Interacting with either button will trigger the first one.
+       Button("OK");
+       Button("OK");          // ID collision! Interacting with either button will trigger the first one.
 
      Fear not! this is easy to solve and there are many ways to solve it!
 
@@ -671,9 +671,9 @@ CODE
      are going to be created:
 
        Begin("MyWindow");
-       Key("Play");        // Label = "Play",   ID = hash of ("MyWindow", "Play")
-       Key("Play##foo1");  // Label = "Play",   ID = hash of ("MyWindow", "Play##foo1")  // Different from above
-       Key("Play##foo2");  // Label = "Play",   ID = hash of ("MyWindow", "Play##foo2")  // Different from above
+       Button("Play");        // Label = "Play",   ID = hash of ("MyWindow", "Play")
+       Button("Play##foo1");  // Label = "Play",   ID = hash of ("MyWindow", "Play##foo1")  // Different from above
+       Button("Play##foo2");  // Label = "Play",   ID = hash of ("MyWindow", "Play##foo2")  // Different from above
        End();
 
    - If you want to completely hide the label, but still need an ID:
@@ -684,8 +684,8 @@ CODE
      you to animate labels. For example you may want to include varying information in a window title bar,
      but windows are uniquely identified by their ID. Use "###" to pass a label that isn't part of ID:
 
-       Key("Hello###ID");  // Label = "Hello",  ID = hash of (..., "###ID")
-       Key("World###ID");  // Label = "World",  ID = hash of (..., "###ID")  // Same as above, even though the label looks different
+       Button("Hello###ID");  // Label = "Hello",  ID = hash of (..., "###ID")
+       Button("World###ID");  // Label = "World",  ID = hash of (..., "###ID")  // Same as above, even though the label looks different
 
        sprintf(buf, "My game (%f FPS)###MyGame", fps);
        Begin(buf);            // Variable title,   ID = hash of "MyGame"
@@ -702,41 +702,41 @@ CODE
        for (int i = 0; i < 100; i++)
        {
          PushID(i);           // Push i to the id tack
-         Key("Click");     // Label = "Click",  ID = hash of ("Window", i, "Click")
+         Button("Click");     // Label = "Click",  ID = hash of ("Window", i, "Click")
          PopID();
        }
        for (int i = 0; i < 100; i++)
        {
          MyObject* obj = Objects[i];
          PushID(obj);
-         Key("Click");     // Label = "Click",  ID = hash of ("Window", obj pointer, "Click")
+         Button("Click");     // Label = "Click",  ID = hash of ("Window", obj pointer, "Click")
          PopID();
        }
        for (int i = 0; i < 100; i++)
        {
          MyObject* obj = Objects[i];
          PushID(obj->Name);
-         Key("Click");     // Label = "Click",  ID = hash of ("Window", obj->Name, "Click")
+         Button("Click");     // Label = "Click",  ID = hash of ("Window", obj->Name, "Click")
          PopID();
        }
        End();
 
    - You can stack multiple prefixes into the ID stack:
 
-       Key("Click");       // Label = "Click",  ID = hash of (..., "Click")
+       Button("Click");       // Label = "Click",  ID = hash of (..., "Click")
        PushID("node");
-       Key("Click");       // Label = "Click",  ID = hash of (..., "node", "Click")
+       Button("Click");       // Label = "Click",  ID = hash of (..., "node", "Click")
          PushID(my_ptr);
-           Key("Click");   // Label = "Click",  ID = hash of (..., "node", my_ptr, "Click")
+           Button("Click");   // Label = "Click",  ID = hash of (..., "node", my_ptr, "Click")
          PopID();
        PopID();
 
    - Tree nodes implicitly creates a scope for you by calling PushID().
 
-       Key("Click");       // Label = "Click",  ID = hash of (..., "Click")
+       Button("Click");       // Label = "Click",  ID = hash of (..., "Click")
        if (TreeNode("node"))  // <-- this function call will do a PushID() for you (unless instructed not to, with a special flag)
        {
-         Key("Click");     // Label = "Click",  ID = hash of (..., "node", "Click")
+         Button("Click");     // Label = "Click",  ID = hash of (..., "node", "Click")
          TreePop();
        }
 
@@ -2692,7 +2692,7 @@ void ImGui::RenderTextClipped(const ImVec2& pos_min, const ImVec2& pos_max, cons
 
 // Another overly complex function until we reorganize everything into a nice all-in-one helper.
 // This is made more complex because we have dissociated the layout rectangle (pos_min..pos_max) which define _where_ the ellipsis is, from actual clipping of text and limit of the ellipsis display.
-// This is because in the context of tabs we selectively hide part of the text when the Close Key appears, but we don't want the ellipsis to move.
+// This is because in the context of tabs we selectively hide part of the text when the Close Button appears, but we don't want the ellipsis to move.
 void ImGui::RenderTextEllipsis(ImDrawList* draw_list, const ImVec2& pos_min, const ImVec2& pos_max, float clip_max_x, float ellipsis_max_x, const char* text, const char* text_end_full, const ImVec2* text_size_if_known)
 {
     ImGuiContext& g = *GImGui;
@@ -12940,7 +12940,7 @@ static void ImGui::DockNodeUpdateTabBar(ImGuiDockNode* node, ImGuiWindow* host_w
     const bool has_window_menu_button = (node_flags & ImGuiDockNodeFlags_NoWindowMenuButton) == 0;
     const bool has_close_button = (node_flags & ImGuiDockNodeFlags_NoCloseButton) == 0;
 
-    // In a dock node, the Collapse Key turns into the Window Menu button.
+    // In a dock node, the Collapse Button turns into the Window Menu button.
     // FIXME-DOCK FIXME-OPT: Could we recycle popups id across multiple dock nodes?
     if (has_window_menu_button && IsPopupOpen("#WindowMenu"))
     {

@@ -7,7 +7,6 @@
 #include "GLFW/glfw3.h"
 
 #include <unordered_map>
-#include <iostream>
 
 namespace
 {
@@ -33,6 +32,8 @@ auto ToKeyState(int action)
 
 namespace nc::input
 {
+    constexpr uint32_t MouseWheelSensitivityScalar = 50u;
+
     struct
     {
         std::unordered_map<KeyCode, KeyState> keyStates = {};
@@ -83,9 +84,9 @@ namespace nc::input
         return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Held;
     }
 
-    void SetMouseWheel(int xOffset, int yOffset)
+    void SetMouseWheel(int yOffset)
     {
-        g_state.mouseWheel = yOffset * 50;
+        g_state.mouseWheel = yOffset * MouseWheelSensitivityScalar;
     }
 
     void ResetMouseState()

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "input/Input.h"
-#include "GLFW/glfw3.h"
+
+struct GLFWwindow;
 
 namespace nc::input
 {
@@ -14,7 +15,7 @@ namespace nc::input
     };
 
     void UpdateMousePosition(int mouseX, int mouseY);
-    void SetMouseWheel(int xOffset, int yOffset);
+    void SetMouseWheel(int yOffset);
     void SetWindow(GLFWwindow* window);
     void AddKeyToQueue(KeyCode_t buttonCode, int action);
     void ResetMouseState();
