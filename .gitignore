@@ -30,3 +30,4 @@ imgui.ini
 /.clang-format
 /Folder.DotSettings.user
 /.editorconfig
+/CMakeSettings.json
