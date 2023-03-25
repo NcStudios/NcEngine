@@ -174,7 +174,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, bool isMinimized)
     {
-        m_camera.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
+        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
         m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics
