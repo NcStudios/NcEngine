@@ -41,10 +41,8 @@ class VulkanGraphics : public IGraphics
                        const config::GraphicsSettings& graphicsSettings,
                        const GpuAccessorSignals& gpuAccessorSignals,
                        ShaderResourceBus& shaderResourceBus,
-                       uint32_t apiVersion, 
-                       Registry* registry, 
-                       GLFWwindow* window, 
-                       Vector2 dimensions);
+                       uint32_t apiVersion, Registry* registry, 
+                       GLFWwindow* window, Vector2 dimensions);
 
         ~VulkanGraphics() noexcept;
 

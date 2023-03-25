@@ -145,7 +145,7 @@ namespace nc::window
         g_instance->InvokeResizeReceivers(window, width, height);
     }
 
-    void WindowImpl::PollEvents()
+    void WindowImpl::ProcessSystemMessages()
     {
         if (glfwWindowShouldClose(m_window))
         {

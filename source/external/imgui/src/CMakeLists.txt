@@ -37,5 +37,4 @@ target_link_libraries(imgui
         Vulkan::Vulkan
     PUBLIC
         glfw
-
 )

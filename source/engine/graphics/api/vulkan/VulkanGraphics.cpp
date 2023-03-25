@@ -32,10 +32,8 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
                                const GpuAccessorSignals& gpuAccessorSignals,
                                ShaderResourceBus& shaderResourceBus,
-                               uint32_t apiVersion,
-                               Registry* registry,
-                               GLFWwindow* window, 
-                               Vector2 dimensions)
+                               uint32_t apiVersion, Registry* registry,
+                               GLFWwindow* window, Vector2 dimensions)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
       m_surface{m_instance->CreateSurface(window)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},

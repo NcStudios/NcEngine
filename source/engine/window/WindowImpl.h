@@ -31,7 +31,7 @@ namespace nc::window
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
             void InvokeResizeReceivers(GLFWwindow* window, int width, int height);
             
-            void PollEvents();
+            void ProcessSystemMessages();
 
         private:
             static void ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);

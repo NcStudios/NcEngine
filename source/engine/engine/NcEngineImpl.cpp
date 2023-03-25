@@ -124,7 +124,7 @@ void NcEngineImpl::Run()
     {
         OPTICK_FRAME("Main Thread");
         input::Flush();
-        m_window.PollEvents();
+        m_window.ProcessSystemMessages();
         auto result = m_executor.Run();
         result.wait();
         if (m_sceneManager.IsSceneChangeQueued())
