@@ -1,4 +1,5 @@
 #include "NcEngineImpl.h"
+#include "asset/NcAsset.h"
 #include "audio/NcAudioImpl.h"
 #include "config/ConfigInternal.h"
 #include "ecs/LogicModule.h"
@@ -14,12 +15,12 @@ namespace
 {
 auto BuildModuleRegistry(nc::Registry* reg,
                          nc::window::WindowImpl* window,
-                         const nc::GpuAccessorSignals& gpuAccessorSignals,
                          const nc::config::Config& config) -> nc::ModuleRegistry
 {
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = nc::ModuleRegistry{};
-    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings, config.graphicsSettings, gpuAccessorSignals, reg, window));
+    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings, config.memorySettings));
+    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings, config.graphicsSettings, moduleRegistry.Get<nc::asset::NcAsset>(), reg, window));
     moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, reg));
     moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, reg));
     moduleRegistry.Register(nc::time::BuildTimeModule());
@@ -42,8 +43,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{config.memorySettings.maxTransforms},
-      m_assets{config.assetSettings, config.memorySettings},
-      m_modules{BuildModuleRegistry(&m_registry, &m_window, m_assets.CreateGpuAccessorSignals(), config)},
+      m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
       m_executor{},
       m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},
       m_isRunning{false}

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "NcEngine.h"
-#include "assets/AssetManagers.h"
 #include "ecs/Registry.h"
 #include "math/Random.h"
 #include "scene/SceneManager.h"
@@ -27,7 +26,6 @@ namespace nc
         private:
             window::WindowImpl m_window;
             nc::Registry m_registry;
-            nc::AssetManagers m_assets;
             ModuleRegistry m_modules;
             task::Executor m_executor;
             scene::SceneManager m_sceneManager;

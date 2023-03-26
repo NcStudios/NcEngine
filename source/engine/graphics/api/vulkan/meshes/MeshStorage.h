@@ -5,8 +5,10 @@
 
 namespace nc
 {
-struct GpuAccessorSignals;
-struct MeshBufferData;
+namespace asset
+{
+struct MeshUpdateEventData;
+} // namespace asset
 
 namespace graphics
 {
@@ -15,9 +17,9 @@ class GpuAllocator;
 class MeshStorage
 {
     public:
-        MeshStorage(GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals);
+        MeshStorage(GpuAllocator* allocator, Signal<const asset::MeshUpdateEventData&>& onMeshUpdate);
 
-        void UpdateBuffer(const MeshBufferData& meshBufferData);
+        void UpdateBuffer(const asset::MeshUpdateEventData& eventData);
 
         auto GetVertexData() const noexcept -> const ImmutableBuffer&
         {
@@ -33,7 +35,7 @@ class MeshStorage
         GpuAllocator* m_allocator;
         ImmutableBuffer m_vertexBuffer;
         ImmutableBuffer m_indexBuffer;
-        nc::Connection<const MeshBufferData&> m_onMeshUpdateConnection;
+        nc::Connection<const asset::MeshUpdateEventData&> m_onMeshUpdateConnection;
 };
 } // namespace nc::graphics
 }

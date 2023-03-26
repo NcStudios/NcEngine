@@ -6,8 +6,12 @@
 
 namespace nc
 {
-struct GpuAccessorSignals;
 class Registry;
+
+namespace asset
+{
+class NcAsset;
+}
 
 namespace config
 {
@@ -40,7 +44,7 @@ class IGraphics
 
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
-                     const GpuAccessorSignals& signals,
+                     asset::NcAsset* assetModule,
                      ShaderResourceBus& shaderResourceBus,
                      Registry* registry,
                      window::WindowImpl* window) -> std::unique_ptr<IGraphics>;
