@@ -1,10 +1,9 @@
 #include "CubeMap.h"
-
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
 
 namespace nc::graphics
 {
-    CubeMap::CubeMap(vk::Device device, GpuAllocator* allocator, const CubeMapData& data)
+    CubeMap::CubeMap(vk::Device device, GpuAllocator* allocator, const asset::CubeMapWithId& data)
         : m_device{device},
           m_allocator{allocator},
           m_image{},
@@ -39,7 +38,7 @@ namespace nc::graphics
         return *this;
     }
 
-    void CubeMap::Bind(const CubeMapData& data)
+    void CubeMap::Bind(const asset::CubeMapWithId& data)
     {
         const auto& cubeMap = data.cubeMap;
         m_image = m_allocator->CreateCubeMapTexture(cubeMap.pixelData.data(), static_cast<uint32_t>(cubeMap.pixelData.size()), cubeMap.faceSideLength);

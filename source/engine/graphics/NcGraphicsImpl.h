@@ -14,7 +14,10 @@
 
 namespace nc
 {
-struct GpuAccessorSignals;
+namespace asset
+{
+class NcAsset;
+} // namespace asset
 
 namespace config
 {
@@ -34,7 +37,7 @@ struct ShaderResourceBus;
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
-                         const GpuAccessorSignals& gpuAccessorSignals,
+                         asset::NcAsset* assetModule,
                          Registry* registry,
                          window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
 
