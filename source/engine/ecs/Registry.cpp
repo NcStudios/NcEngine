@@ -8,6 +8,7 @@
 #include "graphics/MeshRenderer.h"
 #include "graphics/ParticleEmitter.h"
 #include "graphics/PointLight.h"
+#include "graphics/ToonRenderer.h"
 #include "network/NetworkDispatcher.h"
 #include "physics/Collider.h"
 #include "physics/ConcaveCollider.h"
@@ -43,6 +44,7 @@ Registry::Registry(size_t maxEntities)
     RegisterComponentType<graphics::MeshRenderer>();
     RegisterComponentType<graphics::ParticleEmitter>();
     RegisterComponentType<graphics::PointLight>();
+    RegisterComponentType<graphics::ToonRenderer>();
     RegisterComponentType<net::NetworkDispatcher>();
     RegisterComponentType<physics::Collider>();
     RegisterComponentType<physics::ConcaveCollider>();

@@ -31,3 +31,4 @@ imgui.ini
 /Folder.DotSettings.user
 /.editorconfig
 /CMakeSettings.json
+/CMakePresets.json

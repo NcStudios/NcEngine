@@ -117,7 +117,8 @@ Assets are the resources used by some built in components. The components that u
 * AudioSource: expects a path to a sound file.
 * Collider(Hull): expects a path to a convex hull mesh.
 * ConcaveCollider: expects a path to concave mesh.
-* MeshRenderer: expects a path to a mesh and a material wich requires three paths to textures.
+* MeshRenderer: expects a path to a mesh and a material which requires four paths to textures.
+* ToonRenderer: expects a path to a mesh and a material which requires four paths to textures.
 * Skybox(not a component): expects a path to a skybox asset (.nca).
 
 Components do not load or own the assets they use, but instead obtain a view over the data. This means an asset should be loaded before attempting to create a component that depends on it. For example, if you want to create an AudioSource that plays "my_sound.wav", you must have previously loaded "my_sound.wav" by calling LoadAudioClipAsset("my_sound.wav"). The loading functions and supported file types can be found in [Assets.h](../nc/include/Assets.h).

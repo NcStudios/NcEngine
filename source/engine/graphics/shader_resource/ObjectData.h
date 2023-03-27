@@ -12,9 +12,9 @@ struct ObjectData
     DirectX::XMMATRIX modelView;
     DirectX::XMMATRIX viewProjection;
 
-    uint32_t baseColorIndex; // Todo: Make this more generic for materials
-    uint32_t normalIndex;  // Todo: Make this more generic for materials
-    uint32_t roughnessIndex;  // Todo: Make this more generic for materials
-    uint32_t metallicIndex;  // Todo: Make this more generic for materials
+    uint32_t colorSlotAIndex; // Todo: Make this more generic for materials
+    uint32_t colorSlotBIndex; // Todo: Make this more generic for materials
+    uint32_t colorSlotCIndex; // Todo: Make this more generic for materials
+    uint32_t colorSlotDIndex; // Todo: Make this more generic for materials
 };
 } // namespace nc::graphics

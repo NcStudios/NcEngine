@@ -12,6 +12,7 @@
 #include "graphics/MeshRenderer.h"
 #include "graphics/ParticleEmitter.h"
 #include "graphics/PointLight.h"
+#include "graphics/ToonRenderer.h"
 #include "network/NetworkDispatcher.h"
 #include "physics/Collider.h"
 #include "physics/ConcaveCollider.h"
@@ -131,6 +132,9 @@ namespace nc::ui::editor::controls
 
         if (auto* pointLight = registry->Get<graphics::PointLight>(entity))
             ComponentGuiElement(pointLight);
+
+        if (auto* toonRenderer = registry->Get<graphics::ToonRenderer>(entity))
+            ComponentGuiElement(toonRenderer);
 
         if (auto* body = registry->Get<physics::PhysicsBody>(entity))
         {
@@ -269,6 +273,7 @@ namespace nc::ui::editor::controls
         ComponentSystemHeader<Transform>("Transform", View<Transform>(registry));
         ComponentSystemHeader<graphics::MeshRenderer>("Mesh Renderer", View<graphics::MeshRenderer>(registry));
         ComponentSystemHeader<graphics::PointLight>("Point Light", View<graphics::PointLight>(registry));
+        ComponentSystemHeader<graphics::ToonRenderer>("Toon Renderer", View<graphics::ToonRenderer>(registry));
     }
 
 } // end namespace nc::ui::editor

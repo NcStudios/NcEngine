@@ -10,12 +10,12 @@ struct ObjectData
     mat4 model;
     mat4 modelView;
     mat4 viewProjection;
-
+    
     // Textures
-    int baseColorIndex;
-    int normalIndex;
-    int roughnessIndex;
-    int metallicIndex;
+    int colorSlotAIndex;
+    int colorSlotBIndex;
+    int colorSlotCIndex;
+    int colorSlotDIndex;
 };
 
 layout(push_constant) uniform PER_OBJECT

@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType)
+    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, PbrMaterial material, TechniqueType techniqueType)
     : ComponentBase{entity},
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},
@@ -77,7 +77,7 @@ namespace nc::graphics
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Material::EditorGuiElement()
+    void PbrMaterial::EditorGuiElement()
     {
         ImGui::SameLine();
         ImGui::Text("Material");

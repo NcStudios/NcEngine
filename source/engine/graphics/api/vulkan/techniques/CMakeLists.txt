@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         ParticleTechnique.cpp
         PbrTechnique.cpp
         ShadowMappingTechnique.cpp
+        ToonTechnique.cpp
         UiTechnique.cpp
         WireframeTechnique.cpp
 )

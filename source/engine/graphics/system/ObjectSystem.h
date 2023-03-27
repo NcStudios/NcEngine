@@ -4,6 +4,7 @@
 #include "ecs/View.h"
 #include "ecs/Transform.h"
 #include "graphics/MeshRenderer.h"
+#include "graphics/ToonRenderer.h"
 #include "utility/Signal.h"
 
 #include <optional>
@@ -17,7 +18,10 @@ struct ObjectData;
 
 struct ObjectState
 {
-    std::vector<MeshView> meshes;
+    std::vector<MeshView> pbrMeshes;
+    uint32_t pbrMeshStartingIndex;
+    std::vector<MeshView> toonMeshes;
+    uint32_t toonMeshStartingIndex;
     std::optional<uint32_t> skyboxInstanceIndex = std::nullopt;
 };
 
@@ -29,7 +33,8 @@ class ObjectSystem
         {
         }
 
-        auto Execute(MultiView<MeshRenderer, Transform> gameState,
+        auto Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
+                     MultiView<ToonRenderer, Transform> toonRenderers,
                      const CameraState& cameraState,
                      const EnvironmentState& environmentState) -> ObjectState;
 

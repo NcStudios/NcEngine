@@ -5,7 +5,7 @@
 
 namespace nc::graphics
 {
-    struct Material
+    struct PbrMaterial
     {
         std::string baseColor;
         std::string normal;
@@ -20,10 +20,10 @@ namespace nc::graphics
     enum class TechniqueType : uint8_t
     {
         None = 0,
-        PhongAndUi = 1,
+        PhongAndUi = 1
     };
 
-    struct TextureIndices
+    struct PbrTextureIndices
     {
         TextureView baseColor;
         TextureView normal;
@@ -38,11 +38,11 @@ namespace nc::graphics
         public:
             MeshRenderer(Entity entity,
                          std::string meshUid,
-                         Material material,
+                         PbrMaterial material,
                          TechniqueType techniqueType = TechniqueType::PhongAndUi);
 
             auto GetMesh() const -> const MeshView& { return m_mesh; }
-            auto GetTextureIndices() const -> const TextureIndices& { return m_textureIndices; }
+            auto GetTextureIndices() const -> const PbrTextureIndices& { return m_textureIndices; }
             auto GetTechniqueType() const -> TechniqueType { return m_techniqueType; }
 
             void SetMesh(std::string meshUid);
@@ -52,17 +52,17 @@ namespace nc::graphics
             void SetMetallic(const std::string& texturePath);
 
             #ifdef NC_EDITOR_ENABLED
-            auto GetMaterial() -> Material& { return m_material; }
+            auto GetMaterial() -> PbrMaterial& { return m_material; }
             auto GetMeshPath() const -> const std::string& { return m_meshPath; }
             #endif
 
         private:
             #ifdef NC_EDITOR_ENABLED
-            Material m_material;
+            PbrMaterial m_material;
             std::string m_meshPath;
             #endif
             MeshView m_mesh;
-            TextureIndices m_textureIndices;
+            PbrTextureIndices m_textureIndices;
             TechniqueType m_techniqueType;
     };
 } // namespace nc::graphics

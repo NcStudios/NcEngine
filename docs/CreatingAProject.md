@@ -22,7 +22,7 @@ Next we're going to create a scene. A scene's primary responsibility is to set u
 
 /** Default assets from the nc/resources directory. */
 const auto CubeMeshPath = std::string{"cube.nca"};
-const auto DefaultMaterial = nc::Material
+const auto DefaultMaterial = nc::PbrMaterial
 {
     .baseColor = "DefaultBaseColor.png",
     .normal    = "DefaultNormal.png",

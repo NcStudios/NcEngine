@@ -7,6 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 
 #include <string>
@@ -32,32 +33,32 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
-    auto floorMaterial = graphics::Material{
+    auto floorMaterial = graphics::PbrMaterial{
         .baseColor = "floor\\BaseColor.nca",
         .normal    = "floor\\Normal.nca",
         .roughness = "floor\\Roughness.nca",
         .metallic  = "floor\\Roughness.nca"
     };
 
-    auto blacktopMaterial = graphics::Material{
+    auto blacktopMaterial = graphics::PbrMaterial{
         .baseColor = "blacktop\\BaseColor.nca",
         .normal    = "blacktop\\Normal.nca",
         .roughness = "blacktop\\Roughness.nca",
         .metallic  = "blacktop\\Metallic.nca"
     };
 
-    auto blueMaterial = graphics::Material{
+    auto blueMaterial = graphics::PbrMaterial{
         .baseColor = "spheres\\Blue\\BaseColor.nca",
         .normal    = "spheres\\Blue\\Normal.nca",
         .roughness = "spheres\\Blue\\Roughness.nca",
         .metallic  = "spheres\\Blue\\Metallic.nca"
     };
 
-    auto grayMaterial = graphics::Material{
+    auto grayMaterial = graphics::ToonMaterial{
         .baseColor = "spheres\\Gray\\BaseColor.nca",
-        .normal    = "spheres\\Gray\\Normal.nca",
-        .roughness = "spheres\\Gray\\Roughness.nca",
-        .metallic  = "spheres\\Gray\\Metallic.nca"
+        .overlay    = "spheres\\Gray\\Normal.nca",
+        .lightShading = "spheres\\Gray\\Roughness.nca",
+        .heavyShading  = "spheres\\Gray\\Metallic.nca"
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
@@ -93,7 +94,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .tag = "Sphere"
     });
 
-    registry->Add<graphics::MeshRenderer>(blackSphere, "sphere.nca", grayMaterial);
+    registry->Add<graphics::ToonRenderer>(blackSphere, "sphere.nca", grayMaterial);
 
     auto blackBox = registry->Add<Entity>({
         .position = Vector3{-3.0f, 1.0f, 2.0f},

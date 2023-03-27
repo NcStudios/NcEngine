@@ -7,6 +7,7 @@ Engine Components
 * [ConcaveCollider](#concavecollider)
 * [PhysicsBody](#physicsbody)
 * [MeshRenderer](#meshrenderer)
+* [ToonRenderer](#toonrenderer)
 * [PointLight](#pointlight)
 * [AudioSource](#audiosource)
 * [Camera](#camera)
@@ -123,6 +124,10 @@ Degrees of freedom may be restricted with the constructor's linear and angular f
 ### MeshRenderer
 ---------------
 Mesh renderers allows a mesh to be rendered using a material. They rely on multiple assets: one the mesh and four for the material's textures. They also require a technique type, but only one type is currently exposed in the API. Rendering will use the associated entity's transform for vertex transformations.
+
+### ToonRenderer
+---------------
+Toon renderers allows a mesh to be rendered using a toon material. They rely on multiple assets: one the mesh and four for the material's textures. Rendering will use the associated entity's transform for vertex transformations. Note: the toon renderer component is in place only until the generic material system can be completed.
 
 ### PointLight
 -------------

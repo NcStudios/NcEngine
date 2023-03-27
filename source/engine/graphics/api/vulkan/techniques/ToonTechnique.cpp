@@ -1,4 +1,4 @@
-#include "PbrTechnique.h"
+#include "ToonTechnique.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
@@ -14,7 +14,7 @@
 
 namespace nc::graphics
 {
-    PbrTechnique::PbrTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+    ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
         : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
@@ -23,8 +23,8 @@ namespace nc::graphics
 
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PbrVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PbrFragment.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ToonVertex.spv");
+        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ToonFragment.spv");
 
         auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
         auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -82,44 +82,44 @@ namespace nc::graphics
         vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    PbrTechnique::~PbrTechnique() noexcept
+    ToonTechnique::~ToonTechnique() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    bool PbrTechnique::CanBind(const PerFrameRenderState& frameData)
+    bool ToonTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         (void)frameData;
         return true;
     }
 
-    void PbrTechnique::Bind(vk::CommandBuffer* cmd)
+    void ToonTechnique::Bind(vk::CommandBuffer* cmd)
     {
-        OPTICK_CATEGORY("PbrTechnique::Bind", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
 
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
-    bool PbrTechnique::CanRecord(const PerFrameRenderState& frameData)
+    bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
         (void)frameData;
         return true;
     }
 
-    void PbrTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        OPTICK_CATEGORY("PbrTechnique::Record", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ToonTechnique::Record", Optick::Category::Rendering);
         uint32_t objectInstance = 0;
-        for (const auto& mesh : frameData.objectState.pbrMeshes)
+        for (const auto& mesh : frameData.objectState.toonMeshes)
         {
-            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance + frameData.objectState.pbrMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance + frameData.objectState.toonMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             ++objectInstance;
         }
     }
 
-    void PbrTechnique::Clear() noexcept
+    void ToonTechnique::Clear() noexcept
     {
     }
 }
