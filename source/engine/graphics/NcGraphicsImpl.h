@@ -60,7 +60,7 @@ class NcGraphicsImpl : public NcGraphics
         void Clear() noexcept override;
         void Run();
 
-        void OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg);
+        void OnResize(float width, float height, float nearZ, float farZ, bool isMinimized);
 
     private:
         Registry* m_registry;

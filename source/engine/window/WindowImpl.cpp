@@ -10,8 +10,6 @@
 
 namespace
 {
-    constexpr auto WndClassStyleFlags = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    constexpr auto WndStyleFlags = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
     nc::window::WindowImpl* g_instance = nullptr;
 }
 
@@ -38,32 +36,25 @@ namespace nc::window
     /* WindowImpl */
     WindowImpl::WindowImpl(std::function<void()> onQuit)
         : m_onResizeReceivers{},
-          m_hwnd{nullptr},
-          m_wndClass{},
-          m_hInstance{},
           m_dimensions{},
           GraphicsOnResizeCallback{nullptr},
-          UIWndMessageCallback{nullptr},
           EngineDisableRunningCallback{std::move(onQuit)}
     {
+        glfwInit();
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
         g_instance = this;
-        GetModuleHandleExA(0, NULL, &m_hInstance);
 
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
-
-        m_wndClass.style = WndClassStyleFlags;
-        m_wndClass.lpfnWndProc = WindowImpl::WndProc;
-        m_wndClass.hInstance = m_hInstance;
-        m_wndClass.lpszClassName = TEXT(projectSettings.projectName.c_str());
-
-        if(!RegisterClass(&m_wndClass))
+        const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        if (!videoMode)
         {
-            throw NcError("Failed to register wnd class");
+            throw NcError("Error getting the monitor's video mode information.");
         }
 
-        auto nativeWidth = GetSystemMetrics(SM_CXFULLSCREEN);
-        auto nativeHeight = GetSystemMetrics(SM_CYFULLSCREEN);
+        auto nativeWidth = videoMode->width;
+        auto nativeHeight = videoMode->height;
 
         if(graphicsSettings.useNativeResolution)
         {
@@ -74,61 +65,33 @@ namespace nc::window
             m_dimensions = Vector2{ static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight) };
         }
 
-        auto left = Clamp((nativeWidth - (int)m_dimensions.x) / 2, 0, nativeWidth);
-        auto top = Clamp((nativeHeight - (int)m_dimensions.y) / 2, 0, nativeHeight);
+        auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
+        auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
 
-        auto clientRect = RECT
-        {
-            (LONG)left,
-            (LONG)top,
-            (LONG)(left + m_dimensions.x),
-            (LONG)(top + m_dimensions.y)
-        };
+        m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), nullptr, nullptr);
 
-        if(!AdjustWindowRect(&clientRect, WndStyleFlags, FALSE))
-        {
-            throw NcError("Failed to adjust client rect to window rect");
-        }
-
-        if(clientRect.left < 0)
-        {
-            clientRect.right += (-1 * clientRect.left);
-            clientRect.left = 0;
-        }
-
-        if(clientRect.top < 0)
-        {
-            clientRect.bottom += (-1 * clientRect.top);
-            clientRect.top = 0;
-        }
-
-        m_hwnd = CreateWindowExA(0, (LPCSTR)m_wndClass.lpszClassName,
-                                projectSettings.projectName.c_str(),
-                                WndStyleFlags,
-                                clientRect.left, clientRect.top,
-                                clientRect.right - clientRect.left,
-                                clientRect.bottom - clientRect.top,
-                                0, 0, m_hInstance, 0);
-
-        if(!m_hwnd)
+        if(!m_window)
         {
             throw NcError("CreateWindow failed");
         }
+
+        glfwSetKeyCallback(m_window, &ProcessKeyEvent);
+        glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
+        glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
+        glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
+        glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
+        glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
     }
 
     WindowImpl::~WindowImpl() noexcept
     {
-        DestroyWindow(m_hwnd);
+        glfwDestroyWindow(m_window);
+        glfwTerminate();
     }
 
-    HWND WindowImpl::GetHWND() const noexcept
+    auto WindowImpl::GetWindow() -> GLFWwindow*
     {
-        return m_hwnd;
-    }
-
-    HINSTANCE WindowImpl::GetHINSTANCE() const noexcept
-    {
-        return m_hInstance;
+        return m_window;
     }
 
     Vector2 WindowImpl::GetDimensions() const noexcept
@@ -136,14 +99,14 @@ namespace nc::window
         return m_dimensions;
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept
+    void WindowImpl::SetDimensions(int width, int height) noexcept
     {
-        GraphicsOnResizeCallback = std::move(callback);
+        m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
     }
 
-    void WindowImpl::BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,bool)> callback) noexcept
     {
-        UIWndMessageCallback = std::move(callback);
+        GraphicsOnResizeCallback = std::move(callback);
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -161,123 +124,84 @@ namespace nc::window
         }
     }
 
-    void WindowImpl::OnResize(float width, float height, WPARAM windowArg)
+    void WindowImpl::InvokeResizeReceivers(GLFWwindow* window, int width, int height)
     {
         if(!(GraphicsOnResizeCallback))
         {
             return;
         }
 
-        m_dimensions = Vector2{width, height};
         const auto& graphicsSettings = config::GetGraphicsSettings();
-        GraphicsOnResizeCallback(m_dimensions.x, m_dimensions.y, graphicsSettings.nearClip, graphicsSettings.farClip, windowArg);
+        int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
+        GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), graphicsSettings.nearClip, graphicsSettings.farClip, minimized);
+
         for(auto receiver : m_onResizeReceivers)
         {
             receiver->OnResize(m_dimensions);
         }
     }
 
-    LRESULT CALLBACK WindowImpl::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    void WindowImpl::ProcessResizeEvent(GLFWwindow* window, int width, int height)
     {
-        if(g_instance->UIWndMessageCallback &&
-           g_instance->UIWndMessageCallback(hwnd, message, wParam, lParam))
-        {
-            return true;
-        }
-
-        switch(message)
-        {
-            case WM_SIZE:
-            {
-                g_instance->OnResize(LOWORD(lParam), HIWORD(lParam), wParam);
-                break;
-            }
-            case WM_CLOSE:
-            {
-                g_instance->EngineDisableRunningCallback();
-                break;
-            }
-            case WM_DESTROY:
-            {
-                PostQuitMessage(0);
-                break;
-            }
-            case WM_QUIT:
-            {
-                break;
-            }
-            case WM_MOUSEWHEEL:
-            {
-                input::SetMouseWheel(wParam, lParam);
-                break;
-            }
-            default:
-            {
-                return DefWindowProc(hwnd, message, wParam, lParam);
-            }
-        }
-        return 0;
+        g_instance->SetDimensions(width, height);
+        glfwSetWindowSize(window, width, height);
+        g_instance->InvokeResizeReceivers(window, width, height);
     }
 
     void WindowImpl::ProcessSystemMessages()
     {
+        if (glfwWindowShouldClose(m_window))
+        {
+            EngineDisableRunningCallback();
+        }
+
+        glfwPollEvents();
+    }
+
+    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
+    {
+        nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
+        nc::input::AddKeyToQueue(keyCode, action);
+    }
+
+    void WindowImpl::ProcessMouseCursorPosEvent(GLFWwindow*, double xPos, double yPos)
+    {
+        nc::input::UpdateMousePosition(static_cast<int>(xPos), static_cast<int>(yPos));
+    }
+
+    void WindowImpl::ProcessMouseButtonEvent(GLFWwindow*, int button, int action, int)
+    {
         using namespace nc::input;
 
-        MSG message;
-        while(PeekMessage(&message, 0, 0, 0, PM_REMOVE))
+        static constexpr auto mouseLUT = std::array<KeyCode_t, 8>
         {
-            switch (message.message)
-            {
-                case WM_QUIT:
-                {
-                    break;
-                }
-                case WM_MOUSEMOVE:
-                {
-                    UpdateMousePosition(message.lParam);
-                    break;
-                }
-                case WM_LBUTTONDOWN:
-                {
-                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::LeftButton, message.lParam);
-                    break;
-                }
-                case WM_LBUTTONUP:
-                {
-                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::LeftButton, message.lParam);
-                    break;
-                }
-                case WM_MBUTTONDOWN:
-                {
-                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
-                    break;
-                }
-                case WM_MBUTTONUP:
-                {
-                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::MiddleButton, message.lParam);
-                    break;
-                }
-                case WM_RBUTTONDOWN:
-                {
-                    AddMouseButtonDownToQueue((KeyCode_t)KeyCode::RightButton, message.lParam);
-                    break;
-                }
-                case WM_RBUTTONUP:
-                {
-                    AddMouseButtonUpToQueue((KeyCode_t)KeyCode::RightButton, message.lParam);
-                    break;
-                }
-                case WM_SYSKEYDOWN:
-                case WM_SYSKEYUP:
-                case WM_KEYDOWN:
-                case WM_KEYUP:
-                {
-                    AddKeyToQueue(static_cast<KeyCode_t>(message.wParam), message.lParam);
-                    break;
-                }
-            }
-            TranslateMessage(&message);
-            DispatchMessage(&message);
+            (KeyCode_t)KeyCode::LeftButton,
+            (KeyCode_t)KeyCode::RightButton,
+            (KeyCode_t)KeyCode::MiddleButton,
+            (KeyCode_t)KeyCode::MouseButton4,
+            (KeyCode_t)KeyCode::MouseButton5,
+            (KeyCode_t)KeyCode::MouseButton6,
+            (KeyCode_t)KeyCode::MouseButton7,
+            (KeyCode_t)KeyCode::MouseButton8
+        };
+        
+        if (button >= static_cast<int>(mouseLUT.size()))
+        {
+            return;
         }
+
+        const auto mouseButton = mouseLUT.at(button);
+        AddKeyToQueue(mouseButton, action);
+    }
+
+    void WindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
+    {
+        input::SetMouseWheel(static_cast<int>(yOffset));
+    }
+
+    void WindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)
+    {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+        g_instance->EngineDisableRunningCallback();
     }
 } // end namespace nc::window

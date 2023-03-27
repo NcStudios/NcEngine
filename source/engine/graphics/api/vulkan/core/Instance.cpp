@@ -1,5 +1,6 @@
 #include "Instance.h"
 
+#include "GLFW/glfw3.h"
 #include "ncutility/NcError.h"
 
 #include <algorithm>
@@ -7,7 +8,6 @@
 
 namespace
 {
-constexpr auto g_globalExtensions = std::array<const char*, 2>{ VK_KHR_WIN32_SURFACE_EXTENSION_NAME, VK_KHR_SURFACE_EXTENSION_NAME };
 constexpr auto g_validationLayers = std::array<const char*, 1>{ "VK_LAYER_KHRONOS_validation" };
 
 auto CheckValidationLayerSupport() -> bool
@@ -51,10 +51,13 @@ void SetValidationLayersEnabled(bool isEnabled, vk::InstanceCreateInfo& instance
     }
 }
 
-void SetGlobalExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
+void SetExtensions(vk::InstanceCreateInfo& instanceCreateInfo)
 {
-    instanceCreateInfo.setEnabledExtensionCount(static_cast<uint32_t>(g_globalExtensions.size()));
-    instanceCreateInfo.setPpEnabledExtensionNames(g_globalExtensions.data());
+    auto glfwExtensionsCount = 0u;
+    auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
+
+    instanceCreateInfo.setEnabledExtensionCount(glfwExtensionsCount);
+    instanceCreateInfo.setPpEnabledExtensionNames(glfwExtensions);
 }
 
 auto CreateInstance(std::string_view appName, uint32_t appVersion,
@@ -71,7 +74,7 @@ auto CreateInstance(std::string_view appName, uint32_t appVersion,
     };
     auto createInfo = vk::InstanceCreateInfo{{}, &appInfo};
     ::SetValidationLayersEnabled(enableValidationLayers, createInfo);
-    ::SetGlobalExtensions(createInfo);
+    ::SetExtensions(createInfo);
 
     return vk::createInstanceUnique(createInfo);
 }
@@ -85,10 +88,15 @@ Instance::Instance(std::string_view appName, uint32_t appVersion,
 {
 }
 
-auto Instance::CreateSurface(HWND hwnd, HINSTANCE hinstance) const -> vk::UniqueSurfaceKHR
+auto Instance::CreateSurface(GLFWwindow* window) const -> vk::UniqueSurfaceKHR
 {
-    auto createInfo = vk::Win32SurfaceCreateInfoKHR{{}, hinstance, hwnd};
-    return m_instance->createWin32SurfaceKHRUnique(createInfo);
+    VkSurfaceKHR surface;
+    auto result = glfwCreateWindowSurface(m_instance.get(), window, nullptr, &surface);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        throw nc::NcError("Creating a surface - Failed to create a surface.");
+    }
+    return vk::UniqueSurfaceKHR(surface, m_instance.get());
 }
 
 auto Instance::GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>
@@ -104,7 +112,6 @@ auto Instance::GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>
     {
         throw nc::NcError("Get physical devices - Failed to find GPU that supports Vulkan.");
     }
-
     return devices;
 }
 } // namespace nc::graphics

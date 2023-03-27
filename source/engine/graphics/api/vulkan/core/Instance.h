@@ -1,12 +1,11 @@
 #pragma once
 
-#include "platform/win32/NcWin32.h"
-
 #include <string_view>
 #include <vector>
 
-#define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.hpp>
+
+struct GLFWwindow;
 
 namespace nc::graphics
 {
@@ -26,7 +25,7 @@ class Instance
             return m_instance.get();
         }
 
-        auto CreateSurface(HWND hwnd, HINSTANCE hinstance) const -> vk::UniqueSurfaceKHR;
+        auto CreateSurface(GLFWwindow* window) const -> vk::UniqueSurfaceKHR;
         auto GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>;
 
     private:

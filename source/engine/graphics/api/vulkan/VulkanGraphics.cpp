@@ -19,6 +19,8 @@
 #include "ncutility/NcError.h"
 #include "optick/optick.h"
 
+#include "GLFW/glfw3.h"
+
 namespace
 {
 constexpr auto g_requiredDeviceExtensions = std::array<const char*, 1>{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
@@ -30,10 +32,10 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
                                asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
-                               uint32_t apiVersion, Registry* registry, HWND hwnd,
-                               HINSTANCE hinstance, Vector2 dimensions)
+                               uint32_t apiVersion, Registry* registry,
+                               GLFWwindow* window, Vector2 dimensions)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
-      m_surface{m_instance->CreateSurface(hwnd, hinstance)},
+      m_surface{m_instance->CreateSurface(window)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
       m_swapchain{ std::make_unique<Swapchain>(*m_device, m_surface.get(), dimensions)},
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
@@ -80,10 +82,10 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
     m_lighting->Resize(dimensions);
 }
 
-void VulkanGraphics::OnResize(float width, float height, const WPARAM windowArg)
+void VulkanGraphics::OnResize(float width, float height, bool isMinimized)
 {
     m_dimensions = Vector2{ width, height };
-    m_isMinimized = windowArg == 1;
+    m_isMinimized = isMinimized;
     Resize(m_dimensions);
 }
 

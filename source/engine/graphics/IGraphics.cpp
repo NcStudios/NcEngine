@@ -20,8 +20,7 @@ auto GraphicsFactory(const config::ProjectSettings& projectSettings,
     return std::make_unique<vulkan::VulkanGraphics>(projectSettings, graphicsSettings,
                                                     assetModule, shaderResourceBus,
                                                     apiVersion, registry,
-                                                    window->GetHWND(),
-                                                    window->GetHINSTANCE(),
+                                                    window->GetWindow(),
                                                     window->GetDimensions()
     );
 }

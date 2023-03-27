@@ -1,18 +1,17 @@
 #pragma once
 
-#include "platform/win32/NcWin32.h"
 #include "ncmath/Vector.h"
+
+#define GLFW_INCLUDE_NONE
+#include "GLFW/glfw3.h"
 
 #include <functional>
 #include <vector>
 
-namespace nc
-{
-    namespace window { class IOnResizeReceiver; }
-}
-
 namespace nc::window
 {
+    class IOnResizeReceiver;
+
     class WindowImpl
     {
         public:
@@ -23,30 +22,30 @@ namespace nc::window
             WindowImpl& operator=(const WindowImpl& other) = delete;
             WindowImpl& operator=(WindowImpl&& other) = delete;
 
-            auto GetHWND() const noexcept -> HWND;
-            auto GetHINSTANCE() const noexcept -> HINSTANCE;
+            auto GetWindow() -> GLFWwindow*;
             auto GetDimensions() const noexcept -> Vector2;
 
-            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,WPARAM)> callback) noexcept;
-            void BindUICallback(std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> callback) noexcept;
-
+            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,bool)> callback) noexcept;
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
-            void OnResize(float width, float height, WPARAM windowArg);
-
+            void InvokeResizeReceivers(GLFWwindow* window, int width, int height);
+            
             void ProcessSystemMessages();
 
-            static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-
         private:
-            std::vector<IOnResizeReceiver*> m_onResizeReceivers;
-            HWND m_hwnd;
-            WNDCLASS m_wndClass;
-            HINSTANCE m_hInstance;
-            Vector2 m_dimensions;
+            void SetDimensions(int width, int height) noexcept;
 
-            std::function<void(float,float,float,float,WPARAM)> GraphicsOnResizeCallback;
-            std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> UIWndMessageCallback;
+            static void ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
+            static void ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
+            static void ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos);
+            static void ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
+            static void ProcessResizeEvent(GLFWwindow* window, int width, int height);
+            static void ProcessWindowCloseEvent(GLFWwindow* window);
+
+            std::vector<IOnResizeReceiver*> m_onResizeReceivers;
+            Vector2 m_dimensions;
+            GLFWwindow* m_window;
+            std::function<void(float,float,float,float,bool)> GraphicsOnResizeCallback;
             std::function<void()> EngineDisableRunningCallback;
     };
 } // end namespace nc::window

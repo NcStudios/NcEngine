@@ -1,16 +1,41 @@
 #include "input/Input.h"
 #include "InputInternal.h"
 
+#include "GLFW/glfw3.h"
+
 #include <algorithm>
 #include <vector>
-#include <windowsx.h>
+#include <unordered_map>
+
+namespace
+{
+enum class KeyState
+{
+    None,
+    Pressed,
+    Held,
+    Released
+};
+
+auto ToKeyState(int action)
+{
+    switch(action)
+    {
+        case GLFW_PRESS: return KeyState::Pressed;
+        case GLFW_RELEASE: return KeyState::Released;
+        case GLFW_REPEAT: return KeyState::Held; // Note: 'Repeat' is not strictly the same as 'held', and we handle checking for and setting the 'held' state in Input::Flush. However, we know that if 'repeat' is true, 'held' is also true.
+        default: return KeyState::None;
+    }
+}
+}
 
 namespace nc::input
 {
+    constexpr uint32_t MouseWheelSensitivityScalar = 50u;
+
     struct
     {
-        std::vector<InputItem> downKeys = {};
-        std::vector<InputItem> upKeys = {};
+        std::unordered_map<KeyCode, KeyState> keyStates = {};
         uint32_t mouseX = 0u;
         uint32_t mouseY = 0u;
         int32_t mouseWheel = 0;
@@ -44,33 +69,22 @@ namespace nc::input
 
     bool KeyDown(KeyCode keyCode)
     {
-        auto beg = g_state.downKeys.cbegin();
-        auto end = g_state.downKeys.cend();
-        return end != std::ranges::find_if(beg, end, [keyCode](const auto& item)
-        {
-            return item.keyCode == static_cast<KeyCode_t>(keyCode);
-        });
+        return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Pressed;
     }
 
     bool KeyUp(KeyCode keyCode)
     {
-        auto beg = g_state.upKeys.cbegin();
-        auto end = g_state.upKeys.cend();
-        return end != std::find_if(beg, end, [keyCode](const auto& item)
-        {
-            return item.keyCode == static_cast<KeyCode_t>(keyCode);
-        });
+        return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Released;
     }
 
     bool KeyHeld(KeyCode keyCode)
     {
-        //if most significant bit is 1, key is down
-        return (GetAsyncKeyState((KeyCode_t)keyCode) & (1 << 15)) == 0 ? false : true;
+        return g_state.keyStates.contains(keyCode) && g_state.keyStates[keyCode] == KeyState::Held;
     }
 
-    void SetMouseWheel(WPARAM wParam, LPARAM)
+    void SetMouseWheel(int yOffset)
     {
-        g_state.mouseWheel = GET_WHEEL_DELTA_WPARAM(wParam);
+        g_state.mouseWheel = yOffset * MouseWheelSensitivityScalar;
     }
 
     void ResetMouseState()
@@ -78,41 +92,36 @@ namespace nc::input
         g_state.mouseWheel = 0;
     }
 
-    void AddKeyToQueue(KeyCode_t keyCode, LPARAM lParam)
+    void AddKeyToQueue(KeyCode_t keyCode, int action)
     {
-        bool WasDown = ((lParam & (1 << 30)) != 0);
-        bool IsDown  = ((lParam & (1 << 31)) == 0);
-        
-        if (WasDown && !IsDown)
-        {
-            g_state.upKeys.emplace_back(keyCode, lParam);
-        }
-        else if (IsDown)
-        {
-            g_state.downKeys.emplace_back(keyCode, lParam);
-        }
-    }
-
-    void AddMouseButtonDownToQueue(KeyCode_t keyCode, LPARAM lParam)
-    {
-        g_state.downKeys.emplace_back(keyCode, lParam);
-    }
-
-    void AddMouseButtonUpToQueue(KeyCode_t keyCode, LPARAM lParam)
-    {
-        g_state.upKeys.emplace_back(keyCode, lParam);
+        g_state.keyStates[static_cast<KeyCode>(keyCode)] = ::ToKeyState(action);
     }
 
     void Flush()
     {
-        g_state.downKeys.clear();
-        g_state.upKeys.clear();
+        for (auto cur = g_state.keyStates.begin(); cur != g_state.keyStates.end();)
+        {
+            auto& state = cur->second;
+            if (state == KeyState::Pressed)
+            {
+                state = KeyState::Held;
+                cur++;
+            }
+            else if (state == KeyState::None || state == KeyState::Released)
+            {
+                g_state.keyStates.erase(cur++);
+            }
+            else if (state == KeyState::Held)
+            {
+                cur++;
+            }
+        }
         ResetMouseState();
     }
 
-    void UpdateMousePosition(LPARAM lParam)
+    void UpdateMousePosition(int mouseX, int mouseY)
     {
-        g_state.mouseX = GET_X_LPARAM(lParam); // extracted values can be negative so HI/LO WORD doesn't work
-        g_state.mouseY = GET_Y_LPARAM(lParam);
+        g_state.mouseX = mouseX;
+        g_state.mouseY = mouseY;
     }
 } //end namespace nc::input

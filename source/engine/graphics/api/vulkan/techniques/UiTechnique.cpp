@@ -9,6 +9,7 @@
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 
 #include "imgui/imgui_impl_vulkan.h"
+#include "imgui/imgui_impl_glfw.h"
 
 namespace nc::graphics
 {
