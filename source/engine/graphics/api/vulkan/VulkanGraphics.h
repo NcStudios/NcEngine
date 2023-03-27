@@ -78,7 +78,7 @@ class VulkanGraphics : public IGraphics
         Vector2 m_dimensions;
         bool m_isMinimized;
 };
-} // namespace nc::graphics::vulkan
-} // namespace nc::graphics
+} // namespace vulkan
+} // namespace graphics
 } // namespace nc
 

@@ -16,7 +16,6 @@ namespace nc::input
 
     void UpdateMousePosition(int mouseX, int mouseY);
     void SetMouseWheel(int yOffset);
-    void SetWindow(GLFWwindow* window);
     void AddKeyToQueue(KeyCode_t keyCode, int action);
     void ResetMouseState();
     void Flush();

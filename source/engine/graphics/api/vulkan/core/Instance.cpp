@@ -1,10 +1,10 @@
 #include "Instance.h"
 
+#include "GLFW/glfw3.h"
 #include "ncutility/NcError.h"
 
 #include <algorithm>
 #include <array>
-#include "GLFW/glfw3.h"
 
 namespace
 {
@@ -91,7 +91,11 @@ Instance::Instance(std::string_view appName, uint32_t appVersion,
 auto Instance::CreateSurface(GLFWwindow* window) const -> vk::UniqueSurfaceKHR
 {
     VkSurfaceKHR surface;
-    glfwCreateWindowSurface(m_instance.get(), window, nullptr, &surface);
+    auto result = glfwCreateWindowSurface(m_instance.get(), window, nullptr, &surface);
+    if (result != VkResult::VK_SUCCESS)
+    {
+        throw nc::NcError("Creating a surface - Failed to create a surface.");
+    }
     return vk::UniqueSurfaceKHR(surface, m_instance.get());
 }
 
@@ -108,7 +112,6 @@ auto Instance::GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>
     {
         throw nc::NcError("Get physical devices - Failed to find GPU that supports Vulkan.");
     }
-
     return devices;
 }
 } // namespace nc::graphics

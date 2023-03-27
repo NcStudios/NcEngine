@@ -25,7 +25,8 @@ namespace nc::input
     // See https://www.glfw.org/docs/3.3/group__keys.html
     enum class KeyCode : KeyCode_t
     {
-        LeftButton = 0, RightButton = 1, MiddleButton = 2, MouseWheel = 7,
+        LeftButton   = 0, RightButton  = 1, MiddleButton = 2, MouseButton4 = 3, 
+        MouseButton5 = 4, MouseButton6 = 5, MouseButton7 = 6, MouseButton8 = 7,
 
         Zero = 48, One = 49, Two   = 50, Three = 51, Four = 52,
         Five = 53, Six = 54, Seven = 55, Eight = 56, Nine = 57,
@@ -43,9 +44,9 @@ namespace nc::input
 
         LeftArrow = 263, UpArrow = 265, RightArrow = 262, DownArrow = 264,
 
-        Shift = 336, LeftShift = 340, RightShift = 344,
-        Ctrl  = 337, LeftCtrl  = 341, RightCtrl  = 345,
-        Alt   = 338, LeftAlt   = 342, RightAlt   = 346,
+        LeftShift = 340, RightShift = 344,
+        LeftCtrl  = 341, RightCtrl  = 345,
+        LeftAlt   = 342, RightAlt   = 346,
 
         Space = 32,
         Escape = 256,
