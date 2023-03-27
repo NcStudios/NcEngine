@@ -9,7 +9,10 @@
 
 namespace nc
 {
-struct CubeMapBufferData;
+namespace asset
+{
+struct CubeMapUpdateEventData;
+} // namespace asset
 
 class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
 {
@@ -22,13 +25,13 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> CubeMapView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const CubeMapBufferData&>*;
+        auto OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&;
 
     private:
         std::vector<std::string> m_cubeMapIds;
         std::string m_assetDirectory;
         uint32_t m_maxCubeMapsCount;
-        Signal<const CubeMapBufferData&> m_onUpdate;
+        Signal<const asset::CubeMapUpdateEventData&> m_onUpdate;
 };
 } // namesapce nc
 

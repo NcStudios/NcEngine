@@ -8,8 +8,11 @@
 
 namespace nc
 {
-struct TextureBufferData;
-struct TextureData;
+namespace asset
+{
+struct TextureWithId;
+struct TextureUpdateEventData;
+} // namespace nc
 
 class TextureAssetManager : public IAssetService<TextureView, std::string>
 {
@@ -22,12 +25,12 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         void UnloadAll() override;
         auto Acquire(const std::string& path) const -> TextureView override;
         bool IsLoaded(const std::string& path) const override;
-        auto OnUpdate() -> Signal<const TextureBufferData&>*;
+        auto OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&;
 
     private:
-        std::vector<TextureData> m_textureData;
+        std::vector<asset::TextureWithId> m_textureData;
         std::string m_assetDirectory;
         uint32_t m_maxTextureCount;
-        Signal<const TextureBufferData&> m_onUpdate;
+        Signal<const asset::TextureUpdateEventData&> m_onUpdate;
 };
 } // namespace nc

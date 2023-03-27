@@ -1,34 +1,35 @@
 #include "CubeMapStorage.h"
+#include "asset/AssetData.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/shaders/CubeMapShaderResource.h"
 
 namespace nc::graphics
 {
-CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, const nc::GpuAccessorSignals& gpuAccessorSignals)
+CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_cubeMaps{},
       m_sampler{graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat)},
-      m_onCubeMapUpdate{gpuAccessorSignals.onCubeMapUpdate->Connect(this, &CubeMapStorage::UpdateBuffer)}
+      m_onCubeMapUpdate{onCubeMapUpdate.Connect(this, &CubeMapStorage::UpdateBuffer)}
 {
 }
 
-void CubeMapStorage::UpdateBuffer(const CubeMapBufferData& CubeMapBufferData)
+void CubeMapStorage::UpdateBuffer(const asset::CubeMapUpdateEventData& eventData)
 {
-    switch (CubeMapBufferData.updateAction)
+    switch (eventData.updateAction)
     {
-        case UpdateAction::Load:
+        case asset::UpdateAction::Load:
         {
-            LoadCubeMapBuffer(CubeMapBufferData);
+            LoadCubeMapBuffer(eventData);
             break;
         }
-        case UpdateAction::Unload:
+        case asset::UpdateAction::Unload:
         {
-            UnloadCubeMapBuffer(CubeMapBufferData);
+            UnloadCubeMapBuffer(eventData);
             break;
         }
-        case UpdateAction::UnloadAll:
+        case asset::UpdateAction::UnloadAll:
         {
             UnloadAllCubeMapBuffer();
             break;
@@ -36,20 +37,20 @@ void CubeMapStorage::UpdateBuffer(const CubeMapBufferData& CubeMapBufferData)
     }
 }
 
-void CubeMapStorage::LoadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData)
+void CubeMapStorage::LoadCubeMapBuffer(const asset::CubeMapUpdateEventData& eventData)
 {
-    for (auto i = 0u; i < cubeMapBufferData.ids.size(); ++i)
+    for (auto i = 0u; i < eventData.ids.size(); ++i)
     {
-        const auto& cubeMapData = cubeMapBufferData.data[i];
+        const auto& cubeMapData = eventData.data[i];
         m_cubeMaps.emplace_back(m_device, m_allocator, cubeMapData);
     }
 
     graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
 }
 
-void CubeMapStorage::UnloadCubeMapBuffer(const CubeMapBufferData& cubeMapBufferData)
+void CubeMapStorage::UnloadCubeMapBuffer(const asset::CubeMapUpdateEventData& eventData)
 {
-    const auto& id = cubeMapBufferData.ids[0];
+    const auto& id = eventData.ids[0];
     auto pos = std::ranges::find_if(m_cubeMaps, [&id](const auto& cubeMap)
     {
         return cubeMap.GetUid() == id;
