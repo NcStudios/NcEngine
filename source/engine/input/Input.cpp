@@ -1,11 +1,10 @@
 #include "input/Input.h"
 #include "InputInternal.h"
 
-#include <algorithm>
-#include <vector>
-#include <windowsx.h>
 #include "GLFW/glfw3.h"
 
+#include <algorithm>
+#include <vector>
 #include <unordered_map>
 
 namespace
@@ -40,7 +39,6 @@ namespace nc::input
         uint32_t mouseX = 0u;
         uint32_t mouseY = 0u;
         int32_t mouseWheel = 0;
-        GLFWwindow* window = nullptr;
     } g_state;
 
     uint32_t MouseX() { return g_state.mouseX; }
@@ -107,12 +105,16 @@ namespace nc::input
             if (state == KeyState::Pressed)
             {
                 state = KeyState::Held;
+                cur++;
             }
-            else if (state == KeyState::None)
+            else if (state == KeyState::None || state == KeyState::Released)
             {
-                g_state.keyStates.erase(cur);
+                g_state.keyStates.erase(cur++);
             }
-            cur++;
+            else if (state == KeyState::Held)
+            {
+                cur++;
+            }
         }
         ResetMouseState();
     }
@@ -121,10 +123,5 @@ namespace nc::input
     {
         g_state.mouseX = mouseX;
         g_state.mouseY = mouseY;
-    }
-
-    void SetWindow(GLFWwindow* window)
-    {
-        g_state.window = window;
     }
 } //end namespace nc::input

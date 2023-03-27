@@ -48,6 +48,10 @@ namespace nc::window
         const auto& projectSettings = config::GetProjectSettings();
         const auto& graphicsSettings = config::GetGraphicsSettings();
         const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        if (!videoMode)
+        {
+            throw NcError("Error getting the monitor's video mode information.");
+        }
 
         auto nativeWidth = videoMode->width;
         auto nativeHeight = videoMode->height;
@@ -65,7 +69,6 @@ namespace nc::window
         auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
 
         m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), nullptr, nullptr);
-        nc::input::SetWindow(m_window);
 
         if(!m_window)
         {
@@ -158,9 +161,6 @@ namespace nc::window
     void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int mods)
     {
         nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
-        if (mods == GLFW_MOD_SHIFT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Shift);
-        else if (mods == GLFW_MOD_ALT) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Alt);
-        else if (mods == GLFW_MOD_CONTROL) keyCode = static_cast<nc::input::KeyCode_t>(nc::input::KeyCode::Ctrl);
         nc::input::AddKeyToQueue(keyCode, action);
     }
 
@@ -174,12 +174,23 @@ namespace nc::window
         using namespace nc::input;
 
         // TODO: could have more than 3 mouse buttons
-        static constexpr auto mouseLUT = std::array<KeyCode_t, 3>
+        static constexpr auto mouseLUT = std::array<KeyCode_t, 9>
         {
             (KeyCode_t)KeyCode::LeftButton,
             (KeyCode_t)KeyCode::RightButton,
-            (KeyCode_t)KeyCode::MiddleButton
+            (KeyCode_t)KeyCode::MiddleButton,
+            (KeyCode_t)KeyCode::MouseButton4,
+            (KeyCode_t)KeyCode::MouseButton5,
+            (KeyCode_t)KeyCode::MouseButton6,
+            (KeyCode_t)KeyCode::MouseButton7,
+            (KeyCode_t)KeyCode::MouseButton8,
+            (KeyCode_t)KeyCode::MouseWheel,
         };
+        
+        if (button > mouseLUT.size())
+        {
+            throw NcError("Mouse button not supported.");
+        }
 
         const auto mouseButton = mouseLUT.at(button);
         AddKeyToQueue(mouseButton, action);

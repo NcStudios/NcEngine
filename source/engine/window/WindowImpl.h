@@ -24,7 +24,6 @@ namespace nc::window
 
             auto GetWindow() -> GLFWwindow*;
             auto GetDimensions() const noexcept -> Vector2;
-            void SetDimensions(int width, int height) noexcept;
 
             void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,bool)> callback) noexcept;
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
@@ -34,16 +33,18 @@ namespace nc::window
             void ProcessSystemMessages();
 
         private:
+            void SetDimensions(int width, int height) noexcept;
+
             static void ProcessKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
             static void ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
             static void ProcessMouseCursorPosEvent(GLFWwindow* window, double xPos, double yPos);
             static void ProcessMouseScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
             static void ProcessResizeEvent(GLFWwindow* window, int width, int height);
             static void ProcessWindowCloseEvent(GLFWwindow* window);
+
             std::vector<IOnResizeReceiver*> m_onResizeReceivers;
             Vector2 m_dimensions;
             GLFWwindow* m_window;
-
             std::function<void(float,float,float,float,bool)> GraphicsOnResizeCallback;
             std::function<void()> EngineDisableRunningCallback;
     };
