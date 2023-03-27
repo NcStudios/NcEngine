@@ -158,7 +158,7 @@ namespace nc::window
         glfwPollEvents();
     }
 
-    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int mods)
+    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
     {
         nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
         nc::input::AddKeyToQueue(keyCode, action);
