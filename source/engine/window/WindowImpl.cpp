@@ -173,8 +173,7 @@ namespace nc::window
     {
         using namespace nc::input;
 
-        // TODO: could have more than 3 mouse buttons
-        static constexpr auto mouseLUT = std::array<KeyCode_t, 9>
+        static constexpr auto mouseLUT = std::array<KeyCode_t, 8>
         {
             (KeyCode_t)KeyCode::LeftButton,
             (KeyCode_t)KeyCode::RightButton,
@@ -183,13 +182,12 @@ namespace nc::window
             (KeyCode_t)KeyCode::MouseButton5,
             (KeyCode_t)KeyCode::MouseButton6,
             (KeyCode_t)KeyCode::MouseButton7,
-            (KeyCode_t)KeyCode::MouseButton8,
-            (KeyCode_t)KeyCode::MouseWheel,
+            (KeyCode_t)KeyCode::MouseButton8
         };
         
-        if (button > mouseLUT.size())
+        if (button >= mouseLUT.size())
         {
-            throw NcError("Mouse button not supported.");
+            return;
         }
 
         const auto mouseButton = mouseLUT.at(button);

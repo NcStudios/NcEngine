@@ -27,7 +27,6 @@ namespace nc::input
     {
         LeftButton   = 0, RightButton  = 1, MiddleButton = 2, MouseButton4 = 3, 
         MouseButton5 = 4, MouseButton6 = 5, MouseButton7 = 6, MouseButton8 = 7,
-        MouseWheel   = 8,
 
         Zero = 48, One = 49, Two   = 50, Three = 51, Four = 52,
         Five = 53, Six = 54, Seven = 55, Eight = 56, Nine = 57,

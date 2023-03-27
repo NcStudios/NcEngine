@@ -7,7 +7,6 @@ namespace
 struct Key
 {
     static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
-    static constexpr auto Zoom = nc::input::KeyCode::MouseWheel;
     static constexpr auto Look = nc::input::KeyCode::RightButton;
     static constexpr auto Speed = nc::input::KeyCode::LeftShift;
 };
