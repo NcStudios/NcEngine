@@ -158,7 +158,7 @@ namespace nc::window
         glfwPollEvents();
     }
 
-    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int mods)
+    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
     {
         nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
         nc::input::AddKeyToQueue(keyCode, action);
@@ -185,7 +185,7 @@ namespace nc::window
             (KeyCode_t)KeyCode::MouseButton8
         };
         
-        if (button >= mouseLUT.size())
+        if (button >= static_cast<int>(mouseLUT.size()))
         {
             return;
         }
