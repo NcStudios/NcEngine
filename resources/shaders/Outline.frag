@@ -56,6 +56,8 @@ vec3 MaterialColor(int textureIndex)
 
 void main() 
 {
+    outFragColor = vec4(0.0f);
+
     PointLight light = pointLights.lights[0];
 
     vec3 lightDir = normalize(light.lightPos - inFragPosition);
@@ -76,5 +78,5 @@ void main()
     }
     else color = color * 1.0f;
 
-    outFragColor = vec4(color, 1.0f);
+    outFragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }

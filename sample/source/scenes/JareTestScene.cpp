@@ -33,25 +33,25 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
-    auto floorMaterial = graphics::PbrMaterial{
+    auto floorMaterial = graphics::ToonMaterial{
         .baseColor = "floor\\BaseColor.nca",
-        .normal    = "floor\\Normal.nca",
-        .roughness = "floor\\Roughness.nca",
-        .metallic  = "floor\\Roughness.nca"
+        .overlay    = "floor\\Normal.nca",
+        .lightShading = "floor\\Roughness.nca",
+        .heavyShading  = "floor\\Roughness.nca"
     };
 
-    auto blacktopMaterial = graphics::PbrMaterial{
+    auto blacktopMaterial = graphics::ToonMaterial{
         .baseColor = "blacktop\\BaseColor.nca",
-        .normal    = "blacktop\\Normal.nca",
-        .roughness = "blacktop\\Roughness.nca",
-        .metallic  = "blacktop\\Metallic.nca"
+        .overlay    = "blacktop\\Normal.nca",
+        .lightShading = "blacktop\\Roughness.nca",
+        .heavyShading  = "blacktop\\Metallic.nca"
     };
 
-    auto blueMaterial = graphics::PbrMaterial{
+    auto blueMaterial = graphics::ToonMaterial{
         .baseColor = "spheres\\Blue\\BaseColor.nca",
-        .normal    = "spheres\\Blue\\Normal.nca",
-        .roughness = "spheres\\Blue\\Roughness.nca",
-        .metallic  = "spheres\\Blue\\Metallic.nca"
+        .overlay    = "spheres\\Blue\\Normal.nca",
+        .lightShading = "spheres\\Blue\\Roughness.nca",
+        .heavyShading  = "spheres\\Blue\\Metallic.nca"
     };
 
     auto grayMaterial = graphics::ToonMaterial{
@@ -77,7 +77,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .tag = "Floor"
     });
 
-    registry->Add<graphics::MeshRenderer>(floor, "plane.nca", floorMaterial);
+    registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
     auto blueSphere = registry->Add<Entity>({
         .position = Vector3{0.0f, 1.0f, 2.0f},
         .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
@@ -85,7 +85,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .tag = "Sphere"
     });
 
-    registry->Add<graphics::MeshRenderer>(blueSphere, "sphere.nca", blueMaterial);
+    registry->Add<graphics::ToonRenderer>(blueSphere, "sphere.nca", blueMaterial);
 
     auto blackSphere = registry->Add<Entity>({
         .position = Vector3{3.0f, 1.0f, 2.0f},
@@ -103,7 +103,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .tag = "Box"
     });
 
-    registry->Add<graphics::MeshRenderer>(blackBox, "cube.nca", blacktopMaterial);
+    registry->Add<graphics::ToonRenderer>(blackBox, "cube.nca", blacktopMaterial);
 
     // Camera
     auto cameraHandle = registry->Add<Entity>({

@@ -10,11 +10,11 @@ namespace nc::graphics
 class Device;
 class ShaderDescriptorSets;
 
-class ToonTechnique : public ITechnique
+class OutlineTechnique : public ITechnique
 {
 public:
-    ToonTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
-    ~ToonTechnique() noexcept;
+    OutlineTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+    ~OutlineTechnique() noexcept;
 
     bool CanBind(const PerFrameRenderState& frameData) override;
     void Bind(vk::CommandBuffer* cmd) override;

@@ -1,4 +1,4 @@
-#include "ToonTechnique.h"
+#include "OutlineTechnique.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
@@ -14,7 +14,7 @@
 
 namespace nc::graphics
 {
-ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
     : m_descriptorSets{descriptorSets},
         m_pipeline{nullptr},
         m_pipelineLayout{nullptr}
@@ -23,8 +23,8 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
 
     // Shaders
     auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ToonVertex.spv");
-    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ToonFragment.spv");
+    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "OutlineVertex.spv");
+    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "OutlineFragment.spv");
 
     auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
     auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -50,15 +50,15 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
 
     auto depthStencil = CreateDepthStencilCreateInfo(true);
     depthStencil.stencilTestEnable = VK_TRUE;
-    depthStencil.back.compareOp = vk::CompareOp::eAlways;
-    depthStencil.back.failOp = vk::StencilOp::eReplace;
-    depthStencil.back.depthFailOp = vk::StencilOp::eReplace;
+    depthStencil.back.compareOp = vk::CompareOp::eNotEqual;
+    depthStencil.back.failOp = vk::StencilOp::eKeep;
+    depthStencil.back.depthFailOp = vk::StencilOp::eKeep;
     depthStencil.back.passOp = vk::StencilOp::eReplace;
     depthStencil.back.compareMask = 0xff;
     depthStencil.back.writeMask = 0xff;
     depthStencil.back.reference = 1;
     depthStencil.front = depthStencil.back;
-
+    depthStencil.depthTestEnable = VK_FALSE;
 
     // Graphics pipeline
     vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
@@ -77,7 +77,6 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
     pipelineCreateInfo.setPMultisampleState(&multisampling);
-    
     pipelineCreateInfo.setPDepthStencilState(&depthStencil);
     auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
     auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
@@ -95,35 +94,35 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-ToonTechnique::~ToonTechnique() noexcept
+OutlineTechnique::~OutlineTechnique() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-bool ToonTechnique::CanBind(const PerFrameRenderState& frameData)
+bool OutlineTechnique::CanBind(const PerFrameRenderState& frameData)
 {
     (void)frameData;
     return true;
 }
 
-void ToonTechnique::Bind(vk::CommandBuffer* cmd)
+void OutlineTechnique::Bind(vk::CommandBuffer* cmd)
 {
-    OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
+    OPTICK_CATEGORY("OutlineTechnique::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
-bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)
+bool OutlineTechnique::CanRecord(const PerFrameRenderState& frameData)
 {
     (void)frameData;
     return true;
 }
 
-void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+void OutlineTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
 {
-    OPTICK_CATEGORY("ToonTechnique::Record", Optick::Category::Rendering);
+    OPTICK_CATEGORY("OutlineTechnique::Record", Optick::Category::Rendering);
     uint32_t objectInstance = 0;
     for (const auto& mesh : frameData.objectState.toonMeshes)
     {
@@ -132,7 +131,7 @@ void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& fr
     }
 }
 
-void ToonTechnique::Clear() noexcept
+void OutlineTechnique::Clear() noexcept
 {
 }
 }

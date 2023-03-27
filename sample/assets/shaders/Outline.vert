@@ -37,9 +37,9 @@ void main()
 {
     ObjectData object = objectBuffer.objects[gl_BaseInstance];
 
-    gl_Position = object.viewProjection * object.model * vec4(inPos, 1.0);
     outFragPosition = vec3(object.model * vec4(inPos, 1.0));
-    outStencilPosition = vec3(object.viewProjection * object.model * vec4(inPos + inNormal * 1.0, 1.0));
+    gl_Position = object.viewProjection * object.model * vec4(inPos + inNormal * 0.025, 1.0);
+    //gl_Position = (object.viewProjection * object.model * vec4(inPos + inNormal * 1.1, 1.0));
     outNormal = mat3(object.model) * inNormal;
     outUV = inUV;
     outObjectInstance = gl_BaseInstance;
