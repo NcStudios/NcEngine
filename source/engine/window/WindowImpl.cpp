@@ -185,7 +185,7 @@ namespace nc::window
             (KeyCode_t)KeyCode::MouseButton8
         };
         
-        if (button >= mouseLUT.size())
+        if (button >= static_cast<int>(mouseLUT.size()))
         {
             return;
         }
