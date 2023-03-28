@@ -5,50 +5,75 @@
 #include "utility/Log.h"
 
 #include "optick/optick.h"
+
 #include <cstring>
-#include <iostream>
 
 namespace
 {
-constexpr unsigned OutputChannelCount = 2u;
-constexpr unsigned SampleRate = 44100u;
-constexpr unsigned BufferCount = 4u;
-constexpr unsigned BufferFrames = 256u;
-constexpr unsigned BufferLength = BufferFrames * OutputChannelCount;
-constexpr unsigned BufferSizeInBytes = BufferLength * sizeof(double);
+constexpr auto g_preferredBufferFrames = 256u;
+constexpr auto g_outputChannelCount = 2u;
+constexpr auto g_sampleRate = 44100u;
+constexpr auto g_bufferCount = 3u;
+
+auto IndividualBufferSize(uint32_t bufferFrames) -> uint32_t
+{
+    return bufferFrames * g_outputChannelCount;
+}
+
+auto BuildBufferPool(uint32_t bufferFrames) -> std::vector<double>
+{
+    return std::vector<double>(IndividualBufferSize(bufferFrames) * g_bufferCount, 0.0);
+}
 
 auto BuildBufferQueue(std::span<double> bufferPool) -> std::queue<std::span<double>>
 {
-    auto queue = std::queue<std::span<double>>{};
-    for(auto i = 0ull; i < BufferCount; ++i)
+    if (bufferPool.size() % g_bufferCount != 0)
     {
-        auto begin = bufferPool.begin() + i * BufferLength;
-        queue.emplace(begin, BufferLength);
+        throw nc::NcError("Invalid buffer pool size");
+    }
+
+    const auto bufferLength = bufferPool.size() / g_bufferCount;
+    auto queue = std::queue<std::span<double>>{};
+    for(auto i = 0ull; i < g_bufferCount; ++i)
+    {
+        auto begin = bufferPool.begin() + i * bufferLength;
+        queue.emplace(begin, bufferLength);
     }
 
     return queue;
 }
 
-int AudioSystemCallback(void* outputBuffer, void*, [[maybe_unused]] unsigned nBufferFrames, double, unsigned status, void* userData)
+int AudioSystemCallback(void* outputBuffer, void*, unsigned nBufferFrames, double, unsigned, void* userData)
 {
-    assert(nBufferFrames == BufferFrames);
-
-    /** @todo We should log underflows and/or display them in the editor. For now, I just want to
-     *  quickly see when they happen. */
-    if(status) std::cerr << "Audio stream underflow\n";
-
     auto* system = static_cast<nc::audio::NcAudioImpl*>(userData);
-    return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer));
+    return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer), nBufferFrames);
+}
+
+auto CreateStreamParams(nc::audio::NcAudioImpl* impl) -> nc::audio::StreamParameters
+{
+    return nc::audio::StreamParameters
+    {
+        nc::audio::DefaultDeviceId,
+        g_preferredBufferFrames,
+        g_outputChannelCount,
+        g_sampleRate,
+        ::AudioSystemCallback,
+        static_cast<void*>(impl)
+    };
 }
 
 struct NcAudioStub : public nc::audio::NcAudio
 {
     nc::audio::AudioDevice nullDevice{"NoDevice", nc::audio::InvalidDeviceId};
+    nc::Signal<const nc::audio::AudioDevice&> nullSignal;
 
     void RegisterListener(nc::Entity) noexcept override{}
+    auto GetStreamTime() const noexcept -> double override { return 0.0; }
+    void SetStreamTime(double) noexcept override {}
     auto EnumerateOutputDevices() noexcept -> std::vector<nc::audio::AudioDevice> override { return {}; }
     auto GetOutputDevice() const noexcept -> const nc::audio::AudioDevice& override { return nullDevice; }
     auto SetOutputDevice(uint32_t) noexcept -> bool override { return false; }
+    auto OnChangeOutputDevice() noexcept -> nc::Signal<const nc::audio::AudioDevice&>& override { return nullSignal; }
     auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
     void Clear() noexcept override {}
 };
@@ -70,12 +95,12 @@ auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> s
 
 NcAudioImpl::NcAudioImpl(Registry* registry)
     : m_registry{registry},
-      m_bufferMemory(BufferLength * BufferCount, 0.0),
+      m_deviceStream{::CreateStreamParams(this)},
+      m_bufferMemory(::BuildBufferPool(m_deviceStream.GetBufferFrames())),
       m_readyBuffers{},
       m_staleBuffers{::BuildBufferQueue(m_bufferMemory)},
       m_readyMutex{},
       m_staleMutex{},
-      m_deviceStream{0u, ::AudioSystemCallback, static_cast<void*>(this)},
       m_listener{Entity::Null()}
 {
 }
@@ -88,8 +113,7 @@ NcAudioImpl::~NcAudioImpl() noexcept
 void NcAudioImpl::Clear() noexcept
 {
     m_listener = Entity::Null();
-
-    std::lock_guard lock{m_readyMutex};
+    auto lock = std::lock_guard{m_readyMutex};
     while(!m_readyBuffers.empty())
     {
         m_staleBuffers.push(m_readyBuffers.front());
@@ -124,19 +148,42 @@ auto NcAudioImpl::GetOutputDevice() const noexcept -> const AudioDevice&
 
 auto NcAudioImpl::SetOutputDevice(uint32_t deviceId) noexcept -> bool
 {
-    return m_deviceStream.OpenStream(deviceId, ::AudioSystemCallback, static_cast<void*>(this));
+    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(this));
+    if (result)
+    {
+        m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
+    }
+
+    return result;
 }
 
-int NcAudioImpl::WriteToDeviceBuffer(double* output)
+auto NcAudioImpl::OnChangeOutputDevice() noexcept -> Signal<const AudioDevice&>&
 {
+    return m_outputDeviceChanged;
+}
+
+auto NcAudioImpl::GetStreamTime() const noexcept -> double
+{
+    return m_deviceStream.GetStreamTime();
+}
+
+void NcAudioImpl::SetStreamTime(double time) noexcept
+{
+    m_deviceStream.SetStreamTime(time);
+}
+
+int NcAudioImpl::WriteToDeviceBuffer(double* output, uint32_t bufferFrames)
+{
+    assert(bufferFrames == m_deviceStream.GetBufferFrames());
+    const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
     // empty check before lock is only safe with 1 consumer
     if(m_readyBuffers.empty())
     {
-        std::memset(output, 0, BufferSizeInBytes);
+        std::memset(output, 0, bufferSizeInBytes);
         return 0;
     }
 
-    std::span<double> buffer;
+    auto buffer = std::span<double>{};
 
     {
         std::lock_guard lock{m_readyMutex};
@@ -144,7 +191,7 @@ int NcAudioImpl::WriteToDeviceBuffer(double* output)
         m_readyBuffers.pop();
     }
 
-    std::memcpy(output, buffer.data(), BufferSizeInBytes);
+    std::memcpy(output, buffer.data(), bufferSizeInBytes);
 
     {
         std::lock_guard lock{m_staleMutex};
@@ -158,17 +205,27 @@ void NcAudioImpl::Run()
 {
     OPTICK_CATEGORY("AudioModule", Optick::Category::Audio);
     if(!m_listener.Valid())
+    {
         return;
+    }
 
-    std::span<double> buffer;
+    if (m_deviceStream.GetStreamStatus() == StreamStatus::Failed)
+    {
+        // TODO #376: We'd like to attempt to reopen a stream on the same device, but device persistence may not be possible
+        return;
+    }
 
-    for(size_t i = 0u; i < BufferCount; ++i)
+    auto buffer = std::span<double>{};
+
+    for(auto i = 0u; i < g_bufferCount; ++i)
     {
         if(m_staleBuffers.empty())
+        {
             return;
+        }
 
         {
-            std::lock_guard lock{m_staleMutex};
+            auto lock = std::lock_guard{m_staleMutex};
             buffer = m_staleBuffers.front();
             m_staleBuffers.pop();
         }
@@ -176,7 +233,7 @@ void NcAudioImpl::Run()
         MixToBuffer(buffer.data());
 
         {
-            std::lock_guard lock{m_readyMutex};
+            auto lock = std::lock_guard{m_readyMutex};
             m_readyBuffers.push(buffer);
         }
     }
@@ -184,11 +241,15 @@ void NcAudioImpl::Run()
 
 void NcAudioImpl::MixToBuffer(double* buffer)
 {
-    std::memset(buffer, 0, BufferSizeInBytes);
+    const auto bufferFrames = m_deviceStream.GetBufferFrames();
+    const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
+    std::memset(buffer, 0, bufferSizeInBytes);
 
     const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
     if(!listenerTransform)
+    {
         throw NcError("Invalid listener registered");
+    }
 
     const auto listenerPosition = listenerTransform->Position();
     const auto rightEar = listenerTransform->Right();
@@ -196,16 +257,18 @@ void NcAudioImpl::MixToBuffer(double* buffer)
     for(auto& source : View<AudioSource>{m_registry})
     {
         if(!source.IsPlaying())
+        {
             continue;
+        }
 
         if(source.IsSpatial())
         {
             auto* transform = m_registry->Get<Transform>(source.ParentEntity());
-            source.WriteSpatialSamples(buffer, BufferFrames, transform->Position(), listenerPosition, rightEar);
+            source.WriteSpatialSamples(buffer, bufferFrames, transform->Position(), listenerPosition, rightEar);
         }
         else
         {
-            source.WriteNonSpatialSamples(buffer, BufferFrames);
+            source.WriteNonSpatialSamples(buffer, bufferFrames);
         }
     }
 }

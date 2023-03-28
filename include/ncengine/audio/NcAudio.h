@@ -41,6 +41,18 @@ struct NcAudio : public Module
     virtual void RegisterListener(Entity entity) noexcept = 0;
 
     /**
+     * @brief Get the current stream time.
+     * @return The current stream time in seconds.
+     */
+    virtual auto GetStreamTime() const noexcept -> double = 0;
+
+    /**
+     * @brief Set the stream time.
+     * @param time The time in seconds to overwrite the stream time with. Must be >= 0.
+    */
+    virtual void SetStreamTime(double time) noexcept = 0;
+
+    /**
      * @brief Get a list of available output devices.
      * @return A vector of AudioDevice objects.
      * 
@@ -70,7 +82,7 @@ struct NcAudio : public Module
 
     /**
      * @brief Get the signal for device change events.
-     * @return 
+     * @return A reference to the signal managing device change events.
     */
     virtual auto OnChangeOutputDevice() noexcept -> Signal<const AudioDevice&>& = 0;
 };
