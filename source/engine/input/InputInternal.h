@@ -1,23 +1,22 @@
 #pragma once
 
 #include "input/Input.h"
-#include "platform/win32/NcWin32.h"
+
+struct GLFWwindow;
 
 namespace nc::input
 {
     struct InputItem
     {
         KeyCode_t keyCode;
-        LPARAM lparam;
+        int action;
 
-        InputItem(KeyCode_t kCode, LPARAM param) : keyCode(kCode), lparam(param) {}
+        InputItem(KeyCode_t kCode, int kAction) : keyCode(kCode), action(kAction) {}
     };
 
-    void UpdateMousePosition(LPARAM lParam);
-    void SetMouseWheel(WPARAM wParam, LPARAM);
-    void AddKeyToQueue(KeyCode_t keyCode, LPARAM lParam);
-    void AddMouseButtonDownToQueue(KeyCode_t keyCode, LPARAM lParam);
-    void AddMouseButtonUpToQueue(KeyCode_t keyCode, LPARAM lParam);
+    void UpdateMousePosition(int mouseX, int mouseY);
+    void SetMouseWheel(int yOffset);
+    void AddKeyToQueue(KeyCode_t keyCode, int action);
     void ResetMouseState();
     void Flush();
 }

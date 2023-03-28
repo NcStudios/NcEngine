@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/AssetData.h"
+#include "asset/AssetData.h"
 #include "assets/manager/TextureAssetManager.h"
 
 #include <array>

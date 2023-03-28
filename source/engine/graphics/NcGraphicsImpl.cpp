@@ -1,6 +1,6 @@
 #include "NcGraphicsImpl.h"
 #include "PerFrameRenderState.h"
-#include "assets/AssetManagers.h"
+#include "asset/NcAsset.h"
 #include "config/Config.h"
 #include "ecs/View.h"
 
@@ -43,15 +43,15 @@ namespace nc::graphics
 {
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
-                             const GpuAccessorSignals& gpuAccessorSignals,
+                             asset::NcAsset* assetModule,
                              Registry* registry,
                              window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
         {
-            auto resourceBus = ShaderResourceBus{};
             NC_LOG_TRACE("Selecting Graphics API");
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, gpuAccessorSignals, resourceBus, registry, window);
+            auto resourceBus = ShaderResourceBus{};
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, assetModule, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, std::move(graphicsApi), std::move(resourceBus), window);
@@ -66,9 +66,9 @@ namespace nc::graphics
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus&& shaderResourceBus,
                                    window::WindowImpl* window)
-        : m_registry{ registry },
-          m_graphics{ std::move(graphics) },
-          m_ui{ window->GetHWND() },
+        : m_registry{registry},
+          m_graphics{std::move(graphics)},
+          m_ui{window->GetWindow()},
           m_cameraSystem{},
           m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
           m_objectSystem{std::move(shaderResourceBus.objectChannel)},
@@ -78,7 +78,6 @@ namespace nc::graphics
     {
         m_graphics->InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
-        window->BindUICallback(std::bind_front(&ui::UISystemImpl::WndProc, &m_ui));
     }
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
@@ -173,9 +172,9 @@ namespace nc::graphics
         m_graphics->FrameEnd();
     }
 
-    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, WPARAM windowArg)
+    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, bool isMinimized)
     {
         m_cameraSystem.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
-        m_graphics->OnResize(width, height, windowArg);
+        m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics

@@ -10,7 +10,7 @@
 #include "core/Instance.h"
 #include "shaders/ShaderDescriptorSets.h"
 #include "shaders/ShaderResources.h"
-
+#include "asset/NcAsset.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "graphics/Camera.h"
@@ -18,6 +18,8 @@
 
 #include "ncutility/NcError.h"
 #include "optick/optick.h"
+
+#include "GLFW/glfw3.h"
 
 namespace
 {
@@ -28,18 +30,18 @@ namespace nc::graphics::vulkan
 {
 VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
-                               const GpuAccessorSignals& gpuAccessorSignals,
+                               asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
-                               uint32_t apiVersion, Registry* registry, HWND hwnd,
-                               HINSTANCE hinstance, Vector2 dimensions)
+                               uint32_t apiVersion, Registry* registry,
+                               GLFWwindow* window, Vector2 dimensions)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
-      m_surface{m_instance->CreateSurface(hwnd, hinstance)},
+      m_surface{m_instance->CreateSurface(window)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
       m_swapchain{ std::make_unique<Swapchain>(*m_device, m_surface.get(), dimensions)},
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
-      m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), gpuAccessorSignals) },
+      m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
       m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device)},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
@@ -80,10 +82,10 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
     m_lighting->Resize(dimensions);
 }
 
-void VulkanGraphics::OnResize(float width, float height, const WPARAM windowArg)
+void VulkanGraphics::OnResize(float width, float height, bool isMinimized)
 {
     m_dimensions = Vector2{ width, height };
-    m_isMinimized = windowArg == 1;
+    m_isMinimized = isMinimized;
     Resize(m_dimensions);
 }
 

@@ -8,10 +8,16 @@
 #include <mutex>
 #include <vulkan/vulkan.hpp>
 
+struct GLFWwindow;
+
 namespace nc
 {
-struct GpuAccessorSignals;
 class Registry;
+
+namespace asset
+{
+class NcAsset;
+} // namespace asset
 
 namespace graphics
 {
@@ -37,10 +43,10 @@ class VulkanGraphics : public IGraphics
     public:
         VulkanGraphics(const config::ProjectSettings& projectSettings,
                        const config::GraphicsSettings& graphicsSettings,
-                       const GpuAccessorSignals& gpuAccessorSignals,
+                       asset::NcAsset* assetModule,
                        ShaderResourceBus& shaderResourceBus,
-                       uint32_t apiVersion, Registry* registry, HWND hwnd,
-                       HINSTANCE hinstance, Vector2 dimensions);
+                       uint32_t apiVersion, Registry* registry, 
+                       GLFWwindow* window, Vector2 dimensions);
 
         ~VulkanGraphics() noexcept;
 
@@ -48,7 +54,7 @@ class VulkanGraphics : public IGraphics
         auto FrameBegin() -> bool override;
         void Draw(const PerFrameRenderState& state) override;
         void FrameEnd() override;
-        void OnResize(float width, float height, const WPARAM windowArg) override;
+        void OnResize(float width, float height, bool isMinimized) override;
         void Clear() noexcept override;
 
     private:
@@ -73,6 +79,6 @@ class VulkanGraphics : public IGraphics
         bool m_isMinimized;
 };
 } // namespace vulkan
-} // namespace nc::graphics
+} // namespace graphics
 } // namespace nc
 

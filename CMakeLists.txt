@@ -71,7 +71,17 @@ FetchContent_Declare(taskflow
                      GIT_SHALLOW    TRUE
 )
 
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow)
+FetchContent_Declare(glfw
+                     GIT_REPOSITORY https://github.com/NcStudios/glfw.git
+                     GIT_TAG        8f470597d625ae28758c16b4293dd42d63e8a83a # origin/master
+                     GIT_SHALLOW    TRUE
+)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw)
 
 # Add source
 add_subdirectory(source)

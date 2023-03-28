@@ -1,5 +1,5 @@
-#include "AssetManagers.h"
-#include "AssetData.h"
+#include "NcAssetImpl.h"
+#include "asset/AssetData.h"
 #include "config/Config.h"
 #include "manager/AudioClipAssetManager.h"
 #include "manager/ConcaveColliderAssetManager.h"
@@ -8,9 +8,16 @@
 #include "manager/MeshAssetManager.h"
 #include "manager/TextureAssetManager.h"
 
-namespace nc
+namespace nc::asset
 {
-AssetManagers::AssetManagers(const config::AssetSettings& assetSettings, const config::MemorySettings& memorySettings)
+auto BuildAssetModule(const config::AssetSettings& assetSettings,
+                      const config::MemorySettings& memorySettings) -> std::unique_ptr<NcAsset>
+{
+    return std::make_unique<NcAssetImpl>(assetSettings, memorySettings);
+}
+
+NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
+                         const config::MemorySettings& memorySettings)
     : m_audioClipManager{std::make_unique<AudioClipAssetManager>(assetSettings.audioClipsPath)},
       m_concaveColliderManager{std::make_unique<ConcaveColliderAssetManager>(assetSettings.concaveCollidersPath)},
       m_cubeMapManager{std::make_unique<CubeMapAssetManager>(assetSettings.cubeMapsPath, memorySettings.maxTextures)},
@@ -20,24 +27,20 @@ AssetManagers::AssetManagers(const config::AssetSettings& assetSettings, const c
 {
 }
 
-AssetManagers::~AssetManagers() = default;
+NcAssetImpl::~NcAssetImpl() = default;
 
-GpuAccessorSignals AssetManagers::CreateGpuAccessorSignals() noexcept
+auto NcAssetImpl::OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>&
 {
-    return GpuAccessorSignals
-    (
-        m_cubeMapManager->OnUpdate(),
-        m_meshManager->OnUpdate(),
-        m_textureManager->OnUpdate()
-    );
+    return m_cubeMapManager->OnUpdate();
 }
 
-GpuAccessorSignals::GpuAccessorSignals(nc::Signal<const CubeMapBufferData&>* _onCubeMapUpdate,
-                                       nc::Signal<const MeshBufferData&>* _onMeshUpdate,
-                                       nc::Signal<const TextureBufferData&>* _onTextureUpdate) noexcept
-    : onCubeMapUpdate{_onCubeMapUpdate},
-      onMeshUpdate{_onMeshUpdate},
-      onTextureUpdate{_onTextureUpdate}
+auto NcAssetImpl::OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>&
 {
+    return m_textureManager->OnUpdate();
 }
-} // namespace nc
+
+auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
+{
+    return m_meshManager->OnUpdate();
+}
+} // namespace nc::asset

@@ -1,13 +1,15 @@
 #pragma once
 
-#include "platform/win32/NcWin32.h"
-
 #include <memory>
 
 namespace nc
 {
-struct GpuAccessorSignals;
 class Registry;
+
+namespace asset
+{
+class NcAsset;
+}
 
 namespace config
 {
@@ -34,13 +36,13 @@ class IGraphics
         virtual auto FrameBegin() -> bool = 0;
         virtual void Draw(const PerFrameRenderState& state) = 0;
         virtual void FrameEnd() = 0;
-        virtual void OnResize(float width, float height, const WPARAM windowArg) = 0;
+        virtual void OnResize(float width, float height, bool isMinimized) = 0;
         virtual void Clear() noexcept = 0;
 };
 
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
-                     const GpuAccessorSignals& signals,
+                     asset::NcAsset* assetModule,
                      ShaderResourceBus& shaderResourceBus,
                      Registry* registry,
                      window::WindowImpl* window) -> std::unique_ptr<IGraphics>;
