@@ -49,16 +49,6 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* d
     dynamicStateInfo.setDynamicStates(dynamicStates);
 
     auto depthStencil = CreateDepthStencilCreateInfo(true);
-    depthStencil.stencilTestEnable = VK_TRUE;
-    depthStencil.back.compareOp = vk::CompareOp::eNotEqual;
-    depthStencil.back.failOp = vk::StencilOp::eKeep;
-    depthStencil.back.depthFailOp = vk::StencilOp::eKeep;
-    depthStencil.back.passOp = vk::StencilOp::eReplace;
-    depthStencil.back.compareMask = 0xff;
-    depthStencil.back.writeMask = 0xff;
-    depthStencil.back.reference = 1;
-    depthStencil.front = depthStencil.back;
-    depthStencil.depthTestEnable = VK_FALSE;
 
     // Graphics pipeline
     vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
@@ -73,7 +63,7 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* d
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
     auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
-    rasterizer.cullMode = vk::CullModeFlagBits::eNone;
+    rasterizer.cullMode = vk::CullModeFlagBits::eFront;
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
     pipelineCreateInfo.setPMultisampleState(&multisampling);

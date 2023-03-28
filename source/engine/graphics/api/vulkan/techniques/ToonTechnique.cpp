@@ -49,16 +49,6 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
     dynamicStateInfo.setDynamicStates(dynamicStates);
 
     auto depthStencil = CreateDepthStencilCreateInfo(true);
-    depthStencil.stencilTestEnable = VK_TRUE;
-    depthStencil.back.compareOp = vk::CompareOp::eAlways;
-    depthStencil.back.failOp = vk::StencilOp::eReplace;
-    depthStencil.back.depthFailOp = vk::StencilOp::eReplace;
-    depthStencil.back.passOp = vk::StencilOp::eReplace;
-    depthStencil.back.compareMask = 0xff;
-    depthStencil.back.writeMask = 0xff;
-    depthStencil.back.reference = 1;
-    depthStencil.front = depthStencil.back;
-
 
     // Graphics pipeline
     vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};

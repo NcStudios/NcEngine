@@ -61,20 +61,21 @@ void main()
     vec3 lightDir = normalize(light.lightPos - inFragPosition);
     float intensity = dot(lightDir, normalize(inNormal));
     vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex);
+    vec3 lightColor = light.diffuseColor;
 
     if (intensity > 0.95f)
     {
-        color = color * 0.95f;
+        color = color * 0.95f * lightColor;
     }
     else if (intensity > 0.5f)
     {
-        color = color * 0.5f;
+        color = color * 0.5f * lightColor;
     }
     else if (intensity > 0.25f)
     {
-        color = color * 0.25f;
+        color = color * 0.25f * lightColor;
     }
-    else color = color * 1.0f;
+    else color = color * lightColor * 0.05f;
 
     outFragColor = vec4(color, 1.0f);
 }

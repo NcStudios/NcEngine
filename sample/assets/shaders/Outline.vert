@@ -38,7 +38,7 @@ void main()
     ObjectData object = objectBuffer.objects[gl_BaseInstance];
 
     outFragPosition = vec3(object.model * vec4(inPos, 1.0));
-    gl_Position = object.viewProjection * object.model * vec4(inPos + inNormal * 0.025, 1.0);
+    gl_Position = object.viewProjection * object.model * vec4(inPos + inNormal * 0.005, 1.0);
     //gl_Position = (object.viewProjection * object.model * vec4(inPos + inNormal * 1.1, 1.0));
     outNormal = mat3(object.model) * inNormal;
     outUV = inUV;
