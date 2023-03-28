@@ -49,11 +49,11 @@ int AudioSystemCallback(void* outputBuffer, void*, unsigned nBufferFrames, doubl
     return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer), nBufferFrames);
 }
 
-auto CreateStreamParams(nc::audio::NcAudioImpl* impl) -> nc::audio::StreamParameters
+auto CreateStreamParams(uint32_t deviceId, nc::audio::NcAudioImpl* impl) -> nc::audio::StreamParameters
 {
     return nc::audio::StreamParameters
     {
-        nc::audio::DefaultDeviceId,
+        deviceId,
         g_preferredBufferFrames,
         g_outputChannelCount,
         g_sampleRate,
@@ -95,7 +95,7 @@ auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> s
 
 NcAudioImpl::NcAudioImpl(Registry* registry)
     : m_registry{registry},
-      m_deviceStream{::CreateStreamParams(this)},
+      m_deviceStream{::CreateStreamParams(DefaultDeviceId, this)},
       m_bufferMemory(::BuildBufferPool(m_deviceStream.GetBufferFrames())),
       m_readyBuffers{},
       m_staleBuffers{::BuildBufferQueue(m_bufferMemory)},
@@ -148,7 +148,7 @@ auto NcAudioImpl::GetOutputDevice() const noexcept -> const AudioDevice&
 
 auto NcAudioImpl::SetOutputDevice(uint32_t deviceId) noexcept -> bool
 {
-    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(this));
+    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(deviceId, this));
     if (result)
     {
         m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
