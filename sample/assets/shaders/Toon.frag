@@ -63,19 +63,15 @@ void main()
     vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex);
     vec3 lightColor = light.diffuseColor;
 
-    if (intensity > 0.95f)
+    if (intensity > 0.80f)
     {
-        color = color * 0.95f * lightColor;
+        color = color * lightColor;
     }
-    else if (intensity > 0.5f)
+    else if (intensity > 0.33f)
     {
-        color = color * 0.5f * lightColor;
+        color = color * 0.66f * lightColor;
     }
-    else if (intensity > 0.25f)
-    {
-        color = color * 0.25f * lightColor;
-    }
-    else color = color * lightColor * 0.05f;
+    else color = vec3(0.0f);
 
     outFragColor = vec4(color, 1.0f);
 }

@@ -62,6 +62,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
+    LoadMeshAsset("tree.nca");
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -88,13 +89,13 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     registry->Add<graphics::ToonRenderer>(blueSphere, "sphere.nca", blueMaterial);
 
     auto blackSphere = registry->Add<Entity>({
-        .position = Vector3{3.0f, 1.0f, 2.0f},
-        .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f,2.0f},
-        .tag = "Sphere"
+        .position = Vector3{0.0f, 0.0f, 0.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "Tree"
     });
 
-    registry->Add<graphics::ToonRenderer>(blackSphere, "sphere.nca", grayMaterial);
+    registry->Add<graphics::ToonRenderer>(blackSphere, "tree.nca", grayMaterial);
 
     auto blackBox = registry->Add<Entity>({
         .position = Vector3{-3.0f, 1.0f, 2.0f},
