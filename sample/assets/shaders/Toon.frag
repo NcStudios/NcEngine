@@ -49,9 +49,9 @@ layout (location = 4) in vec3 inStencilPosition;
 
 layout (location = 0) out vec4 outFragColor;
 
-vec3 MaterialColor(int textureIndex)
+vec3 MaterialColor(int textureIndex, int scale)
 {
-   return vec3(texture(textures[textureIndex], inUV));
+   return vec3(texture(textures[textureIndex], inUV * scale));
 }
 
 void main() 
@@ -60,18 +60,31 @@ void main()
 
     vec3 lightDir = normalize(light.lightPos - inFragPosition);
     float intensity = dot(lightDir, normalize(inNormal));
-    vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex);
+    vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
     vec3 lightColor = light.diffuseColor;
+    vec3 sampledColor;
+    vec3 baseColor = color;
 
     if (intensity > 0.80f)
     {
         color = color * lightColor;
     }
-    else if (intensity > 0.33f)
+    else if (intensity > 0.25f)
     {
-        color = color * 0.66f * lightColor;
+        color = color * 0.66f * lightColor; // * MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 4);
     }
-    else color = vec3(0.0f);
+    else
+    {
+        color = color * min(mix((MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 4)), vec3(1.0f), intensity/0.05f), color);
+        //if (sampledColor.r < mix(0.1f, 0.2f, intensity))
+        //{
+        //    color = color * lightColor;
+        //}
+        //else
+        //{
+        //    color = color * 0.1f;
+        //}
+    }
 
     outFragColor = vec4(color, 1.0f);
 }

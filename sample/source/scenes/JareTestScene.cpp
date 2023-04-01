@@ -33,32 +33,37 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
+    LoadTextureAsset("tree\\BaseColor.nca");
+    LoadTextureAsset("line\\Hatch.nca");
+    LoadTextureAsset("line\\Hatch2.nca");
+    LoadTextureAsset("line\\Hatch3.nca");
+    
     auto floorMaterial = graphics::ToonMaterial{
         .baseColor = "floor\\BaseColor.nca",
         .overlay    = "floor\\Normal.nca",
-        .lightShading = "floor\\Roughness.nca",
-        .heavyShading  = "floor\\Roughness.nca"
+        .lightShading = "line\\Hatch2.nca",
+        .heavyShading  = "line\\Hatch3.nca"
     };
 
     auto blacktopMaterial = graphics::ToonMaterial{
         .baseColor = "blacktop\\BaseColor.nca",
         .overlay    = "blacktop\\Normal.nca",
-        .lightShading = "blacktop\\Roughness.nca",
-        .heavyShading  = "blacktop\\Metallic.nca"
+        .lightShading = "line\\Hatch2.nca",
+        .heavyShading  = "line\\Hatch3.nca"
     };
 
     auto blueMaterial = graphics::ToonMaterial{
         .baseColor = "spheres\\Blue\\BaseColor.nca",
         .overlay    = "spheres\\Blue\\Normal.nca",
-        .lightShading = "spheres\\Blue\\Roughness.nca",
-        .heavyShading  = "spheres\\Blue\\Metallic.nca"
+        .lightShading = "line\\Hatch2.nca",
+        .heavyShading  = "line\\Hatch3.nca"
     };
 
-    auto grayMaterial = graphics::ToonMaterial{
-        .baseColor = "spheres\\Gray\\BaseColor.nca",
+    auto treeMaterial = graphics::ToonMaterial{
+        .baseColor = "tree\\BaseColor.nca",
         .overlay    = "spheres\\Gray\\Normal.nca",
-        .lightShading = "spheres\\Gray\\Roughness.nca",
-        .heavyShading  = "spheres\\Gray\\Metallic.nca"
+        .lightShading = "line\\Hatch2.nca",
+        .heavyShading  = "line\\Hatch3.nca"
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
@@ -66,7 +71,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.4f, 0.8f), 88.0f);
+    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.85f, 0.64f, 0.125f), 88.0f);
 
     auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
     registry->Add<graphics::PointLight>(lvHandle2, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.8f, 0.4f), 88.0f);
@@ -90,12 +95,12 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 
     auto blackSphere = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f),
         .scale = Vector3{1.0f, 1.0f, 1.0f},
         .tag = "Tree"
     });
 
-    registry->Add<graphics::ToonRenderer>(blackSphere, "tree.nca", grayMaterial);
+    registry->Add<graphics::ToonRenderer>(blackSphere, "tree.nca", treeMaterial);
 
     auto blackBox = registry->Add<Entity>({
         .position = Vector3{-3.0f, 1.0f, 2.0f},

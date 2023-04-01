@@ -27,5 +27,5 @@ layout (location = 1) in vec3 inNormal;
 void main() 
 {
     ObjectData object = objectBuffer.objects[gl_BaseInstance];
-    gl_Position = object.viewProjection * object.model * vec4(inPos + inNormal * 0.005, 1.0);
+    gl_Position = object.viewProjection * object.model * vec4(inPos + inNormal * 0.02, 1.0);
 }
