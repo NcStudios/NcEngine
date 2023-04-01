@@ -33,10 +33,10 @@ else()
     set(NC_SAMPLE_EXE "Sample")
 endif()
 
-# TODO: Taskflow has deprecation warnings for std::aligned_XXX with c++23. We eventually want to remove this.
+# TODO: #383 Taskflow has deprecation warnings for std::aligned_XXX with c++23. We eventually want to remove this.
 add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
 
-# TODO: RtAudio uses deprecated wchar_t conversion
+# TODO: #383 RtAudio uses deprecated wchar_t conversion
 add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 
 # Get dependencies

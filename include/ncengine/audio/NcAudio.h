@@ -42,7 +42,10 @@ struct NcAudio : public Module
 
     /**
      * @brief Get the current stream time.
-     * @return The current stream time in seconds.
+     * @return The time in seconds since the stream was started.
+     * 
+     * The stream time is an approximation of the number of seconds the stream has
+     * been playing based on the number of buffers processed.
      */
     virtual auto GetStreamTime() const noexcept -> double = 0;
 
