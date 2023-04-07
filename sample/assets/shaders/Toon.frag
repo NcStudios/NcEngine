@@ -65,25 +65,44 @@ void main()
     vec3 sampledColor;
     vec3 baseColor = color;
 
-    if (intensity > 0.80f)
+
+    if (intensity > 0.6f)
     {
+//        float normalIntensity = (max(0, dot(lightDir, normalize(MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1)))) + MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1).r)/2 ;
+//        if (normalIntensity > 0.5f)
+//        {
+//            color = color * (1-normalIntensity)*2 / 3;
+//        }
         color = color * lightColor;
     }
-    else if (intensity > 0.25f)
+    else if (intensity > 0.4f)
     {
-        color = color * 0.66f * lightColor; // * MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 4);
+//        float normalIntensity = (max(0, dot(lightDir, normalize(MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1)))) + MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1).r)/2 ;
+//        if (normalIntensity > 0.5f)
+//        {
+//            color = color * (1-normalIntensity)*2 / 3;
+//        }
+//        color = color * 0.66f * lightColor;
+//    }
+//    else if (intensity > 0.3f)
+//    {
+        color = color * 0.66f * lightColor * mix(vec3(1.0f), MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 5), 0.3f);
+    }
+    else if (intensity > 0.005f)
+    {
+        sampledColor = mix((MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 5)), vec3(1.0f), intensity);
+        if (sampledColor.r < 0.5f)
+        {
+            color = color * lightColor * 0.1f;
+        }
+        else
+        {
+            color =  vec3(0.0f);
+        }
     }
     else
     {
-        color = color * min(mix((MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 4)), vec3(1.0f), intensity/0.05f), color);
-        //if (sampledColor.r < mix(0.1f, 0.2f, intensity))
-        //{
-        //    color = color * lightColor;
-        //}
-        //else
-        //{
-        //    color = color * 0.1f;
-        //}
+        color =  vec3(0.0f);
     }
 
     outFragColor = vec4(color, 1.0f);

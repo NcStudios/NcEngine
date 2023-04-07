@@ -37,6 +37,9 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     LoadTextureAsset("line\\Hatch.nca");
     LoadTextureAsset("line\\Hatch2.nca");
     LoadTextureAsset("line\\Hatch3.nca");
+    LoadTextureAsset("line\\Noise.nca");
+    LoadTextureAsset("line\\Dots.nca");
+    LoadTextureAsset("tree\\Normal.nca");
     
     auto floorMaterial = graphics::ToonMaterial{
         .baseColor = "floor\\BaseColor.nca",
@@ -62,8 +65,8 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     auto treeMaterial = graphics::ToonMaterial{
         .baseColor = "tree\\BaseColor.nca",
         .overlay    = "spheres\\Gray\\Normal.nca",
-        .lightShading = "line\\Hatch2.nca",
-        .heavyShading  = "line\\Hatch3.nca"
+        .lightShading = "tree\\Normal.nca",
+        .heavyShading  = "line\\Dots.nca"
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
