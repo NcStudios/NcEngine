@@ -66,7 +66,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .baseColor = "tree\\BaseColor.nca",
         .overlay    = "spheres\\Gray\\Normal.nca",
         .lightShading = "tree\\Normal.nca",
-        .heavyShading  = "line\\Dots.nca"
+        .heavyShading  = "line\\Hatch3.nca"
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");

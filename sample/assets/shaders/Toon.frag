@@ -61,49 +61,34 @@ void main()
     vec3 lightDir = normalize(light.lightPos - inFragPosition);
     float intensity = dot(lightDir, normalize(inNormal));
     vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
+    float normalIntensity = MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 8).x;
     vec3 lightColor = light.diffuseColor;
     vec3 sampledColor;
     vec3 baseColor = color;
-
-
-    if (intensity > 0.6f)
+    float normalDetail = 1.0f;
+    if (normalIntensity > 0.5f)
     {
-//        float normalIntensity = (max(0, dot(lightDir, normalize(MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1)))) + MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1).r)/2 ;
-//        if (normalIntensity > 0.5f)
-//        {
-//            color = color * (1-normalIntensity)*2 / 3;
-//        }
-        color = color * lightColor;
+        normalDetail = 0.0f;
     }
-    else if (intensity > 0.4f)
+
+    float hatchingMin = 0.2f;
+    float hatchingMax = 0.3f;
+    if (intensity <= 0.05f)
     {
-//        float normalIntensity = (max(0, dot(lightDir, normalize(MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1)))) + MaterialColor(objectBuffer.objects[inObjectInstance].lightShadingIndex, 1).r)/2 ;
-//        if (normalIntensity > 0.5f)
-//        {
-//            color = color * (1-normalIntensity)*2 / 3;
-//        }
-//        color = color * 0.66f * lightColor;
-//    }
-//    else if (intensity > 0.3f)
-//    {
-        color = color * 0.66f * lightColor * mix(vec3(1.0f), MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 5), 0.3f);
+        color = color * mix(vec3(0.0f), lightColor * normalIntensity, (intensity* 20));
     }
-    else if (intensity > 0.005f)
+    else if (intensity <= 0.1)
     {
-        sampledColor = mix((MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 5)), vec3(1.0f), intensity);
-        if (sampledColor.r < 0.5f)
-        {
-            color = color * lightColor * 0.1f;
-        }
-        else
-        {
-            color =  vec3(0.0f);
-        }
+        
+        color *= lightColor * normalIntensity;
+    }
+    else if (intensity <= 0.5)
+    {
+        color = color * lightColor * mix(normalIntensity, 1.0f, (intensity - 0.1) * 2.5);
     }
     else
     {
-        color =  vec3(0.0f);
+        color *= lightColor;
     }
-
     outFragColor = vec4(color, 1.0f);
 }
