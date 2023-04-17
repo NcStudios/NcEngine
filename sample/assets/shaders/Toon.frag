@@ -56,39 +56,52 @@ vec3 MaterialColor(int textureIndex, int scale)
 
 void main() 
 {
-    PointLight light = pointLights.lights[0];
+    vec3 result = vec3(0.0);
 
-    vec3 lightDir = normalize(light.lightPos - inFragPosition);
-    float intensity = dot(lightDir, normalize(inNormal));
-    vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
-    float normalIntensity = MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 8).x;
-    vec3 lightColor = light.diffuseColor;
-    vec3 sampledColor;
-    vec3 baseColor = color;
-    float normalDetail = 1.0f;
-    if (normalIntensity > 0.5f)
-    {
-        normalDetail = 0.0f;
-    }
+//    for (int i = 0; i < pointLights.lights.length(); i++)
+//    {
+        PointLight light = pointLights.lights[0];
+        vec3 lightDir = normalize(light.lightPos - inFragPosition);
+        float intensity = dot(lightDir, normalize(inNormal));
+        vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
+        float normalIntensity = MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 8).x;
+        vec3 lightColor = light.diffuseColor;
+        vec3 sampledColor;
+        vec3 baseColor = color;
+        float normalDetail = 1.0f;
+        if (normalIntensity > 0.5f)
+        {
+            normalDetail = 0.0f;
+        }
 
-    float hatchingMin = 0.2f;
-    float hatchingMax = 0.3f;
-    if (intensity <= 0.05f)
-    {
-        color = color * mix(vec3(0.0f), lightColor * normalIntensity, (intensity* 20));
-    }
-    else if (intensity <= 0.1)
-    {
-        
-        color *= lightColor * normalIntensity;
-    }
-    else if (intensity <= 0.5)
-    {
-        color = color * lightColor * mix(normalIntensity, 1.0f, (intensity - 0.1) * 2.5);
-    }
-    else
-    {
-        color *= lightColor;
-    }
-    outFragColor = vec4(color, 1.0f);
+        float hatchingMin = 0.2f;
+        float hatchingMax = 0.3f;
+        float pureBlackThreshold = 0.05f;
+        float firstLevelThreshold = 0.2f;
+        float secondLevelThreshold = 0.25f;
+        float thirdLevelThreshold = 0.65f;
+        float midLevel = 0.7f;
+        if (intensity <= pureBlackThreshold)
+        {
+            color = color * lightColor * mix(0.0f, normalIntensity, (intensity * 1/pureBlackThreshold)) * midLevel;
+        }
+        else if (intensity <= firstLevelThreshold)
+        {
+            color *= lightColor * normalIntensity * midLevel;
+        }
+        else if (intensity <= secondLevelThreshold)
+        {
+            color = color * lightColor * mix(normalIntensity, 1.0f, (intensity - firstLevelThreshold) * 1/(secondLevelThreshold - firstLevelThreshold)) * midLevel;
+        }
+        else if (intensity <= thirdLevelThreshold)
+        {
+            color *= lightColor * midLevel;
+        }
+        else
+        {
+            color *= lightColor;
+        }
+        result += color;
+//    }
+    outFragColor = vec4(result, 1.0f);
 }

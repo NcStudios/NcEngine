@@ -71,6 +71,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
     LoadMeshAsset("tree.nca");
+    LoadMeshAsset("hill.nca");
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -79,14 +80,14 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
     registry->Add<graphics::PointLight>(lvHandle2, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.8f, 0.4f), 88.0f);
 
-    auto floor = registry->Add<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
+    auto hill = registry->Add<Entity>({
+        .position = Vector3{0.0f, -2.7f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
-        .scale = Vector3{30.0f, 30.0f, 1.0f},
-        .tag = "Floor"
+        .scale = Vector3{30.0f, 30.0f, 10.0f},
+        .tag = "Hill"
     });
+    registry->Add<graphics::ToonRenderer>(hill, "hill.nca", blueMaterial);
 
-    registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
     auto blueSphere = registry->Add<Entity>({
         .position = Vector3{0.0f, 1.0f, 2.0f},
         .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
