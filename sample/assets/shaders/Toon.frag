@@ -58,50 +58,48 @@ void main()
 {
     vec3 result = vec3(0.0);
 
-//    for (int i = 0; i < pointLights.lights.length(); i++)
-//    {
-        PointLight light = pointLights.lights[0];
-        vec3 lightDir = normalize(light.lightPos - inFragPosition);
-        float intensity = dot(lightDir, normalize(inNormal));
-        vec3 color = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
-        float normalIntensity = MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 8).x;
-        vec3 lightColor = light.diffuseColor;
-        vec3 sampledColor;
-        vec3 baseColor = color;
-        float normalDetail = 1.0f;
-        if (normalIntensity > 0.5f)
-        {
-            normalDetail = 0.0f;
-        }
+    for (int i = 0; i < pointLights.lights.length(); i++)
+	{
+		if (pointLights.lights[i].isInitialized == 0) continue;
 
-        float hatchingMin = 0.2f;
-        float hatchingMax = 0.3f;
-        float pureBlackThreshold = 0.05f;
-        float firstLevelThreshold = 0.2f;
-        float secondLevelThreshold = 0.25f;
-        float thirdLevelThreshold = 0.65f;
-        float midLevel = 0.7f;
-        if (intensity <= pureBlackThreshold)
-        {
-            color = color * lightColor * mix(0.0f, normalIntensity, (intensity * 1/pureBlackThreshold)) * midLevel;
-        }
-        else if (intensity <= firstLevelThreshold)
-        {
-            color *= lightColor * normalIntensity * midLevel;
-        }
-        else if (intensity <= secondLevelThreshold)
-        {
-            color = color * lightColor * mix(normalIntensity, 1.0f, (intensity - firstLevelThreshold) * 1/(secondLevelThreshold - firstLevelThreshold)) * midLevel;
-        }
-        else if (intensity <= thirdLevelThreshold)
-        {
-            color *= lightColor * midLevel;
-        }
-        else
-        {
-            color *= lightColor;
-        }
-        result += color;
-//    }
+		// Light data
+		PointLight light = pointLights.lights[i];
+		vec3 lightDir = normalize(light.lightPos - inFragPosition);
+		float lightIntensity = dot(lightDir, normalize(inNormal));
+		vec3 lightColor = light.diffuseColor;
+		vec3 lightAmbient = light.ambientColor;
+
+		// Material data
+		vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
+		float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 8).x;
+
+		// Cel shading levels
+		float highlightLevel = 0.85f;
+		float midLevel = 0.2f;
+		float darkestLevel = 0.0f;
+		float blurAmount = 0.05f;
+		if (lightIntensity <= darkestLevel + blurAmount)
+		{
+			baseColor = baseColor * lightColor * mix(darkestLevel, hatchingTexture, (lightIntensity - darkestLevel) * 1/(blurAmount));
+		}
+		else if (lightIntensity <= midLevel)
+		{
+			baseColor *= lightColor * hatchingTexture;
+		}
+		else if (lightIntensity <= midLevel + blurAmount)
+		{
+			baseColor = baseColor * lightColor * mix(hatchingTexture, 1.0f, (lightIntensity - midLevel) * 1/(blurAmount));
+		}
+		else if (lightIntensity <= highlightLevel)
+		{
+			baseColor *= lightColor;
+		}
+		else if (lightIntensity <= highlightLevel + blurAmount)
+		{
+			baseColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
+		}
+		else baseColor *= lightColor + lightAmbient;
+		result += max(vec3(0.0f), baseColor);
+	}
     outFragColor = vec4(result, 1.0f);
 }

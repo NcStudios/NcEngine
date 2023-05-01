@@ -77,8 +77,8 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
     registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.85f, 0.64f, 0.125f), 88.0f);
 
-    auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
-    registry->Add<graphics::PointLight>(lvHandle2, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.8f, 0.4f), 88.0f);
+    //auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
+    //registry->Add<graphics::PointLight>(lvHandle2, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.8f, 0.4f), 88.0f);
 
     auto hill = registry->Add<Entity>({
         .position = Vector3{0.0f, -2.7f, 0.0f},
