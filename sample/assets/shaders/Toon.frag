@@ -4,42 +4,44 @@
 
 struct ObjectData
 {
-    // N MVP matrices
-    mat4 model;
-    mat4 modelView;
-    mat4 viewProjection;
+	// N MVP matrices
+	mat4 model;
+	mat4 modelView;
+	mat4 viewProjection;
 
-    // Textures
-    int baseColorIndex;
-    int overlayIndex;
-    int lightShadingIndex;
-    int heavyShadingIndex;
+	// Textures
+	int baseColorIndex;
+	int overlayIndex;
+	int lightShadingIndex;
+	int heavyShadingIndex;
 };
 
 struct PointLight
 {
-    mat4 lightViewProj;
-    vec3 lightPos;
-    int castShadows;
-    vec3 ambientColor;
-    float attLin;
-    vec3 diffuseColor;
-    float attQuad;
-    float specularIntensity;
-    int isInitialized;
+	mat4 lightViewProj;
+	vec3 lightPos;
+	int castShadows;
+	vec3 ambientColor;
+	float attLin;
+	vec3 diffuseColor;
+	float attQuad;
+	float specularIntensity;
+	int isInitialized;
 };
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
-    ObjectData objects[];
+	ObjectData objects[];
 } objectBuffer;
 
 layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 {
-    PointLight lights[];
+	PointLight lights[];
 } pointLights;
 
 layout (set = 0, binding = 2) uniform sampler2D textures[];
+
+layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
 
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec3 inNormal;
@@ -54,11 +56,50 @@ vec3 MaterialColor(int textureIndex, int scale)
    return vec3(texture(textures[textureIndex], inUV * scale));
 }
 
+float ShadowCalculation(vec4 fragPosLightSpace, int index)
+{
+	// perform perspective divide
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+	// get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+	float closestDepth = texture(shadowMaps[index], projCoords.xy).r; 
+	// get depth of current fragment from light's perspective
+	float currentDepth = projCoords.z;
+
+	// check whether current frag pos is in shadow
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(shadowMaps[index], 0);
+
+	for(int x = 0; x <=1; ++x)
+	{
+		for(int y = 0; y <= 1; ++y)
+		{
+			float pcfDepth = texture(shadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	shadow /= 9.0;  
+
+	if (projCoords.z > 1.0 || projCoords.z < 0)
+	{
+		shadow = 0.0;
+	}
+
+	return shadow;
+}
+
+const mat4 biasMat = mat4( 
+	0.5, 0.0, 0.0, 0.0,
+	0.0, 0.5, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.5, 0.5, 0.0, 1.0 
+);
+
 void main() 
 {
-    vec3 result = vec3(0.0);
+	vec3 result = vec3(0.0);
 
-    for (int i = 0; i < pointLights.lights.length(); i++)
+	for (int i = 0; i < pointLights.lights.length(); i++)
 	{
 		if (pointLights.lights[i].isInitialized == 0) continue;
 
@@ -69,6 +110,16 @@ void main()
 		vec3 lightColor = light.diffuseColor;
 		vec3 lightAmbient = light.ambientColor;
 
+		// Shadow
+		if (light.castShadows == 1)
+		{
+			float shadow = 0.0;
+			vec4 lightViewPos = vec4(0.0);
+			lightViewPos = biasMat * pointLights.lights[i].lightViewProj * vec4(inFragPosition, 1.0);
+			shadow = ShadowCalculation(lightViewPos, i);
+			lightIntensity -= shadow;
+		}
+
 		// Material data
 		vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);
 		float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].heavyShadingIndex, 8).x;
@@ -78,28 +129,31 @@ void main()
 		float midLevel = 0.2f;
 		float darkestLevel = 0.0f;
 		float blurAmount = 0.05f;
+		vec3 pixelColor = baseColor;
+
 		if (lightIntensity <= darkestLevel + blurAmount)
 		{
-			baseColor = baseColor * lightColor * mix(darkestLevel, hatchingTexture, (lightIntensity - darkestLevel) * 1/(blurAmount));
+			pixelColor = pixelColor * lightColor * mix(darkestLevel, hatchingTexture, (lightIntensity - darkestLevel) * 1/(blurAmount));
 		}
 		else if (lightIntensity <= midLevel)
 		{
-			baseColor *= lightColor * hatchingTexture;
+			pixelColor *= lightColor * hatchingTexture;
 		}
 		else if (lightIntensity <= midLevel + blurAmount)
 		{
-			baseColor = baseColor * lightColor * mix(hatchingTexture, 1.0f, (lightIntensity - midLevel) * 1/(blurAmount));
+			pixelColor = pixelColor * lightColor * mix(hatchingTexture, 1.0f, (lightIntensity - midLevel) * 1/(blurAmount));
 		}
 		else if (lightIntensity <= highlightLevel)
 		{
-			baseColor *= lightColor;
+			pixelColor *= lightColor;
 		}
 		else if (lightIntensity <= highlightLevel + blurAmount)
 		{
-			baseColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
+			pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
 		}
-		else baseColor *= lightColor + lightAmbient;
-		result += max(vec3(0.0f), baseColor);
+		else pixelColor *= lightColor + lightAmbient;
+
+		result += max(vec3(0.0f), pixelColor);
 	}
-    outFragColor = vec4(result, 1.0f);
+	outFragColor = vec4(result, 1.0f);
 }
