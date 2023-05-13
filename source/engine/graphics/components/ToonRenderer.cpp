@@ -20,13 +20,13 @@ namespace nc::graphics
         #ifdef NC_EDITOR_ENABLED
         m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor);
         m_textureIndices.overlay = AssetService<TextureView>::Get()->Acquire(m_material.overlay);
-        m_textureIndices.lightShading = AssetService<TextureView>::Get()->Acquire(m_material.lightShading);
-        m_textureIndices.heavyShading = AssetService<TextureView>::Get()->Acquire(m_material.heavyShading);
+        m_textureIndices.hatching = AssetService<TextureView>::Get()->Acquire(m_material.hatching);
+        m_textureIndices.hatchingTiling = m_material.hatchingTiling;
         #else
         m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
         m_textureIndices.overlay = AssetService<TextureView>::Get()->Acquire(material.overlay);
-        m_textureIndices.lightShading = AssetService<TextureView>::Get()->Acquire(material.lightShading);
-        m_textureIndices.heavyShading = AssetService<TextureView>::Get()->Acquire(material.heavyShading);
+        m_textureIndices.hatching = AssetService<TextureView>::Get()->Acquire(material.hatching);
+        m_textureIndices.hatchingTiling = material.hatchingTiling;
         #endif
     }
 
@@ -40,10 +40,10 @@ namespace nc::graphics
         ImGui::Text(baseColor.c_str());
         ImGui::Text("Overlay:");
         ImGui::Text(overlay.c_str());
-        ImGui::Text("Light Shading:");
-        ImGui::Text(lightShading.c_str());
-        ImGui::Text("Heavy Shading:");
-        ImGui::Text(heavyShading.c_str());
+        ImGui::Text("Hatching Texture:");
+        ImGui::Text(hatching.c_str());
+        ImGui::Text("Hatching Tiling:");
+        ImGui::Text(std::to_string(hatchingTiling).c_str());
     }
     #endif
 } // namespace nc::graphics

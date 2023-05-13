@@ -9,8 +9,8 @@ namespace nc::graphics
     {
         std::string baseColor;
         std::string overlay;
-        std::string lightShading;
-        std::string heavyShading;
+        std::string hatching;
+        uint32_t hatchingTiling;
 
         #ifdef NC_EDITOR_ENABLED
         void EditorGuiElement();
@@ -21,8 +21,8 @@ namespace nc::graphics
     {
         TextureView baseColor;
         TextureView overlay;
-        TextureView lightShading;
-        TextureView heavyShading;
+        TextureView hatching;
+        uint32_t hatchingTiling;
     };
 
 

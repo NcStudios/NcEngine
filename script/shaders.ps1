@@ -21,5 +21,3 @@ Foreach-Object {
     $fileName = $_.BaseName + "Vertex.spv"
     .$GlslcExe $InputDir\$_ -o $OutputDir\$fileName
 }
-
-cmake --build "F:\Source\NcEngine\out\build\x64-Debug" --target install --parallel 8 --config Release

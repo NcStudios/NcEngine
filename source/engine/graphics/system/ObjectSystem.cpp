@@ -56,8 +56,8 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
-        const auto& [baseColor, overlay, lightShading, heavyShading] = renderer->GetTextureIndices();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, lightShading.index, heavyShading.index);
+        const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetTextureIndices();
+        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling);
         frontendState.toonMeshes.push_back(renderer->GetMesh());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
