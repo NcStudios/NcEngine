@@ -41,7 +41,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
-        const auto& [base, normal, roughness, metallic] = renderer->GetTextureIndices();
+        const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index);
         frontendState.pbrMeshes.push_back(renderer->GetMesh());
     }
@@ -56,7 +56,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
-        const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetTextureIndices();
+        const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling);
         frontendState.toonMeshes.push_back(renderer->GetMesh());
     }

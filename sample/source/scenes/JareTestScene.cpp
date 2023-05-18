@@ -34,86 +34,44 @@ JareTestScene::JareTestScene(SampleUI* ui)
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
     LoadTextureAsset("tree\\BaseColor.nca");
-    LoadTextureAsset("line\\Hatch.nca");
-    LoadTextureAsset("line\\Hatch2.nca");
     LoadTextureAsset("line\\Hatch3.nca");
-    LoadTextureAsset("line\\Noise.nca");
-    LoadTextureAsset("line\\Dots.nca");
-    LoadTextureAsset("tree\\Normal.nca");
     
     auto floorMaterial = graphics::ToonMaterial{
-        .baseColor = "floor\\BaseColor.nca",
-        .overlay    = "floor\\Normal.nca",
-        .hatching = "line\\Hatch2.nca",
+        .baseColor = "DefaultBaseColor.nca",
+        .overlay   = "DefaultBaseColor.nca",
+        .hatching  = "line\\Hatch3.nca",
         .hatchingTiling  = 8
-    };
-
-    auto blacktopMaterial = graphics::ToonMaterial{
-        .baseColor = "blacktop\\BaseColor.nca",
-        .overlay    = "blacktop\\Normal.nca",
-        .hatching = "line\\Hatch2.nca",
-        .hatchingTiling  = 8
-    };
-
-    auto blueMaterial = graphics::ToonMaterial{
-        .baseColor = "spheres\\Blue\\BaseColor.nca",
-        .overlay    = "spheres\\Blue\\Normal.nca",
-        .hatching = "line\\Hatch3.nca",
-        .hatchingTiling  = 1
     };
 
     auto treeMaterial = graphics::ToonMaterial{
         .baseColor = "tree\\BaseColor.nca",
         .overlay   = "DefaultBaseColor.nca",
-        .hatching = "line\\Hatch3.nca",
+        .hatching  = "line\\Hatch3.nca",
         .hatchingTiling  = 8
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
     LoadMeshAsset("tree.nca");
-    LoadMeshAsset("hill.nca");
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
     registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.85f, 0.64f, 0.125f), 88.0f);
 
-    //auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
-    //registry->Add<graphics::PointLight>(lvHandle2, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.8f, 0.4f), 88.0f);
-
-    auto hill = registry->Add<Entity>({
-        .position = Vector3{0.0f, -2.7f, 0.0f},
+    auto floor = registry->Add<Entity>({
+        .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
-        .scale = Vector3{30.0f, 30.0f, 10.0f},
-        .tag = "Hill"
+        .scale = Vector3{10.0f, 10.0f, 10.0f},
+        .tag = "Floor"
     });
-    registry->Add<graphics::ToonRenderer>(hill, "hill.nca", blueMaterial);
+    registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
 
-    auto blueSphere = registry->Add<Entity>({
-        .position = Vector3{0.0f, 1.0f, 2.0f},
-        .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f,2.0f},
-        .tag = "Sphere"
-    });
-
-    registry->Add<graphics::ToonRenderer>(blueSphere, "sphere.nca", blueMaterial);
-
-    auto blackSphere = registry->Add<Entity>({
+    auto tree = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f),
         .scale = Vector3{1.0f, 1.0f, 1.0f},
         .tag = "Tree"
     });
-
-    registry->Add<graphics::ToonRenderer>(blackSphere, "tree.nca", treeMaterial);
-
-    auto blackBox = registry->Add<Entity>({
-        .position = Vector3{-3.0f, 1.0f, 2.0f},
-        .rotation = Quaternion::FromEulerAngles(0.2f, 0.7f, 0.4f),
-        .scale = Vector3{2.0f, 2.0f,2.0f},
-        .tag = "Box"
-    });
-
-    registry->Add<graphics::ToonRenderer>(blackBox, "cube.nca", blacktopMaterial);
+    registry->Add<graphics::ToonRenderer>(tree, "tree.nca", treeMaterial);
 
     // Camera
     auto cameraHandle = registry->Add<Entity>({

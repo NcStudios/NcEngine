@@ -15,18 +15,18 @@ namespace nc::graphics
       m_meshPath{meshUid},
       #endif
       m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
-      m_textureIndices{}
+      m_materialView{}
     {
         #ifdef NC_EDITOR_ENABLED
-        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor);
-        m_textureIndices.overlay = AssetService<TextureView>::Get()->Acquire(m_material.overlay);
-        m_textureIndices.hatching = AssetService<TextureView>::Get()->Acquire(m_material.hatching);
-        m_textureIndices.hatchingTiling = m_material.hatchingTiling;
+        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor);
+        m_materialView.overlay = AssetService<TextureView>::Get()->Acquire(m_material.overlay);
+        m_materialView.hatching = AssetService<TextureView>::Get()->Acquire(m_material.hatching);
+        m_materialView.hatchingTiling = m_material.hatchingTiling;
         #else
-        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
-        m_textureIndices.overlay = AssetService<TextureView>::Get()->Acquire(material.overlay);
-        m_textureIndices.hatching = AssetService<TextureView>::Get()->Acquire(material.hatching);
-        m_textureIndices.hatchingTiling = material.hatchingTiling;
+        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
+        m_materialView.overlay = AssetService<TextureView>::Get()->Acquire(material.overlay);
+        m_materialView.hatching = AssetService<TextureView>::Get()->Acquire(material.hatching);
+        m_materialView.hatchingTiling = material.hatchingTiling;
         #endif
     }
 

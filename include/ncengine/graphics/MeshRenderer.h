@@ -23,7 +23,7 @@ namespace nc::graphics
         PhongAndUi = 1
     };
 
-    struct PbrTextureIndices
+    struct PbrMaterialView
     {
         TextureView baseColor;
         TextureView normal;
@@ -42,7 +42,7 @@ namespace nc::graphics
                          TechniqueType techniqueType = TechniqueType::PhongAndUi);
 
             auto GetMesh() const -> const MeshView& { return m_mesh; }
-            auto GetTextureIndices() const -> const PbrTextureIndices& { return m_textureIndices; }
+            auto GetMaterialView() const -> const PbrMaterialView& { return m_materialView; }
             auto GetTechniqueType() const -> TechniqueType { return m_techniqueType; }
 
             void SetMesh(std::string meshUid);
@@ -62,7 +62,7 @@ namespace nc::graphics
             std::string m_meshPath;
             #endif
             MeshView m_mesh;
-            PbrTextureIndices m_textureIndices;
+            PbrMaterialView m_materialView;
             TechniqueType m_techniqueType;
     };
 } // namespace nc::graphics

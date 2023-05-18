@@ -50,7 +50,6 @@ layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec2 inUV;
 layout (location = 3) in flat int inObjectInstance;
-layout (location = 4) in vec3 inStencilPosition;
 
 layout (location = 0) out vec4 outFragColor;
 
@@ -117,16 +116,6 @@ void main()
 		float lightIntensity = dot(lightDir, normalize(inNormal));
 		vec3 lightColor = light.diffuseColor;
 		vec3 lightAmbient = light.ambientColor;
-
-		// Shadow
-		if (light.castShadows == 1)
-		{
-			float shadow = 0.0;
-			vec4 lightViewPos = vec4(0.0);
-			lightViewPos = biasMat * pointLights.lights[i].lightViewProj * vec4(inFragPosition, 1.0);
-			shadow = ShadowCalculation(lightViewPos, i);
-			lightIntensity -= shadow;
-		}
 
 		// Material data
 		vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1);

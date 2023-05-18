@@ -20,18 +20,18 @@ namespace
         if(renderer.GetMesh().firstIndex != batch->mesh.firstIndex)
             return false;
 
-        const auto& textures = renderer.GetTextureIndices();
+        const auto& materialView = renderer.GetMaterialView();
 
-        if(textures.baseColor.index != batch->textures.baseColor.index)
+        if(materialView.baseColor.index != batch->materialView.baseColor.index)
             return false;
 
-        if(textures.normal.index != batch->textures.normal.index)
+        if(materialView.normal.index != batch->materialView.normal.index)
             return false;
 
-        if(textures.roughness.index != batch->textures.roughness.index)
+        if(materialView.roughness.index != batch->materialView.roughness.index)
             return false;
 
-        if(textures.metallic.index != batch->textures.metallic.index)
+        if(materialView.metallic.index != batch->materialView.metallic.index)
             return false;
 
         return true;
@@ -99,6 +99,6 @@ namespace nc::graphics
 
     auto MeshBatcher::AddNewBatch(const MeshRenderer& renderer) -> Batch*
     {
-        return &m_batches.emplace_back(renderer.GetMesh(), renderer.GetTextureIndices(), 1u);
+        return &m_batches.emplace_back(renderer.GetMesh(), renderer.GetMaterialView(), 1u);
     }
 }

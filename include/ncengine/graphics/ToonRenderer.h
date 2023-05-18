@@ -17,14 +17,13 @@ namespace nc::graphics
         #endif
     };
 
-    struct ToonTextureIndices
+    struct ToonMaterialView
     {
         TextureView baseColor;
         TextureView overlay;
         TextureView hatching;
         uint32_t hatchingTiling;
     };
-
 
     class ToonRenderer : public ComponentBase
     {
@@ -36,7 +35,7 @@ namespace nc::graphics
                          ToonMaterial material);
 
             auto GetMesh() const -> const MeshView& { return m_mesh; }
-            auto GetTextureIndices() const -> const ToonTextureIndices& { return m_textureIndices; }
+            auto GetMaterialView() const -> const ToonMaterialView& { return m_materialView; }
 
             #ifdef NC_EDITOR_ENABLED
             auto GetMaterial() -> ToonMaterial& { return m_material; }
@@ -49,7 +48,7 @@ namespace nc::graphics
             std::string m_meshPath;
             #endif
             MeshView m_mesh;
-            ToonTextureIndices m_textureIndices;
+            ToonMaterialView m_materialView;
     };
 } // namespace nc::graphics
 

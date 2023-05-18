@@ -12,10 +12,7 @@ struct ObjectData
     mat4 viewProjection;
     
     // Textures
-    int colorSlotAIndex;
-    int colorSlotBIndex;
-    int colorSlotCIndex;
-    int colorSlotDIndex;
+    vec4 unused;
 };
 
 layout(push_constant) uniform PER_OBJECT
