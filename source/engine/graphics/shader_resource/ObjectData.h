@@ -12,9 +12,9 @@ struct ObjectData
     DirectX::XMMATRIX modelView;
     DirectX::XMMATRIX viewProjection;
 
-    uint32_t colorSlotAIndex; // Todo: Make this more generic for materials
-    uint32_t colorSlotBIndex; // Todo: Make this more generic for materials
-    uint32_t colorSlotCIndex; // Todo: Make this more generic for materials
-    uint32_t colorSlotDIndex; // Todo: Make this more generic for materials
+    uint32_t materialParameterA; // Todo: Make this more generic for materials
+    uint32_t materialParameterB; // Todo: Make this more generic for materials
+    uint32_t materialParameterC; // Todo: Make this more generic for materials
+    uint32_t materialParameterD; // Todo: Make this more generic for materials
 };
 } // namespace nc::graphics

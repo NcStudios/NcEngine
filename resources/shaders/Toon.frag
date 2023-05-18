@@ -37,14 +37,12 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 } pointLights;
 
 layout (set = 0, binding = 2) uniform sampler2D textures[];
-layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
 layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
 	vec3 cameraWorldPosition;
 	int skyboxCubemapIndex;
 } environmentData;
-
 
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec3 inNormal;
@@ -62,45 +60,6 @@ vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 {
 	return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
 }
-
-float ShadowCalculation(vec4 fragPosLightSpace, int index)
-{
-	// perform perspective divide
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-
-	// get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-	float closestDepth = texture(shadowMaps[index], projCoords.xy).r; 
-	// get depth of current fragment from light's perspective
-	float currentDepth = projCoords.z;
-
-	// check whether current frag pos is in shadow
-	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(shadowMaps[index], 0);
-
-	for(int x = 0; x <=1; ++x)
-	{
-		for(int y = 0; y <= 1; ++y)
-		{
-			float pcfDepth = texture(shadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r;
-			shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
-		}
-	}
-	shadow /= 9.0;  
-
-	if (projCoords.z > 1.0 || projCoords.z < 0)
-	{
-		shadow = 0.0;
-	}
-
-	return shadow;
-}
-
-const mat4 biasMat = mat4( 
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 
-);
 
 void main() 
 {

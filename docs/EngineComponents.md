@@ -127,7 +127,7 @@ Mesh renderers allows a mesh to be rendered using a material. They rely on multi
 
 ### ToonRenderer
 ---------------
-Toon renderers allows a mesh to be rendered using a toon material. They rely on multiple assets: one the mesh and four for the material's textures. Rendering will use the associated entity's transform for vertex transformations. Note: the toon renderer component is in place only until the generic material system can be completed.
+Toon renderers allows a mesh to be rendered using a toon material. They rely on multiple assets: one the mesh, three for the material's textures and one for a tiling parameter. Rendering will use the associated entity's transform for vertex transformations. Note: the toon renderer component is in place only until the generic material system can be completed.
 
 ### PointLight
 -------------
