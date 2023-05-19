@@ -60,7 +60,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     auto floor = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
-        .scale = Vector3{30.0f, 30.0f, 30.0f},
+        .scale = Vector3{30.0f, 30.0f, 1.0f},
         .tag = "Floor"
     });
     registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
