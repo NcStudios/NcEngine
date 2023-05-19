@@ -37,10 +37,10 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     LoadTextureAsset("line\\Hatch3.nca");
     
     auto floorMaterial = graphics::ToonMaterial{
-        .baseColor = "DefaultBaseColor.nca",
+        .baseColor = "DefaultMetallic.nca",
         .overlay   = "DefaultBaseColor.nca",
-        .hatching  = "line\\Hatch3.nca",
-        .hatchingTiling  = 8
+        .hatching  = "DefaultBaseColor.nca",
+        .hatchingTiling  = 1
     };
 
     auto treeMaterial = graphics::ToonMaterial{
@@ -60,7 +60,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     auto floor = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
-        .scale = Vector3{10.0f, 10.0f, 10.0f},
+        .scale = Vector3{30.0f, 30.0f, 30.0f},
         .tag = "Floor"
     });
     registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
