@@ -5,4 +5,5 @@ target_sources(${NC_ENGINE_LIB}
         ParticleEmitter.cpp
         PointLight.cpp
         SceneNavigationCamera.cpp
+        ToonRenderer.cpp
 )

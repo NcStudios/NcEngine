@@ -14,7 +14,7 @@ namespace nc::graphics
 /** @brief Graphics module interface.
  *  
  *  Component Access:
- *      Write: Camera, MeshRenderer, ParticleEmitter, PointLight
+ *      Write: Camera, MeshRenderer, ToonRenderer, ParticleEmitter, PointLight
  *      Read: Transform
 */
 struct NcGraphics : public Module

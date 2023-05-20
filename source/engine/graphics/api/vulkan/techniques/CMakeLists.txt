@@ -1,9 +1,11 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         EnvironmentTechnique.cpp
+        OutlineTechnique.cpp
         ParticleTechnique.cpp
         PbrTechnique.cpp
         ShadowMappingTechnique.cpp
+        ToonTechnique.cpp
         UiTechnique.cpp
         WireframeTechnique.cpp
 )

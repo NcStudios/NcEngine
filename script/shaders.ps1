@@ -21,4 +21,3 @@ Foreach-Object {
     $fileName = $_.BaseName + "Vertex.spv"
     .$GlslcExe $InputDir\$_ -o $OutputDir\$fileName
 }
-

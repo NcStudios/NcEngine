@@ -156,7 +156,7 @@ namespace nc::graphics
         #endif
 
         auto environmentState = m_environmentSystem.Execute(cameraState);
-        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, cameraState, environmentState);
+        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry}, cameraState, environmentState);
         auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
         auto state = PerFrameRenderState
         {
