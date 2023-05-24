@@ -25,11 +25,11 @@ namespace nc::window
             auto GetWindow() -> GLFWwindow*;
             auto GetDimensions() const noexcept -> Vector2;
 
-            void BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,bool)> callback) noexcept;
+            void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept;
             void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
             void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
             void InvokeResizeReceivers(GLFWwindow* window, int width, int height);
-            
+
             void ProcessSystemMessages();
 
         private:
@@ -45,7 +45,7 @@ namespace nc::window
             std::vector<IOnResizeReceiver*> m_onResizeReceivers;
             Vector2 m_dimensions;
             GLFWwindow* m_window;
-            std::function<void(float,float,float,float,bool)> GraphicsOnResizeCallback;
+            std::function<void(float,float,bool)> GraphicsOnResizeCallback;
             std::function<void()> EngineDisableRunningCallback;
     };
 } // end namespace nc::window

@@ -172,9 +172,9 @@ namespace nc::graphics
         m_graphics->FrameEnd();
     }
 
-    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, bool isMinimized)
+    void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
     {
-        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
+        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height);
         m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics

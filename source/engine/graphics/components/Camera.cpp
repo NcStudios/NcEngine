@@ -1,5 +1,4 @@
 #include "graphics/Camera.h"
-#include "config/Config.h"
 #include "ecs/Registry.h"
 #include "window/Window.h"
 
@@ -9,14 +8,14 @@
 
 namespace nc::graphics
 {
-Camera::Camera(Entity entity) noexcept
+Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     : FreeComponent(entity),
-        m_view{},
-        m_projection{}
+      m_view{},
+      m_projection{},
+      m_properties{properties}
 {
     auto [width, height] = window::GetDimensions();
-    const auto& graphicsSettings = config::GetGraphicsSettings();
-    UpdateProjectionMatrix(width, height, graphicsSettings.nearClip, graphicsSettings.farClip);
+    UpdateProjectionMatrix(width, height);
 }
 
 void Camera::UpdateViewMatrix()
@@ -27,9 +26,9 @@ void Camera::UpdateViewMatrix()
     m_view = DirectX::XMMatrixLookAtRH(m.r[3], look, DirectX::g_XMNegIdentityR1);
 }
 
-void Camera::UpdateProjectionMatrix(float width, float height, float nearZ, float farZ)
+void Camera::UpdateProjectionMatrix(float width, float height)
 {
-    m_projection = DirectX::XMMatrixPerspectiveRH(1.0f, height / width, nearZ, farZ);
+    m_projection = DirectX::XMMatrixPerspectiveFovRH(m_properties.fov, height / width, m_properties.nearClip, m_properties.farClip);
 }
 
 auto Camera::CalculateFrustum() const noexcept -> Frustum

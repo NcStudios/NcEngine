@@ -104,7 +104,7 @@ namespace nc::window
         m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,float,float,bool)> callback) noexcept
+    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept
     {
         GraphicsOnResizeCallback = std::move(callback);
     }
@@ -131,9 +131,8 @@ namespace nc::window
             return;
         }
 
-        const auto& graphicsSettings = config::GetGraphicsSettings();
         int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
-        GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), graphicsSettings.nearClip, graphicsSettings.farClip, minimized);
+        GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), minimized);
 
         for(auto receiver : m_onResizeReceivers)
         {

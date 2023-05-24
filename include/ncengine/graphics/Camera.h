@@ -8,52 +8,65 @@
 
 namespace nc::graphics
 {
-    /** @brief Basic camera component. */
-    class Camera : public FreeComponent
-    {
-        public:
-            /**
-             * @brief Construct a new Camera object.
-             * @param self The parent entity.
-             */
-            Camera(Entity self) noexcept;
+/** @brief Properties for controlling a camera's frustum. */
+struct CameraProperties
+{
+    /** @brief Camera field of view in radians. */
+    float fov = 1.5708f;
 
-            /**
-             * @brief Get the camera's view matrix.
-             * @return DirectX::FXMMATRIX
-             */
-            auto ViewMatrix() const noexcept -> DirectX::FXMMATRIX { return m_view; }
+    /** @brief Distance to near clipping plane. Must be greater than 0. */
+    float nearClip = 0.1f;
 
-            /**
-             * @brief Get the camera's projection matrix.
-             * @return DirectX::FXMMATRIX
-             */
-            auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
+    /** @brief Distance to far clipping plane. Must be greater than nearClip. */
+    float farClip = 400.0f;
+};
 
-            /**
-             * @brief Calculate the camera's viewport.
-             * @return Frustum
-             */
-            auto CalculateFrustum() const noexcept -> Frustum;
+/** @brief Basic camera component. */
+class Camera : public FreeComponent
+{
+    public:
+        /**
+         * @brief Construct a new Camera object.
+         * @param self The parent entity.
+         * @param properties Camera properties.
+         */
+        Camera(Entity self, const CameraProperties& properties = {}) noexcept;
 
-            /** @brief Construct a new view matrix based on the current transform. */
-            virtual void UpdateViewMatrix();
+        /**
+         * @brief Get the camera's view matrix.
+         * @return DirectX::FXMMATRIX
+         */
+        auto ViewMatrix() const noexcept -> DirectX::FXMMATRIX { return m_view; }
 
-            /**
-             * @brief Construct a new projection matrix based on input values.
-             * @param width Screen width
-             * @param height Screen height
-             * @param nearZ Viewport near z plane
-             * @param farZ Viewport far z plane
-             */
-            virtual void UpdateProjectionMatrix(float width, float height, float nearZ, float farZ);
+        /**
+         * @brief Get the camera's projection matrix.
+         * @return DirectX::FXMMATRIX
+         */
+        auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
 
-            #ifdef NC_EDITOR_ENABLED
-            void ComponentGuiElement() override;
-            #endif
+        /**
+         * @brief Calculate the camera's viewport.
+         * @return Frustum
+         */
+        auto CalculateFrustum() const noexcept -> Frustum;
 
-        private:
-            DirectX::XMMATRIX m_view;
-            DirectX::XMMATRIX m_projection;
-    };
-}
+        /** @brief Construct a new view matrix based on the current transform. */
+        virtual void UpdateViewMatrix();
+
+        /**
+         * @brief Construct a new projection matrix based on input values.
+         * @param width Screen width
+         * @param height Screen height
+         */
+        virtual void UpdateProjectionMatrix(float width, float height);
+
+        #ifdef NC_EDITOR_ENABLED
+        void ComponentGuiElement() override;
+        #endif
+
+    private:
+        DirectX::XMMATRIX m_view;
+        DirectX::XMMATRIX m_projection;
+        CameraProperties m_properties;
+};
+} // namespace nc::graphics
