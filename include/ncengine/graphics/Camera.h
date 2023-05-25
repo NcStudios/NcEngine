@@ -12,7 +12,7 @@ namespace nc::graphics
 struct CameraProperties
 {
     /** @brief Camera field of view in radians. */
-    float fov = 1.5708f;
+    float fov = 1.0472f;
 
     /** @brief Distance to near clipping plane. Must be greater than 0. */
     float nearClip = 0.1f;

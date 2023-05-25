@@ -34,19 +34,20 @@ namespace nc::window
     }
 
     /* WindowImpl */
-    WindowImpl::WindowImpl(std::function<void()> onQuit)
+    WindowImpl::WindowImpl(const config::ProjectSettings& projectSettings,
+                           const config::GraphicsSettings& graphicsSettings,
+                           std::function<void()> onQuit)
         : m_onResizeReceivers{},
           m_dimensions{},
           GraphicsOnResizeCallback{nullptr},
           EngineDisableRunningCallback{std::move(onQuit)}
     {
-        glfwInit();
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
         g_instance = this;
 
-        const auto& projectSettings = config::GetProjectSettings();
-        const auto& graphicsSettings = config::GetGraphicsSettings();
+        glfwInit();
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
         const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (!videoMode)
         {
@@ -56,7 +57,7 @@ namespace nc::window
         auto nativeWidth = videoMode->width;
         auto nativeHeight = videoMode->height;
 
-        if(graphicsSettings.useNativeResolution)
+        if(graphicsSettings.useNativeResolution || graphicsSettings.launchInFullscreen)
         {
             m_dimensions = Vector2{ static_cast<float>(nativeWidth), static_cast<float>(nativeHeight) };
         }
@@ -67,8 +68,8 @@ namespace nc::window
 
         auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
         auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
-
-        m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), nullptr, nullptr);
+        auto monitor = graphicsSettings.launchInFullscreen ? glfwGetPrimaryMonitor() : nullptr;
+        m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), monitor, nullptr);
 
         if(!m_window)
         {
