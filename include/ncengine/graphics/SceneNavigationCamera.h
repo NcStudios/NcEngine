@@ -33,7 +33,9 @@ class SceneNavigationCamera : public Camera
          * @param self The owning entity
          * @param config Camera movement settings
          */
-        SceneNavigationCamera(Entity self, const SceneCameraConfig& config = SceneCameraConfig{});
+        SceneNavigationCamera(Entity self,
+                              const CameraProperties& cameraProperties = {},
+                              const SceneCameraConfig& config = {});
 
         /**
          * @brief Handle input and update transform. (for use with FrameLogic/InvokeFreeComponent)
@@ -58,5 +60,5 @@ class SceneNavigationCamera : public Camera
         auto PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion;
         auto Dolly(float dt, float speedMult) -> Vector3;
 };
-} // end namespace graphics
-} // end namespacenc
+} // namespace graphics
+} // namespace nc

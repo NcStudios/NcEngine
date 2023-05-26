@@ -41,7 +41,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 }
 
 NcEngineImpl::NcEngineImpl(const config::Config& config)
-    : m_window{std::bind_front(&NcEngineImpl::Stop, this)},
+    : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{config.memorySettings.maxTransforms},
       m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
       m_executor{},

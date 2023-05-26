@@ -14,10 +14,12 @@ struct Key
 
 namespace nc::graphics
 {
-SceneNavigationCamera::SceneNavigationCamera(Entity entity, const SceneCameraConfig& config)
-    : Camera{entity},
-        m_fineSpeed{config.truckPedestalFine, config.panTiltFine, config.dollyFine},
-        m_coarseSpeed{config.truckPedestalCoarse, config.panTiltCoarse, config.dollyCoarse}
+SceneNavigationCamera::SceneNavigationCamera(Entity entity,
+                                             const CameraProperties& cameraProperties,
+                                             const SceneCameraConfig& config)
+    : Camera{entity, cameraProperties},
+      m_fineSpeed{config.truckPedestalFine, config.panTiltFine, config.dollyFine},
+      m_coarseSpeed{config.truckPedestalCoarse, config.panTiltCoarse, config.dollyCoarse}
 {
 }
 
