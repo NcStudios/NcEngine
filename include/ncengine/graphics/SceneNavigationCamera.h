@@ -60,5 +60,5 @@ class SceneNavigationCamera : public Camera
         auto PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion;
         auto Dolly(float dt, float speedMult) -> Vector3;
 };
-} // end namespace graphics
-} // end namespacenc
+} // namespace graphics
+} // namespace nc
