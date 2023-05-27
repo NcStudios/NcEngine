@@ -123,4 +123,24 @@ namespace nc
         return AssetService<CubeMapView>::Get()->UnloadAll();
     }
 
+    bool LoadNormalMapAsset(const std::string& path, bool isExternal)
+    {
+        return AssetService<NormalMapView>::Get()->Load(path, isExternal);
+    }
+
+    bool LoadNormalMapAssets(std::span<const std::string> paths, bool isExternal)
+    {
+        return AssetService<NormalMapView>::Get()->Load(paths, isExternal);
+    }
+
+    bool UnloadNormalMapAsset(const std::string& path)
+    {
+        return AssetService<NormalMapView>::Get()->Unload(path);
+    }
+
+    void UnloadAllNormalMapAssets()
+    {
+        return AssetService<NormalMapView>::Get()->UnloadAll();
+    }
+
 } // namespace nc

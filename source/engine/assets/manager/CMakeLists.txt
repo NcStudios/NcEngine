@@ -5,6 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         CubeMapAssetManager.cpp
         HullColliderAssetManager.cpp
         MeshAssetManager.cpp
+        NormalMapAssetManager.cpp
         ShaderAssetManager.cpp
         TextureAssetManager.cpp
 )

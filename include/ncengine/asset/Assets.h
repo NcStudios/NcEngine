@@ -60,6 +60,14 @@ namespace nc
     bool UnloadCubeMapAsset(const std::string& paths);
     void UnloadAllCubeMapAssets();
 
+    /** Supported file types: .png
+    *  @note Unloading textures invalidates all NormalMapViews. It is intended
+    *  to be done on scene change. */
+    bool LoadNormalMapAsset(const std::string& path, bool isExternal = false);
+    bool LoadNormalMapAssets(std::span<const std::string> paths, bool isExternal = false);
+    bool UnloadNormalMapAsset(const std::string& paths);
+    void UnloadAllNormalMapAssets();
+
     struct ConcaveColliderView
     {
         std::span<const Triangle> triangles;
@@ -106,6 +114,11 @@ namespace nc
         uint32_t index;
     };
 
+    struct NormalMapView
+    {
+        uint32_t index;
+    };
+
     enum class DescriptorType : uint8_t
     {
         None,
@@ -146,5 +159,6 @@ namespace nc
                         std::same_as<T, MeshView> ||
                         std::same_as<T, TextureView> ||
                         std::same_as<T, CubeMapView> ||
+                        std::same_as<T, NormalMapView> ||
                         std::same_as<T, ShaderView>;
 }

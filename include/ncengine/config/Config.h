@@ -21,6 +21,7 @@ struct AssetSettings
     std::string shadersPath = "resources/assets/shaders/";
     std::string texturesPath = "resources/assets/textures/";
     std::string cubeMapsPath = "resources/assets/cube_maps";
+    std::string normalMapsPath = "resources/assets/normal_maps";
 };
 
 struct MemorySettings

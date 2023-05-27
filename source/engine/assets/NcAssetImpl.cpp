@@ -6,6 +6,7 @@
 #include "manager/CubeMapAssetManager.h"
 #include "manager/HullColliderAssetManager.h"
 #include "manager/MeshAssetManager.h"
+#include "manager/NormalMapAssetManager.h"
 #include "manager/TextureAssetManager.h"
 
 namespace nc::asset
@@ -23,6 +24,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
       m_cubeMapManager{std::make_unique<CubeMapAssetManager>(assetSettings.cubeMapsPath, memorySettings.maxTextures)},
       m_hullColliderManager{std::make_unique<HullColliderAssetManager>(assetSettings.hullCollidersPath)},
       m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
+      m_normalMapManager{std::make_unique<NormalMapAssetManager>(assetSettings.normalMapsPath, memorySettings.maxTextures)},
       m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)}
 {
 }
