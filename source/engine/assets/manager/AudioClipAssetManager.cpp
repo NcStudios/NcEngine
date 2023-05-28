@@ -10,7 +10,7 @@ AudioClipAssetManager::AudioClipAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool AudioClipAssetManager::Load(const std::string& path, bool isExternal)
+bool AudioClipAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     if (IsLoaded(path))
     {
@@ -22,7 +22,7 @@ bool AudioClipAssetManager::Load(const std::string& path, bool isExternal)
     return true;
 }
 
-bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExternal)
+bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
 {
     bool anyLoaded = false;
 
@@ -42,17 +42,17 @@ bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExte
     return anyLoaded;
 }
 
-bool AudioClipAssetManager::Unload(const std::string& path)
+bool AudioClipAssetManager::Unload(const std::string& path, asset_flags_type flags)
 {
     return static_cast<bool>(m_audioClips.erase(path));
 }
 
-void AudioClipAssetManager::UnloadAll()
+void AudioClipAssetManager::UnloadAll(asset_flags_type flags)
 {
     m_audioClips.clear();
 }
 
-auto AudioClipAssetManager::Acquire(const std::string& path) const -> AudioClipView
+auto AudioClipAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> AudioClipView
 {
     const auto it = m_audioClips.find(path);
     if (it == m_audioClips.end())
@@ -68,7 +68,7 @@ auto AudioClipAssetManager::Acquire(const std::string& path) const -> AudioClipV
     };
 }
 
-bool AudioClipAssetManager::IsLoaded(const std::string& path) const
+bool AudioClipAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
 {
     return m_audioClips.contains(path);
 }

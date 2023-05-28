@@ -10,7 +10,7 @@ namespace nc
     {
     }
 
-    bool HullColliderAssetManager::Load(const std::string& path, bool isExternal)
+    bool HullColliderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
     {
         if (IsLoaded(path))
         {
@@ -22,7 +22,7 @@ namespace nc
         return true;
     }
 
-    bool HullColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal)
+    bool HullColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
     {
         bool anyLoaded = false;
 
@@ -42,17 +42,17 @@ namespace nc
         return anyLoaded;
     }
 
-    bool HullColliderAssetManager::Unload(const std::string& path)
+    bool HullColliderAssetManager::Unload(const std::string& path, asset_flags_type flags)
     {
         return static_cast<bool>(m_hullColliders.erase(path));
     }
 
-    void HullColliderAssetManager::UnloadAll()
+    void HullColliderAssetManager::UnloadAll(asset_flags_type flags)
     {
         m_hullColliders.clear();
     }
 
-    auto HullColliderAssetManager::Acquire(const std::string& path) const -> ConvexHullView
+    auto HullColliderAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> ConvexHullView
     {
         const auto it = m_hullColliders.find(path);
         if (it == m_hullColliders.end())
@@ -68,7 +68,7 @@ namespace nc
         };
     }
 
-    bool HullColliderAssetManager::IsLoaded(const std::string& path) const
+    bool HullColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
     {
         return m_hullColliders.contains(path);
     }

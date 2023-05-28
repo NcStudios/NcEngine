@@ -20,7 +20,7 @@ CubeMapAssetManager::CubeMapAssetManager(const std::string& cubeMapAssetDirector
 {
 }
 
-bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
+bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     if (IsLoaded(path))
     {
@@ -44,7 +44,7 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal)
     return true;
 }
 
-bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal)
+bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
 {
     if (paths.size() + m_cubeMapIds.size() >= m_maxCubeMapsCount)
     {
@@ -88,7 +88,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
     return true;
 }
 
-bool CubeMapAssetManager::Unload(const std::string& path)
+bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type flags)
 {
     if (const auto pos = std::ranges::find(m_cubeMapIds, path); pos != m_cubeMapIds.cend())
     {
@@ -106,12 +106,12 @@ bool CubeMapAssetManager::Unload(const std::string& path)
     return false;
 }
 
-void CubeMapAssetManager::UnloadAll()
+void CubeMapAssetManager::UnloadAll(asset_flags_type flags)
 {
     m_cubeMapIds.clear();
 }
 
-auto CubeMapAssetManager::Acquire(const std::string& path) const -> CubeMapView
+auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> CubeMapView
 {
     const auto pos = std::ranges::find(m_cubeMapIds, path);
     if (pos == m_cubeMapIds.cend())
@@ -123,7 +123,7 @@ auto CubeMapAssetManager::Acquire(const std::string& path) const -> CubeMapView
     return CubeMapView{CubeMapUsage::Skybox, index};
 }
 
-bool CubeMapAssetManager::IsLoaded(const std::string& path) const
+bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
 {
     return m_cubeMapIds.cend() != std::ranges::find(m_cubeMapIds, path);
 }

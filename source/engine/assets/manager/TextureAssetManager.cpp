@@ -14,7 +14,7 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
     m_textureData.reserve(m_maxTextureCount);
 }
 
-bool TextureAssetManager::Load(const std::string& path, bool isExternal)
+bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     const auto index = static_cast<uint32_t>(m_textureData.size());
 
@@ -40,7 +40,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal)
     return true;
 }
 
-bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal)
+bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
 {
     const auto newItemsIndex = m_textureData.size();
     const auto newTextureCount = static_cast<uint32_t>(paths.size());
@@ -78,7 +78,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
     return true;
 }
 
-bool TextureAssetManager::Unload(const std::string& path)
+bool TextureAssetManager::Unload(const std::string& path, asset_flags_type flags)
 {
     const auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
     {
@@ -100,13 +100,13 @@ bool TextureAssetManager::Unload(const std::string& path)
     return true;
 }
 
-void TextureAssetManager::UnloadAll()
+void TextureAssetManager::UnloadAll(asset_flags_type flags)
 {
     m_textureData.clear();
     /** No need to send signal to GPU - no need to write an empty buffer to the GPU. **/
 }
 
-auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
+auto TextureAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> TextureView
 {
     const auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
     {
@@ -122,7 +122,7 @@ auto TextureAssetManager::Acquire(const std::string& path) const -> TextureView
     return TextureView{index};
 }
 
-bool TextureAssetManager::IsLoaded(const std::string& path) const
+bool TextureAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
 {
     auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
     {

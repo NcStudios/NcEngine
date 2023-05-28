@@ -98,7 +98,7 @@ TEST_F(TextureAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 3u> paths {Texture_base, Texture_normal, Texture_roughness};
     assetManager->Load(paths, false);
-    assetManager->UnloadAll();
+    assetManager->UnloadAll(asset_flags_type flags = AssetFlags::None);
     EXPECT_FALSE(assetManager->IsLoaded(Texture_base));
     EXPECT_FALSE(assetManager->IsLoaded(Texture_normal));
     EXPECT_FALSE(assetManager->IsLoaded(Texture_roughness));
@@ -106,7 +106,7 @@ TEST_F(TextureAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 
 TEST_F(TextureAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll();
+    assetManager->UnloadAll(asset_flags_type flags = AssetFlags::None);
 }
 
 TEST_F(TextureAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)

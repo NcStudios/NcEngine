@@ -15,12 +15,12 @@ namespace nc
             IAssetService();
             virtual ~IAssetService() = default;
 
-            virtual bool Load(const InputType& input, bool isExternal) = 0;
-            virtual bool Load(std::span<const InputType> inputs, bool isExternal) = 0;
-            virtual bool Unload(const InputType& input) = 0;
-            virtual void UnloadAll() = 0;
-            virtual auto Acquire(const InputType& input) const -> data_type = 0;
-            virtual bool IsLoaded(const InputType& input) const = 0;
+            virtual bool Load(const InputType& input, bool isExternal, asset_flags_type flags = AssetFlags::None) = 0;
+            virtual bool Load(std::span<const InputType> inputs, bool isExternal, asset_flags_type flags = AssetFlags::None) = 0;
+            virtual bool Unload(const InputType& input, asset_flags_type flags = AssetFlags::None) = 0;
+            virtual void UnloadAll(asset_flags_type flags = AssetFlags::None) = 0;
+            virtual auto Acquire(const InputType& input, asset_flags_type flags = AssetFlags::None) const -> data_type = 0;
+            virtual bool IsLoaded(const InputType& input, asset_flags_type flags = AssetFlags::None) const = 0;
     };
 
     /** Helper alias for locating asset services. */

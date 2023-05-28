@@ -30,9 +30,10 @@ struct TextureWithId
 {
     asset::Texture texture;
     std::string id;
+    bool isNormalMap;
 };
 
-/** @brief Event data for texture load and unlaod operations. */
+/** @brief Event data for texture load and unload operations. */
 struct TextureUpdateEventData
 {
     TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureWithId> data_);
