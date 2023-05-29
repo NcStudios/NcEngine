@@ -99,7 +99,7 @@ TEST_F(MeshAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     const auto paths = std::array<std::string, 3u>{meshPath1, meshPath2, meshPath3};
     assetManager->Load(paths, false);
-    assetManager->UnloadAll(asset_flags_type flags = AssetFlags::None);
+    assetManager->UnloadAll(AssetFlags::None);
     EXPECT_FALSE(assetManager->IsLoaded(meshPath1));
     EXPECT_FALSE(assetManager->IsLoaded(meshPath2));
     EXPECT_FALSE(assetManager->IsLoaded(meshPath3));
@@ -107,7 +107,7 @@ TEST_F(MeshAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 
 TEST_F(MeshAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll(asset_flags_type flags = AssetFlags::None);
+    assetManager->UnloadAll(AssetFlags::None);
 }
 
 TEST_F(MeshAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)

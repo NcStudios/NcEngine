@@ -97,12 +97,12 @@ TEST_F(HullColliderAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 2u> paths{HullPath1, HullPath2};
     assetManager->Load(paths, false);
-    assetManager->UnloadAll(asset_flags_type flags = AssetFlags::None);
+    assetManager->UnloadAll(AssetFlags::None);
     EXPECT_FALSE(assetManager->Unload(HullPath1));
     EXPECT_FALSE(assetManager->Unload(HullPath2));
 }
 
 TEST_F(HullColliderAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll(asset_flags_type flags = AssetFlags::None);
+    assetManager->UnloadAll(AssetFlags::None);
 }

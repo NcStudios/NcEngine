@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assets.h"
 #include "ncasset/Assets.h"
 
 #include <cstdlib>
@@ -30,7 +31,7 @@ struct TextureWithId
 {
     asset::Texture texture;
     std::string id;
-    bool isNormalMap;
+    asset_flags_type flags;
 };
 
 /** @brief Event data for texture load and unload operations. */

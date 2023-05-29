@@ -31,7 +31,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_f
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
-    m_textureData.back().isNormalMap = flags == AssetFlags::TextureTypeNormalMap;
+    m_textureData.back().flags = AssetFlags::TextureTypeNormalMap;
 
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
@@ -65,7 +65,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
 
         m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
-        m_textureData.back().isNormalMap = flags == AssetFlags::TextureTypeNormalMap;
+        m_textureData.back().flags = AssetFlags::TextureTypeNormalMap;
         idsToLoad.push_back(path);
     }
 
