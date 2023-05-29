@@ -65,8 +65,6 @@ jobs:
       with:
         msystem: 'mingw64'
         update: true
-          git
-          make
         pacboy: >-
           toolchain:p
           cmake:p
