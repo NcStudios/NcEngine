@@ -10,7 +10,7 @@ namespace nc
     {
     }
 
-    bool ConcaveColliderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
+    bool ConcaveColliderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
     {
         if (IsLoaded(path))
         {
@@ -22,7 +22,7 @@ namespace nc
         return true;
     }
     
-    bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
+    bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
     {
         auto anyLoaded = false;
 
@@ -42,17 +42,17 @@ namespace nc
         return anyLoaded;
     }
     
-    bool ConcaveColliderAssetManager::Unload(const std::string& path, asset_flags_type flags)
+    bool ConcaveColliderAssetManager::Unload(const std::string& path, asset_flags_type)
     {
         return static_cast<bool>(m_concaveColliders.erase(path));
     }
 
-    void ConcaveColliderAssetManager::UnloadAll(asset_flags_type flags)
+    void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
     {
         m_concaveColliders.clear();
     }
 
-    auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> ConcaveColliderView
+    auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
     {
         const auto it = m_concaveColliders.find(path);
         if (it == m_concaveColliders.end())
@@ -67,7 +67,7 @@ namespace nc
         };
     }
     
-    bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
+    bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
     {
         return m_concaveColliders.end() != m_concaveColliders.find(path);
     }

@@ -139,7 +139,7 @@ namespace nc
     {
     }
 
-    bool ShaderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
+    bool ShaderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
     {
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
 
@@ -160,7 +160,7 @@ namespace nc
         return true;
     }
 
-    bool ShaderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
+    bool ShaderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
     {
         auto atLeastOneFailure = false;
         for (const auto& path : paths)
@@ -174,7 +174,7 @@ namespace nc
         return !atLeastOneFailure;
     }
 
-    bool ShaderAssetManager::Unload(const std::string& path, asset_flags_type flags)
+    bool ShaderAssetManager::Unload(const std::string& path, asset_flags_type)
     {
         if (!IsLoaded(path))
         {
@@ -196,12 +196,12 @@ namespace nc
         return true;
     }
 
-    void ShaderAssetManager::UnloadAll(asset_flags_type flags)
+    void ShaderAssetManager::UnloadAll(asset_flags_type)
     {
         m_shaderFlyweights.clear();
     }
 
-    auto ShaderAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> ShaderView
+    auto ShaderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ShaderView
     {
         auto pos = std::ranges::find_if(m_shaderFlyweights, [&path](const auto& asset)
         {
@@ -224,7 +224,7 @@ namespace nc
         };
     }
 
-    bool ShaderAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
+    bool ShaderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
     {
         return std::ranges::any_of(m_shaderFlyweights.begin(), m_shaderFlyweights.end(), [path](const auto& view) { return view.uid == path; });
     }

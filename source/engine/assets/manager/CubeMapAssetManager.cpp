@@ -20,7 +20,7 @@ CubeMapAssetManager::CubeMapAssetManager(const std::string& cubeMapAssetDirector
 {
 }
 
-bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
+bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
 {
     if (IsLoaded(path))
     {
@@ -44,7 +44,7 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_f
     return true;
 }
 
-bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
+bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
     if (paths.size() + m_cubeMapIds.size() >= m_maxCubeMapsCount)
     {
@@ -88,7 +88,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
     return true;
 }
 
-bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type flags)
+bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type)
 {
     if (const auto pos = std::ranges::find(m_cubeMapIds, path); pos != m_cubeMapIds.cend())
     {
@@ -106,12 +106,12 @@ bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type flags
     return false;
 }
 
-void CubeMapAssetManager::UnloadAll(asset_flags_type flags)
+void CubeMapAssetManager::UnloadAll(asset_flags_type)
 {
     m_cubeMapIds.clear();
 }
 
-auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type flags) const -> CubeMapView
+auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type) const -> CubeMapView
 {
     const auto pos = std::ranges::find(m_cubeMapIds, path);
     if (pos == m_cubeMapIds.cend())
@@ -123,7 +123,7 @@ auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type flag
     return CubeMapView{CubeMapUsage::Skybox, index};
 }
 
-bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type flags) const
+bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_cubeMapIds.cend() != std::ranges::find(m_cubeMapIds, path);
 }
