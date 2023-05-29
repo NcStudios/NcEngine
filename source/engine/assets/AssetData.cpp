@@ -36,19 +36,4 @@ CubeMapUpdateEventData::CubeMapUpdateEventData(UpdateAction updateAction_, std::
     }
 }
 
-NormalMapUpdateEventData::NormalMapUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const NormalMapWithId> data_)
-    : ids{ std::move(ids_) },
-    data{ data_ },
-    updateAction{ updateAction_ }
-{
-    if (updateAction == UpdateAction::Load && (data.empty() || ids.empty()))
-    {
-        throw NcError("Cannot load normal map. Normal map data is empty.");
-    }
-
-    if (updateAction == UpdateAction::Unload && ids.empty())
-    {
-        throw NcError("Cannot unload normal map. No ID was provided.");
-    }
-}
 } // namespace nc::asset

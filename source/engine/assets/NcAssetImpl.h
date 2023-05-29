@@ -11,7 +11,6 @@ class ConcaveColliderAssetManager;
 class CubeMapAssetManager;
 class HullColliderAssetManager;
 class MeshAssetManager;
-class NormalMapAssetManager;
 class TextureAssetManager;
 
 namespace config
@@ -32,7 +31,6 @@ class NcAssetImpl : public NcAsset
 
         auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override;
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
-        auto OnNormalMapUpdate() noexcept -> Signal<const NormalMapUpdateEventData&> & override;
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override;
 
     private:
@@ -41,7 +39,6 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<CubeMapAssetManager> m_cubeMapManager;
         std::unique_ptr<HullColliderAssetManager> m_hullColliderManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
-        std::unique_ptr<NormalMapAssetManager> m_normalMapManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
 };
 } // namespace nc::asset

@@ -5,7 +5,7 @@ project("NcSdk"
 )
 
 # Options
-option(NC_BUILD_TESTS "Enable building tests." OFF)
+option(NC_BUILD_TESTS "Enable building tests." ON)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
