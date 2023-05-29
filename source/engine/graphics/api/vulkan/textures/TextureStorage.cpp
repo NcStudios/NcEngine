@@ -57,7 +57,7 @@ void TextureStorage::LoadTextureBuffer(const asset::TextureUpdateEventData& even
 
         TextureBuffer textureBuffer
         {
-            .image = graphics::ImmutableImage(m_device, m_allocator, texture.pixelData.data(), texture.width, texture.height),
+            .image = graphics::ImmutableImage(m_device, m_allocator, texture.pixelData.data(), texture.width, texture.height, textureData.isNormalMap),
             .imageInfo = graphics::CreateDescriptorImageInfo(m_sampler.get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
             .uid = textureData.id
         };
