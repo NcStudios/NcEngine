@@ -9,7 +9,7 @@ option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
-set(CMAKE_CXX_STANDARD 23) # we only actually need 20, but michaelsoft dances to their own beat
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -33,9 +33,6 @@ else()
     set(NC_SAMPLE_EXE "Sample")
 endif()
 
-# TODO: #383 Taskflow has deprecation warnings for std::aligned_XXX with c++23. We eventually want to remove this.
-add_definitions(-D_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS)
-
 # TODO: #383 RtAudio uses deprecated wchar_t conversion
 add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 
@@ -46,7 +43,7 @@ include(FetchContent)
 
 FetchContent_Declare(NcCommon
                      GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
-                     GIT_TAG        origin/release
+                     GIT_TAG        origin/vnext
                      GIT_SHALLOW    TRUE
 )
 
@@ -67,13 +64,13 @@ FetchContent_Declare(nc-convert
 
 FetchContent_Declare(taskflow
                      GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
-                     GIT_TAG        ab6c1b6cd2651d4a4b1a3204b2e1b95f75d06a56 # origin/master
+                     GIT_TAG        origin/master
                      GIT_SHALLOW    TRUE
 )
 
 FetchContent_Declare(glfw
                      GIT_REPOSITORY https://github.com/NcStudios/glfw.git
-                     GIT_TAG        8f470597d625ae28758c16b4293dd42d63e8a83a # origin/master
+                     GIT_TAG        origin/master
                      GIT_SHALLOW    TRUE
 )
 
