@@ -118,6 +118,7 @@ namespace nc::graphics
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
         m_graphics->Clear();
+        m_cameraSystem.Clear();
         m_environmentSystem.Clear();
         m_particleEmitterSystem.Clear();
     }
@@ -137,7 +138,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        if (!cameraState.hasCamera || !m_graphics->FrameBegin())
+        if (!m_graphics->FrameBegin())
         {
             return;
         }

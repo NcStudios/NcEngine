@@ -23,10 +23,16 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("ParticleModule", Optick::Category::VFX);
         const float dt = time::DeltaTime();
-        const auto* camera = m_getCamera();
-        const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
-        const auto camRotation = transform->Rotation();
-        const auto camForward = transform->Forward();
+        const auto [camRotation, camForward] = [this]()
+        {
+            if (auto camera = m_getCamera())
+            {
+                const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
+                return std::make_pair(transform->Rotation(), transform->Forward());
+            }
+
+            return std::make_pair(Quaternion::Identity(), Vector3::Front());
+        }();
 
         for (auto& state : m_emitterStates)
         {
