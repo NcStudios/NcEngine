@@ -14,12 +14,12 @@ class AudioClipAssetManager : public IAssetService<AudioClipView, std::string>
     public:
         explicit AudioClipAssetManager(const std::string& assetDirectory);
 
-        bool Load(const std::string& path, bool isExternal) override;
-        bool Load(std::span<const std::string> paths, bool isExternal) override;
-        bool Unload(const std::string& path) override;
-        void UnloadAll() override;
-        auto Acquire(const std::string& path) const -> AudioClipView override;
-        bool IsLoaded(const std::string& path) const override;
+        bool Load(const std::string& path, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
+        bool Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
+        bool Unload(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
+        void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
+        auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> AudioClipView override;
+        bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
 
     private:
         std::unordered_map<std::string, asset::AudioClip> m_audioClips;

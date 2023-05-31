@@ -87,7 +87,7 @@ namespace nc::sample::prefab
     } // end namespace material
 
     template<class LoadFunc>
-    void LoadAssets(const std::filesystem::path& rootDir, LoadFunc load)
+    void LoadAssets(const std::filesystem::path& rootDir, asset_flags_type flags, LoadFunc load)
     {
         auto paths = std::vector<std::string>{};
         for (auto&& entry : std::filesystem::recursive_directory_iterator{rootDir})
@@ -109,7 +109,7 @@ namespace nc::sample::prefab
             paths.push_back(trimmedPath.string());
         }
 
-        load(paths, false);
+        load(paths, false, flags);
     }
 
     void InitializeResources()
@@ -122,12 +122,52 @@ namespace nc::sample::prefab
         IsInitialized = true;
 
         const auto& assetSettings = config::GetAssetSettings();
-        LoadAssets(assetSettings.audioClipsPath, &LoadAudioClipAssets);
-        LoadAssets(assetSettings.concaveCollidersPath, &LoadConcaveColliderAssets);
-        LoadAssets(assetSettings.cubeMapsPath, &LoadCubeMapAssets);
-        LoadAssets(assetSettings.hullCollidersPath, &LoadConvexHullAssets);
-        LoadAssets(assetSettings.meshesPath, &LoadMeshAssets);
-        LoadAssets(assetSettings.texturesPath, &LoadTextureAssets);
+        LoadAssets(assetSettings.audioClipsPath, AssetFlags::None, &LoadAudioClipAssets);
+        LoadAssets(assetSettings.concaveCollidersPath, AssetFlags::None, &LoadConcaveColliderAssets);
+        LoadAssets(assetSettings.cubeMapsPath, AssetFlags::None, &LoadCubeMapAssets);
+        LoadAssets(assetSettings.hullCollidersPath, AssetFlags::None, &LoadConvexHullAssets);
+        LoadAssets(assetSettings.meshesPath, AssetFlags::None, &LoadMeshAssets);
+
+        std::vector<std::string> textures
+        {
+            "DefaultBaseColor.nca",
+            "DefaultMetallic.nca",
+            "DefaultParticle.nca",
+            "blacktop\\BaseColor.nca",
+            "blacktop\\Roughness.nca",
+            "box\\BaseColor.nca",
+            "box\\Roughness.nca",
+            "coin\\BaseColor.nca",
+            "coin\\Roughness.nca",
+            "floor\\BaseColor.nca",
+            "floor\\Roughness.nca",
+            "line\\Hatch3.nca",
+            "logo\\BaseColor.nca",
+            "logo\\Metallic.nca",
+            "logo\\Roughness.nca",
+            "solid_color\\Blue.nca",
+            "solid_color\\Green.nca",
+            "solid_color\\Red.nca", 
+            "table\\BaseColor.nca",
+            "table\\Roughness.nca",
+            "token\\BaseColor.nca",
+            "token\\Roughness.nca",
+            "tree\\BaseColor.nca"
+        };
+        LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
+
+        std::vector<std::string> normalMaps 
+        {
+            "DefaultNormal.nca",
+            "blacktop\\Normal.nca",
+            "box\\Normal.nca",
+            "coin\\Normal.nca",
+            "floor\\Normal.nca",
+            "logo\\Normal.nca", 
+            "table\\Normal.nca",
+            "token\\Normal.nca"
+        };
+        LoadTextureAssets(normalMaps, false, AssetFlags::TextureTypeNormalMap);
 
         const auto defaultBaseColor = std::string{ "DefaultBaseColor.nca" };
         const auto defaultNormal = std::string{ "DefaultNormal.nca" };

@@ -199,7 +199,7 @@ void main()
     vec3 roughnessColor = MaterialColor(objectBuffer.objects[inObjectInstance].roughnessIndex);
     vec3 metallicColor = MaterialColor(objectBuffer.objects[inObjectInstance].metallicIndex);
 
-    vec3 normal = normalColor;
+    vec3 normal = 2.0 * normalColor - 1.0;
     vec3 N = (normalize(inTBN * normal));
     vec3 V = normalize(environmentData.cameraWorldPosition - inFragPosition);
 

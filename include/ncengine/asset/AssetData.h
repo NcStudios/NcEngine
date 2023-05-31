@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assets.h"
 #include "ncasset/Assets.h"
 
 #include <cstdlib>
@@ -30,9 +31,10 @@ struct TextureWithId
 {
     asset::Texture texture;
     std::string id;
+    asset_flags_type flags;
 };
 
-/** @brief Event data for texture load and unlaod operations. */
+/** @brief Event data for texture load and unload operations. */
 struct TextureUpdateEventData
 {
     TextureUpdateEventData(UpdateAction updateAction_, std::vector<std::string> ids_, std::span<const TextureWithId> data_);
@@ -58,4 +60,5 @@ struct CubeMapUpdateEventData
     std::span<const CubeMapWithId> data;
     UpdateAction updateAction;
 };
+
 } // namespace nc::asset

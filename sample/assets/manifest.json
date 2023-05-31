@@ -174,38 +174,6 @@
             "assetName": "texture/solid_color/Green"
         },
         {
-            "sourcePath": "raw/image/spheres/Blue/BaseColor.png",
-            "assetName": "texture/spheres/Blue/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Blue/Normal.png",
-            "assetName": "texture/spheres/Blue/Normal"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Blue/Roughness.png",
-            "assetName": "texture/spheres/Blue/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Blue/Metallic.png",
-            "assetName": "texture/spheres/Blue/Metallic"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Gray/BaseColor.png",
-            "assetName": "texture/spheres/Gray/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Gray/Normal.png",
-            "assetName": "texture/spheres/Gray/Normal"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Gray/Roughness.png",
-            "assetName": "texture/spheres/Gray/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/spheres/Gray/Metallic.png",
-            "assetName": "texture/spheres/Gray/Metallic"
-        },
-        {
             "sourcePath": "raw/image/table/BaseColor.png",
             "assetName": "texture/table/BaseColor"
         },

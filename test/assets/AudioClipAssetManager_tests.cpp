@@ -97,12 +97,12 @@ TEST_F(AudioClipAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 2u> paths{SoundPath1, SoundPath2};
     assetManager->Load(paths, false);
-    assetManager->UnloadAll();
+    assetManager->UnloadAll(AssetFlags::None);
     EXPECT_FALSE(assetManager->Unload(SoundPath1));
     EXPECT_FALSE(assetManager->Unload(SoundPath2));
 }
 
 TEST_F(AudioClipAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll();
+    assetManager->UnloadAll(AssetFlags::None);
 }
