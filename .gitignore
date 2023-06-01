@@ -9,6 +9,7 @@
 *.exe
 *.out
 *.log
+*.DS_store
 
 #directories
 .vs/

@@ -27,7 +27,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
 {
 }
 
-NcAssetImpl::~NcAssetImpl() = default;
+NcAssetImpl::~NcAssetImpl() noexcept = default;
 
 auto NcAssetImpl::OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>&
 {

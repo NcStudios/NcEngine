@@ -1,10 +1,17 @@
 #pragma once
 
+#ifdef __APPLE__
+    #ifndef VK_USE_PLATFORM_METAL_EXT
+    #define VK_USE_PLATFORM_METAL_EXT
+    #endif 
+#else
+    #ifndef VK_USE_PLATFORM_WIN32_KHR
+    #define VK_USE_PLATFORM_WIN32_KHR
+    #endif
+#endif
+
 #include "ncmath/Vector.h"
 
-#ifndef VK_USE_PLATFORM_WIN32_KHR
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
 #include "vulkan/vk_mem_alloc.hpp"
 #include "utility/Memory.h"
 

@@ -230,23 +230,23 @@ namespace nc::config
 
     bool Validate(const Config& config)
     {
-        return { (config.projectSettings.projectName != "") &&
-                 (config.projectSettings.logFilePath != "") &&
-                 (config.assetSettings.audioClipsPath != "") &&
-                 (config.assetSettings.concaveCollidersPath != "") &&
-                 (config.assetSettings.hullCollidersPath != "") &&
-                 (config.assetSettings.meshesPath != "") &&
-                 (config.assetSettings.shadersPath != "") &&
-                 (config.assetSettings.texturesPath != "") &&
-                 (config.assetSettings.cubeMapsPath != "") &&
-                 (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
-                 (config.physicsSettings.worldspaceExtent > 0.0f) &&
-                 (config.graphicsSettings.screenWidth != 0) &&
-                 (config.graphicsSettings.screenHeight != 0) &&
-                 (config.graphicsSettings.targetFPS != 0) &&
-                 (config.graphicsSettings.nearClip > 0.0f) &&
-                 (config.graphicsSettings.farClip > 0.0f) &&
-                 (config.graphicsSettings.antialiasing > 0)};
+        return (config.projectSettings.projectName != "") &&
+               (config.projectSettings.logFilePath != "") &&
+               (config.assetSettings.audioClipsPath != "") &&
+               (config.assetSettings.concaveCollidersPath != "") &&
+               (config.assetSettings.hullCollidersPath != "") &&
+               (config.assetSettings.meshesPath != "") &&
+               (config.assetSettings.shadersPath != "") &&
+               (config.assetSettings.texturesPath != "") &&
+               (config.assetSettings.cubeMapsPath != "") &&
+               (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
+               (config.physicsSettings.worldspaceExtent > 0.0f) &&
+               (config.graphicsSettings.screenWidth != 0) &&
+               (config.graphicsSettings.screenHeight != 0) &&
+               (config.graphicsSettings.targetFPS != 0) &&
+               (config.graphicsSettings.nearClip > 0.0f) &&
+               (config.graphicsSettings.farClip > 0.0f) &&
+               (config.graphicsSettings.antialiasing > 0);
     }
 
     /* Internal function implementation */
