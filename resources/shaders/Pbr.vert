@@ -13,8 +13,7 @@ struct ObjectData
     int baseColorIndex;
     int normalIndex;
     int roughnessIndex;
-
-    int isInitialized;
+    int metallicIndex;
 };
 
 struct PointLight

@@ -74,20 +74,20 @@ namespace nc::sample::prefab
 
     namespace material
     {
-        graphics::Material Box{};
-        graphics::Material Coin{};
-        graphics::Material Ground{};
-        graphics::Material SolidBlue{};
-        graphics::Material SolidGreen{};
-        graphics::Material SolidRed{};
-        graphics::Material Default{};
-        graphics::Material Table{};
-        graphics::Material Token{};
-        graphics::Material Worm{};
+        graphics::PbrMaterial Box{};
+        graphics::PbrMaterial Coin{};
+        graphics::PbrMaterial Ground{};
+        graphics::PbrMaterial SolidBlue{};
+        graphics::PbrMaterial SolidGreen{};
+        graphics::PbrMaterial SolidRed{};
+        graphics::PbrMaterial Default{};
+        graphics::PbrMaterial Table{};
+        graphics::PbrMaterial Token{};
+        graphics::PbrMaterial Worm{};
     } // end namespace material
 
     template<class LoadFunc>
-    void LoadAssets(const std::filesystem::path& rootDir, LoadFunc load)
+    void LoadAssets(const std::filesystem::path& rootDir, asset_flags_type flags, LoadFunc load)
     {
         auto paths = std::vector<std::string>{};
         for (auto&& entry : std::filesystem::recursive_directory_iterator{rootDir})
@@ -109,7 +109,7 @@ namespace nc::sample::prefab
             paths.push_back(trimmedPath.string());
         }
 
-        load(paths, false);
+        load(paths, false, flags);
     }
 
     void InitializeResources()
@@ -122,27 +122,67 @@ namespace nc::sample::prefab
         IsInitialized = true;
 
         const auto& assetSettings = config::GetAssetSettings();
-        LoadAssets(assetSettings.audioClipsPath, &LoadAudioClipAssets);
-        LoadAssets(assetSettings.concaveCollidersPath, &LoadConcaveColliderAssets);
-        LoadAssets(assetSettings.cubeMapsPath, &LoadCubeMapAssets);
-        LoadAssets(assetSettings.hullCollidersPath, &LoadConvexHullAssets);
-        LoadAssets(assetSettings.meshesPath, &LoadMeshAssets);
-        LoadAssets(assetSettings.texturesPath, &LoadTextureAssets);
+        LoadAssets(assetSettings.audioClipsPath, AssetFlags::None, &LoadAudioClipAssets);
+        LoadAssets(assetSettings.concaveCollidersPath, AssetFlags::None, &LoadConcaveColliderAssets);
+        LoadAssets(assetSettings.cubeMapsPath, AssetFlags::None, &LoadCubeMapAssets);
+        LoadAssets(assetSettings.hullCollidersPath, AssetFlags::None, &LoadConvexHullAssets);
+        LoadAssets(assetSettings.meshesPath, AssetFlags::None, &LoadMeshAssets);
+
+        std::vector<std::string> textures
+        {
+            "DefaultBaseColor.nca",
+            "DefaultMetallic.nca",
+            "DefaultParticle.nca",
+            "blacktop\\BaseColor.nca",
+            "blacktop\\Roughness.nca",
+            "box\\BaseColor.nca",
+            "box\\Roughness.nca",
+            "coin\\BaseColor.nca",
+            "coin\\Roughness.nca",
+            "floor\\BaseColor.nca",
+            "floor\\Roughness.nca",
+            "line\\Hatch3.nca",
+            "logo\\BaseColor.nca",
+            "logo\\Metallic.nca",
+            "logo\\Roughness.nca",
+            "solid_color\\Blue.nca",
+            "solid_color\\Green.nca",
+            "solid_color\\Red.nca", 
+            "table\\BaseColor.nca",
+            "table\\Roughness.nca",
+            "token\\BaseColor.nca",
+            "token\\Roughness.nca",
+            "tree\\BaseColor.nca"
+        };
+        LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
+
+        std::vector<std::string> normalMaps 
+        {
+            "DefaultNormal.nca",
+            "blacktop\\Normal.nca",
+            "box\\Normal.nca",
+            "coin\\Normal.nca",
+            "floor\\Normal.nca",
+            "logo\\Normal.nca", 
+            "table\\Normal.nca",
+            "token\\Normal.nca"
+        };
+        LoadTextureAssets(normalMaps, false, AssetFlags::TextureTypeNormalMap);
 
         const auto defaultBaseColor = std::string{ "DefaultBaseColor.nca" };
         const auto defaultNormal = std::string{ "DefaultNormal.nca" };
         const auto defaultRoughness = std::string{ "DefaultMetallic.nca" };
 
-        material::Box        = graphics::Material{ "box\\BaseColor.nca",     "box\\Normal.nca",   "box\\Roughness.nca",   defaultRoughness };
-        material::SolidBlue  = graphics::Material{ "solid_color\\Blue.nca",  defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::SolidGreen = graphics::Material{ "solid_color\\Green.nca", defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::SolidRed   = graphics::Material{ "solid_color\\Red.nca",   defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::Coin       = graphics::Material{ "coin\\BaseColor.nca",    "coin\\Normal.nca",  "coin\\Roughness.nca",  defaultRoughness };
-        material::Default    = graphics::Material{ defaultBaseColor,        defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::Ground     = graphics::Material{ "floor\\BaseColor.nca",   "floor\\Normal.nca", "floor\\Roughness.nca", defaultRoughness };
-        material::Table      = graphics::Material{ "table\\BaseColor.nca",   "table\\Normal.nca", "table\\Roughness.nca", defaultRoughness };
-        material::Token      = graphics::Material{ "token\\BaseColor.nca",   "token\\Normal.nca", "token\\Roughness.nca", defaultRoughness };
-        material::Worm       = graphics::Material{ "logo\\BaseColor.nca",    "logo\\Normal.nca",  "logo\\Roughness.nca",  defaultRoughness };
+        material::Box        = graphics::PbrMaterial{ "box\\BaseColor.nca",     "box\\Normal.nca",   "box\\Roughness.nca",   defaultRoughness };
+        material::SolidBlue  = graphics::PbrMaterial{ "solid_color\\Blue.nca",  defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::SolidGreen = graphics::PbrMaterial{ "solid_color\\Green.nca", defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::SolidRed   = graphics::PbrMaterial{ "solid_color\\Red.nca",   defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::Coin       = graphics::PbrMaterial{ "coin\\BaseColor.nca",    "coin\\Normal.nca",  "coin\\Roughness.nca",  defaultRoughness };
+        material::Default    = graphics::PbrMaterial{ defaultBaseColor,        defaultNormal,      defaultRoughness,      defaultRoughness };
+        material::Ground     = graphics::PbrMaterial{ "floor\\BaseColor.nca",   "floor\\Normal.nca", "floor\\Roughness.nca", defaultRoughness };
+        material::Table      = graphics::PbrMaterial{ "table\\BaseColor.nca",   "table\\Normal.nca", "table\\Roughness.nca", defaultRoughness };
+        material::Token      = graphics::PbrMaterial{ "token\\BaseColor.nca",   "token\\Normal.nca", "token\\Roughness.nca", defaultRoughness };
+        material::Worm       = graphics::PbrMaterial{ "logo\\BaseColor.nca",    "logo\\Normal.nca",  "logo\\Roughness.nca",  defaultRoughness };
     }
 
     template<Resource Resource_t>

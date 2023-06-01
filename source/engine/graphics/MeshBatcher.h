@@ -14,7 +14,7 @@ namespace nc::graphics
     struct Batch
     {
         MeshView mesh;
-        TextureIndices textures;
+        PbrMaterialView materialView;
         uint32_t count;
     };
 

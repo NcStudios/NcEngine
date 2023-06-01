@@ -97,7 +97,7 @@ TEST_F(CubeMapAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
     std::array<std::string, 3u> paths {skybox1, skybox2, skybox3};
     assetManager->Load(paths, false);
-    assetManager->UnloadAll();
+    assetManager->UnloadAll(AssetFlags::None);
     EXPECT_FALSE(assetManager->IsLoaded(skybox1));
     EXPECT_FALSE(assetManager->IsLoaded(skybox2));
     EXPECT_FALSE(assetManager->IsLoaded(skybox3));
@@ -105,7 +105,7 @@ TEST_F(CubeMapAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 
 TEST_F(CubeMapAssetManager_tests, UnloadAll_Empty_Completes)
 {
-    assetManager->UnloadAll();
+    assetManager->UnloadAll(AssetFlags::None);
 }
 
 TEST_F(CubeMapAssetManager_tests, Unload_FromBeginning_UpdatesAccesors)

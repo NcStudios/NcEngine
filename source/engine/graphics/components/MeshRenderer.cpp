@@ -8,26 +8,26 @@
 
 namespace nc::graphics
 {
-    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, Material material, TechniqueType techniqueType)
+    MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, PbrMaterial material, TechniqueType techniqueType)
     : ComponentBase{entity},
       #ifdef NC_EDITOR_ENABLED
       m_material{std::move(material)},
       m_meshPath{meshUid},
       #endif
       m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
-      m_textureIndices{},
+      m_materialView{},
       m_techniqueType{techniqueType}
     {
         #ifdef NC_EDITOR_ENABLED
-        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor); // Todo: Make this more generic for materials;
-        m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(m_material.normal);
-        m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(m_material.roughness);
-        m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(m_material.metallic);
+        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor); // Todo: Make this more generic for materials;
+        m_materialView.normal = AssetService<TextureView>::Get()->Acquire(m_material.normal);
+        m_materialView.roughness = AssetService<TextureView>::Get()->Acquire(m_material.roughness);
+        m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(m_material.metallic);
         #else
-        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
-        m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(material.normal);
-        m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(material.roughness);
-        m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(material.metallic);
+        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
+        m_materialView.normal = AssetService<TextureView>::Get()->Acquire(material.normal);
+        m_materialView.roughness = AssetService<TextureView>::Get()->Acquire(material.roughness);
+        m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(material.metallic);
         #endif
     }
 
@@ -46,7 +46,7 @@ namespace nc::graphics
         m_material.baseColor = texturePath;
         #endif
 
-        m_textureIndices.baseColor = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(texturePath);
     }
 
     void MeshRenderer::SetNormal(const std::string& texturePath)
@@ -55,7 +55,7 @@ namespace nc::graphics
         m_material.normal = texturePath;
         #endif
 
-        m_textureIndices.normal = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_materialView.normal = AssetService<TextureView>::Get()->Acquire(texturePath);
     }
 
     void MeshRenderer::SetRoughness(const std::string& texturePath)
@@ -64,7 +64,7 @@ namespace nc::graphics
         m_material.roughness = texturePath;
         #endif
 
-        m_textureIndices.roughness = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_materialView.roughness = AssetService<TextureView>::Get()->Acquire(texturePath);
     }
 
     void MeshRenderer::SetMetallic(const std::string& texturePath)
@@ -73,11 +73,11 @@ namespace nc::graphics
         m_material.metallic = texturePath;
         #endif
 
-        m_textureIndices.metallic = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(texturePath);
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void Material::EditorGuiElement()
+    void PbrMaterial::EditorGuiElement()
     {
         ImGui::SameLine();
         ImGui::Text("Material");

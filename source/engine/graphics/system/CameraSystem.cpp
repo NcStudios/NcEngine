@@ -8,7 +8,13 @@ auto CameraSystem::Execute(Registry* registry) -> CameraState
 {
     if (!m_mainCamera)
     {
-        return CameraState{};
+        return CameraState
+        {
+            .view = DirectX::XMMatrixIdentity(),
+            .projection = DirectX::XMMatrixIdentity(),
+            .position = Vector3::Zero(),
+            .frustum = Frustum{}
+        };
     }
 
     m_mainCamera->UpdateViewMatrix();
@@ -19,8 +25,7 @@ auto CameraSystem::Execute(Registry* registry) -> CameraState
         .view = m_mainCamera->ViewMatrix(),
         .projection = m_mainCamera->ProjectionMatrix(),
         .position = transform->Position(),
-        .frustum = m_mainCamera->CalculateFrustum(),
-        .hasCamera = true
+        .frustum = m_mainCamera->CalculateFrustum()
     };
 }
 } // namespace nc::graphics

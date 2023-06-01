@@ -5,8 +5,10 @@
 #include "Swapchain.h"
 #include "core/Device.h"
 #include "techniques/EnvironmentTechnique.h"
+#include "techniques/OutlineTechnique.h"
 #include "techniques/ParticleTechnique.h"
 #include "techniques/PbrTechnique.h"
+#include "techniques/ToonTechnique.h"
 #include "techniques/UiTechnique.h"
 
 #ifdef NC_EDITOR_ENABLED
@@ -101,6 +103,8 @@ RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocato
 
     litPass.RegisterTechnique<EnvironmentTechnique>(device, m_descriptorSets);
     litPass.RegisterTechnique<PbrTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<ToonTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<OutlineTechnique>(device, m_descriptorSets);
     litPass.RegisterTechnique<ParticleTechnique>(device, m_descriptorSets);
     litPass.RegisterTechnique<UiTechnique>(device, m_descriptorSets);
     AddRenderPass(std::move(litPass));
@@ -164,6 +168,8 @@ void RenderGraph::Resize(const Device& device, const Vector2& dimensions)
 
     litPass.RegisterTechnique<EnvironmentTechnique>(device, m_descriptorSets);
     litPass.RegisterTechnique<PbrTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<ToonTechnique>(device, m_descriptorSets);
+    litPass.RegisterTechnique<OutlineTechnique>(device, m_descriptorSets);
     litPass.RegisterTechnique<ParticleTechnique>(device, m_descriptorSets);
     litPass.RegisterTechnique<UiTechnique>(device, m_descriptorSets);
     AddRenderPass(std::move(litPass));

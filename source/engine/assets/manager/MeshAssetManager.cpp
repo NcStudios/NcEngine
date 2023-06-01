@@ -43,7 +43,7 @@ void MeshAssetManager::AddMeshView(const std::string& path, bool isExternal)
     m_accessors.emplace(path, meshView);
 }
 
-bool MeshAssetManager::Load(const std::string& path, bool isExternal)
+bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
 {
     if (IsLoaded(path))
     {
@@ -55,7 +55,7 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal)
     return true;
 }
 
-bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
+bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
     for (const auto& path : paths)
     {
@@ -71,7 +71,7 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal)
     return true;
 }
 
-bool MeshAssetManager::Unload(const std::string& path)
+bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
 {
     auto pos = m_accessors.find(path);
     if(pos == m_accessors.end())
@@ -113,7 +113,7 @@ bool MeshAssetManager::Unload(const std::string& path)
     return true;
 }
 
-void MeshAssetManager::UnloadAll()
+void MeshAssetManager::UnloadAll(asset_flags_type)
 {
     /** We don't want to emit a signal with empty data. **/
     m_accessors.clear();
@@ -121,7 +121,7 @@ void MeshAssetManager::UnloadAll()
     m_indexData.clear();
 }
 
-auto MeshAssetManager::Acquire(const std::string& path) const -> MeshView
+auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshView
 {
     const auto it = m_accessors.find(path);
     if(it == m_accessors.cend())
@@ -130,7 +130,7 @@ auto MeshAssetManager::Acquire(const std::string& path) const -> MeshView
     return it->second;
 }
 
-bool MeshAssetManager::IsLoaded(const std::string& path) const
+bool MeshAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_accessors.contains(path);
 }

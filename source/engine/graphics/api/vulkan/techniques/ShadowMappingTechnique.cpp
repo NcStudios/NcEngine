@@ -131,7 +131,12 @@ namespace nc::graphics
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
         uint32_t objectInstance = 0;
-        for (const auto& mesh : frameData.objectState.meshes)
+        for (const auto& mesh : frameData.objectState.pbrMeshes)
+        {
+            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            objectInstance++;
+        }
+        for (const auto& mesh : frameData.objectState.toonMeshes)
         {
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             objectInstance++;

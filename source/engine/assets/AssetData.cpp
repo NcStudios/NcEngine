@@ -35,4 +35,5 @@ CubeMapUpdateEventData::CubeMapUpdateEventData(UpdateAction updateAction_, std::
         throw NcError("Cannot unload skybox. No ID was provided.");
     }
 }
+
 } // namespace nc::asset

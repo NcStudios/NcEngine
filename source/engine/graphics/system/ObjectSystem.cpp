@@ -9,10 +9,9 @@
 
 namespace
 {
-bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
+bool IsViewedByFrustum(const nc::Frustum& frustum, float maxMeshExtent, DirectX::FXMMATRIX transform)
 {
     const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
-    const auto maxMeshExtent = renderer.GetMesh().maxExtent;
     auto sphere = nc::Sphere{ .center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent };
     DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
     return nc::physics::Intersect(frustum, sphere);
@@ -21,29 +20,47 @@ bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRende
 
 namespace nc::graphics
 {
-auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> gameState,
+auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
+                           MultiView<ToonRenderer, Transform> toonRenderers,
                            const CameraState& cameraState,
                            const EnvironmentState& environmentState) -> ObjectState
 {
     OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
     const auto viewProjection = cameraState.view * cameraState.projection;
     auto objectData = std::vector<ObjectData>{};
-    objectData.reserve(gameState.size_upper_bound());
+    objectData.reserve(pbrRenderers.size_upper_bound() + toonRenderers.size_upper_bound());
     auto frontendState = ObjectState{};
-    frontendState.meshes.reserve(gameState.size_upper_bound());
+    frontendState.pbrMeshes.reserve(pbrRenderers.size_upper_bound());
+    frontendState.toonMeshes.reserve(toonRenderers.size_upper_bound());
 
-    for (const auto& [renderer, transform] : gameState)
+    for (const auto& [renderer, transform] : pbrRenderers)
     {
         const auto& modelMatrix = transform->TransformationMatrix();
-        if (!IsViewedByFrustum(cameraState.frustum, *renderer, modelMatrix))
+        if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMesh().maxExtent, modelMatrix))
         {
             continue;
         }
 
-        const auto& [base, normal, roughness, metallic] = renderer->GetTextureIndices();
+        const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index);
-        frontendState.meshes.push_back(renderer->GetMesh());
+        frontendState.pbrMeshes.push_back(renderer->GetMesh());
     }
+
+    frontendState.pbrMeshStartingIndex = 0u;
+
+    for (const auto& [renderer, transform] : toonRenderers)
+    {
+        const auto& modelMatrix = transform->TransformationMatrix();
+        if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMesh().maxExtent, modelMatrix))
+        {
+            continue;
+        }
+
+        const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
+        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling);
+        frontendState.toonMeshes.push_back(renderer->GetMesh());
+    }
+    frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
 
     if (environmentState.useSkybox)
     {

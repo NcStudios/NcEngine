@@ -118,7 +118,7 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, bool isNormal) -> GpuAllocation<vk::Image>
     {
         const auto imageSize = width * height * 4u;
         auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
@@ -127,7 +127,8 @@ namespace nc::graphics
         Unmap(stagingBuffer.Allocation());
 
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
-        auto imageAllocation = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, vk::SampleCountFlagBits::e1);
+        auto format = isNormal ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb;
+        auto imageAllocation = CreateImage(format, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, vk::SampleCountFlagBits::e1);
 
         TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
@@ -269,12 +270,13 @@ namespace nc::graphics
         });
     }
 
-    auto CreateTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView
+    auto CreateTextureView(vk::Device device, vk::Image image, bool isNormal) -> vk::UniqueImageView
     {
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
         viewInfo.setViewType(vk::ImageViewType::e2D);
-        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
+
+        isNormal ? viewInfo.setFormat(vk::Format::eR8G8B8A8Unorm) : viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
 
         vk::ImageSubresourceRange subresourceRange{};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);

@@ -7,6 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 
 #include <string>
@@ -32,42 +33,29 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
-    auto floorMaterial = graphics::Material{
-        .baseColor = "floor\\BaseColor.nca",
-        .normal    = "floor\\Normal.nca",
-        .roughness = "floor\\Roughness.nca",
-        .metallic  = "floor\\Roughness.nca"
+    LoadTextureAsset("tree\\BaseColor.nca");
+    LoadTextureAsset("line\\Hatch3.nca");
+    
+    auto floorMaterial = graphics::ToonMaterial{
+        .baseColor = "DefaultMetallic.nca",
+        .overlay   = "DefaultBaseColor.nca",
+        .hatching  = "DefaultBaseColor.nca",
+        .hatchingTiling  = 1
     };
 
-    auto blacktopMaterial = graphics::Material{
-        .baseColor = "blacktop\\BaseColor.nca",
-        .normal    = "blacktop\\Normal.nca",
-        .roughness = "blacktop\\Roughness.nca",
-        .metallic  = "blacktop\\Metallic.nca"
-    };
-
-    auto blueMaterial = graphics::Material{
-        .baseColor = "spheres\\Blue\\BaseColor.nca",
-        .normal    = "spheres\\Blue\\Normal.nca",
-        .roughness = "spheres\\Blue\\Roughness.nca",
-        .metallic  = "spheres\\Blue\\Metallic.nca"
-    };
-
-    auto grayMaterial = graphics::Material{
-        .baseColor = "spheres\\Gray\\BaseColor.nca",
-        .normal    = "spheres\\Gray\\Normal.nca",
-        .roughness = "spheres\\Gray\\Roughness.nca",
-        .metallic  = "spheres\\Gray\\Metallic.nca"
+    auto treeMaterial = graphics::ToonMaterial{
+        .baseColor = "tree\\BaseColor.nca",
+        .overlay   = "DefaultBaseColor.nca",
+        .hatching  = "line\\Hatch3.nca",
+        .hatchingTiling  = 8
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
+    LoadMeshAsset("tree.nca");
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.4f, 0.8f), 88.0f);
-
-    auto lvHandle2 = registry->Add<Entity>({.position = Vector3{-2.5f, 4.0f, -1.4f}, .tag = "Point Light 2"});
-    registry->Add<graphics::PointLight>(lvHandle2, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.4f, 0.8f, 0.4f), 88.0f);
+    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.85f, 0.64f, 0.125f), 88.0f);
 
     auto floor = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
@@ -75,34 +63,15 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .scale = Vector3{30.0f, 30.0f, 1.0f},
         .tag = "Floor"
     });
+    registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
 
-    registry->Add<graphics::MeshRenderer>(floor, "plane.nca", floorMaterial);
-    auto blueSphere = registry->Add<Entity>({
-        .position = Vector3{0.0f, 1.0f, 2.0f},
-        .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f,2.0f},
-        .tag = "Sphere"
+    auto tree = registry->Add<Entity>({
+        .position = Vector3{0.0f, 0.0f, 0.0f},
+        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "Tree"
     });
-
-    registry->Add<graphics::MeshRenderer>(blueSphere, "sphere.nca", blueMaterial);
-
-    auto blackSphere = registry->Add<Entity>({
-        .position = Vector3{3.0f, 1.0f, 2.0f},
-        .rotation = Quaternion::FromEulerAngles(-1.5708f, 0.0f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f,2.0f},
-        .tag = "Sphere"
-    });
-
-    registry->Add<graphics::MeshRenderer>(blackSphere, "sphere.nca", grayMaterial);
-
-    auto blackBox = registry->Add<Entity>({
-        .position = Vector3{-3.0f, 1.0f, 2.0f},
-        .rotation = Quaternion::FromEulerAngles(0.2f, 0.7f, 0.4f),
-        .scale = Vector3{2.0f, 2.0f,2.0f},
-        .tag = "Box"
-    });
-
-    registry->Add<graphics::MeshRenderer>(blackBox, "cube.nca", blacktopMaterial);
+    registry->Add<graphics::ToonRenderer>(tree, "tree.nca", treeMaterial);
 
     // Camera
     auto cameraHandle = registry->Add<Entity>({

@@ -20,12 +20,12 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         explicit TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures);
         ~TextureAssetManager() noexcept;
 
-        bool Load(const std::string& path, bool isExternal) override;
-        bool Load(std::span<const std::string> paths, bool isExternal) override;
-        bool Unload(const std::string& path) override;
-        void UnloadAll() override;
-        auto Acquire(const std::string& path) const -> TextureView override;
-        bool IsLoaded(const std::string& path) const override;
+        bool Load(const std::string& path, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
+        bool Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
+        bool Unload(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
+        void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
+        auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> TextureView override;
+        bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
         auto OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&;
 
     private:

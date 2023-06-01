@@ -118,6 +118,7 @@ namespace nc::graphics
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
         m_graphics->Clear();
+        m_cameraSystem.Clear();
         m_environmentSystem.Clear();
         m_particleEmitterSystem.Clear();
     }
@@ -137,7 +138,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        if (!cameraState.hasCamera || !m_graphics->FrameBegin())
+        if (!m_graphics->FrameBegin())
         {
             return;
         }
@@ -156,7 +157,7 @@ namespace nc::graphics
         #endif
 
         auto environmentState = m_environmentSystem.Execute(cameraState);
-        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, cameraState, environmentState);
+        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry}, cameraState, environmentState);
         auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
         auto state = PerFrameRenderState
         {
@@ -172,9 +173,9 @@ namespace nc::graphics
         m_graphics->FrameEnd();
     }
 
-    void NcGraphicsImpl::OnResize(float width, float height, float nearZ, float farZ, bool isMinimized)
+    void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
     {
-        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height, nearZ, farZ);
+        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height);
         m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics

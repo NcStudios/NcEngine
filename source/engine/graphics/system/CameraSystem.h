@@ -18,7 +18,6 @@ struct CameraState
     DirectX::XMMATRIX projection;
     Vector3 position;
     Frustum frustum;
-    bool hasCamera = false;
 };
 
 class CameraSystem final
@@ -32,6 +31,11 @@ class CameraSystem final
         auto Get() noexcept -> Camera*
         {
             return m_mainCamera;
+        }
+
+        void Clear() noexcept
+        {
+            m_mainCamera = nullptr;
         }
 
         auto Execute(Registry* registry) -> CameraState;
