@@ -19,7 +19,7 @@ namespace nc::ui::editor
     inline bool floatWidget(const char* label, const char* id, float* item, float dragSpeed = 0.1f, float min = 0.1f, float max = 10.0f, const char* fmt = "%.1f")
     {
         ImGui::PushID(id);
-        ImGui::Text(label);
+        ImGui::Text("%s", label);
         ImGui::SameLine();
         ImGui::SetNextItemWidth(defaultItemWidth);
         auto result = ImGui::DragFloat("", item, dragSpeed, min, max, fmt);
@@ -43,7 +43,7 @@ namespace nc::ui::editor
 
         ImGui::BeginGroup();
             ImGui::Indent();
-            ImGui::Text(frontPadding); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
+            ImGui::Text("%s", frontPadding); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
             textBlockWidget("X##widgetHeader", buttonSize, color::Clear, color::Red); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
             textBlockWidget("Y##widgetHeader", buttonSize, color::Clear, color::Green); ImGui::SameLine(); ImGui::Spacing(); ImGui::SameLine();
             textBlockWidget("Z##widgetHeader", buttonSize, color::Clear, color::Blue);
@@ -56,7 +56,7 @@ namespace nc::ui::editor
         ImGui::PushID(id);
         ImGui::BeginGroup();
             ImGui::Indent();
-            ImGui::Text(groupLabel); ImGui::SameLine();
+            ImGui::Text("%s", groupLabel); ImGui::SameLine();
             auto xResult = floatWidget("", "x", x, 0.1f, min, max, "%.1f"); ImGui::SameLine();
             auto yResult = floatWidget("", "y", y, 0.1f, min, max, "%.1f"); ImGui::SameLine();
             auto zResult = floatWidget("", "z", z, 0.1f, min, max, "%.1f");
@@ -74,7 +74,7 @@ namespace nc::ui::editor
         ImGui::BeginGroup();
         ImGui::PushItemWidth(defaultItemWidth);
         ImGui::Indent();
-            ImGui::Text(frontPadding); ImGui::SameLine();
+            ImGui::Text("%s", frontPadding); ImGui::SameLine();
             textBlockWidget(label1, buttonSize, color::Clear, color::White); ImGui::SameLine();
             textBlockWidget(label2, buttonSize, color::Clear, color::White); ImGui::SameLine();
             if(label3)

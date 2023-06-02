@@ -4,10 +4,16 @@
     #ifndef VK_USE_PLATFORM_METAL_EXT
     #define VK_USE_PLATFORM_METAL_EXT
     #endif 
-#else
+#elif _WIN32
     #ifndef VK_USE_PLATFORM_WIN32_KHR
     #define VK_USE_PLATFORM_WIN32_KHR
     #endif
+#elif __linux__
+    #ifndef VK_USE_PLATFORM_XLIB_KHR
+    #define VK_USE_PLATFORM_XLIB_KHR
+    #endif
+#else
+    #error "Unknown platform"
 #endif
 
 #include "ncmath/Vector.h"

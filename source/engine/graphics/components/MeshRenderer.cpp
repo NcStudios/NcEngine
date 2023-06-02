@@ -83,11 +83,11 @@ namespace nc::graphics
         ImGui::Text("Material");
         ImGui::Spacing();
         ImGui::Text("Base Color:");
-        ImGui::Text(baseColor.c_str());
+        ImGui::Text("%s", baseColor.c_str());
         ImGui::Text("Normal:");
-        ImGui::Text(normal.c_str());
+        ImGui::Text("%s", normal.c_str());
         ImGui::Text("Roughness:");
-        ImGui::Text(roughness.c_str());
+        ImGui::Text("%s", roughness.c_str());
     }
     #endif
 } // namespace nc::graphics
