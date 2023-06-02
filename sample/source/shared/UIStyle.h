@@ -24,7 +24,6 @@ const ImVec4 COLOR_ACCENT_LIGHT         (0.000f, 0.729f, 0.000f, 1.000f);
 
 inline void SetImGuiStyle()
 {
-    auto& io = ImGui::GetIO();
     auto& style = ImGui::GetStyle();
     style.WindowMenuButtonPosition = ImGuiDir_None;
     ImVec4* colors = style.Colors;
