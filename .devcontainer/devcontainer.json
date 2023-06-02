@@ -1,0 +1,14 @@
+{
+    "name": "ubuntu",
+    "build": {
+        "dockerfile": "ubuntu.dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools-extension-pack",
+                "twxs.cmake"
+            ]
+        }
+    }
+}

@@ -37,13 +37,13 @@ namespace nc::graphics
         ImGui::Text("Material");
         ImGui::Spacing();
         ImGui::Text("Base Color:");
-        ImGui::Text(baseColor.c_str());
+        ImGui::Text("%s", baseColor.c_str());
         ImGui::Text("Overlay:");
-        ImGui::Text(overlay.c_str());
+        ImGui::Text("%s", overlay.c_str());
         ImGui::Text("Hatching Texture:");
-        ImGui::Text(hatching.c_str());
+        ImGui::Text("%s", hatching.c_str());
         ImGui::Text("Hatching Tiling:");
-        ImGui::Text(std::to_string(hatchingTiling).c_str());
+        ImGui::Text("%u", hatchingTiling);
     }
     #endif
 } // namespace nc::graphics

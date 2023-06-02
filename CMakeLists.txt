@@ -103,8 +103,7 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
 )
 
 # Install External Files
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/enet
-                    ${PROJECT_SOURCE_DIR}/source/external/imgui
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
         DESTINATION include
         PATTERN     "src" EXCLUDE
 )

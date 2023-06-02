@@ -24,9 +24,6 @@ const ImVec4 COLOR_ACCENT_LIGHT         (0.000f, 0.729f, 0.000f, 1.000f);
 
 inline void SetImGuiStyle()
 {
-    auto& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigDockingWithShift = false;
     auto& style = ImGui::GetStyle();
     style.WindowMenuButtonPosition = ImGuiDir_None;
     ImVec4* colors = style.Colors;
@@ -68,8 +65,6 @@ inline void SetImGuiStyle()
     colors[ImGuiCol_TabActive]             = COLOR_ACCENT_LIGHT;
     colors[ImGuiCol_TabUnfocused]          = COLOR_ACCENT_DARK;
     colors[ImGuiCol_TabUnfocusedActive]    = COLOR_ACCENT_DARK;
-    colors[ImGuiCol_DockingPreview]        = COLOR_ACCENT;
-    colors[ImGuiCol_DockingEmptyBg]        = COLOR_GRAY;
     colors[ImGuiCol_TextSelectedBg]        = COLOR_ACCENT;
     colors[ImGuiCol_DragDropTarget]        = COLOR_ACCENT;
     colors[ImGuiCol_NavHighlight]          = COLOR_ACCENT;

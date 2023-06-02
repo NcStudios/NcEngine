@@ -13,9 +13,13 @@ target_compile_definitions(${NC_ENGINE_LIB}
         WIN32_LEAN_AND_MEAN
         $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ncengine/ui/DearImGuiConversion.h">
         $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/DearImGuiConversion.h">
-    PRIVATE
-        __WINDOWS_WASAPI__
 )
+
+if(WIN32)
+    target_compile_definitions(${NC_ENGINE_LIB} PRIVATE __WINDOWS_WASAPI__)
+elseif(APPLE)
+    target_compile_definitions(${NC_ENGINE_LIB} PRIVATE __MACOSX_CORE__)
+endif()
 
 if(NOT NC_PROD_BUILD)
     add_definitions(-DNC_ASSERT_ENABLED)
@@ -31,15 +35,6 @@ target_compile_options(${NC_ENGINE_LIB}
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE
         imgui
-        gdi32
-        ws2_32
-        ole32
-        winmm
-        ksuser
-        mfplat
-        mfuuid
-        wmcodecdspuuid
-        #enet add for project requiring networking
     PUBLIC
         NcAsset
         NcMath
@@ -48,6 +43,25 @@ target_link_libraries(${NC_ENGINE_LIB}
         Taskflow
         glfw
 )
+
+if(WIN32)
+    target_link_libraries(${NC_ENGINE_LIB}
+        INTERFACE
+            gdi32
+            ws2_32
+            ole32
+            winmm
+            ksuser
+            mfplat
+            mfuuid
+            wmcodecdspuuid
+    )
+elseif(APPLE)
+    target_link_libraries(${NC_ENGINE_LIB}
+        PUBLIC
+            "-framework CoreAudio"
+    )
+endif()
 
 # Note - OptickCore.dll still needs to be copied to the executable's directory
 if(${NC_PROFILING_ENABLED})
@@ -70,7 +84,7 @@ target_include_directories(${NC_ENGINE_LIB}
 )
 
 # Install
-install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} ${ENET_LIB} NcMath NcUtility NcAsset
+install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} NcMath NcUtility NcAsset
         EXPORT      NcEngine-export
         DESTINATION lib
 )

@@ -90,7 +90,7 @@ namespace nc::sample
     {
         auto columnWidth = ImGui::GetColumnWidth();
         static int ItemCount = GameLog::DefaultItemCount;
-        ImGui::Text("Log");
+        ImGui::Text("%s", "Log");
         ImGui::SameLine(columnWidth - 50);
         if (ImGui::Button("Clear", { 42, 18 }))
             m_gameLog.Clear();

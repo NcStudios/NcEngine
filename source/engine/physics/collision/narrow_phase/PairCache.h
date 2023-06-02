@@ -235,7 +235,7 @@ uint32_t PairCache<Derived, DataType, IdType, InitialSize>::Hash(IdType first, I
     }
     else
     {
-        return ToDerived->Hash(first, second) & m_hashMask;
+        return ToDerived()->Hash(first, second) & m_hashMask;
     }
 }
 } // namespace nc::physics

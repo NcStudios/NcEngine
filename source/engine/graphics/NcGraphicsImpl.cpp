@@ -30,7 +30,7 @@ namespace
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
         void Clear() noexcept override {}
-        auto BuildWorkload() -> std::vector<nc::task::Job> { return {}; }
+        auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
 
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED

@@ -7,6 +7,7 @@ add_library(imgui
         ${IMGUI_SOURCE_DIR}/imgui.cpp
         ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
         ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_tables.cpp
 )
 target_compile_definitions(imgui
     PUBLIC
@@ -16,6 +17,7 @@ target_compile_definitions(imgui
 target_include_directories(imgui
     PRIVATE
         ${PROJECT_SOURCE_DIR}/source/external/
+        ${PROJECT_SOURCE_DIR}/source/external/imgui
         ${PROJECT_SOURCE_DIR}/include
 )
 
