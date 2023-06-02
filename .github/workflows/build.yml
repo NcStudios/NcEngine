@@ -39,6 +39,12 @@ jobs:
         if: ${{ matrix.name == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Install X11
+        if: ${{ matrix.name == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install xorg-dev
+
       - name: Setup Vulkan Sdk
         uses: humbletim/setup-vulkan-sdk@v1.2.0
         with:
