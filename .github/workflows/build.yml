@@ -2,6 +2,8 @@ name: Build
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 14 * * 5'
   pull_request:
     branches: [ vnext, release ]
     paths-ignore:
