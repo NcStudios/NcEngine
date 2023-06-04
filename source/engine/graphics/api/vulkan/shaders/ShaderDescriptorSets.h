@@ -3,6 +3,7 @@
 #include "vulkan/vk_mem_alloc.hpp"
 
 #include <span>
+#include <unordered_map>
 
 namespace nc::graphics
 {

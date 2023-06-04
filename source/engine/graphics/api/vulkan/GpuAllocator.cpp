@@ -169,7 +169,7 @@ namespace nc::graphics
     auto GpuAllocator::Map(vma::Allocation allocation) const -> void*
     {
         void* out;
-        m_allocator.mapMemory(allocation, &out);
+        auto result = m_allocator.mapMemory(allocation, &out);
         return out;
     }
 
