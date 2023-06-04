@@ -105,7 +105,7 @@ namespace nc::sample
         if (ImGui::BeginChild("LogPanel", { 0,0 }, true))
         {
             for (auto& item : m_gameLog.GetItems())
-                ImGui::Text(item.c_str());
+                ImGui::Text("%s", item.c_str());
         } ImGui::EndChild();
     }
 

@@ -2,7 +2,7 @@
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
-#include "shared/Spawner/Spawner.h"
+#include "shared/spawner/Spawner.h"
 
 #include "imgui/imgui.h"
 #include "ncengine/NcEngine.h"
