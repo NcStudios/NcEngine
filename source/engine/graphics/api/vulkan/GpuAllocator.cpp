@@ -170,6 +170,10 @@ namespace nc::graphics
     {
         void* out;
         auto result = m_allocator.mapMemory(allocation, &out);
+        if (result != vk::Result::eSuccess)
+        {
+            throw NcError("Error mapping memory.");
+        }
         return out;
     }
 
