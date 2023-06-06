@@ -59,7 +59,7 @@ if(UNIX AND NOT APPLE)
         # Get pre-built nc-convert from NcTools so we don't have to build it and its dependencies
         FetchContent_Declare(nc-convert
                              URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-ubuntu22.04-x64.zip
-                             URL_HASH            SHA256=61BD8D5CB4C0AFDF6AFFCC548A7896F9B7CC130C5A28DF05290CFBBD64587929
+                             URL_HASH            SHA256=ACC34BD4CFECF517339538C47C1557FCCA77E4EE1F30E7177D6DF94C35A13597
                              DOWNLOAD_NO_EXTRACT FALSE
         )
 elseif(WIN32)
