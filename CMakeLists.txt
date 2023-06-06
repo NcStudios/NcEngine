@@ -101,10 +101,18 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install nc-convert executable
-install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
-        DESTINATION bin
-)
+if(UNIX AND NOT APPLE)
+    # Install nc-convert
+    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
+            DESTINATION bin
+    )
+elseif(WIN32)
+    # Install nc-convert executable
+    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
+            DESTINATION bin
+    )
+elseif(APPLE)
+endif()
 
 # Install Default Assets
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
