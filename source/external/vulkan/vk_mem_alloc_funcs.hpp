@@ -1,3 +1,8 @@
+#if __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#endif
+
 #ifndef VULKAN_MEMORY_ALLOCATOR_FUNCS_HPP
 #define VULKAN_MEMORY_ALLOCATOR_FUNCS_HPP
 
@@ -1082,4 +1087,7 @@ namespace VMA_HPP_NAMESPACE {
     return result;
   }
 }
+#endif
+#if __GNUC__
+#pragma GCC diagnostic pop
 #endif

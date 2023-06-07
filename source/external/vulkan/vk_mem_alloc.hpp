@@ -11,6 +11,8 @@
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #endif
 
 #ifndef VULKAN_MEMORY_ALLOCATOR_HPP
