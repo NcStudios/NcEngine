@@ -51,16 +51,26 @@ set(NC_TOOLS_BUILD_CONVERTER OFF)
 set(NC_TOOLS_BUILD_TESTS OFF)
 FetchContent_Declare(nc-tools
                      GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
-                     GIT_TAG             v1.0.0
+                     GIT_TAG             v1.0.1
                      GIT_SHALLOW         TRUE
 )
 
-# Get pre-built nc-convert.exe from NcTools so we don't have to build it and its dependencies
-FetchContent_Declare(nc-convert
-                     URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.0/nc-convert.exe
-                     URL_HASH            SHA256=281FA6A37D6A72111EF8586F4A8A415F3C9D52CA44B956E143911813A5759A3F
-                     DOWNLOAD_NO_EXTRACT TRUE
-)
+if(UNIX AND NOT APPLE)
+        # Get pre-built nc-convert from NcTools so we don't have to build it and its dependencies
+        FetchContent_Declare(nc-convert
+                             URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-ubuntu22.04-x64.zip
+                             URL_HASH            SHA256=ACC34BD4CFECF517339538C47C1557FCCA77E4EE1F30E7177D6DF94C35A13597
+                             DOWNLOAD_NO_EXTRACT FALSE
+        )
+elseif(WIN32)
+        # Get pre-built nc-convert.exe from NcTools so we don't have to build it and its dependencies
+        FetchContent_Declare(nc-convert
+                             URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-windows-x64.zip
+                             URL_HASH            SHA256=69f53e38436a85de7776cb3161075111a922c9cbdb4049c8a5ce9d3bd3c50d5b
+                             DOWNLOAD_NO_EXTRACT FALSE                 
+        )
+elseif(APPLE)
+endif()
 
 FetchContent_Declare(taskflow
                      GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
@@ -91,10 +101,18 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install nc-convert executable
-install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
-        DESTINATION bin
-)
+if(UNIX AND NOT APPLE)
+    # Install nc-convert
+    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
+            DESTINATION bin
+    )
+elseif(WIN32)
+    # Install nc-convert executable
+    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
+            DESTINATION bin
+    )
+elseif(APPLE)
+endif()
 
 # Install Default Assets
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
