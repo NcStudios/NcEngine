@@ -169,7 +169,11 @@ namespace nc::graphics
     auto GpuAllocator::Map(vma::Allocation allocation) const -> void*
     {
         void* out;
-        m_allocator.mapMemory(allocation, &out);
+        auto result = m_allocator.mapMemory(allocation, &out);
+        if (result != vk::Result::eSuccess)
+        {
+            throw NcError("Error mapping memory.");
+        }
         return out;
     }
 
