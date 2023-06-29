@@ -6,7 +6,6 @@ namespace nc::editor
 {
 void SetImGuiStyle()
 {
-    auto& io = ImGui::GetIO();
     auto& style = ImGui::GetStyle();
     style.WindowMenuButtonPosition = ImGuiDir_None;
     ImVec4* colors = style.Colors;
