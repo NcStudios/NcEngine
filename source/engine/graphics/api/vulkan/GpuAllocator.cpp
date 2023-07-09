@@ -9,6 +9,10 @@ namespace
     auto CreateAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance) -> vma::Allocator
     {
         vma::AllocatorCreateInfo allocatorInfo{};
+        vma::VulkanFunctions vulkanFunctions{};
+        vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
+        vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
+        allocatorInfo.pVulkanFunctions = &vulkanFunctions;
         allocatorInfo.physicalDevice = physicalDevice;
         allocatorInfo.device = logicalDevice;
         allocatorInfo.instance = instance;
