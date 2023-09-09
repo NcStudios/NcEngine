@@ -9,17 +9,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # - name: Checkout Vulkan-Headers
-    #   uses: actions/checkout@v3
-    #   with:
-    #     repository: KhronosGroup/Vulkan-Headers
-    #     ref: 'sdk-${{ inputs.version }}'
-    #     path: 'Vulkan-Headers'
-
     - name: Checkout Vulkan-Headers
-      shell: bash
-      run: |
-        git clone --depth 1 --branch sdk-${{ inputs.version }} https://github.com/KhronosGroup/Vulkan-Headers.git
+      uses: actions/checkout@v3
+      with:
+        repository: KhronosGroup/Vulkan-Headers
+        ref: 'sdk-${{ inputs.version }}'
+        path: 'Vulkan-Headers'
 
     - name: Build Vulkan-Headers
       shell: bash
@@ -27,16 +22,12 @@ runs:
         cmake -S Vulkan-Headers -B Vulkan-Headers/build
         cmake --install Vulkan-Headers/build --prefix VulkanSDK/${{ inputs.version }}
 
-    # - name: Checkout Vulkan-Loader
-    #   uses: actions/checkout@v3
-    #   with:
-    #     repository: KhronosGroup/Vulkan-Loader
-    #     ref: 'sdk-${{ inputs.version }}'
-    #     path: 'Vulkan-Loader'
-
     - name: Checkout Vulkan-Loader
-      shell: bash
-      run: git clone --depth 1 --branch sdk-${{ inputs.version }} https://github.com/KhronosGroup/Vulkan-Loader.git
+      uses: actions/checkout@v3
+      with:
+        repository: KhronosGroup/Vulkan-Loader
+        ref: 'sdk-${{ inputs.version }}'
+        path: 'Vulkan-Loader'
 
     - name: Build Vulkan-Loader
       shell: bash
