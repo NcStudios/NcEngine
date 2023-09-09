@@ -17,6 +17,7 @@ runs:
         path: 'Vulkan-Headers'
 
     - name: Build Vulkan-Headers
+      shell: bash
       run: |
         cmake -S Vulkan-Headers -B Vulkan-Headers/build
         cmake --install Vulkan-Headers/build --prefix VulkanSDK/${{ inputs.version }}
@@ -29,6 +30,7 @@ runs:
         path: 'Vulkan-Loader'
 
     - name: Build Vulkan-Loader
+      shell: bash
       run: |
         cmake -S Vulkan-Loader -B Vulkan-Loader/build -DVULKAN_HEADERS_INSTALL_DIR="VulkanSDK/${{ inputs.version }}"
         cmake --install Vulkan-Loader/build --config Release
