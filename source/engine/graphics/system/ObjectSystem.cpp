@@ -36,14 +36,14 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     for (const auto& [renderer, transform] : pbrRenderers)
     {
         const auto& modelMatrix = transform->TransformationMatrix();
-        if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMesh().maxExtent, modelMatrix))
+        if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMeshView().maxExtent, modelMatrix))
         {
             continue;
         }
 
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index);
-        frontendState.pbrMeshes.push_back(renderer->GetMesh());
+        frontendState.pbrMeshes.push_back(renderer->GetMeshView());
     }
 
     frontendState.pbrMeshStartingIndex = 0u;

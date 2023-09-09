@@ -6,98 +6,101 @@
 #include "ui/editor/Widgets.h"
 #endif
 
+namespace
+{
+auto MakeMaterialView(const nc::graphics::PbrMaterial& material) -> nc::graphics::PbrMaterialView
+{
+    const auto textureService = nc::AssetService<nc::TextureView>::Get();
+    return nc::graphics::PbrMaterialView
+    {
+        textureService->Acquire(material.baseColor),
+        textureService->Acquire(material.normal),
+        textureService->Acquire(material.roughness),
+        textureService->Acquire(material.metallic)
+    };
+}
+} // anonymous namespace
+
 namespace nc::graphics
 {
     MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, PbrMaterial material, TechniqueType techniqueType)
-    : ComponentBase{entity},
-      #ifdef NC_EDITOR_ENABLED
-      m_material{std::move(material)},
-      m_meshPath{meshUid},
-      #endif
-      m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
-      m_materialView{},
-      m_techniqueType{techniqueType}
+        : ComponentBase{entity},
+          m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
+          m_materialView{::MakeMaterialView(material)},
+          m_techniqueType{techniqueType},
+          m_coldData{std::make_unique<MeshRendererColdData>(std::move(meshUid), std::move(material))}
     {
-        #ifdef NC_EDITOR_ENABLED
-        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(m_material.baseColor); // Todo: Make this more generic for materials;
-        m_materialView.normal = AssetService<TextureView>::Get()->Acquire(m_material.normal);
-        m_materialView.roughness = AssetService<TextureView>::Get()->Acquire(m_material.roughness);
-        m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(m_material.metallic);
-        #else
-        m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(material.baseColor);
-        m_materialView.normal = AssetService<TextureView>::Get()->Acquire(material.normal);
-        m_materialView.roughness = AssetService<TextureView>::Get()->Acquire(material.roughness);
-        m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(material.metallic);
-        #endif
     }
 
     void MeshRenderer::SetMesh(std::string meshUid)
     {
-        #ifdef NC_EDITOR_ENABLED
-        m_meshPath = meshUid;
-        #endif
-
         m_mesh = AssetService<MeshView>::Get()->Acquire(meshUid);
+        m_coldData->meshPath = std::move(meshUid);
     }
 
-    void MeshRenderer::SetBaseColor(const std::string& texturePath)
+    void MeshRenderer::SetMaterial(PbrMaterial material)
     {
-        #ifdef NC_EDITOR_ENABLED
-        m_material.baseColor = texturePath;
-        #endif
+        m_materialView = ::MakeMaterialView(material);
+        m_coldData->material = std::move(material);
+    }
 
+    void MeshRenderer::SetBaseColor(std::string texturePath)
+    {
         m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_coldData->material.baseColor = std::move(texturePath);
     }
 
-    void MeshRenderer::SetNormal(const std::string& texturePath)
+    void MeshRenderer::SetNormal(std::string texturePath)
     {
-        #ifdef NC_EDITOR_ENABLED
-        m_material.normal = texturePath;
-        #endif
-
         m_materialView.normal = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_coldData->material.normal = std::move(texturePath);
     }
 
-    void MeshRenderer::SetRoughness(const std::string& texturePath)
+    void MeshRenderer::SetRoughness(std::string texturePath)
     {
-        #ifdef NC_EDITOR_ENABLED
-        m_material.roughness = texturePath;
-        #endif
-
         m_materialView.roughness = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_coldData->material.roughness = std::move(texturePath);
     }
 
-    void MeshRenderer::SetMetallic(const std::string& texturePath)
+    void MeshRenderer::SetMetallic(std::string texturePath)
     {
-        #ifdef NC_EDITOR_ENABLED
-        m_material.metallic = texturePath;
-        #endif
-
         m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(texturePath);
+        m_coldData->material.metallic = std::move(texturePath);
     }
 
     #ifdef NC_EDITOR_ENABLED
-    void PbrMaterial::EditorGuiElement()
+    void PbrMaterial::EditorGuiElement() const
     {
-        ImGui::SameLine();
+        // TODO: try sameline Base Color:\n%s ...
+
+        // ImGui::SameLine();
+
+
         ImGui::Text("Material");
         ImGui::Spacing();
-        ImGui::Text("Base Color:");
-        ImGui::Text("%s", baseColor.c_str());
-        ImGui::Text("Normal:");
-        ImGui::Text("%s", normal.c_str());
-        ImGui::Text("Roughness:");
-        ImGui::Text("%s", roughness.c_str());
+        ImGui::Text("Base Color:\n\t%s", baseColor.c_str());
+        ImGui::Text("Normal:\n\t%s", normal.c_str());
+        ImGui::Text("Roughness:\n\t%s", roughness.c_str());
+        ImGui::Text("Metallic:\n\t%s", metallic.c_str());
     }
     #endif
 } // namespace nc::graphics
 
 namespace nc
 {
+
+
+// TODO: add mesh uid???
+
 #ifdef NC_EDITOR_ENABLED
 template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRenderer* meshRenderer)
 {
     ImGui::Text("Mesh Renderer");
+
+    ImGui::Text("Mesh");
+    ImGui::Spacing();
+    ImGui::Text("\t%s", meshRenderer->GetMeshPath().c_str());
+
     meshRenderer->GetMaterial().EditorGuiElement();
 }
 #endif

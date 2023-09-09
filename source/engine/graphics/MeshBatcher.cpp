@@ -8,7 +8,7 @@ namespace
     bool IsViewedByFrustum(const nc::Frustum& frustum, const nc::graphics::MeshRenderer& renderer, DirectX::FXMMATRIX transform)
     {
         const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
-        const auto maxMeshExtent = renderer.GetMesh().maxExtent;
+        const auto maxMeshExtent = renderer.GetMeshView().maxExtent;
         auto sphere = nc::Sphere{.center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent};
         DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
         return nc::physics::Intersect(frustum, sphere);
@@ -17,7 +17,7 @@ namespace
     /** @todo This is crap. We need a hash or id for materials. */
     bool BelongsToBatch(const nc::graphics::MeshRenderer& renderer, const nc::graphics::Batch* batch)
     {
-        if(renderer.GetMesh().firstIndex != batch->mesh.firstIndex)
+        if(renderer.GetMeshView().firstIndex != batch->mesh.firstIndex)
             return false;
 
         const auto& materialView = renderer.GetMaterialView();
@@ -93,12 +93,12 @@ namespace nc::graphics
         m_isDirty = false;
         m_registry->Sort<MeshRenderer>([](const auto& lhs, const auto& rhs)
         {
-            return lhs.GetMesh().firstIndex < rhs.GetMesh().firstIndex;
+            return lhs.GetMeshView().firstIndex < rhs.GetMeshView().firstIndex;
         });
     }
 
     auto MeshBatcher::AddNewBatch(const MeshRenderer& renderer) -> Batch*
     {
-        return &m_batches.emplace_back(renderer.GetMesh(), renderer.GetMaterialView(), 1u);
+        return &m_batches.emplace_back(renderer.GetMeshView(), renderer.GetMaterialView(), 1u);
     }
 }
