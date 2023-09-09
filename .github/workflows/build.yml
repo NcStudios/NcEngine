@@ -48,7 +48,7 @@ jobs:
           sudo apt-get install xorg-dev
 
       - name: Setup Vulkan SDK
-        uses: ./.github/actions/setup-vulkan
+        uses: ./.github/workflows/setup-vulkan
         with:
           version: 1.3.263
           platform: ${{ matrix.os }}
