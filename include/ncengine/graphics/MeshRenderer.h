@@ -45,7 +45,7 @@ class MeshRenderer : public ComponentBase
 
         auto GetMeshView() const noexcept -> const MeshView&
         {
-            return m_mesh;
+            return m_meshView;
         }
 
         auto GetMaterialView() const noexcept -> const PbrMaterialView&
@@ -76,7 +76,7 @@ class MeshRenderer : public ComponentBase
         void SetMetallic(std::string texturePath);
 
     private:
-        MeshView m_mesh;
+        MeshView m_meshView;
         PbrMaterialView m_materialView;
         TechniqueType m_techniqueType;
 

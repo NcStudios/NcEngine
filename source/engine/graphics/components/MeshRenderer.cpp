@@ -25,7 +25,7 @@ namespace nc::graphics
 {
     MeshRenderer::MeshRenderer(Entity entity, std::string meshUid, PbrMaterial material, TechniqueType techniqueType)
         : ComponentBase{entity},
-          m_mesh{AssetService<MeshView>::Get()->Acquire(meshUid)},
+          m_meshView{AssetService<MeshView>::Get()->Acquire(meshUid)},
           m_materialView{::MakeMaterialView(material)},
           m_techniqueType{techniqueType},
           m_coldData{std::make_unique<MeshRendererColdData>(std::move(meshUid), std::move(material))}
@@ -34,7 +34,7 @@ namespace nc::graphics
 
     void MeshRenderer::SetMesh(std::string meshUid)
     {
-        m_mesh = AssetService<MeshView>::Get()->Acquire(meshUid);
+        m_meshView = AssetService<MeshView>::Get()->Acquire(meshUid);
         m_coldData->meshPath = std::move(meshUid);
     }
 
@@ -71,36 +71,22 @@ namespace nc::graphics
     #ifdef NC_EDITOR_ENABLED
     void PbrMaterial::EditorGuiElement() const
     {
-        // TODO: try sameline Base Color:\n%s ...
-
-        // ImGui::SameLine();
-
-
-        ImGui::Text("Material");
-        ImGui::Spacing();
-        ImGui::Text("Base Color:\n\t%s", baseColor.c_str());
-        ImGui::Text("Normal:\n\t%s", normal.c_str());
-        ImGui::Text("Roughness:\n\t%s", roughness.c_str());
-        ImGui::Text("Metallic:\n\t%s", metallic.c_str());
+        ImGui::Text("Material:");
+        ImGui::Text("  Base Color: %s", baseColor.c_str());
+        ImGui::Text("  Normal:     %s", normal.c_str());
+        ImGui::Text("  Roughness:  %s", roughness.c_str());
+        ImGui::Text("  Metallic:   %s", metallic.c_str());
     }
     #endif
 } // namespace nc::graphics
 
 namespace nc
 {
-
-
-// TODO: add mesh uid???
-
 #ifdef NC_EDITOR_ENABLED
 template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRenderer* meshRenderer)
 {
     ImGui::Text("Mesh Renderer");
-
-    ImGui::Text("Mesh");
-    ImGui::Spacing();
-    ImGui::Text("\t%s", meshRenderer->GetMeshPath().c_str());
-
+    ImGui::Text("Mesh: %s", meshRenderer->GetMeshPath().c_str());
     meshRenderer->GetMaterial().EditorGuiElement();
 }
 #endif
