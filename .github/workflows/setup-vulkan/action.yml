@@ -12,7 +12,7 @@ runs:
     - name: Checkout Vulkan-Headers
       uses: actions/checkout@v3
       with:
-        repository: 'https://github.com/KhronosGroup/Vulkan-Headers.git'
+        repository: KhronosGroup/Vulkan-Headers
         ref: 'sdk-${{ inputs.version }}'
         path: 'Vulkan-Headers'
 
@@ -25,7 +25,7 @@ runs:
     - name: Checkout Vulkan-Loader
       uses: actions/checkout@v3
       with:
-        repository: 'https://github.com/KhronosGroup/Vulkan-Loader.git'
+        repository: KhronosGroup/Vulkan-Loader
         ref: 'sdk-${{ inputs.version }}'
         path: 'Vulkan-Loader'
 
