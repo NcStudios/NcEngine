@@ -33,7 +33,7 @@ runs:
       shell: bash
       run: |
         cmake -S Vulkan-Loader -B Vulkan-Loader/build -DVULKAN_HEADERS_INSTALL_DIR="${{ github.workspace }}/VulkanSDK/${{ inputs.version }}"
-        cmake --install Vulkan-Loader/build --config Release
+        cmake --build Vulkan-Loader/build --config Release
         cmake --install Vulkan-Loader/build --prefix ${{ github.workspace }}/VulkanSDK/${{ inputs.version }}
 
     - name: Setup Environment Variables
