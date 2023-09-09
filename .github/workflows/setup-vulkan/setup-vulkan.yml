@@ -1,0 +1,47 @@
+name: Setup-Vulkan
+
+inputs:
+  version:
+    description: Vulkan SDK Version
+    required: true
+    type: string
+  platform:
+    required: true
+    type: string # has enum?
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build Vulkan-Headers
+      shell: bash
+      run: |
+          set -e
+
+          version=1.3.263
+          gitTag=v$version
+
+          sandbox="$PWD/local_vulkan_sdk"
+          installPath="$sandbox/VulkanSDK/$version"
+
+          mkdir "$sandbox"
+          cd "$sandbox"
+
+          git clone --depth 1 --branch $gitTag https://github.com/KhronosGroup/Vulkan-Headers.git
+          cd Vulkan-Headers
+          cmake -S ./ -B build
+          cmake --install build --prefix "$installPath"
+          cd ..
+
+          git clone --depth 1 --branch $gitTag https://github.com/KhronosGroup/Vulkan-Loader.git
+          cd Vulkan-Loader
+          cmake -G -S ./ -B build -DVULKAN_HEADERS_INSTALL_DIR="$installPath"
+          cmake --build build --config Release
+          cmake --install build --prefix "$installPath"
+          cd ..
+
+          cd ..
+
+          echo "VULKAN_SDK=$installPath" >> "$GITHUB_ENV"
+          echo "VULKAN_SDK_VERSION=$version" >> "$GITHUB_ENV"
+          echo "$installPath/bin" >> "$GITHUB_PATH"
+
