@@ -10,6 +10,7 @@ runs:
   using: "composite"
   steps:
     - name: Set Install Path Variable
+      shell: bash
       run: echo "VK_INSTALL_PATH=${{ github.workspace }}/VulkanSDK/${{ inputs.version }}" >> $GITHUB_ENV
 
     - name: Checkout Vulkan-Headers
