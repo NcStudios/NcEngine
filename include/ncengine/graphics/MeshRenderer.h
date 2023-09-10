@@ -13,16 +13,6 @@ struct PbrMaterial
     std::string normal;
     std::string roughness;
     std::string metallic;
-
-    #ifdef NC_EDITOR_ENABLED
-    void EditorGuiElement() const;
-    #endif
-};
-
-enum class TechniqueType : uint8_t
-{
-    None = 0,
-    PhongAndUi = 1
 };
 
 struct PbrMaterialView
@@ -31,6 +21,12 @@ struct PbrMaterialView
     TextureView normal;
     TextureView roughness;
     TextureView metallic;
+};
+
+enum class TechniqueType : uint8_t
+{
+    None = 0,
+    PhongAndUi = 1
 };
 
 class MeshRenderer : public ComponentBase

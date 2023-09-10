@@ -67,17 +67,6 @@ namespace nc::graphics
         m_materialView.metallic = AssetService<TextureView>::Get()->Acquire(texturePath);
         m_coldData->material.metallic = std::move(texturePath);
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    void PbrMaterial::EditorGuiElement() const
-    {
-        ImGui::Text("Material:");
-        ImGui::Text("  Base Color: %s", baseColor.c_str());
-        ImGui::Text("  Normal:     %s", normal.c_str());
-        ImGui::Text("  Roughness:  %s", roughness.c_str());
-        ImGui::Text("  Metallic:   %s", metallic.c_str());
-    }
-    #endif
 } // namespace nc::graphics
 
 namespace nc
@@ -87,7 +76,12 @@ template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRender
 {
     ImGui::Text("Mesh Renderer");
     ImGui::Text("Mesh: %s", meshRenderer->GetMeshPath().c_str());
-    meshRenderer->GetMaterial().EditorGuiElement();
+    ImGui::Text("Material:");
+    const auto& material = meshRenderer->GetMaterial();
+    ImGui::Text("  Base Color: %s", material.baseColor.c_str());
+    ImGui::Text("  Normal:     %s", material.normal.c_str());
+    ImGui::Text("  Roughness:  %s", material.roughness.c_str());
+    ImGui::Text("  Metallic:   %s", material.metallic.c_str());
 }
 #endif
 } // namespace nc
