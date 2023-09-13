@@ -2,6 +2,8 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
+struct GLFWwindow;
+
 namespace nc::graphics
 {
 class Device;
@@ -10,10 +12,14 @@ class Instance;
 class Imgui
 {
     public:
-        explicit Imgui(const Device& device);
+        explicit Imgui(const Device& device,
+                       const Instance& instance,
+                       GLFWwindow* window,
+                       vk::RenderPass renderPass);
+        ~Imgui() noexcept;
 
-        /** @todo #335: Move contents into constructor and remove this method during fix of imgui bug.*/
-        void InitializeImgui(const Instance& instance, const Device& device, vk::RenderPass renderPass, uint32_t maxSamplesCount);
+        void FrameBegin();
+        void Frame();
 
     private:
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
