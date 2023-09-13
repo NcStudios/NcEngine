@@ -68,15 +68,14 @@ namespace nc::graphics
                                    window::WindowImpl* window)
         : m_registry{registry},
           m_graphics{std::move(graphics)},
-          m_ui{window->GetWindow()},
           m_cameraSystem{},
           m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
           m_objectSystem{std::move(shaderResourceBus.objectChannel)},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
-          m_widgetSystem{}
+          m_widgetSystem{},
+          m_uiSystem{}
     {
-        m_graphics->InitializeUI();
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
     }
 
@@ -94,12 +93,12 @@ namespace nc::graphics
     void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
     {
         NC_LOG_TRACE_FMT("Setting UI to {}", static_cast<void*>(ui));
-        m_ui.Set(ui);
+        m_uiSystem.SetClientUI(ui);
     }
 
     bool NcGraphicsImpl::IsUiHovered() const noexcept
     {
-        return m_ui.IsHovered();
+        return m_uiSystem.IsHovered();
     }
 
     void NcGraphicsImpl::SetSkybox(const std::string& path)
@@ -137,25 +136,14 @@ namespace nc::graphics
     void NcGraphicsImpl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
-        auto cameraState = m_cameraSystem.Execute(m_registry);
         if (!m_graphics->FrameBegin())
         {
             return;
         }
 
-        m_ui.FrameBegin();
-
-        #ifdef NC_EDITOR_ENABLED
-        /** @todo I think the old editor can start to go away. I'm
-         *  hacking dt factor in here. */
-        float dtFactor = 1.0f;
-        m_ui.Draw(&dtFactor, m_registry);
+        auto cameraState = m_cameraSystem.Execute(m_registry);
+        m_uiSystem.Execute(m_registry);
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
-        #else
-        m_ui.Draw();
-        auto widgetState = WidgetState{std::nullopt};
-        #endif
-
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry}, cameraState, environmentState);
         auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});

@@ -50,7 +50,6 @@ class VulkanGraphics : public IGraphics
 
         ~VulkanGraphics() noexcept;
 
-        void InitializeUI() override;
         auto FrameBegin() -> bool override;
         void Draw(const PerFrameRenderState& state) override;
         void FrameEnd() override;

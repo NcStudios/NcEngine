@@ -43,7 +43,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
       m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
       m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
-      m_imgui{std::make_unique<Imgui>(*m_device)},
+      m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetRenderPass(LitPassId).GetVkPass())},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
       m_lighting{std::make_unique<Lighting>(registry, m_device->VkDevice(), m_allocator.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
       m_resizingMutex{},
@@ -99,14 +99,6 @@ void VulkanGraphics::Clear() noexcept
     ShaderResourceService<EnvironmentData>::Get()->Reset();
 }
 
-void VulkanGraphics::InitializeUI() /** @todo: I hate this whole implementation of ImGui and want to create an abstraction layer for it. */
-{
-    m_imgui->InitializeImgui(*m_instance, *m_device,
-        m_renderGraph->GetRenderPass(LitPassId).GetVkPass(),
-        static_cast<uint32_t>(m_device->GetGpuOptions().GetMaxSamplesCount())
-    );
-}
-
 bool VulkanGraphics::FrameBegin()
 {
     OPTICK_CATEGORY("VulkanGraphics::FrameBegin", Optick::Category::Rendering);
@@ -119,6 +111,7 @@ bool VulkanGraphics::FrameBegin()
     }
 
     m_frameManager->Begin();
+    m_imgui->FrameBegin();
     return true;
 }
 
@@ -130,6 +123,7 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     OPTICK_CATEGORY("VulkanGraphics::Draw", Optick::Category::Rendering);
     auto* currentFrame = m_frameManager->CurrentFrameContext();
     if (m_isMinimized) return;
+    m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
     m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions);
