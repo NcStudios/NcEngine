@@ -51,14 +51,14 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     for (const auto& [renderer, transform] : toonRenderers)
     {
         const auto& modelMatrix = transform->TransformationMatrix();
-        if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMesh().maxExtent, modelMatrix))
+        if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMeshView().maxExtent, modelMatrix))
         {
             continue;
         }
 
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling);
-        frontendState.toonMeshes.push_back(renderer->GetMesh());
+        frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
 
