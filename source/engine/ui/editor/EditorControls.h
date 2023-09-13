@@ -107,6 +107,16 @@ namespace nc::ui::editor::controls
         ImGui::PopID();
     }
 
+    template<class T>
+    void ComponentElement(Registry* registry, Entity entity)
+    {
+        if (auto* component = registry->Get<T>(entity))
+        {
+            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+            ComponentGuiElement(component);
+        }
+    }
+
     void EntityPanel(Registry* registry, Entity entity)
     {
         if(!registry->Contains<Entity>(entity)) // entity may have been deleted
@@ -121,39 +131,12 @@ namespace nc::ui::editor::controls
         ImGui::Text("Layer   %d", entity.Layer());
         ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
 
-        if (auto* transform = registry->Get<Transform>(entity); transform)
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(transform);
-        }
-
-        if (auto* meshRenderer = registry->Get<graphics::MeshRenderer>(entity))
-            ComponentGuiElement(meshRenderer);
-
-        if (auto* pointLight = registry->Get<graphics::PointLight>(entity))
-            ComponentGuiElement(pointLight);
-
-        if (auto* toonRenderer = registry->Get<graphics::ToonRenderer>(entity))
-            ComponentGuiElement(toonRenderer);
-
-        if (auto* body = registry->Get<physics::PhysicsBody>(entity))
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(body);
-        }
-
-        if (auto* emitter = registry->Get<graphics::ParticleEmitter>(entity))
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(emitter);
-        }
-
-        if (auto* dispatcher = registry->Get<net::NetworkDispatcher>(entity))
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(dispatcher);
-        }
-
+        ComponentElement<Transform>(registry, entity);
+        ComponentElement<graphics::MeshRenderer>(registry, entity);
+        ComponentElement<graphics::PointLight>(registry, entity);
+        ComponentElement<graphics::ToonRenderer>(registry, entity);
+        ComponentElement<graphics::ParticleEmitter>(registry, entity);
+        ComponentElement<physics::PhysicsBody>(registry, entity);
         if (auto* col = registry->Get<physics::Collider>(entity); col)
         {
             // collider model doesn't update/submit unless we tell it to
@@ -162,11 +145,8 @@ namespace nc::ui::editor::controls
             ComponentGuiElement(col);
         }
 
-        if(auto* col = registry->Get<physics::ConcaveCollider>(entity); col)
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(col);
-        }
+        ComponentElement<physics::ConcaveCollider>(registry, entity);
+        ComponentElement<net::NetworkDispatcher>(registry, entity);
 
         for(const auto& comp : registry->Get<ecs::detail::FreeComponentGroup>(entity)->GetComponents())
             controls::FreeComponentElement(comp);
