@@ -32,7 +32,6 @@ class IGraphics
     public:
         virtual ~IGraphics() = default;
 
-        virtual void InitializeUI() = 0;
         virtual auto FrameBegin() -> bool = 0;
         virtual void Draw(const PerFrameRenderState& state) = 0;
         virtual void FrameEnd() = 0;

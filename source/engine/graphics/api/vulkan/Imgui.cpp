@@ -2,6 +2,7 @@
 #include "core/Device.h"
 #include "core/Instance.h"
 
+#include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_vulkan.h"
 
 namespace
@@ -36,14 +37,17 @@ auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 
 namespace nc::graphics
 {
-Imgui::Imgui(const Device& device)
+Imgui::Imgui(const Device& device,
+             const Instance& instance,
+             GLFWwindow* window,
+             vk::RenderPass renderPass)
     : m_imguiDescriptorPool{CreateImguiDescriptorPool(device.VkDevice())}
 {
-}
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForVulkan(window, true);
 
-void Imgui::InitializeImgui(const Instance& instance, const Device& device, vk::RenderPass renderPass, uint32_t maxSamplesCount)
-{
-    ImGui_ImplVulkan_InitInfo initInfo{};
+    auto initInfo = ImGui_ImplVulkan_InitInfo{};
     initInfo.Instance = instance.VkInstance();
     initInfo.PhysicalDevice = device.VkPhysicalDevice();
     initInfo.Device = device.VkDevice();
@@ -51,10 +55,29 @@ void Imgui::InitializeImgui(const Instance& instance, const Device& device, vk::
     initInfo.DescriptorPool = m_imguiDescriptorPool.get();
     initInfo.MinImageCount = 3;
     initInfo.ImageCount = 3;
-    initInfo.MSAASamples = VkSampleCountFlagBits(maxSamplesCount);
+    initInfo.MSAASamples = VkSampleCountFlagBits(device.GetGpuOptions().GetMaxSamplesCount());
 
     ImGui_ImplVulkan_Init(&initInfo, renderPass);
-    device.ExecuteCommand([&](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
+    device.ExecuteCommand([](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
     ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+
+Imgui::~Imgui() noexcept
+{
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void Imgui::FrameBegin()
+{
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Imgui::Frame()
+{
+    ImGui::Render();
 }
 } // namespace nc::graphics

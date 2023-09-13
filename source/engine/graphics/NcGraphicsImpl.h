@@ -7,8 +7,8 @@
 #include "system/ObjectSystem.h"
 #include "system/ParticleEmitterSystem.h"
 #include "system/PointLightSystem.h"
+#include "system/UISystem.h"
 #include "system/WidgetSystem.h"
-#include "ui/UISystemImpl.h"
 
 #include <memory>
 
@@ -65,13 +65,13 @@ class NcGraphicsImpl : public NcGraphics
     private:
         Registry* m_registry;
         std::unique_ptr<IGraphics> m_graphics;
-        ui::UISystemImpl m_ui;
         CameraSystem m_cameraSystem;
         EnvironmentSystem m_environmentSystem;
         ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
         ParticleEmitterSystem m_particleEmitterSystem;
         WidgetSystem m_widgetSystem;
+        UISystem m_uiSystem;
     };
 } // namespace graphics
 } // namespace nc
