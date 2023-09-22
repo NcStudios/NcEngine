@@ -5,5 +5,6 @@ target_sources(${NC_ENGINE_LIB}
         ObjectSystem.cpp
         ParticleEmitterSystem.cpp
         PointLightSystem.cpp
+        UISystem.cpp
         WidgetSystem.cpp
 )

@@ -1,0 +1,48 @@
+name: Setup-Vulkan
+
+inputs:
+  version:
+    description: Vulkan SDK Version
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set Install Path Variable
+      shell: bash
+      run: echo "VK_INSTALL_PATH=${{ github.workspace }}/VulkanSDK/${{ inputs.version }}" >> $GITHUB_ENV
+
+    - name: Checkout Vulkan-Headers
+      uses: actions/checkout@v3
+      with:
+        repository: KhronosGroup/Vulkan-Headers
+        ref: 'sdk-${{ inputs.version }}'
+        path: 'Vulkan-Headers'
+
+    - name: Build Vulkan-Headers
+      shell: bash
+      run: |
+        cmake -S Vulkan-Headers -B Vulkan-Headers/build
+        cmake --install Vulkan-Headers/build --prefix $VK_INSTALL_PATH
+
+    - name: Checkout Vulkan-Loader
+      uses: actions/checkout@v3
+      with:
+        repository: KhronosGroup/Vulkan-Loader
+        ref: 'sdk-${{ inputs.version }}'
+        path: 'Vulkan-Loader'
+
+    - name: Build Vulkan-Loader
+      shell: bash
+      run: |
+        cmake -S Vulkan-Loader -B Vulkan-Loader/build -DVULKAN_HEADERS_INSTALL_DIR=$VK_INSTALL_PATH
+        cmake --build Vulkan-Loader/build --config Release
+        cmake --install Vulkan-Loader/build --prefix $VK_INSTALL_PATH
+
+    - name: Setup Environment Variables
+      shell: bash
+      run: |
+        echo "VULKAN_SDK=$VK_INSTALL_PATH" >> "$GITHUB_ENV"
+        echo "VULKAN_SDK_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+        echo "$VK_INSTALL_PATH/bin" >> "$GITHUB_PATH"
