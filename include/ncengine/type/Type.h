@@ -6,48 +6,6 @@
 
 namespace nc::type
 {
-/** @brief Concept satisfied for trivially copyable types. */
-template<class T>
-concept TriviallyCopyable = requires
-{
-    requires std::is_trivially_copyable_v<T>;
-};
-
-/** @brief Concept satisfied for aggregate types. */
-template<class T>
-concept Aggregate = requires
-{
-    requires std::is_aggregate_v<T>;
-};
-
-/** @brief Concept satisfied if an aggregate is constructible with the given arguments. */
-template<class Aggregate, class... Args>
-concept ConstructibleWith = requires
-{
-    { Aggregate{ {Args{}}... } };
-};
-
-/** @brief A type implicity convertable to any other type. */
-struct UniversalType
-{
-    template<class T>
-    operator T() {}
-};
-
-/** @brief Count the number of members in an aggregate. */
-template<type::Aggregate T, class... Members>
-consteval auto CountAggregateMembers()
-{
-    if constexpr (!ConstructibleWith<T, Members..., UniversalType>)
-    {
-        return sizeof...(Members);
-    }
-    else
-    {
-        return CountAggregateMembers<T, Members..., UniversalType>();
-    }
-}
-
 template<class T>
 struct Type
 {
