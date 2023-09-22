@@ -60,15 +60,11 @@ constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
 // audio
 constexpr auto AudioEnabledKey = "audio_enabled"sv;
 
-auto TrimWhiteSpace(const std::string& str) -> std::string
+void TrimWhiteSpace(std::string& str)
 {
-    // Todo: can take by non-const and remove copy? - maybe not
-    const auto notSpace = [](unsigned char c) { return !std::isspace(c); };
-    auto out = str;
-    out.erase(out.begin(), std::ranges::find_if(out, notSpace));
-    // how to reverse find with ranges?
-    out.erase(std::find_if(out.rbegin(), out.rend(), notSpace).base(), out.end());
-    return out;
+    const auto notSpace = [](char c) { return !std::isspace(c); };
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(), notSpace));
+    str.erase(std::find_if(str.rbegin(), str.rend(), notSpace).base(), str.end());
 }
 
 auto ReadConfigMap(std::istream& stream) -> std::unordered_map<std::string, std::string>
@@ -79,7 +75,7 @@ auto ReadConfigMap(std::istream& stream) -> std::unordered_map<std::string, std:
     auto line = std::string{};
     while (std::getline(stream, line))
     {
-        line = TrimWhiteSpace(line);
+        TrimWhiteSpace(line);
         if (line.empty() || line.find_first_of(iniSkipChars) == 0)
         {
             continue;

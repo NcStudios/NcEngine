@@ -12,7 +12,12 @@ struct ProjectSettings
     std::string logFilePath = "Diagnostics.log";
 };
 
-/** @brief Options for configuring NcAsset. */
+/**
+ * @brief Options for configuring NcAsset.
+ * 
+ * Each option specifies the search directory for an asset type. Paths may be
+ * absolute or relative to the calling executable.
+ */
 struct AssetSettings
 {
     /** @todo These defaults don't make much sense since we don't know the install path. */
@@ -25,7 +30,12 @@ struct AssetSettings
     std::string cubeMapsPath = "resources/assets/cube_maps";
 };
 
-/** @brief Options for component pool sizes. */
+/**
+ * @brief Options for configuring pre-allocated pools.
+ * 
+ * Each option specifies the maximum number of instances of a particular type
+ * that can exist at one time.
+ */
 struct MemorySettings
 {
     unsigned maxDynamicColliders = 25000;
@@ -83,6 +93,46 @@ struct Config
     AudioSettings audioSettings;
 };
 
+/**
+ * @brief Load a Config object from a file.
+ * @param path The path to a config file.
+ * @return A Config object initialized with key-value pairs from the file.
+ * @throw NcError if there is a failure opening or reading values from the file
+ *        or if Validate() fails on the resulting Config object.
+ * 
+ * The input file may contain any config options as equals-separated key-value
+ * pairs, each on their own line. Any options absent in the file will be
+ * initialized to their default values.
+ * 
+ * The following are ignored:
+ *   - Unrecognized options
+ *   - Leading/trailing whitespace and empty lines
+ *   - Line comments starting with ';' or '#`
+ *   - Sections (e.g. [my_section])
+ * 
+ * For a listing of all keys see the Sample or create a default file with:
+ *   Save("config.ini", nc::config::Config{});
+ */
+auto Load(const std::filesystem::path& path) -> Config;
+
+/**
+ * @brief Write a Config object's contents to a file.
+ * @param path The file path to be written to.
+ * @param config The object data to be written.
+ * @throw NcError if the file cannot be opened or created.
+ */
+void Save(const std::filesystem::path& path, const Config& config);
+
+/**
+ * @brief Check if a Config object is in a valid state for initializing NcEngine.
+ * @param config The object to verify.
+ * @return A bool indicating whether or not the object is valid.
+ * @note This should be called on any manually constructed Config object prior to
+ *       initializing the engine with it. It does not need to be called on an object
+ *       returned from nc::config::Load().
+ */
+auto Validate(const Config& config) -> bool;
+
 /** @brief Get the ProjectSettings NcEngine was initialized with. */
 auto GetProjectSettings() -> const ProjectSettings&;
 
@@ -100,33 +150,4 @@ auto GetPhysicsSettings() -> const PhysicsSettings&;
 
 /** @brief Get the AudioSettings NcEngine was initialized with. */
 auto GetAudioSettings() -> const AudioSettings&;
-
-/**
- * @brief Load a Config object from a file.
- * @param path The path to a config file.
- * @return A Config object initialized with the key=value pairs from the file.
- *         Any values absent in the file are initialized to their default
- *         values.
- * @throw NcError if there is a failure opening or reading values from the file
- *        or if Validate() fails on the resulting Config object.
- */
-auto Load(const std::filesystem::path& path) -> Config;
-
-/**
- * @brief Write a Config object's contents to a file in key=value pairs.
- * @param path The file path to be written to.
- * @param config The object data to be written.
- * @throw NcError if the file cannot be opened or created.
- */
-void Save(const std::filesystem::path& path, const Config& config);
-
-/**
- * @brief Check if a Config object is in a valid state for initializing NcEngine.
- * @param config The object to verify.
- * @return A bool indicating whether or not the object is valid.
- * @note This should be called on any manually constructed Config object prior to
- *       initializing the engine with it. It does not need to be called on an object
- *       returned from nc::config::Load().
- */
-auto Validate(const Config& config) -> bool;
 } // namespace nc::config
