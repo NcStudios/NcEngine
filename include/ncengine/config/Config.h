@@ -107,7 +107,7 @@ struct Config
  * The following are ignored:
  *   - Unrecognized options
  *   - Leading/trailing whitespace and empty lines
- *   - Line comments starting with ';' or '#`
+ *   - Line comments starting with ';' or '#'
  *   - Sections (e.g. [my_section])
  * 
  * For a listing of all keys see the Sample or create a default file with:

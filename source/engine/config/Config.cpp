@@ -60,11 +60,13 @@ constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
 // audio
 constexpr auto AudioEnabledKey = "audio_enabled"sv;
 
-void TrimWhiteSpace(std::string& str)
+auto TrimWhiteSpace(const std::string& str) -> std::string
 {
     const auto notSpace = [](char c) { return !std::isspace(c); };
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), notSpace));
-    str.erase(std::find_if(str.rbegin(), str.rend(), notSpace).base(), str.end());
+    auto out = str;
+    out.erase(out.begin(), std::find_if(out.begin(), out.end(), notSpace));
+    out.erase(std::find_if(out.rbegin(), out.rend(), notSpace).base(), out.end());
+    return out;
 }
 
 auto ReadConfigMap(std::istream& stream) -> std::unordered_map<std::string, std::string>
@@ -75,7 +77,7 @@ auto ReadConfigMap(std::istream& stream) -> std::unordered_map<std::string, std:
     auto line = std::string{};
     while (std::getline(stream, line))
     {
-        TrimWhiteSpace(line);
+        line = TrimWhiteSpace(line);
         if (line.empty() || line.find_first_of(iniSkipChars) == 0)
         {
             continue;
@@ -87,7 +89,11 @@ auto ReadConfigMap(std::istream& stream) -> std::unordered_map<std::string, std:
             throw nc::NcError(fmt::format("Unexpected contents in config file: {}", line));
         }
 
-        map.emplace(line.substr(0, delimPos), line.substr(delimPos + 1));
+        map.emplace
+        (
+            TrimWhiteSpace(line.substr(0, delimPos)),
+            TrimWhiteSpace(line.substr(delimPos + 1))
+        );
     }
 
     return map;
