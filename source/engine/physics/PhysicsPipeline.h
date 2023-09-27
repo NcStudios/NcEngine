@@ -1,20 +1,6 @@
 #pragma once
 
-#include "PhysicsConstants.h"
-#include "PhysicsPipelineTypes.h"
-#include "collision/BspTree.h"
-#include "collision/narrow_phase/ManifoldCache.h"
-#include "collision/narrow_phase/NarrowPhase.h"
-#include "config/Config.h"
-#include "dynamics/Dynamics.h"
-#include "dynamics/Joint.h"
-#include "dynamics/Solver.h"
-#include "ecs/Logic.h"
-#include "ecs/Registry.h"
-#include "ecs/View.h"
-#include "ecs/detail/FreeComponentGroup.h"
-#include "optick/optick.h"
-#include "task/Job.h"
+#include "PhysicsPipelineBuilder.h"
 
 namespace nc::physics
 {
@@ -35,13 +21,11 @@ class PhysicsPipeline
     public:
         PhysicsPipeline(Registry* registry, float fixedTimeStep);
 
-        void Step(tf::Executor& executor);
         void Clear();
         auto GetJointSystem() -> JointSystem* { return &m_jointSystem; }
-        auto GetTasks() -> task::TaskGraph& { return m_tasks; }
+        auto BuildTaskGraph(task::ExceptionContext& context) -> std::unique_ptr<tf::Taskflow>;
 
     private:
-        task::TaskGraph m_tasks;
         proxy_cache m_proxyCache;
         broad_phase m_broadPhase;
         NarrowPhase m_narrowPhase;
@@ -50,62 +34,19 @@ class PhysicsPipeline
         Solver m_solver;
         Registry* m_registry;
         float m_fixedTimeStep;
-
-        void BuildTaskGraph(Registry* registry);
 };
 
 template<class Stages>
 PhysicsPipeline<Stages>::PhysicsPipeline(Registry* registry, float fixedTimeStep)
-    : m_tasks{},
-        m_proxyCache{registry},
-        m_broadPhase{},
-        m_narrowPhase{registry},
-        m_concavePhase{registry},
-        m_jointSystem{registry},
-        m_solver{registry},
-        m_registry{registry},
-        m_fixedTimeStep{fixedTimeStep}
+    : m_proxyCache{registry},
+      m_broadPhase{},
+      m_narrowPhase{registry},
+      m_concavePhase{registry},
+      m_jointSystem{registry},
+      m_solver{registry},
+      m_registry{registry},
+      m_fixedTimeStep{fixedTimeStep}
 {
-    if constexpr(multithreaded::value)
-        BuildTaskGraph(registry);
-}
-
-template<class Stages>
-void PhysicsPipeline<Stages>::Step(tf::Executor& executor)
-{
-    OPTICK_CATEGORY("PhysicsPipeline::Step", Optick::Category::Physics);
-    if constexpr(multithreaded::value)
-    {
-        m_tasks.Run(executor);
-    }
-    else
-    {
-        for(auto& fixedLogic : View<FixedLogic>{m_registry})
-            fixedLogic.Run(m_registry);
-
-        UpdateWorldInertiaTensors(m_registry);
-        ApplyGravity(m_registry, m_fixedTimeStep);
-
-        m_proxyCache.Update();
-        m_broadPhase.Update(&m_proxyCache);
-        m_broadPhase.FindPairs();
-
-        m_narrowPhase.UpdateManifolds();
-        m_concavePhase.template FindPairs<proxy>(m_proxyCache.Proxies());
-        m_narrowPhase.FindPhysicsPairs<proxy>(m_broadPhase.PhysicsPairs());
-        m_narrowPhase.FindTriggerPairs<proxy>(m_broadPhase.TriggerPairs());
-        m_narrowPhase.MergeContacts(m_concavePhase.Pairs());
-
-        m_jointSystem.UpdateJoints(m_fixedTimeStep);
-        m_solver.GenerateConstraints(m_narrowPhase.Manifolds());
-        m_solver.ResolveConstraints(m_jointSystem.Joints(), m_fixedTimeStep);
-
-        if constexpr(EnableContactWarmstarting)
-            m_narrowPhase.CacheImpulses(m_solver.ContactConstraints());
-
-        Integrate(m_registry, m_fixedTimeStep);
-        m_narrowPhase.NotifyEvents();
-    }
 }
 
 template<class Stages>
@@ -118,164 +59,107 @@ void PhysicsPipeline<Stages>::Clear()
 }
 
 template<class Stages>
-void PhysicsPipeline<Stages>::BuildTaskGraph(Registry* registry)
+auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) -> std::unique_ptr<tf::Taskflow>
 {
-    auto fixedUpdateTask = m_tasks.AddGuardedTask([registry]
-    {
-        OPTICK_CATEGORY("SendFixedUpdate", Optick::Category::Physics);
-        for(auto& fixedLogic : View<FixedLogic>{registry})
-            fixedLogic.Run(registry);
-    });
+    auto registry = m_registry;
+    auto tasks = std::make_unique<tf::Taskflow>();
+    auto builder = PipelineBuilder{*tasks};
 
-    auto updateInertiaTask = m_tasks.AddGuardedTask([registry]
-    {
-        OPTICK_CATEGORY("UpdateWorldInertiaTensors", Optick::Category::Physics);
-        UpdateWorldInertiaTensors(registry);
-    });
+    auto fixedUpdate = builder.Add(
+        "Run FixedLogic",
+        BuildFixedUpdateTask(context, registry)
+    );
 
-    auto applyGravityTask = m_tasks.AddGuardedTask(
-        [registry,
-            dt = m_fixedTimeStep]
-    {
-        OPTICK_CATEGORY("ApplyGravity", Optick::Category::Physics);
-        ApplyGravity(registry, dt);
-    });
+    auto updateInertia = builder.Add(
+        "Update World Inertia Tensors",
+        BuildUpdateInertiaTask(context, registry),
+        {fixedUpdate}
+    );
 
-    auto updateManifoldsTask = m_tasks.AddGuardedTask(
-        [&narrow = m_narrowPhase]
-    {
-        OPTICK_CATEGORY("NarrowPhase::UpdateManifolds", Optick::Category::Physics);
-        narrow.UpdateManifolds();
-    });
+    auto applyGravity = builder.Add(
+        "Apply Gravity",
+        BuildApplyGravityTask(context, registry, m_fixedTimeStep),
+        {fixedUpdate}
+    );
 
-    auto updateProxyCacheTask = m_tasks.AddGuardedTask([proxyCache = &m_proxyCache]
-    {
-        OPTICK_CATEGORY("ProxyCache::Update", Optick::Category::Physics);
-        proxyCache->Update();
-    });
+    auto updateManifolds = builder.Add(
+        "Update Contact Manifolds",
+        BuildUpdateManifoldsTask(context, m_narrowPhase),
+        {fixedUpdate}
+    );
 
-    auto broadPhaseTask = m_tasks.AddGuardedTask(
-        [broad = &m_broadPhase,
-            cache = &m_proxyCache]
-    {
-        OPTICK_CATEGORY("BroadPhase", Optick::Category::Physics);
-        broad->Update(cache);
-        broad->FindPairs();
-    });
+    auto updateProxyCache = builder.Add(
+        "Proxy Cache - Update",
+        BuildUpdateProxyCacheTask(context, m_proxyCache),
+        {fixedUpdate}
+    );
 
-    auto narrowPhasePhysicsTask = m_tasks.AddGuardedTask(
-        [&narrow = m_narrowPhase,
-            &broad = std::as_const(m_broadPhase)]
-    {
-        OPTICK_CATEGORY("NarrowPhase::FindPhysicsPairs1", Optick::Category::Physics);
-        narrow.FindPhysicsPairs<proxy>(broad.PhysicsPairs());
-    });
+    auto broadPhase = builder.Add(
+        "Broad Detection",
+        BuildBroadPhaseDetectionTask(context, m_broadPhase, m_proxyCache),
+        {updateProxyCache}
+    );
 
-    auto narrowPhaseTriggerTask = m_tasks.AddGuardedTask(
-        [&narrow = m_narrowPhase,
-            &broad = std::as_const(m_broadPhase)]
-    {
-        OPTICK_CATEGORY("NarrowPhase::FindTriggerPairs", Optick::Category::Physics);
-        narrow.FindTriggerPairs<proxy>(broad.TriggerPairs());
-    });
+    auto narrowPhasePhysics = builder.Add(
+        "Narrow Detection - Convex Contacts",
+        BuildNarrowPhasePhysicsTask(context, m_narrowPhase, m_broadPhase),
+        {broadPhase, updateManifolds}
+    );
 
-    auto concavePhaseTask = m_tasks.AddGuardedTask(
-        [&concave = m_concavePhase,
-            &proxyCache = m_proxyCache]
-    {
-        OPTICK_CATEGORY("Concave::FindPairs", Optick::Category::Physics);
-        concave.template FindPairs<proxy>(proxyCache.Proxies());
-    });
+    auto narrowPhaseTrigger = builder.Add(
+        "Narrow Detection - Triggers",
+        BuildNarrowPhaseTriggerTask(context, m_narrowPhase, m_broadPhase),
+        {broadPhase}
+    );
 
-    auto mergeContactsTask = m_tasks.AddGuardedTask(
-        [&narrow = m_narrowPhase,
-            &concave = std::as_const(m_concavePhase)]
-    {
-        OPTICK_CATEGORY("NarrowPhase::MergeContacts", Optick::Category::Physics);
-        narrow.MergeContacts(concave.Pairs());
-    });
+    auto concavePhase = builder.Add(
+        "Narrow Detection - Concave Contacts",
+        BuildConcavePhaseTask(context, m_concavePhase, m_proxyCache),
+        {updateProxyCache}
+    );
 
-    auto generateConstraintsTask = m_tasks.AddGuardedTask(
-        [&solver = m_solver,
-            &narrow = std::as_const(m_narrowPhase)]
-    {
-        OPTICK_CATEGORY("Solver::GenerateConstraints", Optick::Category::Physics);
-        solver.GenerateConstraints(narrow.Manifolds());
-    });
+    auto mergeContacts = builder.Add(
+        "Merge Contacts",
+        BuildMergeContactsTask(context, m_narrowPhase, m_concavePhase),
+        {narrowPhasePhysics, concavePhase}
+    );
 
-    auto updateJointsTask = m_tasks.AddGuardedTask(
-        [&jointSystem = m_jointSystem,
-            dt = m_fixedTimeStep]
-    {
-        OPTICK_CATEGORY("JointSystem::UpdateJoints", Optick::Category::Physics);
-        jointSystem.UpdateJoints(dt);
-    });
+    auto generateConstraints = builder.Add(
+        "Solver - Generate Constraints",
+        BuildGenerateConstraintsTask(context, m_solver, m_narrowPhase),
+        {updateInertia, applyGravity, mergeContacts}
+    );
 
-    auto resolveConstraintsTask = m_tasks.AddGuardedTask(
-        [&solver = m_solver,
-            &jointSystem = m_jointSystem,
-            dt = m_fixedTimeStep]
-    {
-        OPTICK_CATEGORY("Solver::ResolveConstraints", Optick::Category::Physics);
-        solver.ResolveConstraints(jointSystem.Joints(), dt);
-    });
+    auto updateJoints = builder.Add(
+        "Joint System - Update",
+        BuildUpdateJointsTask(context, m_jointSystem, m_fixedTimeStep),
+        {applyGravity, updateInertia}
+    );
 
-    auto cacheImpulsesTask = m_tasks.AddGuardedTask(
-        [&solver = m_solver,
-            &narrow = m_narrowPhase]
-    {
-        OPTICK_CATEGORY("NarrowPhase::CacheImpulses", Optick::Category::Physics);
-        if constexpr(EnableContactWarmstarting)
-            narrow.CacheImpulses(solver.ContactConstraints());
-    });
+    auto resolveConstraints = builder.Add(
+        "Solver - Resolve Constraints",
+        BuildResolveConstraintsTask(context, m_solver, m_jointSystem, m_fixedTimeStep),
+        {generateConstraints, updateJoints}
+    );
 
-    auto integrateTask = m_tasks.AddGuardedTask(
-        [registry,
-            dt = m_fixedTimeStep]
-    {
-        OPTICK_CATEGORY("Integrate", Optick::Category::Physics);
-        Integrate(registry, dt);
-    });
+    auto cacheImpulses = builder.Add(
+        "Cache Impulses",
+        BuildCacheImpulsesTask(context, m_solver, m_narrowPhase),
+        {resolveConstraints}
+    );
 
-    auto notifyEventsTask = m_tasks.AddGuardedTask(
-        [&narrow = m_narrowPhase]
-    {
-        OPTICK_CATEGORY("NarrowPhase::NotifyEvents", Optick::Category::Physics);
-        narrow.NotifyEvents();
-    });
+    auto integrate = builder.Add(
+        "Integrate",
+        BuildIntegrateTask(context, registry, m_fixedTimeStep),
+        {resolveConstraints}
+    );
 
-    fixedUpdateTask.precede(updateInertiaTask, applyGravityTask, updateManifoldsTask, updateProxyCacheTask);
-    broadPhaseTask.succeed(updateProxyCacheTask);
-    broadPhaseTask.precede(narrowPhasePhysicsTask, narrowPhaseTriggerTask);
-    narrowPhasePhysicsTask.succeed(updateManifoldsTask);
-    concavePhaseTask.succeed(updateProxyCacheTask);
-    mergeContactsTask.succeed(narrowPhasePhysicsTask, concavePhaseTask);
-    generateConstraintsTask.succeed(mergeContactsTask, updateInertiaTask, applyGravityTask);
-    updateJointsTask.succeed(applyGravityTask, updateInertiaTask);
-    resolveConstraintsTask.succeed(generateConstraintsTask, updateJointsTask);
-    cacheImpulsesTask.succeed(resolveConstraintsTask);
-    integrateTask.succeed(resolveConstraintsTask);
-    notifyEventsTask.succeed(integrateTask, narrowPhaseTriggerTask, cacheImpulsesTask);
+    auto notifyEvents = builder.Add(
+        "Notify Events",
+        BuildNotifyEventsTask(context, m_narrowPhase),
+        {narrowPhaseTrigger, cacheImpulses, integrate}
+    );
 
-    /** Task graph visual output */
-    #if NC_OUTPUT_TASKFLOW
-    m_tasks.GetTaskFlow()->name("Physics Pipeline");
-    fixedUpdateTask.name("Component FixedUpdate Logic");
-    updateInertiaTask.name("Update Inertia Tensors");
-    applyGravityTask.name("Apply Gravity");
-    updateManifoldsTask.name("Narrow Phase - Update Manifolds");
-    updateProxyCacheTask.name("Proxy Cache - Update");
-    broadPhaseTask.name("Broad Phase - Update & Find Pairs");
-    narrowPhasePhysicsTask.name("Narrow Phase - Detect Contacts");
-    narrowPhaseTriggerTask.name("Narrow Phase - Detect Triggers");
-    concavePhaseTask.name("Concave Phase - Detect Contacts");
-    mergeContactsTask.name("Narrow Phase - Merge Contacts");
-    generateConstraintsTask.name("Solver - Generate Constraints");
-    updateJointsTask.name("Joints - Update");
-    resolveConstraintsTask.name("Solver - Resolve Constraints");
-    cacheImpulsesTask.name("Narrow Phase - Cache Impulses");
-    integrateTask.name("Integrate");
-    notifyEventsTask.name("Narrow Phase - Notify Events");
-    #endif
+    return tasks;
 }
 } // namespace nc::physics
