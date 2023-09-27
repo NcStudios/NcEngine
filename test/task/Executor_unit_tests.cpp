@@ -73,7 +73,7 @@ struct ThrowingModule : nc::Module
     {
         graph.Add(nc::task::ExecutionPhase::Begin, "", [] {
             RegisterTaskInvocation(nc::task::ExecutionPhase::Begin);
-            throw std::exception("failed task");
+            throw std::runtime_error("failed task");
         });
     }
 };

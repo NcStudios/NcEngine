@@ -17,7 +17,7 @@ struct Module
     virtual ~Module() = default;
 
     /** @brief Called on registered modules when the task graph is constructed. */
-    virtual void OnBuildTaskGraph(task::TaskGraph& taskGraph) {}
+    virtual void OnBuildTaskGraph(task::TaskGraph&) {}
 
     /** @brief Called prior to clearing the module's associated data registry. This includes
      *         scene changes and NcEngine::Shutdown(). */

@@ -5,6 +5,7 @@
 #include <concepts>
 #include <exception>
 #include <mutex>
+#include <utility>
 
 namespace nc::task
 {

@@ -154,7 +154,7 @@ auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) ->
         {resolveConstraints}
     );
 
-    auto notifyEvents = builder.Add(
+    builder.Add(
         "Notify Events",
         BuildNotifyEventsTask(context, m_narrowPhase),
         {narrowPhaseTrigger, cacheImpulses, integrate}
