@@ -1,54 +1,60 @@
 #include "gtest/gtest.h"
-#include "task/Job.h"
+#include "task/TaskGraph.h"
 
-class TaskGraph_unit_tests : public ::testing::Test
+class TestTaskGraph : public nc::task::TaskGraph
 {
     public:
-        tf::Executor executor;
-        nc::task::TaskGraph taskGraph;
+        TestTaskGraph() = default;
 
-        TaskGraph_unit_tests() : executor{2u}, taskGraph{} {}
-        ~TaskGraph_unit_tests() {}
+        auto GetTaskFlow() -> tf::Taskflow&
+        {
+            return m_ctx->graph;
+        }
+
+        auto GetTaskBucket(nc::task::ExecutionPhase phase) -> const std::vector<tf::Task>&
+        {
+            return m_taskBuckets.at(static_cast<size_t>(phase));
+        }
+
+        auto GetGraphStorage() -> const std::vector<std::unique_ptr<tf::Taskflow>>&
+        {
+            return m_ctx->storage;
+        }
 };
 
-TEST_F(TaskGraph_unit_tests, AddGuardedTask_InitializesTask)
+TEST(TaskGraphTests, Add_callableOverload_addsToPhase)
 {
-   auto task = taskGraph.AddGuardedTask([](){});
-   EXPECT_TRUE(task.has_work());
-   EXPECT_NE(nullptr, task.data());
+    constexpr auto phase = nc::task::ExecutionPhase::Render;
+    auto uut = TestTaskGraph{};
+    ASSERT_TRUE(uut.GetTaskBucket(phase).empty());
+    uut.Add(phase, "task1", [](){});
+    uut.Add(phase, "task2", [](){});
+    uut.Add(phase, "task3", [](){});
+    EXPECT_EQ(3, uut.GetTaskBucket(phase).size());
 }
 
-TEST_F(TaskGraph_unit_tests, Run_TaskThrows_ThrowsUponCompletingAllTasks)
+TEST(TaskGraphTests, Add_taskflowOverload_addsToPhaseAndStorage)
 {
-    int value = 0;
-    auto task1 = taskGraph.AddGuardedTask([](){ throw std::runtime_error{"error"}; });
-    auto task2 = taskGraph.AddGuardedTask([&value](){ value = 1; });
-    task1.precede(task2);
-    EXPECT_THROW(taskGraph.Run(executor), std::runtime_error);
-    executor.wait_for_all();
-    EXPECT_EQ(value, 1);
+    constexpr auto phase = nc::task::ExecutionPhase::Begin;
+    auto uut = TestTaskGraph{};
+    ASSERT_TRUE(uut.GetTaskBucket(phase).empty());
+    ASSERT_TRUE(uut.GetGraphStorage().empty());
+    uut.Add(phase, "testTask", std::make_unique<tf::Taskflow>());
+    EXPECT_EQ(1, uut.GetTaskBucket(phase).size());
+    EXPECT_EQ(1, uut.GetGraphStorage().size());
 }
 
-TEST_F(TaskGraph_unit_tests, RunAsync_TaskThrows_StoresException)
+TEST(TaskGraphTests, Add_invalidPhase_throws)
 {
-    taskGraph.AddGuardedTask([](){ throw std::runtime_error{"error"}; });
-    auto result = taskGraph.RunAsync(executor);
-    result.wait();
-    EXPECT_THROW(taskGraph.ThrowIfExceptionStored(), std::runtime_error);
+    constexpr auto phase = static_cast<nc::task::ExecutionPhase>(1000);
+    auto uut = TestTaskGraph{};
+    EXPECT_THROW(uut.Add(phase, "", [](){}), std::exception);
 }
 
-TEST_F(TaskGraph_unit_tests, RunAsync_TaskThrows_OtherTasksFinish)
+TEST(TaskGraphTests, StoreGraph_addsToStorage)
 {
-    int value = 0;
-    auto task1 = taskGraph.AddGuardedTask([](){ throw std::runtime_error{"error"}; });
-    auto task2 = taskGraph.AddGuardedTask([&value](){ value = 1; });
-    task1.precede(task2);
-    taskGraph.RunAsync(executor).wait();
-    EXPECT_EQ(value, 1);
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    auto uut = TestTaskGraph{};
+    ASSERT_TRUE(uut.GetGraphStorage().empty());
+    uut.StoreGraph(std::make_unique<tf::Taskflow>());
+    EXPECT_EQ(1, uut.GetGraphStorage().size());
 }
