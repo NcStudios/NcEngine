@@ -129,8 +129,6 @@ auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
 
 void NcEngineImpl::RebuildTaskGraph()
 {
-    // TODO: make issue to refactor this so it doesn't happen while graph is running
-
     NC_LOG_INFO("Building engine task graph");
     m_executor.SetContext(task::BuildContext(m_modules.GetAllModules()));
 }

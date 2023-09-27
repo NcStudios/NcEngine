@@ -2,6 +2,7 @@
 
 #include "optick/optick.h"
 #include "ncutility/Algorithm.h"
+#include "ncutility/NcError.h"
 
 #include <iostream>
 
@@ -81,7 +82,8 @@ auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> std::u
 
 Executor::Executor(std::unique_ptr<TaskGraphContext> ctx)
     : m_executor{8},
-      m_ctx{std::move(ctx)}
+      m_ctx{std::move(ctx)},
+      m_running{false}
 {
 #ifdef NC_OUTPUT_TASKFLOW
     WriteGraph(std::cout);
@@ -90,16 +92,27 @@ Executor::Executor(std::unique_ptr<TaskGraphContext> ctx)
 
 void Executor::SetContext(std::unique_ptr<TaskGraphContext> ctx)
 {
+    if (m_running)
+    {
+        throw NcError{"Cannot set new context while Executor is running."};
+    }
+
     m_ctx = std::move(ctx);
 }
 
 void Executor::Run()
 {
+    if (std::exchange(m_running, true))
+    {
+        throw NcError{"Executor is already running"};
+    }
+
     m_executor.run(m_ctx->graph).wait();
     m_ctx->exceptionContext.ThrowIfExceptionStored();
+    m_running = false;
 }
 
-void Executor::WriteGraph(std::ostream& stream)
+void Executor::WriteGraph(std::ostream& stream) const
 {
     m_ctx->graph.dump(stream);
 }

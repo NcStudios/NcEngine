@@ -16,6 +16,16 @@ void RegisterTaskInvocation(nc::task::ExecutionPhase taskId)
     s_invokeOrder.push_back(taskId);
 }
 
+// Helper to build modules from a type list
+template<std::derived_from<nc::Module>... Ts>
+auto BuildModules() -> std::vector<std::unique_ptr<nc::Module>>
+{
+    auto out = std::vector<std::unique_ptr<nc::Module>>{};
+    (out.push_back(std::make_unique<Ts>()), ...);
+    return out;
+}
+
+// Module that schedules individual tasks
 struct SingleTaskModule : nc::Module
 {
     void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
@@ -23,7 +33,6 @@ struct SingleTaskModule : nc::Module
         // Note: If setting dependencies is totally stripped from the executor,
         // tasks tend to finish in the order they're added. Tasks should be
         // added in reverse phase order to prevent false positives.
-
         graph.Add(nc::task::ExecutionPhase::PostFrameSync, "", [] {
             RegisterTaskInvocation(nc::task::ExecutionPhase::PostFrameSync); }
         );
@@ -38,6 +47,7 @@ struct SingleTaskModule : nc::Module
     }
 };
 
+// Module that schedules tf::Taskflows
 struct GraphModule : nc::Module
 {
     void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
@@ -56,6 +66,7 @@ struct GraphModule : nc::Module
     }
 };
 
+// Module whose task throws
 struct ThrowingModule : nc::Module
 {
     void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
@@ -67,14 +78,44 @@ struct ThrowingModule : nc::Module
     }
 };
 
-// Test helper to build a module list
-template<std::derived_from<nc::Module>... Ts>
-auto BuildModules() -> std::vector<std::unique_ptr<nc::Module>>
+// Module whose task tries to rerun the executor
+struct DoubleRunModule : nc::Module
 {
-    auto out = std::vector<std::unique_ptr<nc::Module>>{};
-    (out.push_back(std::make_unique<Ts>()), ...);
-    return out;
-}
+    nc::task::Executor* executor = nullptr;
+    void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
+    {
+        graph.Add(nc::task::ExecutionPhase::Begin, "", [this] {
+            // Verifying correct test setup - since the test looks for an exception,
+            // we don't want to throw here.
+            if (!executor)
+            {
+                std::terminate();
+            }
+
+            executor->Run();
+        });
+    }
+};
+
+// Module whose task tries to rebuild the graph its running on
+struct GraphRebuildModule : nc::Module
+{
+    nc::task::Executor* executor = nullptr;
+    void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
+    {
+        graph.Add(nc::task::ExecutionPhase::Begin, "", [this] {
+            // Verifying correct test setup - since the test looks for an exception,
+            // we don't want to throw here.
+            if (!executor)
+            {
+                std::terminate();
+            }
+
+            auto modules = BuildModules<SingleTaskModule>();
+            executor->SetContext(nc::task::BuildContext(modules));
+        });
+    }
+};
 
 // Fixture to wipe counters
 class ExecutorTests : public ::testing::Test
@@ -91,16 +132,6 @@ TEST_F(ExecutorTests, BuildContext_succeeds)
 {
     auto modules = BuildModules<SingleTaskModule, GraphModule, ThrowingModule>();
     EXPECT_NO_THROW(nc::task::BuildContext(modules));
-}
-
-TEST_F(ExecutorTests, PrintGraph_writesToStream)
-{
-    auto modules = BuildModules<SingleTaskModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
-    auto stream = std::ostringstream{};
-    uut.WriteGraph(stream);
-    // Just checking that it succeeded and wrote something
-    EXPECT_NE(std::streampos{0}, stream.tellp());
 }
 
 TEST_F(ExecutorTests, Run_allPhases_schedulesCorrectly)
@@ -140,4 +171,42 @@ TEST_F(ExecutorTests, Run_taskThrows_completesGraph)
     EXPECT_THROW(uut.Run(), std::exception);
     EXPECT_EQ(4, s_numTasksRun); // should still have run the other tasks
     ASSERT_EQ(4, s_invokeOrder.size());
+}
+
+TEST_F(ExecutorTests, Run_alreadyRunning_throws)
+{
+    auto modules = BuildModules<DoubleRunModule>();
+    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    dynamic_cast<DoubleRunModule*>(modules.at(0).get())->executor = &uut;
+    EXPECT_THROW(uut.Run(), nc::NcError);
+}
+
+TEST_F(ExecutorTests, SetContext_subsequentRun_succeeds)
+{
+    auto modules = BuildModules<SingleTaskModule>();
+    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    EXPECT_NO_THROW(uut.Run());
+    auto newModules = BuildModules<SingleTaskModule, GraphModule>();
+    EXPECT_NO_THROW(uut.SetContext(nc::task::BuildContext(newModules)));
+    EXPECT_NO_THROW(uut.Run());
+    EXPECT_EQ(9, s_numTasksRun);
+    EXPECT_EQ(9, s_invokeOrder.size());
+}
+
+TEST_F(ExecutorTests, SetContext_graphRunning_throws)
+{
+    auto modules = BuildModules<GraphRebuildModule>();
+    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    dynamic_cast<GraphRebuildModule*>(modules.at(0).get())->executor = &uut;
+    EXPECT_THROW(uut.Run(), nc::NcError);
+}
+
+TEST_F(ExecutorTests, PrintGraph_writesToStream)
+{
+    auto modules = BuildModules<SingleTaskModule>();
+    const auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto stream = std::ostringstream{};
+    uut.WriteGraph(stream);
+    // Just checking that it succeeded and wrote something
+    EXPECT_NE(std::streampos{0}, stream.tellp());
 }

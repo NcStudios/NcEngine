@@ -24,10 +24,11 @@ class Executor
         void Run();
 
         // Write task graph structure to a stream in Graphviz DOT language.
-        void WriteGraph(std::ostream& stream);
+        void WriteGraph(std::ostream& stream) const;
 
     private:
         tf::Executor m_executor;
         std::unique_ptr<TaskGraphContext> m_ctx;
+        bool m_running;
 };
 } // namespace nc::task
