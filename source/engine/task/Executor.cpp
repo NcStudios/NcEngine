@@ -3,7 +3,7 @@
 #include "optick/optick.h"
 #include "ncutility/Algorithm.h"
 
-#include <ostream>
+#include <iostream>
 
 namespace
 {
@@ -83,6 +83,9 @@ Executor::Executor(std::unique_ptr<TaskGraphContext> ctx)
     : m_executor{8},
       m_ctx{std::move(ctx)}
 {
+#ifdef NC_OUTPUT_TASKFLOW
+    WriteGraph(std::cout);
+#endif
 }
 
 void Executor::SetContext(std::unique_ptr<TaskGraphContext> ctx)
