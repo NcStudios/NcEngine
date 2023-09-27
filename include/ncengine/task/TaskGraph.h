@@ -1,140 +1,114 @@
 #pragma once
 
+#include "ExceptionContext.h"
+
 #include "taskflow/taskflow.hpp"
+#include "ncutility/NcError.h"
 
 #include <array>
-#include <functional>
-#include <mutex>
-#include <variant>
 #include <vector>
 
 namespace nc::task
 {
-    constexpr size_t ExecutionPhaseCount = 7ull;
+/** @brief The number of execution phases in the primary task graph. */
+constexpr size_t ExecutionPhaseCount = 7ull;
 
-    enum class ExecutionPhase : uint8_t
-    {
-        Begin,
-        Free,
-        Logic,
-        Physics,
-        PreRenderSync,
-        Render,
-        PostFrameSync
-    };
+/** @brief Identifies an execution phase in the engine's primary task graph. */
+enum class ExecutionPhase : uint8_t
+{
+    Begin,         // First phase to run
+    Free,          // Runs parallel to Logic and Physics
+    Logic,         // First update phase
+    Physics,       // Second update phase - depends on Logic
+    PreRenderSync, // Point at which Registry changes are committed - depends on Free and Physics
+    Render,        // Rendering phase - depends on PreRenderSync
+    PostFrameSync  // Last phase to run
+};
 
-    struct Job
-    {
-        using single_job_t = std::function<void()>;
-        using multi_job_t = tf::Taskflow*;
-        using inner_type = std::variant<single_job_t, multi_job_t>;
-        inner_type work;
-        const char* name = "unnamed job";
-        ExecutionPhase phase;
-    };
+/** @brief Context object holding a TaskGraph's state. */
+struct TaskGraphContext : StableAddress
+{
+    tf::Taskflow graph;
+    ExceptionContext exceptionContext;
+    std::vector<std::unique_ptr<tf::Taskflow>> storage;
+};
 
-    /** State shared between all tasks in a graph for storing
-     *  an exception. */
-    class TaskExceptionState
-    {
-        public:
-            void StoreException(std::exception_ptr e);
-            void ThrowIfExceptionStored();
-            bool HasException() const;
+/** @brief Task graph interface for building a TaskGraphContext with Module tasks. */
+class TaskGraph
+{
+    public:
+        /**
+         * @brief Schedule a single task to run during a phase.
+         * @tparam F A callable of the form `void()`
+         * @param phase The target phase.
+         * @param name A user-friendly name for the task.
+         * @param func A callable of the form void(*)().
+         * @return A handle to a scheduled task.
+         * @note If func doesn't satisfy std::is_nothrow_invocable, it will be
+         *       wrapped with a call to task::Guard().
+         */
+        template<std::invocable<> F>
+        auto Add(ExecutionPhase phase, std::string_view name, F&& func) -> tf::Task
+        {
+            return Schedule(phase, Emplace(name, std::forward<F>(func)));
+        }
 
-        private:
-            std::exception_ptr m_exception;
-            std::mutex m_mutex;
-    };
+        /**
+         * @brief Schedule a tf::Taskflow to run during a phase.
+         * @param phase The target phase.
+         * @param name A user-friendly name for the task.
+         * @param graph The graph to be composed.
+         * @return A handle to a scheduled task composed of the graph.
+         * @note Ensure exceptions cannot leak from the graph. Tasks may be
+         *       wrapped with task::Guard() to delay throwing until execution
+         *       has finished.
+         */
+        auto Add(ExecutionPhase phase, std::string_view name, std::unique_ptr<tf::Taskflow> graph) -> tf::Task
+        {
+            NC_ASSERT(graph != nullptr, "Task graph should not be null.");
+            return Schedule(phase, Emplace(name, std::move(graph)));
+        }
 
-    /** Wrapper around tf::Taskflow that allow try/catch guarding of tasks.
-     *  Only the first exception thrown may be stored. */
-    class TaskGraph
-    {
-        public:
-            /** Blocking task graph execution. A stored exception will be
-             *  thrown after all tasks have finished. */
-            void Run(tf::Executor& executor);
+        /** @brief Take ownership of a tf::Tasflow without scheduling anything. Useful for
+         *         keeping alive Taskflows that are indirectly refenced in the TaskGraph. */
+        void StoreGraph(std::unique_ptr<tf::Taskflow> graph)
+        {
+            m_ctx->storage.push_back(std::move(graph));
+        }
 
-            /** Non-blocking task graph execution. For a graph containing
-             *  guarded tasks, ThrowIfExceptionStored() should be called
-             *  manually after execution has finished. */
-            auto RunAsync(tf::Executor& executor) -> tf::Future<void>;
+        /** @brief Get the TaskGraph's ExceptionContext object. */
+        auto GetExceptionContext() noexcept -> ExceptionContext&
+        {
+            return m_ctx->exceptionContext;
+        }
 
-            /** Rethrows the first captured exception from a task, if
-             *  one exists. */
-            void ThrowIfExceptionStored();
+    protected:
+        std::unique_ptr<TaskGraphContext> m_ctx;
+        std::array<std::vector<tf::Task>, ExecutionPhaseCount> m_taskBuckets;
 
-            /** Add a task enclosed in a try/catch guard to the graph. */
-            template<class Func>
-            auto AddGuardedTask(Func&& func) -> tf::Task;
+        TaskGraph()
+            : m_ctx{std::make_unique<TaskGraphContext>()}
+        {
+        }
 
-            /** Get underlying Taskflow object for adding unguarded tasks, 
-             *  composing, etc. */
-            auto GetTaskFlow() -> tf::Taskflow* { return &m_tasks; }
+        ~TaskGraph() noexcept = default;
 
-        private:
-            tf::Taskflow m_tasks;
-            TaskExceptionState m_exceptionState;
-    };
+        auto Schedule(ExecutionPhase phase, tf::Task handle) -> tf::Task
+        {
+            return m_taskBuckets.at(static_cast<size_t>(phase)).emplace_back(handle);
+        }
 
-    inline void TaskExceptionState::StoreException(std::exception_ptr e)
-    {
-        std::lock_guard lock{m_mutex};
-        if(HasException())
-            return;
+        template<std::invocable<> F>
+        auto Emplace(std::string_view name, F&& func) -> tf::Task
+        {
+            return m_ctx->graph.emplace(Guard(m_ctx->exceptionContext, std::forward<F>(func))).name(name.data());
+        }
 
-        m_exception = e;
-    }
-
-    inline bool TaskExceptionState::HasException() const
-    {
-        return m_exception != nullptr;
-    }
-
-    inline void TaskExceptionState::ThrowIfExceptionStored()
-    {
-        if(HasException())
-            std::rethrow_exception(m_exception);
-    }
-
-    inline void TaskGraph::Run(tf::Executor& executor)
-    {
-        executor.run(m_tasks).wait();
-        m_exceptionState.ThrowIfExceptionStored();
-    }
-
-    inline auto TaskGraph::RunAsync(tf::Executor& executor) -> tf::Future<void>
-    {
-        return executor.run(m_tasks);
-    }
-
-    inline void TaskGraph::ThrowIfExceptionStored()
-    {
-        m_exceptionState.ThrowIfExceptionStored();
-    }
-
-    template<class Func>
-    auto TaskGraph::AddGuardedTask(Func&& func) -> tf::Task
-    {
-        auto task = m_tasks.placeholder();
-        task.data(&m_exceptionState);
-        task.work
-        (
-            [task, func = std::forward<Func>(func)]
-            {
-                try
-                {
-                    func();
-                }
-                catch(const std::exception&)
-                {
-                    auto* state = static_cast<TaskExceptionState*>(task.data());
-                    state->StoreException(std::current_exception());
-                }
-            }
-        );
-
-        return task;
-    }
-}
+        auto Emplace(std::string_view name, std::unique_ptr<tf::Taskflow> graph) -> tf::Task
+        {
+            auto handle = m_ctx->graph.composed_of(*graph).name(name.data());
+            m_ctx->storage.emplace_back(std::move(graph));
+            return handle;
+        }
+};
+} // namespace nc::task
