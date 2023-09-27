@@ -11,8 +11,30 @@
 #include "time/TimeImpl.h"
 #include "utility/Log.h"
 
+#include <sstream>
+
 namespace
 {
+void LogConfig(const nc::config::Config& config)
+{
+    auto stream = std::stringstream{};
+    nc::config::Write(stream, config, false);
+    auto configStr = std::string{"\t"};
+    configStr.reserve(static_cast<size_t>(stream.tellp()) + 50);
+
+    // Indent contents for readability in the log
+    for (auto c : stream.str())
+    {
+        configStr.push_back(c);
+        if (c == '\n')
+        {
+            configStr.push_back('\t');
+        }
+    }
+
+    NC_LOG_INFO_FMT("Initializing NcEngine with Config:\n{}", configStr);
+}
+
 auto BuildModuleRegistry(nc::Registry* reg,
                          nc::window::WindowImpl* window,
                          const nc::config::Config& config) -> nc::ModuleRegistry
@@ -36,6 +58,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 {
     config::SetConfig(config);
     utility::detail::InitializeLog(config.projectSettings.logFilePath);
+    ::LogConfig(config);
     NC_LOG_INFO("Creating NcEngine instance");
     return std::make_unique<NcEngineImpl>(config);
 }
