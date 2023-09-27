@@ -85,11 +85,9 @@ struct DoubleRunModule : nc::Module
     void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
     {
         graph.Add(nc::task::ExecutionPhase::Begin, "", [this] {
-            // Verifying correct test setup - since the test looks for an exception,
-            // we don't want to throw here.
             if (!executor)
             {
-                std::terminate();
+                FAIL() << "Bad test setup";
             }
 
             executor->Run();
@@ -104,11 +102,9 @@ struct GraphRebuildModule : nc::Module
     void OnBuildTaskGraph(nc::task::TaskGraph& graph) override
     {
         graph.Add(nc::task::ExecutionPhase::Begin, "", [this] {
-            // Verifying correct test setup - since the test looks for an exception,
-            // we don't want to throw here.
             if (!executor)
             {
-                std::terminate();
+                FAIL() << "Bad test setup";
             }
 
             auto modules = BuildModules<SingleTaskModule>();
@@ -201,7 +197,7 @@ TEST_F(ExecutorTests, SetContext_graphRunning_throws)
     EXPECT_THROW(uut.Run(), nc::NcError);
 }
 
-TEST_F(ExecutorTests, PrintGraph_writesToStream)
+TEST_F(ExecutorTests, WriteGraph_writesToStream)
 {
     auto modules = BuildModules<SingleTaskModule>();
     const auto uut = nc::task::Executor{nc::task::BuildContext(modules)};

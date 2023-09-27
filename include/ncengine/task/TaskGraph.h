@@ -39,10 +39,10 @@ class TaskGraph
     public:
         /**
          * @brief Schedule a single task to run during a phase.
-         * @tparam F A callable of the form `void()`
+         * @tparam F A callable of the form void(*)().
          * @param phase The target phase.
          * @param name A user-friendly name for the task.
-         * @param func A callable of the form void(*)().
+         * @param func The callable to schedule.
          * @return A handle to a scheduled task.
          * @note If func doesn't satisfy std::is_nothrow_invocable, it will be
          *       wrapped with a call to task::Guard().
@@ -58,7 +58,7 @@ class TaskGraph
          * @param phase The target phase.
          * @param name A user-friendly name for the task.
          * @param graph The graph to be composed.
-         * @return A handle to a scheduled task composed of the graph.
+         * @return A handle to a scheduled task composed from the Taskflow.
          * @note Ensure exceptions cannot leak from the graph. Tasks may be
          *       wrapped with task::Guard() to delay throwing until execution
          *       has finished.
