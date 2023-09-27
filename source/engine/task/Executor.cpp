@@ -1,8 +1,9 @@
 #include "Executor.h"
 
-#include "optick/optick.h"
 #include "ncutility/Algorithm.h"
 #include "ncutility/NcError.h"
+#include "ncutility/ScopeExit.h"
+#include "optick/optick.h"
 
 #include <iostream>
 
@@ -102,6 +103,7 @@ void Executor::SetContext(std::unique_ptr<TaskGraphContext> ctx)
 
 void Executor::Run()
 {
+    SCOPE_EXIT(m_running = false);
     if (std::exchange(m_running, true))
     {
         throw NcError{"Executor is already running"};
@@ -109,7 +111,6 @@ void Executor::Run()
 
     m_executor.run(m_ctx->graph).wait();
     m_ctx->exceptionContext.ThrowIfExceptionStored();
-    m_running = false;
 }
 
 void Executor::WriteGraph(std::ostream& stream) const
