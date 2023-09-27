@@ -4,21 +4,23 @@
 
 namespace nc
 {
-    namespace task { struct Job; }
+class Registry;
 
-    /** @brief Modules are extensions that provide functionality to the engine. */
-    struct Module
-    {
-        virtual ~Module() = default;
+namespace task
+{
+class TaskGraph;
+} // namespace task
 
-        /**
-         * @brief Builds a list of jobs required by the module. Returns an empty vector by default.
-         * @return std::vector<task::Job>
-         */
-        virtual auto BuildWorkload() -> std::vector<task::Job>;
+/** @brief Modules are extensions that provide functionality to the engine. */
+struct Module
+{
+    virtual ~Module() = default;
 
-        /** @brief Called prior to clearing the module's associated data registry. This includes
-         *  scene changes and NcEngine::Shutdown(). */
-        virtual void Clear() noexcept;
-    };
-}
+    /** @brief Called on registered modules when the task graph is constructed. */
+    virtual void OnBuildTaskGraph(task::TaskGraph& taskGraph) {}
+
+    /** @brief Called prior to clearing the module's associated data registry. This includes
+     *         scene changes and NcEngine::Shutdown(). */
+    virtual void Clear() noexcept {}
+};
+} // namespace nc

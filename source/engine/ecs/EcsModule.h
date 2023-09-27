@@ -8,18 +8,18 @@ namespace nc { class Registry; }
 
 namespace nc::ecs
 {
-/** Module for updating FrameLogic components */
-class LogicModule : public Module
+/** Module for updating FrameLogic components and synchronizing the Registry. */
+class EcsModule : public Module
 {
     public:
-        LogicModule(Registry* registry) noexcept;
+        EcsModule(Registry* registry) noexcept;
 
-        auto BuildWorkload() -> std::vector<task::Job> override;
-        void Run();
+        void OnBuildTaskGraph(task::TaskGraph&) override;
+        void RunFrameLogic();
 
     private:
         Registry* m_registry;
 };
 
-auto BuildLogicModule(Registry* registry) -> std::unique_ptr<LogicModule>;
+auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>;
 } // namespace nc::ecs

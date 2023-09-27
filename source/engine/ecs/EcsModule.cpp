@@ -1,8 +1,8 @@
-#include "LogicModule.h"
+#include "EcsModule.h"
 #include "ecs/Logic.h"
 #include "ecs/Registry.h"
 #include "ecs/View.h"
-#include "task/Job.h"
+#include "task/TaskGraph.h"
 #include "time/Time.h"
 #include "utility/Log.h"
 
@@ -10,29 +10,38 @@
 
 namespace nc::ecs
 {
-auto BuildLogicModule(Registry* registry) -> std::unique_ptr<LogicModule>
+auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>
 {
-    NC_LOG_TRACE("Creating Logic module");
-    return std::make_unique<LogicModule>(registry);
+    NC_LOG_TRACE("Creating Ecs Module");
+    return std::make_unique<EcsModule>(registry);
 }
 
-LogicModule::LogicModule(Registry* registry) noexcept
+EcsModule::EcsModule(Registry* registry) noexcept
     : m_registry{registry}
 {
 }
 
-auto LogicModule::BuildWorkload() -> std::vector<task::Job>
+void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
 {
-    NC_LOG_TRACE("Building Logic workload");
-    return std::vector<task::Job>
-    {
-        task::Job{ [this]{Run();}, "LogicModule", task::ExecutionPhase::Logic }
-    };
+    NC_LOG_TRACE("Building EcsModule workload");
+    graph.Add
+    (
+        task::ExecutionPhase::Logic,
+        "EcsModule",
+        [this] { RunFrameLogic(); }
+    );
+
+    graph.Add
+    (
+        task::ExecutionPhase::PreRenderSync,
+        "Commit Registry Changes",
+        [registry = m_registry] { registry->CommitStagedChanges(); }
+    );
 }
 
-void LogicModule::Run()
+void EcsModule::RunFrameLogic()
 {
-    OPTICK_CATEGORY("Logic", Optick::Category::GameLogic);
+    OPTICK_CATEGORY("RunFrameLogic", Optick::Category::GameLogic);
     const float dt = time::DeltaTime();
     for(auto& logic : View<FrameLogic>{m_registry})
     {

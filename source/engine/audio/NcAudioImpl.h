@@ -3,7 +3,7 @@
 #include "DeviceStream.h"
 #include "audio/NcAudio.h"
 #include "ecs/Registry.h"
-#include "task/Job.h"
+#include "task/TaskGraph.h"
 
 #include <mutex>
 #include <queue>
@@ -37,7 +37,7 @@ class NcAudioImpl final : public NcAudio
         auto OnChangeOutputDevice() noexcept -> Signal<const AudioDevice&>& override;
 
         /** Module API */
-        auto BuildWorkload() -> std::vector<task::Job> override;
+        void OnBuildTaskGraph(task::TaskGraph& graph) override;
         void Clear() noexcept override;
 
         void Run();

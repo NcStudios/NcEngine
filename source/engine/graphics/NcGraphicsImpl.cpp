@@ -7,7 +7,7 @@
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
 
-#include "task/Job.h"
+#include "task/TaskGraph.h"
 #include "utility/Log.h"
 #include "window/WindowImpl.h"
 
@@ -29,8 +29,6 @@ namespace
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
-        void Clear() noexcept override {}
-        auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
 
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED
@@ -122,15 +120,13 @@ namespace nc::graphics
         m_particleEmitterSystem.Clear();
     }
 
-    auto NcGraphicsImpl::BuildWorkload() -> std::vector<task::Job>
+    void NcGraphicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
     {
         NC_LOG_TRACE("Building NcGraphics workload");
-        return std::vector<task::Job>
-        {
-            task::Job{ [this] {Run(); }, "GraphicsModule", task::ExecutionPhase::Render },
-            task::Job{ [this] {m_particleEmitterSystem.Run(); }, "RunParticleEmitterSystem", task::ExecutionPhase::Free },
-            task::Job{ [this] {m_particleEmitterSystem.ProcessFrameEvents(); }, "ProcessParticleFrameEvents", task::ExecutionPhase::PostFrameSync }
-        };
+
+        graph.Add(task::ExecutionPhase::Render, "NcGraphics", [this]{ Run(); });
+        graph.Add(task::ExecutionPhase::Free, "ParticleEmitterSystem", [this]{ m_particleEmitterSystem.Run(); });
+        graph.Add(task::ExecutionPhase::PostFrameSync, "ProcessParticleFrameEvents", [this]{ m_particleEmitterSystem.ProcessFrameEvents(); } );
     }
 
     void NcGraphicsImpl::Run()
