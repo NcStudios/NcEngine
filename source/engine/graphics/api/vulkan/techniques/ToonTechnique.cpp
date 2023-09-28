@@ -10,7 +10,7 @@
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace nc::graphics
 {

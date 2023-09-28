@@ -17,7 +17,7 @@
 #include "utility/Log.h"
 
 #include "ncutility/NcError.h"
-#include "optick/optick.h"
+#include "optick.h"
 
 #include "GLFW/glfw3.h"
 

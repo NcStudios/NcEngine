@@ -5,7 +5,7 @@
 #include "graphics/shader_resource/ObjectData.h"
 #include "physics/collision/IntersectionQueries.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace
 {

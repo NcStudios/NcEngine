@@ -6,6 +6,8 @@ project("NcSdk"
 
 # Options
 option(NC_BUILD_TESTS "Enable building tests." OFF)
+# TODO: switch default to off before merge
+option(NC_PROFILING_ENABLED "Enable profiling with Optick" ON)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
@@ -26,7 +28,6 @@ if(NC_PROD_BUILD)
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=1)
     set(NC_ENGINE_LIB "NcEngine")
 else()
-    # @todo add back NC_PROFILING_ENABLED - we don't currently fetch Optick
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_EDITOR_EXE "NcEditor")
@@ -89,6 +90,16 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw)
+
+if(${NC_PROFILING_ENABLED})
+    FetchContent_Declare(optick
+                        GIT_REPOSITORY https://github.com/bombomby/optick.git
+                        GIT_TAG        1.4.0.0
+                        GIT_SHALLOW    TRUE
+    )
+
+    FetchContent_MakeAvailable(optick)
+endif()
 
 # Add source
 add_subdirectory(source)

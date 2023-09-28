@@ -63,11 +63,10 @@ elseif(APPLE)
     )
 endif()
 
-# Note - OptickCore.dll still needs to be copied to the executable's directory
 if(${NC_PROFILING_ENABLED})
     target_link_libraries(${NC_ENGINE_LIB}
-        INTERFACE
-            $<INSTALL_INTERFACE:${NC_ENGINE_INSTALL_DIR}/lib/OptickCore.dll>
+        PUBLIC
+            OptickCore
     )
 endif()
 

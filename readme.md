@@ -77,7 +77,7 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
 #### NC_PROFILING_ENABLED
     Default: ON (OFF when NC_PROD_BUILD=ON)
     Enabled profiling with Optick. This also requires the Optick application (https://www.optickprofiler.com) and the Optick
-    shared library (nc/lib/libOptick.dll).
+    shared library (installed to install-prefix/bin/OptickCore.dll).
 
 #### NC_LOG_LEVEL
     Default: 2 (1 when NC_PROD_BUILD=ON)

@@ -43,7 +43,7 @@ install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
         DESTINATION sample
 )
 if(${NC_PROFILING_ENABLED})
-    install(FILES       ${PROJECT_SOURCE_DIR}/source/external/lib/OptickCore.dll
+    install(FILES       $<TARGET_FILE:OptickCore>
             DESTINATION sample
     )
 endif()
