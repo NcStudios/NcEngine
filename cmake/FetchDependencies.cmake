@@ -82,7 +82,6 @@ endif()
 
 # Optick
 if(${NC_PROFILING_ENABLED})
-
     FetchContent_Declare(optick
                          GIT_REPOSITORY https://github.com/NcStudios/optick.git
                          GIT_TAG        a89846fb813771ef21ca663cbd85e2a65cc56c5d # origin/release
