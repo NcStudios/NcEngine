@@ -38,68 +38,7 @@ endif()
 add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 
 # Get dependencies
-find_package(Vulkan REQUIRED)
-
-include(FetchContent)
-
-FetchContent_Declare(NcCommon
-                     GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
-                     GIT_TAG        origin/vnext
-                     GIT_SHALLOW    TRUE
-)
-
-set(NC_TOOLS_BUILD_CONVERTER OFF)
-set(NC_TOOLS_BUILD_TESTS OFF)
-FetchContent_Declare(nc-tools
-                     GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
-                     GIT_TAG             v1.0.1
-                     GIT_SHALLOW         TRUE
-)
-
-if(UNIX AND NOT APPLE)
-        # Get pre-built nc-convert from NcTools so we don't have to build it and its dependencies
-        FetchContent_Declare(nc-convert
-                             URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-ubuntu22.04-x64.zip
-                             URL_HASH            SHA256=ACC34BD4CFECF517339538C47C1557FCCA77E4EE1F30E7177D6DF94C35A13597
-                             DOWNLOAD_NO_EXTRACT FALSE
-        )
-elseif(WIN32)
-        # Get pre-built nc-convert.exe from NcTools so we don't have to build it and its dependencies
-        FetchContent_Declare(nc-convert
-                             URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-windows-x64.zip
-                             URL_HASH            SHA256=69f53e38436a85de7776cb3161075111a922c9cbdb4049c8a5ce9d3bd3c50d5b
-                             DOWNLOAD_NO_EXTRACT FALSE                 
-        )
-elseif(APPLE)
-endif()
-
-FetchContent_Declare(taskflow
-                     GIT_REPOSITORY https://github.com/NcStudios/taskflow.git
-                     GIT_TAG        origin/master
-                     GIT_SHALLOW    TRUE
-)
-
-FetchContent_Declare(glfw
-                     GIT_REPOSITORY https://github.com/NcStudios/glfw.git
-                     GIT_TAG        origin/master
-                     GIT_SHALLOW    TRUE
-)
-
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw)
-
-if(${NC_PROFILING_ENABLED})
-    FetchContent_Declare(optick
-                        GIT_REPOSITORY https://github.com/bombomby/optick.git
-                        GIT_TAG        1.4.0.0
-                        GIT_SHALLOW    TRUE
-    )
-
-    FetchContent_MakeAvailable(optick)
-endif()
+include(cmake/FetchDependencies.cmake)
 
 # Add source
 add_subdirectory(source)
@@ -112,13 +51,12 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
+# Install nc-convert
 if(UNIX AND NOT APPLE)
-    # Install nc-convert
     install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
             DESTINATION bin
     )
 elseif(WIN32)
-    # Install nc-convert executable
     install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
             DESTINATION bin
     )
