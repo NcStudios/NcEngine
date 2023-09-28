@@ -6,8 +6,7 @@ project("NcSdk"
 
 # Options
 option(NC_BUILD_TESTS "Enable building tests." OFF)
-# TODO: switch default to off before merge
-option(NC_PROFILING_ENABLED "Enable profiling with Optick" ON)
+option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
