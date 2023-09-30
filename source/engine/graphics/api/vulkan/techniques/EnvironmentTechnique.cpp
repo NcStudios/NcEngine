@@ -13,7 +13,7 @@
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/shader_resource/EnvironmentData.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace nc::graphics
 {

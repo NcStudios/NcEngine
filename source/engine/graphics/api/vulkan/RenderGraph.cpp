@@ -15,7 +15,7 @@
 #include "techniques/WireframeTechnique.h"
 #endif
 
-#include "optick/optick.h"
+#include "optick.h"
 
 #include <array>
 #include <string>

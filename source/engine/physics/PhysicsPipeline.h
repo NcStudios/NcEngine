@@ -13,8 +13,9 @@
 #include "ecs/Registry.h"
 #include "ecs/View.h"
 #include "ecs/detail/FreeComponentGroup.h"
-#include "optick/optick.h"
 #include "task/Job.h"
+
+#include "optick.h"
 
 namespace nc::physics
 {

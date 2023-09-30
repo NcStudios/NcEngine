@@ -2,7 +2,7 @@
 add_library(${NC_ENGINE_LIB} STATIC)
 
 # Propagate version
-configure_file(${NC_SOURCE_DIR}/config/Version.h.in
+configure_file(${PROJECT_SOURCE_DIR}/cmake/Version.h.in
                ${NC_INCLUDE_DIR}/ncengine/config/Version.h
 )
 
@@ -63,11 +63,10 @@ elseif(APPLE)
     )
 endif()
 
-# Note - OptickCore.dll still needs to be copied to the executable's directory
 if(${NC_PROFILING_ENABLED})
     target_link_libraries(${NC_ENGINE_LIB}
-        INTERFACE
-            $<INSTALL_INTERFACE:${NC_ENGINE_INSTALL_DIR}/lib/OptickCore.dll>
+        PUBLIC
+            OptickCore
     )
 endif()
 
@@ -93,7 +92,7 @@ install(EXPORT      NcEngine-export
         NAMESPACE   Nc::
         DESTINATION lib/cmake/NcEngine
 )
-install(FILES       ${PROJECT_SOURCE_DIR}/NcEngineConfig.cmake
+install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
         DESTINATION lib/cmake/NcEngine
 )
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine

@@ -2,7 +2,8 @@
 #include "ecs/Transform.h"
 #include "time/Time.h"
 
-#include "optick/optick.h"
+#include "optick.h"
+
 #include <algorithm>
 
 namespace nc::graphics

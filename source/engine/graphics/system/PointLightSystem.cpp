@@ -1,7 +1,7 @@
 #include "PointLightSystem.h"
 #include "graphics/shader_resource/PointLightData.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace
 {

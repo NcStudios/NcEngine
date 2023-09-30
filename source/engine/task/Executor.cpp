@@ -1,6 +1,6 @@
 #include "Executor.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace
 {
