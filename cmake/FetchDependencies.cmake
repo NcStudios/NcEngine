@@ -39,7 +39,7 @@ elseif(WIN32)
                          DOWNLOAD_NO_EXTRACT FALSE
     )
 elseif(APPLE)
-    # Artifact not yet published
+    # TODO: #349 Artifact not yet published
 endif()
 
 # Taskflow
