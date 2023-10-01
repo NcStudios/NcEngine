@@ -60,8 +60,21 @@ FetchContent_Declare(glfw
                      GIT_SHALLOW    TRUE
 )
 
+# Optick
+if(${NC_PROFILING_ENABLED})
+    set(OPTICK_ENABLED ON CACHE BOOL "" FORCE)
+else()
+    set(OPTICK_ENABLED OFF CACHE BOOL "" FORCE)
+endif()
+
+FetchContent_Declare(optick
+                     GIT_REPOSITORY https://github.com/NcStudios/optick.git
+                     GIT_TAG        e45a8480babaca85bd87ecf1e775547e28754881 # origin/release
+                     GIT_SHALLOW    TRUE
+)
+
 # Fetch all required sources
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick)
 
 #############################
 ### Optional Dependencies ###
@@ -78,15 +91,4 @@ if(${NC_BUILD_TESTS})
     )
 
     FetchContent_MakeAvailable(googletest)
-endif()
-
-# Optick
-if(${NC_PROFILING_ENABLED})
-    FetchContent_Declare(optick
-                         GIT_REPOSITORY https://github.com/NcStudios/optick.git
-                         GIT_TAG        a89846fb813771ef21ca663cbd85e2a65cc56c5d # origin/release
-                         GIT_SHALLOW    TRUE
-    )
-
-    FetchContent_MakeAvailable(optick)
 endif()
