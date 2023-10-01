@@ -42,6 +42,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         Vulkan::Vulkan
         Taskflow
         glfw
+        OptickCore
 )
 
 if(WIN32)
@@ -60,13 +61,6 @@ elseif(APPLE)
     target_link_libraries(${NC_ENGINE_LIB}
         PUBLIC
             "-framework CoreAudio"
-    )
-endif()
-
-if(${NC_PROFILING_ENABLED})
-    target_link_libraries(${NC_ENGINE_LIB}
-        PUBLIC
-            OptickCore
     )
 endif()
 
