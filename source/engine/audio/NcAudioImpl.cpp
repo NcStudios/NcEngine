@@ -74,8 +74,6 @@ struct NcAudioStub : public nc::audio::NcAudio
     auto GetOutputDevice() const noexcept -> const nc::audio::AudioDevice& override { return nullDevice; }
     auto SetOutputDevice(uint32_t) noexcept -> bool override { return false; }
     auto OnChangeOutputDevice() noexcept -> nc::Signal<const nc::audio::AudioDevice&>& override { return nullSignal; }
-    auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
-    void Clear() noexcept override {}
 };
 } // anonymous namespace
 
@@ -121,13 +119,10 @@ void NcAudioImpl::Clear() noexcept
     }
 }
 
-auto NcAudioImpl::BuildWorkload() -> std::vector<task::Job>
+void NcAudioImpl::OnBuildTaskGraph(task::TaskGraph& graph)
 {
     NC_LOG_TRACE("Building NcAudio workload");
-    return std::vector<task::Job>
-    {
-        task::Job{ [this]{Run();}, "AudioModule", task::ExecutionPhase::Free }
-    };
+    graph.Add(task::ExecutionPhase::Free, "NcAudio", [this]{ Run(); });
 }
 
 void NcAudioImpl::RegisterListener(Entity listener) noexcept

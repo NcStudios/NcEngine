@@ -1,31 +1,34 @@
 #pragma once
 
-#include "ecs/Registry.h"
 #include "module/Module.h"
-#include "task/Job.h"
+#include "task/TaskGraph.h"
+
+#include <iosfwd>
 
 namespace nc::task
 {
-    class Executor
-    {
-        public:
-            template<class T>
-            using task_matrix = std::array<std::vector<T>, ExecutionPhaseCount>;
+// Build a graph context from a list of modules.
+auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> std::unique_ptr<TaskGraphContext>;
 
-            Executor();
+// Manages the engine's primary task graph.
+class Executor
+{
+    public:
+        // Initialize with a context object
+        explicit Executor(std::unique_ptr<TaskGraphContext> ctx);
 
-            void BuildTaskGraph(Registry* registry, std::vector<std::unique_ptr<Module>>& modules);
-            auto Run() -> tf::Future<void>;
+        // Assign a new graph context.
+        void SetContext(std::unique_ptr<TaskGraphContext> ctx);
 
-        private:
-            tf::Executor m_taskExecutor;
-            tf::Taskflow m_executionGraph;
-            task_matrix<Job> m_jobRegistry;
+        // Blocking call to run the graph. Throws any exceptions caught during execution.
+        void Run();
 
-            void Add(Job job);
-            void Add(std::vector<Job> workload);
-            auto ConvertJobsToTasks() -> task_matrix<tf::Task>;
-            auto ToTask(Job::single_job_t job) -> tf::Task;
-            auto ToTask(Job::multi_job_t job) -> tf::Task;
-    };
-}
+        // Write task graph structure to a stream in Graphviz DOT language.
+        void WriteGraph(std::ostream& stream) const;
+
+    private:
+        tf::Executor m_executor;
+        std::unique_ptr<TaskGraphContext> m_ctx;
+        bool m_running;
+};
+} // namespace nc::task

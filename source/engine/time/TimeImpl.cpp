@@ -1,5 +1,5 @@
 #include "TimeImpl.h"
-#include "task/Job.h"
+#include "task/TaskGraph.h"
 #include "time/Time.h"
 #include "utility/Log.h"
 
@@ -32,23 +32,20 @@ auto BuildTimeModule() -> std::unique_ptr<TimeImpl>
     return std::make_unique<TimeImpl>();
 }
 
-auto TimeImpl::BuildWorkload() -> std::vector<task::Job>
+void TimeImpl::OnBuildTaskGraph(task::TaskGraph& graph)
 {
     NC_LOG_TRACE("Building Time workload");
-    return std::vector<task::Job>
-    {
-        task::Job
+    graph.Add
+    (
+        task::ExecutionPhase::Begin,
+        "TimeModule",
+        [this]()
         {
-            [this]()
-            {
-                /** @todo shouldn't we do new timepoint first? */
-                g_dt = ::DeltaTimeInSeconds(m_lastTime, m_currentTime);
-                m_lastTime = std::exchange(m_currentTime, Clock_t::now());
-            },
-            "TimeModule",
-            task::ExecutionPhase::Begin
+            /** @todo shouldn't we do new timepoint first? */
+            g_dt = ::DeltaTimeInSeconds(m_lastTime, m_currentTime);
+            m_lastTime = std::exchange(m_currentTime, Clock_t::now());
         }
-    };
+    );
 }
 
 void TimeImpl::Clear() noexcept

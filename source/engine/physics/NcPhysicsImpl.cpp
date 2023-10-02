@@ -1,6 +1,7 @@
 #include "NcPhysicsImpl.h"
 #include "config/Config.h"
 #include "graphics/debug/DebugRenderer.h"
+#include "physics/ConcaveCollider.h"
 #include "time/Time.h"
 #include "utility/Log.h"
 
@@ -12,7 +13,7 @@ struct BspTreeStub
 {
     BspTreeStub(nc::Registry* registry)
         : onAddConnection{registry->OnAdd<ConcaveCollider>().Connect(this, &BspTreeStub::OnAdd)},
-            onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTreeStub::OnRemove)}
+          onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTreeStub::OnRemove)}
     {
     }
 
@@ -25,18 +26,15 @@ struct BspTreeStub
 class NcPhysicsStub : public nc::physics::NcPhysics
 {
     public:
-        NcPhysicsStub(nc::Registry* reg) : m_tasks{}, m_bspStub{reg} {}
+        NcPhysicsStub(nc::Registry* reg) : m_bspStub{reg} {}
         void AddJoint(nc::Entity, nc::Entity, const nc::Vector3&, const nc::Vector3&, float = 0.2f, float = 0.0f) override {}
         void RemoveJoint(nc::Entity, nc::Entity) override {}
         void RemoveAllJoints(nc::Entity) override {}
         void RegisterClickable(IClickable*) override {}
         void UnregisterClickable(IClickable*) noexcept override {}
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr;}
-        auto BuildWorkload() -> std::vector<nc::task::Job> override { return {}; }
-        void Clear() noexcept override {}
 
     private:
-        nc::task::TaskGraph m_tasks;
         BspTreeStub m_bspStub;
 };
 } // anonymous namespace
@@ -93,15 +91,20 @@ auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
     return m_clickableSystem.RaycastToClickables(mask);
 }
 
-auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
+void NcPhysicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
 {
     NC_LOG_TRACE("Building NcPhysics workload");
     const auto fixedStep = config::GetPhysicsSettings().fixedUpdateInterval;
+    auto tasks = std::make_unique<tf::Taskflow>();
+    auto pipelineModule = [&graph, &tasks, &pipeline = m_pipeline]()
+    {
+        auto pipelineGraph = pipeline.BuildTaskGraph(graph.GetExceptionContext());
+        auto pipelineTask = tasks->composed_of(*pipelineGraph).name("Physics Pipeline");
+        graph.StoreGraph(std::move(pipelineGraph));
+        return pipelineTask;
+    }();
 
-    auto* tf = m_pipeline.GetTasks().GetTaskFlow();
-    auto pipelineModule = m_tasks.composed_of(*tf).name("Physics Pipeline");
-
-    auto init = m_tasks.emplace(
+    auto init = tasks->emplace(
         [&iterations = m_currentIterations,
          &fixedDt = m_accumulatedTime]
     {
@@ -109,7 +112,7 @@ auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
         fixedDt += time::DeltaTime();
     }).name("Init");
 
-    auto condition = m_tasks.emplace(
+    auto condition = tasks->emplace(
         [&cur = m_currentIterations,
          &fixedDt = m_accumulatedTime,
          fixedStep]
@@ -118,7 +121,7 @@ auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
         return (cur < maxIterations && fixedDt > fixedStep) ? 1 : 0;
     }).name("Condition");
 
-    auto update = m_tasks.emplace(
+    auto update = tasks->emplace(
         [&curIt = m_currentIterations,
          &fixedDt = m_accumulatedTime,
          fixedStep]
@@ -128,17 +131,14 @@ auto NcPhysicsImpl::BuildWorkload() -> std::vector<task::Job>
         return 0;
     }).name("Update Accumulated Time");
 
-    auto finish = m_tasks.emplace([](){}).name("Finish");
+    auto finish = tasks->emplace([](){}).name("Finish");
 
     init.precede(condition);
     condition.precede(finish, pipelineModule);
     pipelineModule.precede(update);
     update.precede(condition);
 
-    return std::vector<task::Job>
-    {
-        task::Job{ &m_tasks, "Physics Module", task::ExecutionPhase::Physics }
-    };
+    graph.Add(task::ExecutionPhase::Physics, "NcPhysics", std::move(tasks));
 }
 
 void NcPhysicsImpl::Clear() noexcept
