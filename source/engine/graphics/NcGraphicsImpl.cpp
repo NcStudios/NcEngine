@@ -11,7 +11,7 @@
 #include "utility/Log.h"
 #include "window/WindowImpl.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 #ifdef NC_DEBUG_RENDERING_ENABLED
 #include "graphics/debug/DebugRenderer.h"

@@ -11,7 +11,7 @@
 #include "graphics/api/vulkan/meshes/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace nc::graphics
 {

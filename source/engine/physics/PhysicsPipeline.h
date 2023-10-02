@@ -2,6 +2,8 @@
 
 #include "PhysicsPipelineBuilder.h"
 
+#include "optick.h"
+
 namespace nc::physics
 {
 template<class Stages>

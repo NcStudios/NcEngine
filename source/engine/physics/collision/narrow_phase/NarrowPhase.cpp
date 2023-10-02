@@ -2,7 +2,7 @@
 #include "ecs/Logic.h"
 #include "ncutility/NcError.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 #include <algorithm>
 
