@@ -14,14 +14,14 @@
 # every frame after the start of the range. Example: "5-8-2" will output frame
 # 5, continue until frame 13, dumping every other frame. Example: "3,8-2" will
 # output frames 3, 8, and 9.
-lunarg_api_dump.output_range = 1
+lunarg_api_dump.output_range = 0
 
 # Output Format
 # =====================
 # <LayerIdentifier>.output_format
 # Specifies the format used for output; can be HTML, JSON, or  Text (default --
 # outputs plain text)
-lunarg_api_dump.output_format = json
+lunarg_api_dump.output_format = text
 
 # Output to File
 # =====================
@@ -34,7 +34,7 @@ lunarg_api_dump.file = true
 # =====================
 # <LayerIdentifier>.log_filename
 # Specifies the file to dump to when output files are enabled
-lunarg_api_dump.log_filename = vulkan_api_dump_output.txt
+lunarg_api_dump.log_filename = vulkan_api_dump.text
 
 # Log Flush After Write
 # =====================
@@ -61,7 +61,7 @@ lunarg_api_dump.show_types = true
 # <LayerIdentifier>.type_size
 # The number of characters the name of a type should consume, assuming more are
 # not required
-lunarg_api_dump.type_size = 0
+lunarg_api_dump.type_size = 32
 
 # Show Timestamp
 # =====================
