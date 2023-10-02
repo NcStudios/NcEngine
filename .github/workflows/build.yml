@@ -32,7 +32,7 @@ jobs:
             generator: "Unix Makefiles"
             cmakeEnv: "CXX=/usr/bin/g++-12"
           - variant: Dev
-            cmakeArgs: ""
+            cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
             cmakeArgs: "-DNC_PROD_BUILD=ON"
 
