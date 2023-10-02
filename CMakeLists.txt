@@ -73,8 +73,3 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
         DESTINATION include
         PATTERN     "src" EXCLUDE
 )
-
-# Install Vulkan Validation Layer Settings
-install(FILES   ${PROJECT_SOURCE_DIR}/sample/vk_layer_settings.txt
-        DESTINATION sample
-)
