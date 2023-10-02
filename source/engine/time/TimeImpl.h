@@ -11,7 +11,7 @@ namespace nc::time
 class TimeImpl : public Module
 {
     public:
-        auto BuildWorkload() -> std::vector<task::Job> override;
+        void OnBuildTaskGraph(task::TaskGraph&) override;
         void Clear() noexcept override;
 
     private:

@@ -1,126 +1,122 @@
 #include "Executor.h"
 
+#include "ncutility/Algorithm.h"
+#include "ncutility/NcError.h"
+#include "ncutility/ScopeExit.h"
 #include "optick.h"
+
+#include <iostream>
 
 namespace
 {
-    void Connect(std::vector<tf::Task>& predecessors, const std::vector<tf::Task>& successors)
+constexpr auto g_threadCount = size_t{8};
+
+void SetDependencies(std::vector<tf::Task>& predecessors, const std::vector<tf::Task>& successors)
+{
+    for(auto& before : predecessors)
     {
-        for(auto& before : predecessors)
+        for(const auto& after : successors)
         {
-            for(const auto& after : successors)
-            {
-                before.precede(after);
-            }
+            before.precede(after);
         }
     }
-
-    void SetDependencies(nc::task::Executor::task_matrix<tf::Task>& taskList)
-    {
-        constexpr auto beginIndex = static_cast<size_t>(nc::task::ExecutionPhase::Begin);
-        constexpr auto freeIndex = static_cast<size_t>(nc::task::ExecutionPhase::Free);
-        constexpr auto logicIndex = static_cast<size_t>(nc::task::ExecutionPhase::Logic);
-        constexpr auto physicsIndex = static_cast<size_t>(nc::task::ExecutionPhase::Physics);
-        constexpr auto renderIndex = static_cast<size_t>(nc::task::ExecutionPhase::Render);
-        constexpr auto preRenderIndex = static_cast<size_t>(nc::task::ExecutionPhase::PreRenderSync);
-        constexpr auto postFrameIndex = static_cast<size_t>(nc::task::ExecutionPhase::PostFrameSync);
-
-        auto& beginTasks = taskList[beginIndex];
-        auto& freeTasks = taskList[freeIndex];
-        auto& logicTasks = taskList[logicIndex];
-        auto& physicsTasks = taskList[physicsIndex];
-        auto& renderTasks = taskList[renderIndex];
-        auto& preRenderTasks = taskList[preRenderIndex];
-        auto& postFrameTasks = taskList[postFrameIndex];
-
-        Connect(beginTasks, freeTasks);
-        Connect(beginTasks, logicTasks);
-        Connect(logicTasks, physicsTasks);
-        Connect(physicsTasks, preRenderTasks);
-        Connect(freeTasks, preRenderTasks);
-        Connect(preRenderTasks, renderTasks);
-        Connect(renderTasks, postFrameTasks);
-    }
 }
+
+// Internal TaskGraph interface
+class GraphBuilder : public nc::task::TaskGraph
+{
+    public:
+        GraphBuilder() = default;
+
+        // Add necessary placeholder tasks. Call after adding tasks but before
+        // calling Connect().
+        void EnsureNoEmptyBuckets()
+        {
+            for (auto [i, bucket] : nc::algo::Enumerate(m_taskBuckets))
+            {
+                if (bucket.empty())
+                {
+                    const auto phase = static_cast<nc::task::ExecutionPhase>(i);
+                    Add(phase, "Placeholder Task", []() noexcept {});
+                }
+            }
+        }
+
+        // Set task dependencies between phases
+        void Connect(nc::task::ExecutionPhase before, nc::task::ExecutionPhase after)
+        {
+            SetDependencies(Bucket(before), Bucket(after));
+        }
+
+        // Extract TaskGraphContext - leaves this object in an invalid state.
+        auto ReleaseContext()
+        {
+            return std::move(m_ctx);
+        }
+
+    private:
+        auto Bucket(nc::task::ExecutionPhase phase) -> std::vector<tf::Task>&
+        {
+            return m_taskBuckets.at(static_cast<size_t>(phase));
+        }
+};
+} // anonymous namespace
 
 namespace nc::task
 {
-    Executor::Executor()
-        : m_taskExecutor{8u},
-          m_executionGraph{},
-          m_jobRegistry{}
+auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> std::unique_ptr<TaskGraphContext>
+{
+    auto builder = ::GraphBuilder{};
+    for (auto& mod : modules)
     {
+        mod->OnBuildTaskGraph(builder);
     }
 
-    void Executor::BuildTaskGraph(Registry* registry, std::vector<std::unique_ptr<Module>>& modules)
-    {
-        for(auto& module : modules)
-        {
-            Add(module->BuildWorkload());
-        }
-
-        auto syncJob = [registry]
-        {
-            OPTICK_CATEGORY("Sync State", Optick::Category::None);
-            registry->CommitStagedChanges();
-        };
-
-        Add(Job{ syncJob, "Sync", ExecutionPhase::PreRenderSync });
-        auto tasks = ConvertJobsToTasks();
-        SetDependencies(tasks);
-
-        #if NC_OUTPUT_TASKFLOW
-        m_executionGraph.name("Main Loop");
-        m_executionGraph.dump(std::cout);
-        #endif
-    }
-
-    void Executor::Add(Job job)
-    {
-        auto index = static_cast<unsigned>(job.phase);
-        m_jobRegistry.at(index).push_back(std::move(job));
-    }
-
-    void Executor::Add(std::vector<Job> workload)
-    {
-        for(auto& job : workload)
-        {
-            Add(std::move(job));
-        }
-    }
-
-    auto Executor::Run() -> tf::Future<void>
-    {
-        return m_taskExecutor.run(m_executionGraph);
-    }
-
-    auto Executor::ConvertJobsToTasks() -> task_matrix<tf::Task>
-    {
-        task_matrix<tf::Task> out;
-        size_t index = 0ull;
-
-        for(auto& jobList : m_jobRegistry)
-        {
-            for(auto& [job, name, unused] : jobList)
-            {
-                auto task = std::visit([this](auto&& work) { return ToTask(work); }, job);
-                task.name(name);
-                out.at(index).push_back(task);
-            }
-
-            ++index;
-        }
-
-        return out;
-    }
-
-    auto Executor::ToTask(Job::single_job_t job) -> tf::Task
-    {
-        return m_executionGraph.emplace(std::move(job));
-    }
-
-    auto Executor::ToTask(Job::multi_job_t job) -> tf::Task
-    {
-        return m_executionGraph.composed_of(*job);
-    }
+    builder.EnsureNoEmptyBuckets();
+    builder.Connect(ExecutionPhase::Begin, ExecutionPhase::Free);
+    builder.Connect(ExecutionPhase::Begin, ExecutionPhase::Logic);
+    builder.Connect(ExecutionPhase::Logic, ExecutionPhase::Physics);
+    builder.Connect(ExecutionPhase::Physics, ExecutionPhase::PreRenderSync);
+    builder.Connect(ExecutionPhase::Free, ExecutionPhase::PreRenderSync);
+    builder.Connect(ExecutionPhase::PreRenderSync, ExecutionPhase::Render);
+    builder.Connect(ExecutionPhase::Render, ExecutionPhase::PostFrameSync);
+    return builder.ReleaseContext();
 }
+
+Executor::Executor(std::unique_ptr<TaskGraphContext> ctx)
+    : m_executor{g_threadCount},
+      m_ctx{std::move(ctx)},
+      m_running{false}
+{
+#ifdef NC_OUTPUT_TASKFLOW
+    WriteGraph(std::cout);
+#endif
+}
+
+void Executor::SetContext(std::unique_ptr<TaskGraphContext> ctx)
+{
+    if (m_running)
+    {
+        throw NcError{"Cannot set new context while Executor is running."};
+    }
+
+    m_ctx = std::move(ctx);
+}
+
+void Executor::Run()
+{
+    SCOPE_EXIT(m_running = false);
+    if (std::exchange(m_running, true))
+    {
+        throw NcError{"Executor is already running"};
+    }
+
+    m_executor.run(m_ctx->graph).wait();
+    m_ctx->exceptionContext.ThrowIfExceptionStored();
+}
+
+void Executor::WriteGraph(std::ostream& stream) const
+{
+    m_ctx->graph.dump(stream);
+}
+} // namespace nc::task

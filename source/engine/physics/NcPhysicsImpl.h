@@ -3,9 +3,10 @@
 #include "physics/NcPhysics.h"
 #include "ClickableSystem.h"
 #include "PhysicsPipeline.h"
+#include "collision/BspTree.h"
 #include "collision/broad_phase/SingleAxisPrune.h"
 #include "proxy/PerFrameProxyCache.h"
-#include "task/Job.h"
+#include "task/TaskGraph.h"
 
 namespace nc::config { struct PhysicsSettings; }
 
@@ -37,7 +38,7 @@ class NcPhysicsImpl final : public NcPhysics
         void RegisterClickable(IClickable* clickable) override;
         void UnregisterClickable(IClickable* clickable) noexcept override;
         auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
-        auto BuildWorkload() -> std::vector<task::Job> override;
+        void OnBuildTaskGraph(task::TaskGraph& graph) override;
         void Clear() noexcept override;
 
     private:
@@ -45,6 +46,5 @@ class NcPhysicsImpl final : public NcPhysics
         ClickableSystem m_clickableSystem;
         float m_accumulatedTime;
         unsigned m_currentIterations;
-        tf::Taskflow m_tasks;
 };
 } // namespace nc::physics

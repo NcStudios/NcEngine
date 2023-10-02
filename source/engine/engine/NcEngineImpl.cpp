@@ -2,7 +2,7 @@
 #include "asset/NcAsset.h"
 #include "audio/NcAudioImpl.h"
 #include "config/ConfigInternal.h"
-#include "ecs/LogicModule.h"
+#include "ecs/EcsModule.h"
 #include "graphics/NcGraphicsImpl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
@@ -46,7 +46,7 @@ auto BuildModuleRegistry(nc::Registry* reg,
     moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, reg));
     moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, reg));
     moduleRegistry.Register(nc::time::BuildTimeModule());
-    moduleRegistry.Register(nc::ecs::BuildLogicModule(reg));
+    moduleRegistry.Register(nc::ecs::BuildEcsModule(reg));
     moduleRegistry.Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }
@@ -67,7 +67,7 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{config.memorySettings.maxTransforms},
       m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
-      m_executor{},
+      m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},
       m_isRunning{false}
 {
@@ -82,7 +82,6 @@ NcEngineImpl::~NcEngineImpl() noexcept
 void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
 {
     NC_LOG_INFO("Starting engine");
-    RebuildTaskGraph();
     m_sceneManager.QueueSceneChange(std::move(initialScene));
     m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
     m_isRunning = true;
@@ -131,7 +130,7 @@ auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
 void NcEngineImpl::RebuildTaskGraph()
 {
     NC_LOG_INFO("Building engine task graph");
-    m_executor.BuildTaskGraph(&m_registry, m_modules.GetAllModules());
+    m_executor.SetContext(task::BuildContext(m_modules.GetAllModules()));
 }
 
 void NcEngineImpl::Clear()
@@ -148,8 +147,7 @@ void NcEngineImpl::Run()
         OPTICK_FRAME("Main Thread");
         input::Flush();
         m_window.ProcessSystemMessages();
-        auto result = m_executor.Run();
-        result.wait();
+        m_executor.Run();
         if (m_sceneManager.IsSceneChangeQueued())
         {
             m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
