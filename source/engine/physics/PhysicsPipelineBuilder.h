@@ -11,7 +11,7 @@
 #include "ecs/View.h"
 #include "task/TaskGraph.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace nc::physics
 {

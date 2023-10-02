@@ -47,6 +47,7 @@ target_link_libraries(Executor_unit_tests
         gtest_main
         NcUtility
         Taskflow
+        OptickCore
 )
 
 add_test(Executor_unit_tests Executor_unit_tests)

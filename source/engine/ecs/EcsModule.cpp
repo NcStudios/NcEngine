@@ -6,7 +6,7 @@
 #include "time/Time.h"
 #include "utility/Log.h"
 
-#include "optick/optick.h"
+#include "optick.h"
 
 namespace nc::ecs
 {
