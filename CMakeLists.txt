@@ -75,6 +75,6 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
 )
 
 # Install Vulkan Validation Layer Settings
-install(FILES   ${PROJECT_SOURCE_DIR}/vk_layer_settings.txt
+install(FILES   ${PROJECT_SOURCE_DIR}/sample/vk_layer_settings.txt
         DESTINATION sample
 )
