@@ -12,7 +12,7 @@ namespace nc::ecs
 {
 auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>
 {
-    NC_LOG_TRACE("Creating Ecs Module");
+    NC_LOG_TRACE("Creating ECS Module");
     return std::make_unique<EcsModule>(registry);
 }
 

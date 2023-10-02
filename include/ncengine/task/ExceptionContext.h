@@ -13,7 +13,7 @@ namespace nc::task
 class ExceptionContext : StableAddress
 {
     public:
-        /** @brief Attempt to store the current exception. Only */
+        /** @brief Store the current exception, if one is not already stored. */
         void StoreException(std::exception_ptr e)
         {
             auto lock = std::lock_guard{m_mutex};
@@ -27,7 +27,7 @@ class ExceptionContext : StableAddress
 
         /**
          * @brief Rethrow an exception caught during task execution, if one was set.
-         * @note Only call this from the main thread after the graph has finished.
+         * @note Only call this from the main thread and after the graph has finished.
          */
         void ThrowIfExceptionStored()
         {

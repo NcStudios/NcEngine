@@ -9,6 +9,8 @@
 
 namespace
 {
+constexpr auto g_threadCount = size_t{8};
+
 void SetDependencies(std::vector<tf::Task>& predecessors, const std::vector<tf::Task>& successors)
 {
     for(auto& before : predecessors)
@@ -82,7 +84,7 @@ auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> std::u
 }
 
 Executor::Executor(std::unique_ptr<TaskGraphContext> ctx)
-    : m_executor{8},
+    : m_executor{g_threadCount},
       m_ctx{std::move(ctx)},
       m_running{false}
 {

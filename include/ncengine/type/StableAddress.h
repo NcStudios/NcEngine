@@ -2,11 +2,7 @@
 
 namespace nc
 {
-/**
- * @brief Base class for non-copyable non-movable types. Additionally, all types
- *        derived from StableAddress are guaranteed to exist for the lifetime of
- *        the NcEngine instance.
- */
+/** @brief Base class for non-copyable non-movable types. */
 class StableAddress
 {
     public:

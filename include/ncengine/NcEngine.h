@@ -54,8 +54,8 @@ class NcEngine
          * 
          * A graph is built on engine initialization. It only needs rebuilding
          * if modules are added afterwards. Only call this from the main thread
-         * when the graph is not currently running (prior to calling Start() or
-         * from a Scene).
+         * and when the graph is not currently running (prior to calling Start()
+         * or from a Scene).
          */
         virtual void RebuildTaskGraph() = 0;
 };

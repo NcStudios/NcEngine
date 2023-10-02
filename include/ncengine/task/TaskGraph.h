@@ -13,7 +13,14 @@ namespace nc::task
 /** @brief The number of execution phases in the primary task graph. */
 constexpr size_t ExecutionPhaseCount = 7ull;
 
-/** @brief Identifies an execution phase in the engine's primary task graph. */
+/**
+ * @brief Identifies an execution phase in the engine's primary task graph.
+ *
+ * Execution of a frame is broken up into phases. Tasks and task graphs are
+ * scheduled to run during particular phases. Generally, phases execute
+ * sequentially, with the exception of Free, which runs parallel to other
+ * update phases.
+ */
 enum class ExecutionPhase : uint8_t
 {
     Begin,         // First phase to run
@@ -56,7 +63,7 @@ class TaskGraph
         /**
          * @brief Schedule a tf::Taskflow to run during a phase.
          * @param phase The target phase.
-         * @param name A user-friendly name for the task.
+         * @param name A user-friendly name for the task graph.
          * @param graph The graph to be composed.
          * @return A handle to a scheduled task composed from the Taskflow.
          * @note Ensure exceptions cannot leak from the graph. Tasks may be
