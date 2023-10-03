@@ -28,15 +28,17 @@ FetchContent_Declare(nc-tools
 # We get a pre-built nc-convert so we don't have to build it and its dependencies
 if(UNIX AND NOT APPLE)
     FetchContent_Declare(nc-convert
-                         URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-ubuntu22.04-x64.zip
-                         URL_HASH            SHA256=ACC34BD4CFECF517339538C47C1557FCCA77E4EE1F30E7177D6DF94C35A13597
-                         DOWNLOAD_NO_EXTRACT FALSE
+                         URL                        https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-ubuntu22.04-x64.zip
+                         URL_HASH                   SHA256=ACC34BD4CFECF517339538C47C1557FCCA77E4EE1F30E7177D6DF94C35A13597
+                         DOWNLOAD_NO_EXTRACT        FALSE
+                         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
 elseif(WIN32)
     FetchContent_Declare(nc-convert
-                         URL                 https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-windows-x64.zip
-                         URL_HASH            SHA256=69f53e38436a85de7776cb3161075111a922c9cbdb4049c8a5ce9d3bd3c50d5b
-                         DOWNLOAD_NO_EXTRACT FALSE
+                         URL                        https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-windows-x64.zip
+                         URL_HASH                   SHA256=69f53e38436a85de7776cb3161075111a922c9cbdb4049c8a5ce9d3bd3c50d5b
+                         DOWNLOAD_NO_EXTRACT        FALSE
+                         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
 elseif(APPLE)
     # TODO: #349 Artifact not yet published
