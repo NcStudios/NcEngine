@@ -49,16 +49,16 @@ namespace nc::input
     float GetXAxis() //eventually should bind inputs to axis from config file (controller/WASD/arrows)
     {
         float axis = 0.0f;
-        if (KeyHeld(KeyCode::D)) { axis += 1.0; }
-        if (KeyHeld(KeyCode::A)) { axis -= 1.0; }
+        if (KeyHeld(KeyCode::D)) { axis += 1.0f; }
+        if (KeyHeld(KeyCode::A)) { axis -= 1.0f; }
         return axis;
     }
 
     float GetYAxis() //eventually binds inputs to axis from config file (controller/WASD/arrows)
     {
         float axis = 0.0f;
-        if (KeyHeld(KeyCode::W)) { axis += 1.0; }
-        if (KeyHeld(KeyCode::S)) { axis -= 1.0; }
+        if (KeyHeld(KeyCode::W)) { axis += 1.0f; }
+        if (KeyHeld(KeyCode::S)) { axis -= 1.0f; }
         return axis;
     }
 

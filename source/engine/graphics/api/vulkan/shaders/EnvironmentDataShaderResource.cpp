@@ -20,7 +20,7 @@ namespace nc::graphics
     {
         auto initialEnvironmentData = EnvironmentData{};
         initialEnvironmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
-        initialEnvironmentData.skyboxTextureIndex = -1;
+        initialEnvironmentData.skyboxTextureIndex = 0; // ?
         auto dataVector = std::vector<EnvironmentData>{};
         dataVector.push_back(initialEnvironmentData);
         m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_allocator, static_cast<const void*>(&dataVector.back()), static_cast<uint32_t>(sizeof(EnvironmentData) * dataVector.size()));

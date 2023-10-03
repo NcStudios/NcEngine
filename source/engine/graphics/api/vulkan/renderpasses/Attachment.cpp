@@ -163,11 +163,11 @@ auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image i
 
 namespace nc::graphics
 {
-AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp,
+AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex, AttachmentType attachmentType, vk::Format format, vk::AttachmentLoadOp loadOp,
                                vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples)
-    : description{CreateAttachmentDescription(type, format, numSamples, loadOp, storeOp)},
-      reference{CreateAttachmentReference(type, attachmentIndex)},
-      type{type}
+    : description{CreateAttachmentDescription(attachmentType, format, numSamples, loadOp, storeOp)},
+      reference{CreateAttachmentReference(attachmentType, attachmentIndex)},
+      type{attachmentType}
 {
 }
 

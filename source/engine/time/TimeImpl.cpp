@@ -5,16 +5,17 @@
 
 #include <utility>
 
+#include <iostream>
+
 namespace
 {
 float g_dt = 0.0f;
 
 auto DeltaTimeInSeconds(const auto& start, const auto& end) -> float
 {
-    /** @todo Was there any reason to not use nanoseconds here? */
     constexpr float microsecondsPerSecond = 1000000.0f;
     const auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    return microseconds / microsecondsPerSecond;
+    return (float)microseconds / microsecondsPerSecond;
 }
 }
 

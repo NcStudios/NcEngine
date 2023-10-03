@@ -76,6 +76,10 @@ FetchContent_Declare(optick
 # Fetch all required sources
 FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick)
 
+# Set Taskflow includes as system to prevent some warnings
+get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
+
 #############################
 ### Optional Dependencies ###
 #############################

@@ -44,12 +44,19 @@ TEST(TaskGraphTests, Add_taskflowOverload_addsToPhaseAndStorage)
     EXPECT_EQ(1, uut.GetGraphStorage().size());
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
 TEST(TaskGraphTests, Add_invalidPhase_throws)
 {
     constexpr auto phase = static_cast<nc::task::ExecutionPhase>(1000);
     auto uut = TestTaskGraph{};
     EXPECT_THROW(uut.Add(phase, "", [](){}), std::exception);
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 TEST(TaskGraphTests, StoreGraph_addsToStorage)
 {
