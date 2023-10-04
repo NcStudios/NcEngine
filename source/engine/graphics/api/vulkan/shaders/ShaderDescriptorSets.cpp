@@ -14,7 +14,7 @@ namespace
         };
         
         vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
-        renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+        renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
         renderingDescriptorPoolInfo.setMaxSets(1000);
         renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
         renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());

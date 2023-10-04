@@ -230,7 +230,7 @@ vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::
 
     vk::DescriptorSetLayoutCreateInfo setInfo{};
     setInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
-    setInfo.setFlags(vk::DescriptorSetLayoutCreateFlags());
+    setInfo.setFlags(vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool);
     setInfo.setPNext(&extendedInfo);
     setInfo.setPBindings(layoutBindings.data());
 
