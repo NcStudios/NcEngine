@@ -7,15 +7,15 @@ namespace
     {
         std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
         {
-            vk::DescriptorPoolSize { vk::DescriptorType::eSampler, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 10 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 }
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 10 }
         };
         
         vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
         renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
-        renderingDescriptorPoolInfo.setMaxSets(1000);
+        renderingDescriptorPoolInfo.setMaxSets(10);
         renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
         renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
 
