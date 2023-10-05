@@ -1,20 +1,9 @@
 #include "ecs/Registry.h"
-#include "audio/AudioSource.h"
-#include "ecs/Logic.h"
 #include "ecs/Tag.h"
 #include "ecs/Transform.h"
 #include "ecs/detail/FreeComponentGroup.h"
-#include "graphics/Camera.h"
-#include "graphics/MeshRenderer.h"
-#include "graphics/ParticleEmitter.h"
-#include "graphics/PointLight.h"
-#include "graphics/ToonRenderer.h"
-#include "network/NetworkDispatcher.h"
-#include "physics/Collider.h"
-#include "physics/ConcaveCollider.h"
-#include "physics/PhysicsBody.h"
 
-/** @todo This needs to go away. */
+/** @todo #433 This needs to go away. */
 namespace
 {
 nc::Registry* g_registry = nullptr;
@@ -33,22 +22,10 @@ Registry::Registry(size_t maxEntities)
       m_maxEntities{maxEntities}
 {
     g_registry = this;
-
-    RegisterComponentType<CollisionLogic>();
-    RegisterComponentType<FrameLogic>();
-    RegisterComponentType<FixedLogic>();
+    // These component types are directly used by the registry
     RegisterComponentType<Tag>();
     RegisterComponentType<Transform>();
-    RegisterComponentType<audio::AudioSource>();
     RegisterComponentType<ecs::detail::FreeComponentGroup>();
-    RegisterComponentType<graphics::MeshRenderer>();
-    RegisterComponentType<graphics::ParticleEmitter>();
-    RegisterComponentType<graphics::PointLight>();
-    RegisterComponentType<graphics::ToonRenderer>();
-    RegisterComponentType<net::NetworkDispatcher>();
-    RegisterComponentType<physics::Collider>();
-    RegisterComponentType<physics::ConcaveCollider>();
-    RegisterComponentType<physics::PhysicsBody>();
 }
 
 void Registry::RemoveEntityWithoutNotifyingParent(Entity entity)

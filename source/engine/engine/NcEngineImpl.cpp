@@ -1,4 +1,5 @@
 #include "NcEngineImpl.h"
+#include "ComponentRegistration.h"
 #include "asset/NcAsset.h"
 #include "audio/NcAudioImpl.h"
 #include "config/ConfigInternal.h"
@@ -50,6 +51,14 @@ auto BuildModuleRegistry(nc::Registry* reg,
     moduleRegistry.Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }
+
+auto BuildRegistry(size_t maxTransforms) -> nc::Registry
+{
+    // Register components immediately so they're available to modules
+    auto registry = nc::Registry{maxTransforms};
+    nc::RegisterEngineComponents(registry);
+    return registry;
+}
 } // anonymous namespace
 
 namespace nc
@@ -65,7 +74,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
-      m_registry{config.memorySettings.maxTransforms},
+      m_registry{::BuildRegistry(config.memorySettings.maxTransforms)},
       m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},

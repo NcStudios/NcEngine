@@ -2,6 +2,7 @@
 
 #include "FreeComponentGroup.h"
 #include "ncengine/ecs/Component.h"
+#include "ncengine/ecs/AnyComponent.h"
 #include "ncengine/utility/Signal.h"
 
 #include <algorithm>
@@ -23,13 +24,15 @@ class PerComponentStorageBase
         {
         }
 
+        virtual ~PerComponentStorageBase() = default;
+
         auto SparseArray() noexcept -> std::vector<index_type>& { return sparseArray; }
         auto EntityPool() noexcept -> std::vector<Entity>& { return entityPool; }
         auto SparseArray() const noexcept -> const std::vector<index_type>& { return sparseArray; }
         auto EntityPool() const noexcept -> const std::vector<Entity>& { return entityPool; }
         auto Size() const noexcept { return entityPool.size(); }
 
-        virtual ~PerComponentStorageBase() = default;
+        virtual auto GetAsAnyComponent(Entity entity) -> AnyComponent = 0;
         virtual void Clear() = 0;
         virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
 
@@ -51,7 +54,7 @@ class PerComponentStorage : public PerComponentStorageBase
         using value_type = T;
         using iterator = std::vector<T>::iterator;
 
-        PerComponentStorage(size_t maxEntities);
+        PerComponentStorage(size_t maxEntities, ComponentHandler<T> handler);
         ~PerComponentStorage() = default;
         PerComponentStorage(PerComponentStorage&&) = default;
         PerComponentStorage& operator=(PerComponentStorage&&) = default;
@@ -69,12 +72,14 @@ class PerComponentStorage : public PerComponentStorageBase
         bool Contains(Entity entity) const;
         auto Get(Entity entity) -> T*;
         auto Get(Entity entity) const -> const T*;
+        auto GetAsAnyComponent(Entity entity) -> AnyComponent override;
 
         template<std::predicate<const T&, const T&> Predicate>
         void Sort(Predicate&& comparesLessThan);
 
-        auto OnAdd() -> Signal<T&>&;
-        auto OnRemove() -> Signal<Entity>&;
+        auto Handler() noexcept -> ComponentHandler<T>&;
+        auto OnAdd() noexcept -> Signal<T&>&;
+        auto OnRemove() noexcept -> Signal<Entity>&;
 
         void Swap(index_type firstEntity, index_type secondEntity);
         void ReserveHeadroom(size_t additionalRequiredCount);
@@ -85,17 +90,15 @@ class PerComponentStorage : public PerComponentStorageBase
     private:
         std::vector<T> m_componentPool;
         std::vector<StagedComponent> m_stagingPool;
-        Signal<T&> m_onAdd;
-        Signal<Entity> m_onRemove;
+        ComponentHandler<T> m_handler;
 };
 
 template<PooledComponent T>
-PerComponentStorage<T>::PerComponentStorage(size_t maxEntities)
+PerComponentStorage<T>::PerComponentStorage(size_t maxEntities, ComponentHandler<T> handler)
     : PerComponentStorageBase{maxEntities},
         m_componentPool{},
         m_stagingPool{},
-        m_onAdd{},
-        m_onRemove{}
+        m_handler{std::move(handler)}
 {}
 
 template<PooledComponent T>
@@ -107,7 +110,7 @@ auto PerComponentStorage<T>::Add(Entity entity, Args&&... args) -> T*
 
     if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
     {
-        m_onAdd.Emit(emplacedComponent);
+        m_handler.onAdd.Emit(emplacedComponent);
     }
 
     return &emplacedComponent;
@@ -135,7 +138,7 @@ void PerComponentStorage<T>::Remove(Entity entity)
 
     if constexpr(StoragePolicy<T>::EnableOnRemoveCallbacks)
     {
-        m_onRemove.Emit(entity);
+        m_handler.onRemove.Emit(entity);
     }
 }
 
@@ -192,6 +195,14 @@ auto PerComponentStorage<T>::Get(Entity entity) const -> const T*
 }
 
 template<PooledComponent T>
+auto PerComponentStorage<T>::GetAsAnyComponent(Entity entity) -> AnyComponent
+{
+    return Contains(entity) ?
+        AnyComponent{Get(entity), &m_handler} :
+        AnyComponent{};
+}
+
+template<PooledComponent T>
 template<std::predicate<const T&, const T&> Predicate>
 void PerComponentStorage<T>::Sort(Predicate&& comparesLessThan)
 {
@@ -239,15 +250,21 @@ void PerComponentStorage<T>::Sort(Predicate&& comparesLessThan)
 }
 
 template<PooledComponent T>
-auto PerComponentStorage<T>::OnAdd() -> Signal<T&>&
+auto PerComponentStorage<T>::Handler() noexcept -> ComponentHandler<T>&
 {
-    return m_onAdd;
+    return m_handler;
 }
 
 template<PooledComponent T>
-auto PerComponentStorage<T>::OnRemove() -> Signal<Entity>&
+auto PerComponentStorage<T>::OnAdd() noexcept -> Signal<T&>&
 {
-    return m_onRemove;
+    return m_handler.onAdd;
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::OnRemove() noexcept -> Signal<Entity>&
+{
+    return m_handler.onRemove;
 }
 
 template<PooledComponent T>

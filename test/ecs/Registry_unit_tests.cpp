@@ -66,7 +66,9 @@ constexpr auto Handle4 = Entity{3u, 0u, 0u};
 constexpr auto Handle5 = Entity{4u, 0u, 0u};
 const auto TestInfo = EntityInfo{};
 
-Registry g_registry{10u};
+auto g_numDrawUICalls = 0;
+auto drawUIMock = [](auto&) { ++g_numDrawUICalls; };
+auto g_registry = Registry{10u};
 
 class Registry_unit_tests : public ::testing::Test
 {
@@ -76,8 +78,15 @@ class Registry_unit_tests : public ::testing::Test
         Registry_unit_tests()
             : registry{g_registry}
         {
-            registry.RegisterComponentType<Fake1>();
-            registry.RegisterComponentType<Fake2>();
+            g_numDrawUICalls = 0;
+
+            registry.RegisterComponentType<Fake1>(
+                ComponentHandler<Fake1>{.drawUI = drawUIMock}
+            );
+
+            registry.RegisterComponentType<Fake2>(
+                ComponentHandler<Fake2>{.drawUI = drawUIMock}
+            );
         }
 
         ~Registry_unit_tests()
@@ -503,8 +512,22 @@ TEST_F(Registry_unit_tests, Clear_LeavesPersistentEntities)
     EXPECT_TRUE(registry.Contains<Fake1>(e4));
 }
 
-int main(int argc, char ** argv)
+TEST_F(Registry_unit_tests, GetAllComponentsOn_invalidEntity_returnsEmptyList)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    const auto actual = registry.GetAllComponentsOn(Entity{});
+    EXPECT_TRUE(actual.empty());
+}
+
+TEST_F(Registry_unit_tests, GetAllComponentsOn_entityHasComponents_visitsComponents)
+{
+    auto e1 = registry.Add<Entity>({});
+    registry.Add<Fake1>(e1, 1);
+    registry.Add<Fake2>(e1, 1);
+    for (auto& any : registry.GetAllComponentsOn(e1))
+    {
+        ASSERT_TRUE(static_cast<bool>(any));
+        any.DrawUI();
+    }
+
+    EXPECT_EQ(2, g_numDrawUICalls);
 }

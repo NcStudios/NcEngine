@@ -1,10 +1,6 @@
 #include "ecs/Transform.h"
 #include "ecs/Registry.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "ui/editor/Widgets.h"
-#endif
-
 namespace
 {
     using namespace DirectX;
@@ -322,34 +318,4 @@ namespace nc
         for(auto child : m_children)
             registry->Get<Transform>(child)->UpdateWorldMatrix();
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    template<> void ComponentGuiElement<Transform>(Transform* transform)
-    {
-        auto& worldMatrix = transform->m_worldMatrix;
-
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, worldMatrix);
-        Vector3 scl, pos;
-        auto rot = Quaternion::Identity();
-        DirectX::XMStoreVector3(&scl, scl_v);
-        DirectX::XMStoreQuaternion(&rot, rot_v);
-        DirectX::XMStoreVector3(&pos, pos_v);
-
-        auto angles = rot.ToEulerAngles();
-
-        ImGui::Text("Transform");
-        ui::editor::xyzWidgetHeader("   ");
-        auto posResult = ui::editor::xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
-        auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, std::numbers::pi_v<float> * -2.0f, std::numbers::pi_v<float> * 2.0f);
-        auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
-
-        if(posResult)
-            transform->SetPosition(pos);
-        if(rotResult)
-            transform->SetRotation(angles);
-        if(sclResult)
-            transform->SetScale(scl);
-    }
-    #endif
 }

@@ -2,6 +2,7 @@
 
 #include "Entity.h"
 #include "detail/EditorMacros.h"
+#include "ncengine/utility/Signal.h"
 
 #include <concepts>
 #include <type_traits>
@@ -51,11 +52,17 @@ class FreeComponent : public ComponentBase
         #endif
 };
 
+/** @brief Type representation of a null component. */
+struct NullComponent : public ComponentBase
+{
+    NullComponent(Entity entity) : ComponentBase{entity} {}
+};
+
 /** @brief Requirements for the Registry to recognize a pooled component. */
 template<class T>
 concept PooledComponent = std::movable<std::remove_const_t<T>> &&
-                            std::derived_from<T, ComponentBase> &&
-                            !std::derived_from<T, FreeComponent>;
+                          std::derived_from<T, ComponentBase> &&
+                          !std::derived_from<T, FreeComponent>;
 
 /** @brief Default storage behavior for pooled components. */
 struct DefaultStoragePolicy
@@ -75,6 +82,31 @@ struct DefaultStoragePolicy
  */
 template<PooledComponent T>
 struct StoragePolicy : DefaultStoragePolicy {};
+
+/** @brief Optional callbacks for generic component operations. */
+template<PooledComponent T>
+struct ComponentHandler
+{
+    /** @brief Signal type for on add events. */
+    using OnAdd_t = Signal<T&>;
+
+    /** @brief Signal type for on remove events.*/
+    using OnRemove_t = Signal<Entity>;
+
+    /** @brief Function type for the DrawUI handler. */
+    using DrawUI_t = std::function<void(T&)>;
+
+    /** @brief Signal emitted when an instance of T is created.
+     *  @note Requires StoragePolicy<T>::EnableOnAddCallbacks. */
+    OnAdd_t onAdd;
+
+    /** @brief Signal emitted when an instance of T is destroyed.
+     *  @note Requires StoragePolicy<T>::EnableOnRemoveCallbacks. */
+    OnRemove_t onRemove;
+
+    /** @brief Handler for drawing T's UI widget. */
+    DrawUI_t drawUI = [](T&){};
+};
 
 #ifdef NC_EDITOR_ENABLED
 namespace internal

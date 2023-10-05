@@ -1,3 +1,26 @@
+### AnyComponent Tests ###
+add_executable(AnyComponent_unit_test
+    AnyComponent_unit_tests.cpp
+)
+
+target_include_directories(AnyComponent_unit_test
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+)
+
+target_compile_options(AnyComponent_unit_test
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(AnyComponent_unit_test
+    PRIVATE
+        NcUtility
+        gtest_main
+)
+
+add_test(AnyComponent_unit_test AnyComponent_unit_test)
+
 ### FreeComponentGroup Tests ###
 add_executable(FreeComponentGroup_unit_test
     FreeComponentGroup_unit_tests.cpp
@@ -71,7 +94,7 @@ target_link_libraries(Registry_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(Registry_unit_tests Registry_unit_tests)

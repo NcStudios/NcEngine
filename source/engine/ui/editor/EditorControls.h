@@ -131,7 +131,12 @@ namespace nc::ui::editor::controls
         ImGui::Text("Layer   %d", entity.Layer());
         ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
 
-        ComponentElement<Transform>(registry, entity);
+        /** @todo #425 Only Transform has an AnyComponent interface. Update remaining components. */
+        for (auto& any : registry->GetAllComponentsOn(entity))
+        {
+            any.DrawUI();
+        }
+
         ComponentElement<graphics::MeshRenderer>(registry, entity);
         ComponentElement<graphics::PointLight>(registry, entity);
         ComponentElement<graphics::ToonRenderer>(registry, entity);
