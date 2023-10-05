@@ -26,7 +26,7 @@ auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
     };
 
     vk::DescriptorPoolCreateInfo imguiDescriptorPoolInfo = {};
-    imguiDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+    imguiDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
     imguiDescriptorPoolInfo.setMaxSets(1000);
     imguiDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(imguiPoolSizes.size()));
     imguiDescriptorPoolInfo.setPPoolSizes(imguiPoolSizes.data());
