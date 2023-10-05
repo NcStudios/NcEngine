@@ -161,9 +161,18 @@ class MultiViewIterator final
 
         bool fill_values()
         {
-            return std::apply([ent = *m_cur, reg = m_registry](auto*&... element)
+            auto entity = *m_cur;
+            auto registry = m_registry;
+            return std::apply([entity, registry](auto*&... element)
             {
-                return ((element = reg->Get<raw_type<decltype(element)>>(ent)) && ...);
+                auto trySetComponent = [](auto*& dst, Entity ent, Registry* reg)
+                {
+                    using component_t = raw_type<decltype(dst)>;
+                    dst = reg->Get<component_t>(ent);
+                    return dst != nullptr;
+                };
+
+                return (trySetComponent(element, entity, registry) && ...);
             }, m_currentValues);
         }
 };

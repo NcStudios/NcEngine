@@ -104,12 +104,12 @@ inline void Spawner::Spawn(Registry* registry, unsigned count)
         if(m_applyConstantRotation)
             registry->Add<ConstantRotation>(handle, m_generator.RotationAxis(), m_generator.Theta());
 
-        registry->Add<FrameLogic>(handle, [](Entity self, Registry* registry, float dt)
+        registry->Add<FrameLogic>(handle, [](Entity self, Registry* reg, float dt)
         {
-            if(auto* translation = registry->Get<ConstantTranslation>(self))
-                translation->Run(self, registry, dt);
-            if(auto* rotation = registry->Get<ConstantRotation>(self))
-                rotation->Run(self, registry, dt);
+            if(auto* translation = reg->Get<ConstantTranslation>(self))
+                translation->Run(self, reg, dt);
+            if(auto* rotation = reg->Get<ConstantRotation>(self))
+                rotation->Run(self, reg, dt);
         });
 
         if(m_extension)

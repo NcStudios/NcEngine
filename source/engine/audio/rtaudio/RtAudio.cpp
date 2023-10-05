@@ -4534,7 +4534,7 @@ public:
                    unsigned int inSampleRate, unsigned int outSampleRate )
     : _bytesPerSample( bitsPerSample / 8 )
     , _channelCount( channelCount )
-    , _sampleRatio( ( float ) outSampleRate / inSampleRate )
+    , _sampleRatio( ( float ) outSampleRate / static_cast<float>(inSampleRate) )
     , _transformUnk( NULL )
     , _transform( NULL )
     , _mediaType( NULL )
@@ -4633,7 +4633,7 @@ public:
     }
     else
     {
-      outputBufferSize = ( unsigned int ) ceilf( inputBufferSize * _sampleRatio ) + ( _bytesPerSample * _channelCount );
+      outputBufferSize = ( unsigned int ) ceilf( static_cast<float>(inputBufferSize) * _sampleRatio ) + ( _bytesPerSample * _channelCount );
     }
 
     IMFMediaBuffer* rInBuffer;
@@ -5642,7 +5642,7 @@ void RtApiWasapi::wasapiThread()
                                             formatBytes( stream_.deviceFormat[INPUT] ) * 8, stream_.nDeviceChannels[INPUT],
                                             captureFormat->nSamplesPerSec, stream_.sampleRate );
 
-    captureSrRatio = ( ( float ) captureFormat->nSamplesPerSec / stream_.sampleRate );
+    captureSrRatio = ( ( float ) captureFormat->nSamplesPerSec / static_cast<float>(stream_.sampleRate) );
 
     if ( !captureClient ) {
       IAudioClient3* captureAudioClient3 = nullptr;
@@ -5734,7 +5734,7 @@ void RtApiWasapi::wasapiThread()
     }
 
     // scale outBufferSize according to stream->user sample rate ratio
-    unsigned int outBufferSize = ( unsigned int ) ceilf( stream_.bufferSize * captureSrRatio ) * stream_.nDeviceChannels[INPUT];
+    unsigned int outBufferSize = ( unsigned int ) ceilf( static_cast<float>(stream_.bufferSize) * captureSrRatio ) * stream_.nDeviceChannels[INPUT];
     inBufferSize *= stream_.nDeviceChannels[INPUT];
 
     // set captureBuffer size
@@ -5754,7 +5754,7 @@ void RtApiWasapi::wasapiThread()
                                            formatBytes( stream_.deviceFormat[OUTPUT] ) * 8, stream_.nDeviceChannels[OUTPUT],
                                            stream_.sampleRate, renderFormat->nSamplesPerSec );
 
-    renderSrRatio = ( ( float ) renderFormat->nSamplesPerSec / stream_.sampleRate );
+    renderSrRatio = ( ( float ) renderFormat->nSamplesPerSec / static_cast<float>(stream_.sampleRate) );
 
     if ( !renderClient ) {
       IAudioClient3* renderAudioClient3 = nullptr;
@@ -5841,7 +5841,7 @@ void RtApiWasapi::wasapiThread()
     }
 
     // scale inBufferSize according to user->stream sample rate ratio
-    unsigned int inBufferSize = ( unsigned int ) ceilf( stream_.bufferSize * renderSrRatio ) * stream_.nDeviceChannels[OUTPUT];
+    unsigned int inBufferSize = ( unsigned int ) ceilf( static_cast<float>(stream_.bufferSize) * renderSrRatio ) * stream_.nDeviceChannels[OUTPUT];
     outBufferSize *= stream_.nDeviceChannels[OUTPUT];
 
     // set renderBuffer size
@@ -5852,18 +5852,18 @@ void RtApiWasapi::wasapiThread()
   if ( stream_.mode == INPUT )
   {
     using namespace std; // for ceilf
-    convBuffSize = ( unsigned int ) ( ceilf( stream_.bufferSize * captureSrRatio ) ) * stream_.nDeviceChannels[INPUT] * formatBytes( stream_.deviceFormat[INPUT] );
+    convBuffSize = ( unsigned int ) ( ceilf( static_cast<float>(stream_.bufferSize) * captureSrRatio ) ) * stream_.nDeviceChannels[INPUT] * formatBytes( stream_.deviceFormat[INPUT] );
     deviceBuffSize = stream_.bufferSize * stream_.nDeviceChannels[INPUT] * formatBytes( stream_.deviceFormat[INPUT] );
   }
   else if ( stream_.mode == OUTPUT )
   {
-    convBuffSize = ( unsigned int ) ( ceilf( stream_.bufferSize * renderSrRatio ) ) * stream_.nDeviceChannels[OUTPUT] * formatBytes( stream_.deviceFormat[OUTPUT] );
+    convBuffSize = ( unsigned int ) ( ceilf( static_cast<float>(stream_.bufferSize) * renderSrRatio ) ) * stream_.nDeviceChannels[OUTPUT] * formatBytes( stream_.deviceFormat[OUTPUT] );
     deviceBuffSize = stream_.bufferSize * stream_.nDeviceChannels[OUTPUT] * formatBytes( stream_.deviceFormat[OUTPUT] );
   }
   else if ( stream_.mode == DUPLEX )
   {
-    convBuffSize = std::max( ( unsigned int ) ( ceilf( stream_.bufferSize * captureSrRatio ) ) * stream_.nDeviceChannels[INPUT] * formatBytes( stream_.deviceFormat[INPUT] ),
-                             ( unsigned int ) ( ceilf( stream_.bufferSize * renderSrRatio ) ) * stream_.nDeviceChannels[OUTPUT] * formatBytes( stream_.deviceFormat[OUTPUT] ) );
+    convBuffSize = std::max( ( unsigned int ) ( ceilf( static_cast<float>(stream_.bufferSize) * captureSrRatio ) ) * stream_.nDeviceChannels[INPUT] * formatBytes( stream_.deviceFormat[INPUT] ),
+                             ( unsigned int ) ( ceilf( static_cast<float>(stream_.bufferSize) * renderSrRatio ) ) * stream_.nDeviceChannels[OUTPUT] * formatBytes( stream_.deviceFormat[OUTPUT] ) );
     deviceBuffSize = std::max( stream_.bufferSize * stream_.nDeviceChannels[INPUT] * formatBytes( stream_.deviceFormat[INPUT] ),
                                stream_.bufferSize * stream_.nDeviceChannels[OUTPUT] * formatBytes( stream_.deviceFormat[OUTPUT] ) );
   }
@@ -5888,7 +5888,7 @@ void RtApiWasapi::wasapiThread()
 
       if ( captureAudioClient )
       {
-        int samplesToPull = ( unsigned int ) floorf( stream_.bufferSize * captureSrRatio );
+        int samplesToPull = ( unsigned int ) floorf( static_cast<float>(stream_.bufferSize) * captureSrRatio );
 
         convBufferSize = 0;
         while ( convBufferSize < stream_.bufferSize )

@@ -56,7 +56,7 @@ auto Polytope::GetIndices() const -> const std::vector<size_t>&
 {
     if constexpr(Set == DataSet::Merged)
         return m_indices;
-    else if(Set == DataSet::Unmerged)
+    else
         return m_newIndices;
 }
 
@@ -65,7 +65,7 @@ auto Polytope::GetNormals() -> std::vector<NormalData>&
 {
     if constexpr(Set == DataSet::Merged)
         return m_normals;
-    else if(Set == DataSet::Unmerged)
+    else
         return m_newNormals;
 }
 
