@@ -92,9 +92,9 @@ void Log(const std::exception& e) noexcept
     {
         std::rethrow_if_nested(e);
     }
-    catch(const std::exception& e)
+    catch(const std::exception& rethrown)
     {
-        Log(e);
+        Log(rethrown);
     }
 }
 } // namespace nc::utility

@@ -110,9 +110,9 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
         return false;
     }
 
-    if (auto result = m_rtAudio->startStream())
+    if (auto startResult = m_rtAudio->startStream())
     {
-        NC_LOG_ERROR_FMT("Failed to start audio stream: '{}'", ::ToString(result));
+        NC_LOG_ERROR_FMT("Failed to start audio stream: '{}'", ::ToString(startResult));
         m_activeDevice = g_nullDevice;
         return false;
     }
@@ -183,7 +183,7 @@ auto DeviceStream::FindSuitableDevice(uint32_t preferredDeviceId) noexcept -> Au
     if (!requestedDefault)
     {
         preferredDeviceId = m_rtAudio->getDefaultOutputDevice();
-        auto rtDevice = m_rtAudio->getDeviceInfo(preferredDeviceId);
+        rtDevice = m_rtAudio->getDeviceInfo(preferredDeviceId);
         if (::IsSuitableDevice(rtDevice))
         {
             return AudioDevice{std::move(rtDevice.name), preferredDeviceId};

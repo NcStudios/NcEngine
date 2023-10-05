@@ -15,13 +15,13 @@ using namespace nc::physics;
 [[maybe_unused]]
 float SquareMtdToAABB(const Vector3& point, const Box& aabb)
 {
-    auto SingleAxisDistance = [](float point, float min, float max)
+    auto SingleAxisDistance = [](float pt, float min, float max)
     {
         float out = 0.0f;
-        if(point < min)
-            out += (min - point) * (min - point);
-        else if(point > max)
-            out += (point - max) * (point - max);
+        if(pt < min)
+            out += (min - pt) * (min - pt);
+        else if(pt > max)
+            out += (pt - max) * (pt - max);
         return out;
     };
 
@@ -224,9 +224,9 @@ bool Collide(const BoundingVolume& a, const BoundingVolume& b, FXMMATRIX aMatrix
 
 bool Collide(const BoundingVolume& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, CollisionState* stateOut)
 {
-    return std::visit([&b, &aMatrix, stateOut](auto&& a)
+    return std::visit([&b, &aMatrix, stateOut](auto&& aUnpacked)
     {
-        return GjkVsTriangle(a, b, aMatrix, stateOut);
+        return GjkVsTriangle(aUnpacked, b, aMatrix, stateOut);
     }, a);
 }
 

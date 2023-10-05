@@ -90,7 +90,7 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
     assert(vertEnd <= m_vertexData.end());
     m_vertexData.erase(vertBeg, vertEnd);
 
-    for(auto& [unused, accessor] : m_accessors)
+    for(auto& [uid, accessor] : m_accessors)
     {
         if(accessor.firstVertex > firstVertex)
             accessor.firstVertex -= vertexCount;

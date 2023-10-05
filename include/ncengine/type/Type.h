@@ -51,8 +51,8 @@ struct PropertyBase
     {
     }
 
-    constexpr PropertyBase(const char* tag, uint32_t flags)
-        : name{tag}, flags{flags}
+    constexpr PropertyBase(const char* tag, uint32_t flags_)
+        : name{tag}, flags{flags_}
     {
     }
 

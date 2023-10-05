@@ -7,10 +7,10 @@ namespace nc::physics
 class IClickable
 {
     public:
-        IClickable(Entity entity, float radius)
-            : entity{entity},
-                boundingBoxRadius{radius},
-                layers{LayerMaskNone}
+        IClickable(Entity entity_, float radius)
+            : entity{entity_},
+              boundingBoxRadius{radius},
+              layers{LayerMaskNone}
         {
         }
 

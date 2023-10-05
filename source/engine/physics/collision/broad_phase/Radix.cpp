@@ -495,6 +495,6 @@ unsigned RadixSort::GetUsedRam() const
 	UsedRam += 256*4*sizeof(unsigned);			// Histograms
 	UsedRam += 256*sizeof(unsigned);				// Offsets
 #endif
-	UsedRam += 2*CURRENT_SIZE*sizeof(unsigned);	// 2 lists of indices
+	UsedRam += (unsigned)(2*CURRENT_SIZE*sizeof(unsigned));	// 2 lists of indices
 	return UsedRam;
 }

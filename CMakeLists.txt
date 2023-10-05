@@ -14,9 +14,20 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(NC_COMPILER_FLAGS -Werror -Wall -Wextra -Wfatal-errors -Wno-cast-function-type)
+    set(NC_COMPILER_FLAGS -Werror
+                          -Wfatal-errors
+                          -Wall
+                          -Wextra
+                          -Wpedantic
+                          -Wshadow
+                          -Wconversion
+                          -Wno-cast-function-type
+    )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(NC_COMPILER_FLAGS /W3 /WX /MP)
+    set(NC_COMPILER_FLAGS /W4
+                          /WX
+                          /MP
+    )
 endif()
 set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/source/engine/")

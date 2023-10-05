@@ -92,8 +92,8 @@ namespace nc::sample
     {
         m_zDepth += (float)input::MouseWheel() * dt * 2.0f;
         m_zRatio = m_viewPortDist / m_zDepth;
-        auto worldX = input::MouseX() + m_screenDimensions.x / 2;
-        auto worldY = input::MouseY() + m_screenDimensions.y / 2;
+        auto worldX = static_cast<float>(input::MouseX()) + m_screenDimensions.x / 2.0f;
+        auto worldY = static_cast<float>(input::MouseY()) + m_screenDimensions.y / 2.0f;
         registry->Get<Transform>(self)->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
     }
 
@@ -179,15 +179,15 @@ namespace nc::sample
         return m_latestFPS;
     }
 
-    Clickable::Clickable(Entity entity, std::string tag, physics::NcPhysics* physicsModule)
-        : FreeComponent(entity),
-          IClickable(entity, 40.0f),
+    Clickable::Clickable(Entity entity_, std::string tag, physics::NcPhysics* physicsModule)
+        : FreeComponent(entity_),
+          IClickable(entity_, 40.0f),
           m_Tag{std::move(tag)},
           m_physicsModule{physicsModule}
 
     {
         m_physicsModule->RegisterClickable(this);
-        auto layer = entity.Layer();
+        auto layer = entity_.Layer();
         physics::IClickable::layers = physics::ToLayerMask(layer);
     }
 

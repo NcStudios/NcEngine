@@ -67,10 +67,10 @@ void ClickEvents::Load(Registry* registry, ModuleProvider modules)
     auto camera = registry->Add<EdgePanCamera>(cameraHandle);
     graphics->SetCamera(camera);
     auto clickHandler = registry->Add<ClickHandler>(cameraHandle, MaskAll, physics);
-    registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* registry, float dt)
+    registry->Add<FrameLogic>(cameraHandle, [](Entity self, Registry* reg, float dt)
     {
-        registry->Get<EdgePanCamera>(self)->Run(self, registry, dt);
-        registry->Get<ClickHandler>(self)->Run(self, registry, dt);
+        reg->Get<EdgePanCamera>(self)->Run(self, reg, dt);
+        reg->Get<ClickHandler>(self)->Run(self, reg, dt);
     });
     LayerSelectCallback = std::bind(&ClickHandler::SetLayer, clickHandler, std::placeholders::_1);
 

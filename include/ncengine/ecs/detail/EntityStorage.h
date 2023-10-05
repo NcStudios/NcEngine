@@ -39,7 +39,7 @@ class EntityStorage
 
             if(entity.IsPersistent())
             {
-                auto pos = std::ranges::find(m_persistent, entity);
+                pos = std::ranges::find(m_persistent, entity);
                 *pos = m_persistent.back();
                 m_persistent.pop_back();
             }
