@@ -12,9 +12,12 @@ namespace nc::editor
 {
 void TransformUIWidget(Transform& transform)
 {
-    DirectX::XMVECTOR scl_v, rot_v, pos_v;
+    auto scl_v = DirectX::XMVECTOR{};
+    auto rot_v = DirectX::XMVECTOR{};
+    auto pos_v = DirectX::XMVECTOR{};
     DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.TransformationMatrix());
-    Vector3 scl, pos;
+    auto scl = Vector3{};
+    auto pos = Vector3{};
     auto rot = Quaternion::Identity();
     DirectX::XMStoreVector3(&scl, scl_v);
     DirectX::XMStoreQuaternion(&rot, rot_v);
