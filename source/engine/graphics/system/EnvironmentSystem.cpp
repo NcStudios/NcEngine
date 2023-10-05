@@ -41,6 +41,6 @@ auto EnvironmentSystem::Execute(const CameraState& cameraState) -> EnvironmentSt
 void EnvironmentSystem::Clear()
 {
     m_useSkybox = false;
-    m_environmentData.skyboxTextureIndex = 0; // is this ok? why was it -1?
+    m_environmentData.skyboxTextureIndex = std::numeric_limits<uint32_t>::max();
 }
 } // namespace nc::graphics
