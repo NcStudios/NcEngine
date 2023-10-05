@@ -39,7 +39,7 @@ class AnyComponent
         }
 
     private:
-        //TODO: can store in-place and remove allocation
+        /** @todo #438 construct in-place */
         std::unique_ptr<detail::AnyImplBase> m_impl;
 };
 } // namespace nc

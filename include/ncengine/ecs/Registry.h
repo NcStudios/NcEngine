@@ -340,7 +340,7 @@ inline void Registry::CommitStagedChanges()
     m_entities.CommitStagedChanges();
 }
 
-/** @todo Temporary include for POC - Should add view/iterator support for this. */
+/** @todo #437 Temporary include for POC - Should add view/iterator support for this. */
 inline auto Registry::GetAllComponentsOn(Entity entity) -> std::vector<AnyComponent>
 {
     auto out = std::vector<AnyComponent>{};
