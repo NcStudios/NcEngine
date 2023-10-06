@@ -20,7 +20,7 @@ set(NC_TOOLS_BUILD_TESTS OFF)
 
 FetchContent_Declare(nc-tools
                      GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
-                     GIT_TAG             v1.0.1
+                     GIT_TAG             v2.0.0
                      GIT_SHALLOW         TRUE
 )
 
@@ -28,15 +28,15 @@ FetchContent_Declare(nc-tools
 # We get a pre-built nc-convert so we don't have to build it and its dependencies
 if(UNIX AND NOT APPLE)
     FetchContent_Declare(nc-convert
-                         URL                        https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-ubuntu22.04-x64.zip
-                         URL_HASH                   SHA256=ACC34BD4CFECF517339538C47C1557FCCA77E4EE1F30E7177D6DF94C35A13597
+                         URL                        https://github.com/NcStudios/NcTools/releases/download/v2.0.0/nc-convert-ubuntu22.04-x64.zip
+                         URL_HASH                   SHA256=ae96abf6349e42d3e5ee06a6431dddf8ae7950ab70d058ed4c8747fb8ee67501
                          DOWNLOAD_NO_EXTRACT        FALSE
                          DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
 elseif(WIN32)
     FetchContent_Declare(nc-convert
-                         URL                        https://github.com/NcStudios/NcTools/releases/download/v1.0.1/nc-convert-windows-x64.zip
-                         URL_HASH                   SHA256=69f53e38436a85de7776cb3161075111a922c9cbdb4049c8a5ce9d3bd3c50d5b
+                         URL                        https://github.com/NcStudios/NcTools/releases/download/v2.0.0/nc-convert-windows-x64.zip
+                         URL_HASH                   SHA256=97f0fe700224c5c9ab34d4538c1d85a89d6bd377f1040a1bff0b496c395edf08
                          DOWNLOAD_NO_EXTRACT        FALSE
                          DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
