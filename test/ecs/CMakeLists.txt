@@ -71,7 +71,7 @@ target_link_libraries(Registry_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        gtest
+        gtest_main
 )
 
 add_test(Registry_unit_tests Registry_unit_tests)
