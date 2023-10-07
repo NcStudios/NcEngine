@@ -1,10 +1,12 @@
 #include "ncengine/ecs/AnyComponent.h"
 #include "gtest/gtest.h"
 
+struct TestComponent{};
+
 TEST(AnyComponentTest, OperatorBool_hasValue_returnsTrue)
 {
-    auto component = nc::NullComponent{nc::Entity{}};
-    auto handler = nc::ComponentHandler<nc::NullComponent>{};
+    auto component = TestComponent{};
+    auto handler = nc::ComponentHandler<TestComponent>{};
     const auto uut = nc::AnyComponent{&component, &handler};
     EXPECT_TRUE(static_cast<bool>(uut));
 }
@@ -18,10 +20,10 @@ TEST(AnyComponentTest, OperatorBool_nullValue_returnsFalse)
 TEST(AnyComponentTest, DrawUI_validCall_dispatchesToHandler)
 {
     auto numCalls = 0;
-    auto component = nc::NullComponent{nc::Entity{}};
-    auto handler = nc::ComponentHandler<nc::NullComponent>
+    auto component = TestComponent{};
+    auto handler = nc::ComponentHandler<TestComponent>
     {
-        .drawUI = [&numCalls](nc::NullComponent&) { ++numCalls; }
+        .drawUI = [&numCalls](TestComponent&) { ++numCalls; }
     };
 
     auto uut = nc::AnyComponent{&component, &handler};

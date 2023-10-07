@@ -54,12 +54,6 @@ class FreeComponent : public ComponentBase
         #endif
 };
 
-/** @brief Type representation of a null component. */
-struct NullComponent : public ComponentBase
-{
-    NullComponent(Entity entity) : ComponentBase{entity} {}
-};
-
 /** @brief Requirements for the Registry to recognize a pooled component. */
 template<class T>
 concept PooledComponent = std::movable<std::remove_const_t<T>> &&
