@@ -86,22 +86,8 @@ struct ComponentHandler
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T&)>;
 
-    /** @brief Signal type for on add events. */
-    using OnAdd_t = Signal<T&>;
-
-    /** @brief Signal type for on remove events.*/
-    using OnRemove_t = Signal<Entity>;
-
     /** @brief Handler for drawing T's UI widget. */
     DrawUI_t drawUI = [](T&){};
-
-    /** @brief Signal emitted when an instance of T is created.
-     *  @note Requires StoragePolicy<T>::EnableOnAddCallbacks. */
-    OnAdd_t onAdd = {};
-
-    /** @brief Signal emitted when an instance of T is destroyed.
-     *  @note Requires StoragePolicy<T>::EnableOnRemoveCallbacks. */
-    OnRemove_t onRemove = {};
 };
 
 #ifdef NC_EDITOR_ENABLED

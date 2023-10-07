@@ -105,14 +105,18 @@ class PerComponentStorage : public PerComponentStorageBase
         std::vector<T> m_componentPool;
         std::vector<StagedComponent> m_stagingPool;
         ComponentHandler<T> m_handler;
+        Signal<T&> m_onAdd;
+        Signal<Entity> m_onRemove;
 };
 
 template<PooledComponent T>
 PerComponentStorage<T>::PerComponentStorage(size_t maxEntities, ComponentHandler<T> handler)
     : PerComponentStorageBase{maxEntities},
-        m_componentPool{},
-        m_stagingPool{},
-        m_handler{std::move(handler)}
+      m_componentPool{},
+      m_stagingPool{},
+      m_handler{std::move(handler)},
+      m_onAdd{},
+      m_onRemove{}
 {}
 
 template<PooledComponent T>
@@ -124,7 +128,7 @@ auto PerComponentStorage<T>::Add(Entity entity, Args&&... args) -> T*
 
     if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
     {
-        m_handler.onAdd.Emit(component);
+        m_onAdd.Emit(component);
     }
 
     return &component;
@@ -152,7 +156,7 @@ void PerComponentStorage<T>::Remove(Entity entity)
 
     if constexpr(StoragePolicy<T>::EnableOnRemoveCallbacks)
     {
-        m_handler.onRemove.Emit(entity);
+        m_onRemove.Emit(entity);
     }
 }
 
@@ -290,13 +294,13 @@ auto PerComponentStorage<T>::Handler() noexcept -> ComponentHandler<T>&
 template<PooledComponent T>
 auto PerComponentStorage<T>::OnAdd() noexcept -> Signal<T&>&
 {
-    return m_handler.onAdd;
+    return m_onAdd;
 }
 
 template<PooledComponent T>
 auto PerComponentStorage<T>::OnRemove() noexcept -> Signal<Entity>&
 {
-    return m_handler.onRemove;
+    return m_onRemove;
 }
 
 template<PooledComponent T>
