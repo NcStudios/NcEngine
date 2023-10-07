@@ -43,23 +43,25 @@ class Registry
         template<std::same_as<Entity> T>
         bool Contains(Entity entity) const;
 
-        /** Component Functions */
-        template<std::derived_from<ComponentBase> T, class... Args>
+        /** PooledComponent Specific Functions */
+        template<PooledComponent T, class... Args>
         auto Add(Entity entity, Args&&... args) -> T*;
 
-        template<std::derived_from<ComponentBase> T>
+        template<PooledComponent T>
         void Remove(Entity entity);
 
-        template<std::derived_from<ComponentBase> T>
+        template<PooledComponent T>
         bool Contains(Entity entity) const;
 
-        template<std::derived_from<ComponentBase> T>
+        template<PooledComponent T>
         auto Get(Entity entity) -> T*;
 
-        template<std::derived_from<ComponentBase> T>
+        template<PooledComponent T>
         auto Get(Entity entity) const -> const T*;
 
-        /** PooledComponent Specific Functions */
+        template<PooledComponent T>
+        auto GetParent(const T* component) const -> Entity;
+
         template<PooledComponent T, PooledComponent U>
         auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
 
@@ -80,6 +82,22 @@ class Registry
 
         template<PooledComponent T> requires StoragePolicy<T>::EnableOnRemoveCallbacks
         auto OnRemove() -> Signal<Entity>&;
+
+        /** FreeComponent Specific Functions */
+        template<std::derived_from<FreeComponent> T, class... Args>
+        auto Add(Entity entity, Args&&... args) -> T*;
+
+        template<std::derived_from<FreeComponent> T>
+        void Remove(Entity entity);
+
+        template<std::derived_from<FreeComponent> T>
+        bool Contains(Entity entity) const;
+
+        template<std::derived_from<FreeComponent> T>
+        auto Get(Entity entity) -> T*;
+
+        template<std::derived_from<FreeComponent> T>
+        auto Get(Entity entity) const -> const T*;
 
         /** Engine Functions */
         template<PooledComponent T>
@@ -145,19 +163,19 @@ auto Registry::Add(EntityInfo info) -> Entity
     return handle;
 }
 
-template<std::derived_from<ComponentBase> T, class... Args>
+template<PooledComponent T, class... Args>
 auto Registry::Add(Entity entity, Args&&... args) -> T*
 {
     NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
-    if constexpr(std::derived_from<T, FreeComponent>)
-    {
-        auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
-        return group->Add<T>(entity, std::forward<Args>(args)...);
-    }
-    else
-    {
-        return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
-    }
+    return StorageFor<T>()->Add(entity, std::forward<Args>(args)...);
+}
+
+template<std::derived_from<FreeComponent> T, class... Args>
+auto Registry::Add(Entity entity, Args&&... args) -> T*
+{
+    NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
+    auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
+    return group->Add<T>(entity, std::forward<Args>(args)...);
 }
 
 template<std::same_as<Entity> T>
@@ -173,19 +191,19 @@ void Registry::Remove(Entity entity)
     m_entities.Remove(entity);
 }
 
-template<std::derived_from<ComponentBase> T>
+template<PooledComponent T>
 void Registry::Remove(Entity entity)
 {
     NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
-    if constexpr(std::derived_from<T, FreeComponent>)
-    {
-        auto* group = StorageFor<ecs::detail::FreeComponentGroup>()->Get(entity);
-        group->Remove<T>();
-    }
-    else
-    {
-        StorageFor<T>()->Remove(entity);
-    }
+    StorageFor<T>()->Remove(entity);
+}
+
+template<std::derived_from<FreeComponent> T>
+void Registry::Remove(Entity entity)
+{
+    NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
+    auto* group = StorageFor<ecs::detail::FreeComponentGroup>()->Get(entity);
+    group->Remove<T>();
 }
 
 template<std::same_as<Entity> T>
@@ -194,47 +212,51 @@ bool Registry::Contains(Entity entity) const
     return m_entities.Contains(entity);
 }
 
-template<std::derived_from<ComponentBase> T>
+template<PooledComponent T>
 bool Registry::Contains(Entity entity) const
 {
     NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
-    if constexpr(std::derived_from<T, FreeComponent>)
-    {
-        const auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
-        return group->Contains<T>();
-    }
-    else
-    {
-        return StorageFor<T>()->Contains(entity);
-    }
+    return StorageFor<T>()->Contains(entity);
 }
 
-template<std::derived_from<ComponentBase> T>
+template<std::derived_from<FreeComponent> T>
+bool Registry::Contains(Entity entity) const
+{
+    NC_ASSERT(Contains<Entity>(entity), "Bad Entity");
+    const auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
+    return group->Contains<T>();
+}
+
+template<PooledComponent T>
 auto Registry::Get(Entity entity) -> T*
 {
-    if constexpr(std::derived_from<T, FreeComponent>)
-    {
-        auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
-        return group ? group->Get<T>() : nullptr;
-    }
-    else
-    {
-        return StorageFor<T>()->Get(entity);
-    }
+    return StorageFor<T>()->Get(entity);
 }
 
-template<std::derived_from<ComponentBase> T>
+template<PooledComponent T>
 auto Registry::Get(Entity entity) const -> const T*
 {
-    if constexpr(std::derived_from<T, FreeComponent>)
-    {
-        auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
-        return group ? group->Get<T>() : nullptr;
-    }
-    else
-    {
-        return StorageFor<T>()->Get(entity);
-    }
+    return StorageFor<T>()->Get(entity);
+}
+
+template<std::derived_from<FreeComponent> T>
+auto Registry::Get(Entity entity) -> T*
+{
+    auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
+    return group ? group->Get<T>() : nullptr;
+}
+
+template<std::derived_from<FreeComponent> T>
+auto Registry::Get(Entity entity) const -> const T*
+{
+    auto* group = Get<ecs::detail::FreeComponentGroup>(entity);
+    return group ? group->Get<T>() : nullptr;
+}
+
+template<PooledComponent T>
+auto Registry::GetParent(const T* component) const -> Entity
+{
+    return StorageFor<T>()->GetParent(component);
 }
 
 template<PooledComponent T, PooledComponent U>

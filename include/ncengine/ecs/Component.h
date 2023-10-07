@@ -10,10 +10,12 @@
 namespace nc
 {
 /**
- * @brief Base class for all components.
+ * @brief Optional base class for components.
  * 
- * User-defined pooled components should derive directly from this. These types
- * must be registered with Registry::RegisterComponentType<T>() before use.
+ * This is the conventional interface used by engine components for providing
+ * access to their parent `Entity`. Note that `Registry::GetParent()` can find
+ * this value for any component, so types only need to derive from this if they
+ * want faster `Entity` retrieval.
  */
 class ComponentBase
 {
@@ -61,8 +63,8 @@ struct NullComponent : public ComponentBase
 /** @brief Requirements for the Registry to recognize a pooled component. */
 template<class T>
 concept PooledComponent = std::movable<std::remove_const_t<T>> &&
-                          std::derived_from<T, ComponentBase> &&
-                          !std::derived_from<T, FreeComponent>;
+                          !std::derived_from<T, FreeComponent> &&
+                          !std::same_as<T, Entity>;
 
 /** @brief Default storage behavior for pooled components. */
 struct DefaultStoragePolicy

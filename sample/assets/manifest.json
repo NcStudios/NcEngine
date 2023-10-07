@@ -72,6 +72,10 @@
             "assetName": "mesh/token"
         },
         {
+            "sourcePath": "raw/model/tree.fbx",
+            "assetName": "mesh/tree"
+        },
+        {
             "sourcePath": "raw/model/worm.fbx",
             "assetName": "mesh/worm"
         }

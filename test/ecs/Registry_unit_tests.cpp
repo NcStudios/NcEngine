@@ -158,6 +158,17 @@ TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
     EXPECT_EQ(ptr->value, 1);
 }
 
+TEST_F(Registry_unit_tests, AddComponent_argumentForwarding_forwardsEntityOnlyWhenRequired)
+{
+    registry.RegisterComponentType<float>();
+    const auto handle = registry.Add<Entity>({});
+
+    // Testing the Entity arg is correctly passed to component constructors
+    EXPECT_NE(nullptr, registry.Add<Fake1>(handle, 1)); // passes entity
+    EXPECT_NE(nullptr, registry.Add<Fake2>(handle, handle, 1)); // ignores redundant entity
+    EXPECT_NE(nullptr, registry.Add<float>(handle, 42.0f)); // not not pass entity
+}
+
 TEST_F(Registry_unit_tests, AddComponent_BadEntity_Throws)
 {
     EXPECT_THROW(registry.Add<Fake1>(Entity{0u, 0u, 0u}, 1), std::runtime_error);
@@ -360,6 +371,110 @@ TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
     EXPECT_EQ(ptr, nullptr);
 }
 
+TEST_F(Registry_unit_tests, GetParent_inPool_returnsParentEntity)
+{
+    const auto expected = registry.Add<Entity>({});
+    registry.Add<Fake1>(expected, 1);
+    registry.CommitStagedChanges();
+    const auto component = registry.Get<Fake1>(expected);
+    const auto actual = registry.GetParent(component);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(Registry_unit_tests, GetParent_staged_returnsParentEntity)
+{
+    const auto expected = registry.Add<Entity>({});
+    const auto component = registry.Add<Fake1>(expected, 1);
+    const auto actual = registry.GetParent(component);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(Registry_unit_tests, GetParent_nullptr_returnsNull)
+{
+    Fake1* bad = nullptr;
+    EXPECT_EQ(Entity::Null(), registry.GetParent(bad));
+}
+
+TEST_F(Registry_unit_tests, GetParent_emptyPool_returnsNull)
+{
+    const auto handle = registry.Add<Entity>({});
+    const auto stagedPtr = registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    const auto commitedPtr = registry.Get<Fake1>(handle);
+    registry.Remove<Entity>(handle);
+    registry.CommitStagedChanges();
+
+    // Test with dangling pointers into both pools
+    EXPECT_EQ(Entity::Null(), registry.GetParent(stagedPtr));
+    EXPECT_EQ(Entity::Null(), registry.GetParent(commitedPtr));
+}
+
+TEST_F(Registry_unit_tests, GetParent_deletedComponent_returnsNull)
+{
+    const auto handle = registry.Add<Entity>({});
+    const auto deleted = registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    registry.Remove<Fake1>(handle);
+    registry.CommitStagedChanges();
+    EXPECT_EQ(Entity::Null(), registry.GetParent(deleted));
+}
+
+TEST_F(Registry_unit_tests, GetParent_stagedDeletedComponent_returnsNull)
+{
+    const auto handle = registry.Add<Entity>({});
+    const auto deleted = registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    registry.Remove<Fake1>(handle);
+    EXPECT_EQ(Entity::Null(), registry.GetParent(deleted));
+}
+
+TEST_F(Registry_unit_tests, GetParent_deletedEntity_returnsNull)
+{
+    const auto handle = registry.Add<Entity>({});
+    const auto component = registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    registry.Remove<Entity>(handle);
+    registry.CommitStagedChanges();
+    EXPECT_EQ(Entity::Null(), registry.GetParent(component));
+}
+
+TEST_F(Registry_unit_tests, GetParent_stagedDeletedEntity_returnsNull)
+{
+    const auto handle = registry.Add<Entity>({});
+    const auto component = registry.Add<Fake1>(handle, 1);
+    registry.CommitStagedChanges();
+    registry.Remove<Entity>(handle);
+    EXPECT_EQ(Entity::Null(), registry.GetParent(component));
+}
+
+TEST_F(Registry_unit_tests, GetParent_shufflePositions_succeeds)
+{
+    const auto h1 = registry.Add<Entity>({});
+    const auto h2 = registry.Add<Entity>({});
+    const auto h3 = registry.Add<Entity>({});
+    const auto h4 = registry.Add<Entity>({});
+    const auto h5 = registry.Add<Entity>({});
+    const auto h6 = registry.Add<Entity>({});
+    registry.Add<Fake1>(h1, 1);
+    registry.Add<Fake1>(h2, 1);
+    registry.Add<Fake1>(h3, 1);
+    registry.Add<Fake1>(h4, 1);
+    registry.Add<Fake1>(h5, 1);
+    registry.Add<Fake1>(h6, 1);
+    registry.CommitStagedChanges();
+    // Delete some objects to shuffle internal storage
+    registry.Remove<Entity>(h1);
+    registry.Remove<Entity>(h3);
+    registry.Remove<Entity>(h5);
+    registry.CommitStagedChanges();
+    const auto c2 = registry.Get<Fake1>(h2);
+    const auto c4 = registry.Get<Fake1>(h4);
+    const auto c6 = registry.Get<Fake1>(h6);
+    EXPECT_EQ(h2, registry.GetParent(c2));
+    EXPECT_EQ(h4, registry.GetParent(c4));
+    EXPECT_EQ(h6, registry.GetParent(c6));
+}
+
 TEST_F(Registry_unit_tests, AddFreeComponent_ValidCall_ConstructsObject)
 {
     auto handle = registry.Add<Entity>({});
@@ -530,4 +645,11 @@ TEST_F(Registry_unit_tests, GetAllComponentsOn_entityHasComponents_visitsCompone
     }
 
     EXPECT_EQ(2, g_numDrawUICalls);
+}
+
+TEST_F(Registry_unit_tests, RegisterComponentType_arbitraryTypes_succeed)
+{
+    EXPECT_NO_THROW(registry.RegisterComponentType<std::string>());
+    EXPECT_NO_THROW(registry.RegisterComponentType<int>());
+    EXPECT_NO_THROW(registry.RegisterComponentType<void*>());
 }
