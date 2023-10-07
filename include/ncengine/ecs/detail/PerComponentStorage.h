@@ -12,6 +12,19 @@
 
 namespace nc::ecs::detail
 {
+template<class T, class... Args>
+auto ConstructComponent(Entity entity, Args&&... args)
+{
+    if constexpr (std::constructible_from<T, Entity, Args...>)
+    {
+        return T{entity, std::forward<Args>(args)...};
+    }
+    else
+    {
+        return T{std::forward<Args>(args)...};
+    }
+}
+
 class PerComponentStorageBase
 {
     public:
@@ -69,6 +82,7 @@ class PerComponentStorage : public PerComponentStorageBase
         bool Contains(Entity entity) const;
         auto Get(Entity entity) -> T*;
         auto Get(Entity entity) const -> const T*;
+        auto GetParent(const T* component) const -> Entity;
 
         template<std::predicate<const T&, const T&> Predicate>
         void Sort(Predicate&& comparesLessThan);
@@ -103,14 +117,14 @@ template<class... Args>
 auto PerComponentStorage<T>::Add(Entity entity, Args&&... args) -> T*
 {
     NC_ASSERT(!Contains(entity), "Cannot add multiple components of the same type");
-    auto& [emplacedEntity, emplacedComponent] = m_stagingPool.emplace_back(entity, T{entity, std::forward<Args>(args)...});
+    auto& [_, component] = m_stagingPool.emplace_back(entity, ConstructComponent<T>(entity, std::forward<Args>(args)...));
 
     if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
     {
-        m_onAdd.Emit(emplacedComponent);
+        m_onAdd.Emit(component);
     }
 
-    return &emplacedComponent;
+    return &component;
 }
 
 template<PooledComponent T>
@@ -189,6 +203,24 @@ auto PerComponentStorage<T>::Get(Entity entity) const -> const T*
     });
 
     return pos == m_stagingPool.end() ? nullptr : &pos->component;
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::GetParent(const T* component) const -> Entity
+{
+    const auto beg = m_componentPool.data();
+    const auto end = beg + m_componentPool.size();
+    if (component >= beg && component < end)
+    {
+        return entityPool.at(static_cast<size_t>(component - beg));
+    }
+
+    const auto pos = std::ranges::find_if(m_stagingPool, [component](const auto& staged)
+    {
+        return &staged.component == component;
+    });
+
+    return pos != m_stagingPool.cend() ? pos->entity : Entity::Null();
 }
 
 template<PooledComponent T>
