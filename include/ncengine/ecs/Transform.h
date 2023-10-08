@@ -130,13 +130,5 @@ class Transform final : public ComponentBase
         DirectX::XMMATRIX m_worldMatrix;
         Entity m_parent;
         std::vector<Entity> m_children;
-
-        #ifdef NC_EDITOR_ENABLED
-        friend void ComponentGuiElement<Transform>(Transform*);
-        #endif
 };
-
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<Transform>(Transform* transform);
-#endif
 } //end namespace nc

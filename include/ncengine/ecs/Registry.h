@@ -72,7 +72,10 @@ class Registry
         void ReserveHeadroom(size_t additionalRequiredCount);
 
         template<PooledComponent T>
-        void RegisterComponentType();
+        void RegisterComponentType(ComponentHandler<T> handler = {});
+
+        template<PooledComponent T>
+        auto Handler() -> ComponentHandler<T>&;
 
         template<PooledComponent T> requires StoragePolicy<T>::EnableOnAddCallbacks
         auto OnAdd() -> Signal<T&>&;
@@ -111,6 +114,7 @@ class Registry
 
         void CommitStagedChanges();
         void Clear();
+        auto GetAllComponentsOn(Entity entity) -> std::vector<AnyComponent>;
 
     private:
         std::vector<std::unique_ptr<ecs::detail::PerComponentStorageBase>> m_registeredStorage;
@@ -321,14 +325,20 @@ void Registry::ReserveHeadroom(size_t additionalRequiredCount)
 }
 
 template<PooledComponent T>
-void Registry::RegisterComponentType()
+void Registry::RegisterComponentType(ComponentHandler<T> handlers)
 {
     if(m_typedStoragePtr<T>)
         return;
 
-    auto storage = std::make_unique<ecs::detail::PerComponentStorage<T>>(m_maxEntities);
+    auto storage = std::make_unique<ecs::detail::PerComponentStorage<T>>(m_maxEntities, std::move(handlers));
     m_typedStoragePtr<T> = storage.get();
     m_registeredStorage.push_back(std::move(storage));
+}
+
+template<PooledComponent T>
+auto Registry::Handler() -> ComponentHandler<T>&
+{
+    return StorageFor<T>()->Handler();
 }
 
 template<PooledComponent T> requires StoragePolicy<T>::EnableOnAddCallbacks
@@ -350,5 +360,25 @@ inline void Registry::CommitStagedChanges()
         storage->CommitStagedComponents(toRemove);
 
     m_entities.CommitStagedChanges();
+}
+
+/** @todo #437 Temporary include for POC - Should add view/iterator support for this. */
+inline auto Registry::GetAllComponentsOn(Entity entity) -> std::vector<AnyComponent>
+{
+    auto out = std::vector<AnyComponent>{};
+    if (!Contains<Entity>(entity))
+    {
+        return out;
+    }
+
+    for (auto& storage : m_registeredStorage)
+    {
+        if (auto&& any = storage->GetAsAnyComponent(entity))
+        {
+            out.push_back(std::move(any));
+        }
+    }
+
+    return out;
 }
 } // namespace nc

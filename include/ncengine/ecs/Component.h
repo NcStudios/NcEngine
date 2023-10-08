@@ -2,6 +2,7 @@
 
 #include "Entity.h"
 #include "detail/EditorMacros.h"
+#include "ncengine/utility/Signal.h"
 
 #include <concepts>
 #include <type_traits>
@@ -77,6 +78,17 @@ struct DefaultStoragePolicy
  */
 template<PooledComponent T>
 struct StoragePolicy : DefaultStoragePolicy {};
+
+/** @brief Optional callbacks for generic component operations. */
+template<PooledComponent T>
+struct ComponentHandler
+{
+    /** @brief Function type for the DrawUI handler. */
+    using DrawUI_t = std::function<void(T&)>;
+
+    /** @brief Handler for drawing T's UI widget. */
+    DrawUI_t drawUI = [](T&){};
+};
 
 #ifdef NC_EDITOR_ENABLED
 namespace internal

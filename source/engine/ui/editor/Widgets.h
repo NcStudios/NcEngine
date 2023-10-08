@@ -1,5 +1,4 @@
 #pragma once
-#ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
 
 namespace nc::ui::editor
@@ -83,5 +82,3 @@ namespace nc::ui::editor
         ImGui::EndGroup();
     }
 }
-
-#endif

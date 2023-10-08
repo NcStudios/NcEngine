@@ -1,15 +1,10 @@
 #include "NcEngineImpl.h"
-#include "asset/NcAsset.h"
-#include "audio/NcAudioImpl.h"
+#include "RegistryFactories.h"
 #include "config/ConfigInternal.h"
-#include "ecs/EcsModule.h"
-#include "graphics/NcGraphicsImpl.h"
-#include "graphics/PerFrameRenderState.h"
 #include "input/InputInternal.h"
-#include "module/ModuleProvider.h"
-#include "physics/NcPhysicsImpl.h"
-#include "time/TimeImpl.h"
 #include "utility/Log.h"
+
+#include "optick.h"
 
 #include <sstream>
 
@@ -34,22 +29,6 @@ void LogConfig(const nc::config::Config& config)
 
     NC_LOG_INFO_FMT("Initializing NcEngine with Config:\n{}", configStr);
 }
-
-auto BuildModuleRegistry(nc::Registry* reg,
-                         nc::window::WindowImpl* window,
-                         const nc::config::Config& config) -> nc::ModuleRegistry
-{
-    NC_LOG_INFO("Building module registry");
-    auto moduleRegistry = nc::ModuleRegistry{};
-    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings, config.memorySettings));
-    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings, config.graphicsSettings, moduleRegistry.Get<nc::asset::NcAsset>(), reg, window));
-    moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, reg));
-    moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, reg));
-    moduleRegistry.Register(nc::time::BuildTimeModule());
-    moduleRegistry.Register(nc::ecs::BuildEcsModule(reg));
-    moduleRegistry.Register(std::make_unique<nc::Random>());
-    return moduleRegistry;
-}
 } // anonymous namespace
 
 namespace nc
@@ -65,7 +44,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
-      m_registry{config.memorySettings.maxTransforms},
+      m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},
