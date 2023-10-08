@@ -4,10 +4,6 @@
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
-#endif
-
 using namespace DirectX;
 
 namespace
@@ -224,27 +220,3 @@ IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     return IntegrationResult::Integrated;
 }
 } // namespace nc::physics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<physics::PhysicsBody>(physics::PhysicsBody* body)
-{
-    const auto& properties = body->m_properties;
-    ImGui::Text("PhysicsBody");
-    ImGui::SameLine();
-    body->m_awake ? ImGui::Text("(awake)") : ImGui::Text("(asleep)");
-
-    ImGui::BeginGroup();
-        ImGui::Indent();
-        ImGui::Text("Inverse Mass %.2f", properties.mass);
-        ImGui::Text("Drag         %.2f", properties.drag);
-        ImGui::Text("Ang Drag     %.2f", properties.angularDrag);
-        ImGui::Text("Restitution  %.2f", properties.restitution);
-        ImGui::Text("Friction     %.2f", properties.friction);
-        ImGui::Text("Use Gravity  %s", properties.useGravity ? "True" : "False");
-        ImGui::Text("Kinematic    %s", properties.isKinematic ? "True" : "False");
-    ImGui::EndGroup();
-}
-#endif
-} // namespace nc

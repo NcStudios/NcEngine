@@ -17,6 +17,8 @@ namespace nc
  */
 class Tag final : public ComponentBase
 {
+    NC_ENABLE_IN_EDITOR(Tag)
+
     public:
         Tag(Entity entity, std::string tag)
             : ComponentBase{entity},

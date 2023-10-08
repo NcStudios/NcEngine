@@ -8,14 +8,14 @@ namespace nc
 {
 class Registry;
 
-/** @brief FrameLogic callable member type. */
-using FrameLogicCallable_t = std::function<void(Entity, Registry*, float)>;
+/** @brief FrameLogic callable member type */
+using FrameLogicCallable_t = std::function<void(Entity self, Registry* registry, float dt)>;
 
 /** @brief FixedLogic callable member type */
-using FixedLogicCallable_t = std::function<void(Entity, Registry*)>;
+using FixedLogicCallable_t = std::function<void(Entity self, Registry* registry)>;
 
 /** @brief CollisionLogic callable member type */
-using CollisionLogicCallable_t = std::function<void(Entity, Entity, Registry*)>;
+using CollisionLogicCallable_t = std::function<void(Entity self, Entity other, Registry* registry)>;
 
 /** @brief FrameLogic callable type requirements */
 template<class Func>
@@ -32,11 +32,13 @@ concept CollisionLogicCallable = std::convertible_to<Func, CollisionLogicCallabl
 /** @brief Component that runs a custom callable during each logic phase. */
 class FrameLogic final : public ComponentBase
 {
+    NC_ENABLE_IN_EDITOR(FrameLogic)
+
     public:
         template<FrameLogicCallable Func>
         FrameLogic(Entity entity, Func&& func)
             : ComponentBase{entity},
-                m_func{std::forward<Func>(func)}
+              m_func{std::forward<Func>(func)}
         {
         }
 
@@ -59,16 +61,18 @@ class FrameLogic final : public ComponentBase
 /** @brief Component that runs a custom callable during each physics phase. */
 class FixedLogic final : public ComponentBase
 {
+    NC_ENABLE_IN_EDITOR(FixedLogic)
+
     public:
-        template<std::invocable<Entity, Registry*> Func>
+        template<FixedLogicCallable Func>
         FixedLogic(Entity entity, Func&& func)
             : ComponentBase{entity},
-                m_func{std::forward<Func>(func)}
+              m_func{std::forward<Func>(func)}
         {
         }
 
         /** @brief Set a new callable. */
-        template<std::invocable<Entity, Registry*> Func>
+        template<FixedLogicCallable Func>
         void SetFunction(Func&& func)
         {
             m_func = std::forward<Func>(func);
@@ -86,6 +90,8 @@ class FixedLogic final : public ComponentBase
 /** @brief Component that runs custom callables on collision and trigger events. */
 class CollisionLogic final : public ComponentBase
 {
+    NC_ENABLE_IN_EDITOR(CollisionLogic)
+
     public:
         template<CollisionLogicCallable CollisionEnterFunc,
                  CollisionLogicCallable CollisionExitFunc,

@@ -52,13 +52,13 @@ struct ParticleInfo
 class ParticleEmitter final : public ComponentBase
 {
     NC_ENABLE_IN_EDITOR(ParticleEmitter)
-    
+
     public:
         ParticleEmitter(Entity entity, ParticleInfo info);
 
         const ParticleInfo& GetInfo() const noexcept;
         void Emit(size_t count);
-    
+
         void RegisterSystem(ParticleEmitterSystem* system);
 
     private:
@@ -75,8 +75,4 @@ struct StoragePolicy<graphics::ParticleEmitter> : DefaultStoragePolicy
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnRemoveCallbacks = true;
 };
-
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::ParticleEmitter>(graphics::ParticleEmitter*);
-#endif
 } // namespace nc

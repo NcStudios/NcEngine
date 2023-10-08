@@ -65,7 +65,4 @@ struct StoragePolicy<graphics::PointLight> : DefaultStoragePolicy
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnRemoveCallbacks = true;
 };
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::PointLight>(graphics::PointLight* light);
-#endif
 } // namespace nc

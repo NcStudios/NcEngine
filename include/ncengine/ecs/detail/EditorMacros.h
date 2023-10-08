@@ -11,10 +11,13 @@ namespace nc
         class Inspector;
     }
 }
-#define NC_ENABLE_IN_EDITOR(Component)       \
-friend ::nc::editor::Inspector;              \
-friend ::nc::editor::AssetDependencyChecker; \
-friend ::nc::UIStream;
+#define NC_ENABLE_IN_EDITOR(Component)                        \
+public:                                                       \
+    static constexpr auto NcEditorComponentName = #Component; \
+private:                                                      \
+    friend ::nc::editor::Inspector;                           \
+    friend ::nc::editor::AssetDependencyChecker;              \
+    friend ::nc::UIStream;
 #else
 #define NC_ENABLE_IN_EDITOR(Component)
 #endif

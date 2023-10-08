@@ -2,10 +2,6 @@
 #include "ecs/Registry.h"
 #include "graphics/MeshRenderer.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "ui/editor/Widgets.h"
-#endif
-
 namespace
 {
 auto MakeMaterialView(const nc::graphics::PbrMaterial& material) -> nc::graphics::PbrMaterialView
@@ -68,20 +64,3 @@ namespace nc::graphics
         m_coldData->material.metallic = std::move(texturePath);
     }
 } // namespace nc::graphics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRenderer* meshRenderer)
-{
-    ImGui::Text("Mesh Renderer");
-    ImGui::Text("Mesh: %s", meshRenderer->GetMeshPath().c_str());
-    ImGui::Text("Material:");
-    const auto& material = meshRenderer->GetMaterial();
-    ImGui::Text("  Base Color: %s", material.baseColor.c_str());
-    ImGui::Text("  Normal:     %s", material.normal.c_str());
-    ImGui::Text("  Roughness:  %s", material.roughness.c_str());
-    ImGui::Text("  Metallic:   %s", material.metallic.c_str());
-}
-#endif
-} // namespace nc

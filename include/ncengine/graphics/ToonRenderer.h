@@ -72,10 +72,3 @@ class ToonRenderer : public ComponentBase
         std::unique_ptr<ToonRendererColdData> m_coldData;
 };
 } // namespace nc::graphics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::ToonRenderer>(graphics::ToonRenderer* toonRenderer);
-#endif
-} // namespace nc

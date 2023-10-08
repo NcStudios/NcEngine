@@ -31,10 +31,24 @@ class AnyComponent
             return static_cast<bool>(m_impl);
         }
 
+        /** @brief Get the value of ComponentHandler::name for the concrete component type. */
+        auto Name() const -> std::string_view
+        {
+            NC_ASSERT(m_impl, "Invalid use of null AnyComponent.");
+            return m_impl->Name();
+        }
+
+        /** @brief Check if ComponentHandler::drawUI is set for the concrete component type. */
+        auto HasDrawUI() const -> bool
+        {
+            NC_ASSERT(m_impl, "Invalid use of null AnyComponent.");
+            return m_impl->HasDrawUI();
+        }
+
         /** @brief Invoke ComponentHandler::drawUI with the component instance */
         void DrawUI()
         {
-            NC_ASSERT(m_impl, "Cannot dispatch through a null AnyComponent.");
+            NC_ASSERT(m_impl, "Invalid use of null AnyComponent.");
             m_impl->DrawUI();
         }
 
