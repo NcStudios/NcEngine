@@ -90,6 +90,7 @@ class Collider final : public ComponentBase
         auto IsAwake() const noexcept -> bool { return m_awake; }
         auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
+        /** @todo #446 Handle this in editor code. */
         #ifdef NC_EDITOR_ENABLED
         void SetEditorSelection(bool state);
         bool GetEditorSelection();

@@ -121,8 +121,14 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
 
 void ColliderUIWidget(physics::Collider& collider)
 {
-    // collider model doesn't update/submit unless we tell it to
+    /**
+     * Collider Model doesn't update/submit unless we tell it to
+     * @todo #446 Clean up once editor manages collider selection state.
+    */
+#ifdef NC_EDITOR_ENABLED
     collider.SetEditorSelection(true);
+#endif
+
     auto info = collider.GetInfo();
 
     if(ImGui::BeginCombo("Type", ToCString(info.type)))

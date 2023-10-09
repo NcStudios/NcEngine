@@ -218,5 +218,5 @@ graphics::DebugWidget Collider::GetDebugWidget()
 
     return graphics::DebugWidget(m_info.type, transformationMatrix);
 }
-} // namespace nc::physics
 #endif
+} // namespace nc::physics
