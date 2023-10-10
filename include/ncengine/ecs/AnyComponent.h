@@ -43,18 +43,24 @@ class AnyComponent
             return !(*this == other);
         }
 
-        /** @brief Get the value of ComponentHandler::name for the concrete component type. */
+        /**
+         * @brief Get the value of ComponentHandler::name for the concrete component type.
+         * @throw NcError if invoked on a null AnyComponent.
+         */
         auto Name() const -> std::string_view
         {
-            NC_ASSERT(m_impl, "Invalid use of null AnyComponent.");
-            return m_impl->Name();
+            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            return m_storage.AsImpl()->Name();
         }
 
-        /** @brief Check if ComponentHandler::drawUI is set for the concrete component type. */
+        /**
+         * @brief Check if ComponentHandler::drawUI is set for the concrete component type.
+         * @throw NcError if invoked on a null AnyComponent.
+         */
         auto HasDrawUI() const -> bool
         {
-            NC_ASSERT(m_impl, "Invalid use of null AnyComponent.");
-            return m_impl->HasDrawUI();
+            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            return m_storage.AsImpl()->HasDrawUI();
         }
 
         /**
@@ -63,8 +69,8 @@ class AnyComponent
          */
         void DrawUI()
         {
-            NC_ASSERT(m_impl, "Invalid use of null AnyComponent.");
-            m_impl->DrawUI();
+            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            m_storage.AsImpl()->DrawUI();
         }
 
     private:

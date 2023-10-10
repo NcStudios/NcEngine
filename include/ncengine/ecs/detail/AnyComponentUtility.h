@@ -13,8 +13,8 @@ struct AnyImplBase
     virtual ~AnyImplBase() = default;
     virtual auto Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase* = 0;
     virtual auto MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase* = 0;
-    virtual auto Name() -> std::string_view = 0;
-    virtual auto HasDrawUI() const -> bool = 0;
+    virtual auto Name() const noexcept -> std::string_view = 0;
+    virtual auto HasDrawUI() const noexcept -> bool = 0;
     virtual void DrawUI() = 0;
 };
 
@@ -27,25 +27,9 @@ class AnyImplConcrete : public AnyImplBase
 
         auto Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase* override;
         auto MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase* override;
+        auto Name() const noexcept -> std::string_view override;
+        auto HasDrawUI() const noexcept -> bool override;
         void DrawUI() override;
-
-        auto Name() -> std::string_view override
-        {
-            return m_handler->name;
-        }
-
-        auto HasDrawUI() const -> bool override
-        {
-            return m_handler->drawUI != nullptr;
-        }
-
-        void DrawUI() override
-        {
-            if (HasDrawUI())
-            {
-                m_handler->drawUI(*m_instance);
-            }
-        }
 
     private:
         T* m_instance;
@@ -113,6 +97,18 @@ template<PooledComponent T>
 auto AnyImplConcrete<T>::MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase*
 {
     return new (storage.AsStorage()) AnyImplConcrete<T>{std::move(*this)};
+}
+
+template<PooledComponent T>
+auto AnyImplConcrete<T>::Name() const noexcept -> std::string_view
+{
+    return m_handler->name;
+}
+
+template<PooledComponent T>
+auto AnyImplConcrete<T>::HasDrawUI() const noexcept -> bool
+{
+    return m_handler->drawUI != nullptr;
 }
 
 template<PooledComponent T>

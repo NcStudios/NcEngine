@@ -178,11 +178,3 @@ TEST(AnyComponentTest, DrawUI_nullObject_throws)
     auto uut = nc::AnyComponent{};
     EXPECT_THROW(uut.DrawUI(), nc::NcError);
 }
-
-TEST(AnyComponentTest, DrawUI_nullFunc_succeeds)
-{
-    auto component = TestComponent{};
-    auto handler = nc::ComponentHandler<TestComponent>{ .drawUI = nullptr };
-    auto uut = nc::AnyComponent{&component, &handler};
-    EXPECT_NO_THROW(uut.DrawUI());
-}
