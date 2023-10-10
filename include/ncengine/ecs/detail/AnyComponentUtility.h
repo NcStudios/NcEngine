@@ -77,6 +77,8 @@ class AnyImplStorage
         static constexpr auto size = sizeof(Placeholder);
 
         alignas(align) std::byte buffer[size];
+
+        void Clear() noexcept;
 };
 
 template<PooledComponent T>
@@ -144,13 +146,32 @@ inline AnyImplStorage::AnyImplStorage(AnyImplStorage&& other) noexcept
 
 inline auto AnyImplStorage::operator=(const AnyImplStorage& other) noexcept -> AnyImplStorage&
 {
-    other.HasValue() ? other.AsImpl()->Clone(*this) : std::memset(buffer, 0, size);
+    Clear();
+    if (other.HasValue())
+    {
+        other.AsImpl()->Clone(*this);
+    }
+
     return *this;
 }
 
 inline auto AnyImplStorage::operator=(AnyImplStorage&& other) noexcept -> AnyImplStorage&
 {
-    other.HasValue() ? other.AsImpl()->MoveTo(*this) : std::memset(buffer, 0, size);
+    Clear();
+    if (other.HasValue())
+    {
+        other.AsImpl()->MoveTo(*this);
+    }
+
     return *this;
+}
+
+inline void AnyImplStorage::Clear() noexcept
+{
+    if (HasValue())
+    {
+        AsImpl()->~AnyImplBase();
+        std::memset(buffer, 0, size);
+    }
 }
 } // namespace nc::detail
