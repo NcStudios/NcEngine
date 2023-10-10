@@ -35,7 +35,7 @@ class AnyImplConcrete : public AnyImplBase
 
         void DrawUI() override
         {
-            if (m_handler->drawUI)
+            if (HasDrawUI())
             {
                 m_handler->drawUI(*m_instance);
             }
