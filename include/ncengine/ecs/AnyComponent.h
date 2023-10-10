@@ -65,11 +65,12 @@ class AnyComponent
 
         /**
          * @brief Invoke ComponentHandler::drawUI with the component instance.
-         * @throw NcError if invoked on a null AnyComponent.
+         * @throw NcError if invoked on a null AnyComponent or if HasDrawUI() is false.
          */
         void DrawUI()
         {
             NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            NC_ASSERT(HasDrawUI(), "No drawUI handler is set for this component type.");
             m_storage.AsImpl()->DrawUI();
         }
 

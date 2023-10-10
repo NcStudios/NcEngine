@@ -11,8 +11,8 @@ class AnyImplStorage;
 struct AnyImplBase
 {
     virtual ~AnyImplBase() = default;
-    virtual auto Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase* = 0;
-    virtual auto MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase* = 0;
+    virtual auto Clone(AnyImplStorage& dest) const noexcept -> AnyImplBase* = 0;
+    virtual auto MoveTo(AnyImplStorage& dest) noexcept -> AnyImplBase* = 0;
     virtual auto Name() const noexcept -> std::string_view = 0;
     virtual auto HasDrawUI() const noexcept -> bool = 0;
     virtual void DrawUI() = 0;
@@ -25,8 +25,8 @@ class AnyImplConcrete : public AnyImplBase
         explicit AnyImplConcrete(T* instance, ComponentHandler<T>* handler) noexcept
             : m_instance{instance}, m_handler{handler} {}
 
-        auto Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase* override;
-        auto MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase* override;
+        auto Clone(AnyImplStorage& dest) const noexcept -> AnyImplBase* override;
+        auto MoveTo(AnyImplStorage& dest) noexcept -> AnyImplBase* override;
         auto Name() const noexcept -> std::string_view override;
         auto HasDrawUI() const noexcept -> bool override;
         void DrawUI() override;
@@ -88,15 +88,15 @@ class AnyImplStorage
 };
 
 template<PooledComponent T>
-auto AnyImplConcrete<T>::Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase*
+auto AnyImplConcrete<T>::Clone(AnyImplStorage& dest) const noexcept -> AnyImplBase*
 {
-    return new (storage.AsStorage()) AnyImplConcrete<T>{*this};
+    return new (dest.AsStorage()) AnyImplConcrete<T>{*this};
 }
 
 template<PooledComponent T>
-auto AnyImplConcrete<T>::MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase*
+auto AnyImplConcrete<T>::MoveTo(AnyImplStorage& dest) noexcept -> AnyImplBase*
 {
-    return new (storage.AsStorage()) AnyImplConcrete<T>{std::move(*this)};
+    return new (dest.AsStorage()) AnyImplConcrete<T>{std::move(*this)};
 }
 
 template<PooledComponent T>
