@@ -5,18 +5,10 @@
 
 namespace nc
 {
-    void FreeComponent::ComponentGuiElement()
-    {
-        ImGui::Text("Unknown FreeComponent");
-    }
-
-    namespace internal
-    {
-        void DefaultComponentGuiElement()
-        {
-            ImGui::Text("User Component");
-        }
-    }
+void FreeComponent::ComponentGuiElement()
+{
+    ImGui::Text("Unknown FreeComponent");
 }
+} // namespace nc
 
 #endif

@@ -1,10 +1,6 @@
 #include "graphics/ParticleEmitter.h"
 #include "graphics/system/ParticleEmitterSystem.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
-#endif
-
 namespace nc::graphics
 {
 ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
@@ -29,13 +25,3 @@ void ParticleEmitter::RegisterSystem(ParticleEmitterSystem* system)
     m_emitterSystem = system;
 }
 } // namespace nc::graphics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::ParticleEmitter>(graphics::ParticleEmitter*)
-{
-    ImGui::Text("Particle Emitter");
-}
-#endif
-} // namespace nc

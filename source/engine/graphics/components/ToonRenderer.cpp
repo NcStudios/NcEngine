@@ -2,10 +2,6 @@
 #include "ecs/Registry.h"
 #include "graphics/ToonRenderer.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "ui/editor/Widgets.h"
-#endif
-
 namespace
 {
 auto MakeMaterialView(const nc::graphics::ToonMaterial& material) -> nc::graphics::ToonMaterialView
@@ -67,20 +63,3 @@ void ToonRenderer::SetHatchingTiling(uint32_t tiling)
     m_coldData->material.hatchingTiling = tiling;
 }
 } // namespace nc::graphics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::ToonRenderer>(graphics::ToonRenderer* toonRenderer)
-{
-    ImGui::Text("Toon Renderer");
-    ImGui::Text("Mesh: %s", toonRenderer->GetMeshPath().c_str());
-    const auto& material = toonRenderer->GetMaterial();
-    ImGui::Text("Material:");
-    ImGui::Text("  Base Color: %s", material.baseColor.c_str());
-    ImGui::Text("  Overlay: %s", material.overlay.c_str());
-    ImGui::Text("  Hatching Texture: %s", material.hatching.c_str());
-    ImGui::Text("  Hatching Tiling: %u", material.hatchingTiling);
-}
-#endif
-} // namespace nc

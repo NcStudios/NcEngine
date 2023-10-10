@@ -42,20 +42,21 @@ class PhysicsBody final : public ComponentBase
         void ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta);
         void UpdateWorldInertia(const Transform* transform);
         auto Integrate(Transform* transform, float dt) -> IntegrationResult;
-        void Wake() { m_framesAtThreshold = 0u; m_awake = true; }
-        void Sleep() { m_awake = false; }
+        void Wake() noexcept { m_framesAtThreshold = 0u; m_awake = true; }
+        void Sleep() noexcept { m_awake = false; }
 
-        auto GetVelocity() const -> DirectX::FXMVECTOR { return m_linearVelocity; }
-        auto GetAngularVelocity() const -> DirectX::FXMVECTOR { return m_angularVelocity; }
-        auto GetInverseMass() const -> float { return m_properties.mass; }
-        auto GetDrag() const -> float { return m_properties.drag; }
-        auto GetAngularDrag() const -> float { return m_properties.angularDrag; }
-        auto GetFriction() const -> float { return m_properties.friction; }
-        auto GetRestitution() const -> float { return m_properties.restitution; }
-        auto GetInverseInertia() const -> DirectX::FXMMATRIX { return m_invInertiaWorld; }
-        auto UseGravity() const -> bool { return m_properties.useGravity; }
-        auto IsKinematic() const -> bool { return m_properties.isKinematic; }
-        auto IsAwake() const -> bool { return m_awake; }
+        auto GetProperties() const noexcept -> const PhysicsProperties& { return m_properties; }
+        auto GetVelocity() const noexcept -> DirectX::FXMVECTOR { return m_linearVelocity; }
+        auto GetAngularVelocity() const noexcept -> DirectX::FXMVECTOR { return m_angularVelocity; }
+        auto GetInverseMass() const noexcept -> float { return m_properties.mass; }
+        auto GetDrag() const noexcept -> float { return m_properties.drag; }
+        auto GetAngularDrag() const noexcept -> float { return m_properties.angularDrag; }
+        auto GetFriction() const noexcept -> float { return m_properties.friction; }
+        auto GetRestitution() const noexcept -> float { return m_properties.restitution; }
+        auto GetInverseInertia() const noexcept -> DirectX::FXMMATRIX { return m_invInertiaWorld; }
+        auto UseGravity() const noexcept -> bool { return m_properties.useGravity; }
+        auto IsKinematic() const noexcept -> bool { return m_properties.isKinematic; }
+        auto IsAwake() const noexcept -> bool { return m_awake; }
 
     private:
         PhysicsProperties m_properties;
@@ -67,16 +68,5 @@ class PhysicsBody final : public ComponentBase
         Vector3 m_invInertiaLocal;
         uint8_t m_framesAtThreshold;
         bool m_awake;
-
-        #ifdef NC_EDITOR_ENABLED
-        friend void nc::ComponentGuiElement<PhysicsBody>(PhysicsBody*);
-        #endif
 };
 } // namespace nc::physics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<physics::PhysicsBody>(physics::PhysicsBody*);
-#endif
-}

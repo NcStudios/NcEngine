@@ -25,8 +25,4 @@ struct StoragePolicy<physics::ConcaveCollider> : DefaultStoragePolicy
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnRemoveCallbacks = true;
 };
-
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<physics::ConcaveCollider>(physics::ConcaveCollider*);
-#endif
 } // namespace nc

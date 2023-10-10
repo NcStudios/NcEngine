@@ -2,11 +2,15 @@
 
 #include "ncengine/ecs/Component.h"
 
+#include <string_view>
+
 namespace nc::detail
 {
 struct AnyImplBase
 {
     virtual ~AnyImplBase() = default;
+    virtual auto Name() -> std::string_view = 0;
+    virtual auto HasDrawUI() const -> bool = 0;
     virtual void DrawUI() = 0;
 };
 
@@ -19,9 +23,22 @@ class AnyImplConcrete : public AnyImplBase
         {
         }
 
+        auto Name() -> std::string_view override
+        {
+            return m_handler->name;
+        }
+
+        auto HasDrawUI() const -> bool override
+        {
+            return m_handler->drawUI != nullptr;
+        }
+
         void DrawUI() override
         {
-            m_handler->drawUI(*m_instance);
+            if (HasDrawUI())
+            {
+                m_handler->drawUI(*m_instance);
+            }
         }
 
     private:

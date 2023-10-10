@@ -29,11 +29,3 @@ class NetworkDispatcher final : public ComponentBase
         std::unordered_map<PacketType, std::function<void(uint8_t*)>> m_dispatchTable;
 };
 } // namespace nc::net
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<>
-void ComponentGuiElement<net::NetworkDispatcher>(net::NetworkDispatcher*);
-#endif
-} // namespace nc
