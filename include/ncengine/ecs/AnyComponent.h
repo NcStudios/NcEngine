@@ -11,35 +11,49 @@ class AnyComponent
 {
     public:
         /** @brief Construct a null AnyComponent. */
-        explicit AnyComponent() noexcept = default;
+        constexpr explicit AnyComponent() noexcept
+            : m_storage{} {}
 
         /**
          * @brief Construct an AnyComponent wrapper around a component.
          * @tparam T The underlying component type.
-         * @param obj A pointer to the component instance.
-         * @param handlers A pointer to the handler for T.
+         * @param obj A valid pointer to the component instance.
+         * @param handlers A valid pointer to the handler for T.
+         * @throw NcError if either the instance or handler are null.
          */
         template<PooledComponent T>
         explicit AnyComponent(T* instance, ComponentHandler<T>* handler)
-            : m_impl{std::make_unique<detail::AnyImplConcrete<T>>(instance, handler)}
-        {
-        }
+            : m_storage{instance, handler} {}
 
         /** @brief Check if this refers to a valid component. */
         explicit operator bool() const noexcept
         {
-            return static_cast<bool>(m_impl);
+            return m_storage.HasValue();
         }
 
-        /** @brief Invoke ComponentHandler::drawUI with the component instance */
+        /** @brief Check if two AnyComponents refer to the same component. */
+        auto operator==(const AnyComponent& other) const noexcept -> bool
+        {
+            return m_storage == other.m_storage;
+        }
+
+        /** @brief Check if two AnyComponents refer to different components. */
+        auto operator!=(const AnyComponent& other) const noexcept -> bool
+        {
+            return !(*this == other);
+        }
+
+        /**
+         * @brief Invoke ComponentHandler::drawUI with the component instance.
+         * @throw NcError if invoked on a null AnyComponent.
+         */
         void DrawUI()
         {
-            NC_ASSERT(m_impl, "Cannot dispatch through a null AnyComponent.");
-            m_impl->DrawUI();
+            NC_ASSERT(*this, "Cannot dispatch through a null AnyComponent.");
+            m_storage.AsImpl()->DrawUI();
         }
 
     private:
-        /** @todo #438 construct in-place */
-        std::unique_ptr<detail::AnyImplBase> m_impl;
+        detail::AnyImplStorage m_storage;
 };
 } // namespace nc
