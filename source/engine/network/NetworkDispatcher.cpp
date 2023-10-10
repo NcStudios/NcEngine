@@ -1,10 +1,6 @@
 #include "network/NetworkDispatcher.h"
 #include "ncutility/NcError.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
-#endif
-
 namespace nc::net
 {
 NetworkDispatcher::NetworkDispatcher(Entity entity) noexcept
@@ -29,14 +25,3 @@ void NetworkDispatcher::AddHandler(PacketType packetType, std::function<void(uin
     m_dispatchTable[packetType] = func;
 }
 } // namespace nc::net
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<>
-void ComponentGuiElement<net::NetworkDispatcher>(net::NetworkDispatcher*)
-{
-    ImGui::Text("NetworkDispatcher");
-}
-#endif
-} // namespace nc

@@ -2,6 +2,7 @@
 
 #include "Entity.h"
 #include "detail/EditorMacros.h"
+#include "ncengine/type/Type.h"
 #include "ncengine/utility/Signal.h"
 
 #include <concepts>
@@ -79,28 +80,17 @@ struct DefaultStoragePolicy
 template<PooledComponent T>
 struct StoragePolicy : DefaultStoragePolicy {};
 
-/** @brief Optional callbacks for generic component operations. */
+/** @brief Optional data and callbacks for generic component operations. */
 template<PooledComponent T>
 struct ComponentHandler
 {
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T&)>;
 
+    /** @brief A name for the component with no uniqueness constraints. */
+    std::string name = "User Component";
+
     /** @brief Handler for drawing T's UI widget. */
-    DrawUI_t drawUI = [](T&){};
+    DrawUI_t drawUI = nullptr;
 };
-
-#ifdef NC_EDITOR_ENABLED
-namespace internal
-{
-    void DefaultComponentGuiElement();
-}
-
-/** @brief Provide a specialization to customize a pooled component's editor widget. */
-template<class T>
-void ComponentGuiElement(T*)
-{
-    internal::DefaultComponentGuiElement();
-}
-#endif
 } // namespace nc

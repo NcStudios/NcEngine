@@ -34,7 +34,6 @@ namespace nc::ui::editor::controls
     inline void SceneGraphPanel(Registry* registry, float windowHeight);
     inline void SceneGraphNode(Registry* registry, Entity entity, Tag* tag, Transform* transform);
     inline void EntityPanel(Registry* registry, Entity entity);
-    inline void FreeComponentElement(FreeComponent* comp);
     inline void UtilitiesPanel(float* dtMult, Registry* registry, float windowWidth, float windowHeight);
     inline void FrameData(float* dtMult);
     inline void ComponentSystems(Registry* registry);
@@ -107,14 +106,10 @@ namespace nc::ui::editor::controls
         ImGui::PopID();
     }
 
-    template<class T>
-    void ComponentElement(Registry* registry, Entity entity)
+    void PanelElementHeader(std::string_view name)
     {
-        if (auto* component = registry->Get<T>(entity))
-        {
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(component);
-        }
+        ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+        ImGui::Button(name.data(), {-1, 0});
     }
 
     void EntityPanel(Registry* registry, Entity entity)
@@ -125,48 +120,19 @@ namespace nc::ui::editor::controls
             return;
         }
 
-        ImGui::Separator();
-        ImGui::Text("Tag     %s", registry->Get<Tag>(entity)->Value().data());
+        PanelElementHeader("Entity");
         ImGui::Text("Index   %d", entity.Index());
         ImGui::Text("Layer   %d", entity.Layer());
         ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
 
-        /** @todo #425 Only Transform has an AnyComponent interface. Update remaining components. */
         for (auto& any : registry->GetAllComponentsOn(entity))
         {
-            any.DrawUI();
+            if (any.HasDrawUI())
+            {
+                PanelElementHeader(any.Name());
+                any.DrawUI();
+            }
         }
-
-        ComponentElement<graphics::MeshRenderer>(registry, entity);
-        ComponentElement<graphics::PointLight>(registry, entity);
-        ComponentElement<graphics::ToonRenderer>(registry, entity);
-        ComponentElement<graphics::ParticleEmitter>(registry, entity);
-        ComponentElement<physics::PhysicsBody>(registry, entity);
-        if (auto* col = registry->Get<physics::Collider>(entity); col)
-        {
-            // collider model doesn't update/submit unless we tell it to
-            col->SetEditorSelection(true);
-            ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-            ComponentGuiElement(col);
-        }
-
-        ComponentElement<physics::ConcaveCollider>(registry, entity);
-        ComponentElement<net::NetworkDispatcher>(registry, entity);
-
-        for(const auto& comp : registry->Get<ecs::detail::FreeComponentGroup>(entity)->GetComponents())
-            controls::FreeComponentElement(comp);
-
-        ImGui::Separator();
-    }
-
-    void FreeComponentElement(FreeComponent* comp)
-    {
-        if(!comp)
-            return;
-        ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-        ImGui::BeginGroup();
-            comp->ComponentGuiElement();
-        ImGui::EndGroup();
     }
 
     /**

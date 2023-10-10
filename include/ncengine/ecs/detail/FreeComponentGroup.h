@@ -31,7 +31,10 @@ class FreeComponentGroup final : public ComponentBase
         bool Contains() const noexcept;
 
         template<std::derived_from<FreeComponent> T>
-        T* Get() const noexcept; 
+        T* Get() const noexcept;
+
+        template<class F>
+        void ForEach(F&& func);
 
         auto GetComponents() const noexcept -> std::vector<FreeComponent*>;
         void CommitStagedComponents();
@@ -93,5 +96,14 @@ T* FreeComponentGroup::Get() const noexcept
     }
 
     return nullptr;
+}
+
+template<class F>
+void FreeComponentGroup::ForEach(F&& func)
+{
+    for (auto& component : m_components)
+    {
+        func(*component);
+    }
 }
 } // namespace nc::ecs::detail

@@ -85,10 +85,3 @@ class MeshRenderer : public ComponentBase
         std::unique_ptr<MeshRendererColdData> m_coldData;
 };
 } // namespace nc::graphics
-
-namespace nc
-{
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<graphics::MeshRenderer>(graphics::MeshRenderer* meshRenderer);
-#endif
-} // namespace nc

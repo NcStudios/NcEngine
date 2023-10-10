@@ -8,14 +8,14 @@ namespace nc
 {
 class Registry;
 
-/** @brief FrameLogic callable member type. */
-using FrameLogicCallable_t = std::function<void(Entity, Registry*, float)>;
+/** @brief FrameLogic callable member type */
+using FrameLogicCallable_t = std::function<void(Entity self, Registry* registry, float dt)>;
 
 /** @brief FixedLogic callable member type */
-using FixedLogicCallable_t = std::function<void(Entity, Registry*)>;
+using FixedLogicCallable_t = std::function<void(Entity self, Registry* registry)>;
 
 /** @brief CollisionLogic callable member type */
-using CollisionLogicCallable_t = std::function<void(Entity, Entity, Registry*)>;
+using CollisionLogicCallable_t = std::function<void(Entity self, Entity other, Registry* registry)>;
 
 /** @brief FrameLogic callable type requirements */
 template<class Func>
@@ -36,7 +36,7 @@ class FrameLogic final : public ComponentBase
         template<FrameLogicCallable Func>
         FrameLogic(Entity entity, Func&& func)
             : ComponentBase{entity},
-                m_func{std::forward<Func>(func)}
+              m_func{std::forward<Func>(func)}
         {
         }
 
@@ -60,15 +60,15 @@ class FrameLogic final : public ComponentBase
 class FixedLogic final : public ComponentBase
 {
     public:
-        template<std::invocable<Entity, Registry*> Func>
+        template<FixedLogicCallable Func>
         FixedLogic(Entity entity, Func&& func)
             : ComponentBase{entity},
-                m_func{std::forward<Func>(func)}
+              m_func{std::forward<Func>(func)}
         {
         }
 
         /** @brief Set a new callable. */
-        template<std::invocable<Entity, Registry*> Func>
+        template<FixedLogicCallable Func>
         void SetFunction(Func&& func)
         {
             m_func = std::forward<Func>(func);

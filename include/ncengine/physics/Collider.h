@@ -80,16 +80,17 @@ class Collider final : public ComponentBase
         void SetProperties(HullProperties properties);
         void SetProperties(SphereProperties properties);
 
-        void Wake() { m_awake = true; }
-        void Sleep() { m_awake = false; }
+        void Wake() noexcept { m_awake = true; }
+        void Sleep() noexcept { m_awake = false; }
 
-        auto GetInfo() const -> const VolumeInfo& { return m_info; }
-        auto GetType() const -> ColliderType { return m_info.type; }
-        auto GetVolume() const -> const BoundingVolume& { return m_volume; }
-        auto IsTrigger() const -> bool { return m_info.isTrigger; }
-        auto IsAwake() const -> bool { return m_awake; }
+        auto GetInfo() const noexcept -> const VolumeInfo& { return m_info; }
+        auto GetType() const noexcept -> ColliderType { return m_info.type; }
+        auto GetVolume() const noexcept -> const BoundingVolume& { return m_volume; }
+        auto IsTrigger() const noexcept -> bool { return m_info.isTrigger; }
+        auto IsAwake() const noexcept -> bool { return m_awake; }
         auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
+        /** @todo #446 Handle this in editor code. */
         #ifdef NC_EDITOR_ENABLED
         void SetEditorSelection(bool state);
         bool GetEditorSelection();
@@ -103,14 +104,9 @@ class Collider final : public ComponentBase
 
         #ifdef NC_EDITOR_ENABLED
         bool m_selectedInEditor;
-        friend void nc::ComponentGuiElement<Collider>(Collider*);
         #endif
 };
 
 const char* ToCString(ColliderType type);
 } // namespace physics
-
-#ifdef NC_EDITOR_ENABLED
-template<> void ComponentGuiElement<physics::Collider>(physics::Collider*);
-#endif
 } // namespace nc

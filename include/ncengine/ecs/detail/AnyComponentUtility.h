@@ -2,6 +2,8 @@
 
 #include "ncengine/ecs/Component.h"
 
+#include <string_view>
+
 namespace nc::detail
 {
 class AnyImplStorage;
@@ -11,6 +13,8 @@ struct AnyImplBase
     virtual ~AnyImplBase() = default;
     virtual auto Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase* = 0;
     virtual auto MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase* = 0;
+    virtual auto Name() -> std::string_view = 0;
+    virtual auto HasDrawUI() const -> bool = 0;
     virtual void DrawUI() = 0;
 };
 
@@ -24,6 +28,24 @@ class AnyImplConcrete : public AnyImplBase
         auto Clone(AnyImplStorage& storage) const noexcept -> AnyImplBase* override;
         auto MoveTo(AnyImplStorage& storage) noexcept -> AnyImplBase* override;
         void DrawUI() override;
+
+        auto Name() -> std::string_view override
+        {
+            return m_handler->name;
+        }
+
+        auto HasDrawUI() const -> bool override
+        {
+            return m_handler->drawUI != nullptr;
+        }
+
+        void DrawUI() override
+        {
+            if (HasDrawUI())
+            {
+                m_handler->drawUI(*m_instance);
+            }
+        }
 
     private:
         T* m_instance;
