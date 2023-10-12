@@ -140,9 +140,11 @@ void ColliderUIWidget(physics::Collider& collider)
         ImGui::EndCombo();
     }
 
-    ImGui::Checkbox("  ", &info.isTrigger);
-    ImGui::SameLine();
-    ImGui::Text("Trigger");
+    auto isTrigger = collider.IsTrigger();
+    if (ImGui::Checkbox("Trigger", &isTrigger))
+    {
+        collider.SetTrigger(isTrigger);
+    }
 
     auto& offset = info.offset;
 
