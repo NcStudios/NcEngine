@@ -20,6 +20,7 @@ class HullColliderAssetManager : public IAssetService<ConvexHullView, std::strin
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> ConvexHullView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetAllLoaded() const -> std::vector<std::string_view> override;
 
     private:
         std::unordered_map<std::string, asset::HullCollider> m_hullColliders;

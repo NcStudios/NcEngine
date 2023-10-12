@@ -1,6 +1,6 @@
 #include "MeshAssetManager.h"
+#include "AssetUtilities.h"
 #include "asset/AssetData.h"
-#include "assets/AssetUtilities.h"
 
 #include "ncasset/Import.h"
 
@@ -133,6 +133,11 @@ auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const 
 bool MeshAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_accessors.contains(path);
+}
+
+auto MeshAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+{
+    return GetPaths(m_accessors);
 }
 
 auto MeshAssetManager::OnUpdate() -> Signal<const asset::MeshUpdateEventData&>&

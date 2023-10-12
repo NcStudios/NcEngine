@@ -1,4 +1,5 @@
 #include "AudioClipAssetManager.h"
+#include "AssetUtilities.h"
 
 #include "ncasset/Import.h"
 
@@ -71,5 +72,10 @@ auto AudioClipAssetManager::Acquire(const std::string& path, asset_flags_type) c
 bool AudioClipAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_audioClips.contains(path);
+}
+
+auto AudioClipAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+{
+    return GetPaths(m_audioClips);
 }
 }

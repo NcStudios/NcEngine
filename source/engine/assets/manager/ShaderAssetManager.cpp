@@ -1,5 +1,5 @@
 #include "ShaderAssetManager.h"
-#include "assets/AssetUtilities.h"
+#include "AssetUtilities.h"
 
 #include "ncutility/NcError.h"
 
@@ -227,5 +227,13 @@ namespace nc
     bool ShaderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
     {
         return std::ranges::any_of(m_shaderFlyweights.begin(), m_shaderFlyweights.end(), [path](const auto& view) { return view.uid == path; });
+    }
+
+    auto ShaderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+    {
+        return GetPaths(m_shaderFlyweights, [](const auto& item)
+        {
+            return std::string_view{item.uid};
+        });
     }
 }

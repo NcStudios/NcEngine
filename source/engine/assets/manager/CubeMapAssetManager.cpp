@@ -1,6 +1,6 @@
 #include "CubeMapAssetManager.h"
+#include "AssetUtilities.h"
 #include "asset/AssetData.h"
-#include "assets/AssetUtilities.h"
 
 #include "ncasset/Import.h"
 
@@ -126,6 +126,11 @@ auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type) con
 bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_cubeMapIds.cend() != std::ranges::find(m_cubeMapIds, path);
+}
+
+auto CubeMapAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+{
+    return GetPaths(m_cubeMapIds);
 }
 
 auto CubeMapAssetManager::OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&
