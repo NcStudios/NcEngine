@@ -17,8 +17,8 @@ class AnyComponent
         /**
          * @brief Construct an AnyComponent wrapper around a component.
          * @tparam T The underlying component type.
-         * @param obj A valid pointer to the component instance.
-         * @param handlers A valid pointer to the handler for T.
+         * @param instance A valid pointer to the component instance.
+         * @param handler A valid pointer to the handler for T.
          * @throw NcError if either the instance or handler are null.
          */
         template<PooledComponent T>
@@ -63,15 +63,14 @@ class AnyComponent
             return m_storage.AsImpl()->HasDrawUI();
         }
 
-        /**
-         * @brief Invoke ComponentHandler::drawUI with the component instance.
-         * @throw NcError if invoked on a null AnyComponent or if HasDrawUI() is false.
-         */
+        /** @brief Invoke ComponentHandler::drawUI with the component instance, if it is set. */
         void DrawUI()
         {
             NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
-            NC_ASSERT(HasDrawUI(), "No drawUI handler is set for this component type.");
-            m_storage.AsImpl()->DrawUI();
+            if (HasDrawUI())
+            {
+                m_storage.AsImpl()->DrawUI();
+            }
         }
 
     private:

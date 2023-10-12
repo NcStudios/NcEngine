@@ -641,10 +641,7 @@ TEST_F(Registry_unit_tests, GetAllComponentsOn_entityHasComponents_visitsCompone
     for (auto& any : registry.GetAllComponentsOn(e1))
     {
         ASSERT_TRUE(static_cast<bool>(any));
-        if (any.HasDrawUI())
-        {
-            any.DrawUI();
-        }
+        any.DrawUI();
     }
 
     EXPECT_EQ(2, g_numDrawUICalls);

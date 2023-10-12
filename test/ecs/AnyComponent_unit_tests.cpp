@@ -173,6 +173,15 @@ TEST(AnyComponentTest, DrawUI_validCall_dispatchesToHandler)
     EXPECT_EQ(2, numCalls);
 }
 
+TEST(AnyComponentTest, DrawUI_nullFunc_succeeds)
+{
+    auto component = TestComponent{};
+    auto handler = nc::ComponentHandler<TestComponent>{ .drawUI = nullptr };
+    auto uut = nc::AnyComponent{&component, &handler};
+    EXPECT_FALSE(uut.HasDrawUI());
+    EXPECT_NO_THROW(uut.DrawUI());
+}
+
 TEST(AnyComponentTest, DrawUI_nullObject_throws)
 {
     auto uut = nc::AnyComponent{};
