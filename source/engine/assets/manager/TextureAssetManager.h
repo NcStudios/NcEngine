@@ -26,6 +26,7 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> TextureView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&;
 
     private:

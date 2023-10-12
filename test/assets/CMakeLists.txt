@@ -28,6 +28,32 @@ target_link_libraries(AssetId_tests
 
 add_test(AssetId_tests AssetId_tests)
 
+### AssetUtilities Tests ###
+add_executable(AssetUtilities_tests
+    AssetUtilities_tests.cpp
+    ${NC_SOURCE_DIR}/assets/manager/AssetUtilities.cpp
+)
+
+target_include_directories(AssetUtilities_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(AssetUtilities_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(AssetUtilities_tests
+    PRIVATE
+        NcUtility
+        gtest_main
+)
+
+add_test(AssetUtilities_tests AssetUtilities_tests)
+
 ### AudioClipAssetManager Tests ###
 add_executable(AudioClipAssetManager_tests
     AudioClipAssetManager_tests.cpp
@@ -128,7 +154,7 @@ add_test(HullColliderAssetManager_tests HullColliderAssetManager_tests)
 add_executable(CubeMapAssetManager_tests
     CubeMapAssetManager_tests.cpp
     ${NC_SOURCE_DIR}/assets/AssetData.cpp
-    ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
+    ${NC_SOURCE_DIR}/assets/manager/AssetUtilities.cpp
     ${NC_SOURCE_DIR}/assets/manager/CubeMapAssetManager.cpp
 )
 
@@ -163,7 +189,7 @@ add_test(CubeMapAssetManager_tests CubeMapAssetManager_tests)
 add_executable(MeshAssetManager_tests
     MeshAssetManager_tests.cpp
     ${NC_SOURCE_DIR}/assets/manager/MeshAssetManager.cpp
-    ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
+    ${NC_SOURCE_DIR}/assets/manager/AssetUtilities.cpp
 )
 
 target_compile_definitions(MeshAssetManager_tests
@@ -197,7 +223,7 @@ add_test(MeshAssetManager_tests MeshAssetManager_tests)
 add_executable(ShaderAssetManager_tests
     ShaderAssetManager_tests.cpp
     ${NC_SOURCE_DIR}/assets/manager/ShaderAssetManager.cpp
-    ${NC_SOURCE_DIR}/assets/AssetUtilities.cpp
+    ${NC_SOURCE_DIR}/assets/manager/AssetUtilities.cpp
 )
 
 target_compile_definitions(ShaderAssetManager_tests

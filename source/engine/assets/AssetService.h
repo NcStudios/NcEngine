@@ -3,6 +3,9 @@
 #include "asset/Assets.h"
 #include "service/ServiceLocator.h"
 
+#include <string_view>
+#include <vector>
+
 namespace nc
 {
     /** Interface for services that manage assets. */
@@ -21,6 +24,7 @@ namespace nc
             virtual void UnloadAll(asset_flags_type flags = AssetFlags::None) = 0;
             virtual auto Acquire(const InputType& input, asset_flags_type flags = AssetFlags::None) const -> data_type = 0;
             virtual bool IsLoaded(const InputType& input, asset_flags_type flags = AssetFlags::None) const = 0;
+            virtual auto GetAllLoaded() const -> std::vector<std::string_view> = 0;
     };
 
     /** Helper alias for locating asset services. */
