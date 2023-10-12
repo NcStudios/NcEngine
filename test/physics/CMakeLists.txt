@@ -53,3 +53,29 @@ target_link_libraries(ClientObjectProperties_unit_tests
 add_test(ClientObjectProperties_unit_tests ClientObjectProperties_unit_tests)
 
 add_subdirectory(collision)
+
+### Collider Tests ###
+add_executable(Collider_unit_tests
+    Collider_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/Collider.cpp
+)
+
+target_include_directories(Collider_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(Collider_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(Collider_unit_tests
+    PRIVATE
+        NcMath
+        gtest_main
+)
+
+add_test(Collider_unit_tests Collider_unit_tests)
