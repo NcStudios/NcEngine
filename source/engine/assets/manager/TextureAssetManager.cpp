@@ -1,4 +1,5 @@
 #include "TextureAssetManager.h"
+#include "AssetUtilities.h"
 #include "asset/Assets.h"
 #include "asset/AssetData.h"
 
@@ -140,5 +141,13 @@ bool TextureAssetManager::IsLoaded(const std::string& path, asset_flags_type) co
 auto TextureAssetManager::OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&
 {
     return m_onUpdate;
+}
+
+auto TextureAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+{
+    return GetPaths(m_textureData, [](const auto& data)
+    {
+        return std::string_view{data.id};
+    });
 }
 } // namespace nc

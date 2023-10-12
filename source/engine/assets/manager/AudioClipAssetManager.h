@@ -20,6 +20,7 @@ class AudioClipAssetManager : public IAssetService<AudioClipView, std::string>
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> AudioClipView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetAllLoaded() const -> std::vector<std::string_view> override;
 
     private:
         std::unordered_map<std::string, asset::AudioClip> m_audioClips;

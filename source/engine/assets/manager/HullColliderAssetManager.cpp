@@ -1,4 +1,5 @@
 #include "HullColliderAssetManager.h"
+#include "AssetUtilities.h"
 
 #include "ncasset/Import.h"
 
@@ -71,5 +72,10 @@ namespace nc
     bool HullColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
     {
         return m_hullColliders.contains(path);
+    }
+
+    auto HullColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+    {
+        return GetPaths(m_hullColliders);
     }
 }
