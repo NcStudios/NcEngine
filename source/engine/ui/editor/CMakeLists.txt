@@ -3,3 +3,5 @@ target_sources(${NC_ENGINE_LIB}
         ComponentWidgets.cpp
         Editor.cpp
 )
+
+add_subdirectory(assets)
