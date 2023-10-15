@@ -13,6 +13,8 @@
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
+#include <array>
+
 namespace
 {
 void Decompose(DirectX::FXMMATRIX matrix, nc::Vector3* pos, nc::Vector3* rot, nc::Vector3* scl)
@@ -264,7 +266,7 @@ void ColliderUIWidget(physics::Collider& collider)
 #endif
 
     using namespace std::string_view_literals;
-    constexpr auto colliderTypes = { "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
+    constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
     ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);
 
     switch (collider.GetType())
