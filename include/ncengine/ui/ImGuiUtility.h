@@ -29,34 +29,34 @@ constexpr auto g_minScale = 0.0001f;
 constexpr auto g_maxScale = 1000.0f;
 
 /** @brief Text input UI widget. */
-auto InputText(std::string* str, const char* label, ImGuiInputTextFlags flags = 0) -> bool;
+auto InputText(std::string& text, const char* label, ImGuiInputTextFlags flags = 0) -> bool;
 
 /** @brief Vector3 UI widget. */
-auto InputVector3(Vector3* vec, const char* label, float speed = 1.0f, float min = 0.0f, float max = 100.0f) -> bool;
+auto InputVector3(Vector3& vec, const char* label, float speed = 1.0f, float min = 0.0f, float max = 100.0f) -> bool;
 
 /** @brief Vector3 UI widget for position data. */
-auto InputPosition(Vector3* position, const char* label) -> bool;
+auto InputPosition(Vector3& position, const char* label) -> bool;
 
 /** @brief Vector3 UI widget for rotation data. */
-auto InputAngles(Vector3* angles, const char* label) -> bool;
+auto InputAngles(Vector3& angles, const char* label) -> bool;
 
 /** @brief Vector3 UI widget for scale data. */
-auto InputScale(Vector3* scale, const char* label) -> bool;
+auto InputScale(Vector3& scale, const char* label) -> bool;
 
 /** @brief Color picker UI widget. */
-auto InputColor(Vector3* color, const char* label) -> bool;
+auto InputColor(Vector3& color, const char* label) -> bool;
 
 /** @brief unsigned UI widget. */
-auto InputUnsigned(unsigned* value, const char* label) -> bool;
+auto InputUnsigned(unsigned& value, const char* label) -> bool;
 
 /** @brief float UI widget. */
-auto DragFloat(float* value, const char* label, float speed = 1.0f, float min = 0.0f, float max = 1000.0f) -> bool;
+auto DragFloat(float& value, const char* label, float speed = 1.0f, float min = 0.0f, float max = 1000.0f) -> bool;
 
 /** @brief Checkbox UI widget. */
-auto Checkbox(bool* value, const char* name) -> bool;
+auto Checkbox(bool& value, const char* name) -> bool;
 
 /** @brief Combobox UI widget */
-auto Combobox(std::string* value, const char* label, std::span<const std::string_view> items);
+auto Combobox(std::string& selected, const char* label, std::span<const std::string_view> items);
 
 /**
  * @brief Simple getter/setter-based property wrapper.
@@ -88,7 +88,7 @@ struct Property
 auto PropertyWidget(const auto& property, auto& instance, auto&& widget, auto&&... args) -> bool
 {
     auto value = std::invoke(property.get, instance);
-    if (widget(&value, property.name, std::forward<decltype(args)>(args)...))
+    if (widget(value, property.name, std::forward<decltype(args)>(args)...))
     {
         std::invoke(property.set, instance, value);
         return true;
@@ -205,63 +205,63 @@ inline auto InputTextCallback(ImGuiInputTextCallbackData* data) -> int
 }
 } // namespace internal
 
-inline auto InputText(std::string* str, const char* label, ImGuiInputTextFlags flags) -> bool
+inline auto InputText(std::string& text, const char* label, ImGuiInputTextFlags flags) -> bool
 {
     flags |= ImGuiInputTextFlags_CallbackResize | ImGuiInputTextFlags_EnterReturnsTrue;
-    internal::InputTextCallbackUserData userData{.string = str};
-    return ImGui::InputText(label, (char*)str->c_str(), str->capacity() + 1, flags, internal::InputTextCallback, &userData);
+    auto userData = internal::InputTextCallbackUserData{.string = &text};
+    return ImGui::InputText(label, text.data(), text.capacity() + 1, flags, internal::InputTextCallback, &userData);
 }
 
-inline auto InputVector3(Vector3* vec, const char* label, float speed, float min, float max) -> bool
+inline auto InputVector3(Vector3& vec, const char* label, float speed, float min, float max) -> bool
 {
-    return ImGui::DragFloat3(label, &(vec->x), speed, min, max);
+    return ImGui::DragFloat3(label, &vec.x, speed, min, max);
 }
 
-inline auto InputPosition(Vector3* position, const char* label) -> bool
+inline auto InputPosition(Vector3& position, const char* label) -> bool
 {
-    return ImGui::DragFloat3(label, &(position->x), 1.0f, g_minPos, g_maxPos);
+    return ImGui::DragFloat3(label, &position.x, 1.0f, g_minPos, g_maxPos);
 }
 
-inline auto InputAngles(Vector3* angles, const char* label) -> bool
+inline auto InputAngles(Vector3& angles, const char* label) -> bool
 {
-    return ImGui::DragFloat3(label, &(angles->x), 0.1f, g_minAngle, g_maxAngle);
+    return ImGui::DragFloat3(label, &angles.x, 0.1f, g_minAngle, g_maxAngle);
 }
 
-inline auto InputScale(Vector3* scale, const char* label) -> bool
+inline auto InputScale(Vector3& scale, const char* label) -> bool
 {
-    return ImGui::DragFloat3(label, &(scale->x), 0.5f, g_minScale, g_maxScale);
+    return ImGui::DragFloat3(label, &scale.x, 0.5f, g_minScale, g_maxScale);
 }
 
-inline auto InputColor(Vector3* color, const char* label) -> bool
+inline auto InputColor(Vector3& color, const char* label) -> bool
 {
-    return ImGui::ColorEdit3(label, &(color->x), ImGuiColorEditFlags_NoInputs);
+    return ImGui::ColorEdit3(label, &color.x, ImGuiColorEditFlags_NoInputs);
 }
 
-inline auto InputUnsigned(unsigned* value, const char* label) -> bool
+inline auto InputUnsigned(unsigned& value, const char* label) -> bool
 {
     constexpr auto step = 1u;
-    return ImGui::InputScalar(label, ImGuiDataType_U32, value, &step);
+    return ImGui::InputScalar(label, ImGuiDataType_U32, &value, &step);
 }
 
-inline auto DragFloat(float* value, const char* label, float speed, float min, float max) -> bool
+inline auto DragFloat(float& value, const char* label, float speed, float min, float max) -> bool
 {
-    return ImGui::DragFloat(label, value, speed, min, max);
+    return ImGui::DragFloat(label, &value, speed, min, max);
 }
 
-inline auto Checkbox(bool* value, const char* name) -> bool
+inline auto Checkbox(bool& value, const char* name) -> bool
 {
-    return ImGui::Checkbox(name, value);
+    return ImGui::Checkbox(name, &value);
 }
 
-inline auto Combobox(std::string* value, const char* label, std::span<const std::string_view> items)
+inline auto Combobox(std::string& selected, const char* label, std::span<const std::string_view> items)
 {
-    if (ImGui::BeginCombo(label, value->c_str()))
+    if (ImGui::BeginCombo(label, selected.c_str()))
     {
         for (const auto& path : items)
         {
             if (ImGui::Selectable(path.data()))
             {
-                *value = path.data();
+                selected = path.data();
                 return true;
             }
         }

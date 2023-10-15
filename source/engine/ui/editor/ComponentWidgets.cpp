@@ -17,19 +17,6 @@
 
 namespace
 {
-void Decompose(DirectX::FXMMATRIX matrix, nc::Vector3* pos, nc::Vector3* rot, nc::Vector3* scl)
-{
-    auto scl_v = DirectX::XMVECTOR{};
-    auto rot_v = DirectX::XMVECTOR{};
-    auto pos_v = DirectX::XMVECTOR{};
-    auto quat = nc::Quaternion::Identity();
-    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, matrix);
-    DirectX::XMStoreVector3(scl, scl_v);
-    DirectX::XMStoreQuaternion(&quat, rot_v);
-    DirectX::XMStoreVector3(pos, pos_v);
-    *rot = quat.ToEulerAngles();
-}
-
 namespace audio_source_ext
 {
 using T = nc::audio::AudioSource;
@@ -70,8 +57,8 @@ constexpr auto typeProp      = nc::ui::Property{ getType,          setType,     
 void BoxProperties(nc::physics::Collider& obj)
 {
     auto [_, offset, scale] = obj.GetInfo();
-    const auto centerModified = nc::ui::InputPosition(&offset, "center");
-    const auto extentsModified = nc::ui::InputScale(&scale, "extents");
+    const auto centerModified = nc::ui::InputPosition(offset, "center");
+    const auto extentsModified = nc::ui::InputScale(scale, "extents");
     if (centerModified || extentsModified)
     {
         obj.SetProperties(nc::physics::BoxProperties{offset, scale});
@@ -83,9 +70,9 @@ void CapsuleProperties(nc::physics::Collider& obj)
     auto [_, offset, scale] = obj.GetInfo();
     auto height = scale.y * 2.0f;
     auto radius = scale.x * 0.5f;
-    const auto centerModified = nc::ui::InputPosition(&offset, "center");
-    const auto heightModified = nc::ui::DragFloat(&height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    const auto radiusModified = nc::ui::DragFloat(&radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto centerModified = nc::ui::InputPosition(offset, "center");
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
     if (centerModified || heightModified || radiusModified)
     {
         obj.SetProperties(nc::physics::CapsuleProperties{offset, height, radius});
@@ -102,8 +89,8 @@ void SphereProperties(nc::physics::Collider& obj)
 {
     auto [_, offset, scale] = obj.GetInfo();
     auto radius = scale.x * 0.5f;
-    const auto centerModified = nc::ui::InputPosition(&offset, "center");
-    const auto radiusModified = nc::ui::DragFloat(&radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto centerModified = nc::ui::InputPosition(offset, "center");
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
     if (centerModified || radiusModified)
     {
         obj.SetProperties(nc::physics::SphereProperties{offset, radius});
@@ -203,13 +190,22 @@ void TagUIWidget(Tag& tag)
 
 void TransformUIWidget(Transform& transform)
 {
-    auto pos = Vector3{};
-    auto rot = Vector3{};
+    auto scl_v = DirectX::XMVECTOR{};
+    auto rot_v = DirectX::XMVECTOR{};
+    auto pos_v = DirectX::XMVECTOR{};
+    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.TransformationMatrix());
+
     auto scl = Vector3{};
-    Decompose(transform.TransformationMatrix(), &pos, &rot, &scl);
-    if(ui::InputPosition(&pos, "position")) transform.SetPosition(pos);
-    if(ui::InputAngles(&rot, "rotation"))   transform.SetRotation(rot);
-    if(ui::InputScale(&scl, "scale"))       transform.SetScale(scl);
+    auto pos = Vector3{};
+    auto quat = nc::Quaternion::Identity();
+    DirectX::XMStoreVector3(&scl, scl_v);
+    DirectX::XMStoreQuaternion(&quat, rot_v);
+    DirectX::XMStoreVector3(&pos, pos_v);
+    auto rot = quat.ToEulerAngles();
+
+    if(ui::InputPosition(pos, "position")) transform.SetPosition(pos);
+    if(ui::InputAngles(rot, "rotation"))   transform.SetRotation(rot);
+    if(ui::InputScale(scl, "scale"))       transform.SetScale(scl);
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
