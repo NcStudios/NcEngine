@@ -13,8 +13,6 @@
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
-#include <array>
-
 namespace
 {
 void Decompose(DirectX::FXMMATRIX matrix, nc::Vector3* pos, nc::Vector3* rot, nc::Vector3* scl)
@@ -48,15 +46,19 @@ constexpr auto setAssetPath = [](auto& obj, auto& str)
 
 constexpr auto getType = [](auto& obj)
 {
-    return std::string{nc::physics::ToCString(obj.GetType())};
+    return std::string{nc::physics::ToString(obj.GetType())};
 };
 
 constexpr auto setType = [](auto& obj, auto& str)
 {
-    if      (str == "Box")     obj.SetProperties(nc::physics::BoxProperties{});
-    else if (str == "Capsule") obj.SetProperties(nc::physics::CapsuleProperties{});
-    else if (str == "Hull")    obj.SetProperties(nc::physics::HullProperties{});
-    else if (str == "Sphere")  obj.SetProperties(nc::physics::SphereProperties{});
+    using namespace nc::physics;
+    switch(FromString(str))
+    {
+        case ColliderType::Box:     { obj.SetProperties(BoxProperties{});     break; }
+        case ColliderType::Capsule: { obj.SetProperties(CapsuleProperties{}); break; }
+        case ColliderType::Hull:    { /** @todo #453 need default asset. */   break; } 
+        case ColliderType::Sphere:  { obj.SetProperties(SphereProperties{});  break; }
+    }
 };
 
 constexpr auto triggerProp   = nc::ui::Property{ &T::IsTrigger,    &T::SetTrigger, "isTrigger" };
@@ -262,8 +264,8 @@ void ColliderUIWidget(physics::Collider& collider)
 #endif
 
     using namespace std::string_view_literals;
-    constexpr auto types = std::array<std::string_view, 4> { "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
-    ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, types);
+    constexpr auto colliderTypes = { "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
+    ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);
 
     switch (collider.GetType())
     {
@@ -278,6 +280,7 @@ void ColliderUIWidget(physics::Collider& collider)
 
 void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
 {
+    /** @todo #454 Allow updating asset. */
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 

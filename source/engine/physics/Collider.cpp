@@ -91,16 +91,27 @@ auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere
     }, m_volume);
 }
 
-const char* ToCString(ColliderType type)
+auto ToString(ColliderType type) -> std::string_view
 {
+    using namespace std::string_view_literals;
     switch(type)
     {
-        case ColliderType::Box:     return "Box";
-        case ColliderType::Capsule: return "Capsule";
-        case ColliderType::Sphere:  return "Sphere";
-        case ColliderType::Hull:    return "Hull";
+        case ColliderType::Box:     return "Box"sv;
+        case ColliderType::Capsule: return "Capsule"sv;
+        case ColliderType::Sphere:  return "Sphere"sv;
+        case ColliderType::Hull:    return "Hull"sv;
         default: throw NcError("Unknown ColliderType");
     }
+}
+
+auto FromString(std::string_view type) -> ColliderType
+{
+    using namespace std::string_view_literals;
+    if      (type == "Box"sv)     return ColliderType::Box;
+    else if (type == "Capsule"sv) return ColliderType::Capsule;
+    else if (type == "Hull"sv)    return ColliderType::Hull;
+    else if (type == "Sphere"sv)  return ColliderType::Sphere;
+    throw NcError{fmt::format("Failed to parse ColliderType: {}", type)};
 }
 
 #ifdef NC_EDITOR_ENABLED
