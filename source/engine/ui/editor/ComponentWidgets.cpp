@@ -185,7 +185,7 @@ void FrameLogicUIWidget(FrameLogic&)
 
 void TagUIWidget(Tag& tag)
 {
-    ui::PropertyWidget(tag_ext::tagProp, tag, &ui::InputText, 0);
+    ui::PropertyWidget(tag_ext::tagProp, tag, &ui::InputText);
 }
 
 void TransformUIWidget(Transform& transform)
@@ -231,9 +231,12 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter&)
 
 void PointLightUIWidget(graphics::PointLight& light)
 {
-    ui::PropertyWidget(point_light_ext::ambientColorProp, light, &ui::InputColor);
-    ui::PropertyWidget(point_light_ext::diffuseColorProp, light, &ui::InputColor);
-    ui::PropertyWidget(point_light_ext::diffuseIntensityProp, light, &ui::DragFloat, 0.1f, 0.0f, 1200.0f);
+    constexpr auto step = 0.1f;
+    constexpr auto min = 0.0f;
+    constexpr auto max = 1200.0f;
+    ui::PropertyWidget(point_light_ext::ambientColorProp, light, &ui::InputColor3);
+    ui::PropertyWidget(point_light_ext::diffuseColorProp, light, &ui::InputColor3);
+    ui::PropertyWidget(point_light_ext::diffuseIntensityProp, light, &ui::DragFloat, step, min, max);
 }
 
 void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
@@ -244,7 +247,7 @@ void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
     ui::PropertyWidget(toon_renderer_ext::baseColorProp, renderer, &ui::Combobox, textures);
     ui::PropertyWidget(toon_renderer_ext::overlayProp, renderer, &ui::Combobox, textures);
     ui::PropertyWidget(toon_renderer_ext::hatchingProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputUnsigned);
+    ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
 }
 
 void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
@@ -267,10 +270,10 @@ void ColliderUIWidget(physics::Collider& collider)
 
     switch (collider.GetType())
     {
-        case physics::ColliderType::Box:     { collider_ext::BoxProperties(collider); break; }
+        case physics::ColliderType::Box:     { collider_ext::BoxProperties(collider);     break; }
         case physics::ColliderType::Capsule: { collider_ext::CapsuleProperties(collider); break; }
-        case physics::ColliderType::Hull:    { collider_ext::HullProperties(collider); break; }
-        case physics::ColliderType::Sphere:  { collider_ext::SphereProperties(collider); break; }
+        case physics::ColliderType::Hull:    { collider_ext::HullProperties(collider);    break; }
+        case physics::ColliderType::Sphere:  { collider_ext::SphereProperties(collider);  break; }
     }
 
     ui::PropertyWidget(collider_ext::triggerProp, collider, &ui::Checkbox);
@@ -284,17 +287,22 @@ void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
 
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
 {
+    constexpr auto largeStep = 0.1f;
+    constexpr auto smallStep = 0.01f;
+    constexpr auto min = 0.0f;
+    constexpr auto max = 1000.0f;
+
     ImGui::Text("Status: %s", physicsBody.IsAwake() ? "Awake" : "Asleep");
     if (!physicsBody.ParentEntity().IsStatic())
     {
-        ui::PropertyWidget(physics_body_ext::useGravityProp, physicsBody, &ui::Checkbox);
+        ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
         ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
-        ui::PropertyWidget(physics_body_ext::massProp, physicsBody, &ui::DragFloat, 0.1f, 0.0f, 1000.0f);
-        ui::PropertyWidget(physics_body_ext::dragProp, physicsBody, &ui::DragFloat, 0.01f, 0.0f, 1000.0f);
-        ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, 0.01f, 0.0f, 1000.0f);
+        ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
+        ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, max);
+        ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, max);
     }
 
-    ui::PropertyWidget(physics_body_ext::frictionProp, physicsBody, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-    ui::PropertyWidget(physics_body_ext::restitutionProp, physicsBody, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(physics_body_ext::frictionProp,    physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
+    ui::PropertyWidget(physics_body_ext::restitutionProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
 }
 } // namespace nc::editor
