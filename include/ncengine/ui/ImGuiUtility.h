@@ -6,6 +6,7 @@
 #include "ncmath/Vector.h"
 #include "ncmath/Geometry.h"
 
+#include <algorithm>
 #include <functional>
 #include <numbers>
 #include <span>
@@ -248,16 +249,18 @@ inline auto Combobox(std::string& value, const char* label, std::span<const std:
 {
     if (ImGui::BeginCombo(label, value.c_str()))
     {
-        for (const auto& path : items)
+        const auto selected = std::ranges::find_if(items, [](const auto& text)
         {
-            if (ImGui::Selectable(path.data()))
-            {
-                value = path.data();
-                return true;
-            }
-        }
+            return ImGui::Selectable(text.data());
+        });
 
         ImGui::EndCombo();
+
+        if (selected != std::cend(items))
+        {
+            value = selected->data();
+            return true;
+        }
     }
 
     return false;
