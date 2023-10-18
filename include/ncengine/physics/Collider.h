@@ -7,6 +7,7 @@
 #include "ncmath/Geometry.h"
 
 #include <memory>
+#include <string_view>
 #include <variant>
 
 namespace nc
@@ -26,8 +27,11 @@ enum class ColliderType : uint8_t
     Box, Sphere, Capsule, Hull
 };
 
-/** @brief Convert a ColliderType to a string. */
-auto ToCString(ColliderType type) -> const char*;
+/** @brief Convert a ColliderType to a std::string_view. */
+auto ToString(ColliderType type) -> std::string_view;
+
+/** @brief Parse a ColliderType from a std::string_view. */
+auto FromString(std::string_view type) -> ColliderType;
 
 /** @brief Properties for initializing a Sphere Collider. */
 struct SphereProperties

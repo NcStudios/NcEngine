@@ -5,4 +5,5 @@ target_sources(${NC_ENGINE_LIB}
         EditorUI.cpp
 )
 
+add_subdirectory(assets)
 add_subdirectory(windows)

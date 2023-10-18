@@ -1,4 +1,5 @@
 #include "ComponentWidgets.h"
+#include "ui/editor/assets/AssetWrapper.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -10,12 +11,162 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/PhysicsBody.h"
-#include "ui/editor/Widgets.h"
+#include "ncengine/ui/ImGuiUtility.h"
+
+#include <array>
 
 namespace
 {
-constexpr auto g_maxAngle = std::numbers::pi_v<float> * 2.0f;
-constexpr auto g_minAngle = -g_maxAngle;
+namespace audio_source_ext
+{
+using T = nc::audio::AudioSource;
+
+constexpr auto audioClipProperty = nc::ui::Property{ &T::GetClip, &T::SetClip, "audioClip" };
+} // namespace audio_source_ext
+
+namespace collider_ext
+{
+using T = nc::physics::Collider;
+
+constexpr auto setAssetPath = [](auto& obj, auto& str)
+{
+    obj.SetProperties(nc::physics::HullProperties{str});
+};
+
+constexpr auto getType = [](auto& obj)
+{
+    return std::string{nc::physics::ToString(obj.GetType())};
+};
+
+constexpr auto setType = [](auto& obj, auto& str)
+{
+    using namespace nc::physics;
+    switch(FromString(str))
+    {
+        case ColliderType::Box:     { obj.SetProperties(BoxProperties{});     break; }
+        case ColliderType::Capsule: { obj.SetProperties(CapsuleProperties{}); break; }
+        case ColliderType::Hull:    { /** @todo #453 need default asset. */   break; } 
+        case ColliderType::Sphere:  { obj.SetProperties(SphereProperties{});  break; }
+    }
+};
+
+constexpr auto triggerProp   = nc::ui::Property{ &T::IsTrigger,    &T::SetTrigger, "isTrigger" };
+constexpr auto assetPathProp = nc::ui::Property{ &T::GetAssetPath, setAssetPath,   "asset"     };
+constexpr auto typeProp      = nc::ui::Property{ getType,          setType,        "type"      };
+
+void BoxProperties(nc::physics::Collider& obj)
+{
+    auto [_, offset, scale] = obj.GetInfo();
+    const auto centerModified = nc::ui::InputPosition(offset, "center");
+    const auto extentsModified = nc::ui::InputScale(scale, "extents");
+    if (centerModified || extentsModified)
+    {
+        obj.SetProperties(nc::physics::BoxProperties{offset, scale});
+    }
+}
+
+void CapsuleProperties(nc::physics::Collider& obj)
+{
+    auto [_, offset, scale] = obj.GetInfo();
+    auto height = scale.y * 2.0f;
+    auto radius = scale.x * 0.5f;
+    const auto centerModified = nc::ui::InputPosition(offset, "center");
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    if (centerModified || heightModified || radiusModified)
+    {
+        obj.SetProperties(nc::physics::CapsuleProperties{offset, height, radius});
+    }
+}
+
+void HullProperties(nc::physics::Collider& obj)
+{
+    auto colliders = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::HullCollider);
+    nc::ui::PropertyWidget(assetPathProp, obj, &nc::ui::Combobox, colliders);
+}
+
+void SphereProperties(nc::physics::Collider& obj)
+{
+    auto [_, offset, scale] = obj.GetInfo();
+    auto radius = scale.x * 0.5f;
+    const auto centerModified = nc::ui::InputPosition(offset, "center");
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    if (centerModified || radiusModified)
+    {
+        obj.SetProperties(nc::physics::SphereProperties{offset, radius});
+    }
+}
+} // namespace collider_ext
+
+namespace mesh_renderer_ext
+{
+using T = nc::graphics::MeshRenderer;
+
+constexpr auto getBaseColor = [](auto& obj) { return obj.GetMaterial().baseColor; };
+constexpr auto getNormal    = [](auto& obj) { return obj.GetMaterial().normal;    };
+constexpr auto getRoughness = [](auto& obj) { return obj.GetMaterial().roughness; };
+constexpr auto getMetallic  = [](auto& obj) { return obj.GetMaterial().metallic;  };
+
+constexpr auto meshProp      = nc::ui::Property{ &T::GetMeshPath, &T::SetMesh,      "mesh"      };
+constexpr auto baseColorProp = nc::ui::Property{ getBaseColor,    &T::SetBaseColor, "baseColor" };
+constexpr auto normalProp    = nc::ui::Property{ getNormal,       &T::SetNormal,    "normal"    };
+constexpr auto roughnessProp = nc::ui::Property{ getRoughness,    &T::SetRoughness, "roughness" };
+constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetallic,  "metallic"  };
+} // namespace mesh_renderer_ext
+
+namespace physics_body_ext
+{
+using T = nc::physics::PhysicsBody;
+
+constexpr auto getMass = [](T& obj)
+{
+    const auto mass = obj.GetInverseMass();
+    return nc::FloatEqual(mass, 0.0f) ? 0.0f : 1.0f / mass;
+};
+
+constexpr auto massProp        = nc::ui::Property{ getMass,            &T::SetMass,        "mass"        };
+constexpr auto dragProp        = nc::ui::Property{ &T::GetDrag,        &T::SetDrag,        "drag"        };
+constexpr auto angularDragProp = nc::ui::Property{ &T::GetAngularDrag, &T::SetAngularDrag, "angularDrag" };
+constexpr auto frictionProp    = nc::ui::Property{ &T::GetFriction,    &T::SetFriction,    "friction"    };
+constexpr auto restitutionProp = nc::ui::Property{ &T::GetRestitution, &T::SetRestitution, "restitution" };
+constexpr auto useGravityProp  = nc::ui::Property{ &T::UseGravity,     &T::SetUseGravity,  "useGravity"  };
+constexpr auto isKinematicProp = nc::ui::Property{ &T::IsKinematic,    &T::SetIsKinematic, "isKinematic" };
+} // namespace physics_body_ext
+
+namespace point_light_ext
+{
+using T = nc::graphics::PointLight;
+
+constexpr auto ambientColorProp     = nc::ui::Property{ &T::GetAmbient,          &T::SetAmbient,          "ambientColor"     };
+constexpr auto diffuseColorProp     = nc::ui::Property{ &T::GetDiffuseColor,     &T::SetDiffuseColor,     "diffuseColor"     };
+constexpr auto diffuseIntensityProp = nc::ui::Property{ &T::GetDiffuseIntensity, &T::SetDiffuseIntensity, "diffuseIntensity" };
+} // namespace point_light_ext
+
+namespace tag_ext
+{
+using T = nc::Tag;
+
+constexpr auto getTag = [](auto& obj)             { return std::string{obj.Value().data()}; };
+constexpr auto setTag = [](auto& obj, auto&& str) { obj.Set(std::move(str)); };
+
+constexpr auto tagProp = nc::ui::Property{ getTag, setTag, "tag" };
+} // namespace tag_ext
+
+namespace toon_renderer_ext
+{
+using T = nc::graphics::ToonRenderer;
+
+constexpr auto getBaseColor = [](auto& obj) { return obj.GetMaterial().baseColor;      };
+constexpr auto getOverlay   = [](auto& obj) { return obj.GetMaterial().overlay;        };
+constexpr auto getHatching  = [](auto& obj) { return obj.GetMaterial().hatching;       };
+constexpr auto getTiling    = [](auto& obj) { return obj.GetMaterial().hatchingTiling; };
+
+constexpr auto meshProp           = nc::ui::Property{ &T::GetMeshPath, &T::SetMesh,           "mesh"      };
+constexpr auto baseColorProp      = nc::ui::Property{ getBaseColor,    &T::SetBaseColor,      "baseColor" };
+constexpr auto overlayProp        = nc::ui::Property{ getOverlay,      &T::SetOverlay,        "overlay"   };
+constexpr auto hatchingProp       = nc::ui::Property{ getHatching,     &T::SetHatching,       "hatching"  };
+constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHatchingTiling, "tiling"    };
+} // namespace toon_renderer_ext
 } // anonymous namespace
 
 namespace nc::editor
@@ -34,7 +185,7 @@ void FrameLogicUIWidget(FrameLogic&)
 
 void TagUIWidget(Tag& tag)
 {
-    ImGui::Text("  %s", tag.Value().data());
+    ui::PropertyWidget(tag_ext::tagProp, tag, &ui::InputText);
 }
 
 void TransformUIWidget(Transform& transform)
@@ -43,76 +194,60 @@ void TransformUIWidget(Transform& transform)
     auto rot_v = DirectX::XMVECTOR{};
     auto pos_v = DirectX::XMVECTOR{};
     DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.TransformationMatrix());
+
     auto scl = Vector3{};
     auto pos = Vector3{};
-    auto rot = Quaternion::Identity();
+    auto quat = nc::Quaternion::Identity();
     DirectX::XMStoreVector3(&scl, scl_v);
-    DirectX::XMStoreQuaternion(&rot, rot_v);
+    DirectX::XMStoreQuaternion(&quat, rot_v);
     DirectX::XMStoreVector3(&pos, pos_v);
+    auto rot = quat.ToEulerAngles();
 
-    auto angles = rot.ToEulerAngles();
-
-    ui::editor::xyzWidgetHeader("   ");
-    auto posResult = ui::editor::xyzWidget("Pos", "transformpos", &pos.x, &pos.y, &pos.z);
-    auto rotResult = ui::editor::xyzWidget("Rot", "transformrot", &angles.x, &angles.y, &angles.z, g_minAngle, g_maxAngle);
-    auto sclResult = ui::editor::xyzWidget("Scl", "transformscl", &scl.x, &scl.y, &scl.z);
-
-    if(posResult)
-        transform.SetPosition(pos);
-    if(rotResult)
-        transform.SetRotation(angles);
-    if(sclResult)
-        transform.SetScale(scl);
+    if(ui::InputPosition(pos, "position")) transform.SetPosition(pos);
+    if(ui::InputAngles(rot, "rotation"))   transform.SetRotation(rot);
+    if(ui::InputScale(scl, "scale"))       transform.SetScale(scl);
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
 {
-    ImGui::Text("AudioClip: %s", audioSource.GetClip().c_str());
+    auto clips = ui::editor::GetLoadedAssets(asset::AssetType::AudioClip);
+    ui::PropertyWidget(audio_source_ext::audioClipProperty, audioSource, &ui::Combobox, clips);
 }
 
-void MeshRendererUIWidget(graphics::MeshRenderer& meshRenderer)
+void MeshRendererUIWidget(graphics::MeshRenderer& renderer)
 {
-    const auto& meshPath = meshRenderer.GetMeshPath();
-    const auto& material = meshRenderer.GetMaterial();
-    ImGui::Text("Mesh:");
-    ImGui::Text("  Path: %s", meshPath.c_str());
-    ImGui::Text("Material:");
-    ImGui::Text("  Base Color: %s", material.baseColor.c_str());
-    ImGui::Text("  Normal:     %s", material.normal.c_str());
-    ImGui::Text("  Roughness:  %s", material.roughness.c_str());
-    ImGui::Text("  Metallic:   %s", material.metallic.c_str());
+    auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
+    auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
+    ui::PropertyWidget(mesh_renderer_ext::meshProp, renderer, &ui::Combobox, meshes);
+    ui::PropertyWidget(mesh_renderer_ext::baseColorProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(mesh_renderer_ext::normalProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(mesh_renderer_ext::roughnessProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
 }
 
 void ParticleEmitterUIWidget(graphics::ParticleEmitter&)
 {
 }
 
-void PointLightUIWidget(graphics::PointLight& pointLight)
+void PointLightUIWidget(graphics::PointLight& light)
 {
-    constexpr auto dragSpeed = 1.0f;
-    auto ambient = pointLight.GetAmbient();
-    auto diffuse = pointLight.GetDiffuseColor();
-    auto diffuseIntensity = pointLight.GetDiffuseIntensity();
-    const auto ambientResult = ImGui::ColorEdit3("Ambient Color", &ambient.x, ImGuiColorEditFlags_NoInputs);
-    const auto diffuseResult = ImGui::ColorEdit3("Diffuse Color", &diffuse.x, ImGuiColorEditFlags_NoInputs);
-    const auto diffuseIntensityResult = ui::editor::floatWidget("Intensity", "difintensity", &diffuseIntensity, dragSpeed,  0.0f, 1200.0f, "%.2f");
-
-    if (ambientResult) pointLight.SetAmbient(ambient);
-    if (diffuseResult) pointLight.SetDiffuseColor(diffuse);
-    if (diffuseIntensityResult) pointLight.SetDiffuseIntensity(diffuseIntensity);
+    constexpr auto step = 0.1f;
+    constexpr auto min = 0.0f;
+    constexpr auto max = 1200.0f;
+    ui::PropertyWidget(point_light_ext::ambientColorProp, light, &ui::InputColor3);
+    ui::PropertyWidget(point_light_ext::diffuseColorProp, light, &ui::InputColor3);
+    ui::PropertyWidget(point_light_ext::diffuseIntensityProp, light, &ui::DragFloat, step, min, max);
 }
 
-void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer)
+void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
 {
-    const auto& meshPath = toonRenderer.GetMeshPath();
-    const auto& material = toonRenderer.GetMaterial();
-    ImGui::Text("Mesh:");
-    ImGui::Text("  Path: %s", meshPath.c_str());
-    ImGui::Text("Material:");
-    ImGui::Text("  Base Color: %s", material.baseColor.c_str());
-    ImGui::Text("  Overlay: %s", material.overlay.c_str());
-    ImGui::Text("  Hatching Texture: %s", material.hatching.c_str());
-    ImGui::Text("  Hatching Tiling: %u", material.hatchingTiling);
+    auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
+    auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
+    ui::PropertyWidget(toon_renderer_ext::meshProp, renderer, &ui::Combobox, meshes);
+    ui::PropertyWidget(toon_renderer_ext::baseColorProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(toon_renderer_ext::overlayProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(toon_renderer_ext::hatchingProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
 }
 
 void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
@@ -129,55 +264,45 @@ void ColliderUIWidget(physics::Collider& collider)
     collider.SetEditorSelection(true);
 #endif
 
-    auto info = collider.GetInfo();
+    using namespace std::string_view_literals;
+    constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
+    ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);
 
-    if(ImGui::BeginCombo("Type", ToCString(info.type)))
+    switch (collider.GetType())
     {
-        if(ImGui::Selectable("Box"))          collider.SetProperties(physics::BoxProperties{});
-        else if(ImGui::Selectable("Capsule")) collider.SetProperties(physics::CapsuleProperties{});
-        else if(ImGui::Selectable("Hull"))    collider.SetProperties(physics::HullProperties{});
-        else if(ImGui::Selectable("Sphere"))  collider.SetProperties(physics::SphereProperties{});
-        ImGui::EndCombo();
+        case physics::ColliderType::Box:     { collider_ext::BoxProperties(collider);     break; }
+        case physics::ColliderType::Capsule: { collider_ext::CapsuleProperties(collider); break; }
+        case physics::ColliderType::Hull:    { collider_ext::HullProperties(collider);    break; }
+        case physics::ColliderType::Sphere:  { collider_ext::SphereProperties(collider);  break; }
     }
 
-    auto isTrigger = collider.IsTrigger();
-    if (ImGui::Checkbox("Trigger", &isTrigger))
-    {
-        collider.SetTrigger(isTrigger);
-    }
-
-    auto& offset = info.offset;
-
-    switch(info.type)
-    {
-        case physics::ColliderType::Sphere:
-        {
-            ui::editor::xyzWidgetHeader("   ");
-            ui::editor::xyzWidget("Center", "collidercenter", &offset.x, &offset.y, &offset.z, 0.0001f, 1000.0f);
-
-            break;
-        }
-        default: break;
-    }
-
-    /** @todo put widgets back */
+    ui::PropertyWidget(collider_ext::triggerProp, collider, &ui::Checkbox);
 }
 
 void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
 {
+    /** @todo #454 Allow updating asset. */
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
 {
-    const auto& properties = physicsBody.GetProperties();
-    ImGui::Text("Status       %s", physicsBody.IsAwake() ? "Awake" : "Asleep");
-    ImGui::Text("Inverse Mass %.2f", properties.mass);
-    ImGui::Text("Drag         %.2f", properties.drag);
-    ImGui::Text("Ang Drag     %.2f", properties.angularDrag);
-    ImGui::Text("Restitution  %.2f", properties.restitution);
-    ImGui::Text("Friction     %.2f", properties.friction);
-    ImGui::Text("Use Gravity  %s", properties.useGravity ? "True" : "False");
-    ImGui::Text("Kinematic    %s", properties.isKinematic ? "True" : "False");
+    constexpr auto largeStep = 0.1f;
+    constexpr auto smallStep = 0.01f;
+    constexpr auto min = 0.0f;
+    constexpr auto max = 1000.0f;
+
+    ImGui::Text("Status: %s", physicsBody.IsAwake() ? "Awake" : "Asleep");
+    if (!physicsBody.ParentEntity().IsStatic())
+    {
+        ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
+        ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
+        ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
+        ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, max);
+        ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, max);
+    }
+
+    ui::PropertyWidget(physics_body_ext::frictionProp,    physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
+    ui::PropertyWidget(physics_body_ext::restitutionProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
 }
 } // namespace nc::editor

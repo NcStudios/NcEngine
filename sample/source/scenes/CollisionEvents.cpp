@@ -33,7 +33,7 @@ void Widget()
         for(auto v : {ColliderType::Box, ColliderType::Capsule, ColliderType::Sphere, ColliderType::Hull})
         {
             ImGui::SameLine();
-            ImGui::RadioButton(nc::physics::ToCString(v), &PrefabTypeSelection, static_cast<int>(v));
+            ImGui::RadioButton(nc::physics::ToString(v).data(), &PrefabTypeSelection, static_cast<int>(v));
         }
 
         if(ImGui::Button("Spawn"))
