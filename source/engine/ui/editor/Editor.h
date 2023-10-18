@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EditorUI.h"
+
 #include "ecs/Registry.h"
 
 namespace nc::ui::editor
@@ -11,10 +13,8 @@ class Editor
         void Frame(float* dt, Registry* registry);
 
     private:
-        bool m_openState_Editor;
-        bool m_openState_UtilitiesPanel;
-
-        void DrawMenu();
+        EditorUI m_ui;
+        bool m_open = false;
 };
 
 // Provide stubs if editor is disabled

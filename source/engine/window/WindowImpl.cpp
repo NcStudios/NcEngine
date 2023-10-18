@@ -8,6 +8,10 @@
 
 #include <algorithm>
 
+
+
+#include "imgui/imgui.h"
+
 namespace
 {
     nc::window::WindowImpl* g_instance = nullptr;
@@ -160,6 +164,12 @@ namespace nc::window
 
     void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
     {
+        auto& io = ImGui::GetIO();
+        if (io.WantCaptureKeyboard)
+        {
+            return;
+        }
+
         nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
         nc::input::AddKeyToQueue(keyCode, action);
     }
@@ -171,6 +181,9 @@ namespace nc::window
 
     void WindowImpl::ProcessMouseButtonEvent(GLFWwindow*, int button, int action, int)
     {
+        if (ImGui::GetIO().WantCaptureMouse)
+            return;
+
         using namespace nc::input;
 
         static constexpr auto mouseLUT = std::array<KeyCode_t, 8>
@@ -196,6 +209,9 @@ namespace nc::window
 
     void WindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
     {
+        if (ImGui::GetIO().WantCaptureMouse)
+            return;
+
         input::SetMouseWheel(static_cast<int>(yOffset));
     }
 
