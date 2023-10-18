@@ -4,10 +4,7 @@
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/View.h"
-
-
-#include "../editor/ui/ImGuiUtility.h"
-#include "imgui/imgui.h"
+#include "ncengine/ui/ImGuiUtility.h"
 
 namespace
 {
@@ -82,7 +79,7 @@ void SceneGraph::Graph(Registry* registry)
 
 void SceneGraph::GraphNode(Registry* registry, Entity entity, Tag& tag, Transform& transform)
 {
-    IMGUI_SCOPE(nc::editor::ImGuiId, entity.Index());
+    IMGUI_SCOPE(ImGuiId, entity.Index());
     const auto flags = m_selectedEntity == entity ? ImGuiTreeNodeFlags_Framed : 0;
     const auto isNodeExpanded = ImGui::TreeNodeEx(tag.Value().data(), flags);
 
@@ -93,8 +90,8 @@ void SceneGraph::GraphNode(Registry* registry, Entity entity, Tag& tag, Transfor
 
     NodeContextMenu(registry, entity);
 
-    nc::editor::DragAndDropSource<Entity>(&entity);
-    nc::editor::DragAndDropTarget<Entity>([entity, registry](Entity* source)
+    DragAndDropSource<Entity>(&entity);
+    DragAndDropTarget<Entity>([entity, registry](Entity* source)
     {
         registry->Get<Transform>(*source)->SetParent(entity);
     });
