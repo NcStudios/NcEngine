@@ -22,7 +22,7 @@ namespace audio_source_ext
 using T = nc::audio::AudioSource;
 
 constexpr auto audioClipProperty = nc::ui::Property{ &T::GetClip, &T::SetClip, "audioClip" };
-} // namespace audio_ext
+} // namespace audio_source_ext
 
 namespace collider_ext
 {
