@@ -1,5 +1,4 @@
 #include "SampleUI.h"
-#include "UIStyle.h"
 #include "scenes/Worms.h"
 #include "scenes/ClickEvents.h"
 #include "scenes/SpawnTest.h"
@@ -9,12 +8,11 @@
 #include "scenes/RenderingBenchmark.h"
 #include "scenes/JareTestScene.h"
 
-#include "imgui/imgui.h"
 #include "ncengine/config/Version.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
-
 
 namespace
 {
@@ -46,7 +44,7 @@ namespace nc::sample
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()}
     {
-        SetImGuiStyle();
+        ui::SetDefaultUIStyle();
         window::RegisterOnResizeReceiver(this);
     }
 

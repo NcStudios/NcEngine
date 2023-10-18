@@ -23,7 +23,7 @@ enum class IntegrationResult
 class PhysicsBody final : public ComponentBase
 {
     NC_ENABLE_IN_EDITOR(PhysicsBody)
-    
+
     public:
         PhysicsBody(Entity entity,
                     PhysicsProperties properties = PhysicsProperties{},
@@ -33,6 +33,14 @@ class PhysicsBody final : public ComponentBase
         void SetProperties(const PhysicsProperties& properties);
         void SetLinearFreedom(const Vector3& linearFreedom);
         void SetAngularFreedom(const Vector3& angularFreedom);
+
+        void SetMass(float mass) noexcept { m_properties.mass = mass == 0.0f ? 0.0f : 1.0f / mass; }
+        void SetDrag(float drag) noexcept { m_properties.drag = drag; }
+        void SetAngularDrag(float angularDrag) noexcept { m_properties.angularDrag = angularDrag; }
+        void SetFriction(float friction) noexcept { m_properties.friction = friction; }
+        void SetRestitution(float restitution) noexcept { m_properties.restitution = restitution; }
+        void SetUseGravity(bool useGravity) noexcept { m_properties.useGravity = useGravity; }
+        void SetIsKinematic(bool isKinematic) noexcept { m_properties.isKinematic = isKinematic; }
 
         void ApplyImpulse(const Vector3& impulse);
         void ApplyImpulse(DirectX::FXMVECTOR impulse);

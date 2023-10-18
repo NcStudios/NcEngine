@@ -1,7 +1,7 @@
 #include "EditorUI.h"
-#include "ImGuiUtility.h"
 #include "UIStyle.h"
 
+#include "imgui/imgui.h"
 #include "ncengine/window/Window.h"
 
 namespace

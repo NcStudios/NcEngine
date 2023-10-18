@@ -205,3 +205,21 @@ TEST(ColliderTests, Constructor_zeroScale_throws)
     EXPECT_THROW(nc::physics::Collider(nc::Entity{}, boxProps), nc::NcError);
     EXPECT_THROW(nc::physics::Collider(nc::Entity{}, capsuleProps), nc::NcError);
 }
+
+TEST(ColliderTests, ColliderType_ToString_converts)
+{
+    EXPECT_EQ("Box", nc::physics::ToString(nc::physics::ColliderType::Box));
+    EXPECT_EQ("Capsule", nc::physics::ToString(nc::physics::ColliderType::Capsule));
+    EXPECT_EQ("Hull", nc::physics::ToString(nc::physics::ColliderType::Hull));
+    EXPECT_EQ("Sphere", nc::physics::ToString(nc::physics::ColliderType::Sphere));
+    EXPECT_THROW(nc::physics::ToString(static_cast<nc::physics::ColliderType>(100)), nc::NcError);
+}
+
+TEST(ColliderTests, ColliderType_FromString_converts)
+{
+    EXPECT_EQ(nc::physics::ColliderType::Box, nc::physics::FromString("Box"));
+    EXPECT_EQ(nc::physics::ColliderType::Capsule, nc::physics::FromString("Capsule"));
+    EXPECT_EQ(nc::physics::ColliderType::Hull, nc::physics::FromString("Hull"));
+    EXPECT_EQ(nc::physics::ColliderType::Sphere, nc::physics::FromString("Sphere"));
+    EXPECT_THROW(nc::physics::FromString("Throw"), nc::NcError);
+}
