@@ -12,24 +12,6 @@ auto IsRoot(nc::Transform* transform) -> bool
 {
     return !transform->Parent().Valid();
 }
-
-// TODO: move somewhere
-auto ClickedWindowBackground() -> bool
-{
-    return ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered();
-}
-
-// TODO: move somewhere
-template<class F>
-void ChildWindow(const char* label, F&& func)
-{
-    if (ImGui::BeginChild(label, {0, 0}, true))
-    {
-        func();
-    };
-
-    ImGui::EndChild();
-}
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -41,7 +23,7 @@ void SceneGraph::Draw(Registry* registry)
 
     ChildWindow("Entity List", [&]()
     {
-        if (ClickedWindowBackground())
+        if (IsWindowBackgroundClicked())
         {
             m_selectedEntity = Entity::Null();
         }

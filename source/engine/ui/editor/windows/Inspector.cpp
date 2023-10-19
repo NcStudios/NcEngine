@@ -1,7 +1,6 @@
 #include "Inspector.h"
 #include "ncengine/ecs/Registry.h"
-
-#include "imgui/imgui.h"
+#include "ncengine/ui/ImGuiUtility.h"
 
 #include <string_view>
 
@@ -19,7 +18,7 @@ namespace nc::ui::editor
 {
 void Inspector::Draw(Registry* registry, Entity entity)
 {
-    if (ImGui::BeginChild("Inspector", {0, 0}, true))
+    ChildWindow("Inspector", [&]()
     {
         ElementHeader("Entity");
         ImGui::Text("Index   %d", entity.Index());
@@ -34,8 +33,6 @@ void Inspector::Draw(Registry* registry, Entity entity)
                 any.DrawUI();
             }
         }
-
-        ImGui::EndChild();
-    }
+    });
 }
 } // namespace nc::ui::editor
