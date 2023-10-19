@@ -196,6 +196,18 @@ constexpr auto AccentTrans       = Vector4{0.000f, 0.990f, 0.000f, 0.050f};
 /** @brief Set ImGUi style using values from 'default_scheme'.*/
 void SetDefaultUIStyle();
 
+/** @brief Check if the UI is currently using keyboard events. */
+inline auto IsCapturingKeyboard() -> bool
+{
+    return ImGui::GetIO().WantCaptureKeyboard;
+}
+
+/** @brief Check if the UI is currently using mouse events. */
+inline auto IsCapturingMouse() -> bool
+{
+    return ImGui::GetIO().WantCaptureMouse;
+}
+
 template<class F>
 void Window(const char* label, F&& drawContents)
 {

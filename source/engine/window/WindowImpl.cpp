@@ -2,15 +2,13 @@
 #include "NcEngine.h"
 #include "config/Config.h"
 #include "input/InputInternal.h"
+#include "window/Window.h"
+#include "ui/ImGuiUtility.h"
+
 #include "ncmath/Math.h"
 #include "ncutility/NcError.h"
-#include "window/Window.h"
 
 #include <algorithm>
-
-
-
-#include "imgui/imgui.h"
 
 namespace
 {
@@ -164,8 +162,7 @@ namespace nc::window
 
     void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
     {
-        auto& io = ImGui::GetIO();
-        if (io.WantCaptureKeyboard)
+        if (ui::IsCapturingKeyboard())
         {
             return;
         }
@@ -181,9 +178,6 @@ namespace nc::window
 
     void WindowImpl::ProcessMouseButtonEvent(GLFWwindow*, int button, int action, int)
     {
-        if (ImGui::GetIO().WantCaptureMouse)
-            return;
-
         using namespace nc::input;
 
         static constexpr auto mouseLUT = std::array<KeyCode_t, 8>
@@ -197,8 +191,8 @@ namespace nc::window
             (KeyCode_t)KeyCode::MouseButton7,
             (KeyCode_t)KeyCode::MouseButton8
         };
-        
-        if (button >= static_cast<int>(mouseLUT.size()))
+
+        if (ui::IsCapturingMouse() || button >= static_cast<int>(mouseLUT.size()))
         {
             return;
         }
@@ -209,8 +203,10 @@ namespace nc::window
 
     void WindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
     {
-        if (ImGui::GetIO().WantCaptureMouse)
+        if (ui::IsCapturingMouse())
+        {
             return;
+        }
 
         input::SetMouseWheel(static_cast<int>(yOffset));
     }
