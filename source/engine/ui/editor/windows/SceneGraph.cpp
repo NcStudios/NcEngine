@@ -94,9 +94,9 @@ void SceneGraph::GraphContextMenu(Registry* registry)
     if (ImGui::BeginPopupContextWindow())
     {
         if (ImGui::Selectable("New Entity"))
-            registry->Add<Entity>(EntityInfo{});
+            m_selectedEntity = registry->Add<Entity>(EntityInfo{});
         else if (ImGui::Selectable("New Static Entity"))
-            registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+            m_selectedEntity = registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
         else
             m_selectedEntity = Entity::Null();
 
