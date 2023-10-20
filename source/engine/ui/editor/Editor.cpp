@@ -9,7 +9,7 @@ namespace hotkey
 {
 constexpr auto Editor = nc::input::KeyCode::Tilde;
 }
-} // anonymouse namespace
+} // anonymous namespace
 
 namespace nc::ui::editor
 {
