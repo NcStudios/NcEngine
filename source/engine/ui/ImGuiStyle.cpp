@@ -1,4 +1,6 @@
-#include "ncengine/ui/ImGuiUtility.h"
+#include "ncengine/ui/ImGuiStyle.h"
+
+#include "imgui/imgui.h"
 
 namespace nc::ui
 {
