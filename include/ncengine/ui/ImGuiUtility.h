@@ -1,3 +1,12 @@
+/**
+ * @file ImGuiUtility.h
+ * @copyright Jaremie and McCallister Romer 2023
+ * 
+ * @note Unless otherwise noted, all functions in this file must only be called
+ *       during UI rendering. Calls should be made only from within IUI::Draw()
+ *       implementations or from ComponentHandler<T>::drawUI callbacks.
+ */
+
 #pragma once
 
 #include "ncengine/type/EngineTypes.h"
@@ -13,10 +22,12 @@
 #include <string>
 #include <string_view>
 
+/** @cond internal */
 #define IMGUI_SCOPE_UNIQUE_NAME_HELPER(name, lineNumber) name ## lineNumber
 #define IMGUI_SCOPE_UNIQUE_NAME(name, lineNumber) IMGUI_SCOPE_UNIQUE_NAME_HELPER(name, lineNumber)
+/** @endcond */
 
-/** Create a variable to hold a scoped property. */
+/** @brief Create a variable to hold a scoped property. */
 #define IMGUI_SCOPE(Property, ...) auto IMGUI_SCOPE_UNIQUE_NAME(imguiProp, __LINE__) = Property(__VA_ARGS__)
 
 namespace nc::ui
@@ -152,13 +163,15 @@ struct ItemWidth
     ~ItemWidth() noexcept               { ImGui::PopItemWidth();           }
 };
 
-/** @brief Check if the UI is currently using keyboard events. */
+/** @brief Check if the UI is currently using keyboard events.
+ *  @note May be called at any time. */
 inline auto IsCapturingKeyboard() -> bool
 {
     return ImGui::GetIO().WantCaptureKeyboard;
 }
 
-/** @brief Check if the UI is currently using mouse events. */
+/** @brief Check if the UI is currently using mouse events.
+ *  @note May be called at any time. */
 inline auto IsCapturingMouse() -> bool
 {
     return ImGui::GetIO().WantCaptureMouse;
