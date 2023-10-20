@@ -29,13 +29,6 @@ constexpr auto g_minAngle = -g_maxAngle;
 constexpr auto g_minScale = 0.0001f;
 constexpr auto g_maxScale = 1000.0f;
 
-/** @brief Position and size info for a window. */
-struct WindowGeometry
-{
-    ImVec2 position;
-    ImVec2 size;
-};
-
 /** @brief Create a top-level window. */
 template<class F>
 void Window(const char* label, F&& drawContents);
@@ -43,15 +36,6 @@ void Window(const char* label, F&& drawContents);
 /** @brief Create a child window. */
 template<class F>
 void ChildWindow(const char* label, F&& drawContents);
-
-/** @brief Get the position and size of the current window. */
-auto GetWindowGeometry() -> WindowGeometry;
-
-/** @brief Set the position and size of the next window. */
-void SetNextWindowGeometry(const WindowGeometry& geometry, ImGuiCond cond = ImGuiCond_Always);
-
-/** @brief Set the next window to be left aligned to another window. */
-void SetNextWindowLeftAlignedTo(const WindowGeometry& left);
 
 /** @brief Check if the current window background is clicked on. */
 auto IsWindowBackgroundClicked() -> bool;
@@ -231,23 +215,6 @@ void ChildWindow(const char* label, F&& drawContents)
     };
 
     ImGui::EndChild();
-}
-
-inline auto GetWindowGeometry() -> WindowGeometry
-{
-    return WindowGeometry{ ImGui::GetWindowPos(), ImGui::GetWindowSize() };
-}
-
-inline void SetNextWindowGeometry(const WindowGeometry& geometry, ImGuiCond cond)
-{
-    ImGui::SetNextWindowPos(geometry.position, cond);
-    ImGui::SetNextWindowSize(geometry.size, cond);
-}
-
-inline void SetNextWindowLeftAlignedTo(const WindowGeometry& left)
-{
-    ImGui::SameLine();
-    ImGui::SetNextWindowPos(ImVec2{left.position.x + left.size.x, left.position.y});
 }
 
 inline auto IsWindowBackgroundClicked() -> bool
