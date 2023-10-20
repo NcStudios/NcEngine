@@ -11,8 +11,9 @@
 #include "ncengine/config/Version.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/input/Input.h"
-#include "ncengine/ui/ImGuiUtility.h"
+#include "ncengine/ui/ImGuiStyle.h"
 #include "ncengine/window/Window.h"
+#include "imgui/imgui.h"
 
 namespace
 {

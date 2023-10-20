@@ -1,6 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        ImGuiUtility.cpp
+        ImGuiStyle.cpp
         UIElement.cpp
         UIPosition.cpp
 )

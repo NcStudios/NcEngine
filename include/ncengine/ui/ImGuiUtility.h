@@ -1,3 +1,12 @@
+/**
+ * @file ImGuiUtility.h
+ * @copyright Jaremie and McCallister Romer 2023
+ * 
+ * @note Unless otherwise noted, all functions in this file must only be called
+ *       during UI rendering. Calls should be made only from within IUI::Draw()
+ *       implementations or from ComponentHandler<T>::drawUI callbacks.
+ */
+
 #pragma once
 
 #include "ncengine/type/EngineTypes.h"
@@ -13,10 +22,12 @@
 #include <string>
 #include <string_view>
 
+/** @cond internal */
 #define IMGUI_SCOPE_UNIQUE_NAME_HELPER(name, lineNumber) name ## lineNumber
 #define IMGUI_SCOPE_UNIQUE_NAME(name, lineNumber) IMGUI_SCOPE_UNIQUE_NAME_HELPER(name, lineNumber)
+/** @endcond */
 
-/** Create a variable to hold a scoped property. */
+/** @brief Create a variable to hold a scoped property. */
 #define IMGUI_SCOPE(Property, ...) auto IMGUI_SCOPE_UNIQUE_NAME(imguiProp, __LINE__) = Property(__VA_ARGS__)
 
 namespace nc::ui
@@ -28,6 +39,17 @@ constexpr auto g_maxAngle = std::numbers::pi_v<float> * 2.0f;
 constexpr auto g_minAngle = -g_maxAngle;
 constexpr auto g_minScale = 0.0001f;
 constexpr auto g_maxScale = 1000.0f;
+
+/** @brief Create a top-level window. */
+template<class F>
+void Window(const char* label, F&& drawContents);
+
+/** @brief Create a child window. */
+template<class F>
+void ChildWindow(const char* label, F&& drawContents);
+
+/** @brief Check if the current window background is clicked on. */
+auto IsWindowBackgroundClicked() -> bool;
 
 /** @brief Input field UI widget for int. */
 auto InputInt(int& value, const char* label, int step = 1) -> bool;
@@ -141,33 +163,46 @@ struct ItemWidth
     ~ItemWidth() noexcept               { ImGui::PopItemWidth();           }
 };
 
-namespace default_scheme
+/** @brief Check if the UI is currently using keyboard events.
+ *  @note May be called at any time. */
+inline auto IsCapturingKeyboard() -> bool
 {
-constexpr auto Black             = Vector4{0.009f, 0.009f, 0.009f, 1.000f};
-constexpr auto White             = Vector4{1.000f, 1.000f, 1.000f, 1.000f};
-constexpr auto Clear             = Vector4{0.000f, 0.000f, 0.000f, 0.000f};
-constexpr auto TransWhite        = Vector4{1.000f, 1.000f, 1.000f, 0.700f};
-constexpr auto Red               = Vector4{1.000f, 0.200f, 0.100f, 1.000f};
-constexpr auto Green             = Vector4{0.000f, 1.000f, 0.000f, 1.000f};
-constexpr auto Blue              = Vector4{0.000f, 0.400f, 1.000f, 1.000f};
-constexpr auto GrayLightest      = Vector4{0.348f, 0.348f, 0.348f, 1.000f};
-constexpr auto GrayLight         = Vector4{0.168f, 0.168f, 0.168f, 1.000f};
-constexpr auto Gray              = Vector4{0.072f, 0.072f, 0.072f, 1.000f};
-constexpr auto GrayDark          = Vector4{0.035f, 0.035f, 0.035f, 1.000f};
-constexpr auto GrayDarkest       = Vector4{0.018f, 0.018f, 0.018f, 1.000f};
-constexpr auto TransGrayLight    = Vector4{0.740f, 0.740f, 0.740f, 0.200f};
-constexpr auto TransGrayLightAlt = Vector4{0.740f, 0.740f, 0.740f, 0.350f};
-constexpr auto TransGray         = Vector4{0.410f, 0.410f, 0.410f, 0.500f};
-constexpr auto TransGrayAlt      = Vector4{0.610f, 0.610f, 0.610f, 0.390f};
-constexpr auto TransGrayDark     = Vector4{0.017f, 0.017f, 0.017f, 0.530f};
-constexpr auto AccentDark        = Vector4{0.000f, 0.447f, 0.000f, 1.000f};
-constexpr auto Accent            = Vector4{0.000f, 0.490f, 0.000f, 1.000f};
-constexpr auto AccentLight       = Vector4{0.000f, 0.729f, 0.000f, 1.000f};
-constexpr auto AccentTrans       = Vector4{0.000f, 0.990f, 0.000f, 0.050f};
-} // namespace default_scheme
+    return ImGui::GetIO().WantCaptureKeyboard;
+}
 
-/** @brief Set ImGUi style using values from 'default_scheme'.*/
-void SetDefaultUIStyle();
+/** @brief Check if the UI is currently using mouse events.
+ *  @note May be called at any time. */
+inline auto IsCapturingMouse() -> bool
+{
+    return ImGui::GetIO().WantCaptureMouse;
+}
+
+template<class F>
+void Window(const char* label, F&& drawContents)
+{
+    if (ImGui::Begin(label, nullptr))
+    {
+        drawContents();
+    }
+
+    ImGui::End();
+}
+
+template<class F>
+void ChildWindow(const char* label, F&& drawContents)
+{
+    if (ImGui::BeginChild(label, {0, 0}, true))
+    {
+        drawContents();
+    };
+
+    ImGui::EndChild();
+}
+
+inline auto IsWindowBackgroundClicked() -> bool
+{
+    return ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered();
+}
 
 inline void SameLineSpaced()
 {

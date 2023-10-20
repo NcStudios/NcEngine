@@ -1,3 +1,7 @@
+/**
+ * @file ImGuiConversion.h
+ * @copyright Jaremie and McCallister Romer 2023
+ */
 #pragma once
 
 #include "ncmath/Vector.h"

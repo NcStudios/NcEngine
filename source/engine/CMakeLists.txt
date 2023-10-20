@@ -11,8 +11,8 @@ target_compile_definitions(${NC_ENGINE_LIB}
     PUBLIC
         ${NC_COMPILE_DEFINITIONS}
         WIN32_LEAN_AND_MEAN
-        $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ncengine/ui/DearImGuiConversion.h">
-        $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/DearImGuiConversion.h">
+        $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ncengine/ui/ImGuiConversion.h">
+        $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/ImGuiConversion.h">
 )
 
 if(WIN32)

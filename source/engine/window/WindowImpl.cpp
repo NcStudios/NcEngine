@@ -2,9 +2,11 @@
 #include "NcEngine.h"
 #include "config/Config.h"
 #include "input/InputInternal.h"
+#include "window/Window.h"
+#include "ui/ImGuiUtility.h"
+
 #include "ncmath/Math.h"
 #include "ncutility/NcError.h"
-#include "window/Window.h"
 
 #include <algorithm>
 
@@ -160,6 +162,11 @@ namespace nc::window
 
     void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
     {
+        if (ui::IsCapturingKeyboard())
+        {
+            return;
+        }
+
         nc::input::KeyCode_t keyCode = static_cast<nc::input::KeyCode_t>(key);
         nc::input::AddKeyToQueue(keyCode, action);
     }
@@ -184,8 +191,8 @@ namespace nc::window
             (KeyCode_t)KeyCode::MouseButton7,
             (KeyCode_t)KeyCode::MouseButton8
         };
-        
-        if (button >= static_cast<int>(mouseLUT.size()))
+
+        if (ui::IsCapturingMouse() || button >= static_cast<int>(mouseLUT.size()))
         {
             return;
         }
@@ -196,6 +203,11 @@ namespace nc::window
 
     void WindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
     {
+        if (ui::IsCapturingMouse())
+        {
+            return;
+        }
+
         input::SetMouseWheel(static_cast<int>(yOffset));
     }
 
