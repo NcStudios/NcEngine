@@ -97,6 +97,8 @@ void SceneGraph::GraphContextMenu(Registry* registry)
             registry->Add<Entity>(EntityInfo{});
         else if (ImGui::Selectable("New Static Entity"))
             registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+        else
+            m_selectedEntity = Entity::Null();
 
         ImGui::EndPopup();
     }
@@ -110,6 +112,8 @@ void SceneGraph::NodeContextMenu(Registry* registry, Entity entity)
             m_selectedEntity = registry->Add<Entity>(EntityInfo{.parent = entity});
         else if (ImGui::Selectable("Make Root"))
             registry->Get<Transform>(entity)->SetParent(Entity::Null());
+        else
+            m_selectedEntity = entity;
 
         ImGui::EndPopup();
     }
