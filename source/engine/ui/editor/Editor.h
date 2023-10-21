@@ -1,31 +1,20 @@
 #pragma once
 
-#include "EditorUI.h"
+#include <memory>
 
-#include "ecs/Registry.h"
+namespace nc
+{
+class Registry;
 
-namespace nc::ui::editor
+namespace ui::editor
 {
 class Editor
 {
     public:
-        Editor();
-        void Frame(float* dt, Registry* registry);
-
-    private:
-        EditorUI m_ui;
-        bool m_open = false;
+        virtual ~Editor() = default;
+        virtual void Draw(Registry* registry) = 0;
 };
 
-// Provide stubs if editor is disabled
-// TODO: #427 Make a proper interface + factory for editor
-#ifndef NC_EDITOR_ENABLED
-Editor::Editor()
-{
-}
-
-void Editor::Frame(float*, Registry*)
-{
-}
-#endif
-} // namespace nc::ui::editor
+auto BuildEditor() -> std::unique_ptr<Editor>;
+} // namespace ui::editor
+} // namespace nc

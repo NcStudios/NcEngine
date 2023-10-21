@@ -12,7 +12,7 @@ namespace ui::editor
 class EditorUI
 {
     public:
-        void Draw(Registry* registry, float* dt);
+        void Draw(Registry* registry);
 
     private:
         SceneGraph m_sceneGraph;

@@ -1,5 +1,5 @@
-#include "ComponentWidgets.h"
-#include "ui/editor/assets/AssetWrapper.h"
+#include "ui/editor/ComponentWidgets.h"
+#include "assets/AssetWrapper.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
