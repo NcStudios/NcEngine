@@ -27,7 +27,7 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-void EditorUI::Draw(Registry* registry, float*)
+void EditorUI::Draw(Registry* registry)
 {
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", [&]()
