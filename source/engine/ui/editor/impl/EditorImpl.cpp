@@ -8,7 +8,7 @@ namespace
 namespace hotkey
 {
 constexpr auto Editor = nc::input::KeyCode::Tilde;
-}
+} // namespace hotkey
 } // anonymous namespace
 
 namespace nc::ui::editor
