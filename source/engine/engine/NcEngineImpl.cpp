@@ -47,7 +47,7 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
-      m_sceneManager{std::bind_front(&NcEngineImpl::Clear, this)},
+      m_sceneManager{},
       m_isRunning{false}
 {
 }
@@ -61,9 +61,9 @@ NcEngineImpl::~NcEngineImpl() noexcept
 void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
 {
     NC_LOG_INFO("Starting engine");
-    m_sceneManager.QueueSceneChange(std::move(initialScene));
-    m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
     m_isRunning = true;
+    QueueSceneChange(std::move(initialScene));
+    LoadScene();
     Run();
 }
 
@@ -112,10 +112,25 @@ void NcEngineImpl::RebuildTaskGraph()
     m_executor.SetContext(task::BuildContext(m_modules.GetAllModules()));
 }
 
+void NcEngineImpl::LoadScene()
+{
+    for (auto& module : m_modules.GetAllModules())
+    {
+        module->OnSceneLoad();
+    }
+
+    m_sceneManager.LoadQueuedScene(&m_registry, ModuleProvider{&m_modules});
+}
+
 void NcEngineImpl::Clear()
 {
     NC_LOG_TRACE("Clearing engine state");
-    m_modules.Clear();
+    m_sceneManager.UnloadActiveScene();
+    for (auto& module : m_modules.GetAllModules())
+    {
+        module->Clear();
+    }
+
     m_registry.Clear();
 }
 
@@ -127,9 +142,10 @@ void NcEngineImpl::Run()
         input::Flush();
         m_window.ProcessSystemMessages();
         m_executor.Run();
-        if (m_sceneManager.IsSceneChangeQueued())
+        if (IsSceneChangeQueued())
         {
-            m_sceneManager.DoSceneChange(&m_registry, ModuleProvider{&m_modules});
+            Clear();
+            LoadScene();
         }
     }
 
