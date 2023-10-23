@@ -46,7 +46,6 @@ namespace nc::graphics
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
-            std::string m_meshPath;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
             #ifdef NC_DEBUG_RENDERING_ENABLED

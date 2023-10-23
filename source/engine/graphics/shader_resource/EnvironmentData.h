@@ -6,8 +6,6 @@
 
 namespace nc::graphics
 {
-const std::string SkyboxMeshPath = "skybox.nca";
-
 struct EnvironmentData
 {
     Vector3 cameraWorldPosition = Vector3(0.0f, 0.0f, 0.0f);

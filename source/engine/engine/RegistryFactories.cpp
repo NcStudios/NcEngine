@@ -29,6 +29,20 @@
 
 namespace
 {
+auto BuildDefaultAssetMap() -> nc::asset::AssetMap
+{
+    using namespace nc::asset;
+    return AssetMap
+    {
+        { AssetType::AudioClip,       { nc::DefaultAudioClip } },
+        { AssetType::ConcaveCollider, { nc::DefaultConcaveCollider } },
+        { AssetType::CubeMap,         { nc::DefaultCubeMap } },
+        { AssetType::HullCollider,    { nc::DefaultHullCollider } },
+        { AssetType::Mesh,            { nc::PlaneMesh, nc::CubeMesh, nc::SphereMesh, nc::CapsuleMesh, nc::SkyboxMesh } },
+        { AssetType::Texture,         { nc::DefaultBaseColor, nc::DefaultNormal, nc::DefaultParticle } }
+    };
+}
+
 template<class T>
 void Register(nc::Registry& registry, const char* name, void(*drawUI)(T&))
 {
@@ -78,7 +92,9 @@ auto BuildModuleRegistry(Registry* registry,
 {
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = nc::ModuleRegistry{};
-    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings, config.memorySettings));
+    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings,
+                                                        config.memorySettings,
+                                                        BuildDefaultAssetMap()));
     moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
                                                               config.graphicsSettings,
                                                               moduleRegistry.Get<nc::asset::NcAsset>(),
