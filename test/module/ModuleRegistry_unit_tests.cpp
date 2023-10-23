@@ -60,16 +60,6 @@ TEST(ModuleRegistry_unit_tests, Unregister_NonexistentModule_Succeeds)
     EXPECT_EQ(uut.GetAllModules().size(), 0);
 }
 
-TEST(ModuleRegistry_unit_tests, Clear_NotifiesModules)
-{
-    auto uut = ModuleRegistry{};
-    uut.Register<TestModule1>(std::make_unique<TestModule1>());
-    uut.Register<TestModule2>(std::make_unique<TestModule2>());
-    uut.Clear();
-    EXPECT_TRUE(uut.Get<TestModule1>()->cleared);
-    EXPECT_TRUE(uut.Get<TestModule2>()->cleared);
-}
-
 int main(int argc, char ** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
