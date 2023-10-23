@@ -4,7 +4,7 @@
     },
     "audio-clip": [
         {
-            "sourcePath": "raw/audio/empty.wave",
+            "sourcePath": "raw/audio/empty.wav",
             "assetName": "audio_clip/empty"
         },
         {

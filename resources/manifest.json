@@ -2,6 +2,12 @@
     "globalOptions": {
         "outputDirectory": ".\\nca"
     },
+    "audio-clip": [
+        {
+            "sourcePath": "raw\\sound\\empty.wav",
+            "assetName": "audio_clips\\empty"
+        }
+    ],
     "concave-collider": [
         {
             "sourcePath": "raw\\model\\plane.fbx",
