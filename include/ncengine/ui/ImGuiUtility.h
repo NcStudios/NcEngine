@@ -1,6 +1,6 @@
 /**
  * @file ImGuiUtility.h
- * @copyright Jaremie and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2023
  * 
  * @note Unless otherwise noted, all functions in this file must only be called
  *       during UI rendering. Calls should be made only from within IUI::Draw()

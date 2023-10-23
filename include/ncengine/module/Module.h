@@ -1,3 +1,7 @@
+/**
+ * @file Module.h
+ * @copyright Jaremie Romer and McCallister Romer 2023
+ */
 #pragma once
 
 #include <vector>
@@ -19,8 +23,11 @@ struct Module
     /** @brief Called on registered modules when the task graph is constructed. */
     virtual void OnBuildTaskGraph(task::TaskGraph&) {}
 
-    /** @brief Called prior to clearing the module's associated data registry. This includes
-     *         scene changes and NcEngine::Shutdown(). */
+    /** @brief Called on registered modules prior to loading a new scene. */
+    virtual void OnBeforeSceneLoad() {}
+
+    /** @brief Called on registered modules prior to clearing the Registry. This
+     *         includes Scene::Unload() and NcEngine::Shutdown(). */
     virtual void Clear() noexcept {}
 };
 } // namespace nc

@@ -31,6 +31,7 @@ namespace nc
             scene::SceneManager m_sceneManager;
             bool m_isRunning;
 
+            void LoadScene();
             void Clear();
             void Run();
     };
