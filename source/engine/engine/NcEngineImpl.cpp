@@ -116,7 +116,7 @@ void NcEngineImpl::LoadScene()
 {
     for (auto& module : m_modules.GetAllModules())
     {
-        module->OnSceneLoad();
+        module->OnBeforeSceneLoad();
     }
 
     m_sceneManager.LoadQueuedScene(&m_registry, ModuleProvider{&m_modules});

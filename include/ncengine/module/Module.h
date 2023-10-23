@@ -24,7 +24,7 @@ struct Module
     virtual void OnBuildTaskGraph(task::TaskGraph&) {}
 
     /** @brief Called on registered modules prior to loading a new scene. */
-    virtual void OnSceneLoad() {}
+    virtual void OnBeforeSceneLoad() {}
 
     /** @brief Called on registered modules prior to clearing the Registry. This
      *         includes Scene::Unload() and NcEngine::Shutdown(). */
