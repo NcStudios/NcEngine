@@ -19,6 +19,7 @@ using namespace std::literals;
 // project
 constexpr auto ProjectNameKey = "project_name"sv;
 constexpr auto LogFilePathKey = "log_file_path"sv;
+constexpr auto LogMaxFileSizeKey = "log_max_file_size"sv;
 
 // asset
 constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
@@ -145,6 +146,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     {
         ParseValueIfExists(out.projectName, ProjectNameKey, kvPairs);
         ParseValueIfExists(out.logFilePath, LogFilePathKey, kvPairs);
+        ParseValueIfExists(out.logMaxFileSize, LogMaxFileSizeKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::AssetSettings>)
     {
@@ -275,6 +277,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     if (writeSections) stream << "[project_settings]\n";
     ::WriteKVPair(stream, ProjectNameKey, config.projectSettings.projectName);
     ::WriteKVPair(stream, LogFilePathKey, config.projectSettings.logFilePath);
+    ::WriteKVPair(stream, LogMaxFileSizeKey, config.projectSettings.logMaxFileSize);
 
     if (writeSections) stream << "[asset_settings]\n";
     ::WriteKVPair(stream, AudioClipsPathKey, config.assetSettings.audioClipsPath);
@@ -320,6 +323,7 @@ bool Validate(const Config& config)
 {
     return (config.projectSettings.projectName != "") &&
            (config.projectSettings.logFilePath != "") &&
+           (config.projectSettings.logMaxFileSize > 0) &&
            (config.assetSettings.audioClipsPath != "") &&
            (config.assetSettings.concaveCollidersPath != "") &&
            (config.assetSettings.hullCollidersPath != "") &&

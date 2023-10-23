@@ -9,7 +9,8 @@ namespace nc::config
 struct ProjectSettings
 {
     std::string projectName = "Project Name";
-    std::string logFilePath = "Diagnostics.log";
+    std::string logFilePath = "NcEngine.log";
+    size_t logMaxFileSize = 1000000ull;
 };
 
 /**

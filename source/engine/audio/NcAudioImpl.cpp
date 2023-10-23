@@ -127,7 +127,7 @@ void NcAudioImpl::OnBuildTaskGraph(task::TaskGraph& graph)
 
 void NcAudioImpl::RegisterListener(Entity listener) noexcept
 {
-    NC_LOG_TRACE_FMT("Registering audio listener: {}", listener.Index());
+    NC_LOG_TRACE("Registering audio listener: {}", listener.Index());
     m_listener = listener;
 }
 
