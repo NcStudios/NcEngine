@@ -33,7 +33,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
 
 NcAssetImpl::~NcAssetImpl() noexcept = default;
 
-void NcAssetImpl::OnLoadScene()
+void NcAssetImpl::OnBeforeSceneLoad()
 {
     if (m_defaults.contains(asset::AssetType::AudioClip))
         m_audioClipManager->Load(m_defaults.at(asset::AssetType::AudioClip), false);

@@ -76,8 +76,6 @@ namespace nc::graphics
         m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
         vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
         vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
-
-        LoadMeshAsset(m_meshPath);
     }
 
     WireframeTechnique::~WireframeTechnique() noexcept
