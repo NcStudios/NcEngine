@@ -30,6 +30,12 @@ constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";
 /** @brief Name of the default normal texture asset. */
 constexpr auto DefaultNormal = "DefaultNormal.nca";
 
+/** @brief Name of the default roughness texture asset. */
+constexpr auto DefaultRoughness = "DefaultMetallic.nca";
+
+/** @brief Name of the default metallic texture asset. */
+constexpr auto DefaultMetallic = DefaultRoughness;
+
 /** @brief Name of the default particle texture asset. */
 constexpr auto DefaultParticle = "DefaultParticle.nca";
 

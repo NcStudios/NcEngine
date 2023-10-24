@@ -130,9 +130,6 @@ namespace nc::sample::prefab
 
         std::vector<std::string> textures
         {
-            "DefaultBaseColor.nca",
-            "DefaultMetallic.nca",
-            "DefaultParticle.nca",
             "blacktop\\BaseColor.nca",
             "blacktop\\Roughness.nca",
             "box\\BaseColor.nca",
@@ -158,7 +155,6 @@ namespace nc::sample::prefab
 
         std::vector<std::string> normalMaps 
         {
-            "DefaultNormal.nca",
             "blacktop\\Normal.nca",
             "box\\Normal.nca",
             "coin\\Normal.nca",
@@ -169,20 +165,16 @@ namespace nc::sample::prefab
         };
         LoadTextureAssets(normalMaps, false, AssetFlags::TextureTypeNormalMap);
 
-        const auto defaultBaseColor = std::string{ "DefaultBaseColor.nca" };
-        const auto defaultNormal = std::string{ "DefaultNormal.nca" };
-        const auto defaultRoughness = std::string{ "DefaultMetallic.nca" };
-
-        material::Box        = graphics::PbrMaterial{ "box\\BaseColor.nca",     "box\\Normal.nca",   "box\\Roughness.nca",   defaultRoughness };
-        material::SolidBlue  = graphics::PbrMaterial{ "solid_color\\Blue.nca",  defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::SolidGreen = graphics::PbrMaterial{ "solid_color\\Green.nca", defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::SolidRed   = graphics::PbrMaterial{ "solid_color\\Red.nca",   defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::Coin       = graphics::PbrMaterial{ "coin\\BaseColor.nca",    "coin\\Normal.nca",  "coin\\Roughness.nca",  defaultRoughness };
-        material::Default    = graphics::PbrMaterial{ defaultBaseColor,        defaultNormal,      defaultRoughness,      defaultRoughness };
-        material::Ground     = graphics::PbrMaterial{ "floor\\BaseColor.nca",   "floor\\Normal.nca", "floor\\Roughness.nca", defaultRoughness };
-        material::Table      = graphics::PbrMaterial{ "table\\BaseColor.nca",   "table\\Normal.nca", "table\\Roughness.nca", defaultRoughness };
-        material::Token      = graphics::PbrMaterial{ "token\\BaseColor.nca",   "token\\Normal.nca", "token\\Roughness.nca", defaultRoughness };
-        material::Worm       = graphics::PbrMaterial{ "logo\\BaseColor.nca",    "logo\\Normal.nca",  "logo\\Roughness.nca",  defaultRoughness };
+        material::Box        = graphics::PbrMaterial{ "box\\BaseColor.nca",     "box\\Normal.nca",    "box\\Roughness.nca",    asset::DefaultRoughness };
+        material::SolidBlue  = graphics::PbrMaterial{ "solid_color\\Blue.nca",  asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
+        material::SolidGreen = graphics::PbrMaterial{ "solid_color\\Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
+        material::SolidRed   = graphics::PbrMaterial{ "solid_color\\Red.nca",   asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
+        material::Coin       = graphics::PbrMaterial{ "coin\\BaseColor.nca",    "coin\\Normal.nca",   "coin\\Roughness.nca",   asset::DefaultRoughness };
+        material::Default    = graphics::PbrMaterial{ asset::DefaultBaseColor,  asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
+        material::Ground     = graphics::PbrMaterial{ "floor\\BaseColor.nca",   "floor\\Normal.nca",  "floor\\Roughness.nca",  asset::DefaultRoughness };
+        material::Table      = graphics::PbrMaterial{ "table\\BaseColor.nca",   "table\\Normal.nca",  "table\\Roughness.nca",  asset::DefaultRoughness };
+        material::Token      = graphics::PbrMaterial{ "token\\BaseColor.nca",   "token\\Normal.nca",  "token\\Roughness.nca",  asset::DefaultRoughness };
+        material::Worm       = graphics::PbrMaterial{ "logo\\BaseColor.nca",    "logo\\Normal.nca",   "logo\\Roughness.nca",   asset::DefaultRoughness };
     }
 
     template<Resource Resource_t>
@@ -191,28 +183,28 @@ namespace nc::sample::prefab
     template<> Entity Create_<Resource::Capsule>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "capsule.nca", material::Default, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CapsuleMesh, material::Default, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CapsuleBlue>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "capsule.nca", material::SolidBlue, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CapsuleMesh, material::SolidBlue, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CapsuleGreen>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "capsule.nca", material::SolidGreen, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CapsuleMesh, material::SolidGreen, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CapsuleRed>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "capsule.nca", material::SolidRed, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CapsuleMesh, material::SolidRed, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
@@ -226,35 +218,35 @@ namespace nc::sample::prefab
     template<> Entity Create_<Resource::Cube>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "cube.nca", material::Default, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::Default, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CubeBlue>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "cube.nca", material::SolidBlue, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::SolidBlue, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CubeGreen>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "cube.nca", material::SolidGreen, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::SolidGreen, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CubeRed>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "cube.nca", material::SolidRed, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::SolidRed, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::CubeTextured>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "cube.nca", material::Box, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::Box, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
@@ -289,7 +281,7 @@ namespace nc::sample::prefab
     template<> Entity Create_<Resource::Ground>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "cube.nca", material::Ground, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::Ground, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
@@ -303,35 +295,35 @@ namespace nc::sample::prefab
     template<> Entity Create_<Resource::Sphere>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "sphere.nca", material::Default, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::SphereMesh, material::Default, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::SphereBlue>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "sphere.nca", material::SolidBlue, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::SphereMesh, material::SolidBlue, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::SphereGreen>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "sphere.nca", material::SolidGreen, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::SphereMesh, material::SolidGreen, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::SphereRed>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "sphere.nca", material::SolidRed, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::SphereMesh, material::SolidRed, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 
     template<> Entity Create_<Resource::PlaneGreen>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "plane.nca", material::SolidGreen, graphics::TechniqueType::PhongAndUi);
+        registry->Add<graphics::MeshRenderer>(handle, asset::PlaneMesh, material::SolidGreen, graphics::TechniqueType::PhongAndUi);
         return handle;
     }
 

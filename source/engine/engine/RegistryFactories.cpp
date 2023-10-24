@@ -39,8 +39,8 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
         { AssetType::ConcaveCollider, { DefaultConcaveCollider } },
         { AssetType::CubeMap,         { DefaultCubeMap } },
         { AssetType::HullCollider,    { DefaultHullCollider } },
-        { AssetType::Mesh,            { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, SkyboxMesh } },
-        { AssetType::Texture,         { DefaultBaseColor, DefaultNormal, DefaultParticle } }
+        { AssetType::Mesh,            { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh } },
+        { AssetType::Texture,         { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
     };
 }
 

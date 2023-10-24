@@ -33,25 +33,21 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
-    LoadTextureAsset("tree\\BaseColor.nca");
-    LoadTextureAsset("line\\Hatch3.nca");
-    
     auto floorMaterial = graphics::ToonMaterial{
-        .baseColor = "DefaultMetallic.nca",
-        .overlay   = "DefaultBaseColor.nca",
-        .hatching  = "DefaultBaseColor.nca",
+        .baseColor = asset::DefaultMetallic,
+        .overlay   = asset::DefaultBaseColor,
+        .hatching  = asset::DefaultBaseColor,
         .hatchingTiling  = 1
     };
 
     auto treeMaterial = graphics::ToonMaterial{
         .baseColor = "tree\\BaseColor.nca",
-        .overlay   = "DefaultBaseColor.nca",
+        .overlay   = asset::DefaultBaseColor,
         .hatching  = "line\\Hatch3.nca",
         .hatchingTiling  = 8
     };
 
-    modules.Get<graphics::NcGraphics>()->SetSkybox("DefaultSkybox.nca");
-    LoadMeshAsset("tree.nca");
+    modules.Get<graphics::NcGraphics>()->SetSkybox(asset::DefaultCubeMap);
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
@@ -63,7 +59,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .scale = Vector3{30.0f, 30.0f, 1.0f},
         .tag = "Floor"
     });
-    registry->Add<graphics::ToonRenderer>(floor, "plane.nca", floorMaterial);
+    registry->Add<graphics::ToonRenderer>(floor, asset::PlaneMesh, floorMaterial);
 
     auto tree = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
