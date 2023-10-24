@@ -1,4 +1,5 @@
 #include "RegistryFactories.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/config/Config.h"
@@ -34,12 +35,12 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
     using namespace nc::asset;
     return AssetMap
     {
-        { AssetType::AudioClip,       { nc::DefaultAudioClip } },
-        { AssetType::ConcaveCollider, { nc::DefaultConcaveCollider } },
-        { AssetType::CubeMap,         { nc::DefaultCubeMap } },
-        { AssetType::HullCollider,    { nc::DefaultHullCollider } },
-        { AssetType::Mesh,            { nc::PlaneMesh, nc::CubeMesh, nc::SphereMesh, nc::CapsuleMesh, nc::SkyboxMesh } },
-        { AssetType::Texture,         { nc::DefaultBaseColor, nc::DefaultNormal, nc::DefaultParticle } }
+        { AssetType::AudioClip,       { DefaultAudioClip } },
+        { AssetType::ConcaveCollider, { DefaultConcaveCollider } },
+        { AssetType::CubeMap,         { DefaultCubeMap } },
+        { AssetType::HullCollider,    { DefaultHullCollider } },
+        { AssetType::Mesh,            { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, SkyboxMesh } },
+        { AssetType::Texture,         { DefaultBaseColor, DefaultNormal, DefaultParticle } }
     };
 }
 

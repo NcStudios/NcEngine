@@ -128,7 +128,7 @@ namespace nc::graphics
         }
 
         #ifdef NC_DEBUG_RENDERING_ENABLED
-        const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(nc::CubeMesh);
+        const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::CubeMesh);
         auto* debugData = m_debugRenderer.GetData();
 
         for (const auto& point : debugData->points)

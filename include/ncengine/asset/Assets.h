@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DefaultAssets.h"
 #include "ncengine/utility/EnumUtilities.h"
 
 #include "ncmath/Geometry.h"
@@ -12,21 +13,6 @@
 
 namespace nc
 {
-    constexpr auto PlaneMesh = "plane.nca";
-    constexpr auto CubeMesh = "cube.nca";
-    constexpr auto SphereMesh = "sphere.nca";
-    constexpr auto CapsuleMesh = "capsule.nca";
-    constexpr auto SkyboxMesh = "skybox.nca";
-
-    constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";
-    constexpr auto DefaultNormal = "DefaultNormal.nca";
-    constexpr auto DefaultParticle = "DefaultParticle.nca";
-    constexpr auto DefaultCubeMap = "DefaultSkybox.nca";
-    constexpr auto DefaultAudioClip = "empty.nca";
-    constexpr auto DefaultConcaveCollider = "plane.nca";
-    constexpr auto DefaultHullCollider = "cube.nca";
-    constexpr auto DefaultMesh = CubeMesh;
-
     /** Asset flags are used to pass parameters to the asset loading/unloading functions. */
     using asset_flags_type = uint64_t;
     struct AssetFlags

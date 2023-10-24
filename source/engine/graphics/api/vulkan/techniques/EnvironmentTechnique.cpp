@@ -115,7 +115,7 @@ void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderSt
         return;
     }
 
-    const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::SkyboxMesh);
+    const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::SkyboxMesh);
     cmd->drawIndexed
     (
         meshAccessor.indexCount,                          // indexCount
