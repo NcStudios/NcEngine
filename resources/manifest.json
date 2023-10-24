@@ -4,14 +4,14 @@
     },
     "audio-clip": [
         {
-            "sourcePath": "raw\\sound\\empty.wav",
-            "assetName": "audio_clips\\empty"
+            "sourcePath": "raw\\sound\\DefaultAudioClip.wav",
+            "assetName": "audio_clips\\DefaultAudioClip"
         }
     ],
     "concave-collider": [
         {
-            "sourcePath": "raw\\model\\plane.fbx",
-            "assetName": "concave_colliders\\plane"
+            "sourcePath": "raw\\model\\DefaultPlane.fbx",
+            "assetName": "concave_colliders\\DefaultConcaveCollider"
         }
     ],
     "cube-map": [
@@ -22,30 +22,26 @@
     ],
     "hull-collider": [
         {
-            "sourcePath": "raw\\model\\cube.fbx",
-            "assetName": "hull_colliders\\cube"
+            "sourcePath": "raw\\model\\DefaultCube.fbx",
+            "assetName": "hull_colliders\\DefaultHullCollider"
         }
     ],
     "mesh": [
         {
-            "sourcePath": "raw\\model\\capsule.fbx",
-            "assetName": "meshes\\capsule"
+            "sourcePath": "raw\\model\\DefaultCapsule.fbx",
+            "assetName": "meshes\\DefaultCapsule"
         },
         {
-            "sourcePath": "raw\\model\\cube.fbx",
-            "assetName": "meshes\\cube"
+            "sourcePath": "raw\\model\\DefaultCube.fbx",
+            "assetName": "meshes\\DefaultCube"
         },
         {
-            "sourcePath": "raw\\model\\plane.fbx",
-            "assetName": "meshes\\plane"
+            "sourcePath": "raw\\model\\DefaultPlane.fbx",
+            "assetName": "meshes\\DefaultPlane"
         },
         {
-            "sourcePath": "raw\\model\\cube.fbx",
-            "assetName": "meshes\\skybox"
-        },
-        {
-            "sourcePath": "raw\\model\\sphere.fbx",
-            "assetName": "meshes\\sphere"
+            "sourcePath": "raw\\model\\DefaultSphere.fbx",
+            "assetName": "meshes\\DefaultSphere"
         }
     ],
     "texture": [

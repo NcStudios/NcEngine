@@ -10,19 +10,19 @@
 namespace nc::asset
 {
 /** @brief Name of the default plane mesh asset. */
-constexpr auto PlaneMesh = "plane.nca";
+constexpr auto PlaneMesh = "DefaultPlane.nca";
 
 /** @brief Name of the default cube mesh asset. */
-constexpr auto CubeMesh = "cube.nca";
+constexpr auto CubeMesh = "DefaultCube.nca";
 
 /** @brief Name of the default sphere mesh asset. */
-constexpr auto SphereMesh = "sphere.nca";
+constexpr auto SphereMesh = "DefaultSphere.nca";
 
 /** @brief Name of the default capsule mesh asset. */
-constexpr auto CapsuleMesh = "capsule.nca";
+constexpr auto CapsuleMesh = "DefaultCapsule.nca";
 
 /** @brief Name of the default skybox mesh asset. */
-constexpr auto SkyboxMesh = "skybox.nca";
+constexpr auto SkyboxMesh = CubeMesh;
 
 /** @brief Name of the default base color texture asset. */
 constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";
@@ -33,15 +33,15 @@ constexpr auto DefaultNormal = "DefaultNormal.nca";
 /** @brief Name of the default particle texture asset. */
 constexpr auto DefaultParticle = "DefaultParticle.nca";
 
-/** @brief Name of the default cubemap asset. */
+/** @brief Name of the default cube map asset. */
 constexpr auto DefaultCubeMap = "DefaultSkybox.nca";
 
-/** @brief Name of the default audio clip asset. */
-constexpr auto DefaultAudioClip = "empty.nca";
+/** @brief Name of the default empty audio clip asset. */
+constexpr auto DefaultAudioClip = "DefaultAudioClip.nca";
 
-/** @brief Name of the default concave collider asset. */
-constexpr auto DefaultConcaveCollider = "plane.nca";
+/** @brief Name of the default plane-shaped concave collider asset. */
+constexpr auto DefaultConcaveCollider = "DefaultConcaveCollider.nca";
 
-/** @brief Name of the default hull collider asset. */
-constexpr auto DefaultHullCollider = "cube.nca";
+/** @brief Name of the default cube-shaped hull collider asset. */
+constexpr auto DefaultHullCollider = "DefaultHullCollider.nca";
 } // namespace nc::asset
