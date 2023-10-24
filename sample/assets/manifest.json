@@ -4,10 +4,6 @@
     },
     "audio-clip": [
         {
-            "sourcePath": "raw/audio/empty.wav",
-            "assetName": "audio_clip/empty"
-        },
-        {
             "sourcePath": "raw/audio/drums.wav",
             "assetName": "audio_clip/drums"
         },
@@ -18,25 +14,11 @@
     ],
     "concave-collider": [
         {
-            "sourcePath": "raw/model/plane.fbx",
-            "assetName": "concave_collider/plane"
-        },
-        {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "concave_collider/ramp"
         }
     ],
-    "cube-map": [
-        {
-            "sourcePath": "raw/image/cube_maps/DefaultSkybox.png",
-            "assetName": "cube_map/DefaultSkybox.nca"
-        }
-    ],
     "hull-collider": [
-        {
-            "sourcePath": "raw/model/cube.fbx",
-            "assetName": "hull_collider/cube"
-        },
         {
             "sourcePath": "raw/model/coin.fbx",
             "assetName": "hull_collider/coin"
@@ -44,32 +26,12 @@
     ],
     "mesh": [
         {
-            "sourcePath": "raw/model/capsule.fbx",
-            "assetName": "mesh/capsule"
-        },
-        {
             "sourcePath": "raw/model/coin.fbx",
             "assetName": "mesh/coin"
         },
         {
-            "sourcePath": "raw/model/cube.fbx",
-            "assetName": "mesh/cube"
-        },
-        {
-            "sourcePath": "raw/model/plane.fbx",
-            "assetName": "mesh/plane"
-        },
-        {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "mesh/ramp"
-        },
-        {
-            "sourcePath": "raw/model/skybox.fbx",
-            "assetName": "mesh/skybox"
-        },
-        {
-            "sourcePath": "raw/model/sphere.fbx",
-            "assetName": "mesh/sphere"
         },
         {
             "sourcePath": "raw/model/table.fbx",
@@ -89,22 +51,6 @@
         }
     ],
     "texture": [
-        {
-            "sourcePath": "raw/image/DefaultBaseColor.png",
-            "assetName": "texture/DefaultBaseColor"
-        },
-        {
-            "sourcePath": "raw/image/DefaultMetallic.png",
-            "assetName": "texture/DefaultMetallic"
-        },
-        {
-            "sourcePath": "raw/image/DefaultNormal.png",
-            "assetName": "texture/DefaultNormal"
-        },
-        {
-            "sourcePath": "raw/image/DefaultParticle.png",
-            "assetName": "texture/DefaultParticle"
-        },
         {
             "sourcePath": "raw/image/blacktop/BaseColor.png",
             "assetName": "texture/blacktop/BaseColor"
