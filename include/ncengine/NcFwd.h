@@ -1,6 +1,6 @@
 /**
  * @file NcFwd.h
- * @copyright Jaremie and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2023
  */
 #pragma once
 
