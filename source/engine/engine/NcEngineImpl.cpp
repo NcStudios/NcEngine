@@ -46,7 +46,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
-      m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
+      m_modules{BuildModuleRegistry(m_registry.get(), &m_window, config)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{},
       m_isRunning{false}
@@ -99,7 +99,7 @@ void NcEngineImpl::QueueSceneChange(std::unique_ptr<Scene> scene)
 
 auto NcEngineImpl::GetRegistry() noexcept -> Registry*
 {
-    return &m_registry;
+    return m_registry.get();
 }
 
 auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
@@ -120,7 +120,7 @@ void NcEngineImpl::LoadScene()
         module->OnBeforeSceneLoad();
     }
 
-    m_sceneManager.LoadQueuedScene(&m_registry, ModuleProvider{&m_modules});
+    m_sceneManager.LoadQueuedScene(m_registry.get(), ModuleProvider{&m_modules});
 }
 
 void NcEngineImpl::Clear()
@@ -132,7 +132,7 @@ void NcEngineImpl::Clear()
         module->Clear();
     }
 
-    m_registry.Clear();
+    m_registry->Clear();
 }
 
 void NcEngineImpl::Run()
