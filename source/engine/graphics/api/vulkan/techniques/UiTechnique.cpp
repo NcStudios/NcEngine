@@ -1,5 +1,4 @@
 #include "UiTechnique.h"
-#include "assets/AssetService.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"

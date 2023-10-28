@@ -14,8 +14,7 @@
 namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
-        : m_meshPath{"cube.nca"},
-          m_pipeline{nullptr},
+        : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
           #ifdef NC_DEBUG_RENDERING_ENABLED
           ,m_debugRenderer{}
@@ -77,8 +76,6 @@ namespace nc::graphics
         m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
         vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
         vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
-
-        LoadMeshAsset(m_meshPath);
     }
 
     WireframeTechnique::~WireframeTechnique() noexcept
@@ -131,7 +128,7 @@ namespace nc::graphics
         }
 
         #ifdef NC_DEBUG_RENDERING_ENABLED
-        const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(m_meshPath);
+        const auto debugMeshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::CubeMesh);
         auto* debugData = m_debugRenderer.GetData();
 
         for (const auto& point : debugData->points)

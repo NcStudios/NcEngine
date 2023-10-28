@@ -16,23 +16,12 @@ EnvironmentSystem::EnvironmentSystem(Signal<const EnvironmentData&>&& backendCha
 void EnvironmentSystem::SetSkybox(const std::string& path)
 {
     m_useSkybox = true;
-
-    if (!AssetService<MeshView>::Get()->IsLoaded(SkyboxMeshPath))
-    {
-        LoadMeshAsset(SkyboxMeshPath);
-    }
-
     auto skyboxView = AssetService<CubeMapView>::Get()->Acquire(path);
     m_environmentData.skyboxTextureIndex = skyboxView.index;
 }
 
 auto EnvironmentSystem::Execute(const CameraState& cameraState) -> EnvironmentState
 {
-    if (!AssetService<MeshView>::Get()->IsLoaded(SkyboxMeshPath))
-    {
-        LoadMeshAsset(SkyboxMeshPath);
-    }
-
     m_environmentData.cameraWorldPosition = cameraState.position;
     m_backendChannel.Emit(m_environmentData);
     return EnvironmentState{m_useSkybox};

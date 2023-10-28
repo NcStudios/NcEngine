@@ -9,10 +9,10 @@ namespace nc::graphics
 {
 struct ToonMaterial
 {
-    std::string baseColor;
-    std::string overlay;
-    std::string hatching;
-    uint32_t hatchingTiling;
+    std::string baseColor = asset::DefaultBaseColor;
+    std::string overlay = asset::DefaultBaseColor;
+    std::string hatching = asset::DefaultBaseColor;
+    uint32_t hatchingTiling = 1;
 };
 
 struct ToonMaterialView
@@ -29,8 +29,8 @@ class ToonRenderer : public ComponentBase
 
     public:
         ToonRenderer(Entity entity,
-                     std::string meshUid,
-                     ToonMaterial material);
+                     std::string meshUid = asset::CubeMesh,
+                     ToonMaterial material = {});
 
         auto GetMeshView() const noexcept -> const MeshView&
         {

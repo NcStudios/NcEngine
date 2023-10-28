@@ -26,8 +26,11 @@ class NcAssetImpl : public NcAsset
 {
     public:
         NcAssetImpl(const config::AssetSettings& assetSettings,
-                    const config::MemorySettings& memorySettings);
+                    const config::MemorySettings& memorySettings,
+                    AssetMap defaults);
         ~NcAssetImpl() noexcept;
+
+        void OnBeforeSceneLoad() override;
 
         auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override;
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
@@ -40,5 +43,6 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<HullColliderAssetManager> m_hullColliderManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
+        AssetMap m_defaults;
 };
 } // namespace nc::asset

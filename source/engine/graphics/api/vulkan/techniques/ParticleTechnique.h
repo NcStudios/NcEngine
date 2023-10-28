@@ -14,8 +14,6 @@ namespace nc::graphics
     class Device;
     class ShaderDescriptorSets;
 
-    const auto PlaneMeshPath = std::string{ "plane.nca" };
-
     struct ParticlePushConstants
     {
         // N MVP matrices

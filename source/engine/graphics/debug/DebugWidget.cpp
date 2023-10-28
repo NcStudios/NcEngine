@@ -1,13 +1,11 @@
-#include "graphics/DebugWidget.h"
+#include "ncengine/graphics/DebugWidget.h"
+#include "ncengine/asset/DefaultAssets.h"
+
 #include "ncutility/NcError.h"
 
 namespace
 {
 using namespace nc::physics;
-
-const auto CubeMeshPath = std::string{"cube.nca"};
-const auto SphereMeshPath = std::string{"sphere.nca"};
-const auto CapsuleMeshPath = std::string{"capsule.nca"};
 
 std::string GetMeshPathForCollider(ColliderType colliderType)
 {
@@ -15,20 +13,20 @@ std::string GetMeshPathForCollider(ColliderType colliderType)
     {
         case ColliderType::Box:
         {
-            return CubeMeshPath;
+            return nc::asset::CubeMesh;
         }
         case ColliderType::Sphere:
         {
-            return SphereMeshPath;
+            return nc::asset::SphereMesh;
         }
         case ColliderType::Capsule:
         {
-            return CapsuleMeshPath;
+            return nc::asset::CapsuleMesh;
         }
         case ColliderType::Hull:
         {
             // @todo: Eventually not have sphere here.
-            return SphereMeshPath;
+            return nc::asset::SphereMesh;
         }
         default:
         {

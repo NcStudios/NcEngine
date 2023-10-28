@@ -2,44 +2,50 @@
     "globalOptions": {
         "outputDirectory": ".\\nca"
     },
+    "audio-clip": [
+        {
+            "sourcePath": "raw\\sound\\DefaultAudioClip.wav",
+            "assetName": "audio_clip\\DefaultAudioClip"
+        }
+    ],
     "concave-collider": [
         {
-            "sourcePath": "raw\\model\\plane.fbx",
-            "assetName": "concave_colliders\\plane"
+            "sourcePath": "raw\\model\\DefaultPlane.fbx",
+            "assetName": "concave_collider\\DefaultConcaveCollider"
         }
     ],
     "cube-map": [
         {
             "sourcePath": "raw\\image\\DefaultSkybox.png",
-            "assetName": "cube_maps\\DefaultSkybox.png"
+            "assetName": "cube_map\\DefaultSkyboxCubeMap"
         }
     ],
     "hull-collider": [
         {
-            "sourcePath": "raw\\model\\cube.fbx",
-            "assetName": "hull_colliders\\cube"
+            "sourcePath": "raw\\model\\DefaultCube.fbx",
+            "assetName": "hull_collider\\DefaultHullCollider"
         }
     ],
     "mesh": [
         {
-            "sourcePath": "raw\\model\\capsule.fbx",
-            "assetName": "meshes\\capsule"
+            "sourcePath": "raw\\model\\DefaultCapsule.fbx",
+            "assetName": "mesh\\DefaultCapsule"
         },
         {
-            "sourcePath": "raw\\model\\cube.fbx",
-            "assetName": "meshes\\cube"
+            "sourcePath": "raw\\model\\DefaultCube.fbx",
+            "assetName": "mesh\\DefaultCube"
         },
         {
-            "sourcePath": "raw\\model\\plane.fbx",
-            "assetName": "meshes\\plane"
+            "sourcePath": "raw\\model\\DefaultPlane.fbx",
+            "assetName": "mesh\\DefaultPlane"
         },
         {
-            "sourcePath": "raw\\model\\cube.fbx",
-            "assetName": "meshes\\skybox"
+            "sourcePath": "raw\\model\\DefaultSphere.fbx",
+            "assetName": "mesh\\DefaultSphere"
         },
         {
-            "sourcePath": "raw\\model\\sphere.fbx",
-            "assetName": "meshes\\sphere"
+            "sourcePath": "raw\\model\\DefaultSkybox.fbx",
+            "assetName": "mesh\\DefaultSkyboxMesh"
         }
     ],
     "texture": [

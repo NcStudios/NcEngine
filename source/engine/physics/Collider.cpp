@@ -1,6 +1,5 @@
 #include "physics/Collider.h"
 #include "ColliderUtility.h"
-#include "assets/AssetService.h"
 #include "ecs/Registry.h"
 #include "graphics/DebugWidget.h"
 

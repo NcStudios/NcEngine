@@ -113,7 +113,7 @@ namespace nc::graphics
         OPTICK_CATEGORY("ParticleTechnique::Record", Optick::Category::Rendering);
         auto pushConstants = ParticlePushConstants{};
         pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(PlaneMeshPath);
+        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::PlaneMesh);
 
         for (auto& emitterState : frameData.emitterStates)
         {

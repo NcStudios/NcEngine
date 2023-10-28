@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DefaultAssets.h"
 #include "ncengine/utility/EnumUtilities.h"
 
 #include "ncmath/Geometry.h"

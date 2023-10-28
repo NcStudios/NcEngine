@@ -9,10 +9,10 @@ namespace nc::graphics
 {
 struct PbrMaterial
 {
-    std::string baseColor;
-    std::string normal;
-    std::string roughness;
-    std::string metallic;
+    std::string baseColor = asset::DefaultBaseColor;
+    std::string normal = asset::DefaultNormal;
+    std::string roughness = asset::DefaultRoughness;
+    std::string metallic = asset::DefaultMetallic;
 };
 
 struct PbrMaterialView
@@ -35,8 +35,8 @@ class MeshRenderer : public ComponentBase
 
     public:
         MeshRenderer(Entity entity,
-                     std::string meshUid,
-                     PbrMaterial material,
+                     std::string meshUid = asset::CubeMesh,
+                     PbrMaterial material = {},
                      TechniqueType techniqueType = TechniqueType::PhongAndUi);
 
         auto GetMeshView() const noexcept -> const MeshView&
