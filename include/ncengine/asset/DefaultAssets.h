@@ -22,7 +22,7 @@ constexpr auto SphereMesh = "DefaultSphere.nca";
 constexpr auto CapsuleMesh = "DefaultCapsule.nca";
 
 /** @brief Name of the default skybox mesh asset. */
-constexpr auto SkyboxMesh = "DefaultSkybox.nca";
+constexpr auto SkyboxMesh = "DefaultSkyboxMesh.nca";
 
 /** @brief Name of the default base color texture asset. */
 constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";
@@ -39,8 +39,8 @@ constexpr auto DefaultMetallic = DefaultRoughness;
 /** @brief Name of the default particle texture asset. */
 constexpr auto DefaultParticle = "DefaultParticle.nca";
 
-/** @brief Name of the default cube map asset. */
-constexpr auto DefaultCubeMap = "DefaultCubeMap.nca";
+/** @brief Name of the default skybox cubemap asset. */
+constexpr auto DefaultSkyboxCubeMap = "DefaultSkyboxCubeMap.nca";
 
 /** @brief Name of the default empty audio clip asset. */
 constexpr auto DefaultAudioClip = "DefaultAudioClip.nca";

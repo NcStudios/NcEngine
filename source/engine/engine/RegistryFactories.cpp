@@ -37,7 +37,7 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
     {
         { AssetType::AudioClip,       { DefaultAudioClip } },
         { AssetType::ConcaveCollider, { DefaultConcaveCollider } },
-        { AssetType::CubeMap,         { DefaultCubeMap } },
+        { AssetType::CubeMap,         { DefaultSkyboxCubeMap } },
         { AssetType::HullCollider,    { DefaultHullCollider } },
         { AssetType::Mesh,            { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh } },
         { AssetType::Texture,         { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }

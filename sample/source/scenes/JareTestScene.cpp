@@ -47,7 +47,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .hatchingTiling  = 8
     };
 
-    modules.Get<graphics::NcGraphics>()->SetSkybox(asset::DefaultCubeMap);
+    modules.Get<graphics::NcGraphics>()->SetSkybox(asset::DefaultSkyboxCubeMap);
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});

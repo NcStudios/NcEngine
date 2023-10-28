@@ -16,8 +16,8 @@
     ],
     "cube-map": [
         {
-            "sourcePath": "raw\\image\\DefaultCubeMap.png",
-            "assetName": "cube_map\\DefaultCubeMap"
+            "sourcePath": "raw\\image\\DefaultSkybox.png",
+            "assetName": "cube_map\\DefaultSkyboxCubeMap"
         }
     ],
     "hull-collider": [
@@ -45,7 +45,7 @@
         },
         {
             "sourcePath": "raw\\model\\DefaultSkybox.fbx",
-            "assetName": "mesh\\DefaultSkybox"
+            "assetName": "mesh\\DefaultSkyboxMesh"
         }
     ],
     "texture": [
