@@ -25,7 +25,7 @@ namespace nc
 
         private:
             window::WindowImpl m_window;
-            nc::Registry m_registry;
+            std::unique_ptr<Registry> m_registry;
             ModuleRegistry m_modules;
             task::Executor m_executor;
             scene::SceneManager m_sceneManager;

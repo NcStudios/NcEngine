@@ -58,7 +58,7 @@ class DeviceStream::ErrorContext
         {
             return [this](RtAudioErrorType type, const std::string& errorText)
             {
-                NC_LOG_ERROR_FMT("Audio device error: '{}'\n\tError Text: '{}'", ToString(type), errorText);
+                NC_LOG_ERROR("Audio device error: '{}'\n\tError Text: '{}'", ToString(type), errorText);
                 SetStatus(nc::audio::StreamStatus::Failed);
             };
         }
@@ -73,7 +73,7 @@ DeviceStream::DeviceStream(const StreamParameters& params)
       m_rtAudio{std::make_unique<RtAudio>(RtAudio::Api::UNSPECIFIED, m_errorContext->MakeCallback())},
       m_activeDevice{g_nullDevice}
 {
-    NC_LOG_INFO_FMT("Audio API: {}", m_rtAudio->getApiName(m_rtAudio->getCurrentApi()));
+    NC_LOG_INFO("Audio API: {}", m_rtAudio->getApiName(m_rtAudio->getCurrentApi()));
     OpenStream(params);
 }
 
@@ -92,7 +92,7 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
         return false;
     }
 
-    NC_LOG_INFO_FMT("Selected audio output device: '{}'", m_activeDevice.name);
+    NC_LOG_INFO("Selected audio output device: '{}'", m_activeDevice.name);
     auto rtParams = RtAudio::StreamParameters{m_activeDevice.id, params.channelCount, 0};
     m_bufferFrames = params.bufferFrames;
     const auto result = m_rtAudio->openStream(&rtParams,
@@ -105,14 +105,14 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
                                               nullptr);
     if (result)
     {
-        NC_LOG_ERROR_FMT("Failed to open audio stream: '{}'", ::ToString(result));
+        NC_LOG_ERROR("Failed to open audio stream: '{}'", ::ToString(result));
         m_activeDevice = g_nullDevice;
         return false;
     }
 
     if (auto startResult = m_rtAudio->startStream())
     {
-        NC_LOG_ERROR_FMT("Failed to start audio stream: '{}'", ::ToString(startResult));
+        NC_LOG_ERROR("Failed to start audio stream: '{}'", ::ToString(startResult));
         m_activeDevice = g_nullDevice;
         return false;
     }
@@ -133,7 +133,7 @@ void DeviceStream::CloseStream() noexcept
 
     if (auto result = m_rtAudio->isStreamRunning() ? m_rtAudio->stopStream() : RTAUDIO_NO_ERROR)
     {
-        NC_LOG_ERROR_FMT("Failed to stop audio stream: '{}'", ::ToString(result));
+        NC_LOG_ERROR("Failed to stop audio stream: '{}'", ::ToString(result));
         return;
     }
 

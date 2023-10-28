@@ -6,6 +6,7 @@
 #include "detail/HandleManager.h"
 #include "detail/PerComponentStorage.h"
 #include "detail/FreeComponentGroup.h"
+#include "ncengine/type/StableAddress.h"
 
 namespace nc
 {
@@ -21,17 +22,12 @@ concept Viewable = PooledComponent<T> || std::same_as<T, Entity>;
 /**
  * @brief Storage orchestrator for all Entities and Components.
  */
-class Registry
+class Registry : public StableAddress
 {
     using index_type = Entity::index_type;
 
     public:
-        Registry(size_t maxEntities);
-        Registry(Registry&&) = default;
-        Registry& operator=(Registry&&) = default;
-        ~Registry() = default;
-        Registry(const Registry&) = delete;
-        Registry& operator=(const Registry&) = delete;
+        explicit Registry(size_t maxEntities);
 
         /** Entity Functions */
         template<std::same_as<Entity> T>

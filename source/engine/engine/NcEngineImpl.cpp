@@ -1,6 +1,7 @@
 #include "NcEngineImpl.h"
 #include "RegistryFactories.h"
 #include "config/ConfigInternal.h"
+#include "config/Version.h"
 #include "input/InputInternal.h"
 #include "utility/Log.h"
 
@@ -27,7 +28,7 @@ void LogConfig(const nc::config::Config& config)
         }
     }
 
-    NC_LOG_INFO_FMT("Initializing NcEngine with Config:\n{}", configStr);
+    NC_LOG_INFO("Initializing NcEngine with Config:\n{}", configStr);
 }
 } // anonymous namespace
 
@@ -36,16 +37,16 @@ namespace nc
 auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngine>
 {
     config::SetConfig(config);
-    utility::detail::InitializeLog(config.projectSettings.logFilePath);
+    utility::detail::InitializeLog(config.projectSettings);
     ::LogConfig(config);
-    NC_LOG_INFO("Creating NcEngine instance");
+    NC_LOG_INFO("Creating NcEngine instance v{}", NC_PROJECT_VERSION);
     return std::make_unique<NcEngineImpl>(config);
 }
 
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
-      m_modules{BuildModuleRegistry(&m_registry, &m_window, config)},
+      m_modules{BuildModuleRegistry(m_registry.get(), &m_window, config)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{},
       m_isRunning{false}
@@ -98,7 +99,7 @@ void NcEngineImpl::QueueSceneChange(std::unique_ptr<Scene> scene)
 
 auto NcEngineImpl::GetRegistry() noexcept -> Registry*
 {
-    return &m_registry;
+    return m_registry.get();
 }
 
 auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
@@ -119,7 +120,7 @@ void NcEngineImpl::LoadScene()
         module->OnBeforeSceneLoad();
     }
 
-    m_sceneManager.LoadQueuedScene(&m_registry, ModuleProvider{&m_modules});
+    m_sceneManager.LoadQueuedScene(m_registry.get(), ModuleProvider{&m_modules});
 }
 
 void NcEngineImpl::Clear()
@@ -131,7 +132,7 @@ void NcEngineImpl::Clear()
         module->Clear();
     }
 
-    m_registry.Clear();
+    m_registry->Clear();
 }
 
 void NcEngineImpl::Run()
