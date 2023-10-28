@@ -1,11 +1,12 @@
 #pragma once
 
+#include "ComponentPool.h"
 #include "Tag.h"
 #include "Transform.h"
 #include "detail/EntityStorage.h"
+#include "detail/FreeComponentGroup.h"
 #include "detail/HandleManager.h"
 #include "detail/PerComponentStorage.h"
-#include "detail/FreeComponentGroup.h"
 #include "ncengine/type/StableAddress.h"
 
 namespace nc
@@ -58,9 +59,6 @@ class Registry : public StableAddress
         template<PooledComponent T>
         auto GetParent(const T* component) const -> Entity;
 
-        template<PooledComponent T, PooledComponent U>
-        auto ViewGroup() -> std::pair<std::span<T>, std::span<U>>;
-
         template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
         void Sort(Predicate&& comparesLessThan);
 
@@ -108,12 +106,13 @@ class Registry : public StableAddress
         template<std::same_as<Entity> T>
         auto StorageFor() const -> const ecs::detail::EntityStorage*;
 
+        auto GetComponentPools() -> std::span<std::unique_ptr<ecs::ComponentPool>>;
         void CommitStagedChanges();
         void Clear();
         auto GetAllComponentsOn(Entity entity) -> std::vector<AnyComponent>;
 
     private:
-        std::vector<std::unique_ptr<ecs::detail::PerComponentStorageBase>> m_registeredStorage;
+        std::vector<std::unique_ptr<ecs::ComponentPool>> m_registeredStorage;
         ecs::detail::EntityStorage m_entities;
         size_t m_maxEntities;
 
@@ -147,6 +146,11 @@ template<std::same_as<Entity> T>
 auto Registry::StorageFor() const -> const ecs::detail::EntityStorage*
 {
     return &m_entities;
+}
+
+inline auto Registry::GetComponentPools() -> std::span<std::unique_ptr<ecs::ComponentPool>>
+{
+    return m_registeredStorage;
 }
 
 template<std::same_as<Entity> T>
@@ -253,59 +257,6 @@ template<PooledComponent T>
 auto Registry::GetParent(const T* component) const -> Entity
 {
     return StorageFor<T>()->GetParent(component);
-}
-
-template<PooledComponent T, PooledComponent U>
-auto Registry::ViewGroup() -> std::pair<std::span<T>, std::span<U>>
-{
-    auto& referenceStorage = *StorageFor<T>();
-    auto& targetStorage = *StorageFor<U>();
-    auto& referenceEntities = referenceStorage.EntityPool();
-    auto& targetSparseArray = targetStorage.SparseArray();
-    auto& targetEntities = targetStorage.EntityPool();
-
-    size_t referenceSize = referenceEntities.size();
-    if(referenceSize == 0u || targetEntities.size() == 0u)
-        return{};
-
-    size_t current = 0u, end = referenceSize - 1;
-
-    while(current <= end)
-    {
-        auto entityIndex = referenceEntities.at(current).Index();
-        auto indexInTarget = targetSparseArray.at(entityIndex);
-
-        if(indexInTarget != Entity::NullIndex) // Entity has both components
-        {
-            if(indexInTarget != current)
-            {
-                auto swapEntity = targetEntities.at(current);
-                targetStorage.Swap(entityIndex, swapEntity.Index());
-            }
-
-            ++current;
-        }
-        else // Entity does not have target component
-        {
-            auto swapEntity = referenceEntities.at(end).Index();
-            referenceStorage.Swap(entityIndex, swapEntity);
-            --end;
-        }
-    }
-
-    auto& referenceComponents = referenceStorage.ComponentPool();
-    auto& targetComponents = targetStorage.ComponentPool();
-
-    if(referenceComponents.size() < current || targetComponents.size() < current)
-        throw NcError("ViewGroup - Invalid size");
-
-    auto sharedRangeSize = current > end ? current : end;
-
-    return std::pair<std::span<T>, std::span<U>>
-    {
-        std::span<T>{referenceComponents.begin(), sharedRangeSize},
-        std::span<U>{targetComponents.begin(), sharedRangeSize}
-    };
 }
 
 template<PooledComponent T, std::predicate<const T&, const T&> Predicate>

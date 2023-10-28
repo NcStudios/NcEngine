@@ -18,7 +18,11 @@ class SceneGraph
 {
     public:
         void Draw(Registry* registry);
-        auto GetSelectedEntity() const noexcept -> Entity { return m_selectedEntity; }
+
+        auto GetSelectedEntity() const noexcept -> Entity
+        {
+            return m_selectedEntity;
+        }
 
     private:
         Entity m_selectedEntity = Entity::Null();
@@ -29,7 +33,6 @@ class SceneGraph
         void Graph(Registry* registry);
         void GraphNode(Registry* registry, Entity entity, Tag& tag, Transform& transform);
         void GraphContextMenu(Registry* registry);
-        void NodeContextMenu(Registry* registry, Entity entity);
 };
 } // namespace ui::editor
 } // namespace nc

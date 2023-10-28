@@ -84,13 +84,24 @@ struct StoragePolicy : DefaultStoragePolicy {};
 template<PooledComponent T>
 struct ComponentHandler
 {
+    /** @brief Function type for the Factory handler. */
+    using Factory_t = std::function<T(Entity, void*)>;
+
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T&)>;
 
     /** @brief A name for the component with no uniqueness constraints. */
     std::string name = "User Component";
 
-    /** @brief Handler for drawing T's UI widget. */
+    /** @brief Optional pointer to user data, which is passed to the factory handler. */
+    void* userData = nullptr;
+
+    /** @brief Handler for creating an instance of T.
+     *  @note Factory handlers enable adding/removing types through the editor. */
+    Factory_t factory = nullptr;
+
+    /** @brief Handler for drawing T's UI widget.
+     *  @note UI handlers allow viewing types in the editor 'Inspector' window. */
     DrawUI_t drawUI = nullptr;
 };
 } // namespace nc

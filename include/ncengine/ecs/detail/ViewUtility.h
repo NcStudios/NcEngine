@@ -92,7 +92,7 @@ template<PooledComponent... Ts>
 class MultiViewIterator final
 {
     public:
-        using basis_iterator = EntityStorage::iterator;
+        using basis_iterator = std::span<Entity>::iterator;
         using value_type = std::tuple<Ts*...>;
         using pointer = value_type*;
         using const_pointer = const value_type*;
@@ -182,7 +182,7 @@ template<Viewable... Ts>
 struct ViewStorageAdaptor
 {
     using iterator = detail::MultiViewIterator<Ts...>;
-    using storage_type = detail::PerComponentStorageBase;
+    using storage_type = ecs::ComponentPool;
 
     static auto basis(Registry* registry) -> storage_type*
     {
@@ -195,13 +195,13 @@ struct ViewStorageAdaptor
 
     static auto begin(storage_type* basis, Registry* registry) noexcept -> iterator
     {
-        auto& pool = basis->EntityPool();
+        auto pool = basis->EntityPool();
         return iterator{pool.begin(), pool.end(), registry};
     }
 
     static auto end(storage_type* basis, Registry* registry) noexcept -> iterator
     {
-        auto& pool = basis->EntityPool();
+        auto pool = basis->EntityPool();
         return iterator{pool.end(), pool.end(), registry};
     }
 };

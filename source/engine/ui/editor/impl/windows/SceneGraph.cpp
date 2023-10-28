@@ -1,5 +1,5 @@
 #include "SceneGraph.h"
-
+#include "EntityContextMenu.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -69,8 +69,11 @@ void SceneGraph::GraphNode(Registry* registry, Entity entity, Tag& tag, Transfor
     {
         m_selectedEntity = entity;
     }
-
-    NodeContextMenu(registry, entity);
+    else if (ImGui::BeginPopupContextItem())
+    {
+        m_selectedEntity = EntityContextMenu(entity, registry);
+        ImGui::EndPopup();
+    }
 
     DragAndDropSource<Entity>(&entity);
     DragAndDropTarget<Entity>([entity, registry](Entity* source)
@@ -99,21 +102,6 @@ void SceneGraph::GraphContextMenu(Registry* registry)
             m_selectedEntity = registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
         else
             m_selectedEntity = Entity::Null();
-
-        ImGui::EndPopup();
-    }
-}
-
-void SceneGraph::NodeContextMenu(Registry* registry, Entity entity)
-{
-    if (ImGui::BeginPopupContextItem())
-    {
-        if (ImGui::Selectable("Add Child"))
-            m_selectedEntity = registry->Add<Entity>(EntityInfo{.parent = entity});
-        else if (ImGui::Selectable("Make Root"))
-            registry->Get<Transform>(entity)->SetParent(Entity::Null());
-        else
-            m_selectedEntity = entity;
 
         ImGui::EndPopup();
     }

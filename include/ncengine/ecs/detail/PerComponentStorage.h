@@ -2,14 +2,13 @@
 
 #include "FreeComponentGroup.h"
 #include "ncengine/ecs/Component.h"
-#include "ncengine/ecs/AnyComponent.h"
+#include "ncengine/ecs/ComponentPool.h"
 #include "ncengine/utility/Signal.h"
 
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <numeric>
-#include <span>
-#include <vector>
 
 namespace nc::ecs::detail
 {
@@ -26,36 +25,8 @@ auto ConstructComponent(Entity entity, Args&&... args)
     }
 }
 
-class PerComponentStorageBase
-{
-    public:
-        using index_type = Entity::index_type;
-
-        PerComponentStorageBase(size_t maxEntities)
-            : sparseArray(maxEntities, Entity::NullIndex),
-                entityPool{}
-        {
-        }
-
-        virtual ~PerComponentStorageBase() = default;
-
-        auto SparseArray() noexcept -> std::vector<index_type>& { return sparseArray; }
-        auto EntityPool() noexcept -> std::vector<Entity>& { return entityPool; }
-        auto SparseArray() const noexcept -> const std::vector<index_type>& { return sparseArray; }
-        auto EntityPool() const noexcept -> const std::vector<Entity>& { return entityPool; }
-        auto Size() const noexcept { return entityPool.size(); }
-
-        virtual auto GetAsAnyComponent(Entity entity) -> AnyComponent = 0;
-        virtual void Clear() = 0;
-        virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
-
-    protected:
-        std::vector<index_type> sparseArray;
-        std::vector<Entity> entityPool;
-};
-
 template<PooledComponent T>
-class PerComponentStorage : public PerComponentStorageBase
+class PerComponentStorage final : public ComponentPool
 {
     struct StagedComponent
     {
@@ -81,8 +52,8 @@ class PerComponentStorage : public PerComponentStorageBase
         auto Add(Entity entity, Args&&... args) -> T*;
 
         void Remove(Entity entity);
-        bool TryRemove(Entity entity);
-        bool Contains(Entity entity) const;
+        bool TryRemove(Entity entity) override;
+        bool Contains(Entity entity) const override;
         auto Get(Entity entity) -> T*;
         auto Get(Entity entity) const -> const T*;
         auto GetAsAnyComponent(Entity entity) -> AnyComponent override;
@@ -98,6 +69,9 @@ class PerComponentStorage : public PerComponentStorageBase
         void Swap(index_type firstEntity, index_type secondEntity);
         void ReserveHeadroom(size_t additionalRequiredCount);
 
+        auto GetComponentName() const noexcept -> std::string_view override;
+        auto HasFactory() const noexcept -> bool override;
+        auto AddDefault(Entity entity) -> AnyComponent override;
         void Clear() override;
         void CommitStagedComponents(const std::vector<Entity>& removed) override;
 
@@ -111,7 +85,7 @@ class PerComponentStorage : public PerComponentStorageBase
 
 template<PooledComponent T>
 PerComponentStorage<T>::PerComponentStorage(size_t maxEntities, ComponentHandler<T> handler)
-    : PerComponentStorageBase{maxEntities},
+    : ecs::ComponentPool{maxEntities},
       m_componentPool{},
       m_stagingPool{},
       m_handler{std::move(handler)},
@@ -320,6 +294,30 @@ void PerComponentStorage<T>::ReserveHeadroom(size_t additionalRequiredCount)
     auto requiredSize = m_componentPool.size() + additionalRequiredCount;
     m_componentPool.reserve(requiredSize);
     entityPool.reserve(requiredSize);
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::GetComponentName() const noexcept -> std::string_view
+{
+    return m_handler.name;
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::HasFactory() const noexcept -> bool
+{
+    return m_handler.factory != nullptr;
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::AddDefault(Entity entity) -> AnyComponent
+{
+    if (m_handler.factory)
+    {
+        auto comp = Add(entity, m_handler.factory(entity, m_handler.userData));
+        return AnyComponent{comp, &m_handler};
+    }
+
+    return AnyComponent{};
 }
 
 template<PooledComponent T>
