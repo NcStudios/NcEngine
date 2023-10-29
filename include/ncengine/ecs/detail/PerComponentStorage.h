@@ -71,6 +71,8 @@ class PerComponentStorage final : public ComponentPool
 
         auto GetComponentName() const noexcept -> std::string_view override;
         auto HasFactory() const noexcept -> bool override;
+        auto HasDrawUI() const noexcept -> bool override;
+        auto HasUserData() const noexcept -> bool override;
         auto AddDefault(Entity entity) -> AnyComponent override;
         void Clear() override;
         void CommitStagedComponents(const std::vector<Entity>& removed) override;
@@ -306,6 +308,18 @@ template<PooledComponent T>
 auto PerComponentStorage<T>::HasFactory() const noexcept -> bool
 {
     return m_handler.factory != nullptr;
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::HasUserData() const noexcept -> bool
+{
+    return m_handler.userData != nullptr;
+}
+
+template<PooledComponent T>
+auto PerComponentStorage<T>::HasDrawUI() const noexcept -> bool
+{
+    return m_handler.drawUI != nullptr;
 }
 
 template<PooledComponent T>

@@ -25,6 +25,12 @@ class ComponentPool
         /** @brief Check if `ComponentHandler::factory` is set for the underlying type. */
         virtual auto HasFactory() const noexcept -> bool = 0;
 
+        /** @brief Check if `ComponentHandler::userData` is set for the underlying type. */
+        virtual auto HasUserData() const noexcept -> bool = 0;
+
+        /** @brief Check if `ComponentHandler::drawUI` is set for the underlying type. */
+        virtual auto HasDrawUI() const noexcept -> bool = 0;
+
         /** @brief Factory-construct a component attached to an entity. */
         virtual auto AddDefault(Entity entity) -> AnyComponent = 0;
 
