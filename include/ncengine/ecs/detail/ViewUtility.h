@@ -259,13 +259,13 @@ struct ViewStorageAdaptor<T>
 
     static auto begin(storage_type* basis) noexcept -> iterator
     {
-        auto& pool = basis->ComponentPool();
+        auto& pool = basis->GetComponents();
         return iterator{pool.data()};
     }
 
     static auto end(storage_type* basis) noexcept -> iterator
     {
-        auto& pool = basis->ComponentPool();
+        auto& pool = basis->GetComponents();
         return iterator{pool.data() + pool.size()};
     }
 };

@@ -9,6 +9,7 @@
 
 namespace nc::ecs
 {
+/** @brief Base class for component storage. */
 class ComponentPool
 {
     public:
@@ -34,14 +35,15 @@ class ComponentPool
         /** @brief Factory-construct a component attached to an entity. */
         virtual auto AddDefault(Entity entity) -> AnyComponent = 0;
 
-        /** @brief Check if a component is attached to an entity. */
-        virtual bool Contains(Entity entity) const = 0;
+        /** @brief Check if the pool has a component attached to an entity. */
+        virtual auto Contains(Entity entity) const -> bool = 0;
 
-        /** @brief Get the component attached to an entity, or a null AnyComponent if none exists. */
+        /** @brief Get the component attached to an entity as an `AnyComponent`, or a null
+         *         `AnyComponent` if one does not exist. */
         virtual auto GetAsAnyComponent(Entity entity) -> AnyComponent = 0;
 
         /** @brief Remove a component attached to an entity if one exists. */
-        virtual bool TryRemove(Entity entity) = 0;
+        virtual auto TryRemove(Entity entity) -> bool = 0;
 
         /** @brief Remove all components except those attached to persistent entities.
          *  @note This operation is managed automatically for pools owned by the `Registry`. */
@@ -52,16 +54,10 @@ class ComponentPool
         virtual void CommitStagedComponents(const std::vector<Entity>& removed) = 0;
 
         /** @brief Get a collection of all entities with attached components in the pool. */
-        auto EntityPool() noexcept -> std::span<Entity>
-        {
-            return entityPool;
-        }
+        auto EntityPool() noexcept -> std::span<Entity> { return entityPool; }
 
         /** @brief Get the number of components in the pool. */
-        auto Size() const noexcept -> size_t
-        {
-            return entityPool.size();
-        }
+        auto Size() const noexcept -> size_t { return entityPool.size(); }
 
     protected:
         std::vector<index_type> sparseArray;

@@ -39,41 +39,33 @@ class PerComponentStorage final : public ComponentPool
         using iterator = std::vector<T>::iterator;
 
         PerComponentStorage(size_t maxEntities, ComponentHandler<T> handler);
-        ~PerComponentStorage() = default;
-        PerComponentStorage(PerComponentStorage&&) = default;
-        PerComponentStorage& operator=(PerComponentStorage&&) = default;
-        PerComponentStorage(const PerComponentStorage&) = delete;
-        PerComponentStorage& operator=(const PerComponentStorage&) = delete;
-
-        auto ComponentPool() noexcept -> std::vector<T>& { return m_componentPool; }
-        auto ComponentPool() const noexcept -> const std::vector<T>& { return m_componentPool; }
 
         template<class... Args>
         auto Add(Entity entity, Args&&... args) -> T*;
-
         void Remove(Entity entity);
-        bool TryRemove(Entity entity) override;
-        bool Contains(Entity entity) const override;
         auto Get(Entity entity) -> T*;
         auto Get(Entity entity) const -> const T*;
-        auto GetAsAnyComponent(Entity entity) -> AnyComponent override;
         auto GetParent(const T* component) const -> Entity;
 
         template<std::predicate<const T&, const T&> Predicate>
         void Sort(Predicate&& comparesLessThan);
-
-        auto Handler() noexcept -> ComponentHandler<T>&;
-        auto OnAdd() noexcept -> Signal<T&>&;
-        auto OnRemove() noexcept -> Signal<Entity>&;
-
         void Swap(index_type firstEntity, index_type secondEntity);
         void ReserveHeadroom(size_t additionalRequiredCount);
+        auto GetComponents() noexcept -> std::vector<T>& { return m_componentPool; }
+        auto GetComponents() const noexcept -> const std::vector<T>& { return m_componentPool; }
+
+        auto OnAdd() noexcept -> Signal<T&>&;
+        auto OnRemove() noexcept -> Signal<Entity>&;
+        auto Handler() noexcept -> ComponentHandler<T>&;
 
         auto GetComponentName() const noexcept -> std::string_view override;
         auto HasFactory() const noexcept -> bool override;
         auto HasDrawUI() const noexcept -> bool override;
         auto HasUserData() const noexcept -> bool override;
+        auto Contains(Entity entity) const -> bool override;
+        auto GetAsAnyComponent(Entity entity) -> AnyComponent override;
         auto AddDefault(Entity entity) -> AnyComponent override;
+        auto TryRemove(Entity entity) -> bool override;
         void Clear() override;
         void CommitStagedComponents(const std::vector<Entity>& removed) override;
 
