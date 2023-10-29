@@ -71,6 +71,30 @@ target_link_libraries(Entity_unit_tests
 
 add_test(Entity_unit_tests Entity_unit_tests)
 
+### PerComponentStorage Tests ###
+add_executable(PerComponentStorage_unit_tests
+    PerComponentStorage_unit_tests.cpp
+)
+
+target_include_directories(PerComponentStorage_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+)
+
+target_compile_options(PerComponentStorage_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(PerComponentStorage_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        gtest_main
+)
+
+add_test(PerComponentStorage_unit_tests PerComponentStorage_unit_tests)
+
 ### Registry Tests ###
 add_executable(Registry_unit_tests
     Registry_unit_tests.cpp
