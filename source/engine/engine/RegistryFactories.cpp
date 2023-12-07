@@ -53,14 +53,6 @@ void Register(nc::Registry& registry, const char* name, void(*drawUI)(T&))
         .drawUI = drawUI
     });
 }
-
-template<class T>
-void Set(nc::Registry& registry, const char* name, void(*drawUI)(T&))
-{
-    auto& handler = registry.Handler<T>();
-    handler.name = name;
-    handler.drawUI = drawUI;
-}
 } // anonymous namespace
 
 namespace nc
@@ -69,9 +61,9 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
 {
     NC_LOG_INFO("Building registry");
     auto registry = std::make_unique<Registry>(maxEntities);
-    Set<Transform>(*registry, "Transform", editor::TransformUIWidget);
-    Set<Tag>(*registry, "Tag", editor::TagUIWidget);
-
+    registry->RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
+    Register<Tag>(*registry, "Tag", editor::TagUIWidget);
+    Register<Transform>(*registry, "Transform", editor::TransformUIWidget);
     Register<CollisionLogic>(*registry, "CollisionLogic", editor::CollisionLogicUIWidget);
     Register<FrameLogic>(*registry, "FrameLogic", editor::FrameLogicUIWidget);
     Register<FixedLogic>(*registry, "FixedLogic", editor::FixedLogicUIWidget);

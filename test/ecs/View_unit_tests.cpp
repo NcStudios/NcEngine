@@ -42,17 +42,16 @@ struct Fake3 : public ComponentBase
     int value;
 };
 
-
-Registry g_registry{10u};
-
 class View_unit_tests : public ::testing::Test
 {
     public:
-        Registry& registry;
+        static inline Registry registry{10u};
 
-        View_unit_tests()
-            : registry{g_registry}
+        static void SetUpTestSuite()
         {
+            registry.RegisterComponentType<nc::Tag>();
+            registry.RegisterComponentType<nc::Transform>();
+            registry.RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
             registry.RegisterComponentType<Fake1>();
             registry.RegisterComponentType<Fake2>();
             registry.RegisterComponentType<Fake3>();

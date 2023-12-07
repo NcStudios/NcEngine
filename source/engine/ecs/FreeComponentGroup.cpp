@@ -1,4 +1,4 @@
-#include "ecs/detail/FreeComponentGroup.h"
+#include "ncengine/ecs/detail/FreeComponentGroup.h"
 
 #include <algorithm>
 

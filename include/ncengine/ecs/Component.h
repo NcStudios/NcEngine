@@ -61,6 +61,9 @@ concept PooledComponent = std::movable<std::remove_const_t<T>> &&
                           !std::derived_from<T, FreeComponent> &&
                           !std::same_as<T, Entity>;
 
+template<class T>
+concept Component = PooledComponent<T> || std::derived_from<T, FreeComponent>;
+
 /** @brief Default storage behavior for pooled components. */
 struct DefaultStoragePolicy
 {
