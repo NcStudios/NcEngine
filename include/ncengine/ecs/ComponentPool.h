@@ -7,6 +7,7 @@
 #include "ncengine/ecs/AnyComponent.h"
 #include "ncengine/ecs/detail/PoolUtility.h"
 #include "ncengine/ecs/detail/SparseSet.h"
+#include "ncengine/type/StableAddress.h"
 #include "ncengine/utility/Signal.h"
 
 #include "ncutility/NcError.h"
@@ -16,16 +17,13 @@
 
 namespace nc::ecs
 {
-/**
- * @brief Generic interface for component pools.
- * 
- * ComponentPoolBase is the type-agnostic interface for a component pool.
- * 
-*/
-class ComponentPoolBase
+/** @brief Type-agnostic base class for component pools. */
+class ComponentPoolBase : public StableAddress
 {
     public:
         using entity_iterator = std::span<const Entity>::iterator;
+
+        virtual ~ComponentPoolBase() = default;
 
         /** @brief Check if the pool has a component attached to an entity. */
         virtual auto Contains(Entity entity) const -> bool = 0;
@@ -72,15 +70,9 @@ class ComponentPoolBase
         virtual void CommitStagedComponents(const std::vector<Entity>& deleted) = 0;
 };
 
-/**
- * @brief .
- * @tparam T 
- * 
- * 
- */
+/** @brief Type-aware implementation for component pools. */
 template<PooledComponent T>
-class ComponentPool final : public ComponentPoolBase,
-                            public std::ranges::view_interface<ComponentPool<T>>
+class ComponentPool final : public ComponentPoolBase
 {
     public:
         using value_type = T;
@@ -88,22 +80,18 @@ class ComponentPool final : public ComponentPoolBase,
         using const_iterator = std::vector<T>::const_iterator;
         using reverse_iterator = std::vector<T>::reverse_iterator;
 
-        /** @brief  */
+        /** @brief Construct a new component pool. */
         explicit ComponentPool(size_t maxEntities, ComponentHandler<T> handler)
             : m_storage{maxEntities}, m_handler{std::move(handler)} {}
-
-        ~ComponentPool() = default;
-        ComponentPool(ComponentPool&&) = default;
-        ComponentPool& operator=(ComponentPool&&) = default;
-        ComponentPool(const ComponentPool&) = delete;
-        ComponentPool& operator=(const ComponentPool&) = delete;
 
         /** @brief Emplace a component attached to an entity. */
         template<class... Args>
         auto Add(Entity entity, Args&&... args) -> T*;
 
-        /** @brief Get the component attached to an entity, or nullptr on failure. */
+        /** @brief Get a pointer to the component attached to an entity, or nullptr if one does not exist. */
         auto Get(Entity entity) -> T*;
+
+        /** @brief Get a const pointer to the component attached to an entity, or nullptr if one does not exist. */
         auto Get(Entity entity) const -> const T*;
 
         /** @brief Get the entity a component is attached to, or a null entity on failure. */
@@ -126,10 +114,43 @@ class ComponentPool final : public ComponentPoolBase,
 
         /** @brief Sort the components according to a predicate. */
         template<std::predicate<const T&, const T&> Predicate>
-        void Sort(Predicate&& pred);
+        void Sort(Predicate&& compare);
 
-        // TODO: sort out documentation for these - should be grabbed by base class
-        //       is including duplicates
+        /** @brief Get an iterator the the first component in the pool. */
+        auto begin() noexcept { return std::ranges::begin(m_storage.GetPackedArray()); }
+
+        /** @brief Get a const_iterator the the first component in the pool. */
+        auto begin() const noexcept { return std::ranges::begin(m_storage.GetPackedArray()); }
+
+        /** @brief Get an iterator one past the last component in the pool. */
+        auto end() noexcept { return std::ranges::end(m_storage.GetPackedArray()); }
+
+        /** @brief Get a const_iterator one past the last component in the pool. */
+        auto end() const noexcept { return std::ranges::end(m_storage.GetPackedArray()); }
+
+        /** @brief Get the number of components committed to the pool. */
+        auto size() const noexcept { return Size(); }
+
+        /** @brief Check if there are no components in the pool. */
+        [[nodiscard]] auto empty() const noexcept { return GetComponents().empty(); }
+
+        /** @brief Get a reference to the component at the specified position. */
+        auto operator[](size_t pos) noexcept -> T& { return GetComponents()[pos]; }
+
+        /** @brief Get a const reference to the component at the specified position. */
+        auto operator[](size_t pos) const noexcept -> const T& { return GetComponents()[pos]; }
+
+        /** @brief Get a reference to the component at the specified position with bounds checking. */
+        auto at(size_t pos) -> T& { return GetComponents().at(pos); }
+
+        /** @brief Get a reference to the component at the specified position with bounds checking. */
+        auto at(size_t pos) const -> const T& { return GetComponents().at(pos); }
+
+        /** @brief Get a pointer to the underlying component array. */
+        auto data() noexcept { return GetComponents().data(); }
+
+        /** @brief Get a pointer to the underlying component array. */
+        auto data() const noexcept { return GetComponents().data(); }
 
         auto Contains(Entity entity) const -> bool override;
         auto GetAsAnyComponent(Entity entity) -> AnyComponent override;
@@ -143,15 +164,7 @@ class ComponentPool final : public ComponentPoolBase,
         auto HasDrawUI() const noexcept -> bool override { return m_handler.drawUI != nullptr; }
         void ClearNonPersistent() override;
         void Clear() override;
-
-        // span?
         void CommitStagedComponents(const std::vector<Entity>& deleted) override;
-
-        // TODO: document funcs enabled by view_interface
-        auto begin() noexcept { return std::ranges::begin(m_storage.GetPackedArray()); }
-        auto begin() const noexcept { return std::ranges::begin(m_storage.GetPackedArray()); }
-        auto end() noexcept { return std::ranges::end(m_storage.GetPackedArray()); }
-        auto end() const noexcept { return std::ranges::end(m_storage.GetPackedArray()); }
 
     private:
         ecs::detail::SparseSet<T> m_storage;
@@ -196,8 +209,7 @@ bool ComponentPool<T>::Contains(Entity entity) const
 {
     return m_storage.Contains(entity)
         ? true
-        : std::cend(m_staging) != std::ranges::find(
-            m_staging, entity, &detail::StagedComponent<T>::entity);
+        : std::cend(m_staging) != std::ranges::find(m_staging, entity, &detail::StagedComponent<T>::entity);
 }
 
 template<PooledComponent T>
@@ -240,9 +252,9 @@ auto ComponentPool<T>::GetParent(const T* component) const -> Entity
 
 template<PooledComponent T>
 template<std::predicate<const T&, const T&> Pred>
-void ComponentPool<T>::Sort(Pred&& lessThan)
+void ComponentPool<T>::Sort(Pred&& compare)
 {
-    m_storage.Sort(std::forward<Pred>(lessThan));
+    m_storage.Sort(std::forward<Pred>(compare));
 }
 
 template<PooledComponent T>

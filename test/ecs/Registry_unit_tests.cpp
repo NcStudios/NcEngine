@@ -487,59 +487,59 @@ TEST_F(Registry_unit_tests, AddFreeComponent_ValidCall_ConstructsObject)
     EXPECT_EQ(ptr->value, 1);
 }
 
-// TEST_F(Registry_unit_tests, Sort_RandomInput_SortsData)
-// {
-//     auto h1 = registry.Add<Entity>({});
-//     auto h2 = registry.Add<Entity>({});
-//     auto h3 = registry.Add<Entity>({});
-//     auto h4 = registry.Add<Entity>({});
-//     auto h5 = registry.Add<Entity>({});
-//     auto h6 = registry.Add<Entity>({});
+TEST_F(Registry_unit_tests, Sort_RandomInput_SortsData)
+{
+    auto h1 = registry.Add<Entity>({});
+    auto h2 = registry.Add<Entity>({});
+    auto h3 = registry.Add<Entity>({});
+    auto h4 = registry.Add<Entity>({});
+    auto h5 = registry.Add<Entity>({});
+    auto h6 = registry.Add<Entity>({});
 
-//     registry.Add<Fake1>(h1, 3);
-//     registry.Add<Fake1>(h2, 6);
-//     registry.Add<Fake1>(h3, 13);
-//     registry.Add<Fake1>(h4, 9);
-//     registry.Add<Fake1>(h5, 1);
-//     registry.Add<Fake1>(h6, 4);
-//     registry.CommitStagedChanges();
-//     registry.Sort<Fake1>(std::less<Fake1>());
+    registry.Add<Fake1>(h1, 3);
+    registry.Add<Fake1>(h2, 6);
+    registry.Add<Fake1>(h3, 13);
+    registry.Add<Fake1>(h4, 9);
+    registry.Add<Fake1>(h5, 1);
+    registry.Add<Fake1>(h6, 4);
+    registry.CommitStagedChanges();
+    registry.Sort<Fake1>(std::less<Fake1>());
 
-//     const auto& fakes = registry.StorageFor<Fake1>()->GetComponents();
-//     ASSERT_EQ(fakes.size(), 6u);
-//     EXPECT_EQ(fakes[0].value, 1);
-//     EXPECT_EQ(fakes[1].value, 3);
-//     EXPECT_EQ(fakes[2].value, 4);
-//     EXPECT_EQ(fakes[3].value, 6);
-//     EXPECT_EQ(fakes[4].value, 9);
-//     EXPECT_EQ(fakes[5].value, 13);
-// }
+    const auto& fakes = registry.StorageFor<Fake1>()->GetComponents();
+    ASSERT_EQ(fakes.size(), 6u);
+    EXPECT_EQ(fakes[0].value, 1);
+    EXPECT_EQ(fakes[1].value, 3);
+    EXPECT_EQ(fakes[2].value, 4);
+    EXPECT_EQ(fakes[3].value, 6);
+    EXPECT_EQ(fakes[4].value, 9);
+    EXPECT_EQ(fakes[5].value, 13);
+}
 
-// TEST_F(Registry_unit_tests, Sort_SortedInput_PreservesOrder)
-// {
-//     auto h1 = registry.Add<Entity>({});
-//     auto h2 = registry.Add<Entity>({});
-//     auto h3 = registry.Add<Entity>({});
-//     auto h4 = registry.Add<Entity>({});
+TEST_F(Registry_unit_tests, Sort_SortedInput_PreservesOrder)
+{
+    auto h1 = registry.Add<Entity>({});
+    auto h2 = registry.Add<Entity>({});
+    auto h3 = registry.Add<Entity>({});
+    auto h4 = registry.Add<Entity>({});
 
-//     registry.Add<Fake1>(h1, 1);
-//     registry.Add<Fake1>(h2, 1);
-//     registry.Add<Fake1>(h3, 1);
-//     registry.Add<Fake1>(h4, 1);
-//     registry.CommitStagedChanges();
-//     registry.Sort<Fake1>(std::less<Fake1>());
+    registry.Add<Fake1>(h1, 1);
+    registry.Add<Fake1>(h2, 1);
+    registry.Add<Fake1>(h3, 1);
+    registry.Add<Fake1>(h4, 1);
+    registry.CommitStagedChanges();
+    registry.Sort<Fake1>(std::less<Fake1>());
 
-//     const auto& fakes = registry.StorageFor<Fake1>()->GetComponents();
-//     ASSERT_EQ(fakes.size(), 4u);
-//     EXPECT_EQ(fakes[0].value, 1);
-//     EXPECT_EQ(fakes[0].ParentEntity().Index(), 0);
-//     EXPECT_EQ(fakes[1].value, 1);
-//     EXPECT_EQ(fakes[1].ParentEntity().Index(), 1);
-//     EXPECT_EQ(fakes[2].value, 1);
-//     EXPECT_EQ(fakes[2].ParentEntity().Index(), 2);
-//     EXPECT_EQ(fakes[3].value, 1);
-//     EXPECT_EQ(fakes[3].ParentEntity().Index(), 3);
-// }
+    const auto& fakes = registry.StorageFor<Fake1>()->GetComponents();
+    ASSERT_EQ(fakes.size(), 4u);
+    EXPECT_EQ(fakes[0].value, 1);
+    EXPECT_EQ(fakes[0].ParentEntity().Index(), 0);
+    EXPECT_EQ(fakes[1].value, 1);
+    EXPECT_EQ(fakes[1].ParentEntity().Index(), 1);
+    EXPECT_EQ(fakes[2].value, 1);
+    EXPECT_EQ(fakes[2].ParentEntity().Index(), 2);
+    EXPECT_EQ(fakes[3].value, 1);
+    EXPECT_EQ(fakes[3].ParentEntity().Index(), 3);
+}
 
 TEST_F(Registry_unit_tests, Clear_LeavesPersistentEntities)
 {

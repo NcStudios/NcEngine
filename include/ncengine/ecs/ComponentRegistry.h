@@ -6,30 +6,30 @@
 
 #include "ncengine/ecs/ComponentPool.h"
 #include "ncengine/ecs/EntityPool.h"
-#include "ncengine/type/StableAddress.h"
 
 namespace nc::ecs
 {
 /**
  * @brief Core collection of data pools and registration information game types.
  * 
- * The ComponentRegistry houses all entity and component data and provides a low-level interface over
- * game state. An instance is created an bootstrapped with engine types during NcEngine initialization.
- * This instance remains valid and pointer stable until the engine is destroyed. Capacity parameters
- * are taken from the config::Config object used to initialize the engine.
+ * The ComponentRegistry houses all entity and component data and provides a low-level interface over game state. An
+ * instance is created an bootstrapped with engine types during NcEngine initialization. This instance remains valid
+ * and pointer stable until the engine is destroyed. Capacity parameters are taken from the config::Config object used
+ * to initialize the engine.
  * 
- * Custom component types may be registered at any time to create pools for
- * managing component instances. For types satisfying PooledComponent, registration is required prior
- * to working with that type through any ecs operation. Registration is not necessary for any types
- * deriving from FreeComponent.
+ * Custom component types may be registered at any time to create pools for managing component instances. For types
+ * satisfying PooledComponent, registration is required prior to working with that type through any ecs operation.
+ * Registration is not necessary for any types deriving from FreeComponent.
  */
 class ComponentRegistry : public StableAddress
 {
     public:
-        /** @brief Construct a ComponentRegistry instance.
-         *  @param entityCapacity Max concurrent entity instances.
-         *  @note Only one ComponentRegistry instance can exist at a time. An instance is created
-         *        automatically during initialization of the NcEngine instance. */
+        /**
+         * @brief Construct a ComponentRegistry.
+         * @param entityCapacity Max concurrent entity instances.
+         * @note Only one ComponentRegistry instance can exist at a time. An instance is created automatically during
+         *       initialization of the NcEngine instance.
+         */
         explicit ComponentRegistry(size_t entityCapacity)
             : m_maxEntities{entityCapacity}
         {
@@ -43,9 +43,11 @@ class ComponentRegistry : public StableAddress
             s_init = false;
         }
 
-        /** @brief Register a component type.
-         *  @param capacity Max concurrent instances - must be <= the registry's entity capacity.
-         *  @param handler Optional callbacks for handling generic component operations. */
+        /**
+         * @brief Register a component type.
+         * @param capacity Max concurrent instances - must be <= the registry's entity capacity.
+         * @param handler Optional callbacks for handling generic component operations.
+         */
         template<PooledComponent T>
         void RegisterType(size_t capacity, ComponentHandler<T> handler = {})
         {
@@ -97,9 +99,8 @@ class ComponentRegistry : public StableAddress
         /** @brief Merge staged components into their pools and finalize any entity removals. */
         void CommitPendingChanges()
         {
-            const auto& removed = m_entities.GetDeadEntities();
+            const auto removed = m_entities.RecycleDeadEntities();
             std::ranges::for_each(m_pools, [&removed](auto&& p) { p->CommitStagedComponents(removed); });
-            m_entities.RecycleDeadEntities();
         }
 
         /** @brief Destroy all non-persistent entities and components. */

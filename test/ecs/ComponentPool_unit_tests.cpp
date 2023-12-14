@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "ncengine/ecs/ComponentPool.h"
 
+#include <algorithm>
+#include <ranges>
+
 struct S1 {};
 
 TEST(ComponentPoolTests, Add_validCall_attachesComponent)
@@ -245,14 +248,10 @@ TEST(ComponentPoolTests, StlViewInterface_hasExpectedFunctions)
 
     ASSERT_EQ(1, uut.size()); // second item still staged so size only 1
     EXPECT_FALSE(uut.empty());
-    EXPECT_TRUE(static_cast<bool>(uut));
     EXPECT_EQ(*components.data(), uut.data());
-    EXPECT_EQ(components.front(), &uut.front());
-    EXPECT_NE(components.back(), &uut.back());
     EXPECT_EQ(components[0], &uut[0]);
 
-    for (auto& c : uut)
-    {
-        EXPECT_EQ(&c, components.at(0));
-    }
+    const auto asRange = std::ranges::subrange(uut);
+    ASSERT_EQ(1, asRange.size());
+    EXPECT_EQ(components.at(0), &asRange[0]);
 }

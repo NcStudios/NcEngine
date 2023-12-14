@@ -34,16 +34,16 @@ TEST(EntityPoolTests, RecycleDeadEntities_reclaimsHandles)
     const auto b = uut.Add(0, 0);
     uut.Remove(a);
     uut.Remove(b);
-    const auto& dead = uut.GetDeadEntities();
-    ASSERT_EQ(2, dead.size());
-    EXPECT_EQ(a, dead.at(0));
-    EXPECT_EQ(b, dead.at(1));
 
     const auto notRecycled = uut.Add(0, 0); // should not reuse handles yet
     EXPECT_NE(notRecycled, a);
     EXPECT_NE(notRecycled, b);
 
-    uut.RecycleDeadEntities();
+    const auto dead = uut.RecycleDeadEntities();
+    ASSERT_EQ(2, dead.size());
+    EXPECT_EQ(a, dead.at(0));
+    EXPECT_EQ(b, dead.at(1));
+
     const auto recycled = uut.Add(0, 0); // should reuse one of the removed handles
     EXPECT_TRUE(recycled == a || recycled == b);
 }
@@ -102,10 +102,8 @@ TEST(EntityPoolTests, StlViewInterface_hasExpectedFunctions)
 
     ASSERT_EQ(entities.size(), uut.size());
     EXPECT_FALSE(uut.empty());
-    EXPECT_TRUE(static_cast<bool>(uut));
     EXPECT_EQ(*entities.data(), *uut.data());
-    EXPECT_EQ(entities.front(), uut.front());
-    EXPECT_EQ(entities.back(), uut.back());
     EXPECT_EQ(entities[0], uut[0]);
+    EXPECT_EQ(entities.at(0), uut.at(0));
     EXPECT_TRUE(std::ranges::equal(entities, uut));
 }

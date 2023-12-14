@@ -82,17 +82,16 @@ class Registry : public StableAddress
             return m_ecs.GetParent<T>(component);
         }
 
-        // TODO
         template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
         void Sort(Predicate&& comparesLessThan)
         {
-            (void)comparesLessThan;
+            m_impl.GetPool<T>().Sort(std::forward<Predicate>(comparesLessThan));
         }
 
         template<PooledComponent T>
         void Reserve(size_t additionalRequiredCount)
         {
-            m_impl.GetPool<T>()->Reserve(additionalRequiredCount);
+            m_impl.GetPool<T>().Reserve(additionalRequiredCount);
         }
 
         template<PooledComponent T>

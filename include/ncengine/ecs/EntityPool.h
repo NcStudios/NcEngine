@@ -1,7 +1,12 @@
+/**
+ * @file EntityPool.h
+ * @copyright Jaremie Romer and McCallister Romer 2023
+ */
 #pragma once
 
 #include "ncengine/ecs/detail/HandleManager.h"
 #include "ncengine/ecs/detail/PoolUtility.h"
+#include "ncengine/type/StableAddress.h"
 
 #include "ncutility/NcError.h"
 
@@ -10,8 +15,8 @@
 
 namespace nc::ecs
 {
-/** @brief */
-class EntityPool : public std::ranges::view_interface<EntityPool>
+/** @brief Storage class for tracking active entities. */
+class EntityPool : public StableAddress
 {
     public:
         using value_type = Entity;
@@ -19,7 +24,7 @@ class EntityPool : public std::ranges::view_interface<EntityPool>
         using const_iterator = std::vector<Entity>::const_iterator;
         using reverse_iterator = std::vector<Entity>::reverse_iterator;
 
-        /** @brief */
+        /** @brief Add an entity. */
         auto Add(Entity::layer_type layer, Entity::flags_type flags) -> Entity
         {
             auto handle = m_handleManager.GenerateNewHandle(layer, flags);
@@ -30,7 +35,7 @@ class EntityPool : public std::ranges::view_interface<EntityPool>
             return handle;
         }
 
-        /** @brief */
+        /** @brief Remove an entity. */
         void Remove(Entity entity)
         {
             m_toRemove.push_back(entity);
@@ -39,37 +44,26 @@ class EntityPool : public std::ranges::view_interface<EntityPool>
                 detail::EraseUnstable(m_persistent, entity);
         }
 
-        /** @brief */
+        /** @brief Check if an entity exists. */
         bool Contains(Entity entity) const
         {
             return m_entities.cend() != std::ranges::find(m_entities, entity);
         }
 
-        /** @brief */
+        /** @brief Get the number of entities in the pool. */
         auto Size() const noexcept -> size_t { return m_entities.size(); }
 
-        /** @brief Get a list of entities that have been removed but not yet recycled. */
-        // TODO: should be range? span?
-        auto GetDeadEntities() const -> const std::vector<Entity>& { return m_toRemove; }
-
         /** @brief Add removed entity indices back to the pool of possible indices. */
-        void RecycleDeadEntities()
+        auto RecycleDeadEntities() -> std::vector<Entity>
         {
-            if(m_toRemove.empty()) return;
+            if(m_toRemove.empty())
+                return {};
+
             m_handleManager.ReclaimHandles(m_toRemove);
-            m_toRemove.clear();
+            return std::exchange(m_toRemove, std::vector<Entity>{});
         }
 
-        /** @brief */
-        void ClearNonPersistent()
-        {
-            m_toRemove.shrink_to_fit();
-            m_persistent.shrink_to_fit();
-            m_entities = m_persistent;
-            m_handleManager.Reset(m_persistent);
-        }
-
-        /** @brief */
+        /** @brief Remove all entities. */
         void Clear()
         {
             m_entities.clear();
@@ -81,28 +75,50 @@ class EntityPool : public std::ranges::view_interface<EntityPool>
             m_handleManager.Reset({});
         }
 
-        /** @brief Get an iterator to the first entity in the pool. (enables view_interface) */
+        /** @brief Remove all entities, excluding those with the persistent flag. */
+        void ClearNonPersistent()
+        {
+            m_toRemove.shrink_to_fit();
+            m_persistent.shrink_to_fit();
+            m_entities = m_persistent;
+            m_handleManager.Reset(m_persistent);
+        }
+
+        /** @brief Get an iterator to the first entity in the pool. */
         auto begin() noexcept { return std::ranges::begin(m_entities); }
 
-        /** @brief Get a const_iterator to the first entity in the pool. (enables view_interface) */
+        /** @brief Get a const_iterator to the first entity in the pool. */
         auto begin() const noexcept { return std::ranges::begin(m_entities); }
 
-        /** @brief Get an iterator one past the last entity in the pool. (enables view_interface) */
+        /** @brief Get an iterator one past the last entity in the pool. */
         auto end() noexcept { return std::ranges::end(m_entities); }
 
-        /** @brief Get a const_iterator one past the last entity in the pool. (enables view_interface) */
+        /** @brief Get a const_iterator one past the last entity in the pool. */
         auto end() const noexcept { return std::ranges::end(m_entities); }
 
-        /** @brief 
-         * 
-         * empty()
-         * operator bool
-         * data
-         * size
-         * front
-         * back
-         * operator[]
-        */
+        /** @brief Get the number of entities in the pool. */
+        auto size() const noexcept { return m_entities.size(); }
+
+        /** @brief Check if there are no entities in the pool. */
+        [[nodiscard]] auto empty() const noexcept { return m_entities.empty(); }
+
+        /** @brief Get a reference to the entity at the specified position. */
+        auto operator[](size_t pos) noexcept -> Entity& { return m_entities[pos]; }
+
+        /** @brief Get a const reference to the entity at the specified position. */
+        auto operator[](size_t pos) const noexcept -> const Entity& { return m_entities[pos]; }
+
+        /** @brief Get a reference to the entity at the specified position with bounds checking. */
+        auto at(size_t pos) -> Entity& { return m_entities.at(pos); }
+
+        /** @brief Get a const reference to the entity at the specified position with bounds checking. */
+        auto at(size_t pos) const -> const Entity& { return m_entities.at(pos); }
+
+        /** @brief Get a pointer to the underlying entity array. */
+        auto data() noexcept { return m_entities.data(); }
+
+        /** @brief Get a pointer to the underlying entity array. */
+        auto data() const noexcept { return m_entities.data(); }
 
     private:
         std::vector<Entity> m_entities;
@@ -110,4 +126,4 @@ class EntityPool : public std::ranges::view_interface<EntityPool>
         std::vector<Entity> m_persistent;
         detail::HandleManager m_handleManager;
 };
-} // namespace nc::ecs::detail
+} // namespace nc::ecs
