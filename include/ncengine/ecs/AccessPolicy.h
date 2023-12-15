@@ -14,14 +14,10 @@
 
 namespace nc::ecs
 {
-// TODO: make issue to update this
-using Property = nc::FreeComponent;
-using PropertyBag = nc::ecs::detail::FreeComponentGroup;
-
-/** @brief Filter option for AccessPolicy providing course control over type access. */
+/** @brief Filter option for AccessPolicy providing coarse control over type access. */
 enum class FilterBase
 {
-    None  = 0, // Include only Property and any explicitly listed types.
+    None  = 0, // Include only explicitly listed types and those derived from FreeComponent.
     Basic = 1, // Include common types needed to enable operations and any explicitly requested types.
     All   = 2  // Include all types.
 };
@@ -76,8 +72,8 @@ class AccessPolicy
         using FilterType = std::conditional_t<Base == FilterBase::All,
             detail::AllFilter,
             std::conditional_t<Base == FilterBase::Basic,
-                detail::MatchFilter<Entity, Tag, Transform, PropertyBag, Includes...>,
-                detail::MatchFilter<PropertyBag, Includes...>>>;
+                detail::MatchFilter<Entity, Tag, Transform, detail::FreeComponentGroup, Includes...>,
+                detail::MatchFilter<detail::FreeComponentGroup, Includes...>>>;
 
         /** @brief Construct an AccessPolicy object. */
         AccessPolicy(ComponentRegistry& registry) noexcept

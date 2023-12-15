@@ -43,7 +43,7 @@ class EcsInterface
             });
 
             Emplace<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
-            Emplace<PropertyBag>(handle);
+            Emplace<detail::FreeComponentGroup>(handle);
             Emplace<Tag>(handle, std::move(info.tag));
             return handle;
         }
@@ -54,9 +54,9 @@ class EcsInterface
         auto Emplace(Entity entity, Args&&... args) -> T*
         {
             NC_ASSERT(Contains<Entity>(entity), "Bad entity");
-            if constexpr (std::derived_from<T, Property>)
+            if constexpr (std::derived_from<T, FreeComponent>)
             {
-                return Get<PropertyBag>(entity)->template Add<T>(entity, std::forward<Args>(args)...);
+                return Get<detail::FreeComponentGroup>(entity)->template Add<T>(entity, std::forward<Args>(args)...);
             }
             else
             {
@@ -83,9 +83,9 @@ class EcsInterface
             if (!Contains<Entity>(entity))
                 return false;
 
-            if constexpr (std::derived_from<T, Property>)
+            if constexpr (std::derived_from<T, FreeComponent>)
             {
-                return m_policy.template OnPool<PropertyBag>([entity](auto& pool)
+                return m_policy.template OnPool<detail::FreeComponentGroup>([entity](auto& pool)
                 {
                     return pool.Get(entity)->template Remove<T>();
                 });
@@ -104,9 +104,9 @@ class EcsInterface
             requires HasAccess<PolicyType, T>
         auto Get(Entity entity) -> T*
         {
-            if constexpr (std::derived_from<T, Property>)
+            if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto bag = Get<PropertyBag>(entity);
+                auto bag = Get<detail::FreeComponentGroup>(entity);
                 return bag ? bag->template Get<T>() : nullptr;
             }
             else
@@ -123,9 +123,9 @@ class EcsInterface
             requires HasAccess<PolicyType, T>
         auto Get(Entity entity) const -> const T*
         {
-            if constexpr (std::derived_from<T, Property>)
+            if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto bag = Get<PropertyBag>(entity);
+                auto bag = Get<detail::FreeComponentGroup>(entity);
                 return bag ? bag->template Get<T>() : nullptr;
             }
             else
@@ -181,9 +181,9 @@ class EcsInterface
             requires HasAccess<PolicyType, T>
         auto Contains(Entity entity) const -> bool
         {
-            if constexpr (std::derived_from<T, Property>)
+            if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto bag = Get<PropertyBag>(entity);
+                auto bag = Get<detail::FreeComponentGroup>(entity);
                 return bag ? bag->template Contains<T>() : false;
             }
             else
@@ -220,7 +220,7 @@ using Ecs = EcsInterface<FilterBase::All>;
 template<class... Includes>
 using BasicEcs = EcsInterface<FilterBase::Basic, Includes...>;
 
-/** @brief Helper alias for an EcsInterface with access to only Property types and any explicitly approved types. */
+/** @brief Helper alias for an EcsInterface with access to only explicitly approved types and those derived from FreeComponent. */
 template<class... Includes>
 using ExplicitEcs = EcsInterface<FilterBase::None, Includes...>;
 } // namespace nc::ecs

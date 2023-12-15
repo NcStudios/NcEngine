@@ -10,9 +10,9 @@ auto ActiveRegistry() -> Registry* { return nullptr; };
 struct S1 {};
 struct S2 {};
 
-struct TestProperty : public nc::ecs::Property
+struct TestFreeComponent : public nc::FreeComponent
 {
-    TestProperty(nc::Entity e) : nc::ecs::Property{e} {}
+    TestFreeComponent(nc::Entity e) : nc::FreeComponent{e} {}
 };
 
 class EcsInterfaceTests : public ::testing::Test
@@ -35,7 +35,7 @@ class EcsInterfaceTests : public ::testing::Test
         void TestFixture_SyncRegistry()
         {
             registry.CommitPendingChanges();
-            for(auto& bag : registry.GetPool<nc::ecs::PropertyBag>())
+            for(auto& bag : registry.GetPool<nc::ecs::detail::FreeComponentGroup>())
                 bag.CommitStagedComponents();
         }
 };
@@ -52,7 +52,7 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(CanAccess<all, nc::Entity>);
     static_assert(CanAccess<all, nc::Tag>);
     static_assert(CanAccess<all, nc::Transform>);
-    static_assert(CanAccess<all, nc::ecs::PropertyBag>);
+    static_assert(CanAccess<all, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<all, S1>);
     static_assert(CanAccess<all, S2>);
 
@@ -60,15 +60,15 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(CanAccess<basic, nc::Entity>);
     static_assert(CanAccess<basic, nc::Tag>);
     static_assert(CanAccess<basic, nc::Transform>);
-    static_assert(CanAccess<basic, nc::ecs::PropertyBag>);
+    static_assert(CanAccess<basic, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<basic, S1>);
     static_assert(CanAccess<basic, S2>);
 
-    using strict = nc::ecs::ExplicitEcs<S1>; // includes only PropertyBag + explicit type list
+    using strict = nc::ecs::ExplicitEcs<S1>; // includes only FreeComponent + explicit type list
     static_assert(!CanAccess<strict, nc::Entity>);
     static_assert(!CanAccess<strict, nc::Tag>);
     static_assert(!CanAccess<strict, nc::Transform>);
-    static_assert(CanAccess<strict, nc::ecs::PropertyBag>);
+    static_assert(CanAccess<strict, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<strict, S1>);
     static_assert(!CanAccess<strict, S2>);
 }
@@ -116,12 +116,12 @@ TEST_F(EcsInterfaceTests, Emplace_component_addsComponent)
     EXPECT_FALSE(uut.Contains<S1>(bad));
 }
 
-TEST_F(EcsInterfaceTests, Emplace_property_addsItem)
+TEST_F(EcsInterfaceTests, Emplace_freeComponent_addsItem)
 {
     auto uut = nc::ecs::Ecs{registry};
     const auto entity = uut.Emplace<nc::Entity>();
-    EXPECT_NE(nullptr, uut.Emplace<TestProperty>(entity));
-    EXPECT_TRUE(uut.Contains<TestProperty>(entity));
+    EXPECT_NE(nullptr, uut.Emplace<TestFreeComponent>(entity));
+    EXPECT_TRUE(uut.Contains<TestFreeComponent>(entity));
 }
 
 TEST_F(EcsInterfaceTests, Remove_entity_happyAndErrorPathsSucceed)
@@ -147,16 +147,16 @@ TEST_F(EcsInterfaceTests, Remove_component_happyAndErrorPathsSucceed)
     EXPECT_FALSE(uut.Contains<S1>(entity));
 }
 
-TEST_F(EcsInterfaceTests, Remove_property_happyAndErrorPathsSucceed)
+TEST_F(EcsInterfaceTests, Remove_freeComponent_happyAndErrorPathsSucceed)
 {
     auto uut = nc::ecs::Ecs{registry};
     const auto entity = uut.Emplace<nc::Entity>();
-    uut.Emplace<TestProperty>(entity);
+    uut.Emplace<TestFreeComponent>(entity);
     TestFixture_SyncRegistry();
-    EXPECT_TRUE(uut.Remove<TestProperty>(entity));
+    EXPECT_TRUE(uut.Remove<TestFreeComponent>(entity));
     TestFixture_SyncRegistry();
-    EXPECT_FALSE(uut.Contains<TestProperty>(entity));
-    EXPECT_FALSE(uut.Remove<TestProperty>(entity));
+    EXPECT_FALSE(uut.Contains<TestFreeComponent>(entity));
+    EXPECT_FALSE(uut.Remove<TestFreeComponent>(entity));
 }
 
 TEST_F(EcsInterfaceTests, Get_component_happyAndErrorPathsSucceed)
@@ -171,18 +171,18 @@ TEST_F(EcsInterfaceTests, Get_component_happyAndErrorPathsSucceed)
     EXPECT_EQ(nullptr, uut.Get<S1>(badEntity));
 }
 
-TEST_F(EcsInterfaceTests, Get_property_happyAndErrorPathsSucceed)
+TEST_F(EcsInterfaceTests, Get_freeComponent_happyAndErrorPathsSucceed)
 {
     auto uut = nc::ecs::Ecs{registry};
     const auto entity = uut.Emplace<nc::Entity>();
-    const auto expected = uut.Emplace<TestProperty>(entity);
-    EXPECT_EQ(expected, uut.Get<TestProperty>(entity));
+    const auto expected = uut.Emplace<TestFreeComponent>(entity);
+    EXPECT_EQ(expected, uut.Get<TestFreeComponent>(entity));
     TestFixture_SyncRegistry();
-    uut.Remove<TestProperty>(entity);
+    uut.Remove<TestFreeComponent>(entity);
     TestFixture_SyncRegistry();
-    EXPECT_EQ(nullptr, uut.Get<TestProperty>(entity));
+    EXPECT_EQ(nullptr, uut.Get<TestFreeComponent>(entity));
     const auto badEntity = nc::Entity{2, 0, 0};
-    EXPECT_EQ(nullptr, uut.Get<TestProperty>(badEntity));
+    EXPECT_EQ(nullptr, uut.Get<TestFreeComponent>(badEntity));
 }
 
 TEST_F(EcsInterfaceTests, GetAll_entity_returnsAllEntities)

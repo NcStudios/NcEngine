@@ -42,13 +42,13 @@ TEST(AccessPolicyTests, PolicyConvertibleTo_lessRestrictiveTypeList_isFalse)
 TEST(AccessPolicyTests, HasAccess_allAllowed_isTrue)
 {
     static_assert(nc::ecs::HasAccess<explicitPolicy, S1, S2>);
-    static_assert(nc::ecs::HasAccess<basicPolicy, S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::PropertyBag>);
-    static_assert(nc::ecs::HasAccess<allPolicy, S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::PropertyBag, int>);
+    static_assert(nc::ecs::HasAccess<basicPolicy, S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup>);
+    static_assert(nc::ecs::HasAccess<allPolicy, S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup, int>);
 }
 
 TEST(AccessPolicyTests, HasAccess_anyNotAllowed_isFalse)
 {
-    static_assert(!nc::ecs::HasAccess<explicitPolicy, nc::Entity, nc::Transform, nc::Tag, nc::ecs::PropertyBag, int>);
+    static_assert(!nc::ecs::HasAccess<explicitPolicy, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup, int>);
     static_assert(!nc::ecs::HasAccess<basicPolicy, int>);
 }
 
