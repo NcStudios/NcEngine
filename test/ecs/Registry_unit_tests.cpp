@@ -98,7 +98,6 @@ class Registry_unit_tests : public ::testing::Test
         {
             registry.CommitStagedChanges();
             registry.Reset();
-            // registry.Clear();
         }
 };
 

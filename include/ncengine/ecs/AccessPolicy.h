@@ -14,7 +14,10 @@
 
 namespace nc::ecs
 {
-/** @brief Filter option for AccessPolicy providing coarse control over type access. */
+/**
+ * @brief Filter option for AccessPolicy providing coarse control over type access.
+ * @internal Values are required to be ordered by increasing permissiveness.
+*/
 enum class FilterBase
 {
     None  = 0, // Include only explicitly listed types and those derived from FreeComponent.

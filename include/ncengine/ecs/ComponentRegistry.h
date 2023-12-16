@@ -13,7 +13,7 @@ namespace nc::ecs
  * @brief Core collection of data pools and registration information game types.
  * 
  * The ComponentRegistry houses all entity and component data and provides a low-level interface over game state. An
- * instance is created an bootstrapped with engine types during NcEngine initialization. This instance remains valid
+ * instance is created and bootstrapped with engine types during NcEngine initialization. This instance remains valid
  * and pointer stable until the engine is destroyed. Capacity parameters are taken from the config::Config object used
  * to initialize the engine.
  * 

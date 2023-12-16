@@ -144,7 +144,7 @@ TEST(ComponentPoolTests, GetAsAnyComponent_doesNotExist_returnsNullObject)
     EXPECT_FALSE(actual);
 }
 
-TEST(ComponentPoolTests, Size_allVariations_retusnExpectedValues)
+TEST(ComponentPoolTests, Size_allVariations_returnsExpectedValues)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     EXPECT_EQ(0, uut.Size());
