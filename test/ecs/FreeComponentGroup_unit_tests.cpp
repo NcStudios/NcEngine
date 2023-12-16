@@ -40,31 +40,31 @@ TEST(FreeComponentGroup_unit_test, Add_DoubleCall_Throws)
     EXPECT_THROW(group.Add<FakeComponent>(TestEntity), std::runtime_error);
 }
 
-TEST(FreeComponentGroup_unit_test, Remove_ComponentExists_Removes)
+TEST(FreeComponentGroup_unit_test, Remove_ComponentExists_ReturnsTrue)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
-    group.Remove<FakeComponent>();
+    EXPECT_TRUE(group.Remove<FakeComponent>());
     group.CommitStagedComponents();
     auto actual = group.Contains<FakeComponent>();
     EXPECT_FALSE(actual);
 }
 
-TEST(FreeComponentGroup_unit_test, Remove_ComponentDoesNotExist_Throws)
+TEST(FreeComponentGroup_unit_test, Remove_ComponentDoesNotExist_ReturnsFalse)
 {
     auto group = FreeComponentGroup{TestEntity};
-    EXPECT_THROW(group.Remove<FakeComponent>(), std::runtime_error);
+    EXPECT_FALSE(group.Remove<FakeComponent>());
 }
 
-TEST(FreeComponentGroup_unit_test, Remove_DoubleCall_Throws)
+TEST(FreeComponentGroup_unit_test, Remove_DoubleCall_ReturnsFalse)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();
     group.CommitStagedComponents();
-    EXPECT_THROW(group.Remove<FakeComponent>(), std::runtime_error);
+    EXPECT_FALSE(group.Remove<FakeComponent>());
 }
 
 TEST(FreeComponentGroup_unit_test, Contains_Exists_ReturnsTrue)

@@ -1,5 +1,5 @@
-#include "ecs/Transform.h"
-#include "ecs/Registry.h"
+#include "ncengine/ecs/Transform.h"
+#include "ncengine/ecs/Registry.h"
 
 namespace
 {

@@ -25,7 +25,7 @@ class FreeComponentGroup final : public ComponentBase
         T* Add(Args&& ... args);
 
         template<std::derived_from<FreeComponent> T>
-        void Remove();
+        auto Remove() -> bool;
 
         template<std::derived_from<FreeComponent> T>
         bool Contains() const noexcept;
@@ -56,20 +56,20 @@ T* FreeComponentGroup::Add(Args&& ... args)
 }
 
 template<std::derived_from<FreeComponent> T>
-void FreeComponentGroup::Remove()
+auto FreeComponentGroup::Remove() -> bool
 {
     for(size_t i = 0; auto& component : m_components)
     {
         if(dynamic_cast<T*>(component.get()))
         {
             m_toRemove.insert(i);
-            return;
+            return true;
         }
 
         ++i;
     }
 
-    throw NcError("Component does not exist");
+    return false;
 }
 
 template<std::derived_from<FreeComponent> T>

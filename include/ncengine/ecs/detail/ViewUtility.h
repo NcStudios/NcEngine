@@ -92,7 +92,7 @@ template<PooledComponent... Ts>
 class MultiViewIterator final
 {
     public:
-        using basis_iterator = EntityStorage::iterator;
+        using basis_iterator = ComponentPoolBase::entity_iterator;
         using value_type = std::tuple<Ts*...>;
         using pointer = value_type*;
         using const_pointer = const value_type*;
@@ -182,7 +182,7 @@ template<Viewable... Ts>
 struct ViewStorageAdaptor
 {
     using iterator = detail::MultiViewIterator<Ts...>;
-    using storage_type = detail::PerComponentStorageBase;
+    using storage_type = ComponentPoolBase;
 
     static auto basis(Registry* registry) -> storage_type*
     {
@@ -195,14 +195,14 @@ struct ViewStorageAdaptor
 
     static auto begin(storage_type* basis, Registry* registry) noexcept -> iterator
     {
-        auto& pool = basis->EntityPool();
-        return iterator{pool.begin(), pool.end(), registry};
+        auto entities = basis->GetEntityPool();
+        return iterator{std::begin(entities), std::end(entities), registry};
     }
 
     static auto end(storage_type* basis, Registry* registry) noexcept -> iterator
     {
-        auto& pool = basis->EntityPool();
-        return iterator{pool.end(), pool.end(), registry};
+        auto entities = basis->GetEntityPool();
+        return iterator{std::end(entities), std::end(entities), registry};
     }
 };
 
@@ -213,7 +213,7 @@ struct ViewStorageAdaptor<T>
     using value_type = std::remove_const_t<T>;
     using iterator = detail::SingleViewIterator<T>;
     using reverse_iterator = std::reverse_iterator<iterator>;
-    using storage_type = constness_of<detail::EntityStorage, T>::type;
+    using storage_type = constness_of<EntityPool, T>::type;
 
     static auto basis(Registry* registry) -> storage_type*
     {
@@ -227,14 +227,12 @@ struct ViewStorageAdaptor<T>
 
     static auto begin(storage_type* basis) noexcept -> iterator
     {
-        auto& pool = basis->Pool();
-        return iterator{pool.data()};
+        return iterator{basis->data()};
     }
 
     static auto end(storage_type* basis) noexcept -> iterator
     {
-        auto& pool = basis->Pool();
-        return iterator{pool.data() + pool.size()};
+        return iterator{basis->data() + basis->size()};
     }
 };
 
@@ -245,7 +243,7 @@ struct ViewStorageAdaptor<T>
     using value_type = std::remove_const_t<T>;
     using iterator = detail::SingleViewIterator<T>;
     using reverse_iterator = std::reverse_iterator<iterator>;
-    using storage_type = constness_of<detail::PerComponentStorage<std::remove_const_t<T>>, T>::type;
+    using storage_type = constness_of<ComponentPool<std::remove_const_t<T>>, T>::type;
 
     static auto basis(Registry* registry) -> storage_type*
     {
@@ -259,13 +257,13 @@ struct ViewStorageAdaptor<T>
 
     static auto begin(storage_type* basis) noexcept -> iterator
     {
-        auto& pool = basis->ComponentPool();
+        auto pool = basis->GetComponents();
         return iterator{pool.data()};
     }
 
     static auto end(storage_type* basis) noexcept -> iterator
     {
-        auto& pool = basis->ComponentPool();
+        auto pool = basis->GetComponents();
         return iterator{pool.data() + pool.size()};
     }
 };

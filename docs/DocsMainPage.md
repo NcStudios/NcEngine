@@ -47,7 +47,7 @@ The registry contains storage for all entities and components and manages the as
 
 A pointer to the registry may be retrieved from the NcEngine object, which is passed to each scene's Load() function. This pointer will remain valid until the engine is shutdown, so it can be passed around and stored as needed.
 
-Generally, don't store values from the registry across frames, except for Entities. Calls to Add, Remove, ViewGroup, Sort and ReserveHeadroom for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
+Generally, don't store values from the registry across frames, except for Entities. Calls to Add, Remove, Sort and Reserve for a type T may invalidate any existing span\<T\> or pointers/references to other Ts except:
 * if T is derived from FreeComponent, which is guaranteed to be pointer stable.
 * Add\<T\> will not invalidate a span\<T\> until the end of the current frame. It is possible to add while iterating a collection.
 * Remove\<T\> will not invalidate the subrange [ begin(), T's position ) of a span\<T\>. It is possible to remove while reverse iterating a collection.
