@@ -53,8 +53,20 @@ class ComponentPoolBase : public StableAddress
         /** @brief Get the name from the component's ComponentHandler. */
         virtual auto GetComponentName() const noexcept -> std::string_view = 0;
 
+        /** @brief Check if `ComponentHandler::factory` is set for the underlying type. */
+        virtual auto HasFactory() const noexcept -> bool = 0;
+
+        /** @brief Check if `ComponentHandler::userData` is set for the underlying type. */
+        virtual auto HasUserData() const noexcept -> bool = 0;
+
         /** @brief Check if there is a drawUI callback set in the the component's ComponentHandler. */
         virtual auto HasDrawUI() const noexcept -> bool = 0;
+
+        /**
+         * @brief Factory-construct a component attached to an entity.
+         * @note Returns a null AnyComponent if there is no registered factory handler.
+         */
+        virtual auto AddDefault(Entity entity) -> AnyComponent = 0;
 
         /** @brief Remove all components not attached to a persistent entity.
          *  @note This operation is handled automatically for pools owned by the ComponentRegistry. */
@@ -161,7 +173,10 @@ class ComponentPool final : public ComponentPoolBase
         void Reserve(size_t capacity) override;
         auto GetEntityPool() const noexcept -> std::span<const Entity> override { return m_storage.GetEntities(); }
         auto GetComponentName() const noexcept -> std::string_view override { return m_handler.name; }
+        auto HasFactory() const noexcept -> bool override { return m_handler.factory != nullptr; }
+        auto HasUserData() const noexcept -> bool override { return m_handler.userData != nullptr; }
         auto HasDrawUI() const noexcept -> bool override { return m_handler.drawUI != nullptr; }
+        auto AddDefault(Entity entity) -> AnyComponent override;
         void ClearNonPersistent() override;
         void Clear() override;
         void CommitStagedComponents(const std::vector<Entity>& deleted) override;
@@ -268,6 +283,18 @@ void ComponentPool<T>::Reserve(size_t capacity)
         // want to guarantee ptrs remain valid until we exceed capacity.
         m_staging.reserve(capacity - existing);
     }
+}
+
+template<PooledComponent T>
+auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
+{
+    if (m_handler.factory)
+    {
+        auto comp = Add(entity, m_handler.factory(entity, m_handler.userData));
+        return AnyComponent{comp, &m_handler};
+    }
+
+    return AnyComponent{};
 }
 
 template<PooledComponent T>

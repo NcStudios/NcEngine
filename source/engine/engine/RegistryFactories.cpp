@@ -1,4 +1,5 @@
 #include "RegistryFactories.h"
+#include "ComponentFactories.h"
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/AudioSource.h"
@@ -53,6 +54,23 @@ void Register(nc::Registry& registry, const char* name, void(*drawUI)(T&))
         .drawUI = drawUI
     });
 }
+
+template<class T>
+void Register(nc::Registry& registry,
+              const char* name,
+              typename nc::ComponentHandler<T>::DrawUI_t&& drawUI = nullptr,
+              typename nc::ComponentHandler<T>::Factory_t&& factory = nullptr,
+              void* userData = nullptr)
+{
+    registry.RegisterComponentType<T>(nc::ComponentHandler<T>
+    {
+        .name = name,
+        .userData = userData,
+        .factory = std::move(factory),
+        .drawUI = std::move(drawUI)
+    });
+}
+
 } // anonymous namespace
 
 namespace nc
@@ -64,18 +82,18 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
     registry->RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
     Register<Tag>(*registry, "Tag", editor::TagUIWidget);
     Register<Transform>(*registry, "Transform", editor::TransformUIWidget);
-    Register<CollisionLogic>(*registry, "CollisionLogic", editor::CollisionLogicUIWidget);
-    Register<FrameLogic>(*registry, "FrameLogic", editor::FrameLogicUIWidget);
-    Register<FixedLogic>(*registry, "FixedLogic", editor::FixedLogicUIWidget);
-    Register<audio::AudioSource>(*registry, "AudioSource", editor::AudioSourceUIWidget);
-    Register<graphics::MeshRenderer>(*registry, "MeshRenderer", editor::MeshRendererUIWidget);
-    Register<graphics::ParticleEmitter>(*registry, "ParticleEmitter", editor::ParticleEmitterUIWidget);
+    Register<CollisionLogic>(*registry, "CollisionLogic", editor::CollisionLogicUIWidget, CreateCollisionLogic);
+    Register<FrameLogic>(*registry, "FrameLogic", editor::FrameLogicUIWidget, CreateFrameLogic);
+    Register<FixedLogic>(*registry, "FixedLogic", editor::FixedLogicUIWidget, CreateFixedLogic);
+    Register<audio::AudioSource>(*registry, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource);
+    Register<graphics::MeshRenderer>(*registry, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer);
+    Register<graphics::ParticleEmitter>(*registry, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter);
     Register<graphics::PointLight>(*registry, "PointLight", editor::PointLightUIWidget);
-    Register<graphics::ToonRenderer>(*registry, "ToonRenderer", editor::ToonRendererUIWidget);
-    Register<net::NetworkDispatcher>(*registry, "NetworkDispatcher", editor::NetworkDispatcherUIWidget);
-    Register<physics::Collider>(*registry, "Collider", editor::ColliderUIWidget);
+    Register<graphics::ToonRenderer>(*registry, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer);
+    Register<net::NetworkDispatcher>(*registry, "NetworkDispatcher", editor::NetworkDispatcherUIWidget, CreateNetworkDispatcher);
+    Register<physics::Collider>(*registry, "Collider", editor::ColliderUIWidget, CreateCollider);
     Register<physics::ConcaveCollider>(*registry, "ConcaveCollider", editor::ConcaveColliderUIWidget);
-    Register<physics::PhysicsBody>(*registry, "PhysicsBody", editor::PhysicsBodyUIWidget);
+    Register<physics::PhysicsBody>(*registry, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, static_cast<void*>(registry.get()));
     return registry;
 }
 
