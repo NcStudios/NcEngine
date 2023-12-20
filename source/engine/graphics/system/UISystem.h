@@ -1,11 +1,11 @@
 #pragma once
 
+#include "ncengine/ecs/Ecs.h"
+
 #include <memory>
 
 namespace nc
 {
-class Registry;
-
 namespace ui
 {
 class IUI;
@@ -26,7 +26,7 @@ class UISystem
 
         auto IsHovered() const noexcept -> bool;
         void SetClientUI(ui::IUI* ui) noexcept;
-        void Execute(Registry* registry);
+        void Execute(ecs::Ecs world);
 
     private:
         std::unique_ptr<ui::editor::Editor> m_editor;

@@ -16,7 +16,7 @@ namespace nc::ui::editor
 class EditorImpl : public Editor
 {
     public:
-        void Draw(Registry* registry) override
+        void Draw(ecs::Ecs world) override
         {
             if(input::KeyDown(hotkey::Editor))
                 m_open = !m_open;
@@ -24,7 +24,7 @@ class EditorImpl : public Editor
             if(!m_open)
                 return;
 
-            m_ui.Draw(registry);
+            m_ui.Draw(world);
         }
 
     private:

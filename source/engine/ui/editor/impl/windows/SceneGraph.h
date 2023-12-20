@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
 
 #include "imgui/imgui.h"
@@ -8,7 +9,6 @@
 
 namespace nc
 {
-class Registry;
 class Tag;
 class Transform;
 
@@ -17,19 +17,18 @@ namespace ui::editor
 class SceneGraph
 {
     public:
-        void Draw(Registry* registry);
+        void Draw(ecs::Ecs world);
         auto GetSelectedEntity() const noexcept -> Entity { return m_selectedEntity; }
 
     private:
         Entity m_selectedEntity = Entity::Null();
         ImGuiTextFilter m_tagFilter;
 
-        void EnsureSelection(Registry* registry);
+        void EnsureSelection(ecs::Ecs world);
         auto PassFilter(Tag& tag) -> bool;
-        void Graph(Registry* registry);
-        void GraphNode(Registry* registry, Entity entity, Tag& tag, Transform& transform);
-        void GraphContextMenu(Registry* registry);
-        void NodeContextMenu(Registry* registry, Entity entity);
+        void Graph(ecs::Ecs world);
+        void GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform);
+        void GraphContextMenu(ecs::Ecs world);
 };
 } // namespace ui::editor
 } // namespace nc

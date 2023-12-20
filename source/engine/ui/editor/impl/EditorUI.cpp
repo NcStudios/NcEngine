@@ -27,12 +27,12 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-void EditorUI::Draw(Registry* registry)
+void EditorUI::Draw(ecs::Ecs world)
 {
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", [&]()
     {
-        m_sceneGraph.Draw(registry);
+        m_sceneGraph.Draw(world);
     });
 
     const auto selectedEntity = m_sceneGraph.GetSelectedEntity();
@@ -44,7 +44,7 @@ void EditorUI::Draw(Registry* registry)
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
     {
-        m_inspector.Draw(registry, selectedEntity);
+        m_inspector.Draw(world, selectedEntity);
     });
 }
 } // namespace nc::ui::editor

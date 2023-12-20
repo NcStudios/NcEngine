@@ -2,6 +2,7 @@
 #include "PerFrameRenderState.h"
 #include "asset/NcAsset.h"
 #include "config/Config.h"
+#include "ecs/Ecs.h"
 #include "ecs/View.h"
 
 #include "shader_resource/PointLightData.h"
@@ -138,7 +139,7 @@ namespace nc::graphics
         }
 
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        m_uiSystem.Execute(m_registry);
+        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry}, cameraState, environmentState);

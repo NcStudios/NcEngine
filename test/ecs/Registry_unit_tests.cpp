@@ -564,26 +564,6 @@ TEST_F(Registry_unit_tests, Clear_LeavesPersistentEntities)
     EXPECT_TRUE(registry.Contains<Fake1>(e4));
 }
 
-TEST_F(Registry_unit_tests, GetAllComponentsOn_invalidEntity_returnsEmptyList)
-{
-    const auto actual = registry.GetAllComponentsOn(Entity{});
-    EXPECT_TRUE(actual.empty());
-}
-
-TEST_F(Registry_unit_tests, GetAllComponentsOn_entityHasComponents_visitsComponents)
-{
-    auto e1 = registry.Add<Entity>({});
-    registry.Add<Fake1>(e1, 1);
-    registry.Add<Fake2>(e1, 1);
-    for (auto& any : registry.GetAllComponentsOn(e1))
-    {
-        ASSERT_TRUE(static_cast<bool>(any));
-        any.DrawUI();
-    }
-
-    EXPECT_EQ(2, g_numDrawUICalls);
-}
-
 TEST_F(Registry_unit_tests, RegisterComponentType_arbitraryTypes_succeed)
 {
     EXPECT_NO_THROW(registry.RegisterComponentType<std::string>());
