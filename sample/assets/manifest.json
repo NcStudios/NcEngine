@@ -154,6 +154,14 @@
         {
             "sourcePath": "raw/image/token/Roughness.png",
             "assetName": "texture/token/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/tree/BaseColor.png",
+            "assetName": "texture/tree/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/line/Hatch3.jpg",
+            "assetName": "texture/line/Hatch3"
         }
     ]
 }

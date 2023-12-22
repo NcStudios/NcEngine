@@ -1,0 +1,77 @@
+{
+    "globalOptions": {
+        "outputDirectory": ".\\"
+    },
+    "audio-clip": [
+        {
+            "sourcePath": "sound1.wav",
+            "assetName": "sound1"
+        },
+        {
+            "sourcePath": "sound2.wav",
+            "assetName": "sound2"
+        }
+    ],
+    "concave-collider": [
+        {
+            "sourcePath": "concave_collider1.fbx",
+            "assetName": "concave_collider1"
+        },
+        {
+            "sourcePath": "concave_collider2.fbx",
+            "assetName": "concave_collider2"
+        }
+    ],
+    "cube-map": [
+        {
+            "sourcePath": "skybox1.png",
+            "assetName": "skybox1"
+        },
+        {
+            "sourcePath": "skybox2.png",
+            "assetName": "skybox2"
+        },
+        {
+            "sourcePath": "skybox3.png",
+            "assetName": "skybox3"
+        }
+    ],
+    "hull-collider": [
+        {
+            "sourcePath": "hull_collider1.fbx",
+            "assetName": "hull_collider1"
+        },
+        {
+            "sourcePath": "hull_collider2.fbx",
+            "assetName": "hull_collider2"
+        }
+    ],
+    "mesh": [
+        {
+            "sourcePath": "mesh1.fbx",
+            "assetName": "mesh1"
+        },
+        {
+            "sourcePath": "mesh2.fbx",
+            "assetName": "mesh2"
+        },
+        {
+            "sourcePath": "mesh3.fbx",
+            "assetName": "mesh3"
+        }
+    ],
+    "texture": [
+        {
+            "sourcePath": "texture_base.png",
+            "assetName": "texture_base"
+        },
+        {
+            "sourcePath": "texture_normal.png",
+            "assetName": "texture_normal"
+        },
+        {
+            "sourcePath": "texture_roughness.png",
+            "assetName": "texture_roughness"
+        }
+    ]
+}

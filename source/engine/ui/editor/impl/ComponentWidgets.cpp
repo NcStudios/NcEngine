@@ -45,7 +45,7 @@ constexpr auto setType = [](auto& obj, auto& str)
     {
         case ColliderType::Box:     { obj.SetProperties(BoxProperties{});     break; }
         case ColliderType::Capsule: { obj.SetProperties(CapsuleProperties{}); break; }
-        case ColliderType::Hull:    { /** @todo #453 need default asset. */   break; } 
+        case ColliderType::Hull:    { obj.SetProperties(HullProperties{});    break; } 
         case ColliderType::Sphere:  { obj.SetProperties(SphereProperties{});  break; }
     }
 };

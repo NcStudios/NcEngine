@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LayerMask.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/ecs/Component.h"
 
 #include "ncmath/DirectXMathUtility.h"
@@ -58,7 +59,7 @@ struct CapsuleProperties
 /** @brief Properties for initializing a Hull Collider. */
 struct HullProperties
 {
-    std::string assetPath;
+    std::string assetPath = asset::DefaultHullCollider;
 };
 
 /** @brief Normalized Collider properties. */
