@@ -2,6 +2,7 @@
 #include "ecs/Logic.h"
 #include "ecs/Registry.h"
 #include "ecs/View.h"
+#include "ecs/detail/FreeComponentGroup.h"
 #include "task/TaskGraph.h"
 #include "time/Time.h"
 #include "utility/Log.h"
@@ -35,7 +36,15 @@ void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
     (
         task::ExecutionPhase::PreRenderSync,
         "Commit Registry Changes",
-        [registry = m_registry] { registry->CommitStagedChanges(); }
+        [registry = m_registry]
+        {
+            registry->CommitStagedChanges();
+            auto groups = registry->StorageFor<ecs::detail::FreeComponentGroup>();
+            for (auto& group : groups->GetComponents())
+            {
+                group.CommitStagedComponents();
+            }
+        }
     );
 }
 

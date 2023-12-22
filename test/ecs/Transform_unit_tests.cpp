@@ -45,6 +45,13 @@ class Transform_unit_tests : public ::testing::Test
             registry->CommitStagedChanges();
             registry->Clear();
         }
+
+        static void SetUpTestSuite()
+        {
+            g_registry.RegisterComponentType<nc::Tag>();
+            g_registry.RegisterComponentType<nc::Transform>();
+            g_registry.RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
+        }
 };
 
 TEST_F(Transform_unit_tests, LocalPosition_CalledFromRoot_DecomposesPositionFromMatrix)
