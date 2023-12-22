@@ -107,7 +107,7 @@ TEST_F(EcsInterfaceTests, Emplace_entity_addsExpectedState)
 TEST_F(EcsInterfaceTests, Emplace_component_addsComponent)
 {
     static_assert(nc::PooledComponent<S1>);
-    auto uut = nc::ecs::Ecs{registry};
+    auto uut = nc::ecs::Ecs<S1>{registry};
     const auto good = uut.Emplace<nc::Entity>();
     const auto bad = nc::Entity{3, 0, 0};
     EXPECT_NE(nullptr, uut.Emplace<S1>(good));

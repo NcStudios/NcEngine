@@ -8,48 +8,71 @@ using explicitPolicy = nc::ecs::AccessPolicy<nc::ecs::FilterBase::None, S1, S2>;
 using basicPolicy = nc::ecs::AccessPolicy<nc::ecs::FilterBase::Basic, S1, S2>;
 using allPolicy = nc::ecs::AccessPolicy<nc::ecs::FilterBase::All>;
 
-TEST(AccessPolicyTests, PolicyConvertibleTo_identity_isTrue)
+TEST(AccessPolicyTests, ConvertibleTo_identity_isTrue)
 {
     static_assert(explicitPolicy::ConvertibleTo<nc::ecs::FilterBase::None, S1, S2>);
     static_assert(basicPolicy::ConvertibleTo<nc::ecs::FilterBase::Basic, S1, S2>);
     static_assert(allPolicy::ConvertibleTo<nc::ecs::FilterBase::All>);
 }
 
-TEST(AccessPolicyTests, PolicyConvertibleTo_moreRestrictiveBase_isTrue)
+TEST(AccessPolicyTests, ConvertibleTo_moreRestrictiveBase_isTrue)
 {
     static_assert(basicPolicy::ConvertibleTo<nc::ecs::FilterBase::None, S1, S2>);
     static_assert(allPolicy::ConvertibleTo<nc::ecs::FilterBase::Basic, S1>);
 }
 
-TEST(AccessPolicyTests, PolicyConvertibleTo_lessRestrictiveBase_isFalse)
+TEST(AccessPolicyTests, ConvertibleTo_lessRestrictiveBase_isFalse)
 {
     static_assert(!explicitPolicy::ConvertibleTo<nc::ecs::FilterBase::Basic, S1, S2>);
     static_assert(!basicPolicy::ConvertibleTo<nc::ecs::FilterBase::All, S1, S2>); // tparams are redundant but allowed
 }
 
-TEST(AccessPolicyTests, PolicyConvertibleTo_moreRestrictiveTypeList_isTrue)
+TEST(AccessPolicyTests, ConvertibleTo_moreRestrictiveTypeList_isTrue)
 {
     static_assert(explicitPolicy::ConvertibleTo<nc::ecs::FilterBase::None>);
     static_assert(basicPolicy::ConvertibleTo<nc::ecs::FilterBase::Basic>);
 }
 
-TEST(AccessPolicyTests, PolicyConvertibleTo_lessRestrictiveTypeList_isFalse)
+TEST(AccessPolicyTests, ConvertibleTo_lessRestrictiveTypeList_isFalse)
 {
     static_assert(!explicitPolicy::ConvertibleTo<nc::ecs::FilterBase::None, S1, S2, int>);
     static_assert(!basicPolicy::ConvertibleTo<nc::ecs::FilterBase::Basic, S1, S2, int>);
 }
 
-TEST(AccessPolicyTests, PolicyAccessible_allAllowed_isTrue)
+TEST(AccessPolicyTests, HasAccess_allAllowed_isTrue)
 {
     static_assert(explicitPolicy::HasAccess<S1, S2>);
     static_assert(basicPolicy::HasAccess<S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup>);
     static_assert(allPolicy::HasAccess<S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup, int>);
 }
 
-TEST(AccessPolicyTests, PolicyAccessible_anyNotAllowed_isFalse)
+TEST(AccessPolicyTests, HasAccess_anyNotAllowed_isFalse)
 {
     static_assert(!explicitPolicy::HasAccess<nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup, int>);
     static_assert(!basicPolicy::HasAccess<int>);
+}
+
+TEST(AccessPolicyTests, BaseContains_sameBase_isTrue)
+{
+    static_assert(explicitPolicy::BaseContains<nc::ecs::FilterBase::None>);
+    static_assert(basicPolicy::BaseContains<nc::ecs::FilterBase::Basic>);
+    static_assert(allPolicy::BaseContains<nc::ecs::FilterBase::All>);
+}
+
+TEST(AccessPolicyTests, BaseContains_moreRestrictive_isTrue)
+{
+    static_assert(basicPolicy::BaseContains<nc::ecs::FilterBase::Basic>);
+    static_assert(basicPolicy::BaseContains<nc::ecs::FilterBase::None>);
+    static_assert(allPolicy::BaseContains<nc::ecs::FilterBase::All>);
+    static_assert(allPolicy::BaseContains<nc::ecs::FilterBase::Basic>);
+    static_assert(allPolicy::BaseContains<nc::ecs::FilterBase::None>);
+}
+
+TEST(AccessPolicyTests, BaseContains_lessRestrictive_isFalse)
+{
+    static_assert(!explicitPolicy::BaseContains<nc::ecs::FilterBase::Basic>);
+    static_assert(!explicitPolicy::BaseContains<nc::ecs::FilterBase::All>);
+    static_assert(!basicPolicy::BaseContains<nc::ecs::FilterBase::All>);
 }
 
 TEST(AccessPolicyTests, OnPool_returnsReference_preservesValueCategory)

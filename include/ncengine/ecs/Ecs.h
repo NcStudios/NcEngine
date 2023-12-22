@@ -50,7 +50,7 @@ class EcsInterface
 
         /** @brief Emplace a component. */
         template<Component T, class... Args>
-            requires PolicyType::template HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto Emplace(Entity entity, Args&&... args) -> T*
         {
             NC_ASSERT(Contains<Entity>(entity), "Bad entity");

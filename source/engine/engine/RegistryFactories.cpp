@@ -46,16 +46,6 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
 }
 
 template<class T>
-void Register(nc::Registry& registry, const char* name, void(*drawUI)(T&))
-{
-    registry.RegisterComponentType<T>(nc::ComponentHandler<T>
-    {
-        .name = name,
-        .drawUI = drawUI
-    });
-}
-
-template<class T>
 void Register(nc::Registry& registry,
               const char* name,
               typename nc::ComponentHandler<T>::DrawUI_t&& drawUI = nullptr,
