@@ -4,7 +4,7 @@ namespace nc::ui::editor
 {
 struct EditorStub : public Editor
 {
-    void Draw(Registry*) override {}
+    void Draw(ecs::Ecs) override {}
 };
 
 auto BuildEditor() -> std::unique_ptr<Editor>

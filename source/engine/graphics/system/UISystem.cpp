@@ -21,9 +21,9 @@ void UISystem::SetClientUI(ui::IUI* ui) noexcept
     m_clientUI = ui;
 }
 
-void UISystem::Execute(Registry* registry)
+void UISystem::Execute(ecs::Ecs world)
 {
-    m_editor->Draw(registry);
+    m_editor->Draw(world);
 
     if (m_clientUI)
     {

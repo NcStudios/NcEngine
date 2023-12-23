@@ -1,18 +1,18 @@
 #pragma once
 
+#include "ncengine/ecs/Ecs.h"
 #include "windows/Inspector.h"
 #include "windows/SceneGraph.h"
 
 namespace nc
 {
-class Registry;
 
 namespace ui::editor
 {
 class EditorUI
 {
     public:
-        void Draw(Registry* registry);
+        void Draw(ecs::Ecs world);
 
     private:
         SceneGraph m_sceneGraph;

@@ -5,9 +5,6 @@
 
 namespace nc::ui::editor
 {
-class Inspector
-{
-    public:
-        void Draw(ecs::Ecs world, Entity entity);
-};
+auto EntityContextMenu(Entity entity, ecs::Ecs world) -> Entity;
+void ModifyComponentList(Entity entity, ecs::Ecs world);
 } // namespace nc::ui::editor

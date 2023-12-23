@@ -26,7 +26,7 @@ class EcsInterface
 
         /** @brief Implicit conversion operator to a more restricted interface. */
         template<FilterBase TargetBase, class... TargetIncludes>
-            requires PolicyConvertibleTo<PolicyType, TargetBase, TargetIncludes...>
+            requires PolicyType::template ConvertibleTo<TargetBase, TargetIncludes...>
         operator EcsInterface<TargetBase, TargetIncludes...>() const noexcept
         {
             return EcsInterface<TargetBase, TargetIncludes...>(m_policy);
@@ -34,7 +34,7 @@ class EcsInterface
 
         /** @brief Emplace an entity. */
         template<std::same_as<Entity> T>
-            requires HasAccess<PolicyType, Entity, Transform, Tag>
+            requires PolicyType::template HasAccess<Entity, Transform, Tag>
         auto Emplace(EntityInfo info = {}) -> Entity
         {
             const auto handle = m_policy.template OnPool<Entity>([&info](auto&& pool) -> decltype(auto)
@@ -50,7 +50,7 @@ class EcsInterface
 
         /** @brief Emplace a component. */
         template<Component T, class... Args>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto Emplace(Entity entity, Args&&... args) -> T*
         {
             NC_ASSERT(Contains<Entity>(entity), "Bad entity");
@@ -69,7 +69,7 @@ class EcsInterface
 
         /** @brief Remove an entity. */
         template<std::same_as<Entity> T>
-            requires HasAccess<PolicyType, Entity, Transform>
+            requires PolicyType::template HasAccess<Entity, Transform>
         auto Remove(Entity entity) -> bool
         {
             return Contains<Entity>(entity) ? RemoveNode<true>(entity) : false;
@@ -77,7 +77,7 @@ class EcsInterface
 
         /** @brief Remove a component. */
         template<Component T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto Remove(Entity entity) -> bool
         {
             if (!Contains<Entity>(entity))
@@ -101,7 +101,7 @@ class EcsInterface
 
         /** @brief Get a component. */
         template<Component T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto Get(Entity entity) -> T*
         {
             if constexpr (std::derived_from<T, FreeComponent>)
@@ -120,7 +120,7 @@ class EcsInterface
 
         /** @brief Get a component. */
         template<Component T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto Get(Entity entity) const -> const T*
         {
             if constexpr (std::derived_from<T, FreeComponent>)
@@ -139,7 +139,7 @@ class EcsInterface
 
         /** @brief Get a contiguous view of all instances of a type. */
         template<class T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
                  && (PooledComponent<T> || std::same_as<Entity, T>)
         auto GetAll() -> std::span<T>
         {
@@ -153,7 +153,7 @@ class EcsInterface
 
         /** @brief Get a contiguous view of all instances of a type. */
         template<class T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
                  && (PooledComponent<T> || std::same_as<Entity, T>)
         auto GetAll() const -> std::span<const T>
         {
@@ -165,9 +165,16 @@ class EcsInterface
             return std::span<const T>{pool.begin(), pool.end()};
         }
 
+        /** @brief Get a range of pointers to all ComponentPoolBase instances. */
+        auto GetComponentPools()
+            requires PolicyType::template BaseContains<FilterBase::All>
+        {
+            return m_policy.GetComponentPools();
+        }
+
         /** @brief Get the parent entity a component is attached to or Entity::Null(). */
         template<PooledComponent T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto GetParent(const T* component) const -> Entity
         {
             return m_policy.template OnPool<T>([component](auto&& pool)
@@ -178,7 +185,7 @@ class EcsInterface
 
         /** @brief Check if an entity or component exists. */
         template<RegistryType T>
-            requires HasAccess<PolicyType, T>
+            requires PolicyType::template HasAccess<T>
         auto Contains(Entity entity) const -> bool
         {
             if constexpr (std::derived_from<T, FreeComponent>)

@@ -1,6 +1,5 @@
 #include "SceneGraph.h"
-
-#include "ncengine/ecs/Registry.h"
+#include "EntityContextMenu.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/View.h"
@@ -16,9 +15,9 @@ auto IsRoot(nc::Transform* transform) -> bool
 
 namespace nc::ui::editor
 {
-void SceneGraph::Draw(Registry* registry)
+void SceneGraph::Draw(ecs::Ecs world)
 {
-    EnsureSelection(registry);
+    EnsureSelection(world);
     m_tagFilter.Draw("search");
 
     ChildWindow("Entity List", [&]()
@@ -28,14 +27,14 @@ void SceneGraph::Draw(Registry* registry)
             m_selectedEntity = Entity::Null();
         }
 
-        GraphContextMenu(registry);
-        Graph(registry);
+        GraphContextMenu(world);
+        Graph(world);
     });
 }
 
-void SceneGraph::EnsureSelection(Registry* registry)
+void SceneGraph::EnsureSelection(ecs::Ecs world)
 {
-    if (m_selectedEntity.Valid() && !registry->Contains<Entity>(m_selectedEntity))
+    if (m_selectedEntity.Valid() && !world.Contains<Entity>(m_selectedEntity))
     {
         m_selectedEntity = Entity::Null();
     }
@@ -46,74 +45,62 @@ auto SceneGraph::PassFilter(Tag& tag) -> bool
     return m_tagFilter.PassFilter(tag.Value().data());
 }
 
-void SceneGraph::Graph(Registry* registry)
+void SceneGraph::Graph(ecs::Ecs world)
 {
-    for(auto entity : View<Entity>{registry})
+    for(auto entity : world.GetAll<Entity>())
     {
-        auto transform = registry->Get<Transform>(entity);
-        auto tag = registry->Get<Tag>(entity);
+        auto transform = world.Get<Transform>(entity);
+        auto tag = world.Get<Tag>(entity);
         if (IsRoot(transform) && PassFilter(*tag))
         {
-            GraphNode(registry, entity, *tag, *transform);
+            GraphNode(world, entity, *tag, *transform);
         }
     }
 }
 
-void SceneGraph::GraphNode(Registry* registry, Entity entity, Tag& tag, Transform& transform)
+void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform)
 {
     IMGUI_SCOPE(ImGuiId, entity.Index());
     const auto flags = m_selectedEntity == entity ? ImGuiTreeNodeFlags_Framed : 0;
     const auto isNodeExpanded = ImGui::TreeNodeEx(tag.Value().data(), flags);
 
-    if(ImGui::IsItemClicked())
+    if (ImGui::IsItemClicked())
     {
         m_selectedEntity = entity;
     }
-
-    NodeContextMenu(registry, entity);
+    else if (ImGui::BeginPopupContextItem())
+    {
+        m_selectedEntity = EntityContextMenu(entity, world);
+        ImGui::EndPopup();
+    }
 
     DragAndDropSource<Entity>(&entity);
-    DragAndDropTarget<Entity>([entity, registry](Entity* source)
+    DragAndDropTarget<Entity>([entity, world](Entity* source) mutable
     {
-        registry->Get<Transform>(*source)->SetParent(entity);
+        world.Get<Transform>(*source)->SetParent(entity);
     });
 
     if(isNodeExpanded)
     {
         for(auto child : transform.Children())
         {
-            GraphNode(registry, child, *registry->Get<Tag>(child), *registry->Get<Transform>(child));
+            GraphNode(world, child, *world.Get<Tag>(child), *world.Get<Transform>(child));
         }
 
         ImGui::TreePop();
     }
 }
 
-void SceneGraph::GraphContextMenu(Registry* registry)
+void SceneGraph::GraphContextMenu(ecs::Ecs world)
 {
     if (ImGui::BeginPopupContextWindow())
     {
         if (ImGui::Selectable("New Entity"))
-            m_selectedEntity = registry->Add<Entity>(EntityInfo{});
+            m_selectedEntity = world.Emplace<Entity>(EntityInfo{});
         else if (ImGui::Selectable("New Static Entity"))
-            m_selectedEntity = registry->Add<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+            m_selectedEntity = world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static});
         else
             m_selectedEntity = Entity::Null();
-
-        ImGui::EndPopup();
-    }
-}
-
-void SceneGraph::NodeContextMenu(Registry* registry, Entity entity)
-{
-    if (ImGui::BeginPopupContextItem())
-    {
-        if (ImGui::Selectable("Add Child"))
-            m_selectedEntity = registry->Add<Entity>(EntityInfo{.parent = entity});
-        else if (ImGui::Selectable("Make Root"))
-            registry->Get<Transform>(entity)->SetParent(Entity::Null());
-        else
-            m_selectedEntity = entity;
 
         ImGui::EndPopup();
     }

@@ -187,8 +187,6 @@ class Registry : public StableAddress
             m_impl.CommitPendingChanges();
         }
 
-        // TODO: should we update usage of Clear()/Reset() ?
-        // TODO: should we use ClearSceneData() here too?
         void Clear()
         {
             m_impl.ClearSceneData();
@@ -199,14 +197,9 @@ class Registry : public StableAddress
             m_impl.Clear();
         }
 
-        // TODO: remove
-        auto GetAllComponentsOn(Entity entity) -> std::vector<AnyComponent>
+        auto GetImpl() -> ecs::ComponentRegistry&
         {
-            auto r = m_impl.GetComponentPools()
-                | std::views::filter([entity](auto&& p) { return p->Contains(entity); })
-                | std::views::transform([entity](auto&& p) { return p->GetAsAnyComponent(entity); });
-
-            return std::vector<AnyComponent>{std::begin(r), std::end(r)};
+            return m_impl;
         }
 
     private:
