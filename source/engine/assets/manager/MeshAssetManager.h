@@ -13,6 +13,7 @@ namespace nc
 namespace asset
 {
 struct MeshUpdateEventData;
+struct BoneUpdateEventData;
 } // namespace asset
 
 class MeshAssetManager : public IAssetService<MeshView, std::string>
@@ -28,15 +29,18 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> MeshView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto OnUpdate() -> Signal<const asset::MeshUpdateEventData&>&;
+        auto OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData&>&;
+        auto OnMeshUpdate() -> Signal<const asset::MeshUpdateEventData&>&;
 
     private:
         std::vector<asset::MeshVertex> m_vertexData;
+        std::vector<asset::BonesData> m_bonesData;
         std::vector<uint32_t> m_indexData;
         std::unordered_map<std::string, MeshView> m_accessors;
         std::string m_assetDirectory;
-        Signal<const asset::MeshUpdateEventData&> m_onUpdate;
+        Signal<const asset::BoneUpdateEventData&> m_onBoneUpdate;
+        Signal<const asset::MeshUpdateEventData&> m_onMeshUpdate;
 
-        void AddMeshView(const std::string& path, bool isExternal);
+        asset::Mesh ImportMesh(const std::string& path, bool isExternal);
 };
 } // namespace nc

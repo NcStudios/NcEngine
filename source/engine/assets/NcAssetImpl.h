@@ -11,6 +11,7 @@ class ConcaveColliderAssetManager;
 class CubeMapAssetManager;
 class HullColliderAssetManager;
 class MeshAssetManager;
+class SkeletalAnimationAssetManager;
 class TextureAssetManager;
 
 namespace config
@@ -32,9 +33,11 @@ class NcAssetImpl : public NcAsset
 
         void OnBeforeSceneLoad() override;
 
+        auto OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>& override;
         auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override;
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override;
+        auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override;
 
     private:
         std::unique_ptr<AudioClipAssetManager> m_audioClipManager;
@@ -42,6 +45,7 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<CubeMapAssetManager> m_cubeMapManager;
         std::unique_ptr<HullColliderAssetManager> m_hullColliderManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
+        std::unique_ptr<SkeletalAnimationAssetManager> m_skeletalAnimationManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
         AssetMap m_defaults;
 };

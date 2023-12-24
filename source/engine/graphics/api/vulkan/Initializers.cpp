@@ -40,7 +40,7 @@ auto CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModu
     };
 }
 
-vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 5>& vertexAttributeDesc)
+vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 7>& vertexAttributeDesc)
 {
     vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.setVertexBindingDescriptionCount(1);
