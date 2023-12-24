@@ -201,11 +201,19 @@ void TransformUIWidget(Transform& transform)
     DirectX::XMStoreVector3(&scl, scl_v);
     DirectX::XMStoreQuaternion(&quat, rot_v);
     DirectX::XMStoreVector3(&pos, pos_v);
-    auto rot = quat.ToEulerAngles();
+    const auto prevRot = quat.ToEulerAngles();
+    auto curRot = prevRot;
 
-    if(ui::InputPosition(pos, "position")) transform.SetPosition(pos);
-    if(ui::InputAngles(rot, "rotation"))   transform.SetRotation(rot);
-    if(ui::InputScale(scl, "scale"))       transform.SetScale(scl);
+    if (ui::InputPosition(pos, "position")) transform.SetPosition(pos);
+
+    if (ui::InputAngles(curRot, "rotation"))
+    {
+        if      (!FloatEqual(curRot.x, prevRot.x)) transform.Rotate(Vector3::Right(), curRot.x - prevRot.x);
+        else if (!FloatEqual(curRot.y, prevRot.y)) transform.Rotate(Vector3::Up(), curRot.y - prevRot.y);
+        else if (!FloatEqual(curRot.z, prevRot.z)) transform.Rotate(Vector3::Front(), curRot.z - prevRot.z);
+    }
+
+    if (ui::InputScale(scl, "scale"))       transform.SetScale(scl);
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
