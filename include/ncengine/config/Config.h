@@ -31,6 +31,7 @@ struct AssetSettings
     std::string hullCollidersPath = "resources/assets/hull_colliders/";
     std::string meshesPath = "resources/assets/meshes/";
     std::string shadersPath = "resources/assets/shaders/";
+    std::string skeletalAnimationsPath = "resources/assets/skeletal_animations/";
     std::string texturesPath = "resources/assets/textures/";
     std::string cubeMapsPath = "resources/assets/cube_maps";
 };
@@ -50,6 +51,7 @@ struct MemorySettings
     unsigned maxRenderers = 100000;
     unsigned maxTransforms = 100000;
     unsigned maxPointLights = 10;
+    unsigned maxSkeletalAnimations = 1000;
     unsigned maxTextures = 1000;
 };
 

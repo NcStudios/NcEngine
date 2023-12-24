@@ -63,6 +63,26 @@ namespace nc
         AssetService<ConcaveColliderView>::Get()->UnloadAll(flags);
     }
 
+    bool LoadCubeMapAsset(const std::string& path, bool isExternal, asset_flags_type flags)
+    {
+        return AssetService<CubeMapView>::Get()->Load(path, isExternal, flags);
+    }
+
+    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
+    {
+        return AssetService<CubeMapView>::Get()->Load(paths, isExternal, flags);
+    }
+
+    bool UnloadCubeMapAsset(const std::string& path, asset_flags_type flags)
+    {
+        return AssetService<CubeMapView>::Get()->Unload(path, flags);
+    }
+
+    void UnloadAllCubeMapAssets(asset_flags_type flags)
+    {
+        return AssetService<CubeMapView>::Get()->UnloadAll(flags);
+    }
+
     bool LoadMeshAsset(const std::string& path, bool isExternal, asset_flags_type flags)
     {
         return AssetService<MeshView>::Get()->Load(path, isExternal, flags);
@@ -103,24 +123,23 @@ namespace nc
         return AssetService<TextureView>::Get()->UnloadAll(flags);
     }
 
-    bool LoadCubeMapAsset(const std::string& path, bool isExternal, asset_flags_type flags)
+    bool LoadSkeletalAnimationAsset(const std::string& path, bool isExternal, asset_flags_type flags)
     {
-        return AssetService<CubeMapView>::Get()->Load(path, isExternal, flags);
+        return AssetService<SkeletalAnimationView>::Get()->Load(path, isExternal, flags);
     }
 
-    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
+    bool LoadSkeletalAnimationAssets(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
     {
-        return AssetService<CubeMapView>::Get()->Load(paths, isExternal, flags);
+        return AssetService<SkeletalAnimationView>::Get()->Load(paths, isExternal, flags);
     }
 
-    bool UnloadCubeMapAsset(const std::string& path, asset_flags_type flags)
+    bool UnloadSkeletalAnimationAsset(const std::string& path, asset_flags_type flags)
     {
-        return AssetService<CubeMapView>::Get()->Unload(path, flags);
+        return AssetService<SkeletalAnimationView>::Get()->Unload(path, flags);
     }
 
-    void UnloadAllCubeMapAssets(asset_flags_type flags)
+    void UnloadAllSkeletalAnimationAssets(asset_flags_type flags)
     {
-        return AssetService<CubeMapView>::Get()->UnloadAll(flags);
+        return AssetService<SkeletalAnimationView>::Get()->UnloadAll(flags);
     }
-
 } // namespace nc

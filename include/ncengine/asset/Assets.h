@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DefaultAssets.h"
 #include "ncengine/utility/EnumUtilities.h"
 
 #include "ncmath/Geometry.h"
@@ -29,6 +28,12 @@ namespace nc
      *  allows paths to be absolute or relative to the executable. Duplicate loads are ignored. */
 
     /** Supported file types: .nca */
+    bool LoadAudioClipAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+    bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+    bool UnloadAudioClipAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
+    void UnloadAllAudioClipAssets(asset_flags_type flags = AssetFlags::None);
+
+    /** Supported file types: .nca */
     bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
     bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
     bool UnloadConcaveColliderAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
@@ -41,6 +46,14 @@ namespace nc
     void UnloadAllConvexHullAssets(asset_flags_type flags = AssetFlags::None);
 
     /** Supported file types: .nca 
+    *  @note Unloading textures invalidates all CubeMapViews. It is intended
+    *  to be done on scene change. */
+    bool LoadCubeMapAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+    bool UnloadCubeMapAsset(const std::string& paths, asset_flags_type flags = AssetFlags::None);
+    void UnloadAllCubeMapAssets(asset_flags_type flags = AssetFlags::None);
+
+    /** Supported file types: .nca 
      *  @note Unloading meshes invalidates all MeshViews. It is intended
      *  to be done on scene change. */
     bool LoadMeshAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
@@ -48,13 +61,7 @@ namespace nc
     bool UnloadMeshAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
     void UnloadAllMeshAssets(asset_flags_type flags = AssetFlags::None);
 
-    /** Supported file types: .wav */
-    bool LoadAudioClipAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-    bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-    bool UnloadAudioClipAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
-    void UnloadAllAudioClipAssets(asset_flags_type flags = AssetFlags::None);
-
-    /** Supported file types: .png 
+    /** Supported file types: .nca 
      *  @note Unloading textures invalidates all TextureViews. It is intended
      *  to be done on scene change. */
     bool LoadTextureAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
@@ -62,13 +69,20 @@ namespace nc
     bool UnloadTextureAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
     void UnloadAllTextureAssets(asset_flags_type flags = AssetFlags::None);
 
-    /** Supported file types: .png 
-    *  @note Unloading textures invalidates all CubeMapViews. It is intended
-    *  to be done on scene change. */
-    bool LoadCubeMapAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-    bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-    bool UnloadCubeMapAsset(const std::string& paths, asset_flags_type flags = AssetFlags::None);
-    void UnloadAllCubeMapAssets(asset_flags_type flags = AssetFlags::None);
+    /** Supported file types: .nca 
+     *  @note Unloading skeletal animations invalidates all SkeletalAnimations. It is intended
+     *  to be done on scene change. */
+    bool LoadSkeletalAnimationAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+    bool LoadSkeletalAnimationAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+    bool UnloadSkeletalAnimationAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
+    void UnloadAllSkeletalAnimationAssets(asset_flags_type flags = AssetFlags::None);
+
+    struct AudioClipView
+    {
+        std::span<const double> leftChannel;
+        std::span<const double> rightChannel;
+        size_t samplesPerChannel;
+    };
 
     struct ConcaveColliderView
     {
@@ -83,27 +97,6 @@ namespace nc
         float maxExtent;
     };
 
-    struct MeshView
-    {
-        uint32_t firstVertex;
-        uint32_t vertexCount;
-        uint32_t firstIndex;
-        uint32_t indexCount;
-        float maxExtent;
-    };
-
-    struct AudioClipView
-    {
-        std::span<const double> leftChannel;
-        std::span<const double> rightChannel;
-        size_t samplesPerChannel;
-    };
-
-    struct TextureView
-    {
-        uint32_t index;
-    };
-
     enum class CubeMapUsage
     {
         Skybox,
@@ -113,6 +106,20 @@ namespace nc
     struct CubeMapView
     {
         CubeMapUsage usage;
+        uint32_t index;
+    };
+
+    struct MeshView
+    {
+        uint32_t firstVertex;
+        uint32_t vertexCount;
+        uint32_t firstIndex;
+        uint32_t indexCount;
+        float maxExtent;
+    };
+
+    struct TextureView
+    {
         uint32_t index;
     };
 
@@ -147,14 +154,20 @@ namespace nc
         std::span<const DescriptorManifest> descriptors;
     };
 
+    struct SkeletalAnimationView
+    {
+        uint32_t index;
+    };
+
     /** Restrict instantiations to supported asset types to minimize
      *  errors with the service locator. */
     template<class T>
-    concept AssetView = std::same_as<T, AudioClipView> ||
-                        std::same_as<T, ConvexHullView> ||
+    concept AssetView = std::same_as<T, AudioClipView>       ||
+                        std::same_as<T, ConvexHullView>      ||
                         std::same_as<T, ConcaveColliderView> ||
-                        std::same_as<T, MeshView> ||
-                        std::same_as<T, TextureView> ||
-                        std::same_as<T, CubeMapView> ||
-                        std::same_as<T, ShaderView>;
+                        std::same_as<T, MeshView>            ||
+                        std::same_as<T, TextureView>         ||
+                        std::same_as<T, CubeMapView>         ||
+                        std::same_as<T, ShaderView>          ||
+                        std::same_as<T, SkeletalAnimationView>;
 }
