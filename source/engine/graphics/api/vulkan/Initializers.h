@@ -14,7 +14,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode)
 // Pipelines
 vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
 vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo();
-vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 7>& vertexAttributeDesc);
+vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, std::span<const vk::VertexInputAttributeDescription> vertexAttributeDesc);
 vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo();
 vk::PipelineViewportStateCreateInfo CreateViewportCreateInfo();
 vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth, bool depthBiasEnable = false);

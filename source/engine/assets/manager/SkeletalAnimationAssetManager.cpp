@@ -76,7 +76,7 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
 
 bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    auto pos = std::find(m_assetIds.begin(), m_assetIds.end(), path);
+    auto pos = std::ranges::find(m_assetIds, path);
     if (pos == m_assetIds.end())
     {
         return false;
