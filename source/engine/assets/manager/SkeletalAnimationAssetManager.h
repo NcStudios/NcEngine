@@ -4,7 +4,6 @@
 #include "ncasset/AssetsFwd.h"
 #include "utility/Signal.h"
 
-#include <string>
 #include <vector>
 
 namespace nc

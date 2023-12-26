@@ -9,8 +9,6 @@
 
 #include "ncasset/AssetType.h"
 
-#include <unordered_map>
-
 namespace nc
 {
 namespace config

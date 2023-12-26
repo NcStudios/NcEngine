@@ -38,7 +38,6 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExterna
         std::span<const asset::SkeletalAnimation>{m_skeletalAnimations},
         asset::UpdateAction::Load
     });
-
     return true;
 }
 
@@ -91,7 +90,6 @@ bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_
         std::span<const asset::SkeletalAnimation>{m_skeletalAnimations},
         asset::UpdateAction::Unload
     });
-
     return true;
 }
 
@@ -129,5 +127,4 @@ auto SkeletalAnimationAssetManager::OnUpdate() -> Signal<const asset::SkeletalAn
 {
     return m_onUpdate;
 }
-
 } // namespace nc

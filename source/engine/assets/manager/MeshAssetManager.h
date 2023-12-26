@@ -5,7 +5,6 @@
 
 #include "ncasset/AssetsFwd.h"
 
-#include <string>
 #include <unordered_map>
 
 namespace nc

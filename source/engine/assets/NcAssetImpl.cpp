@@ -74,5 +74,4 @@ auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalA
 {
     return m_skeletalAnimationManager->OnUpdate();
 }
-
 } // namespace nc::asset
