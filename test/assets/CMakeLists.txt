@@ -286,3 +286,37 @@ target_link_libraries(TextureAssetManager_tests
 )
 
 add_test(TextureAssetManager_tests TextureAssetManager_tests)
+
+### SkeletalAnimationAssetManager Tests ###
+add_executable(SkeletalAnimationAssetManager_tests
+SkeletalAnimationAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/assets/manager/SkeletalAnimationAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/AssetData.cpp
+)
+
+target_compile_definitions(SkeletalAnimationAssetManager_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(SkeletalAnimationAssetManager_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+)
+
+target_compile_options(SkeletalAnimationAssetManager_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SkeletalAnimationAssetManager_tests
+    PRIVATE
+        NcAsset
+        NcUtility
+        gtest_main
+)
+
+add_test(SkeletalAnimationAssetManager_tests SkeletalAnimationAssetManager_tests)

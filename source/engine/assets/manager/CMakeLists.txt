@@ -7,5 +7,6 @@ target_sources(${NC_ENGINE_LIB}
         HullColliderAssetManager.cpp
         MeshAssetManager.cpp
         ShaderAssetManager.cpp
+        SkeletalAnimationAssetManager.cpp
         TextureAssetManager.cpp
 )

@@ -13,9 +13,9 @@ namespace nc::graphics
         return bindingDescription;
     }
 
-    std::array<vk::VertexInputAttributeDescription, 5> GetVertexAttributeDescriptions()
+    std::array<vk::VertexInputAttributeDescription, 7> GetVertexAttributeDescriptions()
     {
-        std::array<vk::VertexInputAttributeDescription, 5> attributeDescriptions{};
+        std::array<vk::VertexInputAttributeDescription, 7> attributeDescriptions{};
         attributeDescriptions[0].setBinding(0);
         attributeDescriptions[0].setLocation(0);
         attributeDescriptions[0].setFormat(vk::Format::eR32G32B32Sfloat);
@@ -40,6 +40,16 @@ namespace nc::graphics
         attributeDescriptions[4].setLocation(4);
         attributeDescriptions[4].setFormat(vk::Format::eR32G32B32Sfloat);
         attributeDescriptions[4].setOffset(offsetof(asset::MeshVertex, bitangent));
+
+        attributeDescriptions[5].setBinding(0);
+        attributeDescriptions[5].setLocation(5);
+        attributeDescriptions[5].setFormat(vk::Format::eR32G32B32A32Sfloat);
+        attributeDescriptions[5].setOffset(offsetof(asset::MeshVertex, boneWeights));
+
+        attributeDescriptions[6].setBinding(0);
+        attributeDescriptions[6].setLocation(6);
+        attributeDescriptions[6].setFormat(vk::Format::eR32G32B32A32Sint);
+        attributeDescriptions[6].setOffset(offsetof(asset::MeshVertex, boneIds));
         return attributeDescriptions;
     }
 }

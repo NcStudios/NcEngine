@@ -9,8 +9,6 @@
 
 #include "ncasset/AssetType.h"
 
-#include <unordered_map>
-
 namespace nc
 {
 namespace config
@@ -21,8 +19,10 @@ struct MemorySettings;
 
 namespace asset
 {
+struct BoneUpdateEventData;
 struct CubeMapUpdateEventData;
 struct MeshUpdateEventData;
+struct SkeletalAnimationUpdateEventData;
 struct TextureUpdateEventData;
 
 /** @brief A map of AssetType to a list of asset paths of that type. */
@@ -32,11 +32,17 @@ using AssetMap = std::unordered_map<asset::AssetType, std::vector<std::string>>;
 class NcAsset : public Module
 {
     public:
+        /** @brief Get the signal for BonesData load and unload events. */
+        virtual auto OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>& = 0;
+
         /** @brief Get the signal for CubeMap load and unload events. */
         virtual auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& = 0;
 
         /** @brief Get the signal for Mesh load and unload events. */
         virtual auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>& = 0;
+
+        /** @brief Get the signal for SkeletalAnimation load and unload events. */
+        virtual auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&> & = 0;
 
         /** @brief Get the signal for Texture load and unload events. */
         virtual auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&> & = 0;

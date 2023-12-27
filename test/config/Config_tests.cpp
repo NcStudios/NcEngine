@@ -111,6 +111,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.assetSettings.hullCollidersPath, actual.assetSettings.hullCollidersPath);
     EXPECT_EQ(expected.assetSettings.meshesPath, actual.assetSettings.meshesPath);
     EXPECT_EQ(expected.assetSettings.shadersPath, actual.assetSettings.shadersPath);
+    EXPECT_EQ(expected.assetSettings.skeletalAnimationsPath, actual.assetSettings.skeletalAnimationsPath);
     EXPECT_EQ(expected.assetSettings.texturesPath, actual.assetSettings.texturesPath);
     EXPECT_EQ(expected.assetSettings.cubeMapsPath, actual.assetSettings.cubeMapsPath);
 

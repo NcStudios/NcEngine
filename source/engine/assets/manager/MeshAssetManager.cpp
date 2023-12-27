@@ -14,7 +14,8 @@ MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
       m_indexData{},
       m_accessors{},
       m_assetDirectory{assetDirectory},
-      m_onUpdate{}
+      m_onBoneUpdate{},
+      m_onMeshUpdate{}
 {
 }
 
@@ -25,7 +26,7 @@ MeshAssetManager::~MeshAssetManager() noexcept
     m_accessors.clear();
 }
 
-void MeshAssetManager::AddMeshView(const std::string& path, bool isExternal)
+auto MeshAssetManager::ImportMesh(const std::string& path, bool isExternal) -> asset::Mesh
 {
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     const auto mesh = asset::ImportMesh(fullPath);
@@ -41,6 +42,7 @@ void MeshAssetManager::AddMeshView(const std::string& path, bool isExternal)
     m_vertexData.insert(m_vertexData.end(), mesh.vertices.begin(), mesh.vertices.end());
     m_indexData.insert(m_indexData.end(), mesh.indices.begin(), mesh.indices.end());
     m_accessors.emplace(path, meshView);
+    return mesh;
 }
 
 bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
@@ -50,13 +52,28 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flag
         return false;
     }
 
-    AddMeshView(path, isExternal);
-    m_onUpdate.Emit(asset::MeshUpdateEventData{m_vertexData, m_indexData});
+    auto mesh = ImportMesh(path, isExternal);
+    if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
+    {
+        m_bonesData.push_back(std::move(mesh.bonesData.value()));
+        m_onBoneUpdate.Emit(asset::BoneUpdateEventData{
+            std::span<const asset::BonesData>{&m_bonesData.back(), 1},
+            std::vector<std::string>{path},
+            asset::UpdateAction::Load
+        });
+    }
+
+    m_onMeshUpdate.Emit(asset::MeshUpdateEventData{m_vertexData, m_indexData});
     return true;
 }
 
 bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
+    auto idsToLoad = std::vector<std::string>{};
+    idsToLoad.reserve(paths.size());
+    bool anyLoaded = false;
+    bool anyBonesLoaded = false;
+
     for (const auto& path : paths)
     {
         if (IsLoaded(path))
@@ -64,11 +81,27 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal,
             continue;
         }
 
-        AddMeshView(path, isExternal);
+        auto mesh = ImportMesh(path, isExternal);
+        if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
+        {
+            m_bonesData.push_back(std::move(mesh.bonesData.value()));
+            idsToLoad.push_back(path);
+            anyBonesLoaded = true;
+        }
+        anyLoaded = true;
     }
 
-    m_onUpdate.Emit(asset::MeshUpdateEventData{m_vertexData, m_indexData});
-    return true;
+    if (anyBonesLoaded)
+    {
+        m_onBoneUpdate.Emit(asset::BoneUpdateEventData{
+            std::span<const asset::BonesData>{m_bonesData.end() - idsToLoad.size(), m_bonesData.end()},
+            std::move(idsToLoad),
+            asset::UpdateAction::Load
+        });
+    }
+
+    m_onMeshUpdate.Emit(asset::MeshUpdateEventData{m_vertexData, m_indexData});
+    return anyLoaded;
 }
 
 bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
@@ -101,7 +134,7 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
 
     if(m_vertexData.size() != 0)
     {
-        m_onUpdate.Emit
+        m_onMeshUpdate.Emit
         (
             asset::MeshUpdateEventData
             {
@@ -119,6 +152,7 @@ void MeshAssetManager::UnloadAll(asset_flags_type)
     m_accessors.clear();
     m_vertexData.clear();
     m_indexData.clear();
+    m_bonesData.clear();
 }
 
 auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshView
@@ -140,8 +174,13 @@ auto MeshAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
     return GetPaths(m_accessors);
 }
 
-auto MeshAssetManager::OnUpdate() -> Signal<const asset::MeshUpdateEventData&>&
+auto MeshAssetManager::OnMeshUpdate() -> Signal<const asset::MeshUpdateEventData&>&
 {
-    return m_onUpdate;
+    return m_onMeshUpdate;
+}
+
+auto MeshAssetManager::OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData&>&
+{
+    return m_onBoneUpdate;
 }
 } // namespace nc

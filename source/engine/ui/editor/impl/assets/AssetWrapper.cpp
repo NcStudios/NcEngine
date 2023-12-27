@@ -14,7 +14,7 @@ auto GetLoadedAssets(asset::AssetType type) -> std::vector<std::string_view>
         case asset::AssetType::HullCollider:      return AssetService<ConvexHullView>::Get()->GetAllLoaded();
         case asset::AssetType::Mesh:              return AssetService<MeshView>::Get()->GetAllLoaded();
         case asset::AssetType::Shader:            return AssetService<ShaderView>::Get()->GetAllLoaded();
-        case asset::AssetType::SkeletalAnimation: throw nc::NcError("Not implemented.");
+        case asset::AssetType::SkeletalAnimation: return std::vector<std::string_view>(); // @todo: UI for editor
         case asset::AssetType::Texture:           return AssetService<TextureView>::Get()->GetAllLoaded();
     }
 

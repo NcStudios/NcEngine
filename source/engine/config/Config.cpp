@@ -24,11 +24,12 @@ constexpr auto LogMaxFileSizeKey = "log_max_file_size"sv;
 // asset
 constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
 constexpr auto ConcaveCollidersKey = "concave_colliders_path"sv;
+constexpr auto CubeMapsPathKey = "cubemaps_path"sv;
 constexpr auto HullCollidersKey = "hull_colliders_path"sv;
 constexpr auto MeshesPathKey = "meshes_path"sv;
 constexpr auto ShadersPathKey = "shaders_path"sv;
+constexpr auto SkeletalAnimationsPathKey = "skeletal_animations_path"sv;
 constexpr auto TexturesPathKey = "textures_path"sv;
-constexpr auto CubeMapsPathKey = "cubemaps_path"sv;
 
 // memory
 constexpr auto MaxDynamicCollidersKey = "max_dynamic_colliders"sv;
@@ -38,6 +39,7 @@ constexpr auto MaxParticleEmittersKey = "max_particle_emitters"sv;
 constexpr auto MaxRenderersKey = "max_renderers"sv;
 constexpr auto MaxTransformsKey = "max_transforms"sv;
 constexpr auto MaxPointLightsKey = "max_point_lights"sv;
+constexpr auto MaxSkeletalAnimationsKey = "max_skeletal_animations"sv;
 constexpr auto MaxTexturesKey = "max_textures"sv;
 
 // physics
@@ -152,11 +154,12 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     {
         ParseValueIfExists(out.audioClipsPath, AudioClipsPathKey, kvPairs);
         ParseValueIfExists(out.concaveCollidersPath, ConcaveCollidersKey, kvPairs);
+        ParseValueIfExists(out.cubeMapsPath, CubeMapsPathKey, kvPairs);
         ParseValueIfExists(out.hullCollidersPath, HullCollidersKey, kvPairs);
         ParseValueIfExists(out.meshesPath, MeshesPathKey, kvPairs);
         ParseValueIfExists(out.shadersPath, ShadersPathKey, kvPairs);
+        ParseValueIfExists(out.skeletalAnimationsPath, SkeletalAnimationsPathKey, kvPairs);
         ParseValueIfExists(out.texturesPath, TexturesPathKey, kvPairs);
-        ParseValueIfExists(out.cubeMapsPath, CubeMapsPathKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::MemorySettings>)
     {
@@ -167,6 +170,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.maxRenderers, MaxRenderersKey, kvPairs);
         ParseValueIfExists(out.maxTransforms, MaxTransformsKey, kvPairs);
         ParseValueIfExists(out.maxPointLights, MaxPointLightsKey, kvPairs);
+        ParseValueIfExists(out.maxSkeletalAnimations, MaxSkeletalAnimationsKey, kvPairs);
         ParseValueIfExists(out.maxTextures, MaxTexturesKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::GraphicsSettings>)
@@ -282,11 +286,12 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     if (writeSections) stream << "[asset_settings]\n";
     ::WriteKVPair(stream, AudioClipsPathKey, config.assetSettings.audioClipsPath);
     ::WriteKVPair(stream, ConcaveCollidersKey, config.assetSettings.concaveCollidersPath);
+    ::WriteKVPair(stream, CubeMapsPathKey, config.assetSettings.cubeMapsPath);
     ::WriteKVPair(stream, HullCollidersKey, config.assetSettings.hullCollidersPath);
     ::WriteKVPair(stream, MeshesPathKey, config.assetSettings.meshesPath);
     ::WriteKVPair(stream, ShadersPathKey, config.assetSettings.shadersPath);
+    ::WriteKVPair(stream, SkeletalAnimationsPathKey, config.assetSettings.skeletalAnimationsPath);
     ::WriteKVPair(stream, TexturesPathKey, config.assetSettings.texturesPath);
-    ::WriteKVPair(stream, CubeMapsPathKey, config.assetSettings.cubeMapsPath);
 
     if (writeSections) stream << "[memory_settings]\n";
     ::WriteKVPair(stream, MaxDynamicCollidersKey, config.memorySettings.maxDynamicColliders);
@@ -295,6 +300,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, MaxParticleEmittersKey, config.memorySettings.maxParticleEmitters);
     ::WriteKVPair(stream, MaxRenderersKey, config.memorySettings.maxRenderers);
     ::WriteKVPair(stream, MaxTransformsKey, config.memorySettings.maxTransforms);
+    ::WriteKVPair(stream, MaxSkeletalAnimationsKey, config.memorySettings.maxSkeletalAnimations);
     ::WriteKVPair(stream, MaxTexturesKey, config.memorySettings.maxTextures);
 
     if (writeSections) stream << "[physics_settings]\n";

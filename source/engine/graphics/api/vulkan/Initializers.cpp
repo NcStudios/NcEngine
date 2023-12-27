@@ -40,7 +40,7 @@ auto CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModu
     };
 }
 
-vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, const std::array<vk::VertexInputAttributeDescription, 5>& vertexAttributeDesc)
+vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, std::span<const vk::VertexInputAttributeDescription> vertexAttributeDesc)
 {
     vk::PipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.setVertexBindingDescriptionCount(1);
@@ -253,5 +253,4 @@ auto CreateDescriptorImageInfo(vk::Sampler sampler, vk::ImageView imageView, vk:
 {
     return vk::DescriptorImageInfo{sampler, imageView, layout};
 }
-
 } // namespace nc::graphics

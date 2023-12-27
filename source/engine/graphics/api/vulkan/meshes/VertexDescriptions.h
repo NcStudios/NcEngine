@@ -5,5 +5,5 @@
 namespace nc::graphics
 {
     auto GetVertexBindingDescription() -> vk::VertexInputBindingDescription;
-    auto GetVertexAttributeDescriptions() -> std::array<vk::VertexInputAttributeDescription, 5>;
+    auto GetVertexAttributeDescriptions() -> std::array<vk::VertexInputAttributeDescription, 7>;
 }

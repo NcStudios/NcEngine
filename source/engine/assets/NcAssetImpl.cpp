@@ -1,5 +1,4 @@
 #include "NcAssetImpl.h"
-#include "asset/Assets.h"
 #include "asset/AssetData.h"
 #include "config/Config.h"
 #include "manager/AudioClipAssetManager.h"
@@ -7,6 +6,7 @@
 #include "manager/CubeMapAssetManager.h"
 #include "manager/HullColliderAssetManager.h"
 #include "manager/MeshAssetManager.h"
+#include "manager/SkeletalAnimationAssetManager.h"
 #include "manager/TextureAssetManager.h"
 
 namespace nc::asset
@@ -26,6 +26,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
       m_cubeMapManager{std::make_unique<CubeMapAssetManager>(assetSettings.cubeMapsPath, memorySettings.maxTextures)},
       m_hullColliderManager{std::make_unique<HullColliderAssetManager>(assetSettings.hullCollidersPath)},
       m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
+      m_skeletalAnimationManager{std::make_unique<SkeletalAnimationAssetManager>(assetSettings.skeletalAnimationsPath, memorySettings.maxSkeletalAnimations)},
       m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)},
       m_defaults{std::move(defaults)}
 {
@@ -49,6 +50,11 @@ void NcAssetImpl::OnBeforeSceneLoad()
         m_textureManager->Load(m_defaults.at(asset::AssetType::Texture), false);
 }
 
+auto NcAssetImpl::OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>&
+{
+    return m_meshManager->OnBoneUpdate();
+}
+
 auto NcAssetImpl::OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>&
 {
     return m_cubeMapManager->OnUpdate();
@@ -61,6 +67,11 @@ auto NcAssetImpl::OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventD
 
 auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
 {
-    return m_meshManager->OnUpdate();
+    return m_meshManager->OnMeshUpdate();
+}
+
+auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>&
+{
+    return m_skeletalAnimationManager->OnUpdate();
 }
 } // namespace nc::asset
