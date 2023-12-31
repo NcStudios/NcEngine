@@ -38,6 +38,7 @@ class NcAssetImpl : public NcAsset
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override;
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override;
+        auto GetLoadedAssets() const noexcept -> AssetMap override;
 
     private:
         std::unique_ptr<AudioClipAssetManager> m_audioClipManager;
