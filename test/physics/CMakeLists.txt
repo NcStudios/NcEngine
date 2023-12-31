@@ -74,6 +74,7 @@ target_compile_options(Collider_unit_tests
 
 target_link_libraries(Collider_unit_tests
     PRIVATE
+        NcAsset
         NcMath
         gtest_main
 )
