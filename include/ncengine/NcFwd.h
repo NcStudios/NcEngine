@@ -49,6 +49,7 @@ class MeshRenderer;
 class ParticleEmitter;
 class PointLight;
 class SceneNavigationCamera;
+class SkeletalAnimator;
 class ToonRenderer;
 } // namespace graphics
 
