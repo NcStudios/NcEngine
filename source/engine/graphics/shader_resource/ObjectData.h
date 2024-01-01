@@ -17,6 +17,6 @@ struct ObjectData
     uint32_t materialParameterC; // Todo: Make this more generic for materials
     uint32_t materialParameterD; // Todo: Make this more generic for materials
 
-    uint32_t skeletalAnimationIndex;
+    // uint32_t skeletalAnimationIndex; /* @todo : Truncation point for this PR. */
 };
 } // namespace nc::graphics
