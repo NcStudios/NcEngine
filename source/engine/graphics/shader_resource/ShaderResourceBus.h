@@ -15,5 +15,6 @@ struct ShaderResourceBus
     Signal<const EnvironmentData&> environmentChannel;
     Signal<const std::vector<ObjectData>&> objectChannel;
     Signal<const std::vector<PointLightData>&> pointLightChannel;
+    Signal<const std::vector<SkeletalAnimationData>&> skeletalAnimationChannel;
 };
 } // namespace nc::graphics

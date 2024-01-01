@@ -23,6 +23,11 @@ auto Connect(nc::Signal<const nc::graphics::EnvironmentData&>& signal, nc::graph
         manager->Update(buffer);
     });
 }
+
+auto Connect(nc::Signal<const std::vector<nc::graphics::SkeletalAnimationData>&>& signal, nc::graphics::SkeletalAnimationShaderResource* manager)
+{
+    return signal.Connect([manager](auto&& data) { manager->Update(data); });
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -38,9 +43,11 @@ ShaderResources::ShaderResources(vk::Device device,
       shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
       cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
       environmentDataShaderResource{5, allocator, shaderDescriptorSets},
+      skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets},
       objectDataConnection{::Connect(resourceBus.objectChannel, &objectDataShaderResource)},
       pointLightDataConnection{::Connect(resourceBus.pointLightChannel, &pointLightShaderResource)},
-      environmentDataConnection{::Connect(resourceBus.environmentChannel, &environmentDataShaderResource)}
+      environmentDataConnection{::Connect(resourceBus.environmentChannel, &environmentDataShaderResource)},
+      skeletalAnimationDataConnection{::Connect(resourceBus.skeletalAnimationChannel, &skeletalAnimationShaderResource)}
 {
     shaderDescriptorSets->CreateSet(BindFrequency::per_frame);
 }

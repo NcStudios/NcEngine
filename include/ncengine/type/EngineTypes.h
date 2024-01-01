@@ -11,6 +11,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
@@ -38,6 +39,7 @@ REGISTER_TYPE(graphics::MeshRenderer);
 REGISTER_TYPE(graphics::ToonRenderer);
 REGISTER_TYPE(graphics::ParticleEmitter);
 REGISTER_TYPE(graphics::PointLight);
+REGISTER_TYPE(graphics::SkeletalAnimator);
 REGISTER_TYPE(net::NetworkDispatcher);
 REGISTER_TYPE(physics::ConcaveCollider);
 REGISTER_TYPE(physics::Collider);

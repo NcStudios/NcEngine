@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ncengine/assets/Assets.h"
+#include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/Component.h"
+
+#include "graphics/system/SkeletalAnimationTypes.h"
 
 #include <memory>
 
@@ -23,13 +25,20 @@ class SkeletalAnimator : public ComponentBase
         // Connect to system
         auto Connect() -> Signal<const anim::PlayState&>& { return m_onPlayStateChanged; };
 
-        // Get uid of mesh that will be animated
+        // Get UID of mesh that will be animated
         auto MeshUid() -> const std::string& { return m_meshUid; }
 
+        // Used to manage the play once state
+        void CompleteFirstRun();
+
     private:
+        auto ExecuteInitialState() -> bool;
+
         std::string m_meshUid;
         Signal<const anim::PlayState&> m_onPlayStateChanged;
-}
+        anim::State m_initialState;
+        bool m_initialStateInitialized;
+};
 } // namespace nc::graphics
 
 namespace nc

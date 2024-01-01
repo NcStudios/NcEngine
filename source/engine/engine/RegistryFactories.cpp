@@ -14,6 +14,7 @@
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
+#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
@@ -79,6 +80,7 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
     Register<graphics::MeshRenderer>(*registry, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer);
     Register<graphics::ParticleEmitter>(*registry, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter);
     Register<graphics::PointLight>(*registry, "PointLight", editor::PointLightUIWidget);
+    Register<graphics::SkeletalAnimator>(*registry, "SkeletalAnimator", editor::SkeletalAnimatorUIWidget, CreateSkeletalAnimator);
     Register<graphics::ToonRenderer>(*registry, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer);
     Register<net::NetworkDispatcher>(*registry, "NetworkDispatcher", editor::NetworkDispatcherUIWidget, CreateNetworkDispatcher);
     Register<physics::Collider>(*registry, "Collider", editor::ColliderUIWidget, CreateCollider);

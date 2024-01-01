@@ -11,6 +11,7 @@ auto CreateFrameLogic(Entity entity, void*) -> FrameLogic;
 auto CreateParticleEmitter(Entity entity, void*) -> graphics::ParticleEmitter;
 auto CreateMeshRenderer(Entity entity, void*) -> graphics::MeshRenderer;
 auto CreateToonRenderer(Entity entity, void*) -> graphics::ToonRenderer;
+auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator;
 auto CreateNetworkDispatcher(Entity entity, void*) -> net::NetworkDispatcher;
 auto CreateCollider(Entity entity, void*) -> physics::Collider;
 auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody;
