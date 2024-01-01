@@ -42,16 +42,19 @@ class NcAsset : public Module
         virtual auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>& = 0;
 
         /** @brief Get the signal for SkeletalAnimation load and unload events. */
-        virtual auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&> & = 0;
+        virtual auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& = 0;
 
         /** @brief Get the signal for Texture load and unload events. */
-        virtual auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&> & = 0;
+        virtual auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& = 0;
+
+        /** @brief Get the names of all loaded assets as an AssetMap. */
+        virtual auto GetLoadedAssets() const noexcept -> AssetMap = 0;
 };
 
 /**
  * @brief Build an NcAsset instance.
- * @param assetSettings Settings for NcAsset.
- * @param memorySettings 
+ * @param assetSettings Settings controlling asset search locations.
+ * @param memorySettings Settings controlling memory limits.
  * @param defaults A collection of assets to be available by default.
  * @return An NcAsset instance.
  */

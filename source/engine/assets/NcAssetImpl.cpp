@@ -9,6 +9,9 @@
 #include "manager/SkeletalAnimationAssetManager.h"
 #include "manager/TextureAssetManager.h"
 
+#include <array>
+#include <ranges>
+
 namespace nc::asset
 {
 auto BuildAssetModule(const config::AssetSettings& assetSettings,
@@ -46,6 +49,8 @@ void NcAssetImpl::OnBeforeSceneLoad()
         m_hullColliderManager->Load(m_defaults.at(asset::AssetType::HullCollider), false);
     if (m_defaults.contains(asset::AssetType::Mesh))
         m_meshManager->Load(m_defaults.at(asset::AssetType::Mesh), false);
+    if (m_defaults.contains(asset::AssetType::SkeletalAnimation))
+        m_skeletalAnimationManager->Load(m_defaults.at(asset::AssetType::SkeletalAnimation), false);
     if (m_defaults.contains(asset::AssetType::Texture))
         m_textureManager->Load(m_defaults.at(asset::AssetType::Texture), false);
 }
@@ -73,5 +78,30 @@ auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
 auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>&
 {
     return m_skeletalAnimationManager->OnUpdate();
+}
+
+auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
+{
+    const auto managers = std::array<IAssetServiceBase*, 7>
+    {
+        m_audioClipManager.get(),
+        m_concaveColliderManager.get(),
+        m_cubeMapManager.get(),
+        m_hullColliderManager.get(),
+        m_meshManager.get(),
+        m_skeletalAnimationManager.get(),
+        m_textureManager.get()
+    };
+
+    auto out = AssetMap{};
+    std::ranges::for_each(managers, [&out](auto manager) mutable
+    {
+        auto assets = manager->GetAllLoaded()
+            | std::views::transform([](auto&& name){ return std::string{name}; });
+
+        out.emplace(manager->GetAssetType(), std::vector<std::string>{assets.begin(), assets.end()});
+    });
+
+    return out;
 }
 } // namespace nc::asset
