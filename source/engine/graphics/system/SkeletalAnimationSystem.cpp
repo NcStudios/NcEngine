@@ -3,6 +3,8 @@
 #include "graphics/system/SkeletalAnimationCalculations.h"
 #include "time/Time.h"
 
+#include "optick.h"
+
 namespace
 {
 auto PrepareAnimation(nc::graphics::anim::UnitOfWork& unit, const nc::graphics::anim::PackedRig& rig, float dt) -> nc::graphics::anim::PackedAnimation
@@ -67,6 +69,8 @@ SkeletalAnimationSystem::SkeletalAnimationSystem(Registry* registry,
 
 auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
 {
+    OPTICK_CATEGORY("Execute", Optick::Category::Animation);
+
     auto animators = View<SkeletalAnimator>{m_registry};
     for (auto& animator : animators)
     {

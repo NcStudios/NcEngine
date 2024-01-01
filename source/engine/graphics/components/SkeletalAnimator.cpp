@@ -3,8 +3,6 @@
 #include "graphics/ToonRenderer.h"
 #include "ecs/Registry.h"
 
-#include <functional>
-
 namespace
 {
 auto GetMeshPath(nc::Entity entity) -> std::string
@@ -68,6 +66,6 @@ auto SkeletalAnimator::ExecuteInitialState() -> bool
 
 void SkeletalAnimator::CompleteFirstRun()
 {
-    // @todo : Implemented in a later PR
+    /* @todo : Truncation point for this PR. */
 }
 } // namespace nc::graphics

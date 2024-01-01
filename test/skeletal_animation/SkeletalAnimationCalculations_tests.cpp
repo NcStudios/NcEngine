@@ -518,11 +518,3 @@ TEST_F(SkeletalAnimationCalculations_tests, ComposeBlendedMatrices_twoBonesHaveA
     EXPECT_EQ(matrices.hasValues[1], 1);
     EXPECT_EQ(matrices.hasValues[2], 0);
 }
-
-TEST_F(SkeletalAnimationCalculations_tests, ComposeBlendedMatrices_twoBonesHaveAnimDataThirdDoesNot_thirdHasNoValue)
-{
-    auto matrices = nc::graphics::ComposeMatrices(0.0f, testData->boneNames, &testData->animation);
-    EXPECT_EQ(matrices.hasValues[0], 1);
-    EXPECT_EQ(matrices.hasValues[1], 1);
-    EXPECT_EQ(matrices.hasValues[2], 0);
-}
