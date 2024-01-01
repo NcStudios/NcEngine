@@ -55,11 +55,11 @@ auto ComposeMatrices(float timeInTicks,
     auto decomposedAnimation = GetAnimationOffsets(timeInTicks, boneNames, animation);
 
     auto packedAnimation = anim::PackedAnimation{};
-    auto elementsCount = decomposedAnimation.offsets.size(); // Both vectors guaranteed to have same size.
+    auto elementsCount = decomposedAnimation.offsets.size();
     packedAnimation.offsets.reserve(elementsCount);
     packedAnimation.hasValues = std::vector<anim::HasValue>{decomposedAnimation.hasValues.begin(), decomposedAnimation.hasValues.end()};
 
-    for (auto i = 0u; i < elementsCount; i++) /* @todo: replace with std::ranges::zip_view once we have cpp 23*/
+    for (auto i = 0u; i < elementsCount; i++)
     {
         auto positionMatrix = ToTransMatrix(decomposedAnimation.offsets[i].pos);
         auto rotationMatrix = ToRotMatrix(decomposedAnimation.offsets[i].rot);
@@ -81,7 +81,7 @@ auto ComposeBlendedMatrices(float blendFromTime,
     auto blendToDecomposed = GetAnimationOffsets(blendToTime, boneNames, blendToAnim);
 
     auto packedAnimation = anim::PackedAnimation{};
-    auto elementsCount = blendFromDecomposed.offsets.size(); // Both vectors guaranteed to have same size.
+    auto elementsCount = blendFromDecomposed.offsets.size(); // Both vectors (blendFromDecomposed and blendToDecomposed) guaranteed to have same size.
     packedAnimation.offsets.reserve(elementsCount);
     packedAnimation.hasValues = std::vector<anim::HasValue>{blendFromDecomposed.hasValues.begin(), blendFromDecomposed.hasValues.end()};
 
