@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"
 
 #include <memory>
@@ -10,7 +11,7 @@ class Editor
 {
     public:
         virtual ~Editor() = default;
-        virtual void Draw(ecs::Ecs world) = 0;
+        virtual void Draw(ecs::Ecs world, asset::NcAsset& assetModule) = 0;
 };
 
 auto BuildEditor() -> std::unique_ptr<Editor>;

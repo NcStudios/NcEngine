@@ -21,9 +21,9 @@ void UISystem::SetClientUI(ui::IUI* ui) noexcept
     m_clientUI = ui;
 }
 
-void UISystem::Execute(ecs::Ecs world)
+void UISystem::Execute(ecs::Ecs world, asset::NcAsset& assetModule)
 {
-    m_editor->Draw(world);
+    m_editor->Draw(world, assetModule);
 
     if (m_clientUI)
     {

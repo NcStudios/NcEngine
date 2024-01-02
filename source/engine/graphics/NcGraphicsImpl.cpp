@@ -53,7 +53,7 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, assetModule, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, assetModule, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -62,10 +62,12 @@ namespace nc::graphics
 
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                                    Registry* registry,
+                                   asset::NcAsset* assetModule,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus&& shaderResourceBus,
                                    window::WindowImpl* window)
         : m_registry{registry},
+          m_assetModule{assetModule},
           m_graphics{std::move(graphics)},
           m_cameraSystem{},
           m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
@@ -139,7 +141,7 @@ namespace nc::graphics
         }
 
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
+        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()), *m_assetModule);
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry}, cameraState, environmentState);
