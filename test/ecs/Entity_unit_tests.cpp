@@ -91,8 +91,11 @@ TEST(Entity_unit_tests, IsPersistent_FlagNotSet_ReturnsFalse)
     EXPECT_FALSE(handle.IsPersistent());
 }
 
-int main(int argc, char ** argv)
+TEST(Entity_unit_tests, Hash_AllValues_ReturnsExpectedHash)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    constexpr auto handle = Entity{uint32_t{0x01234567}, uint8_t{0x89}, uint8_t{0xAB}};
+    constexpr auto uut = Entity::Hash();
+    constexpr auto actual = uut(handle);
+    constexpr auto expected = size_t{0x00000123456789AB}; // top 4 bytes empty | index | layer | flags
+    EXPECT_EQ(expected, actual);
 }
