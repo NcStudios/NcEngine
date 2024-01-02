@@ -2,9 +2,6 @@
 
 #include "ncutility/NcError.h"
 
-#include "optick.h"
-
-#include <queue>
 #include <ranges>
 
 namespace nc::graphics
@@ -21,8 +18,6 @@ auto GetAnimationOffsets(float timeInTicks,
                          const std::vector<std::string>& boneNames,
                          const nc::asset::SkeletalAnimation* animation) -> anim::PackedAnimationDecomposed
 {
-    OPTICK_CATEGORY("GetAnimationOffsets", Optick::Category::Animation);
-
     auto animationMatrices = anim::PackedAnimationDecomposed{};
     animationMatrices.offsets.reserve(boneNames.size());
     animationMatrices.hasValues.reserve(boneNames.size());
@@ -54,8 +49,6 @@ auto ComposeMatrices(float timeInTicks,
                      const std::vector<std::string>& boneNames,
                      const nc::asset::SkeletalAnimation* animation) -> anim::PackedAnimation
 {
-    OPTICK_CATEGORY("ComposeMatrices", Optick::Category::Animation);
-
     auto decomposedAnimation = GetAnimationOffsets(timeInTicks, boneNames, animation);
 
     auto packedAnimation = anim::PackedAnimation{};
@@ -81,8 +74,6 @@ auto ComposeBlendedMatrices(float blendFromTime,
                             const nc::asset::SkeletalAnimation* blendFromAnim,
                             const nc::asset::SkeletalAnimation* blendToAnim) -> anim::PackedAnimation
 {
-    OPTICK_CATEGORY("ComposeBlendedMatrices", Optick::Category::Animation);
-
     auto blendFromDecomposed = GetAnimationOffsets(blendFromTime, boneNames, blendFromAnim);
     auto blendToDecomposed = GetAnimationOffsets(blendToTime, boneNames, blendToAnim);
 
@@ -109,8 +100,6 @@ auto ComposeBlendedMatrices(float blendFromTime,
 auto AnimateBones(const anim::PackedRig& rig,
                   const anim::PackedAnimation& anim) -> std::vector<nc::graphics::SkeletalAnimationData>
 {
-    OPTICK_CATEGORY("AnimateBones", Optick::Category::Animation);
-
     // Copy the boneToParent vector to perform modifications in place.
     auto boneToParentSandbox = std::vector<DirectX::XMMATRIX>{rig.boneToParent.begin(), rig.boneToParent.end()};
     auto boneToParentSandboxSize = boneToParentSandbox.size();
@@ -150,8 +139,6 @@ auto AnimateBones(const anim::PackedRig& rig,
 
 auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::PositionFrame> positionFrames) -> nc::Vector3
 {
-    OPTICK_CATEGORY("GetInterpolatedPosition", Optick::Category::Animation);
-
     auto interpolatedPosition = nc::Vector3{};
 
     if (positionFrames.size() == 0)
@@ -198,8 +185,6 @@ auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::Pos
 
 auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::RotationFrame> rotationFrames) -> nc::Quaternion
 {
-    OPTICK_CATEGORY("GetInterpolatedRotation", Optick::Category::Animation);
-
     auto interpolatedRotation = nc::Quaternion{};
 
     if (rotationFrames.size() == 0)
@@ -246,8 +231,6 @@ auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::Rot
 
 auto GetInterpolatedScale(float timeInTicks, const std::vector<nc::asset::ScaleFrame> scaleFrames) -> nc::Vector3
 {
-    OPTICK_CATEGORY("GetInterpolatedScale", Optick::Category::Animation);
-
     auto interpolatedScale = nc::Vector3{};
     if (scaleFrames.size() == 0)
     {

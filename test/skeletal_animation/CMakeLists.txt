@@ -1,10 +1,8 @@
 ### SkeletalAnimationCalculations_tests Tests ###
 add_executable(SkeletalAnimationCalculations_tests
-SkeletalAnimationCalculations_tests.cpp
-    ${NC_SOURCE_DIR}/assets/AssetData.cpp
+    SkeletalAnimationCalculations_tests.cpp
     ${NC_SOURCE_DIR}/graphics/system/SkeletalAnimationCalculations.cpp
     ${NC_SOURCE_DIR}/graphics/system/SkeletalAnimationTypes.cpp
-    ${NC_SOURCE_DIR}/time/TimeImpl.cpp
 )
 
 target_include_directories(SkeletalAnimationCalculations_tests
@@ -25,7 +23,6 @@ target_link_libraries(SkeletalAnimationCalculations_tests
         gtest_main
         NcAsset
         NcMath
-        OptickCore
         Taskflow
 )
 
