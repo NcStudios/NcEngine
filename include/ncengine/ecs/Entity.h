@@ -50,6 +50,17 @@ class Entity
         friend bool constexpr operator==(const Entity& a, const Entity& b) { return a.Index() == b.Index(); }
         friend bool constexpr operator!=(const Entity& a, const Entity& b) { return !(a == b); }
 
+        /** @todo before merge: add tests */
+        struct Hash
+        {
+            constexpr auto operator()(const Entity& entity) const noexcept
+            {
+                return static_cast<size_t>(entity.Index()) << 16
+                     | static_cast<size_t>(entity.Layer()) << 8
+                     | static_cast<size_t>(entity.Flags());
+            }
+        };
+
     private:
         index_type m_index;
         layer_type m_layer;
