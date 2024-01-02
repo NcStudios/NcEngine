@@ -14,7 +14,14 @@ namespace nc::ecs::detail
 class FreeComponentGroup final : public ComponentBase
 {
     public:
-        FreeComponentGroup(Entity entity);
+        FreeComponentGroup(Entity entity)
+            : ComponentBase{entity},
+              m_components{},
+              m_toAdd{},
+              m_toRemove{}
+        {
+        }
+
         ~FreeComponentGroup() = default;
         FreeComponentGroup(FreeComponentGroup&&) = default;
         FreeComponentGroup& operator=(FreeComponentGroup&&) = default;

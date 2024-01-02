@@ -1,10 +1,12 @@
+/**
+ * @file Transform.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "Component.h"
 
-#include "ncmath/Vector.h"
-#include "ncmath/Quaternion.h"
-#include "DirectXMath.h"
+#include "ncengine/utility/MatrixUtilities.h"
 
 #include <span>
 #include <vector>
@@ -35,31 +37,31 @@ class Transform final : public ComponentBase
         Transform& operator=(const Transform&) = delete;
 
         /** @brief Get world space position */
-        auto Position() const -> Vector3;
+        auto Position() const noexcept -> Vector3 { return ToVector3(m_worldMatrix.r[3]); }
 
         /** @brief Get world space position as XMVECTOR */
-        auto PositionXM() const -> DirectX::XMVECTOR;
+        auto PositionXM() const noexcept -> DirectX::FXMVECTOR { return m_worldMatrix.r[3]; }
 
         /** @brief Get local space position */
-        auto LocalPosition() const -> Vector3;
+        auto LocalPosition() const noexcept -> Vector3 { return ToVector3(m_localMatrix.r[3]); }
 
         /** @brief Get world space rotation */
-        auto Rotation() const -> Quaternion;
+        auto Rotation() const noexcept -> Quaternion { return ToQuaternion(RotationXM()); }
 
         /** @brief Get world space rotation as XMVECTOR */
-        auto RotationXM() const -> DirectX::XMVECTOR;
+        auto RotationXM() const noexcept -> DirectX::XMVECTOR { return DecomposeRotation(m_worldMatrix); }
 
         /** @brief Get local space rotation */
-        auto LocalRotation() const -> Quaternion;
+        auto LocalRotation() const noexcept -> Quaternion { return ToQuaternion(DecomposeRotation(m_localMatrix)); }
 
         /** @brief Get world space scale */
-        auto Scale() const -> Vector3;
+        auto Scale() const -> Vector3 { return ToVector3(DecomposeScale(m_worldMatrix)); }
 
         /** @brief Get local space scale */
-        auto LocalScale() const -> Vector3;
+        auto LocalScale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_localMatrix)); }
 
         /** @brief Get world space matrix */
-        auto TransformationMatrix() const -> DirectX::FXMMATRIX;
+        auto TransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_worldMatrix; }
 
         /** @brief Get local space matrix */
         auto ToLocalSpace(const Vector3& vec) const -> Vector3;
@@ -112,14 +114,14 @@ class Transform final : public ComponentBase
         /** @brief Get all immediate children of this transform */
         auto Children() const noexcept -> std::span<const Entity>
         {
-            return std::span<const Entity>(m_children.data(), m_children.size());
+            return std::span<const Entity>{m_children.data(), m_children.size()};
         }
 
         /** @brief Get the root node relative to this transform */
         auto Root() const -> Entity;
 
         /** @brief Get the immediate parent of this transform - may be nullptr */
-        auto Parent() const -> Entity;
+        auto Parent() const noexcept -> Entity { return m_parent; }
 
         /** @brief Make this transform the child of another, or pass nullptr to detach from existing parent */
         void SetParent(Entity parent);

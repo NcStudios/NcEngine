@@ -4,12 +4,12 @@
 
 namespace nc::ecs::detail
 {
-FreeComponentGroup::FreeComponentGroup(Entity entity)
-    : ComponentBase{entity},
-        m_components{},
-        m_toAdd{},
-        m_toRemove{}
-{}
+// FreeComponentGroup::FreeComponentGroup(Entity entity)
+//     : ComponentBase{entity},
+//         m_components{},
+//         m_toAdd{},
+//         m_toRemove{}
+// {}
 
 auto FreeComponentGroup::GetComponents() const noexcept -> std::vector<FreeComponent*>
 {

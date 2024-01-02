@@ -39,79 +39,6 @@ namespace nc
         }
     }
 
-    Vector3 Transform::LocalPosition() const
-    {
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, m_localMatrix.r[3]);
-        return out;
-    }
-
-    Vector3 Transform::Position() const
-    {
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, m_worldMatrix.r[3]);
-        return out;
-    }
-
-    DirectX::XMVECTOR Transform::PositionXM() const
-    {
-        return m_worldMatrix.r[3];
-    }
-
-    Quaternion Transform::LocalRotation() const
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
-        auto out = Quaternion::Identity();
-        DirectX::XMStoreQuaternion(&out, rot_v);
-        return out;
-    }
-
-    Quaternion Transform::Rotation() const
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
-        auto out = Quaternion::Identity();
-        DirectX::XMStoreQuaternion(&out, rot_v);
-        return out;
-    }
-
-    DirectX::XMVECTOR Transform::RotationXM() const
-    {
-        DirectX::XMVECTOR scl_v, rot_v, pos_v;
-        DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
-        return rot_v;
-    }
-
-    Vector3 Transform::Scale() const
-    {
-        using namespace DirectX;
-        // Fill out_v with x scale, then shift in y and z values
-        auto out_v = XMVectorSplatX(XMVector3Length(m_worldMatrix.r[0]));
-        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(out_v, XMVector3Length(m_worldMatrix.r[1]));
-        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0W>(out_v, XMVector3Length(m_worldMatrix.r[2]));
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, out_v);
-        return out;
-    }
-
-    Vector3 Transform::LocalScale() const
-    {
-        using namespace DirectX;
-        // Fill out_v with x scale, then shift in y and z values
-        auto out_v = XMVectorSplatX(XMVector3Length(m_localMatrix.r[0]));
-        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(out_v, XMVector3Length(m_localMatrix.r[1]));
-        out_v = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0W>(out_v, XMVector3Length(m_localMatrix.r[2]));
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, out_v);
-        return out;
-    }
-
-    DirectX::FXMMATRIX Transform::TransformationMatrix() const
-    {
-        return m_worldMatrix;
-    }
-
     Vector3 Transform::ToLocalSpace(const Vector3& vec) const
     {
         auto vec_v = DirectX::XMVectorSet(vec.x, vec.y, vec.z, 0.0f);
@@ -265,11 +192,6 @@ namespace nc
             return ActiveRegistry()->Get<Transform>(m_parent)->Root();
         
         return ParentEntity();
-    }
-
-    Entity Transform::Parent() const
-    {
-        return m_parent;
     }
 
     void Transform::SetParent(Entity parent)

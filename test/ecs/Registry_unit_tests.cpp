@@ -18,7 +18,6 @@ Quaternion::Quaternion(float X, float Y, float Z, float W)
 
 namespace ecs::detail
 {
-FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity} {}
 void FreeComponentGroup::CommitStagedComponents() {}
 }
 }
