@@ -110,7 +110,10 @@ class Transform final : public ComponentBase
         void Rotate(const Vector3& axis, float radians);
 
         /** @brief Get all immediate children of this transform */
-        auto Children() -> std::span<Entity>;
+        auto Children() const noexcept -> std::span<const Entity>
+        {
+            return std::span<const Entity>(m_children.data(), m_children.size());
+        }
 
         /** @brief Get the root node relative to this transform */
         auto Root() const -> Entity;

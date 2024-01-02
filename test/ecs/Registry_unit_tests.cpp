@@ -12,8 +12,6 @@ Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vec
 
 void Transform::SetParent(Entity entity) { m_parent = entity; }
 
-std::span<Entity> Transform::Children() { return std::span<Entity>{m_children}; }
-
 Quaternion::Quaternion(float X, float Y, float Z, float W)
     : x{X}, y{Y}, z{Z}, w{W}
 {}
