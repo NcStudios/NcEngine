@@ -39,20 +39,7 @@ NcAssetImpl::~NcAssetImpl() noexcept = default;
 
 void NcAssetImpl::OnBeforeSceneLoad()
 {
-    if (m_defaults.contains(asset::AssetType::AudioClip))
-        m_audioClipManager->Load(m_defaults.at(asset::AssetType::AudioClip), false);
-    if (m_defaults.contains(asset::AssetType::ConcaveCollider))
-        m_concaveColliderManager->Load(m_defaults.at(asset::AssetType::ConcaveCollider), false);
-    if (m_defaults.contains(asset::AssetType::CubeMap))
-        m_cubeMapManager->Load(m_defaults.at(asset::AssetType::CubeMap), false);
-    if (m_defaults.contains(asset::AssetType::HullCollider))
-        m_hullColliderManager->Load(m_defaults.at(asset::AssetType::HullCollider), false);
-    if (m_defaults.contains(asset::AssetType::Mesh))
-        m_meshManager->Load(m_defaults.at(asset::AssetType::Mesh), false);
-    if (m_defaults.contains(asset::AssetType::SkeletalAnimation))
-        m_skeletalAnimationManager->Load(m_defaults.at(asset::AssetType::SkeletalAnimation), false);
-    if (m_defaults.contains(asset::AssetType::Texture))
-        m_textureManager->Load(m_defaults.at(asset::AssetType::Texture), false);
+    LoadAssets(m_defaults);
 }
 
 auto NcAssetImpl::OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>&
@@ -78,6 +65,24 @@ auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
 auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>&
 {
     return m_skeletalAnimationManager->OnUpdate();
+}
+
+void NcAssetImpl::LoadAssets(const AssetMap& assets)
+{
+    if (assets.contains(asset::AssetType::AudioClip))
+        m_audioClipManager->Load(assets.at(asset::AssetType::AudioClip), false);
+    if (assets.contains(asset::AssetType::ConcaveCollider))
+        m_concaveColliderManager->Load(assets.at(asset::AssetType::ConcaveCollider), false);
+    if (assets.contains(asset::AssetType::CubeMap))
+        m_cubeMapManager->Load(assets.at(asset::AssetType::CubeMap), false);
+    if (assets.contains(asset::AssetType::HullCollider))
+        m_hullColliderManager->Load(assets.at(asset::AssetType::HullCollider), false);
+    if (assets.contains(asset::AssetType::Mesh))
+        m_meshManager->Load(assets.at(asset::AssetType::Mesh), false);
+    if (assets.contains(asset::AssetType::SkeletalAnimation))
+        m_skeletalAnimationManager->Load(assets.at(asset::AssetType::SkeletalAnimation), false);
+    if (assets.contains(asset::AssetType::Texture))
+        m_textureManager->Load(assets.at(asset::AssetType::Texture), false);
 }
 
 auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
