@@ -259,11 +259,6 @@ namespace nc
         UpdateWorldMatrix();
     }
 
-    std::span<Entity> Transform::Children()
-    {
-        return std::span<Entity>(m_children.data(), m_children.size());
-    }
-
     Entity Transform::Root() const
     {
         if(m_parent.Valid())
