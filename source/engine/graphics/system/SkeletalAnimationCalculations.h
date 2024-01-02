@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/shader_resource/SkeletalAnimationData.h"
-#include "graphics/system/SkeletalAnimationTypes.h"
+#include "graphics/SkeletalAnimationTypes.h"
 
 #include "asset/AssetData.h"
 #include "DirectXMath.h"

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "ncengine/ecs/Component.h"
-
-#include "graphics/system/SkeletalAnimationTypes.h"
+#include "ncengine/graphics/SkeletalAnimationTypes.h"
 
 #include <memory>
 

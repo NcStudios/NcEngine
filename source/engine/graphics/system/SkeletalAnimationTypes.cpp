@@ -1,5 +1,4 @@
-#include "SkeletalAnimationTypes.h"
-
+#include "ncengine/graphics/SkeletalAnimationTypes.h"
 #include "ncasset/Assets.h"
 
 namespace
