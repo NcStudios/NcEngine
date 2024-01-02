@@ -1,13 +1,16 @@
 #include "ncengine/graphics/SkeletalAnimationTypes.h"
 #include "ncasset/Assets.h"
 
+#include <ranges>
+
 namespace
 {
 auto GetGlobalInverseTransform(const std::vector<nc::asset::BoneSpaceToParentSpace>& offsets) -> DirectX::XMMATRIX
 {
+    static constexpr auto root = std::string_view{"Root"};
     const auto pos = std::ranges::find_if(offsets, [](const auto& offset)
     {
-        return offset.boneName.find(std::string{"Root"}) != std::string::npos;
+        return offset.boneName.find(root) != std::string::npos;
     });
     return pos == offsets.end() ? DirectX::XMMatrixIdentity() : DirectX::XMMatrixInverse(nullptr, pos->transformationMatrix);
 }
@@ -15,15 +18,7 @@ auto GetGlobalInverseTransform(const std::vector<nc::asset::BoneSpaceToParentSpa
 
 namespace nc::graphics::anim
 {
-Initial::Initial(std::string animUid_)
-    : animUid{std::move(animUid_)}{}
-
-State::State(const Initial& initialProperties)
-    : id{},
-      action{Action::Loop},
-      animUid{std::move(initialProperties.animUid)}{}
-
-PackedRig::PackedRig(nc::asset::BonesData bonesData)
+PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
     : vertexToBone{},
       boneToParent{},
       globalInverseTransform{GetGlobalInverseTransform(bonesData.boneSpaceToParentSpace)},
@@ -40,29 +35,25 @@ PackedRig::PackedRig(nc::asset::BonesData bonesData)
     boneToParentIndices.reserve(bspsVec.size());
     offsetsMap.reserve(vsbsVec.size());
 
-    std::transform(vsbsVec.begin(), vsbsVec.end(), std::back_inserter(vertexToBone),
-                [](const nc::asset::VertexSpaceToBoneSpace& vsbs) -> DirectX::XMMATRIX { return vsbs.transformationMatrix; });
+    std::ranges::transform(vsbsVec, std::back_inserter(vertexToBone),
+        [](const nc::asset::VertexSpaceToBoneSpace& vsbs) -> DirectX::XMMATRIX { return vsbs.transformationMatrix; });
 
-    std::transform(bspsVec.begin(), bspsVec.end(), std::back_inserter(boneToParent),
-                [](const nc::asset::BoneSpaceToParentSpace& bsps) -> DirectX::XMMATRIX { return bsps.transformationMatrix; });
+    std::ranges::transform(bspsVec, std::back_inserter(boneToParent),
+        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> DirectX::XMMATRIX { return bsps.transformationMatrix; });
 
-    std::transform(bspsVec.begin(), bspsVec.end(), std::back_inserter(boneNames),
-                   [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::string { return bsps.boneName; });
+    std::ranges::transform(bspsVec, std::back_inserter(boneNames),
+        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::string { return bsps.boneName; });
 
-    std::transform(bspsVec.begin(), bspsVec.end(), std::back_inserter(boneToParentIndices),
-                [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::tuple<uint32_t, uint32_t> { return std::make_tuple(bsps.indexOfFirstChild, bsps.numChildren); });
-
-    for (const auto& vsbs : bonesData.vertexSpaceToBoneSpace)
+    std::ranges::transform(bspsVec, std::back_inserter(boneToParentIndices),
+        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::tuple<uint32_t, uint32_t> { return std::make_tuple(bsps.indexOfFirstChild, bsps.numChildren); });
+    
+    std::ranges::for_each(bonesData.vertexSpaceToBoneSpace, [&map = offsetsMap, &localBsPs = bonesData.boneSpaceToParentSpace](auto&& node)
     {
-        auto pos = std::ranges::find_if(bonesData.boneSpaceToParentSpace, [vsbs](const auto& bsps)
+        auto pos = std::ranges::find(localBsPs, node.boneName, [](auto&& bsPsNode){ return bsPsNode.boneName; });
+        if (pos != localBsPs.end())
         {
-            return vsbs.boneName == bsps.boneName;
-        });
-
-        if (pos != bonesData.boneSpaceToParentSpace.end())
-        {
-            offsetsMap.push_back(static_cast<uint32_t>(std::distance(bonesData.boneSpaceToParentSpace.begin(), pos)));
+            map.push_back(static_cast<uint32_t>(std::distance(localBsPs.begin(), pos)));
         }
-    }
+    });
 }
 }
