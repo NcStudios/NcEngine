@@ -62,7 +62,7 @@ jobs:
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
       - name: Build and Install
-        run: cmake --build build --target install --config Debug --parallel
+        run: cmake --build build --target install --config Debug
 
       - name: Run Tests
         working-directory: ${{github.workspace}}/build/test
