@@ -37,7 +37,7 @@ jobs:
           - variant: Prod
             cmakeArgs: "-DNC_PROD_BUILD=ON"
 
-    name: ${{ matrix.shortName }}-${{ matrix.variant }}
+    name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}
     runs-on: ${{ matrix.os }}
 
     steps:
