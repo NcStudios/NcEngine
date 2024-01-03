@@ -273,5 +273,32 @@ TEST_F(SceneFragmentTests, LoadSceneFragment_hasEntities_loadsEntities)
 
 TEST_F(SceneFragmentTests, LoadSceneFragment_hasEntityHierarchy_setsParents)
 {
-    
+    auto fragment = nc::SceneFragment
+    {
+        .entities = std::vector<nc::FragmentEntityInfo>
+        {
+            {0, nc::EntityInfo{.tag = "0"}},
+            {1, nc::EntityInfo{.parent = nc::Entity{0, 0, 0}, .tag = "1"}},
+            {2, nc::EntityInfo{.parent = nc::Entity{1, 0, 0}, .tag = "2"}},
+            {3, nc::EntityInfo{.parent = nc::Entity{2, 0, 0}, .tag = "3"}},
+        }
+    };
+
+    nc::LoadSceneFragment(fragment, ecs, *assetModule);
+    const auto actualEntities = ecs.GetAll<nc::Entity>();
+    ASSERT_EQ(fragment.entities.size(), actualEntities.size());
+
+    const auto transform0 = ecs.Get<nc::Transform>(actualEntities[0]);
+    const auto transform1 = ecs.Get<nc::Transform>(actualEntities[1]);
+    const auto transform2 = ecs.Get<nc::Transform>(actualEntities[2]);
+    const auto transform3 = ecs.Get<nc::Transform>(actualEntities[3]);
+    ASSERT_NE(nullptr, transform0);
+    ASSERT_NE(nullptr, transform1);
+    ASSERT_NE(nullptr, transform2);
+    ASSERT_NE(nullptr, transform3);
+
+    EXPECT_EQ(nc::Entity::Null(), transform0->Parent());
+    EXPECT_EQ(actualEntities[0], transform1->Parent());
+    EXPECT_EQ(actualEntities[1], transform2->Parent());
+    EXPECT_EQ(actualEntities[2], transform3->Parent());
 }
