@@ -22,6 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-2022, ubuntu-22.04]
+        config: [Debug, Release]
         variant: [Dev, Prod]
         include:
           - os: windows-2022
@@ -59,10 +60,10 @@ jobs:
           version: 1.3.261.1
 
       - name: Configure
-        run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
+        run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
       - name: Build and Install
-        run: cmake --build build --target install --config Release
+        run: cmake --build build --target install --parallel
 
       - name: Run Tests
         working-directory: ${{github.workspace}}/build/test
