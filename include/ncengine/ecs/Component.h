@@ -1,3 +1,7 @@
+/**
+ * @file Component.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "Entity.h"
@@ -83,6 +87,12 @@ struct DefaultStoragePolicy
 template<PooledComponent T>
 struct StoragePolicy : DefaultStoragePolicy {};
 
+/** @brief Marks the beginning of the component id range reserved for engine use. */
+constexpr size_t EngineIdRangeBegin = 1ull;
+
+/** @brief Marks the end of the component id range reserved for engine use. */
+constexpr size_t EngineIdRangeEnd = 100ull;
+
 /** @brief Optional data and callbacks for generic component operations. */
 template<PooledComponent T>
 struct ComponentHandler
@@ -92,6 +102,14 @@ struct ComponentHandler
 
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T&)>;
+
+    /**
+     * @brief A unique identifier for the component.
+     * @note Set to 0 to get assigned an available id. The range [EngineIdRangeBegin, EngineIdRangeEnd]
+     *       is reserved for engine components. Automatically assigned ids are assigned in reverse order
+     *       starting from std::numeric_limites<size_t>::max().
+    */
+    size_t id = 0ull;
 
     /** @brief A name for the component with no uniqueness constraints. */
     std::string name = "User Component";
