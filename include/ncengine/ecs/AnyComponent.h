@@ -44,12 +44,22 @@ class AnyComponent
         }
 
         /**
+         * @brief Get the value of Componenthandler::id for the concrecte component type.
+         * @throw NcError if invoked on a null AnyComponent.
+        */
+        auto Id() const -> size_t
+        {
+            EnsureIsEngaged();
+            return m_storage.AsImpl()->Id();
+        }
+
+        /**
          * @brief Get the value of ComponentHandler::name for the concrete component type.
          * @throw NcError if invoked on a null AnyComponent.
          */
         auto Name() const -> std::string_view
         {
-            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            EnsureIsEngaged();
             return m_storage.AsImpl()->Name();
         }
 
@@ -59,14 +69,14 @@ class AnyComponent
          */
         auto HasDrawUI() const -> bool
         {
-            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            EnsureIsEngaged();
             return m_storage.AsImpl()->HasDrawUI();
         }
 
         /** @brief Invoke ComponentHandler::drawUI with the component instance, if it is set. */
         void DrawUI()
         {
-            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+            EnsureIsEngaged();
             if (HasDrawUI())
             {
                 m_storage.AsImpl()->DrawUI();
@@ -75,5 +85,10 @@ class AnyComponent
 
     private:
         detail::AnyImplStorage m_storage;
+
+        void EnsureIsEngaged() const
+        {
+            NC_ASSERT(m_storage.HasValue(), "Invalid use of null AnyComponent.");
+        }
 };
 } // namespace nc
