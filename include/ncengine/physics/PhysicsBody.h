@@ -25,6 +25,8 @@ class PhysicsBody final : public ComponentBase
     NC_ENABLE_IN_EDITOR(PhysicsBody)
 
     public:
+        static constexpr auto ComponentId = 10ull;
+
         PhysicsBody(Entity entity,
                     PhysicsProperties properties = PhysicsProperties{},
                     Vector3 linearFreedom = Vector3::One(),

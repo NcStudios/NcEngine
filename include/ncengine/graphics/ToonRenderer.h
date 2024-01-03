@@ -29,6 +29,8 @@ class ToonRenderer : public ComponentBase
     NC_ENABLE_IN_EDITOR(ToonRenderer)
 
     public:
+        static constexpr auto ComponentId = 5ull;
+
         ToonRenderer(Entity entity,
                      std::string meshUid = asset::CubeMesh,
                      ToonMaterial material = {});

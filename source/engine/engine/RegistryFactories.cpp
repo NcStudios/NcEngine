@@ -54,13 +54,13 @@ void Register(nc::Registry& registry,
 {
     registry.RegisterComponentType<T>(nc::ComponentHandler<T>
     {
+        .id = T::ComponentId,
         .name = name,
         .userData = userData,
         .factory = std::move(factory),
         .drawUI = std::move(drawUI)
     });
 }
-
 } // anonymous namespace
 
 namespace nc
@@ -72,18 +72,18 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
     registry->RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
     Register<Tag>(*registry, "Tag", editor::TagUIWidget);
     Register<Transform>(*registry, "Transform", editor::TransformUIWidget);
-    Register<CollisionLogic>(*registry, "CollisionLogic", editor::CollisionLogicUIWidget, CreateCollisionLogic);
-    Register<FrameLogic>(*registry, "FrameLogic", editor::FrameLogicUIWidget, CreateFrameLogic);
-    Register<FixedLogic>(*registry, "FixedLogic", editor::FixedLogicUIWidget, CreateFixedLogic);
-    Register<audio::AudioSource>(*registry, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource);
     Register<graphics::MeshRenderer>(*registry, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer);
-    Register<graphics::ParticleEmitter>(*registry, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter);
-    Register<graphics::PointLight>(*registry, "PointLight", editor::PointLightUIWidget);
     Register<graphics::ToonRenderer>(*registry, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer);
-    Register<net::NetworkDispatcher>(*registry, "NetworkDispatcher", editor::NetworkDispatcherUIWidget, CreateNetworkDispatcher);
+    Register<graphics::PointLight>(*registry, "PointLight", editor::PointLightUIWidget);
+    Register<graphics::ParticleEmitter>(*registry, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter);
     Register<physics::Collider>(*registry, "Collider", editor::ColliderUIWidget, CreateCollider);
     Register<physics::ConcaveCollider>(*registry, "ConcaveCollider", editor::ConcaveColliderUIWidget);
     Register<physics::PhysicsBody>(*registry, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, static_cast<void*>(registry.get()));
+    Register<FrameLogic>(*registry, "FrameLogic", editor::FrameLogicUIWidget, CreateFrameLogic);
+    Register<FixedLogic>(*registry, "FixedLogic", editor::FixedLogicUIWidget, CreateFixedLogic);
+    Register<CollisionLogic>(*registry, "CollisionLogic", editor::CollisionLogicUIWidget, CreateCollisionLogic);
+    Register<audio::AudioSource>(*registry, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource);
+    Register<net::NetworkDispatcher>(*registry, "NetworkDispatcher", editor::NetworkDispatcherUIWidget, CreateNetworkDispatcher);
     return registry;
 }
 

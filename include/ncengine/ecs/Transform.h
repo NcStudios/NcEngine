@@ -27,6 +27,8 @@ class Transform final : public ComponentBase
     NC_ENABLE_IN_EDITOR(Transform)
 
     public:
+        static constexpr auto ComponentId = 3ull;
+
         Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent);
         Transform(Transform&&) = default;
         Transform& operator=(Transform&&) = default;

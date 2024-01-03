@@ -79,6 +79,8 @@ class Collider final : public ComponentBase
     NC_ENABLE_IN_EDITOR(Collider)
 
     public:
+        static constexpr auto ComponentId = 8ull;
+
         Collider(Entity entity, SphereProperties properties, bool isTrigger = false);
         Collider(Entity entity, BoxProperties properties, bool isTrigger = false);
         Collider(Entity entity, CapsuleProperties properties, bool isTrigger = false);

@@ -35,6 +35,8 @@ class MeshRenderer : public ComponentBase
     NC_ENABLE_IN_EDITOR(MeshRenderer)
 
     public:
+        static constexpr auto ComponentId = 4ull;
+
         MeshRenderer(Entity entity,
                      std::string meshUid = asset::CubeMesh,
                      PbrMaterial material = {},

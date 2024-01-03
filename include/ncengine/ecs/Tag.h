@@ -18,6 +18,8 @@ namespace nc
 class Tag final : public ComponentBase
 {
     public:
+        static constexpr auto ComponentId = 2ull;
+
         Tag(Entity entity, std::string tag)
             : ComponentBase{entity},
               m_tag{std::move(tag)}

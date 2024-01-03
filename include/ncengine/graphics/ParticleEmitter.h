@@ -54,6 +54,8 @@ class ParticleEmitter final : public ComponentBase
     NC_ENABLE_IN_EDITOR(ParticleEmitter)
 
     public:
+        static constexpr auto ComponentId = 7ull;
+
         ParticleEmitter(Entity entity, ParticleInfo info);
 
         const ParticleInfo& GetInfo() const noexcept;

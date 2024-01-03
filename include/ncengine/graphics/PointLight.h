@@ -12,6 +12,8 @@ class PointLight final : public ComponentBase
     NC_ENABLE_IN_EDITOR(PointLight)
 
     public:
+        static constexpr auto ComponentId = 6ull;
+
         PointLight(Entity entity, const Vector3& ambient, const Vector3& diffuseColor, float diffuseIntensity)
             : ComponentBase{entity},
               m_ambient{ambient},
