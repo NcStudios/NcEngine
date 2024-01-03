@@ -7,6 +7,7 @@ namespace nc::graphics
 struct EnvironmentData;
 struct ObjectData;
 struct PointLightData;
+struct SkeletalAnimationData;
 
 /** @brief Data transfer channels for shader resources. Signals are emitted from frontend graphics
  *         systems to be picked up by API-specific backend handlers. */

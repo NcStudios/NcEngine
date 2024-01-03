@@ -43,7 +43,7 @@ ShaderResources::ShaderResources(vk::Device device,
       shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
       cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
       environmentDataShaderResource{5, allocator, shaderDescriptorSets},
-      skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets},
+      skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets, memorySettings.maxSkeletalAnimations},
       objectDataConnection{::Connect(resourceBus.objectChannel, &objectDataShaderResource)},
       pointLightDataConnection{::Connect(resourceBus.pointLightChannel, &pointLightShaderResource)},
       environmentDataConnection{::Connect(resourceBus.environmentChannel, &environmentDataShaderResource)},

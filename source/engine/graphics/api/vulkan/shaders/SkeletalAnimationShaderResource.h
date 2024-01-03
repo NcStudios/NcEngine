@@ -14,7 +14,7 @@ struct SkeletalAnimationData;
 class SkeletalAnimationShaderResource : public IShaderResource<SkeletalAnimationData>
 {
     public:
-        SkeletalAnimationShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors);
+        SkeletalAnimationShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxSkeletalAnimations);
 
         void Initialize() override;
         void Update(const std::vector<SkeletalAnimationData>& data) override;
@@ -25,5 +25,6 @@ class SkeletalAnimationShaderResource : public IShaderResource<SkeletalAnimation
         GpuAllocator* m_allocator;
         ShaderDescriptorSets* m_descriptors;
         std::unique_ptr<WriteableBuffer<SkeletalAnimationData>> m_skeletalAnimationArrayBuffer;
+        uint32_t m_maxAnimatedBones;
 };
 } // namespace nc::graphics

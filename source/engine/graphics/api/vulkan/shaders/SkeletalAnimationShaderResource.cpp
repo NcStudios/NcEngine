@@ -4,20 +4,21 @@
 
 namespace nc::graphics
 {
-constexpr uint32_t MaxAnimatedBones = 30000u;
+constexpr uint32_t AvgBonesPerAnim = 30u;
 
-SkeletalAnimationShaderResource::SkeletalAnimationShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors)
+SkeletalAnimationShaderResource::SkeletalAnimationShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxSkeletalAnimations)
     : m_bindingSlot{bindingSlot},
-        m_allocator{allocator},
-        m_descriptors{descriptors},
-        m_skeletalAnimationArrayBuffer{nullptr}
+      m_allocator{allocator},
+      m_descriptors{descriptors},
+      m_skeletalAnimationArrayBuffer{nullptr},
+      m_maxAnimatedBones{AvgBonesPerAnim * maxSkeletalAnimations}
 {
     Initialize();
 }
 
 void SkeletalAnimationShaderResource::Initialize()
 {
-    const auto bufferSize = static_cast<uint32_t>(sizeof(SkeletalAnimationData) * MaxAnimatedBones);
+    const auto bufferSize = static_cast<uint32_t>(sizeof(SkeletalAnimationData) * m_maxAnimatedBones);
 
     if (m_skeletalAnimationArrayBuffer == nullptr)
     {

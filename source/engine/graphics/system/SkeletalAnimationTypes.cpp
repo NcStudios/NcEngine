@@ -45,8 +45,10 @@ PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
         [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::string { return bsps.boneName; });
 
     std::ranges::transform(bspsVec, std::back_inserter(boneToParentIndices),
-        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::tuple<uint32_t, uint32_t> { return std::make_tuple(bsps.indexOfFirstChild, bsps.numChildren); });
+        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::pair<uint32_t, uint32_t> { return std::make_pair(bsps.indexOfFirstChild, bsps.numChildren); });
     
+    // Create a vector of uint32_t that represent the vertexOffset's corresponding bone index in the boneSpace offset vector.
+    // This is important because we need to keep the two vectors in sync but the boneSpace vector contains data not present or need in the vertexOffset vector.
     std::ranges::for_each(bonesData.vertexSpaceToBoneSpace, [&map = offsetsMap, &localBsPs = bonesData.boneSpaceToParentSpace](auto&& node)
     {
         auto pos = std::ranges::find(localBsPs, node.boneName, [](auto&& bsPsNode){ return bsPsNode.boneName; });

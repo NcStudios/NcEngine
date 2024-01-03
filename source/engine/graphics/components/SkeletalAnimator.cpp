@@ -5,38 +5,14 @@
 
 namespace
 {
-auto GetMeshPath(nc::Entity entity) -> std::string
-{
-    auto* registry = nc::ActiveRegistry();
-    auto* meshRenderer = registry->Get<nc::graphics::MeshRenderer>(entity);
-    auto* toonRenderer = registry->Get<nc::graphics::ToonRenderer>(entity);
-    if (meshRenderer)
-    {
-        return meshRenderer->GetMeshPath();
-    }
-    else if (toonRenderer)
-    {
-        return toonRenderer->GetMeshPath();
-    }
-    else
-    {
-        throw nc::NcError("SkeletalAnimator must be added to an Entity with either a ToonRenderer or a MeshRenderer.");
-    }
-}
-}
-
 namespace nc::graphics
 {
-SkeletalAnimator::SkeletalAnimator(Entity entity, std::string animUid)
+SkeletalAnimator::SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid)
     : ComponentBase{entity},
-      m_meshUid{GetMeshPath(entity)},
+      m_meshUid{meshUid},
       m_onPlayStateChanged{},
-      m_initialState{anim::State{anim::Initial{std::move(animUid)}}},
+      m_initialState{anim::State{anim::Initial{std::move(animationUid)}}},
       m_initialStateInitialized{}{}
-
-SkeletalAnimator::SkeletalAnimator(SkeletalAnimator&& other) noexcept = default;
-auto SkeletalAnimator::operator=(SkeletalAnimator&& other) noexcept -> SkeletalAnimator& = default;
-SkeletalAnimator::~SkeletalAnimator() noexcept = default;
 
 void SkeletalAnimator::Execute()
 {

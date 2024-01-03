@@ -32,14 +32,12 @@ auto GetAnimationOffsets(float timeInTicks,
            continue;
         }
         
-        auto animatedBoneOffset = anim::DecomposedMatrix
+        animationMatrices.offsets.emplace_back(anim::DecomposedMatrix
         {
             .pos =   GetInterpolatedPosition(timeInTicks, iter->second.positionFrames),
             .rot =   GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
             .scale = GetInterpolatedScale(timeInTicks, iter->second.scaleFrames)
-        };
-
-        animationMatrices.offsets.push_back(std::move(animatedBoneOffset));
+        });
         animationMatrices.hasValues.push_back(1);
     }
     return animationMatrices;
@@ -56,14 +54,11 @@ auto ComposeMatrices(float timeInTicks,
     packedAnimation.offsets.reserve(elementsCount);
     packedAnimation.hasValues = std::vector<anim::HasValue>{decomposedAnimation.hasValues.begin(), decomposedAnimation.hasValues.end()};
 
-    for (auto i = 0u; i < elementsCount; i++)
+    std::ranges::transform(decomposedAnimation.offsets, std::back_inserter(packedAnimation.offsets), [](auto&& offset)
     {
-        auto positionMatrix = ToTransMatrix(decomposedAnimation.offsets[i].pos);
-        auto rotationMatrix = ToRotMatrix(decomposedAnimation.offsets[i].rot);
-        auto scaleMatrix = ToScaleMatrix(decomposedAnimation.offsets[i].scale);
+        return ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot) * ToTransMatrix(offset.pos);
+    });
 
-        packedAnimation.offsets.push_back(scaleMatrix * rotationMatrix * positionMatrix);
-    }
     return packedAnimation;
 }
 
@@ -81,6 +76,7 @@ auto ComposeBlendedMatrices(float blendFromTime,
     auto elementsCount = blendFromDecomposed.offsets.size(); // Both vectors (blendFromDecomposed and blendToDecomposed) guaranteed to have same size.
     packedAnimation.offsets.reserve(elementsCount);
     packedAnimation.hasValues = std::vector<anim::HasValue>{blendFromDecomposed.hasValues.begin(), blendFromDecomposed.hasValues.end()};
+
 
     for (auto i = 0u; i < elementsCount; i++) /* @todo: replace with std::ranges::zip_view once we have cpp 23*/
     {
