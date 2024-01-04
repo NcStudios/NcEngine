@@ -150,28 +150,33 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
 {
     const auto expectedInfos = std::vector<nc::EntityInfo>
     {
-        nc::EntityInfo{},
-        nc::EntityInfo
+        {},
         {
             .position = nc::Vector3::Up(),
             .rotation = nc::Quaternion::FromEulerAngles(1.0f, 2.0f, 3.0f),
             .scale = nc::Vector3{5.0f, 10.0f, 20.0f},
         },
-        nc::EntityInfo
         {
             .tag = "last",
             .layer = nc::Entity::layer_type{2},
             .flags = nc::Entity::Flags::Static
-        }
+        },
+        {.flags = nc::Entity::Flags::NoCollisionNotifications}
     };
 
-    std::ranges::for_each(expectedInfos, [&ecs = ecs](const auto& info)
+    const auto unexpectedInfos = std::vector<nc::EntityInfo>
     {
-        ecs.Emplace<nc::Entity>(info);
-    });
+        {.tag = "miss me", .flags = nc::Entity::Flags::Persistent},
+        {.tag = "maybe next week", .flags = nc::Entity::Flags::Persistent}
+    };
+
+    auto emplaceEntity = [&ecs = ecs](const auto& info) { ecs.Emplace<nc::Entity>(info); };
+    std::ranges::for_each(expectedInfos, emplaceEntity);
+    std::ranges::for_each(unexpectedInfos, emplaceEntity);
 
     auto stream = std::stringstream{};
-    nc::SaveSceneFragment(stream, ecs, nc::asset::AssetMap{});
+    const auto filter = [](nc::Entity entity) { return !entity.IsPersistent(); };
+    nc::SaveSceneFragment(stream, ecs, nc::asset::AssetMap{}, filter);
 
     registry.CommitPendingChanges();
     registry.Clear();
@@ -204,12 +209,19 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e1, .tag = "2"});
         ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
         const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "4"});
-        // Disrupt parenting order to ensure we're sorting correctly prior to saving
-        ecs.Get<nc::Transform>(e1)->SetParent(e4);
+        ecs.Get<nc::Transform>(e1)->SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
+        const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
     }
 
+    const auto filter = [&ecs = ecs](nc::Entity entity)
+    {
+        static constexpr auto toExclude = std::string_view{"exlude me"};
+        return ecs.Get<nc::Tag>(entity)->Value() != toExclude;
+    };
+
     auto stream = std::stringstream{};
-    nc::SaveSceneFragment(stream, ecs, nc::asset::AssetMap{});
+    nc::SaveSceneFragment(stream, ecs, nc::asset::AssetMap{}, filter);
 
     registry.CommitPendingChanges();
     registry.Clear();
