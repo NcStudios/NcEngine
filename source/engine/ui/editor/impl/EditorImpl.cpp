@@ -16,7 +16,7 @@ namespace nc::ui::editor
 class EditorImpl : public Editor
 {
     public:
-        void Draw(ecs::Ecs world, asset::NcAsset& assetModule) override
+        void Draw(ecs::Ecs world, asset::NcAsset&) override
         {
             if(input::KeyDown(hotkey::Editor))
                 m_open = !m_open;
