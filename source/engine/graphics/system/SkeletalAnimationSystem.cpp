@@ -72,7 +72,7 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
     auto state = SkeletalAnimationSystemState{};
     const auto dt = time::DeltaTime();
 
-    for (auto i = 0u; m_units.size(); i++)
+    for (auto i = 0u; i < m_units.size(); i++)
     {
         auto& unit = m_units.at(i);
         auto& rig = *unit.rig;
