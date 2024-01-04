@@ -58,6 +58,15 @@ struct State
 };
 
 /**
+ * @brief Used to traverse the flattened offsets tree.
+ */
+struct OffsetChildren
+{
+    uint32_t indexOfFirstChild;
+    uint32_t numChildren;
+};
+
+/**
  * @brief An SoA representation of nc::asset::BonesData.
  * 
  * SkeletalAnimationSystem uses this type to efficiently perform animation transformation calculations.
@@ -70,7 +79,7 @@ struct PackedRig
     std::vector<DirectX::XMMATRIX> boneToParent;
     DirectX::XMMATRIX globalInverseTransform;
     std::vector<std::string> boneNames;
-    std::vector<std::tuple<uint32_t, uint32_t>> boneToParentIndices;
+    std::vector<OffsetChildren> offsetChildren;
     std::vector<uint32_t> offsetsMap;
 };
 

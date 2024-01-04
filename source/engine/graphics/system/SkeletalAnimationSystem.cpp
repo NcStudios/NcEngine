@@ -22,8 +22,13 @@ auto PrepareAnimation(nc::graphics::anim::UnitOfWork& unit, const nc::graphics::
         return nc::graphics::ComposeBlendedMatrices(blendFromTimeTicks, blendToTimeTicks, unit.blendFactor, rig.boneNames, unit.blendFromAnim, unit.blendToAnim);
     }
 
-    float* timeInSeconds = unit.blendFromAnim ? &unit.blendFromTime : &unit.blendToTime;
-    nc::asset::SkeletalAnimation* animData = unit.blendFromAnim ? unit.blendFromAnim : unit.blendToAnim;
+    auto [timeInSeconds, animData] = [&unit]()
+    {
+        return unit.blendFromAnim ?
+            std::pair{&unit.blendFromTime, unit.blendFromAnim} :
+            std::pair{&unit.blendToTime, unit.blendToAnim};
+    }();
+
     *timeInSeconds = fmod((*timeInSeconds + dt), (static_cast<float>(animData->durationInTicks)/animData->ticksPerSecond));
     auto timeInTicks = *timeInSeconds * animData->ticksPerSecond;
     return nc::graphics::ComposeMatrices(timeInTicks, rig.boneNames, animData);
@@ -72,14 +77,13 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
     auto state = SkeletalAnimationSystemState{};
     const auto dt = time::DeltaTime();
 
-    for (auto i = 0u; i < m_units.size(); i++)
+    for (auto&& [unit, unitEntity] : std::views::zip(m_units, m_unitEntities))
     {
-        auto& unit = m_units.at(i);
         auto& rig = *unit.rig;
-        auto unitIndex = m_unitEntities[i].Index();
+        const auto unitIndex = unitEntity.Index();
 
         if (unit.blendFactor < 1.0f) unit.blendFactor += dt * 2.0f;
-        if (HasCompletedAnimationCycle(unit, dt)) m_registry->Get<SkeletalAnimator>(m_unitEntities[i])->CompleteFirstRun();
+        if (HasCompletedAnimationCycle(unit, dt)) m_registry->Get<SkeletalAnimator>(unitEntity)->CompleteFirstRun();
 
         auto packedAnimation = PrepareAnimation(unit, rig, dt);
         auto animatedBones = AnimateBones(rig, packedAnimation);
@@ -160,16 +164,16 @@ void SkeletalAnimationSystem::Start(const anim::PlayState& playState)
     if (pos == m_unitEntities.end())
     {
         m_unitEntities.emplace_back(playState.entity);
-        m_units.emplace_back(anim::UnitOfWork
-        {
-            .index         = playState.entity.Index(),
-            .rig           = &m_rigs.at(playState.meshUid),
-            .blendFromAnim = playState.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
-            .blendToAnim   = playState.curAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.curAnimUid),
-            .blendFromTime = 0.0f,
-            .blendToTime   = 0.0f,
-            .blendFactor   = 0.0f
-        });
+        m_units.emplace_back
+        (
+            playState.entity.Index(),
+            &m_rigs.at(playState.meshUid),
+            playState.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
+            playState.curAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.curAnimUid),
+            0.0f,
+            0.0f,
+            0.0f
+        );
         return;
     }
 

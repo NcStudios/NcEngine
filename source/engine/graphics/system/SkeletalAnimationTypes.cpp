@@ -23,7 +23,7 @@ PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
       boneToParent{},
       globalInverseTransform{GetGlobalInverseTransform(bonesData.boneSpaceToParentSpace)},
       boneNames{},
-      boneToParentIndices{},
+      offsetChildren{},
       offsetsMap{}
 {
     auto& bspsVec = bonesData.boneSpaceToParentSpace;
@@ -32,7 +32,7 @@ PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
     vertexToBone.reserve(vsbsVec.size());
     boneToParent.reserve(bspsVec.size());
     boneNames.reserve(bspsVec.size());
-    boneToParentIndices.reserve(bspsVec.size());
+    offsetChildren.reserve(bspsVec.size());
     offsetsMap.reserve(vsbsVec.size());
 
     std::ranges::transform(vsbsVec, std::back_inserter(vertexToBone),
@@ -44,8 +44,8 @@ PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
     std::ranges::transform(bspsVec, std::back_inserter(boneNames),
         [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::string { return bsps.boneName; });
 
-    std::ranges::transform(bspsVec, std::back_inserter(boneToParentIndices),
-        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> std::pair<uint32_t, uint32_t> { return std::make_pair(bsps.indexOfFirstChild, bsps.numChildren); });
+    std::ranges::transform(bspsVec, std::back_inserter(offsetChildren),
+        [](const nc::asset::BoneSpaceToParentSpace& bsps) -> OffsetChildren { return OffsetChildren { .indexOfFirstChild = bsps.indexOfFirstChild, .numChildren = bsps.numChildren }; });
     
     // Create a vector of uint32_t that represent the vertexOffset's corresponding bone index in the boneSpace offset vector.
     // This is important because we need to keep the two vectors in sync but the boneSpace vector contains data not present or need in the vertexOffset vector.
