@@ -141,7 +141,7 @@ auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::Pos
         [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;}
     );
 
-    NC_ASSERT(nextFrame != positionFrames.end() && nextFrame != positionFrames.begin(), fmt::format("Animation has no position data at time {}", timeInTicks));
+    NC_ASSERT(nextFrame != positionFrames.end(), fmt::format("Animation has no position data at time {}", timeInTicks));
     const auto frame = std::prev(nextFrame);
     const auto deltaTimeInTicks = nextFrame->timeInTicks - frame->timeInTicks;
     const auto interpolationFactor = (timeInTicks - frame->timeInTicks) / deltaTimeInTicks;
@@ -160,7 +160,7 @@ auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::Rot
         [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;}
     );
 
-    NC_ASSERT(nextFrame != rotationFrames.end() && nextFrame != rotationFrames.begin(), fmt::format("Animation has no rotation data at time {}", timeInTicks));
+    NC_ASSERT(nextFrame != rotationFrames.end(), fmt::format("Animation has no rotation data at time {}", timeInTicks));
     const auto frame = std::prev(nextFrame);
     const auto deltaTimeInTicks = nextFrame->timeInTicks - frame->timeInTicks;
     const auto interpolationFactor = (timeInTicks - frame->timeInTicks) / deltaTimeInTicks;
@@ -179,7 +179,7 @@ auto GetInterpolatedScale(float timeInTicks, const std::vector<nc::asset::ScaleF
         [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;}
     );
 
-    NC_ASSERT(nextFrame != scaleFrames.end() && nextFrame != scaleFrames.begin(), fmt::format("Animation has no scale data at time {}", timeInTicks));
+    NC_ASSERT(nextFrame != scaleFrames.end(), fmt::format("Animation has no scale data at time {}", timeInTicks));
     const auto frame = std::prev(nextFrame);
     const auto deltaTimeInTicks = nextFrame->timeInTicks - frame->timeInTicks;
     const auto interpolationFactor = (timeInTicks - frame->timeInTicks) / deltaTimeInTicks;
