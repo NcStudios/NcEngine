@@ -87,31 +87,23 @@ auto ComposeBlendedMatrices(float blendFromTime,
 auto AnimateBones(const anim::PackedRig& rig,
                   const anim::PackedAnimation& anim) -> std::vector<nc::graphics::SkeletalAnimationData>
 {
+    // Copy the boneToParent vector to perform modifications in place.
+    auto boneToParentSandbox = std::vector<DirectX::XMMATRIX>{rig.boneToParent.begin(), rig.boneToParent.end()};
+
     // Replace each boneToParent offset with its animation offset, if present. Else, leave as the original offset.
-    auto boneToParent = std::vector<DirectX::XMMATRIX>{};
-    boneToParent.reserve(rig.boneToParent.size());
-    std::ranges::transform(
-        std::views::zip(rig.boneToParent, anim.offsets, anim.hasValues),
-        std::back_inserter(boneToParent),
-        [](auto&& in)
-        {
-            auto&& [parent, offset, hasValue] = in;
-            return parent * !hasValue + offset * hasValue;
-        }
-    );
+    for (auto&& [boneOffset, animOffset, animHasValue] : std::views::zip(boneToParentSandbox, anim.offsets, anim.hasValues))
+    {
+        boneOffset = boneOffset * !animHasValue + animOffset * animHasValue;
+    }
 
     // Multiply each child (siblings are contiguous) with its parent.
-    std::ranges::for_each(
-    std::views::zip(rig.offsetChildren, boneToParent),
-        [&boneToParent](auto&& in)
+    for (auto&& [parent, childrenIndex] : std::views::zip(boneToParentSandbox, rig.offsetChildren))
+    {
+        for (auto&& child : std::views::counted(boneToParentSandbox.begin()+ childrenIndex.indexOfFirstChild, childrenIndex.numChildren))
         {
-            auto&& [children, parent] = in;
-            std::ranges::for_each(
-                std::views::counted(boneToParent.begin() + children.indexOfFirstChild, children.numChildren),
-                [&parent](auto& child){ parent *= child; }
-            );
+            child = child * parent;
         }
-    );
+    }
 
     // Create the output vector.
     auto animatedBones = std::vector<nc::graphics::SkeletalAnimationData>{};
@@ -122,10 +114,10 @@ auto AnimateBones(const anim::PackedRig& rig,
     std::ranges::transform(
     std::views::zip(rig.vertexToBone, rig.offsetsMap),
     std::back_inserter(animatedBones),
-        [globalInverseTransform = rig.globalInverseTransform, &boneToParent](auto&& in)
+        [globalInverseTransform = rig.globalInverseTransform, &boneToParentSandbox](auto&& in)
         {  
             auto&& [matrix, offset] = in;
-            return SkeletalAnimationData{matrix * boneToParent.at(offset) * globalInverseTransform};
+            return SkeletalAnimationData{matrix * boneToParentSandbox.at(offset) * globalInverseTransform};
         }
     );
     return animatedBones;
