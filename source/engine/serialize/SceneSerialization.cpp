@@ -8,15 +8,6 @@
 #include <iostream>
 #include <ranges>
 
-namespace
-{
-struct SceneFragmentHeader
-{
-    uint32_t magicNumber = nc::g_sceneFragmentMagicNumber;
-    uint32_t version = nc::g_currentSceneFragmentVersion;
-};
-} // anonymous namespace
-
 namespace nc
 {
 void SaveSceneFragment(std::ostream& stream,

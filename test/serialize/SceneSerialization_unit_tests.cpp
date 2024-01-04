@@ -76,15 +76,29 @@ class SceneSerializationTests : public ::testing::Test
         }
 };
 
+TEST_F(SceneSerializationTests, LoadSceneFragment_onlyHasHeader_succeeds)
+{
+    auto stream = std::stringstream{};
+    const auto header = nc::SceneFragmentHeader{nc::g_sceneFragmentMagicNumber, nc::g_currentSceneFragmentVersion};
+    stream.write(reinterpret_cast<const char*>(&header), sizeof(header));
+    EXPECT_NO_THROW(nc::LoadSceneFragment(stream, ecs, *assetModule));
+}
 
+TEST_F(SceneSerializationTests, LoadSceneFragment_badMagicNumber_throws)
+{
+    auto stream = std::stringstream{};
+    const auto header = nc::SceneFragmentHeader{nc::g_sceneFragmentMagicNumber + 1, nc::g_currentSceneFragmentVersion};
+    stream.write(reinterpret_cast<const char*>(&header), sizeof(header));
+    EXPECT_THROW(nc::LoadSceneFragment(stream, ecs, *assetModule), nc::NcError);
+}
 
-
-// TODO: add back missing tests from scene serialization: fails with bad magic number, fails with bad version
-
-
-
-
-
+TEST_F(SceneSerializationTests, LoadSceneFragment_badVersion_throws)
+{
+    auto stream = std::stringstream{};
+    const auto header = nc::SceneFragmentHeader{nc::g_sceneFragmentMagicNumber, nc::g_currentSceneFragmentVersion + 1};
+    stream.write(reinterpret_cast<const char*>(&header), sizeof(header));
+    EXPECT_THROW(nc::LoadSceneFragment(stream, ecs, *assetModule), nc::NcError);
+}
 
 TEST_F(SceneSerializationTests, RoundTrip_emptyGameState_succeeds)
 {
@@ -188,7 +202,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     {
         const auto e1 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "1"});
         const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e1, .tag = "2"});
-        const auto e3 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
         const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "4"});
         // Disrupt parenting order to ensure we're sorting correctly prior to saving
         ecs.Get<nc::Transform>(e1)->SetParent(e4);

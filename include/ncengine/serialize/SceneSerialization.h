@@ -17,6 +17,13 @@ constexpr auto g_sceneFragmentMagicNumber = 0x3ff0e17b;
 /** @brief Version number serialized with a scene fragment. */
 constexpr auto g_currentSceneFragmentVersion = 1u;
 
+/** @brief Header for a binary scene fragment blob. */
+struct SceneFragmentHeader
+{
+    uint32_t magicNumber = g_sceneFragmentMagicNumber;
+    uint32_t version = g_currentSceneFragmentVersion;
+};
+
 /** @brief Save current game state to a binary stream. */
 void SaveSceneFragment(std::ostream& stream,
                        ecs::Ecs ecs,

@@ -3,12 +3,6 @@
 #include "input/Input.h"
 #include "window/Window.h"
 
-
-
-#include <iostream>
-#include <fstream>
-#include "ncengine/serialize/SceneSerialization.h"
-
 namespace
 {
 namespace hotkey
@@ -29,20 +23,6 @@ class EditorImpl : public Editor
 
             if(!m_open)
                 return;
-
-            /** @todo REMOVE BEFORE CHECK IN - for local testing. */
-            if (input::KeyDown(input::KeyCode::S))
-            {
-                std::cerr << "Saving fragment\n";
-                auto file = std::ofstream{"fragment.nca", std::ios::binary | std::ios::trunc};
-                SaveSceneFragment(file, world, assetModule.GetLoadedAssets());
-            }
-            if (input::KeyDown(input::KeyCode::L))
-            {
-                std::cerr << "Loading fragment\n";
-                auto file = std::ifstream{"fragment.nca", std::ios::binary};
-                LoadSceneFragment(file, world, assetModule);
-            }
 
             m_ui.Draw(world);
         }
