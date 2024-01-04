@@ -22,20 +22,8 @@ auto PrepareAnimation(nc::graphics::anim::UnitOfWork& unit, const nc::graphics::
         return nc::graphics::ComposeBlendedMatrices(blendFromTimeTicks, blendToTimeTicks, unit.blendFactor, rig.boneNames, unit.blendFromAnim, unit.blendToAnim);
     }
 
-    float* timeInSeconds;
-    nc::asset::SkeletalAnimation* animData;
-
-    if (unit.blendFromAnim)
-    {
-        timeInSeconds = &unit.blendFromTime;
-        animData = unit.blendFromAnim;
-    }
-    else
-    {
-        timeInSeconds = &unit.blendToTime;
-        animData = unit.blendToAnim;
-    }
-
+    float* timeInSeconds = unit.blendFromAnim ? &unit.blendFromTime : &unit.blendToTime;
+    nc::asset::SkeletalAnimation* animData = unit.blendFromAnim ? unit.blendFromAnim : unit.blendToAnim;
     *timeInSeconds = fmod((*timeInSeconds + dt), (static_cast<float>(animData->durationInTicks)/animData->ticksPerSecond));
     auto timeInTicks = *timeInSeconds * animData->ticksPerSecond;
     return nc::graphics::ComposeMatrices(timeInTicks, rig.boneNames, animData);
@@ -43,9 +31,9 @@ auto PrepareAnimation(nc::graphics::anim::UnitOfWork& unit, const nc::graphics::
 
 auto HasCompletedAnimationCycle(const nc::graphics::anim::UnitOfWork unit, float dt) -> bool
 {
-    return (unit.blendToAnim && (unit.blendToTime + dt > static_cast<float>(unit.blendToAnim->durationInTicks)/unit.blendToAnim->ticksPerSecond));
+    return unit.blendToAnim && (unit.blendToTime + dt > static_cast<float>(unit.blendToAnim->durationInTicks)/unit.blendToAnim->ticksPerSecond);
 }
-}
+} // anonymous namespace
 
 namespace nc::graphics
 {
@@ -82,7 +70,7 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
     auto stateIndex = 0u;
     auto buffer = std::vector<SkeletalAnimationData>{};
     auto state = SkeletalAnimationSystemState{};
-    auto dt = time::DeltaTime();
+    const auto dt = time::DeltaTime();
 
     for (auto i = 0u; m_units.size(); i++)
     {
@@ -111,18 +99,15 @@ void SkeletalAnimationSystem::UpdateSkeletalAnimationStorage(const asset::Skelet
     {
         case asset::UpdateAction::Load:
         {
-            for (auto i = 0u; i < eventData.ids.size(); i++)
+            for (auto&& [assetUid, asset] : std::views::zip(eventData.ids, eventData.data))
             {
-                m_animationAssets.emplace(eventData.ids[i], eventData.data[i]);
+                m_animationAssets.emplace(assetUid, asset);
             }
             break;
         }
         case asset::UpdateAction::Unload:
         {
-            for (auto i = 0u; i < eventData.ids.size(); i++)
-            {
-                m_animationAssets.erase(eventData.ids[i]);
-            }
+            std::ranges::for_each(eventData.ids, [this](auto&& id) { m_animationAssets.erase(id); });
             break;
         }
         case asset::UpdateAction::UnloadAll:
@@ -141,18 +126,15 @@ void SkeletalAnimationSystem::UpdateBonesStorage(const asset::BoneUpdateEventDat
     {
         case asset::UpdateAction::Load:
         {
-            for (auto i = 0u; i < eventData.ids.size(); i++)
+            for (auto&& [assetUid, asset] : std::views::zip(eventData.ids, eventData.data))
             {
-                m_rigs.emplace(eventData.ids[i], eventData.data[i]); /* @todo Need to move here and not have span in event data? To avoid copying? */
+                m_rigs.emplace(assetUid, asset);
             }
             break;
         }
         case asset::UpdateAction::Unload:
         {
-            for (auto i = 0u; i < eventData.ids.size(); i++)
-            {
-                m_rigs.erase(eventData.ids[i]);
-            }
+            std::ranges::for_each(eventData.ids, [this](auto&& id) { m_rigs.erase(id); });
             break;
         }
         case asset::UpdateAction::UnloadAll:
@@ -167,24 +149,23 @@ void SkeletalAnimationSystem::UpdateBonesStorage(const asset::BoneUpdateEventDat
 
 void SkeletalAnimationSystem::Start(const anim::PlayState& playState)
 {
-    if (m_rigs.find(playState.meshUid) == m_rigs.end() ||
-        m_animationAssets.find(playState.curAnimUid) == m_animationAssets.end() ||
-        m_animationAssets.find(playState.prevAnimUid) == m_animationAssets.end())
+    if (!m_rigs.contains(playState.meshUid) ||
+        (!m_animationAssets.contains(playState.curAnimUid) &&
+        !m_animationAssets.contains(playState.prevAnimUid)) )
     {
         return;
     }
 
-    auto pos = std::find_if(m_unitEntities.begin(), m_unitEntities.end(), [playState](Entity entity){ return playState.entity.Index() == entity.Index(); });
-
+    auto pos = std::ranges::find(m_unitEntities, playState.entity);
     if (pos == m_unitEntities.end())
     {
-        m_unitEntities.push_back(playState.entity);
-        m_units.push_back(anim::UnitOfWork
+        m_unitEntities.emplace_back(playState.entity);
+        m_units.emplace_back(anim::UnitOfWork
         {
             .index         = playState.entity.Index(),
             .rig           = &m_rigs.at(playState.meshUid),
-            .blendFromAnim = playState.prevAnimUid == std::string{} ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
-            .blendToAnim   = playState.curAnimUid == std::string{} ? nullptr : &m_animationAssets.at(playState.curAnimUid),
+            .blendFromAnim = playState.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
+            .blendToAnim   = playState.curAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.curAnimUid),
             .blendFromTime = 0.0f,
             .blendToTime   = 0.0f,
             .blendFactor   = 0.0f
@@ -198,8 +179,8 @@ void SkeletalAnimationSystem::Start(const anim::PlayState& playState)
     {
         .index         = playState.entity.Index(),
         .rig           = &m_rigs.at(playState.meshUid),
-        .blendFromAnim = playState.prevAnimUid == std::string{} ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
-        .blendToAnim   = playState.curAnimUid == std::string{} ? nullptr : &m_animationAssets.at(playState.curAnimUid),
+        .blendFromAnim = playState.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
+        .blendToAnim   = playState.curAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.curAnimUid),
         .blendFromTime = m_units.at(posIndex).blendToTime,
         .blendToTime   = 0.0f,
         .blendFactor   = 0.0f
@@ -227,13 +208,13 @@ void SkeletalAnimationSystem::Add(SkeletalAnimator& animator)
 
 void SkeletalAnimationSystem::Remove(Entity entity)
 {
-    auto pos = std::find(m_handlerIndices.begin(), m_handlerIndices.end(), entity.Index());
+    auto pos = std::ranges::find(m_handlerIndices, entity.Index());
     if(pos == m_handlerIndices.end())
     {
         return;
     }
 
-    auto index = std::distance(m_handlerIndices.begin(), pos);
+    const auto index = std::distance(m_handlerIndices.begin(), pos);
     m_handlerIndices.at(index) = m_handlerIndices.back();
     m_handlerIndices.pop_back();
     m_onPlayStateChangedHandlers.at(index) = std::move(m_onPlayStateChangedHandlers.back());

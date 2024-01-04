@@ -23,6 +23,7 @@ target_link_libraries(SkeletalAnimationCalculations_tests
         gtest_main
         NcAsset
         NcMath
+        NcUtility
         Taskflow
 )
 

@@ -14,7 +14,7 @@ struct SkeletalAnimationSystemState
     std::unordered_map<Entity::index_type, uint32_t> animationIndices;
 };
 
-class SkeletalAnimationSystem
+class SkeletalAnimationSystem : public StableAddress
 {
     public:
         SkeletalAnimationSystem(Registry* registry,

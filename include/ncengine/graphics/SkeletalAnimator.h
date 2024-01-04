@@ -26,11 +26,11 @@ class SkeletalAnimator : public ComponentBase
         auto operator=(SkeletalAnimator& other) -> SkeletalAnimator& = delete;
         ~SkeletalAnimator() noexcept = default;
 
-        /** @brief Called by SkeletalAnimationSystem. Executes the state machine; all transitioning animations emit a signal to be processed. */
+        /** @brief Called by SkeletalAnimationSystem. Executes the state machine; all animations whose transition conditions are met emit a signal to be processed. */
         void Execute();
 
         /** @brief Connect to SkeletalAnimationSystem. **/
-        auto Connect() const noexcept -> Signal<const anim::PlayState&>& { return m_onPlayStateChanged; };
+        auto Connect() noexcept -> Signal<const anim::PlayState&>& { return m_onPlayStateChanged; }
 
         /** @brief Get UID of mesh that will be animated **/
         auto MeshUid() const noexcept -> const std::string& { return m_meshUid; }

@@ -259,64 +259,10 @@ class SkeletalAnimationCalculations_tests : public ::testing::Test
 
 bool MatrixEquals(const DirectX::XMMATRIX& a, const DirectX::XMMATRIX& b)
 {
-    DirectX::XMFLOAT4X4 aView;
-    XMStoreFloat4x4(&aView, a);
-    float aa1 = aView._11;
-    float aa2 = aView._12;
-    float aa3 = aView._13;
-    float aa4 = aView._14;
-    float ab1 = aView._21;
-    float ab2 = aView._22;
-    float ab3 = aView._23;
-    float ab4 = aView._24;
-    float ac1 = aView._31;
-    float ac2 = aView._32;
-    float ac3 = aView._33;
-    float ac4 = aView._34;
-    float ad1 = aView._41;
-    float ad2 = aView._42;
-    float ad3 = aView._43;
-    float ad4 = aView._44;
-
-    DirectX::XMFLOAT4X4 bView;
-    XMStoreFloat4x4(&bView, b);
-    float ba1 = bView._11;
-    float ba2 = bView._12;
-    float ba3 = bView._13;
-    float ba4 = bView._14;
-    float bb1 = bView._21;
-    float bb2 = bView._22;
-    float bb3 = bView._23;
-    float bb4 = bView._24;
-    float bc1 = bView._31;
-    float bc2 = bView._32;
-    float bc3 = bView._33;
-    float bc4 = bView._34;
-    float bd1 = bView._41;
-    float bd2 = bView._42;
-    float bd3 = bView._43;
-    float bd4 = bView._44;
-
-    return 
-    nc::FloatEqual(aa1, ba1) &&
-    nc::FloatEqual(aa2, ba2) &&
-    nc::FloatEqual(aa3, ba3) &&
-    nc::FloatEqual(aa4, ba4) &&
-
-    nc::FloatEqual(ab1, bb1) &&
-    nc::FloatEqual(ab2, bb2) &&
-    nc::FloatEqual(ab3, bb3) &&
-    nc::FloatEqual(ab4, bb4) &&
-
-    nc::FloatEqual(ac1, bc1) &&
-    nc::FloatEqual(ac2, bc2) &&
-    nc::FloatEqual(ac3, bc3) &&
-    nc::FloatEqual(ac4, bc4) &&
-
-    nc::FloatEqual(ad1, bd1) &&
-    nc::FloatEqual(ad2, bd2) &&
-    nc::FloatEqual(ad3, bd3) &&
-    nc::FloatEqual(ad4, bd4);
+    return DirectX::XMVector4Equal(a.r[0], b.r[0]) &&
+           DirectX::XMVector4Equal(a.r[1], b.r[1]) &&
+           DirectX::XMVector4Equal(a.r[2], b.r[2]) &&
+           DirectX::XMVector4Equal(a.r[3], b.r[3]);
 };
 
 TEST_F(SkeletalAnimationCalculations_tests, GetInterpolatedPosition_emptyVector_throws)

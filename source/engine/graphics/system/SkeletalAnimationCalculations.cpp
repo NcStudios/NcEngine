@@ -73,23 +73,17 @@ auto ComposeBlendedMatrices(float blendFromTime,
     auto blendToDecomposed = GetAnimationOffsets(blendToTime, boneNames, blendToAnim);
 
     auto packedAnimation = anim::PackedAnimation{};
-    auto elementsCount = blendFromDecomposed.offsets.size(); // Both vectors (blendFromDecomposed and blendToDecomposed) guaranteed to have same size.
-    packedAnimation.offsets.reserve(elementsCount);
     packedAnimation.hasValues = std::vector<anim::HasValue>{blendFromDecomposed.hasValues.begin(), blendFromDecomposed.hasValues.end()};
 
-
-    for (auto i = 0u; i < elementsCount; i++) /* @todo: replace with std::ranges::zip_view once we have cpp 23*/
+    auto interpolate = [blendFactor](auto& blendFromOffset, auto& blendToOffset)
     {
-        auto blendedPos = Lerp(blendFromDecomposed.offsets[i].pos, blendToDecomposed.offsets[i].pos, blendFactor);
-        auto blendedRot = Normalize(Slerp(blendFromDecomposed.offsets[i].rot, blendToDecomposed.offsets[i].rot, blendFactor));
-        auto blendedScale = Lerp(blendFromDecomposed.offsets[i].scale, blendToDecomposed.offsets[i].scale, blendFactor);
+        return ToScaleMatrix(Lerp(blendFromOffset.scale, blendToOffset.scale, blendFactor)) *
+               ToRotMatrix(Normalize(Slerp(blendFromOffset.rot, blendToOffset.rot, blendFactor))) *
+               ToTransMatrix(Lerp(blendFromOffset.pos, blendToOffset.pos, blendFactor));
+    };
 
-        auto positionMatrix = ToTransMatrix(blendedPos);
-        auto rotationMatrix = ToRotMatrix(blendedRot);
-        auto scaleMatrix = ToScaleMatrix(blendedScale);
-
-        packedAnimation.offsets.push_back(scaleMatrix * rotationMatrix * positionMatrix);
-    }
+    auto offsets = std::views::zip_transform(interpolate, blendFromDecomposed.offsets, blendToDecomposed.offsets);
+    packedAnimation.offsets = std::vector<DirectX::XMMATRIX>{offsets.begin(), offsets.end()};
     return packedAnimation;
 }
 
@@ -129,144 +123,66 @@ auto AnimateBones(const anim::PackedRig& rig,
     {
         animatedBones.push_back(nc::graphics::SkeletalAnimationData{rig.vertexToBone[i] * boneToParentSandbox[rig.offsetsMap[i]] * globalInverseTransform});
     }
-
     return animatedBones;
 }
 
-auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::PositionFrame> positionFrames) -> nc::Vector3
+auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::PositionFrame>& positionFrames) -> nc::Vector3
 {
-    auto interpolatedPosition = nc::Vector3{};
+    NC_ASSERT(positionFrames.size() > 0, "Animation has no position data for the node.");
+    if (positionFrames.size() == 1) return positionFrames[0].position;
 
-    if (positionFrames.size() == 0)
-    {
-        throw NcError("Animation has no position data for the node.");
-    }
+    auto nextFramePos = std::find_if(positionFrames.begin(), positionFrames.end(), [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;});
 
-    if (positionFrames.size() == 1)
-    {
-        return positionFrames[0].position;
-    }
-
-    auto positionIndex = UINT_LEAST32_MAX;
-    for (auto i = 0u; i < positionFrames.size(); i++)
-    {
-        if (timeInTicks < positionFrames[i+1].timeInTicks)
-        {
-            positionIndex = i;
-            break;
-        }
-    }
-    if (positionIndex == UINT_LEAST32_MAX)
-    {
-        throw NcError("Animation has no position data at time: ", std::to_string(timeInTicks));
-    }
+    NC_ASSERT(nextFramePos != positionFrames.end() && nextFramePos != positionFrames.begin(), fmt::format("Animation has no position data at time {}", timeInTicks));
+    auto positionIndex = static_cast<size_t>(std::distance(positionFrames.begin(), std::prev(nextFramePos)));
 
     auto nextPositionIndex = positionIndex + 1;
-    if ((positionIndex + 1) > positionFrames.size())
-    {
-        throw NcError("Animation interpolation index has exceeded the bounds of the frame data.");
-    }
+    NC_ASSERT(nextPositionIndex <= positionFrames.size(), "Animation interpolation index has exceeded the bounds of the frame data.");
 
     auto deltaTimeInTicks = positionFrames[nextPositionIndex].timeInTicks - positionFrames[positionIndex].timeInTicks;
     auto interpolationFactor = (timeInTicks - positionFrames[positionIndex].timeInTicks) / deltaTimeInTicks;
+    NC_ASSERT(interpolationFactor >= 0.0f && interpolationFactor <= 1.0f, fmt::format("Error calculating the interpolation factor: {}", interpolationFactor));
 
-    if (interpolationFactor < 0.0f || interpolationFactor > 1.0f)
-    {
-        throw NcError("Error calculating the interpolation factor: ", std::to_string(interpolationFactor));
-    }
-
-    interpolatedPosition = Lerp(positionFrames[positionIndex].position, positionFrames[nextPositionIndex].position, static_cast<float>(interpolationFactor));
-    return interpolatedPosition;
+    return Lerp(positionFrames[positionIndex].position, positionFrames[nextPositionIndex].position, static_cast<float>(interpolationFactor));
 }
 
-auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::RotationFrame> rotationFrames) -> nc::Quaternion
+auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::RotationFrame>& rotationFrames) -> nc::Quaternion
 {
-    auto interpolatedRotation = nc::Quaternion{};
+    NC_ASSERT(rotationFrames.size() > 0, "Animation has no rotation data for the node.");
+    if (rotationFrames.size() == 1) return Normalize(rotationFrames[0].rotation);
 
-    if (rotationFrames.size() == 0)
-    {
-        throw NcError("Animation has no rotation data.");
-    }
+    auto nextFramePos = std::find_if(rotationFrames.begin(), rotationFrames.end(), [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks; });
 
-    if (rotationFrames.size() == 1)
-    {
-        return Normalize(rotationFrames[0].rotation);
-    }
-
-    auto rotationIndex = UINT_LEAST32_MAX;
-    for (auto i = 0u; i < rotationFrames.size(); i++)
-    {
-        if (timeInTicks < rotationFrames[i+1].timeInTicks)
-        {
-            rotationIndex = i;
-            break;
-        }
-    }
-    if (rotationIndex == UINT_LEAST32_MAX)
-    {
-        throw NcError("Animation has no rotation data at time: ", std::to_string(timeInTicks));
-    }
+    NC_ASSERT(nextFramePos != rotationFrames.end() && nextFramePos != rotationFrames.begin(), fmt::format("Animation has no rotation data at time {}", timeInTicks));
+    auto rotationIndex = static_cast<size_t>(std::distance(rotationFrames.begin(), std::prev(nextFramePos)));
 
     auto nextRotationIndex = rotationIndex + 1;
-    if ((rotationIndex + 1) > rotationFrames.size())
-    {
-        throw NcError("Animation interpolation index has exceeded the bounds of the frame data.");
-    }
+    NC_ASSERT(nextRotationIndex <= rotationFrames.size(), "Animation interpolation index has exceeded the bounds of the frame data.");
 
     auto deltaTimeInTicks = rotationFrames[nextRotationIndex].timeInTicks - rotationFrames[rotationIndex].timeInTicks;
     auto interpolationFactor = (timeInTicks - rotationFrames[rotationIndex].timeInTicks) / deltaTimeInTicks;
+    NC_ASSERT(interpolationFactor >= 0.0f && interpolationFactor <= 1.0f, fmt::format("Error calculating the interpolation factor: {}", interpolationFactor));
 
-    if (interpolationFactor < 0.0f || interpolationFactor > 1.0f)
-    {
-        throw NcError("Error calculating the interpolation factor: ", std::to_string(interpolationFactor));
-    }
-
-    interpolatedRotation = Slerp(rotationFrames[rotationIndex].rotation, rotationFrames[nextRotationIndex].rotation, static_cast<float>(interpolationFactor));
-    return Normalize(interpolatedRotation);
+    return Normalize(Slerp(rotationFrames[rotationIndex].rotation, rotationFrames[nextRotationIndex].rotation, static_cast<float>(interpolationFactor)));
 }
 
-auto GetInterpolatedScale(float timeInTicks, const std::vector<nc::asset::ScaleFrame> scaleFrames) -> nc::Vector3
+auto GetInterpolatedScale(float timeInTicks, const std::vector<nc::asset::ScaleFrame>& scaleFrames) -> nc::Vector3
 {
-    auto interpolatedScale = nc::Vector3{};
-    if (scaleFrames.size() == 0)
-    {
-        throw NcError("Animation has no scale data.");
-    }
+    NC_ASSERT(scaleFrames.size() > 0, "Animation has no scale data for the node.");
+    if (scaleFrames.size() == 1) return scaleFrames[0].scale;
 
-    if (scaleFrames.size() == 1)
-    {
-        return scaleFrames[0].scale;
-    }
+    auto nextFramePos = std::find_if(scaleFrames.begin(), scaleFrames.end(), [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks; });
 
-    auto scaleIndex = UINT_LEAST32_MAX;
-    for (auto i = 0u; i < scaleFrames.size(); i++)
-    {
-        if (timeInTicks < scaleFrames[i+1].timeInTicks)
-        {
-            scaleIndex = i;
-            break;
-        }
-    }
-    if (scaleIndex == UINT_LEAST32_MAX)
-    {
-        throw NcError("Animation has no scale data at time: ", std::to_string(timeInTicks));
-    }
+    NC_ASSERT(nextFramePos != scaleFrames.end() && nextFramePos != scaleFrames.begin(), fmt::format("Animation has no scale data at time {}", timeInTicks));
+    auto scaleIndex = static_cast<size_t>(std::distance(scaleFrames.begin(), std::prev(nextFramePos)));
 
     auto nextScaleIndex = scaleIndex + 1;
-    if ((scaleIndex + 1) > scaleFrames.size())
-    {
-        throw NcError("Animation interpolation index has exceeded the bounds of the frame data.");
-    }
+    NC_ASSERT(nextScaleIndex <= scaleFrames.size(), "Animation interpolation index has exceeded the bounds of the frame data.");
 
     auto deltaTimeInTicks = scaleFrames[nextScaleIndex].timeInTicks - scaleFrames[scaleIndex].timeInTicks;
     auto interpolationFactor = (timeInTicks - scaleFrames[scaleIndex].timeInTicks) / deltaTimeInTicks;
+    NC_ASSERT(interpolationFactor >= 0.0f && interpolationFactor <= 1.0f, fmt::format("Error calculating the interpolation factor: {}", interpolationFactor));
 
-    if (interpolationFactor < 0.0f || interpolationFactor > 1.0f)
-    {
-        throw NcError("Error calculating the interpolation factor: ", std::to_string(interpolationFactor));
-    }
-
-    interpolatedScale = Lerp(scaleFrames[scaleIndex].scale, scaleFrames[nextScaleIndex].scale, static_cast<float>(interpolationFactor));
-    return interpolatedScale;
+    return Lerp(scaleFrames[scaleIndex].scale, scaleFrames[nextScaleIndex].scale, static_cast<float>(interpolationFactor));
 }
 } // namespace nc::graphics

@@ -28,7 +28,7 @@ auto ComposeBlendedMatrices(float blendFromTime,
 auto AnimateBones(const anim::PackedRig& rig,
                   const anim::PackedAnimation& anim) -> std::vector<nc::graphics::SkeletalAnimationData>;
 
-auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::PositionFrame> positionFrames) -> nc::Vector3;
-auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::RotationFrame> rotationFrames) -> nc::Quaternion;
-auto GetInterpolatedScale(float timeInTicks, const std::vector<nc::asset::ScaleFrame> scaleFrames) -> nc::Vector3;
+auto GetInterpolatedPosition(float timeInTicks, const std::vector<nc::asset::PositionFrame>& positionFrames) -> nc::Vector3;
+auto GetInterpolatedRotation(float timeInTicks, const std::vector<nc::asset::RotationFrame>& rotationFrames) -> nc::Quaternion;
+auto GetInterpolatedScale(float timeInTicks, const std::vector<nc::asset::ScaleFrame>& scaleFrames) -> nc::Vector3;
 }

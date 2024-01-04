@@ -50,7 +50,7 @@ auto CreateToonRenderer(Entity entity, void*) -> graphics::ToonRenderer
 
 auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator
 {
-    return graphics::SkeletalAnimator{entity, "@todo"};
+    return graphics::SkeletalAnimator{entity, "dummyMesh", "dummyAnimation"};
 }
 
 auto CreateNetworkDispatcher(Entity entity, void*) -> net::NetworkDispatcher

@@ -3,13 +3,11 @@
 #include "graphics/ToonRenderer.h"
 #include "ecs/Registry.h"
 
-namespace
-{
 namespace nc::graphics
 {
 SkeletalAnimator::SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid)
     : ComponentBase{entity},
-      m_meshUid{meshUid},
+      m_meshUid{std::move(meshUid)},
       m_onPlayStateChanged{},
       m_initialState{anim::State{anim::Initial{std::move(animationUid)}}},
       m_initialStateInitialized{}{}
