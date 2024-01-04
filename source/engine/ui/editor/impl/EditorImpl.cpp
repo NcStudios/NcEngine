@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include "ncengine/serialize/SceneSerialization.h"
-#include "ncengine/scene/SceneFragment.h"
 
 namespace
 {
@@ -35,17 +34,14 @@ class EditorImpl : public Editor
             if (input::KeyDown(input::KeyCode::S))
             {
                 std::cerr << "Saving fragment\n";
-                auto fragment = SaveSceneFragment(world, assetModule);
                 auto file = std::ofstream{"fragment.nca", std::ios::binary | std::ios::trunc};
-                Serialize(file, fragment);
+                SaveSceneFragment(file, world, assetModule.GetLoadedAssets());
             }
             if (input::KeyDown(input::KeyCode::L))
             {
                 std::cerr << "Loading fragment\n";
                 auto file = std::ifstream{"fragment.nca", std::ios::binary};
-                auto fragment = SceneFragment{};
-                Deserialize(file, fragment);
-                LoadSceneFragment(fragment, world, assetModule);
+                LoadSceneFragment(file, world, assetModule);
             }
 
             m_ui.Draw(world);

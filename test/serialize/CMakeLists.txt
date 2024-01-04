@@ -2,7 +2,7 @@
 add_executable(SceneSerialization_unit_tests
     SceneSerialization_unit_tests.cpp
     ${NC_SOURCE_DIR}/serialize/SceneSerialization.cpp
-    ${NC_SOURCE_DIR}/scene/SceneFragment.cpp
+    ${NC_SOURCE_DIR}/serialize/EntitySerializationUtility.cpp
     ${NC_SOURCE_DIR}/ecs/Registry.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
 )

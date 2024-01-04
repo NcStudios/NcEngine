@@ -5,6 +5,10 @@
 #include <iostream>
 #include <ranges>
 
+
+
+#include "ncutility/BinarySerialization.h"
+
 namespace
 {
 auto BuildEntityToFragmentIdMap(std::span<const nc::Entity> entities) -> nc::EntityToFragmentIdMap
@@ -117,6 +121,61 @@ void LoadSceneFragment(SceneFragment& fragment,
     auto entityMap = FragmentIdToEntityMap{};
     assetModule.LoadAssets(fragment.assets);
     std::ranges::for_each(fragment.entities, [&ecs, &entityMap](auto& entityData)
+    {
+        RemapEntity(entityData.info.parent, entityMap);
+        entityMap.emplace(entityData.fragmentId, ecs.Emplace<Entity>(entityData.info));
+    });
+}
+
+void SerializeScene(std::ostream& stream,
+                    ecs::Ecs ecs,
+                    const asset::AssetMap& assets,
+                    std::function<bool(Entity)> entityFilter)
+{
+    static constexpr auto defaultEntityFilter = [](Entity){ return true; };
+    if (!entityFilter)
+        entityFilter = defaultEntityFilter;
+
+    const auto entities = BuildFragmentEntityList(ecs.GetAll<Entity>(), entityFilter, ecs);
+    auto entityMap = BuildEntityToFragmentIdMap(entities);
+    auto fragmentInfos = std::vector<FragmentEntityInfo>{};
+    fragmentInfos.reserve(entities.size());
+    std::ranges::transform(entities, std::back_inserter(fragmentInfos), [&ecs, &entityMap](auto entity)
+    {
+        auto info = ReconstructEntityInfo(entity, ecs);
+        RemapEntity(info.parent, entityMap);
+        return FragmentEntityInfo{entityMap.at(entity), std::move(info)};
+    });
+
+
+    const auto header = SceneFragmentHeader{};
+    serialize::Serialize(stream, header);
+    serialize::Serialize(stream, assets);
+    serialize::Serialize(stream, fragmentInfos);
+}
+
+void DeserializeScene(std::istream& stream,
+                      ecs::Ecs ecs,
+                      asset::NcAsset& assetModule)
+{
+    auto header = SceneFragmentHeader{};
+    serialize::Deserialize(stream, header);
+    if (header.magicNumber != g_sceneFragmentMagicNumber)
+        throw NcError("Unexpected SceneFragment header");
+
+    if (header.version != g_currentSceneFragmentVersion)
+        throw NcError("Unexpected SceneFragment version");
+
+
+    auto assets = asset::AssetMap{};
+    serialize::Deserialize(stream, assets);
+    assetModule.LoadAssets(assets);
+
+
+    auto entities = std::vector<FragmentEntityInfo>{};
+    serialize::Deserialize(stream, entities);
+    auto entityMap = FragmentIdToEntityMap{};
+    std::ranges::for_each(entities, [&ecs, &entityMap](auto& entityData)
     {
         RemapEntity(entityData.info.parent, entityMap);
         entityMap.emplace(entityData.fragmentId, ecs.Emplace<Entity>(entityData.info));
