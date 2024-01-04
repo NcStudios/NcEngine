@@ -26,7 +26,9 @@ inline auto ToQuaternion(DirectX::FXMVECTOR in) noexcept -> Quaternion
 
 inline auto DecomposeRotation(DirectX::FXMMATRIX in) noexcept -> DirectX::XMVECTOR
 {
-    DirectX::XMVECTOR scl, rot, pos;
+    auto scl = DirectX::XMVECTOR{};
+    auto rot = DirectX::XMVECTOR{};
+    auto pos = DirectX::XMVECTOR{};
     DirectX::XMMatrixDecompose(&scl, &rot, &pos, in);
     return rot;
 }
