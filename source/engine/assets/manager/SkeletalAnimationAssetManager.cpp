@@ -76,14 +76,15 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
 
 bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    auto pos = std::ranges::find(m_assetIds, path);
-    if (pos == m_assetIds.end())
+    const auto pos = std::ranges::find(m_assetIds, path);
+    if (pos == std::ranges::cend(m_assetIds))
     {
         return false;
     }
 
+    const auto offset = std::ranges::distance(std::ranges::cbegin(m_assetIds), pos);
     m_assetIds.erase(pos);
-    m_skeletalAnimations.erase(m_skeletalAnimations.begin() + static_cast<uint32_t>(pos - m_assetIds.begin()));
+    m_skeletalAnimations.erase(std::ranges::cbegin(m_skeletalAnimations) + offset);
 
     m_onUpdate.Emit(asset::SkeletalAnimationUpdateEventData{
         std::span<const std::string>{m_assetIds},
