@@ -17,6 +17,21 @@ bool IsViewedByFrustum(const nc::Frustum& frustum, float maxMeshExtent, DirectX:
     DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
     return nc::physics::Intersect(frustum, sphere);
 }
+
+template<typename T>
+concept AnimatableComponent = std::same_as<T, nc::graphics::MeshRenderer> || std::same_as<T, nc::graphics::ToonRenderer>;
+
+template <AnimatableComponent T>
+uint32_t GetSkeletalAnimationIndex(const T* renderer, const nc::graphics::SkeletalAnimationSystemState& state)
+{
+    auto skeletalAnimIndex = UINT32_MAX;
+    auto iter = state.animationIndices.find(renderer->ParentEntity().Index());
+    if(iter != state.animationIndices.end())
+    {
+        skeletalAnimIndex = iter->second;
+    }
+    return skeletalAnimIndex;
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -25,7 +40,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
                            MultiView<ToonRenderer, Transform> toonRenderers,
                            const CameraState& cameraState,
                            const EnvironmentState& environmentState,
-                           const SkeletalAnimationSystemState&) -> ObjectState
+                           const SkeletalAnimationSystemState& skeletalAnimationState) -> ObjectState
 {
     OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
     const auto viewProjection = cameraState.view * cameraState.projection;
@@ -43,8 +58,9 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
+        const auto& skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index);
+        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
         frontendState.pbrMeshes.push_back(renderer->GetMeshView());
     }
 
@@ -58,8 +74,9 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
+        const auto& skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling);
+        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
