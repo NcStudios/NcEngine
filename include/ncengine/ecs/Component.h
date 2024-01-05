@@ -87,12 +87,6 @@ struct DefaultStoragePolicy
 template<PooledComponent T>
 struct StoragePolicy : DefaultStoragePolicy {};
 
-/** @brief Marks the beginning of the component id range reserved for engine use. */
-constexpr size_t EngineIdRangeBegin = 1ull;
-
-/** @brief Marks the end of the component id range reserved for engine use. */
-constexpr size_t EngineIdRangeEnd = 100ull;
-
 /** @brief Optional data and callbacks for generic component operations. */
 template<PooledComponent T>
 struct ComponentHandler
@@ -105,9 +99,9 @@ struct ComponentHandler
 
     /**
      * @brief A unique identifier for the component.
-     * @note Set to 0 to get assigned an available id. The range [EngineIdRangeBegin, EngineIdRangeEnd]
+     * @note Set to 0 to get assigned an available id. The range [0, 100]
      *       is reserved for engine components. Automatically assigned ids are assigned in reverse order
-     *       starting from std::numeric_limites<size_t>::max().
+     *       starting from std::numeric_limits<size_t>::max().
     */
     size_t id = 0ull;
 

@@ -44,7 +44,7 @@ class AnyComponent
         }
 
         /**
-         * @brief Get the value of Componenthandler::id for the concrecte component type.
+         * @brief Get the value of Componenthandler::id for the concrete component type.
          * @throw NcError if invoked on a null AnyComponent.
         */
         auto Id() const -> size_t

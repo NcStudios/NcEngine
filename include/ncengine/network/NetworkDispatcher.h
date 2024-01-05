@@ -17,8 +17,6 @@ class NetworkDispatcher final : public ComponentBase
     NC_ENABLE_IN_EDITOR(NetworkDispatcher)
 
     public:
-        static constexpr auto ComponentId = 15ull;
-
         NetworkHandle networkHandle;
 
         NetworkDispatcher(Entity entity) noexcept;

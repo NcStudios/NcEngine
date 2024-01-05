@@ -32,8 +32,6 @@ class AudioSource : public ComponentBase
     NC_ENABLE_IN_EDITOR(AudioSource)
 
     public:
-        static constexpr auto ComponentId = 14ull;
-
         AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties = AudioSourceProperties{});
 
         void SetClip(const std::string& path);
