@@ -38,6 +38,20 @@ TEST(ComponentRegistryTests, RegisterType_typeAlreadyRegistered_throws)
     EXPECT_THROW(uut.RegisterType<S1>(10), nc::NcError);
 }
 
+TEST(ComponentRegistryTests, RegisterType_idAlreadyUsed_throws)
+{
+    auto uut = nc::ecs::ComponentRegistry{10};
+    uut.RegisterType<S1>(10, nc::ComponentHandler<S1>{.id = 1000});
+    EXPECT_THROW(uut.RegisterType<S2>(10, nc::ComponentHandler<S2>{.id = 1000}), nc::NcError);
+}
+
+TEST(ComponentRegistryTests, RegisterType_idCollidesWithInternallyAssignedId_throws)
+{
+    auto uut = nc::ecs::ComponentRegistry{10};
+    uut.RegisterType<S1>(10, nc::ComponentHandler<S1>{});
+    EXPECT_THROW(uut.RegisterType<S2>(10, nc::ComponentHandler<S2>{.id = uut.GetPool<S1>().Id()}), nc::NcError);
+}
+
 TEST(ComponentRegistryTests, IsTypeRegistered_returnsCorrectState)
 {
     auto uut = nc::ecs::ComponentRegistry{10};
@@ -59,6 +73,21 @@ TEST(ComponentRegistryTests, GetPool_unregisteredType_throws)
 {
     auto uut = nc::ecs::ComponentRegistry{10};
     EXPECT_THROW(uut.GetPool<S1>(), std::exception);
+}
+
+TEST(ComponentRegistryTests, GetPoolById_registeredType_succeeds)
+{
+    auto uut = nc::ecs::ComponentRegistry{10};
+    const auto& asConst = uut;
+    uut.RegisterType<S1>(10, nc::ComponentHandler<S1>{.id = 200});
+    EXPECT_NO_THROW(uut.GetPool(200));
+    EXPECT_NO_THROW(asConst.GetPool(200));
+}
+
+TEST(ComponentRegistryTests, GetPoolById_unregisteredType_throws)
+{
+    auto uut = nc::ecs::ComponentRegistry{10};
+    EXPECT_THROW(uut.GetPool(200), nc::NcError);
 }
 
 TEST(ComponentRegistryTests, GetPool_entity_succeeds)
