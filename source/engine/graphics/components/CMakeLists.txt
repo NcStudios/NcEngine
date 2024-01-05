@@ -4,5 +4,6 @@ target_sources(${NC_ENGINE_LIB}
         MeshRenderer.cpp
         ParticleEmitter.cpp
         SceneNavigationCamera.cpp
+        SkeletalAnimator.cpp
         ToonRenderer.cpp
 )

@@ -15,6 +15,7 @@ namespace nc::graphics
 struct CameraState;
 struct EnvironmentState;
 struct ObjectData;
+struct SkeletalAnimationSystemState;
 
 struct ObjectState
 {
@@ -36,7 +37,8 @@ class ObjectSystem
         auto Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
                      MultiView<ToonRenderer, Transform> toonRenderers,
                      const CameraState& cameraState,
-                     const EnvironmentState& environmentState) -> ObjectState;
+                     const EnvironmentState& environmentState,
+                     const SkeletalAnimationSystemState& skeletalAnimationState) -> ObjectState;
 
     private:
         Signal<const std::vector<ObjectData>&> m_backendPort;

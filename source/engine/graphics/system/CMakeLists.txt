@@ -5,6 +5,9 @@ target_sources(${NC_ENGINE_LIB}
         ObjectSystem.cpp
         ParticleEmitterSystem.cpp
         PointLightSystem.cpp
+        SkeletalAnimationCalculations.cpp
+        SkeletalAnimationTypes.cpp
+        SkeletalAnimationSystem.cpp
         UISystem.cpp
         WidgetSystem.cpp
 )
