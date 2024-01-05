@@ -3,7 +3,6 @@
 #include "ncutility/Algorithm.h"
 #include "ncutility/NcError.h"
 #include "ncutility/ScopeExit.h"
-#include "optick.h"
 
 #include <iostream>
 

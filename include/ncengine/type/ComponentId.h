@@ -22,14 +22,15 @@ constexpr size_t TransformId = 3ull;
 constexpr size_t MeshRendererId = 4ull;
 constexpr size_t ToonRendererId = 5ull;
 constexpr size_t PointLightId = 6ull;
-constexpr size_t ParticleEmitterId = 7ull;
-constexpr size_t ColliderId = 8ull;
-constexpr size_t ConcaveColliderId = 9ull;
-constexpr size_t PhysicsBodyId = 10ull;
-constexpr size_t FrameLogicId = 11ull;
-constexpr size_t FixedLogicId = 12ull;
-constexpr size_t CollisionLogicId = 13ull;
-constexpr size_t AudioSourceId = 14ull;
-constexpr size_t NetworkDispatcherId = 15ull;
+constexpr size_t SkeletalAnimatorId = 7ull;
+constexpr size_t ParticleEmitterId = 8ull;
+constexpr size_t ColliderId = 9ull;
+constexpr size_t ConcaveColliderId = 10ull;
+constexpr size_t PhysicsBodyId = 11ull;
+constexpr size_t FrameLogicId = 12ull;
+constexpr size_t FixedLogicId = 13ull;
+constexpr size_t CollisionLogicId = 14ull;
+constexpr size_t AudioSourceId = 15ull;
+constexpr size_t NetworkDispatcherId = 16ull;
 /** @} */
 } // namespace nc
