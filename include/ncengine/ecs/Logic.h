@@ -37,8 +37,6 @@ concept CollisionLogicCallable = std::convertible_to<Func, CollisionLogicCallabl
 class FrameLogic final : public ComponentBase
 {
     public:
-        static constexpr auto ComponentId = 11ull;
-
         template<FrameLogicCallable Func>
         FrameLogic(Entity entity, Func&& func)
             : ComponentBase{entity},
@@ -66,8 +64,6 @@ class FrameLogic final : public ComponentBase
 class FixedLogic final : public ComponentBase
 {
     public:
-        static constexpr auto ComponentId = 12ull;
-
         template<FixedLogicCallable Func>
         FixedLogic(Entity entity, Func&& func)
             : ComponentBase{entity},
@@ -95,8 +91,6 @@ class FixedLogic final : public ComponentBase
 class CollisionLogic final : public ComponentBase
 {
     public:
-        static constexpr auto ComponentId = 13ull;
-
         template<CollisionLogicCallable CollisionEnterFunc,
                  CollisionLogicCallable CollisionExitFunc,
                  CollisionLogicCallable TriggerEnterFunc,

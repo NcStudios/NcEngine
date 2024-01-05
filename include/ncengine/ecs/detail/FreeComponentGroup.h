@@ -14,8 +14,6 @@ namespace nc::ecs::detail
 class FreeComponentGroup final : public ComponentBase
 {
     public:
-        static constexpr auto ComponentId = 1ull;
-
         FreeComponentGroup(Entity entity);
         ~FreeComponentGroup() = default;
         FreeComponentGroup(FreeComponentGroup&&) = default;

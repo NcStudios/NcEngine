@@ -45,7 +45,7 @@ TEST(ComponentRegistryTests, RegisterType_idAlreadyUsed_throws)
     EXPECT_THROW(uut.RegisterType<S2>(10, nc::ComponentHandler<S2>{.id = 1000}), nc::NcError);
 }
 
-TEST(ComponentRegistryTests, RegisterType_idCollidesWillInternallyAssignedId_throws)
+TEST(ComponentRegistryTests, RegisterType_idCollidesWithInternallyAssignedId_throws)
 {
     auto uut = nc::ecs::ComponentRegistry{10};
     uut.RegisterType<S1>(10, nc::ComponentHandler<S1>{});
