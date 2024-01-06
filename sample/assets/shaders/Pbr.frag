@@ -25,10 +25,12 @@ struct ObjectData
     mat4 viewProjection;
 
     // Textures
-    int baseColorIndex;
-    int normalIndex;
-    int roughnessIndex;
-    int metallicIndex;
+    uint baseColorIndex;
+    uint normalIndex;
+    uint roughnessIndex;
+    uint metallicIndex;
+
+    uint skeletalAnimationIndex;
 };
 
 layout(std140, set=0, binding=0) readonly buffer ObjectBuffer
@@ -62,7 +64,7 @@ layout (location = 8) in vec3 inUVW;
 
 layout (location = 0) out vec4 outFragColor;
 
-vec3 MaterialColor(int textureIndex)
+vec3 MaterialColor(uint textureIndex)
 {
    return vec3(texture(textures[textureIndex], inUV));
 }
@@ -73,7 +75,7 @@ vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 }
 
 const float PI = 3.14159265359;
-// ----------------------------------------------------------------------------
+
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
     float a = roughness*roughness;
@@ -87,7 +89,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 
     return nom / denom;
 }
-// ----------------------------------------------------------------------------
+
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
     float r = (roughness + 1.0);
@@ -98,7 +100,7 @@ float GeometrySchlickGGX(float NdotV, float roughness)
 
     return nom / denom;
 }
-// ----------------------------------------------------------------------------
+
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
     float NdotV = max(dot(N, V), 0.0);
@@ -108,12 +110,11 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
     return ggx1 * ggx2;
 }
-// ----------------------------------------------------------------------------
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
+
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
-// ----------------------------------------------------------------------------
 
 float ShadowCalculation(vec4 fragPosLightSpace, int index)
 {
@@ -146,6 +147,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, int index)
 
     return shadow;
 }
+
 vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor, float roughness, float metallic, vec4 lightViewPos)
 {
     PointLight light = pointLights.lights[lightIndex];
@@ -154,13 +156,13 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
     vec3 L = normalize(light.lightPos - inFragPosition);
     vec3 H = normalize(V + L);
     float distance = length(light.lightPos - inFragPosition);
-    float attenuation = (1.0 / (distance * distance)) * light.specularIntensity;
+    float attenuation = (1.0 / (distance * distance)) * (light.specularIntensity * 0.8);
     vec3 radiance = light.diffuseColor * attenuation;
 
     // Cook-Torrance BRDF
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);
-    vec3 F = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
+    vec3 F = FresnelSchlick(max(dot(H,V), 0.0), F0);
 
     vec3 numerator = NDF * G * F;
     float denominator = 4 * max(dot(N,V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
@@ -170,7 +172,7 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - metallic;
 
-    float NdotL = max(dot(N, L), light.ambientColor.x);
+    float NdotL = max(dot(N, L), 0.0);
 
     vec3 colorTotal = (kD * baseColor / PI + specular) * radiance * NdotL;
 
@@ -182,14 +184,14 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
         shadow = ShadowCalculation(lightViewPos, lightIndex);
     }
 
-    return (light.ambientColor + (1.0 - shadow)) * colorTotal;
+    return (1.0 - shadow) * colorTotal;
 }
 
 const mat4 biasMat = mat4( 
-	0.5, 0.0, 0.0, 0.0,
-	0.0, 0.5, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	0.5, 0.5, 0.0, 1.0 
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.5, 0.5, 0.0, 1.0 
 );
 
 void main() 
@@ -209,7 +211,6 @@ void main()
     F0 = mix(F0, baseColor, metallicColor.r);
 
     vec3 result = vec3(0.0);
-
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
         if (pointLights.lights[i].isInitialized == 0)
@@ -223,15 +224,14 @@ void main()
             lightViewPos = biasMat * pointLights.lights[i].lightViewProj * vec4(inFragPosition, 1.0);
         }
 
-        result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r, lightViewPos);
+        result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r, lightViewPos) + (pointLights.lights[i].ambientColor * 0.015);
     }
 
-    if (environmentData.skyboxCubemapIndex > -1)
+   if (environmentData.skyboxCubemapIndex > -1)
     {
         // Environment reflection
         vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
-        vec3 surfaceNormal = normalize((inNormal + N)/2);
-        vec3 reflected = reflect(I, surfaceNormal);
+        vec3 reflected = reflect(I, N);
         vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
 
         result += (F0 * (1-roughnessColor.r) * environmentReflectionColor) / 2;

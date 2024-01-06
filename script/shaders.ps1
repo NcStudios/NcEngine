@@ -1,10 +1,10 @@
 param
 (
-[Parameter()]
-[string]$InputDir = "..\project\shaders",
+[Parameter(Mandatory=$false)]
+[string]$InputDir = "" + $(get-location).Path + "\resources\shaders",
 
-[Parameter()]
-[string]$OutputDir = "..\project\shaders\Compiled"
+[Parameter(Mandatory=$false)]
+[string]$OutputDir = "" + $(get-location).Path + "\resources\shaders\compiled"
 )
 
 
