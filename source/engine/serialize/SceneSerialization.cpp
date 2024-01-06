@@ -35,10 +35,14 @@ void LoadSceneFragment(std::istream& stream,
     auto header = SceneFragmentHeader{};
     serialize::Deserialize(stream, header);
     if (header.magicNumber != g_sceneFragmentMagicNumber)
+    {
         throw NcError("Unexpected SceneFragment header");
+    }
 
     if (header.version != g_currentSceneFragmentVersion)
+    {
         throw NcError("Unexpected SceneFragment version");
+    }
 
     {
         auto assets = asset::AssetMap{};
