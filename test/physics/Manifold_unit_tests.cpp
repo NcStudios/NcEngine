@@ -36,11 +36,6 @@ namespace
     }
 }
 
-namespace nc
-{
-    DirectX::FXMMATRIX Transform::TransformationMatrix() const { return m_worldMatrix; }
-}
-
 TEST(Manifold_unit_tests, AddContact_UpdatesEventStateToPersisting)
 {
     auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, CreateContact()};

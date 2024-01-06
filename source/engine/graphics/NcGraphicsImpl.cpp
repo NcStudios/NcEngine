@@ -67,6 +67,7 @@ namespace nc::graphics
                                    ShaderResourceBus&& shaderResourceBus,
                                    window::WindowImpl* window)
         : m_registry{registry},
+          m_assetModule{assetModule},
           m_graphics{std::move(graphics)},
           m_cameraSystem{},
           m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
@@ -142,7 +143,7 @@ namespace nc::graphics
         }
 
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
+        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()), *m_assetModule);
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();

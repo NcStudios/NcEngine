@@ -6,6 +6,11 @@
 
 namespace nc
 {
+namespace asset
+{
+class NcAsset;
+} // namespace asset
+
 namespace ui
 {
 class IUI;
@@ -26,7 +31,7 @@ class UISystem
 
         auto IsHovered() const noexcept -> bool;
         void SetClientUI(ui::IUI* ui) noexcept;
-        void Execute(ecs::Ecs world);
+        void Execute(ecs::Ecs world, asset::NcAsset& assetModule);
 
     private:
         std::unique_ptr<ui::editor::Editor> m_editor;

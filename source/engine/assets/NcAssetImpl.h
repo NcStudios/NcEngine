@@ -38,6 +38,7 @@ class NcAssetImpl : public NcAsset
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override;
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override;
+        void LoadAssets(const AssetMap& assets) override;
         auto GetLoadedAssets() const noexcept -> AssetMap override;
 
     private:

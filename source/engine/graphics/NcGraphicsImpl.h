@@ -66,6 +66,7 @@ class NcGraphicsImpl : public NcGraphics
 
     private:
         Registry* m_registry;
+        asset::NcAsset* m_assetModule;
         std::unique_ptr<IGraphics> m_graphics;
         CameraSystem m_cameraSystem;
         EnvironmentSystem m_environmentSystem;

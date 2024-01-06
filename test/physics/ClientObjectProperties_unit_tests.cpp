@@ -14,11 +14,6 @@ namespace
     const auto PhysicsKinematicTriggerProperties = physics::ClientObjectProperties{true,  false, true};
 }
 
-namespace nc
-{
-    auto Transform::TransformationMatrix() const -> DirectX::FXMMATRIX { return m_worldMatrix; }
-}
-
 TEST(ClientObjectProperties_unit_tests, EventType_ColliderVsOthers)
 {
     auto colliderVsCollider = ColliderProperties.EventType(ColliderProperties);

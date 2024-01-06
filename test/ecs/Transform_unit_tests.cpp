@@ -9,7 +9,6 @@ Registry g_registry{10u};
 
 namespace ecs::detail
 {
-FreeComponentGroup::FreeComponentGroup(Entity entity) : ComponentBase{entity}, m_components{} {}
 void FreeComponentGroup::CommitStagedComponents() {}
 }
 }

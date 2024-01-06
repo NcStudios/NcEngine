@@ -142,7 +142,7 @@ target_compile_options(Entity_unit_tests
 target_link_libraries(Entity_unit_tests
     PRIVATE
         NcMath
-        gtest
+        gtest_main
 )
 
 add_test(Entity_unit_tests Entity_unit_tests)
