@@ -24,7 +24,6 @@ concept AnimatableComponent = std::same_as<T, nc::graphics::MeshRenderer> || std
 template <AnimatableComponent T>
 uint32_t GetSkeletalAnimationIndex(const T* renderer, const nc::graphics::SkeletalAnimationSystemState& state)
 {
-    auto skeletalAnimIndex = UINT32_MAX;
     auto iter = state.animationIndices.find(renderer->ParentEntity().Index());
     return iter != state.animationIndices.end() ? iter->second : UINT32_MAX;
 }
