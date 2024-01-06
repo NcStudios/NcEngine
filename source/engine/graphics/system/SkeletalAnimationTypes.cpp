@@ -18,6 +18,61 @@ auto GetGlobalInverseTransform(const std::vector<nc::asset::BoneSpaceToParentSpa
 
 namespace nc::graphics::anim
 {
+void State::AddSuccessor(uint32_t successor)
+{
+    successors.push_back(successor);
+}
+
+SparseSet::SparseSet(uint32_t maxStates)
+    : m_dense{},
+      m_sparse(maxStates, State::NullId)
+{
+    m_dense.reserve(maxStates);
+}
+
+auto SparseSet::Insert(State toInsert) -> uint32_t
+{
+    toInsert.id = AssignId();
+    if (toInsert.id >= m_sparse.size())
+    {
+        throw nc::NcError("Capacity reached. Cannot insert state.");
+    }
+
+    m_sparse.at(toInsert.id) = static_cast<uint32_t>(m_dense.size());
+    m_dense.push_back(std::move(toInsert));
+    return m_dense.back().id;
+}
+
+auto SparseSet::Remove(uint32_t toRemove) -> bool
+{
+    if (!Contains(toRemove))
+        return false;
+
+    const auto toRemoveSparse = toRemove;
+    const auto toRemoveDense = m_sparse.at(toRemoveSparse);
+
+    m_dense.at(toRemoveDense) = std::move(m_dense.back());
+    m_dense.pop_back();
+    m_sparse.at(toRemoveSparse) = State::NullId;
+    m_sparse.at(m_dense.at(toRemoveDense).id) = toRemoveDense;
+    return true;
+}
+
+auto SparseSet::Contains(uint32_t id) -> bool
+{
+    return id < m_sparse.size() ? m_sparse[id] != State::NullId : false;
+}
+
+auto SparseSet::Get(uint32_t id) -> State*
+{
+    return &m_dense.at(m_sparse.at(id));
+}
+
+auto SparseSet::GetLast() -> State*
+{
+    return &m_dense.back();
+}
+
 PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
     : vertexToBone{},
       boneToParent{},

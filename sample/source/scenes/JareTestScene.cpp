@@ -1,5 +1,7 @@
 #include "JareTestScene.h"
 #include "shared/FreeComponents.h"
+#include "shared/Prefabs.h"
+#include "shared/GameLogic.h"
 
 #include "imgui/imgui.h"
 #include "ncengine/NcEngine.h"
@@ -10,20 +12,30 @@
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
+#include "ncengine/input/Input.h"
 
 #include <string>
+#include <iostream>
+
+
+#include "ncengine/physics/Collider.h"
+#include "ncengine/ecs/Logic.h"
 
 namespace
 {
+std::function<float()> GetFPSCallback = nullptr;
+
 void Widget()
 {
-    ImGui::Text("Vulkan");
+    ImGui::Text("Collision Benchmark");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
-        ImGui::Text("Vulkan scratch scene.");
+        ImGui::Text("FPS: %.1f", GetFPSCallback());
+        ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
     } ImGui::EndChild();
 }
-}
+} // anonymous namespace
 
 namespace nc::sample
 {
@@ -34,32 +46,95 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
-    LoadTextureAsset("ogre\\BaseColor.nca");
-    LoadMeshAsset("ogre.nca");
-    LoadSkeletalAnimationAsset("ogre\\idle.nca");
-
-    auto floorMaterial = graphics::ToonMaterial{
-        .baseColor = asset::DefaultMetallic,
-        .overlay   = asset::DefaultBaseColor,
-        .hatching  = asset::DefaultBaseColor,
-        .hatchingTiling  = 1
+    std::vector<std::string> textures
+    {
+        "DefaultBaseColor.nca",
+        "DefaultNormal.nca",
+        "DefaultMetallic.nca",
+        "ogre\\BaseColor.nca",
+        "ogre\\Normal.nca",
+        "ogre\\Roughness.nca",
+        "ogre\\Metallic.nca",
+        "cave\\BaseColor.nca",
+        "cave\\Normal.nca",
+        "cave\\Roughness.nca",
+        "cave\\Metallic.nca",
+        "cave_ceiling\\BaseColor.nca",
+        "cave_ceiling\\Normal.nca",
+        "cave_ceiling\\Roughness.nca",
+        "cave_ceiling\\Metallic.nca",
+        "skeleton\\BaseColor.nca",
+        "skeleton\\Normal.nca",
+        "skeleton\\Roughness.nca",
+        "skeleton\\Metallic.nca",
     };
 
-    auto treeMaterial = graphics::ToonMaterial{
-        .baseColor = "tree\\BaseColor.nca",
-        .overlay   = asset::DefaultBaseColor,
-        .hatching  = "line\\Hatch3.nca",
-        .hatchingTiling  = 8
+    std::vector<std::string> cubemaps
+    {
+        "night_sky.nca"
     };
 
-    auto ogreMaterial = graphics::ToonMaterial{
-        .baseColor = "ogre\\BaseColor.nca",
-        .overlay   = asset::DefaultBaseColor,
-        .hatching  = "line\\Hatch3.nca",
-        .hatchingTiling  = 8
+    std::vector<std::string> meshes
+    {
+        "ogre.nca",
+        "skeleton.nca",
+        "cave.nca",
+        "cave_ceiling.nca"
     };
 
-    modules.Get<graphics::NcGraphics>()->SetSkybox(asset::DefaultSkyboxCubeMap);
+    std::vector<std::string> animations
+    {
+        "ogre//idle.nca",
+        "ogre//attack.nca",
+        "skeleton//idle.nca",
+        "skeleton//walk_right.nca",
+        "skeleton//walk_back.nca",
+        "skeleton//walk_forward.nca",
+        "skeleton//walk_left.nca",
+        "skeleton//jump.nca",
+    };
+
+    LoadSkeletalAnimationAssets(animations);
+    LoadTextureAssets(textures);
+    LoadMeshAssets(meshes);
+    LoadCubeMapAssets(cubemaps);
+
+    auto ogreMaterial = graphics::PbrMaterial{
+        .baseColor  = "ogre\\BaseColor.nca",
+        .normal     = "ogre\\Normal.nca",
+        .roughness  = "ogre\\Roughness.nca",
+        .metallic   = "ogre\\Metallic.nca"
+    };
+
+    auto skeletonMaterial = graphics::PbrMaterial{
+        .baseColor  = "skeleton\\BaseColor.nca",
+        .normal     = "skeleton\\Normal.nca",
+        .roughness  = "skeleton\\Roughness.nca",
+        .metallic   = "skeleton\\Metallic.nca"
+    };
+
+    auto caveMaterial = graphics::PbrMaterial{
+        .baseColor  = "cave\\BaseColor.nca",
+        .normal     = "cave\\Normal.nca",
+        .roughness  = "cave\\Roughness.nca",
+        .metallic   = "cave\\Metallic.nca"
+    };
+
+    auto caveCeilingMaterial = graphics::PbrMaterial{
+        .baseColor  = "cave_ceiling\\BaseColor.nca",
+        .normal     = "cave_ceiling\\Normal.nca",
+        .roughness  = "cave_ceiling\\Roughness.nca",
+        .metallic   = "cave_ceiling\\Metallic.nca"
+    };
+
+    modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
+
+    //Lights
+    auto lvHandle = registry->Add<Entity>({.position = Vector3{3.5f, 4.0f, -14.6f}, .tag = "Point Light 1"});
+    registry->Add<graphics::PointLight>(lvHandle, Vector3(.238f, .441f, .334f), Vector3(.131f, .260f, .0495f), 88.6f);
+
+    auto lv2Handle = registry->Add<Entity>({.position = Vector3{-1.5f, 5.0f, 7.6f}, .tag = "Point Light 2"});
+    registry->Add<graphics::PointLight>(lv2Handle, Vector3(.279f, .036f, .036f), Vector3(.219f, .206f, .417f), 180.4f);
 
     auto ogre = registry->Add<Entity>({
             .position = Vector3{-5.0f, 0.0f, 12.0f},
@@ -67,38 +142,136 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
             .scale = Vector3{3.0f, 3.0f, 3.0f},
             .tag = "ogre"
     });
-    registry->Add<graphics::ToonRenderer>(ogre, "ogre.nca", ogreMaterial);
-    registry->Add<graphics::SkeletalAnimator>(ogre, "ogre.nca", "ogre\\idle.nca");
+    registry->Add<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
+    registry->Add<physics::Collider>(ogre, physics::SphereProperties{}, false);
+    registry->Add<physics::PhysicsBody>(ogre, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
-    //Lights
-    auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, Vector3(0.1f, 0.1f, 0.1f), Vector3(0.85f, 0.64f, 0.125f), 88.0f);
+    // Ogre Animation
+    {
+        using namespace graphics;
+        auto ogreAnimator = registry->Add<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
+        auto stopState = ogreAnimator->AddState(anim::Stop
+        {
+            .enterFrom = ogreAnimator->RootState(),
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
+        });
 
-    auto floor = registry->Add<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 1.5708f),
-        .scale = Vector3{30.0f, 30.0f, 1.0f},
-        .tag = "Floor"
+        ogreAnimator->AddState(anim::Loop
+        {
+            .enterFrom = stopState,
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+            .animUid = "ogre//idle.nca",
+            .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+            .exitTo = stopState
+        });
+    }
+
+    auto skeleton = registry->Add<Entity>({
+            .position = Vector3{6.0f, 0.0f, -10.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+            .scale = Vector3{2.0f, 2.0f, 2.0f},
+            .tag = "skeleton"
     });
-    registry->Add<graphics::ToonRenderer>(floor, asset::PlaneMesh, floorMaterial);
 
-    auto tree = registry->Add<Entity>({
+    registry->Add<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
+    registry->Add<FrameLogic>(skeleton, WasdBasedMovement);
+
+    registry->Add<physics::Collider>(skeleton, physics::SphereProperties{}, true);
+    registry->Add<CollisionLogic>(skeleton, nullptr, nullptr,
+    [](Entity, Entity other, Registry* reg)
+    {
+        auto ogreAnim = reg->Get<graphics::SkeletalAnimator>(other);
+        ogreAnim->PlayOnceImmediate("ogre//attack.nca", ogreAnim->RootState());
+        if(auto* tag = reg->Get<Tag>(other); tag)
+        {
+            GameLog::Log(std::string{"Collision Enter: "} + tag->Value().data());
+        }
+    }, nullptr);
+
+    // Skeleton Animation
+    {
+        using namespace graphics;
+        auto skelAnim = registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
+            .animUid = "skeleton//walk_forward.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
+            .animUid = "skeleton//walk_left.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
+            .animUid = "skeleton//walk_back.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
+            .animUid = "skeleton//walk_right.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::PlayOnce
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
+            .animUid = "skeleton//jump.nca",
+            .exitTo = skelAnim->RootState()
+        });
+    }
+
+    auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
+    auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
+    registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
+
+    auto cave_floor = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(1.5708f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "Tree"
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
+        .scale = Vector3{1.5f, 1.5f, 1.5f},
+        .tag = "cave_floor"
     });
-    registry->Add<graphics::ToonRenderer>(tree, "tree.nca", treeMaterial);
+    
+    registry->Add<graphics::MeshRenderer>(cave_floor, "cave.nca", caveMaterial);
+    auto cave_ceiling = registry->Add<Entity>({
+        .position = Vector3{0.0f, 0.0f, 0.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
+        .scale = Vector3{1.5f, 1.5f, 1.5f},
+        .tag = "cave_ceiling"
+    });
+    registry->Add<graphics::MeshRenderer>(cave_ceiling, "cave_ceiling.nca", caveCeilingMaterial);
 
     // Camera
     auto cameraHandle = registry->Add<Entity>({
-        .position = Vector3{-0.0f, 4.0f, -6.4f},
-        .rotation = Quaternion::FromEulerAngles(0.4f, 0.0f, 0.0f),
+        .position = Vector3{-0.6f, 8.0f, -24.75f},
+        .rotation = Quaternion::FromEulerAngles(0.239f, 0.0f, 0.021f),
         .tag = "Main Camera"
     });
-
     auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
     registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
     modules.Get<graphics::NcGraphics>()->SetCamera(camera);
+
+    GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
+}
+
+void JareTestScene::Unload()
+{
+    GetFPSCallback = nullptr;
 }
 }
