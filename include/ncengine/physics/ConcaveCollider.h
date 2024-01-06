@@ -9,6 +9,8 @@ class ConcaveCollider final : public ComponentBase
     NC_ENABLE_IN_EDITOR(ConcaveCollider)
 
     public:
+        static constexpr auto ComponentId = 9ull;
+
         ConcaveCollider(Entity entity, std::string assetPath);
         auto GetPath() const -> const std::string& { return m_path; }
 

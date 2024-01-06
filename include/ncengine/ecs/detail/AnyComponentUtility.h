@@ -13,6 +13,7 @@ struct AnyImplBase
     virtual ~AnyImplBase() = default;
     virtual auto Clone(AnyImplStorage& dest) const noexcept -> AnyImplBase* = 0;
     virtual auto MoveTo(AnyImplStorage& dest) noexcept -> AnyImplBase* = 0;
+    virtual auto Id() const noexcept -> size_t = 0;
     virtual auto Name() const noexcept -> std::string_view = 0;
     virtual auto HasDrawUI() const noexcept -> bool = 0;
     virtual void DrawUI() = 0;
@@ -27,6 +28,7 @@ class AnyImplConcrete : public AnyImplBase
 
         auto Clone(AnyImplStorage& dest) const noexcept -> AnyImplBase* override;
         auto MoveTo(AnyImplStorage& dest) noexcept -> AnyImplBase* override;
+        auto Id() const noexcept -> size_t override;
         auto Name() const noexcept -> std::string_view override;
         auto HasDrawUI() const noexcept -> bool override;
         void DrawUI() override;
@@ -97,6 +99,12 @@ template<PooledComponent T>
 auto AnyImplConcrete<T>::MoveTo(AnyImplStorage& dest) noexcept -> AnyImplBase*
 {
     return new (dest.AsStorage()) AnyImplConcrete<T>{std::move(*this)};
+}
+
+template<PooledComponent T>
+auto AnyImplConcrete<T>::Id() const noexcept -> size_t
+{
+    return m_handler->id;
 }
 
 template<PooledComponent T>

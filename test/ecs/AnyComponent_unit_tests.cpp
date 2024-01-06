@@ -133,6 +133,15 @@ TEST(AnyComponentTest, OperatorBool_nullValue_returnsFalse)
     EXPECT_FALSE(static_cast<bool>(uut));
 }
 
+TEST(AnyComponentTests, Id_idSet_retrievesValue)
+{
+    constexpr auto expected = 42ull;
+    auto component = TestComponent{};
+    auto handler = nc::ComponentHandler<TestComponent>{ .id = expected };
+    auto uut = nc::AnyComponent{&component, &handler};
+    EXPECT_EQ(expected, uut.Id());
+}
+
 TEST(AnyComponentTest, Name_nameSet_retrievesValue)
 {
     constexpr auto expected = "test";
