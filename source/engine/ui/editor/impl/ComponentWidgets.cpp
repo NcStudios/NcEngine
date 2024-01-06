@@ -247,6 +247,10 @@ void PointLightUIWidget(graphics::PointLight& light)
     ui::PropertyWidget(point_light_ext::diffuseIntensityProp, light, &ui::DragFloat, step, min, max);
 }
 
+void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)
+{
+}
+
 void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);

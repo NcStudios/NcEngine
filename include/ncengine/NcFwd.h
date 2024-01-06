@@ -1,6 +1,6 @@
 /**
  * @file NcFwd.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
 
@@ -49,6 +49,7 @@ class MeshRenderer;
 class ParticleEmitter;
 class PointLight;
 class SceneNavigationCamera;
+class SkeletalAnimator;
 class ToonRenderer;
 } // namespace graphics
 

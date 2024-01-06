@@ -5,6 +5,7 @@
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
@@ -45,6 +46,11 @@ auto CreateMeshRenderer(Entity entity, void*) -> graphics::MeshRenderer
 auto CreateToonRenderer(Entity entity, void*) -> graphics::ToonRenderer
 {
     return graphics::ToonRenderer{entity};
+}
+
+auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator
+{
+    return graphics::SkeletalAnimator{entity, "dummyMesh", "dummyAnimation"};
 }
 
 auto CreateNetworkDispatcher(Entity entity, void*) -> net::NetworkDispatcher

@@ -10,9 +10,12 @@ struct ObjectData
     mat4 viewProjection;
 
     // Textures
-    int baseColorIndex;
-    int normalIndex;
-    int roughnessIndex;
+    uint unused1;
+    uint unused2;
+    uint unused3;
+    uint unused4;
+
+    uint skeletalAnimationIndex;
 };
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
@@ -29,7 +32,7 @@ layout (location = 4) in vec3 inBitangent;
 layout (location = 0) out vec3 outUVW;
 
 out gl_PerVertex {
-	vec4 gl_Position;
+    vec4 gl_Position;
 };
 
 void main() 

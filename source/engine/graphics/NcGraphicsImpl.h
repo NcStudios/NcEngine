@@ -7,6 +7,7 @@
 #include "system/ObjectSystem.h"
 #include "system/ParticleEmitterSystem.h"
 #include "system/PointLightSystem.h"
+#include "system/SkeletalAnimationSystem.h"
 #include "system/UISystem.h"
 #include "system/WidgetSystem.h"
 
@@ -72,6 +73,7 @@ class NcGraphicsImpl : public NcGraphics
         ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
         ParticleEmitterSystem m_particleEmitterSystem;
+        SkeletalAnimationSystem m_skeletalAnimationSystem;
         WidgetSystem m_widgetSystem;
         UISystem m_uiSystem;
     };

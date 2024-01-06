@@ -7,6 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 
@@ -33,6 +34,10 @@ JareTestScene::JareTestScene(SampleUI* ui)
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)
 {
+    LoadTextureAsset("ogre\\BaseColor.nca");
+    LoadMeshAsset("ogre.nca");
+    LoadSkeletalAnimationAsset("ogre\\idle.nca");
+
     auto floorMaterial = graphics::ToonMaterial{
         .baseColor = asset::DefaultMetallic,
         .overlay   = asset::DefaultBaseColor,
@@ -47,7 +52,23 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .hatchingTiling  = 8
     };
 
+    auto ogreMaterial = graphics::ToonMaterial{
+        .baseColor = "ogre\\BaseColor.nca",
+        .overlay   = asset::DefaultBaseColor,
+        .hatching  = "line\\Hatch3.nca",
+        .hatchingTiling  = 8
+    };
+
     modules.Get<graphics::NcGraphics>()->SetSkybox(asset::DefaultSkyboxCubeMap);
+
+    auto ogre = registry->Add<Entity>({
+            .position = Vector3{-5.0f, 0.0f, 12.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
+            .scale = Vector3{3.0f, 3.0f, 3.0f},
+            .tag = "ogre"
+    });
+    registry->Add<graphics::ToonRenderer>(ogre, "ogre.nca", ogreMaterial);
+    registry->Add<graphics::SkeletalAnimator>(ogre, "ogre.nca", "ogre\\idle.nca");
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{2.5f, 4.0f, -1.4f}, .tag = "Point Light 1"});

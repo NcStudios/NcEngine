@@ -1,6 +1,6 @@
 /**
  * @file ComponentPool.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
 
@@ -61,6 +61,9 @@ class ComponentPoolBase : public StableAddress
 
         /** @brief Check if there is a drawUI callback set in the the component's ComponentHandler. */
         virtual auto HasDrawUI() const noexcept -> bool = 0;
+
+        /** @brief Get the component's unique id. */
+        virtual auto Id() const noexcept -> size_t = 0;
 
         /**
          * @brief Factory-construct a component attached to an entity.
@@ -176,6 +179,7 @@ class ComponentPool final : public ComponentPoolBase
         auto HasFactory() const noexcept -> bool override { return m_handler.factory != nullptr; }
         auto HasUserData() const noexcept -> bool override { return m_handler.userData != nullptr; }
         auto HasDrawUI() const noexcept -> bool override { return m_handler.drawUI != nullptr; }
+        auto Id() const noexcept -> size_t override { return m_handler.id; };
         auto AddDefault(Entity entity) -> AnyComponent override;
         void ClearNonPersistent() override;
         void Clear() override;

@@ -1,3 +1,7 @@
+/**
+ * @file Component.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "Entity.h"
@@ -92,6 +96,14 @@ struct ComponentHandler
 
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T&)>;
+
+    /**
+     * @brief A unique identifier for the component.
+     * @note Set to 0 to get assigned an available id. The range [0, 100]
+     *       is reserved for engine components. Automatically assigned ids are assigned in reverse order
+     *       starting from std::numeric_limits<size_t>::max().
+    */
+    size_t id = 0ull;
 
     /** @brief A name for the component with no uniqueness constraints. */
     std::string name = "User Component";
