@@ -26,11 +26,7 @@ uint32_t GetSkeletalAnimationIndex(const T* renderer, const nc::graphics::Skelet
 {
     auto skeletalAnimIndex = UINT32_MAX;
     auto iter = state.animationIndices.find(renderer->ParentEntity().Index());
-    if(iter != state.animationIndices.end())
-    {
-        skeletalAnimIndex = iter->second;
-    }
-    return skeletalAnimIndex;
+    return iter != state.animationIndices.end() ? iter->second : UINT32_MAX;
 }
 } // anonymous namespace
 
@@ -58,7 +54,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
-        const auto& skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
+        const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
         frontendState.pbrMeshes.push_back(renderer->GetMeshView());
@@ -74,7 +70,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
             continue;
         }
 
-        const auto& skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
+        const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
