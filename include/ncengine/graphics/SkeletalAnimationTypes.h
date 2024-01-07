@@ -86,6 +86,7 @@ struct Root
  * 
  * The StopImmediate state is used as an ad-hoc state meant to be invoked from outside of the state machine (example, OnCollisionEnter).
  * The StopImmediate state then transitions back into the state machine into the active animation.
+ * Note: All three Action types are available to be called in Immediate mode, but only Stop needed this helper.
  */
 struct StopImmediate
 {
@@ -102,7 +103,7 @@ struct State
 
     /**
      * @brief Construct a new State in the state machine representing the state the SkeletalAnimator is initialized playing.
-     * @param initialProperties The parent entity.
+     * @param initialProperties The properties of the root state.
      */
     State(const Root& initialProperties)
         : id{},
