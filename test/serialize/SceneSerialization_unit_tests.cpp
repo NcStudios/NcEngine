@@ -3,6 +3,8 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Registry.h"
 
+#include "ncutility/BinarySerialization.h"
+
 #include <set>
 #include <sstream>
 #include <ranges>
@@ -48,6 +50,55 @@ auto BuildAssetModule(const config::AssetSettings&,
 }
 } // namespace nc::asset
 
+struct TestComponent1
+{
+    int value = 0;
+
+    static void Serialize(std::ostream& stream,
+                          const TestComponent1& obj,
+                          const nc::SerializationContext&,
+                          void*)
+    {
+        nc::serialize::Serialize(stream, obj.value);
+    }
+
+    static auto Deserialize(std::istream& stream,
+                            const nc::DeserializationContext&,
+                            void*) -> TestComponent1
+    {
+        auto obj = TestComponent1{};
+        nc::serialize::Deserialize(stream, obj.value);
+        return obj;
+    }
+};
+
+struct TestComponent2
+{
+    std::string value = "";
+
+    static void Serialize(std::ostream& stream,
+                          const TestComponent2& obj,
+                          const nc::SerializationContext&,
+                          void*)
+    {
+        nc::serialize::Serialize(stream, obj.value);
+    }
+
+    static auto Deserialize(std::istream& stream,
+                            const nc::DeserializationContext&,
+                            void*) -> TestComponent2
+    {
+        auto obj = TestComponent2{};
+        nc::serialize::Deserialize(stream, obj.value);
+        return obj;
+    }
+};
+
+struct UnserializableTestComponent
+{
+    int value = 0;
+};
+
 class SceneSerializationTests : public ::testing::Test
 {
     public:
@@ -68,6 +119,26 @@ class SceneSerializationTests : public ::testing::Test
             registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(maxEntities, nc::ComponentHandler<nc::ecs::detail::FreeComponentGroup>{});
             registry.RegisterType<nc::Tag>(maxEntities, nc::ComponentHandler<nc::Tag>{});
             registry.RegisterType<nc::Transform>(maxEntities, nc::ComponentHandler<nc::Transform>{});
+            registry.RegisterType<UnserializableTestComponent>(maxEntities);
+            registry.RegisterType<TestComponent1>
+            (
+                maxEntities,
+                nc::ComponentHandler<TestComponent1>
+                {
+                    .serialize = TestComponent1::Serialize,
+                    .deserialize = TestComponent1::Deserialize
+                }
+            );
+
+            registry.RegisterType<TestComponent2>
+            (
+                maxEntities,
+                nc::ComponentHandler<TestComponent2>
+                {
+                    .serialize = TestComponent2::Serialize,
+                    .deserialize = TestComponent2::Deserialize
+                }
+            );
         }
 
         ~SceneSerializationTests()
@@ -244,4 +315,51 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     EXPECT_EQ(actualEntities[0], transform1->Parent());
     EXPECT_EQ(actualEntities[1], transform2->Parent());
     EXPECT_EQ(actualEntities[2], transform3->Parent());
+}
+
+TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents)
+{
+    {
+        const auto e1 = ecs.Emplace<nc::Entity>(nc::EntityInfo{});
+        const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{});
+        const auto e3 = ecs.Emplace<nc::Entity>(nc::EntityInfo{});
+        const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{});
+
+        ecs.Emplace<TestComponent1>(e1, 42);
+        ecs.Emplace<TestComponent2>(e1, "test");
+        ecs.Emplace<UnserializableTestComponent>(e1);
+        ecs.Emplace<TestComponent1>(e2, 900);
+        ecs.Emplace<TestComponent2>(e3, "another test");
+        ecs.Emplace<UnserializableTestComponent>(e4);
+    }
+
+    auto stream = std::stringstream{};
+    nc::SaveSceneFragment(stream, ecs, nc::asset::AssetMap{});
+
+    registry.CommitPendingChanges();
+    registry.Clear();
+
+    nc::LoadSceneFragment(stream, ecs, *assetModule);
+
+    const auto actualEntities = ecs.GetAll<nc::Entity>();
+    ASSERT_EQ(4, actualEntities.size());
+
+    ASSERT_TRUE(ecs.Contains<TestComponent1>(actualEntities[0]));
+    ASSERT_TRUE(ecs.Contains<TestComponent2>(actualEntities[0]));
+    ASSERT_FALSE(ecs.Contains<UnserializableTestComponent>(actualEntities[0]));
+
+    EXPECT_EQ(42, ecs.Get<TestComponent1>(actualEntities[0])->value);
+    EXPECT_EQ("test", ecs.Get<TestComponent2>(actualEntities[0])->value);
+
+    ASSERT_TRUE(ecs.Contains<TestComponent1>(actualEntities[1]));
+    ASSERT_FALSE(ecs.Contains<TestComponent2>(actualEntities[1]));
+    EXPECT_EQ(900, ecs.Get<TestComponent1>(actualEntities[1])->value);
+
+    ASSERT_FALSE(ecs.Contains<TestComponent1>(actualEntities[2]));
+    ASSERT_TRUE(ecs.Contains<TestComponent2>(actualEntities[2]));
+    EXPECT_EQ("another test", ecs.Get<TestComponent2>(actualEntities[2])->value);
+
+    ASSERT_FALSE(ecs.Contains<TestComponent1>(actualEntities[3]));
+    ASSERT_FALSE(ecs.Contains<TestComponent2>(actualEntities[3]));
+    ASSERT_FALSE(ecs.Contains<UnserializableTestComponent>(actualEntities[3]));
 }

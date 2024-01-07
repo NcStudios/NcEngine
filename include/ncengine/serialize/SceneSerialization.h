@@ -24,6 +24,26 @@ struct SceneFragmentHeader
     uint32_t version = g_currentSceneFragmentVersion;
 };
 
+/** @brief A map of entities to their fragment ids. */
+using EntityToFragmentIdMap = std::unordered_map<Entity, uint32_t, Entity::Hash>;
+
+/** @brief A map of fragment ids to entities. */
+using FragmentIdToEntityMap = std::unordered_map<uint32_t, Entity>;
+
+/** @brief Context object passed to serialization functions. */
+struct SerializationContext
+{
+    EntityToFragmentIdMap entityMap;
+    ecs::Ecs ecs;
+};
+
+/** @brief Context object passed to deserialization functions. */
+struct DeserializationContext
+{
+    FragmentIdToEntityMap entityMap;
+    ecs::Ecs ecs;
+};
+
 /** @brief Save current game state to a binary stream. */
 void SaveSceneFragment(std::ostream& stream,
                        ecs::Ecs ecs,

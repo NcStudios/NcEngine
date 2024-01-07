@@ -10,6 +10,7 @@
 #include "ncengine/utility/Signal.h"
 
 #include <concepts>
+#include <iosfwd>
 #include <type_traits>
 
 namespace nc
@@ -87,12 +88,21 @@ struct DefaultStoragePolicy
 template<PooledComponent T>
 struct StoragePolicy : DefaultStoragePolicy {};
 
+struct SerializationContext;
+struct DeserializationContext;
+
 /** @brief Optional data and callbacks for generic component operations. */
 template<PooledComponent T>
 struct ComponentHandler
 {
     /** @brief Function type for the Factory handler. */
     using Factory_t = std::function<T(Entity, void*)>;
+
+    /** @brief Function type for the serialize handler. */
+    using Serialize_t = std::function<void(std::ostream&, const T&, const SerializationContext&, void*)>;
+
+    /** @brief Function type for the deserialize handler. */
+    using Deserialize_t = std::function<T(std::istream&, const DeserializationContext&, void*)>;
 
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T&)>;
@@ -108,14 +118,22 @@ struct ComponentHandler
     /** @brief A name for the component with no uniqueness constraints. */
     std::string name = "User Component";
 
-    /** @brief Optional pointer to user data, which is passed to the factory handler. */
+    /** @brief Optional pointer to user data, which is passed to the factory, serialize, and deserialize handlers. */
     void* userData = nullptr;
 
-    /** @brief Handler for creating an instance of T.
-     *  @note Factory handlers enable adding/removing types through the editor. */
+    /** @brief Callback for creating an instance of T.
+     *  @note This enables adding/removing types through the editor. */
     Factory_t factory = nullptr;
 
-    /** @brief Handler for drawing T's UI widget. */
+    /** @brief Callback for serializing an instance of T.
+     *  @note This is called when serializing scene fragments if and only if both serialize and deserialize are set. */
+    Serialize_t serialize = nullptr;
+
+    /** @brief Callback for deserializing an instance of T.
+     *  @note This is called when deserializing scene fragments if and only if both serialize and deserialize are set. */
+    Deserialize_t deserialize = nullptr;
+
+    /** @brief Callback for drawing T's UI widget. */
     DrawUI_t drawUI = nullptr;
 };
 } // namespace nc
