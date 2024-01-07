@@ -146,26 +146,26 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     registry->Add<physics::Collider>(ogre, physics::SphereProperties{}, false);
     registry->Add<physics::PhysicsBody>(ogre, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
-    // Ogre Animation
-    {
-        using namespace graphics;
-        registry->Add<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
-        // auto ogreAnimator = registry->Add<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
-        // auto stopState = ogreAnimator->AddState(anim::Stop
-        // {
-        //     .enterFrom = ogreAnimator->RootState(),
-        //     .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
-        // });
+    // // Ogre Animation
+    // {
+    //     using namespace graphics;
+        registry->Add<graphics::SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
+    //     auto ogreAnimator = registry->Add<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
+    //     auto stopState = ogreAnimator->AddState(anim::Stop
+    //     {
+    //         .enterFrom = ogreAnimator->RootState(),
+    //         .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
+    //     });
 
-        // ogreAnimator->AddState(anim::Loop
-        // {
-        //     .enterFrom = stopState,
-        //     .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-        //     .animUid = "ogre//idle.nca",
-        //     .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-        //     .exitTo = stopState
-        // });
-    }
+    //     ogreAnimator->AddState(anim::Loop
+    //     {
+    //         .enterFrom = stopState,
+    //         .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+    //         .animUid = "ogre//idle.nca",
+    //         .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+    //         .exitTo = stopState
+    //     });
+    // }
 
     auto skeleton = registry->Add<Entity>({
             .position = Vector3{6.0f, 0.0f, -10.0f},
@@ -189,54 +189,115 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         }
     }, nullptr);
 
+
+    auto skeleton2 = registry->Add<Entity>({
+            .position = Vector3{0.0f, 0.0f, -10.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+            .scale = Vector3{2.0f, 2.0f, 2.0f},
+            .tag = "skeleton"
+    });
+    registry->Add<graphics::MeshRenderer>(skeleton2, "skeleton.nca", skeletonMaterial);
+    registry->Add<FrameLogic>(skeleton2, WasdBasedMovement);
+
+
     // Skeleton Animation
     {
         using namespace graphics;
-        // auto skelAnim = registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
-        registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
-        // skelAnim->AddState(anim::Loop
-        // {
-        //     .enterFrom = skelAnim->RootState(),
-        //     .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
-        //     .animUid = "skeleton//walk_forward.nca",
-        //     .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);},
-        //     .exitTo = skelAnim->RootState()
-        // });
+        auto skelAnim = registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
+        // registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
+            .animUid = "skeleton//walk_forward.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);},
+            .exitTo = skelAnim->RootState()
+        });
 
-        // skelAnim->AddState(anim::Loop
-        // {
-        //     .enterFrom = skelAnim->RootState(),
-        //     .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
-        //     .animUid = "skeleton//walk_left.nca",
-        //     .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);},
-        //     .exitTo = skelAnim->RootState()
-        // });
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
+            .animUid = "skeleton//walk_left.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);},
+            .exitTo = skelAnim->RootState()
+        });
 
-        // skelAnim->AddState(anim::Loop
-        // {
-        //     .enterFrom = skelAnim->RootState(),
-        //     .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
-        //     .animUid = "skeleton//walk_back.nca",
-        //     .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);},
-        //     .exitTo = skelAnim->RootState()
-        // });
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
+            .animUid = "skeleton//walk_back.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);},
+            .exitTo = skelAnim->RootState()
+        });
 
-        // skelAnim->AddState(anim::Loop
-        // {
-        //     .enterFrom = skelAnim->RootState(),
-        //     .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
-        //     .animUid = "skeleton//walk_right.nca",
-        //     .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);},
-        //     .exitTo = skelAnim->RootState()
-        // });
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
+            .animUid = "skeleton//walk_right.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);},
+            .exitTo = skelAnim->RootState()
+        });
 
-        // skelAnim->AddState(anim::PlayOnce
-        // {
-        //     .enterFrom = skelAnim->RootState(),
-        //     .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
-        //     .animUid = "skeleton//jump.nca",
-        //     .exitTo = skelAnim->RootState()
-        // });
+        skelAnim->AddState(anim::PlayOnce
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
+            .animUid = "skeleton//jump.nca",
+            .exitTo = skelAnim->RootState()
+        });
+    }
+
+    // Skeleton Animation
+    {
+        using namespace graphics;
+        auto skelAnim = registry->Add<SkeletalAnimator>(skeleton2, "skeleton.nca", "skeleton//idle.nca");
+        // registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
+            .animUid = "skeleton//walk_forward.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
+            .animUid = "skeleton//walk_left.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
+            .animUid = "skeleton//walk_back.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::Loop
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
+            .animUid = "skeleton//walk_right.nca",
+            .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);},
+            .exitTo = skelAnim->RootState()
+        });
+
+        skelAnim->AddState(anim::PlayOnce
+        {
+            .enterFrom = skelAnim->RootState(),
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
+            .animUid = "skeleton//jump.nca",
+            .exitTo = skelAnim->RootState()
+        });
     }
 
     auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});

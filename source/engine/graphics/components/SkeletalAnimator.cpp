@@ -8,12 +8,13 @@ namespace nc::graphics
 SkeletalAnimator::SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid)
     : ComponentBase{entity},
       m_states{MaxStates},
-      m_activeState{m_states.Insert(anim::State{anim::Initial{std::move(animationUid)}})},
+      m_activeState{m_states.Insert(anim::State{anim::Initial{animationUid}})},
       m_meshUid{std::move(meshUid)},
       m_immediateState{},
       m_onPlayStateChanged{},
       m_immediateStateInitialized{},
-      m_initialStateInitialized{}
+      m_initialStateInitialized{},
+      m_initialState{anim::State{anim::Initial{animationUid}}}
 {
 }
 
@@ -118,6 +119,24 @@ auto SkeletalAnimator::ExecuteInitialState() -> bool
     }
     return false;
 }
+
+// auto SkeletalAnimator::ExecuteInitialState() -> bool
+// {
+//     if (!m_initialStateInitialized)
+//     {
+//         m_onPlayStateChanged.Emit(anim::PlayState
+//         {
+//             .meshUid = m_meshUid,
+//             .prevAnimUid = std::string{},
+//             .curAnimUid = m_initialState.animUid,
+//             .action = m_initialState.action,
+//             .entity = ParentEntity()
+//         });
+//         m_initialStateInitialized = true;
+//         return true;
+//     }
+//     return false;
+// }
 
 auto SkeletalAnimator::ExecuteImmediateState() -> bool
 {

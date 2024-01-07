@@ -100,6 +100,7 @@ class SkeletalAnimator : public ComponentBase
         Signal<const anim::PlayState&> m_onPlayStateChanged;
         bool m_immediateStateInitialized;
         bool m_initialStateInitialized;
+        anim::State m_initialState;
 };
 } // namespace nc::graphics
 

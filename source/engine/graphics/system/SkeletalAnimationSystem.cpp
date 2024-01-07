@@ -79,7 +79,7 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
 
     for (auto&& [unit, unitEntity] : std::views::zip(m_units, m_unitEntities))
     {
-        auto& rig = *unit.rig;
+        const auto& rig = *unit.rig;
         const auto unitIndex = unitEntity.Index();
 
         if (unit.blendFactor < 1.0f) unit.blendFactor += dt * 2.0f;
