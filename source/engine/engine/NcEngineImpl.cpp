@@ -1,4 +1,5 @@
 #include "NcEngineImpl.h"
+#include "ModuleFactory.h"
 #include "RegistryFactories.h"
 #include "config/ConfigInternal.h"
 #include "config/Version.h"
