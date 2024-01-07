@@ -1,6 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        ComponentFactory.cpp
+        ComponentFactories.cpp
         ModuleFactory.cpp
         NcEngineImpl.cpp
         RegistryFactory.cpp
