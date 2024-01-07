@@ -1,6 +1,6 @@
 #include "NcEngineImpl.h"
 #include "ModuleFactory.h"
-#include "RegistryFactories.h"
+#include "RegistryFactory.h"
 #include "config/ConfigInternal.h"
 #include "config/Version.h"
 #include "input/InputInternal.h"
