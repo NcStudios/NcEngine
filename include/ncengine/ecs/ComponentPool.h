@@ -110,7 +110,7 @@ class ComponentPool final : public ComponentPoolBase
 
         /** @brief Emplace a component attached to an entity. */
         template<class... Args>
-        auto Add(Entity entity, Args&&... args) -> T*;
+        auto Emplace(Entity entity, Args&&... args) -> T*;
 
         /** @brief Insert a component attached to an entity. */
         auto Insert(Entity entity, T obj) -> T*;
@@ -211,7 +211,7 @@ class ComponentPool final : public ComponentPoolBase
 /** @cond internal */
 template<PooledComponent T>
 template<class... Args>
-auto ComponentPool<T>::Add(Entity entity, Args&&... args) -> T*
+auto ComponentPool<T>::Emplace(Entity entity, Args&&... args) -> T*
 {
     NC_ASSERT(entity.Index() < m_storage.MaxSize() && !Contains(entity), "Bad entity");
     auto& [_, component] = m_staging.emplace_back(
@@ -321,7 +321,7 @@ auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
 {
     if (m_handler.factory)
     {
-        auto comp = Add(entity, m_handler.factory(entity, m_handler.userData));
+        auto comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
         return AnyComponent{comp, &m_handler};
     }
 
@@ -333,7 +333,6 @@ void ComponentPool<T>::Serialize(std::ostream& stream, Entity entity, const Seri
 {
     NC_ASSERT(HasSerialize() && Contains(entity), "...");
     m_handler.serialize(stream, *Get(entity), ctx, m_handler.userData);
-
 }
 
 template<PooledComponent T>

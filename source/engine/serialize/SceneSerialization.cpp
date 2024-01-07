@@ -162,7 +162,7 @@ void SaveSceneFragment(std::ostream& stream,
     if (!entityFilter)
         entityFilter = defaultEntityFilter;
 
-    auto ctx = SerializationContext{.ecs = ecs};
+    auto ctx = SerializationContext{.entityMap = {}, .ecs = ecs};
     SaveHeader(stream);
     SaveAssets(stream, assets);
     SaveEntities(stream, entityFilter, ctx);
@@ -173,7 +173,7 @@ void LoadSceneFragment(std::istream& stream,
                        ecs::Ecs ecs,
                        asset::NcAsset& assetModule)
 {
-    auto ctx = DeserializationContext{.ecs = ecs};
+    auto ctx = DeserializationContext{.entityMap = {}, .ecs = ecs};
     LoadHeader(stream);
     LoadAssets(stream, assetModule);
     LoadEntities(stream, ctx);
