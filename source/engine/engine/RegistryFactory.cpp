@@ -1,4 +1,4 @@
-#include "RegistryFactories.h"
+#include "RegistryFactory.h"
 #include "ComponentFactories.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Logic.h"
