@@ -23,7 +23,8 @@ class SkeletalAnimationSystem : public StableAddress
                                 Signal<const std::vector<SkeletalAnimationData>&>&& gpuBackendChannel);
         
         auto Execute() -> SkeletalAnimationSystemState;
-        void Start(const anim::PlayState& playState);
+        void Start(const anim::StateChange& stateChange);
+        void Stop(const anim::StateChange& stateChange);
         void Clear() noexcept;
 
     private:
@@ -32,7 +33,7 @@ class SkeletalAnimationSystem : public StableAddress
         void UpdateBonesStorage(const asset::BoneUpdateEventData& eventData);
 
         // Component methods
-        void OnPlayStateChanged(const anim::PlayState& data);
+        void OnStateChanged(const anim::StateChange& data);
         void Add(SkeletalAnimator& animator);
         void Remove(Entity entity);
 
@@ -49,7 +50,7 @@ class SkeletalAnimationSystem : public StableAddress
         // Component registration
         Connection<graphics::SkeletalAnimator&> m_onAddConnection;
         Connection<Entity> m_onRemoveConnection;
-        std::vector<std::unique_ptr<Connection<const anim::PlayState&>>> m_onPlayStateChangedHandlers;
+        std::vector<std::unique_ptr<Connection<const anim::StateChange&>>> m_onStateChangedHandlers;
         std::vector<Entity::index_type> m_handlerIndices;
 
         // Animation data sandbox

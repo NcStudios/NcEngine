@@ -1,26 +1,22 @@
 #include "graphics/SkeletalAnimator.h"
-#include "graphics/MeshRenderer.h"
-#include "graphics/ToonRenderer.h"
-#include "ecs/Registry.h"
 
 namespace nc::graphics
 {
-SkeletalAnimator::SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid)
+SkeletalAnimator::SkeletalAnimator(Entity entity, const std::string& meshUid, const std::string& animationUid)
     : ComponentBase{entity},
       m_states{MaxStates},
-      m_activeState{m_states.Insert(anim::State{anim::Initial{animationUid}})},
-      m_meshUid{std::move(meshUid)},
+      m_activeState{m_states.Insert(anim::State{anim::Root{animationUid}})},
       m_immediateState{},
-      m_onPlayStateChanged{},
-      m_immediateStateInitialized{},
-      m_initialStateInitialized{},
-      m_initialState{anim::State{anim::Initial{animationUid}}}
+      m_immediateStateSet{},
+      m_rootStateSet{},
+      m_meshUid{meshUid},
+      m_onStateChanged{}
 {
 }
 
 void SkeletalAnimator::Execute()
 {
-    if (ExecuteInitialState()) { return; }
+    if (ExecuteRootState()) { return; }
     if (ExecuteImmediateState()) { return; }
     if (ExecuteExitState()) { return; }
 
@@ -30,61 +26,60 @@ void SkeletalAnimator::Execute()
     }
 }
 
-auto SkeletalAnimator::AddState(anim::Loop loopProperties) -> uint32_t
+auto SkeletalAnimator::AddState(const anim::Loop& loopProperties) -> uint32_t
 {
-    auto addedStateHandle = m_states.Insert(anim::State{std::move(loopProperties)});
+    const auto addedStateHandle = m_states.Insert(anim::State{loopProperties});
     auto* addedState = m_states.GetLast();
     m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
-auto SkeletalAnimator::AddState(anim::PlayOnce playOnceProperties) -> uint32_t
+auto SkeletalAnimator::AddState(const anim::PlayOnce& playOnceProperties) -> uint32_t
 {
-    auto firstRunComplete = std::make_unique<bool>(false);
-    auto addedStateHandle = m_states.Insert(anim::State{std::move(playOnceProperties)});
+    const auto addedStateHandle = m_states.Insert(anim::State{playOnceProperties});
     auto* addedState = m_states.GetLast();
     m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
-auto SkeletalAnimator::AddState(anim::Stop stopProperties) -> uint32_t
+auto SkeletalAnimator::AddState(const anim::Stop& stopProperties) -> uint32_t
 {
-    auto state = anim::State{std::move(stopProperties)};
+    auto state = anim::State{stopProperties};
     state.animUid = m_states.Get(m_activeState)->animUid;
-    auto addedStateHandle = m_states.Insert(std::move(state));
+    const auto addedStateHandle = m_states.Insert(std::move(state));
     auto* addedState = m_states.GetLast();
     m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
-void SkeletalAnimator::LoopImmediate(std::string animUid, std::function<bool ()> exitWhen, uint32_t exitTo)
+void SkeletalAnimator::LoopImmediate(const std::string& animUid, const std::function<bool ()>& exitWhen, uint32_t exitTo)
 {
     m_immediateState = anim::State(anim::Loop
     {
         .enterFrom = anim::State::NullId,
         .enterWhen = [](){ return false; },
-        .animUid = std::move(animUid),
-        .exitWhen = std::move(exitWhen),
+        .animUid = animUid,
+        .exitWhen = exitWhen,
         .exitTo = exitTo
     });
 }
 
-void SkeletalAnimator::PlayOnceImmediate(std::string animUid, uint32_t exitTo)
+void SkeletalAnimator::PlayOnceImmediate(const std::string& animUid, uint32_t exitTo)
 {
     m_immediateState = anim::State(anim::PlayOnce
     {
         .enterFrom = anim::State::NullId,
         .enterWhen = [](){ return false; },
-        .animUid = std::move(animUid),
+        .animUid = animUid,
         .exitTo = exitTo
     });
 }
 
-void SkeletalAnimator::StopImmediate(std::function<bool ()> exitWhen, uint32_t exitTo)
+void SkeletalAnimator::StopImmediate(const std::function<bool ()>& exitWhen, uint32_t exitTo)
 {
     m_immediateState = anim::State(anim::StopImmediate
     {
-        .exitWhen = std::move(exitWhen),
+        .exitWhen = exitWhen,
         .exitTo = exitTo
     });
 }
@@ -102,11 +97,11 @@ void SkeletalAnimator::CompleteFirstRun()
     }
 }
 
-auto SkeletalAnimator::ExecuteInitialState() -> bool
+auto SkeletalAnimator::ExecuteRootState() -> bool
 {
-    if (!m_initialStateInitialized)
+    if (!m_rootStateSet)
     {
-        m_onPlayStateChanged.Emit(anim::PlayState
+        m_onStateChanged.Emit(anim::StateChange
         {
             .meshUid = m_meshUid,
             .prevAnimUid = std::string{},
@@ -114,38 +109,20 @@ auto SkeletalAnimator::ExecuteInitialState() -> bool
             .action = anim::Action::Loop,
             .entity = ParentEntity()
         });
-        m_initialStateInitialized = true;
+        m_rootStateSet = true;
         return true;
     }
     return false;
 }
 
-// auto SkeletalAnimator::ExecuteInitialState() -> bool
-// {
-//     if (!m_initialStateInitialized)
-//     {
-//         m_onPlayStateChanged.Emit(anim::PlayState
-//         {
-//             .meshUid = m_meshUid,
-//             .prevAnimUid = std::string{},
-//             .curAnimUid = m_initialState.animUid,
-//             .action = m_initialState.action,
-//             .entity = ParentEntity()
-//         });
-//         m_initialStateInitialized = true;
-//         return true;
-//     }
-//     return false;
-// }
-
 auto SkeletalAnimator::ExecuteImmediateState() -> bool
 {
     if (m_immediateState.has_value())
     {
-        if (!m_immediateStateInitialized)
+        if (!m_immediateStateSet)
         {
-            m_immediateStateInitialized = true;
-            m_onPlayStateChanged.Emit(anim::PlayState
+            m_immediateStateSet = true;
+            m_onStateChanged.Emit(anim::StateChange
             {
                 .meshUid = m_meshUid,
                 .prevAnimUid =  m_states.Get(m_activeState)->animUid,
@@ -159,7 +136,7 @@ auto SkeletalAnimator::ExecuteImmediateState() -> bool
         {
             m_activeState = m_immediateState.value().exitTo;
 
-            m_onPlayStateChanged.Emit(anim::PlayState
+            m_onStateChanged.Emit(anim::StateChange
             {
                 .meshUid = m_meshUid,
                 .prevAnimUid = m_immediateState.value().animUid,
@@ -168,7 +145,7 @@ auto SkeletalAnimator::ExecuteImmediateState() -> bool
                 .entity = ParentEntity()
             });
 
-            m_immediateStateInitialized = false;
+            m_immediateStateSet = false;
             m_immediateState = std::nullopt;
             return true;
         }
@@ -182,7 +159,7 @@ auto SkeletalAnimator::ExecuteExitState() -> bool
     if (m_states.Get(m_activeState)->exitWhen())
     {
         auto exitToState = m_states.Get(m_states.Get(m_activeState)->exitTo);
-        m_onPlayStateChanged.Emit(anim::PlayState
+        m_onStateChanged.Emit(anim::StateChange
         {
             .meshUid = m_meshUid,
             .prevAnimUid = m_states.Get(m_activeState)->animUid,
@@ -201,7 +178,7 @@ auto SkeletalAnimator::ExecuteChildEnterState(uint32_t childStateHandle) -> bool
     auto childState = m_states.Get(childStateHandle);
     if (childState->enterWhen())
     {
-        m_onPlayStateChanged.Emit(anim::PlayState
+        m_onStateChanged.Emit(anim::StateChange
         {
             .meshUid = m_meshUid,
             .prevAnimUid = m_states.Get(m_activeState)->animUid,
@@ -219,7 +196,7 @@ auto SkeletalAnimator::AddState(anim::StopImmediate stopImmediateProperties) -> 
 {
     auto state = anim::State{std::move(stopImmediateProperties)};
     state.animUid = m_states.Get(m_activeState)->animUid;
-    auto addedStateHandle = m_states.Insert(std::move(state));
+    const auto addedStateHandle = m_states.Insert(std::move(state));
     auto* addedState = m_states.GetLast();
     m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
     return addedStateHandle;

@@ -1,5 +1,5 @@
 /**
- * @file SkeletalAnimationTypes.h
+ * @file SkeletalAnimator.h
  * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
@@ -21,73 +21,76 @@ class SkeletalAnimator : public ComponentBase
          * @param meshUid The UID of the mesh that will be animated by this component.
          * @param animationUid The UID of the asset::SkeletalAnimation that will become the initial animation for this component. The initial state will always loop.
          */
-        SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid);
+        SkeletalAnimator(Entity entity, const std::string& meshUid, const std::string& animationUid);
         SkeletalAnimator(SkeletalAnimator&& other) noexcept  = default;
         SkeletalAnimator(SkeletalAnimator& other) = delete;
         auto operator=(SkeletalAnimator&& other) noexcept -> SkeletalAnimator&  = default;
         auto operator=(SkeletalAnimator& other) -> SkeletalAnimator& = delete;
         ~SkeletalAnimator() noexcept = default;
 
-        /** @brief Called by SkeletalAnimationSystem. Executes the state machine; all animations whose transition conditions are met emit a signal to be processed. */
+        /** 
+         * @brief Called by SkeletalAnimationSystem. Executes the state machine.
+         * All animations whose transition conditions are met emit a signal to be processed.
+         * */
         void Execute();
 
         /** 
          * @brief Add an anim::Loop state to the state machine.
          * @param loopProperties Properties required to create an anim::Loop state.
          */
-        auto AddState(anim::Loop loopProperties) -> uint32_t;
+        auto AddState(const anim::Loop& loopProperties) -> uint32_t;
 
         /** 
          * @brief Add an anim::PlayOnce state to the state machine.
          * @param playOnceProperties Properties required to create an anim::PlayOnce state.
          */
-        auto AddState(anim::PlayOnce playOnceProperties) -> uint32_t;
+        auto AddState(const anim::PlayOnce& playOnceProperties) -> uint32_t;
 
         /** 
          * @brief Add an anim::Stop state to the state machine.
          * @param stopProperties Properties required to create an anim::Stop state.
          */
-        auto AddState(anim::Stop stopProperties) -> uint32_t;
+        auto AddState(const anim::Stop& stopProperties) -> uint32_t;
 
         /**
          * @brief Interrupt the state machine with an immediate looping animation.
-         * Transitions back into a state in the state machine when exitWhen is met.
+         * Transitions back into the state machine when exitWhen is met.
          * @param animUid The animation to play.
          * @param exitWhen Exit back to the state machine when this condition is met.
          * @param exitTo Exit back to this state.
          */
-        void LoopImmediate(std::string animUid, std::function<bool ()> exitWhen, uint32_t exitTo);
+        void LoopImmediate(const std::string& animUid, const std::function<bool ()>& exitWhen, uint32_t exitTo);
 
         /**
          * @brief Interrupt the state machine with an immediate animation that plays once.
-         * Transitions back into a state in the state machine when the animation has completed.
+         * Transitions back into the state machine when the animation has completed.
          * @param animUid The animation to play
          * @param exitTo Exit back to this state.
          */
-        void PlayOnceImmediate(std::string animUid, uint32_t exitTo);
+        void PlayOnceImmediate(const std::string& animUid, uint32_t exitTo);
 
         /**
          * @brief Interrupt the state machine and stop the currently playing animation.
-         * Transitions back into a state in the state machine when exitWhen is met.
+         * Transitions back into the state machine when exitWhen is met.
          * @param exitWhen Exit back to the state machine when this condition is met.
          * @param exitTo Exit back to this state.
          */
-        void StopImmediate(std::function<bool ()> exitWhen, uint32_t exitTo);
+        void StopImmediate(const std::function<bool ()>& exitWhen, uint32_t exitTo);
 
         /** @brief Get the first state in the state machine, initialized by the constructor. */
-        auto RootState() -> uint32_t {return m_states.Get(0)->id;}
+        auto RootState() -> uint32_t { return m_states.Get(0)->id; }
 
         /** @brief Connect to SkeletalAnimationSystem. **/
-        auto Connect() noexcept -> Signal<const anim::PlayState&>& { return m_onPlayStateChanged; }
+        auto Connect() noexcept -> Signal<const anim::StateChange&>& { return m_onStateChanged; }
 
-        /** @brief Get UID of mesh that will be animated **/
+        /** @brief Get the UID of the mesh that will be animated **/
         auto MeshUid() const noexcept -> const std::string& { return m_meshUid; }
 
         /** @brief Used to manage the play once state **/
         void CompleteFirstRun();
 
     private:
-        auto ExecuteInitialState() -> bool;
+        auto ExecuteRootState() -> bool;
         auto ExecuteImmediateState() -> bool;
         auto ExecuteExitState() -> bool;
         auto ExecuteChildEnterState(uint32_t childStateHandle) -> bool;
@@ -95,12 +98,11 @@ class SkeletalAnimator : public ComponentBase
 
         anim::SparseSet m_states;
         uint32_t m_activeState;
-        std::string m_meshUid;
         std::optional<anim::State> m_immediateState;
-        Signal<const anim::PlayState&> m_onPlayStateChanged;
-        bool m_immediateStateInitialized;
-        bool m_initialStateInitialized;
-        anim::State m_initialState;
+        bool m_immediateStateSet;
+        bool m_rootStateSet;
+        std::string m_meshUid;
+        Signal<const anim::StateChange&> m_onStateChanged;
 };
 } // namespace nc::graphics
 

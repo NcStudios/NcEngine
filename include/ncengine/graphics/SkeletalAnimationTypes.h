@@ -22,7 +22,7 @@ enum class Action : uint8_t
 /**
  * @brief A simplified representation of a SkeletalAnimator state machine state sent to SkeletalAnimationSystem on state transition.
  */
-struct PlayState
+struct StateChange
 {
     std::string meshUid;
     std::string prevAnimUid;
@@ -72,11 +72,11 @@ struct PlayOnce
 /**
  * @brief A type used to simplify creating SkeletalAnimator state machine states.
  * 
- * The Initial state is implicitly created from the constructor of the SkeletalAnimator and nowhere else.
+ * The Root state is implicitly created from the constructor of the SkeletalAnimator and nowhere else.
  */
-struct Initial
+struct Root
 {
-    Initial(std::string animUid_)
+    Root(std::string animUid_)
         : animUid{std::move(animUid_)}{} 
     std::string animUid;
 };
@@ -104,7 +104,7 @@ struct State
      * @brief Construct a new State in the state machine representing the state the SkeletalAnimator is initialized playing.
      * @param initialProperties The parent entity.
      */
-    State(const Initial& initialProperties)
+    State(const Root& initialProperties)
         : id{},
           action{Action::Loop},
           animUid{std::move(initialProperties.animUid)},
