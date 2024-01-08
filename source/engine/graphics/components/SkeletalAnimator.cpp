@@ -91,9 +91,10 @@ void SkeletalAnimator::CompleteFirstRun()
         *m_immediateState->firstRunComplete.get() = true;
     }
 
-    if (m_states.Get(m_activeState) && m_states.Get(m_activeState)->action == anim::Action::PlayOnce)
+    auto* activeState = m_states.Get(m_activeState);
+    if (activeState && activeState->action == anim::Action::PlayOnce)
     {
-        *m_states.Get(m_activeState)->firstRunComplete.get() = true;
+        *activeState->firstRunComplete.get() = true;
     }
 }
 

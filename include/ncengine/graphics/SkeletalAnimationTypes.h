@@ -9,9 +9,9 @@
 
 namespace nc::graphics::anim
 {
-static constexpr uint32_t NullState = UINT32_MAX;
-static constexpr uint32_t RootState = 0u;
-static constexpr bool Never(){return false;};
+constexpr uint32_t NullState = UINT32_MAX;
+constexpr uint32_t RootState = 0u;
+constexpr bool Never(){return false;};
 
 /**
  * @brief Options for controlling the behavior of the animation.
@@ -43,8 +43,8 @@ struct StateChange
  */
 struct Stop
 {
-        uint32_t enterFrom;
-        std::function<bool()> enterWhen;
+    uint32_t enterFrom;
+    std::function<bool()> enterWhen;
 };
 
 /**
@@ -54,11 +54,11 @@ struct Stop
  */
 struct Loop
 {
-        uint32_t enterFrom;
-        std::function<bool()> enterWhen;
-        std::string animUid;
-        std::function<bool()> exitWhen;
-        uint32_t exitTo = RootState;
+    uint32_t enterFrom;
+    std::function<bool()> enterWhen;
+    std::string animUid;
+    std::function<bool()> exitWhen;
+    uint32_t exitTo = RootState;
 };
 
 /**
@@ -69,10 +69,10 @@ struct Loop
  */
 struct PlayOnce
 {
-        uint32_t enterFrom;
-        std::function<bool()> enterWhen;
-        std::string animUid;
-        uint32_t exitTo = RootState;
+    uint32_t enterFrom;
+    std::function<bool()> enterWhen;
+    std::string animUid;
+    uint32_t exitTo = RootState;
 };
 
 /**
@@ -83,8 +83,8 @@ struct PlayOnce
  */
 struct Root
 {
-        Root(std::string animUid_) : animUid{std::move(animUid_)} {}
-        std::string animUid;
+    Root(std::string animUid_) : animUid{std::move(animUid_)} {}
+    std::string animUid;
 };
 
 /**
@@ -97,8 +97,8 @@ struct Root
  */
 struct StopImmediate
 {
-        std::function<bool()> exitWhen;
-        uint32_t exitTo = RootState;
+    std::function<bool()> exitWhen;
+    uint32_t exitTo = RootState;
 };
 
 /**
@@ -215,7 +215,7 @@ class StableSet
          * 
          * @param maxStates The container capacity.
          */
-        StableSet(uint32_t maxStates);
+        explicit StableSet(uint32_t maxStates);
 
         /**
          * @brief Add a State.

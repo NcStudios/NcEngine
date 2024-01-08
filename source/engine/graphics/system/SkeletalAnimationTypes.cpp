@@ -27,7 +27,6 @@ StableSet::StableSet(uint32_t maxStates)
     : m_states{},
       m_sparse(maxStates, NullState)
 {
-    m_states.reserve(maxStates);
 }
 
 auto StableSet::Insert(State toInsert) -> uint32_t
