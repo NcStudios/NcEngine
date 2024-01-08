@@ -3,26 +3,9 @@
 
 using namespace nc::graphics::anim;
 
-TEST(StableSet_test, Insert_exceedsMaxSize_throws)
-{
-    auto uut = StableSet{10};
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-    uut.Insert(State{Root{"dummy"}});
-
-    EXPECT_THROW(uut.Insert(State{Root{"dummy"}}), std::out_of_range);
-}
-
 TEST(StableSet_test, Remove_insertAfterRemove_indexIsCorrect)
 {
-    auto uut = StableSet{10};
+    auto uut = StableSet{};
     auto first = uut.Insert(State{Root{"dummy1"}});
     auto second = uut.Insert(State{Root{"dummy2"}});
     uut.Remove(first);
@@ -32,7 +15,7 @@ TEST(StableSet_test, Remove_insertAfterRemove_indexIsCorrect)
 
 TEST(StableSet_test, Remove_insertAfterRemove_removedReturnsNullPtr)
 {
-    auto uut = StableSet{10};
+    auto uut = StableSet{};
     uut.Insert(State{Root{"dummy1"}});
     auto second = uut.Insert(State{Root{"dummy2"}});
     uut.Remove(second);
@@ -41,7 +24,7 @@ TEST(StableSet_test, Remove_insertAfterRemove_removedReturnsNullPtr)
 
 TEST(StableSet_test, Get_insertAfterRemove_handlesStillValid)
 {
-    auto uut = StableSet{10};
+    auto uut = StableSet{};
     auto first  = uut.Insert(State{Root{"dummy1"}});
     auto second = uut.Insert(State{Root{"dummy2"}});
     auto third  = uut.Insert(State{Root{"dummy3"}});
@@ -59,7 +42,7 @@ TEST(StableSet_test, Get_insertAfterRemove_handlesStillValid)
 
 TEST(StableSet_test, GetLast_noStates_ReturnsNullPtr)
 {
-    auto uut = StableSet{10};
+    auto uut = StableSet{};
     auto last = uut.GetLast();
     ASSERT_EQ(last, nullptr);
 }

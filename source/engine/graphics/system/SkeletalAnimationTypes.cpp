@@ -23,16 +23,14 @@ void State::AddSuccessor(uint32_t successor)
     successors.push_back(successor);
 }
 
-StableSet::StableSet(uint32_t maxStates)
-    : m_states{},
-      m_sparse(maxStates, NullState)
+StableSet::StableSet()
+    : m_states{}
 {
 }
 
 auto StableSet::Insert(State toInsert) -> uint32_t
 {
     toInsert.id = AssignId();
-    m_sparse.at(toInsert.id) = static_cast<uint32_t>(m_states.size());
     m_states.push_back(std::move(toInsert));
     return m_states.back().id;
 }
@@ -42,13 +40,13 @@ auto StableSet::Remove(uint32_t toRemove) noexcept -> bool
     if (!Contains(toRemove))
         return false;
 
-    m_sparse.at(toRemove) = NullState;
+    m_states.at(toRemove).id = NullState;
     return true;
 }
 
 auto StableSet::Contains(uint32_t id) const noexcept -> bool
 {
-    return id < m_sparse.size() ? m_sparse[id] != NullState : false;
+    return id < m_states.size() ? m_states[id].id != NullState : false;
 }
 
 auto StableSet::Get(uint32_t id) noexcept -> State*
@@ -58,7 +56,7 @@ auto StableSet::Get(uint32_t id) noexcept -> State*
         return nullptr;
     }
 
-    return &m_states.at(m_sparse.at(id));
+    return &m_states.at(id);
 }
 
 auto StableSet::GetLast() noexcept -> State*
@@ -69,12 +67,7 @@ auto StableSet::GetLast() noexcept -> State*
     }
 
     auto back = &m_states.back();
-    if (m_sparse[back->id] == NullState)
-    {
-        return nullptr;
-    }
-
-    return back;
+    return back->id == NullState ? nullptr : back;
 }
 
 PackedRig::PackedRig(const nc::asset::BonesData& bonesData)

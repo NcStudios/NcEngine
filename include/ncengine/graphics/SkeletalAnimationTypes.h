@@ -212,10 +212,8 @@ class StableSet
     public:
         /**
          * @brief Construct a new Stable Set object
-         * 
-         * @param maxStates The container capacity.
          */
-        explicit StableSet(uint32_t maxStates);
+        explicit StableSet();
 
         /**
          * @brief Add a State.
@@ -260,9 +258,7 @@ class StableSet
 
     private:
         auto AssignId() const noexcept -> uint32_t { return static_cast<uint32_t>(m_states.size()); }
-
         std::vector<anim::State> m_states;
-        std::vector<uint32_t> m_sparse;
 };
 
 /**

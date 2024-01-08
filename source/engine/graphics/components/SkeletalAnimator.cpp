@@ -4,7 +4,7 @@ namespace nc::graphics
 {
 SkeletalAnimator::SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid)
     : ComponentBase{entity},
-      m_states{MaxStates},
+      m_states{},
       m_onStateChanged{},
       m_meshUid{std::move(meshUid)},
       m_immediateState{},

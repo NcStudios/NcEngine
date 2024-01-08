@@ -13,8 +13,6 @@ namespace nc::graphics
 class SkeletalAnimator : public ComponentBase
 {
     public:
-        static constexpr uint32_t MaxStates = 100u;
-
         /**
          * @brief Construct a new SkeletalAnimator component.
          * @param entity The parent entity.
