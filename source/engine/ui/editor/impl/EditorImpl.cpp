@@ -3,6 +3,13 @@
 #include "input/Input.h"
 #include "window/Window.h"
 
+
+
+#include "ncutility/BinarySerialization.h"
+#include "ncengine/serialize/SceneSerialization.h"
+#include <iostream>
+#include <fstream>
+
 namespace
 {
 namespace hotkey
@@ -16,13 +23,27 @@ namespace nc::ui::editor
 class EditorImpl : public Editor
 {
     public:
-        void Draw(ecs::Ecs world, asset::NcAsset&) override
+        void Draw(ecs::Ecs world, asset::NcAsset& assetModule) override
         {
             if(input::KeyDown(hotkey::Editor))
                 m_open = !m_open;
 
             if(!m_open)
                 return;
+
+            if (input::KeyDown(input::KeyCode::S))
+            {
+                std::cerr << "Saving scene\n";
+                auto file = std::ofstream{"fragment.nca", std::ios::binary | std::ios::trunc};
+                SaveSceneFragment(file, world, assetModule.GetLoadedAssets());
+            }
+
+            if (input::KeyDown(input::KeyCode::L))
+            {
+                std::cerr << "Loading scene\n";
+                auto file = std::ifstream{"fragment.nca", std::ios::binary};
+                LoadSceneFragment(file, world, assetModule);
+            }
 
             m_ui.Draw(world);
         }
