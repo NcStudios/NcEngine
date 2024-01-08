@@ -18,6 +18,12 @@
             "assetName": "concave_collider/ramp"
         }
     ],
+    "cube-map": [
+        {
+            "sourcePath": "raw/image/cube_maps/night_sky.png",
+            "assetName": "cube_map/night_sky.nca"
+          }
+    ],
     "hull-collider": [
         {
             "sourcePath": "raw/model/coin.fbx",
@@ -28,6 +34,10 @@
         {
             "sourcePath": "raw/model/coin.fbx",
             "assetName": "mesh/coin"
+        },
+        {
+            "sourcePath": "raw/model/ogre.fbx",
+            "assetName": "mesh/ogre"
         },
         {
             "sourcePath": "raw/model/ramp.fbx",
@@ -42,12 +52,64 @@
             "assetName": "mesh/token"
         },
         {
-            "sourcePath": "raw/model/tree.fbx",
-            "assetName": "mesh/tree"
-        },
-        {
             "sourcePath": "raw/model/worm.fbx",
             "assetName": "mesh/worm"
+        },
+        {
+            "sourcePath": "raw/model/skeleton.fbx",
+            "assetName": "mesh/skeleton"
+        },
+        {
+            "sourcePath": "raw/model/cave.fbx",
+            "assetName": "mesh/cave"
+        },
+        {
+            "sourcePath": "raw/model/cave_ceiling.fbx",
+            "assetName": "mesh/cave_ceiling"
+        }
+    ],
+    "skeletal-animation": [
+        {
+            "sourcePath": "raw/skeletal_animation/skeleton.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Armature|Idle",
+                    "assetName" : "skeletal_animation\\skeleton\\idle"
+                },
+                {
+                    "subResourceName" : "Armature|WalkFront",
+                    "assetName" : "skeletal_animation\\skeleton\\walk_forward"
+                },
+                {
+                    "subResourceName" : "Armature|WalkBack",
+                    "assetName" : "skeletal_animation\\skeleton\\walk_back"
+                },
+                {
+                    "subResourceName" : "Armature|WalkLeft",
+                    "assetName" : "skeletal_animation\\skeleton\\walk_left"
+                },
+                {
+                    "subResourceName" : "Armature|WalkRight",
+                    "assetName" : "skeletal_animation\\skeleton\\walk_right"
+                },
+                {
+                    "subResourceName" : "Armature|Jump",
+                    "assetName" : "skeletal_animation\\skeleton\\jump"
+                }
+            ]
+        },
+        {
+            "sourcePath": "raw/skeletal_animation/ogre.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Attack",
+                    "assetName" : "skeletal_animation\\ogre\\attack"
+                },
+                {
+                    "subResourceName" : "Idle",
+                    "assetName" : "skeletal_animation\\ogre\\idle"
+                }
+            ]
         }
     ],
     "texture": [
@@ -78,6 +140,38 @@
         {
             "sourcePath": "raw/image/box/Roughness.png",
             "assetName": "texture/box/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/cave/BaseColor.png",
+            "assetName": "texture/cave/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/cave/Normal.png",
+            "assetName": "texture/cave/Normal"
+        },
+        {
+            "sourcePath": "raw/image/cave/Roughness.png",
+            "assetName": "texture/cave/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/cave/Metallic.png",
+            "assetName": "texture/cave/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/cave_ceiling/BaseColor.png",
+            "assetName": "texture/cave_ceiling/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/cave_ceiling/Normal.png",
+            "assetName": "texture/cave_ceiling/Normal"
+        },
+        {
+            "sourcePath": "raw/image/cave_ceiling/Roughness.png",
+            "assetName": "texture/cave_ceiling/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/cave_ceiling/Metallic.png",
+            "assetName": "texture/cave_ceiling/Metallic"
         },
         {
             "sourcePath": "raw/image/coin/BaseColor.png",
@@ -120,6 +214,38 @@
             "assetName": "texture/logo/Metallic"
         },
         {
+            "sourcePath": "raw/image/ogre/BaseColor.png",
+            "assetName": "texture/ogre/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/ogre/Normal.png",
+            "assetName": "texture/ogre/Normal"
+        },
+        {
+            "sourcePath": "raw/image/ogre/Roughness.png",
+            "assetName": "texture/ogre/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/ogre/Metallic.png",
+            "assetName": "texture/ogre/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/skeleton/BaseColor.png",
+            "assetName": "texture/skeleton/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/skeleton/Normal.png",
+            "assetName": "texture/skeleton/Normal"
+        },
+        {
+            "sourcePath": "raw/image/skeleton/Roughness.png",
+            "assetName": "texture/skeleton/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/skeleton/Metallic.png",
+            "assetName": "texture/skeleton/Metallic"
+        },
+        {
             "sourcePath": "raw/image/solid_color/Blue.png",
             "assetName": "texture/solid_color/Blue"
         },
@@ -154,14 +280,6 @@
         {
             "sourcePath": "raw/image/token/Roughness.png",
             "assetName": "texture/token/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/tree/BaseColor.png",
-            "assetName": "texture/tree/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/line/Hatch3.jpg",
-            "assetName": "texture/line/Hatch3"
         }
     ]
 }

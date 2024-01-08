@@ -53,7 +53,7 @@ SkeletalAnimationSystem::SkeletalAnimationSystem(Registry* registry,
       m_onSkeletalAnimationUpdate{onSkeletalAnimationUpdate.Connect(this, &SkeletalAnimationSystem::UpdateSkeletalAnimationStorage)},
       m_onAddConnection{registry->OnAdd<graphics::SkeletalAnimator>().Connect(this, &SkeletalAnimationSystem::Add)},
       m_onRemoveConnection{registry->OnRemove<graphics::SkeletalAnimator>().Connect(this, &SkeletalAnimationSystem::Remove)},
-      m_onPlayStateChangedHandlers{},
+      m_onStateChangedHandlers{},
       m_handlerIndices{},
       m_unitEntities{},
       m_units{},
@@ -79,7 +79,7 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
 
     for (auto&& [unit, unitEntity] : std::views::zip(m_units, m_unitEntities))
     {
-        auto& rig = *unit.rig;
+        const auto& rig = *unit.rig;
         const auto unitIndex = unitEntity.Index();
 
         if (unit.blendFactor < 1.0f) unit.blendFactor += dt * 2.0f;
@@ -88,7 +88,7 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
         auto packedAnimation = PrepareAnimation(unit, rig, dt);
         auto animatedBones = AnimateBones(rig, packedAnimation);
 
-        buffer.insert(buffer.begin(), animatedBones.begin(), animatedBones.end());
+        buffer.insert(buffer.end(), animatedBones.begin(), animatedBones.end());
         state.animationIndices.emplace(unitIndex, stateIndex);
         stateIndex = static_cast<uint32_t>(buffer.size());
     }
@@ -151,25 +151,24 @@ void SkeletalAnimationSystem::UpdateBonesStorage(const asset::BoneUpdateEventDat
     }
 }
 
-void SkeletalAnimationSystem::Start(const anim::PlayState& playState)
+void SkeletalAnimationSystem::Start(const anim::StateChange& stateChange)
 {
-    if (!m_rigs.contains(playState.meshUid) ||
-        (!m_animationAssets.contains(playState.curAnimUid) &&
-        !m_animationAssets.contains(playState.prevAnimUid)) )
+    if (!m_rigs.contains(stateChange.meshUid.data()) ||
+       (!m_animationAssets.contains(stateChange.curAnimUid.data()) && !m_animationAssets.contains(stateChange.prevAnimUid.data())))
     {
         return;
     }
 
-    auto pos = std::ranges::find(m_unitEntities, playState.entity);
+    auto pos = std::ranges::find(m_unitEntities, stateChange.entity);
     if (pos == m_unitEntities.end())
     {
-        m_unitEntities.emplace_back(playState.entity);
+        m_unitEntities.emplace_back(stateChange.entity);
         m_units.emplace_back
         (
-            playState.entity.Index(),
-            &m_rigs.at(playState.meshUid),
-            playState.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
-            playState.curAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.curAnimUid),
+            stateChange.entity.Index(),
+            &m_rigs.at(stateChange.meshUid),
+            stateChange.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(stateChange.prevAnimUid),
+            stateChange.curAnimUid.empty() ? nullptr : &m_animationAssets.at(stateChange.curAnimUid),
             0.0f,
             0.0f,
             0.0f
@@ -178,17 +177,32 @@ void SkeletalAnimationSystem::Start(const anim::PlayState& playState)
     }
 
     auto posIndex = std::distance(m_unitEntities.begin(), pos);
-    m_unitEntities.at(posIndex) = playState.entity;
+    m_unitEntities.at(posIndex) = stateChange.entity;
     m_units.at(posIndex) = anim::UnitOfWork
     {
-        .index         = playState.entity.Index(),
-        .rig           = &m_rigs.at(playState.meshUid),
-        .blendFromAnim = playState.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.prevAnimUid),
-        .blendToAnim   = playState.curAnimUid.empty() ? nullptr : &m_animationAssets.at(playState.curAnimUid),
+        .index         = stateChange.entity.Index(),
+        .rig           = &m_rigs.at(stateChange.meshUid),
+        .blendFromAnim = stateChange.prevAnimUid.empty() ? nullptr : &m_animationAssets.at(stateChange.prevAnimUid),
+        .blendToAnim   = stateChange.curAnimUid.empty() ? nullptr : &m_animationAssets.at(stateChange.curAnimUid),
         .blendFromTime = m_units.at(posIndex).blendToTime,
         .blendToTime   = 0.0f,
         .blendFactor   = 0.0f
     };
+}
+
+void SkeletalAnimationSystem::Stop(const anim::StateChange& stateChange)
+{
+     auto pos = std::ranges::find(m_unitEntities, stateChange.entity);
+    if (pos == m_unitEntities.end())
+    {
+        return;
+    }
+    
+    auto posIndex = std::distance(m_unitEntities.begin(), pos);
+    m_unitEntities.at(posIndex) = m_unitEntities.back();
+    m_unitEntities.pop_back();
+    m_units.at(posIndex) = m_units.back();
+    m_units.pop_back();
 }
 
 void SkeletalAnimationSystem::Clear() noexcept
@@ -197,16 +211,21 @@ void SkeletalAnimationSystem::Clear() noexcept
     m_unitEntities.clear();
 }
 
-void SkeletalAnimationSystem::OnPlayStateChanged(const anim::PlayState& playState)
+void SkeletalAnimationSystem::OnStateChanged(const anim::StateChange& stateChange)
 {
-    Start(playState);
+    if (stateChange.action == anim::Action::Stop)
+    {
+        Stop(stateChange);
+        return;
+    }
+    Start(stateChange);
 }
 
 void SkeletalAnimationSystem::Add(SkeletalAnimator& animator)
 {
     auto& signal = animator.Connect();
-    auto connectionState = std::make_unique<Connection<const anim::PlayState&>>(signal.Connect(this, &SkeletalAnimationSystem::OnPlayStateChanged));
-    m_onPlayStateChangedHandlers.emplace_back(std::move(connectionState));
+    auto connectionState = std::make_unique<Connection<const anim::StateChange&>>(signal.Connect(this, &SkeletalAnimationSystem::OnStateChanged));
+    m_onStateChangedHandlers.emplace_back(std::move(connectionState));
     m_handlerIndices.emplace_back(animator.ParentEntity().Index());
 }
 
@@ -221,7 +240,7 @@ void SkeletalAnimationSystem::Remove(Entity entity)
     const auto index = std::distance(m_handlerIndices.begin(), pos);
     m_handlerIndices.at(index) = m_handlerIndices.back();
     m_handlerIndices.pop_back();
-    m_onPlayStateChangedHandlers.at(index) = std::move(m_onPlayStateChangedHandlers.back());
-    m_onPlayStateChangedHandlers.pop_back();
+    m_onStateChangedHandlers.at(index) = std::move(m_onStateChangedHandlers.back());
+    m_onStateChangedHandlers.pop_back();
 }
 }
