@@ -153,8 +153,8 @@ void SkeletalAnimationSystem::UpdateBonesStorage(const asset::BoneUpdateEventDat
 
 void SkeletalAnimationSystem::Start(const anim::StateChange& stateChange)
 {
-    if (!m_rigs.contains(stateChange.meshUid) ||
-       (!m_animationAssets.contains(stateChange.curAnimUid) && !m_animationAssets.contains(stateChange.prevAnimUid)))
+    if (!m_rigs.contains(stateChange.meshUid.data()) ||
+       (!m_animationAssets.contains(stateChange.curAnimUid.data()) && !m_animationAssets.contains(stateChange.prevAnimUid.data())))
     {
         return;
     }

@@ -2,15 +2,15 @@
 
 namespace nc::graphics
 {
-SkeletalAnimator::SkeletalAnimator(Entity entity, const std::string& meshUid, const std::string& animationUid)
+SkeletalAnimator::SkeletalAnimator(Entity entity, std::string meshUid, std::string animationUid)
     : ComponentBase{entity},
       m_states{MaxStates},
-      m_activeState{m_states.Insert(anim::State{anim::Root{animationUid}})},
+      m_onStateChanged{},
+      m_meshUid{std::move(meshUid)},
       m_immediateState{},
+      m_activeState{m_states.Insert(anim::State{anim::Root{std::move(animationUid)}})},
       m_immediateStateSet{},
-      m_rootStateSet{},
-      m_meshUid{meshUid},
-      m_onStateChanged{}
+      m_rootStateSet{}
 {
 }
 
@@ -26,25 +26,25 @@ void SkeletalAnimator::Execute()
     }
 }
 
-auto SkeletalAnimator::AddState(const anim::Loop& loopProperties) -> uint32_t
+auto SkeletalAnimator::AddState(anim::Loop loopProperties) -> uint32_t
 {
-    const auto addedStateHandle = m_states.Insert(anim::State{loopProperties});
+    const auto addedStateHandle = m_states.Insert(anim::State{std::move(loopProperties)});
     auto* addedState = m_states.GetLast();
     m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
-auto SkeletalAnimator::AddState(const anim::PlayOnce& playOnceProperties) -> uint32_t
+auto SkeletalAnimator::AddState(anim::PlayOnce playOnceProperties) -> uint32_t
 {
-    const auto addedStateHandle = m_states.Insert(anim::State{playOnceProperties});
+    const auto addedStateHandle = m_states.Insert(anim::State{std::move(playOnceProperties)});
     auto* addedState = m_states.GetLast();
     m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
-auto SkeletalAnimator::AddState(const anim::Stop& stopProperties) -> uint32_t
+auto SkeletalAnimator::AddState(anim::Stop stopProperties) -> uint32_t
 {
-    auto state = anim::State{stopProperties};
+    auto state = anim::State{std::move(stopProperties)};
     state.animUid = m_states.Get(m_activeState)->animUid;
     const auto addedStateHandle = m_states.Insert(std::move(state));
     auto* addedState = m_states.GetLast();
@@ -52,43 +52,43 @@ auto SkeletalAnimator::AddState(const anim::Stop& stopProperties) -> uint32_t
     return addedStateHandle;
 }
 
-void SkeletalAnimator::LoopImmediate(const std::string& animUid, const std::function<bool ()>& exitWhen, uint32_t exitTo)
+void SkeletalAnimator::LoopImmediate(std::string animUid, std::function<bool ()> exitWhen, uint32_t exitTo)
 {
-    m_immediateState = anim::State(anim::Loop
+    m_immediateState = std::make_unique<anim::State>(anim::Loop
     {
-        .enterFrom = anim::State::NullId,
-        .enterWhen = [](){ return false; },
-        .animUid = animUid,
-        .exitWhen = exitWhen,
+        .enterFrom = anim::NullState,
+        .enterWhen = anim::Never,
+        .animUid = std::move(animUid),
+        .exitWhen = std::move(exitWhen),
         .exitTo = exitTo
     });
 }
 
-void SkeletalAnimator::PlayOnceImmediate(const std::string& animUid, uint32_t exitTo)
+void SkeletalAnimator::PlayOnceImmediate(std::string animUid, uint32_t exitTo)
 {
-    m_immediateState = anim::State(anim::PlayOnce
+    m_immediateState = std::make_unique<anim::State>(anim::PlayOnce
     {
-        .enterFrom = anim::State::NullId,
-        .enterWhen = [](){ return false; },
-        .animUid = animUid,
+        .enterFrom = anim::NullState,
+        .enterWhen = anim::Never,
+        .animUid = std::move(animUid),
         .exitTo = exitTo
     });
 }
 
-void SkeletalAnimator::StopImmediate(const std::function<bool ()>& exitWhen, uint32_t exitTo)
+void SkeletalAnimator::StopImmediate(std::function<bool ()> exitWhen, uint32_t exitTo)
 {
-    m_immediateState = anim::State(anim::StopImmediate
+    m_immediateState = std::make_unique<anim::State>(anim::StopImmediate
     {
-        .exitWhen = exitWhen,
+        .exitWhen = std::move(exitWhen),
         .exitTo = exitTo
     });
 }
 
 void SkeletalAnimator::CompleteFirstRun()
 {
-    if (m_immediateState.has_value() && m_immediateState.value().action == anim::Action::PlayOnce)
+    if (m_immediateState && m_immediateState->action == anim::Action::PlayOnce)
     {
-        *m_immediateState.value().firstRunComplete.get() = true;
+        *m_immediateState->firstRunComplete.get() = true;
     }
 
     if (m_states.Get(m_activeState) && m_states.Get(m_activeState)->action == anim::Action::PlayOnce)
@@ -117,7 +117,7 @@ auto SkeletalAnimator::ExecuteRootState() -> bool
 
 auto SkeletalAnimator::ExecuteImmediateState() -> bool
 {
-    if (m_immediateState.has_value())
+    if (m_immediateState)
     {
         if (!m_immediateStateSet)
         {
@@ -126,27 +126,27 @@ auto SkeletalAnimator::ExecuteImmediateState() -> bool
             {
                 .meshUid = m_meshUid,
                 .prevAnimUid =  m_states.Get(m_activeState)->animUid,
-                .curAnimUid = m_immediateState.value().animUid,
-                .action = m_immediateState.value().action,
+                .curAnimUid = m_immediateState->animUid,
+                .action = m_immediateState->action,
                 .entity = ParentEntity()
             });
             return true;
         }
-        if (m_immediateState.value().exitWhen())
+        if (m_immediateState->exitWhen())
         {
-            m_activeState = m_immediateState.value().exitTo;
+            m_activeState = m_immediateState->exitTo;
 
             m_onStateChanged.Emit(anim::StateChange
             {
                 .meshUid = m_meshUid,
-                .prevAnimUid = m_immediateState.value().animUid,
+                .prevAnimUid = m_immediateState->animUid,
                 .curAnimUid = m_states.Get(m_activeState)->animUid,
                 .action = m_states.Get(m_activeState)->action,
                 .entity = ParentEntity()
             });
 
             m_immediateStateSet = false;
-            m_immediateState = std::nullopt;
+            m_immediateState = nullptr;
             return true;
         }
         return true; // Trapped in the immediate state until its exit condition is met
