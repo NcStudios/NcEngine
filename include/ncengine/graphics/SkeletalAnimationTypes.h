@@ -245,16 +245,16 @@ class StableSet
          * @brief Get the State with the given handle.
          * 
          * @param id The handle of the State to get.
-         * @return State* The State requested or nullptr if not present.
+         * @return State The State requested or nullptr if not present.
          */
-        auto Get(uint32_t id) noexcept -> State*;
+        auto Get(uint32_t id) -> State&;
 
         /**
          * @brief Get the last State added.
          * 
-         * @return State* The handle of the most recently added State or nullptr if no State exists.
+         * @return State The handle of the most recently added State or nullptr if no State exists.
          */
-        auto GetLast() noexcept -> State*;
+        auto GetLast() -> State&;
 
     private:
         auto AssignId() const noexcept -> uint32_t { return static_cast<uint32_t>(m_states.size()); }

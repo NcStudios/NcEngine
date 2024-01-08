@@ -49,25 +49,19 @@ auto StableSet::Contains(uint32_t id) const noexcept -> bool
     return id < m_states.size() ? m_states[id].id != NullState : false;
 }
 
-auto StableSet::Get(uint32_t id) noexcept -> State*
+auto StableSet::Get(uint32_t id) -> State&
 {
-    if (!Contains(id))
-    {
-        return nullptr;
-    }
-
-    return &m_states.at(id);
+    auto& state = m_states.at(id);
+    NC_ASSERT(state.id != NullState, "The last added state was set to null.");
+    return state;
 }
 
-auto StableSet::GetLast() noexcept -> State*
+auto StableSet::GetLast() -> State&
 {
-    if (m_states.empty())
-    {
-        return nullptr;
-    }
-
-    auto back = &m_states.back();
-    return back->id == NullState ? nullptr : back;
+    NC_ASSERT(!m_states.empty(), "The states container is empty.");
+    auto& back = m_states.back();
+    NC_ASSERT(back.id != NullState, "The last added state was set to null."); 
+    return back;
 }
 
 PackedRig::PackedRig(const nc::asset::BonesData& bonesData)

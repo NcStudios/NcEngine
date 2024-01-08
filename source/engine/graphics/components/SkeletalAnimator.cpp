@@ -20,7 +20,7 @@ void SkeletalAnimator::Execute()
     if (ExecuteImmediateState()) { return; }
     if (ExecuteExitState()) { return; }
 
-    for (auto childStateHandle : m_states.Get(m_activeState)->successors)
+    for (auto childStateHandle : m_states.Get(m_activeState).successors)
     {
         if (ExecuteChildEnterState(childStateHandle)) { return; }
     }
@@ -29,26 +29,26 @@ void SkeletalAnimator::Execute()
 auto SkeletalAnimator::AddState(anim::Loop loopProperties) -> uint32_t
 {
     const auto addedStateHandle = m_states.Insert(anim::State{std::move(loopProperties)});
-    auto* addedState = m_states.GetLast();
-    m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
+    auto& addedState = m_states.GetLast();
+    m_states.Get(addedState.enterFrom).AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
 auto SkeletalAnimator::AddState(anim::PlayOnce playOnceProperties) -> uint32_t
 {
     const auto addedStateHandle = m_states.Insert(anim::State{std::move(playOnceProperties)});
-    auto* addedState = m_states.GetLast();
-    m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
+    auto& addedState = m_states.GetLast();
+    m_states.Get(addedState.enterFrom).AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
 auto SkeletalAnimator::AddState(anim::Stop stopProperties) -> uint32_t
 {
     auto state = anim::State{std::move(stopProperties)};
-    state.animUid = m_states.Get(m_activeState)->animUid;
+    state.animUid = m_states.Get(m_activeState).animUid;
     const auto addedStateHandle = m_states.Insert(std::move(state));
-    auto* addedState = m_states.GetLast();
-    m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
+    auto& addedState = m_states.GetLast();
+    m_states.Get(addedState.enterFrom).AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 
@@ -91,10 +91,10 @@ void SkeletalAnimator::CompleteFirstRun()
         *m_immediateState->firstRunComplete.get() = true;
     }
 
-    auto* activeState = m_states.Get(m_activeState);
-    if (activeState && activeState->action == anim::Action::PlayOnce)
+    auto& activeState = m_states.Get(m_activeState);
+    if (activeState.action == anim::Action::PlayOnce)
     {
-        *activeState->firstRunComplete.get() = true;
+        *activeState.firstRunComplete.get() = true;
     }
 }
 
@@ -106,7 +106,7 @@ auto SkeletalAnimator::ExecuteRootState() -> bool
         {
             .meshUid = m_meshUid,
             .prevAnimUid = std::string{},
-            .curAnimUid = m_states.Get(m_activeState)->animUid,
+            .curAnimUid = m_states.Get(m_activeState).animUid,
             .action = anim::Action::Loop,
             .entity = ParentEntity()
         });
@@ -126,7 +126,7 @@ auto SkeletalAnimator::ExecuteImmediateState() -> bool
             m_onStateChanged.Emit(anim::StateChange
             {
                 .meshUid = m_meshUid,
-                .prevAnimUid =  m_states.Get(m_activeState)->animUid,
+                .prevAnimUid =  m_states.Get(m_activeState).animUid,
                 .curAnimUid = m_immediateState->animUid,
                 .action = m_immediateState->action,
                 .entity = ParentEntity()
@@ -141,8 +141,8 @@ auto SkeletalAnimator::ExecuteImmediateState() -> bool
             {
                 .meshUid = m_meshUid,
                 .prevAnimUid = m_immediateState->animUid,
-                .curAnimUid = m_states.Get(m_activeState)->animUid,
-                .action = m_states.Get(m_activeState)->action,
+                .curAnimUid = m_states.Get(m_activeState).animUid,
+                .action = m_states.Get(m_activeState).action,
                 .entity = ParentEntity()
             });
 
@@ -157,18 +157,19 @@ auto SkeletalAnimator::ExecuteImmediateState() -> bool
 
 auto SkeletalAnimator::ExecuteExitState() -> bool
 {
-    if (m_states.Get(m_activeState)->exitWhen())
+    auto& activeState = m_states.Get(m_activeState);
+    if (activeState.exitWhen())
     {
-        auto exitToState = m_states.Get(m_states.Get(m_activeState)->exitTo);
+        auto& exitToState = m_states.Get(activeState.exitTo);
         m_onStateChanged.Emit(anim::StateChange
         {
             .meshUid = m_meshUid,
-            .prevAnimUid = m_states.Get(m_activeState)->animUid,
-            .curAnimUid = exitToState->animUid,
-            .action = exitToState->action,
+            .prevAnimUid = activeState.animUid,
+            .curAnimUid = exitToState.animUid,
+            .action = exitToState.action,
             .entity = ParentEntity()
         });
-        m_activeState = exitToState->id;
+        m_activeState = exitToState.id;
         return true;
     }
     return false;
@@ -176,18 +177,18 @@ auto SkeletalAnimator::ExecuteExitState() -> bool
 
 auto SkeletalAnimator::ExecuteChildEnterState(uint32_t childStateHandle) -> bool
 {
-    auto childState = m_states.Get(childStateHandle);
-    if (childState->enterWhen())
+    auto& childState = m_states.Get(childStateHandle);
+    if (childState.enterWhen())
     {
         m_onStateChanged.Emit(anim::StateChange
         {
             .meshUid = m_meshUid,
-            .prevAnimUid = m_states.Get(m_activeState)->animUid,
-            .curAnimUid = childState->animUid,
-            .action = childState->action,
+            .prevAnimUid = m_states.Get(m_activeState).animUid,
+            .curAnimUid = childState.animUid,
+            .action = childState.action,
             .entity = ParentEntity()
         });
-        m_activeState = childState->id;
+        m_activeState = childState.id;
         return true;
     }
     return false;
@@ -196,10 +197,10 @@ auto SkeletalAnimator::ExecuteChildEnterState(uint32_t childStateHandle) -> bool
 auto SkeletalAnimator::AddState(anim::StopImmediate stopImmediateProperties) -> uint32_t
 {
     auto state = anim::State{std::move(stopImmediateProperties)};
-    state.animUid = m_states.Get(m_activeState)->animUid;
+    state.animUid = m_states.Get(m_activeState).animUid;
     const auto addedStateHandle = m_states.Insert(std::move(state));
-    auto* addedState = m_states.GetLast();
-    m_states.Get(addedState->enterFrom)->AddSuccessor(addedStateHandle);
+    auto& addedState = m_states.GetLast();
+    m_states.Get(addedState.enterFrom).AddSuccessor(addedStateHandle);
     return addedStateHandle;
 }
 } // namespace nc::graphics
