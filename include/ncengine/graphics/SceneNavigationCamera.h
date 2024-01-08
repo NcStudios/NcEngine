@@ -15,8 +15,8 @@ struct SceneCameraConfig
     float truckPedestalCoarse = 7.0f;
     float panTiltFine = 0.004f;
     float panTiltCoarse = 0.008f;
-    float dollyFine = 0.2f;
-    float dollyCoarse = 0.6f;
+    float dollyFine = 1.2f;
+    float dollyCoarse = 2.6f;
 };
 
 /** @brief Camera for the editor's scene view.

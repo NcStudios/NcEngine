@@ -94,10 +94,10 @@ auto SceneNavigationCamera::Dolly(float dt, float speedMult) -> Vector3
 {
     if(const auto wheel = input::MouseWheel())
     {
-        m_dollyVelocity += speedMult * static_cast<float>(wheel);
+        m_dollyVelocity += speedMult * 0.05f * static_cast<float>(wheel) * dt;
     }
 
     m_dollyVelocity = Lerp(m_dollyVelocity, 0.0f, 0.01f);
-    return Vector3{0.0f, 0.0f, m_dollyVelocity * dt};
+    return Vector3{0.0f, 0.0f, m_dollyVelocity};
 }
 } // namespace nc::graphics
