@@ -64,13 +64,13 @@ void LoadEntities(std::istream& stream, nc::DeserializationContext& ctx)
     });
 }
 
-auto GetSerializablePools(nc::ecs::Ecs ecs)
+auto GetSerializablePools(nc::ecs::Ecs ecs) -> std::vector<nc::ecs::ComponentPoolBase*>
 {
     auto filter = std::views::filter(ecs.GetComponentPools(), [](auto pool){ return pool->HasSerialize(); });
     return std::vector<nc::ecs::ComponentPoolBase*>{filter.begin(), filter.end()};
 }
 
-auto FindPoolById(auto&& pools, size_t poolId)
+auto FindPoolById(auto&& pools, size_t poolId) -> nc::ecs::ComponentPoolBase*
 {
     auto pos = std::ranges::find_if(pools, [poolId](auto pool) { return pool->Id() == poolId; });
     if (pos == pools.end())
