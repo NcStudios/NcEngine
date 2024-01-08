@@ -101,8 +101,6 @@ class SkeletalAnimator : public ComponentBase
         bool m_immediateStateSet;
         bool m_rootStateSet;
 };
-
-constexpr auto animatorSize = sizeof(SkeletalAnimator);
 } // namespace nc::graphics
 
 namespace nc

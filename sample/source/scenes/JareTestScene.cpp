@@ -26,7 +26,7 @@ std::function<float()> GetFPSCallback = nullptr;
 
 void Widget()
 {
-    ImGui::Text("Collision Benchmark");
+    ImGui::Text("FPS Benchmark");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
         ImGui::Text("FPS: %.1f", GetFPSCallback());

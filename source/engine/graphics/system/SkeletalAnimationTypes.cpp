@@ -1,7 +1,6 @@
 #include "ncengine/graphics/SkeletalAnimationTypes.h"
 #include "ncasset/Assets.h"
 
-#include <iostream> //@todo
 #include <ranges>
 
 namespace
@@ -34,11 +33,6 @@ StableSet::StableSet(uint32_t maxStates)
 auto StableSet::Insert(State toInsert) -> uint32_t
 {
     toInsert.id = AssignId();
-    if (toInsert.id >= m_sparse.size())
-    {
-        throw nc::NcError("Capacity reached. Cannot insert state.");
-    }
-
     m_sparse.at(toInsert.id) = static_cast<uint32_t>(m_states.size());
     m_states.push_back(std::move(toInsert));
     return m_states.back().id;

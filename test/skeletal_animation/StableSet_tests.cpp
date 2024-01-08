@@ -63,5 +63,3 @@ TEST(StableSet_test, GetLast_noStates_ReturnsNullPtr)
     auto last = uut.GetLast();
     ASSERT_EQ(last, nullptr);
 }
-
-

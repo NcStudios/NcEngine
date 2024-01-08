@@ -9,7 +9,6 @@
 
 namespace nc::graphics::anim
 {
-
 static constexpr uint32_t NullState = UINT32_MAX;
 static constexpr uint32_t RootState = 0u;
 static constexpr bool Never(){return false;};
