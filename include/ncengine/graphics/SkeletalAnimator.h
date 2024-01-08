@@ -79,7 +79,10 @@ class SkeletalAnimator : public ComponentBase
         auto Connect() noexcept -> Signal<const anim::StateChange&>& { return m_onStateChanged; }
 
         /** @brief Get the UID of the mesh that will be animated **/
-        auto MeshUid() const noexcept -> const std::string& { return m_meshUid; }
+        auto GetMeshUid() const noexcept -> const std::string& { return m_meshUid; }
+
+        /** @brief Set the UID of the mesh that will be animated **/
+        void SetMeshUid(std::string meshUid) noexcept { m_meshUid = std::move(meshUid); }
 
         /** @brief Used to manage the play once state **/
         void CompleteFirstRun();
