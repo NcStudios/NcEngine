@@ -17,7 +17,7 @@ TEST(StableSet_test, Insert_exceedsMaxSize_throws)
     uut.Insert(State{Root{"dummy"}});
     uut.Insert(State{Root{"dummy"}});
 
-    EXPECT_THROW(uut.Insert(State{Root{"dummy"}}), std::runtime_error);
+    EXPECT_THROW(uut.Insert(State{Root{"dummy"}}), std::out_of_range);
 }
 
 TEST(StableSet_test, Remove_insertAfterRemove_indexIsCorrect)
