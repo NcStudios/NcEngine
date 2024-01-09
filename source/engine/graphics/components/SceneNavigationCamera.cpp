@@ -7,9 +7,6 @@
 
 namespace
 {
-constexpr auto g_fineUnitsPerPixel = 1.0f / 30.0f;
-constexpr auto g_courseUnitsPerPixel = 1.0f / 15.0f;
-
 struct Key
 {
     static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
@@ -38,6 +35,37 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity,
 {
 }
 
+
+float smoothstep(float edge0, float edge1, float x)
+{
+    // Scale, bias and saturate x to 0..1 range
+    x = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+    // Evaluate polynomial
+    return x*x*(3 - 2 * x);
+}
+
+float smootherstep(float edge0, float edge1, float x) {
+  // Scale, and clamp x to 0..1 range
+  x = Clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+
+  return x * x * x * (x * (6.0f * x - 15.0f) + 10.0f);
+}
+
+constexpr auto Lerp2(const Vector2& from, const Vector2& to, float factor)
+{
+    return (1.0f - factor) * from + factor * to;
+}
+
+constexpr auto Lerp3(const Vector3& from, const Vector3& to, float factor)
+{
+    return (1.0f - factor) * from + factor * to;
+}
+
+constexpr auto SmootherStep(const Vector2& from, const Vector2& to, float factor)
+{
+    return Vector2{smoothstep(from.x, to.x, factor), smoothstep(from.y, to.y, factor)};
+}
+
 void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 {
     const auto useCoarseSpeed = KeyHeld(Key::Speed);
@@ -47,7 +75,7 @@ void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 
     if(HandlePanInput())
     {
-        translation += TruckAndPedestal(dt, truckPedestalSpeed, useCoarseSpeed ? g_courseUnitsPerPixel : g_fineUnitsPerPixel);
+        translation += TruckAndPedestal(dt, truckPedestalSpeed);
     }
 
     transform->TranslateLocalSpace(translation);
@@ -62,8 +90,7 @@ auto SceneNavigationCamera::HandlePanInput() -> bool
 {
     if(KeyDown(Key::Pan))
     {
-        m_slideReference = input::MousePos();
-        m_unitsTraveled = 0.0f;
+        m_prevMousePos = input::MousePos();
         return false;
     }
 
@@ -81,7 +108,7 @@ auto SceneNavigationCamera::HandleLookInput() -> bool
     return KeyHeld(Key::Look);
 }
 
-auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult, float unitsPerPixel) -> Vector3
+auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3
 {
     const auto mousePos = input::MousePos();
     if (!::IsWithinWindow(mousePos))
@@ -89,17 +116,10 @@ auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult, float un
         return Vector3::Zero();
     }
 
-    const auto mouseDelta = (mousePos - m_slideReference);
-    if(m_unitsTraveled > Magnitude(mouseDelta) * unitsPerPixel)
-    {
-        m_slideReference = mousePos;
-        m_unitsTraveled = 0.0f;
-        return Vector3::Zero();
-    }
-
-    auto translation = mouseDelta * unitsPerPixel * speedMult * dt;
-    m_unitsTraveled += Magnitude(translation);
-    return Vector3{-1.0f * translation.x, translation.y, 0.0f};
+    auto delta = (m_prevMousePos - mousePos);
+    delta.y *= -1.0f;
+    m_prevMousePos = mousePos;
+    return Normalize(Vector3{delta.x, delta.y, 0.0f}) * dt * speedMult * Magnitude(delta);
 }
 
 auto SceneNavigationCamera::PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion
