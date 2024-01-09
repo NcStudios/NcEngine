@@ -3,8 +3,6 @@
 #include "ncengine/input/Input.h"
 #include "ncengine/window/Window.h"
 
-#include <iostream>
-
 namespace
 {
 struct Key
@@ -35,41 +33,9 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity,
 {
 }
 
-
-float smoothstep(float edge0, float edge1, float x)
-{
-    // Scale, bias and saturate x to 0..1 range
-    x = std::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-    // Evaluate polynomial
-    return x*x*(3 - 2 * x);
-}
-
-float smootherstep(float edge0, float edge1, float x) {
-  // Scale, and clamp x to 0..1 range
-  x = Clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-
-  return x * x * x * (x * (6.0f * x - 15.0f) + 10.0f);
-}
-
-constexpr auto Lerp2(const Vector2& from, const Vector2& to, float factor)
-{
-    return (1.0f - factor) * from + factor * to;
-}
-
-constexpr auto Lerp3(const Vector3& from, const Vector3& to, float factor)
-{
-    return (1.0f - factor) * from + factor * to;
-}
-
-constexpr auto SmootherStep(const Vector2& from, const Vector2& to, float factor)
-{
-    return Vector2{smoothstep(from.x, to.x, factor), smoothstep(from.y, to.y, factor)};
-}
-
 void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 {
-    const auto useCoarseSpeed = KeyHeld(Key::Speed);
-    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = useCoarseSpeed ? m_coarseSpeed : m_fineSpeed;
+    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
     auto* transform = registry->Get<Transform>(self);
     auto translation = Dolly(dt, dollySpeed);
 
