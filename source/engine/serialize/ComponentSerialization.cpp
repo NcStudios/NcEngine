@@ -200,7 +200,6 @@ auto DeserializePointLight(std::istream& stream, const DeserializationContext& c
 
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, void*)
 {
-    std::cerr << "Serializing ToonRenderer\n";
     nc::serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
     nc::serialize::Serialize(stream, out.GetMeshPath());
     nc::serialize::Serialize(stream, out.GetMaterial());
@@ -208,7 +207,6 @@ void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& o
 
 auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext& ctx, void*) -> graphics::ToonRenderer
 {
-    std::cerr << "Deserializing ToonRenderer\n";
     auto id = uint32_t{};
     auto mesh = std::string{};
     auto material = graphics::ToonMaterial{};
