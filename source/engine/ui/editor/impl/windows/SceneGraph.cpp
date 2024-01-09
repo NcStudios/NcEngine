@@ -18,19 +18,6 @@ namespace nc::ui::editor
 void SceneGraph::Draw(ecs::Ecs world)
 {
     EnsureSelection(world);
-
-    if (ImGui::Button("Save Scene"))
-    {
-
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Load Scene"))
-    {
-
-    }
-
     m_tagFilter.Draw("search");
 
     ChildWindow("Entity List", [&]()

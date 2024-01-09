@@ -109,12 +109,6 @@ struct ComponentHandler
                                           const DeserializationContext& ctx,
                                           void* userData)>;
 
-    /** @brief Function type for the serialize handler. */
-    using Serialize_t = std::function<void(std::ostream&, const T&, const SerializationContext&, void*)>;
-
-    /** @brief Function type for the deserialize handler. */
-    using Deserialize_t = std::function<T(std::istream&, const DeserializationContext&, void*)>;
-
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T& component)>;
 
