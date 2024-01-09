@@ -18,6 +18,52 @@ auto GetGlobalInverseTransform(const std::vector<nc::asset::BoneSpaceToParentSpa
 
 namespace nc::graphics::anim
 {
+void State::AddSuccessor(uint32_t successor)
+{
+    successors.push_back(successor);
+}
+
+StableSet::StableSet()
+    : m_states{}
+{
+}
+
+auto StableSet::Insert(State toInsert) -> uint32_t
+{
+    toInsert.id = AssignId();
+    m_states.push_back(std::move(toInsert));
+    return m_states.back().id;
+}
+
+auto StableSet::Remove(uint32_t toRemove) noexcept -> bool
+{
+    if (!Contains(toRemove))
+        return false;
+
+    m_states.at(toRemove).id = NullState;
+    return true;
+}
+
+auto StableSet::Contains(uint32_t id) const noexcept -> bool
+{
+    return id < m_states.size() ? m_states[id].id != NullState : false;
+}
+
+auto StableSet::Get(uint32_t id) -> State&
+{
+    auto& state = m_states.at(id);
+    NC_ASSERT(state.id != NullState, "The last added state was set to null.");
+    return state;
+}
+
+auto StableSet::GetLast() -> State&
+{
+    NC_ASSERT(!m_states.empty(), "The states container is empty.");
+    auto& back = m_states.back();
+    NC_ASSERT(back.id != NullState, "The last added state was set to null."); 
+    return back;
+}
+
 PackedRig::PackedRig(const nc::asset::BonesData& bonesData)
     : vertexToBone{},
       boneToParent{},

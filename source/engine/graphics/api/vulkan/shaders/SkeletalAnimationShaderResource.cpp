@@ -4,7 +4,7 @@
 
 namespace nc::graphics
 {
-constexpr uint32_t AvgBonesPerAnim = 30u;
+constexpr uint32_t AvgBonesPerAnim = 10u;
 
 SkeletalAnimationShaderResource::SkeletalAnimationShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxSkeletalAnimations)
     : m_bindingSlot{bindingSlot},

@@ -115,8 +115,8 @@ TEST(ComponentRegistryTests, CommitPendingChanges_updatesState)
     auto& components = uut.GetPool<S1>();
     const auto a = entities.Add(0, 0);
     const auto b = entities.Add(0, 0);
-    components.Add(a);
-    components.Add(b);
+    components.Emplace(a);
+    components.Emplace(b);
     entities.Remove(b);
     uut.CommitPendingChanges();
     EXPECT_TRUE(entities.Contains(a));
@@ -136,9 +136,9 @@ TEST(ComponentRegistryTests, ClearSceneData)
     const auto a = entities.Add(0, 0);
     const auto b = entities.Add(0, nc::Entity::Flags::Persistent);
     const auto c = entities.Add(0, 0);
-    components.Add(a);
-    components.Add(b);
-    components.Add(c);
+    components.Emplace(a);
+    components.Emplace(b);
+    components.Emplace(c);
     uut.CommitPendingChanges();
     uut.ClearSceneData();
     EXPECT_EQ(1, entities.Size());
@@ -160,9 +160,9 @@ TEST(ComponentRegistryTests, Clear)
     const auto a = entities.Add(0, 0);
     const auto b = entities.Add(0, nc::Entity::Flags::Persistent);
     const auto c = entities.Add(0, 0);
-    components.Add(a);
-    components.Add(b);
-    components.Add(c);
+    components.Emplace(a);
+    components.Emplace(b);
+    components.Emplace(c);
     uut.CommitPendingChanges();
     uut.Clear();
     EXPECT_EQ(0, entities.Size());

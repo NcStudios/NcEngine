@@ -10,12 +10,6 @@
 
 namespace nc
 {
-// A map of entities to their fragment ids.
-using EntityToFragmentIdMap = std::unordered_map<Entity, uint32_t, Entity::Hash>;
-
-// A map of fragment ids to entities.
-using FragmentIdToEntityMap = std::unordered_map<uint32_t, Entity>;
-
 // A pair containing an entity's local fragment id and EntityInfo.
 struct FragmentEntityInfo
 {
