@@ -4,7 +4,7 @@
 #include "config/Config.h"
 #include "ecs/Ecs.h"
 #include "ecs/View.h"
-
+#include "graphics/GraphicsUtilities.h"
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
 
@@ -169,7 +169,9 @@ namespace nc::graphics
 
     void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
     {
+        auto adjustedDimensions = AdjustDimensionsToAspectRatio(nc::Vector2{width, height});
+
         m_cameraSystem.Get()->UpdateProjectionMatrix(width, height);
-        m_graphics->OnResize(width, height, isMinimized);
+        m_graphics->OnResize(adjustedDimensions.x, adjustedDimensions.y, isMinimized);
     }
 } // namespace nc::graphics

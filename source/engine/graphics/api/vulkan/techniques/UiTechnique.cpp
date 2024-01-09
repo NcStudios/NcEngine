@@ -6,6 +6,7 @@
 #include "graphics/api/vulkan/meshes/VertexDescriptions.h"
 #include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/GraphicsUtilities.h"
 
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -96,6 +97,10 @@ namespace nc::graphics
 
     void UiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&)
     {
+        // auto* drawData = ImGui::GetDrawData();
+        // auto adjustedDimensions = AdjustDimensionsToAspectRatio(nc::Vector2{drawData->DisplaySize.x, drawData->DisplaySize.y});
+        // drawData->DisplayPos = ImVec2(-(drawData->DisplaySize.x - adjustedDimensions.x) / 2, -(drawData->DisplaySize.y - adjustedDimensions.y) / 2);
+        // drawData->DisplaySize = ImVec2(adjustedDimensions.x - drawData->DisplayPos.x, adjustedDimensions.y+ drawData->DisplayPos.y);
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }
 }

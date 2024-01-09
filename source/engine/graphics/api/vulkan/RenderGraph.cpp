@@ -4,6 +4,7 @@
 #include "PerFrameGpuContext.h"
 #include "Swapchain.h"
 #include "core/Device.h"
+#include "graphics/GraphicsUtilities.h"
 #include "techniques/EnvironmentTechnique.h"
 #include "techniques/OutlineTechnique.h"
 #include "techniques/ParticleTechnique.h"
@@ -18,6 +19,7 @@
 #include "optick.h"
 
 #include <array>
+#include <iostream>
 #include <string>
 
 namespace
@@ -33,8 +35,9 @@ void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer
 void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions)
 {
     const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
-    const auto extent = vk::Extent2D{static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y)};
-    const auto scissor = vk::Rect2D{vk::Offset2D{0, 0}, extent};
+    auto adjustedDimensions = nc::graphics::AdjustDimensionsToAspectRatio(dimensions);
+    const auto extent = vk::Extent2D{static_cast<uint32_t>(adjustedDimensions.x), static_cast<uint32_t>(adjustedDimensions.y)};
+    const auto scissor = vk::Rect2D{vk::Offset2D{static_cast<int32_t>(dimensions.x - extent.width) / 2, static_cast<int32_t>(dimensions.y - extent.height) / 2}, extent};
     cmd->setViewport(0, 1, &viewport);
     cmd->setScissor(0, 1, &scissor);
 }
