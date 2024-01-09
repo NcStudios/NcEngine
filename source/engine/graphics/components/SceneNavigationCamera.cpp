@@ -1,15 +1,30 @@
-#include "ecs/Registry.h"
-#include "input/Input.h"
-#include "graphics/SceneNavigationCamera.h"
+#include "ncengine/graphics/SceneNavigationCamera.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/window/Window.h"
+
+#include <iostream>
 
 namespace
 {
+constexpr auto g_fineUnitsPerPixel = 1.0f / 30.0f;
+constexpr auto g_courseUnitsPerPixel = 1.0f / 15.0f;
+
 struct Key
 {
     static constexpr auto Pan = nc::input::KeyCode::MiddleButton;
     static constexpr auto Look = nc::input::KeyCode::RightButton;
     static constexpr auto Speed = nc::input::KeyCode::LeftShift;
 };
+
+auto IsWithinWindow(const nc::Vector2& pos) -> bool
+{
+    const auto dimensions = nc::window::GetDimensions();
+    return pos.x >= 0.0f &&
+           pos.y >= 0.0f &&
+           pos.x <= dimensions.x &&
+           pos.y <= dimensions.y;
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -25,13 +40,14 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity,
 
 void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 {
-    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
+    const auto useCoarseSpeed = KeyHeld(Key::Speed);
+    const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = useCoarseSpeed ? m_coarseSpeed : m_fineSpeed;
     auto* transform = registry->Get<Transform>(self);
     auto translation = Dolly(dt, dollySpeed);
 
     if(HandlePanInput())
     {
-        translation += TruckAndPedestal(dt, truckPedestalSpeed);
+        translation += TruckAndPedestal(dt, truckPedestalSpeed, useCoarseSpeed ? g_courseUnitsPerPixel : g_fineUnitsPerPixel);
     }
 
     transform->TranslateLocalSpace(translation);
@@ -65,12 +81,15 @@ auto SceneNavigationCamera::HandleLookInput() -> bool
     return KeyHeld(Key::Look);
 }
 
-auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3
+auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult, float unitsPerPixel) -> Vector3
 {
-    constexpr auto unitsPerPixel = 1.0f / 350.0f;
     const auto mousePos = input::MousePos();
-    const auto mouseDelta = (mousePos - m_slideReference) * speedMult;
+    if (!::IsWithinWindow(mousePos))
+    {
+        return Vector3::Zero();
+    }
 
+    const auto mouseDelta = (mousePos - m_slideReference);
     if(m_unitsTraveled > Magnitude(mouseDelta) * unitsPerPixel)
     {
         m_slideReference = mousePos;
@@ -78,7 +97,7 @@ auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vecto
         return Vector3::Zero();
     }
 
-    const auto translation = mouseDelta * dt;
+    auto translation = mouseDelta * unitsPerPixel * speedMult * dt;
     m_unitsTraveled += Magnitude(translation);
     return Vector3{-1.0f * translation.x, translation.y, 0.0f};
 }
@@ -94,10 +113,10 @@ auto SceneNavigationCamera::Dolly(float dt, float speedMult) -> Vector3
 {
     if(const auto wheel = input::MouseWheel())
     {
-        m_dollyVelocity += speedMult * 0.05f * static_cast<float>(wheel) * dt;
+        m_dollyVelocity += speedMult * static_cast<float>(wheel);
     }
 
-    m_dollyVelocity = Lerp(m_dollyVelocity, 0.0f, 0.01f);
+    m_dollyVelocity = Lerp(m_dollyVelocity, 0.0f, 5.0f * dt);
     return Vector3{0.0f, 0.0f, m_dollyVelocity};
 }
 } // namespace nc::graphics
