@@ -11,12 +11,12 @@ namespace graphics
 /** @brief Movement settings for SceneNavigationCamera. */
 struct SceneCameraConfig
 {
-    float truckPedestalFine = 1.8f;
-    float truckPedestalCoarse = 7.0f;
-    float panTiltFine = 0.004f;
-    float panTiltCoarse = 0.008f;
-    float dollyFine = 1.2f;
-    float dollyCoarse = 2.6f;
+    float truckPedestalFine = 0.8f;
+    float truckPedestalCoarse = 3.0f;
+    float panTiltFine = 0.006f;
+    float panTiltCoarse = 0.018f;
+    float dollyFine = 0.0025f;
+    float dollyCoarse = 0.025f;
 };
 
 /** @brief Camera for the editor's scene view.
@@ -48,9 +48,8 @@ class SceneNavigationCamera : public Camera
     private:
         Vector3 m_fineSpeed;
         Vector3 m_coarseSpeed;
-        Vector2 m_slideReference = Vector2::Zero();
+        Vector2 m_prevMousePos = Vector2::Zero();
         Vector2 m_pivotReference = Vector2::Zero();
-        float m_unitsTraveled = 0.0f;
         float m_dollyVelocity = 0.0f;
 
         auto HandlePanInput() -> bool;

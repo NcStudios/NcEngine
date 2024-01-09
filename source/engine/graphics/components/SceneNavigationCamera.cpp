@@ -1,6 +1,7 @@
-#include "ecs/Registry.h"
-#include "input/Input.h"
-#include "graphics/SceneNavigationCamera.h"
+#include "ncengine/graphics/SceneNavigationCamera.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/window/Window.h"
 
 namespace
 {
@@ -10,6 +11,15 @@ struct Key
     static constexpr auto Look = nc::input::KeyCode::RightButton;
     static constexpr auto Speed = nc::input::KeyCode::LeftShift;
 };
+
+auto IsWithinWindow(const nc::Vector2& pos) -> bool
+{
+    const auto dimensions = nc::window::GetDimensions();
+    return pos.x >= 0.0f &&
+           pos.y >= 0.0f &&
+           pos.x <= dimensions.x &&
+           pos.y <= dimensions.y;
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -46,8 +56,7 @@ auto SceneNavigationCamera::HandlePanInput() -> bool
 {
     if(KeyDown(Key::Pan))
     {
-        m_slideReference = input::MousePos();
-        m_unitsTraveled = 0.0f;
+        m_prevMousePos = input::MousePos();
         return false;
     }
 
@@ -67,20 +76,16 @@ auto SceneNavigationCamera::HandleLookInput() -> bool
 
 auto SceneNavigationCamera::TruckAndPedestal(float dt, float speedMult) -> Vector3
 {
-    constexpr auto unitsPerPixel = 1.0f / 350.0f;
     const auto mousePos = input::MousePos();
-    const auto mouseDelta = (mousePos - m_slideReference) * speedMult;
-
-    if(m_unitsTraveled > Magnitude(mouseDelta) * unitsPerPixel)
+    if (!::IsWithinWindow(mousePos))
     {
-        m_slideReference = mousePos;
-        m_unitsTraveled = 0.0f;
         return Vector3::Zero();
     }
 
-    const auto translation = mouseDelta * dt;
-    m_unitsTraveled += Magnitude(translation);
-    return Vector3{-1.0f * translation.x, translation.y, 0.0f};
+    auto delta = (m_prevMousePos - mousePos);
+    delta.y *= -1.0f;
+    m_prevMousePos = mousePos;
+    return Normalize(Vector3{delta.x, delta.y, 0.0f}) * dt * speedMult * Magnitude(delta);
 }
 
 auto SceneNavigationCamera::PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion
@@ -97,7 +102,7 @@ auto SceneNavigationCamera::Dolly(float dt, float speedMult) -> Vector3
         m_dollyVelocity += speedMult * static_cast<float>(wheel);
     }
 
-    m_dollyVelocity = Lerp(m_dollyVelocity, 0.0f, 0.01f);
-    return Vector3{0.0f, 0.0f, m_dollyVelocity * dt};
+    m_dollyVelocity = Lerp(m_dollyVelocity, 0.0f, 5.0f * dt);
+    return Vector3{0.0f, 0.0f, m_dollyVelocity};
 }
 } // namespace nc::graphics

@@ -27,7 +27,7 @@ auto DeterminePresentMode(std::span<const vk::PresentModeKHR> availablePresentMo
     NC_ASSERT(!availablePresentModes.empty(), "No present modes found.");
     const auto pos = std::ranges::find_if(availablePresentModes, [](const auto& presentMode)
     {
-        return presentMode == vk::PresentModeKHR::eMailbox;
+        return presentMode == vk::PresentModeKHR::eFifo;
     });
 
     return pos != availablePresentModes.end() ? *pos : vk::PresentModeKHR::eFifo;
