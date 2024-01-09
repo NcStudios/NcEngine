@@ -9,18 +9,24 @@
 
 namespace nc::graphics::anim
 {
+constexpr uint32_t NullState = UINT32_MAX;
+constexpr uint32_t RootState = 0u;
+constexpr bool Never(){return false;};
+
 /**
  * @brief Options for controlling the behavior of the animation.
  */
 enum class Action : uint8_t
 {
-    Loop
+    Loop,
+    PlayOnce,
+    Stop
 };
 
 /**
  * @brief A simplified representation of a SkeletalAnimator state machine state sent to SkeletalAnimationSystem on state transition.
  */
-struct PlayState
+struct StateChange
 {
     std::string meshUid;
     std::string prevAnimUid;
@@ -31,14 +37,68 @@ struct PlayState
 
 /**
  * @brief A type used to simplify creating SkeletalAnimator state machine states.
- * 
- * The Initial state is implicitly created from the constructor of the SkeletalAnimator and nowhere else.
+ *
+ * The Stop state is used to stop an animation and remove it from SkeletalAnimationSystem's active
+ * animations container.
  */
-struct Initial
+struct Stop
 {
-    Initial(std::string animUid_)
-        : animUid{std::move(animUid_)}{} 
+    uint32_t enterFrom;
+    std::function<bool()> enterWhen;
+};
+
+/**
+ * @brief A type used to simplify creating SkeletalAnimator state machine states.
+ *
+ * The Loop state is used to loop an animation until the exitWhen condition is met.
+ */
+struct Loop
+{
+    uint32_t enterFrom;
+    std::function<bool()> enterWhen;
     std::string animUid;
+    std::function<bool()> exitWhen;
+    uint32_t exitTo = RootState;
+};
+
+/**
+ * @brief A type used to simplify creating SkeletalAnimator state machine states.
+ *
+ * The PlayOnce state is used to play an animation through a single cycle. Upon conclusion of the
+ * cycle, the animation will transition to the exitTo state.
+ */
+struct PlayOnce
+{
+    uint32_t enterFrom;
+    std::function<bool()> enterWhen;
+    std::string animUid;
+    uint32_t exitTo = RootState;
+};
+
+/**
+ * @brief A type used to simplify creating SkeletalAnimator state machine states.
+ *
+ * The Root state is implicitly created from the constructor of the SkeletalAnimator and nowhere
+ * else.
+ */
+struct Root
+{
+    Root(std::string animUid_) : animUid{std::move(animUid_)} {}
+    std::string animUid;
+};
+
+/**
+ * @brief A type used to simplify creating SkeletalAnimator state machine states.
+ *
+ * The StopImmediate state is used as an ad-hoc state meant to be invoked from outside of the state
+ * machine (example, OnCollisionEnter). The StopImmediate state then transitions back into the state
+ * machine into the active animation. Note: All three Action types are available to be called in
+ * Immediate mode, but only Stop needed this helper.
+ */
+struct StopImmediate
+{
+    std::function<bool()> exitWhen;
+    uint32_t exitTo = RootState;
 };
 
 /**
@@ -46,15 +106,159 @@ struct Initial
  */
 struct State
 {
-    static constexpr uint32_t NullId = UINT32_MAX;
-    State(const Initial& initialProperties)
-        : id{},
+    /**
+     * @brief Construct a new State in the state machine representing the state the SkeletalAnimator is initialized playing.
+     * @param initialProperties The properties of the root state.
+     */
+    State(Root initialProperties)
+        : animUid{std::move(initialProperties.animUid)},
+          firstRunComplete{nullptr},
+          enterWhen{anim::Never},
+          exitWhen{anim::Never},
+          id{},
+          enterFrom{NullState},
+          exitTo{NullState},
           action{Action::Loop},
-          animUid{std::move(initialProperties.animUid)}{}
+          successors{}
+    {}
 
-    uint32_t id;
-    Action action;
+    /**
+     * @brief Construct a new State in the state machine representing stopping the currently playing animation.
+     * @param stopProperties Specifies from which state and from which condition you enter the Stop state from.
+     */
+    State(Stop stopProperties)
+        : animUid{},
+          firstRunComplete{nullptr},
+          enterWhen{std::move(stopProperties.enterWhen)},
+          exitWhen{Never},
+          id{},
+          enterFrom{stopProperties.enterFrom},
+          exitTo{NullState},
+          action{Action::Stop},
+          successors{}
+    {}
+
+    /**
+     * @brief Construct a new State in the state machine representing adding an animation which loops until the exit condition is met.
+     * @param loopProperties Specifies from which state and from which condition you enter the looping state from, 
+     * which state and from which condition you enter after the exit condition is met, and which animation you loop.
+     */
+    State(Loop loopProperties)
+        : animUid{std::move(loopProperties.animUid)},
+          firstRunComplete{nullptr},
+          enterWhen{std::move(loopProperties.enterWhen)},
+          exitWhen{std::move(loopProperties.exitWhen)},
+          id{},
+          enterFrom{loopProperties.enterFrom},
+          exitTo{loopProperties.exitTo},
+          action{Action::Loop},
+          successors{}
+    {}
+
+    /**
+     * @brief Construct a new State in the state machine representing adding an animation which plays once and then exits to the exit state.
+     * @param playOnceProperties Specifies from which state and from which condition you enter the play once state from, 
+     * which state you enter after the animation has completed one cycle, and which animation you play once.
+     */
+    State(PlayOnce playOnceProperties)
+        : animUid{std::move(playOnceProperties.animUid)},
+          firstRunComplete{std::make_unique<bool>(false)},
+          enterWhen{std::move(playOnceProperties.enterWhen)},
+          exitWhen{[firstRunComplete=firstRunComplete.get()](){ if (*firstRunComplete == true) { *firstRunComplete = false; return true; } return false; }},
+          id{},
+          enterFrom{playOnceProperties.enterFrom},
+          exitTo{playOnceProperties.exitTo},
+          action{Action::PlayOnce},
+          successors{}
+    {}
+
+    /**
+     * @brief Construct a new State in the state machine representing adding an animation which stops the current animation and then exits to the exit state.
+     * @param stopImmediateProperties Specifies which state you enter after the exitCondition is met, and the exitCondition.
+     */
+    State(const StopImmediate stopImmediateProperties)
+        : animUid{},
+          firstRunComplete{nullptr},
+          enterWhen{Never},
+          exitWhen{std::move(stopImmediateProperties.exitWhen)},
+          id{},
+          enterFrom{NullState},
+          exitTo{stopImmediateProperties.exitTo},
+          action{Action::Stop},
+          successors{}
+    {}
+
+    /**
+     * @brief Add a state as a successor to the current state.
+     */
+    void AddSuccessor(uint32_t successor);
+
     std::string animUid;
+    std::unique_ptr<bool> firstRunComplete;
+    std::function<bool ()> enterWhen;
+    std::function<bool ()> exitWhen;
+    uint32_t id;
+    uint32_t enterFrom;
+    uint32_t exitTo;
+    Action action;
+    std::vector<uint32_t> successors;
+};
+
+/**
+ * @brief A container needed for tracking State objects with stable handles.
+ */
+class StableSet
+{
+    public:
+        /**
+         * @brief Construct a new Stable Set object
+         */
+        explicit StableSet();
+
+        /**
+         * @brief Add a State.
+         * 
+         * @param toInsert The State to add.
+         * @return The handle to the State.
+         */
+        auto Insert(State toInsert) -> uint32_t;
+
+        /**
+         * @brief Remove a State.
+         * 
+         * @param toRemove the handle of the State to remove.
+         * @return true If the State was removed.
+         * @return false if the State was not present.
+         */
+        auto Remove(uint32_t toRemove) noexcept -> bool;
+
+        /**
+         * @brief Does the container hold the State with the given handle?
+         * 
+         * @param id The State handle.
+         * @return true If the container holds the State.
+         * @return false If the container does not hold the State.
+         */
+        auto Contains(uint32_t id) const noexcept -> bool;
+
+        /**
+         * @brief Get the State with the given handle.
+         * 
+         * @param id The handle of the State to get.
+         * @return State The State requested or nullptr if not present.
+         */
+        auto Get(uint32_t id) -> State&;
+
+        /**
+         * @brief Get the last State added.
+         * 
+         * @return State The handle of the most recently added State or nullptr if no State exists.
+         */
+        auto GetLast() -> State&;
+
+    private:
+        auto AssignId() const noexcept -> uint32_t { return static_cast<uint32_t>(m_states.size()); }
+        std::vector<anim::State> m_states;
 };
 
 /**

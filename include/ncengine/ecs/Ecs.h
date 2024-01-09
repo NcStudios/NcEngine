@@ -62,7 +62,7 @@ class EcsInterface
             {
                 return m_policy.template OnPool<T>([entity, ...args = std::forward<Args>(args)] (auto&& pool) mutable
                 {
-                    return pool.Add(entity, std::forward<decltype(args)>(args)...);
+                    return pool.Emplace(entity, std::forward<decltype(args)>(args)...);
                 });
             }
         }
