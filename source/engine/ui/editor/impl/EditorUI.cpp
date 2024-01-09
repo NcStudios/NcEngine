@@ -17,7 +17,7 @@ constexpr auto g_pivotRight = ImVec2{1.0f, 0.0f};
 
 void WindowLayout(float width, ImVec2 pivot)
 {
-    const auto dimensions = nc::window::GetDimensions();
+    const auto dimensions = nc::window::GetScreenDimensions();
     const auto size = ImVec2{width, dimensions.y / 2.0f};
     const auto pos = ImVec2{dimensions.x * pivot.x - width * pivot.x, 0.0f};
     ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);

@@ -29,7 +29,7 @@ namespace nc::sample
 
     void EdgePanCamera::Run(Entity self, Registry* registry, float dt)
     {
-        auto [screenWidth, screenHeight] = window::GetDimensions();
+        auto [screenWidth, screenHeight] = window::GetScreenDimensions();
         auto [x, y] = input::MousePos();
         auto xPan = GetPan(x, EdgePanWidth, screenWidth - EdgePanWidth);
         auto yPan = -1.0f * GetPan(y, EdgePanWidth, screenHeight - EdgePanWidth - HudHeight);
@@ -68,7 +68,7 @@ namespace nc::sample
 
     MouseFollower::MouseFollower(Entity entity)
         : FreeComponent(entity),
-          m_screenDimensions{ window::GetDimensions() },
+          m_screenDimensions{ window::GetScreenDimensions() },
           m_viewPortDist{ 0.0f },
           m_zDepth{ 0.0f },
           m_zRatio{ 0.0f }
