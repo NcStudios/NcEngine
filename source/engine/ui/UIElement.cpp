@@ -17,7 +17,7 @@ namespace nc::ui
     UIFixedElement::UIFixedElement(bool startOpen, UIPosition position, Vector2 dimensions)
         : UIElement(startOpen),
           m_position{ position },
-          m_screenDimensions { window::GetScreenDimensions() },
+          m_screenExtent { window::GetScreenExtent() },
           m_elementDimensions{ dimensions }
     {
         CalculateTopLeftPosition();
@@ -31,7 +31,7 @@ namespace nc::ui
 
     void UIFixedElement::OnResize(Vector2 dimensions)
     {
-        m_screenDimensions = dimensions;
+        m_screenExtent = dimensions;
         CalculateTopLeftPosition();
     }
 
@@ -43,6 +43,6 @@ namespace nc::ui
 
     void UIFixedElement::CalculateTopLeftPosition()
     {
-        m_topLeftPosition = utils::GetTopLeftCoords( m_position, m_screenDimensions, m_elementDimensions);
+        m_topLeftPosition = utils::GetTopLeftCoords( m_position, m_screenExtent, m_elementDimensions);
     }
 }

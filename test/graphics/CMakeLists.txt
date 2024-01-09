@@ -1,6 +1,7 @@
 ### GraphicsUtilities Tests ###
 add_executable(GraphicsUtilities_tests
     GraphicsUtilities_tests.cpp
+    ${NC_SOURCE_DIR}/graphics/GraphicsUtilities.cpp
 )
 
 target_include_directories(GraphicsUtilities_tests

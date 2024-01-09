@@ -30,7 +30,7 @@ namespace nc::ui
 
         private:
             UIPosition m_position;
-            Vector2 m_screenDimensions;
+            Vector2 m_screenExtent;
             Vector2 m_elementDimensions;
             Vector2 m_topLeftPosition;
 

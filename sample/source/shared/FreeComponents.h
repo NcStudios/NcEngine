@@ -62,10 +62,10 @@ namespace nc::sample
             MouseFollower(Entity self);
             ~MouseFollower() noexcept;
             void Run(Entity self, Registry* registry, float dt);
-            void OnResize(Vector2 screenDimensions) override;
+            void OnResize(Vector2 screenExtent) override;
 
         private:
-            Vector2 m_screenDimensions;
+            Vector2 m_screenExtent;
             float m_viewPortDist;
             float m_zDepth;
             float m_zRatio;

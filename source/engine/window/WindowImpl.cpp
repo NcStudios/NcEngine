@@ -25,10 +25,10 @@ namespace nc::window
         return g_instance->GetDimensions();
     }
 
-    Vector2 GetScreenDimensions()
+    Vector2 GetScreenExtent()
     {
-        NC_ASSERT(g_instance, "window::GetScreenDimensions - g_instance is not set");
-        return g_instance->GetScreenDimensions();
+        NC_ASSERT(g_instance, "window::GetScreenExtent - g_instance is not set");
+        return g_instance->GetScreenExtent();
     }
 
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -75,7 +75,7 @@ namespace nc::window
             m_dimensions = Vector2{ static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight) };
         }
 
-        m_screenDimensions = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+        m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
         auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
         auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
         auto monitor = graphicsSettings.launchInFullscreen ? glfwGetPrimaryMonitor() : nullptr;
@@ -110,15 +110,15 @@ namespace nc::window
         return m_dimensions;
     }
 
-    Vector2 WindowImpl::GetScreenDimensions() const noexcept
+    Vector2 WindowImpl::GetScreenExtent() const noexcept
     {
-        return m_screenDimensions;
+        return m_screenExtent;
     }
 
     void WindowImpl::SetDimensions(int width, int height) noexcept
     {
         m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
-        m_screenDimensions = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+        m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
     }
 
     void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept

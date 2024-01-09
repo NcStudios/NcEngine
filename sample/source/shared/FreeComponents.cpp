@@ -29,7 +29,7 @@ namespace nc::sample
 
     void EdgePanCamera::Run(Entity self, Registry* registry, float dt)
     {
-        auto [screenWidth, screenHeight] = window::GetScreenDimensions();
+        auto [screenWidth, screenHeight] = window::GetScreenExtent();
         auto [x, y] = input::MousePos();
         auto xPan = GetPan(x, EdgePanWidth, screenWidth - EdgePanWidth);
         auto yPan = -1.0f * GetPan(y, EdgePanWidth, screenHeight - EdgePanWidth - HudHeight);
@@ -68,7 +68,7 @@ namespace nc::sample
 
     MouseFollower::MouseFollower(Entity entity)
         : FreeComponent(entity),
-          m_screenDimensions{ window::GetScreenDimensions() },
+          m_screenExtent{ window::GetScreenExtent() },
           m_viewPortDist{ 0.0f },
           m_zDepth{ 0.0f },
           m_zRatio{ 0.0f }
@@ -83,17 +83,17 @@ namespace nc::sample
         window::UnregisterOnResizeReceiver(this);
     }
 
-    void MouseFollower::OnResize(nc::Vector2 screenDimensions)
+    void MouseFollower::OnResize(nc::Vector2 screenExtent)
     {
-        m_screenDimensions = screenDimensions;
+        m_screenExtent = screenExtent;
     }
 
     void MouseFollower::Run(Entity self, Registry* registry, float dt)
     {
         m_zDepth += (float)input::MouseWheel() * dt * 2.0f;
         m_zRatio = m_viewPortDist / m_zDepth;
-        auto worldX = static_cast<float>(input::MouseX()) + m_screenDimensions.x / 2.0f;
-        auto worldY = static_cast<float>(input::MouseY()) + m_screenDimensions.y / 2.0f;
+        auto worldX = static_cast<float>(input::MouseX()) + m_screenExtent.x / 2.0f;
+        auto worldY = static_cast<float>(input::MouseY()) + m_screenExtent.y / 2.0f;
         registry->Get<Transform>(self)->SetPosition(Vector3{worldX / m_zRatio, worldY / m_zRatio, m_zDepth});
     }
 
