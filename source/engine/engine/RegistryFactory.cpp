@@ -1,9 +1,6 @@
-#include "RegistryFactories.h"
+#include "RegistryFactory.h"
 #include "ComponentFactories.h"
-#include "ncengine/asset/DefaultAssets.h"
-#include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/config/Config.h"
 #include "ncengine/ecs/Logic.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Tag.h"
@@ -15,7 +12,6 @@
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
-#include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -24,35 +20,16 @@
 #include "ncengine/utility/Log.h"
 #include "ui/editor/ComponentWidgets.h"
 
-/** @todo #363 Move factories to public headers and include those instead. */
-#include "audio/NcAudioImpl.h"
-#include "ecs/EcsModule.h"
-#include "graphics/NcGraphicsImpl.h"
-#include "physics/NcPhysicsImpl.h"
-#include "time/TimeImpl.h"
-
 namespace
 {
-auto BuildDefaultAssetMap() -> nc::asset::AssetMap
-{
-    using namespace nc::asset;
-    return AssetMap
-    {
-        { AssetType::AudioClip,       { DefaultAudioClip } },
-        { AssetType::ConcaveCollider, { DefaultConcaveCollider } },
-        { AssetType::CubeMap,         { DefaultSkyboxCubeMap } },
-        { AssetType::HullCollider,    { DefaultHullCollider } },
-        { AssetType::Mesh,            { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh } },
-        { AssetType::Texture,         { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
-    };
-}
-
 template<class T>
 void Register(nc::Registry& registry,
               size_t id,
               const char* name,
               typename nc::ComponentHandler<T>::DrawUI_t&& drawUI = nullptr,
               typename nc::ComponentHandler<T>::Factory_t&& factory = nullptr,
+              typename nc::ComponentHandler<T>::Serialize_t&& serialize = nullptr,
+              typename nc::ComponentHandler<T>::Deserialize_t&& deserialize = nullptr,
               void* userData = nullptr)
 {
     registry.RegisterComponentType<T>(nc::ComponentHandler<T>
@@ -61,6 +38,8 @@ void Register(nc::Registry& registry,
         .name = name,
         .userData = userData,
         .factory = std::move(factory),
+        .serialize = std::move(serialize),
+        .deserialize = std::move(deserialize),
         .drawUI = std::move(drawUI)
     });
 }
@@ -82,34 +61,12 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
     Register<graphics::ParticleEmitter>(*registry, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter);
     Register<physics::Collider>(*registry, ColliderId, "Collider", editor::ColliderUIWidget, CreateCollider);
     Register<physics::ConcaveCollider>(*registry, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget);
-    Register<physics::PhysicsBody>(*registry, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, static_cast<void*>(registry.get()));
+    Register<physics::PhysicsBody>(*registry, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, nullptr, nullptr, static_cast<void*>(registry.get()));
     Register<FrameLogic>(*registry, FrameLogicId, "FrameLogic", editor::FrameLogicUIWidget, CreateFrameLogic);
     Register<FixedLogic>(*registry, FixedLogicId, "FixedLogic", editor::FixedLogicUIWidget, CreateFixedLogic);
     Register<CollisionLogic>(*registry, CollisionLogicId, "CollisionLogic", editor::CollisionLogicUIWidget, CreateCollisionLogic);
     Register<audio::AudioSource>(*registry, AudioSourceId, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource);
     Register<net::NetworkDispatcher>(*registry, NetworkDispatcherId, "NetworkDispatcher", editor::NetworkDispatcherUIWidget, CreateNetworkDispatcher);
     return registry;
-}
-
-auto BuildModuleRegistry(Registry* registry,
-                         window::WindowImpl* window,
-                         const config::Config& config) -> ModuleRegistry
-{
-    NC_LOG_INFO("Building module registry");
-    auto moduleRegistry = nc::ModuleRegistry{};
-    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings,
-                                                        config.memorySettings,
-                                                        BuildDefaultAssetMap()));
-    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
-                                                              config.graphicsSettings,
-                                                              moduleRegistry.Get<nc::asset::NcAsset>(),
-                                                              registry,
-                                                              window));
-    moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
-    moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
-    moduleRegistry.Register(nc::time::BuildTimeModule());
-    moduleRegistry.Register(nc::ecs::BuildEcsModule(registry));
-    moduleRegistry.Register(std::make_unique<nc::Random>());
-    return moduleRegistry;
 }
 } // namespace nc

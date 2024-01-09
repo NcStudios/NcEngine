@@ -25,6 +25,9 @@ class ComponentPoolBase : public StableAddress
 
         virtual ~ComponentPoolBase() = default;
 
+        /** @brief Get the component's unique id. */
+        virtual auto Id() const noexcept -> size_t = 0;
+
         /** @brief Check if the pool has a component attached to an entity. */
         virtual auto Contains(Entity entity) const -> bool = 0;
 
@@ -53,23 +56,29 @@ class ComponentPoolBase : public StableAddress
         /** @brief Get the name from the component's ComponentHandler. */
         virtual auto GetComponentName() const noexcept -> std::string_view = 0;
 
-        /** @brief Check if `ComponentHandler::factory` is set for the underlying type. */
+        /** @brief Check if the factory callback is set in the component's ComponentHandler. */
         virtual auto HasFactory() const noexcept -> bool = 0;
 
-        /** @brief Check if `ComponentHandler::userData` is set for the underlying type. */
+        /** @brief Check if userData is set in the component's ComponentHandler. */
         virtual auto HasUserData() const noexcept -> bool = 0;
 
-        /** @brief Check if there is a drawUI callback set in the the component's ComponentHandler. */
-        virtual auto HasDrawUI() const noexcept -> bool = 0;
+        /** @brief Check if the serialize and deserialize callbacks are set in the component's ComponentHandler. */
+        virtual auto HasSerialize() const noexcept -> bool = 0;
 
-        /** @brief Get the component's unique id. */
-        virtual auto Id() const noexcept -> size_t = 0;
+        /** @brief Check if the drawUI callback set in the the component's ComponentHandler. */
+        virtual auto HasDrawUI() const noexcept -> bool = 0;
 
         /**
          * @brief Factory-construct a component attached to an entity.
          * @note Returns a null AnyComponent if there is no registered factory handler.
          */
         virtual auto AddDefault(Entity entity) -> AnyComponent = 0;
+
+        /** @brief Serialize the component attached to an entity to a binary stream. */
+        virtual void Serialize(std::ostream& stream, Entity entity, const SerializationContext& ctx) = 0;
+
+        /** @brief Deserialize a component from a binary stream and attach it to an entity. */
+        virtual void Deserialize(std::istream& stream, Entity entity, const DeserializationContext& ctx) = 0;
 
         /** @brief Remove all components not attached to a persistent entity.
          *  @note This operation is handled automatically for pools owned by the ComponentRegistry. */
@@ -101,7 +110,10 @@ class ComponentPool final : public ComponentPoolBase
 
         /** @brief Emplace a component attached to an entity. */
         template<class... Args>
-        auto Add(Entity entity, Args&&... args) -> T*;
+        auto Emplace(Entity entity, Args&&... args) -> T*;
+
+        /** @brief Insert a component attached to an entity. */
+        auto Insert(Entity entity, T obj) -> T*;
 
         /** @brief Get a pointer to the component attached to an entity, or nullptr if one does not exist. */
         auto Get(Entity entity) -> T*;
@@ -178,9 +190,12 @@ class ComponentPool final : public ComponentPoolBase
         auto GetComponentName() const noexcept -> std::string_view override { return m_handler.name; }
         auto HasFactory() const noexcept -> bool override { return m_handler.factory != nullptr; }
         auto HasUserData() const noexcept -> bool override { return m_handler.userData != nullptr; }
+        auto HasSerialize() const noexcept -> bool override { return m_handler.serialize && m_handler.deserialize; }
         auto HasDrawUI() const noexcept -> bool override { return m_handler.drawUI != nullptr; }
         auto Id() const noexcept -> size_t override { return m_handler.id; };
         auto AddDefault(Entity entity) -> AnyComponent override;
+        void Serialize(std::ostream& stream, Entity entity, const SerializationContext& ctx) override;
+        void Deserialize(std::istream& stream, Entity entity, const DeserializationContext& ctx) override;
         void ClearNonPersistent() override;
         void Clear() override;
         void CommitStagedComponents(const std::vector<Entity>& deleted) override;
@@ -196,13 +211,25 @@ class ComponentPool final : public ComponentPoolBase
 /** @cond internal */
 template<PooledComponent T>
 template<class... Args>
-auto ComponentPool<T>::Add(Entity entity, Args&&... args) -> T*
+auto ComponentPool<T>::Emplace(Entity entity, Args&&... args) -> T*
 {
     NC_ASSERT(entity.Index() < m_storage.MaxSize() && !Contains(entity), "Bad entity");
     auto& [_, component] = m_staging.emplace_back(
         entity,
         detail::Construct<T>(entity, std::forward<Args>(args)...)
     );
+
+    if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
+        m_onAdd.Emit(component);
+
+    return &component;
+}
+
+template<PooledComponent T>
+auto ComponentPool<T>::Insert(Entity entity, T obj) -> T*
+{
+    NC_ASSERT(entity.Index() < m_storage.MaxSize() && !Contains(entity), "Bad entity");
+    auto& [_, component] = m_staging.emplace_back(entity, std::move(obj));
 
     if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
         m_onAdd.Emit(component);
@@ -294,11 +321,25 @@ auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
 {
     if (m_handler.factory)
     {
-        auto comp = Add(entity, m_handler.factory(entity, m_handler.userData));
+        auto comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
         return AnyComponent{comp, &m_handler};
     }
 
     return AnyComponent{};
+}
+
+template<PooledComponent T>
+void ComponentPool<T>::Serialize(std::ostream& stream, Entity entity, const SerializationContext& ctx)
+{
+    NC_ASSERT(HasSerialize() && Contains(entity), "...");
+    m_handler.serialize(stream, *Get(entity), ctx, m_handler.userData);
+}
+
+template<PooledComponent T>
+void ComponentPool<T>::Deserialize(std::istream& stream, Entity entity, const DeserializationContext& ctx)
+{
+    NC_ASSERT(HasSerialize(), "...");
+    Insert(entity, m_handler.deserialize(stream, ctx, m_handler.userData));
 }
 
 template<PooledComponent T>
