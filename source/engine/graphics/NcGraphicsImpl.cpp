@@ -169,9 +169,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
     {
-        auto adjustedDimensions = AdjustDimensionsToAspectRatio(nc::Vector2{width, height});
-
         m_cameraSystem.Get()->UpdateProjectionMatrix(width, height);
-        m_graphics->OnResize(adjustedDimensions.x, adjustedDimensions.y, isMinimized);
+        m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics

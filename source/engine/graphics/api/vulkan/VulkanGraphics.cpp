@@ -33,7 +33,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
                                uint32_t apiVersion, Registry* registry,
-                               GLFWwindow* window, Vector2 dimensions)
+                               GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
       m_surface{m_instance->CreateSurface(window)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
@@ -42,13 +42,14 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
       m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
-      m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions)},
+      m_renderGraph{std::make_unique<RenderGraph>(*m_device, m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions, screenExtent)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetRenderPass(LitPassId).GetVkPass())},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
       m_lighting{std::make_unique<Lighting>(registry, m_device->VkDevice(), m_allocator.get(), m_swapchain.get(), m_renderGraph.get(), m_shaderDescriptorSets.get(), m_shaderResources.get(), dimensions)},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
       m_dimensions{ dimensions },
+      m_screenExtent{ screenExtent },
       m_isMinimized{ false }
 {
 }
@@ -126,7 +127,7 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions);
+    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions, m_screenExtent);
 
     // Executes the command buffer to render to the image
     m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);

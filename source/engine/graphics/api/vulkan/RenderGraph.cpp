@@ -19,7 +19,6 @@
 #include "optick.h"
 
 #include <array>
-#include <iostream>
 #include <string>
 
 namespace
@@ -32,11 +31,10 @@ void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer
     cmd->bindIndexBuffer(indexData.GetBuffer(), 0, vk::IndexType::eUint32);
 }
 
-void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions)
+void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions, nc::Vector2 screenExtent)
 {
     const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
-    auto adjustedDimensions = nc::graphics::AdjustDimensionsToAspectRatio(dimensions);
-    const auto extent = vk::Extent2D{static_cast<uint32_t>(adjustedDimensions.x), static_cast<uint32_t>(adjustedDimensions.y)};
+    const auto extent = vk::Extent2D{static_cast<uint32_t>(screenExtent.x), static_cast<uint32_t>(screenExtent.y)};
     const auto scissor = vk::Rect2D{vk::Offset2D{static_cast<int32_t>(dimensions.x - extent.width) / 2, static_cast<int32_t>(dimensions.y - extent.height) / 2}, extent};
     cmd->setViewport(0, 1, &viewport);
     cmd->setScissor(0, 1, &scissor);
@@ -92,11 +90,12 @@ auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocato
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
+RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, Vector2 screenExtent)
     : m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
       m_descriptorSets{descriptorSets},
-      m_dimensions{dimensions}
+      m_dimensions{dimensions},
+      m_screenExtent{screenExtent}
 {
     auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, m_dimensions);
 
@@ -113,12 +112,12 @@ RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocato
     AddRenderPass(std::move(litPass));
 }
 
-void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, Vector2 dimensions)
+void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, Vector2 dimensions, Vector2 screenExtent)
 {
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
     const auto cmd = currentFrame->CommandBuffer();
-    SetViewportAndScissor(cmd, dimensions);
+    SetViewportAndScissor(cmd, dimensions, screenExtent);
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
     for (auto& renderPass : m_renderPasses)
