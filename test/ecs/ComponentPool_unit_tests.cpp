@@ -4,35 +4,66 @@
 #include <algorithm>
 #include <ranges>
 
-struct S1 {};
+struct S1
+{
+    int value = 0;
+};
 
-TEST(ComponentPoolTests, Add_validCall_attachesComponent)
+TEST(ComponentPoolTests, Emplace_validCall_attachesComponent)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
-    auto actual = uut.Add(nc::Entity{1, 0, 0});
+    constexpr auto expectedValue = 42;
+    auto actual = uut.Emplace(nc::Entity{1, 0, 0}, expectedValue);
     EXPECT_NE(nullptr, actual);
+    EXPECT_EQ(actual->value, expectedValue);
 }
 
-TEST(ComponentPoolTests, Add_alreadyHasComponent_throws)
+TEST(ComponentPoolTests, Emplace_alreadyHasComponent_throws)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
-    EXPECT_THROW(uut.Add(entity), nc::NcError);
+    uut.Emplace(entity, 42);
+    EXPECT_THROW(uut.Emplace(entity), nc::NcError);
 }
 
-TEST(ComponentPoolTests, Add_badEntity_throws)
+TEST(ComponentPoolTests, Emplace_badEntity_throws)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
-    EXPECT_THROW(uut.Add(nc::Entity::Null()), nc::NcError); // null entity
-    EXPECT_THROW(uut.Add(nc::Entity{11, 0, 0}), nc::NcError); // index exceeds capacity
+    EXPECT_THROW(uut.Emplace(nc::Entity::Null(), 42), nc::NcError); // null entity
+    EXPECT_THROW(uut.Emplace(nc::Entity{11, 0, 0}), nc::NcError); // index exceeds capacity
+}
+
+TEST(ComponentPoolTests, Insert_validCall_attachesComponent)
+{
+    auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
+    constexpr auto expected = S1{42};
+    auto actual = uut.Insert(nc::Entity{1, 0, 0}, expected);
+    EXPECT_NE(nullptr, actual);
+    EXPECT_EQ(actual->value, expected.value);
+}
+
+TEST(ComponentPoolTests, Insert_alreadyHasComponent_throws)
+{
+    auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
+    const auto entity = nc::Entity{1, 0, 0};
+    const auto instance = S1{};
+    uut.Insert(entity, instance);
+    EXPECT_THROW(uut.Insert(entity, instance), nc::NcError);
+}
+
+TEST(ComponentPoolTests, Insert_badEntity_throws)
+{
+    auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
+    const auto instance = S1{};
+    EXPECT_THROW(uut.Insert(nc::Entity::Null(), instance), nc::NcError); // null entity
+    EXPECT_THROW(uut.Insert(nc::Entity{11, 0, 0}, instance), nc::NcError); // index exceeds capacity
 }
 
 TEST(ComponentPoolTests, Remove_stagedComponent_returnsTrue)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     EXPECT_TRUE(uut.Remove(entity));
     EXPECT_FALSE(uut.Contains(entity));
 }
@@ -41,7 +72,7 @@ TEST(ComponentPoolTests, Remove_committedComponent_returnsTrue)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     uut.CommitStagedComponents({});
     EXPECT_TRUE(uut.Remove(entity));
     EXPECT_FALSE(uut.Contains(entity));
@@ -63,7 +94,7 @@ TEST(ComponentPoolTests, Get_stagedComponent_returnsValidPointer)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     EXPECT_NE(nullptr, uut.Get(entity));
 }
 
@@ -71,7 +102,7 @@ TEST(ComponentPoolTests, Get_committedComponent_returnsValidPointer)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     uut.CommitStagedComponents({});
     EXPECT_NE(nullptr, uut.Get(entity));
 }
@@ -92,7 +123,7 @@ TEST(ComponentPoolTests, GetParent_stagedComponent_returnsEntity)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto expected = nc::Entity{1, 0, 0};
-    const auto component = uut.Add(expected);
+    const auto component = uut.Emplace(expected);
     const auto actual = uut.GetParent(component);
     EXPECT_EQ(expected, actual);
 }
@@ -101,7 +132,7 @@ TEST(ComponentPoolTests, GetParent_committedComponent_returnsEntity)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto expected = nc::Entity{1, 0, 0};
-    uut.Add(expected);
+    uut.Emplace(expected);
     uut.CommitStagedComponents({});
     const auto component = uut.Get(expected);
     const auto actual = uut.GetParent(component);
@@ -112,7 +143,7 @@ TEST(ComponentPoolTests, GetParent_componentDeleted_returnsNullEntity)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     uut.CommitStagedComponents({});
     const auto soonToExpire = uut.Get(entity);
     uut.Remove(entity);
@@ -131,7 +162,7 @@ TEST(ComponentPoolTests, GetAsAnyComponent_exists_returnsValidObject)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     const auto actual = uut.GetAsAnyComponent(entity);
     EXPECT_TRUE(actual);
 }
@@ -152,7 +183,7 @@ TEST(ComponentPoolTests, Size_allVariations_returnsExpectedValues)
     EXPECT_EQ(0, uut.StagedSize());
     EXPECT_EQ(0, uut.TotalSize());
 
-    uut.Add(nc::Entity{0, 0, 0});
+    uut.Emplace(nc::Entity{0, 0, 0});
     EXPECT_EQ(0, uut.Size());
     EXPECT_EQ(0, uut.size());
     EXPECT_EQ(1, uut.StagedSize());
@@ -164,7 +195,7 @@ TEST(ComponentPoolTests, Size_allVariations_returnsExpectedValues)
     EXPECT_EQ(0, uut.StagedSize());
     EXPECT_EQ(1, uut.TotalSize());
 
-    uut.Add(nc::Entity{1, 0, 0});
+    uut.Emplace(nc::Entity{1, 0, 0});
     EXPECT_EQ(1, uut.Size());
     EXPECT_EQ(1, uut.size());
     EXPECT_EQ(1, uut.StagedSize());
@@ -177,9 +208,9 @@ TEST(ComponentPoolTests, ClearNonPersistent_leavesPersistentData)
     const auto a = nc::Entity{0, 0, 0};
     const auto b = nc::Entity{1, 0, nc::Entity::Flags::Persistent};
     const auto c = nc::Entity{2, 0, 0};
-    uut.Add(a);
-    uut.Add(b);
-    uut.Add(c);
+    uut.Emplace(a);
+    uut.Emplace(b);
+    uut.Emplace(c);
     uut.CommitStagedComponents({});
     uut.ClearNonPersistent();
     EXPECT_EQ(1, uut.Size());
@@ -194,9 +225,9 @@ TEST(ComponentPoolTests, Clear_clearsAllData)
     const auto a = nc::Entity{0, 0, 0};
     const auto b = nc::Entity{1, 0, nc::Entity::Flags::Persistent};
     const auto c = nc::Entity{2, 0, 0};
-    uut.Add(a);
-    uut.Add(b);
-    uut.Add(c);
+    uut.Emplace(a);
+    uut.Emplace(b);
+    uut.Emplace(c);
     uut.CommitStagedComponents({});
     uut.Clear();
     EXPECT_EQ(0, uut.Size());
@@ -215,14 +246,14 @@ TEST(ComponentPoolTests, Reserve_subsequentAdds_preserveReferenceValidity)
     const auto entityE = nc::Entity{4, 0, 0};
 
     uut.Reserve(5);
-    uut.Add(entityA);
+    uut.Emplace(entityA);
     uut.CommitStagedComponents({});
     const auto expectedA = uut.Get(entityA);
 
-    const auto expectedB = uut.Add(nc::Entity{1, 0, 0});
-    const auto expectedC = uut.Add(nc::Entity{2, 0, 0});
-    const auto expectedD = uut.Add(nc::Entity{3, 0, 0});
-    const auto expectedE = uut.Add(nc::Entity{4, 0, 0});
+    const auto expectedB = uut.Emplace(nc::Entity{1, 0, 0});
+    const auto expectedC = uut.Emplace(nc::Entity{2, 0, 0});
+    const auto expectedD = uut.Emplace(nc::Entity{3, 0, 0});
+    const auto expectedE = uut.Emplace(nc::Entity{4, 0, 0});
     const auto actualA = uut.Get(entityA);
     const auto actualB = uut.Get(entityB);
     const auto actualC = uut.Get(entityC);
@@ -240,11 +271,11 @@ TEST(ComponentPoolTests, StlViewInterface_hasExpectedFunctions)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{0, 0, 0};
-    uut.Add(entity);
+    uut.Emplace(entity);
     uut.CommitStagedComponents({});
     auto components = std::vector<S1*>{};
     components.push_back(uut.Get(entity));
-    components.push_back(uut.Add(nc::Entity{1, 0, 0}));
+    components.push_back(uut.Emplace(nc::Entity{1, 0, 0}));
 
     ASSERT_EQ(1, uut.size()); // second item still staged so size only 1
     EXPECT_FALSE(uut.empty());
