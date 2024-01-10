@@ -187,6 +187,14 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
     return (1.0 - shadow) * colorTotal;
 }
 
+// const mat4 biasMat = mat4( 
+//     0.5, 0.0, 0.0, 0.0,
+//     0.0, 0.5, 0.0, 0.0,
+//     0.0, 0.0, 0.5, 0.0,
+//     0.5, 0.5, 0.5, 1.0 
+// );
+
+
 const mat4 biasMat = mat4( 
     0.5, 0.0, 0.0, 0.0,
     0.0, 0.5, 0.0, 0.0,

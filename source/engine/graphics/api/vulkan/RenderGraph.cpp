@@ -20,6 +20,7 @@
 
 #include <array>
 #include <string>
+#include <ranges>
 
 namespace
 {
@@ -31,7 +32,16 @@ void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer
     cmd->bindIndexBuffer(indexData.GetBuffer(), 0, vk::IndexType::eUint32);
 }
 
-void SetViewportAndScissor(vk::CommandBuffer* cmd, const nc::Vector2& dimensions, const nc::Vector2& screenExtent)
+void SetViewportAndScissorFullWindow(vk::CommandBuffer* cmd, const nc::Vector2& dimensions)
+{
+    const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
+    const auto extent = vk::Extent2D{static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y)};
+    const auto scissor = vk::Rect2D{vk::Offset2D{0, 0}, extent};
+    cmd->setViewport(0, 1, &viewport);
+    cmd->setScissor(0, 1, &scissor);
+}
+
+void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2& dimensions, const nc::Vector2& screenExtent)
 {
     const auto viewport = vk::Viewport{(dimensions.x - screenExtent.x) / 2, (dimensions.y - screenExtent.y) / 2, screenExtent.x, screenExtent.y, 0.0f, 1.0f};
     const auto extent = vk::Extent2D{static_cast<uint32_t>(screenExtent.x), static_cast<uint32_t>(screenExtent.y)};
@@ -115,10 +125,18 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
     const auto cmd = currentFrame->CommandBuffer();
-    SetViewportAndScissor(cmd, dimensions, screenExtent);
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
-    for (auto& renderPass : m_renderPasses)
+    SetViewportAndScissorFullWindow(cmd, dimensions);
+
+    auto& shadowMappingPass = m_renderPasses[0];
+    shadowMappingPass.Begin(cmd, frameBufferIndex);
+    shadowMappingPass.Execute(cmd, frameData);
+    shadowMappingPass.End(cmd);
+
+    SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
+
+    for (auto& renderPass : m_renderPasses | std::views::drop(1))
     {
         renderPass.Begin(cmd, frameBufferIndex);
         renderPass.Execute(cmd, frameData);
