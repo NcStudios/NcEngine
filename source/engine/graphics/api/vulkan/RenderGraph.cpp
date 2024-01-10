@@ -33,7 +33,7 @@ void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer
 
 void SetViewportAndScissor(vk::CommandBuffer* cmd, const nc::Vector2& dimensions, const nc::Vector2& screenExtent)
 {
-    const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
+    const auto viewport = vk::Viewport{(dimensions.x - screenExtent.x) / 2, (dimensions.y - screenExtent.y) / 2, screenExtent.x, screenExtent.y, 0.0f, 1.0f};
     const auto extent = vk::Extent2D{static_cast<uint32_t>(screenExtent.x), static_cast<uint32_t>(screenExtent.y)};
     const auto scissor = vk::Rect2D{vk::Offset2D{static_cast<int32_t>(dimensions.x - extent.width) / 2, static_cast<int32_t>(dimensions.y - extent.height) / 2}, extent};
     cmd->setViewport(0, 1, &viewport);

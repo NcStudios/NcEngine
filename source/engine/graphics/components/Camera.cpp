@@ -14,7 +14,7 @@ Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
       m_projection{},
       m_properties{properties}
 {
-    auto [width, height] = window::GetDimensions();
+    auto [width, height] = window::GetScreenExtent();
     UpdateProjectionMatrix(width, height);
 }
 
