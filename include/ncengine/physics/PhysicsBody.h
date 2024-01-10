@@ -58,6 +58,10 @@ class PhysicsBody final : public ComponentBase
         void Sleep() noexcept { m_awake = false; }
 
         auto GetProperties() const noexcept -> const PhysicsProperties& { return m_properties; }
+        auto GetLinearFreedom() const noexcept -> Vector3 { return ToVector3(GetLinearFreedomXM()); }
+        auto GetAngularFreedom() const noexcept -> Vector3 { return ToVector3(GetAngularFreedomXM()); }
+        auto GetLinearFreedomXM() const noexcept -> DirectX::FXMVECTOR { return m_linearFreedom; }
+        auto GetAngularFreedomXM() const noexcept -> DirectX::FXMVECTOR { return m_angularFreedom; }
         auto GetVelocity() const noexcept -> DirectX::FXMVECTOR { return m_linearVelocity; }
         auto GetAngularVelocity() const noexcept -> DirectX::FXMVECTOR { return m_angularVelocity; }
         auto GetInverseMass() const noexcept -> float { return m_properties.mass; }
