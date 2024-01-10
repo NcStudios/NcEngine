@@ -17,7 +17,7 @@ target_compile_options(ModuleRegistry_unit_tests
 
 target_link_libraries(ModuleRegistry_unit_tests
     PRIVATE
-        gtest
+        gtest_main
         Taskflow
         NcUtility
 )

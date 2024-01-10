@@ -65,6 +65,13 @@ class ModuleRegistry
             return m_typedModulePointer<T>;
         }
 
+        /** @brief Get a pointer to a module by id or nullptr if it is unregistered. */
+        auto Get(size_t id) const noexcept -> Module*
+        {
+            auto pos = std::ranges::find_if(m_modules, [id](auto& module) { return module->Id() == id; });
+            return pos != std::ranges::end(m_modules) ? pos->get() : nullptr;
+        }
+
         /*** @brief Get the collection of all registered modules. */
         auto GetAllModules() noexcept -> const std::vector<std::unique_ptr<Module>>&
         {
