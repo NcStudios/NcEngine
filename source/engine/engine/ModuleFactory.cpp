@@ -5,6 +5,7 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/module/ModuleRegistry.h"
+#include "ncengine/ui/Editor.h"
 #include "ncengine/utility/Log.h"
 
 /** @todo #363 Move factories to public headers and include those instead. */
@@ -35,7 +36,8 @@ namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
                          window::WindowImpl* window,
-                         const config::Config& config) -> ModuleRegistry
+                         const config::Config& config,
+                         NcEngine* engine) -> ModuleRegistry
 {
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = nc::ModuleRegistry{};
@@ -46,7 +48,8 @@ auto BuildModuleRegistry(Registry* registry,
                                                               config.graphicsSettings,
                                                               moduleRegistry.Get<nc::asset::NcAsset>(),
                                                               registry,
-                                                              window));
+                                                              window,
+                                                              ui::editor::BuildEditor(engine)));
     moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
     moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
     moduleRegistry.Register(nc::time::BuildTimeModule());

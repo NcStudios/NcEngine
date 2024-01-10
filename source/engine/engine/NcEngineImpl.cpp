@@ -47,7 +47,7 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
-      m_modules{BuildModuleRegistry(m_registry.get(), &m_window, config)},
+      m_modules{BuildModuleRegistry(m_registry.get(), &m_window, config, this)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{},
       m_isRunning{false}

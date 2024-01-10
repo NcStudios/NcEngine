@@ -5,6 +5,11 @@
 
 #include <memory>
 
+namespace nc
+{
+class NcEngine;
+}
+
 namespace nc::ui::editor
 {
 class Editor
@@ -14,5 +19,5 @@ class Editor
         virtual void Draw(ecs::Ecs world, asset::NcAsset& assetModule) = 0;
 };
 
-auto BuildEditor() -> std::unique_ptr<Editor>;
+auto BuildEditor(NcEngine* engine) -> std::unique_ptr<Editor>;
 } // namespace nc::ui::editor

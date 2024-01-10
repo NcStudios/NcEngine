@@ -15,4 +15,8 @@ auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator;
 auto CreateNetworkDispatcher(Entity entity, void*) -> net::NetworkDispatcher;
 auto CreateCollider(Entity entity, void*) -> physics::Collider;
 auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody;
+
+// only supported in dev branch
+auto CreatePointLight(Entity entity, void*) -> graphics::PointLight;
+auto CreateConcaveCollider(Entity entity, void*) -> physics::ConcaveCollider;
 } // namespace nc

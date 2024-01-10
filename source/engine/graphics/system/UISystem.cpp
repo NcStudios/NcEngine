@@ -1,11 +1,11 @@
 #include "UISystem.h"
-#include "ui/IUI.h"
-#include "ui/editor/Editor.h"
+#include "ncengine/ui/IUI.h"
+#include "ncengine/ui/Editor.h"
 
 namespace nc::graphics
 {
-UISystem::UISystem()
-    : m_editor{ui::editor::BuildEditor()}
+UISystem::UISystem(std::unique_ptr<ui::editor::Editor> editor)
+    : m_editor{std::move(editor)}
 {
 }
 

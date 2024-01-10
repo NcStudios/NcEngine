@@ -2,6 +2,7 @@
 
 namespace nc
 {
+class NcEngine;
 class ModuleRegistry;
 class Registry;
 
@@ -18,5 +19,6 @@ class WindowImpl;
 // Create a module registry and register all engine modules
 auto BuildModuleRegistry(Registry* registry,
                          window::WindowImpl* window,
-                         const config::Config& config) -> ModuleRegistry;
+                         const config::Config& config,
+                         NcEngine* engine) -> ModuleRegistry;
 } // namespace nc

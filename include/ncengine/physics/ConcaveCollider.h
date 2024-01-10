@@ -13,6 +13,7 @@ class ConcaveCollider final : public ComponentBase
 
         ConcaveCollider(Entity entity, std::string assetPath);
         auto GetPath() const -> const std::string& { return m_path; }
+        void SetAsset(std::string assetPath);
 
     private:
         std::string m_path;

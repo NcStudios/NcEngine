@@ -26,7 +26,7 @@ namespace graphics
 class UISystem
 {
     public:
-        UISystem();
+        UISystem(std::unique_ptr<ui::editor::Editor> editor);
         ~UISystem() noexcept;
 
         auto IsHovered() const noexcept -> bool;

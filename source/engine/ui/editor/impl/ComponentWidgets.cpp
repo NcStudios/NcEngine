@@ -98,6 +98,12 @@ void SphereProperties(nc::physics::Collider& obj)
 }
 } // namespace collider_ext
 
+namespace concave_collider_ext
+{
+using T = nc::physics::ConcaveCollider;
+constexpr auto assetProp  = nc::ui::Property{ &T::GetPath, &T::SetAsset, "geometry" };
+} // namespace concave_collider_ext
+
 namespace mesh_renderer_ext
 {
 using T = nc::graphics::MeshRenderer;
@@ -294,7 +300,9 @@ void ColliderUIWidget(physics::Collider& collider)
 void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
 {
     /** @todo #454 Allow updating asset. */
-    ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
+    // ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
+    auto colliders = ui::editor::GetLoadedAssets(asset::AssetType::ConcaveCollider);
+    ui::PropertyWidget(concave_collider_ext::assetProp, concaveCollider, &ui::Combobox, colliders);
 }
 
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)

@@ -321,8 +321,15 @@ auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
 {
     if (m_handler.factory)
     {
-        auto comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
-        return AnyComponent{comp, &m_handler};
+        // workaround for ConcaveCollider: will throw if added to non-static Entity
+        try
+        {
+            auto comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
+            return AnyComponent{comp, &m_handler};
+        }
+        catch(const NcError&)
+        {
+        }
     }
 
     return AnyComponent{};

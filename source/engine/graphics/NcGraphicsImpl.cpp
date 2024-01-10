@@ -4,6 +4,7 @@
 #include "config/Config.h"
 #include "ecs/Ecs.h"
 #include "ecs/View.h"
+#include "ncengine/ui/Editor.h"
 
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
@@ -44,16 +45,28 @@ namespace nc::graphics
                              const config::GraphicsSettings& graphicsSettings,
                              asset::NcAsset* assetModule,
                              Registry* registry,
-                             window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
+                             window::WindowImpl* window,
+                             std::unique_ptr<ui::editor::Editor> editor) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
         {
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, assetModule, resourceBus, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings,
+                                               graphicsSettings,
+                                               assetModule,
+                                               resourceBus,
+                                               registry,
+                                               window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, assetModule, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings,
+                                                    registry,
+                                                    assetModule,
+                                                    std::move(graphicsApi),
+                                                    std::move(resourceBus),
+                                                    window,
+                                                    std::move(editor));
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -65,7 +78,8 @@ namespace nc::graphics
                                    asset::NcAsset* assetModule,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus&& shaderResourceBus,
-                                   window::WindowImpl* window)
+                                   window::WindowImpl* window,
+                                   std::unique_ptr<ui::editor::Editor> editor)
         : m_registry{registry},
           m_assetModule{assetModule},
           m_graphics{std::move(graphics)},
@@ -76,7 +90,7 @@ namespace nc::graphics
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
           m_skeletalAnimationSystem{registry, assetModule->OnSkeletalAnimationUpdate(), assetModule->OnBoneUpdate(), std::move(shaderResourceBus.skeletalAnimationChannel)},
           m_widgetSystem{},
-          m_uiSystem{}
+          m_uiSystem{std::move(editor)}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
     }

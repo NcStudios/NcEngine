@@ -26,6 +26,11 @@ struct GraphicsSettings;
 struct ProjectSettings;
 } // namespace config
 
+namespace ui::editor
+{
+class Editor;
+} // namespace ui::editor
+
 namespace window
 {
 class WindowImpl;
@@ -40,7 +45,8 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
                          asset::NcAsset* assetModule,
                          Registry* registry,
-                         window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
+                         window::WindowImpl* window,
+                         std::unique_ptr<ui::editor::Editor> editor) -> std::unique_ptr<NcGraphics>;
 
 class NcGraphicsImpl : public NcGraphics
 {
@@ -50,7 +56,8 @@ class NcGraphicsImpl : public NcGraphics
                        asset::NcAsset* assetModule,
                        std::unique_ptr<IGraphics> graphics,
                        ShaderResourceBus&& shaderResourceBus,
-                       window::WindowImpl* window);
+                       window::WindowImpl* window,
+                       std::unique_ptr<ui::editor::Editor> editor);
 
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
