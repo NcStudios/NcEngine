@@ -6,7 +6,6 @@
 #include "graphics/api/vulkan/meshes/VertexDescriptions.h"
 #include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
-#include "graphics/GraphicsUtilities.h"
 
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
