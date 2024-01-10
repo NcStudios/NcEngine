@@ -105,7 +105,7 @@ RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocato
       m_gpuAllocator{gpuAllocator},
       m_descriptorSets{descriptorSets}
 {
-    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, std::move(dimensions));
+    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions);
 
     #ifdef NC_EDITOR_ENABLED
     litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);
