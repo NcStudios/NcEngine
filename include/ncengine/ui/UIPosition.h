@@ -19,6 +19,6 @@ namespace nc::ui
 
     namespace utils
     {
-        Vector2 GetTopLeftCoords(UIPosition position, const Vector2& screenExtent, const Vector2& elementDimensions);
+        Vector2 GetTopLeftCoords(UIPosition position, const Vector2& screenDimensions, const Vector2& elementDimensions);
     }
 }

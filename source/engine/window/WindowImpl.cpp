@@ -55,7 +55,7 @@ namespace nc::window
 
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (!videoMode)

@@ -20,10 +20,7 @@ target_compile_options(GraphicsUtilities_tests
 target_link_libraries(GraphicsUtilities_tests
     PRIVATE
         gtest_main
-        NcAsset
         NcMath
-        NcUtility
-        Taskflow
 )
 
 add_test(GraphicsUtilities_tests GraphicsUtilities_tests)
