@@ -2,6 +2,7 @@
 
 #include "IClickable.h"
 #include "ncengine/module/Module.h"
+#include "ncengine/type/EngineId.h"
 
 namespace nc::physics
 {
@@ -12,6 +13,9 @@ namespace nc::physics
  */
 struct NcPhysics : public Module
 {
+    explicit NcPhysics() noexcept
+        : Module{NcPhysicsId} {}
+
     /**
      * @brief A a joint between two entities.
      * 

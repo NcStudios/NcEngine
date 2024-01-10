@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "ncengine/module/Module.h"
+#include "ncengine/type/EngineId.h"
 #include "ncengine/ui/IUI.h"
 
 namespace
@@ -19,6 +20,9 @@ namespace nc::graphics
 */
 struct NcGraphics : public Module
 {
+    explicit NcGraphics() noexcept
+        : Module{NcGraphicsId} {}
+
     /**
      * @brief Set the main Camera.
      * 

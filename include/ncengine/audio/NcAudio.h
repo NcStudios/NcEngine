@@ -2,6 +2,7 @@
 
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/module/Module.h"
+#include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Signal.h"
 
 #include <limits>
@@ -29,6 +30,9 @@ struct AudioDevice
 */
 struct NcAudio : public Module
 {
+    explicit NcAudio() noexcept
+        : Module{NcAudioId} {}
+
     /**
      * @brief Register an object to be the reference point audio.
      * @param entity An Entity to use as the listener.
