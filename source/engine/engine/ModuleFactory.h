@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace nc
 {
 class NcEngine;
@@ -21,4 +23,7 @@ auto BuildModuleRegistry(Registry* registry,
                          window::WindowImpl* window,
                          const config::Config& config,
                          NcEngine* engine) -> ModuleRegistry;
+
+// Create a registry instance and register all engine components
+auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>;
 } // namespace nc
