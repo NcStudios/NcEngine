@@ -99,6 +99,21 @@ class EcsInterface
             }
         }
 
+        // Workaround: Almost a fine function (see #509), but not sufficently tested. Make
+        //             sure the item searched for is committed, not staged.
+        auto GetEntityByTag(std::string_view tagValue) -> Entity
+            requires PolicyType::template HasAccess<Entity>
+                  && PolicyType::template HasAccess<Tag>
+        {
+            const auto tags = GetAll<Tag>();
+            const auto pos = std::ranges::find_if(tags, [&tagValue](const auto& tag)
+            {
+                return tag.Value() == tagValue;
+            });
+
+            return pos != std::ranges::end(tags) ? pos->ParentEntity() : Entity::Null();
+        }
+
         /** @brief Get a component. */
         template<Component T>
             requires PolicyType::template HasAccess<T>
