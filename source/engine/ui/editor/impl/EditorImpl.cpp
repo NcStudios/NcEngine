@@ -25,12 +25,19 @@ constexpr auto LoadScene = nc::input::KeyCode::F3;
 
 namespace nc::ui::editor
 {
-class DummyScene : public Scene
+class SandboxScene : public Scene
 {
     public:
         void Load(Registry* registry, ModuleProvider modules) override
         {
-            auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Scene Camera"});
+            auto cameraHandle = registry->Add<Entity>(
+            {
+                .position = Vector3{0.0f, 6.1f, -6.5f},
+                .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
+                .tag = "Scene Camera",
+                .layer = UINT8_MAX // Don't serialize
+            });
+
             auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
             registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
             modules.Get<graphics::NcGraphics>()->SetCamera(camera);
@@ -41,8 +48,20 @@ class DialogBase
 {
     public:
         auto IsOpen() const noexcept { return m_isOpen; }
-        auto ToggleOpen(bool state) noexcept { m_isOpen = state; }
-        auto GetOpen() -> bool* { return &m_isOpen; }
+
+    protected:
+        auto OpenPopup() { m_isOpen = true; }
+        auto ClosePopup() { m_isOpen = false; ImGui::CloseCurrentPopup(); }
+        auto DrawPopup(const char* label, auto&& func)
+        {
+            ImGui::OpenPopup(label);
+            ImGui::SetNextWindowSize(ImVec2{400.0f, 100.0f}, ImGuiCond_Once);
+            if (ImGui::BeginPopupModal(label, &m_isOpen))
+            {
+                func();
+                ImGui::EndPopup();
+            }
+        }
 
     private:
         bool m_isOpen = false;
@@ -51,30 +70,21 @@ class DialogBase
 class NewSceneDialog : public DialogBase
 {
     public:
-        void Open()
-        {
-            ToggleOpen(true);
-        }
-
+        void Open() { OpenPopup(); }
         void Draw(NcEngine* engine)
         {
-            ImGui::OpenPopup("Create New Scene");
-            if (ImGui::BeginPopupModal("Create New Scene", GetOpen()))
+            DrawPopup("Open Sandbox Scene", [&]()
             {
-                ImGui::Text("Are you sure you want to create a new scene?");
-                if (ImGui::Button("Create Scene"))
+                ImGui::Text("Are you sure you want to open a new sandbox scene?");
+                if (ImGui::Button("Create Sandbox"))
                 {
-                    engine->QueueSceneChange(std::make_unique<DummyScene>());
-                    ToggleOpen(false);
-                    ImGui::CloseCurrentPopup();
+                    engine->QueueSceneChange(std::make_unique<SandboxScene>());
+                    ClosePopup();
                 }
-
-                ImGui::EndPopup();
-            }
+            });
         }
 
     private:
-
         NcEngine* m_engine;
 };
 
@@ -83,36 +93,33 @@ class SaveSceneDialog : public DialogBase
     public:
         void Open(asset::AssetMap assets)
         {
-            ToggleOpen(true);
+            OpenPopup();
             m_fileName.clear();
             m_assets = std::move(assets);
         }
 
         void Draw(ecs::Ecs world)
         {
-            ImGui::OpenPopup("Save Scene Fragment");
-            if (ImGui::BeginPopupModal("Save Scene Fragment", GetOpen()))
+            DrawPopup("Save Scene Fragment", [&]()
             {
-                InputText(m_fileName, "fragment name");
-                if (ImGui::Button("save as"))
+                InputText(m_fileName, "name");
+                if (ImGui::Button("save"))
                 {
-                    // TODO: filter by layer
-                    static constexpr auto persistentFilter = [](Entity entity) { return !entity.IsPersistent(); };
+                    // Workaround: Allow editor + game to easily exclude entities from serialization.
+                    //             We'll most likely want to add an Entity flag as a permanent solution.
+                    static constexpr auto entityFilter = [](Entity entity){ return entity.Layer() != UINT8_MAX; };
                     const auto fileName = m_fileName.empty() ? std::string{"unnamed_fragment"} : m_fileName;
                     if (auto fragmentFile = std::ofstream{fileName, std::ios::binary | std::ios::trunc})
                     {
-                        SaveSceneFragment(fragmentFile, world, m_assets, persistentFilter);
-                        ToggleOpen(false);
-                        ImGui::CloseCurrentPopup();
+                        SaveSceneFragment(fragmentFile, world, m_assets, entityFilter);
+                        ClosePopup();
                     }
                     else
                     {
-                        m_fileName = fmt::format("error opening file '{}'", m_fileName); // idk, don't have immediate error reporting
+                        m_fileName = fmt::format("error saving file '{}'", m_fileName); // idk, don't have immediate error reporting
                     }
                 }
-
-                ImGui::EndPopup();
-            }
+            });
         }
 
     private:
@@ -125,38 +132,32 @@ class LoadSceneDialog : public DialogBase
     public:
         void Open()
         {
-            ToggleOpen(true);
+            OpenPopup();
             m_fileName.clear();
         }
 
         void Draw(ecs::Ecs world, asset::NcAsset& assetModule)
         {
-            ImGui::OpenPopup("Load Scene Fragment");
-            if (ImGui::BeginPopupModal("Load Scene Fragment", GetOpen()))
+            DrawPopup("Load Scene Fragment", [&]()
             {
-                InputText(m_fileName, "fragment name");
+                InputText(m_fileName, "name");
                 if (ImGui::Button("load"))
                 {
                     if (auto fragmentFile = std::ifstream{m_fileName, std::ios::binary})
                     {
                         LoadSceneFragment(fragmentFile, world, assetModule);
-                        ToggleOpen(false);
-                        ImGui::CloseCurrentPopup();
+                        ClosePopup();
                     }
                     else
                     {
                         m_fileName = fmt::format("error opening file '{}'", m_fileName);
                     }
                 }
-
-                ImGui::EndPopup();
-            }
+            });
         }
 
     private:
-        bool m_isOpen = false;
         std::string m_fileName;
-        asset::AssetMap m_assets;
 };
 
 class EditorImpl : public Editor
@@ -172,8 +173,7 @@ class EditorImpl : public Editor
 
             if(!m_open)
                 return;
-
-            if (input::KeyDown(hotkey::NewScene))
+            else if (input::KeyDown(hotkey::NewScene))
                 m_newSceneDialog.Open();
             else if(input::KeyDown(hotkey::SaveScene))
                 m_saveSceneDialog.Open(assetModule.GetLoadedAssets());
@@ -182,16 +182,15 @@ class EditorImpl : public Editor
 
             if (m_newSceneDialog.IsOpen())
                 m_newSceneDialog.Draw(m_engine);
-
-            if (m_saveSceneDialog.IsOpen())
+            else if (m_saveSceneDialog.IsOpen())
                 m_saveSceneDialog.Draw(world);
-
-            if (m_loadSceneDialog.IsOpen())
+            else if (m_loadSceneDialog.IsOpen())
                 m_loadSceneDialog.Draw(world, assetModule);
 
             m_ui.Draw(world);
 
-            // PointLight workaround
+            // Workaround: PointLight creation crashes b/c registry + shader resource are out of sync
+            //             until next frame. Hacky solution is to make a duplicate sync call here.
             m_engine->GetRegistry()->CommitStagedChanges();
         }
 
