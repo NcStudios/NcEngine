@@ -22,7 +22,7 @@ class RenderGraph
     public:
         RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions);
 
-        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, Vector2 dimensions);
+        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Device& device, const Vector2 &dimensions);
 
         auto GetRenderPass(const std::string& uid) -> const RenderPass&;
@@ -35,5 +35,6 @@ class RenderGraph
         ShaderDescriptorSets* m_descriptorSets;
         std::vector<RenderPass> m_renderPasses;
         Vector2 m_dimensions;
+        Vector2 m_screenExtent;
 };
 } // namespace nc

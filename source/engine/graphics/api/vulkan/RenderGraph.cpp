@@ -4,6 +4,7 @@
 #include "PerFrameGpuContext.h"
 #include "Swapchain.h"
 #include "core/Device.h"
+#include "graphics/GraphicsUtilities.h"
 #include "techniques/EnvironmentTechnique.h"
 #include "techniques/OutlineTechnique.h"
 #include "techniques/ParticleTechnique.h"
@@ -19,6 +20,7 @@
 
 #include <array>
 #include <string>
+#include <ranges>
 
 namespace
 {
@@ -30,7 +32,7 @@ void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer
     cmd->bindIndexBuffer(indexData.GetBuffer(), 0, vk::IndexType::eUint32);
 }
 
-void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions)
+void SetViewportAndScissorFullWindow(vk::CommandBuffer* cmd, const nc::Vector2& dimensions)
 {
     const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
     const auto extent = vk::Extent2D{static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y)};
@@ -39,7 +41,16 @@ void SetViewportAndScissor(vk::CommandBuffer* cmd, nc::Vector2 dimensions)
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocator *allocator, nc::graphics::Swapchain *swapchain, nc::Vector2 dimensions) -> nc::graphics::RenderPass
+void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2& dimensions, const nc::Vector2& screenExtent)
+{
+    const auto viewport = vk::Viewport{(dimensions.x - screenExtent.x) / 2, (dimensions.y - screenExtent.y) / 2, screenExtent.x, screenExtent.y, 0.0f, 1.0f};
+    const auto extent = vk::Extent2D{static_cast<uint32_t>(screenExtent.x), static_cast<uint32_t>(screenExtent.y)};
+    const auto scissor = vk::Rect2D{vk::Offset2D{static_cast<int32_t>(dimensions.x - static_cast<float>(extent.width)) / 2, static_cast<int32_t>(dimensions.y - static_cast<float>(extent.height)) / 2}, extent};
+    cmd->setViewport(0, 1, &viewport);
+    cmd->setScissor(0, 1, &scissor);
+}
+
+auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocator *allocator, nc::graphics::Swapchain *swapchain, const nc::Vector2& dimensions) -> nc::graphics::RenderPass
 {
     using namespace nc::graphics;
 
@@ -92,10 +103,9 @@ namespace nc::graphics
 RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
     : m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
-      m_descriptorSets{descriptorSets},
-      m_dimensions{dimensions}
+      m_descriptorSets{descriptorSets}
 {
-    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, m_dimensions);
+    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions);
 
     #ifdef NC_EDITOR_ENABLED
     litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);
@@ -110,15 +120,23 @@ RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocato
     AddRenderPass(std::move(litPass));
 }
 
-void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, Vector2 dimensions)
+void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent)
 {
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
     const auto cmd = currentFrame->CommandBuffer();
-    SetViewportAndScissor(cmd, dimensions);
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
-    for (auto& renderPass : m_renderPasses)
+    SetViewportAndScissorFullWindow(cmd, dimensions);
+
+    auto& shadowMappingPass = m_renderPasses[0];
+    shadowMappingPass.Begin(cmd, frameBufferIndex);
+    shadowMappingPass.Execute(cmd, frameData);
+    shadowMappingPass.End(cmd);
+
+    SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
+
+    for (auto& renderPass : m_renderPasses | std::views::drop(1))
     {
         renderPass.Begin(cmd, frameBufferIndex);
         renderPass.Execute(cmd, frameData);
@@ -158,9 +176,7 @@ void RenderGraph::RemoveRenderPass(const std::string& uid)
 void RenderGraph::Resize(const Device& device, const Vector2& dimensions)
 {
     m_renderPasses.clear();
-    m_dimensions = dimensions;
-
-    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, m_dimensions);
+    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions);
 
     #ifdef NC_EDITOR_ENABLED
     litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);

@@ -1,5 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        GraphicsUtilities.cpp
         IGraphics.cpp
         NcGraphicsImpl.cpp
 )

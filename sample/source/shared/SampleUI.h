@@ -25,6 +25,7 @@ class SampleUI : public ui::IUI, public window::IOnResizeReceiver
         GameLog m_gameLog;
         std::function<void()> m_widgetCallback;
         Vector2 m_windowDimensions;
+        Vector2 m_screenExtent;
 
         void CheckInput();
         void DrawDefaultWidget();

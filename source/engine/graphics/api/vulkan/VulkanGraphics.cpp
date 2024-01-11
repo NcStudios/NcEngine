@@ -33,7 +33,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
                                uint32_t apiVersion, Registry* registry,
-                               GLFWwindow* window, Vector2 dimensions)
+                               GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
       m_surface{m_instance->CreateSurface(window)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
@@ -49,6 +49,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
       m_dimensions{ dimensions },
+      m_screenExtent{ screenExtent },
       m_isMinimized{ false }
 {
 }
@@ -126,7 +127,7 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions);
+    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions, m_screenExtent);
 
     // Executes the command buffer to render to the image
     m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
