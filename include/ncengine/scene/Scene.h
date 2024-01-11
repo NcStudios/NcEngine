@@ -2,17 +2,18 @@
 
 #include "ncengine/module/ModuleProvider.h"
 
+#include <filesystem>
 #include <memory>
 
 namespace nc
 {
-    class Registry;
+class Registry;
 
-    class Scene
-    {
-        public:
-            virtual ~Scene() = default;
-            virtual void Load(Registry* registry, ModuleProvider modules) = 0;
-            virtual void Unload() {}
-    };
-}
+class Scene
+{
+    public:
+        virtual ~Scene() = default;
+        virtual void Load(Registry* registry, ModuleProvider modules) = 0;
+        virtual void Unload() {}
+};
+} // namespace nc
