@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/ecs/Component.h"
 
 #include "ncmath/Vector.h"
@@ -30,9 +31,9 @@ struct ParticleInitInfo
     Vector3 positionMax = Vector3::Zero();
     float rotationMin = 0.0f;
     float rotationMax = 0.0f;
-    float scaleMin = 0.0f;
-    float scaleMax = 0.0f;
-    std::string particleTexturePath = "";
+    float scaleMin = 1.0f;
+    float scaleMax = 1.0f;
+    std::string particleTexturePath = asset::DefaultParticle;
 };
 
 struct ParticleKinematicInfo
@@ -61,6 +62,7 @@ class ParticleEmitter final : public ComponentBase
         ParticleEmitter(Entity entity, ParticleInfo info);
 
         const ParticleInfo& GetInfo() const noexcept;
+        void SetInfo(ParticleInfo info);
         void Emit(size_t count);
 
         void RegisterSystem(ParticleEmitterSystem* system);

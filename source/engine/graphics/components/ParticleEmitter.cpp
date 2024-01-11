@@ -15,6 +15,12 @@ const ParticleInfo& ParticleEmitter::GetInfo() const noexcept
     return m_info;
 }
 
+void ParticleEmitter::SetInfo(ParticleInfo info)
+{
+    m_info = std::move(info);
+    m_emitterSystem->Update(*this);
+}
+
 void ParticleEmitter::Emit(size_t count)
 {
     m_emitterSystem->Emit(ParentEntity(), count);

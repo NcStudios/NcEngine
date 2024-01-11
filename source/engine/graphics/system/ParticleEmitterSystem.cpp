@@ -94,6 +94,25 @@ namespace nc::graphics
         emitter.RegisterSystem(this);
     }
 
+    void ParticleEmitterSystem::Update(graphics::ParticleEmitter& emitter)
+    {
+        auto findPred = [entity = emitter.ParentEntity()](particle::EmitterState& state)
+        {
+            return state.GetEntity() == entity;
+        };
+
+        auto pos = std::ranges::find_if(m_emitterStates, findPred);
+
+        if (pos == m_emitterStates.end())
+        {
+            pos = std::ranges::find_if(m_toAdd, findPred);
+            if (pos == m_toAdd.end())
+                throw NcError("Particle emitter does not exist");
+        }
+
+        pos->UpdateInfo(emitter.GetInfo());
+    }
+
     void ParticleEmitterSystem::Remove(Entity entity)
     {
         m_toRemove.push_back(entity);

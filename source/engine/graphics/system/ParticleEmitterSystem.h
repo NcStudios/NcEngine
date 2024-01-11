@@ -29,6 +29,9 @@ namespace nc::graphics
             void Remove(Entity entity);
             void Clear();
 
+            // Workaround: Make ParticleEmitter usable from editor
+            void Update(graphics::ParticleEmitter& emitter);
+
         private:
             std::vector<particle::EmitterState> m_emitterStates;
             std::vector<particle::EmitterState> m_toAdd;

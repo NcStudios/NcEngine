@@ -58,6 +58,16 @@ namespace nc::particle
         Emit(m_info.emission.initialEmissionCount);
     }
 
+    void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
+    {
+        if (info.emission.maxParticleCount != m_soa.GetSize())
+        {
+            m_soa = ParticleSoA{info.emission.maxParticleCount};
+        }
+
+        m_info = info;
+    }
+
     void EmitterState::Emit(size_t count)
     {
         auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
