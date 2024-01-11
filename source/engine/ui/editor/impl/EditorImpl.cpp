@@ -90,22 +90,25 @@ class SaveSceneDialog : public DialogBase
 
         void Draw(ecs::Ecs world)
         {
-            // static auto openPopupCalled = false;
-            // if (!openPopupCalled)
-                ImGui::OpenPopup("Save Scene Fragment");
-
+            ImGui::OpenPopup("Save Scene Fragment");
             if (ImGui::BeginPopupModal("Save Scene Fragment", GetOpen()))
             {
                 InputText(m_fileName, "fragment name");
                 if (ImGui::Button("save as"))
                 {
+                    // TODO: filter by layer
                     static constexpr auto persistentFilter = [](Entity entity) { return !entity.IsPersistent(); };
                     const auto fileName = m_fileName.empty() ? std::string{"unnamed_fragment"} : m_fileName;
-                    auto fragmentFile = std::ofstream{fileName, std::ios::binary | std::ios::trunc};
-                    SaveSceneFragment(fragmentFile, world, m_assets, persistentFilter);
-                    // openPopupCalled = false;
-                    ToggleOpen(false);
-                    ImGui::CloseCurrentPopup();
+                    if (auto fragmentFile = std::ofstream{fileName, std::ios::binary | std::ios::trunc})
+                    {
+                        SaveSceneFragment(fragmentFile, world, m_assets, persistentFilter);
+                        ToggleOpen(false);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    else
+                    {
+                        m_fileName = fmt::format("error opening file '{}'", m_fileName); // idk, don't have immediate error reporting
+                    }
                 }
 
                 ImGui::EndPopup();
@@ -117,27 +120,19 @@ class SaveSceneDialog : public DialogBase
         asset::AssetMap m_assets;
 };
 
-class LoadSceneDialog
+class LoadSceneDialog : public DialogBase
 {
     public:
-        auto IsOpen() const noexcept
-        {
-            return m_isOpen;
-        }
-
         void Open()
         {
-            m_isOpen = true;
+            ToggleOpen(true);
             m_fileName.clear();
         }
 
         void Draw(ecs::Ecs world, asset::NcAsset& assetModule)
         {
-            static auto openPopupCalled = false;
-            if (!openPopupCalled)
-                ImGui::OpenPopup("Load Scene Fragment");
-
-            if (ImGui::BeginPopupModal("Load Scene Fragment", &m_isOpen))
+            ImGui::OpenPopup("Load Scene Fragment");
+            if (ImGui::BeginPopupModal("Load Scene Fragment", GetOpen()))
             {
                 InputText(m_fileName, "fragment name");
                 if (ImGui::Button("load"))
@@ -145,15 +140,13 @@ class LoadSceneDialog
                     if (auto fragmentFile = std::ifstream{m_fileName, std::ios::binary})
                     {
                         LoadSceneFragment(fragmentFile, world, assetModule);
-                        openPopupCalled = false;
-                        m_isOpen = false;
+                        ToggleOpen(false);
+                        ImGui::CloseCurrentPopup();
                     }
                     else
                     {
-                        m_fileName = fmt::format("error opening file '{}'", m_fileName); // idk, don't have immediate error reporting
+                        m_fileName = fmt::format("error opening file '{}'", m_fileName);
                     }
-
-                    ImGui::CloseCurrentPopup();
                 }
 
                 ImGui::EndPopup();
