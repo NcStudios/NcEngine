@@ -35,8 +35,6 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
 
     auto indexingFeatures = vk::PhysicalDeviceDescriptorIndexingFeaturesEXT{};
     indexingFeatures.setPNext(&vulkan11Features);
-    indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
-    indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
 
     auto deviceCreateInfo = vk::DeviceCreateInfo{};
     deviceCreateInfo.setPNext(&indexingFeatures);

@@ -1,11 +1,9 @@
-#version 460
-#extension GL_ARB_separate_shader_objects : enable
-#extension GL_EXT_nonuniform_qualifier : enable
+#version 450
 
 layout (location = 0) in vec3 inUVW;
 layout (location = 0) out vec4 outFragColor;
 
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[1000];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {

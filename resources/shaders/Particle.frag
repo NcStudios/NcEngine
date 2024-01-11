@@ -1,6 +1,4 @@
-#version 460
-#extension GL_ARB_separate_shader_objects : enable
-#extension GL_EXT_nonuniform_qualifier : enable
+#version 450
 
 layout(push_constant) uniform PER_OBJECT
 {
@@ -12,7 +10,7 @@ layout(push_constant) uniform PER_OBJECT
     int baseColorIndex;
 } pc;
 
-layout (set = 0, binding = 2) uniform sampler2D textures[];
+layout (set = 0, binding = 2) uniform sampler2D textures[1000];
 
 layout (location = 0) in vec3 inFragWorldPos;
 layout (location = 1) in vec2 inUV;
