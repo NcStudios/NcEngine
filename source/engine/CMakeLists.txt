@@ -80,22 +80,24 @@ target_include_directories(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
 )
 
-# Install
-install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} NcMath NcUtility NcAsset
-        EXPORT      NcEngine-export
-        DESTINATION lib
-)
-install(EXPORT      NcEngine-export
-        FILE        NcEngineTargets.cmake
-        NAMESPACE   Nc::
-        DESTINATION lib/cmake/NcEngine
-)
-install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
-        DESTINATION lib/cmake/NcEngine
-)
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
-        DESTINATION include
-)
+if(${NC_INSTALL_ENABLED})
+    # Install
+    install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} NcMath NcUtility NcAsset
+            EXPORT      NcEngine-export
+            DESTINATION lib
+    )
+    install(EXPORT      NcEngine-export
+            FILE        NcEngineTargets.cmake
+            NAMESPACE   Nc::
+            DESTINATION lib/cmake/NcEngine
+    )
+    install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
+            DESTINATION lib/cmake/NcEngine
+    )
+    install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
+            DESTINATION include
+    )
+endif()
 
 add_subdirectory(audio)
 add_subdirectory(assets)
