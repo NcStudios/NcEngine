@@ -30,15 +30,15 @@ auto DeviceSupportsExtensions(vk::PhysicalDevice physicalDevice, std::span<const
     });
 }
 
-auto DeviceSupportsFeatures(vk::PhysicalDevice physicalDevice) -> bool
+auto DeviceSupportsFeatures(vk::PhysicalDevice) -> bool
 {
-    auto indexingFeatures = vk::PhysicalDeviceDescriptorIndexingFeaturesEXT{};
-    indexingFeatures.setPNext(nullptr);
-    auto deviceFeatures = vk::PhysicalDeviceFeatures2{};
-    deviceFeatures.setPNext(&indexingFeatures);
-    physicalDevice.getFeatures2(&deviceFeatures);
+    // auto indexingFeatures = vk::PhysicalDeviceDescriptorIndexingFeaturesEXT{};
+    // indexingFeatures.setPNext(nullptr);
+    // auto deviceFeatures = vk::PhysicalDeviceFeatures2{};
+    // deviceFeatures.setPNext(&indexingFeatures);
+    // physicalDevice.getFeatures2(&deviceFeatures);
 
-    return indexingFeatures.descriptorBindingPartiallyBound && indexingFeatures.runtimeDescriptorArray;
+    return true;
 }
 } // anonymous namespace
 

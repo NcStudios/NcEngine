@@ -35,15 +35,15 @@ namespace nc::graphics
 ShaderResources::ShaderResources(vk::Device device,
                                  ShaderDescriptorSets* shaderDescriptorSets,
                                  GpuAllocator* allocator,
-                                 const config::MemorySettings& memorySettings,
+                                 const config::MemorySettings&,
                                  ShaderResourceBus& resourceBus)
-    : objectDataShaderResource{0, allocator, shaderDescriptorSets, memorySettings.maxRenderers},
-      pointLightShaderResource{1, allocator, shaderDescriptorSets, memorySettings.maxPointLights},
-      textureShaderResource{2, shaderDescriptorSets, memorySettings.maxTextures},
-      shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
-      cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
+    : objectDataShaderResource{0, allocator, shaderDescriptorSets, 100000},
+      pointLightShaderResource{1, allocator, shaderDescriptorSets, 20},
+      textureShaderResource{2, shaderDescriptorSets, 1000},
+      shadowMapShaderResource{3, device, shaderDescriptorSets, 20},
+      cubeMapShaderResource{4, device, shaderDescriptorSets, 1000}, // @todo make separate entry for cubeMaps
       environmentDataShaderResource{5, allocator, shaderDescriptorSets},
-      skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets, memorySettings.maxSkeletalAnimations},
+      skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets, 300},
       objectDataConnection{::Connect(resourceBus.objectChannel, &objectDataShaderResource)},
       pointLightDataConnection{::Connect(resourceBus.pointLightChannel, &pointLightShaderResource)},
       environmentDataConnection{::Connect(resourceBus.environmentChannel, &environmentDataShaderResource)},

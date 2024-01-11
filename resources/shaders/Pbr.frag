@@ -1,8 +1,6 @@
 // Credit to: https://learnopengl.com/Getting-started/OpenGL
 
-#version 460
-#extension GL_ARB_separate_shader_objects : enable
-#extension GL_EXT_nonuniform_qualifier : enable
+#version 450
 
 struct PointLight
 {
@@ -35,18 +33,18 @@ struct ObjectData
 
 layout(std140, set=0, binding=0) readonly buffer ObjectBuffer
 {
-    ObjectData objects[];
+    ObjectData objects[100000];
 } objectBuffer;
 
 
 layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 {
-    PointLight lights[];
+    PointLight lights[20];
 } pointLights;
 
-layout (set = 0, binding = 2) uniform sampler2D textures[];
-layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
+layout (set = 0, binding = 2) uniform sampler2D textures[1000];
+layout (set = 0, binding = 3) uniform sampler2D shadowMaps[20];
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[1000];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {

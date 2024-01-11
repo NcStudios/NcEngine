@@ -1,6 +1,4 @@
-#version 460
-#extension GL_ARB_separate_shader_objects : enable
-#extension GL_EXT_nonuniform_qualifier : enable
+#version 450
 
 struct ObjectData
 {
@@ -20,7 +18,7 @@ struct ObjectData
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
-    ObjectData objects[];
+    ObjectData objects[100000];
 } objectBuffer;
 
 struct SkeletalAnimationData
@@ -30,7 +28,7 @@ struct SkeletalAnimationData
 
 layout (std140, set=0, binding=6) readonly buffer AnimatedBoneTransforms
 {
-    SkeletalAnimationData animatedBones[];
+    SkeletalAnimationData animatedBones[3000];
 } skeletalAnimationBuffer;
 
 layout (location = 0) in vec3 inPos;
@@ -77,7 +75,7 @@ mat4 ApplyAnimation(uint animIndex)
 
 void main() 
 {
-    ObjectData object = objectBuffer.objects[gl_BaseInstance];
+    ObjectData object = objectBuffer.objects[gl_InstanceIndex];
 
     vec4 animatedPos = vec4(1.0f);
     mat4 boneTransform = mat4(1.0f);
@@ -96,5 +94,5 @@ void main()
     outFragPosition = vec3(object.model * animatedPos);
     outNormal = mat3(object.model) * inNormal;
     outUV = inUV;
-    outObjectInstance = gl_BaseInstance;
+    outObjectInstance = gl_InstanceIndex;
 }

@@ -47,13 +47,18 @@ namespace nc::graphics
 
     void ShadowMapShaderResource::Update(const std::vector<ShadowMap>& data)
     {
+        assert(data.size() < m_maxShadows && !data.empty());
+
         m_imageInfos.clear();
-        m_imageInfos.reserve(data.size());
+        m_imageInfos.reserve(m_maxShadows);
 
         std::ranges::transform(data, std::back_inserter(m_imageInfos), [this](auto &dataItem)
         {
             return CreateDescriptorImageInfo(m_sampler.get(), dataItem.imageView, vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
         });
+
+        // Fill the rest of the buffer with default values to satisfy VK_CmdDrawIndexed_None_02669
+        std::generate_n(std::back_inserter(m_imageInfos), m_maxShadows - static_cast<uint32_t>(m_imageInfos.size()), [&first = m_imageInfos.at(0)]() -> vk::DescriptorImageInfo& { return first; });
 
         m_descriptors->UpdateImage
         (   
@@ -74,7 +79,7 @@ namespace nc::graphics
             m_maxShadows,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
-            vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
+            vk::DescriptorBindingFlagBitsEXT()
         );
     }
 }
