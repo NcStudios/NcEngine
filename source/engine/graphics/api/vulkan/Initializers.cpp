@@ -221,17 +221,10 @@ auto CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRan
     return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, layoutSize, layouts.data(), 1u, &pushConstantRange};
 }
 
-vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
+vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT>)
 {
-    vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
-    extendedInfo.setPNext(nullptr);
-    extendedInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
-    extendedInfo.setPBindingFlags(bindingFlags.data());
-
     vk::DescriptorSetLayoutCreateInfo setInfo{};
     setInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
-    setInfo.setFlags(vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool);
-    setInfo.setPNext(&extendedInfo);
     setInfo.setPBindings(layoutBindings.data());
 
     return device.createDescriptorSetLayoutUnique(setInfo);
