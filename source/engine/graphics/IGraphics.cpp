@@ -21,7 +21,8 @@ auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                                                     assetModule, shaderResourceBus,
                                                     apiVersion, registry,
                                                     window->GetWindow(),
-                                                    window->GetDimensions()
+                                                    window->GetDimensions(),
+                                                    window->GetScreenExtent()
     );
 }
 } // namespace nc::graphics

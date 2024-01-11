@@ -46,7 +46,7 @@ class VulkanGraphics : public IGraphics
                        asset::NcAsset* assetModule,
                        ShaderResourceBus& shaderResourceBus,
                        uint32_t apiVersion, Registry* registry, 
-                       GLFWwindow* window, Vector2 dimensions);
+                       GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);
 
         ~VulkanGraphics() noexcept;
 
@@ -75,6 +75,7 @@ class VulkanGraphics : public IGraphics
         std::mutex m_resizingMutex;
         uint32_t m_imageIndex;
         Vector2 m_dimensions;
+        Vector2 m_screenExtent;
         bool m_isMinimized;
 };
 } // namespace vulkan

@@ -5,7 +5,7 @@
 #include "ecs/Ecs.h"
 #include "ecs/View.h"
 #include "ncengine/ui/Editor.h"
-
+#include "graphics/GraphicsUtilities.h"
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
 

@@ -34,6 +34,7 @@ class WindowImpl
 
         auto GetWindow() -> GLFWwindow*;
         auto GetDimensions() const noexcept -> Vector2;
+        auto GetScreenExtent() const noexcept -> Vector2;
 
         void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept;
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
@@ -54,6 +55,7 @@ class WindowImpl
 
         std::vector<IOnResizeReceiver*> m_onResizeReceivers;
         Vector2 m_dimensions;
+        Vector2 m_screenExtent;
         GLFWwindow* m_window;
         std::function<void(float,float,bool)> GraphicsOnResizeCallback;
         std::function<void()> EngineDisableRunningCallback;
