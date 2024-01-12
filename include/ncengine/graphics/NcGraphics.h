@@ -4,10 +4,10 @@
 #include "ncengine/module/Module.h"
 #include "ncengine/ui/IUI.h"
 
-namespace
+namespace nc
 {
 class Registry;
-}
+} // namespace nc
 
 namespace nc::graphics
 {
