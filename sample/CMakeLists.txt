@@ -29,7 +29,7 @@ target_link_libraries(${NC_SAMPLE_EXE}
 add_subdirectory(source)
 
 # Install
-if($NC_INSTALL_ENABLED)
+if(${NC_INSTALL_ENABLED})
     install(TARGETS     ${NC_SAMPLE_EXE}
             DESTINATION sample
     )
@@ -47,8 +47,8 @@ if($NC_INSTALL_ENABLED)
             DESTINATION sample
     )
     if(${NC_PROFILING_ENABLED})
-    install(FILES       $<TARGET_FILE:OptickCore>
-            DESTINATION sample
-    )
-endif()
+        install(FILES       $<TARGET_FILE:OptickCore>
+                DESTINATION sample
+        )
+    endif()
 endif()
