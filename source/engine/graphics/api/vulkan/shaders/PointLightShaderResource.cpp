@@ -2,8 +2,6 @@
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/shader_resource/PointLightData.h"
 
-#include <algorithm>
-
 namespace nc::graphics
 {
     PointLightShaderResource::PointLightShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors, uint32_t maxPointLights)
@@ -53,19 +51,8 @@ namespace nc::graphics
 
     void PointLightShaderResource::Update(const std::vector<PointLightData>& data)
     {
-        auto fullVector =std::vector<PointLightData>{};
-        fullVector.reserve(m_maxPointLights);
-        fullVector.insert(fullVector.begin(), data.begin(), data.end());
-
-        auto uninitializedPointLight = PointLightData{};
-        uninitializedPointLight.isInitialized = false;
-
-        // Fill the rest of the buffer with default values to satisfy VK_CmdDrawIndexed_None_02669
-        std::generate_n(std::back_inserter(fullVector), m_maxPointLights - static_cast<uint32_t>(fullVector.size()), [&uninitializedPointLight]() -> PointLightData& { return uninitializedPointLight; });
-
-        m_pointLightsArrayBuffer->Map(fullVector, [](PointLightData& info)
+        m_pointLightsArrayBuffer->Map(data, [](PointLightData& info)
         {
-            // After mapping, set all lights to uninitialized.
             info.isInitialized = false;
         });
     }

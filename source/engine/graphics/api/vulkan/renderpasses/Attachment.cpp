@@ -48,19 +48,7 @@ auto CreateAttachmentDescription(nc::graphics::AttachmentType type,
                                  vk::AttachmentStoreOp storeOp) -> vk::AttachmentDescription
 {
     using nc::graphics::AttachmentType;
-    const auto stencilLoadOp = [](nc::graphics::AttachmentType attachmentType)
-    {
-        switch (attachmentType)
-        {
-            case AttachmentType::Color:       return vk::AttachmentLoadOp::eDontCare;
-            case AttachmentType::Resolve:     return vk::AttachmentLoadOp::eDontCare;
-            case AttachmentType::Depth:       return vk::AttachmentLoadOp::eClear;
-            case AttachmentType::ShadowDepth: return vk::AttachmentLoadOp::eDontCare;
-        }
-
-        throw nc::NcError("Unknown AttachmentType");
-    }(type);
-
+    const auto stencilLoadOp = type == AttachmentType::Depth ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eDontCare;
     const auto finalLayout = [](nc::graphics::AttachmentType attachmentType)
     {
         switch (attachmentType)

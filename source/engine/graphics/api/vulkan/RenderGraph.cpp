@@ -18,15 +18,9 @@
 
 #include "optick.h"
 
-#include <algorithm>
 #include <array>
 #include <string>
 #include <ranges>
-
-namespace
-{
-inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
-}
 
 namespace
 {
@@ -135,28 +129,19 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    for (auto& shadowMappingPass : std::views::filter(m_renderPasses, [](auto& pass)
-    {
-        return pass.GetUid().contains(ShadowMappingPassId);
-    }))
-    {
-        shadowMappingPass.Begin(cmd, frameBufferIndex);
-        shadowMappingPass.Execute(cmd, frameData);
-        shadowMappingPass.End(cmd);
-    }
+    auto& shadowMappingPass = m_renderPasses[0];
+    shadowMappingPass.Begin(cmd, frameBufferIndex);
+    shadowMappingPass.Execute(cmd, frameData);
+    shadowMappingPass.End(cmd);
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
-    for (auto& otherPass : std::views::filter(m_renderPasses, [](auto& pass)
+    for (auto& renderPass : m_renderPasses | std::views::drop(1))
     {
-        return !pass.GetUid().contains(ShadowMappingPassId);
-    }))
-    {
-        otherPass.Begin(cmd, frameBufferIndex);
-        otherPass.Execute(cmd, frameData);
-        otherPass.End(cmd);
+        renderPass.Begin(cmd, frameBufferIndex);
+        renderPass.Execute(cmd, frameData);
+        renderPass.End(cmd);
     }
-
     cmd->end();
 }
 

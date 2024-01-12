@@ -37,8 +37,7 @@ Lighting::Lighting(Registry* registry,
       m_dimensions{dimensions},
       m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){OnAddPointLightConnection();})},
       m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){OnRemovePointLightConnection();})},
-      m_numShadowCasters{0u},
-      m_nullImage{m_device, m_allocator, m_dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm}
+      m_numShadowCasters{0u}
 {
 }
 
@@ -50,9 +49,6 @@ void Lighting::Clear()
         OnRemovePointLightConnection();
     }
     m_numShadowCasters = 0u;
-
-    auto nullMaps = std::vector<ShadowMap>(1, ShadowMap{m_nullImage.view.get()});
-    m_shaderResources->shadowMapShaderResource.Update(std::vector<ShadowMap>{nullMaps});
 }
 
 void Lighting::Resize(const Vector2& dimensions)
