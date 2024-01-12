@@ -8,6 +8,7 @@ project("NcSdk"
 option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
+option(NC_INSTALL_ENABLED "Enable installation of NcEngine and dependencies." ON)
 
 # Variables
 set(CMAKE_CXX_STANDARD 23)
@@ -64,26 +65,28 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install nc-convert
-if(UNIX AND NOT APPLE)
-    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
-            DESTINATION bin
+if(${NC_INSTALL_ENABLED})
+    # Install nc-convert
+    if(UNIX AND NOT APPLE)
+        install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
+                DESTINATION bin
+        )
+    elseif(WIN32)
+        install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
+                DESTINATION bin
+        )
+    elseif(APPLE)
+    endif()
+
+    # Install Default Assets
+    install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
+            DESTINATION    resources/assets
+            FILES_MATCHING REGEX ".*\.(nca)|(spv)"
     )
-elseif(WIN32)
-    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
-            DESTINATION bin
+
+    # Install External Files
+    install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
+            DESTINATION include
+            PATTERN     "src" EXCLUDE
     )
-elseif(APPLE)
 endif()
-
-# Install Default Assets
-install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
-        DESTINATION    resources/assets
-        FILES_MATCHING REGEX ".*\.(nca)|(spv)"
-)
-
-# Install External Files
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
-        DESTINATION include
-        PATTERN     "src" EXCLUDE
-)
