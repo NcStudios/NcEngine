@@ -4,11 +4,13 @@
 #include "PerFrameGpuContext.h"
 #include "Swapchain.h"
 #include "core/Device.h"
+#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
 #include "graphics/GraphicsUtilities.h"
 #include "techniques/EnvironmentTechnique.h"
 #include "techniques/OutlineTechnique.h"
 #include "techniques/ParticleTechnique.h"
 #include "techniques/PbrTechnique.h"
+#include "techniques/ShadowMappingTechnique.h"
 #include "techniques/ToonTechnique.h"
 #include "techniques/UiTechnique.h"
 
@@ -21,6 +23,8 @@
 #include <array>
 #include <string>
 #include <ranges>
+
+#include <iostream>
 
 namespace
 {
@@ -50,12 +54,44 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocator *allocator, nc::graphics::Swapchain *swapchain, const nc::Vector2& dimensions) -> nc::graphics::RenderPass
+auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, const nc::Vector2& dimensions, uint32_t index) -> nc::graphics::RenderPass
 {
     using namespace nc::graphics;
 
-    const auto vkDevice = device.VkDevice();
-    const auto& gpuOptions = device.GetGpuOptions();
+    const auto vkDevice = device->VkDevice();
+
+    const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
+    {
+        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+    };
+
+    const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
+
+    std::vector<Attachment> attachments;
+    const auto numConcurrentAttachments = swapchain->GetColorImageViews().size();
+    for (auto i = 0u; i < numConcurrentAttachments; i++)
+    {
+        attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
+    }
+
+    const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
+    auto renderPass = RenderPass(vkDevice, 0u, ShadowMappingPassId + std::to_string(index), shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
+
+    for (auto i = 0u; i < numConcurrentAttachments; i++)
+    {
+        const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(i)};
+        renderPass.RegisterAttachmentViews(views, dimensions, i);
+    }
+
+    return renderPass;
+}
+
+auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, nc::graphics::ShaderDescriptorSets* descriptorSets, const nc::Vector2& dimensions) -> nc::graphics::RenderPass
+{
+    using namespace nc::graphics;
+
+    const auto vkDevice = device->VkDevice();
+    const auto& gpuOptions = device->GetGpuOptions();
 
     auto numSamples = gpuOptions.GetMaxSamplesCount();
 
@@ -94,30 +130,50 @@ auto CreateLitPass(const nc::graphics::Device& device, nc::graphics::GpuAllocato
         renderPass.RegisterAttachmentViews(imageViews, dimensions, index++);
     }
 
+    #ifdef NC_EDITOR_ENABLED
+    renderPass.RegisterTechnique<WireframeTechnique>(*device, descriptorSets);
+    #endif
+
+    renderPass.RegisterTechnique<EnvironmentTechnique>(*device, descriptorSets);
+    renderPass.RegisterTechnique<PbrTechnique>(*device, descriptorSets);
+    renderPass.RegisterTechnique<ToonTechnique>(*device, descriptorSets);
+    renderPass.RegisterTechnique<OutlineTechnique>(*device, descriptorSets);
+    renderPass.RegisterTechnique<ParticleTechnique>(*device, descriptorSets);
+    renderPass.RegisterTechnique<UiTechnique>(*device, descriptorSets);
     return renderPass;
+}
+
+void PrintRegisteredTechniques(std::vector<nc::graphics::RenderPass>&  passes)
+{
+    auto i = 0u;
+    for (auto& pass : passes)
+    {
+        auto strI = std::to_string(i);
+        std::cout << "Index: " + strI + " Has Technique? ";
+        pass.PrintHasTechnique();
+        i++;
+        std::cout << std::endl;
+    }
 }
 }
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
-    : m_swapchain{swapchain},
+RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
+    : m_device{device},
+      m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
-      m_descriptorSets{descriptorSets}
+      m_descriptorSets{descriptorSets},
+      m_shadowMappingPasses{},
+      m_litPass{CreateLitPass(device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions)},
+      m_dimensions{dimensions},
+      m_screenExtent{},
+      m_activeShadowMappingPasses{}
 {
-    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions);
-
-    #ifdef NC_EDITOR_ENABLED
-    litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);
-    #endif
-
-    litPass.RegisterTechnique<EnvironmentTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<PbrTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<ToonTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<OutlineTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<ParticleTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<UiTechnique>(device, m_descriptorSets);
-    AddRenderPass(std::move(litPass));
+    for (auto i : std::views::iota(0u, MaxLights))
+    {
+        m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
+    }
 }
 
 void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent)
@@ -129,65 +185,75 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    auto& shadowMappingPass = m_renderPasses[0];
-    shadowMappingPass.Begin(cmd, frameBufferIndex);
-    shadowMappingPass.Execute(cmd, frameData);
-    shadowMappingPass.End(cmd);
+    // for (auto& shadowMappingPass : std::ranges::take_view(m_shadowMappingPasses, m_activeShadowMappingPasses))
+    for (auto& shadowMappingPass : m_shadowMappingPasses)
+    {
+        shadowMappingPass.Begin(cmd, frameBufferIndex);
+        shadowMappingPass.Execute(cmd, frameData);
+        shadowMappingPass.End(cmd);
+    }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
-    for (auto& renderPass : m_renderPasses | std::views::drop(1))
-    {
-        renderPass.Begin(cmd, frameBufferIndex);
-        renderPass.Execute(cmd, frameData);
-        renderPass.End(cmd);
-    }
+    m_litPass.Begin(cmd, frameBufferIndex);
+    m_litPass.Execute(cmd, frameData);
+    m_litPass.End(cmd);
+
     cmd->end();
 }
 
-auto RenderGraph::GetRenderPass(const std::string& uid) -> const RenderPass&
-{
-    const auto renderPassPos = std::ranges::find_if(m_renderPasses, [uid](auto &renderPass)
-    {
-        return renderPass.GetUid() == uid;
-    });
 
-    if (renderPassPos == m_renderPasses.end()) throw NcError("RenderGraph::GetRenderPass - Render pass does not exist.");
-    return *renderPassPos;
+
+void RenderGraph::Resize(const Vector2& dimensions)
+{
+    m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions);
+
+    m_shadowMappingPasses.clear();
+    for (auto i : std::views::iota(0u, MaxLights))
+    {
+        m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
+    }
+
+    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
+    {
+        m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
+    }
 }
 
-void RenderGraph::AddRenderPass(RenderPass renderPass)
+void RenderGraph::IncrementShadowPassCount()
 {
-    m_renderPasses.push_back(std::move(renderPass));
-    std::ranges::sort(m_renderPasses, [](auto &renderPassA, auto &renderPassB)
+    m_activeShadowMappingPasses++;
+    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
-        return renderPassA.GetPriority() < renderPassB.GetPriority();
-    });
+        m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
+    }
+
+    std::cout << "Incrementing. m_activeShadowMappingPasses: " << m_activeShadowMappingPasses << std::endl;
+    PrintRegisteredTechniques(m_shadowMappingPasses);
 }
 
-void RenderGraph::RemoveRenderPass(const std::string& uid)
+void RenderGraph::ClearShadowPasses()
 {
-    std::erase_if(m_renderPasses, [uid](const auto &renderPass)
+
+    for (auto& pass : m_shadowMappingPasses)
     {
-        return renderPass.GetUid() == uid;
-    });
+        pass.UnregisterShadowMappingTechnique();
+    }
+    m_activeShadowMappingPasses = 0u;
+
+    std::cout << "ClearShadowPasses. m_activeShadowMappingPasses: " << m_activeShadowMappingPasses << std::endl;
+    PrintRegisteredTechniques(m_shadowMappingPasses);
 }
 
-void RenderGraph::Resize(const Device& device, const Vector2& dimensions)
+
+
+void RenderGraph::DecrementShadowPassCount()
 {
-    m_renderPasses.clear();
-    auto litPass = CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions);
+    NC_ASSERT(m_activeShadowMappingPasses > 0, "Tried to remove a light source when none are registered.");
+    m_activeShadowMappingPasses--;
+    m_shadowMappingPasses.back().UnregisterShadowMappingTechnique();
 
-    #ifdef NC_EDITOR_ENABLED
-    litPass.RegisterTechnique<WireframeTechnique>(device, m_descriptorSets);
-    #endif
-
-    litPass.RegisterTechnique<EnvironmentTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<PbrTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<ToonTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<OutlineTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<ParticleTechnique>(device, m_descriptorSets);
-    litPass.RegisterTechnique<UiTechnique>(device, m_descriptorSets);
-    AddRenderPass(std::move(litPass));
+    std::cout << "Decrementing. m_activeShadowMappingPasses: " << m_activeShadowMappingPasses << std::endl;
+    PrintRegisteredTechniques(m_shadowMappingPasses);
 }
 }

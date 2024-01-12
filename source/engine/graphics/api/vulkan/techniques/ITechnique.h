@@ -16,5 +16,7 @@ class ITechnique
 
         virtual bool CanRecord(const PerFrameRenderState& frameData) = 0;
         virtual void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) = 0;
+
+        virtual bool IsShadowMapTechnique() = 0; // @todo: total HACK.
 };
 } // namespace nc::graphics

@@ -39,6 +39,7 @@ namespace nc::graphics
         void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         void Clear() noexcept;
+        bool IsShadowMapTechnique() override {return false;} //@todo: total HACK.
 
     private:
         ShaderDescriptorSets* m_descriptorSets;

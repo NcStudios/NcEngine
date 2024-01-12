@@ -42,9 +42,9 @@ class SandboxScene : public Scene
             registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
             modules.Get<graphics::NcGraphics>()->SetCamera(camera);
 
-            // avoid crash on empty scene
-            auto dummy = registry->Add<Entity>(EntityInfo{.tag = "Point Light"});
-            registry->Add<graphics::PointLight>(dummy, Vector3{}, Vector3{}, 0.0f);
+            // // avoid crash on empty scene
+            // auto dummy = registry->Add<Entity>(EntityInfo{.tag = "Point Light"});
+            // registry->Add<graphics::PointLight>(dummy, Vector3{}, Vector3{}, 0.0f);
         }
 };
 

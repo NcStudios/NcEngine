@@ -125,7 +125,10 @@ namespace nc::graphics
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        NC_ASSERT(m_shadowCasterIndex < frameData.lightingState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        if (m_shadowCasterIndex >= frameData.lightingState.viewProjections.size())
+        {
+            throw nc::NcError("Shadow caster index is out of bounds.");
+        }
         pushConstants.lightViewProjection = frameData.lightingState.viewProjections[m_shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
