@@ -142,19 +142,6 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
     renderPass.RegisterTechnique<UiTechnique>(*device, descriptorSets);
     return renderPass;
 }
-
-void PrintRegisteredTechniques(std::vector<nc::graphics::RenderPass>&  passes)
-{
-    auto i = 0u;
-    for (auto& pass : passes)
-    {
-        auto strI = std::to_string(i);
-        std::cout << "Index: " + strI + " Has Technique? ";
-        pass.PrintHasTechnique();
-        i++;
-        std::cout << std::endl;
-    }
-}
 }
 
 namespace nc::graphics
@@ -202,8 +189,6 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     cmd->end();
 }
 
-
-
 void RenderGraph::Resize(const Vector2& dimensions)
 {
     m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions);
@@ -227,9 +212,6 @@ void RenderGraph::IncrementShadowPassCount()
     {
         m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
     }
-
-    std::cout << "Incrementing. m_activeShadowMappingPasses: " << m_activeShadowMappingPasses << std::endl;
-    PrintRegisteredTechniques(m_shadowMappingPasses);
 }
 
 void RenderGraph::ClearShadowPasses()
@@ -240,20 +222,12 @@ void RenderGraph::ClearShadowPasses()
         pass.UnregisterShadowMappingTechnique();
     }
     m_activeShadowMappingPasses = 0u;
-
-    std::cout << "ClearShadowPasses. m_activeShadowMappingPasses: " << m_activeShadowMappingPasses << std::endl;
-    PrintRegisteredTechniques(m_shadowMappingPasses);
 }
-
-
 
 void RenderGraph::DecrementShadowPassCount()
 {
     NC_ASSERT(m_activeShadowMappingPasses > 0, "Tried to remove a light source when none are registered.");
     m_activeShadowMappingPasses--;
     m_shadowMappingPasses.back().UnregisterShadowMappingTechnique();
-
-    std::cout << "Decrementing. m_activeShadowMappingPasses: " << m_activeShadowMappingPasses << std::endl;
-    PrintRegisteredTechniques(m_shadowMappingPasses);
 }
 }
