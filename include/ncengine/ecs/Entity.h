@@ -26,6 +26,7 @@ class Entity
             static constexpr Entity::flags_type Static                   = 0b00000001;
             static constexpr Entity::flags_type Persistent               = 0b00000010;
             static constexpr Entity::flags_type NoCollisionNotifications = 0b00000100;
+            static constexpr Entity::flags_type NoSerialize              = 0b00001000;
         };
 
         explicit constexpr Entity() noexcept
@@ -45,6 +46,7 @@ class Entity
         constexpr auto Flags() const noexcept { return m_flags; }
         constexpr auto IsStatic() const noexcept { return m_flags & Flags::Static; }
         constexpr auto IsPersistent() const noexcept { return m_flags & Flags::Persistent; }
+        constexpr auto IsSerializable() const noexcept { return !(m_flags & Flags::NoSerialize); }
         constexpr auto ReceivesCollisionEvents() const noexcept { return !(m_flags & Flags::NoCollisionNotifications); }
         explicit constexpr operator index_type() const noexcept { return m_index; }
         friend bool constexpr operator==(const Entity& a, const Entity& b) { return a.Index() == b.Index(); }

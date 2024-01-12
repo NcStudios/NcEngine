@@ -35,7 +35,7 @@ class SandboxScene : public Scene
                 .position = Vector3{0.0f, 6.1f, -6.5f},
                 .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
                 .tag = "Scene Camera",
-                .layer = UINT8_MAX // Don't serialize
+                .flags = Entity::Flags::NoSerialize
             });
 
             auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
@@ -106,8 +106,8 @@ class SaveSceneDialog : public DialogBase
                 if (ImGui::Button("save"))
                 {
                     // Workaround: Allow editor + game to easily exclude entities from serialization.
-                    //             We'll most likely want to add an Entity flag as a permanent solution.
-                    static constexpr auto entityFilter = [](Entity entity){ return entity.Layer() != UINT8_MAX; };
+                    //             We'll most likely want to add as a permanent solution.
+                    static constexpr auto entityFilter = [](Entity entity){ return entity.IsSerializable(); };
                     const auto fileName = m_fileName.empty() ? std::string{"unnamed_fragment"} : m_fileName;
                     if (auto fragmentFile = std::ofstream{fileName, std::ios::binary | std::ios::trunc})
                     {
