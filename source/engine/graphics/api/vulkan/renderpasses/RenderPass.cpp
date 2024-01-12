@@ -3,7 +3,7 @@
 
 namespace
 {
-constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
+constexpr std::array<float, 4> ClearColor = {0.0f, 0.0f, 0.0f, 0.0f};
 
 auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {

@@ -125,6 +125,6 @@ void main()
     }
 
     // Overlay
-    result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, 1), 0.25f);
+    result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
     outFragColor = vec4(result, 1.0f);
 }

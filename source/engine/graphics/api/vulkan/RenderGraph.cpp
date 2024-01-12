@@ -227,7 +227,7 @@ void RenderGraph::ClearShadowPasses()
 void RenderGraph::DecrementShadowPassCount()
 {
     NC_ASSERT(m_activeShadowMappingPasses > 0, "Tried to remove a light source when none are registered.");
+    m_shadowMappingPasses[m_activeShadowMappingPasses-1].UnregisterShadowMappingTechnique();
     m_activeShadowMappingPasses--;
-    m_shadowMappingPasses.back().UnregisterShadowMappingTechnique();
 }
 }

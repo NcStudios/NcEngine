@@ -198,6 +198,10 @@
             "assetName": "texture/floor/Roughness"
         },
         {
+            "sourcePath": "raw/image/line/Overlay.png",
+            "assetName": "texture/line/overlay01"
+        },
+        {
             "sourcePath": "raw/image/logo/BaseColor.png",
             "assetName": "texture/logo/BaseColor"
         },

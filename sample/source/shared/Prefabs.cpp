@@ -139,6 +139,7 @@ namespace nc::sample::prefab
             "floor\\BaseColor.nca",
             "floor\\Roughness.nca",
             "line\\Hatch3.nca",
+            "line\\overlay01.nca",
             "logo\\BaseColor.nca",
             "logo\\Metallic.nca",
             "logo\\Roughness.nca",
