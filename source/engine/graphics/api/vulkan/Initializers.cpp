@@ -93,6 +93,7 @@ vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::Polyg
 
 vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, float lineWidth, bool depthBiasEnable)
 {
+    // auto depthBiasConstantFactor();
     vk::PipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
     rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));

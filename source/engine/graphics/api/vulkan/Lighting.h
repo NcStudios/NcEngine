@@ -45,5 +45,7 @@ class Lighting
         Connection<Entity> m_onRemovePointLightConnection;
         uint32_t m_numShadowCasters;
         std::vector<std::string> m_ids;
+        Attachment m_nullImage;
+        vk::ImageView m_nullImageView;
 };
 }
