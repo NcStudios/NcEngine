@@ -110,7 +110,7 @@ bool VulkanGraphics::FrameBegin()
     {
         Resize(m_dimensions);
     }
-
+    
     m_frameManager->Begin();
     m_imgui->FrameBegin();
     return true;
