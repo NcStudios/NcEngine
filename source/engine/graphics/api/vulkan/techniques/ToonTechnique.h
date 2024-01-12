@@ -24,6 +24,8 @@ public:
 
     void Clear() noexcept;
 
+    bool IsShadowMapTechnique() override {return false;} //@todo: total HACK.
+
 private:
     ShaderDescriptorSets* m_descriptorSets;
     vk::UniquePipeline m_pipeline;

@@ -26,6 +26,7 @@ namespace nc::graphics
             
             bool CanRecord(const PerFrameRenderState& frameData) override;
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
+            bool IsShadowMapTechnique() override {return true;} //@todo: total HACK.
 
         private:
             ShaderDescriptorSets* m_descriptorSets;

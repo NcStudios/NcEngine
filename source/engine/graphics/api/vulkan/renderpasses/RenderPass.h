@@ -5,6 +5,7 @@
 
 #include <span>
 #include <vector>
+#include <iostream>
 
 namespace nc::graphics
 {
@@ -41,6 +42,7 @@ class RenderPass
 
         template <std::derived_from<ITechnique> T>
         void UnregisterTechnique();
+        void UnregisterShadowMappingTechnique();
 
     private:
         auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;

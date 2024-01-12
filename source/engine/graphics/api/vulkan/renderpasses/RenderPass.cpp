@@ -93,8 +93,20 @@ RenderPass::RenderPass(vk::Device device,
 
 void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
 {
-    RenderPass::UnregisterTechnique<ShadowMappingTechnique>();
+    UnregisterShadowMappingTechnique();
     m_techniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+}
+
+void RenderPass::UnregisterShadowMappingTechnique()
+{
+    auto techniquePos = std::ranges::find_if(m_techniques, [](const auto &foundTechnique)
+                                             { return foundTechnique->IsShadowMapTechnique(); });
+
+    if (techniquePos != m_techniques.end())
+    {
+        *techniquePos = std::move(m_techniques.back());
+        m_techniques.pop_back();
+    }
 }
 
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
