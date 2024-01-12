@@ -24,5 +24,9 @@ vec4 MaterialColor(int textureIndex)
 
 void main() 
 {
-    outFragColor = MaterialColor(pc.baseColorIndex);
+    vec4 fragColor = MaterialColor(pc.baseColorIndex);
+
+    if(fragColor.a < 0.03)
+        discard;
+    outFragColor = fragColor;
 }
