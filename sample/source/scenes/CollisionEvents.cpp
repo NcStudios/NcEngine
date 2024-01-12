@@ -54,8 +54,8 @@ CollisionEvents::CollisionEvents(SampleUI* ui)
 
 void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
 {
-    // auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
-    // registry->Add<graphics::PointLight>(lvHandle, Vector3{0.443f, 0.412f, 0.412f}, Vector3{0.4751f, 0.525f, 1.0f}, 200.0f);
+    auto lvHandle = registry->Add<Entity>({.position = Vector3{0.1f, 4.2f, -5.8f}, .tag = "Point Light 1"});
+    registry->Add<graphics::PointLight>(lvHandle, Vector3{0.443f, 0.412f, 0.412f}, Vector3{0.4751f, 0.525f, 1.0f}, 200.0f);
 
     // Camera
     auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 6.1f, -6.5f}, .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f), .tag = "Main Camera"});
