@@ -54,19 +54,19 @@ layout (location = 3) in flat int inObjectInstance;
 
 layout (location = 0) out vec4 outFragColor;
 
-vec3 MaterialColor(uint textureIndex, uint scale)
+vec4 MaterialColor(uint textureIndex, uint scale)
 {
-    return vec3(texture(textures[textureIndex], inUV * scale));
+    return vec4(texture(textures[textureIndex], inUV * scale));
 }
 
-vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
+vec4 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 {
-    return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
+    return vec4(texture(cubeMaps[cubeMapIndex], angleVector));
 }
 
 void main() 
 {
-    vec3 result = vec3(0.0);
+    vec4 result = vec4(0.0);
 
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
@@ -76,11 +76,11 @@ void main()
         PointLight light = pointLights.lights[i];
         vec3 lightDir = normalize(light.lightPos - inFragPosition);
         float lightIntensity = dot(lightDir, normalize(inNormal));
-        vec3 lightColor = light.diffuseColor;
-        vec3 lightAmbient = light.ambientColor;
+        vec4 lightColor = vec4(light.diffuseColor, 1.0);
+        vec4 lightAmbient = vec4(light.ambientColor, 1.0);
 
         // Material data
-        vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
+        vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
         float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
 
         // Cel shading levels
@@ -88,7 +88,7 @@ void main()
         float hatchingLevel = 0.4f;
         float darkestLevel = 0.0f;
         float blurAmount = 0.05f;
-        vec3 pixelColor = baseColor;
+        vec4 pixelColor = baseColor;
 
         if (lightIntensity <= darkestLevel + blurAmount)
         {
@@ -111,7 +111,7 @@ void main()
             pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
         }
         else pixelColor *= lightColor + lightAmbient;
-        result += max(vec3(0.0f), pixelColor);
+        result += max(vec4(0.0f), pixelColor);
     }
 
     if (environmentData.skyboxCubemapIndex > -1)
@@ -120,11 +120,16 @@ void main()
         vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
         vec3 surfaceNormal = normalize(inNormal);
         vec3 reflected = reflect(I, surfaceNormal);
-        vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
+        vec4 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
         result = mix(result, result + environmentReflectionColor, 0.01f);
     }
 
+
     // Overlay
     result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
-    outFragColor = vec4(result, 1.0f);
+    if (result.a < 0.3f)
+    {
+        discard;
+    }
+    outFragColor = vec4(result);
 }

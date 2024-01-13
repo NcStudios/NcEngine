@@ -69,8 +69,8 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
     pipelineCreateInfo.setPMultisampleState(&multisampling);
     
     pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-    auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
-    auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
+    auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
+    auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
     pipelineCreateInfo.setPColorBlendState(&colorBlending);
     pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
     pipelineCreateInfo.setLayout(m_pipelineLayout.get());
