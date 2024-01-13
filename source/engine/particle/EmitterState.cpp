@@ -60,9 +60,12 @@ namespace nc::particle
 
     void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
     {
-        if (info.emission.maxParticleCount != m_soa.GetSize())
+        // disabling resizing of underlying soa, fine in editor/rendering code, but UB if called from game logic
+        // if (info.emission.maxParticleCount != m_soa.GetSize())
+        if (info.emission.maxParticleCount != m_info.emission.maxParticleCount)
         {
-            m_soa = ParticleSoA{info.emission.maxParticleCount};
+            throw NcError{"Resizing of particle system is disabled due to potential UB"};
+            // m_soa = ParticleSoA{info.emission.maxParticleCount};
         }
 
         m_info = info;

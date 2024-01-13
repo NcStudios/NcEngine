@@ -132,7 +132,7 @@ constexpr auto name = [](auto& obj, auto& v)   \
     obj.SetInfo(std::move(info));              \
 };
 
-constexpr auto getMaxParticleCount = [](auto& obj) { return obj.GetInfo().emission.maxParticleCount; };
+// constexpr auto getMaxParticleCount = [](auto& obj) { return obj.GetInfo().emission.maxParticleCount; };
 constexpr auto getInitialEmissionCount = [](auto& obj) { return obj.GetInfo().emission.initialEmissionCount; };
 constexpr auto getperiodicEmissionCount = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionCount; };
 constexpr auto getPeriodicEmissionFrequency = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionFrequency; };
@@ -152,7 +152,7 @@ constexpr auto getRotationMax = [](auto& obj) { return obj.GetInfo().kinematic.r
 constexpr auto getRotationOverTime = [](auto& obj) { return obj.GetInfo().kinematic.rotationOverTimeFactor; };
 constexpr auto getScaleOverTime = [](auto& obj) { return obj.GetInfo().kinematic.scaleOverTimeFactor; };
 
-DECLARE_SETTER(setMaxParticleCount, emission.maxParticleCount);
+// DECLARE_SETTER(setMaxParticleCount, emission.maxParticleCount);
 DECLARE_SETTER(setInitialEmissionCount, emission.initialEmissionCount);
 DECLARE_SETTER(setPeriodicEmissionCount, emission.periodicEmissionCount);
 DECLARE_SETTER(setPeriodicEmissionFrequency, emission.periodicEmissionFrequency);
@@ -172,7 +172,7 @@ DECLARE_SETTER(setRotationMax, kinematic.rotationMax);
 DECLARE_SETTER(setRotationOverTime, kinematic.rotationOverTimeFactor);
 DECLARE_SETTER(setScaleOverTime, kinematic.scaleOverTimeFactor);
 
-constexpr auto maxParticleCountProp = nc::ui::Property{ getMaxParticleCount, setMaxParticleCount, "maxParticles" };
+// constexpr auto maxParticleCountProp = nc::ui::Property{ getMaxParticleCount, setMaxParticleCount, "maxParticles" };
 constexpr auto initialEmissionCountProp = nc::ui::Property{ getInitialEmissionCount, setInitialEmissionCount, "initialEmitCount" };
 constexpr auto periodicEmissionCountProp = nc::ui::Property{ getperiodicEmissionCount, setPeriodicEmissionCount, "periodicEmitCount" };
 constexpr auto periodicEmissionFrequencyProp = nc::ui::Property{ getPeriodicEmissionFrequency, setPeriodicEmissionFrequency, "periodicFrequency" };
@@ -331,7 +331,7 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
 
     ImGui::Text("%s", "Emission");
     ImGui::Separator();
-    ui::PropertyWidget(particle_emitter_ext::maxParticleCountProp, emitter, &ui::InputU32);
+    // ui::PropertyWidget(particle_emitter_ext::maxParticleCountProp, emitter, &ui::InputU32);
     ui::PropertyWidget(particle_emitter_ext::initialEmissionCountProp, emitter, &ui::InputU32);
     ui::PropertyWidget(particle_emitter_ext::periodicEmissionCountProp, emitter, &ui::InputU32);
     ui::PropertyWidget(particle_emitter_ext::periodicEmissionFrequencyProp, emitter, &ui::DragFloat, step, min, max);
