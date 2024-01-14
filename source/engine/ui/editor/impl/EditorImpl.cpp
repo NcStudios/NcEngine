@@ -34,13 +34,22 @@ class SandboxScene : public Scene
             {
                 .position = Vector3{0.0f, 6.1f, -6.5f},
                 .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
-                .tag = "Scene Camera",
+                .tag = "Camera [sandbox]",
                 .flags = Entity::Flags::NoSerialize
             });
 
             auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
             registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
             modules.Get<graphics::NcGraphics>()->SetCamera(camera);
+
+            auto light = registry->Add<Entity>(
+            {
+                .position = Vector3{1.20484f, 9.4f, -8.48875f},
+                .tag = "Light [sandbox]",
+                .flags = Entity::Flags::NoSerialize
+            });
+
+            registry->Add<graphics::PointLight>(light, Vector3::Zero(), Vector3{1.0f, 0.957f, 0.725f}, 600.0f);
         }
 };
 

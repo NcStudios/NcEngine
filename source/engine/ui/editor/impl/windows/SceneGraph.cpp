@@ -30,6 +30,40 @@ void SceneGraph::Draw(ecs::Ecs world)
         GraphContextMenu(world);
         Graph(world);
     });
+
+    if (m_entityCreateWindowOpen)
+    {
+        ImGui::OpenPopup("Create Entity");
+        ImGui::SetNextWindowSize(ImVec2{400.0f, 200.0f}, ImGuiCond_Once);
+        if (ImGui::BeginPopupModal("Create Entity", &m_entityCreateWindowOpen))
+        {
+            static std::string tag = "Entity";
+            static uint8_t layer = 0;
+            static bool staticFlag = false;
+            static bool persistentFlag = false;
+            static bool noCollisionFlag = false;
+            static bool noSerializeFlag = false;
+
+            ui::InputText(tag, "tag");
+            ui::InputU8(layer, "layer");
+            ImGui::Checkbox("static", &staticFlag);
+            ImGui::Checkbox("persistent", &persistentFlag);
+            ImGui::Checkbox("noCollisionNotifications", &noCollisionFlag);
+            ImGui::Checkbox("noSerialize", &noSerializeFlag);
+
+            if (ImGui::Button("Create"))
+            {
+                auto flags = Entity::Flags::None;
+                if (staticFlag) flags |= Entity::Flags::Static;
+                if (persistentFlag) flags |= Entity::Flags::Persistent;
+                if (noCollisionFlag) flags |= Entity::Flags::NoCollisionNotifications;
+                if (noSerializeFlag) flags |= Entity::Flags::NoSerialize;
+                world.Emplace<Entity>({.tag = tag, .layer = layer, .flags = flags});
+                m_entityCreateWindowOpen = false;
+            }
+            ImGui::EndPopup();
+        }
+    }
 }
 
 void SceneGraph::EnsureSelection(ecs::Ecs world)
@@ -61,7 +95,10 @@ void SceneGraph::Graph(ecs::Ecs world)
 void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform)
 {
     IMGUI_SCOPE(ImGuiId, entity.Index());
-    const auto flags = m_selectedEntity == entity ? ImGuiTreeNodeFlags_Framed : 0;
+    const auto flags = m_selectedEntity == entity 
+        ? ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow
+        : 0;
+
     const auto isNodeExpanded = ImGui::TreeNodeEx(tag.Value().data(), flags);
 
     if (ImGui::IsItemClicked())
@@ -95,10 +132,14 @@ void SceneGraph::GraphContextMenu(ecs::Ecs world)
 {
     if (ImGui::BeginPopupContextWindow())
     {
-        if (ImGui::Selectable("New Entity"))
+        if (ImGui::Selectable("New Default Entity"))
             m_selectedEntity = world.Emplace<Entity>(EntityInfo{});
-        else if (ImGui::Selectable("New Static Entity"))
-            m_selectedEntity = world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+        // else if (ImGui::Selectable("New Static Entity"))
+            // m_selectedEntity = world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+        else if (ImGui::Selectable("New Entity"))
+        {
+            m_entityCreateWindowOpen = true;
+        }
         else
             m_selectedEntity = Entity::Null();
 
