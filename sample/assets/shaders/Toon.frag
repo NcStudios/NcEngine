@@ -126,6 +126,7 @@ void main()
         result = mix(result, result + environmentReflectionColor, 0.01f);
     }
 
+
     // Overlay
     result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
 
