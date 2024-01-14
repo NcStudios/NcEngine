@@ -67,6 +67,12 @@ vec4 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 void main() 
 {
     vec4 result = vec4(0.0);
+    float alpha = 1.0f;
+
+    // Material data
+    vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
+    alpha = baseColor.a;
+    float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
 
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
@@ -78,10 +84,6 @@ void main()
         float lightIntensity = dot(lightDir, normalize(inNormal));
         vec4 lightColor = vec4(light.diffuseColor, 1.0);
         vec4 lightAmbient = vec4(light.ambientColor, 1.0);
-
-        // Material data
-        vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
-        float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
 
         // Cel shading levels
         float highlightLevel = 0.85f;
@@ -127,9 +129,6 @@ void main()
 
     // Overlay
     result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
-    if (result.a < 0.3f)
-    {
-        discard;
-    }
-    outFragColor = vec4(result);
+
+    outFragColor = vec4(result.r, result.g, result.b, alpha);
 }
