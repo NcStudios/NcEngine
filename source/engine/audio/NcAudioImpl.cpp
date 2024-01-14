@@ -10,7 +10,7 @@
 
 namespace
 {
-constexpr auto g_preferredBufferFrames = 256u;
+constexpr auto g_preferredBufferFrames = 512u;
 constexpr auto g_outputChannelCount = 2u;
 constexpr auto g_sampleRate = 44100u;
 constexpr auto g_bufferCount = 3u;
