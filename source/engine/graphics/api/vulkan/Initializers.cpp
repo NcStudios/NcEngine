@@ -110,7 +110,7 @@ vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::Polyg
 vk::PipelineMultisampleStateCreateInfo CreateMultisampleCreateInfo(vk::SampleCountFlagBits numSamples)
 {
     vk::PipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(false));
+    multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(true));
     multisampling.setRasterizationSamples(numSamples);
     multisampling.setMinSampleShading(1.0f);
     multisampling.setPSampleMask(nullptr);
