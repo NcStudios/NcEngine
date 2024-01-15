@@ -34,9 +34,12 @@ void Inspector::Draw(ecs::Ecs world, Entity entity)
 
         ElementHeader("Entity");
         DragAndDropSource<Entity>(&entity);
-        ImGui::Text("Index   %d", entity.Index());
-        ImGui::Text("Layer   %d", entity.Layer());
-        ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
+        ImGui::Text("Index        %d", entity.Index());
+        ImGui::Text("Layer        %d", entity.Layer());
+        ImGui::Text("Static       %s", entity.IsStatic() ? "True" : "False");
+        ImGui::Text("Persistent   %s", entity.IsPersistent() ? "True" : "False");
+        ImGui::Text("Serializable %s", entity.IsSerializable() ? "True" : "False");
+
         std::ranges::for_each(world.GetComponentPools(), [entity](auto&& pool)
         {
             if (pool->HasDrawUI() && pool->Contains(entity))

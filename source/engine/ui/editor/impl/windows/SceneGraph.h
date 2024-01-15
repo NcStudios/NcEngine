@@ -23,6 +23,7 @@ class SceneGraph
     private:
         Entity m_selectedEntity = Entity::Null();
         ImGuiTextFilter m_tagFilter;
+        bool m_entityCreateWindowOpen = false;
 
         void EnsureSelection(ecs::Ecs world);
         auto PassFilter(Tag& tag) -> bool;

@@ -54,6 +54,8 @@ auto IsWindowBackgroundClicked() -> bool;
 /** @brief Input field UI widget for int. */
 auto InputInt(int& value, const char* label, int step = 1) -> bool;
 
+auto InputU8(uint8_t& value, const char* label) -> bool;
+
 /** @brief Input field UI widget for uint32_t. */
 auto InputU32(uint32_t& value, const char* label) -> bool;
 
@@ -221,6 +223,12 @@ inline void SeparatorSpaced()
 inline auto InputInt(int& value, const char* label, int step) -> bool
 {
     return ImGui::InputInt(label, &value, step);
+}
+
+inline auto InputU8(uint8_t& value, const char* label) -> bool
+{
+    constexpr auto step = 1u;
+    return ImGui::InputScalar(label, ImGuiDataType_U8, &value, &step);
 }
 
 inline auto InputU32(unsigned& value, const char* label) -> bool
