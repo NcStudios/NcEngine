@@ -29,6 +29,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
                           /WX
                           /MP
     )
+
+    # just static link for simplicity
+    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+
 endif()
 set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/source/engine/")
