@@ -116,17 +116,6 @@ void main()
         result += max(vec4(0.0f), pixelColor);
     }
 
-    if (environmentData.skyboxCubemapIndex > -1)
-    {
-        // Environment reflection
-        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
-        vec3 surfaceNormal = normalize(inNormal);
-        vec3 reflected = reflect(I, surfaceNormal);
-        vec4 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
-        result = mix(result, result + environmentReflectionColor, 0.01f);
-    }
-
-
     // Overlay
     result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
 

@@ -29,6 +29,7 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
     deviceFeatures.setSamplerAnisotropy(VK_TRUE);
     deviceFeatures.setFillModeNonSolid(VK_TRUE);
     deviceFeatures.setWideLines(VK_TRUE);
+    deviceFeatures.setSampleRateShading(VK_TRUE);
 
     auto deviceCreateInfo = vk::DeviceCreateInfo{};
     deviceCreateInfo.setQueueCreateInfoCount(static_cast<uint32_t>(queueCreateInfos.size()));
