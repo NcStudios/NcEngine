@@ -31,9 +31,11 @@ void LoadHeader(std::istream& stream)
     }
 }
 
-void SaveAssets(std::ostream& stream, const nc::asset::AssetMap& assets)
+void SaveAssets(std::ostream& stream, const nc::asset::AssetMap&)
 {
-    nc::serialize::Serialize(stream, assets);
+    // disabled for game jam b/c we don't need
+    auto dummy = nc::asset::AssetMap{};
+    nc::serialize::Serialize(stream, dummy);
 }
 
 void LoadAssets(std::istream& stream, nc::asset::NcAsset& assetModule)
