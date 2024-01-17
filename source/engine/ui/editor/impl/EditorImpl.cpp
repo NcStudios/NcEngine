@@ -49,7 +49,7 @@ class SandboxScene : public Scene
                 .flags = Entity::Flags::NoSerialize
             });
 
-            registry->Add<graphics::PointLight>(light, Vector3::Zero(), Vector3{1.0f, 0.957f, 0.725f}, 600.0f);
+            registry->Add<graphics::PointLight>(light, Vector3{1.0f, 0.957f, 0.725f}, Vector3{1.0f, 0.957f, 0.725f}, 600.0f);
         }
 };
 
