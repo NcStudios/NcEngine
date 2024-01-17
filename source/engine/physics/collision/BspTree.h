@@ -96,6 +96,9 @@ void BspTree::FindPairs(std::span<const ProxyType> proxies)
     for(size_t i = 0u; i < dynamicCount; ++i)
     {
         const auto& proxy = proxies[i];
+        // concave col seem to be pushing static things if spawned on top of them.
+        if (proxy.Id().IsStatic())
+            continue;
 
         /** Find mesh colliders that are in the same region as the estimate. */
         narrowTestMeshIndices.clear();
