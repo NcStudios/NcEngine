@@ -2,15 +2,19 @@
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
+#include "ncengine/graphics/DebugWidget.h"
 
 #include "imgui/imgui.h"
 
+#include <optional>
 #include <string_view>
 
 namespace nc
 {
 class Tag;
 class Transform;
+
+auto GetSelectedEntityWidget() -> const std::optional<graphics::DebugWidget>&;
 
 namespace ui::editor
 {

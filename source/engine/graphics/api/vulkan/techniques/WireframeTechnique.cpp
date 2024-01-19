@@ -11,6 +11,8 @@
 #include "graphics/debug/DebugRenderer.h"
 #include "graphics/PerFrameRenderState.h"
 
+#include "ui/editor/impl/windows/SceneGraph.h"
+
 namespace nc::graphics
 {
     WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
@@ -86,7 +88,7 @@ namespace nc::graphics
 
     bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.widgetState.selectedCollider.has_value() 
+        return frameData.widgetState.selectedCollider.has_value() || GetSelectedEntityWidget().has_value()
         #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
@@ -103,7 +105,7 @@ namespace nc::graphics
 
     bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.widgetState.selectedCollider.has_value() 
+        return frameData.widgetState.selectedCollider.has_value() || GetSelectedEntityWidget().has_value()
         #ifndef NC_DEBUG_RENDERING_ENABLED
         ;
         #else
@@ -123,6 +125,15 @@ namespace nc::graphics
         {
             pushConstants.model = widget->transformationMatrix;
             const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(widget->meshUid);
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        }
+
+        const auto& selectedEntityWidget = GetSelectedEntityWidget();
+        if (selectedEntityWidget.has_value())
+        {
+            pushConstants.model = selectedEntityWidget->transformationMatrix;
+            const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(selectedEntityWidget->meshUid);
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
             cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }

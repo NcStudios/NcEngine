@@ -7,11 +7,21 @@
 
 namespace
 {
+auto g_selectedEntityWidget = std::optional<nc::graphics::DebugWidget>{};
+
 auto IsRoot(nc::Transform* transform) -> bool
 {
     return !transform->Parent().Valid();
 }
 } // anonymous namespace
+
+namespace nc
+{
+auto GetSelectedEntityWidget() -> const std::optional<graphics::DebugWidget>&
+{
+    return g_selectedEntityWidget;
+}
+}
 
 namespace nc::ui::editor
 {
@@ -58,8 +68,9 @@ void SceneGraph::Draw(ecs::Ecs world)
                 if (persistentFlag) flags |= Entity::Flags::Persistent;
                 if (noCollisionFlag) flags |= Entity::Flags::NoCollisionNotifications;
                 if (noSerializeFlag) flags |= Entity::Flags::NoSerialize;
-                world.Emplace<Entity>({.tag = tag, .layer = layer, .flags = flags});
+                auto newEntity = world.Emplace<Entity>({.tag = tag, .layer = layer, .flags = flags});
                 m_entityCreateWindowOpen = false;
+                m_selectedEntity = newEntity;
             }
             ImGui::EndPopup();
         }
@@ -68,9 +79,34 @@ void SceneGraph::Draw(ecs::Ecs world)
 
 void SceneGraph::EnsureSelection(ecs::Ecs world)
 {
-    if (m_selectedEntity.Valid() && !world.Contains<Entity>(m_selectedEntity))
+    if (m_selectedEntity.Valid())
     {
-        m_selectedEntity = Entity::Null();
+        if (!world.Contains<Entity>(m_selectedEntity))
+        {
+            m_selectedEntity = Entity::Null();
+            g_selectedEntityWidget = std::nullopt;
+        }
+        else
+        {
+            auto transform = world.Get<Transform>(m_selectedEntity);
+            const auto& mesh = [&]()
+            {
+                static const auto defaultMesh = std::string{asset::CubeMesh};
+                if (world.Contains<graphics::ToonRenderer>(m_selectedEntity))
+                    return world.Get<graphics::ToonRenderer>(m_selectedEntity)->GetMeshPath();
+                else if (world.Contains<graphics::MeshRenderer>(m_selectedEntity))
+                    return world.Get<graphics::MeshRenderer>(m_selectedEntity)->GetMeshPath();
+                else
+                    return defaultMesh;
+            }();
+
+            g_selectedEntityWidget = graphics::DebugWidget{mesh, transform->TransformationMatrix()};
+            // g_selectedEntityWidget = graphics::DebugWidget{asset::CubeMesh, DirectX::XMMatrixScaling(2.0f, 2.0f, 2.0f) * transform->TransformationMatrix()};
+        }
+    }
+    else
+    {
+        g_selectedEntityWidget = std::nullopt;
     }
 }
 
