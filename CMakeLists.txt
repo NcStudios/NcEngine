@@ -87,7 +87,7 @@ if(${NC_INSTALL_ENABLED})
     # Install Default Assets
     install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
             DESTINATION    resources/assets
-            FILES_MATCHING REGEX ".*\.(nca)|(spv)"
+            FILES_MATCHING REGEX ".*\.(nca)|(spv)|(ttf)"
     )
 
     # Install External Files
