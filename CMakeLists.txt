@@ -8,6 +8,7 @@ project("NcSdk"
 option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
+option(NC_INSTALL_ENABLED "Enable installation of NcEngine and dependencies." ON)
 
 # Variables
 set(CMAKE_CXX_STANDARD 23)
@@ -28,6 +29,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
                           /WX
                           /MP
     )
+
+    # just static link for simplicity
+    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+
 endif()
 set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(NC_SOURCE_DIR "${PROJECT_SOURCE_DIR}/source/engine/")
@@ -38,7 +43,9 @@ if(NC_PROD_BUILD)
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=1)
     set(NC_ENGINE_LIB "NcEngine")
 else()
-    set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
+    # set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
+    # Disabling debug rendering for game jam - is this even used anymore? wireframe widgets work without
+    set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_EDITOR_EXE "NcEditor")
     set(NC_SAMPLE_EXE "Sample")
@@ -64,26 +71,28 @@ if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-# Install nc-convert
-if(UNIX AND NOT APPLE)
-    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
-            DESTINATION bin
+if(${NC_INSTALL_ENABLED})
+    # Install nc-convert
+    if(UNIX AND NOT APPLE)
+        install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
+                DESTINATION bin
+        )
+    elseif(WIN32)
+        install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
+                DESTINATION bin
+        )
+    elseif(APPLE)
+    endif()
+
+    # Install Default Assets
+    install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
+            DESTINATION    resources/assets
+            FILES_MATCHING REGEX ".*\.(nca)|(spv)|(ttf)"
     )
-elseif(WIN32)
-    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
-            DESTINATION bin
+
+    # Install External Files
+    install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
+            DESTINATION include
+            PATTERN     "src" EXCLUDE
     )
-elseif(APPLE)
 endif()
-
-# Install Default Assets
-install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
-        DESTINATION    resources/assets
-        FILES_MATCHING REGEX ".*\.(nca)|(spv)"
-)
-
-# Install External Files
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
-        DESTINATION include
-        PATTERN     "src" EXCLUDE
-)
