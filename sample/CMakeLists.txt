@@ -46,6 +46,10 @@ if(${NC_INSTALL_ENABLED})
     install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
             DESTINATION sample
     )
+    install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/fonts
+            DESTINATION    sample/nca
+            FILES_MATCHING REGEX ".*\.(nca)|(spv)|(ttf)"
+    )
     if(${NC_PROFILING_ENABLED})
         install(FILES       $<TARGET_FILE:OptickCore>
                 DESTINATION sample
