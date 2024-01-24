@@ -11,7 +11,7 @@ TextureStorage::TextureStorage(vk::Device device, GpuAllocator* allocator, Signa
     : m_device{device},
       m_allocator{allocator},
       m_textureBuffers{},
-      m_sampler{graphics::CreateTextureSampler(device, vk::SamplerAddressMode::eRepeat)},
+      m_samplers{},
       m_onTextureUpdate{onTextureUpdate.Connect(this, &TextureStorage::UpdateBuffer)}
 {
 }
@@ -54,11 +54,13 @@ void TextureStorage::LoadTextureBuffer(const asset::TextureUpdateEventData& even
     {
         auto& textureData = eventData.data[i];
         auto& texture = textureData.texture;
+        auto mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texture.width, texture.height)))) + 1;
+        m_samplers.push_back(std::move(graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat, mipLevels)));
 
         TextureBuffer textureBuffer
         {
             .image = graphics::ImmutableImage(m_device, m_allocator, texture.pixelData.data(), texture.width, texture.height, textureData.flags == AssetFlags::TextureTypeNormalMap),
-            .imageInfo = graphics::CreateDescriptorImageInfo(m_sampler.get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
+            .imageInfo = graphics::CreateDescriptorImageInfo(m_samplers.back().get(), textureBuffer.image.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal),
             .uid = textureData.id
         };
 
@@ -76,8 +78,13 @@ void TextureStorage::UnloadTextureBuffer(const asset::TextureUpdateEventData& ev
         return texture.uid == id;
     });
 
+    auto index = std::distance(m_textureBuffers.begin(), pos);
     assert(pos != m_textureBuffers.end());
-    m_textureBuffers.erase(pos);
+
+    m_samplers.at(index) = std::move(m_samplers.back());
+    m_samplers.pop_back();
+    m_textureBuffers.at(index) = std::move(m_textureBuffers.back());
+    m_textureBuffers.pop_back();
     graphics::ShaderResourceService<graphics::TextureBuffer>::Get()->Update(m_textureBuffers);
 }
 
@@ -85,5 +92,6 @@ void TextureStorage::UnloadAllTextureBuffer()
 {
     /** No need to write an empty buffer to the GPU. **/
     m_textureBuffers.clear();
+    m_samplers.clear();
 }
 } // namespace nc::graphics

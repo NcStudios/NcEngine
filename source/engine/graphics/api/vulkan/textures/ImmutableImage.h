@@ -18,6 +18,7 @@ namespace nc::graphics
             void Clear() noexcept;
 
         private:
+            uint32_t m_mipLevels;
             GpuAllocation<vk::Image> m_image;
             vk::UniqueImageView m_view;
     };

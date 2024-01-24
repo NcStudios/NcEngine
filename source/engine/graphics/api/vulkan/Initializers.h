@@ -9,7 +9,7 @@
 namespace nc::graphics
 {
 // Resources
-auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler;
+auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode, uint32_t mipLevels) -> vk::UniqueSampler;
 
 // Pipelines
 vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
