@@ -8,6 +8,7 @@
 #include "utility/Signal.h"
 
 #include <optional>
+#include <string_view>
 #include <vector>
 
 namespace nc::graphics
@@ -17,11 +18,18 @@ struct EnvironmentState;
 struct ObjectData;
 struct SkeletalAnimationSystemState;
 
+struct ToonMeshes
+{
+    std::string_view meshUid;
+    MeshView mesh;
+    uint32_t count;
+};
+
 struct ObjectState
 {
     std::vector<MeshView> pbrMeshes;
     uint32_t pbrMeshStartingIndex;
-    std::vector<MeshView> toonMeshes;
+    std::vector<ToonMeshes> toonMeshGroups;
     uint32_t toonMeshStartingIndex;
     std::optional<uint32_t> skyboxInstanceIndex = std::nullopt;
 };

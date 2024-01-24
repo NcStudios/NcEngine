@@ -139,10 +139,5 @@ namespace nc::graphics
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
             objectInstance++;
         }
-        for (const auto& mesh : frameData.objectState.toonMeshes)
-        {
-            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            objectInstance++;
-        }
     }
 }
