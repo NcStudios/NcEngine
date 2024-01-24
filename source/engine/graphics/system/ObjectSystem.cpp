@@ -8,6 +8,7 @@
 
 #include "optick.h"
 
+#include <ranges>
 namespace
 {
 bool IsViewedByFrustum(const nc::Frustum& frustum, float maxMeshExtent, DirectX::FXMMATRIX transform)
@@ -43,7 +44,6 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     objectData.reserve(pbrRenderers.size_upper_bound() + toonRenderers.size_upper_bound());
     auto frontendState = ObjectState{};
     frontendState.pbrMeshes.reserve(pbrRenderers.size_upper_bound());
-    frontendState.toonMeshes.reserve(toonRenderers.size_upper_bound());
 
     for (const auto& [renderer, transform] : pbrRenderers)
     {
@@ -63,6 +63,19 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
 
     for (const auto& [renderer, transform] : toonRenderers)
     {
+        if (!frontendState.toonMeshGroups.empty() && frontendState.toonMeshGroups.back().meshUid == renderer->GetMeshPath())
+        {
+            frontendState.toonMeshGroups.back().count++;
+        }
+        else
+        {
+            frontendState.toonMeshGroups.emplace_back(renderer->GetMeshPath(), renderer->GetMeshView(), 1);
+        }
+    }
+
+    // populating the buffer
+    for (const auto& [renderer, transform] : toonRenderers)
+    {
         const auto& modelMatrix = transform->TransformationMatrix();
         if (!IsViewedByFrustum(cameraState.frustum, renderer->GetMeshView().maxExtent, modelMatrix))
         {
@@ -72,8 +85,8 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
-        frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
+
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
 
     if (environmentState.useSkybox)
