@@ -163,6 +163,7 @@ namespace nc::graphics
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
 
         m_registry->Sort<ToonRenderer>([](auto&& renderableLhs, auto&& renderableRhs) { return std::less{}(renderableLhs.GetMeshPath(), renderableRhs.GetMeshPath()); });
+        m_registry->Sort<MeshRenderer>([](auto&& renderableLhs, auto&& renderableRhs) { return std::less{}(renderableLhs.GetMeshPath(), renderableRhs.GetMeshPath()); });
 
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},
                                                   MultiView<ToonRenderer, Transform>{m_registry},

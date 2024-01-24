@@ -18,7 +18,7 @@ struct EnvironmentState;
 struct ObjectData;
 struct SkeletalAnimationSystemState;
 
-struct ToonMeshes
+struct MeshGroup
 {
     std::string_view meshUid;
     MeshView mesh;
@@ -27,9 +27,9 @@ struct ToonMeshes
 
 struct ObjectState
 {
-    std::vector<MeshView> pbrMeshes;
+    std::vector<MeshGroup> pbrMeshGroups;
     uint32_t pbrMeshStartingIndex;
-    std::vector<ToonMeshes> toonMeshGroups;
+    std::vector<MeshGroup> toonMeshGroups;
     uint32_t toonMeshStartingIndex;
     std::optional<uint32_t> skyboxInstanceIndex = std::nullopt;
 };

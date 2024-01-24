@@ -112,12 +112,12 @@ bool OutlineTechnique::CanRecord(const PerFrameRenderState& frameData)
 
 void OutlineTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
 {
-    OPTICK_CATEGORY("OutlineTechnique::Record", Optick::Category::Rendering);
-    uint32_t objectInstance = 0;
+    OPTICK_CATEGORY("ToonTechnique::Record", Optick::Category::Rendering);
+    auto previousGroupCount = 0u;
     for (const auto& meshGroup : frameData.objectState.toonMeshGroups)
     {
-        cmd->drawIndexed(meshGroup.mesh.indexCount, meshGroup.count, meshGroup.mesh.firstIndex, meshGroup.mesh.firstVertex, objectInstance + frameData.objectState.toonMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-        ++objectInstance;
+        cmd->drawIndexed(meshGroup.mesh.indexCount, meshGroup.count, meshGroup.mesh.firstIndex, meshGroup.mesh.firstVertex, previousGroupCount + frameData.objectState.toonMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        previousGroupCount += meshGroup.count;
     }
 }
 

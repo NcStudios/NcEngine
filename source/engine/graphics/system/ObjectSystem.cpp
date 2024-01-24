@@ -8,6 +8,7 @@
 
 #include "optick.h"
 
+#include <iostream>
 #include <ranges>
 namespace
 {
@@ -43,7 +44,20 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     auto objectData = std::vector<ObjectData>{};
     objectData.reserve(pbrRenderers.size_upper_bound() + toonRenderers.size_upper_bound());
     auto frontendState = ObjectState{};
-    frontendState.pbrMeshes.reserve(pbrRenderers.size_upper_bound());
+    auto pbrRenderersCount = 0u;
+
+    for (const auto& [renderer, transform] : pbrRenderers)
+    {
+        pbrRenderersCount++;
+        if (!frontendState.pbrMeshGroups.empty() && frontendState.pbrMeshGroups.back().meshUid == renderer->GetMeshPath())
+        {
+            frontendState.pbrMeshGroups.back().count++;
+        }
+        else
+        {
+            frontendState.pbrMeshGroups.emplace_back(renderer->GetMeshPath(), renderer->GetMeshView(), 1);
+        }
+    }
 
     for (const auto& [renderer, transform] : pbrRenderers)
     {
@@ -56,7 +70,6 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
-        frontendState.pbrMeshes.push_back(renderer->GetMeshView());
     }
 
     frontendState.pbrMeshStartingIndex = 0u;
@@ -87,7 +100,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
         objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
     }
 
-    frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
+    frontendState.toonMeshStartingIndex = static_cast<uint32_t>(pbrRenderersCount);
 
     if (environmentState.useSkybox)
     {

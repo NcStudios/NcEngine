@@ -133,11 +133,11 @@ namespace nc::graphics
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
-        uint32_t objectInstance = 0;
-        for (const auto& mesh : frameData.objectState.pbrMeshes)
+        auto previousGroupCount = 0u;
+        for (const auto& meshGroup : frameData.objectState.pbrMeshes)
         {
-            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            objectInstance++;
+            cmd->drawIndexed(meshGroup.mesh.indexCount, meshGroup.count, meshGroup.mesh.firstIndex, meshGroup.mesh.firstVertex, previousGroupCount + frameData.objectState.pbrMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+            previousGroupCount += meshGroup.count;
         }
-    }
+        }
 }
