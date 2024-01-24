@@ -112,7 +112,7 @@ vk::PipelineMultisampleStateCreateInfo CreateMultisampleCreateInfo(vk::SampleCou
     vk::PipelineMultisampleStateCreateInfo multisampling{};
     multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(true));
     multisampling.setRasterizationSamples(numSamples);
-    multisampling.setMinSampleShading(1.0f);
+    multisampling.setMinSampleShading(0.44f);
     multisampling.setPSampleMask(nullptr);
     multisampling.setAlphaToCoverageEnable(static_cast<vk::Bool32>(false));
     multisampling.setAlphaToOneEnable(static_cast<vk::Bool32>(false));
