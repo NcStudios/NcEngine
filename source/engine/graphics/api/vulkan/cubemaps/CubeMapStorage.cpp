@@ -10,7 +10,7 @@ CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signa
     : m_device{device},
       m_allocator{allocator},
       m_cubeMaps{},
-      m_sampler{graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat)},
+      m_sampler{graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat, 1)},
       m_onCubeMapUpdate{onCubeMapUpdate.Connect(this, &CubeMapStorage::UpdateBuffer)}
 {
 }

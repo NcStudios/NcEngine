@@ -2,7 +2,7 @@
 
 namespace nc::graphics
 {
-auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler
+auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode, uint32_t mipLevels) -> vk::UniqueSampler
 {
     const auto samplerInfo = vk::SamplerCreateInfo
     {
@@ -19,7 +19,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode)
         VK_FALSE,                         // compareEnable
         vk::CompareOp::eAlways,           // compareOp
         0.0f,                             // minLod
-        0.0f,                             // maxLod
+        static_cast<float>(mipLevels),    // maxLod
         vk::BorderColor::eIntOpaqueWhite, // borderColor
         VK_FALSE                          // unnormalizedCoordinates
     };

@@ -33,7 +33,7 @@ class TextureStorage
         vk::Device m_device;
         GpuAllocator* m_allocator;
         std::vector<TextureBuffer> m_textureBuffers;
-        vk::UniqueSampler m_sampler;
+        std::vector<vk::UniqueSampler> m_samplers;
         nc::Connection<const asset::TextureUpdateEventData&> m_onTextureUpdate;
 };
 } // namespace graphics

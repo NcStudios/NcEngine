@@ -96,13 +96,13 @@ namespace nc::graphics
         return GpuAllocation<vk::Buffer>{buffer, allocation, this};
     }
 
-    auto GpuAllocator::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, uint32_t mipLevels, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>
     {
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
         imageInfo.setFormat(format);
         imageInfo.setExtent( { static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y), 1 });
-        imageInfo.setMipLevels(1);
+        imageInfo.setMipLevels(mipLevels);
         imageInfo.setArrayLayers(arrayLayers);
         imageInfo.setSamples(numSamples);
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
@@ -122,7 +122,88 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, bool isNormal) -> GpuAllocation<vk::Image>
+    void GpuAllocator::GenerateMipMaps(vk::Image image, uint32_t width, uint32_t height, uint32_t mipLevels)
+    {
+         m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
+        { 
+            auto barrier = vk::ImageMemoryBarrier{};
+            barrier.setImage(image);
+            barrier.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+            barrier.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
+
+            auto subresourceRange = vk::ImageSubresourceRange{};
+            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresourceRange.setLevelCount(1);
+            subresourceRange.setLayerCount(1);
+            subresourceRange.setBaseArrayLayer(0);
+
+            barrier.setSubresourceRange(subresourceRange);
+
+            auto mipWidth = width;
+            auto mipHeight = height;
+
+            for (auto i = 1u; i < mipLevels; i++)
+            {
+                subresourceRange.setBaseMipLevel(i-1);
+
+                barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal);
+                barrier.setNewLayout(vk::ImageLayout::eTransferSrcOptimal);
+                barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
+                barrier.setDstAccessMask(vk::AccessFlagBits::eTransferRead);
+                barrier.setSubresourceRange(subresourceRange);
+                cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+
+                auto srcOffsets = std::array<vk::Offset3D, 2>{};
+                srcOffsets[0] = vk::Offset3D(0, 0, 0);
+                srcOffsets[1] = vk::Offset3D(mipWidth, mipHeight, 1);
+
+                auto dstOffsets = std::array<vk::Offset3D, 2>{};
+                dstOffsets[0] = vk::Offset3D(0, 0, 0);
+                dstOffsets[1] = vk::Offset3D(mipWidth > 1 ? mipWidth/2 : 1, mipHeight > 1 ? mipHeight / 2: 1, 1);
+
+                auto srcSubresource = vk::ImageSubresourceLayers{};
+                srcSubresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+                srcSubresource.setMipLevel(i-1);
+                srcSubresource.setLayerCount(1);
+                srcSubresource.setBaseArrayLayer(0);
+
+                auto dstSubresource = vk::ImageSubresourceLayers{};
+                dstSubresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+                dstSubresource.setMipLevel(i);
+                dstSubresource.setLayerCount(1);
+                dstSubresource.setBaseArrayLayer(0);
+
+                auto blit = vk::ImageBlit{};
+                blit.setSrcOffsets(srcOffsets);
+                blit.setSrcSubresource(srcSubresource);
+                blit.setDstSubresource(dstSubresource);
+                blit.setDstOffsets(dstOffsets);
+
+                cmd.blitImage(image, vk::ImageLayout::eTransferSrcOptimal, image, vk::ImageLayout::eTransferDstOptimal, 1, &blit, vk::Filter::eLinear);
+
+                barrier.setOldLayout(vk::ImageLayout::eTransferSrcOptimal);
+                barrier.setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+                barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferRead);
+                barrier.setDstAccessMask(vk::AccessFlagBits::eShaderRead);
+
+                cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+
+                if (mipWidth > 1) mipWidth /= 2;
+                if (mipHeight > 1) mipHeight /= 2;
+            }
+
+            subresourceRange.setBaseMipLevel(mipLevels-1);
+            barrier.setSubresourceRange(subresourceRange);
+            barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal);
+            barrier.setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+            barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
+            barrier.setDstAccessMask(vk::AccessFlagBits::eShaderRead);
+
+            cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
+        });
+    }
+
+    auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, uint32_t mipLevels, bool isNormal) -> GpuAllocation<vk::Image>
     {
         const auto imageSize = width * height * 4u;
         auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
@@ -132,11 +213,12 @@ namespace nc::graphics
 
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         auto format = isNormal ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb;
-        auto imageAllocation = CreateImage(format, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlags(), 1, vk::SampleCountFlagBits::e1);
+        auto imageAllocation = CreateImage(format, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageCreateFlags(), 1, mipLevels, vk::SampleCountFlagBits::e1);
 
-        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, vk::ImageLayout::eTransferDstOptimal);
+        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, mipLevels, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
-        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        GenerateMipMaps(imageAllocation.Data(), width, height, mipLevels);
 
         stagingBuffer.Release();
         return imageAllocation;
@@ -150,11 +232,11 @@ namespace nc::graphics
 
         Unmap(stagingBuffer.Allocation());
         auto dimensions = Vector2{static_cast<float>(sideLength), static_cast<float>(sideLength)};
-        auto imageBuffer = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, vk::SampleCountFlagBits::e1);
+        auto imageBuffer = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, 1, vk::SampleCountFlagBits::e1);
 
-        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, vk::ImageLayout::eTransferDstOptimal);
+        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, 1, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), sideLength, sideLength, 6);
-        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, vk::ImageLayout::eShaderReadOnlyOptimal);
+        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
 
         stagingBuffer.Release();
         return imageBuffer;
@@ -232,7 +314,7 @@ namespace nc::graphics
         });
     }
 
-    void GpuAllocator::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout)
+    void GpuAllocator::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, uint32_t mipLevels, vk::ImageLayout newLayout)
     {
         m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         { 
@@ -246,7 +328,7 @@ namespace nc::graphics
             vk::ImageSubresourceRange subresourceRange{};
             subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
             subresourceRange.setBaseMipLevel(0);
-            subresourceRange.setLevelCount(1);
+            subresourceRange.setLevelCount(mipLevels);
             subresourceRange.setBaseArrayLayer(0);
             subresourceRange.setLayerCount(layerCount);
 
@@ -278,7 +360,7 @@ namespace nc::graphics
         });
     }
 
-    auto CreateTextureView(vk::Device device, vk::Image image, bool isNormal) -> vk::UniqueImageView
+    auto CreateTextureView(vk::Device device, vk::Image image, uint32_t mipLevels, bool isNormal) -> vk::UniqueImageView
     {
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
@@ -289,7 +371,7 @@ namespace nc::graphics
         vk::ImageSubresourceRange subresourceRange{};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
         subresourceRange.setBaseMipLevel(0);
-        subresourceRange.setLevelCount(1);
+        subresourceRange.setLevelCount(mipLevels);
         subresourceRange.setBaseArrayLayer(0);
         subresourceRange.setLayerCount(1);
 

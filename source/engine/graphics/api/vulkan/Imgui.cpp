@@ -64,7 +64,7 @@ Imgui::Imgui(const Device& device,
     if (std::filesystem::exists(fontPath))
     {
         ImGuiIO& io = ImGui::GetIO();
-        io.Fonts->AddFontFromFileTTF("assets\\fonts\\font.ttf", 14.0f);
+        io.Fonts->AddFontFromFileTTF("assets\\fonts\\font.ttf", 16.0f);
     }
 
     device.ExecuteCommand([](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});

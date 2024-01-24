@@ -16,7 +16,7 @@ namespace graphics
     class Instance;
 
     /** @todo Add create image view (used in Attachment) */
-    auto CreateTextureView(vk::Device device, vk::Image image, bool isNormal) -> vk::UniqueImageView;
+    auto CreateTextureView(vk::Device device, vk::Image image, uint32_t mipLevels, bool isNormal) -> vk::UniqueImageView;
     auto CreateCubeMapTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
 
     template<class T>
@@ -60,8 +60,8 @@ namespace graphics
 
             void CopyBuffer(const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
             auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
-            auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
-            auto CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, bool isNormal) -> GpuAllocation<vk::Image>;
+            auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, uint32_t mipLevels, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
+            auto CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, uint32_t mipLevels, bool isNormal) -> GpuAllocation<vk::Image>;
             auto CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength) -> GpuAllocation<vk::Image>;
 
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
@@ -76,9 +76,10 @@ namespace graphics
             }
 
         private:
+            void GenerateMipMaps(vk::Image, uint32_t width, uint32_t height, uint32_t mipLevels);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
-            void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, vk::ImageLayout newLayout);
+            void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, uint32_t mipLevels, vk::ImageLayout newLayout);
             const Device* m_device;
             vma::Allocator m_allocator;
             vk::PhysicalDeviceProperties m_deviceProperties;
