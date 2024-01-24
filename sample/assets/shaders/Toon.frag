@@ -96,6 +96,10 @@ void main()
     vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
     alpha = baseColor.a;
     float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
+    if (hatchingTexture < 0.6)
+    {
+        hatchingTexture = 0.0f;
+    }
 
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
@@ -113,10 +117,10 @@ void main()
         vec4 lightAmbient = vec4(light.ambientColor, 1.0);
 
         // Cel shading levels
-        float highlightLevel = 0.85f;
-        float hatchingLevel = 0.4f;
+        float highlightLevel = 0.83f;
+        float hatchingLevel = 0.5f;
         float darkestLevel = 0.0f;
-        float blurAmount = 0.005f;
+        float blurAmount = 0.0025f;
         vec4 pixelColor = baseColor;
 
         if (lightIntensity <= darkestLevel + blurAmount)
@@ -126,10 +130,6 @@ void main()
         else if (lightIntensity <= hatchingLevel)
         {
             pixelColor *= lightColor * hatchingTexture;
-        }
-        else if (lightIntensity <= hatchingLevel + blurAmount)
-        {
-            pixelColor = pixelColor * lightColor * mix(hatchingTexture, 1.0f, (lightIntensity - hatchingLevel) * 1/(blurAmount));
         }
         else if (lightIntensity <= highlightLevel)
         {
