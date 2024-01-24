@@ -8,8 +8,6 @@
 
 #include "optick.h"
 
-#include <iostream>
-#include <ranges>
 namespace
 {
 bool IsViewedByFrustum(const nc::Frustum& frustum, float maxMeshExtent, DirectX::FXMMATRIX transform)

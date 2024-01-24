@@ -105,6 +105,10 @@ void main()
         PointLight light = pointLights.lights[i];
         vec3 lightDir = normalize(light.lightPos - inFragPosition);
         float lightIntensity = dot(lightDir, normalize(inNormal));
+        float distanceToLight = length(light.lightPos - inFragPosition);
+        float lightRadius = light.specularIntensity;
+        float lightAttenuated = max(0.0, 1.0 - distanceToLight / lightRadius) * dot(lightDir, normalize(inNormal));
+
         vec4 lightColor = vec4(light.diffuseColor, 1.0);
         vec4 lightAmbient = vec4(light.ambientColor, 1.0);
 
@@ -112,7 +116,7 @@ void main()
         float highlightLevel = 0.85f;
         float hatchingLevel = 0.4f;
         float darkestLevel = 0.0f;
-        float blurAmount = 0.05f;
+        float blurAmount = 0.005f;
         vec4 pixelColor = baseColor;
 
         if (lightIntensity <= darkestLevel + blurAmount)
@@ -136,7 +140,8 @@ void main()
             pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
         }
         else pixelColor *= lightColor + lightAmbient;
-        result += max(vec4(0.0f), pixelColor);
+        float snappedLight = round(lightAttenuated / 0.3) * 0.3;
+        result += max(vec4(0.0f), pixelColor) * mix(snappedLight, lightAttenuated, 0.8);
     }
 
     // Overlay
