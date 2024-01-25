@@ -14,8 +14,8 @@ auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      Registry* registry,
                      window::WindowImpl* window) -> std::unique_ptr<IGraphics>
 {
-    // TODO: #343 Provide an API/version switch in GraphicsSettings. Continue using Vulkan v1.0 for now.
-    constexpr auto apiVersion = VK_API_VERSION_1_0;
+    // TODO: #343 Provide an API/version switch in GraphicsSettings. Continue using Vulkan v1.1 for now.
+    constexpr auto apiVersion = VK_API_VERSION_1_1;
     NC_LOG_TRACE("Creating VulkanGraphics");
     return std::make_unique<vulkan::VulkanGraphics>(projectSettings, graphicsSettings,
                                                     assetModule, shaderResourceBus,
