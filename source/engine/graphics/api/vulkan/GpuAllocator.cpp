@@ -122,20 +122,10 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    void GpuAllocator::GenerateMipMaps(vk::Image image, vk::Format format, uint32_t width, uint32_t height, uint32_t mipLevels)
+    void GpuAllocator::GenerateMipMaps(vk::Image image, uint32_t width, uint32_t height, uint32_t mipLevels)
     {
         if (mipLevels <= 1)
         {
-            return;
-        }
-
-        vk::FormatProperties formatProperties;
-        auto physicalDevice = m_device->VkPhysicalDevice();
-        physicalDevice.getFormatProperties(format, &formatProperties);
-
-        if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear))
-        {
-            // Return without mip-map generation
             return;
         }
 
@@ -145,42 +135,36 @@ namespace nc::graphics
             barrier.setImage(image);
             barrier.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
             barrier.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED);
-
-            auto subresourceRange = vk::ImageSubresourceRange{};
-            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-            subresourceRange.setLevelCount(1);
-            subresourceRange.setLayerCount(1);
-            subresourceRange.setBaseArrayLayer(0);
-
-            barrier.setSubresourceRange(subresourceRange);
+            barrier.subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            barrier.subresourceRange.setBaseArrayLayer(0);
+            barrier.subresourceRange.setLayerCount(1);
+            barrier.subresourceRange.setLevelCount(1);
 
             auto mipWidth = width;
             auto mipHeight = height;
 
             for (auto i = 1u; i < mipLevels; i++)
             {
-                subresourceRange.setBaseMipLevel(i-1);
-
+                barrier.subresourceRange.setBaseMipLevel(i - 1);
                 barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal);
                 barrier.setNewLayout(vk::ImageLayout::eTransferSrcOptimal);
                 barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
                 barrier.setDstAccessMask(vk::AccessFlagBits::eTransferRead);
-                barrier.setSubresourceRange(subresourceRange);
                 cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
 
                 auto srcOffsets = std::array<vk::Offset3D, 2>{};
                 srcOffsets[0] = vk::Offset3D(0, 0, 0);
                 srcOffsets[1] = vk::Offset3D(mipWidth, mipHeight, 1);
 
-                auto dstOffsets = std::array<vk::Offset3D, 2>{};
-                dstOffsets[0] = vk::Offset3D(0, 0, 0);
-                dstOffsets[1] = vk::Offset3D(mipWidth > 1 ? mipWidth/2 : 1, mipHeight > 1 ? mipHeight / 2: 1, 1);
-
                 auto srcSubresource = vk::ImageSubresourceLayers{};
                 srcSubresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
                 srcSubresource.setMipLevel(i-1);
                 srcSubresource.setLayerCount(1);
                 srcSubresource.setBaseArrayLayer(0);
+
+                auto dstOffsets = std::array<vk::Offset3D, 2>{};
+                dstOffsets[0] = vk::Offset3D(0, 0, 0);
+                dstOffsets[1] = vk::Offset3D(mipWidth > 1 ? mipWidth/2 : 1, mipHeight > 1 ? mipHeight / 2: 1, 1);
 
                 auto dstSubresource = vk::ImageSubresourceLayers{};
                 dstSubresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
@@ -207,8 +191,7 @@ namespace nc::graphics
                 if (mipHeight > 1) mipHeight /= 2;
             }
 
-            subresourceRange.setBaseMipLevel(mipLevels-1);
-            barrier.setSubresourceRange(subresourceRange);
+            barrier.subresourceRange.setBaseMipLevel(mipLevels-1);
             barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal);
             barrier.setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
             barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
@@ -216,10 +199,22 @@ namespace nc::graphics
 
             cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1, &barrier);
         });
+
     }
 
     auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, uint32_t mipLevels, bool isNormal) -> GpuAllocation<vk::Image>
     {
+        auto format = isNormal ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb;
+
+        vk::FormatProperties formatProperties;
+        auto physicalDevice = m_device->VkPhysicalDevice();
+        physicalDevice.getFormatProperties(format, &formatProperties);
+
+        if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear))
+        {
+            mipLevels = 1;
+        }
+
         const auto imageSize = width * height * 4u;
         auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
         void* mappedData = Map(stagingBuffer.Allocation());
@@ -227,15 +222,21 @@ namespace nc::graphics
         Unmap(stagingBuffer.Allocation());
 
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
-        auto format = isNormal ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb;
         auto imageAllocation = CreateImage(format, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageCreateFlags(), 1, mipLevels, vk::SampleCountFlagBits::e1);
 
         TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, mipLevels, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
-
-        GenerateMipMaps(imageAllocation.Data(), format, width, height, mipLevels);
-
         stagingBuffer.Release();
+        if (mipLevels == 1)
+        {
+            TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
+        }
+        else
+        {
+            // Mip mapping transitions the layout to eShaderReadOnlyOptimal
+            GenerateMipMaps(imageAllocation.Data(), width, height, mipLevels);
+        }
+
         return imageAllocation;
     }
 

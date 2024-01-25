@@ -14,7 +14,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode,
         addressMode,                      // addressModeV
         addressMode,                      // addressModeW
         0.0f,                             // mipLodBias
-        VK_FALSE,                          // anisotropyEnable
+        VK_FALSE,                         // anisotropyEnable
         1.0f,                             // maxAnisotropy
         VK_FALSE,                         // compareEnable
         vk::CompareOp::eAlways,           // compareOp
