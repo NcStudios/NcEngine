@@ -122,8 +122,23 @@ namespace nc::graphics
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
-    void GpuAllocator::GenerateMipMaps(vk::Image image, uint32_t width, uint32_t height, uint32_t mipLevels)
+    void GpuAllocator::GenerateMipMaps(vk::Image image, vk::Format format, uint32_t width, uint32_t height, uint32_t mipLevels)
     {
+        if (mipLevels <= 1)
+        {
+            return;
+        }
+
+        vk::FormatProperties formatProperties;
+        auto physicalDevice = m_device->VkPhysicalDevice();
+        physicalDevice.getFormatProperties(format, &formatProperties);
+
+        if (!(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImageFilterLinear))
+        {
+            // Return without mip-map generation
+            return;
+        }
+
          m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         { 
             auto barrier = vk::ImageMemoryBarrier{};
@@ -218,7 +233,7 @@ namespace nc::graphics
         TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, mipLevels, vk::ImageLayout::eTransferDstOptimal);
         CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
 
-        GenerateMipMaps(imageAllocation.Data(), width, height, mipLevels);
+        GenerateMipMaps(imageAllocation.Data(), format, width, height, mipLevels);
 
         stagingBuffer.Release();
         return imageAllocation;

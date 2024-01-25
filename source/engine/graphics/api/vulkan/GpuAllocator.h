@@ -76,7 +76,7 @@ namespace graphics
             }
 
         private:
-            void GenerateMipMaps(vk::Image, uint32_t width, uint32_t height, uint32_t mipLevels);
+            void GenerateMipMaps(vk::Image, vk::Format format, uint32_t width, uint32_t height, uint32_t mipLevels);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, uint32_t mipLevels, vk::ImageLayout newLayout);
