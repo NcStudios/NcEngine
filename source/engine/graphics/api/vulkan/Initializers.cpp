@@ -14,7 +14,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode,
         addressMode,                      // addressModeV
         addressMode,                      // addressModeW
         0.0f,                             // mipLodBias
-        VK_TRUE,                          // anisotropyEnable
+        VK_FALSE,                          // anisotropyEnable
         1.0f,                             // maxAnisotropy
         VK_FALSE,                         // compareEnable
         vk::CompareOp::eAlways,           // compareOp
@@ -110,9 +110,9 @@ vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::Polyg
 vk::PipelineMultisampleStateCreateInfo CreateMultisampleCreateInfo(vk::SampleCountFlagBits numSamples)
 {
     vk::PipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(true));
+    multisampling.setSampleShadingEnable(static_cast<vk::Bool32>(false));
     multisampling.setRasterizationSamples(numSamples);
-    multisampling.setMinSampleShading(0.44f);
+    multisampling.setMinSampleShading(0.0f);
     multisampling.setPSampleMask(nullptr);
     multisampling.setAlphaToCoverageEnable(static_cast<vk::Bool32>(false));
     multisampling.setAlphaToOneEnable(static_cast<vk::Bool32>(false));
