@@ -1,6 +1,5 @@
 #include "SampleUI.h"
 #include "scenes/Worms.h"
-#include "scenes/ClickEvents.h"
 #include "scenes/SpawnTest.h"
 #include "scenes/CollisionBenchmark.h"
 #include "scenes/CollisionEvents.h"
@@ -117,9 +116,6 @@ namespace nc::sample
             auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 18 };
             if (ImGui::Button("Worms", buttonSize))
                 m_engine->QueueSceneChange(std::make_unique<Worms>(this));
-
-            if (ImGui::Button("Click Events", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<ClickEvents>(this));
 
             if (ImGui::Button("Collision Events", buttonSize))
                 m_engine->QueueSceneChange(std::make_unique<CollisionEvents>(this));

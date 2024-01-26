@@ -130,38 +130,24 @@ namespace nc::sample::prefab
 
         std::vector<std::string> textures
         {
-            "blacktop\\BaseColor.nca",
-            "blacktop\\Roughness.nca",
             "box\\BaseColor.nca",
             "box\\Roughness.nca",
-            "coin\\BaseColor.nca",
-            "coin\\Roughness.nca",
             "floor\\BaseColor.nca",
             "floor\\Roughness.nca",
-            "line\\Hatch3.nca",
-            "line\\overlay01.nca",
             "logo\\BaseColor.nca",
             "logo\\Metallic.nca",
             "logo\\Roughness.nca",
             "solid_color\\Blue.nca",
             "solid_color\\Green.nca",
-            "solid_color\\Red.nca", 
-            "table\\BaseColor.nca",
-            "table\\Roughness.nca",
-            "token\\BaseColor.nca",
-            "token\\Roughness.nca",
-            "tree\\BaseColor.nca"
+            "solid_color\\Red.nca",
         };
         LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
 
         std::vector<std::string> normalMaps 
         {
-            "blacktop\\Normal.nca",
             "box\\Normal.nca",
-            "coin\\Normal.nca",
             "floor\\Normal.nca",
             "logo\\Normal.nca", 
-            "table\\Normal.nca",
             "token\\Normal.nca"
         };
         LoadTextureAssets(normalMaps, false, AssetFlags::TextureTypeNormalMap);
@@ -170,10 +156,7 @@ namespace nc::sample::prefab
         material::SolidBlue  = graphics::PbrMaterial{ "solid_color\\Blue.nca",  asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
         material::SolidGreen = graphics::PbrMaterial{ "solid_color\\Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
         material::SolidRed   = graphics::PbrMaterial{ "solid_color\\Red.nca",   asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultRoughness };
-        material::Coin       = graphics::PbrMaterial{ "coin\\BaseColor.nca",    "coin\\Normal.nca",   "coin\\Roughness.nca",   asset::DefaultRoughness };
         material::Ground     = graphics::PbrMaterial{ "floor\\BaseColor.nca",   "floor\\Normal.nca",  "floor\\Roughness.nca",  asset::DefaultRoughness };
-        material::Table      = graphics::PbrMaterial{ "table\\BaseColor.nca",   "table\\Normal.nca",  "table\\Roughness.nca",  asset::DefaultRoughness };
-        material::Token      = graphics::PbrMaterial{ "token\\BaseColor.nca",   "token\\Normal.nca",  "token\\Roughness.nca",  asset::DefaultRoughness };
         material::Worm       = graphics::PbrMaterial{ "logo\\BaseColor.nca",    "logo\\Normal.nca",   "logo\\Roughness.nca",   asset::DefaultRoughness };
     }
 
@@ -327,20 +310,6 @@ namespace nc::sample::prefab
         return handle;
     }
 
-    template<> Entity Create_<Resource::Table>(Registry* registry, EntityInfo info)
-    {
-        auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "table.nca", material::Table);
-        return handle;
-    }
-
-    template<> Entity Create_<Resource::Token>(Registry* registry, EntityInfo info)
-    {
-        auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, "token.nca", material::Token);
-        return handle;
-    }
-
     template<> Entity Create_<Resource::Worm>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
@@ -373,8 +342,6 @@ namespace nc::sample::prefab
         std::pair{Resource::SphereGreen,   &Create_<Resource::SphereGreen>},
         std::pair{Resource::SphereRed,     &Create_<Resource::SphereRed>},
         std::pair{Resource::PlaneGreen,    &Create_<Resource::PlaneGreen>},
-        std::pair{Resource::Table,         &Create_<Resource::Table>},
-        std::pair{Resource::Token,         &Create_<Resource::Token>},
         std::pair{Resource::Worm,          &Create_<Resource::Worm>}
     };
 

@@ -1,6 +1,5 @@
 target_sources(${NC_SAMPLE_EXE}
     PRIVATE
-        ClickEvents.cpp
         CollisionEvents.cpp
         CollisionBenchmark.cpp
         JareTestScene.cpp

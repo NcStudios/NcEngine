@@ -3,7 +3,7 @@
 layout (location = 0) in vec3 inUVW;
 layout (location = 0) out vec4 outFragColor;
 
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[1000];
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[3];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
