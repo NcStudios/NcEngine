@@ -31,7 +31,7 @@ struct PointLight
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
-    ObjectData objects[100000];
+    ObjectData objects[10000];
 } objectBuffer;
 
 layout (std140, set=0, binding=1) readonly buffer PointLightsArray
@@ -39,8 +39,8 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[20];
 } pointLights;
 
-layout (set = 0, binding = 2) uniform sampler2D textures[1000];
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[1000];
+layout (set = 0, binding = 2) uniform sampler2D textures[60];
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[2];
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
     vec3 cameraWorldPosition;

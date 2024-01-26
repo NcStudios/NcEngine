@@ -36,7 +36,7 @@ struct SkeletalAnimationData
 
 layout(std140, set=0, binding=0) readonly buffer ObjectBuffer
 {
-    ObjectData objects[100000];
+    ObjectData objects[10000];
 } objectBuffer;
 
 layout (std140, set=0, binding=1) readonly buffer PointLightsArray

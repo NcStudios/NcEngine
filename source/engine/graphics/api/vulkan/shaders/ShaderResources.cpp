@@ -37,11 +37,11 @@ ShaderResources::ShaderResources(vk::Device device,
                                  GpuAllocator* allocator,
                                  const config::MemorySettings&,
                                  ShaderResourceBus& resourceBus)
-    : objectDataShaderResource{0, allocator, shaderDescriptorSets, 100000},
+    : objectDataShaderResource{0, allocator, shaderDescriptorSets, 10000},
       pointLightShaderResource{1, allocator, shaderDescriptorSets, 20},
-      textureShaderResource{2, shaderDescriptorSets, 1000},
-      shadowMapShaderResource{3, device, shaderDescriptorSets, 20},
-      cubeMapShaderResource{4, device, shaderDescriptorSets, 1000}, // @todo make separate entry for cubeMaps
+      textureShaderResource{2, shaderDescriptorSets, 60},
+      shadowMapShaderResource{3, device, shaderDescriptorSets, 2},
+      cubeMapShaderResource{4, device, shaderDescriptorSets, 2}, // @todo make separate entry for cubeMaps
       environmentDataShaderResource{5, allocator, shaderDescriptorSets},
       skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets, 300},
       objectDataConnection{::Connect(resourceBus.objectChannel, &objectDataShaderResource)},

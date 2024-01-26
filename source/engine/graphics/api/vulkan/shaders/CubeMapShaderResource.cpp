@@ -35,7 +35,7 @@ void CubeMapShaderResource::Initialize()
 
 void CubeMapShaderResource::Update(const std::vector<CubeMap>& data)
 {
-    assert(data.size() < m_maxCubeMapsCount && !data.empty());
+    assert(data.size() <= m_maxCubeMapsCount && !data.empty());
 
     m_cubeMapSampler = graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat, 1);
 

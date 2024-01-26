@@ -7,8 +7,8 @@ namespace
     {
         std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
         {
-            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 2050 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 64 },
+            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 64 },
             vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 },
             vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 10 }
         };

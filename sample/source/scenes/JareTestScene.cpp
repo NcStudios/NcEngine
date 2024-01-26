@@ -68,11 +68,6 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         "skeleton\\Metallic.nca",
     };
 
-    std::vector<std::string> cubemaps
-    {
-        "night_sky.nca"
-    };
-
     std::vector<std::string> meshes
     {
         "ogre.nca",
@@ -96,7 +91,6 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     LoadSkeletalAnimationAssets(animations);
     LoadTextureAssets(textures);
     LoadMeshAssets(meshes);
-    LoadCubeMapAssets(cubemaps);
 
     auto ogreMaterial = graphics::PbrMaterial{
         .baseColor  = "ogre\\BaseColor.nca",
@@ -125,8 +119,6 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
         .roughness  = "cave_ceiling\\Roughness.nca",
         .metallic   = "cave_ceiling\\Metallic.nca"
     };
-
-    modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
 
     //Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{-4.5f, 7.0f, -12.6f}, .tag = "Point Light 1"});

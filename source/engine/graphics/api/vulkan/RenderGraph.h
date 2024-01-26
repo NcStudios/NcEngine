@@ -17,7 +17,7 @@ class Swapchain;
 
 inline static const std::string LitPassId = "Lit Pass";
 inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
-inline static const uint32_t MaxLights = 20u;
+inline static const uint32_t MaxShadowcasters = 2u;
 
 class RenderGraph
 {

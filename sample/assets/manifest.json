@@ -18,23 +18,9 @@
             "assetName": "concave_collider/ramp"
         }
     ],
-    "cube-map": [
-        {
-            "sourcePath": "raw/image/cube_maps/night_sky.png",
-            "assetName": "cube_map/night_sky.nca"
-          }
-    ],
-    "hull-collider": [
-        {
-            "sourcePath": "raw/model/coin.fbx",
-            "assetName": "hull_collider/coin"
-        }
-    ],
+    "cube-map": [],
+    "hull-collider": [],
     "mesh": [
-        {
-            "sourcePath": "raw/model/coin.fbx",
-            "assetName": "mesh/coin"
-        },
         {
             "sourcePath": "raw/model/ogre.fbx",
             "assetName": "mesh/ogre"
@@ -42,14 +28,6 @@
         {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "mesh/ramp"
-        },
-        {
-            "sourcePath": "raw/model/table.fbx",
-            "assetName": "mesh/table"
-        },
-        {
-            "sourcePath": "raw/model/token.fbx",
-            "assetName": "mesh/token"
         },
         {
             "sourcePath": "raw/model/worm.fbx",
@@ -114,22 +92,6 @@
     ],
     "texture": [
         {
-            "sourcePath": "raw/image/blacktop/BaseColor.png",
-            "assetName": "texture/blacktop/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Normal.png",
-            "assetName": "texture/blacktop/Normal"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Roughness.png",
-            "assetName": "texture/blacktop/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Metallic.png",
-            "assetName": "texture/blacktop/Metallic"
-        },
-        {
             "sourcePath": "raw/image/box/BaseColor.png",
             "assetName": "texture/box/BaseColor"
         },
@@ -173,19 +135,7 @@
             "sourcePath": "raw/image/cave_ceiling/Metallic.png",
             "assetName": "texture/cave_ceiling/Metallic"
         },
-        {
-            "sourcePath": "raw/image/coin/BaseColor.png",
-            "assetName": "texture/coin/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/coin/Normal.png",
-            "assetName": "texture/coin/Normal"
-        },
-        {
-            "sourcePath": "raw/image/coin/Roughness.png",
-            "assetName": "texture/coin/Roughness"
-        },
-        {
+       {
             "sourcePath": "raw/image/floor/BaseColor.png",
             "assetName": "texture/floor/BaseColor"
         },
@@ -196,10 +146,6 @@
         {
             "sourcePath": "raw/image/floor/Roughness.png",
             "assetName": "texture/floor/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/line/Overlay.png",
-            "assetName": "texture/line/overlay01"
         },
         {
             "sourcePath": "raw/image/logo/BaseColor.png",
@@ -260,30 +206,6 @@
         {
             "sourcePath": "raw/image/solid_color/Green.png",
             "assetName": "texture/solid_color/Green"
-        },
-        {
-            "sourcePath": "raw/image/table/BaseColor.png",
-            "assetName": "texture/table/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/table/Normal.png",
-            "assetName": "texture/table/Normal"
-        },
-        {
-            "sourcePath": "raw/image/table/Roughness.png",
-            "assetName": "texture/table/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/token/BaseColor.png",
-            "assetName": "texture/token/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/token/Normal.png",
-            "assetName": "texture/token/Normal"
-        },
-        {
-            "sourcePath": "raw/image/token/Roughness.png",
-            "assetName": "texture/token/Roughness"
         }
     ]
 }

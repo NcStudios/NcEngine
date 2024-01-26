@@ -157,7 +157,7 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
       m_screenExtent{},
       m_activeShadowMappingPasses{}
 {
-    for (auto i : std::views::iota(0u, MaxLights))
+    for (auto i : std::views::iota(0u, MaxShadowcasters))
     {
         m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
     }
@@ -194,7 +194,7 @@ void RenderGraph::Resize(const Vector2& dimensions)
     m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions);
 
     m_shadowMappingPasses.clear();
-    for (auto i : std::views::iota(0u, MaxLights))
+    for (auto i : std::views::iota(0u, MaxShadowcasters))
     {
         m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
     }
@@ -207,6 +207,10 @@ void RenderGraph::Resize(const Vector2& dimensions)
 
 void RenderGraph::IncrementShadowPassCount()
 {
+    if (m_activeShadowMappingPasses == MaxShadowcasters)
+    {
+        return;
+    }
     m_activeShadowMappingPasses++;
     for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
@@ -216,7 +220,6 @@ void RenderGraph::IncrementShadowPassCount()
 
 void RenderGraph::ClearShadowPasses()
 {
-
     for (auto& pass : m_shadowMappingPasses)
     {
         pass.UnregisterShadowMappingTechnique();
