@@ -207,6 +207,10 @@ void RenderGraph::Resize(const Vector2& dimensions)
 
 void RenderGraph::IncrementShadowPassCount()
 {
+    if (m_activeShadowMappingPasses == MaxShadowcasters)
+    {
+        return;
+    }
     m_activeShadowMappingPasses++;
     for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
@@ -216,7 +220,6 @@ void RenderGraph::IncrementShadowPassCount()
 
 void RenderGraph::ClearShadowPasses()
 {
-
     for (auto& pass : m_shadowMappingPasses)
     {
         pass.UnregisterShadowMappingTechnique();

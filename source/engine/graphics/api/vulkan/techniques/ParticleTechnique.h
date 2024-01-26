@@ -22,8 +22,6 @@ namespace nc::graphics
 
         // Indices into texture array
         uint32_t baseColorIndex;
-        uint32_t normalColorIndex;
-        uint32_t roughnessColorIndex;
     };
 
     class ParticleTechnique : public ITechnique
