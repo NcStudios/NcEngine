@@ -40,7 +40,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 } pointLights;
 
 layout (set = 0, binding = 2) uniform sampler2D textures[60];
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[3];
+layout (set = 0, binding = 4) uniform samplerCube cubeMaps[2];
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
     vec3 cameraWorldPosition;

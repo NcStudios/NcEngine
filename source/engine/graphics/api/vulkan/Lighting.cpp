@@ -16,7 +16,7 @@ Lighting::Lighting(Registry* registry,
       m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){OnRemovePointLightConnection();})}
 {
     std::vector<ShadowMap> shadowMaps;
-    shadowMaps.reserve(MaxLights);
+    shadowMaps.reserve(MaxShadowcasters);
 
     auto& shadowMapPasses = m_renderGraph->GetShadowPasses();
     std::transform(shadowMapPasses.cbegin(), shadowMapPasses.cend(), std::back_inserter(shadowMaps), [](auto&& pass)
@@ -35,7 +35,7 @@ void Lighting::Clear()
 void Lighting::Resize()
 {
     std::vector<ShadowMap> shadowMaps;
-    shadowMaps.reserve(MaxLights);
+    shadowMaps.reserve(MaxShadowcasters);
 
     auto& shadowMapPasses = m_renderGraph->GetShadowPasses();
     std::transform(shadowMapPasses.cbegin(), shadowMapPasses.cend(), std::back_inserter(shadowMaps), [](auto&& pass)
