@@ -43,7 +43,8 @@ namespace nc::sample
         : m_engine{engine},
           m_gameLog{},
           m_widgetCallback{},
-          m_windowDimensions{window::GetDimensions()}
+          m_windowDimensions{window::GetDimensions()},
+          m_screenExtent{window::GetScreenExtent()}
     {
         ui::SetDefaultUIStyle();
         window::RegisterOnResizeReceiver(this);
@@ -56,8 +57,8 @@ namespace nc::sample
 
     void SampleUI::Draw()
     {
-        ImGui::SetNextWindowPos({ 0, m_windowDimensions.y - PanelHeight });
-        ImGui::SetNextWindowSize({ m_windowDimensions.x, PanelHeight });
+        ImGui::SetNextWindowPos({ (m_windowDimensions.x-m_screenExtent.x)/2, m_windowDimensions.y - PanelHeight });
+        ImGui::SetNextWindowSize({ m_screenExtent.x, PanelHeight });
 
         if (ImGui::Begin("SampleUI", nullptr, WindowFlags))
         {

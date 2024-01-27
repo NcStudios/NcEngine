@@ -26,6 +26,21 @@ inline auto ToVolumeInfo(const HullProperties&) noexcept -> VolumeInfo
     return VolumeInfo{ColliderType::Hull, Vector3::Zero(), Vector3::One()};
 }
 
+inline auto ToBoxProperties(const VolumeInfo& in) noexcept -> BoxProperties
+{
+    return BoxProperties{in.offset, in.scale};
+}
+
+inline auto ToSphereProperties(const VolumeInfo& in) noexcept -> SphereProperties
+{
+    return SphereProperties{in.offset, in.scale.x * 0.5f};
+}
+
+inline auto ToCapsuleProperties(const VolumeInfo& in) noexcept -> CapsuleProperties
+{
+    return CapsuleProperties{in.offset, in.scale.y * 2.0f, in.scale.x * 0.5f};
+}
+
 inline auto MakeBoundingVolume(const BoxProperties& in) -> BoundingVolume
 {
     return { Box{in.center, in.extents, Magnitude(in.extents / 2.0f)} };

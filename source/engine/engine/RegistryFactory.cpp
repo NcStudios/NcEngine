@@ -18,6 +18,7 @@
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Log.h"
+#include "serialize/ComponentSerialization.h"
 #include "ui/editor/ComponentWidgets.h"
 
 namespace
@@ -54,18 +55,18 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
     Register<ecs::detail::FreeComponentGroup>(*registry, FreeComponentGroupId, "");
     Register<Tag>(*registry, TagId, "Tag", editor::TagUIWidget);
     Register<Transform>(*registry, TransformId, "Transform", editor::TransformUIWidget);
-    Register<graphics::MeshRenderer>(*registry, MeshRendererId, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer);
-    Register<graphics::ToonRenderer>(*registry, ToonRendererId, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer);
+    Register<graphics::MeshRenderer>(*registry, MeshRendererId, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer, SerializeMeshRenderer, DeserializeMeshRenderer);
+    Register<graphics::ToonRenderer>(*registry, ToonRendererId, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer, SerializeToonRenderer, DeserializeToonRenderer);
     Register<graphics::SkeletalAnimator>(*registry, SkeletalAnimatorId, "SkeletalAnimator", editor::SkeletalAnimatorUIWidget, CreateSkeletalAnimator);
-    Register<graphics::PointLight>(*registry, PointLightId, "PointLight", editor::PointLightUIWidget);
-    Register<graphics::ParticleEmitter>(*registry, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter);
-    Register<physics::Collider>(*registry, ColliderId, "Collider", editor::ColliderUIWidget, CreateCollider);
-    Register<physics::ConcaveCollider>(*registry, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget);
-    Register<physics::PhysicsBody>(*registry, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, nullptr, nullptr, static_cast<void*>(registry.get()));
+    Register<graphics::PointLight>(*registry, PointLightId, "PointLight", editor::PointLightUIWidget);//, nullptr, SerializePointLight, DeserializePointLight);
+    Register<graphics::ParticleEmitter>(*registry, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter, SerializeParticleEmitter, DeserializeParticleEmitter);
+    Register<physics::Collider>(*registry, ColliderId, "Collider", editor::ColliderUIWidget, CreateCollider, SerializeCollider, DeserializeCollider);
+    Register<physics::ConcaveCollider>(*registry, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget, nullptr, SerializeConcaveCollider, DeserializeConcaveCollider);
+    Register<physics::PhysicsBody>(*registry, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, SerializePhysicsBody, DeserializePhysicsBody, static_cast<void*>(registry.get()));
     Register<FrameLogic>(*registry, FrameLogicId, "FrameLogic", editor::FrameLogicUIWidget, CreateFrameLogic);
     Register<FixedLogic>(*registry, FixedLogicId, "FixedLogic", editor::FixedLogicUIWidget, CreateFixedLogic);
     Register<CollisionLogic>(*registry, CollisionLogicId, "CollisionLogic", editor::CollisionLogicUIWidget, CreateCollisionLogic);
-    Register<audio::AudioSource>(*registry, AudioSourceId, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource);
+    Register<audio::AudioSource>(*registry, AudioSourceId, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource, SerializeAudioSource, DeserializeAudioSource);
     Register<net::NetworkDispatcher>(*registry, NetworkDispatcherId, "NetworkDispatcher", editor::NetworkDispatcherUIWidget, CreateNetworkDispatcher);
     return registry;
 }
