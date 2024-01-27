@@ -16,7 +16,7 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/PhysicsBody.h"
-#include "ncengine/type/ComponentId.h"
+#include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Log.h"
 #include "serialize/ComponentSerialization.h"
 #include "ui/editor/ComponentWidgets.h"

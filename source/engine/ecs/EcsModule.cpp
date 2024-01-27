@@ -1,11 +1,12 @@
 #include "EcsModule.h"
-#include "ecs/Logic.h"
-#include "ecs/Registry.h"
-#include "ecs/View.h"
-#include "ecs/detail/FreeComponentGroup.h"
-#include "task/TaskGraph.h"
-#include "time/Time.h"
-#include "utility/Log.h"
+#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/View.h"
+#include "ncengine/ecs/detail/FreeComponentGroup.h"
+#include "ncengine/task/TaskGraph.h"
+#include "ncengine/time/Time.h"
+#include "ncengine/type/EngineId.h"
+#include "ncengine/utility/Log.h"
 
 #include "optick.h"
 
@@ -18,7 +19,8 @@ auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>
 }
 
 EcsModule::EcsModule(Registry* registry) noexcept
-    : m_registry{registry}
+    : Module{NcEcsId},
+      m_registry{registry}
 {
 }
 
