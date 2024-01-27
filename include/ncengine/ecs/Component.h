@@ -114,9 +114,9 @@ struct ComponentHandler
 
     /**
      * @brief A unique identifier for the component.
-     * @note Set to 0 to get assigned an available id. The range [0, 100]
-     *       is reserved for engine components. Automatically assigned ids are assigned in reverse order
-     *       starting from std::numeric_limits<size_t>::max().
+     * @note Set to 0 to get assigned an available id. The range [1, 100] is reserved for engine
+     *       components. Automatically assigned ids are assigned in reverse order starting from
+     *       std::numeric_limits<size_t>::max().
     */
     size_t id = 0ull;
 

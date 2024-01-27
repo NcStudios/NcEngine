@@ -1,6 +1,7 @@
 #pragma once
 
-#include "module/Module.h"
+#include "ncengine/module/Module.h"
+#include "ncengine/type/EngineId.h"
 
 #include <chrono>
 #include <memory>
@@ -11,6 +12,9 @@ namespace nc::time
 class TimeImpl : public Module
 {
     public:
+        explicit TimeImpl() noexcept
+            : Module{NcTimeId} {}
+
         void OnBuildTaskGraph(task::TaskGraph&) override;
         void Clear() noexcept override;
 

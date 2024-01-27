@@ -8,10 +8,10 @@
 
 namespace nc
 {
-/** @brief Marks the beginning of the component id range reserved for engine use. */
+/** @brief Marks the beginning of the component and module id range reserved for engine use. */
 constexpr size_t EngineIdRangeBegin = 1ull;
 
-/** @brief Marks the end of the component id range reserved for engine use. */
+/** @brief Marks the end of the component and module id range reserved for engine use. */
 constexpr size_t EngineIdRangeEnd = 100ull;
 
 /** @{ */
@@ -32,5 +32,16 @@ constexpr size_t FixedLogicId = 13ull;
 constexpr size_t CollisionLogicId = 14ull;
 constexpr size_t AudioSourceId = 15ull;
 constexpr size_t NetworkDispatcherId = 16ull;
+/** @} */
+
+/** @{ */
+/** @brief Unique engine module id. */
+constexpr size_t NcAssetId = 1ull;
+constexpr size_t NcAudioId = 2ull;
+constexpr size_t NcEcsId = 3ull;
+constexpr size_t NcGraphicsId = 4ull;
+constexpr size_t NcPhysicsId = 5ull;
+constexpr size_t NcTimeId = 6ull;
+constexpr size_t NcRandomId = 7ull;
 /** @} */
 } // namespace nc
