@@ -54,6 +54,12 @@ auto IsWindowBackgroundClicked() -> bool;
 /** @brief Input field UI widget for int. */
 auto InputInt(int& value, const char* label, int step = 1) -> bool;
 
+/** @brief Input field UI widget for uint8_t. */
+auto InputU8(uint8_t& value, const char* label) -> bool;
+
+/** @brief Input field UI widget for uint16_t. */
+auto InputU16(uint16_t& value, const char* label) -> bool;
+
 /** @brief Input field UI widget for uint32_t. */
 auto InputU32(uint32_t& value, const char* label) -> bool;
 
@@ -223,15 +229,27 @@ inline auto InputInt(int& value, const char* label, int step) -> bool
     return ImGui::InputInt(label, &value, step);
 }
 
+inline auto InputU8(uint8_t& value, const char* label) -> bool
+{
+    constexpr uint8_t step = 1;
+    return ImGui::InputScalar(label, ImGuiDataType_U8, &value, &step);
+}
+
+inline auto InputU16(uint16_t& value, const char* label) -> bool
+{
+    constexpr uint16_t step = 1;
+    return ImGui::InputScalar(label, ImGuiDataType_U16, &value, &step);
+}
+
 inline auto InputU32(unsigned& value, const char* label) -> bool
 {
-    constexpr auto step = 1u;
+    constexpr uint32_t step = 1;
     return ImGui::InputScalar(label, ImGuiDataType_U32, &value, &step);
 }
 
 inline auto InputU62(unsigned& value, const char* label) -> bool
 {
-    constexpr auto step = 1ull;
+    constexpr uint64_t step = 1;
     return ImGui::InputScalar(label, ImGuiDataType_U64, &value, &step);
 }
 
