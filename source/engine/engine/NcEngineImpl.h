@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NcEngine.h"
-#include "ecs/Registry.h"
+#include "ecs/ComponentRegistry.h"
 #include "math/Random.h"
 #include "scene/SceneManager.h"
 #include "task/Executor.h"
@@ -19,13 +19,14 @@ namespace nc
             void Shutdown() noexcept override;
             void QueueSceneChange(std::unique_ptr<Scene> scene) override;
             bool IsSceneChangeQueued() const noexcept override;
-            auto GetRegistry() noexcept -> Registry* override;
+            auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& override;
             auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
             void RebuildTaskGraph() override;
 
         private:
             window::WindowImpl m_window;
-            std::unique_ptr<Registry> m_registry;
+            std::unique_ptr<ecs::ComponentRegistry> m_registry;
+            Registry m_legacyRegistry; // delete once all usage is cutover
             ModuleRegistry m_modules;
             task::Executor m_executor;
             scene::SceneManager m_sceneManager;

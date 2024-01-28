@@ -40,9 +40,9 @@ class NcEngine
         virtual bool IsSceneChangeQueued() const noexcept = 0;
 
         /**
-         * @brief Get a pointer to the active registry.
+         * @brief Get a reference to the ComponentRegistry.
          */
-        virtual auto GetRegistry() noexcept -> Registry* = 0;
+        virtual auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& = 0;
 
         /**
          * @brief Get a pointer to the module registry.
