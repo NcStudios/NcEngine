@@ -35,8 +35,8 @@ Lighting::Lighting(Registry* registry,
       m_shaderDescriptorSets{shaderDescriptorSets},
       m_shaderResources{shaderResources},
       m_dimensions{dimensions},
-      m_onAddPointLightConnection{registry->OnAdd<PointLight>().Connect([this](graphics::PointLight&){OnAddPointLightConnection();})},
-      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){OnRemovePointLightConnection();})},
+      m_onCommitPointLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){OnCommitPointLight();})},
+      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){OnRemovePointLight();})},
       m_numShadowCasters{0u}
 {
 }
@@ -46,7 +46,7 @@ void Lighting::Clear()
     const auto countBeforeClearing = m_numShadowCasters;
     for (auto i = 0u; i < countBeforeClearing; ++i)
     {
-        OnRemovePointLightConnection();
+        OnRemovePointLight();
     }
     m_numShadowCasters = 0u;
 }
@@ -59,11 +59,11 @@ void Lighting::Resize(const Vector2& dimensions)
     m_numShadowCasters = 0u;
     for (auto i = 0u; i < countBeforeClearing; ++i)
     {
-        OnAddPointLightConnection();
+        OnCommitPointLight();
     }
 }
 
-void Lighting::OnAddPointLightConnection()
+void Lighting::OnCommitPointLight()
 {
     m_renderGraph->AddRenderPass(CreateShadowMappingPass(m_dimensions, m_numShadowCasters));
 
@@ -77,7 +77,7 @@ void Lighting::OnAddPointLightConnection()
     m_numShadowCasters++;
 }
 
-void Lighting::OnRemovePointLightConnection()
+void Lighting::OnRemovePointLight()
 {
     m_numShadowCasters--;
     m_renderGraph->RemoveRenderPass(m_ids.back());
