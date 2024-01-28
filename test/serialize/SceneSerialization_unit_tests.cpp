@@ -237,7 +237,8 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
 
     const auto unexpectedInfos = std::vector<nc::EntityInfo>
     {
-        {.tag = "miss me", .flags = nc::Entity::Flags::Persistent},
+        {.flags = nc::Entity::Flags::NoSerialize}, // excluded by default
+        {.tag = "miss me", .flags = nc::Entity::Flags::Persistent}, // excluded by filter
         {.tag = "maybe next week", .flags = nc::Entity::Flags::Persistent}
     };
 
@@ -283,6 +284,9 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         ecs.Get<nc::Transform>(e1)->SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
         const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
+        const auto e6 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .flags = nc::Entity::Flags::NoSerialize }); // automatically excluded
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // excluded by parent
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e4, .flags = nc::Entity::Flags::NoSerialize }); // child excluded, but not by parent
     }
 
     const auto filter = [&ecs = ecs](nc::Entity entity)
