@@ -285,7 +285,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
         const auto e6 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .flags = nc::Entity::Flags::NoSerialize }); // automatically excluded
-        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // excluded by parent
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e6 }); // excluded by parent
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e4, .flags = nc::Entity::Flags::NoSerialize }); // child excluded, but not by parent
     }
 
