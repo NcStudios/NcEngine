@@ -76,7 +76,7 @@ namespace nc::graphics
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
           m_skeletalAnimationSystem{registry, assetModule->OnSkeletalAnimationUpdate(), assetModule->OnBoneUpdate(), std::move(shaderResourceBus.skeletalAnimationChannel)},
           m_widgetSystem{},
-          m_uiSystem{}
+          m_uiSystem{registry->GetEcs()}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
     }

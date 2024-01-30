@@ -67,4 +67,6 @@ class NcEngine
  * @return std::unique_ptr<NcEngine>
  */
 auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngine>;
+
+void QueueSceneChange(std::unique_ptr<Scene> scene);
 } // namespace nc

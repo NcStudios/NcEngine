@@ -202,6 +202,11 @@ class Registry : public StableAddress
             return m_impl;
         }
 
+        auto GetEcs() -> ecs::Ecs
+        {
+            return m_ecs;
+        }
+
     private:
         ecs::ComponentRegistry m_impl;
         ecs::Ecs m_ecs;

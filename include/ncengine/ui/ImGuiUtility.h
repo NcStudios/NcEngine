@@ -223,15 +223,21 @@ inline auto InputInt(int& value, const char* label, int step) -> bool
     return ImGui::InputInt(label, &value, step);
 }
 
-inline auto InputU32(unsigned& value, const char* label) -> bool
+inline auto InputU8(uint8_t& value, const char* label) -> bool
 {
-    constexpr auto step = 1u;
+    constexpr uint8_t step = 1u;
+    return ImGui::InputScalar(label, ImGuiDataType_U8, &value, &step);
+}
+
+inline auto InputU32(uint32_t& value, const char* label) -> bool
+{
+    constexpr uint32_t step = 1u;
     return ImGui::InputScalar(label, ImGuiDataType_U32, &value, &step);
 }
 
-inline auto InputU62(unsigned& value, const char* label) -> bool
+inline auto InputU62(uint64_t& value, const char* label) -> bool
 {
-    constexpr auto step = 1ull;
+    constexpr uint64_t step = 1ull;
     return ImGui::InputScalar(label, ImGuiDataType_U64, &value, &step);
 }
 

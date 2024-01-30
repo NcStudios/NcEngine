@@ -26,7 +26,7 @@ namespace graphics
 class UISystem
 {
     public:
-        UISystem();
+        UISystem(ecs::Ecs world);
         ~UISystem() noexcept;
 
         auto IsHovered() const noexcept -> bool;

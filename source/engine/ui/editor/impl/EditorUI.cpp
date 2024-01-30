@@ -1,5 +1,7 @@
 #include "EditorUI.h"
+#include "ui/editor/Editor.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/input/Input.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
 
@@ -29,13 +31,61 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-void EditorUI::Draw(ecs::Ecs world)
+EditorUI::EditorUI(ecs::Ecs world)
+    : m_newSceneDialog{},
+      m_saveSceneDialog{world},
+      m_loadSceneDialog{world}
 {
+}
+
+void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, asset::NcAsset& ncAsset)
+{
+
+    if(input::KeyDown(hotkeys.toggleEditor))
+        m_open = !m_open;
+
+    const auto dimensions = window::GetDimensions();
+    if (m_fpsOverlay.IsOpen()) m_fpsOverlay.Draw(ImVec2{dimensions.x, dimensions.y});
+
+    if(!m_open)
+        return;
+
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", [&]()
     {
+        // if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("View"))
+            {
+                if (ImGui::MenuItem("FPS"))
+                {
+                    m_fpsOverlay.ToggleOpen();
+                }
+
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Scene"))
+            {
+                if (ImGui::MenuItem("New")) m_newSceneDialog.Open();
+                if (ImGui::MenuItem("Save")) m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+                if (ImGui::MenuItem("Load")) m_loadSceneDialog.Open(&ncAsset);
+                ImGui::EndMenu();
+            }
+
+            // ImGui::EndMenuBar();
+        }
+
         m_sceneGraph.Draw(world);
     });
+
+    if (KeyDown(hotkeys.openLoadSceneDialog)) m_newSceneDialog.Open();
+    else if (KeyDown(hotkeys.openSaveSceneDialog)) m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+    else if (KeyDown(hotkeys.openLoadSceneDialog)) m_loadSceneDialog.Open(&ncAsset);
+
+
+    if (m_newSceneDialog.IsOpen()) m_newSceneDialog.Draw();
+    else if (m_saveSceneDialog.IsOpen()) m_saveSceneDialog.Draw();
+    else if (m_loadSceneDialog.IsOpen()) m_loadSceneDialog.Draw();
 
     const auto selectedEntity = m_sceneGraph.GetSelectedEntity();
     if (!selectedEntity.Valid())

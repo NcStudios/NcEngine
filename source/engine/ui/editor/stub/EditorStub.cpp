@@ -7,7 +7,7 @@ struct EditorStub : public Editor
     void Draw(ecs::Ecs, asset::NcAsset&) override {}
 };
 
-auto BuildEditor() -> std::unique_ptr<Editor>
+auto BuildEditor(ecs::Ecs, const EditorHotkeys&) -> std::unique_ptr<Editor>
 {
     return std::make_unique<EditorStub>();
 }

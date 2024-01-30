@@ -4,8 +4,8 @@
 
 namespace nc::graphics
 {
-UISystem::UISystem()
-    : m_editor{ui::editor::BuildEditor()}
+UISystem::UISystem(ecs::Ecs world)
+    : m_editor{ui::editor::BuildEditor(world)}
 {
 }
 
