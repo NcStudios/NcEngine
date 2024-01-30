@@ -134,10 +134,25 @@ class ComponentPool final : public ComponentPoolBase
         auto Handler() noexcept -> ComponentHandler<T>& { return m_handler; }
 
         /** @brief Get the T's onAdd event Signal. */
-        auto OnAdd() noexcept -> Signal<T&>& { return m_onAdd; }
+        auto OnAdd() noexcept -> Signal<T&>&
+            requires StoragePolicy<T>::EnableOnAddCallbacks
+        {
+            return m_onAdd;
+        }
+
+        /** @brief Get the T's onCommit event Signal. */
+        auto OnCommit() noexcept -> Signal<T&>&
+            requires StoragePolicy<T>::EnableOnCommitCallbacks
+        {
+            return m_onCommit;
+        }
 
         /** @brief Get the T's onRemove event Signal. */
-        auto OnRemove() noexcept -> Signal<Entity>& { return m_onRemove; }
+        auto OnRemove() noexcept -> Signal<Entity>&
+            requires StoragePolicy<T>::EnableOnRemoveCallbacks
+        {
+            return m_onRemove;
+        }
 
         /** @brief Sort the components according to a predicate. */
         template<std::predicate<const T&, const T&> Predicate>
@@ -205,6 +220,7 @@ class ComponentPool final : public ComponentPoolBase
         std::vector<detail::StagedComponent<T>> m_staging;
         ComponentHandler<T> m_handler;
         Signal<T&> m_onAdd;
+        Signal<T&> m_onCommit;
         Signal<Entity> m_onRemove;
 };
 
@@ -349,7 +365,11 @@ void ComponentPool<T>::CommitStagedComponents(const std::vector<Entity>& deleted
         Remove(entity);
 
     for(auto& [entity, component] : m_staging)
-        m_storage.Insert(entity, std::move(component));
+    {
+        [[maybe_unused]] auto& committed = m_storage.Insert(entity, std::move(component));
+        if constexpr (StoragePolicy<T>::EnableOnCommitCallbacks)
+            m_onCommit(committed);
+    }
 
     m_staging.clear();
 }

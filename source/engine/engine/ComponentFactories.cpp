@@ -4,6 +4,7 @@
 #include "ncengine/ecs/Logic.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/ParticleEmitter.h"
+#include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/ToonRenderer.h"
@@ -36,6 +37,11 @@ auto CreateFrameLogic(Entity entity, void*) -> FrameLogic
 auto CreateParticleEmitter(Entity entity, void*) -> graphics::ParticleEmitter
 {
     return graphics::ParticleEmitter{entity, graphics::ParticleInfo{}};
+}
+
+auto CreatePointLight(Entity entity, void*) -> graphics::PointLight
+{
+    return graphics::PointLight{entity};
 }
 
 auto CreateMeshRenderer(Entity entity, void*) -> graphics::MeshRenderer
