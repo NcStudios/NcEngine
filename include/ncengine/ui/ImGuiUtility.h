@@ -247,7 +247,7 @@ inline auto InputU32(unsigned& value, const char* label) -> bool
     return ImGui::InputScalar(label, ImGuiDataType_U32, &value, &step);
 }
 
-inline auto InputU62(unsigned& value, const char* label) -> bool
+inline auto InputU64(uint64_t& value, const char* label) -> bool
 {
     constexpr uint64_t step = 1;
     return ImGui::InputScalar(label, ImGuiDataType_U64, &value, &step);
