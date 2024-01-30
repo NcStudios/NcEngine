@@ -91,6 +91,34 @@ TEST(Entity_unit_tests, IsPersistent_FlagNotSet_ReturnsFalse)
     EXPECT_FALSE(handle.IsPersistent());
 }
 
+TEST(Entity_unit_tests, IsSerializable_NoSerializeNotSet_ReturnsTrue)
+{
+    auto flags = Entity::Flags::None;
+    auto handle = Entity{1u, 1u, flags};
+    EXPECT_TRUE(handle.IsSerializable());
+}
+
+TEST(Entity_unit_tests, IsSerializable_NoSerializeSet_ReturnsFalse)
+{
+    auto flags = Entity::Flags::NoSerialize;
+    auto handle = Entity{1u, 1u, flags};
+    EXPECT_FALSE(handle.IsSerializable());
+}
+
+TEST(Entity_unit_tests, IsInternal_FlagSet_ReturnsTrue)
+{
+    auto flags = Entity::Flags::Internal;
+    auto handle = Entity{1u, 1u, flags};
+    EXPECT_TRUE(handle.IsInternal());
+}
+
+TEST(Entity_unit_tests, IsInternal_FlagNotSet_ReturnsFalse)
+{
+    auto flags = Entity::Flags::None;
+    auto handle = Entity{1u, 1u, flags};
+    EXPECT_FALSE(handle.IsInternal());
+}
+
 TEST(Entity_unit_tests, Hash_AllValues_ReturnsExpectedHash)
 {
     constexpr auto handle = Entity{uint32_t{0x01234567}, uint8_t{0x89}, uint8_t{0xAB}};
