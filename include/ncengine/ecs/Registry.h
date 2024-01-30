@@ -115,6 +115,13 @@ class Registry : public StableAddress
         }
 
         template<PooledComponent T>
+            requires StoragePolicy<T>::EnableOnCommitCallbacks
+        auto OnCommit() -> Signal<T&>&
+        {
+            return m_impl.GetPool<T>().OnCommit();
+        }
+
+        template<PooledComponent T>
             requires StoragePolicy<T>::EnableOnRemoveCallbacks
         auto OnRemove() -> Signal<Entity>&
         {
