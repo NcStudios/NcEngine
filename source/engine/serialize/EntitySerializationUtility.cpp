@@ -7,9 +7,14 @@ void AddChildren(nc::Entity parent,
                  std::function<bool(nc::Entity)>& filter,
                  std::vector<nc::Entity>& out)
 {
-    std::ranges::for_each(
-        ecs.Get<nc::Transform>(parent)->Children()
-            | std::views::filter(filter),
+    auto included = ecs.Get<nc::Transform>(parent)->Children() |
+        std::views::filter(
+            [&filter](nc::Entity entity){
+                return entity.IsSerializable() && filter(entity);
+            }
+    );
+
+    std::ranges::for_each(included,
         [&ecs, &filter, &out](auto&& child)
         {
             out.emplace_back(child);
@@ -45,7 +50,9 @@ auto BuildFragmentEntityList(std::span<const Entity> in,
     // All parents must precede their children, so we want a list of all root nodes that pass the filter.
     auto rootEntities = in | std::views::filter([&filter, &ecs](auto entity)
     {
-        return filter(entity) && !ecs.Get<Transform>(entity)->Parent().Valid();
+        return entity.IsSerializable()
+            && filter(entity)
+            && !ecs.Get<Transform>(entity)->Parent().Valid();
     });
 
     auto out = std::vector<Entity>{};
