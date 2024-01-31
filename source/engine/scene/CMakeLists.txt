@@ -1,4 +1,4 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        SceneManager.cpp
+        NcSceneImpl.cpp
 )

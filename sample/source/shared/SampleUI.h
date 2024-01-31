@@ -3,6 +3,7 @@
 #include "shared/GameLog.h"
 
 #include "ncengine/NcEngine.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/IUI.h"
 #include "ncengine/window/Window.h"
 
@@ -13,7 +14,7 @@ namespace nc::sample
 class SampleUI : public ui::IUI, public window::IOnResizeReceiver
 {
     public:
-        SampleUI(NcEngine* engine);
+        SampleUI(NcScene* ncScene);
         ~SampleUI() noexcept;
         void Draw() override;
         bool IsHovered() override;
@@ -21,7 +22,7 @@ class SampleUI : public ui::IUI, public window::IOnResizeReceiver
         void SetWidgetCallback(std::function<void()> func);
 
     private:
-        NcEngine* m_engine;
+        NcScene* m_ncScene;
         GameLog m_gameLog;
         std::function<void()> m_widgetCallback;
         Vector2 m_windowDimensions;

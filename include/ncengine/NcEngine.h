@@ -30,16 +30,6 @@ class NcEngine
         virtual void Shutdown() noexcept = 0;
 
         /**
-         * @brief Queue a scene to be loaded upon completion of the current frame.
-         */
-        virtual void QueueSceneChange(std::unique_ptr<Scene> scene) = 0;
-
-        /**
-         * @brief Check if a scene change is scheduled.
-         */
-        virtual bool IsSceneChangeQueued() const noexcept = 0;
-
-        /**
          * @brief Get a pointer to the active registry.
          */
         virtual auto GetRegistry() noexcept -> Registry* = 0;
