@@ -54,9 +54,9 @@ auto BuildLayerFilter(bool includePersistent, const std::vector<uint8_t>& includ
 
 namespace nc::ui::editor
 {
-NewSceneDialog::NewSceneDialog(std::function<void(std::unique_ptr<Scene>)> changeScene)
+NewSceneDialog::NewSceneDialog(NcScene* ncScene)
     : ModalDialog{DialogSize},
-      m_changeScene{std::move(changeScene)}
+      m_ncScene{ncScene}
 {
 }
 
@@ -72,7 +72,8 @@ void NewSceneDialog::Draw(const ImVec2& dimensions)
         ImGui::TextWrapped("%s", "Are you sure you want to open a new sandbox scene?");
         if (ImGui::Button("Create Scene"))
         {
-            m_changeScene(std::make_unique<SandboxScene>());
+            m_ncScene->Queue(std::make_unique<SandboxScene>());
+            m_ncScene->ScheduleTransition();
             ClosePopup();
         }
     });
@@ -207,10 +208,10 @@ auto SaveSceneDialog::SelectFilter() -> std::function<bool(Entity)>
         : BuildLayerFilter(m_includePersistent, m_includedLayers);
 }
 
-LoadSceneDialog::LoadSceneDialog(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene)
+LoadSceneDialog::LoadSceneDialog(ecs::Ecs world, NcScene* ncScene)
     : ModalDialog{DialogSize},
       m_world{world},
-      m_changeScene{std::move(changeScene)}
+      m_ncScene{ncScene}
 {
 }
 
@@ -233,7 +234,8 @@ void LoadSceneDialog::Draw(const ImVec2& dimensions)
         {
             if (m_openType == OpenInNewScene && std::filesystem::is_regular_file(m_fileName))
             {
-                m_changeScene(std::make_unique<SandboxScene>(m_fileName));
+                m_ncScene->Queue(std::make_unique<SandboxScene>(m_fileName));
+                m_ncScene->ScheduleTransition();
                 ClosePopup();
             }
             else if (auto file = std::ifstream{m_fileName, std::ios::binary})

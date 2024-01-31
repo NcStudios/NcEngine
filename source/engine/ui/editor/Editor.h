@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/module/ModuleProvider.h"
 
 #include <memory>
 
@@ -27,7 +27,7 @@ class Editor
             : m_hotkeys{hotkeys} {}
 
         virtual ~Editor() = default;
-        virtual void Draw(ecs::Ecs world, asset::NcAsset& assetModule) = 0;
+        virtual void Draw(ecs::Ecs world) = 0;
 
         auto GetHotkeys() const noexcept -> const EditorHotkeys&
         {
@@ -39,7 +39,7 @@ class Editor
 };
 
 auto BuildEditor(ecs::Ecs world,
-                 std::function<void(std::unique_ptr<Scene>)> changeScene,
+                 ModuleProvider modules,
                  const EditorHotkeys& hotkeys = EditorHotkeys{}) -> std::unique_ptr<Editor>;
 } // namespace ui::editor
 } // namespace nc

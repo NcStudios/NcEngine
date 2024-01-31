@@ -2,6 +2,7 @@
 #include "ui/editor/Editor.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
 
@@ -31,15 +32,16 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-EditorUI::EditorUI(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene)
-    : m_newSceneDialog{changeScene},
+EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
+    : m_newSceneDialog{modules.Get<NcScene>()},
       m_saveSceneDialog{world},
-      m_loadSceneDialog{world, std::move(changeScene)}
+      m_loadSceneDialog{world, modules.Get<NcScene>()}
 {
 }
 
-void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, asset::NcAsset& ncAsset)
+void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules)
 {
+    auto& ncAsset = *modules.Get<asset::NcAsset>();
     const auto dimensions = []()
     {
         const auto dimensions = window::GetDimensions();

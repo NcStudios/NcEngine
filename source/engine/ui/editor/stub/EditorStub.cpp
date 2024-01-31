@@ -4,10 +4,10 @@ namespace nc::ui::editor
 {
 struct EditorStub : public Editor
 {
-    void Draw(ecs::Ecs, asset::NcAsset&) override {}
+    void Draw(ecs::Ecs) override {}
 };
 
-auto BuildEditor(ecs::Ecs, std::function<void(std::unique_ptr<Scene>)>, const EditorHotkeys&) -> std::unique_ptr<Editor>
+auto BuildEditor(ecs::Ecs, ModuleProvider modules, const EditorHotkeys&) -> std::unique_ptr<Editor>
 {
     return std::make_unique<EditorStub>();
 }

@@ -6,6 +6,7 @@
 #include "windows/SceneGraph.h"
 
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/module/ModuleProvider.h"
 
 #include <memory>
 #include <vector>
@@ -26,9 +27,9 @@ struct EditorHotkeys;
 class EditorUI
 {
     public:
-        explicit EditorUI(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene);
+        explicit EditorUI(ecs::Ecs world, ModuleProvider modules);
 
-        void Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, asset::NcAsset& ncAsset);
+        void Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules);
 
     private:
         SceneGraph m_sceneGraph;

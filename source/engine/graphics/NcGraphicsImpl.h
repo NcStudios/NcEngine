@@ -1,7 +1,8 @@
 #pragma once
 
 #include "IGraphics.h"
-#include "graphics/NcGraphics.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/module/ModuleProvider.h"
 #include "system/CameraSystem.h"
 #include "system/EnvironmentSystem.h"
 #include "system/ObjectSystem.h"
@@ -16,11 +17,6 @@
 namespace nc
 {
 class Scene;
-
-namespace asset
-{
-class NcAsset;
-} // namespace asset
 
 namespace config
 {
@@ -40,21 +36,19 @@ struct ShaderResourceBus;
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
-                         asset::NcAsset* assetModule,
+                         ModuleProvider modules,
                          Registry* registry,
-                         window::WindowImpl* window,
-                         std::function<void(std::unique_ptr<Scene>)> changeScene) -> std::unique_ptr<NcGraphics>;
+                         window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
 
 class NcGraphicsImpl : public NcGraphics
 {
     public:
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                        Registry* registry,
-                       asset::NcAsset* assetModule,
+                       ModuleProvider modules,
                        std::unique_ptr<IGraphics> graphics,
                        ShaderResourceBus&& shaderResourceBus,
-                       window::WindowImpl* window,
-                       std::function<void(std::unique_ptr<Scene>)> changeScene);
+                       window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
@@ -70,7 +64,6 @@ class NcGraphicsImpl : public NcGraphics
 
     private:
         Registry* m_registry;
-        asset::NcAsset* m_assetModule;
         std::unique_ptr<IGraphics> m_graphics;
         CameraSystem m_cameraSystem;
         EnvironmentSystem m_environmentSystem;

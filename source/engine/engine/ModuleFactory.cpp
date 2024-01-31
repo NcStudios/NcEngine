@@ -36,26 +36,24 @@ namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
                          window::WindowImpl* window,
-                         const config::Config& config,
-                         std::function<void(std::unique_ptr<Scene>)> changeScene) -> ModuleRegistry
+                         const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
     NC_LOG_INFO("Building module registry");
-    auto moduleRegistry = nc::ModuleRegistry{};
-    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings,
+    auto moduleRegistry = std::make_unique<nc::ModuleRegistry>();
+    moduleRegistry->Register(nc::asset::BuildAssetModule(config.assetSettings,
                                                         config.memorySettings,
                                                         BuildDefaultAssetMap()));
-    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
+    moduleRegistry->Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
                                                               config.graphicsSettings,
-                                                              moduleRegistry.Get<nc::asset::NcAsset>(),
+                                                              ModuleProvider{moduleRegistry.get()},
                                                               registry,
-                                                              window,
-                                                              std::move(changeScene)));
-    moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
-    moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
-    moduleRegistry.Register(nc::time::BuildTimeModule());
-    moduleRegistry.Register(nc::ecs::BuildEcsModule(registry));
-    moduleRegistry.Register(std::make_unique<nc::Random>());
-    moduleRegistry.Register(nc::BuildSceneModule());
+                                                              window));
+    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
+    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
+    moduleRegistry->Register(nc::time::BuildTimeModule());
+    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry));
+    moduleRegistry->Register(std::make_unique<nc::Random>());
+    moduleRegistry->Register(nc::BuildSceneModule());
     return moduleRegistry;
 }
 } // namespace nc

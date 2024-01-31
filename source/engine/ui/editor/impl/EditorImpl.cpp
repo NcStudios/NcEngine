@@ -8,25 +8,27 @@ namespace nc::ui::editor
 class EditorImpl : public Editor
 {
     public:
-        explicit EditorImpl(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene, const EditorHotkeys& hotkeys)
+        explicit EditorImpl(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& hotkeys)
             : Editor{hotkeys},
-              m_ui{world, std::move(changeScene)}
+              m_modules{modules},
+              m_ui{world, modules}
         {
         }
 
-        void Draw(ecs::Ecs world, asset::NcAsset& ncAsset) override
+        void Draw(ecs::Ecs world) override
         {
-            m_ui.Draw(GetHotkeys(), world, ncAsset);
+            m_ui.Draw(GetHotkeys(), world, m_modules);
         }
 
     private:
+        ModuleProvider m_modules;
         EditorUI m_ui;
 };
 
 auto BuildEditor(ecs::Ecs world,
-                 std::function<void(std::unique_ptr<Scene>)> changeScene,
+                 ModuleProvider modules,
                  const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
 {
-    return std::make_unique<EditorImpl>(world, std::move(changeScene), hotkeys);
+    return std::make_unique<EditorImpl>(world, modules, hotkeys);
 }
 } // namespace nc::ui::editor

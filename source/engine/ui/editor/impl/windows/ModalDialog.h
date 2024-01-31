@@ -2,6 +2,7 @@
 
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace nc
@@ -55,13 +56,13 @@ class NewSceneDialog : public ModalDialog
     static constexpr auto DialogSize = Vector2{370.0f, 128.0f};
 
     public:
-        explicit NewSceneDialog(std::function<void(std::unique_ptr<Scene>)> changeScene);
+        explicit NewSceneDialog(NcScene* ncScene);
 
         void Open();
         void Draw(const ImVec2& dimensions);
 
     private:
-        std::function<void(std::unique_ptr<Scene>)> m_changeScene;
+        NcScene* m_ncScene;
 };
 
 class SaveSceneDialog : public ModalDialog
@@ -105,7 +106,7 @@ class LoadSceneDialog : public ModalDialog
     static constexpr auto OpenInNewScene = 1;
 
     public:
-        explicit LoadSceneDialog(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene);
+        explicit LoadSceneDialog(ecs::Ecs world, NcScene* ncScene);
 
         void Open(asset::NcAsset* ncAsset);
         void Draw(const ImVec2& dimensions);
@@ -114,7 +115,7 @@ class LoadSceneDialog : public ModalDialog
         std::string m_fileName;
         std::string m_errorText;
         ecs::Ecs m_world;
-        std::function<void(std::unique_ptr<Scene>)> m_changeScene;
+        NcScene* m_ncScene;
         asset::NcAsset* m_ncAsset = nullptr;
 
         int m_openType = OpenOverlayed;
