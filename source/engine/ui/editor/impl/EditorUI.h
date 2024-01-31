@@ -11,16 +11,7 @@
 #include <memory>
 #include <vector>
 
-namespace nc
-{
-class Scene;
-
-namespace asset
-{
-class NcAsset;
-} // namespace asset
-
-namespace ui::editor
+namespace nc::ui::editor
 {
 struct EditorHotkeys;
 
@@ -49,5 +40,4 @@ class EditorUI
         void DrawOverlays(const ImVec2& dimensions);
         void DrawDialogs(const ImVec2& dimensions);
 };
-} // namespace ui::editor
-} // namespace nc
+} // namespace nc::ui::editor

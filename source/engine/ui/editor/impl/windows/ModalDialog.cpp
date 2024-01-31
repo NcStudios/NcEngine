@@ -14,7 +14,7 @@ auto BuildSimpleFilter(bool includePersistent)
 {
     return std::function<bool(nc::Entity)>{[includePersistent](nc::Entity entity)
     {
-        return includePersistent? true : !entity.IsPersistent();
+        return includePersistent ? true : !entity.IsPersistent();
     }};
 }
 

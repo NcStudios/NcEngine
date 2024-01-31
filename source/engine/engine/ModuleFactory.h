@@ -1,13 +1,11 @@
 #pragma once
 
-#include <functional>
 #include <memory>
 
 namespace nc
 {
 class ModuleRegistry;
 class Registry;
-class Scene;
 
 namespace config
 {

@@ -26,12 +26,10 @@ class FpsOverlay
         {
             ImGui::SetNextWindowPos({dimensions.x - 90, 0}, ImGuiCond_Once);
             ImGui::SetNextWindowSize({90, 40});
-            if (ImGui::Begin("FpsOverlay", nullptr, WindowFlags))
+            Window("FpsOverlay", WindowFlags, [&]()
             {
                 ImGui::Text("fps: %.1f", ImGui::GetIO().Framerate);
-            }
-
-            ImGui::End();
+            });
         }
 
     private:

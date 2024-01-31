@@ -7,8 +7,6 @@
 
 namespace nc
 {
-class Scene;
-
 namespace asset
 {
 class NcAsset;
