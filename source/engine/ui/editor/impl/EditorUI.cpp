@@ -44,8 +44,8 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     auto& ncAsset = *modules.Get<asset::NcAsset>();
     const auto dimensions = []()
     {
-        const auto dimensions = window::GetDimensions();
-        return ImVec2{dimensions.x, dimensions.y};
+        const auto dim = window::GetDimensions();
+        return ImVec2{dim.x, dim.y};
     }();
 
     DrawOverlays(dimensions);
