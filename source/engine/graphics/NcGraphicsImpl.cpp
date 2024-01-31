@@ -44,7 +44,8 @@ namespace nc::graphics
                              const config::GraphicsSettings& graphicsSettings,
                              asset::NcAsset* assetModule,
                              Registry* registry,
-                             window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
+                             window::WindowImpl* window,
+                             std::function<void(std::unique_ptr<Scene>)> changeScene) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
         {
@@ -53,7 +54,7 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, assetModule, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, assetModule, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, assetModule, std::move(graphicsApi), std::move(resourceBus), window, std::move(changeScene));
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -65,7 +66,8 @@ namespace nc::graphics
                                    asset::NcAsset* assetModule,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus&& shaderResourceBus,
-                                   window::WindowImpl* window)
+                                   window::WindowImpl* window,
+                                   std::function<void(std::unique_ptr<Scene>)> changeScene)
         : m_registry{registry},
           m_assetModule{assetModule},
           m_graphics{std::move(graphics)},
@@ -76,7 +78,7 @@ namespace nc::graphics
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
           m_skeletalAnimationSystem{registry, assetModule->OnSkeletalAnimationUpdate(), assetModule->OnBoneUpdate(), std::move(shaderResourceBus.skeletalAnimationChannel)},
           m_widgetSystem{},
-          m_uiSystem{registry->GetEcs()}
+          m_uiSystem{registry->GetEcs(), std::move(changeScene)}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
     }

@@ -35,7 +35,8 @@ namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
                          window::WindowImpl* window,
-                         const config::Config& config) -> ModuleRegistry
+                         const config::Config& config,
+                         std::function<void(std::unique_ptr<Scene>)> changeScene) -> ModuleRegistry
 {
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = nc::ModuleRegistry{};
@@ -46,7 +47,8 @@ auto BuildModuleRegistry(Registry* registry,
                                                               config.graphicsSettings,
                                                               moduleRegistry.Get<nc::asset::NcAsset>(),
                                                               registry,
-                                                              window));
+                                                              window,
+                                                              std::move(changeScene)));
     moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
     moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
     moduleRegistry.Register(nc::time::BuildTimeModule());

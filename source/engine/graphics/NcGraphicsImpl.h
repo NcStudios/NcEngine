@@ -15,6 +15,8 @@
 
 namespace nc
 {
+class Scene;
+
 namespace asset
 {
 class NcAsset;
@@ -40,7 +42,8 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
                          asset::NcAsset* assetModule,
                          Registry* registry,
-                         window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
+                         window::WindowImpl* window,
+                         std::function<void(std::unique_ptr<Scene>)> changeScene) -> std::unique_ptr<NcGraphics>;
 
 class NcGraphicsImpl : public NcGraphics
 {
@@ -50,7 +53,8 @@ class NcGraphicsImpl : public NcGraphics
                        asset::NcAsset* assetModule,
                        std::unique_ptr<IGraphics> graphics,
                        ShaderResourceBus&& shaderResourceBus,
-                       window::WindowImpl* window);
+                       window::WindowImpl* window,
+                       std::function<void(std::unique_ptr<Scene>)> changeScene);
 
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;

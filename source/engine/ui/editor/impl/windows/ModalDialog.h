@@ -4,7 +4,11 @@
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
-namespace nc::ui::editor
+namespace nc
+{
+class Scene;
+
+namespace ui::editor
 {
 class ModalDialog
 {
@@ -29,10 +33,11 @@ class ModalDialog
             ImGui::CloseCurrentPopup();
         }
 
-        void DrawPopup(const char* label, auto&& func)
+        void DrawPopup(const char* label, const ImVec2& dimensions, auto&& func)
         {
             ImGui::OpenPopup(label);
             ImGui::SetNextWindowSize(m_size, ImGuiCond_Once);
+            ImGui::SetNextWindowPos(dimensions * 0.5f, ImGuiCond_Once, ImVec2{0.5f, 0.5f});
             if (ImGui::BeginPopupModal(label, &m_isOpen))
             {
                 func();
@@ -47,21 +52,21 @@ class ModalDialog
 
 class NewSceneDialog : public ModalDialog
 {
-    static constexpr auto DialogSize = Vector2{256.0f, 128.0f};
+    static constexpr auto DialogSize = Vector2{370.0f, 128.0f};
 
     public:
-        explicit NewSceneDialog();
+        explicit NewSceneDialog(std::function<void(std::unique_ptr<Scene>)> changeScene);
 
         void Open();
-        void Draw();
+        void Draw(const ImVec2& dimensions);
 
     private:
-
+        std::function<void(std::unique_ptr<Scene>)> m_changeScene;
 };
 
 class SaveSceneDialog : public ModalDialog
 {
-    static constexpr auto DialogSize = Vector2{400.0f, 300.0f};
+    static constexpr auto DialogSize = Vector2{350.0f, 400.0f};
     static constexpr auto LayerInclusionAll = 0;
     static constexpr auto LayerInclusionFilter = 1;
 
@@ -69,7 +74,7 @@ class SaveSceneDialog : public ModalDialog
         explicit SaveSceneDialog(ecs::Ecs world);
 
         void Open(asset::AssetMap assets);
-        void Draw();
+        void Draw(const ImVec2& dimensions);
 
     private:
         std::string m_fileName;
@@ -85,30 +90,34 @@ class SaveSceneDialog : public ModalDialog
         bool m_backup = true;
 
         void DrawLayerFilterListBox();
+        void AddLayer();
+        void RemoveSelectedLayer();
         void EnableAllLayers();
         void DisableAllLayers();
         void OnSave();
+        auto SelectFilter() -> std::function<bool(Entity)>;
 };
 
 class LoadSceneDialog : public ModalDialog
 {
-    static constexpr auto DialogSize = Vector2{300.0f, 128.0f};
+    static constexpr auto DialogSize = Vector2{310.0f, 170.0f};
     static constexpr auto OpenOverlayed = 0;
     static constexpr auto OpenInNewScene = 1;
 
     public:
-        explicit LoadSceneDialog(ecs::Ecs world);
+        explicit LoadSceneDialog(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene);
 
         void Open(asset::NcAsset* ncAsset);
-        void Draw();
+        void Draw(const ImVec2& dimensions);
 
     private:
         std::string m_fileName;
         std::string m_errorText;
         ecs::Ecs m_world;
+        std::function<void(std::unique_ptr<Scene>)> m_changeScene;
         asset::NcAsset* m_ncAsset = nullptr;
 
         int m_openType = OpenOverlayed;
 };
-
-} // namespace nc::ui::editor
+} // namespace ui::editor
+} // namespace nc

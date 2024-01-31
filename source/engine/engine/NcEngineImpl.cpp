@@ -31,18 +31,10 @@ void LogConfig(const nc::config::Config& config)
 
     NC_LOG_INFO("Initializing NcEngine with Config:\n{}", configStr);
 }
-
-nc::NcEngine* g_instance = nullptr;
 } // anonymous namespace
 
 namespace nc
 {
-void QueueSceneChange(std::unique_ptr<Scene> scene)
-{
-    NC_ASSERT(::g_instance, "No engine instance is initialized");
-    ::g_instance->QueueSceneChange(std::move(scene));
-}
-
 auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngine>
 {
     config::SetConfig(config);
@@ -55,19 +47,20 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
-      m_modules{BuildModuleRegistry(m_registry.get(), &m_window, config)},
+      m_modules{BuildModuleRegistry(m_registry.get(),
+                                    &m_window,
+                                    config,
+                                    std::bind_front(&NcEngineImpl::QueueSceneChange, this))},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
       m_sceneManager{},
       m_isRunning{false}
 {
-    ::g_instance = this;
 }
 
 NcEngineImpl::~NcEngineImpl() noexcept
 {
     Shutdown();
     utility::detail::CloseLog();
-    ::g_instance = nullptr;
 }
 
 void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)

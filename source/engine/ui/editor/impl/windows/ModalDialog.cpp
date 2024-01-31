@@ -8,11 +8,6 @@
 #include <filesystem>
 #include <fstream>
 
-
-// remove
-#include "ncengine/NcEngine.h"
-
-
 namespace
 {
 auto BuildSimpleFilter(bool includePersistent)
@@ -59,8 +54,9 @@ auto BuildLayerFilter(bool includePersistent, const std::vector<uint8_t>& includ
 
 namespace nc::ui::editor
 {
-NewSceneDialog::NewSceneDialog()
-    : ModalDialog{DialogSize}
+NewSceneDialog::NewSceneDialog(std::function<void(std::unique_ptr<Scene>)> changeScene)
+    : ModalDialog{DialogSize},
+      m_changeScene{std::move(changeScene)}
 {
 }
 
@@ -69,15 +65,14 @@ void NewSceneDialog::Open()
     OpenPopup();
 }
 
-void NewSceneDialog::Draw()
+void NewSceneDialog::Draw(const ImVec2& dimensions)
 {
-    DrawPopup("Open Sandbox Scene", [&]()
+    DrawPopup("Open Sandbox Scene", dimensions, [&]()
     {
         ImGui::TextWrapped("%s", "Are you sure you want to open a new sandbox scene?");
         if (ImGui::Button("Create Scene"))
         {
-            // .. 
-            QueueSceneChange(std::make_unique<SandboxScene>());
+            m_changeScene(std::make_unique<SandboxScene>());
             ClosePopup();
         }
     });
@@ -96,9 +91,9 @@ void SaveSceneDialog::Open(asset::AssetMap assets)
     OpenPopup();
 }
 
-void SaveSceneDialog::Draw()
+void SaveSceneDialog::Draw(const ImVec2& dimensions)
 {
-    DrawPopup("Save Scene Fragment", [&]()
+    DrawPopup("Save Scene Fragment", dimensions, [&]()
     {
         ImGui::Text("%s", "Include:");
         Checkbox(m_includeAssets, "Loaded Assets");
@@ -124,56 +119,49 @@ void SaveSceneDialog::Draw()
 
 void SaveSceneDialog::DrawLayerFilterListBox()
 {
-    static constexpr auto selectableFlags = ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_AllowItemOverlap;
     static constexpr auto selectableSize = ImVec2{0.0f, 19.0f};
     if (ImGui::BeginListBox("##layerfilters"))
     {
         for (auto [i, value] : std::views::enumerate(m_includedLayers))
         {
             IMGUI_SCOPE(ImGuiId, static_cast<int>(i));
-            if (ImGui::Selectable("##select", i == m_selectedLayer, selectableFlags, selectableSize))
+            const auto selected = i == m_selectedLayer;
+            if (SelectableWidget(selected, selectableSize, [&](){ InputU8(value, "##value"); }))
                 m_selectedLayer = i;
-
-            ImGui::SameLine();
-            InputU8(value, "##input");
-
-            if (ImGui::IsItemClicked(0))
-            {
-                m_selectedLayer = i;
-                ImGui::SetKeyboardFocusHere(-1);
-            }
         }
 
         ImGui::EndListBox();
     }
 
     if (ImGui::Button("+"))
-    {
-        m_includedLayers.push_back(0);
-    }
+        AddLayer();
 
     ImGui::SameLine();
 
     ImGui::BeginDisabled(static_cast<size_t>(m_selectedLayer) >= m_includedLayers.size());
     if (ImGui::Button("-"))
-    {
-        m_includedLayers.erase(m_includedLayers.begin() + m_selectedLayer);
-    }
+        RemoveSelectedLayer();
     ImGui::EndDisabled();
 
     ImGui::SameLine();
 
     if (ImGui::Button("Add All"))
-    {
         EnableAllLayers();
-    }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Remove All"))
-    {
         DisableAllLayers();
-    }
+}
+
+void SaveSceneDialog::AddLayer()
+{
+    m_includedLayers.push_back(0);
+}
+
+void SaveSceneDialog::RemoveSelectedLayer()
+{
+    m_includedLayers.erase(m_includedLayers.begin() + m_selectedLayer);
 }
 
 void SaveSceneDialog::EnableAllLayers()
@@ -202,12 +190,8 @@ void SaveSceneDialog::OnSave()
 
     if (auto file = std::ofstream{m_fileName, std::ios::binary | std::ios::trunc})
     {
-        SaveSceneFragment(file,
-                          m_world,
-                          m_includeAssets ? m_assets : asset::AssetMap{},
-                          m_layerInclusionType == LayerInclusionAll
-                            ? BuildSimpleFilter(m_includePersistent)
-                            : BuildLayerFilter(m_includePersistent, m_includedLayers));
+        const auto& assets = m_includeAssets ? m_assets : asset::AssetMap{};
+        SaveSceneFragment(file, m_world, assets, SelectFilter());
         ClosePopup();
     }
     else
@@ -216,9 +200,17 @@ void SaveSceneDialog::OnSave()
     }
 }
 
-LoadSceneDialog::LoadSceneDialog(ecs::Ecs world)
+auto SaveSceneDialog::SelectFilter() -> std::function<bool(Entity)>
+{
+    return m_layerInclusionType == LayerInclusionAll
+        ? BuildSimpleFilter(m_includePersistent)
+        : BuildLayerFilter(m_includePersistent, m_includedLayers);
+}
+
+LoadSceneDialog::LoadSceneDialog(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene)
     : ModalDialog{DialogSize},
-      m_world{world}
+      m_world{world},
+      m_changeScene{std::move(changeScene)}
 {
 }
 
@@ -229,9 +221,9 @@ void LoadSceneDialog::Open(asset::NcAsset* ncAsset)
     OpenPopup();
 }
 
-void LoadSceneDialog::Draw()
+void LoadSceneDialog::Draw(const ImVec2& dimensions)
 {
-    DrawPopup("Load Scene Fragment", [&]()
+    DrawPopup("Load Scene Fragment", dimensions, [&]()
     {
         ImGui::RadioButton("Overlay on current scene", &m_openType, OpenOverlayed);
         ImGui::RadioButton("Open in new scene", &m_openType, OpenInNewScene);
@@ -239,11 +231,12 @@ void LoadSceneDialog::Draw()
         InputText(m_fileName, "filename");
         if (ImGui::Button("load"))
         {
-            // handle loading in new scene with like:
-            // if exists -> QueueSceneChange(DynamicScene{m_fileName})
-            // else errorText
-
-            if (auto file = std::ifstream{m_fileName, std::ios::binary})
+            if (m_openType == OpenInNewScene && std::filesystem::is_regular_file(m_fileName))
+            {
+                m_changeScene(std::make_unique<SandboxScene>(m_fileName));
+                ClosePopup();
+            }
+            else if (auto file = std::ifstream{m_fileName, std::ios::binary})
             {
                 LoadSceneFragment(file, m_world, *m_ncAsset);
                 ClosePopup();

@@ -4,8 +4,8 @@
 
 namespace nc::graphics
 {
-UISystem::UISystem(ecs::Ecs world)
-    : m_editor{ui::editor::BuildEditor(world)}
+UISystem::UISystem(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene)
+    : m_editor{ui::editor::BuildEditor(world, std::move(changeScene))}
 {
 }
 

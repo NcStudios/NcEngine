@@ -6,7 +6,11 @@
 
 #include <memory>
 
-namespace nc::ui::editor
+namespace nc
+{
+class Scene;
+
+namespace ui::editor
 {
 struct EditorHotkeys
 {
@@ -34,5 +38,8 @@ class Editor
         EditorHotkeys m_hotkeys;
 };
 
-auto BuildEditor(ecs::Ecs world, const EditorHotkeys& hotkeys = EditorHotkeys{}) -> std::unique_ptr<Editor>;
-} // namespace nc::ui::editor
+auto BuildEditor(ecs::Ecs world,
+                 std::function<void(std::unique_ptr<Scene>)> changeScene,
+                 const EditorHotkeys& hotkeys = EditorHotkeys{}) -> std::unique_ptr<Editor>;
+} // namespace ui::editor
+} // namespace nc

@@ -6,6 +6,8 @@
 
 namespace nc
 {
+class Scene;
+
 namespace asset
 {
 class NcAsset;
@@ -26,7 +28,7 @@ namespace graphics
 class UISystem
 {
     public:
-        UISystem(ecs::Ecs world);
+        UISystem(ecs::Ecs world, std::function<void(std::unique_ptr<Scene>)> changeScene);
         ~UISystem() noexcept;
 
         auto IsHovered() const noexcept -> bool;
