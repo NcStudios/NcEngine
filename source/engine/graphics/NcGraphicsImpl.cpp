@@ -1,16 +1,16 @@
 #include "NcGraphicsImpl.h"
 #include "PerFrameRenderState.h"
-#include "asset/NcAsset.h"
-#include "config/Config.h"
-#include "ecs/Ecs.h"
-#include "ecs/View.h"
-#include "graphics/GraphicsUtilities.h"
+#include "GraphicsUtilities.h"
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
-
-#include "task/TaskGraph.h"
-#include "utility/Log.h"
 #include "window/WindowImpl.h"
+#include "ncengine/asset/NcAsset.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/View.h"
+#include "ncengine/scene/NcScene.h"
+#include "ncengine/task/TaskGraph.h"
+#include "ncengine/utility/Log.h"
 
 #include "optick.h"
 
@@ -50,6 +50,7 @@ namespace nc::graphics
         {
             auto ncAsset = modules.Get<asset::NcAsset>();
             NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
+            NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};

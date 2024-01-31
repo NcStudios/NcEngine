@@ -40,6 +40,7 @@ auto BuildModuleRegistry(Registry* registry,
 {
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = std::make_unique<nc::ModuleRegistry>();
+    moduleRegistry->Register(nc::BuildSceneModule());
     moduleRegistry->Register(nc::asset::BuildAssetModule(config.assetSettings,
                                                         config.memorySettings,
                                                         BuildDefaultAssetMap()));
@@ -53,7 +54,6 @@ auto BuildModuleRegistry(Registry* registry,
     moduleRegistry->Register(nc::time::BuildTimeModule());
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry));
     moduleRegistry->Register(std::make_unique<nc::Random>());
-    moduleRegistry->Register(nc::BuildSceneModule());
     return moduleRegistry;
 }
 } // namespace nc
