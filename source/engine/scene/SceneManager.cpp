@@ -4,23 +4,42 @@
 
 #include "ncutility/NcError.h"
 
-namespace nc::scene
+namespace nc
 {
-SceneManager::SceneManager()
-    : m_activeScene{nullptr},
-      m_swapScene{nullptr}
+auto BuildSceneModule() -> std::unique_ptr<NcScene>
 {
+    NC_LOG_TRACE("Building NcScene module");
+    return std::make_unique<SceneManager>();
 }
 
-auto SceneManager::IsSceneChangeQueued() const noexcept -> bool
+auto SceneManager::Queue(std::unique_ptr<Scene> scene) noexcept -> size_t
 {
-    return static_cast<bool>(m_swapScene);
+    NC_LOG_TRACE("Queueing scene");
+    m_sceneQueue.push_back(std::move(scene));
+    return m_sceneQueue.size() - 1;
 }
 
-void SceneManager::QueueSceneChange(std::unique_ptr<Scene> swapScene) noexcept
+void SceneManager::DequeueScene(size_t queuePosition)
 {
-    NC_LOG_TRACE("Queueing scene change");
-    m_swapScene = std::move(swapScene);
+    NC_LOG_TRACE("Dequeueing scene");
+    NC_ASSERT(queuePosition < m_sceneQueue.size(), "Invalid scene queuePosition");
+    m_sceneQueue.erase(m_sceneQueue.begin() + queuePosition);
+}
+
+auto SceneManager::GetNumberOfScenesInQueue() const noexcept -> size_t
+{
+    return m_sceneQueue.size();
+}
+
+void SceneManager::ScheduleTransition() noexcept
+{
+    NC_LOG_TRACE("Scheduling scene transition");
+    m_transitionScheduled = true;
+}
+
+auto SceneManager::IsTransitionScheduled() const noexcept -> bool
+{
+    return m_transitionScheduled;
 }
 
 auto SceneManager::UnloadActiveScene() -> bool
@@ -37,20 +56,27 @@ auto SceneManager::UnloadActiveScene() -> bool
     return true;
 }
 
-auto SceneManager::LoadQueuedScene(Registry* registry, ModuleProvider modules)-> bool
+auto SceneManager::LoadQueuedScene(Registry* registry, ModuleRegistry& modules)-> bool
 {
-    NC_LOG_TRACE("Changing scene");
+    m_transitionScheduled = false;
+    NC_LOG_TRACE("Starting scene change");
     NC_ASSERT(!m_activeScene, "Attempt to change scenes with an active scene loaded.");
-    if(!m_swapScene)
+    if(m_sceneQueue.empty())
     {
         NC_LOG_WARNING("No scene queued - ignoring scene change request.");
         return false;
     }
 
-    m_activeScene = std::move(m_swapScene);
-    m_swapScene = nullptr;
+    NC_LOG_TRACE("Notifying OnBeforeSceneLoad()");
+    for (auto& module : modules.GetAllModules())
+    {
+        module->OnBeforeSceneLoad();
+    }
+
     NC_LOG_TRACE("Loading scene");
-    m_activeScene->Load(registry, modules);
+    m_activeScene = std::move(m_sceneQueue.front());
+    m_sceneQueue.erase(m_sceneQueue.begin());
+    m_activeScene->Load(registry, ModuleProvider{&modules});
     return true;
 }
 } // namespace nc::scene
