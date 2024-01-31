@@ -4,6 +4,11 @@ namespace nc::ui::editor
 {
 struct EditorStub : public Editor
 {
+    EditorStub()
+        : Editor{EditorHotkeys{}}
+    {
+    }
+
     void Draw(ecs::Ecs) override {}
 };
 
