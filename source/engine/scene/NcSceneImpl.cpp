@@ -1,6 +1,6 @@
-#include "SceneManager.h"
-#include "module/ModuleProvider.h"
-#include "utility/Log.h"
+#include "NcSceneImpl.h"
+#include "ncengine/module/ModuleProvider.h"
+#include "ncengine/utility/Log.h"
 
 #include "ncutility/NcError.h"
 

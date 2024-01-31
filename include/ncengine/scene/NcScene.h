@@ -16,19 +16,14 @@ namespace nc
  * @brief Module managing the scene queue and transitions.
  * 
  * The simplest and preferred method of changing Scenes is by queueing the desired Scene(s) and calling ScheduleTransition()
- * when it is time to perform the transition. This guarantees the transition will happen while no tasks are in flight and
- * performs the following routine at the end of the frame:
+ * when it is time to perform the transition. This schedules the transition at the end of the frame, guaranteeing no tasks
+ * are in flight. The following routine is performed before starting the next frame:
  *   - Unload() is called on the active Scene.
  *   - The active Scene's destructor is called.
  *   - Clear() is called on all registered Modules.
  *   - ClearSceneData() is called on the ComponentRegistry.
  *   - OnBeforeSceneLoad() is called on each Module.
  *   - Dequeue the next queued Scene and call Load().
- * 
- * It is possible to manually perform a transition that uses a different routine by not calling ScheduleTransition() and
- * instead explicitly calling UnloadActiveScene() and LoadQueuedScene(). Care must be taken to avoid data races in the
- * task graph - explicit change (un)loading should only happen during ExecutionPhase::PostFrameSync, or outside of the
- * task graph entirely.
 */
 class NcScene : public Module
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene/NcScene.h"
+#include "ncengine/scene/NcScene.h"
 
 #include <vector>
 
@@ -14,9 +14,6 @@ class SceneManager : public NcScene
         auto GetNumberOfScenesInQueue() const noexcept -> size_t override;
         void ScheduleTransition() noexcept override;
         auto IsTransitionScheduled() const noexcept -> bool override;
-
-        // auto IsSceneChangeQueued() const noexcept -> bool override;
-        // void QueueSceneChange(std::unique_ptr<Scene> swapScene) noexcept override;
         auto UnloadActiveScene() -> bool override;
         auto LoadQueuedScene(Registry* registry, ModuleRegistry& modules) -> bool override;
 

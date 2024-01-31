@@ -4,7 +4,7 @@
 #include "config/ConfigInternal.h"
 #include "config/Version.h"
 #include "input/InputInternal.h"
-#include "scene/SceneManager.h"
+#include "scene/NcScene.h"
 #include "utility/Log.h"
 
 #include "optick.h"
