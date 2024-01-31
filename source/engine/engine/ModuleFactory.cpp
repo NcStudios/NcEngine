@@ -5,6 +5,7 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/module/ModuleRegistry.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/utility/Log.h"
 
 /** @todo #363 Move factories to public headers and include those instead. */
@@ -54,6 +55,7 @@ auto BuildModuleRegistry(Registry* registry,
     moduleRegistry.Register(nc::time::BuildTimeModule());
     moduleRegistry.Register(nc::ecs::BuildEcsModule(registry));
     moduleRegistry.Register(std::make_unique<nc::Random>());
+    moduleRegistry.Register(nc::BuildSceneModule());
     return moduleRegistry;
 }
 } // namespace nc

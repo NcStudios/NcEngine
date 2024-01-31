@@ -33,14 +33,15 @@ namespace nc::sample
 {
     auto InitializeSampleUI(NcEngine* engine) -> std::unique_ptr<SampleUI>
     {
-        auto ui = std::make_unique<SampleUI>(engine);
+        auto ncScene = engine->GetModuleRegistry()->Get<NcScene>();
+        auto ui = std::make_unique<SampleUI>(ncScene);
         auto* graphics = engine->GetModuleRegistry()->Get<graphics::NcGraphics>();
         graphics->SetUi(ui.get());
         return ui;
     }
 
-    SampleUI::SampleUI(NcEngine* engine)
-        : m_engine{engine},
+    SampleUI::SampleUI(NcScene* ncScene)
+        : m_ncScene{ncScene},
           m_gameLog{},
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()},
@@ -116,28 +117,52 @@ namespace nc::sample
         {
             auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 18 };
             if (ImGui::Button("Worms", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<Worms>(this));
+            {
+                m_ncScene->Queue(std::make_unique<Worms>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Click Events", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<ClickEvents>(this));
+            {
+                m_ncScene->Queue(std::make_unique<ClickEvents>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Collision Events", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<CollisionEvents>(this));
+            {
+                m_ncScene->Queue(std::make_unique<CollisionEvents>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Joints Test", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<JointsTest>(this));
+            {
+                m_ncScene->Queue(std::make_unique<JointsTest>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Spawn Test", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<SpawnTest>(this));
+            {
+                m_ncScene->Queue(std::make_unique<SpawnTest>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Rendering Benchmark", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<RenderingBenchmark>(this));
+            {
+                m_ncScene->Queue(std::make_unique<RenderingBenchmark>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Collision Benchmark", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<CollisionBenchmark>(this));
+            {
+                m_ncScene->Queue(std::make_unique<CollisionBenchmark>(this));
+                m_ncScene->ScheduleTransition();
+            }
 
             if (ImGui::Button("Jare Test", buttonSize))
-                m_engine->QueueSceneChange(std::make_unique<JareTestScene>(this));
+            {
+                m_ncScene->Queue(std::make_unique<JareTestScene>(this));
+                m_ncScene->ScheduleTransition();
+            }
         } ImGui::EndChild();
     }
 
