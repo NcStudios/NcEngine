@@ -58,8 +58,8 @@ auto SceneManager::UnloadActiveScene() -> bool
 
 auto SceneManager::LoadQueuedScene(Registry* registry, ModuleRegistry& modules)-> bool
 {
-    m_transitionScheduled = false;
     NC_LOG_TRACE("Starting scene change");
+    m_transitionScheduled = false;
     NC_ASSERT(!m_activeScene, "Attempt to change scenes with an active scene loaded.");
     if(m_sceneQueue.empty())
     {

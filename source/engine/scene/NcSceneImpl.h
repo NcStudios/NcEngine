@@ -21,6 +21,5 @@ class SceneManager : public NcScene
         std::unique_ptr<Scene> m_activeScene;
         std::vector<std::unique_ptr<Scene>> m_sceneQueue;
         bool m_transitionScheduled = false;
-        // std::unique_ptr<Scene> m_swapScene;
 };
 } // namespace nc
