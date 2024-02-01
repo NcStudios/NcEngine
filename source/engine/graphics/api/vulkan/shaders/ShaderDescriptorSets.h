@@ -7,9 +7,11 @@
 
 namespace nc::graphics
 {
-    enum class BindFrequency : uint8_t
+    enum class DescriptorScope : uint8_t
     {
-        per_frame
+        Global,
+        PerObject,
+        Lighting
     };
 
     /* Represents the binding of a resource handle to the descriptor set's GPU memory */
@@ -53,23 +55,23 @@ namespace nc::graphics
             ShaderDescriptorSets(vk::Device device);
 
             /* Shader resource services attach themselves to a shader slot by registering themselves here. */
-            uint32_t RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
+            uint32_t RegisterDescriptor(uint32_t bindingSlot, DescriptorScope descriptorScope, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
             
             /* Called when the data in the image or buffer changes. */
-            void UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
-            void UpdateBuffer(BindFrequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateImage(DescriptorScope descriptorScope, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateBuffer(DescriptorScope descriptorScope, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
 
             /* Called in the techniques to access and bind the descriptor set(s). */
-            vk::DescriptorSetLayout* GetSetLayout(BindFrequency bindFrequency);
-            DescriptorSet* GetSet(BindFrequency bindFrequency);
-            void BindSet(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
+            vk::DescriptorSetLayout* GetSetLayout(DescriptorScope descriptorScope);
+            DescriptorSet* GetSet(DescriptorScope descriptorScope);
+            void BindSet(DescriptorScope descriptorScope, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
 
             /* Called in ShaderResources CTOR after each of the services have been initialized. */
-            void CreateSet(BindFrequency bindFrequency);
+            void CreateSet(DescriptorScope descriptorScope);
 
         private:
             vk::UniqueDescriptorPool m_renderingDescriptorPool;
-            std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
+            std::unordered_map<DescriptorScope, DescriptorSet> m_descriptorSets;
             vk::Device m_device;
     };
 }

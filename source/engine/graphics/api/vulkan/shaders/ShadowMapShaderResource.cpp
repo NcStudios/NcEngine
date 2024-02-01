@@ -57,7 +57,7 @@ namespace nc::graphics
 
         m_descriptors->UpdateImage
         (   
-            BindFrequency::per_frame,
+            DescriptorScope::Global,
             m_imageInfos,
             static_cast<uint32_t>(m_imageInfos.size()),
             vk::DescriptorType::eCombinedImageSampler,
@@ -70,7 +70,7 @@ namespace nc::graphics
         m_descriptors->RegisterDescriptor
         (
             m_bindingSlot,
-            BindFrequency::per_frame,
+            DescriptorScope::Global,
             m_maxShadows,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,

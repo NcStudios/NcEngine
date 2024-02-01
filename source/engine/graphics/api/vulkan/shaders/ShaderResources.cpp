@@ -49,6 +49,6 @@ ShaderResources::ShaderResources(vk::Device device,
       environmentDataConnection{::Connect(resourceBus.environmentChannel, &environmentDataShaderResource)},
       skeletalAnimationDataConnection{::Connect(resourceBus.skeletalAnimationChannel, &skeletalAnimationShaderResource)}
 {
-    shaderDescriptorSets->CreateSet(BindFrequency::per_frame);
+    shaderDescriptorSets->CreateSet(DescriptorScope::Global);
 }
 } // namespace nc::graphics

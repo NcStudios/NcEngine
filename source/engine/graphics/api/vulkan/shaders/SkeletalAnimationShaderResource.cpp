@@ -28,7 +28,7 @@ void SkeletalAnimationShaderResource::Initialize()
     m_descriptors->RegisterDescriptor
     (
         m_bindingSlot,
-        BindFrequency::per_frame,
+        DescriptorScope::Global,
         1,
         vk::DescriptorType::eStorageBuffer,
         vk::ShaderStageFlagBits::eVertex,
@@ -37,7 +37,7 @@ void SkeletalAnimationShaderResource::Initialize()
 
     m_descriptors->UpdateBuffer
     (
-        BindFrequency::per_frame,
+        DescriptorScope::Global,
         m_skeletalAnimationArrayBuffer->GetBuffer(),
         bufferSize,
         1,

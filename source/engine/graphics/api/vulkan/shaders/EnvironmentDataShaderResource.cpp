@@ -28,7 +28,7 @@ namespace nc::graphics
         m_descriptors->RegisterDescriptor
         (
             m_bindingSlot,
-            BindFrequency::per_frame,
+            DescriptorScope::Global,
             1,
             vk::DescriptorType::eUniformBuffer,
             vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex,
@@ -37,7 +37,7 @@ namespace nc::graphics
 
         m_descriptors->UpdateBuffer
         (
-            BindFrequency::per_frame,
+            DescriptorScope::Global,
             m_environmentDataBuffer->GetBuffer(),
             sizeof(EnvironmentData),
             1,

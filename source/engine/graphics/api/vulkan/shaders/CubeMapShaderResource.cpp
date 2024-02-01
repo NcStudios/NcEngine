@@ -25,7 +25,7 @@ void CubeMapShaderResource::Initialize()
     m_descriptors->RegisterDescriptor
     (
         m_bindingSlot,
-        BindFrequency::per_frame,
+        DescriptorScope::Global,
         m_maxCubeMapsCount,
         vk::DescriptorType::eCombinedImageSampler,
         vk::ShaderStageFlagBits::eFragment,
@@ -48,7 +48,7 @@ void CubeMapShaderResource::Update(const std::vector<CubeMap>& data)
 
     m_descriptors->UpdateImage
     (
-        BindFrequency::per_frame,
+        DescriptorScope::Global,
         m_imageInfos,
         static_cast<uint32_t>(data.size()),
         vk::DescriptorType::eCombinedImageSampler,
