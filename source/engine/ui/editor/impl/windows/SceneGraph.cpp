@@ -15,7 +15,7 @@ auto IsRoot(nc::Transform* transform) -> bool
 
 namespace nc::ui::editor
 {
-void SceneGraph::Draw(ecs::Ecs world)
+void SceneGraph::Draw(ecs::Ecs world, CreateEntityWindow& createEntityWindow)
 {
     EnsureSelection(world);
     m_tagFilter.Draw("search");
@@ -27,8 +27,8 @@ void SceneGraph::Draw(ecs::Ecs world)
             m_selectedEntity = Entity::Null();
         }
 
-        GraphContextMenu(world);
-        Graph(world);
+        GraphContextMenu(world, createEntityWindow);
+        Graph(world, createEntityWindow);
     });
 }
 
@@ -45,7 +45,7 @@ auto SceneGraph::PassFilter(Tag& tag) -> bool
     return m_tagFilter.PassFilter(tag.Value().data());
 }
 
-void SceneGraph::Graph(ecs::Ecs world)
+void SceneGraph::Graph(ecs::Ecs world, CreateEntityWindow& createEntityWindow)
 {
     for(auto entity : world.GetAll<Entity>())
     {
@@ -53,15 +53,18 @@ void SceneGraph::Graph(ecs::Ecs world)
         auto tag = world.Get<Tag>(entity);
         if (IsRoot(transform) && PassFilter(*tag))
         {
-            GraphNode(world, entity, *tag, *transform);
+            GraphNode(world, entity, *tag, *transform, createEntityWindow);
         }
     }
 }
 
-void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform)
+void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform, CreateEntityWindow& createEntityWindow)
 {
     IMGUI_SCOPE(ImGuiId, entity.Index());
-    const auto flags = m_selectedEntity == entity ? ImGuiTreeNodeFlags_Framed : 0;
+    const auto flags = m_selectedEntity == entity
+        ? ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow
+        : 0;
+
     const auto isNodeExpanded = ImGui::TreeNodeEx(tag.Value().data(), flags);
 
     if (ImGui::IsItemClicked())
@@ -70,7 +73,7 @@ void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& t
     }
     else if (ImGui::BeginPopupContextItem())
     {
-        m_selectedEntity = EntityContextMenu(entity, world);
+        m_selectedEntity = EntityContextMenu(entity, world, createEntityWindow);
         ImGui::EndPopup();
     }
 
@@ -84,21 +87,21 @@ void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& t
     {
         for(auto child : transform.Children())
         {
-            GraphNode(world, child, *world.Get<Tag>(child), *world.Get<Transform>(child));
+            GraphNode(world, child, *world.Get<Tag>(child), *world.Get<Transform>(child), createEntityWindow);
         }
 
         ImGui::TreePop();
     }
 }
 
-void SceneGraph::GraphContextMenu(ecs::Ecs world)
+void SceneGraph::GraphContextMenu(ecs::Ecs world, CreateEntityWindow& createEntityWindow)
 {
     if (ImGui::BeginPopupContextWindow())
     {
         if (ImGui::Selectable("New Entity"))
+            createEntityWindow.Open();
+        else if (ImGui::Selectable("New Default Entity"))
             m_selectedEntity = world.Emplace<Entity>(EntityInfo{});
-        else if (ImGui::Selectable("New Static Entity"))
-            m_selectedEntity = world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static});
         else
             m_selectedEntity = Entity::Null();
 

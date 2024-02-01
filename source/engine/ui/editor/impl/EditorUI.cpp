@@ -31,10 +31,13 @@ namespace nc::ui::editor
 {
 void EditorUI::Draw(ecs::Ecs world)
 {
+    if (m_createEntityWindow.IsOpen())
+        m_createEntityWindow.Draw(world, m_sceneGraph.GetSelectedEntity());
+
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", [&]()
     {
-        m_sceneGraph.Draw(world);
+        m_sceneGraph.Draw(world, m_createEntityWindow);
     });
 
     const auto selectedEntity = m_sceneGraph.GetSelectedEntity();
@@ -46,7 +49,7 @@ void EditorUI::Draw(ecs::Ecs world)
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
     {
-        m_inspector.Draw(world, selectedEntity);
+        m_inspector.Draw(world, selectedEntity, m_createEntityWindow);
     });
 }
 } // namespace nc::ui::editor

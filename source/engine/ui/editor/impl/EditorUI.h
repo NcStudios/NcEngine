@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ncengine/ecs/Ecs.h"
+#include "windows/CreateEntityWindow.h"
 #include "windows/Inspector.h"
 #include "windows/SceneGraph.h"
 
@@ -18,6 +19,8 @@ class EditorUI
         SceneGraph m_sceneGraph;
         Inspector m_inspector;
         bool m_open = false;
+
+        CreateEntityWindow m_createEntityWindow;
 };
 } // namespace ui::editor
 } // namespace nc
