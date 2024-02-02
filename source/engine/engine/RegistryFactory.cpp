@@ -12,6 +12,7 @@
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -57,6 +58,7 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<Registry>
     Register<Transform>(*registry, TransformId, "Transform", editor::TransformUIWidget);
     Register<graphics::MeshRenderer>(*registry, MeshRendererId, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer, SerializeMeshRenderer, DeserializeMeshRenderer);
     Register<graphics::ToonRenderer>(*registry, ToonRendererId, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer, SerializeToonRenderer, DeserializeToonRenderer);
+    Register<graphics::WireframeRenderer>(*registry, WireframeRendererId, "WireframeRenderer");
     Register<graphics::SkeletalAnimator>(*registry, SkeletalAnimatorId, "SkeletalAnimator", editor::SkeletalAnimatorUIWidget, CreateSkeletalAnimator);
     Register<graphics::PointLight>(*registry, PointLightId, "PointLight", editor::PointLightUIWidget, CreatePointLight, SerializePointLight, DeserializePointLight);
     Register<graphics::ParticleEmitter>(*registry, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter, SerializeParticleEmitter, DeserializeParticleEmitter);

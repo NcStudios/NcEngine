@@ -4,6 +4,7 @@
 #include "config/Config.h"
 #include "ecs/Ecs.h"
 #include "ecs/View.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "graphics/GraphicsUtilities.h"
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
@@ -13,10 +14,6 @@
 #include "window/WindowImpl.h"
 
 #include "optick.h"
-
-#ifdef NC_DEBUG_RENDERING_ENABLED
-#include "graphics/debug/DebugRenderer.h"
-#endif
 
 namespace
 {
@@ -30,11 +27,6 @@ namespace
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
-
-        /** @todo Debug renderer is becoming a problem... */
-        #ifdef NC_DEBUG_RENDERING_ENABLED
-        nc::graphics::DebugRenderer debugRenderer;
-        #endif
     };
 } // anonymous namespace
 
@@ -144,7 +136,7 @@ namespace nc::graphics
 
         auto cameraState = m_cameraSystem.Execute(m_registry);
         m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()), *m_assetModule);
-        auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
+        auto widgetState = m_widgetSystem.Execute(m_registry->GetEcs());
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},

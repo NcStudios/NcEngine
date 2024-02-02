@@ -268,14 +268,6 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
 
 void ColliderUIWidget(physics::Collider& collider)
 {
-    /**
-     * Collider Model doesn't update/submit unless we tell it to
-     * @todo #446 Clean up once editor manages collider selection state.
-    */
-#ifdef NC_EDITOR_ENABLED
-    collider.SetEditorSelection(true);
-#endif
-
     using namespace std::string_view_literals;
     constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
     ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);

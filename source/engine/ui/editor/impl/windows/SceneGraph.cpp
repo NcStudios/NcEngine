@@ -3,6 +3,7 @@
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/View.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace
@@ -17,6 +18,42 @@ namespace nc::ui::editor
 {
 void SceneGraph::Draw(ecs::Ecs world)
 {
+    {
+        static bool _ = [&]()
+        {
+            // TODO: move this to c'tor once other PR is merged
+            // TODO: should go in 'Internal' bucket
+            // TODO: clear selected entity on editor close, or at least clear wireframe
+            m_selectedEntityWireframe = world.Emplace<Entity>({
+                .tag = "SelectedEntity",
+                .flags = Entity::Flags::Persistent |
+                         Entity::Flags::Internal |
+                         Entity::Flags::NoSerialize
+            });
+
+            world.Emplace<graphics::WireframeRenderer>(
+                m_selectedEntityWireframe,
+                Entity::Null(),
+                graphics::WireframeSource::Renderer
+            );
+
+            m_selectedColliderWireframe = world.Emplace<Entity>({
+                .tag = "SelectedCollider",
+                .flags = Entity::Flags::Persistent |
+                         Entity::Flags::Internal |
+                         Entity::Flags::NoSerialize
+            });
+
+            world.Emplace<graphics::WireframeRenderer>(
+                m_selectedColliderWireframe,
+                Entity::Null(),
+                graphics::WireframeSource::Collider
+            );
+
+            return true;
+        }();
+    }
+
     EnsureSelection(world);
     m_tagFilter.Draw("search");
 
@@ -24,7 +61,7 @@ void SceneGraph::Draw(ecs::Ecs world)
     {
         if (IsWindowBackgroundClicked())
         {
-            m_selectedEntity = Entity::Null();
+            SetEntitySelection(world, Entity::Null());
         }
 
         GraphContextMenu(world);
@@ -32,11 +69,30 @@ void SceneGraph::Draw(ecs::Ecs world)
     });
 }
 
+void SceneGraph::SetEntitySelection(ecs::Ecs world, Entity entity)
+{
+    m_selectedEntity = entity;
+    auto entityRenderer = world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe);
+    NC_ASSERT(entityRenderer, "Editor's selected entity renderer is gone");
+    entityRenderer->target = m_selectedEntity;
+
+    auto colliderRenderer = world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe);
+    NC_ASSERT(colliderRenderer, "Editor's selected collider renderer is gone");
+    if (!entity.Valid() || !world.Contains<physics::Collider>(entity))
+    {
+        colliderRenderer->target = Entity::Null();
+    }
+    else
+    {
+        colliderRenderer->target = m_selectedEntity;
+    }
+}
+
 void SceneGraph::EnsureSelection(ecs::Ecs world)
 {
     if (m_selectedEntity.Valid() && !world.Contains<Entity>(m_selectedEntity))
     {
-        m_selectedEntity = Entity::Null();
+        SetEntitySelection(world, Entity::Null());
     }
 }
 
@@ -66,11 +122,16 @@ void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& t
 
     if (ImGui::IsItemClicked())
     {
-        m_selectedEntity = entity;
+        SetEntitySelection(world, entity);
     }
     else if (ImGui::BeginPopupContextItem())
     {
-        m_selectedEntity = EntityContextMenu(entity, world);
+        const auto selectedEntityFromContext = EntityContextMenu(entity, world);
+        if (selectedEntityFromContext != m_selectedEntity)
+        {
+            SetEntitySelection(world, selectedEntityFromContext);
+        }
+
         ImGui::EndPopup();
     }
 
@@ -96,11 +157,11 @@ void SceneGraph::GraphContextMenu(ecs::Ecs world)
     if (ImGui::BeginPopupContextWindow())
     {
         if (ImGui::Selectable("New Entity"))
-            m_selectedEntity = world.Emplace<Entity>(EntityInfo{});
+            SetEntitySelection(world, world.Emplace<Entity>(EntityInfo{}));
         else if (ImGui::Selectable("New Static Entity"))
-            m_selectedEntity = world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static});
+            SetEntitySelection(world, world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static}));
         else
-            m_selectedEntity = Entity::Null();
+            SetEntitySelection(world, Entity::Null());
 
         ImGui::EndPopup();
     }

@@ -22,8 +22,11 @@ class SceneGraph
 
     private:
         Entity m_selectedEntity = Entity::Null();
+        Entity m_selectedEntityWireframe = Entity::Null();
+        Entity m_selectedColliderWireframe = Entity::Null();
         ImGuiTextFilter m_tagFilter;
 
+        void SetEntitySelection(ecs::Ecs world, Entity entity);
         void EnsureSelection(ecs::Ecs world);
         auto PassFilter(Tag& tag) -> bool;
         void Graph(ecs::Ecs world);

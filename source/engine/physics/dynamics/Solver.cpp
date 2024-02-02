@@ -1,11 +1,8 @@
 #include "Solver.h"
 #include "ecs/Registry.h"
-#include "graphics/debug/DebugRenderer.h"
 #include "physics/PhysicsConstants.h"
 
 #include <cassert>
-
-#define USE_DEBUG_RENDERING 0
 
 using namespace DirectX;
 
@@ -338,11 +335,6 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         for(const auto& contact : manifold.Contacts())
         {
-            #if USE_DEBUG_RENDERING
-            graphics::DebugRenderer::AddPoint(contact.worldPointA);
-            graphics::DebugRenderer::AddPoint(contact.worldPointB);
-            #endif
-
             m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB));
         }
     }
