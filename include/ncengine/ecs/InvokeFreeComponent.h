@@ -22,22 +22,22 @@ struct InvokeFreeComponent
     /** FrameLogic call operator */
     void operator()(Entity self, Registry* registry, float dt) const
     {
-        if(auto* component = registry->Get<T>(self))
-            component->Run(self, registry, dt);
+        if(registry->Contains<T>(self))
+            registry->Get<T>(self)->Run(self, registry, dt);
     }
 
     /** FixedLogic call operator */
     void operator()(Entity self, Registry* registry) const
     {
-        if(auto* component = registry->Get<T>(self))
-            component->Run(self, registry);
+        if(registry->Contains<T>(self))
+            registry->Get<T>(self)->Run(self, registry);
     }
 
     /** CollisionLogic call operator */
     void operator()(Entity self, Entity hit, Registry* registry) const
     {
-        if(auto* component = registry->Get<T>(self))
-            component->Run(self, hit, registry);
+        if(registry->Contains<T>(self))
+            registry->Get<T>(self)->Run(self, hit, registry);
     }
 };
 } // namespace nc

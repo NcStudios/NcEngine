@@ -51,16 +51,16 @@ class EcsInterface
         /** @brief Emplace a component. */
         template<Component T, class... Args>
             requires PolicyType::template HasAccess<T>
-        auto Emplace(Entity entity, Args&&... args) -> T*
+        auto Emplace(Entity entity, Args&&... args) -> T&
         {
             NC_ASSERT(Contains<Entity>(entity), "Bad entity");
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                return Get<detail::FreeComponentGroup>(entity)->template Add<T>(entity, std::forward<Args>(args)...);
+                return Get<detail::FreeComponentGroup>(entity).template Add<T>(entity, std::forward<Args>(args)...);
             }
             else
             {
-                return m_policy.template OnPool<T>([entity, ...args = std::forward<Args>(args)] (auto&& pool) mutable
+                return m_policy.template OnPool<T>([entity, ...args = std::forward<Args>(args)] (auto&& pool) mutable -> T&
                 {
                     return pool.Emplace(entity, std::forward<decltype(args)>(args)...);
                 });
@@ -87,7 +87,7 @@ class EcsInterface
             {
                 return m_policy.template OnPool<detail::FreeComponentGroup>([entity](auto& pool)
                 {
-                    return pool.Get(entity)->template Remove<T>();
+                    return pool.Get(entity).template Remove<T>();
                 });
             }
             else
@@ -102,16 +102,16 @@ class EcsInterface
         /** @brief Get a component. */
         template<Component T>
             requires PolicyType::template HasAccess<T>
-        auto Get(Entity entity) -> T*
+        auto Get(Entity entity) -> T&
         {
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto bag = Get<detail::FreeComponentGroup>(entity);
-                return bag ? bag->template Get<T>() : nullptr;
+                auto& bag = Get<detail::FreeComponentGroup>(entity);
+                return bag.template Get<T>();
             }
             else
             {
-                return m_policy.template OnPool<T>([entity](auto&& pool)
+                return m_policy.template OnPool<T>([entity](auto&& pool) -> T&
                 {
                     return pool.Get(entity);
                 });
@@ -121,16 +121,16 @@ class EcsInterface
         /** @brief Get a component. */
         template<Component T>
             requires PolicyType::template HasAccess<T>
-        auto Get(Entity entity) const -> const T*
+        auto Get(Entity entity) const -> const T&
         {
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto bag = Get<detail::FreeComponentGroup>(entity);
-                return bag ? bag->template Get<T>() : nullptr;
+                auto& bag = Get<detail::FreeComponentGroup>(entity);
+                return bag.template Get<T>();
             }
             else
             {
-                return m_policy.template OnPool<T>([entity](auto&& pool)
+                return m_policy.template OnPool<T>([entity](auto&& pool) -> const T&
                 {
                     return pool.Get(entity);
                 });
@@ -190,8 +190,11 @@ class EcsInterface
         {
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto bag = Get<detail::FreeComponentGroup>(entity);
-                return bag ? bag->template Contains<T>() : false;
+                if (!Contains<detail::FreeComponentGroup>(entity))
+                    return false;
+
+                const auto& bag = Get<detail::FreeComponentGroup>(entity);
+                return bag.template Contains<T>();
             }
             else
             {
@@ -208,11 +211,11 @@ class EcsInterface
         template<bool IsRoot>
         auto RemoveNode(Entity entity) -> bool
         {
-            auto transform = Get<Transform>(entity);
+            auto& transform = Get<Transform>(entity);
             if constexpr(IsRoot)
-                transform->SetParent(Entity::Null());
+                transform.SetParent(Entity::Null());
 
-            for (auto child : transform->Children())
+            for (auto child : transform.Children())
                 RemoveNode<false>(child);
 
             m_policy.template OnPool<Entity>([entity](auto&& p) { p.Remove(entity); });

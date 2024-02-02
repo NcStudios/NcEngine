@@ -106,10 +106,14 @@ inline void Spawner::Spawn(Registry* registry, unsigned count)
 
         registry->Add<FrameLogic>(handle, [](Entity self, Registry* reg, float dt)
         {
-            if(auto* translation = reg->Get<ConstantTranslation>(self))
-                translation->Run(self, reg, dt);
-            if(auto* rotation = reg->Get<ConstantRotation>(self))
-                rotation->Run(self, reg, dt);
+            if(reg->Contains<ConstantTranslation>(self))
+            {
+                reg->Get<ConstantTranslation>(self)->Run(self, reg, dt);
+            }
+            if(reg->Contains<ConstantRotation>(self))
+            {
+                reg->Get<ConstantRotation>(self)->Run(self, reg, dt);
+            }
         });
 
         if(m_extension)
