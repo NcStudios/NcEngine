@@ -29,8 +29,8 @@ class Lighting
         void Clear();
 
     private:
-        void OnAddPointLightConnection();
-        void OnRemovePointLightConnection();
+        void OnCommitPointLight();
+        void OnRemovePointLight();
         auto CreateShadowMappingPass(nc::Vector2 dimensions, uint32_t index) -> nc::graphics::RenderPass;
 
         Registry* m_registry;
@@ -41,9 +41,9 @@ class Lighting
         ShaderDescriptorSets* m_shaderDescriptorSets;
         ShaderResources* m_shaderResources;
         Vector2 m_dimensions;
-        Connection<PointLight&> m_onAddPointLightConnection;
+        Connection<PointLight&> m_onCommitPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;
         uint32_t m_numShadowCasters;
         std::vector<std::string> m_ids;
 };
-}
+} // namespace nc::graphics

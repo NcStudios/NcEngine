@@ -60,7 +60,7 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<ecs::ComponentRegistry
     Register<graphics::MeshRenderer>(*registry, maxEntities, MeshRendererId, "MeshRenderer", editor::MeshRendererUIWidget, CreateMeshRenderer, SerializeMeshRenderer, DeserializeMeshRenderer);
     Register<graphics::ToonRenderer>(*registry, maxEntities, ToonRendererId, "ToonRenderer", editor::ToonRendererUIWidget, CreateToonRenderer, SerializeToonRenderer, DeserializeToonRenderer);
     Register<graphics::SkeletalAnimator>(*registry, maxEntities, SkeletalAnimatorId, "SkeletalAnimator", editor::SkeletalAnimatorUIWidget, CreateSkeletalAnimator);
-    Register<graphics::PointLight>(*registry, maxEntities, PointLightId, "PointLight", editor::PointLightUIWidget);//, nullptr, SerializePointLight, DeserializePointLight);
+    Register<graphics::PointLight>(*registry, maxEntities, PointLightId, "PointLight", editor::PointLightUIWidget, CreatePointLight, SerializePointLight, DeserializePointLight);
     Register<graphics::ParticleEmitter>(*registry, maxEntities, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter, SerializeParticleEmitter, DeserializeParticleEmitter);
     Register<physics::Collider>(*registry, maxEntities, ColliderId, "Collider", editor::ColliderUIWidget, CreateCollider, SerializeCollider, DeserializeCollider);
     Register<physics::ConcaveCollider>(*registry, maxEntities, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget, nullptr, SerializeConcaveCollider, DeserializeConcaveCollider);

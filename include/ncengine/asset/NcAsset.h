@@ -4,8 +4,8 @@
  */
 #pragma once
 
-#include "module/Module.h"
-#include "utility/Signal.h"
+#include "ncengine/module/Module.h"
+#include "ncengine/utility/Signal.h"
 
 #include "ncasset/AssetType.h"
 

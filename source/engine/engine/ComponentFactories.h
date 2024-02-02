@@ -9,6 +9,7 @@ auto CreateCollisionLogic(Entity entity, void*) -> CollisionLogic;
 auto CreateFixedLogic(Entity entity, void*) -> FixedLogic;
 auto CreateFrameLogic(Entity entity, void*) -> FrameLogic;
 auto CreateParticleEmitter(Entity entity, void*) -> graphics::ParticleEmitter;
+auto CreatePointLight(Entity entity, void*) -> graphics::PointLight;
 auto CreateMeshRenderer(Entity entity, void*) -> graphics::MeshRenderer;
 auto CreateToonRenderer(Entity entity, void*) -> graphics::ToonRenderer;
 auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator;

@@ -4,6 +4,7 @@
 #include "config/ConfigInternal.h"
 #include "config/Version.h"
 #include "input/InputInternal.h"
+#include "scene/NcScene.h"
 #include "utility/Log.h"
 
 #include "optick.h"
@@ -50,7 +51,6 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
       m_legacyRegistry{*m_registry},
       m_modules{BuildModuleRegistry(&m_legacyRegistry, &m_window, config)},
       m_executor{task::BuildContext(m_modules.GetAllModules())},
-      m_sceneManager{},
       m_isRunning{false}
 {
 }
@@ -65,8 +65,9 @@ void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
 {
     NC_LOG_INFO("Starting engine");
     m_isRunning = true;
-    QueueSceneChange(std::move(initialScene));
-    LoadScene();
+    auto ncScene = m_modules.Get<NcScene>();
+    ncScene->Queue(std::move(initialScene));
+    ncScene->LoadQueuedScene(m_registry.get(), m_modules);
     Run();
 }
 
@@ -89,16 +90,6 @@ void NcEngineImpl::Shutdown() noexcept
     }
 }
 
-bool NcEngineImpl::IsSceneChangeQueued() const noexcept
-{
-    return m_sceneManager.IsSceneChangeQueued();
-}
-
-void NcEngineImpl::QueueSceneChange(std::unique_ptr<Scene> scene)
-{
-    m_sceneManager.QueueSceneChange(std::move(scene));
-}
-
 auto NcEngineImpl::GetComponentRegistry() noexcept -> ecs::ComponentRegistry&
 {
     return *m_registry;
@@ -115,20 +106,10 @@ void NcEngineImpl::RebuildTaskGraph()
     m_executor.SetContext(task::BuildContext(m_modules.GetAllModules()));
 }
 
-void NcEngineImpl::LoadScene()
-{
-    for (auto& module : m_modules.GetAllModules())
-    {
-        module->OnBeforeSceneLoad();
-    }
-
-    m_sceneManager.LoadQueuedScene(&m_legacyRegistry, ModuleProvider{&m_modules});
-}
-
 void NcEngineImpl::Clear()
 {
     NC_LOG_TRACE("Clearing engine state");
-    m_sceneManager.UnloadActiveScene();
+    m_modules.Get<NcScene>()->UnloadActiveScene();
     for (auto& module : m_modules.GetAllModules())
     {
         module->Clear();
@@ -139,16 +120,18 @@ void NcEngineImpl::Clear()
 
 void NcEngineImpl::Run()
 {
+    auto* ncScene = m_modules.Get<NcScene>();
+
     while(m_isRunning)
     {
         OPTICK_FRAME("Main Thread");
         input::Flush();
         m_window.ProcessSystemMessages();
         m_executor.Run();
-        if (IsSceneChangeQueued())
+        if (ncScene->IsTransitionScheduled())
         {
             Clear();
-            LoadScene();
+            ncScene->LoadQueuedScene(m_registry.get(), m_modules);
         }
     }
 
