@@ -112,7 +112,7 @@ class Registry : public StableAddress
             requires StoragePolicy<T>::EnableOnCommitCallbacks
         auto OnCommit() -> Signal<T&>&
         {
-            return m_impl.GetPool<T>().OnCommit();
+            return m_impl->GetPool<T>().OnCommit();
         }
 
         template<PooledComponent T>

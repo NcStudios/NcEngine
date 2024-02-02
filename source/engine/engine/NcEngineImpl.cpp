@@ -67,7 +67,7 @@ void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
     m_isRunning = true;
     auto ncScene = m_modules.Get<NcScene>();
     ncScene->Queue(std::move(initialScene));
-    ncScene->LoadQueuedScene(m_registry.get(), m_modules);
+    ncScene->LoadQueuedScene(&m_legacyRegistry, m_modules);
     Run();
 }
 
@@ -131,7 +131,7 @@ void NcEngineImpl::Run()
         if (ncScene->IsTransitionScheduled())
         {
             Clear();
-            ncScene->LoadQueuedScene(m_registry.get(), m_modules);
+            ncScene->LoadQueuedScene(&m_legacyRegistry, m_modules);
         }
     }
 
