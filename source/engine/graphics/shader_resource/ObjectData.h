@@ -9,8 +9,6 @@ namespace nc::graphics
 struct ObjectData
 {
     DirectX::XMMATRIX model;
-    DirectX::XMMATRIX modelView;
-    DirectX::XMMATRIX viewProjection;
 
     uint32_t materialParameterA; // Todo: Make this more generic for materials
     uint32_t materialParameterB; // Todo: Make this more generic for materials

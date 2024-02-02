@@ -4,12 +4,12 @@
 
 namespace nc::graphics
 {
-EnvironmentSystem::EnvironmentSystem(Signal<const EnvironmentData&>&& backendChannel)
+EnvironmentSystem::EnvironmentSystem(Signal<const GlobalData&>&& backendChannel)
     : m_backendChannel{std::move(backendChannel)},
       m_environmentData{},
       m_useSkybox{false}
 {
-    m_environmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
+    m_environmentData.cameraWorldPos = Vector3{-0.0f, 4.0f, -6.4f};
     m_environmentData.skyboxTextureIndex = 0u;
 }
 
@@ -22,7 +22,8 @@ void EnvironmentSystem::SetSkybox(const std::string& path)
 
 auto EnvironmentSystem::Execute(const CameraState& cameraState) -> EnvironmentState
 {
-    m_environmentData.cameraWorldPosition = cameraState.position;
+    m_environmentData.cameraViewProjMat = cameraState.view * cameraState.projection;
+    m_environmentData.cameraWorldPos = cameraState.position;
     m_backendChannel.Emit(m_environmentData);
     return EnvironmentState{m_useSkybox};
 }

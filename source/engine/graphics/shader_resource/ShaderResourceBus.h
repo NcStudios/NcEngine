@@ -4,7 +4,7 @@
 
 namespace nc::graphics
 {
-struct EnvironmentData;
+struct GlobalData;
 struct ObjectData;
 struct PointLightData;
 struct SkeletalAnimationData;
@@ -13,7 +13,7 @@ struct SkeletalAnimationData;
  *         systems to be picked up by API-specific backend handlers. */
 struct ShaderResourceBus
 {
-    Signal<const EnvironmentData&> environmentChannel;
+    Signal<const GlobalData&> environmentChannel;
     Signal<const std::vector<ObjectData>&> objectChannel;
     Signal<const std::vector<PointLightData>&> pointLightChannel;
     Signal<const std::vector<SkeletalAnimationData>&> skeletalAnimationChannel;

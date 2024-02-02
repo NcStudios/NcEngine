@@ -6,16 +6,16 @@
 
 namespace nc::graphics
 {
-struct EnvironmentData;
+struct GlobalData;
 
-class EnvironmentDataShaderResource : public IShaderResource<EnvironmentData>
+class GlobalDataShaderResource : public IShaderResource<GlobalData>
 {
     public:
-        EnvironmentDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors);
-        ~EnvironmentDataShaderResource() noexcept;
+        GlobalDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors);
+        ~GlobalDataShaderResource() noexcept;
 
         void Initialize() override;
-        void Update(const std::vector<EnvironmentData>& data) override;
+        void Update(const std::vector<GlobalData>& data) override;
         void Reset() override;
 
     private:

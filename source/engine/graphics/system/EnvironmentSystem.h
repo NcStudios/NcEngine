@@ -15,7 +15,7 @@ struct EnvironmentState
 class EnvironmentSystem
 {
     public:
-        EnvironmentSystem(Signal<const EnvironmentData&>&& backendChannel);
+        EnvironmentSystem(Signal<const GlobalData&>&& backendChannel);
 
         void SetSkybox(const std::string& path);
         void Clear();
@@ -23,8 +23,8 @@ class EnvironmentSystem
         auto Execute(const CameraState& cameraState) -> EnvironmentState;
 
     private:
-        Signal<const EnvironmentData&> m_backendChannel;
-        EnvironmentData m_environmentData;
+        Signal<const GlobalData&> m_backendChannel;
+        GlobalData m_environmentData;
         bool m_useSkybox;
 };
 } // namespace nc::graphics

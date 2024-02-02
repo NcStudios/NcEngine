@@ -38,7 +38,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
                            const SkeletalAnimationSystemState& skeletalAnimationState) -> ObjectState
 {
     OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
-    const auto viewProjection = cameraState.view * cameraState.projection;
+
     auto objectData = std::vector<ObjectData>{};
     objectData.reserve(pbrRenderers.size_upper_bound() + toonRenderers.size_upper_bound());
     auto frontendState = ObjectState{};
@@ -55,7 +55,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
+        objectData.emplace_back(modelMatrix, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
         frontendState.pbrMeshes.push_back(renderer->GetMeshView());
     }
 
@@ -71,7 +71,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
+        objectData.emplace_back(modelMatrix, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
@@ -80,7 +80,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     {
         auto skyboxMatrix = DirectX::XMMatrixScaling(200.0f, 200.0f, 200.0f);
         skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraState.position), DirectX::g_XMIdentityR3);
-        objectData.emplace_back(skyboxMatrix, skyboxMatrix * cameraState.view, viewProjection, 0, 0, 0, 0);
+        objectData.emplace_back(skyboxMatrix, 0, 0, 0, 0);
         frontendState.skyboxInstanceIndex = static_cast<uint32_t>(objectData.size() - 1);
     }
 

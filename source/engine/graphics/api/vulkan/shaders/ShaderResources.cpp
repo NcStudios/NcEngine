@@ -14,11 +14,11 @@ auto Connect(nc::Signal<const std::vector<nc::graphics::PointLightData>&>& signa
     return signal.Connect([manager](auto&& data) { manager->Update(data); });
 }
 
-auto Connect(nc::Signal<const nc::graphics::EnvironmentData&>& signal, nc::graphics::EnvironmentDataShaderResource* manager)
+auto Connect(nc::Signal<const nc::graphics::GlobalData&>& signal, nc::graphics::GlobalDataShaderResource* manager)
 {
     return signal.Connect([manager](auto&& data)
     {
-        auto buffer = std::vector<nc::graphics::EnvironmentData>{};
+        auto buffer = std::vector<nc::graphics::GlobalData>{};
         buffer.push_back(data);
         manager->Update(buffer);
     });

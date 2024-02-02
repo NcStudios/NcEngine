@@ -4,7 +4,7 @@
 
 namespace nc::graphics
 {
-    EnvironmentDataShaderResource::EnvironmentDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors)
+    GlobalDataShaderResource::GlobalDataShaderResource(uint32_t bindingSlot, GpuAllocator* allocator, ShaderDescriptorSets* descriptors)
         : m_allocator{allocator},
           m_descriptors{descriptors},
           m_bindingSlot{bindingSlot}
@@ -12,18 +12,18 @@ namespace nc::graphics
         Initialize();
     }
 
-    EnvironmentDataShaderResource::~EnvironmentDataShaderResource() noexcept
+    GlobalDataShaderResource::~GlobalDataShaderResource() noexcept
     {
     }
 
-    void EnvironmentDataShaderResource::Initialize()
+    void GlobalDataShaderResource::Initialize()
     {
-        auto initialEnvironmentData = EnvironmentData{};
-        initialEnvironmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
+        auto initialEnvironmentData = GlobalData{};
+        initialEnvironmentData.cameraWorldPos = Vector3{-0.0f, 4.0f, -6.4f};
         initialEnvironmentData.skyboxTextureIndex = std::numeric_limits<uint32_t>::max();
-        auto dataVector = std::vector<EnvironmentData>{};
+        auto dataVector = std::vector<GlobalData>{};
         dataVector.push_back(initialEnvironmentData);
-        m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_allocator, static_cast<const void*>(&dataVector.back()), static_cast<uint32_t>(sizeof(EnvironmentData) * dataVector.size()));
+        m_environmentDataBuffer = std::make_unique<UniformBuffer>(m_allocator, static_cast<const void*>(&dataVector.back()), static_cast<uint32_t>(sizeof(GlobalData) * dataVector.size()));
 
         m_descriptors->RegisterDescriptor
         (
@@ -39,19 +39,19 @@ namespace nc::graphics
         (
             DescriptorScope::Global,
             m_environmentDataBuffer->GetBuffer(),
-            sizeof(EnvironmentData),
+            sizeof(GlobalData),
             1,
             vk::DescriptorType::eUniformBuffer,
             m_bindingSlot
         );
     }
 
-    void EnvironmentDataShaderResource::Update(const std::vector<EnvironmentData>& data)
+    void GlobalDataShaderResource::Update(const std::vector<GlobalData>& data)
     {
-       m_environmentDataBuffer->Bind(static_cast<const void*>(&data.at(0)), static_cast<uint32_t>(sizeof(EnvironmentData) * data.size()));
+       m_environmentDataBuffer->Bind(static_cast<const void*>(&data.at(0)), static_cast<uint32_t>(sizeof(GlobalData) * data.size()));
     }
 
-    void EnvironmentDataShaderResource::Reset()
+    void GlobalDataShaderResource::Reset()
     {
         Initialize();
     }

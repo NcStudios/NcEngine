@@ -97,7 +97,7 @@ void VulkanGraphics::Clear() noexcept
     ShaderResourceService<ObjectData>::Get()->Reset();
     ShaderResourceService<PointLightData>::Get()->Reset();
     ShaderResourceService<ShadowMap>::Get()->Reset();
-    ShaderResourceService<EnvironmentData>::Get()->Reset();
+    ShaderResourceService<GlobalData>::Get()->Reset();
 }
 
 bool VulkanGraphics::FrameBegin()
