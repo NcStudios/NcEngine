@@ -10,7 +10,11 @@ class RenderingBenchmark : public Scene
 {
     public:
         RenderingBenchmark(SampleUI* ui);
+        ~RenderingBenchmark() noexcept;
         void Load(Registry* registry, ModuleProvider modules) override;
         void Unload() override;
+
+    private:
+        SampleUI* m_sampleUI;
 };
 }

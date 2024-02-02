@@ -10,7 +10,11 @@ class CollisionBenchmark : public Scene
 {
     public:
         CollisionBenchmark(SampleUI* ui);
+        ~CollisionBenchmark() noexcept;
         void Load(Registry* registry, ModuleProvider modules) override;
         void Unload() override;
+
+    private:
+        SampleUI* m_sampleUI;
 };
 }

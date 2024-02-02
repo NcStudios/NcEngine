@@ -39,8 +39,14 @@ void Widget()
 namespace nc::sample
 {
 JareTestScene::JareTestScene(SampleUI* ui)
+    : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
+}
+
+JareTestScene::~JareTestScene() noexcept
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void JareTestScene::Load(Registry* registry, ModuleProvider modules)

@@ -53,8 +53,14 @@ void Widget()
 namespace nc::sample
 {
 SpawnTest::SpawnTest(SampleUI* ui)
+    : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
+}
+
+SpawnTest::~SpawnTest() noexcept
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void SpawnTest::Load(Registry* registry, ModuleProvider modules)
