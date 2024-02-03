@@ -45,6 +45,7 @@ auto BuildModuleRegistry(Registry* registry,
                                                         BuildDefaultAssetMap()));
     moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
                                                               config.graphicsSettings,
+                                                              config.memorySettings,
                                                               moduleRegistry.Get<nc::asset::NcAsset>(),
                                                               registry,
                                                               window));

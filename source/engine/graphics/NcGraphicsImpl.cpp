@@ -42,6 +42,7 @@ namespace nc::graphics
 {
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
+                             const config::MemorySettings& memorySettings,
                              asset::NcAsset* assetModule,
                              Registry* registry,
                              window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
@@ -50,7 +51,7 @@ namespace nc::graphics
         {
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, assetModule, resourceBus, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, assetModule, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, assetModule, std::move(graphicsApi), std::move(resourceBus), window);

@@ -16,25 +16,32 @@ class ShaderDescriptorSets;
 class Swapchain;
 
 inline static const std::string LitPassId = "Lit Pass";
+inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
 
 class RenderGraph
 {
     public:
-        RenderGraph(const Device& device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions);
+        RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, uint32_t maxLights);
 
         void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
-        void Resize(const Device& device, const Vector2 &dimensions);
+        void Resize(const Vector2 &dimensions);
 
-        auto GetRenderPass(const std::string& uid) -> const RenderPass&;
-        void AddRenderPass(RenderPass renderPass);
-        void RemoveRenderPass(const std::string& uid);
+        auto GetShadowPasses() const noexcept -> const std::vector<RenderPass>& { return m_shadowMappingPasses; };
+        auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass; };
+        void IncrementShadowPassCount();
+        void DecrementShadowPassCount();
+        void ClearShadowPasses();
 
     private:
+        const Device* m_device;
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
         ShaderDescriptorSets* m_descriptorSets;
-        std::vector<RenderPass> m_renderPasses;
+        std::vector<RenderPass> m_shadowMappingPasses;
+        RenderPass m_litPass;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
+        uint32_t m_activeShadowMappingPasses;
+        uint32_t m_maxLights;
 };
-} // namespace nc
+} // namespace nc::graphics
