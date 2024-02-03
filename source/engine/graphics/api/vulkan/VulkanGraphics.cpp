@@ -133,6 +133,7 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     // Executes the command buffer to render to the image
     m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
     currentFrame->RenderFrame(m_device->VkGraphicsQueue());
+    m_device->VkDevice().waitIdle();
 
     // Returns the image to the swapchain
     bool isSwapChainValid = true;
