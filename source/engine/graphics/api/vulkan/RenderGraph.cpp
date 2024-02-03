@@ -206,11 +206,9 @@ void RenderGraph::Resize(const Vector2& dimensions)
 
 void RenderGraph::IncrementShadowPassCount()
 {
+    NC_ASSERT(m_activeShadowMappingPasses < m_maxLights, "Tried to add a light source when max lights are registered.");
+    m_shadowMappingPasses[m_activeShadowMappingPasses].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, m_activeShadowMappingPasses);
     m_activeShadowMappingPasses++;
-    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
-    {
-        m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
-    }
 }
 
 void RenderGraph::ClearShadowPasses()
