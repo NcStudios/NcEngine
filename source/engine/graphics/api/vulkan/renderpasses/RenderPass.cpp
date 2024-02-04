@@ -93,8 +93,13 @@ RenderPass::RenderPass(vk::Device device,
 
 void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
 {
-    RenderPass::UnregisterTechnique<ShadowMappingTechnique>();
-    m_techniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+}
+
+void RenderPass::UnregisterShadowMappingTechnique()
+{
+    if (!m_shadowMappingTechniques.empty())
+        m_shadowMappingTechniques.pop_back();
 }
 
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
@@ -113,7 +118,16 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
 
 void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const
 {
-    for (const auto &technique : m_techniques)
+    for (const auto &technique : m_shadowMappingTechniques)
+    {
+        if (!technique->CanBind(frameData)) continue;
+        technique->Bind(cmd);
+
+        if (!technique->CanRecord(frameData)) continue;
+        technique->Record(cmd, frameData);
+    }
+
+    for (const auto &technique : m_litTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
         technique->Bind(cmd);

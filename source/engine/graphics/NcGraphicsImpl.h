@@ -21,6 +21,7 @@ class Scene;
 namespace config
 {
 struct GraphicsSettings;
+struct MemorySettings;
 struct ProjectSettings;
 } // namespace config
 
@@ -36,6 +37,7 @@ struct ShaderResourceBus;
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
+                         const config::MemorySettings& memorySettings,
                          ModuleProvider modules,
                          Registry* registry,
                          window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
