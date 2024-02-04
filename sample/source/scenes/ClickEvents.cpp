@@ -52,8 +52,14 @@ void Widget()
 namespace nc::sample
 {
 ClickEvents::ClickEvents(SampleUI* ui)
+    : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
+}
+
+ClickEvents::~ClickEvents() noexcept
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void ClickEvents::Load(Registry* registry, ModuleProvider modules)

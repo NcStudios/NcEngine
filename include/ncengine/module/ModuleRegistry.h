@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Module.h"
+#include "ncengine/type/StableAddress.h"
 
 #include "ncutility/NcError.h"
 
@@ -14,7 +15,7 @@
 
 namespace nc
 {
-class ModuleRegistry
+class ModuleRegistry : public StableAddress
 {
     public:
         /** @brief Add a new module to the registry. Overwrites any existing module of the same type. */
