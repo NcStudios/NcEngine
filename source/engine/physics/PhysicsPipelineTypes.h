@@ -125,23 +125,27 @@ struct NarrowPhysicsResult
     std::vector<Contact> contacts = {};
 };
 
-/** A persistent list of contact points for a pair. Retains at most four points,
- *  prioritizing those that maximize depth and area. */
+/**
+ * A persistent list of contact points for a pair. Retains at most four points,
+ * prioritizing those that maximize depth and area. Implementation adapted from
+ * Bullet Physics.
+ */
 class Manifold
 {
     static constexpr size_t MaxPointCount = 4u;
 
     public:
-        Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact);
+        explicit Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact) noexcept
+            : m_event{a, b, type}, m_contacts{contact} {}
 
         void AddContact(const Contact& contact);
         void UpdateWorldPoints(const Registry* registry);
 
         auto DeepestContact() const -> const Contact&;
-        auto Event() const -> const NarrowEvent& { return m_event; }
-        auto Event() -> NarrowEvent& { return m_event; }
-        auto Contacts() const -> std::span<const Contact> { return m_contacts; }
-        auto Contacts() -> std::span<Contact> { return m_contacts; }
+        auto Event() const noexcept -> const NarrowEvent& { return m_event; }
+        auto Event() noexcept -> NarrowEvent& { return m_event; }
+        auto Contacts() const noexcept -> std::span<const Contact> { return m_contacts; }
+        auto Contacts() noexcept -> std::span<Contact> { return m_contacts; }
 
     private:
         NarrowEvent m_event;

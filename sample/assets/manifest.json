@@ -66,6 +66,14 @@
         {
             "sourcePath": "raw/model/cave_ceiling.fbx",
             "assetName": "mesh/cave_ceiling"
+        },
+        {
+            "sourcePath": "raw/model/bus.fbx",
+            "assetName": "mesh/bus"
+        },
+        {
+            "sourcePath": "raw/model/bus_car.fbx",
+            "assetName": "mesh/bus_car"
         }
     ],
     "skeletal-animation": [
@@ -280,6 +288,23 @@
         {
             "sourcePath": "raw/image/token/Roughness.png",
             "assetName": "texture/token/Roughness"
+        },
+
+        {
+            "sourcePath": "raw/image/line/hatch.jpg",
+            "assetName": "texture/line/hatch"
+        },
+        {
+            "sourcePath": "raw/image/line/overlay.png",
+            "assetName": "texture/line/overlay"
+        },
+        {
+            "sourcePath": "raw/image/steve/bus_base_color.png",
+            "assetName": "texture/steve/bus_base_color"
+        },
+        {
+            "sourcePath": "raw/image/steve/bus_car_base_color.png",
+            "assetName": "texture/steve/bus_car_base_color"
         }
     ]
 }

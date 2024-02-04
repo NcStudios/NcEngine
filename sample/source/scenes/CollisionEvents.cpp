@@ -94,8 +94,8 @@ void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
     auto ground = prefab::Create(registry, prefab::Resource::CubeRed, {.position = Vector3{0.0f, -1.5f, 0.0f}, .scale = Vector3{25.0f, 1.0f, 25.0f}, .tag = "Ground", .flags = Entity::Flags::Static});
     registry->Add<Collider>(ground, BoxProperties{}, false);
 
-    auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
-    registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
+    // auto bigRedSphere = prefab::Create(registry, prefab::Resource::SphereRed, {.position = Vector3{-4.5f, 0.0f, 5.0f}, .scale = Vector3::Splat(3.0f), .tag = "Big Red Sphere", .flags = Entity::Flags::Static});
+    // registry->Add<Collider>(bigRedSphere, SphereProperties{}, false);
 
     modules.Get<graphics::NcGraphics>()->SetSkybox(asset::DefaultSkyboxCubeMap);
 }

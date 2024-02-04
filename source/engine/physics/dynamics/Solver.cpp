@@ -3,9 +3,12 @@
 #include "graphics/debug/DebugRenderer.h"
 #include "physics/PhysicsConstants.h"
 
+#include "optick.h"
+
 #include <cassert>
 
-#define USE_DEBUG_RENDERING 0
+// move to phys constants
+#define USE_DEBUG_RENDERING 1
 
 using namespace DirectX;
 
@@ -29,21 +32,23 @@ auto ClampMu(float newMu, float extent, float* totalMu) -> float;
 XMVECTOR ComputeLinearVelocity(FXMVECTOR jNorm, FXMVECTOR jTan, FXMVECTOR jBit, float invMass, float lambda, float muTangent, float muBitangent)
 {
     return XMVectorScale(jNorm, invMass * lambda) +
-            XMVectorScale(jTan, invMass * muTangent) +
-            XMVectorScale(jBit, invMass * muBitangent);
+           XMVectorScale(jTan, invMass * muTangent) +
+           XMVectorScale(jBit, invMass * muBitangent);
 }
 
 XMVECTOR ComputeAngularVelocity(FXMVECTOR jNorm, FXMVECTOR jTan, FXMVECTOR jBit, FXMMATRIX invInertia, float lambda, float muTangent, float muBitangent)
 {
     return XMVectorScale(XMVector3Transform(jNorm, invInertia), lambda) +
-            XMVectorScale(XMVector3Transform(jTan, invInertia), muTangent) +
-            XMVectorScale(XMVector3Transform(jBit, invInertia), muBitangent);
+           XMVectorScale(XMVector3Transform(jTan, invInertia), muTangent) +
+           XMVectorScale(XMVector3Transform(jBit, invInertia), muBitangent);
 }
 
 /** Compute largrange multipliers for contact constraint (1 for normal, 2 for friction).
  *  Result is returned as a vector: [lNorm, lTan, lBit] */
 Vector3 ComputeLagrangeMultipliers(ContactConstraint& c, const ConstraintMatrix& v, float biasAlongNormal)
 {
+    OPTICK_CATEGORY("ComputeLagrangeMultipliers", Optick::Category::Physics);
+
     /** Compute JV in each direction. */
     XMVECTOR first = g_XMZero;
     if(c.physBodyA)
@@ -99,7 +104,7 @@ float ClampMu(float newMu, float extent, float* totalMu)
 
 void Warmstart(const ContactConstraint& c, PhysicsBody* bodyA, PhysicsBody* bodyB)
 {
-    if(bodyA)
+    if (bodyA && !c.physBodyA->ParentEntity().IsStatic() && !c.physBodyA->IsKinematic())
     {
         bodyA->ApplyVelocities
         (
@@ -108,7 +113,7 @@ void Warmstart(const ContactConstraint& c, PhysicsBody* bodyA, PhysicsBody* body
         );
     }
 
-    if(bodyB)
+    if (bodyB && !c.physBodyB->ParentEntity().IsStatic() && !c.physBodyB->IsKinematic())
     {
         bodyB->ApplyVelocities
         (
@@ -119,11 +124,13 @@ void Warmstart(const ContactConstraint& c, PhysicsBody* bodyA, PhysicsBody* body
 }
 
 ContactConstraint CreateContactConstraint(const Contact& contact,
-                                            Transform* transformA,
-                                            Transform* transformB,
-                                            PhysicsBody* physBodyA,
-                                            PhysicsBody* physBodyB)
+                                          Transform* transformA,
+                                          Transform* transformB,
+                                          PhysicsBody* physBodyA,
+                                          PhysicsBody* physBodyB)
 {
+    OPTICK_CATEGORY("CreateContactConstraint", Optick::Category::Physics);
+
     /** Compute vectors from object centers to contact points */
     auto rA = contact.worldPointA - transformA->Position();
     auto rB = contact.worldPointB - transformB->Position();
@@ -202,6 +209,8 @@ ContactConstraint CreateContactConstraint(const Contact& contact,
 /** Resolve contacts through sequential impulse. */
 void ResolveContactConstraint(ContactConstraint& constraint, float dt)
 {
+    OPTICK_CATEGORY("ResolveContactConstraint", Optick::Category::Physics);
+
     /** V = [Va, Wa, Vb, Wb] */
     ConstraintMatrix v
     {
@@ -232,14 +241,14 @@ void ResolveContactConstraint(ContactConstraint& constraint, float dt)
     /** Compute impulse factors */
     auto [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = ComputeLagrangeMultipliers(constraint, v, bias);
 
-    if(constraint.physBodyA)
+    if(constraint.physBodyA && !constraint.physBodyA->ParentEntity().IsStatic() && !constraint.physBodyA->IsKinematic())
     {
         auto linear = ComputeLinearVelocity(constraint.jNormal.vA(), constraint.jTangent.vA(), constraint.jBitangent.vA(), constraint.invMassA, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
         auto angular = ComputeAngularVelocity(constraint.jNormal.wA(), constraint.jTangent.wA(), constraint.jBitangent.wA(), constraint.invInertiaA, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
         constraint.physBodyA->ApplyVelocities(linear, angular);
     }
 
-    if(constraint.physBodyB)
+    if(constraint.physBodyB && !constraint.physBodyB->ParentEntity().IsStatic() && !constraint.physBodyB->IsKinematic())
     {
         auto linear = ComputeLinearVelocity(constraint.jNormal.vB(), constraint.jTangent.vB(), constraint.jBitangent.vB(), constraint.invMassB, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
         auto angular = ComputeAngularVelocity(constraint.jNormal.wB(), constraint.jTangent.wB(), constraint.jBitangent.wB(), constraint.invInertiaB, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
@@ -249,9 +258,11 @@ void ResolveContactConstraint(ContactConstraint& constraint, float dt)
 
 void ResolvePositionConstraint(PositionConstraint& constraint)
 {
+    OPTICK_CATEGORY("ResolvePositionConstraint", Optick::Category::Physics);
+
     if(constraint.depth < PenetrationSlop)
         return;
-    
+
     const auto mtv = constraint.normal * (constraint.depth * PositionCorrectionFactor);
 
     /** If only one body can move, the mtv is doubled so the total translation is the same
@@ -274,14 +285,16 @@ void ResolvePositionConstraint(PositionConstraint& constraint)
 
 void ResolveJoint(Joint& joint)
 {
-    auto vA = joint.bodyA->GetVelocity();
-    auto wA = joint.bodyA->GetAngularVelocity();
-    auto vB = joint.bodyB->GetVelocity();
-    auto wB = joint.bodyB->GetAngularVelocity();
+    OPTICK_CATEGORY("ResolveJoint", Optick::Category::Physics);
 
-    auto relativeVelocity = vB + XMVector3Cross(wB, joint.rB) - vA - XMVector3Cross(wA, joint.rA);
-    auto softness = XMVectorScale(joint.p, joint.softness);
-    auto impulse = XMVector3Transform(joint.bias - relativeVelocity - softness, joint.m);
+    const auto& vA = joint.bodyA->GetVelocity();
+    const auto& wA = joint.bodyA->GetAngularVelocity();
+    const auto& vB = joint.bodyB->GetVelocity();
+    const auto& wB = joint.bodyB->GetAngularVelocity();
+
+    const auto relativeVelocity = vB + XMVector3Cross(wB, joint.rB) - vA - XMVector3Cross(wA, joint.rA);
+    const auto softness = XMVectorScale(joint.p, joint.softness);
+    const auto impulse = XMVector3Transform(joint.bias - relativeVelocity - softness, joint.m);
     joint.p += impulse;
 
     /** dV = +/- (impulse / mass)
@@ -311,6 +324,12 @@ Solver::Solver(Registry* registry)
 
 void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 {
+    OPTICK_CATEGORY("GenerateConstraints", Optick::Category::Physics);
+
+#if USE_DEBUG_RENDERING
+    graphics::DebugRenderer::ClearPoints();
+#endif
+
     const auto manifoldCount = manifolds.size();
     m_contactConstraints.clear();
     m_contactConstraints.reserve(manifoldCount * 4u);
@@ -350,6 +369,8 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
 void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
 {
+    OPTICK_CATEGORY("ResolveConstraints", Optick::Category::Physics);
+
     for(size_t i = 0u; i < SolverIterations; ++i)
     {
         for(auto& constraint : m_contactConstraints)

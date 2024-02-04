@@ -5,6 +5,7 @@
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -84,6 +85,10 @@ namespace nc::sample::prefab
         graphics::PbrMaterial Table{};
         graphics::PbrMaterial Token{};
         graphics::PbrMaterial Worm{};
+
+        graphics::ToonMaterial FrontCar{};
+        graphics::ToonMaterial Car{};
+        graphics::ToonMaterial ToonBox{};
     } // end namespace material
 
     template<class LoadFunc>
@@ -149,7 +154,11 @@ namespace nc::sample::prefab
             "table\\Roughness.nca",
             "token\\BaseColor.nca",
             "token\\Roughness.nca",
-            "tree\\BaseColor.nca"
+            "tree\\BaseColor.nca",
+            "steve\\bus_base_color.nca",
+            "steve\\bus_car_base_color.nca",
+            "line\\hatch.nca",
+            "line\\overlay.nca"
         };
         LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
 
@@ -174,6 +183,9 @@ namespace nc::sample::prefab
         material::Table      = graphics::PbrMaterial{ "table\\BaseColor.nca",   "table\\Normal.nca",  "table\\Roughness.nca",  asset::DefaultRoughness };
         material::Token      = graphics::PbrMaterial{ "token\\BaseColor.nca",   "token\\Normal.nca",  "token\\Roughness.nca",  asset::DefaultRoughness };
         material::Worm       = graphics::PbrMaterial{ "logo\\BaseColor.nca",    "logo\\Normal.nca",   "logo\\Roughness.nca",   asset::DefaultRoughness };
+
+
+        material::ToonBox   = graphics::ToonMaterial{ "box\\BaseColor.nca", "line\\overlay.nca", "line\\hatch.nca", 4};
     }
 
     template<Resource Resource_t>
@@ -245,7 +257,7 @@ namespace nc::sample::prefab
     template<> Entity Create_<Resource::CubeTextured>(Registry* registry, EntityInfo info)
     {
         auto handle = registry->Add<Entity>(std::move(info));
-        registry->Add<graphics::MeshRenderer>(handle, asset::CubeMesh, material::Box);
+        registry->Add<graphics::ToonRenderer>(handle, asset::CubeMesh, material::ToonBox);
         return handle;
     }
 

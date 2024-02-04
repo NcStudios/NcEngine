@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 namespace nc::physics
 {
 NarrowPhase::NarrowPhase(Registry* registry)
@@ -44,6 +46,8 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
         m_manifoldCache.Add(a, b, type, externalResults.contacts[i]);
     }
 
+    // Should get rid of this removal and the one in notify events. UpdateManifolds should correctly clear
+    // itself always - wackiness should be the result of bad parameters/break distance
     /** @todo There are some questions surrounding this:
      *  - If a manifold isn't 'updated' I would expect UpdateManfiolds() to have removed it.
      *    Why isn't this the case?
@@ -54,6 +58,12 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
     {
         if(cur->Event().state == NarrowEvent::State::Stale)
         {
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+            std::cout << "Remove stale manifold [contact not broken]\n";
+            for (auto& c : cur->Contacts())
+                std::cout << "\t" << c.depth << ", ";
+            std::cout << '\n';
+#endif
             m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
             m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
         }
@@ -149,6 +159,9 @@ void NarrowPhase::NotifyEvents()
             }
             [[unlikely]] case NarrowEvent::State::Stale:
             {
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+                std::cerr << "Clear stale manifold [expected impossible code path]\n";
+#endif
                 /** This isn't expected to be detected here, but just in case. */
                 const auto e1 = cur->Event().first;
                 const auto e2 = cur->Event().second;

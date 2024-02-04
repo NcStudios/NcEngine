@@ -5,12 +5,14 @@
 
 #include <array>
 
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+#include <iostream>
+#endif
+
 namespace
 {
 using namespace nc;
 using namespace nc::physics;
-
-constexpr float SquareContactBreakDistance = physics::ContactBreakDistance * physics::ContactBreakDistance;
 
 constexpr auto CollisionEventTypeLookup = std::array<std::array<physics::CollisionEventType, 6u>, 6u>
 {
@@ -79,12 +81,10 @@ float CalcArea4Points(const Vector3& p0, const Vector3& p1, const Vector3& p2, c
     float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
     return Max(Max(mag0, mag1), mag2);
 }
-
 } // anonymous namespace
 
 namespace nc::physics
 {
-
 ClientObjectProperties::ClientObjectProperties(bool isTrigger, bool noBody, bool isKinematic)
     : m_index{0u}
 {
@@ -106,25 +106,16 @@ auto ClientObjectProperties::EventType(ClientObjectProperties second) const -> C
     return CollisionEventTypeLookup.at(m_index).at(second.m_index);
 }
 
-Manifold::Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact)
-    : m_event{a, b, type},
-        m_contacts{contact}
-{
-}
-
 void Manifold::AddContact(const Contact& contact)
 {
     m_event.state = NarrowEvent::State::Persisting;
-    auto insertIndex = m_contacts.size();
-
-    if(insertIndex < Manifold::MaxPointCount)
+    if (m_contacts.size() < MaxPointCount)
     {
         m_contacts.push_back(contact);
         return;
     }
 
-    insertIndex = SortPoints(contact);
-    m_contacts[insertIndex] = contact;
+    m_contacts[SortPoints(contact)] = contact;
 }
 
 auto Manifold::DeepestContact() const -> const Contact&
@@ -148,8 +139,7 @@ auto Manifold::DeepestContact() const -> const Contact&
 auto Manifold::SortPoints(const Contact& contact) -> size_t
 {
     auto maxPenetrationIndex = std::numeric_limits<size_t>::max();
-
-    float maxPenetration = contact.depth;
+    auto maxPenetration = contact.depth;
     for(size_t i = 0; i < m_contacts.size(); ++i)
     {
         if(m_contacts[i].depth > maxPenetration)
@@ -182,6 +172,9 @@ auto Manifold::SortPoints(const Contact& contact) -> size_t
 
 void Manifold::UpdateWorldPoints(const Registry* registry)
 {
+    if (m_contacts.empty())
+        return;
+
     /** @todo Manifolds can linger after objects are destroyed. The check below prevents problems,
      *  but the caller then has to destroy this manifold upon detecting it is empty. It would be
      *  cleaner to handle this through registy callbacks, but we can't because the BspTree uses the
@@ -195,51 +188,150 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         return;
     }
 
+    using namespace DirectX;
     const auto& aMatrix = transformA->TransformationMatrix();
     const auto& bMatrix = transformB->TransformationMatrix();
+    [[maybe_unused]]bool haveBrokenAlongTangent = false;
+    [[maybe_unused]]auto maxTangentBreakDistance = 0.0f;
+    auto tangentBreakIndex = 0ull;
 
-    size_t removeCount = 0u;
-    size_t removePosition = m_contacts.empty() ? 0u : m_contacts.size() - 1u;
+    // shouldn't need removeCount, can determine from removePosition
+    auto removeCount = 0ull;
+    auto removePosition = m_contacts.size() - 1ull;
 
-    for(auto cur = m_contacts.rbegin(); cur != m_contacts.rend(); ++cur)
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+    std::cout << "--------\nUpdateWorldPoints\n";
+#endif
+
+    for(auto cur = m_contacts.rbegin(), end = m_contacts.rend(); cur != end; ++cur)
     {
         auto& contact = *cur;
-
-        auto pointA_v = DirectX::XMLoadVector3(&contact.localPointA);
-        auto pointB_v = DirectX::XMLoadVector3(&contact.localPointB);
-
-        pointA_v = DirectX::XMVector3Transform(pointA_v, aMatrix);
-        pointB_v = DirectX::XMVector3Transform(pointB_v, bMatrix);
-
-        DirectX::XMStoreVector3(&contact.worldPointA, pointA_v);
-        DirectX::XMStoreVector3(&contact.worldPointB, pointB_v);
-
-        contact.depth = Dot(contact.worldPointB - contact.worldPointA, contact.normal);
-
-        if(contact.depth < ContactBreakDistance)
+        const auto worldA = XMVector3Transform(XMLoadVector3(&contact.localPointA), aMatrix);
+        const auto worldB = XMVector3Transform(XMLoadVector3(&contact.localPointB), bMatrix);
+        const auto normal = XMLoadVector3(&contact.normal);
+        const auto aToB = XMVectorSubtract(worldA, worldB);
+        const auto depth = XMVectorGetX(XMVector3Dot(aToB, normal));
+        if (depth < ContactBreakDistanceAlongNormal)
         {
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+            std::cout << "Contact Break [Normal]: " << contact.depth << " < " << ContactBreakDistanceAlongNormal << "\n";
+#endif
             *cur = m_contacts.at(removePosition--);
             ++removeCount;
             continue;
         }
 
-        auto projectedPoint = contact.worldPointA + contact.normal * contact.depth;
-        auto projectedDifference = contact.worldPointB - projectedPoint;
-        auto distance2d = SquareMagnitude(projectedDifference);
-        if(distance2d > SquareContactBreakDistance)
+        const auto projectedPoint = XMVectorSubtract(worldA, XMVectorScale(normal, depth));
+        const auto projectedDifference = XMVectorSubtract(worldB, projectedPoint);
+        const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
+        if (distance2d > ContactBreakDistanceAlongNormal * ContactBreakDistanceAlongNormal)
         {
-            *cur = m_contacts.at(removePosition--);
-            ++removeCount;
-            continue;
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+            std::cout << "Contact Break [Tangent]: " << distance2d << " > " << ContactBreakDistanceAlongNormal * ContactBreakDistanceAlongNormal << '\n';
+#endif
+            if (distance2d > maxTangentBreakDistance)
+            {
+#if NC_PHYSICS_DEBUG_CONTACT_POINTS
+                std::cout << "  Greater tangent distance: " << distance2d << " > " << maxTangentBreakDistance << '\n';
+#endif
+                maxTangentBreakDistance = distance2d;
+
+                if (!haveBrokenAlongTangent)
+                {
+                    ++removeCount;
+                    tangentBreakIndex = removePosition--;
+                    haveBrokenAlongTangent = true;
+                    std::cout << "  First break, index: " << tangentBreakIndex << "\n";
+                }
+
+                std::swap(contact, m_contacts.at(tangentBreakIndex));
+                continue;
+            }
+
+            // *cur = m_contacts.at(removePosition--);
+            // ++removeCount;
+            // continue;
         }
+
+        contact.depth = depth;
+        DirectX::XMStoreVector3(&contact.worldPointA, worldA);
+        DirectX::XMStoreVector3(&contact.worldPointB, worldB);
     }
 
-    /** 'cur' is invalidated when removing the last element. MSVC's iterator debug checks
-     *  can segfault on the next advance, so we just delay all removals. */
     while (removeCount != 0)
     {
         m_contacts.pop_back();
         --removeCount;
     }
+
+    // auto indexOffset = 0ull;
+
+    // if (tangentBreakIndex != UINT64_MAX)
+    // {
+    //     ++indexOffset;
+    //     m_contacts.erase(m_contacts.begin() + tangentBreakIndex);
+    // }
+
+
+
+    // while (numPointsRemoved != 0)
+    // {
+    //     // remove at()
+    //     const auto removeIndex = toRemove.at(--numPointsRemoved);
+    //     m_contacts.erase(m_contacts.begin() + removeIndex - indexOffset);
+    //     ++indexOffset;
+    // }
+
+
+
+//     size_t removeCount = 0u;
+//     size_t removePosition = m_contacts.size() - 1u;
+//     for(auto cur = m_contacts.rbegin(), end = m_contacts.rend(); cur != end; ++cur)
+//     {
+//         auto& contact = *cur;
+//         const auto worldA = XMVector3Transform(XMLoadVector3(&contact.localPointA), aMatrix);
+//         const auto worldB = XMVector3Transform(XMLoadVector3(&contact.localPointB), bMatrix);
+//         const auto normal = XMLoadVector3(&contact.normal);
+//         const auto aToB = XMVectorSubtract(worldA, worldB);
+//         const auto depth = XMVectorGetX(XMVector3Dot(aToB, normal));
+//         if (depth < ContactBreakDistanceAlongNormal)
+//         {
+// #if NC_PHYSICS_DEBUG_CONTACT_POINTS
+//             std::cout << "Contact Break [Normal]: " << contact.depth << " < " << ContactBreakDistanceAlongNormal << "\n";
+// #endif
+//             *cur = m_contacts.at(removePosition--);
+//             ++removeCount;
+//             continue;
+//         }
+
+//         if (!haveBrokenAlongTangent)
+//         {
+//             const auto projectedPoint = XMVectorSubtract(worldA, XMVectorScale(normal, depth));
+//             const auto projectedDifference = XMVectorSubtract(worldB, projectedPoint);
+//             const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
+//             if (distance2d > SquareContactBreakDistanceAlongTangent)
+//             {
+//     #if NC_PHYSICS_DEBUG_CONTACT_POINTS
+//                 std::cout << "Contact Break [Tangent]: " << distance2d << " > " << SquareContactBreakDistanceAlongTangent << '\n';
+//     #endif
+//                 // haveBrokenAlongTangent = true;
+//                 *cur = m_contacts.at(removePosition--);
+//                 ++removeCount;
+//                 continue;
+//             }
+//         }
+
+//         contact.depth = depth;
+//         DirectX::XMStoreVector3(&contact.worldPointA, worldA);
+//         DirectX::XMStoreVector3(&contact.worldPointB, worldB);
+//     }
+
+//     /** 'cur' is invalidated when removing the last element. MSVC's iterator debug checks
+//      *  can segfault on the next advance, so we just delay all removals. */
+//     while (removeCount != 0)
+//     {
+//         m_contacts.pop_back();
+//         --removeCount;
+//     }
 }
 } // namespace nc::physics
