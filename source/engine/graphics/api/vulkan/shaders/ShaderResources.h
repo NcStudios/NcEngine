@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CubeMapShaderResource.h"
-#include "EnvironmentDataShaderResource.h"
+#include "GlobalDataShaderResource.h"
 #include "ObjectDataShaderResource.h"
 #include "PointLightShaderResource.h"
 #include "ShaderDescriptorSets.h"
@@ -28,12 +28,12 @@ struct ShaderResources
     TextureShaderResource textureShaderResource;
     ShadowMapShaderResource shadowMapShaderResource;
     CubeMapShaderResource cubeMapShaderResource;
-    GlobalDataShaderResource environmentDataShaderResource;
+    GlobalDataShaderResource globalDataShaderResource;
     SkeletalAnimationShaderResource skeletalAnimationShaderResource;
 
     Connection<const std::vector<ObjectData>&> objectDataConnection;
     Connection<const std::vector<PointLightData>&> pointLightDataConnection;
-    Connection<const GlobalData&> environmentDataConnection;
+    Connection<const GlobalData&> globalDataConnection;
     Connection<const std::vector<SkeletalAnimationData>&> skeletalAnimationDataConnection;
 };
 } // namespace nc::graphics

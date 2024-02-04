@@ -3,7 +3,7 @@
 #include "IGraphics.h"
 #include "graphics/NcGraphics.h"
 #include "system/CameraSystem.h"
-#include "system/EnvironmentSystem.h"
+#include "system/GlobalDataSystem.h"
 #include "system/ObjectSystem.h"
 #include "system/ParticleEmitterSystem.h"
 #include "system/PointLightSystem.h"
@@ -57,7 +57,7 @@ class NcGraphicsImpl : public NcGraphics
         void SetUi(ui::IUI* ui) noexcept override;
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
-        void ClearEnvironment() override;
+        void ClearGlobalData() override;
         void OnBuildTaskGraph(task::TaskGraph&) override;
         void Clear() noexcept override;
         void Run();
@@ -69,7 +69,7 @@ class NcGraphicsImpl : public NcGraphics
         asset::NcAsset* m_assetModule;
         std::unique_ptr<IGraphics> m_graphics;
         CameraSystem m_cameraSystem;
-        EnvironmentSystem m_environmentSystem;
+        GlobalDataSystem m_globalDataSystem;
         ObjectSystem m_objectSystem;
         PointLightSystem m_pointLightSystem;
         ParticleEmitterSystem m_particleEmitterSystem;

@@ -7,11 +7,11 @@ layout (location = 0) out vec4 outFragColor;
 
 layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
 
-layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
+layout (set = 0, binding = 5) uniform GlobalDataBuffer
 {
     vec3 cameraWorldPosition;
     int skyboxCubemapIndex;
-} environmentData;
+} globalData;
 
 vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 {
@@ -20,5 +20,5 @@ vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 
 void main() 
 {
-    outFragColor = vec4(SkyboxColor(environmentData.skyboxCubemapIndex, inUVW), 1.0);
+    outFragColor = vec4(SkyboxColor(globalData.skyboxCubemapIndex, inUVW), 1.0);
 }

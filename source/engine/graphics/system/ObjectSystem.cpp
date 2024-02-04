@@ -1,6 +1,6 @@
 #include "ObjectSystem.h"
 #include "CameraSystem.h"
-#include "EnvironmentSystem.h"
+#include "GlobalDataSystem.h"
 #include "SkeletalAnimationSystem.h"
 #include "graphics/Camera.h"
 #include "graphics/shader_resource/ObjectData.h"
@@ -34,7 +34,7 @@ namespace nc::graphics
 auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
                            MultiView<ToonRenderer, Transform> toonRenderers,
                            const CameraState& cameraState,
-                           const EnvironmentState& environmentState,
+                           const GlobalDataState& globalDataState,
                            const SkeletalAnimationSystemState& skeletalAnimationState) -> ObjectState
 {
     OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
@@ -76,7 +76,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
 
-    if (environmentState.useSkybox)
+    if (globalDataState.useSkybox)
     {
         auto skyboxMatrix = DirectX::XMMatrixScaling(200.0f, 200.0f, 200.0f);
         skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraState.position), DirectX::g_XMIdentityR3);

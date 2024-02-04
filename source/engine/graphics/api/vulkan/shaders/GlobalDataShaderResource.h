@@ -21,7 +21,7 @@ class GlobalDataShaderResource : public IShaderResource<GlobalData>
     private:
         GpuAllocator* m_allocator;
         ShaderDescriptorSets* m_descriptors;
-        std::unique_ptr<UniformBuffer> m_environmentDataBuffer;
+        std::unique_ptr<UniformBuffer> m_globalDataBuffer;
         uint32_t m_bindingSlot;
 };
 } // namespace nc::graphics

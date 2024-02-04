@@ -4,11 +4,8 @@
 
 #include "DirectXMath.h"
 
-#include <string>
-
 namespace nc::graphics
 {
-
 #ifdef _MSC_VER
 #pragma warning( disable : 4324 ) // Justification: We want to be explicit about alignment for the GPU buffer structs.
 #endif
@@ -21,11 +18,7 @@ struct GlobalData
     alignas(16)Vector4 padding0 = Vector4::Zero();
     alignas(16)Vector4 padding1 = Vector4::Zero();
 };
-
-constexpr auto sizeOfData = alignof(Vector3);
-constexpr auto sizeOfViewProj = sizeof(GlobalData);
 #ifdef _MSC_VER
 #pragma warning( default  : 4324 )
 #endif
-
 } // namespace nc::graphics

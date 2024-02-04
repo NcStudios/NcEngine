@@ -11,7 +11,7 @@
 #include "graphics/api/vulkan/shaders/ShaderResources.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/shader_resource/EnvironmentData.h"
+#include "graphics/shader_resource/GlobalData.h"
 
 #include "optick.h"
 
@@ -92,7 +92,7 @@ EnvironmentTechnique::~EnvironmentTechnique() noexcept
 
 bool EnvironmentTechnique::CanBind(const PerFrameRenderState& frameData)
 {
-    return frameData.environmentState.useSkybox;
+    return frameData.globalDataState.useSkybox;
 }
 
 void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
@@ -104,13 +104,13 @@ void EnvironmentTechnique::Bind(vk::CommandBuffer* cmd)
 
 bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)
 {
-    return frameData.environmentState.useSkybox;
+    return frameData.globalDataState.useSkybox;
 }
 
 void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
 {
     OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
-    if (!frameData.environmentState.useSkybox)
+    if (!frameData.globalDataState.useSkybox)
     {
         return;
     }

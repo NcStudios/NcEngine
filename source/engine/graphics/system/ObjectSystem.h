@@ -13,7 +13,7 @@
 namespace nc::graphics
 {
 struct CameraState;
-struct EnvironmentState;
+struct GlobalDataState;
 struct ObjectData;
 struct SkeletalAnimationSystemState;
 
@@ -37,7 +37,7 @@ class ObjectSystem
         auto Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
                      MultiView<ToonRenderer, Transform> toonRenderers,
                      const CameraState& cameraState,
-                     const EnvironmentState& environmentState,
+                     const GlobalDataState& globalDataState,
                      const SkeletalAnimationSystemState& skeletalAnimationState) -> ObjectState;
 
     private:

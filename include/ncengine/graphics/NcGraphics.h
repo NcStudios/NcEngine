@@ -61,11 +61,11 @@ struct NcGraphics : public Module
     virtual void SetSkybox(const std::string& path) = 0;
 
     /**
-     * @brief Clear all environment data (currently only the skybox).
+     * @brief Clear all global data (currently only the skybox).
      * 
      * This is called automatically on scene changes. The main Camera
      * is not cleared as it can be set on a persistent Entity.
      */
-    virtual void ClearEnvironment() = 0;
+    virtual void ClearGlobalData() = 0;
 };
 } // namespace nc::graphics

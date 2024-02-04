@@ -43,11 +43,11 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 
 layout (set = 0, binding = 2) uniform sampler2D textures[];
 layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
-layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
+layout (set = 0, binding = 5) uniform GlobalDataBuffer
 {
     vec3 cameraWorldPosition;
     int skyboxCubemapIndex;
-} environmentData;
+} globalData;
 
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec3 inNormal;
@@ -116,13 +116,13 @@ void main()
         result += max(vec3(0.0f), pixelColor);
     }
 
-    if (environmentData.skyboxCubemapIndex > -1)
+    if (globalData.skyboxCubemapIndex > -1)
     {
         // Environment reflection
-        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
+        vec3 I = normalize(inFragPosition - globalData.cameraWorldPosition);
         vec3 surfaceNormal = normalize(inNormal);
         vec3 reflected = reflect(I, surfaceNormal);
-        vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
+        vec3 environmentReflectionColor = SkyboxColor(globalData.skyboxCubemapIndex, reflected);
         result = mix(result, result + environmentReflectionColor, 0.01f);
     }
 

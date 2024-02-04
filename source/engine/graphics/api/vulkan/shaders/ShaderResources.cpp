@@ -1,5 +1,5 @@
 #include "ShaderResources.h"
-#include "graphics/shader_resource/EnvironmentData.h"
+#include "graphics/shader_resource/GlobalData.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
 
 namespace
@@ -42,11 +42,11 @@ ShaderResources::ShaderResources(vk::Device device,
       textureShaderResource{2, shaderDescriptorSets, memorySettings.maxTextures},
       shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
       cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures}, // @todo make separate entry for cubeMaps
-      environmentDataShaderResource{5, allocator, shaderDescriptorSets},
+      globalDataShaderResource{5, allocator, shaderDescriptorSets},
       skeletalAnimationShaderResource{6, allocator, shaderDescriptorSets, memorySettings.maxSkeletalAnimations},
       objectDataConnection{::Connect(resourceBus.objectChannel, &objectDataShaderResource)},
       pointLightDataConnection{::Connect(resourceBus.pointLightChannel, &pointLightShaderResource)},
-      environmentDataConnection{::Connect(resourceBus.environmentChannel, &environmentDataShaderResource)},
+      globalDataConnection{::Connect(resourceBus.globalDataChannel, &globalDataShaderResource)},
       skeletalAnimationDataConnection{::Connect(resourceBus.skeletalAnimationChannel, &skeletalAnimationShaderResource)}
 {
     shaderDescriptorSets->CreateSet(DescriptorScope::Global);

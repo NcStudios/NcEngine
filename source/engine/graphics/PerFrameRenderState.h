@@ -2,7 +2,7 @@
 
 #include "particle/EmitterState.h"
 #include "system/CameraSystem.h"
-#include "system/EnvironmentSystem.h"
+#include "system/GlobalDataSystem.h"
 #include "system/ObjectSystem.h"
 #include "system/PointLightSystem.h"
 #include "system/WidgetSystem.h"
@@ -14,7 +14,7 @@ namespace nc::graphics
 struct PerFrameRenderState
 {
     CameraState cameraState;
-    EnvironmentState environmentState;
+    GlobalDataState globalDataState;
     ObjectState objectState;
     LightingState lightingState;
     WidgetState widgetState;

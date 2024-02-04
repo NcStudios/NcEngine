@@ -29,7 +29,7 @@ namespace
         void SetUi(nc::ui::IUI*) noexcept override {}
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
-        void ClearEnvironment() override {}
+        void ClearGlobalData() override {}
 
         /** @todo Debug renderer is becoming a problem... */
         #ifdef NC_DEBUG_RENDERING_ENABLED
@@ -70,7 +70,7 @@ namespace nc::graphics
           m_assetModule{assetModule},
           m_graphics{std::move(graphics)},
           m_cameraSystem{},
-          m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
+          m_globalDataSystem{std::move(shaderResourceBus.globalDataChannel)},
           m_objectSystem{std::move(shaderResourceBus.objectChannel)},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
@@ -106,12 +106,12 @@ namespace nc::graphics
     void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
         NC_LOG_TRACE("Setting skybox to {}", path);
-        m_environmentSystem.SetSkybox(path);
+        m_globalDataSystem.SetSkybox(path);
     }
 
-    void NcGraphicsImpl::ClearEnvironment()
+    void NcGraphicsImpl::ClearGlobalData()
     {
-        m_environmentSystem.Clear();
+        m_globalDataSystem.Clear();
     }
 
     void NcGraphicsImpl::Clear() noexcept
@@ -120,7 +120,7 @@ namespace nc::graphics
         /** @todo graphics::clear not marked noexcept */
         m_graphics->Clear();
         m_cameraSystem.Clear();
-        m_environmentSystem.Clear();
+        m_globalDataSystem.Clear();
         m_particleEmitterSystem.Clear();
         m_skeletalAnimationSystem.Clear();
     }
@@ -145,18 +145,18 @@ namespace nc::graphics
         auto cameraState = m_cameraSystem.Execute(m_registry);
         m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()), *m_assetModule);
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
-        auto environmentState = m_environmentSystem.Execute(cameraState);
+        auto globalDataState = m_globalDataSystem.Execute(cameraState);
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},
                                                   MultiView<ToonRenderer, Transform>{m_registry},
                                                   cameraState,
-                                                  environmentState,
+                                                  globalDataState,
                                                   skeletalAnimationState);
         auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
         auto state = PerFrameRenderState
         {
             std::move(cameraState),
-            std::move(environmentState),
+            std::move(globalDataState),
             std::move(objectState),
             std::move(lightingState),
             std::move(widgetState),
