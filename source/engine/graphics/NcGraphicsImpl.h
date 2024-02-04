@@ -23,6 +23,7 @@ class NcAsset;
 namespace config
 {
 struct GraphicsSettings;
+struct MemorySettings;
 struct ProjectSettings;
 } // namespace config
 
@@ -38,6 +39,7 @@ struct ShaderResourceBus;
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
+                         const config::MemorySettings& memorySettings,
                          asset::NcAsset* assetModule,
                          Registry* registry,
                          window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
