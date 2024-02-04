@@ -13,8 +13,7 @@ class Lighting
     public:
         Lighting(Registry* registry,
                  RenderGraph* renderGraph,
-                 ShaderResources* shaderResources,
-                 uint32_t maxPointLights);
+                 ShaderResources* shaderResources);
         void Clear();
         void Resize();
 
@@ -26,6 +25,5 @@ class Lighting
         ShaderResources* m_shaderResources;
         Connection<PointLight&> m_onCommitPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;
-        uint32_t m_maxPointLights;
 };
 } // namespace nc::graphics

@@ -59,7 +59,6 @@ auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::G
     using namespace nc::graphics;
 
     const auto vkDevice = device->VkDevice();
-
     const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
     {
         AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
@@ -160,7 +159,7 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
 {
     for (auto i : std::views::iota(0u, m_maxLights))
     {
-        m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
+        m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
     }
 }
 

@@ -6,28 +6,33 @@
 
 #include <algorithm>
 
+namespace
+{
+void InitializeAllShadowMaps(nc::graphics::RenderGraph* renderGraph, nc::graphics::ShaderResources* shaderResources)
+{
+    auto& shadowMapPasses = renderGraph->GetShadowPasses();
+    std::vector<nc::graphics::ShadowMapData> shadowMaps;
+    shadowMaps.reserve(shadowMapPasses.size());
+    std::transform(shadowMapPasses.cbegin(), shadowMapPasses.cend(), std::back_inserter(shadowMaps), [](auto&& pass)
+    {
+        return nc::graphics::ShadowMapData{pass.GetAttachmentView(0)};
+    });
+
+    shaderResources->shadowMapShaderResource.Update(std::move(std::vector<nc::graphics::ShadowMapData>{shadowMaps}));
+}
+}
+
 namespace nc::graphics
 {
 Lighting::Lighting(Registry* registry,
                    RenderGraph* renderGraph,
-                   ShaderResources* shaderResources,
-                   uint32_t maxPointLights)
+                   ShaderResources* shaderResources)
     : m_renderGraph{renderGraph},
       m_shaderResources{shaderResources},
       m_onCommitPointLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){OnCommitPointLightConnection();})},
-      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){OnRemovePointLightConnection();})},
-      m_maxPointLights{maxPointLights}
+      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){OnRemovePointLightConnection();})}
 {
-    std::vector<ShadowMapData> shadowMaps;
-    shadowMaps.reserve(m_maxPointLights);
-
-    auto& shadowMapPasses = m_renderGraph->GetShadowPasses();
-    std::transform(shadowMapPasses.cbegin(), shadowMapPasses.cend(), std::back_inserter(shadowMaps), [](auto&& pass)
-    {
-        return ShadowMapData{pass.GetAttachmentView(0)};
-    });
-
-    m_shaderResources->shadowMapShaderResource.Update(std::vector<ShadowMapData>{shadowMaps});
+    InitializeAllShadowMaps(m_renderGraph, m_shaderResources);
 }
 
 void Lighting::Clear()
@@ -37,16 +42,7 @@ void Lighting::Clear()
 
 void Lighting::Resize()
 {
-    std::vector<ShadowMapData> shadowMaps;
-    shadowMaps.reserve(m_maxPointLights);
-
-    auto& shadowMapPasses = m_renderGraph->GetShadowPasses();
-    std::transform(shadowMapPasses.cbegin(), shadowMapPasses.cend(), std::back_inserter(shadowMaps), [](auto&& pass)
-    {
-        return ShadowMapData{pass.GetAttachmentView(0)};
-    });
-
-    m_shaderResources->shadowMapShaderResource.Update(std::vector<ShadowMapData>{shadowMaps});
+    InitializeAllShadowMaps(m_renderGraph, m_shaderResources);
 }
 
 void Lighting::OnCommitPointLightConnection()

@@ -6,7 +6,6 @@
 
 #include <span>
 #include <vector>
-#include <iostream>
 
 namespace nc::graphics
 {
