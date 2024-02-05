@@ -49,7 +49,7 @@ class Registry : public StableAddress
         template<PooledComponent T, class... Args>
         auto Add(Entity entity, Args&&... args) -> T*
         {
-            return m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
+            return &m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
         }
 
         template<PooledComponent T>
@@ -67,13 +67,13 @@ class Registry : public StableAddress
         template<PooledComponent T>
         auto Get(Entity entity) -> T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         template<PooledComponent T>
         auto Get(Entity entity) const -> const T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         template<PooledComponent T>
@@ -132,7 +132,7 @@ class Registry : public StableAddress
         template<std::derived_from<FreeComponent> T, class... Args>
         auto Add(Entity entity, Args&&... args) -> T*
         {
-            return m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
+            return &m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
         }
 
         template<std::derived_from<FreeComponent> T>
@@ -150,13 +150,13 @@ class Registry : public StableAddress
         template<std::derived_from<FreeComponent> T>
         auto Get(Entity entity) -> T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         template<std::derived_from<FreeComponent> T>
         auto Get(Entity entity) const -> const T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         /** Engine Functions */

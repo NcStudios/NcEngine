@@ -3,6 +3,7 @@ target_sources(${NC_ENGINE_LIB}
         ComponentWidgets.cpp
         EditorImpl.cpp
         EditorUI.cpp
+        SandboxScene.cpp
 )
 
 add_subdirectory(assets)

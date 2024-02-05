@@ -110,7 +110,7 @@ TEST_F(EcsInterfaceTests, Emplace_component_addsComponent)
     auto uut = nc::ecs::Ecs{registry};
     const auto good = uut.Emplace<nc::Entity>();
     const auto bad = nc::Entity{3, 0, 0};
-    EXPECT_NE(nullptr, uut.Emplace<S1>(good));
+    uut.Emplace<S1>(good);
     EXPECT_THROW(uut.Emplace<S1>(bad), nc::NcError);
     EXPECT_TRUE(uut.Contains<S1>(good));
     EXPECT_FALSE(uut.Contains<S1>(bad));
@@ -120,7 +120,7 @@ TEST_F(EcsInterfaceTests, Emplace_freeComponent_addsItem)
 {
     auto uut = nc::ecs::Ecs{registry};
     const auto entity = uut.Emplace<nc::Entity>();
-    EXPECT_NE(nullptr, uut.Emplace<TestFreeComponent>(entity));
+    uut.Emplace<TestFreeComponent>(entity);
     EXPECT_TRUE(uut.Contains<TestFreeComponent>(entity));
 }
 
@@ -159,30 +159,44 @@ TEST_F(EcsInterfaceTests, Remove_freeComponent_happyAndErrorPathsSucceed)
     EXPECT_FALSE(uut.Remove<TestFreeComponent>(entity));
 }
 
-TEST_F(EcsInterfaceTests, Get_component_happyAndErrorPathsSucceed)
+TEST_F(EcsInterfaceTests, Get_component_happyPath_succeeds)
 {
     auto uut = nc::ecs::Ecs{registry};
     const auto entity = uut.Emplace<nc::Entity>();
-    const auto expected = uut.Emplace<S1>(entity);
-    EXPECT_EQ(expected, uut.Get<S1>(entity));
-    uut.Remove<S1>(entity);
-    EXPECT_EQ(nullptr, uut.Get<S1>(entity));
-    const auto badEntity = nc::Entity{2, 0, 0};
-    EXPECT_EQ(nullptr, uut.Get<S1>(badEntity));
+    const auto& expected = uut.Emplace<S1>(entity);
+    EXPECT_EQ(&expected, &uut.Get<S1>(entity));
 }
 
-TEST_F(EcsInterfaceTests, Get_freeComponent_happyAndErrorPathsSucceed)
+TEST_F(EcsInterfaceTests, Get_component_errorPath_throws)
 {
     auto uut = nc::ecs::Ecs{registry};
     const auto entity = uut.Emplace<nc::Entity>();
-    const auto expected = uut.Emplace<TestFreeComponent>(entity);
-    EXPECT_EQ(expected, uut.Get<TestFreeComponent>(entity));
+    uut.Emplace<S1>(entity);
+    uut.Remove<S1>(entity);
+    EXPECT_THROW(uut.Get<S1>(entity), nc::NcError);
+    const auto badEntity = nc::Entity{2, 0, 0};
+    EXPECT_THROW(uut.Get<S1>(badEntity), nc::NcError);
+}
+
+TEST_F(EcsInterfaceTests, Get_freeComponent_happyPath_succeed)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto entity = uut.Emplace<nc::Entity>();
+    const auto& expected = uut.Emplace<TestFreeComponent>(entity);
+    EXPECT_EQ(&expected, &uut.Get<TestFreeComponent>(entity));
+}
+
+TEST_F(EcsInterfaceTests, Get_freeComponent_errorPath_throws)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto entity = uut.Emplace<nc::Entity>();
+    uut.Emplace<TestFreeComponent>(entity);
     TestFixture_SyncRegistry();
     uut.Remove<TestFreeComponent>(entity);
     TestFixture_SyncRegistry();
-    EXPECT_EQ(nullptr, uut.Get<TestFreeComponent>(entity));
+    EXPECT_THROW(uut.Get<TestFreeComponent>(entity), nc::NcError);
     const auto badEntity = nc::Entity{2, 0, 0};
-    EXPECT_EQ(nullptr, uut.Get<TestFreeComponent>(badEntity));
+    EXPECT_THROW(uut.Get<TestFreeComponent>(badEntity), nc::NcError);
 }
 
 TEST_F(EcsInterfaceTests, GetAll_entity_returnsAllEntities)
@@ -207,16 +221,16 @@ TEST_F(EcsInterfaceTests, GetAll_entity_returnsAllEntities)
 TEST_F(EcsInterfaceTests, GetAll_component_returnsAllTs)
 {
     auto uut = nc::ecs::Ecs{registry};
-    const auto notRemoved = uut.Emplace<nc::Entity>();
-    const auto indirectlyRemoved = uut.Emplace<nc::Entity>();
-    const auto directlyRemoved = uut.Emplace<nc::Entity>();
+    const auto& notRemoved = uut.Emplace<nc::Entity>();
+    const auto& indirectlyRemoved = uut.Emplace<nc::Entity>();
+    const auto& directlyRemoved = uut.Emplace<nc::Entity>();
     uut.Emplace<S1>(notRemoved);
     uut.Emplace<S1>(indirectlyRemoved);
     uut.Emplace<S1>(directlyRemoved);
     TestFixture_SyncRegistry();
     uut.Remove<nc::Entity>(indirectlyRemoved); // indirect removal requires registry sync; still expect to see
     uut.Remove<S1>(directlyRemoved); // direct removal is immediate; do not expect to see
-    const auto staged = uut.Emplace<nc::Entity>();
+    const auto& staged = uut.Emplace<nc::Entity>();
     uut.Emplace<S1>(staged); // staged until registry sync; do not expect to see
 
     const auto expected = std::vector<nc::Entity>{notRemoved, indirectlyRemoved};
@@ -233,17 +247,17 @@ TEST_F(EcsInterfaceTests, GetAll_component_returnsAllTs)
 TEST_F(EcsInterfaceTests, GetParent_happyAndErrorPathsSucceed)
 {
     auto uut = nc::ecs::Ecs{registry};
-    const auto expected = uut.Emplace<nc::Entity>();
-    const auto stagedComponent = uut.Emplace<S1>(expected);
-    EXPECT_EQ(expected, uut.GetParent(stagedComponent));
+    const auto& expected = uut.Emplace<nc::Entity>();
+    const auto& stagedComponent = uut.Emplace<S1>(expected);
+    EXPECT_EQ(expected, uut.GetParent(&stagedComponent));
     TestFixture_SyncRegistry();
-    const auto mergedComponent = uut.Get<S1>(expected);
-    EXPECT_EQ(expected, uut.GetParent(mergedComponent));
+    const auto& mergedComponent = uut.Get<S1>(expected);
+    EXPECT_EQ(expected, uut.GetParent(&mergedComponent));
     uut.Remove<S1>(expected);
-    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(mergedComponent));
+    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(&mergedComponent));
     TestFixture_SyncRegistry();
-    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(mergedComponent));
+    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(&mergedComponent));
     uut.Remove<nc::Entity>(expected);
     TestFixture_SyncRegistry();
-    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(mergedComponent));
+    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(&mergedComponent));
 }

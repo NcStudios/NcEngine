@@ -24,7 +24,7 @@ auto EntityContextMenu(Entity entity, ecs::Ecs world, CreateEntityWindow& create
     }
     else if (ImGui::Selectable("Make Root"))
     {
-        world.Get<Transform>(entity)->SetParent(Entity::Null());
+        world.Get<Transform>(entity).SetParent(Entity::Null());
         return entity;
     }
 

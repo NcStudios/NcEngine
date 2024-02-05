@@ -23,7 +23,7 @@ namespace nc
         private:
             window::WindowImpl m_window;
             std::unique_ptr<Registry> m_registry;
-            ModuleRegistry m_modules;
+            std::unique_ptr<ModuleRegistry> m_modules;
             task::Executor m_executor;
             bool m_isRunning;
 

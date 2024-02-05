@@ -3,37 +3,32 @@
 #include "input/Input.h"
 #include "window/Window.h"
 
-namespace
-{
-namespace hotkey
-{
-constexpr auto Editor = nc::input::KeyCode::Tilde;
-} // namespace hotkey
-} // anonymous namespace
-
 namespace nc::ui::editor
 {
 class EditorImpl : public Editor
 {
     public:
-        void Draw(ecs::Ecs world, asset::NcAsset&) override
+        explicit EditorImpl(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& hotkeys)
+            : Editor{hotkeys},
+              m_modules{modules},
+              m_ui{world, modules}
         {
-            if(input::KeyDown(hotkey::Editor))
-                m_open = !m_open;
+        }
 
-            if(!m_open)
-                return;
-
-            m_ui.Draw(world);
+        void Draw(ecs::Ecs world) override
+        {
+            m_ui.Draw(GetHotkeys(), world, m_modules);
         }
 
     private:
+        ModuleProvider m_modules;
         EditorUI m_ui;
-        bool m_open = false;
 };
 
-auto BuildEditor() -> std::unique_ptr<Editor>
+auto BuildEditor(ecs::Ecs world,
+                 ModuleProvider modules,
+                 const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
 {
-    return std::make_unique<EditorImpl>();
+    return std::make_unique<EditorImpl>(world, modules, hotkeys);
 }
 } // namespace nc::ui::editor

@@ -7,9 +7,9 @@
 
 namespace
 {
-auto IsRoot(nc::Transform* transform) -> bool
+auto IsRoot(nc::Transform& transform) -> bool
 {
-    return !transform->Parent().Valid();
+    return !transform.Parent().Valid();
 }
 } // anonymous namespace
 
@@ -49,11 +49,11 @@ void SceneGraph::Graph(ecs::Ecs world, CreateEntityWindow& createEntityWindow)
 {
     for(auto entity : world.GetAll<Entity>())
     {
-        auto transform = world.Get<Transform>(entity);
-        auto tag = world.Get<Tag>(entity);
-        if (IsRoot(transform) && PassFilter(*tag))
+        auto& transform = world.Get<Transform>(entity);
+        auto& tag = world.Get<Tag>(entity);
+        if (IsRoot(transform) && PassFilter(tag))
         {
-            GraphNode(world, entity, *tag, *transform, createEntityWindow);
+            GraphNode(world, entity, tag, transform, createEntityWindow);
         }
     }
 }
@@ -80,14 +80,14 @@ void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& t
     DragAndDropSource<Entity>(&entity);
     DragAndDropTarget<Entity>([entity, world](Entity* source) mutable
     {
-        world.Get<Transform>(*source)->SetParent(entity);
+        world.Get<Transform>(*source).SetParent(entity);
     });
 
     if(isNodeExpanded)
     {
         for(auto child : transform.Children())
         {
-            GraphNode(world, child, *world.Get<Tag>(child), *world.Get<Transform>(child), createEntityWindow);
+            GraphNode(world, child, world.Get<Tag>(child), world.Get<Transform>(child), createEntityWindow);
         }
 
         ImGui::TreePop();

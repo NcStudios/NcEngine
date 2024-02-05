@@ -48,8 +48,14 @@ void Widget()
 namespace nc::sample
 {
 CollisionEvents::CollisionEvents(SampleUI* ui)
+    : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
+}
+
+CollisionEvents::~CollisionEvents() noexcept
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void CollisionEvents::Load(Registry* registry, ModuleProvider modules)
