@@ -151,7 +151,7 @@ auto CreateVehicle(nc::ecs::Ecs world, nc::physics::NcPhysics* phys, const nc::V
     const auto fourth = CreateVehicleNode(world, position - nc::Vector3{0.0f, -0.1f, 3.78f}, nc::Vector3::Splat(0.4f), "Car",      0, "bus_car.nca", CarMat, car3Mass, car3Friction);
 
     // TODO: play with these values
-    constexpr auto bias = 0.3f; // lower has more 'spring', too high propagates too much force to front car
+    constexpr auto bias = 0.1f; // lower has more 'spring', too high propagates too much force to front car
     constexpr auto softness = 0.4f; // maybe lower?
     phys->AddJoint(head, second, nc::Vector3{0.0f, -0.1f, -1.08f}, nc::Vector3{0.0f, 0.0f, 0.9f}, bias, softness);
     phys->AddJoint(second, third, nc::Vector3{0.0f, -0.1f, -0.9f}, nc::Vector3{0.0f, 0.0f, 0.72f}, bias * 2.0f, softness);
@@ -228,7 +228,8 @@ void CharacterController::Run(nc::Entity self, nc::Registry* registry)
             }
         }
 
-        transform->Translate(transform->Forward() * m_currentMoveVelocity * fixedDt);
+        body->ApplyImpulse(transform->Forward() * 100.0f * m_currentMoveVelocity * fixedDt);
+        // transform->Translate(transform->Forward() * m_currentMoveVelocity * fixedDt);
     }
     else if (!nc::FloatEqual(m_currentMoveVelocity, 0.0f))
     {
@@ -241,13 +242,15 @@ void CharacterController::Run(nc::Entity self, nc::Registry* registry)
         }
         else
         {
-            transform->Translate(transform->Forward() * m_currentMoveVelocity * fixedDt);
+            body->ApplyImpulse(transform->Forward() * 100.0f * m_currentMoveVelocity * fixedDt);
+            // transform->Translate(transform->Forward() * m_currentMoveVelocity * fixedDt);
         }
     }
 
     if (KeyHeld(input::KeyCode::S))
     {
-        transform->Translate(-transform->Forward() * moveVelocityUpperBound * 0.5f * fixedDt);
+        body->ApplyImpulse(-transform->Forward() * 100.0f * moveVelocityUpperBound * 0.5f * fixedDt);
+        // transform->Translate(-transform->Forward() * moveVelocityUpperBound * 0.5f * fixedDt);
     }
 
     auto turning = false;
@@ -270,7 +273,8 @@ void CharacterController::Run(nc::Entity self, nc::Registry* registry)
     if (turning)
     {
         // TODO: Torque may be ok/better for rotation - requires tinkering, but is probably a 'nice to have'
-        transform->Rotate(transform->Up(), m_currentTurnVelocity * fixedDt);
+        body->ApplyTorqueImpulse(transform->Up() * 100.0f * m_currentTurnVelocity * fixedDt);
+        // transform->Rotate(transform->Up(), m_currentTurnVelocity * fixedDt);
     }
     else if (!nc::FloatEqual(m_currentTurnVelocity, 0.0f))
     {
@@ -353,14 +357,12 @@ void FollowCamera::Run(nc::Entity entity, nc::Registry* registry, float dt)
     self->SetRotation(nc::Quaternion::FromAxisAngle(axis, angle));
 }
 
-auto CreateCamera(nc::ecs::Ecs world, nc::graphics::NcGraphics* gfx, const nc::Vector3&, nc::Entity initialTarget) -> nc::Entity
+auto CreateCamera(nc::ecs::Ecs world, nc::graphics::NcGraphics* gfx, const nc::Vector3& initialPosition, nc::Entity initialTarget) -> nc::Entity
 {
     const auto handle = world.Emplace<nc::Entity>(nc::EntityInfo
     {
-        // .position = initialPosition + nc::Vector3{0.0f, 5.0f, -11.0f},
-        // .rotation = nc::Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f),
-        .position = nc::Vector3{120.0f, 6.5f, -143.5},
-        .rotation = nc::Quaternion::FromEulerAngles(0.709f, 0.0f, 0.0f),
+        .position = initialPosition + nc::Vector3{0.0f, 5.0f, -11.0f},
+        .rotation = nc::Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f),
         .tag = "Camera",
         .flags = nc::Entity::Flags::NoSerialize
     });

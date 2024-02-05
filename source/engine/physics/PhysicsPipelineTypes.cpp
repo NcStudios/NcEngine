@@ -81,6 +81,24 @@ float CalcArea4Points(const Vector3& p0, const Vector3& p1, const Vector3& p2, c
     float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
     return Max(Max(mag0, mag1), mag2);
 }
+
+float CalcArea4Points(const DirectX::FXMVECTOR& p0,
+                      const DirectX::FXMVECTOR& p1,
+                      const DirectX::FXMVECTOR& p2,
+                      const DirectX::FXMVECTOR& p3)
+{
+    using namespace DirectX;
+    auto mag0 = XMVector3LengthSq(XMVector3Cross(p0 - p1, p2 - p3));
+    auto mag1 = XMVector3LengthSq(XMVector3Cross(p0 - p2, p1 - p3));
+    auto mag2 = XMVector3LengthSq(XMVector3Cross(p0 - p3, p1 - p2));
+    auto max = XMVectorMax(XMVectorMax(mag0, mag1), mag2);
+    return XMVectorGetX(max);
+
+    // float mag0 = SquareMagnitude(CrossProduct(p0-p1, p2-p3));
+    // float mag1 = SquareMagnitude(CrossProduct(p0-p2, p1-p3));
+    // float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
+    // return Max(Max(mag0, mag1), mag2);
+}
 } // anonymous namespace
 
 namespace nc::physics
@@ -149,25 +167,37 @@ auto Manifold::SortPoints(const Contact& contact) -> size_t
         }
     }
 
-    float res0 = 0.0f;
-    float res1 = 0.0f;
-    float res2 = 0.0f;
-    float res3 = 0.0f;
+    using namespace DirectX;
+    const auto newPt = XMLoadVector3(&contact.localPointA);
+    const auto pt0 = XMLoadVector3(&m_contacts[0].localPointA);
+    const auto pt1 = XMLoadVector3(&m_contacts[1].localPointA);
+    const auto pt2 = XMLoadVector3(&m_contacts[2].localPointA);
+    const auto pt3 = XMLoadVector3(&m_contacts[3].localPointA);
+    const auto res0 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt1, pt2, pt3) : 0.0f;
+    const auto res1 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt2, pt3) : 0.0f;
+    const auto res2 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt1, pt3) : 0.0f;
+    const auto res3 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt1, pt2) : 0.0f;
+    return ClosestAxis(res0, res1, res2, res3);
 
-    if(maxPenetrationIndex != 0)
-        res0 = CalcArea4Points(contact.localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
+    // float res0 = 0.0f;
+    // float res1 = 0.0f;
+    // float res2 = 0.0f;
+    // float res3 = 0.0f;
 
-    if(maxPenetrationIndex != 1)
-        res1 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
+    // if(maxPenetrationIndex != 0)
+    //     res0 = CalcArea4Points(contact.localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
 
-    if(maxPenetrationIndex != 2)
-        res2 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[3].localPointA);
+    // if(maxPenetrationIndex != 1)
+    //     res1 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
 
-    if(maxPenetrationIndex != 3)
-        res3 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA);
+    // if(maxPenetrationIndex != 2)
+    //     res2 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[3].localPointA);
 
-    size_t biggestArea = ClosestAxis(res0, res1, res2, res3);
-    return biggestArea;
+    // if(maxPenetrationIndex != 3)
+    //     res3 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA);
+
+    // size_t biggestArea = ClosestAxis(res0, res1, res2, res3);
+    // return biggestArea;
 }
 
 void Manifold::UpdateWorldPoints(const Registry* registry)
@@ -188,20 +218,18 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         return;
     }
 
+    PhysicsLog("Event: ", m_event.first.Index(), ", ", m_event.second.Index());
+
     using namespace DirectX;
     const auto& aMatrix = transformA->TransformationMatrix();
     const auto& bMatrix = transformB->TransformationMatrix();
     [[maybe_unused]]bool haveBrokenAlongTangent = false;
     [[maybe_unused]]auto maxTangentBreakDistance = 0.0f;
-    auto tangentBreakIndex = 0ull;
+    [[maybe_unused]]auto tangentBreakIndex = 0ull;
 
     // shouldn't need removeCount, can determine from removePosition
     auto removeCount = 0ull;
     auto removePosition = m_contacts.size() - 1ull;
-
-#if NC_PHYSICS_DEBUG_CONTACT_POINTS
-    std::cout << "--------\nUpdateWorldPoints\n";
-#endif
 
     for(auto cur = m_contacts.rbegin(), end = m_contacts.rend(); cur != end; ++cur)
     {
@@ -211,11 +239,9 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         const auto normal = XMLoadVector3(&contact.normal);
         const auto aToB = XMVectorSubtract(worldA, worldB);
         const auto depth = XMVectorGetX(XMVector3Dot(aToB, normal));
-        if (depth < ContactBreakDistanceAlongNormal)
+        if (depth < ContactBreakDistance)
         {
-#if NC_PHYSICS_DEBUG_CONTACT_POINTS
-            std::cout << "Contact Break [Normal]: " << contact.depth << " < " << ContactBreakDistanceAlongNormal << "\n";
-#endif
+            PhysicsLog("Contact Break [Normal]: ", contact.depth, " < ", ContactBreakDistance);
             *cur = m_contacts.at(removePosition--);
             ++removeCount;
             continue;
@@ -224,33 +250,41 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         const auto projectedPoint = XMVectorSubtract(worldA, XMVectorScale(normal, depth));
         const auto projectedDifference = XMVectorSubtract(worldB, projectedPoint);
         const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
-        if (distance2d > ContactBreakDistanceAlongNormal * ContactBreakDistanceAlongNormal)
+        if (distance2d > SquareContactBreakDistance)
         {
-#if NC_PHYSICS_DEBUG_CONTACT_POINTS
-            std::cout << "Contact Break [Tangent]: " << distance2d << " > " << ContactBreakDistanceAlongNormal * ContactBreakDistanceAlongNormal << '\n';
-#endif
-            if (distance2d > maxTangentBreakDistance)
+            // PhysicsLog("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
+            // Attempt to increase stability for sliding cases by 
+            if constexpr (PreferSingleTangentContactBreak)
             {
-#if NC_PHYSICS_DEBUG_CONTACT_POINTS
-                std::cout << "  Greater tangent distance: " << distance2d << " > " << maxTangentBreakDistance << '\n';
-#endif
-                maxTangentBreakDistance = distance2d;
-
-                if (!haveBrokenAlongTangent)
+                if (distance2d > MandatoryTangentContactBreakDistance)
                 {
+                    PhysicsLog("\tmandatory break: ", distance2d, " > ", MandatoryTangentContactBreakDistance);
+                    *cur = m_contacts.at(removePosition--);
                     ++removeCount;
-                    tangentBreakIndex = removePosition--;
-                    haveBrokenAlongTangent = true;
-                    std::cout << "  First break, index: " << tangentBreakIndex << "\n";
+                    continue;
                 }
+                else if (distance2d > maxTangentBreakDistance)
+                {
+                    // PhysicsLog("\tlargest tangent distance: ", distance2d, " > ", maxTangentBreakDistance);
+                    maxTangentBreakDistance = distance2d;
 
-                std::swap(contact, m_contacts.at(tangentBreakIndex));
+                    if (!haveBrokenAlongTangent)
+                    {
+                        ++removeCount;
+                        tangentBreakIndex = removePosition--;
+                        haveBrokenAlongTangent = true;
+                    }
+
+                    std::swap(contact, m_contacts.at(tangentBreakIndex));
+                    continue;
+                }
+            }
+            else
+            {
+                *cur = m_contacts.at(removePosition--);
+                ++removeCount;
                 continue;
             }
-
-            // *cur = m_contacts.at(removePosition--);
-            // ++removeCount;
-            // continue;
         }
 
         contact.depth = depth;

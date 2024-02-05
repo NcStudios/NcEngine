@@ -7,9 +7,6 @@
 
 #include <cassert>
 
-// move to phys constants
-#define USE_DEBUG_RENDERING 1
-
 using namespace DirectX;
 
 namespace
@@ -326,7 +323,7 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 {
     OPTICK_CATEGORY("GenerateConstraints", Optick::Category::Physics);
 
-#if USE_DEBUG_RENDERING
+#if NC_PHYSICS_DRAW_CONTACT_POINTS
     graphics::DebugRenderer::ClearPoints();
 #endif
 
@@ -357,7 +354,7 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         for(const auto& contact : manifold.Contacts())
         {
-            #if USE_DEBUG_RENDERING
+            #if NC_PHYSICS_DRAW_CONTACT_POINTS
             graphics::DebugRenderer::AddPoint(contact.worldPointA);
             graphics::DebugRenderer::AddPoint(contact.worldPointB);
             #endif
