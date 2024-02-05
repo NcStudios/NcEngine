@@ -46,8 +46,14 @@ void Widget()
 namespace nc::sample
 {
 RenderingBenchmark::RenderingBenchmark(SampleUI* ui)
+    : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
+}
+
+RenderingBenchmark::~RenderingBenchmark() noexcept
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void RenderingBenchmark::Load(Registry* registry, ModuleProvider modules)
