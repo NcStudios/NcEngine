@@ -29,7 +29,7 @@ class FreeComponentGroup final : public ComponentBase
         FreeComponentGroup& operator=(const FreeComponentGroup&) = delete;
 
         template<std::derived_from<FreeComponent> T, class ... Args>
-        T* Add(Args&& ... args);
+        auto Add(Args&& ... args) -> T&;
 
         template<std::derived_from<FreeComponent> T>
         auto Remove() -> bool;
@@ -38,7 +38,7 @@ class FreeComponentGroup final : public ComponentBase
         bool Contains() const noexcept;
 
         template<std::derived_from<FreeComponent> T>
-        T* Get() const noexcept;
+        auto Get() const -> T&;
 
         template<class F>
         void ForEach(F&& func);
@@ -53,11 +53,11 @@ class FreeComponentGroup final : public ComponentBase
 };
 
 template<std::derived_from<FreeComponent> T, class ... Args>
-T* FreeComponentGroup::Add(Args&& ... args)
+auto FreeComponentGroup::Add(Args&& ... args) -> T&
 {
     NC_ASSERT(!Contains<T>(), "Entity already has a component of this type");
     auto newComponent = std::make_unique<T>(std::forward<Args>(args)...);
-    auto* out = newComponent.get();
+    auto& out = *newComponent;
     m_toAdd.push_back(std::move(newComponent));
     return out;
 }
@@ -82,27 +82,41 @@ auto FreeComponentGroup::Remove() -> bool
 template<std::derived_from<FreeComponent> T>
 bool FreeComponentGroup::Contains() const noexcept
 {
-    return Get<T>() != nullptr;
-}
-
-template<std::derived_from<FreeComponent> T>
-T* FreeComponentGroup::Get() const noexcept
-{
     for(auto& item : m_components)
     {
         auto* ptr = dynamic_cast<T*>(item.get());
         if(ptr)
-            return ptr;
+            return true;
     }
 
     for(auto& item : m_toAdd)
     {
         auto* ptr = dynamic_cast<T*>(item.get());
         if(ptr)
-            return ptr;
+            return true;
     }
 
-    return nullptr;
+    return false;
+}
+
+template<std::derived_from<FreeComponent> T>
+auto FreeComponentGroup::Get() const -> T&
+{
+    for(auto& item : m_components)
+    {
+        auto* ptr = dynamic_cast<T*>(item.get());
+        if(ptr)
+            return *ptr;
+    }
+
+    for(auto& item : m_toAdd)
+    {
+        auto* ptr = dynamic_cast<T*>(item.get());
+        if(ptr)
+            return *ptr;
+    }
+
+    throw NcError("Component does not exist");
 }
 
 template<class F>

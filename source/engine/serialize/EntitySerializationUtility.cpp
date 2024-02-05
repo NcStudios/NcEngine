@@ -7,7 +7,7 @@ void AddChildren(nc::Entity parent,
                  std::function<bool(nc::Entity)>& filter,
                  std::vector<nc::Entity>& out)
 {
-    auto included = ecs.Get<nc::Transform>(parent)->Children() |
+    auto included = ecs.Get<nc::Transform>(parent).Children() |
         std::views::filter(
             [&filter](nc::Entity entity){
                 return entity.IsSerializable() && filter(entity);
@@ -26,15 +26,15 @@ void AddChildren(nc::Entity parent,
 auto ReconstructEntityInfo(nc::Entity entity,
                            nc::ecs::ExplicitEcs<nc::Transform, nc::Tag> ecs) -> nc::EntityInfo
 {
-    const auto transform = ecs.Get<nc::Transform>(entity);
-    const auto tag = ecs.Get<nc::Tag>(entity);
+    const auto& transform = ecs.Get<nc::Transform>(entity);
+    const auto& tag = ecs.Get<nc::Tag>(entity);
     return nc::EntityInfo
     {
-        .position = transform->LocalPosition(),
-        .rotation = transform->LocalRotation(),
-        .scale = transform->LocalScale(),
-        .parent = transform->Parent(),
-        .tag = std::string{tag->Value()},
+        .position = transform.LocalPosition(),
+        .rotation = transform.LocalRotation(),
+        .scale = transform.LocalScale(),
+        .parent = transform.Parent(),
+        .tag = std::string{tag.Value()},
         .layer = entity.Layer(),
         .flags = entity.Flags()
     };
@@ -52,7 +52,7 @@ auto BuildFragmentEntityList(std::span<const Entity> in,
     {
         return entity.IsSerializable()
             && filter(entity)
-            && !ecs.Get<Transform>(entity)->Parent().Valid();
+            && !ecs.Get<Transform>(entity).Parent().Valid();
     });
 
     auto out = std::vector<Entity>{};

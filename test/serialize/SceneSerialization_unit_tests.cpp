@@ -262,15 +262,13 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
         EXPECT_EQ(expected.layer, actualEntity.Layer());
         EXPECT_EQ(expected.flags, actualEntity.Flags());
 
-        const auto actualTransform = ecs.Get<nc::Transform>(actualEntity);
-        ASSERT_NE(nullptr, actualTransform);
-        EXPECT_EQ(expected.position, actualTransform->LocalPosition());
-        EXPECT_EQ(expected.rotation, actualTransform->LocalRotation());
-        EXPECT_EQ(expected.scale, actualTransform->LocalScale());
+        const auto& actualTransform = ecs.Get<nc::Transform>(actualEntity);
+        EXPECT_EQ(expected.position, actualTransform.LocalPosition());
+        EXPECT_EQ(expected.rotation, actualTransform.LocalRotation());
+        EXPECT_EQ(expected.scale, actualTransform.LocalScale());
 
-        const auto actualTag = ecs.Get<nc::Tag>(actualEntity);
-        ASSERT_NE(nullptr, actualTag);
-        EXPECT_EQ(expected.tag, actualTag->Value());
+        const auto& actualTag = ecs.Get<nc::Tag>(actualEntity);
+        EXPECT_EQ(expected.tag, actualTag.Value());
     }
 }
 
@@ -281,7 +279,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e1, .tag = "2"});
         ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
         const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "4"});
-        ecs.Get<nc::Transform>(e1)->SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
+        ecs.Get<nc::Transform>(e1).SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
         const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
         const auto e6 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .flags = nc::Entity::Flags::NoSerialize }); // automatically excluded
@@ -292,7 +290,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     const auto filter = [&ecs = ecs](nc::Entity entity)
     {
         static constexpr auto toExclude = std::string_view{"exlude me"};
-        return ecs.Get<nc::Tag>(entity)->Value() != toExclude;
+        return ecs.Get<nc::Tag>(entity).Value() != toExclude;
     };
 
     auto stream = std::stringstream{};
@@ -306,19 +304,15 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     const auto actualEntities = ecs.GetAll<nc::Entity>();
     ASSERT_EQ(4, actualEntities.size());
 
-    const auto transform0 = ecs.Get<nc::Transform>(actualEntities[0]);
-    const auto transform1 = ecs.Get<nc::Transform>(actualEntities[1]);
-    const auto transform2 = ecs.Get<nc::Transform>(actualEntities[2]);
-    const auto transform3 = ecs.Get<nc::Transform>(actualEntities[3]);
-    ASSERT_NE(nullptr, transform0);
-    ASSERT_NE(nullptr, transform1);
-    ASSERT_NE(nullptr, transform2);
-    ASSERT_NE(nullptr, transform3);
+    const auto& transform0 = ecs.Get<nc::Transform>(actualEntities[0]);
+    const auto& transform1 = ecs.Get<nc::Transform>(actualEntities[1]);
+    const auto& transform2 = ecs.Get<nc::Transform>(actualEntities[2]);
+    const auto& transform3 = ecs.Get<nc::Transform>(actualEntities[3]);
 
-    EXPECT_EQ(nc::Entity::Null(), transform0->Parent());
-    EXPECT_EQ(actualEntities[0], transform1->Parent());
-    EXPECT_EQ(actualEntities[1], transform2->Parent());
-    EXPECT_EQ(actualEntities[2], transform3->Parent());
+    EXPECT_EQ(nc::Entity::Null(), transform0.Parent());
+    EXPECT_EQ(actualEntities[0], transform1.Parent());
+    EXPECT_EQ(actualEntities[1], transform2.Parent());
+    EXPECT_EQ(actualEntities[2], transform3.Parent());
 }
 
 TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents)
@@ -352,16 +346,16 @@ TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents
     ASSERT_TRUE(ecs.Contains<TestComponent2>(actualEntities[0]));
     ASSERT_FALSE(ecs.Contains<UnserializableTestComponent>(actualEntities[0]));
 
-    EXPECT_EQ(42, ecs.Get<TestComponent1>(actualEntities[0])->value);
-    EXPECT_EQ("test", ecs.Get<TestComponent2>(actualEntities[0])->value);
+    EXPECT_EQ(42, ecs.Get<TestComponent1>(actualEntities[0]).value);
+    EXPECT_EQ("test", ecs.Get<TestComponent2>(actualEntities[0]).value);
 
     ASSERT_TRUE(ecs.Contains<TestComponent1>(actualEntities[1]));
     ASSERT_FALSE(ecs.Contains<TestComponent2>(actualEntities[1]));
-    EXPECT_EQ(900, ecs.Get<TestComponent1>(actualEntities[1])->value);
+    EXPECT_EQ(900, ecs.Get<TestComponent1>(actualEntities[1]).value);
 
     ASSERT_FALSE(ecs.Contains<TestComponent1>(actualEntities[2]));
     ASSERT_TRUE(ecs.Contains<TestComponent2>(actualEntities[2]));
-    EXPECT_EQ("another test", ecs.Get<TestComponent2>(actualEntities[2])->value);
+    EXPECT_EQ("another test", ecs.Get<TestComponent2>(actualEntities[2]).value);
 
     ASSERT_FALSE(ecs.Contains<TestComponent1>(actualEntities[3]));
     ASSERT_FALSE(ecs.Contains<TestComponent2>(actualEntities[3]));
