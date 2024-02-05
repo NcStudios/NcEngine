@@ -30,9 +30,10 @@ class NcEngine
         virtual void Shutdown() noexcept = 0;
 
         /**
+         * @brief Get a reference to the ComponentRegistry.
          * @brief Get a pointer to the active registry.
          */
-        virtual auto GetRegistry() noexcept -> Registry* = 0;
+        virtual auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& = 0;
 
         /**
          * @brief Get a pointer to the module registry.

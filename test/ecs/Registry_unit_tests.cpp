@@ -69,7 +69,8 @@ auto drawUIMock = [](auto&) { ++g_numDrawUICalls; };
 class Registry_unit_tests : public ::testing::Test
 {
     public:
-        static inline Registry registry = Registry{10u};
+        static inline ecs::ComponentRegistry impl = ecs::ComponentRegistry{10u};
+        static inline Registry registry = Registry{impl};
 
         Registry_unit_tests()
         {
@@ -78,15 +79,17 @@ class Registry_unit_tests : public ::testing::Test
 
         static void SetUpTestSuite()
         {
-            registry.RegisterComponentType<nc::Tag>();
-            registry.RegisterComponentType<nc::Transform>();
-            registry.RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
+            impl.RegisterType<nc::Tag>(10);
+            impl.RegisterType<nc::Transform>(10);
+            impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
 
-            registry.RegisterComponentType<Fake1>(
+            impl.RegisterType<Fake1>(
+                10,
                 ComponentHandler<Fake1>{.drawUI = drawUIMock}
             );
 
-            registry.RegisterComponentType<Fake2>(
+            impl.RegisterType<Fake2>(
+                10,
                 ComponentHandler<Fake2>{.drawUI = drawUIMock}
             );
         }
@@ -158,17 +161,6 @@ TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
     auto* ptr = registry.Add<Fake1>(handle, 1);
     EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
-}
-
-TEST_F(Registry_unit_tests, AddComponent_argumentForwarding_forwardsEntityOnlyWhenRequired)
-{
-    registry.RegisterComponentType<float>();
-    const auto handle = registry.Add<Entity>({});
-
-    // Testing the Entity arg is correctly passed to component constructors
-    EXPECT_NE(nullptr, registry.Add<Fake1>(handle, 1)); // passes entity
-    EXPECT_NE(nullptr, registry.Add<Fake2>(handle, handle, 1)); // ignores redundant entity
-    EXPECT_NE(nullptr, registry.Add<float>(handle, 42.0f)); // not not pass entity
 }
 
 TEST_F(Registry_unit_tests, AddComponent_BadEntity_Throws)
@@ -553,11 +545,4 @@ TEST_F(Registry_unit_tests, Clear_LeavesPersistentEntities)
 
     ASSERT_TRUE(registry.Contains<Entity>(e4));
     EXPECT_TRUE(registry.Contains<Fake1>(e4));
-}
-
-TEST_F(Registry_unit_tests, RegisterComponentType_arbitraryTypes_succeed)
-{
-    EXPECT_NO_THROW(registry.RegisterComponentType<std::string>());
-    EXPECT_NO_THROW(registry.RegisterComponentType<int>());
-    EXPECT_NO_THROW(registry.RegisterComponentType<void*>());
 }

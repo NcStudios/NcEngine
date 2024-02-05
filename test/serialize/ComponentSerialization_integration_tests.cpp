@@ -29,8 +29,8 @@ void ParticleEmitterSystem::Emit(Entity, size_t) {}
 } // namespace nc::graphics
 
 // We only need the old Registry here so that it sets the ptr for ActiveRegistry(), which is only used by PhysicsBody.
-auto g_legacyRegistry = nc::Registry{10ull};
-auto& g_registry = g_legacyRegistry.GetImpl();
+auto g_registry = nc::ecs::ComponentRegistry{10ull};
+auto g_legacyRegistry = nc::Registry{g_registry};
 auto g_ecs = nc::ecs::Ecs{g_registry};
 constexpr auto g_entity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::None};
 constexpr auto g_staticEntity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::Static};
