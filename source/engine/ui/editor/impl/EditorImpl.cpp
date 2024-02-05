@@ -1,7 +1,7 @@
 #include "ui/editor/Editor.h"
 #include "EditorUI.h"
-#include "input/Input.h"
-#include "window/Window.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/window/Window.h"
 
 namespace nc::ui::editor
 {

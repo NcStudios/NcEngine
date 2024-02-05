@@ -69,6 +69,11 @@ void SceneGraph::Draw(ecs::Ecs world)
     });
 }
 
+void SceneGraph::OnClose(ecs::Ecs world)
+{
+    SetEntitySelection(world, Entity::Null());
+}
+
 void SceneGraph::SetEntitySelection(ecs::Ecs world, Entity entity)
 {
     m_selectedEntity = entity;
@@ -81,7 +86,7 @@ void SceneGraph::SetEntitySelection(ecs::Ecs world, Entity entity)
 
 void SceneGraph::EnsureSelection(ecs::Ecs world)
 {
-    if (m_selectedEntity.Valid() && !world.Contains<Entity>(m_selectedEntity))
+    if (m_selectedEntity.Valid() && !world.Contains<Transform>(m_selectedEntity))
     {
         SetEntitySelection(world, Entity::Null());
     }

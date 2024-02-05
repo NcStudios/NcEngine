@@ -19,6 +19,7 @@ class SceneGraph
     public:
         void Draw(ecs::Ecs world);
         auto GetSelectedEntity() const noexcept -> Entity { return m_selectedEntity; }
+        void OnClose(ecs::Ecs world);
 
     private:
         Entity m_selectedEntity = Entity::Null();

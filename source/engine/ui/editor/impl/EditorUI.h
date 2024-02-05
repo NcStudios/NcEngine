@@ -17,6 +17,14 @@ struct EditorHotkeys;
 
 class EditorUI
 {
+    enum class OpenState
+    {
+        Closed,
+        ClosePersisted,
+        Opened,
+        OpenPersisted
+    };
+
     public:
         explicit EditorUI(ecs::Ecs world, ModuleProvider modules);
 
@@ -35,7 +43,7 @@ class EditorUI
         SaveSceneDialog m_saveSceneDialog;
         LoadSceneDialog m_loadSceneDialog;
 
-        void ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset);
+        auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
         void DrawMenu(asset::NcAsset& ncAsset);
         void DrawOverlays(const ImVec2& dimensions);
         void DrawDialogs(const ImVec2& dimensions);

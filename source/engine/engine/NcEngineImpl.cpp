@@ -82,7 +82,8 @@ void NcEngineImpl::Shutdown() noexcept
     NC_LOG_INFO("Shutting down engine");
     try
     {
-        Clear();
+        ClearScene();
+        m_registry->Clear();
     }
     catch (const std::exception& e)
     {
@@ -106,7 +107,7 @@ void NcEngineImpl::RebuildTaskGraph()
     m_executor.SetContext(task::BuildContext(m_modules->GetAllModules()));
 }
 
-void NcEngineImpl::Clear()
+void NcEngineImpl::ClearScene()
 {
     NC_LOG_TRACE("Clearing engine state");
     m_modules->Get<NcScene>()->UnloadActiveScene();
@@ -115,7 +116,7 @@ void NcEngineImpl::Clear()
         module->Clear();
     }
 
-    m_registry->Clear();
+    m_registry->ClearSceneData();
 }
 
 void NcEngineImpl::Run()
@@ -130,7 +131,7 @@ void NcEngineImpl::Run()
         m_executor.Run();
         if (ncScene->IsTransitionScheduled())
         {
-            Clear();
+            ClearScene();
             ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
         }
     }

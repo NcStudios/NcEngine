@@ -49,9 +49,17 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     }();
 
     DrawOverlays(dimensions);
-    ProcessInput(hotkeys, ncAsset);
-    if(!m_open)
-        return;
+    switch (ProcessInput(hotkeys, ncAsset))
+    {
+        case OpenState::ClosePersisted: { return; }
+        case OpenState::OpenPersisted:  { break;  }
+        case OpenState::Opened:         { break;  }
+        case OpenState::Closed:
+        {
+            m_sceneGraph.OnClose(world);
+            return;
+        }
+    }
 
     DrawDialogs(dimensions);
 
@@ -75,13 +83,21 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     });
 }
 
-void EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset)
+auto EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState
 {
+    auto state = OpenState::ClosePersisted;
     if(KeyDown(hotkeys.toggleEditor))
+    {
         m_open = !m_open;
+        state = m_open ? OpenState::Opened : OpenState::Closed;
+    }
+    else if (m_open)
+    {
+        state = OpenState::OpenPersisted;
+    }
 
     if (!m_open)
-        return;
+        return state;
 
     if (KeyDown(hotkeys.openNewSceneDialog))
         m_newSceneDialog.Open();
@@ -89,6 +105,8 @@ void EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsse
         m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
     else if (KeyDown(hotkeys.openLoadSceneDialog))
         m_loadSceneDialog.Open(&ncAsset);
+
+    return state;
 }
 
 void EditorUI::DrawOverlays(const ImVec2& dimensions)
