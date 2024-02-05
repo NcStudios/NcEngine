@@ -3,8 +3,9 @@
 #include "ui/editor/Editor.h"
 #include "windows/FpsOverlay.h"
 #include "windows/Inspector.h"
-#include "windows/ModalDialog.h"
 #include "windows/SceneGraph.h"
+#include "windows/dialogs/CreateEntityDialog.h"
+#include "windows/dialogs/SceneDialogs.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/module/ModuleProvider.h"
@@ -32,6 +33,7 @@ class EditorUI
         FpsOverlay m_fpsOverlay;
 
         // dialogs
+        CreateEntityDialog m_createEntityDialog;
         NewSceneDialog m_newSceneDialog;
         SaveSceneDialog m_saveSceneDialog;
         LoadSceneDialog m_loadSceneDialog;

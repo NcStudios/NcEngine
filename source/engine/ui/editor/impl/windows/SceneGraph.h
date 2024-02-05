@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui/editor/Editor.h"
+#include "dialogs/CreateEntityDialog.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
 
@@ -18,7 +19,7 @@ namespace ui::editor
 class SceneGraph
 {
     public:
-        void Draw(EditorContext& ctx);
+        void Draw(EditorContext& ctx, CreateEntityDialog& createEntity);
         void OnClose(EditorContext& ctx);
 
     private:
@@ -29,9 +30,9 @@ class SceneGraph
         void SetEntitySelection(EditorContext& ctx, Entity entity);
         void EnsureSelection(EditorContext& ctx);
         auto PassFilter(Tag& tag) -> bool;
-        void Graph(EditorContext& ctx);
-        void GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transform& transform);
-        void GraphContextMenu(EditorContext& ctx);
+        void Graph(EditorContext& ctx, CreateEntityDialog& createEntity);
+        void GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transform& transform, CreateEntityDialog& createEntity);
+        void GraphContextMenu(EditorContext& ctx, CreateEntityDialog& createEntity);
 };
 } // namespace ui::editor
 } // namespace nc

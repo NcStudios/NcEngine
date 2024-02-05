@@ -33,7 +33,8 @@ void WindowLayout(float width, ImVec2 pivot)
 namespace nc::ui::editor
 {
 EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
-    : m_newSceneDialog{modules.Get<NcScene>()},
+    : m_createEntityDialog{world},
+      m_newSceneDialog{modules.Get<NcScene>()},
       m_saveSceneDialog{world},
       m_loadSceneDialog{world, modules.Get<NcScene>()}
 {
@@ -42,12 +43,7 @@ EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
 void EditorUI::Draw(EditorContext& ctx)
 {
     auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
-    const auto dimensions = []()
-    {
-        const auto dim = window::GetDimensions();
-        return ImVec2{dim.x, dim.y};
-    }();
-
+    const auto dimensions =  ImVec2{window::GetDimensions()};
     DrawOverlays(dimensions);
     switch (ctx.openState = ProcessInput(ctx.hotkeys, ncAsset))
     {
@@ -59,13 +55,13 @@ void EditorUI::Draw(EditorContext& ctx)
         }
     }
 
-    DrawDialogs(dimensions);
+    DrawDialogs(ctx, dimensions);
 
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
     {
         DrawMenu(ncAsset);
-        m_sceneGraph.Draw(ctx);
+        m_sceneGraph.Draw(ctx, m_createEntityDialog);
     });
 
     if (!ctx.selectedEntity.Valid())
@@ -76,7 +72,7 @@ void EditorUI::Draw(EditorContext& ctx)
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
     {
-        m_inspector.Draw(ctx);
+        m_inspector.Draw(ctx, m_createEntityDialog);
     });
 }
 
@@ -112,9 +108,11 @@ void EditorUI::DrawOverlays(const ImVec2& dimensions)
         m_fpsOverlay.Draw(dimensions);
 }
 
-void EditorUI::DrawDialogs(const ImVec2& dimensions)
+void EditorUI::DrawDialogs(EditorContext& ctx, const ImVec2& dimensions)
 {
-    if (m_newSceneDialog.IsOpen())
+    if (m_createEntityDialog.IsOpen())
+        m_createEntityDialog.Draw(dimensions, ctx.selectedEntity);
+    else if (m_newSceneDialog.IsOpen())
         m_newSceneDialog.Draw(dimensions);
     else if (m_saveSceneDialog.IsOpen())
         m_saveSceneDialog.Draw(dimensions);
@@ -134,6 +132,7 @@ void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
                 m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
             if (ImGui::MenuItem("Load"))
                 m_loadSceneDialog.Open(&ncAsset);
+
             ImGui::EndMenu();
         }
 
@@ -141,6 +140,7 @@ void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
         {
             if (ImGui::MenuItem("FPS Overlay"))
                 m_fpsOverlay.ToggleOpen();
+
             ImGui::EndMenu();
         }
 

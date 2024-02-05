@@ -1,64 +1,26 @@
 #pragma once
 
+#include "ModalDialog.h"
+
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/scene/NcScene.h"
-#include "ncengine/ui/ImGuiUtility.h"
 
-namespace nc
+namespace nc::ui::editor
 {
-class Scene;
-
-namespace ui::editor
-{
-class ModalDialog
-{
-    public:
-        auto IsOpen() const noexcept -> bool
-        {
-            return m_isOpen;
-        }
-
-    protected:
-        explicit ModalDialog(Vector2 size) noexcept
-            : m_size{size.x, size.y} {}
-
-        auto OpenPopup()
-        {
-            m_isOpen = true;
-        }
-
-        void ClosePopup()
-        {
-            m_isOpen = false;
-            ImGui::CloseCurrentPopup();
-        }
-
-        void DrawPopup(const char* label, const ImVec2& dimensions, auto&& func)
-        {
-            ImGui::OpenPopup(label);
-            ImGui::SetNextWindowSize(m_size, ImGuiCond_Once);
-            ImGui::SetNextWindowPos(dimensions * 0.5f, ImGuiCond_Once, ImVec2{0.5f, 0.5f});
-            if (ImGui::BeginPopupModal(label, &m_isOpen))
-            {
-                func();
-                ImGui::EndPopup();
-            }
-        }
-
-    private:
-        ImVec2 m_size;
-        bool m_isOpen = false;
-};
-
 class NewSceneDialog : public ModalDialog
 {
     static constexpr auto DialogSize = Vector2{370.0f, 128.0f};
 
     public:
-        explicit NewSceneDialog(NcScene* ncScene);
+        explicit NewSceneDialog(NcScene* ncScene) noexcept
+            : ModalDialog{DialogSize}, m_ncScene{ncScene} {}
 
-        void Open();
+        void Open()
+        {
+            OpenPopup();
+        }
+
         void Draw(const ImVec2& dimensions);
 
     private:
@@ -72,7 +34,8 @@ class SaveSceneDialog : public ModalDialog
     static constexpr auto LayerInclusionFilter = 1;
 
     public:
-        explicit SaveSceneDialog(ecs::Ecs world);
+        explicit SaveSceneDialog(ecs::Ecs world) noexcept
+            : ModalDialog{DialogSize}, m_world{world} {}
 
         void Open(asset::AssetMap assets);
         void Draw(const ImVec2& dimensions);
@@ -106,7 +69,8 @@ class LoadSceneDialog : public ModalDialog
     static constexpr auto OpenInNewScene = 1;
 
     public:
-        explicit LoadSceneDialog(ecs::Ecs world, NcScene* ncScene);
+        explicit LoadSceneDialog(ecs::Ecs world, NcScene* ncScene) noexcept
+            : ModalDialog{DialogSize}, m_world{world}, m_ncScene{ncScene} {}
 
         void Open(asset::NcAsset* ncAsset);
         void Draw(const ImVec2& dimensions);
@@ -120,5 +84,4 @@ class LoadSceneDialog : public ModalDialog
 
         int m_openType = OpenOverlayed;
 };
-} // namespace ui::editor
-} // namespace nc
+} // namespace nc::ui::editor

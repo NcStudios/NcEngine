@@ -1,4 +1,4 @@
-#include "ModalDialog.h"
+#include "SceneDialogs.h"
 #include "ui/editor/impl/SandboxScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
 
@@ -54,17 +54,6 @@ auto BuildLayerFilter(bool includePersistent, const std::vector<uint8_t>& includ
 
 namespace nc::ui::editor
 {
-NewSceneDialog::NewSceneDialog(NcScene* ncScene)
-    : ModalDialog{DialogSize},
-      m_ncScene{ncScene}
-{
-}
-
-void NewSceneDialog::Open()
-{
-    OpenPopup();
-}
-
 void NewSceneDialog::Draw(const ImVec2& dimensions)
 {
     DrawPopup("Open Sandbox Scene", dimensions, [&]()
@@ -77,12 +66,6 @@ void NewSceneDialog::Draw(const ImVec2& dimensions)
             ClosePopup();
         }
     });
-}
-
-SaveSceneDialog::SaveSceneDialog(ecs::Ecs world)
-    : ModalDialog{DialogSize},
-      m_world{world}
-{
 }
 
 void SaveSceneDialog::Open(asset::AssetMap assets)
@@ -206,13 +189,6 @@ auto SaveSceneDialog::SelectFilter() -> std::function<bool(Entity)>
     return m_layerInclusionType == LayerInclusionAll
         ? BuildSimpleFilter(m_includePersistent)
         : BuildLayerFilter(m_includePersistent, m_includedLayers);
-}
-
-LoadSceneDialog::LoadSceneDialog(ecs::Ecs world, NcScene* ncScene)
-    : ModalDialog{DialogSize},
-      m_world{world},
-      m_ncScene{ncScene}
-{
 }
 
 void LoadSceneDialog::Open(asset::NcAsset* ncAsset)
