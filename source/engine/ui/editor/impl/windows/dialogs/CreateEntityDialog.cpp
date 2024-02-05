@@ -12,10 +12,16 @@ void CreateEntityDialog::Draw(const ImVec2& dimensions, Entity& selectedEntity)
         ImGui::Checkbox("persistent", &m_persistentFlag);
         ImGui::Checkbox("noCollisionNotifications", &m_noCollisionFlag);
         ImGui::Checkbox("noSerialize", &m_noSerializeFlag);
+        ui::InputVector3(m_position, "position");
+        ui::InputAngles(m_rotation, "rotation");
+        ui::InputScale(m_scale, "scale");
 
         if (ImGui::Button("Create"))
         {
             selectedEntity = m_world.Emplace<Entity>({
+                .position = m_position,
+                .rotation = Quaternion::FromEulerAngles(m_rotation),
+                .scale = m_scale,
                 .parent = selectedEntity,
                 .tag = m_tag,
                 .layer = m_layer,

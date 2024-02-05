@@ -34,9 +34,9 @@ void Inspector::Draw(ecs::Ecs world, Entity entity, CreateEntityDialog& createEn
 
         ElementHeader("Entity");
         DragAndDropSource<Entity>(&entity);
-        ImGui::Text("Index %d", entity.Index());
-        ImGui::Text("Layer %d", entity.Layer());
-        if (ImGui::TreeNodeEx("flags"))
+        ImGui::Text("Index: %d", entity.Index());
+        ImGui::Text("Layer: %d", entity.Layer());
+        if (ImGui::TreeNodeEx("Flags"))
         {
             ImGui::BeginDisabled(true);
             auto isStatic = entity.IsStatic();
