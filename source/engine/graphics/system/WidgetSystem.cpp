@@ -9,9 +9,9 @@ auto GetMeshWireframeView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::
     static const auto defaultMeshView = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::CubeMesh);
 
     if (worldView.Contains<nc::graphics::MeshRenderer>(target))
-        return worldView.Get<nc::graphics::MeshRenderer>(target)->GetMeshView();
+        return worldView.Get<nc::graphics::MeshRenderer>(target).GetMeshView();
     else if (worldView.Contains<nc::graphics::ToonRenderer>(target))
-        return worldView.Get<nc::graphics::ToonRenderer>(target)->GetMeshView();
+        return worldView.Get<nc::graphics::ToonRenderer>(target).GetMeshView();
     else
         return defaultMeshView;
 }
@@ -72,35 +72,35 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
         if (!renderer.target.Valid())
             continue;
 
-        const auto targetTransform = worldView.Get<Transform>(renderer.target);
-        if (!targetTransform)
+        if (!worldView.Contains<Transform>(renderer.target))
         {
             renderer.target = Entity::Null();
             continue;
         }
 
+        const auto& targetTransform = worldView.Get<Transform>(renderer.target);
         switch (renderer.source)
         {
             case WireframeSource::Renderer:
             {
                 state.wireframeData.emplace_back(
-                    targetTransform->TransformationMatrix(),
+                    targetTransform.TransformationMatrix(),
                     GetMeshWireframeView(renderer.target, worldView)
                 );
                 break;
             }
             case WireframeSource::Collider:
             {
-                const auto collider = worldView.Get<physics::Collider>(renderer.target);
-                if (!collider)
+                if (!worldView.Contains<physics::Collider>(renderer.target))
                 {
                     renderer.target = Entity::Null();
                     continue;
                 }
 
+                const auto& collider = worldView.Get<physics::Collider>(renderer.target);
                 state.wireframeData.emplace_back(
-                    CalculateColliderWireframeMatrix(targetTransform->TransformationMatrix(), collider->GetInfo()),
-                    GetColliderWireframeView(collider->GetType())
+                    CalculateColliderWireframeMatrix(targetTransform.TransformationMatrix(), collider.GetInfo()),
+                    GetColliderWireframeView(collider.GetType())
                 );
                 break;
             }

@@ -72,20 +72,11 @@ void SceneGraph::Draw(ecs::Ecs world)
 void SceneGraph::SetEntitySelection(ecs::Ecs world, Entity entity)
 {
     m_selectedEntity = entity;
-    auto entityRenderer = world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe);
-    NC_ASSERT(entityRenderer, "Editor's selected entity renderer is gone");
-    entityRenderer->target = m_selectedEntity;
-
-    auto colliderRenderer = world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe);
-    NC_ASSERT(colliderRenderer, "Editor's selected collider renderer is gone");
-    if (!entity.Valid() || !world.Contains<physics::Collider>(entity))
-    {
-        colliderRenderer->target = Entity::Null();
-    }
-    else
-    {
-        colliderRenderer->target = m_selectedEntity;
-    }
+    world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
+    world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
+        (entity.Valid() && world.Contains<physics::Collider>(entity))
+        ? entity
+        : Entity::Null();
 }
 
 void SceneGraph::EnsureSelection(ecs::Ecs world)
