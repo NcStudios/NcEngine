@@ -5,7 +5,8 @@ using namespace nc;
 
 namespace nc
 {
-Registry g_registry{10u};
+ecs::ComponentRegistry g_impl{10u};
+Registry g_registry{g_impl};
 
 namespace ecs::detail
 {
@@ -47,9 +48,9 @@ class Transform_unit_tests : public ::testing::Test
 
         static void SetUpTestSuite()
         {
-            g_registry.RegisterComponentType<nc::Tag>();
-            g_registry.RegisterComponentType<nc::Transform>();
-            g_registry.RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
+            g_impl.RegisterType<nc::Tag>(10);
+            g_impl.RegisterType<nc::Transform>(10);
+            g_impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
         }
 };
 

@@ -24,7 +24,7 @@ class Registry : public StableAddress
     using index_type = Entity::index_type;
 
     public:
-        explicit Registry(size_t maxEntities);
+        explicit Registry(ecs::ComponentRegistry& impl);
 
         /** Entity Functions */
         template<std::same_as<Entity> T>
@@ -49,7 +49,7 @@ class Registry : public StableAddress
         template<PooledComponent T, class... Args>
         auto Add(Entity entity, Args&&... args) -> T*
         {
-            return m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
+            return &m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
         }
 
         template<PooledComponent T>
@@ -67,13 +67,13 @@ class Registry : public StableAddress
         template<PooledComponent T>
         auto Get(Entity entity) -> T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         template<PooledComponent T>
         auto Get(Entity entity) const -> const T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         template<PooledComponent T>
@@ -85,54 +85,48 @@ class Registry : public StableAddress
         template<PooledComponent T, std::predicate<const T&, const T&> Predicate>
         void Sort(Predicate&& comparesLessThan)
         {
-            m_impl.GetPool<T>().Sort(std::forward<Predicate>(comparesLessThan));
+            m_impl->GetPool<T>().Sort(std::forward<Predicate>(comparesLessThan));
         }
 
         template<PooledComponent T>
         void Reserve(size_t additionalRequiredCount)
         {
-            m_impl.GetPool<T>().Reserve(additionalRequiredCount);
-        }
-
-        template<PooledComponent T>
-        void RegisterComponentType(ComponentHandler<T> handler = {})
-        {
-            m_impl.RegisterType<T>(m_maxEntities, std::move(handler));
+            m_impl->GetPool<T>().Reserve(additionalRequiredCount);
         }
 
         // TODO: get manager?
         template<PooledComponent T>
         auto Handler() -> ComponentHandler<T>&
         {
-            return m_impl.GetPool<T>()->Handler();
+            return m_impl->GetPool<T>()->Handler();
         }
 
         template<PooledComponent T>
             requires StoragePolicy<T>::EnableOnAddCallbacks
         auto OnAdd() -> Signal<T&>&
         {
-            return m_impl.GetPool<T>().OnAdd();
+            return m_impl->GetPool<T>().OnAdd();
         }
 
         template<PooledComponent T>
             requires StoragePolicy<T>::EnableOnCommitCallbacks
         auto OnCommit() -> Signal<T&>&
         {
-            return m_impl.GetPool<T>().OnCommit();
+            return m_impl->GetPool<T>().OnCommit();
         }
 
         template<PooledComponent T>
             requires StoragePolicy<T>::EnableOnRemoveCallbacks
         auto OnRemove() -> Signal<Entity>&
         {
-            return m_impl.GetPool<T>().OnRemove();
+            return m_impl->GetPool<T>().OnRemove();
         }
 
         /** FreeComponent Specific Functions */
         template<std::derived_from<FreeComponent> T, class... Args>
         auto Add(Entity entity, Args&&... args) -> T*
         {
-            return m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
+            return &m_ecs.Emplace<T>(entity, std::forward<Args>(args)...);
         }
 
         template<std::derived_from<FreeComponent> T>
@@ -150,63 +144,63 @@ class Registry : public StableAddress
         template<std::derived_from<FreeComponent> T>
         auto Get(Entity entity) -> T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         template<std::derived_from<FreeComponent> T>
         auto Get(Entity entity) const -> const T*
         {
-            return m_ecs.Get<T>(entity);
+            return &m_ecs.Get<T>(entity);
         }
 
         /** Engine Functions */
         template<PooledComponent T>
         auto StorageFor() -> ecs::ComponentPool<T>*
         {
-            return &m_impl.GetPool<T>();
+            return &m_impl->GetPool<T>();
         }
 
         template<PooledComponent T>
         auto StorageFor() const -> const ecs::ComponentPool<T>*
         {
-            return &m_impl.GetPool<T>();
+            return &m_impl->GetPool<T>();
         }
 
         template<std::same_as<Entity> T>
         auto StorageFor() -> ecs::EntityPool*
         {
-            return &m_impl.GetPool<Entity>();
+            return &m_impl->GetPool<Entity>();
         }
 
         template<std::same_as<Entity> T>
         auto StorageFor() const -> const ecs::EntityPool*
         {
-            return &m_impl.GetPool<Entity>();
+            return &m_impl->GetPool<Entity>();
         }
 
         auto GetBasePools()
         {
-            return m_impl.GetComponentPools();
+            return m_impl->GetComponentPools();
         }
 
         void CommitStagedChanges()
         {
-            m_impl.CommitPendingChanges();
+            m_impl->CommitPendingChanges();
         }
 
         void Clear()
         {
-            m_impl.ClearSceneData();
+            m_impl->ClearSceneData();
         }
 
         void Reset()
         {
-            m_impl.Clear();
+            m_impl->Clear();
         }
 
         auto GetImpl() -> ecs::ComponentRegistry&
         {
-            return m_impl;
+            return *m_impl;
         }
 
         auto GetEcs() -> ecs::Ecs
@@ -215,8 +209,7 @@ class Registry : public StableAddress
         }
 
     private:
-        ecs::ComponentRegistry m_impl;
+        ecs::ComponentRegistry* m_impl;
         ecs::Ecs m_ecs;
-        size_t m_maxEntities;
 };
 } // namespace nc

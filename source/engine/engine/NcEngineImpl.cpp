@@ -48,8 +48,9 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
-      m_modules{BuildModuleRegistry(m_registry.get(), &m_window, config)},
-      m_executor{task::BuildContext(m_modules.GetAllModules())},
+      m_legacyRegistry{*m_registry},
+      m_modules{BuildModuleRegistry(&m_legacyRegistry, &m_window, config)},
+      m_executor{task::BuildContext(m_modules->GetAllModules())},
       m_isRunning{false}
 {
 }
@@ -64,9 +65,9 @@ void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
 {
     NC_LOG_INFO("Starting engine");
     m_isRunning = true;
-    auto ncScene = m_modules.Get<NcScene>();
+    auto ncScene = m_modules->Get<NcScene>();
     ncScene->Queue(std::move(initialScene));
-    ncScene->LoadQueuedScene(m_registry.get(), m_modules);
+    ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
     Run();
 }
 
@@ -89,27 +90,27 @@ void NcEngineImpl::Shutdown() noexcept
     }
 }
 
-auto NcEngineImpl::GetRegistry() noexcept -> Registry*
+auto NcEngineImpl::GetComponentRegistry() noexcept -> ecs::ComponentRegistry&
 {
-    return m_registry.get();
+    return *m_registry;
 }
 
 auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
 {
-    return &m_modules;
+    return m_modules.get();
 }
 
 void NcEngineImpl::RebuildTaskGraph()
 {
     NC_LOG_INFO("Building engine task graph");
-    m_executor.SetContext(task::BuildContext(m_modules.GetAllModules()));
+    m_executor.SetContext(task::BuildContext(m_modules->GetAllModules()));
 }
 
 void NcEngineImpl::Clear()
 {
     NC_LOG_TRACE("Clearing engine state");
-    m_modules.Get<NcScene>()->UnloadActiveScene();
-    for (auto& module : m_modules.GetAllModules())
+    m_modules->Get<NcScene>()->UnloadActiveScene();
+    for (auto& module : m_modules->GetAllModules())
     {
         module->Clear();
     }
@@ -119,7 +120,7 @@ void NcEngineImpl::Clear()
 
 void NcEngineImpl::Run()
 {
-    auto* ncScene = m_modules.Get<NcScene>();
+    auto* ncScene = m_modules->Get<NcScene>();
 
     while(m_isRunning)
     {
@@ -130,7 +131,7 @@ void NcEngineImpl::Run()
         if (ncScene->IsTransitionScheduled())
         {
             Clear();
-            ncScene->LoadQueuedScene(m_registry.get(), m_modules);
+            ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
         }
     }
 

@@ -324,8 +324,8 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
         const Entity entityB = manifold.Event().second;
         auto* transformA = m_registry->Get<Transform>(entityA);
         auto* transformB = m_registry->Get<Transform>(entityB);
-        auto* physBodyA = m_registry->Get<PhysicsBody>(entityA);
-        auto* physBodyB = m_registry->Get<PhysicsBody>(entityB);
+        auto* physBodyA = m_registry->Contains<PhysicsBody>(entityA) ? m_registry->Get<PhysicsBody>(entityA) : nullptr;
+        auto* physBodyB = m_registry->Contains<PhysicsBody>(entityB) ? m_registry->Get<PhysicsBody>(entityB) : nullptr;
 
         if constexpr(EnableDirectPositionCorrection)
         {
