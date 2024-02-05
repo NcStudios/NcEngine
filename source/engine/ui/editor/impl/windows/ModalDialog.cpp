@@ -72,7 +72,7 @@ void NewSceneDialog::Draw(const ImVec2& dimensions)
         ImGui::TextWrapped("%s", "Are you sure you want to open a new sandbox scene?");
         if (ImGui::Button("Create Scene"))
         {
-            m_ncScene->Queue(std::make_unique<SandboxScene>());
+            m_ncScene->Queue(std::make_unique<SandboxScene>(Entity::Null()));
             m_ncScene->ScheduleTransition();
             ClosePopup();
         }
@@ -234,7 +234,7 @@ void LoadSceneDialog::Draw(const ImVec2& dimensions)
         {
             if (m_openType == OpenInNewScene && std::filesystem::is_regular_file(m_fileName))
             {
-                m_ncScene->Queue(std::make_unique<SandboxScene>(m_fileName));
+                m_ncScene->Queue(std::make_unique<SandboxScene>(Entity::Null(), m_fileName));
                 m_ncScene->ScheduleTransition();
                 ClosePopup();
             }

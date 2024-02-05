@@ -4,7 +4,7 @@
 
 namespace
 {
-auto GetMeshWireframeView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRenderer, nc::graphics::ToonRenderer> worldView) -> nc::MeshView
+auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRenderer, nc::graphics::ToonRenderer> worldView) -> nc::MeshView
 {
     static const auto defaultMeshView = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::CubeMesh);
 
@@ -16,7 +16,7 @@ auto GetMeshWireframeView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::
         return defaultMeshView;
 }
 
-auto GetColliderWireframeView(nc::physics::ColliderType type) -> nc::MeshView
+auto GetMeshView(nc::physics::ColliderType type) -> nc::MeshView
 {
     switch(type)
     {
@@ -48,7 +48,7 @@ auto GetColliderWireframeView(nc::physics::ColliderType type) -> nc::MeshView
     }
 }
 
-auto CalculateColliderWireframeMatrix(DirectX::FXMMATRIX worldSpace, const nc::physics::VolumeInfo& info) -> DirectX::XMMATRIX
+auto CalculateWireframeMatrix(DirectX::FXMMATRIX worldSpace, const nc::physics::VolumeInfo& info) -> DirectX::XMMATRIX
 {
     const auto scale = DirectX::XMLoadVector3(&info.scale);
     const auto offset = DirectX::XMLoadVector3(&info.offset);
@@ -78,15 +78,12 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
             continue;
         }
 
-        const auto& targetTransform = worldView.Get<Transform>(renderer.target);
+        const auto& targetMatrix = worldView.Get<Transform>(renderer.target).TransformationMatrix();
         switch (renderer.source)
         {
             case WireframeSource::Renderer:
             {
-                state.wireframeData.emplace_back(
-                    targetTransform.TransformationMatrix(),
-                    GetMeshWireframeView(renderer.target, worldView)
-                );
+                state.wireframeData.emplace_back(targetMatrix, GetMeshView(renderer.target, worldView));
                 break;
             }
             case WireframeSource::Collider:
@@ -97,11 +94,8 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                     continue;
                 }
 
-                const auto& collider = worldView.Get<physics::Collider>(renderer.target);
-                state.wireframeData.emplace_back(
-                    CalculateColliderWireframeMatrix(targetTransform.TransformationMatrix(), collider.GetInfo()),
-                    GetColliderWireframeView(collider.GetType())
-                );
+                const auto& info = worldView.Get<physics::Collider>(renderer.target).GetInfo();
+                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, info), GetMeshView(info.type));
                 break;
             }
         }

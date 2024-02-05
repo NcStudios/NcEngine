@@ -39,9 +39,9 @@ EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
 {
 }
 
-void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules)
+void EditorUI::Draw(EditorContext& ctx)
 {
-    auto& ncAsset = *modules.Get<asset::NcAsset>();
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
     const auto dimensions = []()
     {
         const auto dim = window::GetDimensions();
@@ -49,14 +49,12 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     }();
 
     DrawOverlays(dimensions);
-    switch (ProcessInput(hotkeys, ncAsset))
+    switch (ctx.openState = ProcessInput(ctx.hotkeys, ncAsset))
     {
         case OpenState::ClosePersisted: { return; }
-        case OpenState::OpenPersisted:  { break;  }
-        case OpenState::Opened:         { break;  }
         case OpenState::Closed:
         {
-            m_sceneGraph.OnClose(world);
+            m_sceneGraph.OnClose(ctx);
             return;
         }
     }
@@ -67,11 +65,10 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
     {
         DrawMenu(ncAsset);
-        m_sceneGraph.Draw(world);
+        m_sceneGraph.Draw(ctx);
     });
 
-    const auto selectedEntity = m_sceneGraph.GetSelectedEntity();
-    if (!selectedEntity.Valid())
+    if (!ctx.selectedEntity.Valid())
     {
         return;
     }
@@ -79,7 +76,7 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
     {
-        m_inspector.Draw(world, selectedEntity);
+        m_inspector.Draw(ctx);
     });
 }
 

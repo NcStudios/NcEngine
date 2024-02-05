@@ -22,22 +22,22 @@ void ElementHeader(std::string_view name)
 
 namespace nc::ui::editor
 {
-void Inspector::Draw(ecs::Ecs world, Entity entity)
+void Inspector::Draw(EditorContext& ctx)
 {
     ChildWindow("Inspector", [&]()
     {
         if (ImGui::BeginPopupContextWindow(nullptr, g_contextMenuFlags))
         {
-            EntityContextMenu(entity, world);
+            EntityContextMenu(ctx.selectedEntity, ctx.world);
             ImGui::EndPopup();
         }
 
         ElementHeader("Entity");
-        DragAndDropSource<Entity>(&entity);
-        ImGui::Text("Index   %d", entity.Index());
-        ImGui::Text("Layer   %d", entity.Layer());
-        ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
-        std::ranges::for_each(world.GetComponentPools(), [entity](auto&& pool)
+        DragAndDropSource<Entity>(&ctx.selectedEntity);
+        ImGui::Text("Index   %d", ctx.selectedEntity.Index());
+        ImGui::Text("Layer   %d", ctx.selectedEntity.Layer());
+        ImGui::Text("Static  %s", ctx.selectedEntity.IsStatic() ? "True" : "False");
+        std::ranges::for_each(ctx.world.GetComponentPools(), [entity = ctx.selectedEntity](auto&& pool)
         {
             if (pool->HasDrawUI() && pool->Contains(entity))
             {

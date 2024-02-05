@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/editor/Editor.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
 
@@ -17,22 +18,20 @@ namespace ui::editor
 class SceneGraph
 {
     public:
-        void Draw(ecs::Ecs world);
-        auto GetSelectedEntity() const noexcept -> Entity { return m_selectedEntity; }
-        void OnClose(ecs::Ecs world);
+        void Draw(EditorContext& ctx);
+        void OnClose(EditorContext& ctx);
 
     private:
-        Entity m_selectedEntity = Entity::Null();
         Entity m_selectedEntityWireframe = Entity::Null();
         Entity m_selectedColliderWireframe = Entity::Null();
         ImGuiTextFilter m_tagFilter;
 
-        void SetEntitySelection(ecs::Ecs world, Entity entity);
-        void EnsureSelection(ecs::Ecs world);
+        void SetEntitySelection(EditorContext& ctx, Entity entity);
+        void EnsureSelection(EditorContext& ctx);
         auto PassFilter(Tag& tag) -> bool;
-        void Graph(ecs::Ecs world);
-        void GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform);
-        void GraphContextMenu(ecs::Ecs world);
+        void Graph(EditorContext& ctx);
+        void GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transform& transform);
+        void GraphContextMenu(EditorContext& ctx);
 };
 } // namespace ui::editor
 } // namespace nc

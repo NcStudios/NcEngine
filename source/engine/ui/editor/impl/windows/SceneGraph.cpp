@@ -16,15 +16,17 @@ auto IsRoot(nc::Transform& transform) -> bool
 
 namespace nc::ui::editor
 {
-void SceneGraph::Draw(ecs::Ecs world)
+void SceneGraph::Draw(EditorContext& ctx)
 {
     {
         static bool _ = [&]()
         {
+            auto& world = ctx.world;
             // TODO: move this to c'tor once other PR is merged
             // TODO: should go in 'Internal' bucket
             // TODO: clear selected entity on editor close, or at least clear wireframe
             m_selectedEntityWireframe = world.Emplace<Entity>({
+                .parent = ctx.objectBucket,
                 .tag = "SelectedEntity",
                 .flags = Entity::Flags::Persistent |
                          Entity::Flags::Internal |
@@ -38,6 +40,7 @@ void SceneGraph::Draw(ecs::Ecs world)
             );
 
             m_selectedColliderWireframe = world.Emplace<Entity>({
+                .parent = ctx.objectBucket,
                 .tag = "SelectedCollider",
                 .flags = Entity::Flags::Persistent |
                          Entity::Flags::Internal |
@@ -54,41 +57,41 @@ void SceneGraph::Draw(ecs::Ecs world)
         }();
     }
 
-    EnsureSelection(world);
+    EnsureSelection(ctx);
     m_tagFilter.Draw("search");
 
     ChildWindow("Entity List", [&]()
     {
         if (IsWindowBackgroundClicked())
         {
-            SetEntitySelection(world, Entity::Null());
+            SetEntitySelection(ctx, Entity::Null());
         }
 
-        GraphContextMenu(world);
-        Graph(world);
+        GraphContextMenu(ctx);
+        Graph(ctx);
     });
 }
 
-void SceneGraph::OnClose(ecs::Ecs world)
+void SceneGraph::OnClose(EditorContext& ctx)
 {
-    SetEntitySelection(world, Entity::Null());
+    SetEntitySelection(ctx, Entity::Null());
 }
 
-void SceneGraph::SetEntitySelection(ecs::Ecs world, Entity entity)
+void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
 {
-    m_selectedEntity = entity;
-    world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
-    world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
-        (entity.Valid() && world.Contains<physics::Collider>(entity))
+    ctx.selectedEntity = entity;
+    ctx.world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
+    ctx.world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
+        (entity.Valid() && ctx.world.Contains<physics::Collider>(entity))
         ? entity
         : Entity::Null();
 }
 
-void SceneGraph::EnsureSelection(ecs::Ecs world)
+void SceneGraph::EnsureSelection(EditorContext& ctx)
 {
-    if (m_selectedEntity.Valid() && !world.Contains<Transform>(m_selectedEntity))
+    if (ctx.selectedEntity.Valid() && !ctx.world.Contains<Transform>(ctx.selectedEntity))
     {
-        SetEntitySelection(world, Entity::Null());
+        SetEntitySelection(ctx, Entity::Null());
     }
 }
 
@@ -97,42 +100,42 @@ auto SceneGraph::PassFilter(Tag& tag) -> bool
     return m_tagFilter.PassFilter(tag.Value().data());
 }
 
-void SceneGraph::Graph(ecs::Ecs world)
+void SceneGraph::Graph(EditorContext& ctx)
 {
-    for(auto entity : world.GetAll<Entity>())
+    for(auto entity : ctx.world.GetAll<Entity>())
     {
-        auto& transform = world.Get<Transform>(entity);
-        auto& tag = world.Get<Tag>(entity);
+        auto& transform = ctx.world.Get<Transform>(entity);
+        auto& tag = ctx.world.Get<Tag>(entity);
         if (IsRoot(transform) && PassFilter(tag))
         {
-            GraphNode(world, entity, tag, transform);
+            GraphNode(ctx, entity, tag, transform);
         }
     }
 }
 
-void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform)
+void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transform& transform)
 {
     IMGUI_SCOPE(ImGuiId, entity.Index());
-    const auto flags = m_selectedEntity == entity ? ImGuiTreeNodeFlags_Framed : 0;
+    const auto flags = ctx.selectedEntity == entity ? ImGuiTreeNodeFlags_Framed : 0;
     const auto isNodeExpanded = ImGui::TreeNodeEx(tag.Value().data(), flags);
 
     if (ImGui::IsItemClicked())
     {
-        SetEntitySelection(world, entity);
+        SetEntitySelection(ctx, entity);
     }
     else if (ImGui::BeginPopupContextItem())
     {
-        const auto selectedEntityFromContext = EntityContextMenu(entity, world);
-        if (selectedEntityFromContext != m_selectedEntity)
+        const auto selectedEntityFromContext = EntityContextMenu(entity, ctx.world);
+        if (selectedEntityFromContext != ctx.selectedEntity)
         {
-            SetEntitySelection(world, selectedEntityFromContext);
+            SetEntitySelection(ctx, selectedEntityFromContext);
         }
 
         ImGui::EndPopup();
     }
 
     DragAndDropSource<Entity>(&entity);
-    DragAndDropTarget<Entity>([entity, world](Entity* source) mutable
+    DragAndDropTarget<Entity>([entity, world = ctx.world](Entity* source) mutable
     {
         world.Get<Transform>(*source).SetParent(entity);
     });
@@ -141,23 +144,23 @@ void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& t
     {
         for(auto child : transform.Children())
         {
-            GraphNode(world, child, world.Get<Tag>(child), world.Get<Transform>(child));
+            GraphNode(ctx, child, ctx.world.Get<Tag>(child), ctx.world.Get<Transform>(child));
         }
 
         ImGui::TreePop();
     }
 }
 
-void SceneGraph::GraphContextMenu(ecs::Ecs world)
+void SceneGraph::GraphContextMenu(EditorContext& ctx)
 {
     if (ImGui::BeginPopupContextWindow())
     {
         if (ImGui::Selectable("New Entity"))
-            SetEntitySelection(world, world.Emplace<Entity>(EntityInfo{}));
+            SetEntitySelection(ctx, ctx.world.Emplace<Entity>(EntityInfo{}));
         else if (ImGui::Selectable("New Static Entity"))
-            SetEntitySelection(world, world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static}));
+            SetEntitySelection(ctx, ctx.world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static}));
         else
-            SetEntitySelection(world, Entity::Null());
+            SetEntitySelection(ctx, Entity::Null());
 
         ImGui::EndPopup();
     }

@@ -16,22 +16,40 @@ struct EditorHotkeys
     input::KeyCode openLoadSceneDialog = input::KeyCode::F3;
 };
 
+enum class OpenState
+{
+    Closed,
+    ClosePersisted,
+    Opened,
+    OpenPersisted
+};
+
+struct EditorContext
+{
+    ecs::Ecs world;
+    ModuleProvider modules;
+    Entity selectedEntity;
+    Entity objectBucket;
+    EditorHotkeys hotkeys;
+    OpenState openState;
+};
+
 class Editor
 {
     public:
-        explicit Editor(const EditorHotkeys& hotkeys) noexcept
-            : m_hotkeys{hotkeys} {}
+        explicit Editor(const EditorContext& ctx) noexcept
+            : m_ctx{ctx} {}
 
         virtual ~Editor() = default;
         virtual void Draw(ecs::Ecs world) = 0;
 
-        auto GetHotkeys() const noexcept -> const EditorHotkeys&
+        auto GetContext() const noexcept -> const EditorContext&
         {
-            return m_hotkeys;
+            return m_ctx;
         }
 
-    private:
-        EditorHotkeys m_hotkeys;
+    protected:
+        EditorContext m_ctx;
 };
 
 auto BuildEditor(ecs::Ecs world,

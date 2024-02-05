@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/editor/Editor.h"
 #include "windows/FpsOverlay.h"
 #include "windows/Inspector.h"
 #include "windows/ModalDialog.h"
@@ -17,18 +18,10 @@ struct EditorHotkeys;
 
 class EditorUI
 {
-    enum class OpenState
-    {
-        Closed,
-        ClosePersisted,
-        Opened,
-        OpenPersisted
-    };
-
     public:
         explicit EditorUI(ecs::Ecs world, ModuleProvider modules);
 
-        void Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules);
+        void Draw(EditorContext& ctx);
 
     private:
         SceneGraph m_sceneGraph;
