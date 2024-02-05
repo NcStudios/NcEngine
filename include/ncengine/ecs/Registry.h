@@ -211,6 +211,5 @@ class Registry : public StableAddress
     private:
         ecs::ComponentRegistry* m_impl;
         ecs::Ecs m_ecs;
-        // size_t m_maxEntities;
 };
 } // namespace nc
