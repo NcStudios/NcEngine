@@ -1,5 +1,8 @@
 #include "EditorUI.h"
+#include "ui/editor/Editor.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
 
@@ -29,11 +32,33 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-void EditorUI::Draw(ecs::Ecs world)
+EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
+    : m_newSceneDialog{modules.Get<NcScene>()},
+      m_saveSceneDialog{world},
+      m_loadSceneDialog{world, modules.Get<NcScene>()}
 {
-    RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
-    Window("Scene Graph", [&]()
+}
+
+void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules)
+{
+    auto& ncAsset = *modules.Get<asset::NcAsset>();
+    const auto dimensions = []()
     {
+        const auto dim = window::GetDimensions();
+        return ImVec2{dim.x, dim.y};
+    }();
+
+    DrawOverlays(dimensions);
+    ProcessInput(hotkeys, ncAsset);
+    if(!m_open)
+        return;
+
+    DrawDialogs(dimensions);
+
+    RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
+    Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
+    {
+        DrawMenu(ncAsset);
         m_sceneGraph.Draw(world);
     });
 
@@ -48,5 +73,63 @@ void EditorUI::Draw(ecs::Ecs world)
     {
         m_inspector.Draw(world, selectedEntity);
     });
+}
+
+void EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset)
+{
+    if(KeyDown(hotkeys.toggleEditor))
+        m_open = !m_open;
+
+    if (!m_open)
+        return;
+
+    if (KeyDown(hotkeys.openNewSceneDialog))
+        m_newSceneDialog.Open();
+    else if (KeyDown(hotkeys.openSaveSceneDialog))
+        m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+    else if (KeyDown(hotkeys.openLoadSceneDialog))
+        m_loadSceneDialog.Open(&ncAsset);
+}
+
+void EditorUI::DrawOverlays(const ImVec2& dimensions)
+{
+    if (m_fpsOverlay.IsOpen())
+        m_fpsOverlay.Draw(dimensions);
+}
+
+void EditorUI::DrawDialogs(const ImVec2& dimensions)
+{
+    if (m_newSceneDialog.IsOpen())
+        m_newSceneDialog.Draw(dimensions);
+    else if (m_saveSceneDialog.IsOpen())
+        m_saveSceneDialog.Draw(dimensions);
+    else if (m_loadSceneDialog.IsOpen())
+        m_loadSceneDialog.Draw(dimensions);
+}
+
+void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
+{
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Scene"))
+        {
+            if (ImGui::MenuItem("New"))
+                m_newSceneDialog.Open();
+            if (ImGui::MenuItem("Save"))
+                m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+            if (ImGui::MenuItem("Load"))
+                m_loadSceneDialog.Open(&ncAsset);
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Debug"))
+        {
+            if (ImGui::MenuItem("FPS Overlay"))
+                m_fpsOverlay.ToggleOpen();
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
 }
 } // namespace nc::ui::editor

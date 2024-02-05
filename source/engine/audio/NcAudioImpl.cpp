@@ -240,12 +240,12 @@ void NcAudioImpl::MixToBuffer(double* buffer)
     const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
     std::memset(buffer, 0, bufferSizeInBytes);
 
-    const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
-    if(!listenerTransform)
+    if(!m_registry->Contains<Entity>(m_listener))
     {
         throw NcError("Invalid listener registered");
     }
 
+    const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
     const auto listenerPosition = listenerTransform->Position();
     const auto rightEar = listenerTransform->Right();
 

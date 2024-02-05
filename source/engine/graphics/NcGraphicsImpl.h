@@ -1,7 +1,8 @@
 #pragma once
 
 #include "IGraphics.h"
-#include "graphics/NcGraphics.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/module/ModuleProvider.h"
 #include "system/CameraSystem.h"
 #include "system/EnvironmentSystem.h"
 #include "system/ObjectSystem.h"
@@ -15,14 +16,12 @@
 
 namespace nc
 {
-namespace asset
-{
-class NcAsset;
-} // namespace asset
+class Scene;
 
 namespace config
 {
 struct GraphicsSettings;
+struct MemorySettings;
 struct ProjectSettings;
 } // namespace config
 
@@ -38,7 +37,8 @@ struct ShaderResourceBus;
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
-                         asset::NcAsset* assetModule,
+                         const config::MemorySettings& memorySettings,
+                         ModuleProvider modules,
                          Registry* registry,
                          window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
 
@@ -47,7 +47,7 @@ class NcGraphicsImpl : public NcGraphics
     public:
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                        Registry* registry,
-                       asset::NcAsset* assetModule,
+                       ModuleProvider modules,
                        std::unique_ptr<IGraphics> graphics,
                        ShaderResourceBus&& shaderResourceBus,
                        window::WindowImpl* window);
@@ -66,7 +66,6 @@ class NcGraphicsImpl : public NcGraphics
 
     private:
         Registry* m_registry;
-        asset::NcAsset* m_assetModule;
         std::unique_ptr<IGraphics> m_graphics;
         CameraSystem m_cameraSystem;
         EnvironmentSystem m_environmentSystem;

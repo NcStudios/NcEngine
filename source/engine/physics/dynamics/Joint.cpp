@@ -108,9 +108,13 @@ void JointSystem::UpdateJoint(Joint& joint, float dt)
     joint.bias = XMVectorScale(XMVectorSubtract(pB, pA), -joint.biasFactor * (1.0f / dt));
 
     /** Fetch inverse mass and inertia of each body */
+    NC_ASSERT(
+        m_registry->Contains<PhysicsBody>(joint.entityA) &&
+        m_registry->Contains<PhysicsBody>(joint.entityB),
+        "UpdateJoint - Entity does not have a PhysicsBody"
+    );
     joint.bodyA = m_registry->Get<PhysicsBody>(joint.entityA);
     joint.bodyB = m_registry->Get<PhysicsBody>(joint.entityB);
-    NC_ASSERT(joint.bodyA && joint.bodyB, "UpdateJoint - Entity does not have a PhysicsBody");
     auto invMassA = joint.bodyA->GetInverseMass();
     const auto& invInertiaA = joint.bodyA->GetInverseInertia();
     auto invMassB = joint.bodyB->GetInverseMass();

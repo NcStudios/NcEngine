@@ -67,8 +67,14 @@ void Widget()
 namespace nc::sample
 {
 CollisionBenchmark::CollisionBenchmark(SampleUI* ui)
+    : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
+}
+
+CollisionBenchmark::~CollisionBenchmark() noexcept
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)

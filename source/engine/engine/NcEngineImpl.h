@@ -24,7 +24,7 @@ namespace nc
             window::WindowImpl m_window;
             std::unique_ptr<ecs::ComponentRegistry> m_registry;
             Registry m_legacyRegistry; // delete once all usage is cutover
-            ModuleRegistry m_modules;
+            std::unique_ptr<ModuleRegistry> m_modules;
             task::Executor m_executor;
             bool m_isRunning;
 

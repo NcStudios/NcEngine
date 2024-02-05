@@ -281,10 +281,9 @@ TEST_F(Registry_unit_tests, GetComponent_Exists_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponent_BadEntity_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponent_BadEntity_Throws)
 {
-    auto* actual = registry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None});
-    EXPECT_EQ(actual, nullptr);
+    EXPECT_THROW(registry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None}), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_ExistsStaged_ReturnsPointer)
@@ -297,11 +296,10 @@ TEST_F(Registry_unit_tests, GetComponent_ExistsStaged_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponent_DoesNotExist_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponent_DoesNotExist_Throws)
 {
     auto handle = registry.Add<Entity>({});
-    auto* ptr = registry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(registry.Get<Fake1>(handle), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_CallAfterRemoved_ReturnsNull)
@@ -310,8 +308,7 @@ TEST_F(Registry_unit_tests, GetComponent_CallAfterRemoved_ReturnsNull)
     registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
     registry.Remove<Fake1>(handle);
-    auto* ptr = registry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(registry.Get<Fake1>(handle), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
@@ -326,11 +323,10 @@ TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_Throws)
 {
     const auto& constRegistry = registry;
-    const auto* actual = constRegistry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None});
-    EXPECT_EQ(actual, nullptr);
+    EXPECT_THROW(constRegistry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None}), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_ExistsStaged_ReturnsPointer)
@@ -344,23 +340,21 @@ TEST_F(Registry_unit_tests, GetComponentConst_ExistsStaged_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponentConst_DoesNotExist_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponentConst_DoesNotExist_Throws)
 {
     auto handle = registry.Add<Entity>({});
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(constRegistry.Get<Fake1>(handle), NcError);
 }
 
-TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_Throws)
 {
     auto handle = registry.Add<Entity>({});
     registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
     registry.Remove<Fake1>(handle);
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(constRegistry.Get<Fake1>(handle), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetParent_inPool_returnsParentEntity)
