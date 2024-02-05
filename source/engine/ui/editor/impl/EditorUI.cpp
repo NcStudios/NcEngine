@@ -43,16 +43,13 @@ EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
 void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules)
 {
     auto& ncAsset = *modules.Get<asset::NcAsset>();
-    const auto dimensions = []()
-    {
-        const auto dim = window::GetDimensions();
-        return ImVec2{dim.x, dim.y};
-    }();
-
+    const auto dimensions = ImVec2{window::GetDimensions()};
     DrawOverlays(dimensions);
     ProcessInput(hotkeys, ncAsset);
     if(!m_open)
+    {
         return;
+    }
 
     DrawDialogs(dimensions);
 
@@ -122,6 +119,7 @@ void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
                 m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
             if (ImGui::MenuItem("Load"))
                 m_loadSceneDialog.Open(&ncAsset);
+
             ImGui::EndMenu();
         }
 
@@ -129,6 +127,7 @@ void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
         {
             if (ImGui::MenuItem("FPS Overlay"))
                 m_fpsOverlay.ToggleOpen();
+
             ImGui::EndMenu();
         }
 

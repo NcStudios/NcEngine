@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CreateEntityDialog.h"
+#include "dialogs/CreateEntityDialog.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
 
