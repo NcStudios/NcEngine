@@ -13,10 +13,9 @@ auto ActiveRegistry() -> Registry*
     return g_registry;
 }
 
-Registry::Registry(size_t maxEntities)
-    : m_impl{maxEntities},
-      m_ecs{m_impl},
-      m_maxEntities{maxEntities}
+Registry::Registry(ecs::ComponentRegistry& impl)
+    : m_impl{&impl},
+      m_ecs{impl}
 {
     g_registry = this;
 }
