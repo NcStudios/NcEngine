@@ -5,3 +5,5 @@ target_sources(${NC_ENGINE_LIB}
         ModalDialog.cpp
         SceneGraph.cpp
 )
+
+add_subdirectory(dialogs)

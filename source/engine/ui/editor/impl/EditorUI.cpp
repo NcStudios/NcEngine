@@ -33,7 +33,8 @@ void WindowLayout(float width, ImVec2 pivot)
 namespace nc::ui::editor
 {
 EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
-    : m_newSceneDialog{modules.Get<NcScene>()},
+    : m_createEntityDialog{world},
+      m_newSceneDialog{modules.Get<NcScene>()},
       m_saveSceneDialog{world},
       m_loadSceneDialog{world, modules.Get<NcScene>()}
 {
@@ -53,16 +54,13 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     if(!m_open)
         return;
 
-    if (m_createEntityWindow.IsOpen())
-        m_createEntityWindow.Draw(world, m_sceneGraph.GetSelectedEntity());
-
     DrawDialogs(dimensions);
 
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
     {
         DrawMenu(ncAsset);
-        m_sceneGraph.Draw(world, m_createEntityWindow);
+        m_sceneGraph.Draw(world, m_createEntityDialog);
     });
 
     const auto selectedEntity = m_sceneGraph.GetSelectedEntity();
@@ -74,7 +72,7 @@ void EditorUI::Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
     {
-        m_inspector.Draw(world, selectedEntity, m_createEntityWindow);
+        m_inspector.Draw(world, selectedEntity, m_createEntityDialog);
     });
 }
 
@@ -102,7 +100,9 @@ void EditorUI::DrawOverlays(const ImVec2& dimensions)
 
 void EditorUI::DrawDialogs(const ImVec2& dimensions)
 {
-    if (m_newSceneDialog.IsOpen())
+    if (m_createEntityDialog.IsOpen())
+        m_createEntityDialog.Draw(dimensions, m_sceneGraph.GetSelectedEntity());
+    else if (m_newSceneDialog.IsOpen())
         m_newSceneDialog.Draw(dimensions);
     else if (m_saveSceneDialog.IsOpen())
         m_saveSceneDialog.Draw(dimensions);

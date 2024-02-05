@@ -22,13 +22,13 @@ void ElementHeader(std::string_view name)
 
 namespace nc::ui::editor
 {
-void Inspector::Draw(ecs::Ecs world, Entity entity, CreateEntityWindow& createEntityWindow)
+void Inspector::Draw(ecs::Ecs world, Entity entity, CreateEntityDialog& createEntityDialog)
 {
     ChildWindow("Inspector", [&]()
     {
         if (ImGui::BeginPopupContextWindow(nullptr, g_contextMenuFlags))
         {
-            EntityContextMenu(entity, world, createEntityWindow);
+            EntityContextMenu(entity, world, createEntityDialog);
             ImGui::EndPopup();
         }
 

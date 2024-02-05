@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ncengine/ecs/Ecs.h"
-#include "windows/CreateEntityWindow.h"
+#include "windows/CreateEntityDialog.h"
 #include "windows/FpsOverlay.h"
 #include "windows/Inspector.h"
 #include "windows/ModalDialog.h"
@@ -33,10 +33,10 @@ class EditorUI
         FpsOverlay m_fpsOverlay;
 
         // dialogs
+        CreateEntityDialog m_createEntityDialog;
         NewSceneDialog m_newSceneDialog;
         SaveSceneDialog m_saveSceneDialog;
         LoadSceneDialog m_loadSceneDialog;
-        CreateEntityWindow m_createEntityWindow;
 
         void ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset);
         void DrawMenu(asset::NcAsset& ncAsset);

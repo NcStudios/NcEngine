@@ -1,28 +1,28 @@
 #pragma once
 
+#include "ModalDialog.h"
+
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace nc::ui::editor
 {
-class CreateEntityWindow
+class CreateEntityDialog : public ModalDialog
 {
+    static constexpr auto DialogSize = Vector2{400.0f, 200.0f};
+
     public:
+        explicit CreateEntityDialog(ecs::Ecs world)
+            : ModalDialog{DialogSize}, m_world{world} {}
+
         void Open() noexcept
         {
-            m_open = true;
+            OpenPopup();
         }
 
-        auto IsOpen() const noexcept -> bool
+        void Draw(const ImVec2& dimensions, Entity& selectedEntity)
         {
-            return m_open;
-        }
-
-        void Draw(ecs::Ecs world, Entity& selectedEntity)
-        {
-            ImGui::OpenPopup("Create Entity");
-            ImGui::SetNextWindowSize(ImVec2{400.0f, 200.0f}, ImGuiCond_Once);
-            if (ImGui::BeginPopupModal("Create Entity", &m_open))
+            DrawPopup("Create Entity", dimensions, [&]()
             {
                 ui::InputText(m_tag, "tag");
                 ui::InputU8(m_layer, "layer");
@@ -33,23 +33,20 @@ class CreateEntityWindow
 
                 if (ImGui::Button("Create"))
                 {
-                    selectedEntity = world.Emplace<Entity>({
+                    selectedEntity = m_world.Emplace<Entity>({
                         .parent = selectedEntity,
                         .tag = m_tag,
                         .layer = m_layer,
                         .flags = BuildFlags()
                     });
 
-                    m_open = false;
-                    ImGui::CloseCurrentPopup();
+                    ClosePopup();
                 }
-
-                ImGui::EndPopup();
-            }
+            });
         }
 
     private:
-        bool m_open = false;
+        ecs::Ecs m_world;
         std::string m_tag = "Entity";
         uint8_t m_layer = 0;
         bool m_staticFlag = false;

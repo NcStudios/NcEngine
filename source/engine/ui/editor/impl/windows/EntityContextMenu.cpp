@@ -6,7 +6,7 @@
 
 namespace nc::ui::editor
 {
-auto EntityContextMenu(Entity entity, ecs::Ecs world, CreateEntityWindow& createEntityWindow) -> Entity
+auto EntityContextMenu(Entity entity, ecs::Ecs world, CreateEntityDialog& createEntityDialog) -> Entity
 {
     if (ImGui::Selectable("Remove Entity"))
     {
@@ -15,7 +15,7 @@ auto EntityContextMenu(Entity entity, ecs::Ecs world, CreateEntityWindow& create
     }
     else if (ImGui::Selectable("Add Child"))
     {
-        createEntityWindow.Open();
+        createEntityDialog.Open();
         return entity;
     }
     else if (ImGui::Selectable("Add Default Child"))
