@@ -132,8 +132,8 @@ bool Gjk(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
     NC_ASSERT(stateOut, "CollisionState cannot be null");
 
     stateOut->simplex = Simplex{};
-    stateOut->rotationA = GetRotation(aMatrix);
-    stateOut->rotationB = GetRotation(bMatrix);
+    stateOut->rotationA = DecomposeRotation(aMatrix);
+    stateOut->rotationB = DecomposeRotation(bMatrix);
     Vector3 direction = Vector3::One();
     size_t itCount = 0;
 
@@ -181,7 +181,7 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
     using namespace DirectX;
 
     stateOut->simplex = Simplex{};
-    stateOut->rotationA = GetRotation(aMatrix);
+    stateOut->rotationA = DecomposeRotation(aMatrix);
     Vector3 direction = Vector3::One();
     size_t itCount = 0;
 

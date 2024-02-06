@@ -348,7 +348,7 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         if constexpr(EnableDirectPositionCorrection)
         {
-            auto deepestContact = manifold.DeepestContact();
+            const auto& deepestContact = manifold.DeepestContact();
             m_positionConstraints.emplace_back(transformA, transformB, deepestContact.normal, deepestContact.depth, manifold.Event().eventType);
         }
 

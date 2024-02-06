@@ -37,9 +37,9 @@ template<bool GenerateContacts>
 bool SphereVsSphere(const Sphere& a, const Sphere& b, FXMMATRIX aMatrix, FXMMATRIX bMatrix, [[maybe_unused]] CollisionState* stateOut)
 {
     const auto centerA = XMLoadVector3(&a.center) + aMatrix.r[3];
-    const auto radiusA = XMVectorScale(GetScale(aMatrix), a.radius);
+    const auto radiusA = XMVectorScale(DecomposeScale(aMatrix), a.radius);
     const auto centerB = XMLoadVector3(&b.center) + bMatrix.r[3];
-    const auto radiusB = XMVectorScale(GetScale(bMatrix), b.radius);
+    const auto radiusB = XMVectorScale(DecomposeScale(bMatrix), b.radius);
 
     const auto ab = centerB - centerA;
     const auto sqDist = XMVector3LengthSq(ab);
@@ -74,7 +74,7 @@ bool BoxVsSphere(const Box& box, const Sphere& sphere, FXMMATRIX boxMatrix, FXMM
     const auto boxCenter_v = boxPos_v + XMLoadVector3(&box.center);
 
     const auto sphereCenter_v = XMLoadVector3(&box.center) + sphereMatrix.r[3];
-    const auto sphereRadius = XMVectorScale(GetScale(sphereMatrix), sphere.radius);
+    const auto sphereRadius = XMVectorScale(DecomposeScale(sphereMatrix), sphere.radius);
 
     const auto direction = sphereCenter_v - boxCenter_v;
     auto closestPointOnBox = boxCenter_v;
