@@ -1,4 +1,5 @@
 #include "NarrowPhase.h"
+#include "physics/PhysicsConstants.h"
 #include "ecs/Logic.h"
 #include "ncutility/NcError.h"
 
@@ -58,12 +59,7 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
     {
         if(cur->Event().state == NarrowEvent::State::Stale)
         {
-#if NC_PHYSICS_DEBUG_CONTACT_POINTS
-            std::cout << "Remove stale manifold [contact not broken]\n";
-            for (auto& c : cur->Contacts())
-                std::cout << "\t" << c.depth << ", ";
-            std::cout << '\n';
-#endif
+            NC_LOG_CONTACTS("Remove stale manifold [contact not broken]");
             m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
             m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
         }
@@ -159,10 +155,8 @@ void NarrowPhase::NotifyEvents()
             }
             [[unlikely]] case NarrowEvent::State::Stale:
             {
-#if NC_PHYSICS_DEBUG_CONTACT_POINTS
-                std::cerr << "Clear stale manifold [expected impossible code path]\n";
-#endif
                 /** This isn't expected to be detected here, but just in case. */
+                NC_LOG_CONTACTS("Clear stale manifold [unexpected code path]");
                 const auto e1 = cur->Event().first;
                 const auto e2 = cur->Event().second;
                 if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionExit(e2, m_registry);
