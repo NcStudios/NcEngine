@@ -4,6 +4,7 @@
 
 namespace
 {
+[[maybe_unused]]
 auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRenderer, nc::graphics::ToonRenderer> worldView) -> nc::MeshView
 {
     static const auto defaultMeshView = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::CubeMesh);
@@ -16,6 +17,7 @@ auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRende
         return defaultMeshView;
 }
 
+[[maybe_unused]]
 auto GetMeshView(nc::physics::ColliderType type) -> nc::MeshView
 {
     switch(type)
@@ -48,6 +50,7 @@ auto GetMeshView(nc::physics::ColliderType type) -> nc::MeshView
     }
 }
 
+[[maybe_unused]]
 auto CalculateWireframeMatrix(DirectX::FXMMATRIX worldSpace, const nc::physics::VolumeInfo& info) -> DirectX::XMMATRIX
 {
     const auto scale = DirectX::XMLoadVector3(&info.scale);
