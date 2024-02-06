@@ -48,6 +48,8 @@ void EditorUI::Draw(EditorContext& ctx)
     switch (ctx.openState = ProcessInput(ctx.hotkeys, ncAsset))
     {
         case OpenState::ClosePersisted: { return; }
+        case OpenState::OpenPersisted: { break; }
+        case OpenState::Opened: { break; }
         case OpenState::Closed:
         {
             m_sceneGraph.OnClose(ctx);

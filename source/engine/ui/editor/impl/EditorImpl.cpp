@@ -42,6 +42,7 @@ auto BuildContext(nc::ecs::Ecs world,
         .modules = modules,
         .selectedEntity = nc::Entity::Null(),
         .openState = nc::ui::editor::OpenState::ClosePersisted,
+        .dimensions = ImVec2{},
         .objectBucket = bucket,
         .editorCamera = camera,
         .hotkeys = hotkeys

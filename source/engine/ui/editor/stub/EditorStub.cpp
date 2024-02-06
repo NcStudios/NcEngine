@@ -19,6 +19,8 @@ auto BuildEditor(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& ho
         .world = world,
         .modules = modules,
         .selectedEntity = Entity::Null(),
+        .openState = OpenState::ClosePersisted,
+        .dimensions = ImVec2{},
         .objectBucket = Entity::Null(),
         .editorCamera = Entity::Null(),
         .hotkeys = hotkeys
