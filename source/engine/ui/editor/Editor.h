@@ -43,6 +43,11 @@ struct EditorContext
     const EditorHotkeys hotkeys;
 };
 
+// Flags to keep editor objects out of the way
+constexpr auto EditorObjectFlags = nc::Entity::Flags::Persistent |
+                                   nc::Entity::Flags::Internal |
+                                   nc::Entity::Flags::NoSerialize;
+
 class Editor
 {
     public:

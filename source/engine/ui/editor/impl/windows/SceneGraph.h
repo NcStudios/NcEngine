@@ -19,6 +19,7 @@ namespace ui::editor
 class SceneGraph
 {
     public:
+        explicit SceneGraph(EditorContext& ctx);
         void Draw(EditorContext& ctx, CreateEntityDialog& createEntity);
         void OnClose(EditorContext& ctx);
 

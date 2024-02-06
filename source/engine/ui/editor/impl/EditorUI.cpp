@@ -32,11 +32,12 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
-    : m_createEntityDialog{world},
-      m_newSceneDialog{modules.Get<NcScene>()},
-      m_saveSceneDialog{world},
-      m_loadSceneDialog{world, modules.Get<NcScene>()}
+EditorUI::EditorUI(EditorContext& ctx)
+    : m_sceneGraph{ctx},
+      m_createEntityDialog{ctx.world},
+      m_newSceneDialog{ctx.modules.Get<NcScene>()},
+      m_saveSceneDialog{ctx.world},
+      m_loadSceneDialog{ctx.world, ctx.modules.Get<NcScene>()}
 {
 }
 

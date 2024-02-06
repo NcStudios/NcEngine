@@ -8,6 +8,40 @@
 
 namespace
 {
+auto MakeSelectedEntityWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedEntity",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::graphics::WireframeRenderer>(
+        entity,
+        nc::Entity::Null(),
+        nc::graphics::WireframeSource::Renderer
+    );
+
+    return entity;
+}
+
+auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedCollider",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::graphics::WireframeRenderer>(
+        entity,
+        nc::Entity::Null(),
+        nc::graphics::WireframeSource::Collider
+    );
+
+    return entity;
+}
+
 auto IsRoot(nc::Transform& transform) -> bool
 {
     return !transform.Parent().Valid();
@@ -16,47 +50,14 @@ auto IsRoot(nc::Transform& transform) -> bool
 
 namespace nc::ui::editor
 {
+SceneGraph::SceneGraph(EditorContext& ctx)
+    : m_selectedEntityWireframe{::MakeSelectedEntityWireFrame(ctx.world, ctx.objectBucket)},
+      m_selectedColliderWireframe{::MakeSelectedColliderWireFrame(ctx.world, ctx.objectBucket)}
+{
+}
+
 void SceneGraph::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
 {
-    {
-        static bool _ = [&]()
-        {
-            auto& world = ctx.world;
-            // TODO: move this to c'tor once other PR is merged
-            // TODO: should go in 'Internal' bucket
-            // TODO: clear selected entity on editor close, or at least clear wireframe
-            m_selectedEntityWireframe = world.Emplace<Entity>({
-                .parent = ctx.objectBucket,
-                .tag = "SelectedEntity",
-                .flags = Entity::Flags::Persistent |
-                         Entity::Flags::Internal |
-                         Entity::Flags::NoSerialize
-            });
-
-            world.Emplace<graphics::WireframeRenderer>(
-                m_selectedEntityWireframe,
-                Entity::Null(),
-                graphics::WireframeSource::Renderer
-            );
-
-            m_selectedColliderWireframe = world.Emplace<Entity>({
-                .parent = ctx.objectBucket,
-                .tag = "SelectedCollider",
-                .flags = Entity::Flags::Persistent |
-                         Entity::Flags::Internal |
-                         Entity::Flags::NoSerialize
-            });
-
-            world.Emplace<graphics::WireframeRenderer>(
-                m_selectedColliderWireframe,
-                Entity::Null(),
-                graphics::WireframeSource::Collider
-            );
-
-            return true;
-        }();
-    }
-
     EnsureSelection(ctx);
     m_tagFilter.Draw("search");
 

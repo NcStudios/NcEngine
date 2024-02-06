@@ -20,7 +20,7 @@ struct EditorHotkeys;
 class EditorUI
 {
     public:
-        explicit EditorUI(ecs::Ecs world, ModuleProvider modules);
+        explicit EditorUI(EditorContext& ctx);
 
         void Draw(EditorContext& ctx);
 
