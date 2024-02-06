@@ -54,14 +54,14 @@ auto BuildLayerFilter(bool includePersistent, const std::vector<uint8_t>& includ
 
 namespace nc::ui::editor
 {
-void NewSceneDialog::Draw(const ImVec2& dimensions)
+void NewSceneDialog::Draw(const EditorContext& ctx)
 {
-    DrawPopup("Open Sandbox Scene", dimensions, [&]()
+    DrawPopup("Open Sandbox Scene", ctx.dimensions, [&]()
     {
         ImGui::TextWrapped("%s", "Are you sure you want to open a new sandbox scene?");
         if (ImGui::Button("Create Scene"))
         {
-            m_ncScene->Queue(std::make_unique<SandboxScene>(Entity::Null()));
+            m_ncScene->Queue(std::make_unique<SandboxScene>(ctx.objectBucket, ctx.editorCamera));
             m_ncScene->ScheduleTransition();
             ClosePopup();
         }
@@ -198,9 +198,9 @@ void LoadSceneDialog::Open(asset::NcAsset* ncAsset)
     OpenPopup();
 }
 
-void LoadSceneDialog::Draw(const ImVec2& dimensions)
+void LoadSceneDialog::Draw(const EditorContext& ctx)
 {
-    DrawPopup("Load Scene Fragment", dimensions, [&]()
+    DrawPopup("Load Scene Fragment", ctx.dimensions, [&]()
     {
         ImGui::RadioButton("Overlay on current scene", &m_openType, OpenOverlayed);
         ImGui::RadioButton("Open in new scene", &m_openType, OpenInNewScene);
@@ -210,7 +210,7 @@ void LoadSceneDialog::Draw(const ImVec2& dimensions)
         {
             if (m_openType == OpenInNewScene && std::filesystem::is_regular_file(m_fileName))
             {
-                m_ncScene->Queue(std::make_unique<SandboxScene>(Entity::Null(), m_fileName));
+                m_ncScene->Queue(std::make_unique<SandboxScene>(ctx.objectBucket, ctx.editorCamera, m_fileName));
                 m_ncScene->ScheduleTransition();
                 ClosePopup();
             }

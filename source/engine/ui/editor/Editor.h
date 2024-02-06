@@ -3,6 +3,7 @@
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/module/ModuleProvider.h"
+#include "ncengine/ui/ImGuiUtility.h"
 
 #include <memory>
 
@@ -14,6 +15,7 @@ struct EditorHotkeys
     input::KeyCode openNewSceneDialog = input::KeyCode::F1;
     input::KeyCode openSaveSceneDialog = input::KeyCode::F2;
     input::KeyCode openLoadSceneDialog = input::KeyCode::F3;
+    input::KeyCode toggleEditorCamera = input::KeyCode::F5;
 };
 
 enum class OpenState
@@ -26,12 +28,19 @@ enum class OpenState
 
 struct EditorContext
 {
+    // General game state
     ecs::Ecs world;
     ModuleProvider modules;
+
+    // Mutable state
     Entity selectedEntity;
-    Entity objectBucket;
-    EditorHotkeys hotkeys;
     OpenState openState;
+    ImVec2 dimensions;
+
+    // Immutable state
+    const Entity objectBucket;
+    const Entity editorCamera;
+    const EditorHotkeys hotkeys;
 };
 
 class Editor

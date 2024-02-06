@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModalDialog.h"
+#include "ui/editor/Editor.h"
 
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"
@@ -21,7 +22,7 @@ class NewSceneDialog : public ModalDialog
             OpenPopup();
         }
 
-        void Draw(const ImVec2& dimensions);
+        void Draw(const EditorContext& ctx);
 
     private:
         NcScene* m_ncScene;
@@ -73,7 +74,7 @@ class LoadSceneDialog : public ModalDialog
             : ModalDialog{DialogSize}, m_world{world}, m_ncScene{ncScene} {}
 
         void Open(asset::NcAsset* ncAsset);
-        void Draw(const ImVec2& dimensions);
+        void Draw(const EditorContext& ctx);
 
     private:
         std::string m_fileName;

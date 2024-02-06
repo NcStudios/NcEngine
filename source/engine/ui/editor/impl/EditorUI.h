@@ -41,6 +41,6 @@ class EditorUI
         auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
         void DrawMenu(asset::NcAsset& ncAsset);
         void DrawOverlays(const ImVec2& dimensions);
-        void DrawDialogs(const ImVec2& dimensions);
+        void DrawDialogs(EditorContext& ctx);
 };
 } // namespace nc::ui::editor

@@ -159,11 +159,47 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
     if (ImGui::BeginPopupContextWindow())
     {
         if (ImGui::Selectable("New Entity"))
+        {
             createEntity.Open();
+        }
         else if (ImGui::Selectable("New Default Entity"))
+        {
             ctx.selectedEntity = ctx.world.Emplace<Entity>(EntityInfo{});
+        }
+        else if (ImGui::BeginMenu("Object"))
+        {
+            if (ImGui::Selectable("PointLight"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "PointLight"});
+                ctx.world.Emplace<graphics::PointLight>(ctx.selectedEntity);
+            }
+            else if (ImGui::Selectable("Cube"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Cube"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::CubeMesh);
+            }
+            else if (ImGui::Selectable("Sphere"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Sphere"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::SphereMesh);
+            }
+            else if (ImGui::Selectable("Capsule"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Capsule"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::CapsuleMesh);
+            }
+            else if (ImGui::Selectable("Plane"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Plane"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::PlaneMesh);
+            }
+
+            ImGui::EndMenu();
+        }
         else
+        {
             SetEntitySelection(ctx, Entity::Null());
+        }
 
         ImGui::EndPopup();
     }

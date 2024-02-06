@@ -43,8 +43,8 @@ EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
 void EditorUI::Draw(EditorContext& ctx)
 {
     auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
-    const auto dimensions =  ImVec2{window::GetDimensions()};
-    DrawOverlays(dimensions);
+    ctx.dimensions = ImVec2{window::GetDimensions()};
+    DrawOverlays(ctx.dimensions);
     switch (ctx.openState = ProcessInput(ctx.hotkeys, ncAsset))
     {
         case OpenState::ClosePersisted: { return; }
@@ -55,7 +55,7 @@ void EditorUI::Draw(EditorContext& ctx)
         }
     }
 
-    DrawDialogs(ctx, dimensions);
+    DrawDialogs(ctx);
 
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
@@ -108,16 +108,16 @@ void EditorUI::DrawOverlays(const ImVec2& dimensions)
         m_fpsOverlay.Draw(dimensions);
 }
 
-void EditorUI::DrawDialogs(EditorContext& ctx, const ImVec2& dimensions)
+void EditorUI::DrawDialogs(EditorContext& ctx)
 {
     if (m_createEntityDialog.IsOpen())
-        m_createEntityDialog.Draw(dimensions, ctx.selectedEntity);
+        m_createEntityDialog.Draw(ctx.dimensions, ctx.selectedEntity);
     else if (m_newSceneDialog.IsOpen())
-        m_newSceneDialog.Draw(dimensions);
+        m_newSceneDialog.Draw(ctx);
     else if (m_saveSceneDialog.IsOpen())
-        m_saveSceneDialog.Draw(dimensions);
+        m_saveSceneDialog.Draw(ctx.dimensions);
     else if (m_loadSceneDialog.IsOpen())
-        m_loadSceneDialog.Draw(dimensions);
+        m_loadSceneDialog.Draw(ctx);
 }
 
 void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
