@@ -20,6 +20,7 @@ auto BuildEditor(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& ho
         .modules = modules,
         .selectedEntity = Entity::Null(),
         .objectBucket = Entity::Null(),
+        .editorCamera = Entity::Null(),
         .hotkeys = hotkeys
     });
 }

@@ -8,7 +8,7 @@ namespace nc::ui::editor
 class SandboxScene : public Scene
 {
     public:
-        // Create a default scene with camera and point light
+        // Create an empty scene
         explicit SandboxScene(Entity objectBucket, Entity editorCamera)
             : m_bucket{objectBucket},
               m_editorCamera{editorCamera}

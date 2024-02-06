@@ -42,9 +42,9 @@ EditorUI::EditorUI(ecs::Ecs world, ModuleProvider modules)
 
 void EditorUI::Draw(EditorContext& ctx)
 {
-    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
     ctx.dimensions = ImVec2{window::GetDimensions()};
     DrawOverlays(ctx.dimensions);
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
     switch (ctx.openState = ProcessInput(ctx.hotkeys, ncAsset))
     {
         case OpenState::ClosePersisted: { return; }

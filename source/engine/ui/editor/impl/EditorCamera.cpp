@@ -8,7 +8,7 @@ void EditorCamera::Run(Entity, Registry* registry, float dt)
 {
     if (nc::input::KeyDown(m_hotkey))
     {
-        m_enabled ? Disable(registry) : Disable(registry);
+        m_enabled ? Disable(registry) : Enable();
     }
 
     if (m_enabled)
