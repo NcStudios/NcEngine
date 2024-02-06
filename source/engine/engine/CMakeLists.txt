@@ -5,3 +5,5 @@ target_sources(${NC_ENGINE_LIB}
         NcEngineImpl.cpp
         RegistryFactory.cpp
 )
+
+add_subdirectory(registration)
