@@ -2,15 +2,51 @@
 #include "shared/FreeComponents.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
+#include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/ui/ImGuiUtility.h"
 
 namespace nc::sample
 {
+std::function<void(unsigned)> SpawnFunc = nullptr;
+std::function<void(unsigned)> DestroyFunc = nullptr;
+
+int SpawnCount = 1000;
+int DestroyCount = 1000;
+
+void Widget()
+{
+    ImGui::Text("Spawn Test");
+    if(ImGui::BeginChild("Widget", {0,0}, true))
+    {
+        ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+        ImGui::InputInt("##spawncount", &SpawnCount);
+        SpawnCount = nc::Clamp(SpawnCount, 1, 20000);
+
+        if(ImGui::Button("Spawn", {100, 20}))
+            SpawnFunc(SpawnCount);
+
+        ImGui::InputInt("##destroycount", &DestroyCount);
+        DestroyCount = nc::Clamp(DestroyCount, 1, 20000);
+
+        if(ImGui::Button("Destroy", {100, 20}))
+            DestroyFunc(DestroyCount);
+
+        ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+        ImGui::Text("-middle mouse button + drag to pan");
+        ImGui::Text("-right mouse button + drag to look");
+        ImGui::Text("-mouse wheel to zoom");
+    }
+
+    ImGui::EndChild();
+}
+
 
 auto BuildVehicle(Registry* registry, physics::NcPhysics* physics) -> Entity
 {
@@ -45,7 +81,7 @@ auto BuildVehicle(Registry* registry, physics::NcPhysics* physics) -> Entity
 
 PhysicsTest::PhysicsTest(SampleUI* ui)
 {
-    ui->SetWidgetCallback(nullptr);
+    ui->SetWidgetCallback(Widget);
 }
 
 void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
@@ -70,7 +106,8 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     auto ground = world.Emplace<Entity>({
         .position = Vector3{0.0f, -1.0f, 0.0f},
         .scale = Vector3{200.0f, 1.0f, 200.0f},
-        .tag = "Platform1"
+        .tag = "Platform1",
+        .flags = Entity::Flags::Static
     });
     world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, prefab::BlueToonMaterial);
     world.Emplace<physics::Collider>(ground, physics::BoxProperties{}, false);
@@ -199,5 +236,27 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
         physics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
         physics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
     }
+
+
+    // Fixed interval spawner for moving cubes
+    SpawnBehavior dynamicCubeBehavior
+    {
+        .minPosition = Vector3{-70.0f, 20.0f, -70.0f},
+        .maxPosition = Vector3{70.0f, 50.0f, 70.0f},
+        .minRotation = Vector3::Zero(),
+        .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
+    };
+
+    auto dynamicCubeExtension = [registry](Entity handle)
+    {
+        registry->Add<physics::Collider>(handle, physics::BoxProperties{}, false);
+        registry->Add<physics::PhysicsBody>(handle, physics::PhysicsProperties{.mass = 5.0f});
+    };
+
+    auto spawner = registry->Add<Entity>({});
+    auto spawnerPtr = registry->Add<Spawner>(spawner, modules.Get<Random>(), prefab::Resource::CubeTextured, dynamicCubeBehavior, dynamicCubeExtension);
+    registry->Add<FrameLogic>(spawner, InvokeFreeComponent<Spawner>{});
+    SpawnFunc = std::bind(&Spawner::StageSpawn, spawnerPtr, std::placeholders::_1);
+    DestroyFunc = std::bind(&Spawner::StageDestroy, spawnerPtr, std::placeholders::_1);
 }
 }
