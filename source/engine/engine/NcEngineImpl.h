@@ -28,7 +28,7 @@ namespace nc
             task::Executor m_executor;
             bool m_isRunning;
 
-            void Clear();
+            void ClearScene();
             void Run();
     };
 }

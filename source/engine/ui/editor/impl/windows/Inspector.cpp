@@ -22,22 +22,39 @@ void ElementHeader(std::string_view name)
 
 namespace nc::ui::editor
 {
-void Inspector::Draw(ecs::Ecs world, Entity entity)
+void Inspector::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
 {
     ChildWindow("Inspector", [&]()
     {
+        auto entity = ctx.selectedEntity;
         if (ImGui::BeginPopupContextWindow(nullptr, g_contextMenuFlags))
         {
-            EntityContextMenu(entity, world);
+            EntityContextMenu(ctx.selectedEntity, ctx.world, createEntity);
             ImGui::EndPopup();
         }
 
         ElementHeader("Entity");
         DragAndDropSource<Entity>(&entity);
-        ImGui::Text("Index   %d", entity.Index());
-        ImGui::Text("Layer   %d", entity.Layer());
-        ImGui::Text("Static  %s", entity.IsStatic() ? "True" : "False");
-        std::ranges::for_each(world.GetComponentPools(), [entity](auto&& pool)
+        ImGui::Text("Index: %d", entity.Index());
+        ImGui::Text("Layer: %d", entity.Layer());
+        if (ImGui::TreeNodeEx("Flags"))
+        {
+            ImGui::BeginDisabled(true);
+            auto isStatic = entity.IsStatic();
+            auto isPersistent = entity.IsPersistent();
+            auto collisionEvents = entity.ReceivesCollisionEvents();
+            auto serializable = entity.IsSerializable();
+            auto isInternal = entity.IsInternal();
+            Checkbox(isStatic, "static");
+            Checkbox(isPersistent, "persistent");
+            Checkbox(collisionEvents, "collisionEvents");
+            Checkbox(serializable, "serializable");
+            Checkbox(isInternal, "internal");
+            ImGui::EndDisabled();
+            ImGui::TreePop();
+        }
+
+        std::ranges::for_each(ctx.world.GetComponentPools(), [entity](auto&& pool)
         {
             if (pool->HasDrawUI() && pool->Contains(entity))
             {

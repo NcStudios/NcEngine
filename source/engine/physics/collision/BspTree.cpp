@@ -1,6 +1,5 @@
 #include "BspTree.h"
 #include "assets/AssetService.h"
-#include "graphics/debug/DebugRenderer.h"
 
 #include <iostream>
 
@@ -120,9 +119,6 @@ void BspTree::Clear()
     m_results.contacts.shrink_to_fit();
     m_results.events.clear();
     m_results.events.shrink_to_fit();
-    #ifdef NC_DEBUG_RENDERING_ENABLED
-    graphics::DebugRenderer::ClearPlanes();
-    #endif
 }
 
 void BspTree::AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex)
@@ -241,10 +237,6 @@ void BspTree::SplitLeaf(const TriMesh& mesh, size_t meshIndex, size_t leafNodeIn
             break;
         }
     }
-
-    #ifdef NC_DEBUG_RENDERING_ENABLED
-    graphics::DebugRenderer::AddPlane(plane.normal, plane.d);
-    #endif
 }
 
 auto BspTree::FindSplitPlane(const LeafNode& node) -> Plane

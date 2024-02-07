@@ -60,6 +60,18 @@ class Camera : public FreeComponent
          */
         virtual void UpdateProjectionMatrix(float width, float height);
 
+        /**
+         * @brief Enable execution of the Run() method in thhe derived class.
+         * @note It is only necessary to implement this if the derived class has update logic running in a FrameLogic.
+         */
+        virtual void EnableUpdate() noexcept {}
+
+        /**
+         * @brief Disable execution of the Run() method in the derived class.
+         * @note It is only necessary to implement this if the derived class has update logic running in a FrameLogic.
+         */
+        virtual void DisableUpdate() noexcept {}
+
         #ifdef NC_EDITOR_ENABLED
         void ComponentGuiElement() override;
         #endif

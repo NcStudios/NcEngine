@@ -38,7 +38,7 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sample/assets/nca
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/resources/nca
         DESTINATION sample
 )
-install(DIRECTORY      ${PROJECT_SOURCE_DIR}/sample/assets/shaders/compiled/
+install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
         DESTINATION    sample/nca/shaders
         FILES_MATCHING REGEX ".*\.(spv)"
 )
