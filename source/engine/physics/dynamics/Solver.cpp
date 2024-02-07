@@ -257,22 +257,21 @@ void ResolvePositionConstraint(PositionConstraint& constraint)
 {
     OPTICK_CATEGORY("ResolvePositionConstraint", Optick::Category::Physics);
 
-    if(constraint.depth < PenetrationSlop)
+    const auto correctionAmount = constraint.depth - PenetrationSlop;
+    if(correctionAmount <= 0.0f)
         return;
 
-    const auto mtv = constraint.normal * (constraint.depth * PositionCorrectionFactor);
+    const auto mtv = constraint.normal * Min(correctionAmount * PositionCorrectionFactor, MaxLinearPositionCorrection);
 
-    /** If only one body can move, the mtv is doubled so the total translation is the same
-     *  as the two body case. */
     if(constraint.eventType == CollisionEventType::FirstBodyPhysics)
     {
-        constraint.transformA->Translate(mtv * -2.0f);
+        constraint.transformA->Translate(-mtv);
         return;
     }
 
     if(constraint.eventType == CollisionEventType::SecondBodyPhysics)
     {
-        constraint.transformB->Translate(mtv * 2.0f);
+        constraint.transformB->Translate(mtv);
         return;
     }
 
