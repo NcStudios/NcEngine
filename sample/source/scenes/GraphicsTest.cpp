@@ -1,4 +1,4 @@
-#include "JareTestScene.h"
+#include "GraphicsTest.h"
 #include "shared/FreeComponents.h"
 #include "shared/Prefabs.h"
 #include "shared/GameLogic.h"
@@ -38,18 +38,18 @@ void Widget()
 
 namespace nc::sample
 {
-JareTestScene::JareTestScene(SampleUI* ui)
+GraphicsTest::GraphicsTest(SampleUI* ui)
     : m_sampleUI{ui}
 {
     ui->SetWidgetCallback(::Widget);
 }
 
-JareTestScene::~JareTestScene() noexcept
+GraphicsTest::~GraphicsTest() noexcept
 {
     m_sampleUI->SetWidgetCallback(nullptr);
 }
 
-void JareTestScene::Load(Registry* registry, ModuleProvider modules)
+void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
 {
     std::vector<std::string> textures
     {
@@ -272,7 +272,7 @@ void JareTestScene::Load(Registry* registry, ModuleProvider modules)
     GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 }
 
-void JareTestScene::Unload()
+void GraphicsTest::Unload()
 {
     GetFPSCallback = nullptr;
 }

@@ -6,11 +6,11 @@
 
 namespace nc::sample
 {
-class JareTestScene : public Scene
+class GraphicsTest : public Scene
 {
     public:
-        JareTestScene(SampleUI* ui);
-        ~JareTestScene() noexcept;
+        GraphicsTest(SampleUI* ui);
+        ~GraphicsTest() noexcept;
         void Load(Registry* registry, ModuleProvider modules) override;
         void Unload() override;
 

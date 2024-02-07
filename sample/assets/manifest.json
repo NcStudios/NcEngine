@@ -44,14 +44,6 @@
             "assetName": "mesh/ramp"
         },
         {
-            "sourcePath": "raw/model/table.fbx",
-            "assetName": "mesh/table"
-        },
-        {
-            "sourcePath": "raw/model/token.fbx",
-            "assetName": "mesh/token"
-        },
-        {
             "sourcePath": "raw/model/worm.fbx",
             "assetName": "mesh/worm"
         },
@@ -174,18 +166,6 @@
             "assetName": "texture/cave_ceiling/Metallic"
         },
         {
-            "sourcePath": "raw/image/coin/BaseColor.png",
-            "assetName": "texture/coin/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/coin/Normal.png",
-            "assetName": "texture/coin/Normal"
-        },
-        {
-            "sourcePath": "raw/image/coin/Roughness.png",
-            "assetName": "texture/coin/Roughness"
-        },
-        {
             "sourcePath": "raw/image/floor/BaseColor.png",
             "assetName": "texture/floor/BaseColor"
         },
@@ -258,28 +238,20 @@
             "assetName": "texture/solid_color/Green"
         },
         {
-            "sourcePath": "raw/image/table/BaseColor.png",
-            "assetName": "texture/table/BaseColor"
+            "sourcePath": "raw/image/solid_color/Orange.png",
+            "assetName": "texture/solid_color/Orange"
         },
         {
-            "sourcePath": "raw/image/table/Normal.png",
-            "assetName": "texture/table/Normal"
+            "sourcePath": "raw/image/solid_color/Purple.png",
+            "assetName": "texture/solid_color/Purple"
         },
         {
-            "sourcePath": "raw/image/table/Roughness.png",
-            "assetName": "texture/table/Roughness"
+            "sourcePath": "raw/image/solid_color/Teal.png",
+            "assetName": "texture/solid_color/Teal"
         },
         {
-            "sourcePath": "raw/image/token/BaseColor.png",
-            "assetName": "texture/token/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/token/Normal.png",
-            "assetName": "texture/token/Normal"
-        },
-        {
-            "sourcePath": "raw/image/token/Roughness.png",
-            "assetName": "texture/token/Roughness"
+            "sourcePath": "raw/image/solid_color/Yellow.png",
+            "assetName": "texture/solid_color/Yellow"
         }
     ]
 }

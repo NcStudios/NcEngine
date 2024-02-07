@@ -1,5 +1,6 @@
-#include "scenes/Worms.h"
+#include "scenes/PhysicsTest.h"
 #include "shared/SampleUI.h"
+#include "shared/Prefabs.h"
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/utility/Log.h"
@@ -14,8 +15,9 @@ int main()
     {
         const auto config = nc::config::Load("config.ini");
         engine = nc::InitializeNcEngine(config);
+        nc::sample::prefab::InitializeResources();
         auto ui = nc::sample::InitializeSampleUI(engine.get());
-        engine->Start(std::make_unique<nc::sample::Worms>(ui.get()));
+        engine->Start(std::make_unique<nc::sample::PhysicsTest>(ui.get()));
     }
     catch(std::exception& e)
     {

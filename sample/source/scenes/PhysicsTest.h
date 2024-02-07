@@ -6,10 +6,10 @@
 
 namespace nc::sample
 {
-class JointsTest : public Scene
+class PhysicsTest : public Scene
 {
     public:
-        JointsTest(SampleUI* ui);
+        PhysicsTest(SampleUI* ui);
         void Load(Registry* registry, ModuleProvider modules) override;
 };
 }

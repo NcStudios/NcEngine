@@ -1,12 +1,8 @@
 #include "SampleUI.h"
-#include "scenes/Worms.h"
-#include "scenes/ClickEvents.h"
-#include "scenes/SpawnTest.h"
 #include "scenes/CollisionBenchmark.h"
-#include "scenes/CollisionEvents.h"
-#include "scenes/JointsTest.h"
+#include "scenes/GraphicsTest.h"
+#include "scenes/PhysicsTest.h"
 #include "scenes/RenderingBenchmark.h"
-#include "scenes/JareTestScene.h"
 
 #include "ncengine/config/Version.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -116,39 +112,15 @@ namespace nc::sample
         if (ImGui::BeginChild("SceneList", { 0,0 }, true))
         {
             auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 18 };
-            if (ImGui::Button("Worms", buttonSize))
+            if (ImGui::Button("PhysicsTest", buttonSize))
             {
-                m_ncScene->Queue(std::make_unique<Worms>(this));
+                m_ncScene->Queue(std::make_unique<PhysicsTest>(this));
                 m_ncScene->ScheduleTransition();
             }
 
-            if (ImGui::Button("Click Events", buttonSize))
+            if (ImGui::Button("GraphicsTest", buttonSize))
             {
-                m_ncScene->Queue(std::make_unique<ClickEvents>(this));
-                m_ncScene->ScheduleTransition();
-            }
-
-            if (ImGui::Button("Collision Events", buttonSize))
-            {
-                m_ncScene->Queue(std::make_unique<CollisionEvents>(this));
-                m_ncScene->ScheduleTransition();
-            }
-
-            if (ImGui::Button("Joints Test", buttonSize))
-            {
-                m_ncScene->Queue(std::make_unique<JointsTest>(this));
-                m_ncScene->ScheduleTransition();
-            }
-
-            if (ImGui::Button("Spawn Test", buttonSize))
-            {
-                m_ncScene->Queue(std::make_unique<SpawnTest>(this));
-                m_ncScene->ScheduleTransition();
-            }
-
-            if (ImGui::Button("Rendering Benchmark", buttonSize))
-            {
-                m_ncScene->Queue(std::make_unique<RenderingBenchmark>(this));
+                m_ncScene->Queue(std::make_unique<GraphicsTest>(this));
                 m_ncScene->ScheduleTransition();
             }
 
@@ -158,11 +130,12 @@ namespace nc::sample
                 m_ncScene->ScheduleTransition();
             }
 
-            if (ImGui::Button("Jare Test", buttonSize))
+            if (ImGui::Button("Rendering Benchmark", buttonSize))
             {
-                m_ncScene->Queue(std::make_unique<JareTestScene>(this));
+                m_ncScene->Queue(std::make_unique<RenderingBenchmark>(this));
                 m_ncScene->ScheduleTransition();
             }
+
         } ImGui::EndChild();
     }
 
