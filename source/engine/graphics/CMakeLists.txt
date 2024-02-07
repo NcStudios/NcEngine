@@ -7,5 +7,4 @@ target_sources(${NC_ENGINE_LIB}
 
 add_subdirectory(api/vulkan)
 add_subdirectory(components)
-add_subdirectory(debug)
 add_subdirectory(system)

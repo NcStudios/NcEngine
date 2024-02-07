@@ -1,6 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         ComponentWidgets.cpp
+        EditorCamera.cpp
         EditorImpl.cpp
         EditorUI.cpp
         SandboxScene.cpp

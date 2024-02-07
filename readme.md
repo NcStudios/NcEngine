@@ -70,10 +70,6 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
     Default: ON (OFF when NC_PROD_BUILD=ON)
     Enables extra checks through the NC_ASSERT macro. These are enabled by default, even in release builds, as they are unlikely to have a serious effect on performance.
 
-#### NC_DEBUG_RENDERING_ENABLED
-    Default: ON (OFF when NC_PROD_BUILD=ON)
-    Allows rendering wireframe primitives for debugging purposes.
-
 #### NC_PROFILING_ENABLED
     Default: ON (OFF when NC_PROD_BUILD=ON)
     Enabled profiling with Optick. This also requires the Optick application (https://www.optickprofiler.com) and the Optick
