@@ -5,4 +5,4 @@
 namespace nc
 {
 void RegisterLogicTypes(ecs::ComponentRegistry& registry, size_t maxEntities);
-} // namespac nc
+} // namespace nc

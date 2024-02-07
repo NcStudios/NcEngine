@@ -19,4 +19,4 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
     Register<graphics::PointLight>(registry, maxEntities, PointLightId, "PointLight", editor::PointLightUIWidget, CreatePointLight, SerializePointLight, DeserializePointLight);
     Register<graphics::ParticleEmitter>(registry, maxEntities, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter, SerializeParticleEmitter, DeserializeParticleEmitter);
 }
-} // namespac nc
+} // namespace nc

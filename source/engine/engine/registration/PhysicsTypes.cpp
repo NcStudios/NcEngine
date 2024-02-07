@@ -11,4 +11,4 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
     Register<physics::ConcaveCollider>(registry, maxEntities, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget, nullptr, SerializeConcaveCollider, DeserializeConcaveCollider);
     Register<physics::PhysicsBody>(registry, maxEntities, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, SerializePhysicsBody, DeserializePhysicsBody, static_cast<void*>(&registry));
 }
-} // namespac nc
+} // namespace nc

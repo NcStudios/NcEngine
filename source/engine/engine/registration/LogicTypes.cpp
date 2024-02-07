@@ -9,4 +9,4 @@ void RegisterLogicTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
     Register<FixedLogic>(registry, maxEntities, FixedLogicId, "FixedLogic", editor::FixedLogicUIWidget, CreateFixedLogic);
     Register<CollisionLogic>(registry, maxEntities, CollisionLogicId, "CollisionLogic", editor::CollisionLogicUIWidget, CreateCollisionLogic);
 }
-} // namespac nc
+} // namespace nc

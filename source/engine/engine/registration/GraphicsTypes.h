@@ -5,4 +5,4 @@
 namespace nc
 {
 void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities);
-} // namespac nc
+} // namespace nc

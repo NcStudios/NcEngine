@@ -7,4 +7,4 @@ void RegisterAudioTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
     Register<audio::AudioSource>(registry, maxEntities, AudioSourceId, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource, SerializeAudioSource, DeserializeAudioSource);
 }
-} // namespac nc
+} // namespace nc
