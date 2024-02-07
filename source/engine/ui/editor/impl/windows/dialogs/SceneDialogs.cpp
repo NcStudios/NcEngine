@@ -1,4 +1,4 @@
-#include "ModalDialog.h"
+#include "SceneDialogs.h"
 #include "ui/editor/impl/SandboxScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
 
@@ -54,35 +54,18 @@ auto BuildLayerFilter(bool includePersistent, const std::vector<uint8_t>& includ
 
 namespace nc::ui::editor
 {
-NewSceneDialog::NewSceneDialog(NcScene* ncScene)
-    : ModalDialog{DialogSize},
-      m_ncScene{ncScene}
+void NewSceneDialog::Draw(const EditorContext& ctx)
 {
-}
-
-void NewSceneDialog::Open()
-{
-    OpenPopup();
-}
-
-void NewSceneDialog::Draw(const ImVec2& dimensions)
-{
-    DrawPopup("Open Sandbox Scene", dimensions, [&]()
+    DrawPopup("Open Sandbox Scene", ctx.dimensions, [&]()
     {
         ImGui::TextWrapped("%s", "Are you sure you want to open a new sandbox scene?");
         if (ImGui::Button("Create Scene"))
         {
-            m_ncScene->Queue(std::make_unique<SandboxScene>());
+            m_ncScene->Queue(std::make_unique<SandboxScene>(ctx.objectBucket, ctx.editorCamera));
             m_ncScene->ScheduleTransition();
             ClosePopup();
         }
     });
-}
-
-SaveSceneDialog::SaveSceneDialog(ecs::Ecs world)
-    : ModalDialog{DialogSize},
-      m_world{world}
-{
 }
 
 void SaveSceneDialog::Open(asset::AssetMap assets)
@@ -208,13 +191,6 @@ auto SaveSceneDialog::SelectFilter() -> std::function<bool(Entity)>
         : BuildLayerFilter(m_includePersistent, m_includedLayers);
 }
 
-LoadSceneDialog::LoadSceneDialog(ecs::Ecs world, NcScene* ncScene)
-    : ModalDialog{DialogSize},
-      m_world{world},
-      m_ncScene{ncScene}
-{
-}
-
 void LoadSceneDialog::Open(asset::NcAsset* ncAsset)
 {
     m_errorText.clear();
@@ -222,9 +198,9 @@ void LoadSceneDialog::Open(asset::NcAsset* ncAsset)
     OpenPopup();
 }
 
-void LoadSceneDialog::Draw(const ImVec2& dimensions)
+void LoadSceneDialog::Draw(const EditorContext& ctx)
 {
-    DrawPopup("Load Scene Fragment", dimensions, [&]()
+    DrawPopup("Load Scene Fragment", ctx.dimensions, [&]()
     {
         ImGui::RadioButton("Overlay on current scene", &m_openType, OpenOverlayed);
         ImGui::RadioButton("Open in new scene", &m_openType, OpenInNewScene);
@@ -234,7 +210,7 @@ void LoadSceneDialog::Draw(const ImVec2& dimensions)
         {
             if (m_openType == OpenInNewScene && std::filesystem::is_regular_file(m_fileName))
             {
-                m_ncScene->Queue(std::make_unique<SandboxScene>(m_fileName));
+                m_ncScene->Queue(std::make_unique<SandboxScene>(ctx.objectBucket, ctx.editorCamera, m_fileName));
                 m_ncScene->ScheduleTransition();
                 ClosePopup();
             }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ncengine/type/EngineTypes.h"
+#include "ncengine/ui/ImGuiConversion.h"
 
 #include "imgui/imgui.h"
 #include "ncmath/Vector.h"

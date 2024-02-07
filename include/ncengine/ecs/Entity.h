@@ -45,11 +45,11 @@ class Entity
         constexpr auto Index() const noexcept { return m_index; }
         constexpr auto Layer() const noexcept { return m_layer; }
         constexpr auto Flags() const noexcept { return m_flags; }
-        constexpr auto IsStatic() const noexcept { return m_flags & Flags::Static; }
-        constexpr auto IsPersistent() const noexcept { return m_flags & Flags::Persistent; }
-        constexpr auto ReceivesCollisionEvents() const noexcept { return !(m_flags & Flags::NoCollisionNotifications); }
-        constexpr auto IsSerializable() const noexcept { return !(m_flags & Flags::NoSerialize); }
-        constexpr auto IsInternal() const noexcept { return m_flags & Flags::Internal; }
+        constexpr auto IsStatic() const noexcept -> bool { return m_flags & Flags::Static; }
+        constexpr auto IsPersistent() const noexcept -> bool { return m_flags & Flags::Persistent; }
+        constexpr auto ReceivesCollisionEvents() const noexcept -> bool { return !(m_flags & Flags::NoCollisionNotifications); }
+        constexpr auto IsSerializable() const noexcept -> bool { return !(m_flags & Flags::NoSerialize); }
+        constexpr auto IsInternal() const noexcept -> bool { return m_flags & Flags::Internal; }
         explicit constexpr operator index_type() const noexcept { return m_index; }
         friend bool constexpr operator==(const Entity& a, const Entity& b) { return a.Index() == b.Index(); }
         friend bool constexpr operator!=(const Entity& a, const Entity& b) { return !(a == b); }

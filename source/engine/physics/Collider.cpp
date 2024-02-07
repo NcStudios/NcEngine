@@ -1,13 +1,8 @@
 #include "physics/Collider.h"
 #include "ColliderUtility.h"
 #include "ecs/Registry.h"
-#include "graphics/DebugWidget.h"
 
 #include "ncutility/NcError.h"
-
-namespace
-{
-} // anonymous namespace
 
 namespace nc::physics
 {
@@ -112,31 +107,4 @@ auto FromString(std::string_view type) -> ColliderType
     else if (type == "Sphere"sv)  return ColliderType::Sphere;
     throw NcError{fmt::format("Failed to parse ColliderType: {}", type)};
 }
-
-#ifdef NC_EDITOR_ENABLED
-void Collider::SetEditorSelection(bool state)
-{
-    m_coldData->selectedInEditor = state;
-}
-
-bool Collider::GetEditorSelection()
-{
-    return m_coldData->selectedInEditor;
-}
-
-graphics::DebugWidget Collider::GetDebugWidget()
-{
-    const auto& scale = m_coldData->info.scale;
-    const auto& offset = m_coldData->info.offset;
-
-    auto transformationMatrix = DirectX::FXMMATRIX
-    (
-        DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-        ActiveRegistry()->Get<Transform>(ParentEntity())->TransformationMatrix() *
-        DirectX::XMMatrixTranslation(offset.x, offset.y, offset.z)
-    );
-
-    return graphics::DebugWidget(m_coldData->info.type, transformationMatrix);
-}
-#endif
 } // namespace nc::physics

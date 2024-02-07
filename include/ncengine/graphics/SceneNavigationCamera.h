@@ -45,12 +45,16 @@ class SceneNavigationCamera : public Camera
          */
         void Run(Entity self, Registry* registry, float dt);
 
+        void EnableUpdate() noexcept override { m_enabled = true; }
+        void DisableUpdate() noexcept override { m_enabled = false; }
+
     private:
         Vector3 m_fineSpeed;
         Vector3 m_coarseSpeed;
         Vector2 m_prevMousePos = Vector2::Zero();
         Vector2 m_pivotReference = Vector2::Zero();
         float m_dollyVelocity = 0.0f;
+        bool m_enabled = true;
 
         auto HandlePanInput() -> bool;
         auto HandleZoomInput() -> bool;

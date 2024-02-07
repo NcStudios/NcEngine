@@ -1,6 +1,5 @@
 #include "NcPhysicsImpl.h"
 #include "config/Config.h"
-#include "graphics/debug/DebugRenderer.h"
 #include "physics/ConcaveCollider.h"
 #include "time/Time.h"
 #include "utility/Log.h"

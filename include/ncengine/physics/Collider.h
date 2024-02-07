@@ -15,16 +15,7 @@
 #include <string_view>
 #include <variant>
 
-namespace nc
-{
-namespace graphics
-{
-#ifdef NC_EDITOR_ENABLED
-struct DebugWidget;
-#endif
-}
-
-namespace physics
+namespace nc::physics
 {
 /** @brief The type of geometry used by a Collider. */
 enum class ColliderType : uint8_t
@@ -109,13 +100,6 @@ class Collider final : public ComponentBase
         auto IsAwake() const noexcept -> bool { return m_awake; }
         auto EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere;
 
-        /** @todo #446 Handle this in editor code. */
-        #ifdef NC_EDITOR_ENABLED
-        void SetEditorSelection(bool state);
-        bool GetEditorSelection();
-        graphics::DebugWidget GetDebugWidget();
-        #endif
-
     private:
         BoundingVolume m_volume;
         bool m_isTrigger;
@@ -130,5 +114,4 @@ class Collider final : public ComponentBase
 
         std::unique_ptr<ColliderColdData> m_coldData;
 };
-} // namespace physics
-} // namespace nc
+} // namespace nc::physics
