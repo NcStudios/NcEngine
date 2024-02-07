@@ -22,7 +22,16 @@ void EditorCamera::Enable()
     m_enabled = true;
     auto gfx = m_modules.Get<nc::graphics::NcGraphics>();
     auto restoreTo = gfx->GetCamera();
-    m_handleToRestore = restoreTo ? restoreTo->ParentEntity() : Entity::Null();
+    if (restoreTo)
+    {
+        m_handleToRestore = restoreTo->ParentEntity();
+        restoreTo->DisableUpdate();
+    }
+    else
+    {
+        m_handleToRestore = Entity::Null();
+    }
+
     gfx->SetCamera(this);
 }
 
@@ -36,6 +45,11 @@ void EditorCamera::Disable(Registry* registry)
         if (m_handleToRestore.Valid() && registry->Contains<Transform>(m_handleToRestore))
         {
             auto toRestore = registry->Get<graphics::Camera>(m_handleToRestore);
+            if (toRestore)
+            {
+                toRestore->EnableUpdate();
+            }
+
             gfx->SetCamera(toRestore);
         }
         else

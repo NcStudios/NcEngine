@@ -8,7 +8,7 @@
 
 namespace
 {
-auto BuildEditorObjectx(nc::ecs::Ecs world, nc::ModuleProvider modules, nc::input::KeyCode cameraHotkey) -> std::pair<nc::Entity, nc::Entity>
+auto BuildEditorObjects(nc::ecs::Ecs world, nc::ModuleProvider modules, nc::input::KeyCode cameraHotkey) -> std::pair<nc::Entity, nc::Entity>
 {
     // Parent Entity for all Editor objects
     const auto bucket = world.Emplace<nc::Entity>({
@@ -34,7 +34,7 @@ auto BuildContext(nc::ecs::Ecs world,
                   nc::ModuleProvider modules,
                   nc::ui::editor::EditorHotkeys hotkeys) -> nc::ui::editor::EditorContext
 {
-    const auto [bucket, camera] = ::BuildEditorObjectx(world, modules, hotkeys.toggleEditorCamera);
+    const auto [bucket, camera] = ::BuildEditorObjects(world, modules, hotkeys.toggleEditorCamera);
     return nc::ui::editor::EditorContext{
         .world = world,
         .modules = modules,
