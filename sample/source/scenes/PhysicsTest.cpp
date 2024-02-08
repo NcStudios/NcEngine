@@ -58,12 +58,12 @@ struct FollowCamera : public graphics::Camera
     float speed;
 
     FollowCamera(Entity self,
-                 Entity target,
+                 Entity target_,
                  float initialHeight = 10.0f,
                  float initialDistance = -10.0f,
                  float initialSpeed = 5.0f)
         : graphics::Camera{self},
-          target{target},
+          target{target_},
           followHeight{initialHeight},
           followDistance{initialDistance},
           speed{initialSpeed}
