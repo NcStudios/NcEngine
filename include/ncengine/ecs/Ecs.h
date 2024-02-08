@@ -42,7 +42,17 @@ class EcsInterface
                 return pool.Add(info.layer, info.flags);
             });
 
-            Emplace<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
+            if (info.parent.Valid())
+            {
+                auto& parentTransform = Get<Transform>(info.parent);
+                parentTransform.AddChild(handle);
+                Emplace<Transform>(handle, info.position, info.rotation, info.scale, parentTransform.TransformationMatrix(), info.parent);
+            }
+            else
+            {
+                Emplace<Transform>(handle, info.position, info.rotation, info.scale);
+            }
+
             Emplace<detail::FreeComponentGroup>(handle);
             Emplace<Tag>(handle, std::move(info.tag));
             return handle;

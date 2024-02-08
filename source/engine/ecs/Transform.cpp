@@ -6,38 +6,53 @@ namespace
     using namespace DirectX;
     using namespace nc;
 
-    XMVECTOR ToXMVector(const Vector3& v)            { return XMVectorSet(v.x, v.y, v.z, 0.0f); }
-    XMVECTOR ToXMVectorHomogeneous(const Vector3& v) { return XMVectorSet(v.x, v.y, v.z, 1.0f); }
-    XMVECTOR ToXMVector(const Quaternion& q)         { return XMVectorSet(q.x, q.y, q.z, q.w); }
-    XMMATRIX ToTransMatrix(const Vector3& v)         { return XMMatrixTranslation(v.x, v.y, v.z); }
-    XMMATRIX ToScaleMatrix(const Vector3& v)         { return XMMatrixScaling(v.x, v.y, v.z); }
-    XMMATRIX ToRotMatrix(const Vector3& v)           { return XMMatrixRotationRollPitchYaw(v.x, v.y, v.z); }
-    XMMATRIX ToRotMatrix(const Quaternion& q)        { return XMMatrixRotationQuaternion(ToXMVector(q)); }
-    XMMATRIX ToRotMatrix(const Vector3& a, float r)  { return XMMatrixRotationAxis(ToXMVector(a), r); }
+    // XMVECTOR ToXMVector(const Vector3& v)            { return XMVectorSet(v.x, v.y, v.z, 0.0f); }
+    // XMVECTOR ToXMVectorHomogeneous(const Vector3& v) { return XMVectorSet(v.x, v.y, v.z, 1.0f); }
+    // XMVECTOR ToXMVector(const Quaternion& q)         { return XMVectorSet(q.x, q.y, q.z, q.w); }
+    // XMMATRIX ToTransMatrix(const Vector3& v)         { return XMMatrixTranslation(v.x, v.y, v.z); }
+    // XMMATRIX ToScaleMatrix(const Vector3& v)         { return XMMatrixScaling(v.x, v.y, v.z); }
+    // XMMATRIX ToRotMatrix(const Vector3& v)           { return XMMatrixRotationRollPitchYaw(v.x, v.y, v.z); }
+    // XMMATRIX ToRotMatrix(const Quaternion& q)        { return XMMatrixRotationQuaternion(ToXMVector(q)); }
+    // XMMATRIX ToRotMatrix(const Vector3& a, float r)  { return XMMatrixRotationAxis(ToXMVector(a), r); }
 
-    XMMATRIX ComposeMatrix(const Vector3& scale, const Quaternion& rot, const Vector3& pos)
-    {
-        return ToScaleMatrix(scale) * ToRotMatrix(rot) * ToTransMatrix(pos);
-    }
+    // XMMATRIX ComposeMatrix(const Vector3& scale, const Quaternion& rot, const Vector3& pos)
+    // {
+    //     return ToScaleMatrix(scale) * ToRotMatrix(rot) * ToTransMatrix(pos);
+    // }
 }
 
 namespace nc
 {
-    Transform::Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent)
-        : ComponentBase(entity),
-          m_localMatrix{ComposeMatrix(scale, rot, pos)},
-          m_worldMatrix{m_localMatrix},
-          m_parent{parent},
-          m_children{}
-    {
-        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
-        if(m_parent.Valid())
-        {
-            auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
-            parentTransform->AddChild(entity);
-            m_worldMatrix = parentTransform->TransformationMatrix() * m_worldMatrix;
-        }
-    }
+    // Transform::Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale)
+    //     : ComponentBase(entity),
+    //       m_localMatrix{ComposeMatrix(scale, rot, pos)},
+    //       m_worldMatrix{m_localMatrix},
+    //       m_parent{Entity::Null()},
+    //       m_children{}
+    // {
+    //     NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+    //     // if(m_parent.Valid())
+    //     // {
+    //     //     auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
+    //     //     parentTransform->AddChild(entity);
+    //     //     m_worldMatrix = parentTransform->TransformationMatrix() * m_worldMatrix;
+    //     // }
+    // }
+
+    // Transform::Transform(Entity entity,
+    //                      const Vector3& pos,
+    //                      const Quaternion& rot,
+    //                      const Vector3& scale,
+    //                      DirectX::FXMMATRIX parentTransform,
+    //                      Entity parent)
+    //     : ComponentBase(entity),
+    //       m_localMatrix{ComposeMatrix(scale, rot, pos)},
+    //       m_worldMatrix{parentTransform * m_localMatrix},
+    //       m_parent{parent},
+    //       m_children{}
+    // {
+
+    // }
 
     Vector3 Transform::ToLocalSpace(const Vector3& vec) const
     {
@@ -159,6 +174,7 @@ namespace nc
         UpdateWorldMatrix();
     }
 
+    // TODO: I think these are wrong
     void Transform::Rotate(const Quaternion& quat)
     {
         auto pos_v = m_localMatrix.r[3];
@@ -207,10 +223,10 @@ namespace nc
             registry->Get<Transform>(m_parent)->AddChild(ParentEntity());
     }
 
-    void Transform::AddChild(Entity child)
-    {
-        m_children.push_back(child);
-    }
+    // void Transform::AddChild(Entity child)
+    // {
+    //     m_children.push_back(child);
+    // }
 
     void Transform::RemoveChild(Entity child)
     {

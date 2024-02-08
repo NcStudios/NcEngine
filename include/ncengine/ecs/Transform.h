@@ -29,7 +29,49 @@ class Transform final : public ComponentBase
     NC_ENABLE_IN_EDITOR(Transform)
 
     public:
-        Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent);
+    Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale)
+        : ComponentBase(entity),
+          m_localMatrix{ComposeMatrix(scale, rot, pos)},
+          m_worldMatrix{m_localMatrix},
+          m_parent{Entity::Null()},
+          m_children{}
+    {
+        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+        // if(m_parent.Valid())
+        // {
+        //     auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
+        //     parentTransform->AddChild(entity);
+        //     m_worldMatrix = parentTransform->TransformationMatrix() * m_worldMatrix;
+        // }
+    }
+
+    Transform(Entity entity,
+                         const Vector3& pos,
+                         const Quaternion& rot,
+                         const Vector3& scale,
+                         DirectX::FXMMATRIX parentTransform,
+                         Entity parent)
+        : ComponentBase(entity),
+          m_localMatrix{ComposeMatrix(scale, rot, pos)},
+          m_worldMatrix{parentTransform * m_localMatrix},
+          m_parent{parent},
+          m_children{}
+    {
+
+    }
+
+        // Transform(Entity entity,
+        //           const Vector3& pos,
+        //           const Quaternion& rot,
+        //           const Vector3& scale);
+
+        // Transform(Entity entity,
+        //           const Vector3& pos,
+        //           const Quaternion& rot,
+        //           const Vector3& scale,
+        //           DirectX::FXMMATRIX parentTransform,
+        //           Entity parent);
+
         Transform(Transform&&) = default;
         Transform& operator=(Transform&&) = default;
         ~Transform() = default;
@@ -126,8 +168,16 @@ class Transform final : public ComponentBase
         /** @brief Make this transform the child of another, or pass nullptr to detach from existing parent */
         void SetParent(Entity parent);
 
+
+
+        // want to have private??
+        void AddChild(Entity child)
+        {
+            m_children.push_back(child);
+        }
+
+
     private:
-        void AddChild(Entity child);
         void RemoveChild(Entity child);
         void UpdateWorldMatrix();
 

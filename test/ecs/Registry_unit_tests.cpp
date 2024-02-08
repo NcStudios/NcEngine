@@ -6,10 +6,6 @@ using namespace nc;
 
 namespace nc
 {
-Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
-    : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
-{}
-
 void Transform::SetParent(Entity entity) { m_parent = entity; }
 
 Quaternion::Quaternion(float X, float Y, float Z, float W)
