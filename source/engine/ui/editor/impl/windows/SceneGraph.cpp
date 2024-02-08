@@ -141,7 +141,7 @@ void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transfor
     DragAndDropSource<Entity>(&entity);
     DragAndDropTarget<Entity>([entity, world = ctx.world](Entity* source) mutable
     {
-        world.Get<Transform>(*source).SetParent(entity);
+        world.SetParent(*source, entity);
     });
 
     if(isNodeExpanded)

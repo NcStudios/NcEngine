@@ -8,6 +8,24 @@
 
 namespace nc::ecs
 {
+struct HierarchyManager
+{
+    static void SetParent(Transform& transform, Entity parent)
+    {
+        transform.m_parent = parent;
+    }
+
+    static void AddChild(Transform& transform, Entity child)
+    {
+        transform.m_children.push_back(child);
+    }
+
+    static void RemoveChild(Transform& transform, Entity child)
+    {
+        std::erase(transform.m_children, child);
+    }
+};
+
 /**
  * @brief Interface for higher-level entity and component operations with optional type access restriction.
  * @tparam Base A FilterBase describing the baseline set of types accessible through the interface.
@@ -45,7 +63,7 @@ class EcsInterface
             if (info.parent.Valid())
             {
                 auto& parentTransform = Get<Transform>(info.parent);
-                parentTransform.AddChild(handle);
+                HierarchyManager::AddChild(parentTransform, handle);
                 Emplace<Transform>(handle, info.position, info.rotation, info.scale, parentTransform.TransformationMatrix(), info.parent);
             }
             else
@@ -75,6 +93,36 @@ class EcsInterface
                     return pool.Emplace(entity, std::forward<decltype(args)>(args)...);
                 });
             }
+        }
+
+        /** @brief Set an Entity to be the child of another, or pass Entity::Null() to detach from an existing parent. */
+        void SetParent(Entity entity, Entity parent)
+        {
+            NC_ASSERT(Contains<Entity>(entity), "Bad entity");
+            auto& child = Get<Transform>(entity);
+            auto currentParent = child.Parent();
+
+            HierarchyManager::SetParent(child, parent);
+
+            if (currentParent.Valid())
+            {
+                auto& cur = Get<Transform>(currentParent);
+                HierarchyManager::RemoveChild(cur, entity);
+            }
+
+            if (parent.Valid())
+            {
+                NC_ASSERT(Contains<Entity>(parent), "Bad entity");
+                auto& parentTransform = Get<Transform>(parent);
+                HierarchyManager::AddChild(parentTransform, entity);
+            }
+        }
+
+        /** @brief Get the root Entity in a hierarchy. */
+        auto GetRoot(Entity entity) -> Entity
+        {
+            auto parent = Get<Transform>(entity).Parent();
+            return !parent.Valid() ? entity : GetRoot(parent);
         }
 
         /** @brief Remove an entity. */
@@ -223,7 +271,12 @@ class EcsInterface
         {
             auto& transform = Get<Transform>(entity);
             if constexpr(IsRoot)
-                transform.SetParent(Entity::Null());
+            {
+                if (transform.Parent().Valid())
+                {
+                    HierarchyManager::RemoveChild(Get<Transform>(transform.Parent()), entity);
+                }
+            }
 
             for (auto child : transform.Children())
                 RemoveNode<false>(child);

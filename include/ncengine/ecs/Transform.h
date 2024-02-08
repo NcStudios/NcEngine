@@ -13,6 +13,11 @@
 
 namespace nc
 {
+namespace ecs
+{
+struct HierarchyManager;
+}
+
 /** @brief Component with translation, rotation, and scale properties.
  * 
  *  @note Transforms are automatically added and removed with their parent
@@ -37,40 +42,22 @@ class Transform final : public ComponentBase
           m_children{}
     {
         NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
-        // if(m_parent.Valid())
-        // {
-        //     auto* parentTransform = ActiveRegistry()->Get<Transform>(parent);
-        //     parentTransform->AddChild(entity);
-        //     m_worldMatrix = parentTransform->TransformationMatrix() * m_worldMatrix;
-        // }
     }
 
     Transform(Entity entity,
-                         const Vector3& pos,
-                         const Quaternion& rot,
-                         const Vector3& scale,
-                         DirectX::FXMMATRIX parentTransform,
-                         Entity parent)
+              const Vector3& pos,
+              const Quaternion& rot,
+              const Vector3& scale,
+              DirectX::FXMMATRIX parentTransform,
+              Entity parent)
         : ComponentBase(entity),
           m_localMatrix{ComposeMatrix(scale, rot, pos)},
           m_worldMatrix{parentTransform * m_localMatrix},
           m_parent{parent},
           m_children{}
     {
-
+        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
     }
-
-        // Transform(Entity entity,
-        //           const Vector3& pos,
-        //           const Quaternion& rot,
-        //           const Vector3& scale);
-
-        // Transform(Entity entity,
-        //           const Vector3& pos,
-        //           const Quaternion& rot,
-        //           const Vector3& scale,
-        //           DirectX::FXMMATRIX parentTransform,
-        //           Entity parent);
 
         Transform(Transform&&) = default;
         Transform& operator=(Transform&&) = default;
@@ -104,6 +91,8 @@ class Transform final : public ComponentBase
 
         /** @brief Get world space matrix */
         auto TransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_worldMatrix; }
+
+        auto LocalTransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_localMatrix; }
 
         /** @brief Get local space matrix */
         auto ToLocalSpace(const Vector3& vec) const -> Vector3;
@@ -159,31 +148,16 @@ class Transform final : public ComponentBase
             return std::span<const Entity>{m_children.data(), m_children.size()};
         }
 
-        /** @brief Get the root node relative to this transform */
-        auto Root() const -> Entity;
-
         /** @brief Get the immediate parent of this transform - may be nullptr */
         auto Parent() const noexcept -> Entity { return m_parent; }
 
-        /** @brief Make this transform the child of another, or pass nullptr to detach from existing parent */
-        void SetParent(Entity parent);
-
-
-
-        // want to have private??
-        void AddChild(Entity child)
-        {
-            m_children.push_back(child);
-        }
-
-
     private:
-        void RemoveChild(Entity child);
-        void UpdateWorldMatrix();
+        friend struct ecs::HierarchyManager;
 
+        void UpdateWorldMatrix();
         DirectX::XMMATRIX m_localMatrix;
         DirectX::XMMATRIX m_worldMatrix;
-        Entity m_parent;
         std::vector<Entity> m_children;
+        Entity m_parent;
 };
 } //end namespace nc
