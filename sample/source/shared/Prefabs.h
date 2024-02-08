@@ -3,11 +3,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ToonRenderer.h"
 
-namespace nc
-{
-class Registry;
-
-namespace sample
+namespace nc::sample
 {
 void InitializeResources();
 
@@ -24,5 +20,4 @@ extern graphics::PbrMaterial DefaultPbrMaterial;
 extern graphics::PbrMaterial RedPbrMaterial;
 extern graphics::PbrMaterial GreenPbrMaterial;
 extern graphics::PbrMaterial BluePbrMaterial;
-} // namespace sample
-} // namespace nc
+} // namespace nc::sample

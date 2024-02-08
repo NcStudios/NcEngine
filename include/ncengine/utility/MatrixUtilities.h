@@ -40,10 +40,7 @@ inline auto DecomposeMatrix(DirectX::FXMMATRIX in) noexcept -> DecomposedMatrixX
 
 inline auto DecomposeRotation(DirectX::FXMMATRIX in) noexcept -> DirectX::XMVECTOR
 {
-    auto scl = DirectX::XMVECTOR{};
-    auto rot = DirectX::XMVECTOR{};
-    auto pos = DirectX::XMVECTOR{};
-    DirectX::XMMatrixDecompose(&scl, &rot, &pos, in);
+    auto [scl, rot, pos] = DecomposeMatrix(in);
     return rot;
 }
 
