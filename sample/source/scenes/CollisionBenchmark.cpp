@@ -1,10 +1,13 @@
 #include "CollisionBenchmark.h"
-#include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
 #include "imgui/imgui.h"
 #include "ncengine/NcEngine.h"
+#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/PointLight.h"
+#include "ncengine/physics/Collider.h"
 
 namespace
 {
@@ -14,7 +17,6 @@ std::function<void(unsigned)> DestroyDynamicCallback = nullptr;
 std::function<int()> GetStaticCountCallback = nullptr;
 std::function<void(unsigned)> SpawnStaticCallback = nullptr;
 std::function<void(unsigned)> DestroyStaticCallback = nullptr;
-std::function<float()> GetFPSCallback = nullptr;
 
 int DynamicCount = 100;
 int StaticCount = 100;
@@ -25,7 +27,6 @@ void Widget()
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
         ImGui::Text("Count Static/Dynamic: %d / %d", GetStaticCountCallback(), GetDynamicCountCallback());
-        ImGui::Text("FPS: %.1f", GetFPSCallback());
         ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
         ImGui::Text("Dynamic Cubes");
@@ -91,25 +92,26 @@ void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
         .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
     };
 
-    auto spawnExtension = [registry](Entity entity)
+    // Dynamic Cube Spawner
+    auto dynamicSpawnExtension = [registry](Entity entity)
     {
+        registry->Add<graphics::MeshRenderer>(entity, asset::CubeMesh, prefab::GreenPbrMaterial);
         registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
     };
-
-    // Dynamic Cube Spawner
     auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
-    auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, modules.Get<Random>(), prefab::Resource::CubeGreen, spawnBehavior, spawnExtension);
+    auto dynamicSpawner = registry->Add<Spawner>(dynamicSpawnerHandle, modules.Get<Random>(), spawnBehavior, dynamicSpawnExtension);
     registry->Add<FrameLogic>(dynamicSpawnerHandle, InvokeFreeComponent<Spawner>{});
 
     // Static Cube Spawner
+    auto staticSpawnExtension = [registry](Entity entity)
+    {
+        registry->Add<graphics::MeshRenderer>(entity, asset::CubeMesh, prefab::RedPbrMaterial);
+        registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
+    };
     spawnBehavior.flags = Entity::Flags::Static;
     auto staticSpawnerHandle = registry->Add<Entity>({.tag = "StaticCubeSpawner"});
-    auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, modules.Get<Random>(), prefab::Resource::CubeRed, spawnBehavior, spawnExtension);
+    auto staticSpawner = registry->Add<Spawner>(staticSpawnerHandle, modules.Get<Random>(), spawnBehavior, staticSpawnExtension);
     registry->Add<FrameLogic>(staticSpawnerHandle, InvokeFreeComponent<Spawner>{});
-
-    auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
-    auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-    registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
@@ -122,7 +124,6 @@ void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
     GetStaticCountCallback = std::bind(&Spawner::GetObjectCount, staticSpawner);
     SpawnStaticCallback = std::bind(&Spawner::StageSpawn, staticSpawner, std::placeholders::_1);
     DestroyStaticCallback = std::bind(&Spawner::StageDestroy, staticSpawner, std::placeholders::_1);
-    GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 }
 
 void CollisionBenchmark::Unload()
@@ -132,7 +133,6 @@ void CollisionBenchmark::Unload()
     DestroyDynamicCallback = nullptr;
     SpawnStaticCallback = nullptr;
     DestroyStaticCallback = nullptr;
-    GetFPSCallback = nullptr;
 }
 } // namespace nc::sample
 

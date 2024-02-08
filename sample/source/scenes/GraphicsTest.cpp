@@ -1,5 +1,4 @@
 #include "GraphicsTest.h"
-#include "shared/FreeComponents.h"
 #include "shared/Prefabs.h"
 #include "shared/GameLogic.h"
 
@@ -9,9 +8,11 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/physics/PhysicsBody.h"
 
 #include <string>
 #include <iostream>
@@ -20,33 +21,16 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/ecs/Logic.h"
 
-namespace
-{
-std::function<float()> GetFPSCallback = nullptr;
-
-void Widget()
-{
-    ImGui::Text("FPS Benchmark");
-    if(ImGui::BeginChild("Widget", {0,0}, true))
-    {
-        ImGui::Text("FPS: %.1f", GetFPSCallback());
-        ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-
-    } ImGui::EndChild();
-}
-} // anonymous namespace
-
 namespace nc::sample
 {
 GraphicsTest::GraphicsTest(SampleUI* ui)
     : m_sampleUI{ui}
 {
-    ui->SetWidgetCallback(::Widget);
+    ui->SetWidgetCallback(nullptr);
 }
 
 GraphicsTest::~GraphicsTest() noexcept
 {
-    m_sampleUI->SetWidgetCallback(nullptr);
 }
 
 void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
@@ -237,11 +221,6 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
         });
     }
 
-    // FPS Tracker
-    auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FpsTracker"});
-    auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-    registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
-
     // Cave
     auto cave_floor = registry->Add<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
@@ -268,12 +247,9 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
     registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
     modules.Get<graphics::NcGraphics>()->SetCamera(camera);
-
-    GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 }
 
 void GraphicsTest::Unload()
 {
-    GetFPSCallback = nullptr;
 }
 } // namespace nc::sample

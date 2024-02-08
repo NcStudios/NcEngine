@@ -1,17 +1,18 @@
 #include "RenderingBenchmark.h"
-#include "shared/FreeComponents.h"
 #include "shared/spawner/Spawner.h"
 
 #include "imgui/imgui.h"
 #include "ncengine/NcEngine.h"
+#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/PointLight.h"
 
 #include <functional>
 
 namespace
 {
 std::function<int()> GetObjectCountCallback = nullptr;
-std::function<float()> GetFPSCallback = nullptr;
 std::function<void(unsigned)> SpawnCallback = nullptr;
 std::function<void(unsigned)> DestroyCallback = nullptr;
 
@@ -24,7 +25,6 @@ void Widget()
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
         ImGui::Text("Objects: %d", GetObjectCountCallback());
-        ImGui::Text("FPS: %.1f", GetFPSCallback());
         ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
         ImGui::SetNextItemWidth(100);
@@ -72,12 +72,12 @@ void RenderingBenchmark::Load(Registry* registry, ModuleProvider modules)
     };
 
     auto spawnerHandle = registry->Add<Entity>({.tag = "Spawner"});
-    auto spawner = registry->Add<Spawner>(spawnerHandle, modules.Get<Random>(), prefab::Resource::Cube, spawnBehavior);
-    registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
+    auto spawner = registry->Add<Spawner>(spawnerHandle, modules.Get<Random>(), spawnBehavior, [registry](Entity entity)
+    {
+        registry->Add<graphics::MeshRenderer>(entity);
+    });
 
-    auto fpsTrackerHandle = registry->Add<Entity>({.tag = "FPSTracker"});
-    auto fpsTracker = registry->Add<FPSTracker>(fpsTrackerHandle);
-    registry->Add<FrameLogic>(fpsTrackerHandle, InvokeFreeComponent<FPSTracker>{});
+    registry->Add<FrameLogic>(spawnerHandle, InvokeFreeComponent<Spawner>{});
 
     // Lights
     auto lvHandle = registry->Add<Entity>({.position = Vector3{0.0f, 3.4f, 1.3f}, .tag = "Point Light 1"});
@@ -87,13 +87,11 @@ void RenderingBenchmark::Load(Registry* registry, ModuleProvider modules)
     GetObjectCountCallback = std::bind(&Spawner::GetObjectCount, spawner);
     SpawnCallback = std::bind(&Spawner::StageSpawn, spawner, std::placeholders::_1);
     DestroyCallback = std::bind(&Spawner::StageDestroy, spawner, std::placeholders::_1);
-    GetFPSCallback = std::bind(&FPSTracker::GetFPS, fpsTracker);
 }
 
 void RenderingBenchmark::Unload()
 {
     GetObjectCountCallback = nullptr;
-    GetFPSCallback = nullptr;
     SpawnCallback = nullptr;
     DestroyCallback = nullptr;
 }

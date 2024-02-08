@@ -106,22 +106,6 @@
     ],
     "texture": [
         {
-            "sourcePath": "raw/image/blacktop/BaseColor.png",
-            "assetName": "texture/blacktop/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Normal.png",
-            "assetName": "texture/blacktop/Normal"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Roughness.png",
-            "assetName": "texture/blacktop/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Metallic.png",
-            "assetName": "texture/blacktop/Metallic"
-        },
-        {
             "sourcePath": "raw/image/box/BaseColor.png",
             "assetName": "texture/box/BaseColor"
         },
@@ -164,18 +148,6 @@
         {
             "sourcePath": "raw/image/cave_ceiling/Metallic.png",
             "assetName": "texture/cave_ceiling/Metallic"
-        },
-        {
-            "sourcePath": "raw/image/floor/BaseColor.png",
-            "assetName": "texture/floor/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/floor/Normal.png",
-            "assetName": "texture/floor/Normal"
-        },
-        {
-            "sourcePath": "raw/image/floor/Roughness.png",
-            "assetName": "texture/floor/Roughness"
         },
         {
             "sourcePath": "raw/image/logo/BaseColor.png",
