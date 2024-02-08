@@ -10,6 +10,7 @@ namespace nc::ui::editor
 void SandboxScene::Load(Registry* registry, ModuleProvider modules)
 {
     auto world = registry->GetEcs();
+    world.Get<EditorCamera>(m_editorCamera).Enable();
     if (!m_fragmentPath.empty())
     {
         auto file = std::ifstream{m_fragmentPath, std::ios::binary};
@@ -17,7 +18,5 @@ void SandboxScene::Load(Registry* registry, ModuleProvider modules)
         LoadSceneFragment(file, world, *modules.Get<asset::NcAsset>());
         return;
     }
-
-    world.Get<EditorCamera>(m_editorCamera).Enable();
 }
 } // namespace nc::ui::editor

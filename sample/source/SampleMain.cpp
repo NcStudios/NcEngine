@@ -15,7 +15,7 @@ int main()
     {
         const auto config = nc::config::Load("config.ini");
         engine = nc::InitializeNcEngine(config);
-        nc::sample::prefab::InitializeResources();
+        nc::sample::InitializeResources();
         auto ui = nc::sample::InitializeSampleUI(engine.get());
         engine->Start(std::make_unique<nc::sample::PhysicsTest>(ui.get()));
     }

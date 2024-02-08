@@ -95,7 +95,7 @@ void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
     // Dynamic Cube Spawner
     auto dynamicSpawnExtension = [registry](Entity entity)
     {
-        registry->Add<graphics::MeshRenderer>(entity, asset::CubeMesh, prefab::GreenPbrMaterial);
+        registry->Add<graphics::MeshRenderer>(entity, asset::CubeMesh, GreenPbrMaterial);
         registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
     };
     auto dynamicSpawnerHandle = registry->Add<Entity>({.tag = "DynamicCubeSpawner"});
@@ -105,7 +105,7 @@ void CollisionBenchmark::Load(Registry* registry, ModuleProvider modules)
     // Static Cube Spawner
     auto staticSpawnExtension = [registry](Entity entity)
     {
-        registry->Add<graphics::MeshRenderer>(entity, asset::CubeMesh, prefab::RedPbrMaterial);
+        registry->Add<graphics::MeshRenderer>(entity, asset::CubeMesh, RedPbrMaterial);
         registry->Add<physics::Collider>(entity, physics::BoxProperties{}, false);
     };
     spawnBehavior.flags = Entity::Flags::Static;

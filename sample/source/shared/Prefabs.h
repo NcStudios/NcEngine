@@ -1,18 +1,16 @@
 #pragma once
 
-#include "ncengine/ecs/Entity.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ToonRenderer.h"
-
-namespace nc { class Registry; }
-
 
 namespace nc
 {
 class Registry;
 
-namespace sample::prefab
+namespace sample
 {
+void InitializeResources();
+
 extern graphics::ToonMaterial DefaultToonMaterial;
 extern graphics::ToonMaterial RedToonMaterial;
 extern graphics::ToonMaterial GreenToonMaterial;
@@ -26,15 +24,5 @@ extern graphics::PbrMaterial DefaultPbrMaterial;
 extern graphics::PbrMaterial RedPbrMaterial;
 extern graphics::PbrMaterial GreenPbrMaterial;
 extern graphics::PbrMaterial BluePbrMaterial;
-
-
-} // namespace sample::asset
+} // namespace sample
 } // namespace nc
-
-
-
-
-namespace nc::sample::prefab
-{
-    void InitializeResources();
-} // end namespace project::prefab

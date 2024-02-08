@@ -10,6 +10,13 @@
 
 namespace nc
 {
+struct DecomposedMatrixXM
+{
+    DirectX::XMVECTOR scale;
+    DirectX::XMVECTOR rotation;
+    DirectX::XMVECTOR position;
+};
+
 inline auto ToVector3(DirectX::FXMVECTOR in) noexcept -> Vector3
 {
     auto out = Vector3{};
@@ -21,6 +28,13 @@ inline auto ToQuaternion(DirectX::FXMVECTOR in) noexcept -> Quaternion
 {
     auto out = Quaternion::Identity();
     DirectX::XMStoreQuaternion(&out, in);
+    return out;
+}
+
+inline auto DecomposeMatrix(DirectX::FXMMATRIX in) noexcept -> DecomposedMatrixXM
+{
+    auto out = DecomposedMatrixXM{};
+    DirectX::XMMatrixDecompose(&out.scale, &out.rotation, &out.position, in);
     return out;
 }
 

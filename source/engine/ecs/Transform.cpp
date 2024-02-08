@@ -186,6 +186,16 @@ namespace nc
         UpdateWorldMatrix();
     }
 
+    void Transform::LookAt(const Vector3& target)
+    {
+        const auto selfToTarget = target - Position();
+        const auto forward = Normalize(selfToTarget);
+        const auto cosTheta = Dot(Vector3::Front(), forward);
+        const auto angle = std::acos(cosTheta);
+        const auto axis = Normalize(CrossProduct(Vector3::Front(), forward));
+        SetRotation(Quaternion::FromAxisAngle(axis, angle));
+    }
+
     Entity Transform::Root() const
     {
         if(m_parent.Valid())

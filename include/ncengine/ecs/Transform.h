@@ -111,6 +111,9 @@ class Transform final : public ComponentBase
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
 
+        /** @brief Rotate to point towards a target position. */
+        void LookAt(const Vector3& target);
+
         /** @brief Get all immediate children of this transform */
         auto Children() const noexcept -> std::span<const Entity>
         {

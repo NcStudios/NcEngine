@@ -17,37 +17,6 @@ void WasdBasedMovement(Entity self, Registry* registry, float dt)
     registry->Get<Transform>(self)->Translate(Vector3{leftRight, upDown, frontBack});
 }
 
-void ForceBasedMovement(Entity self, Registry* registry)
-{
-    static constexpr float force = 0.7f;
-
-    if(!registry->Contains<physics::PhysicsBody>(self))
-        return;
-
-    auto* body = registry->Get<physics::PhysicsBody>(self);
-
-    if(KeyHeld(input::KeyCode::W))
-        body->ApplyImpulse(Vector3::Front() * force);
-
-    if(KeyHeld(input::KeyCode::S))
-        body->ApplyImpulse(Vector3::Back() * force);
-
-    if(KeyHeld(input::KeyCode::A))
-        body->ApplyImpulse(Vector3::Left() * force);
-    
-    if(KeyHeld(input::KeyCode::D))
-        body->ApplyImpulse(Vector3::Right() * force);
-
-    if(KeyHeld(input::KeyCode::Space))
-        body->ApplyImpulse(Vector3::Up() * 4.0f);
-
-    if(KeyHeld(input::KeyCode::Q))
-        body->ApplyTorqueImpulse(Vector3::Down() * 0.6f);
-
-    if(KeyHeld(input::KeyCode::E))
-        body->ApplyTorqueImpulse(Vector3::Up() * 0.6f);
-}
-
 void DestroyOnTriggerExit(Entity, Entity hit, Registry* registry)
 {
     if(registry->Contains<Entity>(hit))
