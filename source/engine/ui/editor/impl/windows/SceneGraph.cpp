@@ -102,7 +102,7 @@ void SceneGraph::Graph(EditorContext& ctx, CreateEntityDialog& createEntity)
     {
         auto& hierarchy = ctx.world.Get<Hierarchy>(entity);
         auto& tag = ctx.world.Get<Tag>(entity);
-        if (hierarchy.IsRoot() && PassFilter(tag))
+        if (!hierarchy.parent.Valid() && PassFilter(tag))
         {
             GraphNode(ctx, entity, tag, hierarchy, createEntity);
         }

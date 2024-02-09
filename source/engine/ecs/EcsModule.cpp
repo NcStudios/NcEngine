@@ -112,7 +112,7 @@ void EcsModule::UpdateWorldSpaceMatrices(Registry* registry)
 #else // debug update
         auto& hierarchy = world.Get<Hierarchy>(entity);
         auto& transform = world.Get<Transform>(entity);
-        if (hierarchy.IsRoot())
+        if (!hierarchy.parent.Valid())
             transform.UpdateWorldMatrix();
         else
         {

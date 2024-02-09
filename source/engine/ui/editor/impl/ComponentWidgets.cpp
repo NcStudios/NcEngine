@@ -190,7 +190,6 @@ void TagUIWidget(Tag& tag)
 
 void TransformUIWidget(Transform& transform)
 {
-    (void)transform;
     auto scl_v = DirectX::XMVECTOR{};
     auto rot_v = DirectX::XMVECTOR{};
     auto pos_v = DirectX::XMVECTOR{};
@@ -206,7 +205,6 @@ void TransformUIWidget(Transform& transform)
     auto curRot = prevRot;
 
     if (ui::InputPosition(pos, "position")) transform.SetPosition(pos);
-    // if (ui::InputPosition(pos, "position")) transform.SetWorldPosition(pos);
 
     if (ui::InputAngles(curRot, "rotation"))
     {

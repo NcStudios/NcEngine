@@ -78,11 +78,10 @@ class EcsInterface
             }
         }
 
-        // TODO set requires clause
-        /** @brief Set an Entity to be the child of another, or pass Entity::Null() to detach from an existing parent. */
+        /** @brief Child an Entity to another, or pass Entity::Null() to detach from an existing parent. */
         void SetParent(Entity entity, Entity parent)
+            requires PolicyType::template HasAccess<Hierarchy>
         {
-            NC_ASSERT(Contains<Entity>(entity), "Bad entity");
             auto& hierarchy = Get<Hierarchy>(entity);
             auto oldParent = std::exchange(hierarchy.parent, parent);
             if (oldParent.Valid())
@@ -98,9 +97,10 @@ class EcsInterface
 
         /** @brief Get the root Entity in a hierarchy. */
         auto GetRoot(Entity entity) -> Entity
+            requires PolicyType::template HasAccess<Hierarchy>
         {
-            auto parent = Get<Transform>(entity).Parent();
-            return !parent.Valid() ? entity : GetRoot(parent);
+            const auto& hierarchy = Get<Hierarchy>(entity);
+            return !hierarchy.parent.Valid() ? entity : GetRoot(hierarchy.parent);
         }
 
         /** @brief Remove an entity. */

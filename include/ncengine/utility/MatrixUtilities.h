@@ -42,14 +42,47 @@ inline auto DecomposeScale(DirectX::FXMMATRIX in) noexcept -> DirectX::XMVECTOR
     return out;
 }
 
-    inline DirectX::XMVECTOR ToXMVector(const Vector3& v)            { return DirectX::XMVectorSet(v.x, v.y, v.z, 0.0f); }
-    inline DirectX::XMVECTOR ToXMVectorHomogeneous(const Vector3& v) { return DirectX::XMVectorSet(v.x, v.y, v.z, 1.0f); }
-    inline DirectX::XMVECTOR ToXMVector(const Quaternion& q)         { return DirectX::XMVectorSet(q.x, q.y, q.z, q.w); }
-    inline DirectX::XMMATRIX ToTransMatrix(const Vector3& v)         { return DirectX::XMMatrixTranslation(v.x, v.y, v.z); }
-    inline DirectX::XMMATRIX ToScaleMatrix(const Vector3& v)         { return DirectX::XMMatrixScaling(v.x, v.y, v.z); }
-    inline DirectX::XMMATRIX ToRotMatrix(const Vector3& v)           { return DirectX::XMMatrixRotationRollPitchYaw(v.x, v.y, v.z); }
-    inline DirectX::XMMATRIX ToRotMatrix(const Quaternion& q)        { return DirectX::XMMatrixRotationQuaternion(ToXMVector(q)); }
-    inline DirectX::XMMATRIX ToRotMatrix(const Vector3& a, float r)  { return DirectX::XMMatrixRotationAxis(ToXMVector(a), r); }
+inline DirectX::XMVECTOR ToXMVector(const Vector3& v)
+{
+    return DirectX::XMLoadVector3(&v);
+}
+
+inline DirectX::XMVECTOR ToXMVectorHomogeneous(const Vector3& v)
+{
+    auto out = DirectX::XMLoadVector3(&v);
+    DirectX::XMVectorSetW(out, 1.0f);
+    return out;
+}
+
+inline DirectX::XMVECTOR ToXMVector(const Quaternion& q)
+{
+    return DirectX::XMLoadQuaternion(&q);
+}
+
+inline DirectX::XMMATRIX ToTransMatrix(const Vector3& v)
+{
+    return DirectX::XMMatrixTranslation(v.x, v.y, v.z);
+}
+
+inline DirectX::XMMATRIX ToScaleMatrix(const Vector3& v)
+{
+    return DirectX::XMMatrixScaling(v.x, v.y, v.z);
+}
+
+inline DirectX::XMMATRIX ToRotMatrix(const Vector3& v)
+{
+    return DirectX::XMMatrixRotationRollPitchYaw(v.x, v.y, v.z);
+}
+
+inline DirectX::XMMATRIX ToRotMatrix(const Quaternion& q)
+{
+    return DirectX::XMMatrixRotationQuaternion(ToXMVector(q));
+}
+
+inline DirectX::XMMATRIX ToRotMatrix(const Vector3& a, float r)
+{
+    return DirectX::XMMatrixRotationAxis(ToXMVector(a), r);
+}
 
 inline auto ComposeMatrix(const Vector3& scale, const Quaternion& rot, const Vector3& pos) -> DirectX::XMMATRIX
 {
