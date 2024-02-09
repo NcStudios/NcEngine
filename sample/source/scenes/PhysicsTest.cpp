@@ -21,7 +21,7 @@ int DestroyCount = 1000;
 
 void Widget()
 {
-    ImGui::Text("Spawn Test");
+    ImGui::Text("Physics Test");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
@@ -39,9 +39,16 @@ void Widget()
             DestroyFunc(DestroyCount);
 
         ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-        ImGui::Text("-middle mouse button + drag to pan");
-        ImGui::Text("-right mouse button + drag to look");
-        ImGui::Text("-mouse wheel to zoom");
+        ImGui::Text("Character Controls");
+        ImGui::BulletText("WASD to move");
+        ImGui::BulletText("QE to rotate");
+        ImGui::BulletText("Space to jump");
+        ImGui::BulletText("Mouse Wheel to zoom");
+
+
+        ImGui::Text("Debug Controls");
+        ImGui::BulletText("~ to toggle editor");
+        ImGui::BulletText("F5 to toggle debug camera");
     }
 
     ImGui::EndChild();
@@ -59,8 +66,8 @@ struct FollowCamera : public graphics::Camera
 
     FollowCamera(Entity self,
                  Entity target_,
-                 float initialHeight = 10.0f,
-                 float initialDistance = -10.0f,
+                 float initialHeight = 12.0f,
+                 float initialDistance = -12.0f,
                  float initialSpeed = 5.0f)
         : graphics::Camera{self},
           target{target_},
@@ -264,19 +271,28 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     });
 
     // Ramp
-    const auto ramp = world.Emplace<Entity>({
+    const auto ramp1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 1.15f, 25.99f},
         .rotation = Quaternion::FromEulerAngles(-0.4f, 0.0f, 0.0f),
         .scale = Vector3{8.0f, 1.0f, 20.0f},
         .tag = "Ramp"
     });
 
+    const auto ramp2 = world.Emplace<Entity>({
+        .position = Vector3{7.2f, 1.25f, 60.0f},
+        .rotation = Quaternion::FromAxisAngle(Vector3::Up(), -1.571f),
+        .scale = Vector3::Splat(3.2f),
+        .tag = "Ramp"
+    });
+
     world.Emplace<graphics::ToonRenderer>(platform1, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(platform2, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(ramp, asset::CubeMesh, TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(ramp2, "ramp.nca", TealToonMaterial);
     world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
     world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(ramp, physics::BoxProperties{});
+    world.Emplace<physics::Collider>(ramp1, physics::BoxProperties{});
+    world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = "ramp.nca"});
     world.Emplace<physics::PhysicsBody>(platform1, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
     world.Emplace<physics::PhysicsBody>(platform2, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
@@ -334,8 +350,8 @@ void BuildHalfPipe(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe, "ramp.nca", RedToonMaterial);
-    world.Emplace<physics::ConcaveCollider>(halfPipe, "ramp.nca");
+    world.Emplace<graphics::ToonRenderer>(halfPipe, "halfpipe.nca", RedToonMaterial);
+    world.Emplace<physics::ConcaveCollider>(halfPipe, "halfpipe.nca");
 }
 
 void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -428,7 +444,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
         ncRandom,
         SpawnBehavior{
             .minPosition = Vector3{-70.0f, 20.0f, -70.0f},
-            .maxPosition = Vector3{70.0f, 50.0f, 70.0f},
+            .maxPosition = Vector3{70.0f, 30.0f, 70.0f},
             .minRotation = Vector3::Zero(),
             .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         },
@@ -463,7 +479,7 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
 
     // Camera
     auto cameraHandle = registry->Add<Entity>({
-        .position = Vector3{0.0f, 6.1f, -6.5f},
+        .position = Vector3{0.0f, 12.0f, -12.0f},
         .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
         .tag = "Main Camera"
     });

@@ -14,8 +14,8 @@
     ],
     "concave-collider": [
         {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "concave_collider/ramp"
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "concave_collider/halfpipe"
         }
     ],
     "cube-map": [
@@ -28,6 +28,10 @@
         {
             "sourcePath": "raw/model/coin.fbx",
             "assetName": "hull_collider/coin"
+        },
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "hull_collider/ramp"
         }
     ],
     "mesh": [
@@ -40,8 +44,8 @@
             "assetName": "mesh/ogre"
         },
         {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "mesh/ramp"
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "mesh/halfpipe"
         },
         {
             "sourcePath": "raw/model/worm.fbx",
@@ -58,6 +62,10 @@
         {
             "sourcePath": "raw/model/cave_ceiling.fbx",
             "assetName": "mesh/cave_ceiling"
+        },
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "mesh/ramp"
         }
     ],
     "skeletal-animation": [
