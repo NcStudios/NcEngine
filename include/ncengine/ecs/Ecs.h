@@ -78,31 +78,6 @@ class EcsInterface
             }
         }
 
-        /** @brief Child an Entity to another, or pass Entity::Null() to detach from an existing parent. */
-        void SetParent(Entity entity, Entity parent)
-            requires PolicyType::template HasAccess<Hierarchy>
-        {
-            auto& hierarchy = Get<Hierarchy>(entity);
-            auto oldParent = std::exchange(hierarchy.parent, parent);
-            if (oldParent.Valid())
-            {
-                std::erase(Get<Hierarchy>(oldParent).children, entity);
-            }
-
-            if (parent.Valid())
-            {
-                Get<Hierarchy>(parent).children.push_back(entity);
-            }
-        }
-
-        /** @brief Get the root Entity in a hierarchy. */
-        auto GetRoot(Entity entity) -> Entity
-            requires PolicyType::template HasAccess<Hierarchy>
-        {
-            const auto& hierarchy = Get<Hierarchy>(entity);
-            return !hierarchy.parent.Valid() ? entity : GetRoot(hierarchy.parent);
-        }
-
         /** @brief Remove an entity. */
         template<std::same_as<Entity> T>
             requires PolicyType::template HasAccess<Entity, Transform>
@@ -206,6 +181,31 @@ class EcsInterface
             requires PolicyType::template BaseContains<FilterBase::All>
         {
             return m_policy.GetComponentPools();
+        }
+
+        /** @brief Child an Entity to another, or pass Entity::Null() to detach from an existing parent. */
+        void SetParent(Entity entity, Entity parent)
+            requires PolicyType::template HasAccess<Hierarchy>
+        {
+            auto& hierarchy = Get<Hierarchy>(entity);
+            const auto oldParent = std::exchange(hierarchy.parent, parent);
+            if (oldParent.Valid())
+            {
+                std::erase(Get<Hierarchy>(oldParent).children, entity);
+            }
+
+            if (parent.Valid())
+            {
+                Get<Hierarchy>(parent).children.push_back(entity);
+            }
+        }
+
+        /** @brief Get the root Entity in a hierarchy. */
+        auto GetRoot(Entity entity) -> Entity
+            requires PolicyType::template HasAccess<Hierarchy>
+        {
+            const auto& hierarchy = Get<Hierarchy>(entity);
+            return !hierarchy.parent.Valid() ? entity : GetRoot(hierarchy.parent);
         }
 
         /** @brief Get the parent entity a component is attached to or Entity::Null(). */

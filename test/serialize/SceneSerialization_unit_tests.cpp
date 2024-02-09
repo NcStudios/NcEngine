@@ -280,8 +280,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e1, .tag = "2"});
         ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
         const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "4"});
-        ecs.SetParent(e1, e4);
-        // ecs.Get<nc::Transform>(e1).SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
+        ecs.SetParent(e1, e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
         const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
         const auto e6 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .flags = nc::Entity::Flags::NoSerialize }); // automatically excluded

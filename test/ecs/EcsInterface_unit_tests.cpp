@@ -53,6 +53,7 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(CanAccess<all, nc::Entity>);
     static_assert(CanAccess<all, nc::Tag>);
     static_assert(CanAccess<all, nc::Transform>);
+    static_assert(CanAccess<all, nc::Hierarchy>);
     static_assert(CanAccess<all, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<all, S1>);
     static_assert(CanAccess<all, S2>);
@@ -61,6 +62,7 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(CanAccess<basic, nc::Entity>);
     static_assert(CanAccess<basic, nc::Tag>);
     static_assert(CanAccess<basic, nc::Transform>);
+    static_assert(CanAccess<basic, nc::Hierarchy>);
     static_assert(CanAccess<basic, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<basic, S1>);
     static_assert(CanAccess<basic, S2>);
@@ -69,6 +71,7 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(!CanAccess<strict, nc::Entity>);
     static_assert(!CanAccess<strict, nc::Tag>);
     static_assert(!CanAccess<strict, nc::Transform>);
+    static_assert(!CanAccess<strict, nc::Hierarchy>);
     static_assert(CanAccess<strict, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<strict, S1>);
     static_assert(!CanAccess<strict, S2>);
@@ -103,6 +106,21 @@ TEST_F(EcsInterfaceTests, Emplace_entity_addsExpectedState)
     EXPECT_TRUE(uut.Contains<nc::Tag>(e));
     EXPECT_TRUE(uut.Contains<nc::Transform>(e));
     EXPECT_TRUE(uut.Contains<nc::ecs::detail::FreeComponentGroup>(e));
+    EXPECT_TRUE(uut.Contains<nc::Hierarchy>(e));
+}
+
+TEST_F(EcsInterfaceTests, Emplace_entity_setsHierarchy)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto e1 = uut.Emplace<nc::Entity>();
+    const auto e2 = uut.Emplace<nc::Entity>({.parent = e1});
+    const auto& h1 = uut.Get<nc::Hierarchy>(e1);
+    const auto& h2 = uut.Get<nc::Hierarchy>(e2);
+    EXPECT_EQ(nc::Entity::Null(), h1.parent);
+    ASSERT_EQ(1, h1.children.size());
+    EXPECT_EQ(e2, h1.children[0]);
+    EXPECT_EQ(e1, h2.parent);
+    EXPECT_EQ(0, h2.children.size());
 }
 
 TEST_F(EcsInterfaceTests, Emplace_component_addsComponent)
@@ -135,6 +153,15 @@ TEST_F(EcsInterfaceTests, Remove_entity_happyAndErrorPathsSucceed)
     EXPECT_FALSE(uut.Remove<nc::Entity>(entity));
     registry.CommitPendingChanges();
     EXPECT_FALSE(uut.Contains<S1>(entity));
+}
+
+TEST_F(EcsInterfaceTests, Remove_entity_updatesHierarchy)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto e1 = uut.Emplace<nc::Entity>();
+    const auto e2 = uut.Emplace<nc::Entity>({.parent = e1});
+    EXPECT_TRUE(uut.Remove<nc::Entity>(e2));
+    EXPECT_EQ(0, uut.Get<nc::Hierarchy>(e1).children.size());
 }
 
 TEST_F(EcsInterfaceTests, Remove_component_happyAndErrorPathsSucceed)
@@ -243,6 +270,51 @@ TEST_F(EcsInterfaceTests, GetAll_component_returnsAllTs)
     const auto& uutConst = uut;
     const auto actualConst = uutConst.GetAll<S1>();
     ASSERT_EQ(2, actualConst.size());
+}
+
+TEST_F(EcsInterfaceTests, SetParent_makeChild_updatesHierarchies)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto parent = uut.Emplace<nc::Entity>();
+    const auto child = uut.Emplace<nc::Entity>();
+    uut.SetParent(child, parent);
+    const auto& parentHierarchy = uut.Get<nc::Hierarchy>(parent);
+    const auto& childHierarchy = uut.Get<nc::Hierarchy>(child);
+    ASSERT_EQ(1, parentHierarchy.children.size());
+    EXPECT_EQ(child, parentHierarchy.children[0]);
+    EXPECT_EQ(parent, childHierarchy.parent);
+}
+
+TEST_F(EcsInterfaceTests, SetParent_makeRoot_updatesHierarchies)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto parent = uut.Emplace<nc::Entity>();
+    const auto child = uut.Emplace<nc::Entity>({.parent = parent});
+    uut.SetParent(child, nc::Entity::Null());
+    const auto& parentHierarchy = uut.Get<nc::Hierarchy>(parent);
+    const auto& childHierarchy = uut.Get<nc::Hierarchy>(child);
+    EXPECT_EQ(0, parentHierarchy.children.size());
+    EXPECT_EQ(nc::Entity::Null(), childHierarchy.parent);
+}
+
+TEST_F(EcsInterfaceTests, GetRoot_traversesHierarchy)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    const auto loneRoot = uut.Emplace<nc::Entity>();
+    const auto root = uut.Emplace<nc::Entity>();
+    const auto middle1 = uut.Emplace<nc::Entity>({.parent = root});
+    const auto middle2 = uut.Emplace<nc::Entity>({.parent = root});
+    const auto leaf = uut.Emplace<nc::Entity>({.parent = middle1});
+    const auto actualRootOfLoneRoot = uut.GetRoot(loneRoot);
+    const auto actualRootOfRoot = uut.GetRoot(root);
+    const auto actualRootOfMiddle1 = uut.GetRoot(middle1);
+    const auto actualRootOfMiddle2 = uut.GetRoot(middle2);
+    const auto actualRootOfLeaf = uut.GetRoot(leaf);
+    EXPECT_EQ(loneRoot, actualRootOfLoneRoot);
+    EXPECT_EQ(root, actualRootOfRoot);
+    EXPECT_EQ(root, actualRootOfMiddle1);
+    EXPECT_EQ(root, actualRootOfMiddle2);
+    EXPECT_EQ(root, actualRootOfLeaf);
 }
 
 TEST_F(EcsInterfaceTests, GetParent_happyAndErrorPathsSucceed)

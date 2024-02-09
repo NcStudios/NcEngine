@@ -5,8 +5,6 @@ using namespace nc;
 
 namespace nc
 {
-// void Transform::SetParent(Entity entity) { m_parent = entity; }
-
 Quaternion::Quaternion(float X, float Y, float Z, float W)
     : x{X}, y{Y}, z{Z}, w{W}
 {}
