@@ -10,73 +10,6 @@
 
 #include "optick.h"
 
-namespace
-{
-void UpdateWorldSpaceMatrices(nc::ecs::Ecs world)
-{
-    using namespace nc;
-
-    struct Place
-    {
-        Transform* transform;
-        std::span<Entity> children;
-    };
-
-    auto stack = std::vector<Place>{};
-    for (auto e : world.GetAll<Entity>())
-    {
-        auto& h = world.Get<Hierarchy>(e);
-        if (h.parent.Valid())
-        {
-            continue;
-        }
-
-        // can have UpdateWorldMatrix() return dirty state, then split below?
-
-        auto t = &world.Get<Transform>(e);
-        t->UpdateWorldMatrix();
-        if (h.children.empty())
-        {
-            continue;
-        }
-
-        stack.emplace_back(t, h.children);
-
-        while (!stack.empty())
-        {
-            auto& children = stack.back().children;
-            if (children.empty())
-            {
-                stack.pop_back();
-                continue;
-            }
-
-            auto& child = world.Get<Transform>(children.front());
-            child.UpdateWorldMatrix(stack.back().transform->TransformationMatrix());
-
-            auto& childH = world.Get<Hierarchy>(children.front());
-            if (!childH.children.empty())
-            {
-                stack.emplace_back(&child, childH.children);
-            }
-
-            children = children.subspan(1);
-        }
-
-
-        // auto& h = world.Get<Hierarchy>(e);
-        // auto& t = world.Get<Transform>(e);
-        // if (h.IsRoot())
-        //     t.UpdateWorldMatrix(DirectX::XMMatrixIdentity());
-        // else
-        // {
-        //     auto& parent = world.Get<Transform>(h.parent);
-        //     t.UpdateWorldMatrix(parent.TransformationMatrix());
-        // }
-    }
-}
-} // anonymous namespace
-
 namespace nc::ecs
 {
 auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>
@@ -105,16 +38,16 @@ void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
     (
         task::ExecutionPhase::PreRenderSync,
         "Commit Registry Changes",
-        [registry = m_registry]
+        [this]
         {
-            registry->CommitStagedChanges();
-            auto groups = registry->StorageFor<ecs::detail::FreeComponentGroup>();
+            m_registry->CommitStagedChanges();
+            auto groups = m_registry->StorageFor<ecs::detail::FreeComponentGroup>();
             for (auto& group : groups->GetComponents())
             {
                 group.CommitStagedComponents();
             }
 
-            UpdateWorldSpaceMatrices(registry->GetEcs());
+            UpdateWorldSpaceMatrices(m_registry);
         }
     );
 }
@@ -126,6 +59,67 @@ void EcsModule::RunFrameLogic()
     for(auto& logic : View<FrameLogic>{m_registry})
     {
         logic.Run(m_registry, dt);
+    }
+}
+
+void EcsModule::UpdateWorldSpaceMatrices(Registry* registry)
+{
+    auto world = registry->GetEcs();
+
+#if 1 // normal update using graph traversal
+    struct ParentInfo
+    {
+        Transform* transform;
+        std::span<Entity> children;
+    };
+
+    auto stack = std::vector<ParentInfo>{};
+    for (auto entity : world.GetAll<Entity>())
+    {
+        auto& hierarchy = world.Get<Hierarchy>(entity);
+        if (hierarchy.parent.Valid()) // process root nodes first
+            continue;
+
+        auto& transform = world.Get<Transform>(entity);
+        auto dirty = transform.IsDirty();
+        if (dirty)
+            transform.UpdateWorldMatrix();
+
+        if (hierarchy.children.empty())
+            continue;
+
+        stack.emplace_back(&transform, hierarchy.children);
+        while (!stack.empty())
+        {
+            auto& children = stack.back().children;
+            if (children.empty())
+            {
+                stack.pop_back();
+                continue;
+            }
+
+            auto& child = world.Get<Transform>(children.front());
+            dirty = dirty || child.IsDirty();
+            if (dirty)
+                child.UpdateWorldMatrix(stack.back().transform->TransformationMatrix());
+
+            auto& childHierarchy = world.Get<Hierarchy>(children.front());
+            if (!childHierarchy.children.empty())
+                stack.emplace_back(&child, childHierarchy.children);
+
+            children = children.subspan(1);
+        }
+#else // debug update
+        auto& hierarchy = world.Get<Hierarchy>(entity);
+        auto& transform = world.Get<Transform>(entity);
+        if (hierarchy.IsRoot())
+            transform.UpdateWorldMatrix();
+        else
+        {
+            auto& parentTransform = world.Get<Transform>(hierarchy.parent);
+            transform.UpdateWorldMatrix(parentTransform.TransformationMatrix());
+        }
+#endif
     }
 }
 } // namespace nc::ecs

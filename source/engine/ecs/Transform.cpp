@@ -152,16 +152,4 @@ namespace nc
         m_localMatrix.r[3] = pos_v;
         m_dirty = true;
     }
-
-    void Transform::UpdateWorldMatrix()
-    {
-        m_dirty = false;
-        m_worldMatrix = m_localMatrix;
-    }
-
-    void Transform::UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix)
-    {
-        m_dirty = false;
-        m_worldMatrix = m_localMatrix * parentMatrix;
-    }
 }

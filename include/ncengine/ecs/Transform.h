@@ -27,7 +27,7 @@ class EcsModule;
  * 
  *  Data is stored for local and world space, but only local space values may be
  *  directly modified. World space calculations are done internally based on the
- *  Transform/Entity hierarchy.
+ *  Entity's Hierarchy component.
 */
 class Transform final : public ComponentBase
 {
@@ -43,10 +43,10 @@ class Transform final : public ComponentBase
         }
 
         Transform(Entity entity,
-                const Vector3& pos,
-                const Quaternion& rot,
-                const Vector3& scale,
-                DirectX::FXMMATRIX parentTransform)
+                  const Vector3& pos,
+                  const Quaternion& rot,
+                  const Vector3& scale,
+                  DirectX::FXMMATRIX parentTransform)
             : ComponentBase(entity),
               m_localMatrix{ComposeMatrix(scale, rot, pos)},
               m_worldMatrix{parentTransform * m_localMatrix}
@@ -87,6 +87,7 @@ class Transform final : public ComponentBase
         /** @brief Get world space matrix */
         auto TransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_worldMatrix; }
 
+        /** @brief Get local space matrix */
         auto LocalTransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_localMatrix; }
 
         /** @brief Get local space matrix */
@@ -137,17 +138,27 @@ class Transform final : public ComponentBase
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
 
-        // TODO: make private
-        void UpdateWorldMatrix();
-        void UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix);
-
     private:
         friend class ecs::EcsModule;
-
+        bool m_dirty = false;
         DirectX::XMMATRIX m_localMatrix;
         DirectX::XMMATRIX m_worldMatrix;
-        bool m_dirty = false;
 
+        auto IsDirty() const noexcept
+        {
+            return m_dirty;
+        }
 
+        void UpdateWorldMatrix()
+        {
+            m_dirty = false;
+            m_worldMatrix = m_localMatrix;
+        }
+
+        void UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix)
+        {
+            m_dirty = false;
+            m_worldMatrix = m_localMatrix * parentMatrix;
+        }
 };
 } //end namespace nc
