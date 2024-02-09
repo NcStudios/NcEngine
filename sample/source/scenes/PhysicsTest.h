@@ -11,5 +11,9 @@ class PhysicsTest : public Scene
     public:
         PhysicsTest(SampleUI* ui);
         void Load(Registry* registry, ModuleProvider modules) override;
+        void Unload() override;
+
+    private:
+        SampleUI* m_sampleUI;
 };
 }

@@ -445,12 +445,14 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
 }
 
 PhysicsTest::PhysicsTest(SampleUI* ui)
+    : m_sampleUI{ui}
 {
-    ui->SetWidgetCallback(Widget);
 }
 
 void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
 {
+    m_sampleUI->SetWidgetCallback(Widget);
+
     auto world = registry->GetEcs();
     auto ncPhysics = modules.Get<physics::NcPhysics>();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
@@ -490,5 +492,10 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
         Vector3{0.4751f, 0.525f, 1.0f},
         600.0f
     );
+}
+
+void PhysicsTest::Unload()
+{
+    m_sampleUI->SetWidgetCallback(nullptr);
 }
 } // namespace nc::sample

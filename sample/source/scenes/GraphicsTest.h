@@ -10,7 +10,6 @@ class GraphicsTest : public Scene
 {
     public:
         GraphicsTest(SampleUI* ui);
-        ~GraphicsTest() noexcept;
         void Load(Registry* registry, ModuleProvider modules) override;
         void Unload() override;
 

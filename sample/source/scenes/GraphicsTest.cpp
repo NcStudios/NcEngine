@@ -26,15 +26,12 @@ namespace nc::sample
 GraphicsTest::GraphicsTest(SampleUI* ui)
     : m_sampleUI{ui}
 {
-    ui->SetWidgetCallback(nullptr);
-}
-
-GraphicsTest::~GraphicsTest() noexcept
-{
 }
 
 void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
 {
+    m_sampleUI->SetWidgetCallback(nullptr);
+
     std::vector<std::string> textures
     {
         "DefaultBaseColor.nca",
