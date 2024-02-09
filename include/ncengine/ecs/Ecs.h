@@ -34,7 +34,7 @@ class EcsInterface
 
         /** @brief Emplace an entity. */
         template<std::same_as<Entity> T>
-            requires PolicyType::template HasAccess<Entity, Transform, Tag>
+            requires PolicyType::template HasAccess<Entity, Transform, Tag, Hierarchy>
         auto Emplace(EntityInfo info = {}) -> Entity
         {
             const auto handle = m_policy.template OnPool<Entity>([&info](auto&& pool) -> decltype(auto)
@@ -53,7 +53,7 @@ class EcsInterface
                 Emplace<Transform>(handle, info.position, info.rotation, info.scale);
             }
 
-            Emplace<Hierarchy>(handle, info.parent);
+            Emplace<Hierarchy>(handle, info.parent, std::vector<Entity>{});
             Emplace<detail::FreeComponentGroup>(handle);
             Emplace<Tag>(handle, std::move(info.tag));
             return handle;
