@@ -22,8 +22,8 @@ graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay
 
 graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial RedPbrMaterial{"solid_color\\Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial GreenPbrMaterial{"solid_color\\Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial BluePbrMaterial{"solid_color\\Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial GreenPbrMaterial{"solid_color\\Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial BluePbrMaterial{"solid_color\\Blue.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 
 template<class LoadFunc>
 void LoadAssets(const std::filesystem::path& rootDir, asset_flags_type flags, LoadFunc load)
