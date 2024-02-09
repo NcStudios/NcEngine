@@ -41,11 +41,6 @@ auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc:
 
     return entity;
 }
-
-auto IsRoot(nc::Transform& transform) -> bool
-{
-    return !transform.Parent().Valid();
-}
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -105,16 +100,16 @@ void SceneGraph::Graph(EditorContext& ctx, CreateEntityDialog& createEntity)
 {
     for(auto entity : ctx.world.GetAll<Entity>())
     {
-        auto& transform = ctx.world.Get<Transform>(entity);
+        auto& hierarchy = ctx.world.Get<Hierarchy>(entity);
         auto& tag = ctx.world.Get<Tag>(entity);
-        if (IsRoot(transform) && PassFilter(tag))
+        if (hierarchy.IsRoot() && PassFilter(tag))
         {
-            GraphNode(ctx, entity, tag, transform, createEntity);
+            GraphNode(ctx, entity, tag, hierarchy, createEntity);
         }
     }
 }
 
-void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transform& transform, CreateEntityDialog& createEntity)
+void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Hierarchy& hierarchy, CreateEntityDialog& createEntity)
 {
     IMGUI_SCOPE(ImGuiId, entity.Index());
     const auto flags = ctx.selectedEntity == entity
@@ -146,9 +141,9 @@ void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transfor
 
     if(isNodeExpanded)
     {
-        for(auto child : transform.Children())
+        for(auto child : hierarchy.children)
         {
-            GraphNode(ctx, child, ctx.world.Get<Tag>(child), ctx.world.Get<Transform>(child), createEntity);
+            GraphNode(ctx, child, ctx.world.Get<Tag>(child), ctx.world.Get<Hierarchy>(child), createEntity);
         }
 
         ImGui::TreePop();

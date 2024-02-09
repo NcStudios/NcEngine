@@ -8,24 +8,6 @@
 
 namespace nc::ecs
 {
-struct HierarchyManager
-{
-    static void SetParent(Transform& transform, Entity parent)
-    {
-        transform.m_parent = parent;
-    }
-
-    static void AddChild(Transform& transform, Entity child)
-    {
-        transform.m_children.push_back(child);
-    }
-
-    static void RemoveChild(Transform& transform, Entity child)
-    {
-        std::erase(transform.m_children, child);
-    }
-};
-
 /**
  * @brief Interface for higher-level entity and component operations with optional type access restriction.
  * @tparam Base A FilterBase describing the baseline set of types accessible through the interface.
@@ -63,14 +45,15 @@ class EcsInterface
             if (info.parent.Valid())
             {
                 auto& parentTransform = Get<Transform>(info.parent);
-                HierarchyManager::AddChild(parentTransform, handle);
-                Emplace<Transform>(handle, info.position, info.rotation, info.scale, parentTransform.TransformationMatrix(), info.parent);
+                Emplace<Transform>(handle, info.position, info.rotation, info.scale, parentTransform.TransformationMatrix());
+                Get<Hierarchy>(info.parent).children.push_back(handle);
             }
             else
             {
                 Emplace<Transform>(handle, info.position, info.rotation, info.scale);
             }
 
+            Emplace<Hierarchy>(handle, info.parent);
             Emplace<detail::FreeComponentGroup>(handle);
             Emplace<Tag>(handle, std::move(info.tag));
             return handle;
@@ -95,26 +78,21 @@ class EcsInterface
             }
         }
 
+        // TODO set requires clause
         /** @brief Set an Entity to be the child of another, or pass Entity::Null() to detach from an existing parent. */
         void SetParent(Entity entity, Entity parent)
         {
             NC_ASSERT(Contains<Entity>(entity), "Bad entity");
-            auto& child = Get<Transform>(entity);
-            auto currentParent = child.Parent();
-
-            HierarchyManager::SetParent(child, parent);
-
-            if (currentParent.Valid())
+            auto& hierarchy = Get<Hierarchy>(entity);
+            auto oldParent = std::exchange(hierarchy.parent, parent);
+            if (oldParent.Valid())
             {
-                auto& cur = Get<Transform>(currentParent);
-                HierarchyManager::RemoveChild(cur, entity);
+                std::erase(Get<Hierarchy>(oldParent).children, entity);
             }
 
             if (parent.Valid())
             {
-                NC_ASSERT(Contains<Entity>(parent), "Bad entity");
-                auto& parentTransform = Get<Transform>(parent);
-                HierarchyManager::AddChild(parentTransform, entity);
+                Get<Hierarchy>(parent).children.push_back(entity);
             }
         }
 
@@ -269,16 +247,16 @@ class EcsInterface
         template<bool IsRoot>
         auto RemoveNode(Entity entity) -> bool
         {
-            auto& transform = Get<Transform>(entity);
+            auto& hierarchy = Get<Hierarchy>(entity);
             if constexpr(IsRoot)
             {
-                if (transform.Parent().Valid())
+                if (hierarchy.parent.Valid())
                 {
-                    HierarchyManager::RemoveChild(Get<Transform>(transform.Parent()), entity);
+                    std::erase(Get<Hierarchy>(hierarchy.parent).children, entity);
                 }
             }
 
-            for (auto child : transform.Children())
+            for (auto child : hierarchy.children)
                 RemoveNode<false>(child);
 
             m_policy.template OnPool<Entity>([entity](auto&& p) { p.Remove(entity); });

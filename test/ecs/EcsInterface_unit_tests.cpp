@@ -27,6 +27,7 @@ class EcsInterfaceTests : public ::testing::Test
             registry.RegisterType<nc::Tag>(10);
             registry.RegisterType<nc::Transform>(10);
             registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
+            registry.RegisterType<nc::Hierarchy>(10);
             registry.RegisterType<S1>(10);
             registry.RegisterType<S2>(10);
         }

@@ -15,7 +15,7 @@ namespace nc
 {
 namespace ecs
 {
-struct HierarchyManager;
+class EcsModule;
 }
 
 /** @brief Component with translation, rotation, and scale properties.
@@ -34,30 +34,25 @@ class Transform final : public ComponentBase
     NC_ENABLE_IN_EDITOR(Transform)
 
     public:
-    Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale)
-        : ComponentBase(entity),
-          m_localMatrix{ComposeMatrix(scale, rot, pos)},
-          m_worldMatrix{m_localMatrix},
-          m_parent{Entity::Null()},
-          m_children{}
-    {
-        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
-    }
+        Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale)
+            : ComponentBase(entity),
+              m_localMatrix{ComposeMatrix(scale, rot, pos)},
+              m_worldMatrix{m_localMatrix}
+        {
+            NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+        }
 
-    Transform(Entity entity,
-              const Vector3& pos,
-              const Quaternion& rot,
-              const Vector3& scale,
-              DirectX::FXMMATRIX parentTransform,
-              Entity parent)
-        : ComponentBase(entity),
-          m_localMatrix{ComposeMatrix(scale, rot, pos)},
-          m_worldMatrix{parentTransform * m_localMatrix},
-          m_parent{parent},
-          m_children{}
-    {
-        NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
-    }
+        Transform(Entity entity,
+                const Vector3& pos,
+                const Quaternion& rot,
+                const Vector3& scale,
+                DirectX::FXMMATRIX parentTransform)
+            : ComponentBase(entity),
+              m_localMatrix{ComposeMatrix(scale, rot, pos)},
+              m_worldMatrix{parentTransform * m_localMatrix}
+        {
+            NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+        }
 
         Transform(Transform&&) = default;
         Transform& operator=(Transform&&) = default;
@@ -142,22 +137,17 @@ class Transform final : public ComponentBase
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
 
-        /** @brief Get all immediate children of this transform */
-        auto Children() const noexcept -> std::span<const Entity>
-        {
-            return std::span<const Entity>{m_children.data(), m_children.size()};
-        }
-
-        /** @brief Get the immediate parent of this transform - may be nullptr */
-        auto Parent() const noexcept -> Entity { return m_parent; }
+        // TODO: make private
+        void UpdateWorldMatrix();
+        void UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix);
 
     private:
-        friend struct ecs::HierarchyManager;
+        friend class ecs::EcsModule;
 
-        void UpdateWorldMatrix();
         DirectX::XMMATRIX m_localMatrix;
         DirectX::XMMATRIX m_worldMatrix;
-        std::vector<Entity> m_children;
-        Entity m_parent;
+        bool m_dirty = false;
+
+
 };
 } //end namespace nc

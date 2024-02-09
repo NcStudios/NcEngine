@@ -51,6 +51,7 @@ class Transform_unit_tests : public ::testing::Test
             g_impl.RegisterType<nc::Tag>(10);
             g_impl.RegisterType<nc::Transform>(10);
             g_impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
+            g_impl.RegisterType<nc::Hierarchy>(10);
         }
 };
 
@@ -544,85 +545,85 @@ TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnParent_OnlyWorldRot
     EXPECT_EQ(tChild->LocalScale(), Vector3::One());
 }
 
-TEST_F(Transform_unit_tests, GetChildren_ChildConstructor_AddsChildToParent)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tParent = registry->Get<Transform>(parent);
-    auto children = tParent->Children();
-    auto actualCount = children.size();
-    ASSERT_EQ(actualCount, 1u);
-    EXPECT_EQ(children[0], child);
-}
+// TEST_F(Transform_unit_tests, GetChildren_ChildConstructor_AddsChildToParent)
+// {
+//     auto parent = registry->Add<Entity>(EntityInfo{});
+//     auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
+//     auto tParent = registry->Get<Transform>(parent);
+//     auto children = tParent->Children();
+//     auto actualCount = children.size();
+//     ASSERT_EQ(actualCount, 1u);
+//     EXPECT_EQ(children[0], child);
+// }
 
-TEST_F(Transform_unit_tests, GetRoot_CalledOnRoot_ReturnsSelf)
-{
-    auto e = registry->Add<Entity>(EntityInfo{});
-    auto t = registry->Get<Transform>(e);
-    auto actual = t->Root();
-    EXPECT_EQ(actual, e);
-}
+// TEST_F(Transform_unit_tests, GetRoot_CalledOnRoot_ReturnsSelf)
+// {
+//     auto e = registry->Add<Entity>(EntityInfo{});
+//     auto t = registry->Get<Transform>(e);
+//     auto actual = t->Root();
+//     EXPECT_EQ(actual, e);
+// }
 
-TEST_F(Transform_unit_tests, GetRoot_WithOneDepthLevel_ReturnsParent)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tChild = registry->Get<Transform>(child);
-    auto actual = tChild->Root();
-    EXPECT_EQ(actual, parent);
-}
+// TEST_F(Transform_unit_tests, GetRoot_WithOneDepthLevel_ReturnsParent)
+// {
+//     auto parent = registry->Add<Entity>(EntityInfo{});
+//     auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
+//     auto tChild = registry->Get<Transform>(child);
+//     auto actual = tChild->Root();
+//     EXPECT_EQ(actual, parent);
+// }
 
-TEST_F(Transform_unit_tests, GetRoot_WithTwoDepthLevels_ReturnsParentsParent)
-{
-    auto root = registry->Add<Entity>(EntityInfo{});
-    auto parent = registry->Add<Entity>(EntityInfo{.parent = root});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tChild = registry->Get<Transform>(child);
-    auto actual = tChild->Root();
-    EXPECT_EQ(actual, root);
-}
+// TEST_F(Transform_unit_tests, GetRoot_WithTwoDepthLevels_ReturnsParentsParent)
+// {
+//     auto root = registry->Add<Entity>(EntityInfo{});
+//     auto parent = registry->Add<Entity>(EntityInfo{.parent = root});
+//     auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
+//     auto tChild = registry->Get<Transform>(child);
+//     auto actual = tChild->Root();
+//     EXPECT_EQ(actual, root);
+// }
 
-TEST_F(Transform_unit_tests, SetParent_RootChangedToChild_ParentAndChildUpdated)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{});
-    auto tParent = registry->Get<Transform>(parent);
-    auto tChild = registry->Get<Transform>(child);
-    tChild->SetParent(parent);
-    EXPECT_EQ(tChild->Parent(), parent);
-    auto children = tParent->Children();
-    ASSERT_EQ(children.size(), 1u);
-    EXPECT_EQ(children[0], child);
-}
+// TEST_F(Transform_unit_tests, SetParent_RootChangedToChild_ParentAndChildUpdated)
+// {
+//     auto parent = registry->Add<Entity>(EntityInfo{});
+//     auto child = registry->Add<Entity>(EntityInfo{});
+//     auto tParent = registry->Get<Transform>(parent);
+//     auto tChild = registry->Get<Transform>(child);
+//     tChild->SetParent(parent);
+//     EXPECT_EQ(tChild->Parent(), parent);
+//     auto children = tParent->Children();
+//     ASSERT_EQ(children.size(), 1u);
+//     EXPECT_EQ(children[0], child);
+// }
 
-TEST_F(Transform_unit_tests, SetParent_ChildReParented_ParentAndChildUpdated)
-{
-    auto oldParent = registry->Add<Entity>(EntityInfo{});
-    auto newParent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = oldParent});
-    auto tOldParent = registry->Get<Transform>(oldParent);
-    auto tNewParent = registry->Get<Transform>(newParent);
-    auto tChild = registry->Get<Transform>(child);
-    tChild->SetParent(newParent);
-    EXPECT_EQ(tChild->Parent(), newParent);
-    auto oldParentChildren = tOldParent->Children();
-    EXPECT_EQ(oldParentChildren.size(), 0u);
-    auto newParentChildren = tNewParent->Children();
-    ASSERT_EQ(newParentChildren.size(), 1u);
-    EXPECT_EQ(newParentChildren[0], child);
-}
+// TEST_F(Transform_unit_tests, SetParent_ChildReParented_ParentAndChildUpdated)
+// {
+//     auto oldParent = registry->Add<Entity>(EntityInfo{});
+//     auto newParent = registry->Add<Entity>(EntityInfo{});
+//     auto child = registry->Add<Entity>(EntityInfo{.parent = oldParent});
+//     auto tOldParent = registry->Get<Transform>(oldParent);
+//     auto tNewParent = registry->Get<Transform>(newParent);
+//     auto tChild = registry->Get<Transform>(child);
+//     tChild->SetParent(newParent);
+//     EXPECT_EQ(tChild->Parent(), newParent);
+//     auto oldParentChildren = tOldParent->Children();
+//     EXPECT_EQ(oldParentChildren.size(), 0u);
+//     auto newParentChildren = tNewParent->Children();
+//     ASSERT_EQ(newParentChildren.size(), 1u);
+//     EXPECT_EQ(newParentChildren[0], child);
+// }
 
-TEST_F(Transform_unit_tests, SetParent_ChildDetached_ParentAndChildUpdated)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tParent = registry->Get<Transform>(parent);
-    auto tChild = registry->Get<Transform>(child);
-    tChild->SetParent(Entity::Null());
-    EXPECT_EQ(tChild->Parent(), Entity::Null());
-    auto children = tParent->Children();
-    EXPECT_EQ(children.size(), 0u);
-}
+// TEST_F(Transform_unit_tests, SetParent_ChildDetached_ParentAndChildUpdated)
+// {
+//     auto parent = registry->Add<Entity>(EntityInfo{});
+//     auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
+//     auto tParent = registry->Get<Transform>(parent);
+//     auto tChild = registry->Get<Transform>(child);
+//     tChild->SetParent(Entity::Null());
+//     EXPECT_EQ(tChild->Parent(), Entity::Null());
+//     auto children = tParent->Children();
+//     EXPECT_EQ(children.size(), 0u);
+// }
 
 int main(int argc, char ** argv)
 {

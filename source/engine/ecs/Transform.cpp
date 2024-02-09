@@ -52,20 +52,20 @@ namespace nc
     {
         NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(quat) * ToTransMatrix(pos);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::Set(const Vector3& pos, const Vector3& angles, const Vector3& scale)
     {
         NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         m_localMatrix = ToScaleMatrix(scale) * ToRotMatrix(angles) * ToTransMatrix(pos);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::SetPosition(const Vector3& pos)
     {
         m_localMatrix.r[3] = ToXMVectorHomogeneous(pos);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::SetRotation(const Quaternion& quat)
@@ -75,7 +75,7 @@ namespace nc
         m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
                         ToRotMatrix(quat) *
                         DirectX::XMMatrixTranslationFromVector(pos_v);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::SetRotation(const Vector3& angles)
@@ -85,7 +85,7 @@ namespace nc
         m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
                         ToRotMatrix(angles) *
                         DirectX::XMMatrixTranslationFromVector(pos_v);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::SetScale(const Vector3& scale)
@@ -96,7 +96,7 @@ namespace nc
         m_localMatrix = ToScaleMatrix(scale) *
                         DirectX::XMMatrixRotationQuaternion(rot_v) *
                         DirectX::XMMatrixTranslationFromVector(pos_v);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::Translate(const Vector3& translation)
@@ -104,14 +104,14 @@ namespace nc
         const auto trans_v = ToXMVector(translation);
         auto& localPos = m_localMatrix.r[3];
         localPos = XMVectorAdd(localPos, trans_v);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::Translate(DirectX::FXMVECTOR translation)
     {
         auto& localPos = m_localMatrix.r[3];
         localPos = XMVectorAdd(localPos, translation);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::TranslateLocalSpace(const Vector3& translation)
@@ -122,7 +122,7 @@ namespace nc
         trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
         trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
         m_localMatrix.r[3] = XMVectorAdd(m_localMatrix.r[3], trans_v);
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     // TODO: I think these are wrong
@@ -132,7 +132,7 @@ namespace nc
         m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
         m_localMatrix *= ToRotMatrix(quat);
         m_localMatrix.r[3] = pos_v;
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::Rotate(DirectX::FXMVECTOR quaternion)
@@ -141,7 +141,7 @@ namespace nc
         m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
         m_localMatrix *= DirectX::XMMatrixRotationQuaternion(quaternion);
         m_localMatrix.r[3] = pos_v;
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::Rotate(const Vector3& axis, float radians)
@@ -150,19 +150,18 @@ namespace nc
         m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
         m_localMatrix *= ToRotMatrix(axis, radians);
         m_localMatrix.r[3] = pos_v;
-        UpdateWorldMatrix();
+        m_dirty = true;
     }
 
     void Transform::UpdateWorldMatrix()
     {
-        auto* registry = ActiveRegistry();
+        m_dirty = false;
+        m_worldMatrix = m_localMatrix;
+    }
 
-        if(m_parent.Valid())
-            m_worldMatrix = m_localMatrix * registry->Get<Transform>(m_parent)->TransformationMatrix();
-        else
-            m_worldMatrix = m_localMatrix;
-
-        for(auto child : m_children)
-            registry->Get<Transform>(child)->UpdateWorldMatrix();
+    void Transform::UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix)
+    {
+        m_dirty = false;
+        m_worldMatrix = m_localMatrix * parentMatrix;
     }
 }

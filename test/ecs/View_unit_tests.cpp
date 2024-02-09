@@ -5,7 +5,7 @@ using namespace nc;
 
 namespace nc
 {
-void Transform::SetParent(Entity entity) { m_parent = entity; }
+// void Transform::SetParent(Entity entity) { m_parent = entity; }
 
 Quaternion::Quaternion(float X, float Y, float Z, float W)
     : x{X}, y{Y}, z{Z}, w{W}
@@ -46,6 +46,7 @@ class View_unit_tests : public ::testing::Test
             impl.RegisterType<nc::Tag>(10);
             impl.RegisterType<nc::Transform>(10);
             impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
+            impl.RegisterType<nc::Hierarchy>(10);
             impl.RegisterType<Fake1>(10);
             impl.RegisterType<Fake2>(10);
             impl.RegisterType<Fake3>(10);

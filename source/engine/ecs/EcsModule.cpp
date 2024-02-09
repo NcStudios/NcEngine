@@ -10,6 +10,73 @@
 
 #include "optick.h"
 
+namespace
+{
+void UpdateWorldSpaceMatrices(nc::ecs::Ecs world)
+{
+    using namespace nc;
+
+    struct Place
+    {
+        Transform* transform;
+        std::span<Entity> children;
+    };
+
+    auto stack = std::vector<Place>{};
+    for (auto e : world.GetAll<Entity>())
+    {
+        auto& h = world.Get<Hierarchy>(e);
+        if (h.parent.Valid())
+        {
+            continue;
+        }
+
+        // can have UpdateWorldMatrix() return dirty state, then split below?
+
+        auto t = &world.Get<Transform>(e);
+        t->UpdateWorldMatrix();
+        if (h.children.empty())
+        {
+            continue;
+        }
+
+        stack.emplace_back(t, h.children);
+
+        while (!stack.empty())
+        {
+            auto& children = stack.back().children;
+            if (children.empty())
+            {
+                stack.pop_back();
+                continue;
+            }
+
+            auto& child = world.Get<Transform>(children.front());
+            child.UpdateWorldMatrix(stack.back().transform->TransformationMatrix());
+
+            auto& childH = world.Get<Hierarchy>(children.front());
+            if (!childH.children.empty())
+            {
+                stack.emplace_back(&child, childH.children);
+            }
+
+            children = children.subspan(1);
+        }
+
+
+        // auto& h = world.Get<Hierarchy>(e);
+        // auto& t = world.Get<Transform>(e);
+        // if (h.IsRoot())
+        //     t.UpdateWorldMatrix(DirectX::XMMatrixIdentity());
+        // else
+        // {
+        //     auto& parent = world.Get<Transform>(h.parent);
+        //     t.UpdateWorldMatrix(parent.TransformationMatrix());
+        // }
+    }
+}
+} // anonymous namespace
+
 namespace nc::ecs
 {
 auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>
@@ -46,6 +113,8 @@ void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
             {
                 group.CommitStagedComponents();
             }
+
+            UpdateWorldSpaceMatrices(registry->GetEcs());
         }
     );
 }

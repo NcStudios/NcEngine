@@ -228,6 +228,7 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     g_registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(1);
     g_registry.RegisterType<nc::Tag>(1);
     g_registry.RegisterType<nc::Transform>(1);
+    g_registry.RegisterType<nc::Hierarchy>(1);
     g_registry.RegisterType<nc::physics::Collider>(1);
 
     const auto entity = g_ecs.Emplace<nc::Entity>(nc::EntityInfo{});
