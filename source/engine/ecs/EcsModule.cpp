@@ -109,7 +109,10 @@ void EcsModule::UpdateWorldSpaceMatrices()
 
             children = children.subspan(1);
         }
+    }
 #else // debug update
+    for (auto entity : world.GetAll<Entity>())
+    {
         auto& hierarchy = world.Get<Hierarchy>(entity);
         auto& transform = world.Get<Transform>(entity);
         if (!hierarchy.parent.Valid())
@@ -119,7 +122,7 @@ void EcsModule::UpdateWorldSpaceMatrices()
             auto& parentTransform = world.Get<Transform>(hierarchy.parent);
             transform.UpdateWorldMatrix(parentTransform.TransformationMatrix());
         }
-#endif
     }
+#endif
 }
 } // namespace nc::ecs

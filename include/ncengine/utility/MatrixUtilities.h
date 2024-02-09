@@ -49,9 +49,7 @@ inline DirectX::XMVECTOR ToXMVector(const Vector3& v)
 
 inline DirectX::XMVECTOR ToXMVectorHomogeneous(const Vector3& v)
 {
-    auto out = DirectX::XMLoadVector3(&v);
-    DirectX::XMVectorSetW(out, 1.0f);
-    return out;
+    return DirectX::XMVectorSetW(ToXMVector(v), 1.0f);
 }
 
 inline DirectX::XMVECTOR ToXMVector(const Quaternion& q)
