@@ -1,8 +1,7 @@
 #include "SampleUI.h"
-#include "scenes/CollisionBenchmark.h"
+#include "scenes/Benchmarks.h"
 #include "scenes/GraphicsTest.h"
 #include "scenes/PhysicsTest.h"
-#include "scenes/RenderingBenchmark.h"
 
 #include "ncengine/config/Version.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -15,8 +14,8 @@ namespace
 {
     constexpr auto PanelHeight = 200u;
     constexpr auto WindowFlags = ImGuiWindowFlags_NoCollapse |
-						         ImGuiWindowFlags_NoTitleBar |
-						         ImGuiWindowFlags_NoResize;
+                                 ImGuiWindowFlags_NoTitleBar |
+                                 ImGuiWindowFlags_NoResize;
 
     void Spacing(unsigned count)
     {
@@ -124,15 +123,9 @@ namespace nc::sample
                 m_ncScene->ScheduleTransition();
             }
 
-            if (ImGui::Button("Collision Benchmark", buttonSize))
+            if (ImGui::Button("Benchmarks", buttonSize))
             {
-                m_ncScene->Queue(std::make_unique<CollisionBenchmark>(this));
-                m_ncScene->ScheduleTransition();
-            }
-
-            if (ImGui::Button("Rendering Benchmark", buttonSize))
-            {
-                m_ncScene->Queue(std::make_unique<RenderingBenchmark>(this));
+                m_ncScene->Queue(std::make_unique<Benchmarks>(this));
                 m_ncScene->ScheduleTransition();
             }
 

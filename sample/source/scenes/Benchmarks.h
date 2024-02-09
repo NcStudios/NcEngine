@@ -6,15 +6,14 @@
 
 namespace nc::sample
 {
-class CollisionBenchmark : public Scene
+class Benchmarks : public Scene
 {
     public:
-        CollisionBenchmark(SampleUI* ui);
-        ~CollisionBenchmark() noexcept;
+        Benchmarks(SampleUI* ui);
         void Load(Registry* registry, ModuleProvider modules) override;
         void Unload() override;
 
     private:
         SampleUI* m_sampleUI;
 };
-}
+} // namespace nc::sample
