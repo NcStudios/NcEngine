@@ -47,7 +47,7 @@ void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
                 group.CommitStagedComponents();
             }
 
-            UpdateWorldSpaceMatrices(m_registry);
+            UpdateWorldSpaceMatrices();
         }
     );
 }
@@ -62,9 +62,9 @@ void EcsModule::RunFrameLogic()
     }
 }
 
-void EcsModule::UpdateWorldSpaceMatrices(Registry* registry)
+void EcsModule::UpdateWorldSpaceMatrices()
 {
-    auto world = registry->GetEcs();
+    auto world = m_registry->GetEcs();
 
 #if 1 // normal update using graph traversal
     struct ParentInfo
