@@ -51,14 +51,16 @@ const auto g_toonMaterials = std::array{
 auto RandomPbrMaterial() -> const nc::graphics::PbrMaterial&
 {
     static auto index = 0ull;
-    index = ++index % (g_pbrMaterials.size() - 1);
+    ++index;
+    index = index % (g_pbrMaterials.size() - 1);
     return *g_pbrMaterials.at(index);
 }
 
 auto RandomToonMaterial() -> const nc::graphics::ToonMaterial&
 {
     static auto index = 0ull;
-    index = ++index % (g_toonMaterials.size() - 1);
+    ++index;
+    index = index % (g_toonMaterials.size() - 1);
     return *g_toonMaterials.at(index);
 }
 
@@ -79,17 +81,6 @@ void AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view 
     else if (mesh == nc::sample::RampMesh)
         world.Emplace<nc::physics::Collider>(entity, nc::physics::HullProperties{.assetPath = nc::sample::RampHullCollider});
 }
-
-struct entity_hierarchy
-{
-    static constexpr auto name = "Entity Hierarchy";
-    static inline std::function<int()> GetObjectCountCallback = nullptr;
-    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
-    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
-    static inline unsigned SpawnCount = 1;
-    static inline unsigned DestroyCount = 1;
-    static inline unsigned HierarchySize = 200;
-};
 
 struct mesh_renderer
 {
@@ -122,8 +113,6 @@ struct collider
     static inline unsigned SpawnCount = 1000;
     static inline unsigned DestroyCount = 1000;
     static inline std::string Mesh = std::string{nc::asset::CubeMesh};
-
-
 };
 
 struct physics_body
@@ -135,6 +124,50 @@ struct physics_body
     static inline unsigned SpawnCount = 1000;
     static inline unsigned DestroyCount = 1000;
     static inline std::string Mesh = std::string{nc::asset::CubeMesh};
+};
+
+struct point_light
+{
+    static constexpr auto name = "Point Light";
+    static inline std::function<int()> GetObjectCountCallback = nullptr;
+    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
+    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
+    static inline unsigned SpawnCount = 1;
+    static inline unsigned DestroyCount = 1;
+};
+
+struct entity_hierarchy
+{
+    static constexpr auto name = "Entity Hierarchy";
+    static inline std::function<int()> GetObjectCountCallback = nullptr;
+    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
+    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
+    static inline unsigned SpawnCount = 1;
+    static inline unsigned DestroyCount = 1;
+    static inline unsigned HierarchySize = 200;
+
+    static void Rotate(nc::Entity self, nc::Registry* registry, float dt)
+    {
+        auto transform = registry->Get<nc::Transform>(self);
+        transform->Rotate(nc::Vector3::Up(), 0.3f * dt);
+    }
+
+    static void AttachChildren(nc::ecs::Ecs world, nc::Entity root)
+    {
+        auto parent = root;
+        auto count = HierarchySize;
+        while (count-- > 0)
+        {
+            const auto child = world.Emplace<nc::Entity>({
+                .position = nc::Vector3::Up(),
+                .rotation = nc::Quaternion::FromAxisAngle(nc::Vector3::Up(), 0.05f),
+                .parent = parent
+            });
+
+            world.Emplace<nc::graphics::MeshRenderer>(child, nc::asset::CubeMesh, RandomPbrMaterial());
+            parent = child;
+        }
+    }
 };
 
 template<class T>
@@ -198,6 +231,9 @@ void Widget()
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
+            InnerWidget<point_light>([](){});
+
+            ImGui::TableNextColumn();
             InnerWidget<entity_hierarchy>([](){
                 ImGui::SetNextItemWidth(g_buttonWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
@@ -228,9 +264,9 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
             .position = Vector3{0.0f, 10.0f, -12.0f},
             .tag = "Point Light"
         }),
-        Vector3(0.3f, 0.3f, 0.3f),
-        Vector3(0.8f, 0.6f, 1.0f),
-        1200.0f
+        Vector3{1.0f, 0.871f, 0.6f},
+        Vector3{1.0f, 0.871f, 0.6f},
+        600.0f
     );
 
     const auto cameraHandle = world.Emplace<Entity>({
@@ -317,7 +353,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
 
     // Physics Body
     {
-        const auto handle = world.Emplace<Entity>({});
+        const auto handle = world.Emplace<Entity>({.tag = "PhysicsBody Spawner"});
         auto& spawner = world.Emplace<Spawner>(
             handle,
             ncRandom,
@@ -335,6 +371,24 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
         ::physics_body::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
+    // Point Light
+    {
+        const auto handle = world.Emplace<Entity>({.tag = "PointLight Spawner"});
+        auto& spawner = world.Emplace<Spawner>(
+            handle,
+            ncRandom,
+            spawnBehavior,
+            [world](Entity entity) mutable {
+                world.Emplace<graphics::PointLight>(entity);
+            }
+        );
+
+        world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
+        ::point_light::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::point_light::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::point_light::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+    }
+
     // Entity Hierarchy
     {
         const auto handle = world.Emplace<Entity>({.tag = "Hierarchy Spawner"});
@@ -347,24 +401,8 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
             },
             [world](Entity entity) mutable{
                 world.Emplace<graphics::MeshRenderer>(entity, asset::CubeMesh, ::RandomPbrMaterial());
-                world.Emplace<FrameLogic>(entity, [](Entity self, Registry* registry, float dt){
-                    auto transform = registry->Get<Transform>(self);
-                    transform->Rotate(Vector3::Up(), 0.3f * dt);
-                });
-
-                auto parent = entity;
-                auto count = entity_hierarchy::HierarchySize;
-                while (count-- > 0)
-                {
-                    const auto child = world.Emplace<Entity>({
-                        .position = Vector3::Up(),
-                        .rotation = Quaternion::FromAxisAngle(Vector3::Up(), 0.05f),
-                        .parent = parent
-                    });
-
-                    world.Emplace<graphics::MeshRenderer>(child, asset::CubeMesh, ::RandomPbrMaterial());
-                    parent = child;
-                }
+                world.Emplace<FrameLogic>(entity, &::entity_hierarchy::Rotate);
+                ::entity_hierarchy::AttachChildren(world, entity);
             }
         );
 
