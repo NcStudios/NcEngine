@@ -119,6 +119,7 @@ class SceneSerializationTests : public ::testing::Test
             registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(maxEntities, nc::ComponentHandler<nc::ecs::detail::FreeComponentGroup>{});
             registry.RegisterType<nc::Tag>(maxEntities, nc::ComponentHandler<nc::Tag>{});
             registry.RegisterType<nc::Transform>(maxEntities, nc::ComponentHandler<nc::Transform>{});
+            registry.RegisterType<nc::Hierarchy>(maxEntities);
             registry.RegisterType<UnserializableTestComponent>(maxEntities);
             registry.RegisterType<TestComponent1>
             (
@@ -279,7 +280,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e1, .tag = "2"});
         ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
         const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "4"});
-        ecs.Get<nc::Transform>(e1).SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
+        ecs.SetParent(e1, e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
         const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
         const auto e6 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .flags = nc::Entity::Flags::NoSerialize }); // automatically excluded
@@ -304,15 +305,15 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     const auto actualEntities = ecs.GetAll<nc::Entity>();
     ASSERT_EQ(4, actualEntities.size());
 
-    const auto& transform0 = ecs.Get<nc::Transform>(actualEntities[0]);
-    const auto& transform1 = ecs.Get<nc::Transform>(actualEntities[1]);
-    const auto& transform2 = ecs.Get<nc::Transform>(actualEntities[2]);
-    const auto& transform3 = ecs.Get<nc::Transform>(actualEntities[3]);
+    const auto& hierarchy0 = ecs.Get<nc::Hierarchy>(actualEntities[0]);
+    const auto& hierarchy1 = ecs.Get<nc::Hierarchy>(actualEntities[1]);
+    const auto& hierarchy2 = ecs.Get<nc::Hierarchy>(actualEntities[2]);
+    const auto& hierarchy3 = ecs.Get<nc::Hierarchy>(actualEntities[3]);
 
-    EXPECT_EQ(nc::Entity::Null(), transform0.Parent());
-    EXPECT_EQ(actualEntities[0], transform1.Parent());
-    EXPECT_EQ(actualEntities[1], transform2.Parent());
-    EXPECT_EQ(actualEntities[2], transform3.Parent());
+    EXPECT_EQ(nc::Entity::Null(), hierarchy0.parent);
+    EXPECT_EQ(actualEntities[0], hierarchy1.parent);
+    EXPECT_EQ(actualEntities[1], hierarchy2.parent);
+    EXPECT_EQ(actualEntities[2], hierarchy3.parent);
 }
 
 TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents)

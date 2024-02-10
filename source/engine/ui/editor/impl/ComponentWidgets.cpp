@@ -193,7 +193,7 @@ void TransformUIWidget(Transform& transform)
     auto scl_v = DirectX::XMVECTOR{};
     auto rot_v = DirectX::XMVECTOR{};
     auto pos_v = DirectX::XMVECTOR{};
-    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.TransformationMatrix());
+    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.LocalTransformationMatrix());
 
     auto scl = Vector3{};
     auto pos = Vector3{};
@@ -213,7 +213,7 @@ void TransformUIWidget(Transform& transform)
         else if (!FloatEqual(curRot.z, prevRot.z)) transform.Rotate(Vector3::Front(), curRot.z - prevRot.z);
     }
 
-    if (ui::InputScale(scl, "scale"))       transform.SetScale(scl);
+    if (ui::InputScale(scl, "scale")) transform.SetScale(scl);
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
