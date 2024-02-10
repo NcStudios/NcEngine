@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "ecs/Registry.h"
+#include "ecs/EcsModule.h"
 
 using namespace nc;
 
@@ -8,11 +9,41 @@ namespace nc
 ecs::ComponentRegistry g_impl{10u};
 Registry g_registry{g_impl};
 
-namespace ecs::detail
+namespace ecs
+{
+EcsModule::EcsModule(Registry* registry) noexcept
+    : Module{0ull}, m_registry{registry} {}
+
+void EcsModule::OnBuildTaskGraph(task::TaskGraph&) {}
+void EcsModule::RunFrameLogic()
+{
+    UpdateWorldSpaceMatrices();
+}
+
+// Mock for updating transform worldspace matrices
+void EcsModule::UpdateWorldSpaceMatrices()
+{
+    auto world = m_registry->GetEcs();
+    for (auto entity : world.GetAll<Entity>())
+    {
+        auto& hierarchy = world.Get<Hierarchy>(entity);
+        auto& transform = world.Get<Transform>(entity);
+        if (!hierarchy.parent.Valid())
+            transform.UpdateWorldMatrix();
+        else
+        {
+            auto& parentTransform = world.Get<Transform>(hierarchy.parent);
+            transform.UpdateWorldMatrix(parentTransform.TransformationMatrix());
+        }
+    }
+}
+
+namespace detail
 {
 void FreeComponentGroup::CommitStagedComponents() {}
 }
-}
+} // namespace detail
+} // namespace ecs
 
 constexpr auto TestLayer = Entity::layer_type{0u};
 constexpr auto TestFlags = Entity::Flags::None;
@@ -34,9 +65,11 @@ class Transform_unit_tests : public ::testing::Test
 {
     public:
         Registry* registry;
+        ecs::EcsModule ecsModule;
 
         Transform_unit_tests()
-            : registry{&g_registry}
+            : registry{&g_registry},
+              ecsModule{registry}
         {
         }
 
@@ -51,6 +84,7 @@ class Transform_unit_tests : public ::testing::Test
             g_impl.RegisterType<nc::Tag>(10);
             g_impl.RegisterType<nc::Transform>(10);
             g_impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
+            g_impl.RegisterType<nc::Hierarchy>(10);
         }
 };
 
@@ -253,6 +287,7 @@ TEST_F(Transform_unit_tests, Set_CalledOnRoot_CorrectlyRecomposesBothMatrices)
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->Set(TestPos2, TestRotQuat2, TestScale2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos2);
     EXPECT_EQ(t->Rotation(), TestRotQuat2);
     EXPECT_EQ(t->Scale(), TestScale2);
@@ -267,6 +302,7 @@ TEST_F(Transform_unit_tests, Set_CalledOnParent_OnlyRecomposesChildWorldMatrix)
     auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
     auto tParent = registry->Get<Transform>(parent);
     tParent->Set(TestPos2, TestRotQuat2, TestScale2);
+    ecsModule.RunFrameLogic();
     auto tChild = registry->Get<Transform>(child);
     EXPECT_EQ(tChild->Position(), TestPos2);
     EXPECT_EQ(tChild->Rotation(), TestRotQuat2);
@@ -281,6 +317,7 @@ TEST_F(Transform_unit_tests, SetAngleOverload_CalledOnRoot_CorrectlyRecomposesBo
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->Set(TestPos2, TestRotAngles, TestScale2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos2);
     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
     EXPECT_EQ(t->Rotation(), expectedRot);
@@ -297,6 +334,7 @@ TEST_F(Transform_unit_tests, SetAngleOverload_CalledOnParent_OnlyRecomposesChild
     auto* tParent = registry->Get<Transform>(parent);
     auto* tChild = registry->Get<Transform>(child);
     tParent->Set(TestPos2, TestRotAngles, TestScale2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos2);
     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
     EXPECT_EQ(tChild->Rotation(), expectedRot);
@@ -311,6 +349,7 @@ TEST_F(Transform_unit_tests, SetPosition_CalledOnRoot_OnlyPositionModified)
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->SetPosition(TestPos2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos2);
     EXPECT_EQ(t->Rotation(), TestRotQuat1);
     EXPECT_EQ(t->Scale(), TestScale1);
@@ -326,6 +365,7 @@ TEST_F(Transform_unit_tests, SetPosition_CalledOnParent_OnlyWorldPositionModifie
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->SetPosition(TestPos2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos2);
     EXPECT_EQ(tChild->Rotation(), TestRotQuat1);
     EXPECT_EQ(tChild->Scale(), TestScale1);
@@ -339,6 +379,7 @@ TEST_F(Transform_unit_tests, SetRotation_CalledOnRoot_OnlyRotationModified)
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->SetRotation(TestRotQuat2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos1);
     EXPECT_EQ(t->Rotation(), TestRotQuat2);
     EXPECT_EQ(t->Scale(), TestScale1);
@@ -354,6 +395,7 @@ TEST_F(Transform_unit_tests, SetRotation_CalledOnParent_OnlyWorldRotationModifie
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->SetRotation(TestRotQuat2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos1);
     EXPECT_EQ(tChild->Rotation(), TestRotQuat2);
     EXPECT_EQ(tChild->Scale(), TestScale1);
@@ -367,6 +409,7 @@ TEST_F(Transform_unit_tests, SetRotationAnglesOverload_CalledOnRoot_OnlyRotation
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->SetRotation(TestRotAngles);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos1);
     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
     EXPECT_EQ(t->Rotation(), expectedRot);
@@ -383,6 +426,7 @@ TEST_F(Transform_unit_tests, SetRotationAnglesOverload_CalledOnParent_OnlyWorldR
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->SetRotation(TestRotAngles);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos1);
     auto expectedRot = Quaternion::FromEulerAngles(TestRotAngles);
     EXPECT_EQ(tChild->Rotation(), expectedRot);
@@ -397,6 +441,7 @@ TEST_F(Transform_unit_tests, SetScale_CalledOnRoot_OnlyScaleModified)
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->SetScale(TestScale2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos1);
     EXPECT_EQ(t->Rotation(), TestRotQuat1);
     EXPECT_EQ(t->Scale(), TestScale2);
@@ -412,6 +457,7 @@ TEST_F(Transform_unit_tests, SetScale_CalledOnParent_OnlyWorldScaleModifiedInChi
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->SetScale(TestScale2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos1);
     EXPECT_EQ(tChild->Rotation(), TestRotQuat1);
     EXPECT_EQ(tChild->Scale(), TestScale2);
@@ -425,6 +471,7 @@ TEST_F(Transform_unit_tests, Translate_CalledOnRoot_OnlyPositionModified)
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .rotation = TestRotQuat1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->Translate(TestPos1);
+    ecsModule.RunFrameLogic();
     auto expectedPos = TestPos1 + TestPos1;
     EXPECT_EQ(t->Position(), expectedPos);
     EXPECT_EQ(t->Rotation(), TestRotQuat1);
@@ -441,6 +488,7 @@ TEST_F(Transform_unit_tests, Translate_CalledOnParent_OnlyWorldPositionModifiedI
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->Translate(TestPos1);
+    ecsModule.RunFrameLogic();
     auto expectedPos = TestPos1 + TestPos1;
     EXPECT_EQ(tChild->Position(), expectedPos);
     EXPECT_EQ(tChild->Rotation(), TestRotQuat1);
@@ -455,6 +503,7 @@ TEST_F(Transform_unit_tests, TranslateLocalSpace_CalledOnRoot_OnlyPositionModifi
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->TranslateLocalSpace(TestPos1);
+    ecsModule.RunFrameLogic();
     auto expectedPos = TestPos1 + TestPos1;
     EXPECT_EQ(t->Position(), expectedPos);
     EXPECT_EQ(t->Rotation(), Quaternion::Identity());
@@ -471,6 +520,7 @@ TEST_F(Transform_unit_tests, TranslateLocalSpace_CalledOnParent_OnlyWorldPositio
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->TranslateLocalSpace(TestPos1);
+    ecsModule.RunFrameLogic();
     auto expectedPos = TestPos1 + TestPos1;
     EXPECT_EQ(tChild->Position(), expectedPos);
     EXPECT_EQ(tChild->Rotation(), Quaternion::Identity());
@@ -485,6 +535,7 @@ TEST_F(Transform_unit_tests, Rotate_CalledOnRoot_OnlyRotationModified)
     auto e = registry->Add<Entity>(EntityInfo{.position = TestPos1, .scale = TestScale1});
     auto t = registry->Get<Transform>(e);
     t->Rotate(TestRotQuat2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(t->Position(), TestPos1);
     EXPECT_EQ(t->Rotation(), TestRotQuat2);
     EXPECT_EQ(t->Scale(), TestScale1);
@@ -500,6 +551,7 @@ TEST_F(Transform_unit_tests, Rotate_CalledOnParent_OnlyWorldRotationModifiedInCh
     auto tParent = registry->Get<Transform>(parent);
     auto tChild = registry->Get<Transform>(child);
     tParent->Rotate(TestRotQuat2);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos1);
     EXPECT_EQ(tChild->Rotation(), TestRotQuat2);
     EXPECT_EQ(tChild->Scale(), TestScale1);
@@ -515,6 +567,7 @@ TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnRoot_OnlyRotationMo
     auto expectedAxis = Vector3::Up();
     auto expectedAngle = 2.2f; 
     t->Rotate(expectedAxis, expectedAngle);
+    ecsModule.RunFrameLogic();
     auto actualQuat = t->Rotation();
     auto expectedQuat = Quaternion::FromAxisAngle(expectedAxis, expectedAngle);
     EXPECT_EQ(t->Position(), TestPos1);
@@ -534,6 +587,7 @@ TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnParent_OnlyWorldRot
     auto expectedAxis = Vector3::Up();
     auto expectedAngle = 2.2f; 
     tParent->Rotate(expectedAxis, expectedAngle);
+    ecsModule.RunFrameLogic();
     EXPECT_EQ(tChild->Position(), TestPos1);
     auto expectedQuat = Quaternion::FromAxisAngle(expectedAxis, expectedAngle);
     auto actualQuat = tChild->Rotation();
@@ -542,86 +596,6 @@ TEST_F(Transform_unit_tests, RotateAxisAngleOverload_CalledOnParent_OnlyWorldRot
     EXPECT_EQ(tChild->LocalPosition(), Vector3::Zero());
     EXPECT_EQ(tChild->LocalRotation(), Quaternion::Identity());
     EXPECT_EQ(tChild->LocalScale(), Vector3::One());
-}
-
-TEST_F(Transform_unit_tests, GetChildren_ChildConstructor_AddsChildToParent)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tParent = registry->Get<Transform>(parent);
-    auto children = tParent->Children();
-    auto actualCount = children.size();
-    ASSERT_EQ(actualCount, 1u);
-    EXPECT_EQ(children[0], child);
-}
-
-TEST_F(Transform_unit_tests, GetRoot_CalledOnRoot_ReturnsSelf)
-{
-    auto e = registry->Add<Entity>(EntityInfo{});
-    auto t = registry->Get<Transform>(e);
-    auto actual = t->Root();
-    EXPECT_EQ(actual, e);
-}
-
-TEST_F(Transform_unit_tests, GetRoot_WithOneDepthLevel_ReturnsParent)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tChild = registry->Get<Transform>(child);
-    auto actual = tChild->Root();
-    EXPECT_EQ(actual, parent);
-}
-
-TEST_F(Transform_unit_tests, GetRoot_WithTwoDepthLevels_ReturnsParentsParent)
-{
-    auto root = registry->Add<Entity>(EntityInfo{});
-    auto parent = registry->Add<Entity>(EntityInfo{.parent = root});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tChild = registry->Get<Transform>(child);
-    auto actual = tChild->Root();
-    EXPECT_EQ(actual, root);
-}
-
-TEST_F(Transform_unit_tests, SetParent_RootChangedToChild_ParentAndChildUpdated)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{});
-    auto tParent = registry->Get<Transform>(parent);
-    auto tChild = registry->Get<Transform>(child);
-    tChild->SetParent(parent);
-    EXPECT_EQ(tChild->Parent(), parent);
-    auto children = tParent->Children();
-    ASSERT_EQ(children.size(), 1u);
-    EXPECT_EQ(children[0], child);
-}
-
-TEST_F(Transform_unit_tests, SetParent_ChildReParented_ParentAndChildUpdated)
-{
-    auto oldParent = registry->Add<Entity>(EntityInfo{});
-    auto newParent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = oldParent});
-    auto tOldParent = registry->Get<Transform>(oldParent);
-    auto tNewParent = registry->Get<Transform>(newParent);
-    auto tChild = registry->Get<Transform>(child);
-    tChild->SetParent(newParent);
-    EXPECT_EQ(tChild->Parent(), newParent);
-    auto oldParentChildren = tOldParent->Children();
-    EXPECT_EQ(oldParentChildren.size(), 0u);
-    auto newParentChildren = tNewParent->Children();
-    ASSERT_EQ(newParentChildren.size(), 1u);
-    EXPECT_EQ(newParentChildren[0], child);
-}
-
-TEST_F(Transform_unit_tests, SetParent_ChildDetached_ParentAndChildUpdated)
-{
-    auto parent = registry->Add<Entity>(EntityInfo{});
-    auto child = registry->Add<Entity>(EntityInfo{.parent = parent});
-    auto tParent = registry->Get<Transform>(parent);
-    auto tChild = registry->Get<Transform>(child);
-    tChild->SetParent(Entity::Null());
-    EXPECT_EQ(tChild->Parent(), Entity::Null());
-    auto children = tParent->Children();
-    EXPECT_EQ(children.size(), 0u);
 }
 
 int main(int argc, char ** argv)

@@ -125,7 +125,7 @@ namespace nc::particle
 
     auto EmitterState::ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const -> DirectX::XMMATRIX
     {
-        return ComposeMatrix
+        return ::ComposeMatrix
         (
             particle.scale,
             Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)),

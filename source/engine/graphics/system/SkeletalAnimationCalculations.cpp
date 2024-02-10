@@ -1,4 +1,5 @@
 #include "SkeletalAnimationCalculations.h"
+#include "ncengine/utility/MatrixUtilities.h"
 
 #include "ncutility/NcError.h"
 
@@ -8,11 +9,6 @@ namespace nc::graphics
 {
 using namespace DirectX;
 using namespace nc;
-
-XMVECTOR ToXMVector(const Quaternion& q)         { return XMVectorSet(q.x, q.y, q.z, q.w); }
-XMMATRIX ToTransMatrix(const Vector3& v)         { return XMMatrixTranslation(v.x, v.y, v.z); }
-XMMATRIX ToScaleMatrix(const Vector3& v)         { return XMMatrixScaling(v.x, v.y, v.z); }
-XMMATRIX ToRotMatrix(const Quaternion& q)        { return XMMatrixRotationQuaternion(ToXMVector(q)); }
 
 auto GetAnimationOffsets(float timeInTicks,
                          const std::vector<std::string>& boneNames,

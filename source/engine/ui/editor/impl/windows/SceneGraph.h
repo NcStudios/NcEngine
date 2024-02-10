@@ -32,7 +32,7 @@ class SceneGraph
         void EnsureSelection(EditorContext& ctx);
         auto PassFilter(Tag& tag) -> bool;
         void Graph(EditorContext& ctx, CreateEntityDialog& createEntity);
-        void GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Transform& transform, CreateEntityDialog& createEntity);
+        void GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Hierarchy& hierarchy, CreateEntityDialog& createEntity);
         void GraphContextMenu(EditorContext& ctx, CreateEntityDialog& createEntity);
 };
 } // namespace ui::editor
