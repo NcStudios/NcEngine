@@ -94,6 +94,7 @@ PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 li
     if(entity.IsStatic())
     {
         m_properties.mass = 0.0f;
+        m_properties.useGravity = false;
     }
 
     if(m_properties.mass == 0.0f)
@@ -129,9 +130,7 @@ void PhysicsBody::ApplyImpulse(const Vector3& impulse)
 
 void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
 {
-    if(m_properties.isKinematic || ParentEntity().IsStatic())
-        return;
-    
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(XMVectorScale(impulse, m_properties.mass), m_linearFreedom));
 }
 
@@ -142,26 +141,20 @@ void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
 
 void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
 {
-    if(m_properties.isKinematic || ParentEntity().IsStatic())
-        return;
-
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
     auto restrictedTorque = XMVectorMultiply(torque, m_angularFreedom);
     m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVector3Transform(restrictedTorque, m_invInertiaWorld));
 }
 
 void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
 {
-    if(m_properties.isKinematic || ParentEntity().IsStatic())
-        return;
-    
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(delta, m_linearFreedom));
 }
 
 void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
 {
-    if(m_properties.isKinematic || ParentEntity().IsStatic())
-        return;
-    
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(velDelta, m_linearFreedom));
     m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVectorMultiply(angVelDelta, m_angularFreedom));
 }
@@ -186,7 +179,7 @@ IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
      *  needs to be notified as well. */
     if(m_properties.isKinematic || !m_awake)
         return IntegrationResult::Ignored;
-    
+
     auto linearDragFactor = pow(1.0f - m_properties.drag, dt);
     auto angularDragFactor = pow(1.0f - m_properties.angularDrag, dt);
     m_linearVelocity = XMVectorScale(m_linearVelocity, linearDragFactor);

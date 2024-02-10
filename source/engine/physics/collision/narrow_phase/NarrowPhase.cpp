@@ -7,8 +7,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-
 namespace nc::physics
 {
 NarrowPhase::NarrowPhase(Registry* registry)

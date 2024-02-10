@@ -38,12 +38,15 @@ constexpr uint8_t FramesUntilSleep = 5u; // How many frames below epsilon until 
 } // namespace nc::physics
 
 #define NC_PHYSICS_DEBUGGING 1
-#define NC_PHYSICS_DRAW_CONTACT_POINTS 1
+#define NC_PHYSICS_DRAW_CONTACT_POINTS 0
 #define NC_PHYSICS_COLLISION_LOGGING 0
 #define NC_PHYSICS_CONTACT_LOGGING 0
 #define NC_PHYSICS_SOLVER_LOGGING 0
 
 #if NC_PHYSICS_DEBUGGING
+
+#define NC_PHYSICS_ASSERT(expr, msg) NC_ASSERT(expr, msg)
+
 #include <iostream>
 
 inline void PhysicsDebugLog() {}
@@ -55,6 +58,8 @@ void PhysicsDebugLog(const Args&... args)
 }
 
 #else
+#define NC_PHYSICS_ASSERT(expr, msg)
+
 inline void PhysicsDebugLog() {}
 
 template<typename... Args>

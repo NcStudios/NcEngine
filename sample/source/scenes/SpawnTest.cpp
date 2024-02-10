@@ -392,7 +392,7 @@ void SpawnTest::Load(Registry* registry, ModuleProvider modules)
 
     const auto characterSpawnPos = Vector3::Up() * 1.5f;
     auto character = CreateCharacter(registry->GetEcs(), ncPhysics, characterSpawnPos);
-    const auto camera = CreateCamera(registry->GetEcs(), modules.Get<graphics::NcGraphics>(), characterSpawnPos, character);
+    CreateCamera(registry->GetEcs(), modules.Get<graphics::NcGraphics>(), characterSpawnPos, character);
 
     // Camera
     // auto cameraHandle = registry->Add<Entity>({.position = Vector3{0.0f, 35.0f, -100.0f}, .rotation = Quaternion::FromEulerAngles(0.35f, 0.0f, 0.0f), .tag = "SceneNavigationCamera"});

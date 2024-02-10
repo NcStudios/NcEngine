@@ -130,17 +130,23 @@ void JointSystem::UpdateJoint(Joint& joint, float dt)
     /** Apply or zero out accumulated impulse */
     if constexpr(EnableJointWarmstarting)
     {
-        auto vA = XMVectorScale(joint.p, invMassA * WarmstartFactor);
-        vA = XMVectorNegate(XMVectorScale(vA, WarmstartFactor));
-        auto wA = XMVector3Transform(XMVector3Cross(joint.rA, joint.p), invInertiaA);
-        wA = XMVectorNegate(XMVectorScale(wA, WarmstartFactor));
-        joint.bodyA->ApplyVelocities(vA, wA);
+        if (!joint.bodyA->ParentEntity().IsStatic() && !joint.bodyA->IsKinematic())
+        {
+            auto vA = XMVectorScale(joint.p, invMassA * WarmstartFactor);
+            vA = XMVectorNegate(XMVectorScale(vA, WarmstartFactor));
+            auto wA = XMVector3Transform(XMVector3Cross(joint.rA, joint.p), invInertiaA);
+            wA = XMVectorNegate(XMVectorScale(wA, WarmstartFactor));
+            joint.bodyA->ApplyVelocities(vA, wA);
+        }
 
-        auto vB = XMVectorScale(joint.p, invMassB);
-        vB = XMVectorScale(vB, WarmstartFactor);
-        auto wB = XMVector3Transform(XMVector3Cross(joint.rB, joint.p), invInertiaB);
-        wB =  XMVectorScale(wB, WarmstartFactor);
-        joint.bodyB->ApplyVelocities(vB, wB);
+        if (!joint.bodyB->ParentEntity().IsStatic() && !joint.bodyB->IsKinematic())
+        {
+            auto vB = XMVectorScale(joint.p, invMassB);
+            vB = XMVectorScale(vB, WarmstartFactor);
+            auto wB = XMVector3Transform(XMVector3Cross(joint.rB, joint.p), invInertiaB);
+            wB =  XMVectorScale(wB, WarmstartFactor);
+            joint.bodyB->ApplyVelocities(vB, wB);
+        }
     }
     else
     {

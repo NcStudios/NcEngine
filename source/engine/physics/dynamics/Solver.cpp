@@ -295,17 +295,23 @@ void ResolveJoint(Joint& joint)
 
     /** dV = +/- (impulse / mass)
      *  dW = +/- (r X impulse) * I^-1 */
-    joint.bodyA->ApplyVelocities
-    (
-        XMVectorNegate(XMVectorScale(impulse, joint.bodyA->GetInverseMass())),
-        XMVectorNegate(XMVector3Transform(XMVector3Cross(joint.rA, impulse), joint.bodyA->GetInverseInertia()))
-    );
+    if (!joint.bodyA->ParentEntity().IsStatic() && !joint.bodyA->IsKinematic())
+    {
+        joint.bodyA->ApplyVelocities
+        (
+            XMVectorNegate(XMVectorScale(impulse, joint.bodyA->GetInverseMass())),
+            XMVectorNegate(XMVector3Transform(XMVector3Cross(joint.rA, impulse), joint.bodyA->GetInverseInertia()))
+        );
+    }
 
-    joint.bodyB->ApplyVelocities
-    (
-        XMVectorScale(impulse, joint.bodyB->GetInverseMass()),
-        XMVector3Transform(XMVector3Cross(joint.rB, impulse), joint.bodyB->GetInverseInertia())
-    );
+    if (!joint.bodyB->ParentEntity().IsStatic() && !joint.bodyB->IsKinematic())
+    {
+        joint.bodyB->ApplyVelocities
+        (
+            XMVectorScale(impulse, joint.bodyB->GetInverseMass()),
+            XMVector3Transform(XMVector3Cross(joint.rB, impulse), joint.bodyB->GetInverseInertia())
+        );
+    }
 }
 } // anonymous namespace
 

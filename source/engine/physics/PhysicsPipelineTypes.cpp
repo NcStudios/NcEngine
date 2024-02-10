@@ -70,14 +70,6 @@ size_t ClosestAxis(float x, float y, float z, float w)
     return maxIndex;
 }
 
-float CalcArea4Points(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3)
-{
-    float mag0 = SquareMagnitude(CrossProduct(p0-p1, p2-p3));
-    float mag1 = SquareMagnitude(CrossProduct(p0-p2, p1-p3));
-    float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
-    return Max(Max(mag0, mag1), mag2);
-}
-
 float CalcArea4Points(const DirectX::FXMVECTOR& p0,
                       const DirectX::FXMVECTOR& p1,
                       const DirectX::FXMVECTOR& p2,
@@ -89,11 +81,6 @@ float CalcArea4Points(const DirectX::FXMVECTOR& p0,
     auto mag2 = XMVector3LengthSq(XMVector3Cross(p0 - p3, p1 - p2));
     auto max = XMVectorMax(XMVectorMax(mag0, mag1), mag2);
     return XMVectorGetX(max);
-
-    // float mag0 = SquareMagnitude(CrossProduct(p0-p1, p2-p3));
-    // float mag1 = SquareMagnitude(CrossProduct(p0-p2, p1-p3));
-    // float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
-    // return Max(Max(mag0, mag1), mag2);
 }
 } // anonymous namespace
 
@@ -174,26 +161,6 @@ auto Manifold::SortPoints(const Contact& contact) -> size_t
     const auto res2 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt1, pt3) : 0.0f;
     const auto res3 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt1, pt2) : 0.0f;
     return ClosestAxis(res0, res1, res2, res3);
-
-    // float res0 = 0.0f;
-    // float res1 = 0.0f;
-    // float res2 = 0.0f;
-    // float res3 = 0.0f;
-
-    // if(maxPenetrationIndex != 0)
-    //     res0 = CalcArea4Points(contact.localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
-
-    // if(maxPenetrationIndex != 1)
-    //     res1 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
-
-    // if(maxPenetrationIndex != 2)
-    //     res2 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[3].localPointA);
-
-    // if(maxPenetrationIndex != 3)
-    //     res3 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA);
-
-    // size_t biggestArea = ClosestAxis(res0, res1, res2, res3);
-    // return biggestArea;
 }
 
 void Manifold::UpdateWorldPoints(const Registry* registry)
@@ -246,24 +213,22 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
         if (distance2d > SquareContactBreakDistance)
         {
-            // PhysicsLog("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
             // Attempt to increase stability for sliding cases by 
             if constexpr (PreferSingleTangentContactBreak)
             {
                 if (distance2d > MandatoryTangentContactBreakDistance)
                 {
-                    NC_LOG_CONTACTS("\tmandatory break: ", distance2d, " > ", MandatoryTangentContactBreakDistance);
+                    NC_LOG_CONTACTS("Contact Break [Tangent - Mandatory]: ", distance2d, " > ", MandatoryTangentContactBreakDistance);
                     *cur = m_contacts.at(removePosition--);
                     ++removeCount;
                     continue;
                 }
                 else if (distance2d > maxTangentBreakDistance)
                 {
-                    // PhysicsLog("\tlargest tangent distance: ", distance2d, " > ", maxTangentBreakDistance);
                     maxTangentBreakDistance = distance2d;
-
                     if (!haveBrokenAlongTangent)
                     {
+                        NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
                         ++removeCount;
                         tangentBreakIndex = removePosition--;
                         haveBrokenAlongTangent = true;
@@ -275,6 +240,7 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
             }
             else
             {
+                NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
                 *cur = m_contacts.at(removePosition--);
                 ++removeCount;
                 continue;
