@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common.h"
+#include "graphics/shader_resource/ShaderTypes.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -12,7 +12,7 @@ namespace nc::graphics
 auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler;
 
 // Pipelines
-vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
+vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(shader_stage stage, const vk::ShaderModule& shader);
 vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo();
 vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, std::span<const vk::VertexInputAttributeDescription> vertexAttributeDesc);
 vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo();

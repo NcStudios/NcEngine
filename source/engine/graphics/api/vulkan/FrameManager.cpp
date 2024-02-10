@@ -1,4 +1,5 @@
 #include "FrameManager.h"
+#include "graphics/GraphicsConstants.h"
 #include "core/Device.h"
 
 #include <algorithm>

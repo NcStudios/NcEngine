@@ -49,7 +49,7 @@ class NcGraphicsImpl : public NcGraphics
                        Registry* registry,
                        ModuleProvider modules,
                        std::unique_ptr<IGraphics> graphics,
-                       ShaderResourceBus&& shaderResourceBus,
+                       ShaderResourceBus shaderResourceBus,
                        window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
@@ -67,6 +67,7 @@ class NcGraphicsImpl : public NcGraphics
     private:
         Registry* m_registry;
         std::unique_ptr<IGraphics> m_graphics;
+        ShaderResourceBus m_shaderResourceBus;
         CameraSystem m_cameraSystem;
         EnvironmentSystem m_environmentSystem;
         ObjectSystem m_objectSystem;

@@ -2,7 +2,7 @@
 
 #include "graphics/api/vulkan/GpuAllocator.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     // Buffer that is intended for frequent writes on the CPU, and frequent reads on the GPU.
     class UniformBuffer
@@ -23,4 +23,4 @@ namespace nc::graphics
             GpuAllocator* m_allocator;
             GpuAllocation<vk::Buffer> m_buffer;
     };
-}
+} // namespace nc::graphics::vulkan

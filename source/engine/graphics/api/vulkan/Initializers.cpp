@@ -1,4 +1,5 @@
 #include "Initializers.h"
+#include "shaders\ShaderUtilities.h"
 
 namespace nc::graphics
 {
@@ -27,7 +28,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode)
     return device.createSamplerUnique(samplerInfo);
 }
 
-auto CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader) -> vk::PipelineShaderStageCreateInfo
+auto CreatePipelineShaderStageCreateInfo(shader_stage stage, const vk::ShaderModule& shader) -> vk::PipelineShaderStageCreateInfo
 {
     const auto shaderStageFlags = stage == ShaderStage::Vertex ? vk::ShaderStageFlagBits::eVertex : vk::ShaderStageFlagBits::eFragment;
     return vk::PipelineShaderStageCreateInfo

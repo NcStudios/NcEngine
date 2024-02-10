@@ -69,12 +69,13 @@ namespace nc::graphics
                                    Registry* registry,
                                    ModuleProvider modules,
                                    std::unique_ptr<IGraphics> graphics,
-                                   ShaderResourceBus&& shaderResourceBus,
+                                   ShaderResourceBus shaderResourceBus,
                                    window::WindowImpl* window)
         : m_registry{registry},
           m_graphics{std::move(graphics)},
+          m_shaderResourceBus{std::move(shaderResourceBus)},
           m_cameraSystem{},
-          m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
+          m_environmentSystem{&m_shaderResourceBus},
           m_objectSystem{std::move(shaderResourceBus.objectChannel)},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
@@ -149,10 +150,12 @@ namespace nc::graphics
             return;
         }
 
+        auto currentFrameIndex = m_graphics->CurrentFrameIndex();
+
         auto cameraState = m_cameraSystem.Execute(m_registry);
         m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
-        auto environmentState = m_environmentSystem.Execute(cameraState);
+        auto environmentState = m_environmentSystem.Execute(cameraState, m_graphics->currentFrameIndex);
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},
                                                   MultiView<ToonRenderer, Transform>{m_registry},

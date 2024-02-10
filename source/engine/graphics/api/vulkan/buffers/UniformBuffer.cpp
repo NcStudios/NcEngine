@@ -1,6 +1,6 @@
 #include "UniformBuffer.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     UniformBuffer::UniformBuffer()
         : m_allocator{nullptr},

@@ -2,6 +2,8 @@
 #include "FrameManager.h"
 #include "GpuAllocator.h"
 #include "GpuAssetsStorage.h"
+#include "GpuShaderStorage.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 #include "Imgui.h"
 #include "Lighting.h"
 #include "RenderGraph.h"
@@ -43,6 +45,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
       m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
+      m_gpuShaderStorage{ std::make_unique<GpuShaderStorage>(m_allocator.get(), m_shaderDescriptorSets.get(), shaderResourceBus.uniformBufferChannel) },
       m_renderGraph{std::make_unique<RenderGraph>(m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions, memorySettings.maxPointLights)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass())},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
@@ -98,7 +101,6 @@ void VulkanGraphics::Clear() noexcept
     ShaderResourceService<ObjectData>::Get()->Reset();
     ShaderResourceService<PointLightData>::Get()->Reset();
     ShaderResourceService<ShadowMapData>::Get()->Reset();
-    ShaderResourceService<EnvironmentData>::Get()->Reset();
 }
 
 bool VulkanGraphics::FrameBegin()
@@ -115,6 +117,11 @@ bool VulkanGraphics::FrameBegin()
     m_frameManager->Begin();
     m_imgui->FrameBegin();
     return true;
+}
+
+auto VulkanGraphics::CurrentFrameIndex() -> uint32_t
+{
+    return m_frameManager->CurrentFrameIndex();
 }
 
 // Executes the command buffer for the next swapchain image which writes to the image.

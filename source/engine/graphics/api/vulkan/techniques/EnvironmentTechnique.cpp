@@ -11,7 +11,6 @@
 #include "graphics/api/vulkan/shaders/ShaderResources.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/shader_resource/EnvironmentData.h"
 
 #include "optick.h"
 
@@ -35,7 +34,7 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderDescripto
     std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
     {
         CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-        CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+        CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
     std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts

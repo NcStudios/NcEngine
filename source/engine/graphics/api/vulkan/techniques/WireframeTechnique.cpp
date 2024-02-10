@@ -33,7 +33,7 @@ namespace nc::graphics
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants

@@ -3,6 +3,7 @@ target_sources(${NC_ENGINE_LIB}
         FrameManager.cpp
         GpuAllocator.cpp
         GpuAssetsStorage.cpp
+        GpuShaderStorage.cpp
         Imgui.cpp
         Initializers.cpp
         Lighting.cpp

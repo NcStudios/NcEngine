@@ -32,7 +32,7 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* d
     std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
     {
         CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-        CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+        CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
     std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts

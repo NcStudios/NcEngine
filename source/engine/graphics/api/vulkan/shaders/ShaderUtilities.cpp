@@ -46,4 +46,18 @@ namespace nc::graphics
         file.close();
         return buffer;
     }
+
+    auto GetStageFlags(shader_stage stage) -> vk::ShaderStageFlags
+    {
+        auto vulkanFlags = vk::ShaderStageFlags();
+        if (stage & ShaderStage::Fragment)
+        {
+            vulkanFlags |= vk::ShaderStageFlagBits::eFragment;
+        }
+        if (stage & ShaderStage::Vertex)
+        {
+            vulkanFlags |= vk::ShaderStageFlagBits::eVertex;
+        }
+        return vulkanFlags;
+    }
 }

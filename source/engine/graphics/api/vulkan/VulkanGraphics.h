@@ -38,6 +38,8 @@ struct ShaderResourceBus;
 
 namespace vulkan
 {
+struct GpuShaderStorage;
+
 class VulkanGraphics : public IGraphics
 {
     public:
@@ -52,6 +54,7 @@ class VulkanGraphics : public IGraphics
         ~VulkanGraphics() noexcept;
 
         auto FrameBegin() -> bool override;
+        auto CurrentFrameIndex() -> uint32_t override;
         void Draw(const PerFrameRenderState& state) override;
         void FrameEnd() override;
         void OnResize(float width, float height, bool isMinimized) override;
@@ -68,6 +71,7 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;
         std::unique_ptr<ShaderResources> m_shaderResources;
         std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
+        std::unique_ptr<GpuShaderStorage> m_gpuShaderStorage;
         std::unique_ptr<RenderGraph> m_renderGraph;
         std::unique_ptr<Imgui> m_imgui;
         std::unique_ptr<FrameManager> m_frameManager;

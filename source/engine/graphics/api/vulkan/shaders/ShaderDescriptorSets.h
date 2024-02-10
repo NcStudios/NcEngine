@@ -68,6 +68,7 @@ namespace nc::graphics
             void CreateSet(BindFrequency bindFrequency);
 
         private:
+            std::vector<vk::UniqueDescriptorPool> m_descriptorPools;
             vk::UniqueDescriptorPool m_renderingDescriptorPool;
             std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
             vk::Device m_device;
