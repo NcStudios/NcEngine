@@ -220,8 +220,7 @@ void InnerWidget(auto&& extension = [](){})
 
 void Widget()
 {
-    const auto objectCount = fmt::format("Objects: {}", g_currentEntities);
-    ImGui::Text(objectCount.c_str());
+    ImGui::Text("Objects: %u", g_currentEntities);
     nc::ui::ChildWindow("Benchmarks", []()
     {
         constexpr auto flags = ImGuiTableFlags_Borders;
@@ -284,6 +283,8 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
     auto world = registry->GetEcs();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
+
+    ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
