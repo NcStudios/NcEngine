@@ -3,6 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
@@ -17,6 +18,9 @@ namespace
 constexpr auto g_mapExtent = 150.0f;
 constexpr auto g_buttonWidth = 100.0f;
 constexpr auto g_buttonHeight = 20.0f;
+auto g_maxEntities = 0u;
+auto g_maxPointLights = 0u;
+auto g_currentEntities = 0u;
 
 constexpr auto g_assets = std::array{
     std::string_view{nc::asset::CubeMesh},
@@ -85,6 +89,7 @@ void AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view 
 struct mesh_renderer
 {
     static constexpr auto name = "Mesh Renderer";
+    static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -96,6 +101,7 @@ struct mesh_renderer
 struct toon_renderer
 {
     static constexpr auto name = "Toon Renderer";
+    static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -107,6 +113,7 @@ struct toon_renderer
 struct collider
 {
     static constexpr auto name = "Collider";
+    static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -118,6 +125,7 @@ struct collider
 struct physics_body
 {
     static constexpr auto name = "Physics Body";
+    static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -129,6 +137,7 @@ struct physics_body
 struct point_light
 {
     static constexpr auto name = "Point Light";
+    static inline const auto& maxCount = g_maxPointLights;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -139,6 +148,7 @@ struct point_light
 struct entity_hierarchy
 {
     static constexpr auto name = "Entity Hierarchy";
+    static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -174,12 +184,16 @@ template<class T>
 void InnerWidget(auto&& extension = [](){})
 {
     IMGUI_SCOPE(nc::ui::ImGuiId, T::name);
+    const auto currentObjectCount = static_cast<unsigned>(T::GetObjectCountCallback());
+    const auto remainingEntityCount = g_maxEntities - g_currentEntities;
+    const auto maxObjectCount = nc::Min(T::maxCount - currentObjectCount, remainingEntityCount);
+
     ImGui::Spacing();
     ImGui::Text("%s", T::name);
-    ImGui::Text("Count: %d", T::GetObjectCountCallback());
 
     ImGui::SetNextItemWidth(g_buttonWidth);
     nc::ui::InputU32(T::SpawnCount, "##spawncount");
+    T::SpawnCount = nc::Clamp(T::SpawnCount, 0u, maxObjectCount);
 
     ImGui::SameLine();
 
@@ -187,12 +201,18 @@ void InnerWidget(auto&& extension = [](){})
     nc::ui::InputU32(T::DestroyCount, "##destroycount");
 
     if(ImGui::Button("Spawn", {g_buttonWidth, g_buttonHeight}))
+    {
         T::SpawnCallback(T::SpawnCount);
+        g_currentEntities += T::SpawnCount;
+    }
 
     ImGui::SameLine();
 
     if(ImGui::Button("Destroy", {g_buttonWidth, g_buttonHeight}))
+    {
         T::DestroyCallback(T::DestroyCount);
+        g_currentEntities -= nc::Min(T::DestroyCount, currentObjectCount);
+    }
 
     extension();
     ImGui::Spacing();
@@ -200,11 +220,11 @@ void InnerWidget(auto&& extension = [](){})
 
 void Widget()
 {
-    ImGui::Text("Benchmarks");
+    const auto objectCount = fmt::format("Objects: {}", g_currentEntities);
+    ImGui::Text(objectCount.c_str());
     nc::ui::ChildWindow("Benchmarks", []()
     {
         constexpr auto flags = ImGuiTableFlags_Borders;
-
         if (ImGui::BeginTable("table", 2, flags))
         {
             ImGui::TableNextRow();
@@ -254,6 +274,12 @@ Benchmarks::Benchmarks(SampleUI* ui)
 
 void Benchmarks::Load(Registry* registry, ModuleProvider modules)
 {
+    {
+        const auto& config = config::GetMemorySettings();
+        ::g_maxEntities = config.maxTransforms;
+        ::g_maxPointLights = config.maxPointLights - 1ull;
+    }
+
     m_sampleUI->SetWidgetCallback(::Widget);
     auto world = registry->GetEcs();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
@@ -411,6 +437,8 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
         ::entity_hierarchy::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
         ::entity_hierarchy::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
+
+    g_currentEntities += static_cast<unsigned>(world.GetAll<Entity>().size());
 }
 
 void Benchmarks::Unload()
