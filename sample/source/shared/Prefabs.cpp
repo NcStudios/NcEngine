@@ -9,6 +9,15 @@ namespace nc::sample
 {
 bool IsInitialized = false;
 
+graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial RedPbrMaterial{"solid_color\\Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial GreenPbrMaterial{"solid_color\\Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial BluePbrMaterial{"solid_color\\Blue.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial OrangePbrMaterial{"solid_color\\Orange.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial PurplePbrMaterial{"solid_color\\Purple.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial TealPbrMaterial{"solid_color\\Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial YellowPbrMaterial{"solid_color\\Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+
 constexpr auto toonOverlay = "line\\overlay.nca";
 constexpr auto toonHatch = asset::DefaultBaseColor;
 graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
@@ -19,11 +28,6 @@ graphics::ToonMaterial OrangeToonMaterial{"solid_color\\Orange.nca", toonOverlay
 graphics::ToonMaterial PurpleToonMaterial{"solid_color\\Purple.nca", toonOverlay, toonHatch, 8};
 graphics::ToonMaterial TealToonMaterial{"solid_color\\Teal.nca", toonOverlay, toonHatch, 8};
 graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay, toonHatch, 8};
-
-graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial RedPbrMaterial{"solid_color\\Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial GreenPbrMaterial{"solid_color\\Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial BluePbrMaterial{"solid_color\\Blue.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 
 template<class LoadFunc>
 void LoadAssets(const std::filesystem::path& rootDir, asset_flags_type flags, LoadFunc load)
