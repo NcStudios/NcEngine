@@ -26,19 +26,11 @@
     ],
     "hull-collider": [
         {
-            "sourcePath": "raw/model/coin.fbx",
-            "assetName": "hull_collider/coin"
-        },
-        {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "hull_collider/ramp"
         }
     ],
     "mesh": [
-        {
-            "sourcePath": "raw/model/coin.fbx",
-            "assetName": "mesh/coin"
-        },
         {
             "sourcePath": "raw/model/ogre.fbx",
             "assetName": "mesh/ogre"
