@@ -276,7 +276,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
     {
         const auto& config = config::GetMemorySettings();
         ::g_maxEntities = config.maxTransforms;
-        ::g_maxPointLights = config.maxPointLights - 1ull;
+        ::g_maxPointLights = config.maxPointLights - 1u;
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
