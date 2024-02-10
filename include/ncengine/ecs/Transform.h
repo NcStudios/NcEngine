@@ -49,7 +49,7 @@ class Transform final : public ComponentBase
                   DirectX::FXMMATRIX parentTransform)
             : ComponentBase(entity),
               m_localMatrix{ComposeMatrix(scale, rot, pos)},
-              m_worldMatrix{parentTransform * m_localMatrix}
+              m_worldMatrix{m_localMatrix * parentTransform}
         {
             NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         }
@@ -137,6 +137,9 @@ class Transform final : public ComponentBase
 
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
+
+        /** @brief Rotate to point towards a target position. */
+        void LookAt(const Vector3& target);
 
     private:
         friend class ecs::EcsModule;

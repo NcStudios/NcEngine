@@ -153,7 +153,7 @@ TEST_F(Transform_unit_tests, Rotation_CalledFromChild_ResultIncludesParentRotati
     auto child = registry->Add<Entity>(EntityInfo{.rotation = TestRotQuat3, .parent = parent});
     auto t = registry->Get<Transform>(child);
     auto actual = t->Rotation();
-    auto expected = Multiply(TestRotQuat2, TestRotQuat3);
+    auto expected = Multiply(TestRotQuat3, TestRotQuat2);
     EXPECT_EQ(actual, expected);
 }
 

@@ -124,7 +124,6 @@ namespace nc
         m_dirty = true;
     }
 
-    // TODO: I think these are wrong
     void Transform::Rotate(const Quaternion& quat)
     {
         auto pos_v = m_localMatrix.r[3];
@@ -150,5 +149,15 @@ namespace nc
         m_localMatrix *= ToRotMatrix(axis, radians);
         m_localMatrix.r[3] = pos_v;
         m_dirty = true;
+    }
+
+    void Transform::LookAt(const Vector3& target)
+    {
+        const auto selfToTarget = target - Position();
+        const auto forward = Normalize(selfToTarget);
+        const auto cosTheta = Dot(Vector3::Front(), forward);
+        const auto angle = std::acos(cosTheta);
+        const auto axis = Normalize(CrossProduct(Vector3::Front(), forward));
+        SetRotation(Quaternion::FromAxisAngle(axis, angle));
     }
 }
