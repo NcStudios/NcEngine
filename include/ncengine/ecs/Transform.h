@@ -49,7 +49,7 @@ class Transform final : public ComponentBase
                   DirectX::FXMMATRIX parentTransform)
             : ComponentBase(entity),
               m_localMatrix{ComposeMatrix(scale, rot, pos)},
-              m_worldMatrix{parentTransform * m_localMatrix}
+              m_worldMatrix{m_localMatrix * parentTransform}
         {
             NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
         }
