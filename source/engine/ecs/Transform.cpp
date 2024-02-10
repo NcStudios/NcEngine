@@ -124,7 +124,6 @@ namespace nc
         m_dirty = true;
     }
 
-    // TODO: I think these are wrong
     void Transform::Rotate(const Quaternion& quat)
     {
         auto pos_v = m_localMatrix.r[3];
