@@ -288,11 +288,11 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<graphics::ToonRenderer>(platform1, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(platform2, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(ramp2, "ramp.nca", TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, TealToonMaterial);
     world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
     world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
     world.Emplace<physics::Collider>(ramp1, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = "ramp.nca"});
+    world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = RampHullCollider});
     world.Emplace<physics::PhysicsBody>(platform1, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
     world.Emplace<physics::PhysicsBody>(platform2, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
@@ -350,8 +350,8 @@ void BuildHalfPipe(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe, "halfpipe.nca", RedToonMaterial);
-    world.Emplace<physics::ConcaveCollider>(halfPipe, "halfpipe.nca");
+    world.Emplace<graphics::ToonRenderer>(halfPipe, HalfPipeMesh, RedToonMaterial);
+    world.Emplace<physics::ConcaveCollider>(halfPipe, HalfPipeConcaveCollider);
 }
 
 void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)

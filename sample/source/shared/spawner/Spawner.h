@@ -26,7 +26,7 @@ class Spawner : public FreeComponent
         void Destroy(Registry* registry, unsigned count = 1u);
         const std::vector<Entity>& GetHandles() const;
         int GetObjectCount() const;
-    
+
     private:
         SpawnExtension m_extension;
         std::vector<Entity> m_entities;
