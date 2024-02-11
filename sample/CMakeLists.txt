@@ -35,6 +35,10 @@ install(TARGETS     ${NC_SAMPLE_EXE}
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sample/assets/nca
         DESTINATION sample
 )
+install(DIRECTORY      ${PROJECT_SOURCE_DIR}/sample/assets/fonts
+        DESTINATION    sample/nca
+        FILES_MATCHING REGEX ".*\.(ttf)"
+)
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/resources/nca
         DESTINATION sample
 )

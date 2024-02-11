@@ -3,6 +3,8 @@
 #include "GpuOptions.h"
 #include "graphics/api/vulkan/QueueFamily.h"
 
+#include "ncengine/type/StableAddress.h"
+
 #include <functional>
 #include <memory>
 #include <span>
@@ -12,7 +14,7 @@ namespace nc::graphics
 {
 class Instance;
 
-class Device
+class Device : public StableAddress
 {
     public:
         static auto Create(const Instance& instance, vk::SurfaceKHR surface,

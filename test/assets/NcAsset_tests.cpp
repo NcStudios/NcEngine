@@ -1,8 +1,17 @@
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "gtest/gtest.h"
+#include "ncmath/Vector.h"
 
 #include <ranges>
+
+namespace nc::window
+{
+auto GetContentScale() -> Vector2
+{
+    return Vector2{1.0f, 1.0f};
+}
+} // namespace nc::window
 
 const auto g_assetSettings = nc::config::AssetSettings
 {

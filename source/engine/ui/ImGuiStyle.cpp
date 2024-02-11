@@ -1,4 +1,5 @@
 #include "ncengine/ui/ImGuiStyle.h"
+#include "ncengine/window/Window.h"
 
 #include "imgui/imgui.h"
 
@@ -7,6 +8,8 @@ namespace nc::ui
 void SetDefaultUIStyle()
 {
     auto& style = ImGui::GetStyle();
+    auto [xScale, yScale] = window::GetContentScale();
+    style.ScaleAllSizes(std::floor(std::max(xScale, yScale)));
     style.WindowMenuButtonPosition = ImGuiDir_None;
     ImVec4* colors = style.Colors;
     colors[ImGuiCol_Text]                  = default_scheme::Text;

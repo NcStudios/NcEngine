@@ -4,6 +4,7 @@
 #include "manager/AudioClipAssetManager.h"
 #include "manager/ConcaveColliderAssetManager.h"
 #include "manager/CubeMapAssetManager.h"
+#include "manager/FontAssetManager.h"
 #include "manager/HullColliderAssetManager.h"
 #include "manager/MeshAssetManager.h"
 #include "manager/SkeletalAnimationAssetManager.h"
@@ -31,6 +32,7 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
       m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
       m_skeletalAnimationManager{std::make_unique<SkeletalAnimationAssetManager>(assetSettings.skeletalAnimationsPath, memorySettings.maxSkeletalAnimations)},
       m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)},
+      m_fontManager{std::make_unique<FontAssetManager>(assetSettings.fontsPath)},
       m_defaults{std::move(defaults)}
 {
 }
@@ -65,6 +67,11 @@ auto NcAssetImpl::OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>&
 auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>&
 {
     return m_skeletalAnimationManager->OnUpdate();
+}
+
+auto NcAssetImpl::OnFontUpdate() noexcept -> Signal<>&
+{
+    return m_fontManager->OnUpdate();
 }
 
 void NcAssetImpl::LoadAssets(const AssetMap& assets)
