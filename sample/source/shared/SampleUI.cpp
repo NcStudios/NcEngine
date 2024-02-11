@@ -1,8 +1,10 @@
 #include "SampleUI.h"
+#include "Prefabs.h"
 #include "scenes/Benchmarks.h"
 #include "scenes/GraphicsTest.h"
 #include "scenes/PhysicsTest.h"
 
+#include "ncengine/asset/Assets.h"
 #include "ncengine/config/Version.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/input/Input.h"
@@ -40,7 +42,8 @@ namespace nc::sample
           m_gameLog{},
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()},
-          m_screenExtent{window::GetScreenExtent()}
+          m_screenExtent{window::GetScreenExtent()},
+          m_font{nc::AcquireFont(UIFont)}
     {
         ui::SetDefaultUIStyle();
         window::RegisterOnResizeReceiver(this);
@@ -53,6 +56,7 @@ namespace nc::sample
 
     void SampleUI::Draw()
     {
+        ImGui::PushFont(m_font.font);
         ImGui::SetNextWindowPos({ (m_windowDimensions.x-m_screenExtent.x)/2, m_windowDimensions.y - PanelHeight });
         ImGui::SetNextWindowSize({ m_screenExtent.x, PanelHeight });
 
@@ -64,7 +68,10 @@ namespace nc::sample
             DrawLog();
             ImGui::NextColumn();
             DrawSceneList();
-        } ImGui::End();
+        }
+
+        ImGui::End();
+        ImGui::PopFont();
     }
 
     void SampleUI::DrawDefaultWidget()
