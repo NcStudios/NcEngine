@@ -20,6 +20,7 @@ class NcAssetMock : public NcAsset
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>& override { return m_meshSignal; }
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override { return m_textureSignal; }
+        auto OnFontUpdate() noexcept -> Signal<>& override { return m_fontSignal; }
 
         // Mocks
         void LoadAssets(const AssetMap& assets) override
@@ -40,6 +41,7 @@ class NcAssetMock : public NcAsset
         Signal<const MeshUpdateEventData&> m_meshSignal;
         Signal<const SkeletalAnimationUpdateEventData&> m_animSignal;
         Signal<const TextureUpdateEventData&> m_textureSignal;
+        Signal<> m_fontSignal;
 };
 
 auto BuildAssetModule(const config::AssetSettings&,
