@@ -224,8 +224,8 @@ void Widget()
     {
         const auto [cellWidth, halfCellWidth] = []()
         {
-            const auto cellWidth = (ImGui::GetColumnWidth() * 0.5f);
-            return ImVec2{cellWidth - 10.0f, (cellWidth * 0.5f) - 10.0f};
+            const auto columnWidth = (ImGui::GetColumnWidth() * 0.5f);
+            return ImVec2{columnWidth - 10.0f, (columnWidth * 0.5f) - 10.0f};
         }();
 
         constexpr auto flags = ImGuiTableFlags_Borders;
