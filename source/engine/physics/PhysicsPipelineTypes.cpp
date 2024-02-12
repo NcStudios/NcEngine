@@ -10,6 +10,8 @@ namespace
 using namespace nc;
 using namespace nc::physics;
 
+constexpr float SquareContactBreakDistance = physics::ContactBreakDistance * physics::ContactBreakDistance;
+
 constexpr auto CollisionEventTypeLookup = std::array<std::array<physics::CollisionEventType, 6u>, 6u>
 {
     std::array<physics::CollisionEventType, 6u> /** Physics */
@@ -70,18 +72,26 @@ size_t ClosestAxis(float x, float y, float z, float w)
     return maxIndex;
 }
 
-float CalcArea4Points(const DirectX::FXMVECTOR& p0,
-                      const DirectX::FXMVECTOR& p1,
-                      const DirectX::FXMVECTOR& p2,
-                      const DirectX::FXMVECTOR& p3)
+float CalcArea4Points(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& p3)
 {
-    using namespace DirectX;
-    auto mag0 = XMVector3LengthSq(XMVector3Cross(p0 - p1, p2 - p3));
-    auto mag1 = XMVector3LengthSq(XMVector3Cross(p0 - p2, p1 - p3));
-    auto mag2 = XMVector3LengthSq(XMVector3Cross(p0 - p3, p1 - p2));
-    auto max = XMVectorMax(XMVectorMax(mag0, mag1), mag2);
-    return XMVectorGetX(max);
+    float mag0 = SquareMagnitude(CrossProduct(p0-p1, p2-p3));
+    float mag1 = SquareMagnitude(CrossProduct(p0-p2, p1-p3));
+    float mag2 = SquareMagnitude(CrossProduct(p0-p3, p1-p2));
+    return Max(Max(mag0, mag1), mag2);
 }
+
+// float CalcArea4Points(const DirectX::FXMVECTOR& p0,
+//                       const DirectX::FXMVECTOR& p1,
+//                       const DirectX::FXMVECTOR& p2,
+//                       const DirectX::FXMVECTOR& p3)
+// {
+//     using namespace DirectX;
+//     auto mag0 = XMVector3LengthSq(XMVector3Cross(p0 - p1, p2 - p3));
+//     auto mag1 = XMVector3LengthSq(XMVector3Cross(p0 - p2, p1 - p3));
+//     auto mag2 = XMVector3LengthSq(XMVector3Cross(p0 - p3, p1 - p2));
+//     auto max = XMVectorMax(XMVectorMax(mag0, mag1), mag2);
+//     return XMVectorGetX(max);
+// }
 } // anonymous namespace
 
 namespace nc::physics
@@ -151,16 +161,37 @@ auto Manifold::SortPoints(const Contact& contact) -> size_t
     }
 
     using namespace DirectX;
-    const auto newPt = XMLoadVector3(&contact.localPointA);
-    const auto pt0 = XMLoadVector3(&m_contacts[0].localPointA);
-    const auto pt1 = XMLoadVector3(&m_contacts[1].localPointA);
-    const auto pt2 = XMLoadVector3(&m_contacts[2].localPointA);
-    const auto pt3 = XMLoadVector3(&m_contacts[3].localPointA);
-    const auto res0 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt1, pt2, pt3) : 0.0f;
-    const auto res1 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt2, pt3) : 0.0f;
-    const auto res2 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt1, pt3) : 0.0f;
-    const auto res3 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt0, pt1, pt2) : 0.0f;
-    return ClosestAxis(res0, res1, res2, res3);
+    // const auto newPt = XMLoadVector3(&contact.localPointA);
+    // const auto pt0 = XMLoadVector3(&m_contacts[0].localPointA);
+    // const auto pt1 = XMLoadVector3(&m_contacts[1].localPointA);
+    // const auto pt2 = XMLoadVector3(&m_contacts[2].localPointA);
+    // const auto pt3 = XMLoadVector3(&m_contacts[3].localPointA);
+    // const auto res0 = maxPenetrationIndex != 0 ? CalcArea4Points(newPt, pt1, pt2, pt3) : 0.0f;
+    // const auto res1 = maxPenetrationIndex != 1 ? CalcArea4Points(newPt, pt0, pt2, pt3) : 0.0f;
+    // const auto res2 = maxPenetrationIndex != 2 ? CalcArea4Points(newPt, pt0, pt1, pt3) : 0.0f;
+    // const auto res3 = maxPenetrationIndex != 3 ? CalcArea4Points(newPt, pt0, pt1, pt2) : 0.0f;
+    // return ClosestAxis(res0, res1, res2, res3);
+
+    float res0 = 0.0f;
+    float res1 = 0.0f;
+    float res2 = 0.0f;
+    float res3 = 0.0f;
+
+    if(maxPenetrationIndex != 0)
+        res0 = CalcArea4Points(contact.localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
+
+    if(maxPenetrationIndex != 1)
+        res1 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[2].localPointA, m_contacts[3].localPointA);
+
+    if(maxPenetrationIndex != 2)
+        res2 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[3].localPointA);
+
+    if(maxPenetrationIndex != 3)
+        res3 = CalcArea4Points(contact.localPointA, m_contacts[0].localPointA, m_contacts[1].localPointA, m_contacts[2].localPointA);
+
+    size_t biggestArea = ClosestAxis(res0, res1, res2, res3);
+    return biggestArea;
+
 }
 
 void Manifold::UpdateWorldPoints(const Registry* registry)
@@ -181,6 +212,48 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         return;
     }
 
+    // old
+    // const auto& aMatrix = transformA->TransformationMatrix();
+    // const auto& bMatrix = transformB->TransformationMatrix();
+
+    // size_t removeCount = 0u;
+    // size_t removePosition = m_contacts.empty() ? 0u : m_contacts.size() - 1u;
+
+    // for(auto cur = m_contacts.rbegin(); cur != m_contacts.rend(); ++cur)
+    // {
+    //     auto& contact = *cur;
+
+    //     auto pointA_v = DirectX::XMLoadVector3(&contact.localPointA);
+    //     auto pointB_v = DirectX::XMLoadVector3(&contact.localPointB);
+
+    //     pointA_v = DirectX::XMVector3Transform(pointA_v, aMatrix);
+    //     pointB_v = DirectX::XMVector3Transform(pointB_v, bMatrix);
+
+    //     DirectX::XMStoreVector3(&contact.worldPointA, pointA_v);
+    //     DirectX::XMStoreVector3(&contact.worldPointB, pointB_v);
+
+    //     contact.depth = Dot(contact.worldPointB - contact.worldPointA, contact.normal);
+
+    //     if(contact.depth < ContactBreakDistance)
+    //     {
+    //         *cur = m_contacts.at(removePosition--);
+    //         ++removeCount;
+    //         continue;
+    //     }
+
+    //     auto projectedPoint = contact.worldPointA + contact.normal * contact.depth;
+    //     auto projectedDifference = contact.worldPointB - projectedPoint;
+    //     auto distance2d = SquareMagnitude(projectedDifference);
+    //     if(distance2d > SquareContactBreakDistance)
+    //     {
+    //         *cur = m_contacts.at(removePosition--);
+    //         ++removeCount;
+    //         continue;
+    //     }
+    // }
+
+
+    // new
     using namespace DirectX;
     const auto& aMatrix = transformA->TransformationMatrix();
     const auto& bMatrix = transformB->TransformationMatrix();
@@ -213,7 +286,7 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
         if (distance2d > SquareContactBreakDistance)
         {
-            // Attempt to increase stability for sliding cases by 
+            // Attempt to increase stability for sliding cases by limiting number of contact breaks per tick
             if constexpr (PreferSingleTangentContactBreak)
             {
                 if (distance2d > MandatoryTangentContactBreakDistance)

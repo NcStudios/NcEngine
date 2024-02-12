@@ -161,7 +161,6 @@ namespace nc
 
     void Transform::Rotate(const Quaternion& quat)
     {
-        // TODO: fix
         auto pos_v = m_localMatrix.r[3];
         m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
         m_localMatrix *= ToRotMatrix(quat);
@@ -171,26 +170,10 @@ namespace nc
 
     void Transform::Rotate(DirectX::FXMVECTOR quaternion)
     {
-        // TODO: fix, these are the source of the weird 'shrinking' bug
-        (void)quaternion;
-
-        auto s = DirectX::XMVECTOR{};
-        auto r = DirectX::XMVECTOR{};
-        auto p = DirectX::XMVECTOR{};
-        DirectX::XMMatrixDecompose(&s, &r, &p, m_localMatrix);
-
-        r = DirectX::XMQuaternionMultiply(r, quaternion);
-        // m_localMatrix = DirectX::XMMatrixAffineTransformation(s, g_XMZero, r, p);
-        m_localMatrix = DirectX::XMMatrixScalingFromVector(s) *
-                        DirectX::XMMatrixRotationQuaternion(r) *
-                        DirectX::XMMatrixTranslationFromVector(p);
-
-
-
-        // auto pos_v = m_localMatrix.r[3];
-        // m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
-        // m_localMatrix *= DirectX::XMMatrixRotationQuaternion(quaternion);
-        // m_localMatrix.r[3] = pos_v;
+        auto pos_v = m_localMatrix.r[3];
+        m_localMatrix.r[3] = DirectX::g_XMIdentityR3;
+        m_localMatrix *= DirectX::XMMatrixRotationQuaternion(quaternion);
+        m_localMatrix.r[3] = pos_v;
         UpdateWorldMatrix();
     }
 

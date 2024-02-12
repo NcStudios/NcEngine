@@ -27,6 +27,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(NC_COMPILER_FLAGS /W4
                           /WX
                           /MP
+                          /arch:AVX2
     )
 endif()
 set(NC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
