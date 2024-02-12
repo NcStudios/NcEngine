@@ -29,7 +29,7 @@ graphics::ToonMaterial PurpleToonMaterial{"solid_color\\Purple.nca", toonOverlay
 graphics::ToonMaterial TealToonMaterial{"solid_color\\Teal.nca", toonOverlay, toonHatch, 8};
 graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay, toonHatch, 8};
 
-FontInfo UIFont{"SourceCodePro-Regular.ttf", 14.0f};
+FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
 template<class LoadFunc>
 void LoadAssets(const std::filesystem::path& rootDir, asset_flags_type flags, LoadFunc load)

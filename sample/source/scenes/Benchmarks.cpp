@@ -70,7 +70,6 @@ auto RandomToonMaterial() -> const nc::graphics::ToonMaterial&
 
 auto AssetCombo(std::string& selection) -> bool
 {
-    ImGui::SetNextItemWidth(g_buttonWidth * 2.09f);
     return nc::ui::Combobox(selection, "##assetcombo", g_assets);
 }
 
@@ -181,7 +180,7 @@ struct entity_hierarchy
 };
 
 template<class T>
-void InnerWidget(auto&& extension = [](){})
+void InnerWidget(float buttonWidth, auto&& extension = [](){})
 {
     IMGUI_SCOPE(nc::ui::ImGuiId, T::name);
     const auto currentObjectCount = static_cast<unsigned>(T::GetObjectCountCallback());
@@ -191,16 +190,16 @@ void InnerWidget(auto&& extension = [](){})
     ImGui::Spacing();
     ImGui::Text("%s", T::name);
 
-    ImGui::SetNextItemWidth(g_buttonWidth);
+    ImGui::SetNextItemWidth(buttonWidth);
     nc::ui::InputU32(T::SpawnCount, "##spawncount");
     T::SpawnCount = nc::Clamp(T::SpawnCount, 0u, maxObjectCount);
 
     ImGui::SameLine();
 
-    ImGui::SetNextItemWidth(g_buttonWidth);
+    ImGui::SetNextItemWidth(buttonWidth);
     nc::ui::InputU32(T::DestroyCount, "##destroycount");
 
-    if(ImGui::Button("Spawn", {g_buttonWidth, g_buttonHeight}))
+    if(ImGui::Button("Spawn", {buttonWidth, 0}))
     {
         T::SpawnCallback(T::SpawnCount);
         g_currentEntities += T::SpawnCount;
@@ -208,7 +207,7 @@ void InnerWidget(auto&& extension = [](){})
 
     ImGui::SameLine();
 
-    if(ImGui::Button("Destroy", {g_buttonWidth, g_buttonHeight}))
+    if(ImGui::Button("Destroy", {buttonWidth, 0}))
     {
         T::DestroyCallback(T::DestroyCount);
         g_currentEntities -= nc::Min(T::DestroyCount, currentObjectCount);
@@ -223,38 +222,48 @@ void Widget()
     ImGui::Text("Objects: %u", g_currentEntities);
     nc::ui::ChildWindow("Benchmarks", []()
     {
+        const auto [cellWidth, halfCellWidth] = []()
+        {
+            const auto cellWidth = (ImGui::GetColumnWidth() * 0.5f);
+            return ImVec2{cellWidth - 10.0f, (cellWidth * 0.5f) - 10.0f};
+        }();
+
         constexpr auto flags = ImGuiTableFlags_Borders;
         if (ImGui::BeginTable("table", 2, flags))
         {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<mesh_renderer>([](){
+            InnerWidget<mesh_renderer>(halfCellWidth, [cellWidth](){
+                ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(mesh_renderer::Mesh);
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<toon_renderer>([](){
+            InnerWidget<toon_renderer>(halfCellWidth, [cellWidth](){
+                ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(toon_renderer::Mesh);
             });
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<collider>([](){
+            InnerWidget<collider>(halfCellWidth, [cellWidth](){
+                ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(collider::Mesh);
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<physics_body>([](){
+            InnerWidget<physics_body>(halfCellWidth, [cellWidth](){
+                ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(physics_body::Mesh);
             });
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<point_light>([](){});
+            InnerWidget<point_light>(halfCellWidth, [](){});
 
             ImGui::TableNextColumn();
-            InnerWidget<entity_hierarchy>([](){
-                ImGui::SetNextItemWidth(g_buttonWidth);
+            InnerWidget<entity_hierarchy>(halfCellWidth, [halfCellWidth](){
+                ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
             });
 
