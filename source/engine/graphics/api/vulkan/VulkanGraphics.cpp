@@ -121,7 +121,7 @@ bool VulkanGraphics::FrameBegin()
 
 auto VulkanGraphics::CurrentFrameIndex() -> uint32_t
 {
-    return m_frameManager->CurrentFrameIndex();
+    return m_frameManager->Index();
 }
 
 // Executes the command buffer for the next swapchain image which writes to the image.

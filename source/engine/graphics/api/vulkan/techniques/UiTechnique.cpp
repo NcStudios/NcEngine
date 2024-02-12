@@ -1,6 +1,6 @@
 #include "UiTechnique.h"
 #include "config/Config.h"
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
+#include "graphics/api/vulkan/buffers/MeshBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/meshes/VertexDescriptions.h"

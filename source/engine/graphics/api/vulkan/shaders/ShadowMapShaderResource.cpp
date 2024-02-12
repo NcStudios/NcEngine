@@ -59,7 +59,7 @@ namespace nc::graphics
 
         m_descriptors->UpdateImage
         (   
-            BindFrequency::per_frame,
+            0,
             m_imageInfos,
             static_cast<uint32_t>(m_imageInfos.size()),
             vk::DescriptorType::eCombinedImageSampler,
@@ -69,14 +69,17 @@ namespace nc::graphics
 
     void ShadowMapShaderResource::Initialize()
     {
-        m_descriptors->RegisterDescriptor
-        (
-            m_bindingSlot,
-            BindFrequency::per_frame,
-            m_maxShadows,
-            vk::DescriptorType::eCombinedImageSampler,
-            vk::ShaderStageFlagBits::eFragment,
-            vk::DescriptorBindingFlagBitsEXT()
-        );
+        for (auto i : std::views::iota(0u, MaxFramesInFlight))
+        {
+            m_descriptors->RegisterDescriptor
+            (
+                m_bindingSlot,
+                0,
+                m_maxShadows,
+                vk::DescriptorType::eCombinedImageSampler,
+                vk::ShaderStageFlagBits::eFragment,
+                vk::DescriptorBindingFlagBitsEXT()
+            );
+        }
     }
 } // namespace nc::graphics

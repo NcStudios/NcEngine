@@ -17,7 +17,7 @@ class IShaderResource
         virtual ~IShaderResource() = default;
         
         virtual void Initialize() = 0;
-        virtual void Update(const std::vector<data_type>& data) = 0;
+        virtual void Update(uint32_t frameIndex, const std::vector<data_type>& data) = 0;
         virtual void Reset() = 0;
 };
 

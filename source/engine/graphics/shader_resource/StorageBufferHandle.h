@@ -10,14 +10,14 @@
 
 namespace nc::graphics
 {
-enum class UboUpdateAction : uint8_t
+enum class SsboUpdateAction : uint8_t
 {
     Initialize,
     Update,
     Clear
 };
 
-struct UboUpdateEventData
+struct SsboUpdateEventData
 {
     uint32_t uid;
     uint32_t currentFrameIndex;
@@ -26,14 +26,14 @@ struct UboUpdateEventData
     void* data;
     size_t size;
     shader_stage stage;
-    UboUpdateAction action;
+    SsboUpdateAction action;
 };
 
-class UniformBufferHandle
+class StorageBufferHandle
 {
     public:
-        UniformBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const UboUpdateEventData&>& backendPort, uint32_t slot, uint32_t set = 0u);
-        void Update(const char* data, uint32_t currentFrameIndex);
+        StorageBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const SsboUpdateEventData&>& backendPort, uint32_t slot, uint32_t set = 0u);
+        void Update(void* data, uint32_t currentFrameIndex);
         void Clear();
 
     private:
@@ -42,6 +42,6 @@ class UniformBufferHandle
         uint32_t m_set;
         size_t m_size;
         shader_stage m_stage;
-        Signal<const UboUpdateEventData&> m_backendPort;
+        Signal<const SsboUpdateEventData&> m_backendPort;
 };
 } // namespace nc::graphics

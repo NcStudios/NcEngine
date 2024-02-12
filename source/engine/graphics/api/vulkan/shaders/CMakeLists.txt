@@ -1,12 +1,9 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         CubeMapShaderResource.cpp
-        ObjectDataShaderResource.cpp
-        PointLightShaderResource.cpp
         ShaderDescriptorSets.cpp
         ShaderResources.cpp
         ShaderUtilities.cpp
         ShadowMapShaderResource.cpp
-        SkeletalAnimationShaderResource.cpp
         TextureShaderResource.cpp
 )

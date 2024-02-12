@@ -28,7 +28,7 @@
 
 namespace
 {
-void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::ImmutableBuffer& vertexData, const nc::graphics::ImmutableBuffer& indexData)
+void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::MeshBuffer& vertexData, const nc::graphics::MeshBuffer& indexData)
 {
     vk::DeviceSize offsets[] = { 0 };
     auto vertexBuffer = vertexData.GetBuffer();

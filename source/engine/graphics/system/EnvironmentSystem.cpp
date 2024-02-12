@@ -7,7 +7,7 @@ namespace nc::graphics
 {
 EnvironmentSystem::EnvironmentSystem(ShaderResourceBus* shaderResourceBus)
     : m_environmentData{},
-      m_environmentDataBuffer{shaderResourceBus->CreateUniformBuffer("EnvironmentData", (char*)&m_environmentData, 5, ShaderStage::Fragment | ShaderStage::Vertex)},
+      m_environmentDataBuffer{shaderResourceBus->CreateUniformBuffer(sizeof(EnvironmentData), ShaderStage::Fragment | ShaderStage::Vertex, 5, 0)},
       m_useSkybox{false}
 {
 }

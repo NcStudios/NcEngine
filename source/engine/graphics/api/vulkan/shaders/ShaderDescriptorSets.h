@@ -1,50 +1,36 @@
 #pragma once
 
+#include "graphics/GraphicsConstants.h"
+
 #include "vulkan/vk_mem_alloc.hpp"
 
 #include <span>
 #include <unordered_map>
 
+namespace
+{
+    auto NullBinding = vk::DescriptorSetLayoutBinding(std::numeric_limits<uint32_t>::max(), vk::DescriptorType::eUniformBuffer, 0, vk::ShaderStageFlagBits::eAll);
+}
+
 namespace nc::graphics
 {
-    enum class BindFrequency : uint8_t
+    struct DescriptorSetLayout
     {
-        per_frame
-    };
-
-    /* Represents the binding of a resource handle to the descriptor set's GPU memory */
-    struct DescriptorWrite
-    {
-        /* Buffer write */
-        DescriptorWrite(vk::WriteDescriptorSet inWrite, vk::DescriptorBufferInfo inBuffer)
-            : write{inWrite},
-              buffer{inBuffer},
-              images{std::span<const vk::DescriptorImageInfo>()}
-        {}
-
-        /* Images write */
-        DescriptorWrite(vk::WriteDescriptorSet inWrite, std::span<const vk::DescriptorImageInfo> inImages)
-            : write{ inWrite },
-              buffer{ vk::DescriptorBufferInfo() },
-              images{ inImages }
-        {}
-
-        vk::WriteDescriptorSet write;
-        vk::DescriptorBufferInfo buffer;
-        std::span<const vk::DescriptorImageInfo> images;
-    };
-
-    /* All of the components required for a descriptor set.
-    *  The unordered_map keys are the binding slots for each descriptor in the set. 
-    *  (The binding slots correspond with the shader slots.) */
-    struct DescriptorSet
-    {
-        vk::UniqueDescriptorSet set;
         vk::UniqueDescriptorSetLayout layout;
-        std::unordered_map<uint32_t, DescriptorWrite> writes;
-        std::unordered_map<uint32_t, vk::DescriptorSetLayoutBinding> bindings;
-        std::unordered_map<uint32_t, vk::DescriptorBindingFlagsEXT> bindingFlags;
-        bool isDirty;
+        std::vector<vk::DescriptorSetLayoutBinding> bindings = std::vector<vk::DescriptorSetLayoutBinding>{DefaultResourceSlotsPerShader, NullBinding};
+        std::vector<vk::DescriptorBindingFlagsEXT> bindingFlags = std::vector<vk::DescriptorBindingFlagsEXT>{DefaultResourceSlotsPerShader};
+    };
+
+    struct DescriptorWrites
+    {
+        std::vector<vk::WriteDescriptorSet> writes = std::vector<vk::WriteDescriptorSet>{DefaultResourceSlotsPerShader};
+    };
+
+    struct PerFrameDescriptorSets
+    {
+        std::vector<vk::UniqueDescriptorSet> sets;
+        std::vector<DescriptorWrites> writesPerSet;
+        std::vector<bool> isDirty;
     };
 
     class ShaderDescriptorSets
@@ -52,25 +38,25 @@ namespace nc::graphics
         public:
             ShaderDescriptorSets(vk::Device device);
 
-            /* Shader resource services attach themselves to a shader slot by registering themselves here. */
-            uint32_t RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
+            /* Resources attach themselves to a shader slot by registering themselves here. */
+            void RegisterDescriptor(uint32_t frameIndex, uint32_t bindingSlot, uint32_t setIndex, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
             
             /* Called when the data in the image or buffer changes. */
-            void UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
-            void UpdateBuffer(BindFrequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateImage(uint32_t frameIndex, uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateBuffer(uint32_t frameIndex, uint32_t setIndex, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
 
             /* Called in the techniques to access and bind the descriptor set(s). */
-            vk::DescriptorSetLayout* GetSetLayout(BindFrequency bindFrequency);
-            DescriptorSet* GetSet(BindFrequency bindFrequency);
-            void BindSet(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
-
-            /* Called in ShaderResources CTOR after each of the services have been initialized. */
-            void CreateSet(BindFrequency bindFrequency);
+            vk::DescriptorSetLayout* GetSetLayout(uint32_t setIndex);
+            void BindSet(uint32_t frameIndex, uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
 
         private:
-            std::vector<vk::UniqueDescriptorPool> m_descriptorPools;
-            vk::UniqueDescriptorPool m_renderingDescriptorPool;
-            std::unordered_map<BindFrequency, DescriptorSet> m_descriptorSets;
+            auto SetExists(uint32_t frameIndex, uint32_t setIndex) -> bool { return m_perFrameSets.at(frameIndex).sets.size() > setIndex; }
+            auto GetSet(uint32_t frameIndex, uint32_t setIndex) -> vk::DescriptorSet* { return &m_perFrameSets.at(frameIndex).sets.at(setIndex).get(); }
+            auto LayoutExists(uint32_t setIndex) -> bool { return m_layouts.size() > setIndex; }
+
             vk::Device m_device;
+            vk::UniqueDescriptorPool m_pool;
+            std::vector<PerFrameDescriptorSets> m_perFrameSets;
+            std::vector<DescriptorSetLayout> m_layouts;
     };
 }

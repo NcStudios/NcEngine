@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
+#include "graphics/api/vulkan/buffers/MeshBuffer.h"
 #include "utility/Signal.h"
 
 namespace nc
@@ -10,7 +10,7 @@ namespace asset
 struct MeshUpdateEventData;
 } // namespace asset
 
-namespace graphics
+namespace graphics::vulkan
 {
 class GpuAllocator;
 
@@ -21,21 +21,21 @@ class MeshStorage
 
         void UpdateBuffer(const asset::MeshUpdateEventData& eventData);
 
-        auto GetVertexData() const noexcept -> const ImmutableBuffer&
+        auto GetVertexData() const noexcept -> const MeshBuffer&
         {
             return m_vertexBuffer;
         }
 
-        auto GetIndexData() const noexcept -> const ImmutableBuffer&
+        auto GetIndexData() const noexcept -> const MeshBuffer&
         {
             return m_indexBuffer;
         }
 
     private:
         GpuAllocator* m_allocator;
-        ImmutableBuffer m_vertexBuffer;
-        ImmutableBuffer m_indexBuffer;
+        MeshBuffer m_vertexBuffer;
+        MeshBuffer m_indexBuffer;
         nc::Connection<const asset::MeshUpdateEventData&> m_onMeshUpdateConnection;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan
 }

@@ -28,7 +28,7 @@ void TextureShaderResource::Initialize()
     m_descriptors->RegisterDescriptor
     (
         m_bindingSlot,
-        BindFrequency::per_frame,
+        0,
         m_maxTexturesCount,
         vk::DescriptorType::eCombinedImageSampler,
         vk::ShaderStageFlagBits::eFragment,
@@ -49,7 +49,7 @@ void TextureShaderResource::Update(const std::vector<TextureBuffer>& data)
 
     m_descriptors->UpdateImage
     (
-        BindFrequency::per_frame,
+        0,
         m_imageInfos,
         static_cast<uint32_t>(data.size()),
         vk::DescriptorType::eCombinedImageSampler,

@@ -2,7 +2,7 @@
 #include "assets/AssetService.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
+#include "graphics/api/vulkan/buffers/MeshBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
@@ -40,7 +40,7 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
-            *(m_descriptorSets->GetSetLayout(BindFrequency::per_frame))
+            *(m_descriptorSets->GetSetLayout(0))
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
@@ -100,7 +100,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("ParticleTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)

@@ -1,119 +1,132 @@
 #include "ShaderDescriptorSets.h"
 #include "graphics/api/vulkan/Initializers.h"
 
+#include "ncutility/NcError.h"
+
 namespace
 {
-    auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
-    {
-        std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
-        {
-            vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 },
-            vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 10 }
-        };
-        
-        vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
-        renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
-        renderingDescriptorPoolInfo.setMaxSets(10);
-        renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
-        renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
+vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
+{
+    vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
+    extendedInfo.setPNext(nullptr);
+    extendedInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
+    extendedInfo.setPBindingFlags(bindingFlags.data());
 
-        return device.createDescriptorPoolUnique(renderingDescriptorPoolInfo);
-    }
+    vk::DescriptorSetLayoutCreateInfo setInfo{};
+    setInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
+    setInfo.setFlags(vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool);
+    setInfo.setPNext(&extendedInfo);
+    setInfo.setPBindings(layoutBindings.data());
+
+    return device.createDescriptorSetLayoutUnique(setInfo);
+}
+
+vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
+{
+    vk::DescriptorSetAllocateInfo allocationInfo{};
+    allocationInfo.setPNext(nullptr);
+    allocationInfo.setDescriptorPool(*descriptorPool);
+    allocationInfo.setDescriptorSetCount(descriptorSetCount);
+    allocationInfo.setPSetLayouts(descriptorSetLayout);
+
+    // @todo: return the vector rather than the indiviual item, don't use move in return values
+    return std::move(device.allocateDescriptorSetsUnique(allocationInfo)[0]);
+}
+
+auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
+{
+    std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
+    {
+        vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
+        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
+        vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 },
+        vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 10 }
+    };
+    
+    vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
+    renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
+    renderingDescriptorPoolInfo.setMaxSets(10);
+    renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
+    renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
+
+    return device.createDescriptorPoolUnique(renderingDescriptorPoolInfo);
+}
 }
 
 namespace nc::graphics
 {
     ShaderDescriptorSets::ShaderDescriptorSets(vk::Device device)
-        : m_renderingDescriptorPool{CreateRenderingDescriptorPool(device)},
-          m_descriptorSets{},
-          m_device{device}
+        : m_device{device},
+          m_pool{CreateRenderingDescriptorPool(device)},
+          m_perFrameSets{MaxFramesInFlight},
+          m_layouts{}
     {
-        m_descriptorSets.reserve(1);
-        m_descriptorSets.emplace(BindFrequency::per_frame, DescriptorSet{});
     }
 
-    uint32_t ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, BindFrequency bindFrequency, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags)
+    void ShaderDescriptorSets::RegisterDescriptor(uint32_t frameIndex, uint32_t bindingSlot, uint32_t setIndex, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags)
     {
-        auto* descriptorSet = GetSet(bindFrequency);
+        NC_ASSERT(bindingSlot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 
-        /* Add binding */
-        auto bindingsIt = descriptorSet->bindings.find(bindingSlot);
-        if (bindingsIt != descriptorSet->bindings.end())
+        if (!LayoutExists(setIndex))
         {
-            bindingsIt->second = vk::DescriptorSetLayoutBinding{bindingSlot, descriptorType, descriptorCount, shaderStages, nullptr};
+            m_layouts.emplace_back();
         }
-        else
+
+        auto* layout = &m_layouts.at(setIndex);
+        if (layout->bindings.size() <= bindingSlot)
         {
-            descriptorSet->bindings.emplace(bindingSlot, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, descriptorCount, shaderStages));
+            layout->bindings.resize(std::min(static_cast<uint32_t>(layout->bindings.size()) + DefaultResourceSlotsPerShader, MaxResourceSlotsPerShader));
+            layout->bindingFlags.resize(std::min(static_cast<uint32_t>(layout->bindingFlags.size()) + DefaultResourceSlotsPerShader, MaxResourceSlotsPerShader));
         }
+
+        auto binding = vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, descriptorCount, shaderStages);
+        if (layout->bindings.at(bindingSlot) != NullBinding)
+        {
+            throw nc::NcError(fmt::format("A different binding at descriptor set index {} and slot {} already exists.", setIndex, bindingSlot));
+        }
+        layout->bindings.at(bindingSlot) = binding;
 
         /* Add binding flag */
-        auto flagsIt = descriptorSet->bindingFlags.find(bindingSlot);
-        if (flagsIt != descriptorSet->bindingFlags.end()) flagsIt->second = bindingFlags;
-        else descriptorSet->bindingFlags.emplace(bindingSlot, bindingFlags);
-
-        return bindingSlot;
+        if (layout->bindingFlags.at(bindingSlot) != vk::DescriptorBindingFlagBitsEXT())
+        {
+            throw nc::NcError(fmt::format("A different binding flag at descriptor set index {} and slot {} already exists.", setIndex, bindingSlot));
+        }
+        layout->bindingFlags.at(bindingSlot) = bindingFlags;
+        layout->layout.reset();
+        layout->layout = CreateDescriptorSetLayout(m_device, layout->bindings, layout->bindingFlags);
+        m_perFrameSets.at(frameIndex).sets.at(setIndex) = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout->layout.get());
     }
 
-    vk::DescriptorSetLayout* ShaderDescriptorSets::GetSetLayout(BindFrequency bindFrequency)
+    vk::DescriptorSetLayout* ShaderDescriptorSets::GetSetLayout(uint32_t setIndex)
     {
-        return &GetSet(bindFrequency)->layout.get();
+        NC_ASSERT(m_layouts.size() > 0, "No descriptor set layouts found. Make sure to call RegistorDescriptor to add descriptors to a set.");
+        return &m_layouts.at(setIndex).layout.get();
     }
 
-    void ShaderDescriptorSets::BindSet(BindFrequency bindFrequency, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet)
+    void ShaderDescriptorSets::BindSet(uint32_t frameIndex, uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet)
     {
-        auto* descriptorSet = GetSet(bindFrequency);
+        auto isDirty = m_perFrameSets.at(frameIndex).isDirty.at(setIndex);
+        auto& writes = m_perFrameSets.at(frameIndex).writesPerSet.at(setIndex).writes;
+        auto* set = GetSet(frameIndex, setIndex);
 
         /* Only update the descriptor sets if they have changed since last bind. */
-        if (descriptorSet->isDirty)
+        if (isDirty)
         {
-            std::vector<vk::WriteDescriptorSet> writes;
-            writes.reserve(descriptorSet->writes.size());
-
-            for (auto& kv : descriptorSet->writes)
+            for (auto& write : writes)
             {
-                kv.second.write.setDstSet(descriptorSet->set.get());
-                writes.push_back(kv.second.write);
+                write.setDstSet(*set);
             }
 
             m_device.updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
-            descriptorSet->isDirty = false;
+            m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = false;
         }
 
         /* Bind the set to the pipeline */
-        cmd->bindDescriptorSets(bindPoint, pipelineLayout, firstSet, 1, &descriptorSet->set.get(), 0, 0);
+        cmd->bindDescriptorSets(bindPoint, pipelineLayout, firstSet, 1, set, 0, 0);
     }
 
-    void ShaderDescriptorSets::CreateSet(BindFrequency bindFrequency)
+    void ShaderDescriptorSets::UpdateImage(uint32_t frameIndex, uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
     {
-        auto* descriptorSet = GetSet(bindFrequency);
-
-        /* Grab the bindings from the unordered map. */
-        std::vector<vk::DescriptorSetLayoutBinding> bindings;
-        bindings.reserve(descriptorSet->bindings.size());
-        for (auto& kv : descriptorSet->bindings)
-        {
-            bindings.push_back(kv.second);
-        }
-
-        /* Grab the binding flags from the unordered map. */
-        std::vector<vk::DescriptorBindingFlagsEXT> bindingFlags;
-        bindingFlags.reserve(descriptorSet->bindingFlags.size());
-        for (auto& kv : descriptorSet->bindingFlags)
-        {
-            bindingFlags.push_back(kv.second);
-        }
-
-        descriptorSet->layout = CreateDescriptorSetLayout(m_device, bindings, bindingFlags);
-        descriptorSet->set = CreateDescriptorSet(m_device, &m_renderingDescriptorPool.get(), 1, &descriptorSet->layout.get());
-    }
-
-    void ShaderDescriptorSets::UpdateImage(BindFrequency bindFrequency, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
-    {
-        auto* descriptorSet = GetSet(bindFrequency);
-
         vk::WriteDescriptorSet write{};
         write.setDstBinding(bindingSlot);
         write.setDstArrayElement(0);
@@ -122,18 +135,15 @@ namespace nc::graphics
         write.setPBufferInfo(0);
         write.setPImageInfo(imageInfos.data());
 
-        /* Add or update the write for the image descriptor. */
-        auto it = descriptorSet->writes.find(bindingSlot);
-        if (it != descriptorSet->writes.end()) it->second = DescriptorWrite(write, imageInfos);
-        else descriptorSet->writes.emplace(bindingSlot, DescriptorWrite(write, imageInfos));
+        auto& writes = m_perFrameSets.at(frameIndex).writesPerSet.at(setIndex).writes;
 
-        descriptorSet->isDirty = true;
+        /* Add or update the write for the image descriptor. */
+        writes.at(bindingSlot) = write;
+        m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = true;
     }
 
-    void ShaderDescriptorSets::UpdateBuffer(BindFrequency bindFrequency, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
+    void ShaderDescriptorSets::UpdateBuffer(uint32_t frameIndex, uint32_t setIndex, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
     {
-        auto* descriptorSet = GetSet(bindFrequency);
-
         vk::DescriptorBufferInfo bufferInfo;
         bufferInfo.buffer = buffer;
         bufferInfo.offset = 0;
@@ -145,25 +155,12 @@ namespace nc::graphics
         write.setDescriptorType(descriptorType);
         write.setDescriptorCount(descriptorCount);
         write.setPImageInfo(0);
+        write.setPBufferInfo(&bufferInfo);
+
+        auto& writes = m_perFrameSets.at(frameIndex).writesPerSet.at(setIndex).writes;
 
         /* Add or update the write for the buffer descriptor. */
-        auto it = descriptorSet->writes.find(bindingSlot);
-        if (it != descriptorSet->writes.end())
-        {
-            it->second = DescriptorWrite(write, bufferInfo);
-            it->second.write.setPBufferInfo(&it->second.buffer); /* Update the pointer */
-        }
-        else
-        {
-            auto [pos, success] = descriptorSet->writes.emplace(bindingSlot, DescriptorWrite(write, bufferInfo));
-            pos->second.write.setPBufferInfo(&pos->second.buffer);  /* Update the pointer */
-        }
-
-        descriptorSet->isDirty = true;
-    }
-
-    DescriptorSet* ShaderDescriptorSets::GetSet(BindFrequency bindFrequency)
-    {
-        return &m_descriptorSets.at(bindFrequency);
+        writes.at(bindingSlot) = write;
+        m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = true;
     }
 }

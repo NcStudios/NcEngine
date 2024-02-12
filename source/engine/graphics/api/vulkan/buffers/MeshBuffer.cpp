@@ -1,4 +1,4 @@
-#include "ImmutableBuffer.h"
+#include "MeshBuffer.h"
 
 #include "ncasset/Assets.h"
 
@@ -43,27 +43,27 @@ namespace
 
         return buffer;
     }
-}
+} // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-    ImmutableBuffer::ImmutableBuffer()
+    MeshBuffer::MeshBuffer()
         : m_buffer{}
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(GpuAllocator* allocator, std::span<const uint32_t> data)
+    MeshBuffer::MeshBuffer(GpuAllocator* allocator, std::span<const uint32_t> data)
         : m_buffer{CreateBuffer(allocator, data)}
     {
     }
 
-    ImmutableBuffer::ImmutableBuffer(GpuAllocator* allocator, std::span<const asset::MeshVertex> data)
+    MeshBuffer::MeshBuffer(GpuAllocator* allocator, std::span<const asset::MeshVertex> data)
         : m_buffer{CreateBuffer(allocator, data)}
     {
     }
 
-    void ImmutableBuffer::Clear() noexcept
+    void MeshBuffer::Clear() noexcept
     {
         m_buffer.Release();
     }
-}
+} // namespace nc::graphics::vulkan

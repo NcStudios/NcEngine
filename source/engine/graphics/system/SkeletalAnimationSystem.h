@@ -2,7 +2,9 @@
 
 #include "ecs/Registry.h"
 #include "asset/AssetData.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 #include "graphics/shader_resource/SkeletalAnimationData.h"
+#include "graphics/shader_resource/StorageBufferHandle.h"
 #include "graphics/SkeletalAnimator.h"
 #include "graphics/SkeletalAnimationTypes.h"
 
@@ -16,13 +18,16 @@ struct SkeletalAnimationSystemState
 
 class SkeletalAnimationSystem : public StableAddress
 {
+    constexpr uint32_t AvgBonesPerAnim = 10u;
+
     public:
         SkeletalAnimationSystem(Registry* registry,
+                                ShaderResourceBus* shaderResourceBus,
+                                uint32_t maxSkeletalAnimations,
                                 Signal<const asset::SkeletalAnimationUpdateEventData&>& onSkeletalAnimationUpdate,
-                                Signal<const asset::BoneUpdateEventData&>& onBonesUpdate,
-                                Signal<const std::vector<SkeletalAnimationData>&>&& gpuBackendChannel);
+                                Signal<const asset::BoneUpdateEventData&>& onBonesUpdate);
         
-        auto Execute() -> SkeletalAnimationSystemState;
+        auto Execute(uint32_t frameIndex) -> SkeletalAnimationSystemState;
         void Start(const anim::StateChange& stateChange);
         void Stop(const anim::StateChange& stateChange);
         void Clear() noexcept;
@@ -58,6 +63,6 @@ class SkeletalAnimationSystem : public StableAddress
         std::vector<anim::UnitOfWork> m_units;
 
         // GPU
-        Signal<const std::vector<SkeletalAnimationData>&> m_gpuBackendChannel;
+        StorageBufferHandle m_skeletalAnimationDataBuffer;
 };
 } // namespace nc::graphics

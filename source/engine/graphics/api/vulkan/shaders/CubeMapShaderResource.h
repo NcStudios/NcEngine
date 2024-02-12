@@ -14,7 +14,7 @@ class CubeMapShaderResource : public IShaderResource<CubeMap>
         CubeMapShaderResource(uint32_t bindingSlot, vk::Device device, ShaderDescriptorSets* descriptors, uint32_t maxCubeMaps);
 
         void Initialize() override;
-        void Update(const std::vector<CubeMap>& data) override;
+        void Update(uint32_t frameIndex, const std::vector<CubeMap>& data) override;
         void Reset() override;
 
     private:

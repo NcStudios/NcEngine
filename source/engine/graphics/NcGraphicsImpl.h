@@ -46,6 +46,7 @@ class NcGraphicsImpl : public NcGraphics
 {
     public:
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                       const config::MemorySettings& memorySettings,
                        Registry* registry,
                        ModuleProvider modules,
                        std::unique_ptr<IGraphics> graphics,

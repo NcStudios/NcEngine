@@ -43,6 +43,8 @@ auto HasCompletedAnimationCycle(const nc::graphics::anim::UnitOfWork unit, float
 namespace nc::graphics
 {
 SkeletalAnimationSystem::SkeletalAnimationSystem(Registry* registry,
+                                                 ShaderResourceBus* shaderResourceBus,
+                                                 uint32_t maxSkeletalAnimations,
                                                  Signal<const asset::SkeletalAnimationUpdateEventData&>& onSkeletalAnimationUpdate,
                                                  Signal<const asset::BoneUpdateEventData&>& onBonesUpdate,
                                                  Signal<const std::vector<SkeletalAnimationData>&>&& gpuBackendChannel)
@@ -57,10 +59,10 @@ SkeletalAnimationSystem::SkeletalAnimationSystem(Registry* registry,
       m_handlerIndices{},
       m_unitEntities{},
       m_units{},
-      m_gpuBackendChannel{std::move(gpuBackendChannel)}
+      m_skeletalAnimationDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(SkeletalAnimationData) * AvgBonesPerAnim * maxSkeletalAnimations, ShaderStage::Vertex, 6, 0)}
 {}
 
-auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
+auto SkeletalAnimationSystem::Execute(uint32_t frameIndex) -> SkeletalAnimationSystemState
 {
     OPTICK_CATEGORY("Execute", Optick::Category::Animation);
 
@@ -93,7 +95,7 @@ auto SkeletalAnimationSystem::Execute() -> SkeletalAnimationSystemState
         stateIndex = static_cast<uint32_t>(buffer.size());
     }
 
-    m_gpuBackendChannel.Emit(buffer);
+    m_skeletalAnimationDataBuffer.Update(frameIndex, buffer);
     return state;
 }
 

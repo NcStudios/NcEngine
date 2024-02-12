@@ -1,7 +1,7 @@
 #include "MeshStorage.h"
 #include "asset/AssetData.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 MeshStorage::MeshStorage(GpuAllocator* allocator, Signal<const asset::MeshUpdateEventData&>& onMeshUpdate)
     : m_allocator{allocator},
@@ -13,7 +13,7 @@ MeshStorage::MeshStorage(GpuAllocator* allocator, Signal<const asset::MeshUpdate
 
 void MeshStorage::UpdateBuffer(const asset::MeshUpdateEventData& eventData)
 {
-    m_vertexBuffer = ImmutableBuffer(m_allocator, eventData.vertices);
-    m_indexBuffer = ImmutableBuffer(m_allocator, eventData.indices);
+    m_vertexBuffer = MeshBuffer(m_allocator, eventData.vertices);
+    m_indexBuffer = MeshBuffer(m_allocator, eventData.indices);
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

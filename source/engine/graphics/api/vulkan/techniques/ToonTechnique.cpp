@@ -1,7 +1,7 @@
 #include "ToonTechnique.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
+#include "graphics/api/vulkan/buffers/MeshBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/meshes/VertexDescriptions.h"
@@ -37,7 +37,7 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
 
     std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
     {
-        *(m_descriptorSets->GetSetLayout(BindFrequency::per_frame))
+        *(m_descriptorSets->GetSetLayout(0))
     };
 
     auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -102,7 +102,7 @@ void ToonTechnique::Bind(vk::CommandBuffer* cmd)
     OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
 bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)

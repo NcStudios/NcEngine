@@ -1,9 +1,11 @@
 #include "CubeMapShaderResource.h"
 #include "graphics/api/vulkan/Initializers.h"
+#include "graphics/GraphicsConstants.h"
 
 #include "ncutility/NcError.h"
 
 #include <array>
+#include <ranges>
 
 namespace nc::graphics
 {
@@ -22,18 +24,22 @@ CubeMapShaderResource::CubeMapShaderResource(uint32_t bindingSlot, vk::Device de
 
 void CubeMapShaderResource::Initialize()
 {
-    m_descriptors->RegisterDescriptor
-    (
-        m_bindingSlot,
-        BindFrequency::per_frame,
-        m_maxCubeMapsCount,
-        vk::DescriptorType::eCombinedImageSampler,
-        vk::ShaderStageFlagBits::eFragment,
-        vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
-    );
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_descriptors->RegisterDescriptor
+        (
+            i,
+            m_bindingSlot,
+            0,
+            m_maxCubeMapsCount,
+            vk::DescriptorType::eCombinedImageSampler,
+            vk::ShaderStageFlagBits::eFragment,
+            vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
+        );
+    }
 }
 
-void CubeMapShaderResource::Update(const std::vector<CubeMap>& data)
+void CubeMapShaderResource::Update(uint32_t frameIndex, const std::vector<CubeMap>& data)
 {
     assert(data.size() < m_maxCubeMapsCount && !data.empty());
 
@@ -48,7 +54,8 @@ void CubeMapShaderResource::Update(const std::vector<CubeMap>& data)
 
     m_descriptors->UpdateImage
     (
-        BindFrequency::per_frame,
+        frameIndex,
+        0,
         m_imageInfos,
         static_cast<uint32_t>(data.size()),
         vk::DescriptorType::eCombinedImageSampler,

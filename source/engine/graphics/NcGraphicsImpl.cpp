@@ -58,7 +58,7 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -66,6 +66,7 @@ namespace nc::graphics
     }
 
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                                   const config::MemorySettings& memorySettings,
                                    Registry* registry,
                                    ModuleProvider modules,
                                    std::unique_ptr<IGraphics> graphics,
@@ -76,7 +77,7 @@ namespace nc::graphics
           m_shaderResourceBus{std::move(shaderResourceBus)},
           m_cameraSystem{},
           m_environmentSystem{&m_shaderResourceBus},
-          m_objectSystem{std::move(shaderResourceBus.objectChannel)},
+          m_objectSystem{&m_shaderResourceBus, memorySettings.maxRenderers},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
           m_skeletalAnimationSystem{registry,
@@ -155,14 +156,15 @@ namespace nc::graphics
         auto cameraState = m_cameraSystem.Execute(m_registry);
         m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
-        auto environmentState = m_environmentSystem.Execute(cameraState, m_graphics->currentFrameIndex);
+        auto environmentState = m_environmentSystem.Execute(cameraState, currentFrameIndex);
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
-        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},
+        auto objectState = m_objectSystem.Execute(currentFrameIndex,
+                                                  MultiView<MeshRenderer, Transform>{m_registry},
                                                   MultiView<ToonRenderer, Transform>{m_registry},
                                                   cameraState,
                                                   environmentState,
                                                   skeletalAnimationState);
-        auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
+        auto lightingState = m_pointLightSystem.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
         auto state = PerFrameRenderState
         {
             std::move(cameraState),

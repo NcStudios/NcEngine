@@ -19,24 +19,24 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 
 namespace nc::graphics
 {
-PointLightSystem::PointLightSystem(Signal<const std::vector<PointLightData>&>&& backendChannel, bool useShadows)
-    : m_backendChannel{std::move(backendChannel)},
+PointLightSystem::PointLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxPointLights, bool useShadows)
+    : m_pointLightDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0)}
       m_useShadows{useShadows}
 {
+    m_pointLightData.reserve(maxPointLights);
 }
 
-auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> LightingState
+auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Transform> view) -> LightingState
 {
     OPTICK_CATEGORY("PointLightSystem::Execute", Optick::Category::Rendering);
     auto state = LightingState{};
     state.viewProjections.clear();
-    auto shaderBuffer = std::vector<PointLightData>{};
-    shaderBuffer.reserve(view.size_upper_bound());
+    m_pointLightData.clear();
 
     for (const auto& [light, transform] : view)
     {
         state.viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-        shaderBuffer.emplace_back(state.viewProjections.back(),
+        m_pointLightData.emplace_back(state.viewProjections.back(),
                                   transform->Position(),
                                   m_useShadows,
                                   light->GetAmbient(),
@@ -44,7 +44,7 @@ auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> Lightin
                                   light->GetDiffuseIntensity());
     }
 
-    m_backendChannel.Emit(shaderBuffer);
+    m_pointLightDataBuffer.Update(currentFrameIndex, m_pointLightData);
     return state;
 }
 } // namespace nc::graphics
