@@ -44,7 +44,7 @@ FontAssetManager::FontAssetManager(const std::string& assetDirectory)
 {
 }
 
-bool FontAssetManager::Load(const Font& font, bool isExternal, asset_flags_type)
+bool FontAssetManager::Load(const FontInfo& font, bool isExternal, asset_flags_type)
 {
     if (IsLoaded(font))
         return false;
@@ -60,7 +60,7 @@ bool FontAssetManager::Load(const Font& font, bool isExternal, asset_flags_type)
     return true;
 }
 
-bool FontAssetManager::Load(std::span<const Font> fonts, bool isExternal, asset_flags_type)
+bool FontAssetManager::Load(std::span<const FontInfo> fonts, bool isExternal, asset_flags_type)
 {
     const auto scale = ::GetFontScaling();
     auto anyLoaded = false;
@@ -85,7 +85,7 @@ bool FontAssetManager::Load(std::span<const Font> fonts, bool isExternal, asset_
     return anyLoaded;
 }
 
-bool FontAssetManager::Unload(const Font& font, asset_flags_type)
+bool FontAssetManager::Unload(const FontInfo& font, asset_flags_type)
 {
     if (m_fonts.erase(font) == 0)
         return false;
@@ -102,7 +102,7 @@ void FontAssetManager::UnloadAll(asset_flags_type)
     m_onUpdate.Emit();
 }
 
-auto FontAssetManager::Acquire(const Font& font, asset_flags_type) const -> FontView
+auto FontAssetManager::Acquire(const FontInfo& font, asset_flags_type) const -> FontView
 {
     const auto it = m_fonts.find(font);
     if (it == m_fonts.end())
@@ -113,7 +113,7 @@ auto FontAssetManager::Acquire(const Font& font, asset_flags_type) const -> Font
     return it->second;
 }
 
-bool FontAssetManager::IsLoaded(const Font& font, asset_flags_type) const
+bool FontAssetManager::IsLoaded(const FontInfo& font, asset_flags_type) const
 {
     return m_fonts.contains(font);
 }

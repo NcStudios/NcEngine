@@ -17,8 +17,8 @@ auto GetContentScale() -> Vector2
 }
 } // namespace nc::window
 
-const auto Font1 = Font{.path = "font.ttf", .size = 12.0f};
-const auto Font2 = Font{.path = "font.ttf", .size = 16.0f};
+const auto Font1 = FontInfo{.path = "font.ttf", .size = 12.0f};
+const auto Font2 = FontInfo{.path = "font.ttf", .size = 16.0f};
 
 class FontAssetManager_tests : public ::testing::Test
 {
@@ -52,12 +52,12 @@ TEST_F(FontAssetManager_tests, Load_Loaded_ReturnsFalse)
 
 TEST_F(FontAssetManager_tests, Load_BadPath_Throws)
 {
-    EXPECT_THROW(assetManager->Load(Font{"bad/path", 12.0f}, false), std::runtime_error);
+    EXPECT_THROW(assetManager->Load(FontInfo{"bad/path", 12.0f}, false), std::runtime_error);
 }
 
 TEST_F(FontAssetManager_tests, Load_Collection_ReturnsTrue)
 {
-    std::array<Font, 2u> paths{Font1, Font2};
+    std::array<FontInfo, 2u> paths{Font1, Font2};
     auto actual = assetManager->Load(paths, false);
     EXPECT_TRUE(actual);
 }
@@ -77,7 +77,7 @@ TEST_F(FontAssetManager_tests, Unload_NotLoaded_ReturnsFalse)
 
 TEST_F(FontAssetManager_tests, Unload_BadPath_ReturnsFalse)
 {
-    auto actual = assetManager->Unload(Font{"bad/path", 12.0f});
+    auto actual = assetManager->Unload(FontInfo{"bad/path", 12.0f});
     EXPECT_FALSE(actual);
 }
 
@@ -104,7 +104,7 @@ TEST_F(FontAssetManager_tests, IsLoaded_AfterUnload_ReturnsFalse)
 
 TEST_F(FontAssetManager_tests, UnloadAll_HasAssets_RemovesAssets)
 {
-    std::array<Font, 2u> paths{Font1, Font2};
+    std::array<FontInfo, 2u> paths{Font1, Font2};
     assetManager->Load(paths, false);
     assetManager->UnloadAll(AssetFlags::None);
     EXPECT_FALSE(assetManager->Unload(Font1));

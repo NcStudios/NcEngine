@@ -70,9 +70,9 @@ bool UnloadSkeletalAnimationAsset(const std::string& path, asset_flags_type flag
 void UnloadAllSkeletalAnimationAssets(asset_flags_type flags = AssetFlags::None);
 
 /** Supported file types: .ttf */
-bool LoadFont(const Font& font, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-bool LoadFonts(std::span<const Font> font, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-bool UnloadFont(const Font& font, asset_flags_type flags = AssetFlags::None);
+bool LoadFont(const FontInfo& font, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+bool LoadFonts(std::span<const FontInfo> font, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+bool UnloadFont(const FontInfo& font, asset_flags_type flags = AssetFlags::None);
 void UnloadAllFonts(asset_flags_type flags = AssetFlags::None);
-auto AcquireFont(const Font& font) -> FontView;
+auto AcquireFont(const FontInfo& font) -> FontView;
 } // namespace nc

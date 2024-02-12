@@ -94,7 +94,7 @@ struct SkeletalAnimationView
     uint32_t index;
 };
 
-struct Font
+struct FontInfo
 {
     std::string path;
     float size = 12.0f;

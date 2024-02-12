@@ -36,5 +36,5 @@ extern graphics::ToonMaterial TealToonMaterial;
 extern graphics::ToonMaterial YellowToonMaterial;
 
 // Fonts
-extern Font UIFont;
+extern FontInfo UIFont;
 } // namespace nc::sample

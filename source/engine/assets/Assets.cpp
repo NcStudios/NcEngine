@@ -143,28 +143,28 @@ void UnloadAllTextureAssets(asset_flags_type flags)
     return AssetService<TextureView>::Get()->UnloadAll(flags);
 }
 
-bool LoadFont(const Font& font, bool isExternal, asset_flags_type flags)
+bool LoadFont(const FontInfo& font, bool isExternal, asset_flags_type flags)
 {
-    return AssetService<FontView, Font>::Get()->Load(font, isExternal, flags);
+    return AssetService<FontView, FontInfo>::Get()->Load(font, isExternal, flags);
 }
 
-bool LoadFonts(std::span<const Font> fonts, bool isExternal, asset_flags_type flags)
+bool LoadFonts(std::span<const FontInfo> fonts, bool isExternal, asset_flags_type flags)
 {
-    return AssetService<FontView, Font>::Get()->Load(fonts, isExternal, flags);
+    return AssetService<FontView, FontInfo>::Get()->Load(fonts, isExternal, flags);
 }
 
-auto AcquireFont(const Font& font) -> FontView
+auto AcquireFont(const FontInfo& font) -> FontView
 {
-    return AssetService<FontView, Font>::Get()->Acquire(font);
+    return AssetService<FontView, FontInfo>::Get()->Acquire(font);
 }
 
-bool UnloadFont(const Font& font, asset_flags_type flags)
+bool UnloadFont(const FontInfo& font, asset_flags_type flags)
 {
-    return AssetService<FontView, Font>::Get()->Unload(font, flags);
+    return AssetService<FontView, FontInfo>::Get()->Unload(font, flags);
 }
 
 void UnloadAllFonts(asset_flags_type flags)
 {
-    return AssetService<FontView, Font>::Get()->UnloadAll(flags);
+    return AssetService<FontView, FontInfo>::Get()->UnloadAll(flags);
 }
 } // namespace nc
