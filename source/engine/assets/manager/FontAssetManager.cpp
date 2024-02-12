@@ -53,9 +53,8 @@ bool FontAssetManager::Load(const FontInfo& font, bool isExternal, asset_flags_t
     if (!std::filesystem::exists(fullPath))
         throw NcError{fmt::format("Font file does not exist '{}'", fullPath)};
 
-    const auto size = font.size * ::GetFontScaling();
-    auto fontHandle = ::LoadFontToAtlas(fullPath.c_str(), size);
-    m_fonts.emplace(font, FontView{fontHandle, size});
+    auto fontHandle = ::LoadFontToAtlas(fullPath.c_str(), font.size * ::GetFontScaling());
+    m_fonts.emplace(font, FontView{fontHandle, font.size}); // save original size as its part the 'id'
     m_onUpdate.Emit();
     return true;
 }
@@ -73,9 +72,8 @@ bool FontAssetManager::Load(std::span<const FontInfo> fonts, bool isExternal, as
         if (!std::filesystem::exists(fullPath))
             throw NcError{fmt::format("Font file does not exist '{}'", fullPath)};
 
-        const auto size = font.size * scale;
-        auto fontHandle = ::LoadFontToAtlas(fullPath.c_str(), size);
-        m_fonts.emplace(font, FontView{fontHandle, size});
+        auto fontHandle = ::LoadFontToAtlas(fullPath.c_str(), font.size * scale);
+        m_fonts.emplace(font, FontView{fontHandle, font.size});
         anyLoaded = true;
     }
 

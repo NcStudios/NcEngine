@@ -14,11 +14,10 @@ struct FontHash
 {
     auto operator()(const FontInfo& font) const noexcept
     {
-        auto stringHasher = std::hash<std::string>{};
-        auto floatHasher = std::hash<float>{};
+        // roughly Boost hash_combine
         auto hash = 17ull;
-        hash = hash * 31 + stringHasher(font.path);
-        hash = hash * 31 + floatHasher(font.size);
+        hash ^= std::hash<std::string>{}(font.path) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        hash ^= std::hash<float>{}(font.size) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
         return hash;
     }
 };
