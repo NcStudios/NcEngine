@@ -95,6 +95,13 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
     NC_LOG_INFO("Selected audio output device: '{}'", m_activeDevice.name);
     auto rtParams = RtAudio::StreamParameters{m_activeDevice.id, params.channelCount, 0};
     m_bufferFrames = params.bufferFrames;
+
+    NC_LOG_TRACE("Audio stream parameters:\n"
+                 "\tsample rate: {}\n"
+                 "\tbuffer frames: {}",
+                 params.sampleRate,
+                 params.bufferFrames);
+
     const auto result = m_rtAudio->openStream(&rtParams,
                                               nullptr,
                                               g_format,
@@ -109,6 +116,8 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
         m_activeDevice = g_nullDevice;
         return false;
     }
+
+    NC_LOG_TRACE("Actual stream buffer frames {}", m_bufferFrames);
 
     if (auto startResult = m_rtAudio->startStream())
     {

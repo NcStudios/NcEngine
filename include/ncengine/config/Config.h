@@ -83,6 +83,7 @@ struct PhysicsSettings
 struct AudioSettings
 {
     bool enabled = true;
+    unsigned bufferFrames = 512u; // must be a multiple of two in the range [16, 2056]
 };
 
 /** @brief A collection of all configuration options.
