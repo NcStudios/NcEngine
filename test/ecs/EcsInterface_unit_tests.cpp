@@ -227,6 +227,36 @@ TEST_F(EcsInterfaceTests, Get_freeComponent_errorPath_throws)
     EXPECT_THROW(uut.Get<TestFreeComponent>(badEntity), nc::NcError);
 }
 
+TEST_F(EcsInterfaceTests, GetEntityByTag_tagExists_returnsEntity)
+{
+    constexpr auto tag = "FindMe";
+    auto uut = nc::ecs::Ecs{registry};
+    const auto expected = uut.Emplace<nc::Entity>({.tag = tag});
+    registry.CommitPendingChanges();
+    const auto actual = uut.GetEntityByTag(tag);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(EcsInterfaceTests, GetEntityByTag_multipleMatchingTags_returnsFirst)
+{
+    constexpr auto tag = "ManyOf";
+    auto uut = nc::ecs::Ecs{registry};
+    const auto expected = uut.Emplace<nc::Entity>({.tag = tag});
+    uut.Emplace<nc::Entity>({.tag = tag});
+    uut.Emplace<nc::Entity>({.tag = tag});
+    registry.CommitPendingChanges();
+    const auto actual = uut.GetEntityByTag(tag);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(EcsInterfaceTests, GetEntityByTag_tagDoesNotExist_throws)
+{
+    auto uut = nc::ecs::Ecs{registry};
+    uut.Emplace<nc::Entity>({.tag = "Unreachable"});
+    registry.CommitPendingChanges();
+    EXPECT_THROW(uut.GetEntityByTag("NoneSuch"), nc::NcError);
+}
+
 TEST_F(EcsInterfaceTests, GetAll_entity_returnsAllEntities)
 {
     auto uut = nc::ecs::Ecs{registry};
