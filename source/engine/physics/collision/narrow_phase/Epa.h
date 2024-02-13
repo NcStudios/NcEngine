@@ -49,8 +49,8 @@ bool Epa(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
         auto direction_v = XMLoadVector3(&minNorm.normal);
         auto supports = MinkowskiSupports(a, b, state->rotationA, state->rotationB, aMatrix, bMatrix, direction_v);
 
-        alignas(16) Vector3 support;
-        XMStoreVector3A(&support, supports.worldCSO);
+        Vector3 support;
+        XMStoreVector3(&support, supports.worldCSO);
         XMStoreVector3(&(state->contact.worldPointA), supports.worldA);
         XMStoreVector3(&(state->contact.worldPointB), supports.worldB);
         XMStoreVector3(&(state->contact.localPointA), supports.localA);
@@ -110,8 +110,8 @@ bool EpaVsTriangle(const BVA& a, const TriangleXM& b, DirectX::FXMMATRIX aMatrix
         auto bSupportWorld_v = MinkowskiSupport(b, bDirection_v);
         
         auto support_v = XMVectorSubtract(aSupportWorld_v, bSupportWorld_v);
-        alignas(16) Vector3 support;
-        XMStoreVector3A(&support, support_v);
+        Vector3 support;
+        XMStoreVector3(&support, support_v);
 
         XMStoreVector3(&(stateOut->contact.worldPointA), aSupportWorld_v);
         XMStoreVector3(&(stateOut->contact.worldPointB), bSupportWorld_v);

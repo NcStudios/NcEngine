@@ -6,8 +6,8 @@ namespace
 {
 auto Skew(DirectX::FXMVECTOR vec) -> DirectX::XMMATRIX
 {
-    alignas(16) nc::Vector3 v;
-    DirectX::XMStoreVector3A(&v, vec);
+    nc::Vector3 v;
+    DirectX::XMStoreVector3(&v, vec);
 
     return DirectX::XMMatrixSet
     (

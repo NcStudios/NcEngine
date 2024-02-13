@@ -134,27 +134,27 @@ bool Gjk(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
     stateOut->simplex = Simplex{};
     stateOut->rotationA = DecomposeRotation(aMatrix);
     stateOut->rotationB = DecomposeRotation(bMatrix);
-    alignas(16) Vector3 direction = Vector3::One();
+    Vector3 direction = Vector3::One();
     size_t itCount = 0;
 
     while(++itCount <= GjkMaxIterations)
     {
-        const auto direction_v = XMLoadVector3A(&direction);
+        const auto direction_v = XMLoadVector3(&direction);
         auto supports = MinkowskiSupports(a, b, stateOut->rotationA, stateOut->rotationB, aMatrix, bMatrix, direction_v);
 
         if(XMVector3Less(XMVector3Dot(supports.worldCSO, direction_v), g_XMZero))
             break;
 
-        alignas(16) Vector3 supportCSO;
-        alignas(16) Vector3 worldSupportA;
-        alignas(16) Vector3 worldSupportB;
-        alignas(16) Vector3 localSupportA;
-        alignas(16) Vector3 localSupportB;
-        XMStoreVector3A(&supportCSO, supports.worldCSO);
-        XMStoreVector3A(&worldSupportA, supports.worldA);
-        XMStoreVector3A(&worldSupportB, supports.worldB);
-        XMStoreVector3A(&localSupportA, supports.localA);
-        XMStoreVector3A(&localSupportB, supports.localB);
+        Vector3 supportCSO;
+        Vector3 worldSupportA;
+        Vector3 worldSupportB;
+        Vector3 localSupportA;
+        Vector3 localSupportB;
+        XMStoreVector3(&supportCSO, supports.worldCSO);
+        XMStoreVector3(&worldSupportA, supports.worldA);
+        XMStoreVector3(&worldSupportB, supports.worldB);
+        XMStoreVector3(&localSupportA, supports.localA);
+        XMStoreVector3(&localSupportB, supports.localB);
 
         stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
 
@@ -186,7 +186,7 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
 
     stateOut->simplex = Simplex{};
     stateOut->rotationA = DecomposeRotation(aMatrix);
-    alignas(16) Vector3 direction = Vector3::One();
+    Vector3 direction = Vector3::One();
     size_t itCount = 0;
 
     auto bXM = TriangleXM
@@ -198,7 +198,7 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
 
     while(++itCount <= GjkMaxIterations)
     {
-        const auto direction_v = XMLoadVector3A(&direction);
+        const auto direction_v = XMLoadVector3(&direction);
         auto aDirection_v = XMVector3InverseRotate(direction_v, stateOut->rotationA);
         auto aSupportLocal_v = MinkowskiSupport(a, aDirection_v);
         auto aSupportWorld_v = XMVector3Transform(aSupportLocal_v, aMatrix);
@@ -210,14 +210,14 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
 
-        alignas(16) Vector3 supportCSO;
-        alignas(16) Vector3 worldSupportA;
-        alignas(16) Vector3 worldSupportB;
-        alignas(16) Vector3 localSupportA;
-        XMStoreVector3A(&supportCSO, supportCSO_v);
-        XMStoreVector3A(&worldSupportA, aSupportWorld_v);
-        XMStoreVector3A(&worldSupportB, bSupportWorld_v);
-        XMStoreVector3A(&localSupportA, aSupportLocal_v);
+        Vector3 supportCSO;
+        Vector3 worldSupportA;
+        Vector3 worldSupportB;
+        Vector3 localSupportA;
+        XMStoreVector3(&supportCSO, supportCSO_v);
+        XMStoreVector3(&worldSupportA, aSupportWorld_v);
+        XMStoreVector3(&worldSupportB, bSupportWorld_v);
+        XMStoreVector3(&localSupportA, aSupportLocal_v);
 
         stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, worldSupportB);
 
@@ -238,7 +238,7 @@ bool Gjk(const BVA& a, const BVB& b)
 {
     using namespace DirectX;
 
-    alignas(16) Vector3 direction = Vector3::One();
+    Vector3 direction = Vector3::One();
     Simplex simplex;
     size_t itCount = 0;
 
@@ -252,9 +252,9 @@ bool Gjk(const BVA& a, const BVB& b)
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
 
-        alignas(16) Vector3 supportCSO;
-        alignas(16) Vector3 supportA;
-        alignas(16) Vector3 supportB;
+        Vector3 supportCSO;
+        Vector3 supportA;
+        Vector3 supportB;
         XMStoreVector3(&supportCSO, supportCSO_v);
         XMStoreVector3(&supportA, supportA_v);
         XMStoreVector3(&supportB, supportB_v);

@@ -19,8 +19,8 @@ struct DecomposedMatrixXM
 
 inline auto ToVector3(DirectX::FXMVECTOR in) noexcept -> Vector3
 {
-    alignas(16) auto out = Vector3{};
-    DirectX::XMStoreVector3A(&out, in);
+    auto out = Vector3{};
+    DirectX::XMStoreVector3(&out, in);
     return out;
 }
 

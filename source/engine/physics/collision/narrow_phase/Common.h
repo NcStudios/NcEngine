@@ -52,8 +52,8 @@ inline DirectX::XMVECTOR MinkowskiSupport(const Sphere& collider, DirectX::FXMVE
 
 inline DirectX::XMVECTOR MinkowskiSupport(const Box& collider, DirectX::FXMVECTOR direction_v)
 {
-    alignas(16) Vector3 dir;
-    DirectX::XMStoreVector3A(&dir, direction_v);
+    Vector3 dir;
+    DirectX::XMStoreVector3(&dir, direction_v);
 
     auto sign = [](float n) { return n < 0.0f ? -1.0f : 1.0f; };
 
@@ -65,13 +65,13 @@ inline DirectX::XMVECTOR MinkowskiSupport(const Box& collider, DirectX::FXMVECTO
     };
 
     dir = collider.center + extent;
-    return DirectX::XMLoadVector3A(&dir);
+    return DirectX::XMLoadVector3(&dir);
 }
 
 inline DirectX::XMVECTOR MinkowskiSupport(const Capsule& collider, DirectX::FXMVECTOR direction_v)
 {
-    alignas(16) Vector3 normalizedDirection;
-    DirectX::XMStoreVector3A(&normalizedDirection, DirectX::XMVector3Normalize(direction_v));
+    Vector3 normalizedDirection;
+    DirectX::XMStoreVector3(&normalizedDirection, DirectX::XMVector3Normalize(direction_v));
 
     auto dotPointA = Dot(collider.pointA, normalizedDirection);
     auto dotPointB = Dot(collider.pointB, normalizedDirection);
@@ -86,8 +86,8 @@ inline DirectX::XMVECTOR MinkowskiSupport(const ConvexHull& collider, DirectX::F
 {
     NC_ASSERT(!collider.vertices.empty(), "ConvexHull vertex buffer is empty");
     const auto& vertices = collider.vertices;
-    alignas(16) Vector3 direction;
-    DirectX::XMStoreVector3A(&direction, direction_v);
+    Vector3 direction;
+    DirectX::XMStoreVector3(&direction, direction_v);
     size_t maxIndex = 0u;
     float maxDot = Dot(vertices[maxIndex], direction);
 
