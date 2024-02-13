@@ -5,6 +5,7 @@
 #include "ncengine/NcEngine.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
@@ -144,6 +145,17 @@ struct point_light
     static inline unsigned DestroyCount = 1;
 };
 
+struct particle_emitter
+{
+    static constexpr auto name = "Particle Emitter";
+    static inline const auto& maxCount = g_maxEntities;
+    static inline std::function<int()> GetObjectCountCallback = nullptr;
+    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
+    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
+    static inline unsigned SpawnCount = 1;
+    static inline unsigned DestroyCount = 1;
+};
+
 struct entity_hierarchy
 {
     static constexpr auto name = "Entity Hierarchy";
@@ -261,6 +273,10 @@ void Widget()
             ImGui::TableNextColumn();
             InnerWidget<point_light>(halfCellWidth, [](){});
 
+            ImGui::TableNextColumn();
+            InnerWidget<particle_emitter>(halfCellWidth, [](){});
+
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<entity_hierarchy>(halfCellWidth, [halfCellWidth](){
                 ImGui::SetNextItemWidth(halfCellWidth);
@@ -423,6 +439,34 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
         ::point_light::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
         ::point_light::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
         ::point_light::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+    }
+
+    // Particle Emitter
+    {
+        const auto handle = world.Emplace<Entity>({.tag = "ParticleEmitter Spawner"});
+        auto& spawner = world.Emplace<Spawner>(
+            handle,
+            ncRandom,
+            spawnBehavior,
+            [world](Entity entity) mutable {
+                world.Emplace<graphics::ParticleEmitter>(entity, graphics::ParticleInfo{
+                    .emission = {
+                        .periodicEmissionCount = 15u,
+                        .periodicEmissionFrequency = 0.1f
+                    },
+                    .kinematic = {
+                        .velocityMin = Vector3::One() * -2.0f,
+                        .velocityMax = Vector3::One() * 2.0f,
+                        .scaleOverTimeFactor = -10.0f
+                    }
+                });
+            }
+        );
+
+        world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
+        ::particle_emitter::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::particle_emitter::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::particle_emitter::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
     // Entity Hierarchy

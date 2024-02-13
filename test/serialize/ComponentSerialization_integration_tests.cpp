@@ -26,6 +26,7 @@ DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc
 namespace nc::graphics
 {
 void ParticleEmitterSystem::Emit(Entity, size_t) {}
+void ParticleEmitterSystem::Update(graphics::ParticleEmitter&) {}
 } // namespace nc::graphics
 
 // We only need the old Registry here so that it sets the ptr for ActiveRegistry(), which is only used by PhysicsBody.

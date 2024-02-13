@@ -17,34 +17,25 @@ namespace nc
 
     /** @note It is slighly faster to use dx identity globals instead of the vector
      *  set used in ToLocalSpace, so some code is repeated in Up/Forward/Right. */
-    Vector3 Transform::Up() const
+    auto Transform::UpXM() const noexcept -> DirectX::XMVECTOR
     {
         auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR1, m_worldMatrix);
         out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
-        out_v = DirectX::XMVector3Normalize(out_v);
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, out_v);
-        return out;
+        return DirectX::XMVector3Normalize(out_v);
     }
 
-    Vector3 Transform::Forward() const
+    auto Transform::ForwardXM() const noexcept -> DirectX::XMVECTOR
     {
         auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m_worldMatrix);
         out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
-        out_v = DirectX::XMVector3Normalize(out_v);
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, out_v);
-        return out;
+        return DirectX::XMVector3Normalize(out_v);
     }
 
-    Vector3 Transform::Right() const
+    auto Transform::RightXM() const noexcept -> DirectX::XMVECTOR
     {
         auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR0, m_worldMatrix);
         out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
-        out_v = DirectX::XMVector3Normalize(out_v);
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, out_v);
-        return out;
+        return DirectX::XMVector3Normalize(out_v);
     }
 
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
