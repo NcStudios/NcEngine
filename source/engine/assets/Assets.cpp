@@ -142,4 +142,29 @@ void UnloadAllTextureAssets(asset_flags_type flags)
 {
     return AssetService<TextureView>::Get()->UnloadAll(flags);
 }
+
+bool LoadFont(const FontInfo& font, bool isExternal, asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->Load(font, isExternal, flags);
+}
+
+bool LoadFonts(std::span<const FontInfo> fonts, bool isExternal, asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->Load(fonts, isExternal, flags);
+}
+
+auto AcquireFont(const FontInfo& font) -> FontView
+{
+    return AssetService<FontView, FontInfo>::Get()->Acquire(font);
+}
+
+bool UnloadFont(const FontInfo& font, asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->Unload(font, flags);
+}
+
+void UnloadAllFonts(asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->UnloadAll(flags);
+}
 } // namespace nc
