@@ -4,3 +4,5 @@ target_sources(${NC_ENGINE_LIB}
         Inspector.cpp
         SceneGraph.cpp
 )
+
+add_subdirectory(dialogs)

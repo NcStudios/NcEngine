@@ -20,7 +20,7 @@ struct FragmentEntityInfo
 // Build a list of all entities to include in a scene fragment. All parents are guaranteed to precede their children.
 auto BuildFragmentEntityList(std::span<const Entity> in,
                              std::function<bool(Entity)>& filter,
-                             ecs::ExplicitEcs<Transform> ecs) -> std::vector<Entity>;
+                             ecs::ExplicitEcs<Hierarchy> ecs) -> std::vector<Entity>;
 
 // Build a map of Entity to fragment id.
 auto BuildEntityToFragmentIdMap(std::span<const Entity> entities) -> EntityToFragmentIdMap;
@@ -33,6 +33,6 @@ void RemapEntity(Entity& entity, const FragmentIdToEntityMap& map);
 
 // Build a list of pairs of entity fragment id and reconstructed EntityInfo.
 auto BuildFragmentEntityInfos(std::span<const Entity> entities,
-                              ecs::ExplicitEcs<Transform, Tag> ecs,
+                              ecs::ExplicitEcs<Hierarchy, Transform, Tag> ecs,
                               const EntityToFragmentIdMap& entityMap) -> std::vector<FragmentEntityInfo>;
 } // namespace nc

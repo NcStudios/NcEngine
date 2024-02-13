@@ -193,7 +193,7 @@ void TransformUIWidget(Transform& transform)
     auto scl_v = DirectX::XMVECTOR{};
     auto rot_v = DirectX::XMVECTOR{};
     auto pos_v = DirectX::XMVECTOR{};
-    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.TransformationMatrix());
+    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.LocalTransformationMatrix());
 
     auto scl = Vector3{};
     auto pos = Vector3{};
@@ -213,7 +213,7 @@ void TransformUIWidget(Transform& transform)
         else if (!FloatEqual(curRot.z, prevRot.z)) transform.Rotate(Vector3::Front(), curRot.z - prevRot.z);
     }
 
-    if (ui::InputScale(scl, "scale"))       transform.SetScale(scl);
+    if (ui::InputScale(scl, "scale")) transform.SetScale(scl);
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
@@ -268,14 +268,6 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
 
 void ColliderUIWidget(physics::Collider& collider)
 {
-    /**
-     * Collider Model doesn't update/submit unless we tell it to
-     * @todo #446 Clean up once editor manages collider selection state.
-    */
-#ifdef NC_EDITOR_ENABLED
-    collider.SetEditorSelection(true);
-#endif
-
     using namespace std::string_view_literals;
     constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
     ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);

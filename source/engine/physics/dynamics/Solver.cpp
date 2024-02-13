@@ -1,11 +1,8 @@
 #include "Solver.h"
 #include "ecs/Registry.h"
-#include "graphics/debug/DebugRenderer.h"
 #include "physics/PhysicsConstants.h"
 
 #include "optick.h"
-
-#include <cassert>
 
 using namespace DirectX;
 
@@ -327,11 +324,6 @@ Solver::Solver(Registry* registry)
 void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 {
     OPTICK_CATEGORY("GenerateConstraints", Optick::Category::Physics);
-
-#if NC_PHYSICS_DRAW_CONTACT_POINTS
-    graphics::DebugRenderer::ClearPoints();
-#endif
-
     const auto manifoldCount = manifolds.size();
     m_contactConstraints.clear();
     m_contactConstraints.reserve(manifoldCount * 4u);
@@ -348,8 +340,8 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
         const Entity entityB = manifold.Event().second;
         auto* transformA = m_registry->Get<Transform>(entityA);
         auto* transformB = m_registry->Get<Transform>(entityB);
-        auto* physBodyA = m_registry->Get<PhysicsBody>(entityA);
-        auto* physBodyB = m_registry->Get<PhysicsBody>(entityB);
+        auto* physBodyA = m_registry->Contains<PhysicsBody>(entityA) ? m_registry->Get<PhysicsBody>(entityA) : nullptr;
+        auto* physBodyB = m_registry->Contains<PhysicsBody>(entityB) ? m_registry->Get<PhysicsBody>(entityB) : nullptr;
 
         if constexpr(EnableDirectPositionCorrection)
         {
@@ -359,11 +351,6 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         for(const auto& contact : manifold.Contacts())
         {
-            #if NC_PHYSICS_DRAW_CONTACT_POINTS
-            graphics::DebugRenderer::AddPoint(contact.worldPointA);
-            graphics::DebugRenderer::AddPoint(contact.worldPointB);
-            #endif
-
             m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB));
         }
     }

@@ -175,15 +175,16 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
      *  cleaner to handle this through registy callbacks, but we can't because the BspTree uses the
      *  ConcaveCollider callback. Long story short, I think we need to support multiple callbacks per
      *  component type. */
-    const auto* transformA = registry->Get<Transform>(m_event.first);
-    const auto* transformB = registry->Get<Transform>(m_event.second);
-    if(!transformA || !transformB)
+
+    if(!registry->Contains<Transform>(m_event.first) || !registry->Contains<Transform>(m_event.second))
     {
         m_contacts.clear();
         return;
     }
 
     using namespace DirectX;
+    const auto* transformA = registry->Get<Transform>(m_event.first);
+    const auto* transformB = registry->Get<Transform>(m_event.second);
     const auto& aMatrix = transformA->TransformationMatrix();
     const auto& bMatrix = transformB->TransformationMatrix();
     [[maybe_unused]]bool haveBrokenAlongTangent = false;

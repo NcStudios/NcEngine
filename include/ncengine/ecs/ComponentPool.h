@@ -110,16 +110,16 @@ class ComponentPool final : public ComponentPoolBase
 
         /** @brief Emplace a component attached to an entity. */
         template<class... Args>
-        auto Emplace(Entity entity, Args&&... args) -> T*;
+        auto Emplace(Entity entity, Args&&... args) -> T&;
 
         /** @brief Insert a component attached to an entity. */
-        auto Insert(Entity entity, T obj) -> T*;
+        auto Insert(Entity entity, T obj) -> T&;
 
         /** @brief Get a pointer to the component attached to an entity, or nullptr if one does not exist. */
-        auto Get(Entity entity) -> T*;
+        auto Get(Entity entity) -> T&;
 
         /** @brief Get a const pointer to the component attached to an entity, or nullptr if one does not exist. */
-        auto Get(Entity entity) const -> const T*;
+        auto Get(Entity entity) const -> const T&;
 
         /** @brief Get the entity a component is attached to, or a null entity on failure. */
         auto GetParent(const T* component) const -> Entity;
@@ -227,7 +227,7 @@ class ComponentPool final : public ComponentPoolBase
 /** @cond internal */
 template<PooledComponent T>
 template<class... Args>
-auto ComponentPool<T>::Emplace(Entity entity, Args&&... args) -> T*
+auto ComponentPool<T>::Emplace(Entity entity, Args&&... args) -> T&
 {
     NC_ASSERT(entity.Index() < m_storage.MaxSize() && !Contains(entity), "Bad entity");
     auto& [_, component] = m_staging.emplace_back(
@@ -238,11 +238,11 @@ auto ComponentPool<T>::Emplace(Entity entity, Args&&... args) -> T*
     if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
         m_onAdd.Emit(component);
 
-    return &component;
+    return component;
 }
 
 template<PooledComponent T>
-auto ComponentPool<T>::Insert(Entity entity, T obj) -> T*
+auto ComponentPool<T>::Insert(Entity entity, T obj) -> T&
 {
     NC_ASSERT(entity.Index() < m_storage.MaxSize() && !Contains(entity), "Bad entity");
     auto& [_, component] = m_staging.emplace_back(entity, std::move(obj));
@@ -250,7 +250,7 @@ auto ComponentPool<T>::Insert(Entity entity, T obj) -> T*
     if constexpr(StoragePolicy<T>::EnableOnAddCallbacks)
         m_onAdd.Emit(component);
 
-    return &component;
+    return component;
 }
 
 template<PooledComponent T>
@@ -275,31 +275,33 @@ bool ComponentPool<T>::Contains(Entity entity) const
 }
 
 template<PooledComponent T>
-auto ComponentPool<T>::Get(Entity entity) -> T*
+auto ComponentPool<T>::Get(Entity entity) -> T&
 {
     NC_ASSERT(entity.Valid(), "Bad entity");
     if (m_storage.Contains(entity))
-        return &m_storage.Get(entity);
+        return m_storage.Get(entity);
 
     auto pos = std::ranges::find(m_staging, entity, &detail::StagedComponent<T>::entity);
-    return pos != std::cend(m_staging) ? &pos->component : nullptr;
+    NC_ASSERT(pos != std::cend(m_staging), "Component does not exist");
+    return pos->component;
 }
 
 template<PooledComponent T>
-auto ComponentPool<T>::Get(Entity entity) const -> const T*
+auto ComponentPool<T>::Get(Entity entity) const -> const T&
 {
     NC_ASSERT(entity.Valid(), "Bad entity");
     if (m_storage.Contains(entity))
-        return &m_storage.Get(entity);
+        return m_storage.Get(entity);
 
     auto pos = std::ranges::find(m_staging, entity);
-    return pos != std::cend(m_staging) ? &pos->component : nullptr;
+    NC_ASSERT(pos != std::cend(m_staging), "Component does not exist");
+    return pos->component;
 }
 
 template<PooledComponent T>
 auto ComponentPool<T>::GetAsAnyComponent(Entity entity) -> AnyComponent
 {
-    return Contains(entity) ? AnyComponent{Get(entity), &m_handler} : AnyComponent{};
+    return Contains(entity) ? AnyComponent{&Get(entity), &m_handler} : AnyComponent{};
 }
 
 template<PooledComponent T>
@@ -337,8 +339,8 @@ auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
 {
     if (m_handler.factory)
     {
-        auto comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
-        return AnyComponent{comp, &m_handler};
+        auto& comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
+        return AnyComponent{&comp, &m_handler};
     }
 
     return AnyComponent{};
@@ -347,14 +349,14 @@ auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
 template<PooledComponent T>
 void ComponentPool<T>::Serialize(std::ostream& stream, Entity entity, const SerializationContext& ctx)
 {
-    NC_ASSERT(HasSerialize() && Contains(entity), "...");
-    m_handler.serialize(stream, *Get(entity), ctx, m_handler.userData);
+    NC_ASSERT(HasSerialize() && Contains(entity), "Component does not exist or is not serializable");
+    m_handler.serialize(stream, Get(entity), ctx, m_handler.userData);
 }
 
 template<PooledComponent T>
 void ComponentPool<T>::Deserialize(std::istream& stream, Entity entity, const DeserializationContext& ctx)
 {
-    NC_ASSERT(HasSerialize(), "...");
+    NC_ASSERT(HasSerialize(), "Component is not serializable");
     Insert(entity, m_handler.deserialize(stream, ctx, m_handler.userData));
 }
 

@@ -17,8 +17,8 @@ constexpr auto TestEntity = Entity{0, 0, 0};
 TEST(FreeComponentGroup_unit_test, Add_ValidCall_ConstructsObject)
 {
     auto group = FreeComponentGroup{TestEntity};
-    auto ptr = group.Add<FakeComponent>(TestEntity);
-    EXPECT_EQ(ptr->ParentEntity(), TestEntity);
+    auto& component = group.Add<FakeComponent>(TestEntity);
+    EXPECT_EQ(component.ParentEntity(), TestEntity);
 }
 
 TEST(FreeComponentGroup_unit_test, Add_ReplaceAfterRemove_ConstructsObject)
@@ -28,8 +28,8 @@ TEST(FreeComponentGroup_unit_test, Add_ReplaceAfterRemove_ConstructsObject)
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();
     group.CommitStagedComponents();
-    auto ptr = group.Add<FakeComponent>(TestEntity);
-    EXPECT_EQ(ptr->ParentEntity(), TestEntity);
+    auto& component = group.Add<FakeComponent>(TestEntity);
+    EXPECT_EQ(component.ParentEntity(), TestEntity);
 }
 
 TEST(FreeComponentGroup_unit_test, Add_DoubleCall_Throws)
@@ -102,28 +102,25 @@ TEST(FreeComponentGroup_unit_test, Contains_AfterRemoved_ReturnsFalse)
     EXPECT_FALSE(actual);
 }
 
-TEST(FreeComponentGroup_unit_test, Get_Exists_ReturnsPointer)
+TEST(FreeComponentGroup_unit_test, Get_Exists_Succeeds)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
-    auto* ptr = group.Get<FakeComponent>();
-    EXPECT_NE(ptr, nullptr);
+    EXPECT_NO_THROW(group.Get<FakeComponent>());
 }
 
-TEST(FreeComponentGroup_unit_test, Get_ExistsStaged_ReturnsPointer)
+TEST(FreeComponentGroup_unit_test, Get_ExistsStaged_Succeeds)
 {
     auto group = FreeComponentGroup{TestEntity};
     group.Add<FakeComponent>(TestEntity);
-    auto* ptr = group.Get<FakeComponent>();
-    EXPECT_NE(ptr, nullptr);
+    EXPECT_NO_THROW(group.Get<FakeComponent>());
 }
 
-TEST(FreeComponentGroup_unit_test, Get_DoesNotExist_ReturnsNull)
+TEST(FreeComponentGroup_unit_test, Get_DoesNotExist_Throws)
 {
     auto group = FreeComponentGroup{TestEntity};
-    auto* ptr = group.Get<FakeComponent>();
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(group.Get<FakeComponent>(), nc::NcError);
 }
 
 TEST(FreeComponentGroup_unit_test, Get_CallAfterRemoved_ReturnsNull)
@@ -133,8 +130,7 @@ TEST(FreeComponentGroup_unit_test, Get_CallAfterRemoved_ReturnsNull)
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();
     group.CommitStagedComponents();
-    auto* ptr = group.Get<FakeComponent>();
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(group.Get<FakeComponent>(), nc::NcError);
 }
 
 int main(int argc, char ** argv)

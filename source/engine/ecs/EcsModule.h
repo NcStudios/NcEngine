@@ -19,6 +19,8 @@ class EcsModule : public Module
 
     private:
         Registry* m_registry;
+
+        void UpdateWorldSpaceMatrices();
 };
 
 auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>;

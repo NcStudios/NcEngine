@@ -1,14 +1,51 @@
 #include "ui/editor/Editor.h"
+#include "EditorCamera.h"
 #include "EditorUI.h"
-#include "input/Input.h"
-#include "window/Window.h"
+#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/window/Window.h"
 
 namespace
 {
-namespace hotkey
+auto BuildEditorObjects(nc::ecs::Ecs world, nc::ModuleProvider modules, nc::input::KeyCode cameraHotkey) -> std::pair<nc::Entity, nc::Entity>
 {
-constexpr auto Editor = nc::input::KeyCode::Tilde;
-} // namespace hotkey
+    // Parent Entity for all Editor objects
+    const auto bucket = world.Emplace<nc::Entity>({
+        .tag = "[Editor]",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    // Editor camera
+    const auto camera = world.Emplace<nc::Entity>({
+        .position = nc::Vector3{0.0f, 8.0f, -10.0f},
+        .rotation = nc::Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
+        .parent = bucket,
+        .tag = "EditorCamera",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::ui::editor::EditorCamera>(camera, modules, cameraHotkey);
+    world.Emplace<nc::FrameLogic>(camera, nc::InvokeFreeComponent<nc::ui::editor::EditorCamera>{});
+    return std::pair{bucket, camera};
+}
+
+auto BuildContext(nc::ecs::Ecs world,
+                  nc::ModuleProvider modules,
+                  nc::ui::editor::EditorHotkeys hotkeys) -> nc::ui::editor::EditorContext
+{
+    const auto [bucket, camera] = ::BuildEditorObjects(world, modules, hotkeys.toggleEditorCamera);
+    return nc::ui::editor::EditorContext{
+        .world = world,
+        .modules = modules,
+        .selectedEntity = nc::Entity::Null(),
+        .openState = nc::ui::editor::OpenState::ClosePersisted,
+        .dimensions = ImVec2{},
+        .objectBucket = bucket,
+        .editorCamera = camera,
+        .hotkeys = hotkeys
+    };
+}
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -16,24 +53,25 @@ namespace nc::ui::editor
 class EditorImpl : public Editor
 {
     public:
-        void Draw(ecs::Ecs world, asset::NcAsset&) override
+        explicit EditorImpl(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& hotkeys)
+            : Editor{::BuildContext(world, modules, hotkeys)},
+              m_ui{m_ctx}
         {
-            if(input::KeyDown(hotkey::Editor))
-                m_open = !m_open;
+        }
 
-            if(!m_open)
-                return;
-
-            m_ui.Draw(world);
+        void Draw(ecs::Ecs) override
+        {
+            m_ui.Draw(m_ctx);
         }
 
     private:
         EditorUI m_ui;
-        bool m_open = false;
 };
 
-auto BuildEditor() -> std::unique_ptr<Editor>
+auto BuildEditor(ecs::Ecs world,
+                 ModuleProvider modules,
+                 const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
 {
-    return std::make_unique<EditorImpl>();
+    return std::make_unique<EditorImpl>(world, modules, hotkeys);
 }
 } // namespace nc::ui::editor

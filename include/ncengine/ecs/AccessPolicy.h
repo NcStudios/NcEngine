@@ -5,6 +5,7 @@
 #pragma once
 
 #include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/ecs/Hierarchy.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
@@ -67,7 +68,7 @@ class AccessPolicy
         using FilterType = std::conditional_t<Base == FilterBase::All,
             detail::AllFilter,
             std::conditional_t<Base == FilterBase::Basic,
-                detail::MatchFilter<Entity, Tag, Transform, detail::FreeComponentGroup, Includes...>,
+                detail::MatchFilter<Entity, Hierarchy, Tag, Transform, detail::FreeComponentGroup, Includes...>,
                 detail::MatchFilter<detail::FreeComponentGroup, Includes...>>>;
 
         /** @brief Indicates whether all requested types are accessible by the policy. */

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NcEngine.h"
-#include "ecs/Registry.h"
+#include "ecs/ComponentRegistry.h"
 #include "math/Random.h"
 #include "task/Executor.h"
 #include "window/WindowImpl.h"
@@ -16,18 +16,19 @@ namespace nc
             void Start(std::unique_ptr<Scene> initialScene) override;
             void Stop() noexcept override;
             void Shutdown() noexcept override;
-            auto GetRegistry() noexcept -> Registry* override;
+            auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& override;
             auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
             void RebuildTaskGraph() override;
 
         private:
             window::WindowImpl m_window;
-            std::unique_ptr<Registry> m_registry;
-            ModuleRegistry m_modules;
+            std::unique_ptr<ecs::ComponentRegistry> m_registry;
+            Registry m_legacyRegistry; // delete once all usage is cutover
+            std::unique_ptr<ModuleRegistry> m_modules;
             task::Executor m_executor;
             bool m_isRunning;
 
-            void Clear();
+            void ClearScene();
             void Run();
     };
 }

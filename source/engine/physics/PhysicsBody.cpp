@@ -86,11 +86,10 @@ PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 li
         m_awake{true}
 {
     auto* registry = ActiveRegistry();
-    auto* collider = registry->Get<Collider>(entity);
-
-    if(!collider)
+    if(!registry->Contains<Collider>(entity))
         throw NcError("PhysicsBody added to Entity with no Collider");
 
+    auto* collider = registry->Get<Collider>(entity);
     if(entity.IsStatic())
     {
         m_properties.mass = 0.0f;

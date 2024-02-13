@@ -5,12 +5,6 @@ using namespace nc;
 
 namespace nc
 {
-Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
-    : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
-{}
-
-void Transform::SetParent(Entity entity) { m_parent = entity; }
-
 Quaternion::Quaternion(float X, float Y, float Z, float W)
     : x{X}, y{Y}, z{Z}, w{W}
 {}
@@ -42,16 +36,18 @@ struct Fake3 : public ComponentBase
 class View_unit_tests : public ::testing::Test
 {
     public:
-        static inline Registry registry{10u};
+        static inline ecs::ComponentRegistry impl{10u};
+        static inline Registry registry{impl};
 
         static void SetUpTestSuite()
         {
-            registry.RegisterComponentType<nc::Tag>();
-            registry.RegisterComponentType<nc::Transform>();
-            registry.RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
-            registry.RegisterComponentType<Fake1>();
-            registry.RegisterComponentType<Fake2>();
-            registry.RegisterComponentType<Fake3>();
+            impl.RegisterType<nc::Tag>(10);
+            impl.RegisterType<nc::Transform>(10);
+            impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
+            impl.RegisterType<nc::Hierarchy>(10);
+            impl.RegisterType<Fake1>(10);
+            impl.RegisterType<Fake2>(10);
+            impl.RegisterType<Fake3>(10);
         }
 
         ~View_unit_tests()

@@ -1,5 +1,8 @@
 #include "EditorUI.h"
+#include "ui/editor/Editor.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/input/Input.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
 
@@ -29,16 +32,42 @@ void WindowLayout(float width, ImVec2 pivot)
 
 namespace nc::ui::editor
 {
-void EditorUI::Draw(ecs::Ecs world)
+EditorUI::EditorUI(EditorContext& ctx)
+    : m_sceneGraph{ctx},
+      m_createEntityDialog{ctx.world},
+      m_newSceneDialog{ctx.modules.Get<NcScene>()},
+      m_saveSceneDialog{ctx.world},
+      m_loadSceneDialog{ctx.world, ctx.modules.Get<NcScene>()}
 {
-    RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
-    Window("Scene Graph", [&]()
+}
+
+void EditorUI::Draw(EditorContext& ctx)
+{
+    ctx.dimensions = ImVec2{window::GetDimensions()};
+    DrawOverlays(ctx.dimensions);
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
+    switch (ctx.openState = ProcessInput(ctx.hotkeys, ncAsset))
     {
-        m_sceneGraph.Draw(world);
+        case OpenState::ClosePersisted: { return; }
+        case OpenState::OpenPersisted: { break; }
+        case OpenState::Opened: { break; }
+        case OpenState::Closed:
+        {
+            m_sceneGraph.OnClose(ctx);
+            return;
+        }
+    }
+
+    DrawDialogs(ctx);
+
+    RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
+    Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
+    {
+        DrawMenu(ncAsset);
+        m_sceneGraph.Draw(ctx, m_createEntityDialog);
     });
 
-    const auto selectedEntity = m_sceneGraph.GetSelectedEntity();
-    if (!selectedEntity.Valid())
+    if (!ctx.selectedEntity.Valid())
     {
         return;
     }
@@ -46,7 +75,79 @@ void EditorUI::Draw(ecs::Ecs world)
     RUN_ONCE(WindowLayout(g_initialInspectorWidth, g_pivotRight));
     Window("Inspector", [&]()
     {
-        m_inspector.Draw(world, selectedEntity);
+        m_inspector.Draw(ctx, m_createEntityDialog);
     });
+}
+
+auto EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState
+{
+    auto state = OpenState::ClosePersisted;
+    if(KeyDown(hotkeys.toggleEditor))
+    {
+        m_open = !m_open;
+        state = m_open ? OpenState::Opened : OpenState::Closed;
+    }
+    else if (m_open)
+    {
+        state = OpenState::OpenPersisted;
+    }
+
+    if (!m_open)
+        return state;
+
+    if (KeyDown(hotkeys.openNewSceneDialog))
+        m_newSceneDialog.Open();
+    else if (KeyDown(hotkeys.openSaveSceneDialog))
+        m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+    else if (KeyDown(hotkeys.openLoadSceneDialog))
+        m_loadSceneDialog.Open(&ncAsset);
+
+    return state;
+}
+
+void EditorUI::DrawOverlays(const ImVec2& dimensions)
+{
+    if (m_fpsOverlay.IsOpen())
+        m_fpsOverlay.Draw(dimensions);
+}
+
+void EditorUI::DrawDialogs(EditorContext& ctx)
+{
+    if (m_createEntityDialog.IsOpen())
+        m_createEntityDialog.Draw(ctx.dimensions, ctx.selectedEntity);
+    else if (m_newSceneDialog.IsOpen())
+        m_newSceneDialog.Draw(ctx);
+    else if (m_saveSceneDialog.IsOpen())
+        m_saveSceneDialog.Draw(ctx.dimensions);
+    else if (m_loadSceneDialog.IsOpen())
+        m_loadSceneDialog.Draw(ctx);
+}
+
+void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
+{
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Scene"))
+        {
+            if (ImGui::MenuItem("New"))
+                m_newSceneDialog.Open();
+            if (ImGui::MenuItem("Save"))
+                m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+            if (ImGui::MenuItem("Load"))
+                m_loadSceneDialog.Open(&ncAsset);
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Debug"))
+        {
+            if (ImGui::MenuItem("FPS Overlay"))
+                m_fpsOverlay.ToggleOpen();
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
 }
 } // namespace nc::ui::editor

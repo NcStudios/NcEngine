@@ -6,7 +6,7 @@
 
 namespace nc::ui::editor
 {
-auto EntityContextMenu(Entity entity, ecs::Ecs world) -> Entity
+auto EntityContextMenu(Entity entity, ecs::Ecs world, CreateEntityDialog& createEntityDialog) -> Entity
 {
     if (ImGui::Selectable("Remove Entity"))
     {
@@ -15,11 +15,16 @@ auto EntityContextMenu(Entity entity, ecs::Ecs world) -> Entity
     }
     else if (ImGui::Selectable("Add Child"))
     {
+        createEntityDialog.Open();
+        return entity;
+    }
+    else if (ImGui::Selectable("Add Default Child"))
+    {
         return world.Emplace<Entity>({.parent = entity});
     }
     else if (ImGui::Selectable("Make Root"))
     {
-        world.Get<Transform>(entity)->SetParent(Entity::Null());
+        world.SetParent(entity, Entity::Null());
         return entity;
     }
 

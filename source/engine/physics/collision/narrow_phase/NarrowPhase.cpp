@@ -88,7 +88,9 @@ auto NarrowPhase::TryGetCollisionLogic(Entity a) -> CollisionLogic*
 {
     if(a.ReceivesCollisionEvents() && m_registry->Contains<Entity>(a))
     {
-        return m_registry->Get<CollisionLogic>(a);
+        return m_registry->Contains<CollisionLogic>(a)
+            ? m_registry->Get<CollisionLogic>(a)
+            : nullptr;
     }
 
     return nullptr;

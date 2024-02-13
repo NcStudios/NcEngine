@@ -45,10 +45,12 @@ namespace nc::graphics
         m_imageInfos.clear();
     }
 
-    void ShadowMapShaderResource::Update(const std::vector<ShadowMap>& data)
+    void ShadowMapShaderResource::Update(const std::vector<ShadowMapData>& data)
     {
+        assert(data.size() <= m_maxShadows && !data.empty());
+
         m_imageInfos.clear();
-        m_imageInfos.reserve(data.size());
+        m_imageInfos.reserve(m_maxShadows);
 
         std::ranges::transform(data, std::back_inserter(m_imageInfos), [this](auto &dataItem)
         {
@@ -74,7 +76,7 @@ namespace nc::graphics
             m_maxShadows,
             vk::DescriptorType::eCombinedImageSampler,
             vk::ShaderStageFlagBits::eFragment,
-            vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
+            vk::DescriptorBindingFlagBitsEXT()
         );
     }
-}
+} // namespace nc::graphics

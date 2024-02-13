@@ -3,11 +3,11 @@
 namespace
 {
 void AddChildren(nc::Entity parent,
-                 nc::ecs::ExplicitEcs<nc::Transform> ecs,
+                 nc::ecs::ExplicitEcs<nc::Hierarchy> ecs,
                  std::function<bool(nc::Entity)>& filter,
                  std::vector<nc::Entity>& out)
 {
-    auto included = ecs.Get<nc::Transform>(parent)->Children() |
+    auto included = ecs.Get<nc::Hierarchy>(parent).children |
         std::views::filter(
             [&filter](nc::Entity entity){
                 return entity.IsSerializable() && filter(entity);
@@ -24,17 +24,18 @@ void AddChildren(nc::Entity parent,
 }
 
 auto ReconstructEntityInfo(nc::Entity entity,
-                           nc::ecs::ExplicitEcs<nc::Transform, nc::Tag> ecs) -> nc::EntityInfo
+                           nc::ecs::ExplicitEcs<nc::Hierarchy, nc::Transform, nc::Tag> ecs) -> nc::EntityInfo
 {
-    const auto transform = ecs.Get<nc::Transform>(entity);
-    const auto tag = ecs.Get<nc::Tag>(entity);
+    const auto& hierarchy = ecs.Get<nc::Hierarchy>(entity);
+    const auto& transform = ecs.Get<nc::Transform>(entity);
+    const auto& tag = ecs.Get<nc::Tag>(entity);
     return nc::EntityInfo
     {
-        .position = transform->LocalPosition(),
-        .rotation = transform->LocalRotation(),
-        .scale = transform->LocalScale(),
-        .parent = transform->Parent(),
-        .tag = std::string{tag->Value()},
+        .position = transform.LocalPosition(),
+        .rotation = transform.LocalRotation(),
+        .scale = transform.LocalScale(),
+        .parent = hierarchy.parent,
+        .tag = std::string{tag.Value()},
         .layer = entity.Layer(),
         .flags = entity.Flags()
     };
@@ -45,14 +46,14 @@ namespace nc
 {
 auto BuildFragmentEntityList(std::span<const Entity> in,
                              std::function<bool(Entity)>& filter,
-                             ecs::ExplicitEcs<Transform> ecs) -> std::vector<Entity>
+                             ecs::ExplicitEcs<Hierarchy> ecs) -> std::vector<Entity>
 {
     // All parents must precede their children, so we want a list of all root nodes that pass the filter.
     auto rootEntities = in | std::views::filter([&filter, &ecs](auto entity)
     {
         return entity.IsSerializable()
             && filter(entity)
-            && !ecs.Get<Transform>(entity)->Parent().Valid();
+            && !ecs.Get<Hierarchy>(entity).parent.Valid();
     });
 
     auto out = std::vector<Entity>{};
@@ -91,7 +92,7 @@ void RemapEntity(Entity& entity, const FragmentIdToEntityMap& map)
 }
 
 auto BuildFragmentEntityInfos(std::span<const Entity> entities,
-                              ecs::ExplicitEcs<Transform, Tag> ecs,
+                              ecs::ExplicitEcs<Hierarchy, Transform, Tag> ecs,
                               const EntityToFragmentIdMap& entityMap) -> std::vector<FragmentEntityInfo>
 {
     auto out = std::vector<FragmentEntityInfo>{};

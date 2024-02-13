@@ -1,11 +1,6 @@
 target_sources(${NC_SAMPLE_EXE}
     PRIVATE
-        ClickEvents.cpp
-        CollisionEvents.cpp
-        CollisionBenchmark.cpp
-        JareTestScene.cpp
-        JointsTest.cpp
-        RenderingBenchmark.cpp
-        SpawnTest.cpp
-        Worms.cpp
+        Benchmarks.cpp
+        GraphicsTest.cpp
+        PhysicsTest.cpp
 )
