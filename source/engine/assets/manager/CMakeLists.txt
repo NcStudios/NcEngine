@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         AudioClipAssetManager.cpp
         ConcaveColliderAssetManager.cpp
         CubeMapAssetManager.cpp
+        FontAssetManager.cpp
         HullColliderAssetManager.cpp
         MeshAssetManager.cpp
         ShaderAssetManager.cpp

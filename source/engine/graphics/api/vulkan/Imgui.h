@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ncengine/utility/Signal.h"
+
 #include "vulkan/vk_mem_alloc.hpp"
 
 struct GLFWwindow;
@@ -15,7 +17,8 @@ class Imgui
         explicit Imgui(const Device& device,
                        const Instance& instance,
                        GLFWwindow* window,
-                       vk::RenderPass renderPass);
+                       vk::RenderPass renderPass,
+                       Signal<>& onFontUpdate);
         ~Imgui() noexcept;
 
         void FrameBegin();
@@ -23,5 +26,6 @@ class Imgui
 
     private:
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
+        Connection<> m_buildFonts;
     };
 } // namespace nc::graphics

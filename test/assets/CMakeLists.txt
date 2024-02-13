@@ -185,6 +185,40 @@ target_link_libraries(CubeMapAssetManager_tests
 
 add_test(CubeMapAssetManager_tests CubeMapAssetManager_tests)
 
+### FontAssetManager Tests ###
+add_executable(FontAssetManager_tests
+    FontAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/assets/manager/FontAssetManager.cpp
+)
+
+target_compile_definitions(FontAssetManager_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+        NC_TEST_STRIP_DEPENDENCIES
+)
+
+target_include_directories(FontAssetManager_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+)
+
+target_compile_options(FontAssetManager_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(FontAssetManager_tests
+    PRIVATE
+        NcAsset
+        NcUtility
+        gtest_main
+)
+
+add_test(FontAssetManager_tests FontAssetManager_tests)
+
 ### MeshAssetManager Tests ###
 add_executable(MeshAssetManager_tests
     MeshAssetManager_tests.cpp
@@ -330,6 +364,7 @@ add_executable(NcAsset_tests
     ${NC_SOURCE_DIR}/assets/manager/AudioClipAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/manager/ConcaveColliderAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/manager/CubeMapAssetManager.cpp
+    ${NC_SOURCE_DIR}/assets/manager/FontAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/manager/HullColliderAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/manager/MeshAssetManager.cpp
     ${NC_SOURCE_DIR}/assets/manager/ShaderAssetManager.cpp
@@ -340,6 +375,7 @@ add_executable(NcAsset_tests
 target_compile_definitions(NcAsset_tests
     PRIVATE
         NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+        NC_TEST_STRIP_DEPENDENCIES
 )
 
 target_include_directories(NcAsset_tests

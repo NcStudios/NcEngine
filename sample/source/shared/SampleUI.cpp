@@ -1,8 +1,10 @@
 #include "SampleUI.h"
+#include "Prefabs.h"
 #include "scenes/Benchmarks.h"
 #include "scenes/GraphicsTest.h"
 #include "scenes/PhysicsTest.h"
 
+#include "ncengine/asset/Assets.h"
 #include "ncengine/config/Version.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/input/Input.h"
@@ -40,7 +42,8 @@ namespace nc::sample
           m_gameLog{},
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()},
-          m_screenExtent{window::GetScreenExtent()}
+          m_screenExtent{window::GetScreenExtent()},
+          m_font{nc::AcquireFont(UIFont)}
     {
         ui::SetDefaultUIStyle();
         window::RegisterOnResizeReceiver(this);
@@ -53,9 +56,9 @@ namespace nc::sample
 
     void SampleUI::Draw()
     {
+        ImGui::PushFont(m_font.font);
         ImGui::SetNextWindowPos({ (m_windowDimensions.x-m_screenExtent.x)/2, m_windowDimensions.y - PanelHeight });
         ImGui::SetNextWindowSize({ m_screenExtent.x, PanelHeight });
-
         if (ImGui::Begin("SampleUI", nullptr, WindowFlags))
         {
             ImGui::Columns(3);
@@ -64,7 +67,10 @@ namespace nc::sample
             DrawLog();
             ImGui::NextColumn();
             DrawSceneList();
-        } ImGui::End();
+        }
+
+        ImGui::End();
+        ImGui::PopFont();
     }
 
     void SampleUI::DrawDefaultWidget()
@@ -84,19 +90,20 @@ namespace nc::sample
 
     void SampleUI::DrawLog()
     {
-        auto columnWidth = ImGui::GetColumnWidth();
         static int ItemCount = GameLog::DefaultItemCount;
         ImGui::Text("%s", "Log");
-        ImGui::SameLine(columnWidth - 50);
-        if (ImGui::Button("Clear", { 42, 18 }))
-            m_gameLog.Clear();
-        ImGui::SameLine(columnWidth - 130);
-        ImGui::SetNextItemWidth(70);
+        ImGui::SameLine();
+
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 6);
         if (ImGui::InputInt("##logcount", &ItemCount, 1, 5))
         {
             ItemCount = nc::Clamp(ItemCount, 0, 1000); //for sanity, since Dear ImGui doesn't deal with unsigned
             m_gameLog.SetItemCount(ItemCount);
         }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Clear"))
+            m_gameLog.Clear();
 
         if (ImGui::BeginChild("LogPanel", { 0,0 }, true))
         {
@@ -110,7 +117,7 @@ namespace nc::sample
         ImGui::Text("Scenes");
         if (ImGui::BeginChild("SceneList", { 0,0 }, true))
         {
-            auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 18 };
+            auto buttonSize = ImVec2{ ImGui::GetWindowWidth() - 20, 0 };
             if (ImGui::Button("PhysicsTest", buttonSize))
             {
                 m_ncScene->Queue(std::make_unique<PhysicsTest>(this));

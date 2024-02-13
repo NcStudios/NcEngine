@@ -21,14 +21,20 @@ namespace nc::window
     /* Api Function Implementation */
     Vector2 GetDimensions()
     {
-        NC_ASSERT(g_instance, "window::GetDimensions - g_instance is not set");
+        NC_ASSERT(g_instance, "Window instance is not set");
         return g_instance->GetDimensions();
     }
 
     Vector2 GetScreenExtent()
     {
-        NC_ASSERT(g_instance, "window::GetScreenExtent - g_instance is not set");
+        NC_ASSERT(g_instance, "Window instance is not set");
         return g_instance->GetScreenExtent();
+    }
+
+    Vector2 GetContentScale()
+    {
+        NC_ASSERT(g_instance, "Window instance is not set");
+        return g_instance->GetContentScale();
     }
 
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -86,11 +92,14 @@ namespace nc::window
             throw NcError("CreateWindow failed");
         }
 
+        glfwGetWindowContentScale(m_window, &m_contentScale.x, &m_contentScale.y);
+
         glfwSetKeyCallback(m_window, &ProcessKeyEvent);
         glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
         glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
         glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
         glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
+        glfwSetWindowContentScaleCallback(m_window, &ProcessSetContentScaleEvent);
         glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
     }
 
@@ -113,6 +122,11 @@ namespace nc::window
     Vector2 WindowImpl::GetScreenExtent() const noexcept
     {
         return m_screenExtent;
+    }
+
+    Vector2 WindowImpl::GetContentScale() const noexcept
+    {
+        return m_contentScale;
     }
 
     void WindowImpl::SetDimensions(int width, int height) noexcept
@@ -162,6 +176,11 @@ namespace nc::window
         g_instance->SetDimensions(width, height);
         glfwSetWindowSize(window, width, height);
         g_instance->InvokeResizeReceivers(window, width, height);
+    }
+
+    void WindowImpl::ProcessSetContentScaleEvent(GLFWwindow*, float x, float y)
+    {
+        g_instance->m_contentScale = Vector2{x, y};
     }
 
     void WindowImpl::ProcessSystemMessages()

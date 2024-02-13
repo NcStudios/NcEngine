@@ -20,7 +20,7 @@ set(NC_TOOLS_BUILD_TESTS OFF)
 
 FetchContent_Declare(nc-tools
                      GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
-                     GIT_TAG             v3.0.0
+                     GIT_TAG             v3.1.0-ncasset
                      GIT_SHALLOW         TRUE
 )
 

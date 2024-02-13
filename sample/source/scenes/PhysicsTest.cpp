@@ -25,17 +25,21 @@ void Widget()
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+        const auto halfCellWidth = (ImGui::GetColumnWidth() * 0.5f) - 10.0f;
 
+        ImGui::SetNextItemWidth(halfCellWidth);
         ImGui::InputInt("##spawncount", &SpawnCount);
         SpawnCount = nc::Clamp(SpawnCount, 1, 20000);
-
-        if(ImGui::Button("Spawn", {100, 20}))
-            SpawnFunc(SpawnCount);
-
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(halfCellWidth);
         ImGui::InputInt("##destroycount", &DestroyCount);
         DestroyCount = nc::Clamp(DestroyCount, 1, 20000);
 
-        if(ImGui::Button("Destroy", {100, 20}))
+        if(ImGui::Button("Spawn", ImVec2{halfCellWidth, 0}))
+            SpawnFunc(SpawnCount);
+
+        ImGui::SameLine();
+        if(ImGui::Button("Destroy", ImVec2{halfCellWidth, 0}))
             DestroyFunc(DestroyCount);
 
         ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
