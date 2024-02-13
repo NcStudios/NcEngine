@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ToonRenderer.h"
 
@@ -33,4 +34,7 @@ extern graphics::ToonMaterial OrangeToonMaterial;
 extern graphics::ToonMaterial PurpleToonMaterial;
 extern graphics::ToonMaterial TealToonMaterial;
 extern graphics::ToonMaterial YellowToonMaterial;
+
+// Fonts
+extern FontInfo UIFont;
 } // namespace nc::sample

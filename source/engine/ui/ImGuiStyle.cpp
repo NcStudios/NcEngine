@@ -1,4 +1,5 @@
 #include "ncengine/ui/ImGuiStyle.h"
+#include "ncengine/window/Window.h"
 
 #include "imgui/imgui.h"
 
@@ -7,6 +8,22 @@ namespace nc::ui
 void SetDefaultUIStyle()
 {
     auto& style = ImGui::GetStyle();
+
+    auto [xScale, yScale] = window::GetContentScale();
+    style.ScaleAllSizes(std::floor(std::max(xScale, yScale)));
+
+    constexpr auto rounding = 4.0f;
+    style.WindowRounding = rounding;
+    style.ChildRounding = rounding;
+    style.FrameRounding = rounding;
+    style.PopupRounding = rounding;
+
+    constexpr auto borderSize = 2.0f;
+    style.WindowBorderSize = borderSize;
+    style.ChildBorderSize = borderSize;
+    style.FrameBorderSize = borderSize;
+    style.PopupBorderSize = borderSize;
+
     style.WindowMenuButtonPosition = ImGuiDir_None;
     ImVec4* colors = style.Colors;
     colors[ImGuiCol_Text]                  = default_scheme::Text;
@@ -15,7 +32,7 @@ void SetDefaultUIStyle()
     colors[ImGuiCol_ChildBg]               = default_scheme::ChildBG;
     colors[ImGuiCol_PopupBg]               = default_scheme::PopupBG;
     colors[ImGuiCol_Border]                = default_scheme::Border;
-    colors[ImGuiCol_BorderShadow]          = default_scheme::AccentTrans;
+    colors[ImGuiCol_BorderShadow]          = default_scheme::ScrollBarBG;
     colors[ImGuiCol_FrameBg]               = default_scheme::Title;
     colors[ImGuiCol_FrameBgHovered]        = default_scheme::Hovered;
     colors[ImGuiCol_FrameBgActive]         = default_scheme::Active;

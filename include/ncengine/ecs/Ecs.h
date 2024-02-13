@@ -148,6 +148,22 @@ class EcsInterface
             }
         }
 
+        /**
+         * @brief Get the first Entity matching a Tag.
+         * @note To minimize the search cost, staged Entities are not considered. If they need to be, first call
+         *       ComponentRegistry::CommitPendingChanges(), but DO NOT do this from within the task graph (e.g.
+         *       from game logic). It is safe to commit changes inside of Scene::Load().
+         */
+        auto GetEntityByTag(std::string_view tagValue) -> Entity
+            requires PolicyType::template HasAccess<Entity>
+                  && PolicyType::template HasAccess<Tag>
+        {
+            const auto tags = GetAll<Tag>();
+            const auto pos = std::ranges::find(tags, tagValue, [](const auto& tag) { return tag.Value(); });
+            NC_ASSERT(pos != std::ranges::end(tags), fmt::format("No Entity found with Tag '{}'", tagValue));
+            return pos->ParentEntity();
+        }
+
         /** @brief Get a contiguous view of all instances of a type. */
         template<class T>
             requires PolicyType::template HasAccess<T>
