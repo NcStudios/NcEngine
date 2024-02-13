@@ -36,8 +36,8 @@ constexpr float SleepEpsilon = 0.01f;    // Velocity threshold for physics sleep
 constexpr uint8_t FramesUntilSleep = 5u; // How many frames below epsilon until an object sleeps
 } // namespace nc::physics
 
-#define NC_PHYSICS_DEBUGGING 1
-#define NC_PHYSICS_DRAW_CONTACT_POINTS 1
+#define NC_PHYSICS_DEBUGGING 0
+#define NC_PHYSICS_DRAW_CONTACT_POINTS 0
 #define NC_PHYSICS_COLLISION_LOGGING 0
 #define NC_PHYSICS_CONTACT_LOGGING 0
 #define NC_PHYSICS_SOLVER_LOGGING 0

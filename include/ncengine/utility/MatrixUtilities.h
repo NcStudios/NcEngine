@@ -12,8 +12,8 @@ namespace nc
 {
 inline auto ToVector3(DirectX::FXMVECTOR in) noexcept -> Vector3
 {
-    auto out = Vector3{};
-    DirectX::XMStoreVector3(&out, in);
+    alignas(16) auto out = Vector3{};
+    DirectX::XMStoreVector3A(&out, in);
     return out;
 }
 

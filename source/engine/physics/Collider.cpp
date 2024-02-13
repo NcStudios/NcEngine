@@ -81,8 +81,7 @@ void Collider::SetProperties(SphereProperties properties)
 
 auto Collider::EstimateBoundingVolume(DirectX::FXMMATRIX matrix) const -> Sphere
 {
-    Vector3 translation;
-    DirectX::XMStoreVector3(&translation, matrix.r[3]);
+    auto translation = ToVector3(matrix.r[3]);
     auto scale = GetMaxScaleExtent(matrix);
     return std::visit([&translation, scale](auto&& v)
     {

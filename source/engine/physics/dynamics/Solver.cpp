@@ -70,8 +70,8 @@ Vector3 ComputeLagrangeMultipliers(ContactConstraint& c, const ConstraintMatrix&
     /** lagrange = -(JV + b) / (J M^-1 J^t)^-1 = effMass [-(JV + b)] */
     auto bias = XMVectorSet(biasAlongNormal, 0.0f, 0.0f, 0.0f);
     auto lagrange_v = XMVectorNegate(first + second + bias) * c.effectiveMass;
-    Vector3 lagrange;
-    XMStoreVector3(&lagrange, lagrange_v);
+    alignas(16) Vector3 lagrange;
+    XMStoreVector3A(&lagrange, lagrange_v);
 
     /** clamping = (Ln >= 0) && (-mu*Ln <= Lt <= mu*Ln) && (-mu*Ln <= Lb < = mu*Ln) */
     float maxFriction = c.friction * c.totalLambda;

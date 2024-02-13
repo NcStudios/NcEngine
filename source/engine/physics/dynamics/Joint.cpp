@@ -6,13 +6,13 @@ namespace
 {
 auto Skew(DirectX::FXMVECTOR vec) -> DirectX::XMMATRIX
 {
-    nc::Vector3 v;
-    DirectX::XMStoreVector3(&v, vec);
+    alignas(16) nc::Vector3 v;
+    DirectX::XMStoreVector3A(&v, vec);
 
     return DirectX::XMMatrixSet
     (
         0.0f, -v.z,  v.y, 0.0f,
-            v.z, 0.0f, -v.x, 0.0f,
+        v.z, 0.0f, -v.x, 0.0f,
         -v.y,  v.x, 0.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     );
