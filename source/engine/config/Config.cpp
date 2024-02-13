@@ -63,6 +63,22 @@ constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
 
 // audio
 constexpr auto AudioEnabledKey = "audio_enabled"sv;
+constexpr auto BufferFramesKey = "buffer_frames"sv;
+
+auto ValidateBufferFrames(unsigned frames)
+{
+    switch(frames)
+    {
+        case 16:   [[fallthrough]];
+        case 32:   [[fallthrough]];
+        case 64:   [[fallthrough]];
+        case 128:  [[fallthrough]];
+        case 512:  [[fallthrough]];
+        case 1024: [[fallthrough]];
+        case 2048: return true;
+        default:   return false;
+    }
+}
 
 auto TrimWhiteSpace(const std::string& str) -> std::string
 {
@@ -198,6 +214,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     else if constexpr (std::same_as<Struct_t, nc::config::AudioSettings>)
     {
         ParseValueIfExists(out.enabled, AudioEnabledKey, kvPairs);
+        ParseValueIfExists(out.bufferFrames, BufferFramesKey, kvPairs);
     }
 
     return out;
@@ -326,6 +343,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[audio_settings]\n";
     ::WriteKVPair(stream, AudioEnabledKey, config.audioSettings.enabled);
+    ::WriteKVPair(stream, BufferFramesKey, config.audioSettings.bufferFrames);
 }
 
 bool Validate(const Config& config)
@@ -348,7 +366,8 @@ bool Validate(const Config& config)
            (config.graphicsSettings.targetFPS != 0) &&
            (config.graphicsSettings.nearClip > 0.0f) &&
            (config.graphicsSettings.farClip > 0.0f) &&
-           (config.graphicsSettings.antialiasing > 0);
+           (config.graphicsSettings.antialiasing > 0) &&
+           ValidateBufferFrames(config.audioSettings.bufferFrames);
 }
 
 // Implementation from ConfigInternal.h
