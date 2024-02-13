@@ -4,7 +4,7 @@
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/shaders/CubeMapShaderResource.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate)
     : m_device{device},
@@ -66,4 +66,4 @@ void CubeMapStorage::UnloadAllCubeMapBuffer()
     /** No need to write an empty buffer to the GPU. **/
     m_cubeMaps.clear();
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

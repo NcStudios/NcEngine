@@ -57,10 +57,10 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             (
                 eventData.currentFrameIndex,
                 0,
-                perFrameUboStorage.uniformBuffers.back()->GetBuffer(),
+                perFrameSsboStorage.storageBuffers.back()->GetBuffer(),
                 eventData.size,
                 1,
-                vk::DescriptorType::eUniformBuffer,
+                vk::DescriptorType::eStorageBuffer,
                 eventData.slot
             );
             break;
@@ -77,7 +77,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
 
             auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uniformBufferUids.begin(), pos));
             auto& buffer = perFrameUboStorage.uniformBuffers.at(posIndex);
-            buffer->Bind(eventData.data, eventData.size);
+            buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
             break;
         }
         case SsboUpdateAction::Clear:
@@ -138,7 +138,7 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
                 eventData.currentFrameIndex,
                 0,
                 perFrameUboStorage.uniformBuffers.back()->GetBuffer(),
-                eventData.size,
+                static_cast<uint32_t>(eventData.size),
                 1,
                 vk::DescriptorType::eUniformBuffer,
                 eventData.slot
@@ -157,7 +157,7 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
 
             auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uniformBufferUids.begin(), pos));
             auto& buffer = perFrameUboStorage.uniformBuffers.at(posIndex);
-            buffer->Bind(eventData.data, eventData.size);
+            buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
             break;
         }
         case UboUpdateAction::Clear:

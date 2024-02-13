@@ -14,6 +14,8 @@ namespace graphics
 {
 class GpuAllocator;
 
+namespace vulkan
+{
 class CubeMapStorage
 {
     public:
@@ -32,5 +34,6 @@ class CubeMapStorage
         vk::UniqueSampler m_sampler;
         nc::Connection<const asset::CubeMapUpdateEventData&> m_onCubeMapUpdate;
 };
+} // namespace vulkan
 } // namespace graphics
 } // namespace nc

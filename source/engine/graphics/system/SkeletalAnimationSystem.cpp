@@ -46,8 +46,7 @@ SkeletalAnimationSystem::SkeletalAnimationSystem(Registry* registry,
                                                  ShaderResourceBus* shaderResourceBus,
                                                  uint32_t maxSkeletalAnimations,
                                                  Signal<const asset::SkeletalAnimationUpdateEventData&>& onSkeletalAnimationUpdate,
-                                                 Signal<const asset::BoneUpdateEventData&>& onBonesUpdate,
-                                                 Signal<const std::vector<SkeletalAnimationData>&>&& gpuBackendChannel)
+                                                 Signal<const asset::BoneUpdateEventData&>& onBonesUpdate)
     : m_registry{registry},
       m_rigs{},
       m_onBonesUpdate{onBonesUpdate.Connect(this, &SkeletalAnimationSystem::UpdateBonesStorage)},

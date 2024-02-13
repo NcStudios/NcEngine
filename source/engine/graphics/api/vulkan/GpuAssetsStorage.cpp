@@ -1,6 +1,6 @@
 #include "GpuAssetsStorage.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 GpuAssetsStorage::GpuAssetsStorage(vk::Device device,
                                    GpuAllocator* allocator,
@@ -12,4 +12,4 @@ GpuAssetsStorage::GpuAssetsStorage(vk::Device device,
       textureStorage{device, allocator, onTextureUpdate}
 {
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

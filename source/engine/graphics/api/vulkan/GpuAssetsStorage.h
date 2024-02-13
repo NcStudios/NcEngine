@@ -7,7 +7,8 @@
 namespace nc::graphics
 {
 class GpuAllocator;
-
+namespace vulkan
+{
 struct GpuAssetsStorage
 {
     GpuAssetsStorage(vk::Device device,
@@ -20,4 +21,5 @@ struct GpuAssetsStorage
     MeshStorage meshStorage;
     TextureStorage textureStorage;
 };
+} // namespace vulkan
 } // namespace nc::graphics

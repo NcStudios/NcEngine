@@ -16,10 +16,10 @@ struct SkeletalAnimationSystemState
     std::unordered_map<Entity::index_type, uint32_t> animationIndices;
 };
 
+constexpr uint32_t AvgBonesPerAnim = 10u;
+
 class SkeletalAnimationSystem : public StableAddress
 {
-    constexpr uint32_t AvgBonesPerAnim = 10u;
-
     public:
         SkeletalAnimationSystem(Registry* registry,
                                 ShaderResourceBus* shaderResourceBus,
