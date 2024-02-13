@@ -33,6 +33,15 @@ auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 
     return device.createDescriptorPoolUnique(imguiDescriptorPoolInfo);
 }
+
+auto MakeBuildFontHandler(const nc::graphics::Device& device)
+{
+    return [&device]()
+    {
+        device.ExecuteCommand([](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
+        ImGui_ImplVulkan_DestroyFontUploadObjects();
+    };
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -40,8 +49,10 @@ namespace nc::graphics
 Imgui::Imgui(const Device& device,
              const Instance& instance,
              GLFWwindow* window,
-             vk::RenderPass renderPass)
-    : m_imguiDescriptorPool{CreateImguiDescriptorPool(device.VkDevice())}
+             vk::RenderPass renderPass,
+             Signal<>& onFontUpdate)
+    : m_imguiDescriptorPool{CreateImguiDescriptorPool(device.VkDevice())},
+      m_buildFonts{onFontUpdate.Connect(::MakeBuildFontHandler(device))}
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

@@ -30,6 +30,7 @@ constexpr auto MeshesPathKey = "meshes_path"sv;
 constexpr auto ShadersPathKey = "shaders_path"sv;
 constexpr auto SkeletalAnimationsPathKey = "skeletal_animations_path"sv;
 constexpr auto TexturesPathKey = "textures_path"sv;
+constexpr auto FontsPathKey = "fonts_path"sv;
 
 // memory
 constexpr auto MaxDynamicCollidersKey = "max_dynamic_colliders"sv;
@@ -176,6 +177,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.shadersPath, ShadersPathKey, kvPairs);
         ParseValueIfExists(out.skeletalAnimationsPath, SkeletalAnimationsPathKey, kvPairs);
         ParseValueIfExists(out.texturesPath, TexturesPathKey, kvPairs);
+        ParseValueIfExists(out.fontsPath, FontsPathKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::MemorySettings>)
     {
@@ -309,6 +311,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, ShadersPathKey, config.assetSettings.shadersPath);
     ::WriteKVPair(stream, SkeletalAnimationsPathKey, config.assetSettings.skeletalAnimationsPath);
     ::WriteKVPair(stream, TexturesPathKey, config.assetSettings.texturesPath);
+    ::WriteKVPair(stream, FontsPathKey, config.assetSettings.fontsPath);
 
     if (writeSections) stream << "[memory_settings]\n";
     ::WriteKVPair(stream, MaxDynamicCollidersKey, config.memorySettings.maxDynamicColliders);
@@ -355,6 +358,7 @@ bool Validate(const Config& config)
            (config.assetSettings.shadersPath != "") &&
            (config.assetSettings.texturesPath != "") &&
            (config.assetSettings.cubeMapsPath != "") &&
+           (config.assetSettings.fontsPath != "") &&
            (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
            (config.physicsSettings.worldspaceExtent > 0.0f) &&
            (config.graphicsSettings.screenWidth != 0) &&

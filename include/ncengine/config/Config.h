@@ -34,6 +34,7 @@ struct AssetSettings
     std::string skeletalAnimationsPath = "resources/assets/skeletal_animations/";
     std::string texturesPath = "resources/assets/textures/";
     std::string cubeMapsPath = "resources/assets/cube_maps";
+    std::string fontsPath = "resources/assets/fonts";
 };
 
 /**
