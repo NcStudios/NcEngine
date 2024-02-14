@@ -454,6 +454,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
                         .periodicEmissionCount = 15u,
                         .periodicEmissionFrequency = 0.1f
                     },
+                    .init = {},
                     .kinematic = {
                         .velocityMin = Vector3::One() * -2.0f,
                         .velocityMax = Vector3::One() * 2.0f,
