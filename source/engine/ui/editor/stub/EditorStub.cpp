@@ -18,6 +18,7 @@ auto BuildEditor(ecs::Ecs world, ModuleProvider modules, SystemEvents&, const Ed
     {
         .world = world,
         .modules = modules,
+        .events = nullptr,
         .selectedEntity = Entity::Null(),
         .openState = OpenState::ClosePersisted,
         .dimensions = ImVec2{},
