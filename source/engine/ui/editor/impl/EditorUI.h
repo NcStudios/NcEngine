@@ -39,7 +39,7 @@ class EditorUI
         LoadSceneDialog m_loadSceneDialog;
 
         auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
-        void DrawMenu(asset::NcAsset& ncAsset);
+        void DrawMenu(EditorContext& ctx);
         void DrawOverlays(const ImVec2& dimensions);
         void DrawDialogs(EditorContext& ctx);
 };

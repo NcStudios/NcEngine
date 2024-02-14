@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "ecs/Registry.h"
 #include "ecs/EcsModule.h"
+#include "ncengine/Events.h"
 
 using namespace nc;
 
@@ -11,8 +12,12 @@ Registry g_registry{g_impl};
 
 namespace ecs
 {
-EcsModule::EcsModule(Registry* registry) noexcept
-    : Module{0ull}, m_registry{registry} {}
+EcsModule::EcsModule(Registry* registry, SystemEvents& events) noexcept
+    : Module{0ull},
+      m_registry{registry},
+      m_rebuildStaticConnection{events.rebuildStatics.Connect([](){})}
+{
+}
 
 void EcsModule::OnBuildTaskGraph(task::TaskGraph&) {}
 void EcsModule::RunFrameLogic()
@@ -65,11 +70,12 @@ class Transform_unit_tests : public ::testing::Test
 {
     public:
         Registry* registry;
+        SystemEvents events;
         ecs::EcsModule ecsModule;
 
         Transform_unit_tests()
             : registry{&g_registry},
-              ecsModule{registry}
+              ecsModule{registry, events}
         {
         }
 

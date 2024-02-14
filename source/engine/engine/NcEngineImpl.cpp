@@ -56,7 +56,7 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_legacyRegistry{*m_registry},
-      m_modules{BuildModuleRegistry(&m_legacyRegistry, &m_window, config)},
+      m_modules{BuildModuleRegistry(&m_legacyRegistry, m_events, &m_window, config)},
       m_executor{task::BuildContext(m_modules->GetAllModules())},
       m_isRunning{false}
 {
@@ -106,6 +106,11 @@ auto NcEngineImpl::GetComponentRegistry() noexcept -> ecs::ComponentRegistry&
 auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
 {
     return m_modules.get();
+}
+
+auto NcEngineImpl::GetSystemEvents() noexcept -> SystemEvents&
+{
+    return m_events;
 }
 
 void NcEngineImpl::RebuildTaskGraph()

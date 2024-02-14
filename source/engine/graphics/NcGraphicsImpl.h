@@ -16,6 +16,7 @@
 
 namespace nc
 {
+struct SystemEvents;
 class Scene;
 
 namespace config
@@ -40,6 +41,7 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::MemorySettings& memorySettings,
                          ModuleProvider modules,
                          Registry* registry,
+                         SystemEvents& events,
                          window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
 
 class NcGraphicsImpl : public NcGraphics
@@ -48,6 +50,7 @@ class NcGraphicsImpl : public NcGraphics
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                        Registry* registry,
                        ModuleProvider modules,
+                       SystemEvents& events,
                        std::unique_ptr<IGraphics> graphics,
                        ShaderResourceBus&& shaderResourceBus,
                        window::WindowImpl* window);

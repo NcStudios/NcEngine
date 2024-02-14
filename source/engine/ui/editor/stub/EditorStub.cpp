@@ -12,7 +12,7 @@ struct EditorStub : public Editor
     void Draw(ecs::Ecs) override {}
 };
 
-auto BuildEditor(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
+auto BuildEditor(ecs::Ecs world, ModuleProvider modules, SystemEvents&, const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
 {
     return std::make_unique<EditorStub>(EditorContext
     {
