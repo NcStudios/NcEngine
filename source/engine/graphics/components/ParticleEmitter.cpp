@@ -10,9 +10,10 @@ ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
 {
 }
 
-const ParticleInfo& ParticleEmitter::GetInfo() const noexcept
+void ParticleEmitter::SetInfo(const ParticleInfo& info)
 {
-    return m_info;
+    m_info = info;
+    return m_emitterSystem->UpdateInfo(*this);
 }
 
 void ParticleEmitter::Emit(size_t count)

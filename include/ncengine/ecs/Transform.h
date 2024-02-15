@@ -79,7 +79,7 @@ class Transform final : public ComponentBase
         auto LocalRotation() const noexcept -> Quaternion { return ToQuaternion(DecomposeRotation(m_localMatrix)); }
 
         /** @brief Get world space scale */
-        auto Scale() const -> Vector3 { return ToVector3(DecomposeScale(m_worldMatrix)); }
+        auto Scale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_worldMatrix)); }
 
         /** @brief Get local space scale */
         auto LocalScale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_localMatrix)); }
@@ -94,13 +94,22 @@ class Transform final : public ComponentBase
         auto ToLocalSpace(const Vector3& vec) const -> Vector3;
 
         /** @brief Get the up axis of the transform */
-        auto Up() const -> Vector3;
+        auto Up() const noexcept -> Vector3 { return ToVector3(UpXM()); }
+
+        /** @brief Get the up axis of the transform as an XMVECTOR */
+        auto UpXM() const noexcept -> DirectX::XMVECTOR;
 
         /** @brief Get the forward axis of the transform */
-        auto Forward() const -> Vector3;
+        auto Forward() const noexcept -> Vector3 { return ToVector3(ForwardXM()); }
+
+        /** @brief Get the forward axis of the transform as an XMVECTOR */
+        auto ForwardXM() const noexcept -> DirectX::XMVECTOR;
 
         /** @brief Get the right axis of the transform */
-        auto Right() const -> Vector3;
+        auto Right() const noexcept -> Vector3 { return ToVector3(RightXM()); }
+
+        /** @brief Get the right axis of the transform as an XMVECTOR */
+        auto RightXM() const noexcept -> DirectX::XMVECTOR;
 
         /** @brief Set all local values [Quaternion] */
         void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
