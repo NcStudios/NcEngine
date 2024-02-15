@@ -67,7 +67,7 @@ auto AudioSource::AddClip(std::string clip) -> uint32_t
 
 void AudioSource::SetClip(uint32_t clipIndex, std::string path)
 {
-    NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bound");
+    NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bounds");
     m_clips[clipIndex] = AcquireAudioClipAsset(path);
     m_coldData->assetPaths.at(clipIndex) = std::move(path);
     if (m_currentClipIndex == clipIndex && IsPlaying())
