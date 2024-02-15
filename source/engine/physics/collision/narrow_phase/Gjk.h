@@ -132,8 +132,8 @@ bool Gjk(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
     NC_ASSERT(stateOut, "CollisionState cannot be null");
 
     stateOut->simplex = Simplex{};
-    stateOut->rotationA = GetRotation(aMatrix);
-    stateOut->rotationB = GetRotation(bMatrix);
+    stateOut->rotationA = DecomposeRotation(aMatrix);
+    stateOut->rotationB = DecomposeRotation(bMatrix);
     Vector3 direction = Vector3::One();
     size_t itCount = 0;
 
@@ -145,7 +145,11 @@ bool Gjk(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
         if(XMVector3Less(XMVector3Dot(supports.worldCSO, direction_v), g_XMZero))
             break;
 
-        Vector3 supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB;
+        Vector3 supportCSO;
+        Vector3 worldSupportA;
+        Vector3 worldSupportB;
+        Vector3 localSupportA;
+        Vector3 localSupportB;
         XMStoreVector3(&supportCSO, supports.worldCSO);
         XMStoreVector3(&worldSupportA, supports.worldA);
         XMStoreVector3(&worldSupportB, supports.worldB);
@@ -181,7 +185,7 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
     using namespace DirectX;
 
     stateOut->simplex = Simplex{};
-    stateOut->rotationA = GetRotation(aMatrix);
+    stateOut->rotationA = DecomposeRotation(aMatrix);
     Vector3 direction = Vector3::One();
     size_t itCount = 0;
 
@@ -206,7 +210,10 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
 
-        Vector3 supportCSO, worldSupportA, worldSupportB, localSupportA;
+        Vector3 supportCSO;
+        Vector3 worldSupportA;
+        Vector3 worldSupportB;
+        Vector3 localSupportA;
         XMStoreVector3(&supportCSO, supportCSO_v);
         XMStoreVector3(&worldSupportA, aSupportWorld_v);
         XMStoreVector3(&worldSupportB, bSupportWorld_v);
@@ -230,7 +237,7 @@ template<class BVA, class BVB>
 bool Gjk(const BVA& a, const BVB& b)
 {
     using namespace DirectX;
-    
+
     Vector3 direction = Vector3::One();
     Simplex simplex;
     size_t itCount = 0;
@@ -245,7 +252,9 @@ bool Gjk(const BVA& a, const BVB& b)
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
 
-        Vector3 supportCSO, supportA, supportB;
+        Vector3 supportCSO;
+        Vector3 supportA;
+        Vector3 supportB;
         XMStoreVector3(&supportCSO, supportCSO_v);
         XMStoreVector3(&supportA, supportA_v);
         XMStoreVector3(&supportB, supportB_v);
