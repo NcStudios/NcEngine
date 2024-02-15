@@ -98,6 +98,8 @@ void BspTree::FindPairs(std::span<const ProxyType> proxies)
     for(size_t i = 0u; i < dynamicCount; ++i)
     {
         const auto& proxy = proxies[i];
+        if (proxy.Id().IsStatic())
+            continue;
 
         // DO NOT CHECKIN
         if (proxy.Id().IsStatic())

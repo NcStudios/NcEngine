@@ -26,7 +26,7 @@ void ApplyGravity(Registry* registry, float dt)
 
     for(auto& body : View<PhysicsBody>{registry})
     {
-        if(body.UseGravity())
+        if(body.UseGravity() && !body.IsKinematic())
         {
             body.ApplyVelocity(g);
         }
