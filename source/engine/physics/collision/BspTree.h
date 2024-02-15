@@ -101,10 +101,6 @@ void BspTree::FindPairs(std::span<const ProxyType> proxies)
         if (proxy.Id().IsStatic())
             continue;
 
-        // DO NOT CHECKIN
-        if (proxy.Id().IsStatic())
-            continue;
-
         /** Find mesh colliders that are in the same region as the estimate. */
         narrowTestMeshIndices.clear();
         BroadTest(0u, proxy.estimate, narrowTestMeshIndices);

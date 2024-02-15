@@ -1,14 +1,11 @@
 #include "EditorUI.h"
 #include "ui/editor/Editor.h"
+#include "ncengine/Events.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
-
-
-
-#include "ncengine/Events.h"
 
 // Helper for setting up initial window layout:
 // Runs a block only the first time its seen by wrapping in an immediately
