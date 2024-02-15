@@ -278,7 +278,7 @@ namespace nc::graphics
         });
     }
 
-    auto CreateTextureView(vk::Device device, vk::Image image, bool isNormal) -> vk::UniqueImageView
+    auto GpuAllocator::CreateTextureView(vk::Image image, bool isNormal) -> vk::UniqueImageView
     {
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
@@ -294,10 +294,10 @@ namespace nc::graphics
         subresourceRange.setLayerCount(1);
 
         viewInfo.setSubresourceRange(subresourceRange);
-        return device.createImageViewUnique(viewInfo);
+        return m_device->VkDevice().createImageViewUnique(viewInfo);
     }
 
-    auto CreateCubeMapTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView
+    auto GpuAllocator::CreateCubeMapTextureView(vk::Image image) -> vk::UniqueImageView
     {
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
@@ -312,6 +312,6 @@ namespace nc::graphics
         subresourceRange.setLayerCount(6);
 
         viewInfo.setSubresourceRange(subresourceRange);
-        return device.createImageViewUnique(viewInfo);
+        return m_device->VkDevice().createImageViewUnique(viewInfo);
     }
 } // namespace nc::graphics

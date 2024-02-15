@@ -8,7 +8,7 @@
 
 namespace
 {
-void InitializeAllShadowMaps(nc::graphics::RenderGraph* renderGraph, nc::graphics::ShaderResources* shaderResources)
+void InitializeAllShadowMaps(nc::graphics::RenderGraph* renderGraph, nc::graphics::ShaderResources*)
 {
     auto& shadowMapPasses = renderGraph->GetShadowPasses();
     std::vector<nc::graphics::ShadowMapData> shadowMaps;
@@ -18,7 +18,7 @@ void InitializeAllShadowMaps(nc::graphics::RenderGraph* renderGraph, nc::graphic
         return nc::graphics::ShadowMapData{pass.GetAttachmentView(0)};
     });
 
-    shaderResources->shadowMapShaderResource.Update(std::move(std::vector<nc::graphics::ShadowMapData>{shadowMaps}));
+    //shaderResources->shadowMapShaderResource.Update(std::move(std::vector<nc::graphics::ShadowMapData>{shadowMaps}));
 }
 }
 

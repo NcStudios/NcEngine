@@ -96,7 +96,7 @@ namespace nc::graphics
         #endif
     }
 
-    void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
+    void WireframeTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }

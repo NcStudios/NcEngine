@@ -28,7 +28,7 @@
 
 namespace
 {
-void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::MeshBuffer& vertexData, const nc::graphics::MeshBuffer& indexData)
+void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::vulkan::MeshBuffer& vertexData, const nc::graphics::vulkan::MeshBuffer& indexData)
 {
     vk::DeviceSize offsets[] = { 0 };
     auto vertexBuffer = vertexData.GetBuffer();
@@ -163,7 +163,7 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
     }
 }
 
-void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent)
+void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const vulkan::MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex)
 {
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
@@ -175,14 +175,14 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     for (auto& shadowMappingPass : m_shadowMappingPasses)
     {
         shadowMappingPass.Begin(cmd, frameBufferIndex);
-        shadowMappingPass.Execute(cmd, frameData);
+        shadowMappingPass.Execute(cmd, frameData, frameIndex);
         shadowMappingPass.End(cmd);
     }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
     m_litPass.Begin(cmd, frameBufferIndex);
-    m_litPass.Execute(cmd, frameData);
+    m_litPass.Execute(cmd, frameData, frameIndex);
     m_litPass.End(cmd);
     cmd->end();
 }

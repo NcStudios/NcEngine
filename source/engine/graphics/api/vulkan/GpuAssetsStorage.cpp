@@ -3,13 +3,11 @@
 namespace nc::graphics::vulkan
 {
 GpuAssetsStorage::GpuAssetsStorage(vk::Device device,
-                                   GpuAllocator* allocator,
+                                   nc::graphics::GpuAllocator* allocator,
                                    Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate,
-                                   Signal<const asset::MeshUpdateEventData&>& onMeshUpdate,
-                                   Signal<const asset::TextureUpdateEventData&>& onTextureUpdate)
+                                   Signal<const asset::MeshUpdateEventData&>& onMeshUpdate)
     : cubeMapStorage{device, allocator, onCubeMapUpdate},
-      meshStorage{allocator, onMeshUpdate},
-      textureStorage{device, allocator, onTextureUpdate}
+      meshStorage{allocator, onMeshUpdate}
 {
 }
 } // namespace nc::graphics::vulkan

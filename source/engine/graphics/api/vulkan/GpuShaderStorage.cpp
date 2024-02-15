@@ -3,6 +3,7 @@
 #include "GpuShaderStorage.h"
 #include "GpuAllocator.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
+#include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "graphics/shader_resource/UniformBufferHandle.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "shaders/ShaderDescriptorSets.h"
@@ -11,16 +12,21 @@
 
 namespace nc::graphics::vulkan
 {
-GpuShaderStorage::GpuShaderStorage(GpuAllocator* allocator, 
+GpuShaderStorage::GpuShaderStorage(vk::Device device,
+                                   GpuAllocator* allocator, 
                                    ShaderDescriptorSets* descriptorSets,
                                    Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
-                                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate)
-    : m_allocator{allocator},
+                                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
+                                   Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate)
+    : m_device{device},
+      m_allocator{allocator},
       m_descriptorSets{descriptorSets},
       m_perFrameSsboStorage{},
       m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &GpuShaderStorage::UpdateStorageBuffer)},
       m_perFrameUboStorage{},
-      m_onUniformBufferUpdate{onUniformBufferUpdate.Connect(this, &GpuShaderStorage::UpdateUniformBuffer)}
+      m_onUniformBufferUpdate{onUniformBufferUpdate.Connect(this, &GpuShaderStorage::UpdateUniformBuffer)},
+      m_textureArrayBufferStorage{},
+      m_onTextureArrayBufferUpdate{onTextureArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateTextureArrayBuffer)}
 {}
 
 void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
@@ -35,7 +41,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             if (pos == perFrameSsboStorage.storageBufferUids.end())
             {
                 perFrameSsboStorage.storageBufferUids.push_back(std::move(eventData.uid));
-                perFrameSsboStorage.storageBuffers.emplace_back(std::make_unique<vulkan::StorageBuffer>(m_allocator, static_cast<const void*>(&eventData.data), static_cast<uint32_t>(sizeof(eventData.data))));
+                perFrameSsboStorage.storageBuffers.emplace_back(std::make_unique<vulkan::StorageBuffer>(m_allocator, static_cast<uint32_t>(eventData.size)));
             }
             else
             {
@@ -58,7 +64,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
                 eventData.currentFrameIndex,
                 0,
                 perFrameSsboStorage.storageBuffers.back()->GetBuffer(),
-                eventData.size,
+                static_cast<uint32_t>(eventData.size),
                 1,
                 vk::DescriptorType::eStorageBuffer,
                 eventData.slot
@@ -126,7 +132,7 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
             (
                 eventData.currentFrameIndex,
                 eventData.slot,
-                0,
+                eventData.set,
                 1,
                 vk::DescriptorType::eUniformBuffer,
                 GetStageFlags(eventData.stage),
@@ -136,7 +142,7 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
             m_descriptorSets->UpdateBuffer
             (
                 eventData.currentFrameIndex,
-                0,
+                eventData.set,
                 perFrameUboStorage.uniformBuffers.back()->GetBuffer(),
                 static_cast<uint32_t>(eventData.size),
                 1,
@@ -178,6 +184,79 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
                 perFrameUboStorage.uniformBuffers.at(posIndex) = std::move(perFrameUboStorage.uniformBuffers.back());
                 perFrameUboStorage.uniformBuffers.pop_back();
             }
+            break;
+        }
+    }
+}
+
+void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData)
+{
+    switch (eventData.action)
+    {
+        case TabUpdateAction::Initialize:
+        {
+            if (m_textureArrayBufferStorage.textureArrayBufferUids.size() <= eventData.uid)
+            {
+                m_textureArrayBufferStorage.textureArrayBufferUids.emplace_back(eventData.uid);
+                m_textureArrayBufferStorage.textureArrayBuffers.emplace_back(std::make_unique<TextureArrayBuffer>(m_device));
+            }
+
+            m_descriptorSets->RegisterDescriptor
+            (
+                0u,
+                eventData.slot,
+                eventData.set,
+                eventData.capacity,
+                vk::DescriptorType::eCombinedImageSampler,
+                GetStageFlags(eventData.stage),
+                vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
+            );
+            break;
+        }
+        case TabUpdateAction::Update:
+        {
+            auto& sampler = m_textureArrayBufferStorage.textureArrayBuffers.at(eventData.uid)->sampler.get();
+            auto& images = m_textureArrayBufferStorage.textureArrayBuffers.at(eventData.uid)->images;
+            auto& imageInfos = m_textureArrayBufferStorage.textureArrayBuffers.at(eventData.uid)->imageInfos;
+            auto& uids = m_textureArrayBufferStorage.textureArrayBuffers.at(eventData.uid)->uids;
+
+            auto incomingSize = images.size() + eventData.data.size();
+            images.reserve(incomingSize);
+            imageInfos.reserve(incomingSize);
+            uids.reserve(incomingSize);
+
+            for (auto& textureWithId : eventData.data)
+            {
+                auto& texture = textureWithId.texture;
+                images.emplace_back(m_allocator, texture.pixelData.data(), texture.width, texture.height, textureWithId.flags == AssetFlags::TextureTypeNormalMap);
+                imageInfos.emplace_back(sampler, images.back().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
+                uids.emplace_back(Image::ImageUid++);
+            }
+
+            m_descriptorSets->UpdateImage
+            (
+                0,
+                eventData.set,
+                imageInfos,
+                static_cast<uint32_t>(imageInfos.size()),
+                vk::DescriptorType::eCombinedImageSampler,
+                eventData.slot
+            );
+            break;
+        }
+        case TabUpdateAction::Clear:
+        {
+            auto pos = std::ranges::find(m_textureArrayBufferStorage.textureArrayBufferUids, eventData.uid);
+            if (pos == m_textureArrayBufferStorage.textureArrayBufferUids.end())
+            {
+                throw nc::NcError("Attempted to clear a Texture Array Buffer that doesn't exist.");
+            }
+
+            auto posIndex = static_cast<uint32_t>(std::distance(m_textureArrayBufferStorage.textureArrayBufferUids.begin(), pos));
+            m_textureArrayBufferStorage.textureArrayBufferUids.at(posIndex) = m_textureArrayBufferStorage.textureArrayBufferUids.back();
+            m_textureArrayBufferStorage.textureArrayBufferUids.pop_back();
+            m_textureArrayBufferStorage.textureArrayBuffers.at(posIndex) = std::move( m_textureArrayBufferStorage.textureArrayBuffers.back());
+            m_textureArrayBufferStorage.textureArrayBuffers.pop_back();
             break;
         }
     }

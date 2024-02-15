@@ -96,11 +96,11 @@ namespace nc::graphics
         return frameData.emitterStates.size() > 0;
     }
 
-    void ParticleTechnique::Bind(vk::CommandBuffer* cmd)
+    void ParticleTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
         OPTICK_CATEGORY("ParticleTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_descriptorSets->BindSet(frameIndex, 0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)

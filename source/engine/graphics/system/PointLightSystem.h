@@ -63,6 +63,8 @@ class PointLightSystem
 
         auto Execute(uint32_t currentFrameIndex, MultiView<PointLight, Transform> view) -> LightingState;
 
+        void Clear() { m_pointLightBuffer.Clear(); }
+
     private:
         std::vector<PointLightData> m_pointLightData;
         StorageBufferHandle m_pointLightBuffer;

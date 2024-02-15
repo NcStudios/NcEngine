@@ -97,12 +97,12 @@ bool ToonTechnique::CanBind(const PerFrameRenderState& frameData)
     return true;
 }
 
-void ToonTechnique::Bind(vk::CommandBuffer* cmd)
+void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_descriptorSets->BindSet(frameIndex, 0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
 bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)

@@ -23,7 +23,7 @@ class RenderGraph
     public:
         RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, uint32_t maxLights);
 
-        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const vulkan::MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
+        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const vulkan::MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex);
         void Resize(const Vector2 &dimensions);
 
         auto GetShadowPasses() const noexcept -> const std::vector<RenderPass>& { return m_shadowMappingPasses; };

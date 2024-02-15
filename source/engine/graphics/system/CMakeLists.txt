@@ -8,6 +8,7 @@ target_sources(${NC_ENGINE_LIB}
         SkeletalAnimationCalculations.cpp
         SkeletalAnimationTypes.cpp
         SkeletalAnimationSystem.cpp
+        TextureSystem.cpp
         UISystem.cpp
         WidgetSystem.cpp
 )

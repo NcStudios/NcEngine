@@ -26,7 +26,7 @@ class RenderPass
                    ClearValueFlags_t clearFlags);
 
         void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex);
-        void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const;
+        void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer *cmd);
 
         auto GetPriority() const -> uint32_t;

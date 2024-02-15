@@ -116,12 +116,12 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
 {
     for (const auto &technique : m_shadowMappingTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
-        technique->Bind(cmd);
+        technique->Bind(frameIndex, cmd);
 
         if (!technique->CanRecord(frameData)) continue;
         technique->Record(cmd, frameData);
@@ -130,7 +130,7 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
     for (const auto &technique : m_litTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
-        technique->Bind(cmd);
+        technique->Bind(frameIndex, cmd);
 
         if (!technique->CanRecord(frameData)) continue;
         technique->Record(cmd, frameData);

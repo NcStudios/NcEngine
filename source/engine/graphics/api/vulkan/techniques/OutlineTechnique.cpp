@@ -96,12 +96,12 @@ bool OutlineTechnique::CanBind(const PerFrameRenderState& frameData)
     return true;
 }
 
-void OutlineTechnique::Bind(vk::CommandBuffer* cmd)
+void OutlineTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     OPTICK_CATEGORY("OutlineTechnique::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_descriptorSets->BindSet(frameIndex, 0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
 bool OutlineTechnique::CanRecord(const PerFrameRenderState& frameData)

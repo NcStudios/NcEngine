@@ -24,7 +24,6 @@ namespace graphics
 class Device;
 class FrameManager;
 class GpuAllocator;
-struct GpuAssetsStorage;
 class Imgui;
 class Instance;
 class Lighting;
@@ -38,6 +37,7 @@ struct ShaderResourceBus;
 
 namespace vulkan
 {
+struct GpuAssetsStorage;
 struct GpuShaderStorage;
 
 class VulkanGraphics : public IGraphics
@@ -46,7 +46,6 @@ class VulkanGraphics : public IGraphics
         VulkanGraphics(const config::ProjectSettings& projectSettings,
                        const config::GraphicsSettings& graphicsSettings,
                        const config::MemorySettings& memorySettings,
-                       asset::NcAsset* assetModule,
                        ShaderResourceBus& shaderResourceBus,
                        uint32_t apiVersion, Registry* registry, 
                        GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);

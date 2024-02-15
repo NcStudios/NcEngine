@@ -6,7 +6,7 @@
 
 namespace nc::graphics::vulkan
 {
-CubeMapStorage::CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate)
+CubeMapStorage::CubeMapStorage(vk::Device device, nc::graphics::GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_cubeMaps{},
@@ -45,7 +45,7 @@ void CubeMapStorage::LoadCubeMapBuffer(const asset::CubeMapUpdateEventData& even
         m_cubeMaps.emplace_back(m_device, m_allocator, cubeMapData);
     }
 
-    graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
+    graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(0, m_cubeMaps);
 }
 
 void CubeMapStorage::UnloadCubeMapBuffer(const asset::CubeMapUpdateEventData& eventData)
@@ -58,7 +58,7 @@ void CubeMapStorage::UnloadCubeMapBuffer(const asset::CubeMapUpdateEventData& ev
 
     assert(pos != m_cubeMaps.end());
     m_cubeMaps.erase(pos);
-    graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(m_cubeMaps);
+    graphics::ShaderResourceService<graphics::CubeMap>::Get()->Update(0, m_cubeMaps);
 }
 
 void CubeMapStorage::UnloadAllCubeMapBuffer()

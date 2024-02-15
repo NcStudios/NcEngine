@@ -5,13 +5,12 @@
 
 namespace nc::graphics
 {
-struct ObjectData;
-struct PointLightData;
-struct SkeletalAnimationData;
 struct SsboUpdateEventData;
 class StorageBufferHandle;
 struct UboUpdateEventData;
 class UniformBufferHandle;
+struct TabUpdateEventData;
+class TextureArrayBufferHandle;
 
 
 /** @brief Data transfer channels for shader resources. Signals are emitted from frontend graphics
@@ -21,13 +20,14 @@ struct ShaderResourceBus
     inline static uint32_t StorageBufferUid = 0u;
     auto CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set) -> StorageBufferHandle;
 
+    inline static uint32_t TextureArrayBufferUid = 0u;
+    auto CreateTextureArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> TextureArrayBufferHandle;
+
     inline static uint32_t UniformBufferUid = 0u;
     auto CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set) -> UniformBufferHandle;
 
     Signal<const SsboUpdateEventData&> storageBufferChannel;
+    Signal<const TabUpdateEventData&> textureArrayBufferChannel;
     Signal<const UboUpdateEventData&> uniformBufferChannel;
-    Signal<const std::vector<ObjectData>&> objectChannel;
-    Signal<const std::vector<PointLightData>&> pointLightChannel;
-    Signal<const std::vector<SkeletalAnimationData>&> skeletalAnimationChannel;
 };
 } // namespace nc::graphics

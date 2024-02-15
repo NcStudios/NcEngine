@@ -99,11 +99,11 @@ namespace nc::graphics
         return m_enabled = useShadows && !frameData.lightingState.viewProjections.empty();
     }
 
-    void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
+    void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_descriptorSets->BindSet(frameIndex, 0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)

@@ -33,7 +33,6 @@ namespace nc::graphics::vulkan
 VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
                                const config::MemorySettings& memorySettings,
-                               asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
                                uint32_t apiVersion, Registry* registry,
                                GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent)
@@ -44,8 +43,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
-      m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnCubeMapUpdate(), assetModule->OnMeshUpdate(), assetModule->OnTextureUpdate()) },
-      m_gpuShaderStorage{ std::make_unique<GpuShaderStorage>(m_allocator.get(), m_shaderDescriptorSets.get(), shaderResourceBus.uniformBufferChannel) },
+      m_gpuShaderStorage{ std::make_unique<GpuShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderDescriptorSets.get(), shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
       m_renderGraph{std::make_unique<RenderGraph>(m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions, memorySettings.maxPointLights)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass())},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
@@ -98,9 +96,6 @@ void VulkanGraphics::Clear() noexcept
 {
     m_device->VkDevice().waitIdle();
     m_lighting->Clear();
-    ShaderResourceService<ObjectData>::Get()->Reset();
-    ShaderResourceService<PointLightData>::Get()->Reset();
-    ShaderResourceService<ShadowMapData>::Get()->Reset();
 }
 
 bool VulkanGraphics::FrameBegin()
@@ -135,7 +130,7 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions, m_screenExtent);
+    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions, m_screenExtent, CurrentFrameIndex());
 
     // Executes the command buffer to render to the image
     m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);

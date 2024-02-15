@@ -1,5 +1,4 @@
 #include "PointLightSystem.h"
-#include "graphics/shader_resource/PointLightData.h"
 
 #include "optick.h"
 
@@ -20,7 +19,7 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 namespace nc::graphics
 {
 PointLightSystem::PointLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxPointLights, bool useShadows)
-    : m_pointLightDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0)}
+    : m_pointLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0)},
       m_useShadows{useShadows}
 {
     m_pointLightData.reserve(maxPointLights);
@@ -44,7 +43,7 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
                                   light->GetDiffuseIntensity());
     }
 
-    m_pointLightDataBuffer.Update(currentFrameIndex, m_pointLightData);
+    m_pointLightBuffer.Update(&m_pointLightData, currentFrameIndex);
     return state;
 }
 } // namespace nc::graphics

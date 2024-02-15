@@ -1,5 +1,5 @@
 #include "StorageBufferHandle.h"
-#include "GraphicsConstants.h"
+#include "graphics/GraphicsConstants.h"
 
 #include "ncutility/NcError.h"
 
@@ -13,7 +13,7 @@ StorageBufferHandle::StorageBufferHandle(uint32_t uid, size_t size, shader_stage
       m_stage{stage},
       m_backendPort{std::move(backendPort)}
 {
-    NC_ASSERT(bindingSlot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
+    NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
 void StorageBufferHandle::Update(void* data, uint32_t currentFrameIndex)

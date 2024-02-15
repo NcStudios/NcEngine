@@ -48,13 +48,11 @@ namespace nc::graphics
     {
         if (graphicsSettings.enabled)
         {
-            auto ncAsset = modules.Get<asset::NcAsset>();
-            NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, std::move(graphicsApi), std::move(resourceBus), window);
@@ -77,12 +75,14 @@ namespace nc::graphics
           m_cameraSystem{},
           m_environmentSystem{&m_shaderResourceBus},
           m_objectSystem{&m_shaderResourceBus, memorySettings.maxRenderers},
-          m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
+          m_pointLightSystem{&m_shaderResourceBus, memorySettings.maxPointLights, graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
           m_skeletalAnimationSystem{registry,
+                                    &m_shaderResourceBus,
+                                    memorySettings.maxSkeletalAnimations,
                                     modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
-                                    modules.Get<asset::NcAsset>()->OnBoneUpdate(),
-                                    std::move(shaderResourceBus.skeletalAnimationChannel)},
+                                    modules.Get<asset::NcAsset>()->OnBoneUpdate(),},
+          m_textureSystem{&m_shaderResourceBus, modules.Get<asset::NcAsset>()->OnTextureUpdate(), memorySettings.maxTextures},
           m_widgetSystem{},
           m_uiSystem{registry->GetEcs(), modules}
     {
@@ -156,7 +156,7 @@ namespace nc::graphics
         m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
         auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
         auto environmentState = m_environmentSystem.Execute(cameraState, currentFrameIndex);
-        auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
+        auto skeletalAnimationState = m_skeletalAnimationSystem.Execute(currentFrameIndex);
         auto objectState = m_objectSystem.Execute(currentFrameIndex,
                                                   MultiView<MeshRenderer, Transform>{m_registry},
                                                   MultiView<ToonRenderer, Transform>{m_registry},

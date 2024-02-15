@@ -42,7 +42,7 @@ namespace nc::graphics
     {
         const auto& cubeMap = data.cubeMap;
         m_image = m_allocator->CreateCubeMapTexture(cubeMap.pixelData.data(), static_cast<uint32_t>(cubeMap.pixelData.size()), cubeMap.faceSideLength);
-        m_cubeMapView = CreateCubeMapTextureView(m_device, m_image);
+        m_cubeMapView = m_allocator->CreateCubeMapTextureView(m_image);
     }
 
     const vk::ImageView& CubeMap::GetImageView() const noexcept

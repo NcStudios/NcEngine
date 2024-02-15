@@ -19,7 +19,7 @@ namespace vulkan
 class CubeMapStorage
 {
     public:
-        CubeMapStorage(vk::Device device, GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate);
+        CubeMapStorage(vk::Device device, nc::graphics::GpuAllocator* allocator, Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate);
 
         void UpdateBuffer(const asset::CubeMapUpdateEventData& eventData);
 
@@ -29,7 +29,7 @@ class CubeMapStorage
         void UnloadAllCubeMapBuffer();
 
         vk::Device m_device;
-        GpuAllocator* m_allocator;
+        nc::graphics::GpuAllocator* m_allocator;
         std::vector<CubeMap> m_cubeMaps;
         vk::UniqueSampler m_sampler;
         nc::Connection<const asset::CubeMapUpdateEventData&> m_onCubeMapUpdate;

@@ -1,7 +1,11 @@
 #include "ShadowMapShaderResource.h"
 #include "graphics/api/vulkan/Initializers.h"
 
+
+#include "ncutility/NcError.h"
+
 #include <vector>
+#include <ranges>
 
 namespace 
 {
@@ -45,7 +49,7 @@ namespace nc::graphics
         m_imageInfos.clear();
     }
 
-    void ShadowMapShaderResource::Update(const std::vector<ShadowMapData>& data)
+    void ShadowMapShaderResource::Update(uint32_t, const std::vector<ShadowMapData>& data)
     {
         assert(data.size() <= m_maxShadows && !data.empty());
 
@@ -58,7 +62,8 @@ namespace nc::graphics
         });
 
         m_descriptors->UpdateImage
-        (   
+        (
+            0,
             0,
             m_imageInfos,
             static_cast<uint32_t>(m_imageInfos.size()),
@@ -69,17 +74,15 @@ namespace nc::graphics
 
     void ShadowMapShaderResource::Initialize()
     {
-        for (auto i : std::views::iota(0u, MaxFramesInFlight))
-        {
-            m_descriptors->RegisterDescriptor
-            (
-                m_bindingSlot,
-                0,
-                m_maxShadows,
-                vk::DescriptorType::eCombinedImageSampler,
-                vk::ShaderStageFlagBits::eFragment,
-                vk::DescriptorBindingFlagBitsEXT()
-            );
-        }
+        m_descriptors->RegisterDescriptor
+        (
+            0u,
+            m_bindingSlot,
+            0,
+            m_maxShadows,
+            vk::DescriptorType::eCombinedImageSampler,
+            vk::ShaderStageFlagBits::eFragment,
+            vk::DescriptorBindingFlagBitsEXT()
+        );
     }
 } // namespace nc::graphics

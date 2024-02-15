@@ -10,10 +10,12 @@ namespace asset
 struct MeshUpdateEventData;
 } // namespace asset
 
-namespace graphics::vulkan
+namespace graphics
 {
 class GpuAllocator;
 
+namespace vulkan
+{
 class MeshStorage
 {
     public:
@@ -37,5 +39,7 @@ class MeshStorage
         MeshBuffer m_indexBuffer;
         nc::Connection<const asset::MeshUpdateEventData&> m_onMeshUpdateConnection;
 };
-} // namespace nc::graphics::vulkan
-}
+} // namespace vulkan
+} // namespace graphics
+} // namespace nc
+

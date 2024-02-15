@@ -5,5 +5,4 @@ target_sources(${NC_ENGINE_LIB}
         ShaderResources.cpp
         ShaderUtilities.cpp
         ShadowMapShaderResource.cpp
-        TextureShaderResource.cpp
 )

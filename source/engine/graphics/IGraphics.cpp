@@ -10,7 +10,6 @@ namespace nc::graphics
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
                      const config::MemorySettings& memorySettings,
-                     asset::NcAsset* assetModule,
                      ShaderResourceBus& shaderResourceBus,
                      Registry* registry,
                      window::WindowImpl* window) -> std::unique_ptr<IGraphics>
@@ -19,7 +18,7 @@ auto GraphicsFactory(const config::ProjectSettings& projectSettings,
     constexpr auto apiVersion = VK_API_VERSION_1_3;
     NC_LOG_TRACE("Creating VulkanGraphics");
     return std::make_unique<vulkan::VulkanGraphics>(projectSettings, graphicsSettings, memorySettings,
-                                                    assetModule, shaderResourceBus,
+                                                    shaderResourceBus,
                                                     apiVersion, registry,
                                                     window->GetWindow(),
                                                     window->GetDimensions(),

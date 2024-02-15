@@ -84,7 +84,7 @@ namespace nc::graphics
         return true;
     }
 
-    void UiTechnique::Bind(vk::CommandBuffer* cmd)
+    void UiTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }

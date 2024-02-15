@@ -60,6 +60,8 @@ class ObjectSystem
                      const EnvironmentState& environmentState,
                      const SkeletalAnimationSystemState& skeletalAnimationState) -> ObjectState;
 
+        void Clear() { m_objectDataBuffer.Clear(); }
+
     private:
         std::vector<ObjectData> m_objectData;
         StorageBufferHandle m_objectDataBuffer;
