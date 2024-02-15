@@ -17,17 +17,25 @@
 
 #include <sstream>
 
-DEFINE_ASSET_SERVICE_STUB(audioClipAssetManager, nc::asset::AssetType::AudioClip, nc::AudioClipView, std::string);
 DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::ConcaveCollider, nc::ConcaveColliderView, std::string);
 DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::HullCollider, nc::ConvexHullView, std::string);
 DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::MeshView, std::string);
 DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::TextureView, std::string);
 
-namespace nc::graphics
+namespace nc
+{
+auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
+{
+    static auto view = AudioClipView{};
+    return view;
+}
+
+namespace graphics
 {
 void ParticleEmitterSystem::Emit(Entity, size_t) {}
 void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc
 
 // We only need the old Registry here so that it sets the ptr for ActiveRegistry(), which is only used by PhysicsBody.
 auto g_registry = nc::ecs::ComponentRegistry{10ull};
@@ -62,18 +70,18 @@ auto g_deserializationContext = nc::DeserializationContext
 TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expectedProperties = nc::audio::AudioSourceProperties{};
-    const auto expected = nc::audio::AudioSource{g_entity, "sound.nca", expectedProperties};
+    const auto expectedClips = std::vector<std::string>{"sound1.nca", "sound2.nca"};
+    const auto expectedFlags = nc::audio::AudioSourceFlags::Spatial;
+    const auto expectedProperties = nc::audio::AudioSourceProperties{.flags = expectedFlags};
+    const auto expected = nc::audio::AudioSource{g_entity, expectedClips, expectedProperties};
     nc::SerializeAudioSource(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeAudioSource(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.GetClip(), actual.GetClip());
+    EXPECT_TRUE(std::ranges::equal(expectedClips, actual.GetAssetPaths()));
     const auto& actualProperties = actual.GetProperties();
     EXPECT_EQ(expectedProperties.gain, actualProperties.gain);
     EXPECT_EQ(expectedProperties.innerRadius, actualProperties.innerRadius);
     EXPECT_EQ(expectedProperties.outerRadius, actualProperties.outerRadius);
-    EXPECT_EQ(expectedProperties.attenuation, actualProperties.attenuation);
-    EXPECT_EQ(expectedProperties.spatialize, actualProperties.spatialize);
-    EXPECT_EQ(expectedProperties.loop, actualProperties.loop);
+    EXPECT_EQ(expectedFlags, actualProperties.flags);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_collider_box_preservesValues)
