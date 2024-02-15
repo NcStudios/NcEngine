@@ -33,10 +33,10 @@ jobs:
           doxyfile-path: 'docs/Doxyfile'
 
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           path: 'build/docs/html'
 

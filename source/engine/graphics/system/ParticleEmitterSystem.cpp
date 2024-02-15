@@ -29,10 +29,10 @@ namespace nc::graphics
             if (auto camera = m_getCamera())
             {
                 const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
-                return std::make_pair(transform->Rotation(), transform->Forward());
+                return std::make_pair(transform->RotationXM(), transform->ForwardXM());
             }
 
-            return std::make_pair(Quaternion::Identity(), Vector3::Front());
+            return std::make_pair(DirectX::XMQuaternionIdentity(), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
         }();
 
         for (auto& state : m_emitterStates)
@@ -81,6 +81,24 @@ namespace nc::graphics
         }
 
         pos->Emit(count);
+    }
+
+    void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
+    {
+        auto findPred = [entity = emitter.ParentEntity()](particle::EmitterState& state)
+        {
+            return state.GetEntity() == entity;
+        };
+
+        auto pos = std::ranges::find_if(m_emitterStates, findPred);
+        if (pos == m_emitterStates.end())
+        {
+            pos = std::ranges::find_if(m_toAdd, findPred);
+            if (pos == m_toAdd.end())
+                throw NcError("Particle emitter does not exist");
+        }
+
+        pos->UpdateInfo(emitter.GetInfo());
     }
 
     std::span<const particle::EmitterState> ParticleEmitterSystem::GetParticles() const
