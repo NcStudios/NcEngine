@@ -7,6 +7,11 @@
 
 #include <memory>
 
+namespace nc
+{
+struct SystemEvents;
+}
+
 namespace nc::ui::editor
 {
 struct EditorHotkeys
@@ -31,6 +36,7 @@ struct EditorContext
     // General game state
     ecs::Ecs world;
     ModuleProvider modules;
+    SystemEvents* events;
 
     // Mutable state
     Entity selectedEntity;
@@ -68,5 +74,6 @@ class Editor
 
 auto BuildEditor(ecs::Ecs world,
                  ModuleProvider modules,
+                 SystemEvents& events,
                  const EditorHotkeys& hotkeys = EditorHotkeys{}) -> std::unique_ptr<Editor>;
 } // namespace nc::ui::editor

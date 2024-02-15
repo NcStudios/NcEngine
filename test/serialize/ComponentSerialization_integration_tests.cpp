@@ -33,6 +33,7 @@ auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
 namespace graphics
 {
 void ParticleEmitterSystem::Emit(Entity, size_t) {}
+void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
 } // namespace graphics
 } // namespace nc
 

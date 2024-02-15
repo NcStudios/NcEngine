@@ -7,6 +7,8 @@
 
 namespace nc
 {
+struct SystemEvents;
+
 namespace asset
 {
 class NcAsset;
@@ -27,7 +29,7 @@ namespace graphics
 class UISystem
 {
     public:
-        UISystem(ecs::Ecs world, ModuleProvider modules);
+        UISystem(ecs::Ecs world, ModuleProvider modules, SystemEvents& events);
         ~UISystem() noexcept;
 
         auto IsHovered() const noexcept -> bool;

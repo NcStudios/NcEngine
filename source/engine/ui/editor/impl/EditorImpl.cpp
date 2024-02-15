@@ -32,12 +32,14 @@ auto BuildEditorObjects(nc::ecs::Ecs world, nc::ModuleProvider modules, nc::inpu
 
 auto BuildContext(nc::ecs::Ecs world,
                   nc::ModuleProvider modules,
+                  nc::SystemEvents& events,
                   nc::ui::editor::EditorHotkeys hotkeys) -> nc::ui::editor::EditorContext
 {
     const auto [bucket, camera] = ::BuildEditorObjects(world, modules, hotkeys.toggleEditorCamera);
     return nc::ui::editor::EditorContext{
         .world = world,
         .modules = modules,
+        .events = &events,
         .selectedEntity = nc::Entity::Null(),
         .openState = nc::ui::editor::OpenState::ClosePersisted,
         .dimensions = ImVec2{},
@@ -53,8 +55,8 @@ namespace nc::ui::editor
 class EditorImpl : public Editor
 {
     public:
-        explicit EditorImpl(ecs::Ecs world, ModuleProvider modules, const EditorHotkeys& hotkeys)
-            : Editor{::BuildContext(world, modules, hotkeys)},
+        explicit EditorImpl(ecs::Ecs world, ModuleProvider modules, SystemEvents& events, const EditorHotkeys& hotkeys)
+            : Editor{::BuildContext(world, modules, events, hotkeys)},
               m_ui{m_ctx}
         {
         }
@@ -70,8 +72,9 @@ class EditorImpl : public Editor
 
 auto BuildEditor(ecs::Ecs world,
                  ModuleProvider modules,
+                 SystemEvents& events,
                  const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
 {
-    return std::make_unique<EditorImpl>(world, modules, hotkeys);
+    return std::make_unique<EditorImpl>(world, modules, events, hotkeys);
 }
 } // namespace nc::ui::editor
