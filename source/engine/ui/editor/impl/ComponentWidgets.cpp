@@ -147,7 +147,7 @@ constexpr auto name = [](auto& obj, auto& v)   \
 
 constexpr auto getMaxParticleCount = [](auto& obj) { return obj.GetInfo().emission.maxParticleCount; };
 constexpr auto getInitialEmissionCount = [](auto& obj) { return obj.GetInfo().emission.initialEmissionCount; };
-constexpr auto getperiodicEmissionCount = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionCount; };
+constexpr auto getPeriodicEmissionCount = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionCount; };
 constexpr auto getPeriodicEmissionFrequency = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionFrequency; };
 constexpr auto getLifetime = [](auto& obj) { return obj.GetInfo().init.lifetime; };
 constexpr auto getInitPositionMin = [](auto& obj) { return obj.GetInfo().init.positionMin; };
@@ -187,7 +187,7 @@ DECLARE_SETTER(setScaleOverTime, kinematic.scaleOverTimeFactor);
 
 constexpr auto maxParticleCountProp = nc::ui::Property{ getMaxParticleCount, setMaxParticleCount, "maxParticles" };
 constexpr auto initialEmissionCountProp = nc::ui::Property{ getInitialEmissionCount, setInitialEmissionCount, "initialCount" };
-constexpr auto periodicEmissionCountProp = nc::ui::Property{ getperiodicEmissionCount, setPeriodicEmissionCount, "periodicCount" };
+constexpr auto periodicEmissionCountProp = nc::ui::Property{ getPeriodicEmissionCount, setPeriodicEmissionCount, "periodicCount" };
 constexpr auto periodicEmissionFrequencyProp = nc::ui::Property{ getPeriodicEmissionFrequency, setPeriodicEmissionFrequency, "frequency" };
 constexpr auto lifetimeProp = nc::ui::Property{ getLifetime, setLifetime, "lifetime" };
 constexpr auto initPositionMinProp = nc::ui::Property{ getInitPositionMin, setInitPositionMin, "posMin" };
