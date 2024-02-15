@@ -10,9 +10,7 @@ namespace nc
         auto out_v = DirectX::XMVector3Transform(vec_v, m_worldMatrix);
         out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
         out_v = DirectX::XMVector3Normalize(out_v);
-        Vector3 out;
-        DirectX::XMStoreVector3(&out, out_v);
-        return out;
+        return ToVector3(out_v);
     }
 
     /** @note It is slighly faster to use dx identity globals instead of the vector

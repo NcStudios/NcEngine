@@ -12,20 +12,47 @@ class ConstraintMatrix
 {
     public:
         ConstraintMatrix() = default;
-        ConstraintMatrix(const Vector3& vA, const Vector3& wA, const Vector3& vB, const Vector3& wB);
-        ConstraintMatrix(DirectX::FXMVECTOR vA, DirectX::FXMVECTOR wA, DirectX::FXMVECTOR vB, DirectX::FXMVECTOR wB);
 
-        static auto VelocityJacobian(DirectX::FXMVECTOR a, DirectX::FXMVECTOR b, DirectX::FXMVECTOR direction) -> ConstraintMatrix;
+        ConstraintMatrix(const Vector3& vA,
+                         const Vector3& wA,
+                         const Vector3& vB,
+                         const Vector3& wB) noexcept
+            : m_data{DirectX::XMLoadVector3(&vA),
+                     DirectX::XMLoadVector3(&wA),
+                     DirectX::XMLoadVector3(&vB),
+                     DirectX::XMLoadVector3(&wB)}
+        {
+        }
 
-        auto vA() const -> DirectX::FXMVECTOR { return m_data.r[0]; }
-        auto wA() const -> DirectX::FXMVECTOR { return m_data.r[1]; }
-        auto vB() const -> DirectX::FXMVECTOR { return m_data.r[2]; }
-        auto wB() const -> DirectX::FXMVECTOR { return m_data.r[3]; }
+        ConstraintMatrix(DirectX::FXMVECTOR vA,
+                         DirectX::FXMVECTOR wA,
+                         DirectX::FXMVECTOR vB,
+                         DirectX::FXMVECTOR wB) noexcept
+            : m_data{vA, wA, vB, wB}
+        {
+        }
 
-        auto vA() -> DirectX::XMVECTOR& { return m_data.r[0]; }
-        auto wA() -> DirectX::XMVECTOR& { return m_data.r[1]; }
-        auto vB() -> DirectX::XMVECTOR& { return m_data.r[2]; }
-        auto wB() -> DirectX::XMVECTOR& { return m_data.r[3]; }
+        static auto VelocityJacobian(DirectX::FXMVECTOR a,
+                                     DirectX::FXMVECTOR b,
+                                     DirectX::FXMVECTOR direction) noexcept -> ConstraintMatrix
+        {
+            return ConstraintMatrix
+            {
+                DirectX::XMVectorNegate(direction),
+                DirectX::XMVector3Cross(DirectX::XMVectorNegate(a), direction),
+                direction,
+                DirectX::XMVector3Cross(b, direction)
+            };
+        }
+
+        auto vA() const noexcept -> DirectX::FXMVECTOR { return m_data.r[0]; }
+        auto wA() const noexcept -> DirectX::FXMVECTOR { return m_data.r[1]; }
+        auto vB() const noexcept -> DirectX::FXMVECTOR { return m_data.r[2]; }
+        auto wB() const noexcept -> DirectX::FXMVECTOR { return m_data.r[3]; }
+        auto vA() noexcept -> DirectX::XMVECTOR& { return m_data.r[0]; }
+        auto wA() noexcept -> DirectX::XMVECTOR& { return m_data.r[1]; }
+        auto vB() noexcept -> DirectX::XMVECTOR& { return m_data.r[2]; }
+        auto wB() noexcept -> DirectX::XMVECTOR& { return m_data.r[3]; }
 
     private:
         DirectX::XMMATRIX m_data;
@@ -59,28 +86,4 @@ struct Constraints
     std::vector<ContactConstraint> contact;
     std::vector<PositionConstraint> position;
 };
-
-inline ConstraintMatrix::ConstraintMatrix(const Vector3& vA, const Vector3& wA, const Vector3& vB, const Vector3& wB)
-    : m_data{DirectX::XMLoadVector3(&vA),
-                DirectX::XMLoadVector3(&wA),
-                DirectX::XMLoadVector3(&vB),
-                DirectX::XMLoadVector3(&wB)}
-{
-}
-
-inline ConstraintMatrix::ConstraintMatrix(DirectX::FXMVECTOR vA, DirectX::FXMVECTOR wA, DirectX::FXMVECTOR vB, DirectX::FXMVECTOR wB)
-    : m_data{vA, wA, vB, wB}
-{
-}
-
-inline auto ConstraintMatrix::VelocityJacobian(DirectX::FXMVECTOR a, DirectX::FXMVECTOR b, DirectX::FXMVECTOR direction) -> ConstraintMatrix
-{
-    return ConstraintMatrix
-    {
-        DirectX::XMVectorNegate(direction),
-        DirectX::XMVector3Cross(DirectX::XMVectorNegate(a), direction),
-        direction,
-        DirectX::XMVector3Cross(b, direction)
-    };
-}
 } // namespace nc::physics
