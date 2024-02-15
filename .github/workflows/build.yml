@@ -73,7 +73,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.shortName }}-${{ matrix.variant }}-TestResults
+          name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-TestResults
           path: build/test/TestResults.xml
 
   Publish-Test-Results:
