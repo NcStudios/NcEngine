@@ -37,6 +37,7 @@ namespace nc::graphics
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,
                              Registry* registry,
+                             SystemEvents& events,
                              window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
@@ -50,7 +51,7 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -60,6 +61,7 @@ namespace nc::graphics
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                                    Registry* registry,
                                    ModuleProvider modules,
+                                   SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus&& shaderResourceBus,
                                    window::WindowImpl* window)
@@ -75,7 +77,7 @@ namespace nc::graphics
                                     modules.Get<asset::NcAsset>()->OnBoneUpdate(),
                                     std::move(shaderResourceBus.skeletalAnimationChannel)},
           m_widgetSystem{},
-          m_uiSystem{registry->GetEcs(), modules}
+          m_uiSystem{registry->GetEcs(), modules, events}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
     }

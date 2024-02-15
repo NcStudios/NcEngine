@@ -1,5 +1,6 @@
 #include "ModuleFactory.h"
 
+#include "ncengine/Events.h"
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
@@ -35,6 +36,7 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
 namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
+                         SystemEvents& events,
                          window::WindowImpl* window,
                          const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
@@ -49,11 +51,12 @@ auto BuildModuleRegistry(Registry* registry,
                                                               config.memorySettings,
                                                               ModuleProvider{moduleRegistry.get()},
                                                               registry,
+                                                              events,
                                                               window));
-    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
+    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
     moduleRegistry->Register(nc::time::BuildTimeModule());
-    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry));
+    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry, events));
     moduleRegistry->Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }

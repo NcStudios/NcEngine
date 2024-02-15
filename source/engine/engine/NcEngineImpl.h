@@ -18,9 +18,11 @@ namespace nc
             void Shutdown() noexcept override;
             auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& override;
             auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
+            auto GetSystemEvents() noexcept -> SystemEvents& override;
             void RebuildTaskGraph() override;
 
         private:
+            SystemEvents m_events;
             window::WindowImpl m_window;
             std::unique_ptr<ecs::ComponentRegistry> m_registry;
             Registry m_legacyRegistry; // delete once all usage is cutover
