@@ -14,6 +14,7 @@
 #include "ncengine/ui/ImGuiUtility.h"
 
 #include <array>
+#include <ranges>
 
 namespace
 {
@@ -21,7 +22,11 @@ namespace audio_source_ext
 {
 using T = nc::audio::AudioSource;
 
-constexpr auto audioClipProperty = nc::ui::Property{ &T::GetClip, &T::SetClip, "audioClip" };
+constexpr auto gainProp        = nc::ui::Property{ &T::GetGain,        &T::SetGain,        "gain"       };
+constexpr auto innerRadiusProp = nc::ui::Property{ &T::GetInnerRadius, &T::SetInnerRadius, "innerRadius"};
+constexpr auto outerRadiusProp = nc::ui::Property{ &T::GetOuterRadius, &T::SetOuterRadius, "outerRadius"};
+constexpr auto spatialProp     = nc::ui::Property{ &T::IsSpatial,      &T::SetSpatial,     "spatial"    };
+constexpr auto loopProp        = nc::ui::Property{ &T::IsLooping,      &T::SetLooping,     "loop"       };
 } // namespace audio_source_ext
 
 namespace collider_ext
@@ -218,8 +223,33 @@ void TransformUIWidget(Transform& transform)
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
 {
+    ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
+    ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
+    ui::PropertyWidget(audio_source_ext::outerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 200.0f);
+    ui::PropertyWidget(audio_source_ext::spatialProp, audioSource, &ui::Checkbox);
+    ImGui::SameLine();
+    ui::PropertyWidget(audio_source_ext::loopProp, audioSource, &ui::Checkbox);
+
     auto clips = ui::editor::GetLoadedAssets(asset::AssetType::AudioClip);
-    ui::PropertyWidget(audio_source_ext::audioClipProperty, audioSource, &ui::Combobox, clips);
+    auto curPath = std::string{};
+    for (auto [i, path] : std::views::enumerate(audioSource.GetAssetPaths()))
+    {
+        IMGUI_SCOPE(ui::ImGuiId, (unsigned)i);
+        curPath = path;
+        if (ui::Combobox(curPath, "", clips))
+            audioSource.SetClip(static_cast<uint32_t>(i), curPath);
+
+        ImGui::SameLine();
+        if (ImGui::Button("-"))
+            audioSource.RemoveClip(static_cast<uint32_t>(i));
+
+        ImGui::SameLine();
+        if (ImGui::Button("Play"))
+            audioSource.Play(static_cast<uint32_t>(i));
+    }
+
+    if (ImGui::Button("Add Clip"))
+        audioSource.AddClip(asset::DefaultAudioClip);
 }
 
 void MeshRendererUIWidget(graphics::MeshRenderer& renderer)

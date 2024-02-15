@@ -1,53 +1,92 @@
-#include "audio/AudioSource.h"
-#include "ecs/Registry.h"
-#include "assets/AssetService.h"
+#include "ncengine/audio/AudioSource.h"
+#include "ncengine/ecs/Registry.h"
 
 namespace
 {
+auto GetClips(const std::vector<std::string>& paths) -> std::vector<nc::AudioClipView>
+{
+    auto out = std::vector<nc::AudioClipView>{};
+    out.reserve(paths.size());
+    std::ranges::transform(paths, std::back_inserter(out), [](const auto& path)
+    {
+        return nc::AcquireAudioClipAsset(path);
+    });
 
-double CalculateAttenuation(nc::audio::AttenuationFunction curveType, double innerRadius, double outerRadius, double squareDistance)
+    return out;
+}
+
+auto CalculateAttenuation(double innerRadius, double outerRadius, double squareDistance) -> double
 {
     if(innerRadius * innerRadius > squareDistance)
         return 1.0;
 
-    switch(curveType)
-    {
-        case nc::audio::AttenuationFunction::Linear:
-        {
-            double distance = std::sqrt(squareDistance);
-            double distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
-            return nc::Clamp(1.0 - distanceRatio, 0.0, 1.0);
-        }
-    }
-
-    throw nc::NcError("Unknown AttenuationFunction");
+    double distance = std::sqrt(squareDistance);
+    double distanceRatio = (distance - innerRadius) / (outerRadius - innerRadius);
+    return nc::Clamp(1.0 - distanceRatio, 0.0, 1.0);
 }
-
 } // anonymous namespace
 
 namespace nc::audio
 {
-
-AudioSource::AudioSource(Entity entity, const std::string& path, AudioSourceProperties properties)
+AudioSource::AudioSource(Entity entity,
+                         std::vector<std::string> clips,
+                         AudioSourceProperties properties)
     : ComponentBase{entity},
-        m_audioClip{AssetService<AudioClipView>::Get()->Acquire(path)},
-        m_currentSampleIndex{0u},
-        m_properties{properties},
-        m_audioClipPath{path},
-        m_playing{false}
+      m_clips{::GetClips(clips)},
+      m_properties{properties},
+      m_coldData{std::make_unique<AudioSourceColdData>(std::move(clips))}
 {
-    m_properties.gain = Clamp(properties.gain, 0.0f, 1.0f);
 }
 
-void AudioSource::SetClip(const std::string& path)
+void AudioSource::Play(uint32_t clipIndex)
 {
-    m_audioClip = AssetService<AudioClipView>::Get()->Acquire(path);
+    NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bounds");
+    m_currentClipIndex = clipIndex;
     m_currentSampleIndex = 0u;
+    SetPlaying();
 }
 
-void AudioSource::SetProperties(const AudioSourceProperties& properties)
+void AudioSource::PlayNext()
 {
-    m_properties = properties;
+    NC_ASSERT(!m_clips.empty(), "AudioSource has no audio clips");
+    if (m_currentClipIndex == NullClipIndex || ++m_currentClipIndex >= m_clips.size())
+    {
+        m_currentClipIndex = 0u;
+    }
+
+    m_currentSampleIndex = 0u;
+    SetPlaying();
+}
+
+auto AudioSource::AddClip(std::string clip) -> uint32_t
+{
+    m_clips.push_back(AcquireAudioClipAsset(clip));
+    m_coldData->assetPaths.push_back(std::move(clip));
+    return static_cast<uint32_t>(m_clips.size() - 1);
+}
+
+void AudioSource::SetClip(uint32_t clipIndex, std::string path)
+{
+    NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bound");
+    m_clips[clipIndex] = AcquireAudioClipAsset(path);
+    m_coldData->assetPaths.at(clipIndex) = std::move(path);
+    if (m_currentClipIndex == clipIndex && IsPlaying())
+    {
+        m_currentClipIndex = NullClipIndex;
+        SetStopped();
+    }
+}
+
+void AudioSource::RemoveClip(uint32_t clipIndex)
+{
+    NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bounds");
+    m_clips.erase(m_clips.begin() + clipIndex);
+    m_coldData->assetPaths.erase(m_coldData->assetPaths.begin() + clipIndex);
+    if (m_currentClipIndex == clipIndex)
+    {
+        m_currentClipIndex = NullClipIndex;
+        SetStopped();
+    }
 }
 
 void AudioSource::WriteSpatialSamples(double* buffer, size_t frames, const Vector3& sourcePosition, const Vector3& listenerPosition, const Vector3& rightEar)
@@ -64,22 +103,23 @@ void AudioSource::WriteSpatialSamples(double* buffer, size_t frames, const Vecto
     const double rightPresence = dotRight <= 0.0 ? 1.0 : Clamp(1.0 - dotRight, 0.2, 1.0);
     const double dotLeft = Dot(sourceToListener, -rightEar);
     const double leftPresence = dotLeft <= 0.0 ? 1.0 : Clamp(1.0 - dotLeft, 0.2, 1.0);
-    const double attenuation = CalculateAttenuation(m_properties.attenuation, m_properties.innerRadius, m_properties.outerRadius, squareDistance);
+    const double attenuation = CalculateAttenuation(m_properties.innerRadius, m_properties.outerRadius, squareDistance);
     const double gain = 0.5 * attenuation * m_properties.gain;
+    const auto& clip = m_clips.at(m_currentClipIndex);
 
     for(size_t i = 0u; i < frames; ++i)
     {
-        if(++m_currentSampleIndex >= m_audioClip.samplesPerChannel)
+        if(++m_currentSampleIndex >= clip.samplesPerChannel)
         {
             m_currentSampleIndex = 0;
-            if(!m_properties.loop)
+            if (!IsLooping())
             {
-                m_playing = false;
+                SetStopped();
                 return;
             }
         }
 
-        const double sample = gain * (m_audioClip.leftChannel[m_currentSampleIndex] + m_audioClip.rightChannel[m_currentSampleIndex]);
+        const double sample = gain * (clip.leftChannel[m_currentSampleIndex] + clip.rightChannel[m_currentSampleIndex]);
         *buffer++ += sample * leftPresence;
         *buffer++ += sample * rightPresence;
     }
@@ -88,22 +128,22 @@ void AudioSource::WriteSpatialSamples(double* buffer, size_t frames, const Vecto
 void AudioSource::WriteNonSpatialSamples(double* buffer, size_t frames)
 {
     const double gain = 0.5 * m_properties.gain;
+    const auto& clip = m_clips.at(m_currentClipIndex);
 
     for(size_t i = 0u; i < frames; ++i)
     {
-        *buffer++ += gain * m_audioClip.leftChannel[m_currentSampleIndex];
-        *buffer++ += gain * m_audioClip.rightChannel[m_currentSampleIndex];
+        *buffer++ += gain * clip.leftChannel[m_currentSampleIndex];
+        *buffer++ += gain * clip.rightChannel[m_currentSampleIndex];
 
-        if(++m_currentSampleIndex >= m_audioClip.samplesPerChannel)
+        if(++m_currentSampleIndex >= clip.samplesPerChannel)
         {
             m_currentSampleIndex = 0;
-            if(!m_properties.loop)
+            if (!IsLooping())
             {
-                m_playing = false;
+                SetStopped();
                 return;
             }
         }
     }
 }
-
 } // namespace nc::audio

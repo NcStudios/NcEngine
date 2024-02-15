@@ -23,6 +23,11 @@ void UnloadAllAudioClipAssets(asset_flags_type flags)
     AssetService<AudioClipView>::Get()->UnloadAll(flags);
 }
 
+auto AcquireAudioClipAsset(const std::string& path) -> AudioClipView
+{
+    return AssetService<AudioClipView>::Get()->Acquire(path);
+}
+
 bool LoadConvexHullAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<ConvexHullView>::Get()->Load(path, isExternal, flags);

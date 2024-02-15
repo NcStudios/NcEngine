@@ -17,19 +17,19 @@ namespace nc
 void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, void*)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetClip());
+    serialize::Serialize(stream, out.GetAssetPaths());
     serialize::Serialize(stream, out.GetProperties());
 }
 
 auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, void*) -> audio::AudioSource
 {
     auto id = uint32_t{};
-    auto clip = std::string{};
+    auto paths = std::vector<std::string>{};
     auto properties = audio::AudioSourceProperties{};
     serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, clip);
+    serialize::Deserialize(stream, paths);
     serialize::Deserialize(stream, properties);
-    return audio::AudioSource{ctx.entityMap.at(id), std::move(clip), std::move(properties)};
+    return audio::AudioSource{ctx.entityMap.at(id), std::move(paths), properties};
 }
 
 void SerializeCollider(std::ostream& stream, const physics::Collider& out, const SerializationContext& ctx, void*)

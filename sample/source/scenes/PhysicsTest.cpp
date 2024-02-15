@@ -11,6 +11,8 @@
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
+#include "ncengine/audio/NcAudio.h"
+
 namespace nc::sample
 {
 std::function<void(unsigned)> SpawnFunc = nullptr;
@@ -487,6 +489,9 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
         .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
         .tag = "Main Camera"
     });
+
+    modules.Get<audio::NcAudio>()->RegisterListener(vehicle);
+
 
     auto& camera = world.Emplace<FollowCamera>(cameraHandle, vehicle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
