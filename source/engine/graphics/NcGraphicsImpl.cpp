@@ -48,11 +48,13 @@ namespace nc::graphics
     {
         if (graphicsSettings.enabled)
         {
+            auto ncAsset = modules.Get<asset::NcAsset>();
+            NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, resourceBus, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, std::move(graphicsApi), std::move(resourceBus), window);
@@ -81,7 +83,7 @@ namespace nc::graphics
                                     &m_shaderResourceBus,
                                     memorySettings.maxSkeletalAnimations,
                                     modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
-                                    modules.Get<asset::NcAsset>()->OnBoneUpdate(),},
+                                    modules.Get<asset::NcAsset>()->OnBoneUpdate()},
           m_textureSystem{&m_shaderResourceBus, modules.Get<asset::NcAsset>()->OnTextureUpdate(), memorySettings.maxTextures},
           m_widgetSystem{},
           m_uiSystem{registry->GetEcs(), modules}

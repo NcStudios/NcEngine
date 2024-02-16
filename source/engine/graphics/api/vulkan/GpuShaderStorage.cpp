@@ -47,6 +47,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             {
                 throw nc::NcError("Attempted to initialize a Storage Buffer when one by the same UID was already present.");
             }
+            auto flags = GetStageFlags(eventData.stage);
 
             m_descriptorSets->RegisterDescriptor
             (
@@ -55,7 +56,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
                 0,
                 1,
                 vk::DescriptorType::eStorageBuffer,
-                GetStageFlags(eventData.stage),
+                flags,
                 vk::DescriptorBindingFlagBitsEXT()
             );
 
@@ -128,6 +129,7 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
                 throw nc::NcError("Attempted to initialize a Uniform Buffer when one by the same UID was already present.");
             }
 
+            auto flags = GetStageFlags(eventData.stage);
             m_descriptorSets->RegisterDescriptor
             (
                 eventData.currentFrameIndex,
@@ -135,7 +137,7 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
                 eventData.set,
                 1,
                 vk::DescriptorType::eUniformBuffer,
-                GetStageFlags(eventData.stage),
+                flags,
                 vk::DescriptorBindingFlagBitsEXT()
             );
 
@@ -200,6 +202,7 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
                 m_textureArrayBufferStorage.textureArrayBufferUids.emplace_back(eventData.uid);
                 m_textureArrayBufferStorage.textureArrayBuffers.emplace_back(std::make_unique<TextureArrayBuffer>(m_device));
             }
+            auto flags = GetStageFlags(eventData.stage);
 
             m_descriptorSets->RegisterDescriptor
             (
@@ -208,7 +211,7 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
                 eventData.set,
                 eventData.capacity,
                 vk::DescriptorType::eCombinedImageSampler,
-                GetStageFlags(eventData.stage),
+                flags,
                 vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
             );
             break;
