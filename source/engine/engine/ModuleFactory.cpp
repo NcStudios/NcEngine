@@ -1,11 +1,12 @@
 #include "ModuleFactory.h"
 
+#include "ncengine/Events.h"
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/module/ModuleRegistry.h"
-#include "ncengine/ui/Editor.h"
+#include "ncengine/scene/NcScene.h"
 #include "ncengine/utility/Log.h"
 
 /** @todo #363 Move factories to public headers and include those instead. */
@@ -35,26 +36,28 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
 namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
+                         SystemEvents& events,
                          window::WindowImpl* window,
-                         const config::Config& config,
-                         NcEngine* engine) -> ModuleRegistry
+                         const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
     NC_LOG_INFO("Building module registry");
-    auto moduleRegistry = nc::ModuleRegistry{};
-    moduleRegistry.Register(nc::asset::BuildAssetModule(config.assetSettings,
+    auto moduleRegistry = std::make_unique<nc::ModuleRegistry>();
+    moduleRegistry->Register(nc::BuildSceneModule());
+    moduleRegistry->Register(nc::asset::BuildAssetModule(config.assetSettings,
                                                         config.memorySettings,
                                                         BuildDefaultAssetMap()));
-    moduleRegistry.Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
+    moduleRegistry->Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
                                                               config.graphicsSettings,
-                                                              moduleRegistry.Get<nc::asset::NcAsset>(),
+                                                              config.memorySettings,
+                                                              ModuleProvider{moduleRegistry.get()},
                                                               registry,
-                                                              window,
-                                                              ui::editor::BuildEditor(engine)));
-    moduleRegistry.Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry));
-    moduleRegistry.Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
-    moduleRegistry.Register(nc::time::BuildTimeModule());
-    moduleRegistry.Register(nc::ecs::BuildEcsModule(registry));
-    moduleRegistry.Register(std::make_unique<nc::Random>());
+                                                              events,
+                                                              window));
+    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
+    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
+    moduleRegistry->Register(nc::time::BuildTimeModule());
+    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry, events));
+    moduleRegistry->Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }
 } // namespace nc

@@ -5,6 +5,9 @@ using namespace nc;
 
 struct TestModule1 : public Module
 {
+    static constexpr size_t expectedId = 1ull;
+
+    TestModule1() : Module{expectedId} {}
     void Clear() noexcept override { cleared = true; }
     bool cleared = false;
 };
@@ -15,22 +18,38 @@ struct TestModule2 : public Module
     bool cleared = false;
 };
 
-TEST(ModuleRegistry_unit_tests, Register_NewModule_RegistersModule)
+struct TestModuleBadId : public Module
 {
-    auto uut = ModuleRegistry{};
+    TestModuleBadId() : Module{TestModule1::expectedId} {}
+};
+
+class ModuleRegistryTests : public ::testing::Test
+{
+    public:
+        ModuleRegistry uut = ModuleRegistry{};
+
+        ~ModuleRegistryTests() noexcept
+        {
+            // clear any static pts from previous tests
+            uut.Unregister<TestModule1>();
+            uut.Unregister<TestModule2>();
+        }
+};
+
+TEST_F(ModuleRegistryTests, Register_NewModule_RegistersModule)
+{
     auto module1 = std::make_unique<TestModule1>();
     uut.Register<TestModule1>(std::move(module1));
 
     EXPECT_TRUE(uut.IsRegistered<TestModule1>());
 }
 
-TEST(ModuleRegistry_unit_tests, Register_ExistingModule_ReplacesModule)
+TEST_F(ModuleRegistryTests, Register_ExistingModule_ReplacesModule)
 {
     auto module1 = std::make_unique<TestModule1>();
     auto module2 = std::make_unique<TestModule1>();
     const auto* expected = module2.get();
 
-    auto uut = ModuleRegistry{};
     uut.Register<TestModule1>(std::make_unique<TestModule1>());
     uut.Register<TestModule1>(std::move(module2));
 
@@ -39,9 +58,28 @@ TEST(ModuleRegistry_unit_tests, Register_ExistingModule_ReplacesModule)
     EXPECT_EQ(uut.GetAllModules().size(), 1);
 }
 
-TEST(ModuleRegistry_unit_tests, Unregister_ExistingModule_Unregisters)
+TEST_F(ModuleRegistryTests, Register_HasExplicitId_DoesNotModifyId)
 {
-    auto uut = ModuleRegistry{};
+    uut.Register<TestModule1>(std::make_unique<TestModule1>());
+    const auto actual = uut.Get<TestModule1>();
+    EXPECT_EQ(TestModule1::expectedId, actual->Id());
+}
+
+TEST_F(ModuleRegistryTests, Register_HasDefaultId_AssignsAvailableid)
+{
+    uut.Register<TestModule2>(std::make_unique<TestModule2>());
+    const auto actual = uut.Get<TestModule2>();
+    EXPECT_EQ(std::numeric_limits<size_t>::max(), actual->Id());
+}
+
+TEST_F(ModuleRegistryTests, Register_IdAlreadyInUse_Throws)
+{
+    uut.Register<TestModule1>(std::make_unique<TestModule1>());
+    EXPECT_THROW(uut.Register<TestModuleBadId>(std::make_unique<TestModuleBadId>()), NcError);
+}
+
+TEST_F(ModuleRegistryTests, Unregister_ExistingModule_Unregisters)
+{
     uut.Register<TestModule1>(std::make_unique<TestModule1>());
     uut.Unregister<TestModule1>();
 
@@ -50,9 +88,8 @@ TEST(ModuleRegistry_unit_tests, Unregister_ExistingModule_Unregisters)
     EXPECT_EQ(uut.GetAllModules().size(), 0);
 }
 
-TEST(ModuleRegistry_unit_tests, Unregister_NonexistentModule_Succeeds)
+TEST_F(ModuleRegistryTests, Unregister_NonexistentModule_Succeeds)
 {
-    auto uut = ModuleRegistry{};
     uut.Unregister<TestModule1>();
 
     EXPECT_FALSE(uut.IsRegistered<TestModule1>());
@@ -60,8 +97,35 @@ TEST(ModuleRegistry_unit_tests, Unregister_NonexistentModule_Succeeds)
     EXPECT_EQ(uut.GetAllModules().size(), 0);
 }
 
-int main(int argc, char ** argv)
+TEST_F(ModuleRegistryTests, IsRegistered_ModuleRegistered_ReturnsTrue)
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    uut.Register<TestModule1>(std::make_unique<TestModule1>());
+    EXPECT_TRUE(uut.IsRegistered<TestModule1>());
+    EXPECT_TRUE(uut.IsRegistered(TestModule1::expectedId));
+}
+
+TEST_F(ModuleRegistryTests, IsRegistered_ModuleNotRegistered_ReturnsFalse)
+{
+    uut.Register<TestModule2>(std::make_unique<TestModule2>());
+    EXPECT_FALSE(uut.IsRegistered<TestModule1>());
+    EXPECT_FALSE(uut.IsRegistered(TestModule1::expectedId));
+}
+
+TEST_F(ModuleRegistryTests, Get_ModuleRegistered_ReturnsPointerToModule)
+{
+    auto module = std::make_unique<TestModule1>();
+    const auto expectedPtr = module.get();
+    uut.Register<TestModule1>(std::move(module));
+    const auto actualPtrByType = uut.Get<TestModule1>();
+    const auto actualPtrById = uut.Get(TestModule1::expectedId);
+    EXPECT_EQ(expectedPtr, actualPtrByType);
+    EXPECT_EQ(expectedPtr, actualPtrById);
+}
+
+TEST_F(ModuleRegistryTests, Get_ModuleNotRegistered_ReturnsNull)
+{
+    const auto actualPtrByType = uut.Get<TestModule1>();
+    const auto actualPtrById = uut.Get(TestModule1::expectedId);
+    EXPECT_EQ(nullptr, actualPtrByType);
+    EXPECT_EQ(nullptr, actualPtrById);
 }

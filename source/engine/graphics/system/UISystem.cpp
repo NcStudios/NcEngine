@@ -4,8 +4,8 @@
 
 namespace nc::graphics
 {
-UISystem::UISystem(std::unique_ptr<ui::editor::Editor> editor)
-    : m_editor{std::move(editor)}
+UISystem::UISystem(ecs::Ecs world, ModuleProvider modules, SystemEvents& events)
+    : m_editor{ui::editor::BuildEditor(world, modules, events)}
 {
 }
 
@@ -21,9 +21,9 @@ void UISystem::SetClientUI(ui::IUI* ui) noexcept
     m_clientUI = ui;
 }
 
-void UISystem::Execute(ecs::Ecs world, asset::NcAsset& assetModule)
+void UISystem::Execute(ecs::Ecs world)
 {
-    m_editor->Draw(world, assetModule);
+    m_editor->Draw(world);
 
     if (m_clientUI)
     {

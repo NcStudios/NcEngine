@@ -1,23 +1,46 @@
 #pragma once
 
-#include "ncengine/ecs/Ecs.h"
+#include "ui/editor/Editor.h"
+#include "windows/FpsOverlay.h"
 #include "windows/Inspector.h"
 #include "windows/SceneGraph.h"
+#include "windows/dialogs/CreateEntityDialog.h"
+#include "windows/dialogs/SceneDialogs.h"
 
-namespace nc
-{
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/module/ModuleProvider.h"
 
-namespace ui::editor
+#include <memory>
+#include <vector>
+
+namespace nc::ui::editor
 {
+struct EditorHotkeys;
+
 class EditorUI
 {
     public:
-        void Draw(ecs::Ecs world);
+        explicit EditorUI(EditorContext& ctx);
+
+        void Draw(EditorContext& ctx);
 
     private:
         SceneGraph m_sceneGraph;
         Inspector m_inspector;
         bool m_open = false;
+
+        // overlays
+        FpsOverlay m_fpsOverlay;
+
+        // dialogs
+        CreateEntityDialog m_createEntityDialog;
+        NewSceneDialog m_newSceneDialog;
+        SaveSceneDialog m_saveSceneDialog;
+        LoadSceneDialog m_loadSceneDialog;
+
+        auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
+        void DrawMenu(EditorContext& ctx);
+        void DrawOverlays(const ImVec2& dimensions);
+        void DrawDialogs(EditorContext& ctx);
 };
-} // namespace ui::editor
-} // namespace nc
+} // namespace nc::ui::editor

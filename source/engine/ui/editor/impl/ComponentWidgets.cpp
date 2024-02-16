@@ -14,6 +14,7 @@
 #include "ncengine/ui/ImGuiUtility.h"
 
 #include <array>
+#include <ranges>
 
 namespace
 {
@@ -21,7 +22,11 @@ namespace audio_source_ext
 {
 using T = nc::audio::AudioSource;
 
-constexpr auto audioClipProperty = nc::ui::Property{ &T::GetClip, &T::SetClip, "audioClip" };
+constexpr auto gainProp        = nc::ui::Property{ &T::GetGain,        &T::SetGain,        "gain"       };
+constexpr auto innerRadiusProp = nc::ui::Property{ &T::GetInnerRadius, &T::SetInnerRadius, "innerRadius"};
+constexpr auto outerRadiusProp = nc::ui::Property{ &T::GetOuterRadius, &T::SetOuterRadius, "outerRadius"};
+constexpr auto spatialProp     = nc::ui::Property{ &T::IsSpatial,      &T::SetSpatial,     "spatial"    };
+constexpr auto loopProp        = nc::ui::Property{ &T::IsLooping,      &T::SetLooping,     "loop"       };
 } // namespace audio_source_ext
 
 namespace collider_ext
@@ -212,6 +217,79 @@ constexpr auto useGravityProp  = nc::ui::Property{ &T::UseGravity,     &T::SetUs
 constexpr auto isKinematicProp = nc::ui::Property{ &T::IsKinematic,    &T::SetIsKinematic, "isKinematic" };
 } // namespace physics_body_ext
 
+namespace particle_emitter_ext
+{
+using T = nc::graphics::ParticleEmitter;
+
+#define DECLARE_SETTER(name, memberAccess)     \
+constexpr auto name = [](auto& obj, auto& v)   \
+{                                              \
+    auto info = obj.GetInfo();                 \
+    info.memberAccess = v;                     \
+    obj.SetInfo(std::move(info));              \
+};
+
+constexpr auto getMaxParticleCount = [](auto& obj) { return obj.GetInfo().emission.maxParticleCount; };
+constexpr auto getInitialEmissionCount = [](auto& obj) { return obj.GetInfo().emission.initialEmissionCount; };
+constexpr auto getPeriodicEmissionCount = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionCount; };
+constexpr auto getPeriodicEmissionFrequency = [](auto& obj) { return obj.GetInfo().emission.periodicEmissionFrequency; };
+constexpr auto getLifetime = [](auto& obj) { return obj.GetInfo().init.lifetime; };
+constexpr auto getInitPositionMin = [](auto& obj) { return obj.GetInfo().init.positionMin; };
+constexpr auto getInitPositionMax = [](auto& obj) { return obj.GetInfo().init.positionMax; };
+constexpr auto getInitRotationMin = [](auto& obj) { return obj.GetInfo().init.rotationMin; };
+constexpr auto getInitRotationMax = [](auto& obj) { return obj.GetInfo().init.rotationMax; };
+constexpr auto getInitScaleMin = [](auto& obj) { return obj.GetInfo().init.scaleMin; };
+constexpr auto getInitScaleMax = [](auto& obj) { return obj.GetInfo().init.scaleMax; };
+constexpr auto getTexture = [](auto& obj) { return obj.GetInfo().init.particleTexturePath; };
+constexpr auto getVelocityMin = [](auto& obj) { return obj.GetInfo().kinematic.velocityMin; };
+constexpr auto getVelocityMax = [](auto& obj) { return obj.GetInfo().kinematic.velocityMax; };
+constexpr auto getVelocityOverTime = [](auto& obj) { return obj.GetInfo().kinematic.velocityOverTimeFactor; };
+constexpr auto getRotationMin = [](auto& obj) { return obj.GetInfo().kinematic.rotationMin; };
+constexpr auto getRotationMax = [](auto& obj) { return obj.GetInfo().kinematic.rotationMax; };
+constexpr auto getRotationOverTime = [](auto& obj) { return obj.GetInfo().kinematic.rotationOverTimeFactor; };
+constexpr auto getScaleOverTime = [](auto& obj) { return obj.GetInfo().kinematic.scaleOverTimeFactor; };
+
+DECLARE_SETTER(setMaxParticleCount, emission.maxParticleCount);
+DECLARE_SETTER(setInitialEmissionCount, emission.initialEmissionCount);
+DECLARE_SETTER(setPeriodicEmissionCount, emission.periodicEmissionCount);
+DECLARE_SETTER(setPeriodicEmissionFrequency, emission.periodicEmissionFrequency);
+DECLARE_SETTER(setLifetime, init.lifetime);
+DECLARE_SETTER(setInitPositionMin, init.positionMin);
+DECLARE_SETTER(setInitPositionMax, init.positionMax);
+DECLARE_SETTER(setInitRotationMin, init.rotationMin);
+DECLARE_SETTER(setInitRotationMax, init.rotationMax);
+DECLARE_SETTER(setInitScaleMin, init.scaleMin);
+DECLARE_SETTER(setInitScaleMax, init.scaleMax);
+DECLARE_SETTER(setTexture, init.particleTexturePath);
+DECLARE_SETTER(setVelocityMin, kinematic.velocityMin);
+DECLARE_SETTER(setVelocityMax, kinematic.velocityMax);
+DECLARE_SETTER(setVelocityOverTime, kinematic.velocityOverTimeFactor);
+DECLARE_SETTER(setRotationMin, kinematic.rotationMin);
+DECLARE_SETTER(setRotationMax, kinematic.rotationMax);
+DECLARE_SETTER(setRotationOverTime, kinematic.rotationOverTimeFactor);
+DECLARE_SETTER(setScaleOverTime, kinematic.scaleOverTimeFactor);
+
+constexpr auto maxParticleCountProp = nc::ui::Property{ getMaxParticleCount, setMaxParticleCount, "maxParticles" };
+constexpr auto initialEmissionCountProp = nc::ui::Property{ getInitialEmissionCount, setInitialEmissionCount, "initialCount" };
+constexpr auto periodicEmissionCountProp = nc::ui::Property{ getPeriodicEmissionCount, setPeriodicEmissionCount, "periodicCount" };
+constexpr auto periodicEmissionFrequencyProp = nc::ui::Property{ getPeriodicEmissionFrequency, setPeriodicEmissionFrequency, "frequency" };
+constexpr auto lifetimeProp = nc::ui::Property{ getLifetime, setLifetime, "lifetime" };
+constexpr auto initPositionMinProp = nc::ui::Property{ getInitPositionMin, setInitPositionMin, "posMin" };
+constexpr auto initPositionMaxProp = nc::ui::Property{ getInitPositionMax, setInitPositionMax, "posMax" };
+constexpr auto initRotationMinProp = nc::ui::Property{ getInitRotationMin, setInitRotationMin, "rotMin" };
+constexpr auto initRotationMaxProp = nc::ui::Property{ getInitRotationMax, setInitRotationMax, "rotMax" };
+constexpr auto initScaleMinProp = nc::ui::Property{ getInitScaleMin, setInitScaleMin, "scaleMin" };
+constexpr auto initScaleMaxProp = nc::ui::Property{ getInitScaleMax, setInitScaleMax, "scaleMax" };
+constexpr auto textureProp = nc::ui::Property{ getTexture, setTexture, "texture" };
+constexpr auto velocityMinProp = nc::ui::Property{ getVelocityMin, setVelocityMin, "velMin" };
+constexpr auto velocityMaxProp = nc::ui::Property{ getVelocityMax, setVelocityMax, "velMax" };
+constexpr auto velocityOverTimeFactorProp = nc::ui::Property{ getVelocityOverTime, setVelocityOverTime, "velOverTime" };
+constexpr auto rotationMinProp = nc::ui::Property{ getRotationMin, setRotationMin, "angVelMin" };
+constexpr auto rotationMaxProp = nc::ui::Property{ getRotationMax, setRotationMax, "angVelMax" };
+constexpr auto rotationOverTimeFactorProp = nc::ui::Property{ getRotationOverTime, setRotationOverTime, "angVelOverTime" };
+constexpr auto scaleOverTimeFactoryProp = nc::ui::Property{ getScaleOverTime, setScaleOverTime, "scaleOverTime" };
+} // namespace particle_emitter_ext
+
 namespace point_light_ext
 {
 using T = nc::graphics::PointLight;
@@ -272,7 +350,7 @@ void TransformUIWidget(Transform& transform)
     auto scl_v = DirectX::XMVECTOR{};
     auto rot_v = DirectX::XMVECTOR{};
     auto pos_v = DirectX::XMVECTOR{};
-    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.TransformationMatrix());
+    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.LocalTransformationMatrix());
 
     auto scl = Vector3{};
     auto pos = Vector3{};
@@ -292,13 +370,38 @@ void TransformUIWidget(Transform& transform)
         else if (!FloatEqual(curRot.z, prevRot.z)) transform.Rotate(Vector3::Front(), curRot.z - prevRot.z);
     }
 
-    if (ui::InputScale(scl, "scale"))       transform.SetScale(scl);
+    if (ui::InputScale(scl, "scale")) transform.SetScale(scl);
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource)
 {
+    ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
+    ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
+    ui::PropertyWidget(audio_source_ext::outerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 200.0f);
+    ui::PropertyWidget(audio_source_ext::spatialProp, audioSource, &ui::Checkbox);
+    ImGui::SameLine();
+    ui::PropertyWidget(audio_source_ext::loopProp, audioSource, &ui::Checkbox);
+
     auto clips = ui::editor::GetLoadedAssets(asset::AssetType::AudioClip);
-    ui::PropertyWidget(audio_source_ext::audioClipProperty, audioSource, &ui::Combobox, clips);
+    auto curPath = std::string{};
+    for (auto [i, path] : std::views::enumerate(audioSource.GetAssetPaths()))
+    {
+        IMGUI_SCOPE(ui::ImGuiId, (unsigned)i);
+        curPath = path;
+        if (ui::Combobox(curPath, "", clips))
+            audioSource.SetClip(static_cast<uint32_t>(i), curPath);
+
+        ImGui::SameLine();
+        if (ImGui::Button("-"))
+            audioSource.RemoveClip(static_cast<uint32_t>(i));
+
+        ImGui::SameLine();
+        if (ImGui::Button("Play"))
+            audioSource.Play(static_cast<uint32_t>(i));
+    }
+
+    if (ImGui::Button("Add Clip"))
+        audioSource.AddClip(asset::DefaultAudioClip);
 }
 
 void MeshRendererUIWidget(graphics::MeshRenderer& renderer)
@@ -331,7 +434,7 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
 
     ImGui::Text("%s", "Emission");
     ImGui::Separator();
-    // ui::PropertyWidget(particle_emitter_ext::maxParticleCountProp, emitter, &ui::InputU32);
+    ui::PropertyWidget(particle_emitter_ext::maxParticleCountProp, emitter, &ui::InputU32);
     ui::PropertyWidget(particle_emitter_ext::initialEmissionCountProp, emitter, &ui::InputU32);
     ui::PropertyWidget(particle_emitter_ext::periodicEmissionCountProp, emitter, &ui::InputU32);
     ui::PropertyWidget(particle_emitter_ext::periodicEmissionFrequencyProp, emitter, &ui::DragFloat, step, min, max);
@@ -382,14 +485,6 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
 
 void ColliderUIWidget(physics::Collider& collider)
 {
-    /**
-     * Collider Model doesn't update/submit unless we tell it to
-     * @todo #446 Clean up once editor manages collider selection state.
-    */
-#ifdef NC_EDITOR_ENABLED
-    collider.SetEditorSelection(true);
-#endif
-
     using namespace std::string_view_literals;
     constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
     ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);

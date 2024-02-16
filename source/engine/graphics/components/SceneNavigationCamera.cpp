@@ -35,6 +35,9 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity,
 
 void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
 {
+    if (!m_enabled)
+        return;
+
     const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
     auto* transform = registry->Get<Transform>(self);
     auto translation = Dolly(dt, dollySpeed);

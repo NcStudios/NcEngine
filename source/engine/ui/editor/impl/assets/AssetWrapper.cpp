@@ -16,6 +16,7 @@ auto GetLoadedAssets(asset::AssetType type) -> std::vector<std::string_view>
         case asset::AssetType::Shader:            return AssetService<ShaderView>::Get()->GetAllLoaded();
         case asset::AssetType::SkeletalAnimation: return std::vector<std::string_view>(); // @todo: UI for editor
         case asset::AssetType::Texture:           return AssetService<TextureView>::Get()->GetAllLoaded();
+        case asset::AssetType::Font:              return AssetService<FontView, FontInfo>::Get()->GetAllLoaded();
     }
 
     throw NcError{fmt::format("Unknown AssetType: {}", static_cast<unsigned>(type))};

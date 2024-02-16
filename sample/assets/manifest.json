@@ -14,20 +14,30 @@
     ],
     "concave-collider": [
         {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "concave_collider/ramp"
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "concave_collider/halfpipe"
         }
     ],
-    "cube-map": [],
-    "hull-collider": [],
+    "cube-map": [
+        {
+            "sourcePath": "raw/image/cube_maps/night_sky.png",
+            "assetName": "cube_map/night_sky.nca"
+          }
+    ],
+    "hull-collider": [
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "hull_collider/ramp"
+        }
+    ],
     "mesh": [
         {
             "sourcePath": "raw/model/ogre.fbx",
             "assetName": "mesh/ogre"
         },
         {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "mesh/ramp"
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "mesh/halfpipe"
         },
         {
             "sourcePath": "raw/model/worm.fbx",
@@ -44,6 +54,10 @@
         {
             "sourcePath": "raw/model/cave_ceiling.fbx",
             "assetName": "mesh/cave_ceiling"
+        },
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "mesh/ramp"
         }
     ],
     "skeletal-animation": [
@@ -135,18 +149,6 @@
             "sourcePath": "raw/image/cave_ceiling/Metallic.png",
             "assetName": "texture/cave_ceiling/Metallic"
         },
-       {
-            "sourcePath": "raw/image/floor/BaseColor.png",
-            "assetName": "texture/floor/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/floor/Normal.png",
-            "assetName": "texture/floor/Normal"
-        },
-        {
-            "sourcePath": "raw/image/floor/Roughness.png",
-            "assetName": "texture/floor/Roughness"
-        },
         {
             "sourcePath": "raw/image/logo/BaseColor.png",
             "assetName": "texture/logo/BaseColor"
@@ -206,6 +208,30 @@
         {
             "sourcePath": "raw/image/solid_color/Green.png",
             "assetName": "texture/solid_color/Green"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Orange.png",
+            "assetName": "texture/solid_color/Orange"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Purple.png",
+            "assetName": "texture/solid_color/Purple"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Teal.png",
+            "assetName": "texture/solid_color/Teal"
+        },
+        {
+            "sourcePath": "raw/image/solid_color/Yellow.png",
+            "assetName": "texture/solid_color/Yellow"
+        },
+        {
+            "sourcePath": "raw/image/line/hatch.jpg",
+            "assetName": "texture/line/hatch"
+        },
+        {
+            "sourcePath": "raw/image/line/overlay.png",
+            "assetName": "texture/line/overlay"
         }
     ]
 }

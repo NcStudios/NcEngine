@@ -6,12 +6,6 @@ using namespace nc;
 
 namespace nc
 {
-Transform::Transform(Entity entity, const Vector3&, const Quaternion&, const Vector3&, Entity parent)
-    : ComponentBase{entity}, m_localMatrix{}, m_worldMatrix{}, m_parent{parent}, m_children{}
-{}
-
-void Transform::SetParent(Entity entity) { m_parent = entity; }
-
 Quaternion::Quaternion(float X, float Y, float Z, float W)
     : x{X}, y{Y}, z{Z}, w{W}
 {}
@@ -69,7 +63,8 @@ auto drawUIMock = [](auto&) { ++g_numDrawUICalls; };
 class Registry_unit_tests : public ::testing::Test
 {
     public:
-        static inline Registry registry = Registry{10u};
+        static inline ecs::ComponentRegistry impl = ecs::ComponentRegistry{10u};
+        static inline Registry registry = Registry{impl};
 
         Registry_unit_tests()
         {
@@ -78,15 +73,18 @@ class Registry_unit_tests : public ::testing::Test
 
         static void SetUpTestSuite()
         {
-            registry.RegisterComponentType<nc::Tag>();
-            registry.RegisterComponentType<nc::Transform>();
-            registry.RegisterComponentType<nc::ecs::detail::FreeComponentGroup>();
+            impl.RegisterType<nc::Tag>(10);
+            impl.RegisterType<nc::Transform>(10);
+            impl.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
+            impl.RegisterType<nc::Hierarchy>(10);
 
-            registry.RegisterComponentType<Fake1>(
+            impl.RegisterType<Fake1>(
+                10,
                 ComponentHandler<Fake1>{.drawUI = drawUIMock}
             );
 
-            registry.RegisterComponentType<Fake2>(
+            impl.RegisterType<Fake2>(
+                10,
                 ComponentHandler<Fake2>{.drawUI = drawUIMock}
             );
         }
@@ -158,17 +156,6 @@ TEST_F(Registry_unit_tests, AddComponent_ValidCall_ConstructsObject)
     auto* ptr = registry.Add<Fake1>(handle, 1);
     EXPECT_EQ(ptr->ParentEntity(), handle);
     EXPECT_EQ(ptr->value, 1);
-}
-
-TEST_F(Registry_unit_tests, AddComponent_argumentForwarding_forwardsEntityOnlyWhenRequired)
-{
-    registry.RegisterComponentType<float>();
-    const auto handle = registry.Add<Entity>({});
-
-    // Testing the Entity arg is correctly passed to component constructors
-    EXPECT_NE(nullptr, registry.Add<Fake1>(handle, 1)); // passes entity
-    EXPECT_NE(nullptr, registry.Add<Fake2>(handle, handle, 1)); // ignores redundant entity
-    EXPECT_NE(nullptr, registry.Add<float>(handle, 42.0f)); // not not pass entity
 }
 
 TEST_F(Registry_unit_tests, AddComponent_BadEntity_Throws)
@@ -289,10 +276,9 @@ TEST_F(Registry_unit_tests, GetComponent_Exists_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponent_BadEntity_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponent_BadEntity_Throws)
 {
-    auto* actual = registry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None});
-    EXPECT_EQ(actual, nullptr);
+    EXPECT_THROW(registry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None}), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_ExistsStaged_ReturnsPointer)
@@ -305,11 +291,10 @@ TEST_F(Registry_unit_tests, GetComponent_ExistsStaged_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponent_DoesNotExist_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponent_DoesNotExist_Throws)
 {
     auto handle = registry.Add<Entity>({});
-    auto* ptr = registry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(registry.Get<Fake1>(handle), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponent_CallAfterRemoved_ReturnsNull)
@@ -318,8 +303,7 @@ TEST_F(Registry_unit_tests, GetComponent_CallAfterRemoved_ReturnsNull)
     registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
     registry.Remove<Fake1>(handle);
-    auto* ptr = registry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(registry.Get<Fake1>(handle), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
@@ -334,11 +318,10 @@ TEST_F(Registry_unit_tests, GetComponentConst_Exists_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponentConst_BadEntity_Throws)
 {
     const auto& constRegistry = registry;
-    const auto* actual = constRegistry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None});
-    EXPECT_EQ(actual, nullptr);
+    EXPECT_THROW(constRegistry.Get<Fake1>(Entity{0u, 0u, Entity::Flags::None}), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetComponentConst_ExistsStaged_ReturnsPointer)
@@ -352,23 +335,21 @@ TEST_F(Registry_unit_tests, GetComponentConst_ExistsStaged_ReturnsPointer)
     EXPECT_EQ(ptr->value, value);
 }
 
-TEST_F(Registry_unit_tests, GetComponentConst_DoesNotExist_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponentConst_DoesNotExist_Throws)
 {
     auto handle = registry.Add<Entity>({});
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(constRegistry.Get<Fake1>(handle), NcError);
 }
 
-TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_ReturnsNull)
+TEST_F(Registry_unit_tests, GetComponentConst_CallAfterRemoved_Throws)
 {
     auto handle = registry.Add<Entity>({});
     registry.Add<Fake1>(handle, 1);
     registry.CommitStagedChanges();
     registry.Remove<Fake1>(handle);
     const auto& constRegistry = registry;
-    const auto* ptr = constRegistry.Get<Fake1>(handle);
-    EXPECT_EQ(ptr, nullptr);
+    EXPECT_THROW(constRegistry.Get<Fake1>(handle), NcError);
 }
 
 TEST_F(Registry_unit_tests, GetParent_inPool_returnsParentEntity)
@@ -559,11 +540,4 @@ TEST_F(Registry_unit_tests, Clear_LeavesPersistentEntities)
 
     ASSERT_TRUE(registry.Contains<Entity>(e4));
     EXPECT_TRUE(registry.Contains<Fake1>(e4));
-}
-
-TEST_F(Registry_unit_tests, RegisterComponentType_arbitraryTypes_succeed)
-{
-    EXPECT_NO_THROW(registry.RegisterComponentType<std::string>());
-    EXPECT_NO_THROW(registry.RegisterComponentType<int>());
-    EXPECT_NO_THROW(registry.RegisterComponentType<void*>());
 }

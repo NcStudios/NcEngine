@@ -17,13 +17,12 @@ class Swapchain;
 
 inline static const std::string LitPassId = "Lit Pass";
 inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
-inline static const uint32_t MaxShadowcasters = 2u;
 
 class RenderGraph
 {
 
     public:
-        RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions);
+        RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, uint32_t maxLights);
 
         void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, const MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
@@ -44,5 +43,6 @@ class RenderGraph
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         uint32_t m_activeShadowMappingPasses;
+        uint32_t m_maxLights;
 };
-} // namespace nc
+} // namespace nc::graphics

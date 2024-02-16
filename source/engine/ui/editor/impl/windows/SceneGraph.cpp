@@ -3,15 +3,43 @@
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/View.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace
 {
-auto g_selectedEntityWidget = std::optional<nc::graphics::DebugWidget>{};
-
-auto IsRoot(nc::Transform* transform) -> bool
+auto MakeSelectedEntityWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
 {
-    return !transform->Parent().Valid();
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedEntity",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::graphics::WireframeRenderer>(
+        entity,
+        nc::Entity::Null(),
+        nc::graphics::WireframeSource::Renderer
+    );
+
+    return entity;
+}
+
+auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::Entity
+{
+    const auto entity = world.Emplace<nc::Entity>({
+        .parent = parent,
+        .tag = "SelectedCollider",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::graphics::WireframeRenderer>(
+        entity,
+        nc::Entity::Null(),
+        nc::graphics::WireframeSource::Collider
+    );
+
+    return entity;
 }
 } // anonymous namespace
 
@@ -25,20 +53,26 @@ auto GetSelectedEntityWidget() -> const std::optional<graphics::DebugWidget>&
 
 namespace nc::ui::editor
 {
-void SceneGraph::Draw(ecs::Ecs world)
+SceneGraph::SceneGraph(EditorContext& ctx)
+    : m_selectedEntityWireframe{::MakeSelectedEntityWireFrame(ctx.world, ctx.objectBucket)},
+      m_selectedColliderWireframe{::MakeSelectedColliderWireFrame(ctx.world, ctx.objectBucket)}
 {
-    EnsureSelection(world);
+}
+
+void SceneGraph::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
+{
+    EnsureSelection(ctx);
     m_tagFilter.Draw("search");
 
     ChildWindow("Entity List", [&]()
     {
         if (IsWindowBackgroundClicked())
         {
-            m_selectedEntity = Entity::Null();
+            SetEntitySelection(ctx, Entity::Null());
         }
 
-        GraphContextMenu(world);
-        Graph(world);
+        GraphContextMenu(ctx, createEntity);
+        Graph(ctx, createEntity);
     });
 
     if (m_entityCreateWindowOpen)
@@ -77,36 +111,26 @@ void SceneGraph::Draw(ecs::Ecs world)
     }
 }
 
-void SceneGraph::EnsureSelection(ecs::Ecs world)
+void SceneGraph::OnClose(EditorContext& ctx)
 {
-    if (m_selectedEntity.Valid())
-    {
-        if (!world.Contains<Entity>(m_selectedEntity))
-        {
-            m_selectedEntity = Entity::Null();
-            g_selectedEntityWidget = std::nullopt;
-        }
-        else
-        {
-            auto transform = world.Get<Transform>(m_selectedEntity);
-            const auto& mesh = [&]()
-            {
-                static const auto defaultMesh = std::string{asset::CubeMesh};
-                if (world.Contains<graphics::ToonRenderer>(m_selectedEntity))
-                    return world.Get<graphics::ToonRenderer>(m_selectedEntity)->GetMeshPath();
-                else if (world.Contains<graphics::MeshRenderer>(m_selectedEntity))
-                    return world.Get<graphics::MeshRenderer>(m_selectedEntity)->GetMeshPath();
-                else
-                    return defaultMesh;
-            }();
+    SetEntitySelection(ctx, Entity::Null());
+}
 
-            g_selectedEntityWidget = graphics::DebugWidget{mesh, transform->TransformationMatrix()};
-            // g_selectedEntityWidget = graphics::DebugWidget{asset::CubeMesh, DirectX::XMMatrixScaling(2.0f, 2.0f, 2.0f) * transform->TransformationMatrix()};
-        }
-    }
-    else
+void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
+{
+    ctx.selectedEntity = entity;
+    ctx.world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
+    ctx.world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
+        (entity.Valid() && ctx.world.Contains<physics::Collider>(entity))
+        ? entity
+        : Entity::Null();
+}
+
+void SceneGraph::EnsureSelection(EditorContext& ctx)
+{
+    if (ctx.selectedEntity.Valid() && !ctx.world.Contains<Transform>(ctx.selectedEntity))
     {
-        g_selectedEntityWidget = std::nullopt;
+        SetEntitySelection(ctx, Entity::Null());
     }
 }
 
@@ -115,23 +139,23 @@ auto SceneGraph::PassFilter(Tag& tag) -> bool
     return m_tagFilter.PassFilter(tag.Value().data());
 }
 
-void SceneGraph::Graph(ecs::Ecs world)
+void SceneGraph::Graph(EditorContext& ctx, CreateEntityDialog& createEntity)
 {
-    for(auto entity : world.GetAll<Entity>())
+    for(auto entity : ctx.world.GetAll<Entity>())
     {
-        auto transform = world.Get<Transform>(entity);
-        auto tag = world.Get<Tag>(entity);
-        if (IsRoot(transform) && PassFilter(*tag))
+        auto& hierarchy = ctx.world.Get<Hierarchy>(entity);
+        auto& tag = ctx.world.Get<Tag>(entity);
+        if (!hierarchy.parent.Valid() && PassFilter(tag))
         {
-            GraphNode(world, entity, *tag, *transform);
+            GraphNode(ctx, entity, tag, hierarchy, createEntity);
         }
     }
 }
 
-void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform)
+void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Hierarchy& hierarchy, CreateEntityDialog& createEntity)
 {
     IMGUI_SCOPE(ImGuiId, entity.Index());
-    const auto flags = m_selectedEntity == entity 
+    const auto flags = ctx.selectedEntity == entity
         ? ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow
         : 0;
 
@@ -139,45 +163,82 @@ void SceneGraph::GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& t
 
     if (ImGui::IsItemClicked())
     {
-        m_selectedEntity = entity;
+        SetEntitySelection(ctx, entity);
     }
     else if (ImGui::BeginPopupContextItem())
     {
-        m_selectedEntity = EntityContextMenu(entity, world);
+        const auto selectedEntityFromContext = EntityContextMenu(entity, ctx.world, createEntity);
+        if (selectedEntityFromContext != ctx.selectedEntity)
+        {
+            SetEntitySelection(ctx, selectedEntityFromContext);
+        }
+
         ImGui::EndPopup();
     }
 
     DragAndDropSource<Entity>(&entity);
-    DragAndDropTarget<Entity>([entity, world](Entity* source) mutable
+    DragAndDropTarget<Entity>([entity, world = ctx.world](Entity* source) mutable
     {
-        world.Get<Transform>(*source)->SetParent(entity);
+        world.SetParent(*source, entity);
     });
 
     if(isNodeExpanded)
     {
-        for(auto child : transform.Children())
+        for(auto child : hierarchy.children)
         {
-            GraphNode(world, child, *world.Get<Tag>(child), *world.Get<Transform>(child));
+            GraphNode(ctx, child, ctx.world.Get<Tag>(child), ctx.world.Get<Hierarchy>(child), createEntity);
         }
 
         ImGui::TreePop();
     }
 }
 
-void SceneGraph::GraphContextMenu(ecs::Ecs world)
+void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& createEntity)
 {
     if (ImGui::BeginPopupContextWindow())
     {
-        if (ImGui::Selectable("New Default Entity"))
-            m_selectedEntity = world.Emplace<Entity>(EntityInfo{});
-        // else if (ImGui::Selectable("New Static Entity"))
-            // m_selectedEntity = world.Emplace<Entity>(EntityInfo{.flags = Entity::Flags::Static});
-        else if (ImGui::Selectable("New Entity"))
+        if (ImGui::Selectable("New Entity"))
         {
-            m_entityCreateWindowOpen = true;
+            createEntity.Open();
+        }
+        else if (ImGui::Selectable("New Default Entity"))
+        {
+            ctx.selectedEntity = ctx.world.Emplace<Entity>(EntityInfo{});
+        }
+        else if (ImGui::BeginMenu("Object"))
+        {
+            if (ImGui::Selectable("PointLight"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "PointLight"});
+                ctx.world.Emplace<graphics::PointLight>(ctx.selectedEntity);
+            }
+            else if (ImGui::Selectable("Cube"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Cube"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::CubeMesh);
+            }
+            else if (ImGui::Selectable("Sphere"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Sphere"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::SphereMesh);
+            }
+            else if (ImGui::Selectable("Capsule"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Capsule"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::CapsuleMesh);
+            }
+            else if (ImGui::Selectable("Plane"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Plane"});
+                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::PlaneMesh);
+            }
+
+            ImGui::EndMenu();
         }
         else
-            m_selectedEntity = Entity::Null();
+        {
+            SetEntitySelection(ctx, Entity::Null());
+        }
 
         ImGui::EndPopup();
     }

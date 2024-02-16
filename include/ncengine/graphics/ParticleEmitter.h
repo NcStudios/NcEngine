@@ -40,10 +40,10 @@ struct ParticleKinematicInfo
 {
     Vector3 velocityMin = Vector3::Zero();
     Vector3 velocityMax = Vector3::Zero();
-    float velocityOverTimeFactor = 0.5f;
+    float velocityOverTimeFactor = 0.0f;
     float rotationMin = 0.0f;
     float rotationMax = 0.0f;
-    float rotationOverTimeFactor = 0.5f;
+    float rotationOverTimeFactor = 0.0f;
     float scaleOverTimeFactor = 0.0f;
 };
 
@@ -61,8 +61,8 @@ class ParticleEmitter final : public ComponentBase
     public:
         ParticleEmitter(Entity entity, ParticleInfo info);
 
-        const ParticleInfo& GetInfo() const noexcept;
-        void SetInfo(ParticleInfo info);
+        auto GetInfo() const noexcept -> const ParticleInfo& { return m_info; }
+        void SetInfo(const ParticleInfo& info);
         void Emit(size_t count);
 
         void RegisterSystem(ParticleEmitterSystem* system);

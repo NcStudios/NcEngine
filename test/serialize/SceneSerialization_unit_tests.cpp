@@ -20,6 +20,7 @@ class NcAssetMock : public NcAsset
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>& override { return m_meshSignal; }
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override { return m_textureSignal; }
+        auto OnFontUpdate() noexcept -> Signal<>& override { return m_fontSignal; }
 
         // Mocks
         void LoadAssets(const AssetMap& assets) override
@@ -40,6 +41,7 @@ class NcAssetMock : public NcAsset
         Signal<const MeshUpdateEventData&> m_meshSignal;
         Signal<const SkeletalAnimationUpdateEventData&> m_animSignal;
         Signal<const TextureUpdateEventData&> m_textureSignal;
+        Signal<> m_fontSignal;
 };
 
 auto BuildAssetModule(const config::AssetSettings&,
@@ -103,14 +105,14 @@ class SceneSerializationTests : public ::testing::Test
 {
     public:
         static constexpr auto maxEntities = 10ull;
+        nc::ecs::ComponentRegistry registry;
         nc::Registry legacyRegistry; // unfortunately we need this around for ActiveRegistry() usage inside Transform
-        nc::ecs::ComponentRegistry& registry;
         nc::ecs::Ecs ecs;
         std::unique_ptr<nc::asset::NcAsset> assetModule;
 
         SceneSerializationTests()
-            : legacyRegistry{maxEntities},
-              registry{legacyRegistry.GetImpl()},
+            : registry{maxEntities},
+              legacyRegistry{registry},
               ecs{registry},
               assetModule{nc::asset::BuildAssetModule(nc::config::AssetSettings{},
                                                       nc::config::MemorySettings{},
@@ -119,6 +121,7 @@ class SceneSerializationTests : public ::testing::Test
             registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(maxEntities, nc::ComponentHandler<nc::ecs::detail::FreeComponentGroup>{});
             registry.RegisterType<nc::Tag>(maxEntities, nc::ComponentHandler<nc::Tag>{});
             registry.RegisterType<nc::Transform>(maxEntities, nc::ComponentHandler<nc::Transform>{});
+            registry.RegisterType<nc::Hierarchy>(maxEntities);
             registry.RegisterType<UnserializableTestComponent>(maxEntities);
             registry.RegisterType<TestComponent1>
             (
@@ -237,7 +240,8 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
 
     const auto unexpectedInfos = std::vector<nc::EntityInfo>
     {
-        {.tag = "miss me", .flags = nc::Entity::Flags::Persistent},
+        {.flags = nc::Entity::Flags::NoSerialize}, // excluded by default
+        {.tag = "miss me", .flags = nc::Entity::Flags::Persistent}, // excluded by filter
         {.tag = "maybe next week", .flags = nc::Entity::Flags::Persistent}
     };
 
@@ -261,15 +265,13 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
         EXPECT_EQ(expected.layer, actualEntity.Layer());
         EXPECT_EQ(expected.flags, actualEntity.Flags());
 
-        const auto actualTransform = ecs.Get<nc::Transform>(actualEntity);
-        ASSERT_NE(nullptr, actualTransform);
-        EXPECT_EQ(expected.position, actualTransform->LocalPosition());
-        EXPECT_EQ(expected.rotation, actualTransform->LocalRotation());
-        EXPECT_EQ(expected.scale, actualTransform->LocalScale());
+        const auto& actualTransform = ecs.Get<nc::Transform>(actualEntity);
+        EXPECT_EQ(expected.position, actualTransform.LocalPosition());
+        EXPECT_EQ(expected.rotation, actualTransform.LocalRotation());
+        EXPECT_EQ(expected.scale, actualTransform.LocalScale());
 
-        const auto actualTag = ecs.Get<nc::Tag>(actualEntity);
-        ASSERT_NE(nullptr, actualTag);
-        EXPECT_EQ(expected.tag, actualTag->Value());
+        const auto& actualTag = ecs.Get<nc::Tag>(actualEntity);
+        EXPECT_EQ(expected.tag, actualTag.Value());
     }
 }
 
@@ -280,15 +282,18 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
         const auto e2 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e1, .tag = "2"});
         ecs.Emplace<nc::Entity>(nc::EntityInfo{.parent = e2, .tag = "3"});
         const auto e4 = ecs.Emplace<nc::Entity>(nc::EntityInfo{.tag = "4"});
-        ecs.Get<nc::Transform>(e1)->SetParent(e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
+        ecs.SetParent(e1, e4); // Disrupt parenting order to ensure we're sorting correctly prior to saving
         const auto e5 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .tag = "exlude me"}); // will filter this out
         ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e5 }); // expect this to get filtered as well
+        const auto e6 = ecs.Emplace<nc::Entity>(nc::EntityInfo{ .flags = nc::Entity::Flags::NoSerialize }); // automatically excluded
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e6 }); // excluded by parent
+        ecs.Emplace<nc::Entity>(nc::EntityInfo{ .parent = e4, .flags = nc::Entity::Flags::NoSerialize }); // child excluded, but not by parent
     }
 
     const auto filter = [&ecs = ecs](nc::Entity entity)
     {
         static constexpr auto toExclude = std::string_view{"exlude me"};
-        return ecs.Get<nc::Tag>(entity)->Value() != toExclude;
+        return ecs.Get<nc::Tag>(entity).Value() != toExclude;
     };
 
     auto stream = std::stringstream{};
@@ -302,19 +307,15 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     const auto actualEntities = ecs.GetAll<nc::Entity>();
     ASSERT_EQ(4, actualEntities.size());
 
-    const auto transform0 = ecs.Get<nc::Transform>(actualEntities[0]);
-    const auto transform1 = ecs.Get<nc::Transform>(actualEntities[1]);
-    const auto transform2 = ecs.Get<nc::Transform>(actualEntities[2]);
-    const auto transform3 = ecs.Get<nc::Transform>(actualEntities[3]);
-    ASSERT_NE(nullptr, transform0);
-    ASSERT_NE(nullptr, transform1);
-    ASSERT_NE(nullptr, transform2);
-    ASSERT_NE(nullptr, transform3);
+    const auto& hierarchy0 = ecs.Get<nc::Hierarchy>(actualEntities[0]);
+    const auto& hierarchy1 = ecs.Get<nc::Hierarchy>(actualEntities[1]);
+    const auto& hierarchy2 = ecs.Get<nc::Hierarchy>(actualEntities[2]);
+    const auto& hierarchy3 = ecs.Get<nc::Hierarchy>(actualEntities[3]);
 
-    EXPECT_EQ(nc::Entity::Null(), transform0->Parent());
-    EXPECT_EQ(actualEntities[0], transform1->Parent());
-    EXPECT_EQ(actualEntities[1], transform2->Parent());
-    EXPECT_EQ(actualEntities[2], transform3->Parent());
+    EXPECT_EQ(nc::Entity::Null(), hierarchy0.parent);
+    EXPECT_EQ(actualEntities[0], hierarchy1.parent);
+    EXPECT_EQ(actualEntities[1], hierarchy2.parent);
+    EXPECT_EQ(actualEntities[2], hierarchy3.parent);
 }
 
 TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents)
@@ -348,16 +349,16 @@ TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents
     ASSERT_TRUE(ecs.Contains<TestComponent2>(actualEntities[0]));
     ASSERT_FALSE(ecs.Contains<UnserializableTestComponent>(actualEntities[0]));
 
-    EXPECT_EQ(42, ecs.Get<TestComponent1>(actualEntities[0])->value);
-    EXPECT_EQ("test", ecs.Get<TestComponent2>(actualEntities[0])->value);
+    EXPECT_EQ(42, ecs.Get<TestComponent1>(actualEntities[0]).value);
+    EXPECT_EQ("test", ecs.Get<TestComponent2>(actualEntities[0]).value);
 
     ASSERT_TRUE(ecs.Contains<TestComponent1>(actualEntities[1]));
     ASSERT_FALSE(ecs.Contains<TestComponent2>(actualEntities[1]));
-    EXPECT_EQ(900, ecs.Get<TestComponent1>(actualEntities[1])->value);
+    EXPECT_EQ(900, ecs.Get<TestComponent1>(actualEntities[1]).value);
 
     ASSERT_FALSE(ecs.Contains<TestComponent1>(actualEntities[2]));
     ASSERT_TRUE(ecs.Contains<TestComponent2>(actualEntities[2]));
-    EXPECT_EQ("another test", ecs.Get<TestComponent2>(actualEntities[2])->value);
+    EXPECT_EQ("another test", ecs.Get<TestComponent2>(actualEntities[2]).value);
 
     ASSERT_FALSE(ecs.Contains<TestComponent1>(actualEntities[3]));
     ASSERT_FALSE(ecs.Contains<TestComponent2>(actualEntities[3]));

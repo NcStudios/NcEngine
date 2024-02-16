@@ -72,10 +72,13 @@ concept Component = PooledComponent<T> || std::derived_from<T, FreeComponent>;
 /** @brief Default storage behavior for pooled components. */
 struct DefaultStoragePolicy
 {
-    /** @brief Allows OnAdd callbacks to be set in the registry. */
+    /** @brief Enable the OnAdd Signal in the component's pool. */
     static constexpr bool EnableOnAddCallbacks = false;
 
-    /** @brief Allows OnRemove callbacks to be set in the registry. */
+    /** @brief Enable the OnCommit Signal in the component's pool. */
+    static constexpr bool EnableOnCommitCallbacks = false;
+
+    /** @brief Enable the OnRemove Signal in the component's pool. */
     static constexpr bool EnableOnRemoveCallbacks = false;
 };
 
@@ -114,9 +117,9 @@ struct ComponentHandler
 
     /**
      * @brief A unique identifier for the component.
-     * @note Set to 0 to get assigned an available id. The range [0, 100]
-     *       is reserved for engine components. Automatically assigned ids are assigned in reverse order
-     *       starting from std::numeric_limits<size_t>::max().
+     * @note Set to 0 to get assigned an available id. The range [1, 100] is reserved for engine
+     *       components. Automatically assigned ids are assigned in reverse order starting from
+     *       std::numeric_limits<size_t>::max().
     */
     size_t id = 0ull;
 

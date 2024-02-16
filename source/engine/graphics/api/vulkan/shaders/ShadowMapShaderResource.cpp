@@ -45,7 +45,7 @@ namespace nc::graphics
         m_imageInfos.clear();
     }
 
-    void ShadowMapShaderResource::Update(const std::vector<ShadowMap>& data)
+    void ShadowMapShaderResource::Update(const std::vector<ShadowMapData>& data)
     {
         assert(data.size() <= m_maxShadows && !data.empty());
 
@@ -79,4 +79,4 @@ namespace nc::graphics
             vk::DescriptorBindingFlagBitsEXT()
         );
     }
-}
+} // namespace nc::graphics

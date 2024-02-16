@@ -10,7 +10,6 @@
 
 namespace
 {
-constexpr auto g_preferredBufferFrames = 512u;
 constexpr auto g_outputChannelCount = 2u;
 constexpr auto g_sampleRate = 44100u;
 constexpr auto g_bufferCount = 3u;
@@ -49,12 +48,12 @@ int AudioSystemCallback(void* outputBuffer, void*, unsigned nBufferFrames, doubl
     return system->WriteToDeviceBuffer(static_cast<double*>(outputBuffer), nBufferFrames);
 }
 
-auto CreateStreamParams(uint32_t deviceId, nc::audio::NcAudioImpl* impl) -> nc::audio::StreamParameters
+auto CreateStreamParams(uint32_t deviceId, uint32_t bufferFrames, nc::audio::NcAudioImpl* impl) -> nc::audio::StreamParameters
 {
     return nc::audio::StreamParameters
     {
         deviceId,
-        g_preferredBufferFrames,
+        bufferFrames,
         g_outputChannelCount,
         g_sampleRate,
         ::AudioSystemCallback,
@@ -84,22 +83,23 @@ auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> s
     if(settings.enabled)
     {
         NC_LOG_TRACE("Building NcAudio module");
-        return std::make_unique<NcAudioImpl>(reg);
+        return std::make_unique<NcAudioImpl>(settings, reg);
     }
 
     NC_LOG_TRACE("Audio disabled - building NcAudio stub");
     return std::make_unique<NcAudioStub>();
 }
 
-NcAudioImpl::NcAudioImpl(Registry* registry)
+NcAudioImpl::NcAudioImpl(const config::AudioSettings& settings, Registry* registry)
     : m_registry{registry},
-      m_deviceStream{::CreateStreamParams(DefaultDeviceId, this)},
+      m_deviceStream{::CreateStreamParams(DefaultDeviceId, settings.bufferFrames, this)},
       m_bufferMemory(::BuildBufferPool(m_deviceStream.GetBufferFrames())),
       m_readyBuffers{},
       m_staleBuffers{::BuildBufferQueue(m_bufferMemory)},
       m_readyMutex{},
       m_staleMutex{},
-      m_listener{Entity::Null()}
+      m_listener{Entity::Null()},
+      m_configBufferFrames{settings.bufferFrames}
 {
 }
 
@@ -143,7 +143,7 @@ auto NcAudioImpl::GetOutputDevice() const noexcept -> const AudioDevice&
 
 auto NcAudioImpl::SetOutputDevice(uint32_t deviceId) noexcept -> bool
 {
-    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(deviceId, this));
+    const auto result = m_deviceStream.OpenStream(::CreateStreamParams(deviceId, m_configBufferFrames, this));
     if (result)
     {
         m_outputDeviceChanged.Emit(m_deviceStream.GetDevice());
@@ -240,12 +240,12 @@ void NcAudioImpl::MixToBuffer(double* buffer)
     const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
     std::memset(buffer, 0, bufferSizeInBytes);
 
-    const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
-    if(!listenerTransform)
+    if(!m_registry->Contains<Entity>(m_listener))
     {
         throw NcError("Invalid listener registered");
     }
 
+    const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
     const auto listenerPosition = listenerTransform->Position();
     const auto rightEar = listenerTransform->Right();
 

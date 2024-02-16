@@ -13,9 +13,8 @@ TEST(ComponentPoolTests, Emplace_validCall_attachesComponent)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     constexpr auto expectedValue = 42;
-    auto actual = uut.Emplace(nc::Entity{1, 0, 0}, expectedValue);
-    EXPECT_NE(nullptr, actual);
-    EXPECT_EQ(actual->value, expectedValue);
+    auto& actual = uut.Emplace(nc::Entity{1, 0, 0}, expectedValue);
+    EXPECT_EQ(actual.value, expectedValue);
 }
 
 TEST(ComponentPoolTests, Emplace_alreadyHasComponent_throws)
@@ -37,9 +36,8 @@ TEST(ComponentPoolTests, Insert_validCall_attachesComponent)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     constexpr auto expected = S1{42};
-    auto actual = uut.Insert(nc::Entity{1, 0, 0}, expected);
-    EXPECT_NE(nullptr, actual);
-    EXPECT_EQ(actual->value, expected.value);
+    auto& actual = uut.Insert(nc::Entity{1, 0, 0}, expected);
+    EXPECT_EQ(actual.value, expected.value);
 }
 
 TEST(ComponentPoolTests, Insert_alreadyHasComponent_throws)
@@ -90,27 +88,27 @@ TEST(ComponentPoolTests, Remove_badEntity_throws)
     EXPECT_THROW(uut.Remove(nc::Entity::Null()), nc::NcError);
 }
 
-TEST(ComponentPoolTests, Get_stagedComponent_returnsValidPointer)
+TEST(ComponentPoolTests, Get_stagedComponent_succeeds)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
     uut.Emplace(entity);
-    EXPECT_NE(nullptr, uut.Get(entity));
+    EXPECT_NO_THROW(uut.Get(entity));
 }
 
-TEST(ComponentPoolTests, Get_committedComponent_returnsValidPointer)
+TEST(ComponentPoolTests, Get_committedComponent_succeeds)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto entity = nc::Entity{1, 0, 0};
     uut.Emplace(entity);
     uut.CommitStagedComponents({});
-    EXPECT_NE(nullptr, uut.Get(entity));
+    EXPECT_NO_THROW(uut.Get(entity));
 }
 
-TEST(ComponentPoolTests, Get_componentDoesNotExist_returnsNull)
+TEST(ComponentPoolTests, Get_componentDoesNotExist_throws)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
-    EXPECT_EQ(nullptr, uut.Get(nc::Entity{1, 0, 0}));
+    EXPECT_THROW(uut.Get(nc::Entity{1, 0, 0}), nc::NcError);
 }
 
 TEST(ComponentPoolTests, Get_badEntity_throws)
@@ -123,8 +121,8 @@ TEST(ComponentPoolTests, GetParent_stagedComponent_returnsEntity)
 {
     auto uut = nc::ecs::ComponentPool<S1>{10u, nc::ComponentHandler<S1>{}};
     const auto expected = nc::Entity{1, 0, 0};
-    const auto component = uut.Emplace(expected);
-    const auto actual = uut.GetParent(component);
+    const auto& component = uut.Emplace(expected);
+    const auto actual = uut.GetParent(&component);
     EXPECT_EQ(expected, actual);
 }
 
@@ -134,8 +132,8 @@ TEST(ComponentPoolTests, GetParent_committedComponent_returnsEntity)
     const auto expected = nc::Entity{1, 0, 0};
     uut.Emplace(expected);
     uut.CommitStagedComponents({});
-    const auto component = uut.Get(expected);
-    const auto actual = uut.GetParent(component);
+    const auto& component = uut.Get(expected);
+    const auto actual = uut.GetParent(&component);
     EXPECT_EQ(expected, actual);
 }
 
@@ -145,11 +143,11 @@ TEST(ComponentPoolTests, GetParent_componentDeleted_returnsNullEntity)
     const auto entity = nc::Entity{1, 0, 0};
     uut.Emplace(entity);
     uut.CommitStagedComponents({});
-    const auto soonToExpire = uut.Get(entity);
+    const auto& soonToExpire = uut.Get(entity);
     uut.Remove(entity);
     uut.CommitStagedComponents({});
 
-    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(soonToExpire));
+    EXPECT_EQ(nc::Entity::Null(), uut.GetParent(&soonToExpire));
 }
 
 TEST(ComponentPoolTests, GetParent_nullComponent_returnsNullEntity)
@@ -248,23 +246,23 @@ TEST(ComponentPoolTests, Reserve_subsequentAdds_preserveReferenceValidity)
     uut.Reserve(5);
     uut.Emplace(entityA);
     uut.CommitStagedComponents({});
-    const auto expectedA = uut.Get(entityA);
+    const auto& expectedA = uut.Get(entityA);
 
-    const auto expectedB = uut.Emplace(nc::Entity{1, 0, 0});
-    const auto expectedC = uut.Emplace(nc::Entity{2, 0, 0});
-    const auto expectedD = uut.Emplace(nc::Entity{3, 0, 0});
-    const auto expectedE = uut.Emplace(nc::Entity{4, 0, 0});
-    const auto actualA = uut.Get(entityA);
-    const auto actualB = uut.Get(entityB);
-    const auto actualC = uut.Get(entityC);
-    const auto actualD = uut.Get(entityD);
-    const auto actualE = uut.Get(entityE);
+    const auto& expectedB = uut.Emplace(nc::Entity{1, 0, 0});
+    const auto& expectedC = uut.Emplace(nc::Entity{2, 0, 0});
+    const auto& expectedD = uut.Emplace(nc::Entity{3, 0, 0});
+    const auto& expectedE = uut.Emplace(nc::Entity{4, 0, 0});
+    const auto& actualA = uut.Get(entityA);
+    const auto& actualB = uut.Get(entityB);
+    const auto& actualC = uut.Get(entityC);
+    const auto& actualD = uut.Get(entityD);
+    const auto& actualE = uut.Get(entityE);
 
-    EXPECT_EQ(expectedA, actualA);
-    EXPECT_EQ(expectedB, actualB);
-    EXPECT_EQ(expectedC, actualC);
-    EXPECT_EQ(expectedD, actualD);
-    EXPECT_EQ(expectedE, actualE);
+    EXPECT_EQ(&expectedA, &actualA);
+    EXPECT_EQ(&expectedB, &actualB);
+    EXPECT_EQ(&expectedC, &actualC);
+    EXPECT_EQ(&expectedD, &actualD);
+    EXPECT_EQ(&expectedE, &actualE);
 }
 
 TEST(ComponentPoolTests, StlViewInterface_hasExpectedFunctions)
@@ -274,8 +272,8 @@ TEST(ComponentPoolTests, StlViewInterface_hasExpectedFunctions)
     uut.Emplace(entity);
     uut.CommitStagedComponents({});
     auto components = std::vector<S1*>{};
-    components.push_back(uut.Get(entity));
-    components.push_back(uut.Emplace(nc::Entity{1, 0, 0}));
+    components.push_back(&uut.Get(entity));
+    components.push_back(&uut.Emplace(nc::Entity{1, 0, 0}));
 
     ASSERT_EQ(1, uut.size()); // second item still staged so size only 1
     EXPECT_FALSE(uut.empty());

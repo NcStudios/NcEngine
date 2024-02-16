@@ -14,6 +14,7 @@ class NcAsset;
 namespace config
 {
 struct GraphicsSettings;
+struct MemorySettings;
 struct ProjectSettings;
 }
 
@@ -41,6 +42,7 @@ class IGraphics
 
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
+                     const config::MemorySettings& memorySettings,
                      asset::NcAsset* assetModule,
                      ShaderResourceBus& shaderResourceBus,
                      Registry* registry,

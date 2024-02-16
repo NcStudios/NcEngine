@@ -2,6 +2,7 @@
 
 #include "Attachment.h"
 #include "graphics/api/vulkan/techniques/ITechnique.h"
+#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
 #include <span>
 #include <vector>
@@ -52,7 +53,8 @@ class RenderPass
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;
         ClearValueFlags_t m_clearFlags;
-        std::vector<std::unique_ptr<ITechnique>> m_techniques;
+        std::vector<std::unique_ptr<ITechnique>> m_litTechniques;
+        std::vector<std::unique_ptr<ShadowMappingTechnique>> m_shadowMappingTechniques;
         std::vector<Attachment> m_attachments;
         std::vector<FrameBuffer> m_frameBuffers;
 };
@@ -61,20 +63,20 @@ template <std::derived_from<ITechnique> T>
 void RenderPass::RegisterTechnique(const Device& device, ShaderDescriptorSets* descriptorSets)
 {
     UnregisterTechnique<T>();
-    m_techniques.push_back(std::make_unique<T>(device, descriptorSets, &m_renderPass.get()));
+    m_litTechniques.push_back(std::make_unique<T>(device, descriptorSets, &m_renderPass.get()));
 }
 
 template <std::derived_from<ITechnique> T>
 void RenderPass::UnregisterTechnique()
 {
     const auto &techniqueType = typeid(T);
-    auto techniquePos = std::ranges::find_if(m_techniques, [&techniqueType](const auto &foundTechnique)
+    auto techniquePos = std::ranges::find_if(m_litTechniques, [&techniqueType](const auto &foundTechnique)
                                              { return (typeid(foundTechnique) == techniqueType); });
 
-    if (techniquePos != m_techniques.end())
+    if (techniquePos != m_litTechniques.end())
     {
-        *techniquePos = std::move(m_techniques.back());
-        m_techniques.pop_back();
+        *techniquePos = std::move(m_litTechniques.back());
+        m_litTechniques.pop_back();
     }
 }
-}
+} // namespace nc::graphics

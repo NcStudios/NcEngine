@@ -13,6 +13,11 @@
 
 namespace nc
 {
+namespace ecs
+{
+class EcsModule;
+}
+
 /** @brief Component with translation, rotation, and scale properties.
  * 
  *  @note Transforms are automatically added and removed with their parent
@@ -22,14 +27,33 @@ namespace nc
  * 
  *  Data is stored for local and world space, but only local space values may be
  *  directly modified. World space calculations are done internally based on the
- *  Transform/Entity hierarchy.
+ *  Entity's Hierarchy component.
 */
 class Transform final : public ComponentBase
 {
     NC_ENABLE_IN_EDITOR(Transform)
 
     public:
-        Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale, Entity parent);
+        Transform(Entity entity, const Vector3& pos, const Quaternion& rot, const Vector3& scale)
+            : ComponentBase(entity),
+              m_localMatrix{ComposeMatrix(scale, rot, pos)},
+              m_worldMatrix{m_localMatrix}
+        {
+            NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+        }
+
+        Transform(Entity entity,
+                  const Vector3& pos,
+                  const Quaternion& rot,
+                  const Vector3& scale,
+                  DirectX::FXMMATRIX parentTransform)
+            : ComponentBase(entity),
+              m_localMatrix{ComposeMatrix(scale, rot, pos)},
+              m_worldMatrix{m_localMatrix * parentTransform}
+        {
+            NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+        }
+
         Transform(Transform&&) = default;
         Transform& operator=(Transform&&) = default;
         ~Transform() = default;
@@ -55,7 +79,7 @@ class Transform final : public ComponentBase
         auto LocalRotation() const noexcept -> Quaternion { return ToQuaternion(DecomposeRotation(m_localMatrix)); }
 
         /** @brief Get world space scale */
-        auto Scale() const -> Vector3 { return ToVector3(DecomposeScale(m_worldMatrix)); }
+        auto Scale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_worldMatrix)); }
 
         /** @brief Get local space scale */
         auto LocalScale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_localMatrix)); }
@@ -64,16 +88,28 @@ class Transform final : public ComponentBase
         auto TransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_worldMatrix; }
 
         /** @brief Get local space matrix */
+        auto LocalTransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_localMatrix; }
+
+        /** @brief Get local space matrix */
         auto ToLocalSpace(const Vector3& vec) const -> Vector3;
 
         /** @brief Get the up axis of the transform */
-        auto Up() const -> Vector3;
+        auto Up() const noexcept -> Vector3 { return ToVector3(UpXM()); }
+
+        /** @brief Get the up axis of the transform as an XMVECTOR */
+        auto UpXM() const noexcept -> DirectX::XMVECTOR;
 
         /** @brief Get the forward axis of the transform */
-        auto Forward() const -> Vector3;
+        auto Forward() const noexcept -> Vector3 { return ToVector3(ForwardXM()); }
+
+        /** @brief Get the forward axis of the transform as an XMVECTOR */
+        auto ForwardXM() const noexcept -> DirectX::XMVECTOR;
 
         /** @brief Get the right axis of the transform */
-        auto Right() const -> Vector3;
+        auto Right() const noexcept -> Vector3 { return ToVector3(RightXM()); }
+
+        /** @brief Get the right axis of the transform as an XMVECTOR */
+        auto RightXM() const noexcept -> DirectX::XMVECTOR;
 
         /** @brief Set all local values [Quaternion] */
         void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
@@ -111,29 +147,30 @@ class Transform final : public ComponentBase
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
 
-        /** @brief Get all immediate children of this transform */
-        auto Children() const noexcept -> std::span<const Entity>
-        {
-            return std::span<const Entity>{m_children.data(), m_children.size()};
-        }
-
-        /** @brief Get the root node relative to this transform */
-        auto Root() const -> Entity;
-
-        /** @brief Get the immediate parent of this transform - may be nullptr */
-        auto Parent() const noexcept -> Entity { return m_parent; }
-
-        /** @brief Make this transform the child of another, or pass nullptr to detach from existing parent */
-        void SetParent(Entity parent);
+        /** @brief Rotate to point towards a target position. */
+        void LookAt(const Vector3& target);
 
     private:
-        void AddChild(Entity child);
-        void RemoveChild(Entity child);
-        void UpdateWorldMatrix();
-
+        friend class ecs::EcsModule;
+        bool m_dirty = false;
         DirectX::XMMATRIX m_localMatrix;
         DirectX::XMMATRIX m_worldMatrix;
-        Entity m_parent;
-        std::vector<Entity> m_children;
+
+        auto IsDirty() const noexcept
+        {
+            return m_dirty;
+        }
+
+        void UpdateWorldMatrix()
+        {
+            m_dirty = false;
+            m_worldMatrix = m_localMatrix;
+        }
+
+        void UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix)
+        {
+            m_dirty = false;
+            m_worldMatrix = m_localMatrix * parentMatrix;
+        }
 };
 } //end namespace nc

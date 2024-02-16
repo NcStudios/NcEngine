@@ -16,7 +16,10 @@ class PointLight final : public ComponentBase
     NC_ENABLE_IN_EDITOR(PointLight)
 
     public:
-        PointLight(Entity entity, const Vector3& ambient, const Vector3& diffuseColor, float diffuseIntensity)
+        PointLight(Entity entity,
+                   const Vector3& ambient = Vector3{1.0f, 0.9f, 0.9f},
+                   const Vector3& diffuseColor = Vector3{1.0f, 0.9f, 0.9f},
+                   float diffuseIntensity = 600.0f)
             : ComponentBase{entity},
               m_ambient{ambient},
               m_diffuseColor{diffuseColor},
@@ -66,7 +69,8 @@ namespace nc
 template<>
 struct StoragePolicy<graphics::PointLight> : DefaultStoragePolicy
 {
-    static constexpr bool EnableOnAddCallbacks = true;
+    static constexpr bool EnableOnAddCallbacks = false;
+    static constexpr bool EnableOnCommitCallbacks = true;
     static constexpr bool EnableOnRemoveCallbacks = true;
 };
 } // namespace nc

@@ -1,23 +1,19 @@
 #include "NcGraphicsImpl.h"
 #include "PerFrameRenderState.h"
-#include "asset/NcAsset.h"
-#include "config/Config.h"
-#include "ecs/Ecs.h"
-#include "ecs/View.h"
-#include "ncengine/ui/Editor.h"
 #include "graphics/GraphicsUtilities.h"
 #include "shader_resource/PointLightData.h"
 #include "shader_resource/ShaderResourceBus.h"
-
-#include "task/TaskGraph.h"
-#include "utility/Log.h"
 #include "window/WindowImpl.h"
+#include "ncengine/asset/NcAsset.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/View.h"
+#include "ncengine/graphics/WireframeRenderer.h"
+#include "ncengine/scene/NcScene.h"
+#include "ncengine/task/TaskGraph.h"
+#include "ncengine/utility/Log.h"
 
 #include "optick.h"
-
-#ifdef NC_DEBUG_RENDERING_ENABLED
-#include "graphics/debug/DebugRenderer.h"
-#endif
 
 namespace
 {
@@ -31,11 +27,6 @@ namespace
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
-
-        /** @todo Debug renderer is becoming a problem... */
-        #ifdef NC_DEBUG_RENDERING_ENABLED
-        nc::graphics::DebugRenderer debugRenderer;
-        #endif
     };
 } // anonymous namespace
 
@@ -43,30 +34,24 @@ namespace nc::graphics
 {
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
-                             asset::NcAsset* assetModule,
+                             const config::MemorySettings& memorySettings,
+                             ModuleProvider modules,
                              Registry* registry,
-                             window::WindowImpl* window,
-                             std::unique_ptr<ui::editor::Editor> editor) -> std::unique_ptr<NcGraphics>
+                             SystemEvents& events,
+                             window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
         {
+            auto ncAsset = modules.Get<asset::NcAsset>();
+            NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
+            NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
+
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings,
-                                               graphicsSettings,
-                                               assetModule,
-                                               resourceBus,
-                                               registry,
-                                               window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings,
-                                                    registry,
-                                                    assetModule,
-                                                    std::move(graphicsApi),
-                                                    std::move(resourceBus),
-                                                    window,
-                                                    std::move(editor));
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -75,22 +60,25 @@ namespace nc::graphics
 
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                                    Registry* registry,
-                                   asset::NcAsset* assetModule,
+                                   ModuleProvider modules,
+                                   SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus&& shaderResourceBus,
                                    window::WindowImpl* window,
                                    std::unique_ptr<ui::editor::Editor> editor)
         : m_registry{registry},
-          m_assetModule{assetModule},
           m_graphics{std::move(graphics)},
           m_cameraSystem{},
           m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
           m_objectSystem{std::move(shaderResourceBus.objectChannel)},
           m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
-          m_skeletalAnimationSystem{registry, assetModule->OnSkeletalAnimationUpdate(), assetModule->OnBoneUpdate(), std::move(shaderResourceBus.skeletalAnimationChannel)},
+          m_skeletalAnimationSystem{registry,
+                                    modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
+                                    modules.Get<asset::NcAsset>()->OnBoneUpdate(),
+                                    std::move(shaderResourceBus.skeletalAnimationChannel)},
           m_widgetSystem{},
-          m_uiSystem{std::move(editor)}
+          m_uiSystem{registry->GetEcs(), modules, events}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
     }
@@ -157,8 +145,8 @@ namespace nc::graphics
         }
 
         auto cameraState = m_cameraSystem.Execute(m_registry);
-        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()), *m_assetModule);
-        auto widgetState = m_widgetSystem.Execute(View<physics::Collider>{m_registry});
+        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
+        auto widgetState = m_widgetSystem.Execute(m_registry->GetEcs());
         auto environmentState = m_environmentSystem.Execute(cameraState);
         auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
         auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},

@@ -1,9 +1,9 @@
 #include "NcPhysicsImpl.h"
-#include "config/Config.h"
-#include "graphics/debug/DebugRenderer.h"
-#include "physics/ConcaveCollider.h"
-#include "time/Time.h"
-#include "utility/Log.h"
+#include "ncengine/Events.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/time/Time.h"
+#include "ncengine/utility/Log.h"
 
 namespace
 {
@@ -41,20 +41,20 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 
 namespace nc::physics
 {
-auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(settings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl>(settings, registry);
+        return std::make_unique<NcPhysicsImpl>(settings, registry, events);
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
     return std::make_unique<NcPhysicsStub>(registry);
 }
 
-NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry)
-    : m_pipeline{registry, settings.fixedUpdateInterval},
+NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events)
+    : m_pipeline{registry, settings.fixedUpdateInterval, events.rebuildStatics},
       m_clickableSystem{},
       m_accumulatedTime{0.0},
       m_currentIterations{0u}

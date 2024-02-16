@@ -7,11 +7,11 @@ namespace
 {
     using namespace nc;
 
-    DirectX::XMMATRIX ComposeMatrix(float scale, const Quaternion& r, const Vector3& pos)
+    DirectX::XMMATRIX ComposeMatrix(float scale, const DirectX::XMVECTOR& r, const Vector3& pos)
     {
         return DirectX::XMMatrixScaling(scale, scale, scale) *
-            DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(r.x, r.y, r.z, r.w)) *
-            DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+               DirectX::XMMatrixRotationQuaternion(r) *
+               DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadVector3(&pos));
     }
 
     particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
@@ -50,10 +50,10 @@ namespace nc::particle
 {
     EmitterState::EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random)
         : m_soa{ info.emission.maxParticleCount },
-        m_info{ info },
-        m_entity{ entity },
-        m_emissionCounter{ 0.0f },
-        m_random{ random }
+          m_info{ info },
+          m_entity{ entity },
+          m_emissionCounter{ 0.0f },
+          m_random{ random }
     {
         Emit(m_info.emission.initialEmissionCount);
     }
@@ -81,8 +81,14 @@ namespace nc::particle
         }
     }
 
-    void EmitterState::Update(float dt, const Quaternion& camRotation, const Vector3& camForward)
+    void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward)
     {
+        if (m_needsResize)
+        {
+            m_needsResize = false;
+            m_soa = ParticleSoA{m_info.emission.maxParticleCount};
+        }
+
         PeriodicEmission(dt);
 
         std::vector<unsigned> toRemove; // linear allocator?
@@ -106,6 +112,17 @@ namespace nc::particle
 
         for (auto i : toRemove)
             m_soa.RemoveAtIndex(i);
+    }
+
+    void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
+    {
+        // delay resize so we don't blow up the particle task
+        if (info.emission.maxParticleCount != m_info.emission.maxParticleCount)
+        {
+            m_needsResize = true;
+        }
+
+        m_info = info;
     }
 
     const graphics::ParticleInfo& EmitterState::GetInfo() const
@@ -136,12 +153,13 @@ namespace nc::particle
         }
     }
 
-    auto EmitterState::ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const -> DirectX::XMMATRIX
+    auto EmitterState::ComputeMvp(const Particle& particle, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward) const -> DirectX::XMMATRIX
     {
-        return ComposeMatrix
+        auto rot = DirectX::XMQuaternionMultiply(camRotation, DirectX::XMQuaternionRotationAxis(camForward, particle.rotation));
+        return ::ComposeMatrix
         (
             particle.scale,
-            Multiply(camRotation, Quaternion::FromAxisAngle(camForward, particle.rotation)),
+            rot,
             particle.position
         );
     }

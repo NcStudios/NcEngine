@@ -1,10 +1,15 @@
 #pragma once
 
-#include "module/Module.h"
+#include "ncengine/module/Module.h"
+#include "ncengine/utility/Signal.h"
 
 #include <memory>
 
-namespace nc { class Registry; }
+namespace nc
+{
+struct SystemEvents;
+class Registry;
+}
 
 namespace nc::ecs
 {
@@ -12,14 +17,18 @@ namespace nc::ecs
 class EcsModule : public Module
 {
     public:
-        EcsModule(Registry* registry) noexcept;
+        EcsModule(Registry* registry, SystemEvents& events) noexcept;
 
         void OnBuildTaskGraph(task::TaskGraph&) override;
         void RunFrameLogic();
 
     private:
         Registry* m_registry;
+        Connection<> m_rebuildStaticConnection;
+
+        void UpdateWorldSpaceMatrices();
+        void UpdateStaticWorldSpaceMatrices();
 };
 
-auto BuildEcsModule(Registry* registry) -> std::unique_ptr<EcsModule>;
+auto BuildEcsModule(Registry* registry, SystemEvents& events) -> std::unique_ptr<EcsModule>;
 } // namespace nc::ecs

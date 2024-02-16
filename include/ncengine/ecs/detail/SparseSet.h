@@ -233,8 +233,12 @@ void SparseSet<T>::ClearNonPersistent()
 
         // push persistent entities/components to the front
         m_sparse.at(entity.Index()) = swapToIndex;
-        m_dense.at(swapToIndex) = std::move(m_dense.at(denseIndex));
-        m_entities.at(swapToIndex) = entity;
+        if (swapToIndex != denseIndex) // don't self move!
+        {
+            m_dense.at(swapToIndex) = std::move(m_dense.at(denseIndex));
+            m_entities.at(swapToIndex) = entity;
+        }
+
         ++swapToIndex;
     }
 

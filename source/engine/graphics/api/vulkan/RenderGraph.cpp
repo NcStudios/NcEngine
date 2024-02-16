@@ -59,7 +59,6 @@ auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::G
     using namespace nc::graphics;
 
     const auto vkDevice = device->VkDevice();
-
     const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
     {
         AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
@@ -146,7 +145,7 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions)
+RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, uint32_t maxLights)
     : m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
@@ -155,11 +154,12 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
       m_litPass{CreateLitPass(device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions)},
       m_dimensions{dimensions},
       m_screenExtent{},
-      m_activeShadowMappingPasses{}
+      m_activeShadowMappingPasses{},
+      m_maxLights{maxLights}
 {
-    for (auto i : std::views::iota(0u, MaxShadowcasters))
+    for (auto i : std::views::iota(0u, m_maxLights))
     {
-        m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
+        m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
     }
 }
 
@@ -172,7 +172,6 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    // for (auto& shadowMappingPass : std::ranges::take_view(m_shadowMappingPasses, m_activeShadowMappingPasses))
     for (auto& shadowMappingPass : m_shadowMappingPasses)
     {
         shadowMappingPass.Begin(cmd, frameBufferIndex);
@@ -185,7 +184,6 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     m_litPass.Begin(cmd, frameBufferIndex);
     m_litPass.Execute(cmd, frameData);
     m_litPass.End(cmd);
-
     cmd->end();
 }
 
@@ -194,7 +192,7 @@ void RenderGraph::Resize(const Vector2& dimensions)
     m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions);
 
     m_shadowMappingPasses.clear();
-    for (auto i : std::views::iota(0u, MaxShadowcasters))
+    for (auto i : std::views::iota(0u, m_maxLights))
     {
         m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
     }
@@ -207,15 +205,9 @@ void RenderGraph::Resize(const Vector2& dimensions)
 
 void RenderGraph::IncrementShadowPassCount()
 {
-    if (m_activeShadowMappingPasses == MaxShadowcasters)
-    {
-        return;
-    }
+    NC_ASSERT(m_activeShadowMappingPasses < m_maxLights, "Tried to add a light source when max lights are registered.");
+    m_shadowMappingPasses[m_activeShadowMappingPasses].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, m_activeShadowMappingPasses);
     m_activeShadowMappingPasses++;
-    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
-    {
-        m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
-    }
 }
 
 void RenderGraph::ClearShadowPasses()
@@ -233,4 +225,4 @@ void RenderGraph::DecrementShadowPassCount()
     m_shadowMappingPasses[m_activeShadowMappingPasses-1].UnregisterShadowMappingTechnique();
     m_activeShadowMappingPasses--;
 }
-}
+} // namespace nc::graphics

@@ -10,7 +10,7 @@ class NcEngine;
 class Registry;
 class ModuleRegistry;
 class Entity;
-struct Module;
+class Module;
 class AnyComponent;
 class ComponentBase;
 class FreeComponent;

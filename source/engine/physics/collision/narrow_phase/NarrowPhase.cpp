@@ -1,4 +1,5 @@
 #include "NarrowPhase.h"
+#include "physics/PhysicsConstants.h"
 #include "ecs/Logic.h"
 #include "ncutility/NcError.h"
 
@@ -44,6 +45,8 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
         m_manifoldCache.Add(a, b, type, externalResults.contacts[i]);
     }
 
+    // Should get rid of this removal and the one in notify events. UpdateManifolds should correctly clear
+    // itself always - wackiness should be the result of bad parameters/break distance
     /** @todo There are some questions surrounding this:
      *  - If a manifold isn't 'updated' I would expect UpdateManfiolds() to have removed it.
      *    Why isn't this the case?
@@ -54,6 +57,7 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
     {
         if(cur->Event().state == NarrowEvent::State::Stale)
         {
+            NC_LOG_CONTACTS("Remove stale manifold [contact not broken]");
             m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
             m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
         }
@@ -84,7 +88,9 @@ auto NarrowPhase::TryGetCollisionLogic(Entity a) -> CollisionLogic*
 {
     if(a.ReceivesCollisionEvents() && m_registry->Contains<Entity>(a))
     {
-        return m_registry->Get<CollisionLogic>(a);
+        return m_registry->Contains<CollisionLogic>(a)
+            ? m_registry->Get<CollisionLogic>(a)
+            : nullptr;
     }
 
     return nullptr;
@@ -150,6 +156,7 @@ void NarrowPhase::NotifyEvents()
             [[unlikely]] case NarrowEvent::State::Stale:
             {
                 /** This isn't expected to be detected here, but just in case. */
+                NC_LOG_CONTACTS("Clear stale manifold [unexpected code path]");
                 const auto e1 = cur->Event().first;
                 const auto e2 = cur->Event().second;
                 if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionExit(e2, m_registry);

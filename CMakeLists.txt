@@ -28,6 +28,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(NC_COMPILER_FLAGS /W4
                           /WX
                           /MP
+                          /arch:AVX2
     )
 
     # just static link for simplicity
@@ -43,8 +44,6 @@ if(NC_PROD_BUILD)
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=1)
     set(NC_ENGINE_LIB "NcEngine")
 else()
-    # set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
-    # Disabling debug rendering for game jam - is this even used anymore? wireframe widgets work without
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_EDITOR_EXE "NcEditor")

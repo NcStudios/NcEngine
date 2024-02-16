@@ -1,26 +1,53 @@
-#include "ncengine/ui/Editor.h"
-#include "ncengine/NcEngine.h"
-#include "ncengine/input/Input.h"
-#include "ncengine/module/ModuleProvider.h"
-#include "ncengine/window/Window.h"
+#include "ui/editor/Editor.h"
+#include "EditorCamera.h"
 #include "EditorUI.h"
-
-#include "ncengine/ui/ImGuiUtility.h"
+#include "ncengine/ecs/Logic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
-#include "ncengine/graphics/NcGraphics.h"
-#include "ncengine/graphics/SceneNavigationCamera.h"
-#include "ncengine/serialize/SceneSerialization.h"
-#include <fstream>
+#include "ncengine/input/Input.h"
+#include "ncengine/window/Window.h"
 
 namespace
 {
-namespace hotkey
+auto BuildEditorObjects(nc::ecs::Ecs world, nc::ModuleProvider modules, nc::input::KeyCode cameraHotkey) -> std::pair<nc::Entity, nc::Entity>
 {
-constexpr auto Editor = nc::input::KeyCode::Tilde;
-constexpr auto NewScene = nc::input::KeyCode::F1;
-constexpr auto SaveScene = nc::input::KeyCode::F2;
-constexpr auto LoadScene = nc::input::KeyCode::F3;
-} // namespace hotkey
+    // Parent Entity for all Editor objects
+    const auto bucket = world.Emplace<nc::Entity>({
+        .tag = "[Editor]",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    // Editor camera
+    const auto camera = world.Emplace<nc::Entity>({
+        .position = nc::Vector3{0.0f, 8.0f, -10.0f},
+        .rotation = nc::Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
+        .parent = bucket,
+        .tag = "EditorCamera",
+        .flags = nc::ui::editor::EditorObjectFlags
+    });
+
+    world.Emplace<nc::ui::editor::EditorCamera>(camera, modules, cameraHotkey);
+    world.Emplace<nc::FrameLogic>(camera, nc::InvokeFreeComponent<nc::ui::editor::EditorCamera>{});
+    return std::pair{bucket, camera};
+}
+
+auto BuildContext(nc::ecs::Ecs world,
+                  nc::ModuleProvider modules,
+                  nc::SystemEvents& events,
+                  nc::ui::editor::EditorHotkeys hotkeys) -> nc::ui::editor::EditorContext
+{
+    const auto [bucket, camera] = ::BuildEditorObjects(world, modules, hotkeys.toggleEditorCamera);
+    return nc::ui::editor::EditorContext{
+        .world = world,
+        .modules = modules,
+        .events = &events,
+        .selectedEntity = nc::Entity::Null(),
+        .openState = nc::ui::editor::OpenState::ClosePersisted,
+        .dimensions = ImVec2{},
+        .objectBucket = bucket,
+        .editorCamera = camera,
+        .hotkeys = hotkeys
+    };
+}
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -172,48 +199,26 @@ class LoadSceneDialog : public DialogBase
 class EditorImpl : public Editor
 {
     public:
-        explicit EditorImpl(NcEngine* engine)
-            : m_ui{}, m_engine{engine} {}
-
-        void Draw(ecs::Ecs world, asset::NcAsset& assetModule) override
+        explicit EditorImpl(ecs::Ecs world, ModuleProvider modules, SystemEvents& events, const EditorHotkeys& hotkeys)
+            : Editor{::BuildContext(world, modules, events, hotkeys)},
+              m_ui{m_ctx}
         {
-            if(input::KeyDown(hotkey::Editor))
-                m_open = !m_open;
+        }
 
-            if(!m_open)
-                return;
-            else if (input::KeyDown(hotkey::NewScene))
-                m_newSceneDialog.Open();
-            else if(input::KeyDown(hotkey::SaveScene))
-                m_saveSceneDialog.Open(assetModule.GetLoadedAssets());
-            else if(input::KeyDown(hotkey::LoadScene))
-                m_loadSceneDialog.Open();
-
-            if (m_newSceneDialog.IsOpen())
-                m_newSceneDialog.Draw(m_engine);
-            else if (m_saveSceneDialog.IsOpen())
-                m_saveSceneDialog.Draw(world);
-            else if (m_loadSceneDialog.IsOpen())
-                m_loadSceneDialog.Draw(world, assetModule);
-
-            m_ui.Draw(world);
-
-            // Workaround: PointLight creation crashes b/c registry + shader resource are out of sync
-            //             until next frame. Hacky solution is to make a duplicate sync call here.
-            m_engine->GetRegistry()->CommitStagedChanges();
+        void Draw(ecs::Ecs) override
+        {
+            m_ui.Draw(m_ctx);
         }
 
     private:
         EditorUI m_ui;
-        NewSceneDialog m_newSceneDialog;
-        SaveSceneDialog m_saveSceneDialog;
-        LoadSceneDialog m_loadSceneDialog;
-        NcEngine* m_engine;
-        bool m_open = false;
 };
 
-auto BuildEditor(NcEngine* engine) -> std::unique_ptr<Editor>
+auto BuildEditor(ecs::Ecs world,
+                 ModuleProvider modules,
+                 SystemEvents& events,
+                 const EditorHotkeys& hotkeys) -> std::unique_ptr<Editor>
 {
-    return std::make_unique<EditorImpl>(engine);
+    return std::make_unique<EditorImpl>(world, modules, events, hotkeys);
 }
 } // namespace nc::ui::editor

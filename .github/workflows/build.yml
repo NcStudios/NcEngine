@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup MSVC
         if: ${{ matrix.shortName == 'Windows' }}
@@ -71,9 +71,9 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.shortName }}-${{ matrix.variant }}-TestResults
+          name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-TestResults
           path: build/test/TestResults.xml
 
   Publish-Test-Results:
@@ -86,12 +86,12 @@ jobs:
 
     steps:
     - name: Download Results
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: artifacts
 
     - name: Publish Results
-      uses: mikepenz/action-junit-report@v3
+      uses: mikepenz/action-junit-report@v4
       if: always()
       with:
         report_paths: 'artifacts/**/*.xml'

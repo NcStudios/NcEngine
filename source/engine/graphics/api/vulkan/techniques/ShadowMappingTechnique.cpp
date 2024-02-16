@@ -145,4 +145,4 @@ namespace nc::graphics
             objectInstance++;
         }
     }
-}
+} // namespace nc::graphics

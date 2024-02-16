@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ncengine/type/EngineTypes.h"
+#include "ncengine/ui/ImGuiConversion.h"
 
 #include "imgui/imgui.h"
 #include "ncmath/Vector.h"
@@ -44,6 +45,10 @@ constexpr auto g_maxScale = 1000.0f;
 template<class F>
 void Window(const char* label, F&& drawContents);
 
+/** @brief Create a top-level window. */
+template<class F>
+void Window(const char* label, ImGuiWindowFlags flags, F&& drawContents);
+
 /** @brief Create a child window. */
 template<class F>
 void ChildWindow(const char* label, F&& drawContents);
@@ -54,7 +59,11 @@ auto IsWindowBackgroundClicked() -> bool;
 /** @brief Input field UI widget for int. */
 auto InputInt(int& value, const char* label, int step = 1) -> bool;
 
+/** @brief Input field UI widget for uint8_t. */
 auto InputU8(uint8_t& value, const char* label) -> bool;
+
+/** @brief Input field UI widget for uint16_t. */
+auto InputU16(uint16_t& value, const char* label) -> bool;
 
 /** @brief Input field UI widget for uint32_t. */
 auto InputU32(uint32_t& value, const char* label) -> bool;
@@ -91,6 +100,9 @@ auto Combobox(std::string& value, const char* label, std::span<const std::string
 
 /** @brief Text input UI widget. */
 auto InputText(std::string& value, const char* label) -> bool;
+
+/** @brief Wrap a widget with a selectable - allows for things like list box of input widgets. */
+auto SelectableWidget(bool selected, const ImVec2& size, auto&& widget) -> bool;
 
 /**
  * @brief Simple getter/setter-based property wrapper.
@@ -180,14 +192,20 @@ inline auto IsCapturingMouse() -> bool
 }
 
 template<class F>
-void Window(const char* label, F&& drawContents)
+void Window(const char* label, ImGuiWindowFlags flags, F&& drawContents)
 {
-    if (ImGui::Begin(label, nullptr))
+    if (ImGui::Begin(label, nullptr, flags))
     {
         drawContents();
     }
 
     ImGui::End();
+}
+
+template<class F>
+void Window(const char* label, F&& drawContents)
+{
+    Window(label, ImGuiWindowFlags_None, std::forward<F>(drawContents));
 }
 
 template<class F>
@@ -227,19 +245,25 @@ inline auto InputInt(int& value, const char* label, int step) -> bool
 
 inline auto InputU8(uint8_t& value, const char* label) -> bool
 {
-    constexpr auto step = 1u;
+    constexpr uint8_t step = 1;
     return ImGui::InputScalar(label, ImGuiDataType_U8, &value, &step);
+}
+
+inline auto InputU16(uint16_t& value, const char* label) -> bool
+{
+    constexpr uint16_t step = 1;
+    return ImGui::InputScalar(label, ImGuiDataType_U16, &value, &step);
 }
 
 inline auto InputU32(unsigned& value, const char* label) -> bool
 {
-    constexpr auto step = 1u;
+    constexpr uint32_t step = 1;
     return ImGui::InputScalar(label, ImGuiDataType_U32, &value, &step);
 }
 
-inline auto InputU62(unsigned& value, const char* label) -> bool
+inline auto InputU64(uint64_t& value, const char* label) -> bool
 {
-    constexpr auto step = 1ull;
+    constexpr uint64_t step = 1;
     return ImGui::InputScalar(label, ImGuiDataType_U64, &value, &step);
 }
 
@@ -336,6 +360,25 @@ inline auto InputText(std::string& text, const char* label) -> bool
     auto userData = internal::InputTextCallbackUserData{.string = &text};
     return ImGui::InputText(label, text.data(), text.capacity() + 1, flags, internal::InputTextCallback, &userData);
 }
+
+auto SelectableWidget(bool selected, const ImVec2& size, auto&& widget) -> bool
+{
+    static constexpr auto flags = ImGuiSelectableFlags_AllowDoubleClick |
+                                  ImGuiSelectableFlags_AllowItemOverlap;
+    auto clicked = false;
+    if (ImGui::Selectable("##select", selected, flags, size))
+        clicked = true;
+
+    ImGui::SameLine();
+    widget();
+    if (ImGui::IsItemClicked(0))
+    {
+        clicked = true;
+        ImGui::SetKeyboardFocusHere(-1);
+    }
+
+    return clicked;
+};
 
 auto PropertyWidget(const auto& property, auto& instance, auto&& widget, auto&&... args) -> bool
 {

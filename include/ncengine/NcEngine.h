@@ -1,9 +1,10 @@
 #pragma once
 
-#include "config/Config.h"
-#include "ecs/Registry.h"
-#include "module/ModuleRegistry.h"
-#include "scene/Scene.h"
+#include "ncengine/Events.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/module/ModuleRegistry.h"
+#include "ncengine/scene/Scene.h"
 
 namespace nc
 {
@@ -19,35 +20,20 @@ class NcEngine
          */
         virtual void Start(std::unique_ptr<Scene> initialScene) = 0;
 
-        /**
-         * @brief Signal the engine to stop execution after all tasks have completed.
-         */
+        /** @brief Signal the engine to stop execution after all tasks have completed. */
         virtual void Stop() noexcept = 0;
 
-        /**
-         * @brief Clear all engine state.
-         */
+        /** @brief Clear all engine state. */
         virtual void Shutdown() noexcept = 0;
 
-        /**
-         * @brief Queue a scene to be loaded upon completion of the current frame.
-         */
-        virtual void QueueSceneChange(std::unique_ptr<Scene> scene) = 0;
+        /** @brief Get a reference to the ComponentRegistry. */
+        virtual auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& = 0;
 
-        /**
-         * @brief Check if a scene change is scheduled.
-         */
-        virtual bool IsSceneChangeQueued() const noexcept = 0;
-
-        /**
-         * @brief Get a pointer to the active registry.
-         */
-        virtual auto GetRegistry() noexcept -> Registry* = 0;
-
-        /**
-         * @brief Get a pointer to the module registry.
-         */
+        /** @brief Get a pointer to the module registry. */
         virtual auto GetModuleRegistry() noexcept -> ModuleRegistry* = 0;
+
+        /** @brief Get a reference to the collection of system events. */
+        virtual auto GetSystemEvents() noexcept -> SystemEvents& = 0;
 
         /**
          * @brief Compose a new task graph from all registered modules.

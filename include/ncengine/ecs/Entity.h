@@ -22,11 +22,12 @@ class Entity
 
         struct Flags
         {
-            static constexpr Entity::flags_type None                     = 0b00000000;
-            static constexpr Entity::flags_type Static                   = 0b00000001;
-            static constexpr Entity::flags_type Persistent               = 0b00000010;
-            static constexpr Entity::flags_type NoCollisionNotifications = 0b00000100;
-            static constexpr Entity::flags_type NoSerialize              = 0b00001000;
+            static constexpr Entity::flags_type None                     = 0b00000000; // Default behavior
+            static constexpr Entity::flags_type Static                   = 0b00000001; // The Entitiy's Transform will not be moved after construction
+            static constexpr Entity::flags_type Persistent               = 0b00000010; // Entity persists across scene load/unload
+            static constexpr Entity::flags_type NoCollisionNotifications = 0b00000100; // Do not send Collision/Trigger events involving the Entity
+            static constexpr Entity::flags_type NoSerialize              = 0b00001000; // Exclude the Entity and its children from scene serialization
+            static constexpr Entity::flags_type Internal                 = 0b00010000; // Entity was created by the engine/editor
         };
 
         explicit constexpr Entity() noexcept
@@ -44,10 +45,11 @@ class Entity
         constexpr auto Index() const noexcept { return m_index; }
         constexpr auto Layer() const noexcept { return m_layer; }
         constexpr auto Flags() const noexcept { return m_flags; }
-        constexpr auto IsStatic() const noexcept { return m_flags & Flags::Static; }
-        constexpr auto IsPersistent() const noexcept { return m_flags & Flags::Persistent; }
-        constexpr auto IsSerializable() const noexcept { return !(m_flags & Flags::NoSerialize); }
-        constexpr auto ReceivesCollisionEvents() const noexcept { return !(m_flags & Flags::NoCollisionNotifications); }
+        constexpr auto IsStatic() const noexcept -> bool { return m_flags & Flags::Static; }
+        constexpr auto IsPersistent() const noexcept -> bool { return m_flags & Flags::Persistent; }
+        constexpr auto ReceivesCollisionEvents() const noexcept -> bool { return !(m_flags & Flags::NoCollisionNotifications); }
+        constexpr auto IsSerializable() const noexcept -> bool { return !(m_flags & Flags::NoSerialize); }
+        constexpr auto IsInternal() const noexcept -> bool { return m_flags & Flags::Internal; }
         explicit constexpr operator index_type() const noexcept { return m_index; }
         friend bool constexpr operator==(const Entity& a, const Entity& b) { return a.Index() == b.Index(); }
         friend bool constexpr operator!=(const Entity& a, const Entity& b) { return !(a == b); }
