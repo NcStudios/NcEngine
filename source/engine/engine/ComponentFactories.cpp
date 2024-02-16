@@ -83,12 +83,6 @@ auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
     return physics::PhysicsBody{entity};
 }
 
-auto CreatePointLight(Entity entity, void*) -> graphics::PointLight
-{
-    // unsure on defaults
-    return graphics::PointLight{entity, Vector3{0.443f, 0.412f, 0.412f}, Vector3{0.4751f, 0.525f, 1.0f}, 600.0f};
-}
-
 auto CreateConcaveCollider(Entity entity, void*) -> physics::ConcaveCollider
 {
     return physics::ConcaveCollider{entity, asset::DefaultConcaveCollider};

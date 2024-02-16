@@ -43,14 +43,6 @@ auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc:
 }
 } // anonymous namespace
 
-namespace nc
-{
-auto GetSelectedEntityWidget() -> const std::optional<graphics::DebugWidget>&
-{
-    return g_selectedEntityWidget;
-}
-}
-
 namespace nc::ui::editor
 {
 SceneGraph::SceneGraph(EditorContext& ctx)
@@ -74,41 +66,6 @@ void SceneGraph::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
         GraphContextMenu(ctx, createEntity);
         Graph(ctx, createEntity);
     });
-
-    if (m_entityCreateWindowOpen)
-    {
-        ImGui::OpenPopup("Create Entity");
-        ImGui::SetNextWindowSize(ImVec2{400.0f, 200.0f}, ImGuiCond_Once);
-        if (ImGui::BeginPopupModal("Create Entity", &m_entityCreateWindowOpen))
-        {
-            static std::string tag = "Entity";
-            static uint8_t layer = 0;
-            static bool staticFlag = false;
-            static bool persistentFlag = false;
-            static bool noCollisionFlag = false;
-            static bool noSerializeFlag = false;
-
-            ui::InputText(tag, "tag");
-            ui::InputU8(layer, "layer");
-            ImGui::Checkbox("static", &staticFlag);
-            ImGui::Checkbox("persistent", &persistentFlag);
-            ImGui::Checkbox("noCollisionNotifications", &noCollisionFlag);
-            ImGui::Checkbox("noSerialize", &noSerializeFlag);
-
-            if (ImGui::Button("Create"))
-            {
-                auto flags = Entity::Flags::None;
-                if (staticFlag) flags |= Entity::Flags::Static;
-                if (persistentFlag) flags |= Entity::Flags::Persistent;
-                if (noCollisionFlag) flags |= Entity::Flags::NoCollisionNotifications;
-                if (noSerializeFlag) flags |= Entity::Flags::NoSerialize;
-                auto newEntity = world.Emplace<Entity>({.tag = tag, .layer = layer, .flags = flags});
-                m_entityCreateWindowOpen = false;
-                m_selectedEntity = newEntity;
-            }
-            ImGui::EndPopup();
-        }
-    }
 }
 
 void SceneGraph::OnClose(EditorContext& ctx)

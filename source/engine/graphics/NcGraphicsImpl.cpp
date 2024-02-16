@@ -1,4 +1,5 @@
 #include "NcGraphicsImpl.h"
+#include "ui/Editor.h"
 #include "PerFrameRenderState.h"
 #include "graphics/GraphicsUtilities.h"
 #include "shader_resource/PointLightData.h"

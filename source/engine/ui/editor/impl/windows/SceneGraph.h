@@ -1,10 +1,9 @@
 #pragma once
 
-#include "ui/editor/Editor.h"
+#include "ui/Editor.h"
 #include "dialogs/CreateEntityDialog.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
-#include "ncengine/graphics/DebugWidget.h"
 
 #include "imgui/imgui.h"
 
@@ -15,8 +14,6 @@ namespace nc
 {
 class Tag;
 class Transform;
-
-auto GetSelectedEntityWidget() -> const std::optional<graphics::DebugWidget>&;
 
 namespace ui::editor
 {
@@ -31,7 +28,6 @@ class SceneGraph
         Entity m_selectedEntityWireframe = Entity::Null();
         Entity m_selectedColliderWireframe = Entity::Null();
         ImGuiTextFilter m_tagFilter;
-        bool m_entityCreateWindowOpen = false;
 
         void SetEntitySelection(EditorContext& ctx, Entity entity);
         void EnsureSelection(EditorContext& ctx);

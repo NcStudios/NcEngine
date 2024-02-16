@@ -102,18 +102,6 @@ void RenderPass::UnregisterShadowMappingTechnique()
         m_shadowMappingTechniques.pop_back();
 }
 
-void RenderPass::UnregisterShadowMappingTechnique()
-{
-    auto techniquePos = std::ranges::find_if(m_techniques, [](const auto &foundTechnique)
-                                             { return foundTechnique->IsShadowMapTechnique(); });
-
-    if (techniquePos != m_techniques.end())
-    {
-        *techniquePos = std::move(m_techniques.back());
-        m_techniques.pop_back();
-    }
-}
-
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
 {
     const auto clearValues = CreateClearValues(m_clearFlags);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/editor/Editor.h"
+#include "ui/Editor.h"
 #include "windows/FpsOverlay.h"
 #include "windows/Inspector.h"
 #include "windows/SceneGraph.h"

@@ -1,5 +1,5 @@
 #include "EditorUI.h"
-#include "ui/editor/Editor.h"
+#include "ui/Editor.h"
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"

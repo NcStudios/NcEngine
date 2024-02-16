@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ModalDialog.h"
-#include "ui/editor/Editor.h"
+#include "ui/Editor.h"
 
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"

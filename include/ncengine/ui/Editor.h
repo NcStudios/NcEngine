@@ -72,12 +72,8 @@ class Editor
         EditorContext m_ctx;
 };
 
-<<<<<<< HEAD:include/ncengine/ui/Editor.h
-auto BuildEditor(NcEngine* engine) -> std::unique_ptr<Editor>;
-=======
 auto BuildEditor(ecs::Ecs world,
                  ModuleProvider modules,
                  SystemEvents& events,
                  const EditorHotkeys& hotkeys = EditorHotkeys{}) -> std::unique_ptr<Editor>;
->>>>>>> 952df400ab17c0462abe0ca0df1f213ad7439216:source/engine/ui/editor/Editor.h
 } // namespace nc::ui::editor

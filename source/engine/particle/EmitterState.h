@@ -42,8 +42,6 @@ namespace nc::particle
         const graphics::ParticleInfo& GetInfo() const;
         Entity GetEntity() const;
 
-        void UpdateInfo(const graphics::ParticleInfo& info);
-
     private:
         void PeriodicEmission(float dt);
         auto ComputeMvp(const Particle& particle, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward) const->DirectX::XMMATRIX;

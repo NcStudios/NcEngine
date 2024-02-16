@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/editor/Editor.h"
+#include "ui/Editor.h"
 #include "dialogs/CreateEntityDialog.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
