@@ -1,36 +1,40 @@
 #pragma once
 
 #include "graphics/GraphicsConstants.h"
+#include "utility/Signal.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
 #include <span>
 #include <unordered_map>
 
-namespace
-{
-    auto NullBinding = vk::DescriptorSetLayoutBinding(std::numeric_limits<uint32_t>::max(), vk::DescriptorType::eUniformBuffer, 0, vk::ShaderStageFlagBits::eAll);
-}
-
 namespace nc::graphics
 {
+    using SetIndex = uint32_t;
+    using BindingSlot = uint32_t;
+
     struct DescriptorSetLayout
     {
         vk::UniqueDescriptorSetLayout layout;
-        std::vector<vk::DescriptorSetLayoutBinding> bindings = std::vector<vk::DescriptorSetLayoutBinding>{DefaultResourceSlotsPerShader, NullBinding};
-        std::vector<vk::DescriptorBindingFlagsEXT> bindingFlags = std::vector<vk::DescriptorBindingFlagsEXT>{DefaultResourceSlotsPerShader};
+        std::unordered_map<BindingSlot, vk::DescriptorSetLayoutBinding> bindings;
+        std::unordered_map<BindingSlot,vk::DescriptorBindingFlagsEXT> bindingFlags;
     };
 
     struct DescriptorWrites
     {
-        std::vector<vk::WriteDescriptorSet> writes = std::vector<vk::WriteDescriptorSet>{DefaultResourceSlotsPerShader};
+        std::unordered_map<BindingSlot, vk::WriteDescriptorSet> writes;
     };
 
     struct PerFrameDescriptorSets
     {
-        std::vector<vk::UniqueDescriptorSet> sets;
-        std::vector<DescriptorWrites> writesPerSet;
-        std::vector<bool> isDirty;
+        std::unordered_map<SetIndex, vk::UniqueDescriptorSet> sets;
+        std::unordered_map<SetIndex, DescriptorWrites> writesPerSet;
+        std::unordered_map<SetIndex, bool> isDirty;
+    };
+
+    struct DescriptorSetLayoutsChanged
+    {
+        uint32_t unused;
     };
 
     class ShaderDescriptorSets
@@ -48,6 +52,8 @@ namespace nc::graphics
             /* Called in the techniques to access and bind the descriptor set(s). */
             vk::DescriptorSetLayout* GetSetLayout(uint32_t setIndex);
             void BindSet(uint32_t frameIndex, uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
+            auto OnDescriptorSetsChanged() -> Signal<const DescriptorSetLayoutsChanged&>& { return m_setLayoutsChanged; }
+
 
         private:
             auto SetExists(uint32_t frameIndex, uint32_t setIndex) -> bool { return m_perFrameSets.at(frameIndex).sets.size() > setIndex; }
@@ -56,7 +62,9 @@ namespace nc::graphics
 
             vk::Device m_device;
             vk::UniqueDescriptorPool m_pool;
-            std::vector<PerFrameDescriptorSets> m_perFrameSets;
+            std::array<PerFrameDescriptorSets, MaxFramesInFlight> m_perFrameSets;
             std::vector<DescriptorSetLayout> m_layouts;
+            Signal<const DescriptorSetLayoutsChanged&> m_setLayoutsChanged;
+
     };
 }

@@ -49,40 +49,40 @@ namespace nc::graphics
         m_imageInfos.clear();
     }
 
-    void ShadowMapShaderResource::Update(uint32_t, const std::vector<ShadowMapData>& data)
+    void ShadowMapShaderResource::Update(uint32_t, const std::vector<ShadowMapData>& )
     {
-        assert(data.size() <= m_maxShadows && !data.empty());
+        // assert(data.size() <= m_maxShadows && !data.empty());
 
-        m_imageInfos.clear();
-        m_imageInfos.reserve(m_maxShadows);
+        // m_imageInfos.clear();
+        // m_imageInfos.reserve(m_maxShadows);
 
-        std::ranges::transform(data, std::back_inserter(m_imageInfos), [this](auto &dataItem)
-        {
-            return CreateDescriptorImageInfo(m_sampler.get(), dataItem.imageView, vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
-        });
+        // std::ranges::transform(data, std::back_inserter(m_imageInfos), [this](auto &dataItem)
+        // {
+        //     return CreateDescriptorImageInfo(m_sampler.get(), dataItem.imageView, vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);
+        // });
 
-        m_descriptors->UpdateImage
-        (
-            0,
-            0,
-            m_imageInfos,
-            static_cast<uint32_t>(m_imageInfos.size()),
-            vk::DescriptorType::eCombinedImageSampler,
-            m_bindingSlot
-        );
+        // m_descriptors->UpdateImage
+        // (
+        //     0,
+        //     0,
+        //     m_imageInfos,
+        //     static_cast<uint32_t>(m_imageInfos.size()),
+        //     vk::DescriptorType::eCombinedImageSampler,
+        //     m_bindingSlot
+        // );
     }
 
     void ShadowMapShaderResource::Initialize()
     {
-        m_descriptors->RegisterDescriptor
-        (
-            0u,
-            m_bindingSlot,
-            0,
-            m_maxShadows,
-            vk::DescriptorType::eCombinedImageSampler,
-            vk::ShaderStageFlagBits::eFragment,
-            vk::DescriptorBindingFlagBitsEXT()
-        );
+        // m_descriptors->RegisterDescriptor
+        // (
+        //     0u,
+        //     m_bindingSlot,
+        //     0,
+        //     m_maxShadows,
+        //     vk::DescriptorType::eCombinedImageSampler,
+        //     vk::ShaderStageFlagBits::eFragment,
+        //     vk::DescriptorBindingFlagBitsEXT()
+        // );
     }
 } // namespace nc::graphics

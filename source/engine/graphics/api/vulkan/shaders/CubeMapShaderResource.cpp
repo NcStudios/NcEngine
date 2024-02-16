@@ -24,43 +24,43 @@ CubeMapShaderResource::CubeMapShaderResource(uint32_t bindingSlot, vk::Device de
 
 void CubeMapShaderResource::Initialize()
 {
-    for (auto i : std::views::iota(0u, MaxFramesInFlight))
-    {
-        m_descriptors->RegisterDescriptor
-        (
-            i,
-            m_bindingSlot,
-            0,
-            m_maxCubeMapsCount,
-            vk::DescriptorType::eCombinedImageSampler,
-            vk::ShaderStageFlagBits::eFragment,
-            vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
-        );
-    }
+    // for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    // {
+    //     m_descriptors->RegisterDescriptor
+    //     (
+    //         i,
+    //         m_bindingSlot,
+    //         0,
+    //         m_maxCubeMapsCount,
+    //         vk::DescriptorType::eCombinedImageSampler,
+    //         vk::ShaderStageFlagBits::eFragment,
+    //         vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
+    //     );
+    // }
 }
 
-void CubeMapShaderResource::Update(uint32_t frameIndex, const std::vector<CubeMap>& data)
+void CubeMapShaderResource::Update(uint32_t , const std::vector<CubeMap>& )
 {
-    assert(data.size() < m_maxCubeMapsCount && !data.empty());
+    // assert(data.size() < m_maxCubeMapsCount && !data.empty());
 
-    m_cubeMapSampler = graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat);
+    // m_cubeMapSampler = graphics::CreateTextureSampler(m_device, vk::SamplerAddressMode::eRepeat);
 
-    m_imageInfos = std::vector<vk::DescriptorImageInfo>();
+    // m_imageInfos = std::vector<vk::DescriptorImageInfo>();
 
-    std::transform(data.cbegin(), data.cend(), std::back_inserter(m_imageInfos), [sampler = m_cubeMapSampler.get()](const auto& cubeMap)
-    {
-        return CreateDescriptorImageInfo(sampler, cubeMap.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
-    });
+    // std::transform(data.cbegin(), data.cend(), std::back_inserter(m_imageInfos), [sampler = m_cubeMapSampler.get()](const auto& cubeMap)
+    // {
+    //     return CreateDescriptorImageInfo(sampler, cubeMap.GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
+    // });
 
-    m_descriptors->UpdateImage
-    (
-        frameIndex,
-        0,
-        m_imageInfos,
-        static_cast<uint32_t>(data.size()),
-        vk::DescriptorType::eCombinedImageSampler,
-        m_bindingSlot
-    );
+    // m_descriptors->UpdateImage
+    // (
+    //     frameIndex,
+    //     0,
+    //     m_imageInfos,
+    //     static_cast<uint32_t>(data.size()),
+    //     vk::DescriptorType::eCombinedImageSampler,
+    //     m_bindingSlot
+    // );
 }
 
 void CubeMapShaderResource::Reset()

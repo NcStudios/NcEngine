@@ -27,7 +27,7 @@ auto ShaderResourceBus::CreateStorageBuffer(size_t size, shader_stage stage, uin
             }
         );
     }
-    return StorageBufferHandle(uid, size, stage, storageBufferChannel, slot, set);
+    return StorageBufferHandle(uid, size, stage, &storageBufferChannel, slot, set);
 }
 
 auto ShaderResourceBus::CreateTextureArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> TextureArrayBufferHandle
@@ -44,7 +44,7 @@ auto ShaderResourceBus::CreateTextureArrayBuffer(uint32_t capacity, shader_stage
             TabUpdateAction::Initialize
         }
     );
-    return TextureArrayBufferHandle(uid, stage, textureArrayBufferChannel, slot, set);
+    return TextureArrayBufferHandle(uid, stage, &textureArrayBufferChannel, slot, set);
 }
 
 auto ShaderResourceBus::CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set) -> UniformBufferHandle
@@ -66,6 +66,6 @@ auto ShaderResourceBus::CreateUniformBuffer(size_t size, shader_stage stage, uin
             }
         );
     }
-    return UniformBufferHandle(uid, size, stage, uniformBufferChannel, slot, set);
+    return UniformBufferHandle(uid, size, stage, &uniformBufferChannel, slot, set);
 }
 }

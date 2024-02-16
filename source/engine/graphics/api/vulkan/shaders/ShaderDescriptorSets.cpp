@@ -3,13 +3,15 @@
 
 #include "ncutility/NcError.h"
 
+#include <ranges>
+
 namespace
 {
 vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
 {
     vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
     extendedInfo.setPNext(nullptr);
-    extendedInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
+    extendedInfo.setBindingCount(static_cast<uint32_t>(bindingFlags.size()));
     extendedInfo.setPBindingFlags(bindingFlags.data());
 
     vk::DescriptorSetLayoutCreateInfo setInfo{};
@@ -51,6 +53,27 @@ auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPoo
 
     return device.createDescriptorPoolUnique(renderingDescriptorPoolInfo);
 }
+
+template<typename T> 
+auto AddOrUpdate(uint32_t bindingSlot, std::unordered_map<uint32_t, T>& collection, T itemToAdd) -> std::vector<T>
+{
+        if (!collection.contains(bindingSlot))
+    {
+        collection.emplace(bindingSlot, itemToAdd);
+    }
+    else
+    {
+        collection.at(bindingSlot) = itemToAdd;
+    }
+
+    auto flattenedCollection = std::vector<T>{};
+    flattenedCollection.reserve(collection.size());
+    std::ranges::transform(collection, std::back_inserter(flattenedCollection), [](auto&& kvp)
+    {
+        return kvp.second;
+    });
+    return flattenedCollection;
+} 
 }
 
 namespace nc::graphics
@@ -58,7 +81,7 @@ namespace nc::graphics
     ShaderDescriptorSets::ShaderDescriptorSets(vk::Device device)
         : m_device{device},
           m_pool{CreateRenderingDescriptorPool(device)},
-          m_perFrameSets{MaxFramesInFlight},
+          m_perFrameSets{},
           m_layouts{}
     {
     }
@@ -73,28 +96,18 @@ namespace nc::graphics
         }
 
         auto* layout = &m_layouts.at(setIndex);
-        if (layout->bindings.size() <= bindingSlot)
-        {
-            layout->bindings.resize(std::min(static_cast<uint32_t>(layout->bindings.size()) + DefaultResourceSlotsPerShader, MaxResourceSlotsPerShader));
-            layout->bindingFlags.resize(std::min(static_cast<uint32_t>(layout->bindingFlags.size()) + DefaultResourceSlotsPerShader, MaxResourceSlotsPerShader));
-        }
 
-        auto binding = vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, descriptorCount, shaderStages);
-        if (layout->bindings.at(bindingSlot) != NullBinding)
-        {
-            throw nc::NcError(fmt::format("A different binding at descriptor set index {} and slot {} already exists.", setIndex, bindingSlot));
-        }
-        layout->bindings.at(bindingSlot) = binding;
+        auto flattenedBindings = AddOrUpdate(bindingSlot, layout->bindings, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, descriptorCount, shaderStages));
+        auto flattenedFlags = AddOrUpdate(bindingSlot, layout->bindingFlags, vk::DescriptorBindingFlagsEXT(bindingFlags));
 
-        /* Add binding flag */
-        if (layout->bindingFlags.at(bindingSlot) != vk::DescriptorBindingFlagBitsEXT())
-        {
-            throw nc::NcError(fmt::format("A different binding flag at descriptor set index {} and slot {} already exists.", setIndex, bindingSlot));
-        }
-        layout->bindingFlags.at(bindingSlot) = bindingFlags;
         layout->layout.reset();
-        layout->layout = CreateDescriptorSetLayout(m_device, layout->bindings, layout->bindingFlags);
-        m_perFrameSets.at(frameIndex).sets.at(setIndex) = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout->layout.get());
+        layout->layout = CreateDescriptorSetLayout(m_device, flattenedBindings, flattenedFlags);
+
+        if (!m_perFrameSets.at(frameIndex).sets.contains(setIndex))
+             m_perFrameSets.at(frameIndex).sets.emplace(setIndex, CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout->layout.get()));
+        else
+            m_perFrameSets.at(frameIndex).sets.at(setIndex) = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout->layout.get());
+        m_setLayoutsChanged.Emit(DescriptorSetLayoutsChanged{});
     }
 
     vk::DescriptorSetLayout* ShaderDescriptorSets::GetSetLayout(uint32_t setIndex)
@@ -112,12 +125,15 @@ namespace nc::graphics
         /* Only update the descriptor sets if they have changed since last bind. */
         if (isDirty)
         {
-            for (auto& write : writes)
+            auto flattenedWrites = std::vector<vk::WriteDescriptorSet>{};
+            flattenedWrites.reserve(writes.size());
+            std::ranges::transform(writes, std::back_inserter(flattenedWrites), [set](auto &&write)
             {
-                write.setDstSet(*set);
-            }
+                write.second.setDstSet(*set);
+                return write.second;
+            });
 
-            m_device.updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+            m_device.updateDescriptorSets(static_cast<uint32_t>(flattenedWrites.size()), flattenedWrites.data(), 0, nullptr);
             m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = false;
         }
 
@@ -135,11 +151,18 @@ namespace nc::graphics
         write.setPBufferInfo(0);
         write.setPImageInfo(imageInfos.data());
 
+        if (!m_perFrameSets.at(frameIndex).writesPerSet.contains(setIndex))
+        {
+            m_perFrameSets.at(frameIndex).writesPerSet.emplace(setIndex, DescriptorWrites{});
+        }
+
         auto& writes = m_perFrameSets.at(frameIndex).writesPerSet.at(setIndex).writes;
 
-        /* Add or update the write for the image descriptor. */
-        writes.at(bindingSlot) = write;
-        m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = true;
+        /* Add or update the write for the buffer descriptor. */
+        if (!writes.contains(bindingSlot))
+            writes.emplace(bindingSlot, write);
+        else
+            writes.at(bindingSlot) = write;
     }
 
     void ShaderDescriptorSets::UpdateBuffer(uint32_t frameIndex, uint32_t setIndex, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot)
@@ -157,10 +180,22 @@ namespace nc::graphics
         write.setPImageInfo(0);
         write.setPBufferInfo(&bufferInfo);
 
+        if (!m_perFrameSets.at(frameIndex).writesPerSet.contains(setIndex))
+        {
+            m_perFrameSets.at(frameIndex).writesPerSet.emplace(setIndex, DescriptorWrites{});
+        }
+
         auto& writes = m_perFrameSets.at(frameIndex).writesPerSet.at(setIndex).writes;
 
         /* Add or update the write for the buffer descriptor. */
-        writes.at(bindingSlot) = write;
-        m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = true;
+        if (!writes.contains(bindingSlot))
+            writes.emplace(bindingSlot, write);
+        else
+            writes.at(bindingSlot) = write;
+
+        if (!m_perFrameSets.at(frameIndex).isDirty.contains(setIndex))
+            m_perFrameSets.at(frameIndex).isDirty.emplace(setIndex, true);
+        else
+            m_perFrameSets.at(frameIndex).isDirty.at(setIndex) = true;
     }
 }

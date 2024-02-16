@@ -85,7 +85,7 @@ auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::G
     return renderPass;
 }
 
-auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, nc::graphics::ShaderDescriptorSets* descriptorSets, const nc::Vector2& dimensions) -> nc::graphics::RenderPass
+auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, const nc::Vector2& dimensions) -> nc::graphics::RenderPass
 {
     using namespace nc::graphics;
 
@@ -129,16 +129,6 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
         renderPass.RegisterAttachmentViews(imageViews, dimensions, index++);
     }
 
-    #ifdef NC_EDITOR_ENABLED
-    renderPass.RegisterTechnique<WireframeTechnique>(*device, descriptorSets);
-    #endif
-
-    renderPass.RegisterTechnique<EnvironmentTechnique>(*device, descriptorSets);
-    renderPass.RegisterTechnique<PbrTechnique>(*device, descriptorSets);
-    renderPass.RegisterTechnique<ToonTechnique>(*device, descriptorSets);
-    renderPass.RegisterTechnique<OutlineTechnique>(*device, descriptorSets);
-    renderPass.RegisterTechnique<ParticleTechnique>(*device, descriptorSets);
-    renderPass.RegisterTechnique<UiTechnique>(*device, descriptorSets);
     return renderPass;
 }
 }
@@ -151,11 +141,13 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
       m_gpuAllocator{gpuAllocator},
       m_descriptorSets{descriptorSets},
       m_shadowMappingPasses{},
-      m_litPass{CreateLitPass(device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions)},
+      m_litPass{CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions)},
       m_dimensions{dimensions},
       m_screenExtent{},
       m_activeShadowMappingPasses{},
-      m_maxLights{maxLights}
+      m_maxLights{maxLights},
+      m_isDescriptorSetLayoutsDirty{true},
+      m_onDescriptorSetsChanged{m_descriptorSets->OnDescriptorSetsChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)}
 {
     for (auto i : std::views::iota(0u, m_maxLights))
     {
@@ -163,9 +155,37 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
     }
 }
 
+void RenderGraph::MapShaderResources()
+{
+    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
+    {
+        m_shadowMappingPasses[i].ClearTechniques();
+        m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
+    }
+
+    m_litPass.ClearTechniques();
+
+    #ifdef NC_EDITOR_ENABLED
+    m_litPass.RegisterTechnique<WireframeTechnique>(*m_device, m_descriptorSets);
+    #endif
+
+    m_litPass.RegisterTechnique<EnvironmentTechnique>(*m_device, m_descriptorSets);
+    m_litPass.RegisterTechnique<PbrTechnique>(*m_device, m_descriptorSets);
+    m_litPass.RegisterTechnique<ToonTechnique>(*m_device, m_descriptorSets);
+    m_litPass.RegisterTechnique<OutlineTechnique>(*m_device, m_descriptorSets);
+    m_litPass.RegisterTechnique<ParticleTechnique>(*m_device, m_descriptorSets);
+    m_litPass.RegisterTechnique<UiTechnique>(*m_device, m_descriptorSets);
+}
+
 void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const vulkan::MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex)
 {
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
+
+    if (m_isDescriptorSetLayoutsDirty)
+    {
+        MapShaderResources();
+        m_isDescriptorSetLayoutsDirty = false;
+    }
 
     const auto cmd = currentFrame->CommandBuffer();
     BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
@@ -189,40 +209,33 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, m_descriptorSets, dimensions);
+    m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions);
 
     m_shadowMappingPasses.clear();
     for (auto i : std::views::iota(0u, m_maxLights))
     {
         m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
     }
-
-    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
-    {
-        m_shadowMappingPasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
-    }
+    m_isDescriptorSetLayoutsDirty = true;
 }
 
 void RenderGraph::IncrementShadowPassCount()
 {
     NC_ASSERT(m_activeShadowMappingPasses < m_maxLights, "Tried to add a light source when max lights are registered.");
-    m_shadowMappingPasses[m_activeShadowMappingPasses].RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, m_activeShadowMappingPasses);
     m_activeShadowMappingPasses++;
+    m_isDescriptorSetLayoutsDirty = true;
 }
 
 void RenderGraph::ClearShadowPasses()
 {
-    for (auto& pass : m_shadowMappingPasses)
-    {
-        pass.UnregisterShadowMappingTechnique();
-    }
     m_activeShadowMappingPasses = 0u;
+    m_isDescriptorSetLayoutsDirty = true;
 }
 
 void RenderGraph::DecrementShadowPassCount()
 {
     NC_ASSERT(m_activeShadowMappingPasses > 0, "Tried to remove a light source when none are registered.");
-    m_shadowMappingPasses[m_activeShadowMappingPasses-1].UnregisterShadowMappingTechnique();
     m_activeShadowMappingPasses--;
+    m_isDescriptorSetLayoutsDirty = true;
 }
 } // namespace nc::graphics

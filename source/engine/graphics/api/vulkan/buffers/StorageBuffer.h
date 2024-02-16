@@ -7,7 +7,6 @@ namespace nc::graphics::vulkan
 class StorageBuffer
 {
     public:
-        StorageBuffer();
         StorageBuffer(GpuAllocator* allocator, uint32_t size);
         StorageBuffer(StorageBuffer&&) noexcept;
         StorageBuffer& operator=(StorageBuffer&&) noexcept;
@@ -16,7 +15,7 @@ class StorageBuffer
 
         vk::Buffer GetBuffer() const noexcept;
         void Clear() noexcept;
-        void Map(const void* dataToMap, uint32_t elementSize, uint32_t elementCount);
+        void Map(const void* dataToMap, uint32_t dataSize);
 
     private:
         GpuAllocator* m_allocator;

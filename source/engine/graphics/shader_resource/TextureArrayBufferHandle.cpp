@@ -5,7 +5,7 @@
 
 namespace nc::graphics
 {
-TextureArrayBufferHandle::TextureArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const TabUpdateEventData&>& backendPort, uint32_t slot, uint32_t set)
+TextureArrayBufferHandle::TextureArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const TabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set)
     : m_uid{uid},
       m_slot{slot},
       m_set{set},
@@ -17,7 +17,7 @@ TextureArrayBufferHandle::TextureArrayBufferHandle(uint32_t uid, shader_stage st
 
 void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data)
 {
-    m_backendPort.Emit(
+    m_backendPort->Emit(
         TabUpdateEventData
         {
             data,
@@ -33,7 +33,7 @@ void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data
 
 void TextureArrayBufferHandle::Clear()
 {
-    m_backendPort.Emit(
+    m_backendPort->Emit(
         TabUpdateEventData
         {
             std::span<const asset::TextureWithId>{},

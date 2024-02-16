@@ -43,7 +43,7 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
                                   light->GetDiffuseIntensity());
     }
 
-    m_pointLightBuffer.Update(&m_pointLightData, currentFrameIndex);
+    m_pointLightBuffer.Update(static_cast<void*>(m_pointLightData.data()), currentFrameIndex);
     return state;
 }
 } // namespace nc::graphics

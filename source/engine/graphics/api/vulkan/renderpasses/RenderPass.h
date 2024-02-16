@@ -44,6 +44,8 @@ class RenderPass
         void UnregisterTechnique();
         void UnregisterShadowMappingTechnique();
 
+        void ClearTechniques() { m_litTechniques.clear(); m_shadowMappingTechniques.clear(); }
+
     private:
         auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;
         vk::Device m_device;

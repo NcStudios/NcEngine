@@ -45,7 +45,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             }
             else
             {
-                throw nc::NcError("Attempted to initialize a Uniform Buffer when one by the same UID was already present.");
+                throw nc::NcError("Attempted to initialize a Storage Buffer when one by the same UID was already present.");
             }
 
             m_descriptorSets->RegisterDescriptor
@@ -54,7 +54,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
                 eventData.slot,
                 0,
                 1,
-                vk::DescriptorType::eUniformBuffer,
+                vk::DescriptorType::eStorageBuffer,
                 GetStageFlags(eventData.stage),
                 vk::DescriptorBindingFlagBitsEXT()
             );
@@ -73,36 +73,36 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
         }
         case SsboUpdateAction::Update:
         {
-            auto& perFrameUboStorage = m_perFrameUboStorage.at(eventData.currentFrameIndex);
+            auto& perFrameSsboStorage = m_perFrameSsboStorage.at(eventData.currentFrameIndex);
 
-            auto pos = std::ranges::find(perFrameUboStorage.uniformBufferUids, eventData.uid);
-            if (pos == perFrameUboStorage.uniformBufferUids.end())
+            auto pos = std::ranges::find(perFrameSsboStorage.storageBufferUids, eventData.uid);
+            if (pos == perFrameSsboStorage.storageBufferUids.end())
             {
-                throw nc::NcError("Attempted to update a Uniform Buffer that doesn't exist.");
+                throw nc::NcError("Attempted to update a Storage Buffer that doesn't exist.");
             }
 
-            auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uniformBufferUids.begin(), pos));
-            auto& buffer = perFrameUboStorage.uniformBuffers.at(posIndex);
-            buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
+            auto posIndex = static_cast<uint32_t>(std::distance(perFrameSsboStorage.storageBufferUids.begin(), pos));
+            auto& buffer = perFrameSsboStorage.storageBuffers.at(posIndex);
+            buffer->Map(eventData.data, static_cast<uint32_t>(eventData.size));
             break;
         }
         case SsboUpdateAction::Clear:
         {
             for (auto i : std::views::iota(0u, MaxFramesInFlight))
             {
-                auto& perFrameUboStorage = m_perFrameUboStorage.at(i);
+                auto& perFrameSsboStorage = m_perFrameSsboStorage.at(i);
 
-                auto pos = std::ranges::find(perFrameUboStorage.uniformBufferUids, eventData.uid);
-                if (pos == perFrameUboStorage.uniformBufferUids.end())
+                auto pos = std::ranges::find(perFrameSsboStorage.storageBufferUids, eventData.uid);
+                if (pos == perFrameSsboStorage.storageBufferUids.end())
                 {
-                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
+                    throw nc::NcError("Attempted to clear a Storage Buffer that doesn't exist.");
                 }
 
-                auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uniformBufferUids.begin(), pos));
-                perFrameUboStorage.uniformBufferUids.at(posIndex) = perFrameUboStorage.uniformBufferUids.back();
-                perFrameUboStorage.uniformBufferUids.pop_back();
-                perFrameUboStorage.uniformBuffers.at(posIndex) = std::move(perFrameUboStorage.uniformBuffers.back());
-                perFrameUboStorage.uniformBuffers.pop_back();
+                auto posIndex = static_cast<uint32_t>(std::distance(perFrameSsboStorage.storageBufferUids.begin(), pos));
+                perFrameSsboStorage.storageBufferUids.at(posIndex) = perFrameSsboStorage.storageBufferUids.back();
+                perFrameSsboStorage.storageBufferUids.pop_back();
+                perFrameSsboStorage.storageBuffers.at(posIndex) = std::move(perFrameSsboStorage.storageBuffers.back());
+                perFrameSsboStorage.storageBuffers.pop_back();
             }
             break;
         }

@@ -70,8 +70,8 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;
         std::unique_ptr<ShaderResources> m_shaderResources;
         std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
-        std::unique_ptr<GpuShaderStorage> m_gpuShaderStorage;
         std::unique_ptr<RenderGraph> m_renderGraph;
+        std::unique_ptr<GpuShaderStorage> m_gpuShaderStorage;
         std::unique_ptr<Imgui> m_imgui;
         std::unique_ptr<FrameManager> m_frameManager;
         std::unique_ptr<Lighting> m_lighting;

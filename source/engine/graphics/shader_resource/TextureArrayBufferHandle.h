@@ -34,7 +34,7 @@ struct TabUpdateEventData
 class TextureArrayBufferHandle
 {
     public:
-        TextureArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const TabUpdateEventData&>& backendPort, uint32_t slot, uint32_t set = 0u);
+        TextureArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const TabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
         void Update(std::span<const asset::TextureWithId> data);
         void Clear();
 
@@ -43,6 +43,6 @@ class TextureArrayBufferHandle
         uint32_t m_slot;
         uint32_t m_set;
         shader_stage m_stage;
-        Signal<const TabUpdateEventData&> m_backendPort;
+        Signal<const TabUpdateEventData&>* m_backendPort;
 };
 } // namespace nc::graphics

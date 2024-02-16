@@ -32,7 +32,7 @@ struct UboUpdateEventData
 class UniformBufferHandle
 {
     public:
-        UniformBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const UboUpdateEventData&>& backendPort, uint32_t slot, uint32_t set = 0u);
+        UniformBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const UboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
         void Update(void* data, uint32_t currentFrameIndex);
         void Clear();
 
@@ -42,6 +42,6 @@ class UniformBufferHandle
         uint32_t m_set;
         size_t m_size;
         shader_stage m_stage;
-        Signal<const UboUpdateEventData&> m_backendPort;
+        Signal<const UboUpdateEventData&>* m_backendPort;
 };
 } // namespace nc::graphics

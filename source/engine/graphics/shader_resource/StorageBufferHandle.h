@@ -32,7 +32,7 @@ struct SsboUpdateEventData
 class StorageBufferHandle
 {
     public:
-        StorageBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const SsboUpdateEventData&>& backendPort, uint32_t slot, uint32_t set = 0u);
+        StorageBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const SsboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
         void Update(void* data, uint32_t currentFrameIndex);
         void Clear();
 
@@ -42,6 +42,6 @@ class StorageBufferHandle
         uint32_t m_set;
         size_t m_size;
         shader_stage m_stage;
-        Signal<const SsboUpdateEventData&> m_backendPort;
+        Signal<const SsboUpdateEventData&>* m_backendPort;
 };
 } // namespace nc::graphics

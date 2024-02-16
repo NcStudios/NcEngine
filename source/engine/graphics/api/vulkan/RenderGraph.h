@@ -4,6 +4,8 @@
 #include "core/GpuOptions.h"
 #include "renderpasses/RenderPass.h"
 
+#include "utility/Signal.h"
+
 #include <string>
 
 namespace nc::graphics
@@ -13,6 +15,7 @@ class GpuAllocator;
 class GpuOptions;
 class PerFrameGpuContext;
 class ShaderDescriptorSets;
+struct DescriptorSetLayoutsChanged;
 class Swapchain;
 
 inline static const std::string LitPassId = "Lit Pass";
@@ -33,6 +36,9 @@ class RenderGraph
         void ClearShadowPasses();
 
     private:
+        void SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&) { m_isDescriptorSetLayoutsDirty = true; }
+        void MapShaderResources();
+
         const Device* m_device;
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
@@ -43,5 +49,7 @@ class RenderGraph
         Vector2 m_screenExtent;
         uint32_t m_activeShadowMappingPasses;
         uint32_t m_maxLights;
+        bool m_isDescriptorSetLayoutsDirty;
+        Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
 };
 } // namespace nc::graphics

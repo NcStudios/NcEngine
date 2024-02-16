@@ -8,13 +8,12 @@ namespace nc::graphics::vulkan
     {
     }
 
-    UniformBuffer::UniformBuffer(GpuAllocator* allocator, const void* data, uint32_t size)
+    UniformBuffer::UniformBuffer(GpuAllocator* allocator, const void*, uint32_t size)
         : m_allocator{allocator},
           m_buffer{}
     {
         auto paddedSize = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
         m_buffer = m_allocator->CreateBuffer(paddedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
-        Bind(data, size);
     }
 
     UniformBuffer::UniformBuffer(UniformBuffer&& other) noexcept
