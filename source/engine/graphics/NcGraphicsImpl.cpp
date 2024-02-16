@@ -52,7 +52,8 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
+            auto editor = ui::editor::BuildEditor(registry->GetEcs(), modules, events);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window, std::move(editor));
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");

@@ -135,8 +135,6 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     currentFrame->RenderFrame(m_device->VkGraphicsQueue());
     m_device->VkDevice().waitIdle();
 
-    m_device->VkDevice().waitIdle();
-
     // Returns the image to the swapchain
     bool isSwapChainValid = true;
     m_swapchain->Present(currentFrame, m_device->VkGraphicsQueue(), m_imageIndex, isSwapChainValid);

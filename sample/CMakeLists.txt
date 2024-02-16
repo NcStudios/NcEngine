@@ -49,9 +49,9 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
 install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
         DESTINATION sample
 )
-install(FILES       ${PROJECT_SOURCE_DIR}/sample/vk_layer_settings.txt
-        DESTINATION sample
-)
+# install(FILES       ${PROJECT_SOURCE_DIR}/sample/vk_layer_settings.txt
+#         DESTINATION sample
+# )
 if(${NC_PROFILING_ENABLED})
     install(FILES       $<TARGET_FILE:OptickCore>
             DESTINATION sample

@@ -5,7 +5,6 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_vulkan.h"
 
-#include <filesystem>
 namespace
 {
 auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
@@ -70,14 +69,6 @@ Imgui::Imgui(const Device& device,
     initInfo.MSAASamples = VkSampleCountFlagBits(device.GetGpuOptions().GetMaxSamplesCount());
 
     ImGui_ImplVulkan_Init(&initInfo, renderPass);
-
-    constexpr auto fontPath =  "assets\\fonts\\font.ttf";
-    if (std::filesystem::exists(fontPath))
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        io.Fonts->AddFontFromFileTTF("assets\\fonts\\font.ttf", 18.0f);
-    }
-
     device.ExecuteCommand([](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
     ImGui_ImplVulkan_DestroyFontUploadObjects();
 
