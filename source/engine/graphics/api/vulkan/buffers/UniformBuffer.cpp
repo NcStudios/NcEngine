@@ -2,18 +2,15 @@
 
 namespace nc::graphics::vulkan
 {
-    UniformBuffer::UniformBuffer()
-        : m_allocator{nullptr},
-          m_buffer{}
-    {
-    }
-
     UniformBuffer::UniformBuffer(GpuAllocator* allocator, const void*, uint32_t size)
         : m_allocator{allocator},
-          m_buffer{}
+          m_buffer{},
+          m_alignedSize{},
+          m_info{}
     {
-        auto paddedSize = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
-        m_buffer = m_allocator->CreateBuffer(paddedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+        m_alignedSize = m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer);
+        m_buffer = m_allocator->CreateBuffer(m_alignedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu);
+        m_info = vk::DescriptorBufferInfo{m_buffer, 0, m_alignedSize};
     }
 
     UniformBuffer::UniformBuffer(UniformBuffer&& other) noexcept
@@ -27,11 +24,6 @@ namespace nc::graphics::vulkan
         m_allocator = std::exchange(other.m_allocator, nullptr);
         m_buffer = std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{});
         return *this;
-    }
-
-    vk::Buffer UniformBuffer::GetBuffer()
-    {
-        return m_buffer;
     }
 
     void UniformBuffer::Clear()

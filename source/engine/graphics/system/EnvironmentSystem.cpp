@@ -30,6 +30,5 @@ void EnvironmentSystem::Clear()
 {
     m_useSkybox = false;
     m_environmentData.skyboxTextureIndex = std::numeric_limits<uint32_t>::max();
-    m_environmentDataBuffer.Clear();
 }
 } // namespace nc::graphics

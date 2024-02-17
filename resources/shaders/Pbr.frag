@@ -44,9 +44,9 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 0, binding = 2) uniform sampler2D textures[];
-layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
+layout (set = 1, binding = 2) uniform sampler2D textures[];
+// layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
+// layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
@@ -69,10 +69,10 @@ vec3 MaterialColor(uint textureIndex)
    return vec3(texture(textures[textureIndex], inUV));
 }
 
-vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
-{
-    return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
-}
+// vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
+// {
+//     return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
+// }
 
 const float PI = 3.14159265359;
 
@@ -116,37 +116,37 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float ShadowCalculation(vec4 fragPosLightSpace, int index)
-{
-    // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+// float ShadowCalculation(vec4 fragPosLightSpace, int index)
+// {
+//     // perform perspective divide
+//     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(shadowMaps[index], projCoords.xy).r; 
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
+//     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+//     float closestDepth = texture(shadowMaps[index], projCoords.xy).r; 
+//     // get depth of current fragment from light's perspective
+//     float currentDepth = projCoords.z;
 
-    // check whether current frag pos is in shadow
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMaps[index], 0);
+//     // check whether current frag pos is in shadow
+//     float shadow = 0.0;
+//     vec2 texelSize = 1.0 / textureSize(shadowMaps[index], 0);
 
-    for(int x = 0; x <=1; ++x)
-    {
-        for(int y = 0; y <= 1; ++y)
-        {
-            float pcfDepth = texture(shadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 9.0;  
+//     for(int x = 0; x <=1; ++x)
+//     {
+//         for(int y = 0; y <= 1; ++y)
+//         {
+//             float pcfDepth = texture(shadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r;
+//             shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+//         }
+//     }
+//     shadow /= 9.0;  
 
-    if (projCoords.z > 1.0 || projCoords.z < 0)
-    {
-        shadow = 0.0;
-    }
+//     if (projCoords.z > 1.0 || projCoords.z < 0)
+//     {
+//         shadow = 0.0;
+//     }
 
-    return shadow;
-}
+//     return shadow;
+// }
 
 vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor, float roughness, float metallic, vec4 lightViewPos)
 {
@@ -178,11 +178,11 @@ vec3 CalculatePointLight(int lightIndex, vec3 N, vec3 V, vec3 F0, vec3 baseColor
 
     float shadow = 0.0;
     
-    // Shadow
-    if (light.castShadows == 1)
-    {
-        shadow = ShadowCalculation(lightViewPos, lightIndex);
-    }
+    // // Shadow
+    // if (light.castShadows == 1)
+    // {
+    //     shadow = ShadowCalculation(lightViewPos, lightIndex);
+    // }
 
     return (1.0 - shadow) * colorTotal;
 }
@@ -219,23 +219,23 @@ void main()
         }
 
         vec4 lightViewPos = vec4(1.0f);
-        if (pointLights.lights[i].castShadows == 1)
-        {
-            lightViewPos = biasMat * pointLights.lights[i].lightViewProj * vec4(inFragPosition, 1.0);
-        }
+        // if (pointLights.lights[i].castShadows == 1)
+        // {
+        //     lightViewPos = biasMat * pointLights.lights[i].lightViewProj * vec4(inFragPosition, 1.0);
+        // }
 
         result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r, lightViewPos) + (pointLights.lights[i].ambientColor * 0.015);
     }
 
-   if (environmentData.skyboxCubemapIndex > -1)
-    {
-        // Environment reflection
-        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
-        vec3 reflected = reflect(I, N);
-        vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
+//    if (environmentData.skyboxCubemapIndex > -1)
+//     {
+//         // Environment reflection
+//         vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
+//         vec3 reflected = reflect(I, N);
+//         vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
 
-        result += (F0 * (1-roughnessColor.r) * environmentReflectionColor) / 2;
-    }
+//         result += (F0 * (1-roughnessColor.r) * environmentReflectionColor) / 2;
+//     }
 
-    outFragColor = vec4(result, 1.0);
+    outFragColor = vec4(pointLights.lights[0].diffuseColor, 1.0);
 }

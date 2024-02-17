@@ -51,24 +51,23 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
 
             m_descriptorSets->RegisterDescriptor
             (
-                eventData.currentFrameIndex,
                 eventData.slot,
                 0,
                 1,
                 vk::DescriptorType::eStorageBuffer,
                 flags,
-                vk::DescriptorBindingFlagBitsEXT()
+                vk::DescriptorBindingFlagBitsEXT(),
+                eventData.currentFrameIndex
             );
 
             m_descriptorSets->UpdateBuffer
             (
-                eventData.currentFrameIndex,
                 0,
-                perFrameSsboStorage.storageBuffers.back()->GetBuffer(),
-                static_cast<uint32_t>(eventData.size),
+                perFrameSsboStorage.storageBuffers.back()->GetInfo(),
                 1,
                 vk::DescriptorType::eStorageBuffer,
-                eventData.slot
+                eventData.slot,
+                eventData.currentFrameIndex
             );
             break;
         }
@@ -132,24 +131,23 @@ void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
             auto flags = GetStageFlags(eventData.stage);
             m_descriptorSets->RegisterDescriptor
             (
-                eventData.currentFrameIndex,
                 eventData.slot,
                 eventData.set,
                 1,
                 vk::DescriptorType::eUniformBuffer,
                 flags,
-                vk::DescriptorBindingFlagBitsEXT()
+                vk::DescriptorBindingFlagBitsEXT(),
+                eventData.currentFrameIndex
             );
 
             m_descriptorSets->UpdateBuffer
             (
-                eventData.currentFrameIndex,
                 eventData.set,
-                perFrameUboStorage.uniformBuffers.back()->GetBuffer(),
-                static_cast<uint32_t>(eventData.size),
+                perFrameUboStorage.uniformBuffers.back()->GetInfo(),
                 1,
                 vk::DescriptorType::eUniformBuffer,
-                eventData.slot
+                eventData.slot,
+                eventData.currentFrameIndex
             );
             break;
         }
@@ -206,7 +204,6 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
 
             m_descriptorSets->RegisterDescriptor
             (
-                0u,
                 eventData.slot,
                 eventData.set,
                 eventData.capacity,
@@ -238,7 +235,6 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
 
             m_descriptorSets->UpdateImage
             (
-                0,
                 eventData.set,
                 imageInfos,
                 static_cast<uint32_t>(imageInfos.size()),

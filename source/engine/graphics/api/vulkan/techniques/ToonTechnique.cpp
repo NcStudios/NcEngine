@@ -35,9 +35,10 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
         CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
-    std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
+    std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
     {
-        *(m_descriptorSets->GetSetLayout(0))
+        *(m_descriptorSets->GetSetLayout(0)),
+        *(m_descriptorSets->GetSetLayout(1))
     };
 
     auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -102,7 +103,8 @@ void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(frameIndex, 0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+    m_descriptorSets->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
 bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)

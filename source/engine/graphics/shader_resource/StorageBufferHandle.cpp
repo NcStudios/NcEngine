@@ -16,8 +16,9 @@ StorageBufferHandle::StorageBufferHandle(uint32_t uid, size_t size, shader_stage
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void StorageBufferHandle::Update(void* data, uint32_t currentFrameIndex)
+void StorageBufferHandle::Bind(void* data, size_t size, uint32_t currentFrameIndex)
 {
+    NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
     m_backendPort->Emit(
         SsboUpdateEventData
         {
@@ -26,7 +27,7 @@ void StorageBufferHandle::Update(void* data, uint32_t currentFrameIndex)
             m_slot,
             m_set,
             data,
-            m_size,
+            size,
             m_stage,
             SsboUpdateAction::Update
         }

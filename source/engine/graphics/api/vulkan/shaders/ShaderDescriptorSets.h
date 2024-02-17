@@ -15,9 +15,15 @@ namespace nc::graphics
 
     struct DescriptorSetLayout
     {
+        DescriptorSetLayout(bool isGlobal_)
+            : isGlobal{isGlobal_}
+        {
+        }
+
         vk::UniqueDescriptorSetLayout layout;
         std::unordered_map<BindingSlot, vk::DescriptorSetLayoutBinding> bindings;
         std::unordered_map<BindingSlot,vk::DescriptorBindingFlagsEXT> bindingFlags;
+        bool isGlobal;
     };
 
     struct DescriptorWrites
@@ -25,12 +31,13 @@ namespace nc::graphics
         std::unordered_map<BindingSlot, vk::WriteDescriptorSet> writes;
     };
 
-    struct PerFrameDescriptorSets
+    struct DescriptorSets
     {
         std::unordered_map<SetIndex, vk::UniqueDescriptorSet> sets;
         std::unordered_map<SetIndex, DescriptorWrites> writesPerSet;
         std::unordered_map<SetIndex, bool> isDirty;
     };
+
 
     struct DescriptorSetLayoutsChanged
     {
@@ -43,27 +50,29 @@ namespace nc::graphics
             ShaderDescriptorSets(vk::Device device);
 
             /* Resources attach themselves to a shader slot by registering themselves here. */
-            void RegisterDescriptor(uint32_t frameIndex, uint32_t bindingSlot, uint32_t setIndex, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags);
-            
+            void RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
+            void CommitResourceLayout();
+            auto OnResourceLayoutChanged() -> Signal<const DescriptorSetLayoutsChanged&>& { return m_setLayoutsChanged; }
+
             /* Called when the data in the image or buffer changes. */
-            void UpdateImage(uint32_t frameIndex, uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
-            void UpdateBuffer(uint32_t frameIndex, uint32_t setIndex, vk::Buffer buffer, uint32_t setSize, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot);
+            void UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
+            void UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
 
             /* Called in the techniques to access and bind the descriptor set(s). */
             vk::DescriptorSetLayout* GetSetLayout(uint32_t setIndex);
-            void BindSet(uint32_t frameIndex, uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet);
-            auto OnDescriptorSetsChanged() -> Signal<const DescriptorSetLayoutsChanged&>& { return m_setLayoutsChanged; }
-
+            void BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t firstSet, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
 
         private:
-            auto SetExists(uint32_t frameIndex, uint32_t setIndex) -> bool { return m_perFrameSets.at(frameIndex).sets.size() > setIndex; }
-            auto GetSet(uint32_t frameIndex, uint32_t setIndex) -> vk::DescriptorSet* { return &m_perFrameSets.at(frameIndex).sets.at(setIndex).get(); }
-            auto LayoutExists(uint32_t setIndex) -> bool { return m_layouts.size() > setIndex; }
+            auto GetSets(uint32_t frameIndex) -> DescriptorSets& { return frameIndex != std::numeric_limits<uint32_t>::max() ? m_perFrameSets.at(frameIndex) : m_globalSets; }
+            auto GetSet(uint32_t frameIndex, uint32_t setIndex) -> vk::DescriptorSet* { return &GetSets(frameIndex).sets.at(setIndex).get(); }
+            auto SetExists(uint32_t frameIndex, uint32_t setIndex) -> bool { return GetSets(frameIndex).sets.contains(setIndex); }
+            auto LayoutExists(uint32_t setIndex) -> bool { return m_layouts.contains(setIndex); }
 
             vk::Device m_device;
             vk::UniqueDescriptorPool m_pool;
-            std::array<PerFrameDescriptorSets, MaxFramesInFlight> m_perFrameSets;
-            std::vector<DescriptorSetLayout> m_layouts;
+            std::array<DescriptorSets, MaxFramesInFlight> m_perFrameSets;
+            DescriptorSets m_globalSets;
+            std::unordered_map<SetIndex, DescriptorSetLayout> m_layouts;
             Signal<const DescriptorSetLayoutsChanged&> m_setLayoutsChanged;
 
     };

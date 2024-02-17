@@ -94,7 +94,7 @@ auto SkeletalAnimationSystem::Execute(uint32_t frameIndex) -> SkeletalAnimationS
         stateIndex = static_cast<uint32_t>(buffer.size());
     }
 
-    m_skeletalAnimationDataBuffer.Update(static_cast<void*>(buffer.data()), frameIndex);
+    m_skeletalAnimationDataBuffer.Bind(static_cast<void*>(buffer.data()), sizeof(SkeletalAnimationData) * buffer.size(), frameIndex);
     return state;
 }
 
@@ -210,7 +210,6 @@ void SkeletalAnimationSystem::Clear() noexcept
 {
     m_units.clear();
     m_unitEntities.clear();
-    m_skeletalAnimationDataBuffer.Clear();
 }
 
 void SkeletalAnimationSystem::OnStateChanged(const anim::StateChange& stateChange)

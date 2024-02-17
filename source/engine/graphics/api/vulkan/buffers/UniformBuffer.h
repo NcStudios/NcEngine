@@ -4,23 +4,24 @@
 
 namespace nc::graphics::vulkan
 {
-    // Buffer that is intended for frequent writes on the CPU, and frequent reads on the GPU.
-    class UniformBuffer
-    {
-        public:
-            UniformBuffer();
-            UniformBuffer(GpuAllocator* allocator, const void* data, uint32_t size);
-            UniformBuffer(UniformBuffer&&) noexcept;
-            UniformBuffer& operator=(UniformBuffer&&) noexcept;
-            UniformBuffer& operator=(const UniformBuffer&) = delete;
-            UniformBuffer(const UniformBuffer&) = delete;
+// Buffer that is intended for frequent writes on the CPU, and frequent reads on the GPU.
+class UniformBuffer
+{
+    public:
+        UniformBuffer(GpuAllocator* allocator, const void* data, uint32_t size);
+        UniformBuffer(UniformBuffer&&) noexcept;
+        UniformBuffer& operator=(UniformBuffer&&) noexcept;
+        UniformBuffer& operator=(const UniformBuffer&) = delete;
+        UniformBuffer(const UniformBuffer&) = delete;
 
-            vk::Buffer GetBuffer();
-            void Bind(const void* data, uint32_t size);
-            void Clear();
+        void Bind(const void* data, uint32_t size);
+        void Clear();
+        auto GetInfo() noexcept -> vk::DescriptorBufferInfo* {return &m_info;}
 
-        private:
-            GpuAllocator* m_allocator;
-            GpuAllocation<vk::Buffer> m_buffer;
-    };
+    private:
+        GpuAllocator* m_allocator;
+        GpuAllocation<vk::Buffer> m_buffer;
+        uint32_t m_alignedSize;
+        vk::DescriptorBufferInfo m_info;
+};
 } // namespace nc::graphics::vulkan

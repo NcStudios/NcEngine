@@ -116,6 +116,11 @@ bool VulkanGraphics::FrameBegin()
     return true;
 }
 
+void VulkanGraphics::CommitResourceLayout()
+{
+    m_shaderDescriptorSets->CommitResourceLayout();
+}
+
 auto VulkanGraphics::CurrentFrameIndex() -> uint32_t
 {
     return m_frameManager->Index();

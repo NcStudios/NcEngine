@@ -53,6 +53,7 @@ class VulkanGraphics : public IGraphics
 
         ~VulkanGraphics() noexcept;
 
+        void CommitResourceLayout() override;
         auto FrameBegin() -> bool override;
         auto CurrentFrameIndex() -> uint32_t override;
         void Draw(const PerFrameRenderState& state) override;

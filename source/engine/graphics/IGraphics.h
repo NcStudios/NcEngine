@@ -33,6 +33,7 @@ class IGraphics
     public:
         virtual ~IGraphics() = default;
 
+        virtual void CommitResourceLayout() = 0;
         virtual auto FrameBegin() -> bool = 0;
         virtual auto CurrentFrameIndex() -> uint32_t = 0;
         virtual void Draw(const PerFrameRenderState& state) = 0;

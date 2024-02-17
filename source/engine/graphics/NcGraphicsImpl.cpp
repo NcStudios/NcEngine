@@ -89,6 +89,7 @@ namespace nc::graphics
           m_uiSystem{registry->GetEcs(), modules}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
+        m_graphics->CommitResourceLayout();
     }
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept

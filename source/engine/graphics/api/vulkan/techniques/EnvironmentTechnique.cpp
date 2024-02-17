@@ -98,7 +98,7 @@ void EnvironmentTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     OPTICK_CATEGORY("EnvironmentTechnique::Bind", Optick::Category::Rendering);
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(frameIndex, 0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
 bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)

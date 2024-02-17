@@ -147,7 +147,7 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
       m_activeShadowMappingPasses{},
       m_maxLights{maxLights},
       m_isDescriptorSetLayoutsDirty{true},
-      m_onDescriptorSetsChanged{m_descriptorSets->OnDescriptorSetsChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)}
+      m_onDescriptorSetsChanged{m_descriptorSets->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)}
 {
     for (auto i : std::views::iota(0u, m_maxLights))
     {

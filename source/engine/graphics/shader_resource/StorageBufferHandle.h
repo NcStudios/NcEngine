@@ -33,7 +33,7 @@ class StorageBufferHandle
 {
     public:
         StorageBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const SsboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
-        void Update(void* data, uint32_t currentFrameIndex);
+        void Bind(void* data, size_t size, uint32_t currentFrameIndex);
         void Clear();
 
     private:

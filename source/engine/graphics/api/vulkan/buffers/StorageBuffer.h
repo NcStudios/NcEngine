@@ -13,13 +13,14 @@ class StorageBuffer
         StorageBuffer& operator=(const StorageBuffer&) = delete;
         StorageBuffer(const StorageBuffer&) = delete;
 
-        vk::Buffer GetBuffer() const noexcept;
         void Clear() noexcept;
         void Map(const void* dataToMap, uint32_t dataSize);
+        auto GetInfo() noexcept -> vk::DescriptorBufferInfo* {return &m_info;}
 
     private:
         GpuAllocator* m_allocator;
         GpuAllocation<vk::Buffer> m_buffer;
-        uint32_t m_memorySize;
+        uint32_t m_alignedSize;
+        vk::DescriptorBufferInfo m_info;
 };
 } // namespace nc::graphics::vulkan
