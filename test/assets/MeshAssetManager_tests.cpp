@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 #include "assets/manager/MeshAssetManager.h"
 
+#include "ncasset/Assets.h"
+
 #include <array>
 #include <string>
 

@@ -18,19 +18,19 @@ class BasicStringTable
     public:
         static constexpr auto NullIndex = UINT64_MAX;
 
-        void emplace(const std::string_view key)
+        void emplace(std::string_view key)
         {
             m_ids.push_back(Hash(key));
             if constexpr (Policy::PreserveOriginalKeys)
                 m_keys.push_back(std::string{key});
         }
 
-        auto contains(const std::string_view key) const noexcept -> bool
+        auto contains(std::string_view key) const noexcept -> bool
         {
             return std::ranges::contains(m_ids, Hash(key));
         }
 
-        auto index(const std::string_view key) const noexcept -> size_t
+        auto index(std::string_view key) const noexcept -> size_t
         {
             const auto pos = std::ranges::find(m_ids, Hash(key));
             return pos != std::ranges::cend(m_ids)
@@ -122,26 +122,26 @@ class StringMap
     public:
         static constexpr auto NullIndex = UINT64_MAX;
 
-        auto emplace(const std::string_view key, T&& value) -> T&
+        auto emplace(std::string_view key, T&& value) -> T&
         {
             m_table.emplace(key);
             m_values.push_back(std::move(value));
             return m_values.back();
         }
 
-        auto emplace(const std::string_view key, const T& value) -> T&
+        auto emplace(std::string_view key, const T& value) -> T&
         {
             m_table.emplace(key);
             m_values.push_back(value);
             return m_values.back();
         }
 
-        auto contains(const std::string_view key) const noexcept -> bool
+        auto contains(std::string_view key) const noexcept -> bool
         {
             return m_table.contains(key);
         }
 
-        auto index(const std::string_view key) const -> size_t
+        auto index(std::string_view key) const -> size_t
         {
             return m_table.index(key);
         }
@@ -192,7 +192,7 @@ class StringMap
             m_values.shrink_to_fit();
         }
 
-        auto at(const std::string_view key) -> T&
+        auto at(std::string_view key) -> T&
         {
             const auto index = index(key);
             NC_ASSERT(index != NullIndex, fmt::format("Key does not exist '{}'", key));
@@ -205,7 +205,7 @@ class StringMap
             return m_values[index];
         }
 
-        auto at(const std::string_view key) const-> const T&
+        auto at(std::string_view key) const-> const T&
         {
             const auto i = index(key);
             NC_ASSERT(i != NullIndex, fmt::format("Key does not exist '{}'", key));
