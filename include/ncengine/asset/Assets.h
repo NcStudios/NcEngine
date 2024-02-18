@@ -24,6 +24,7 @@ bool LoadAudioClipAsset(const std::string& path, bool isExternal = false, asset_
 bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
 bool UnloadAudioClipAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllAudioClipAssets(asset_flags_type flags = AssetFlags::None);
+auto AcquireAudioClipAsset(const std::string& path) -> AudioClipView;
 
 /** Supported file types: .nca */
 bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);

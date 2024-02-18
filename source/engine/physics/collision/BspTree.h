@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ecs/Registry.h"
-#include "physics/ConcaveCollider.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/physics/ConcaveCollider.h"
 #include "physics/PhysicsPipelineTypes.h"
 #include "physics/collision/IntersectionQueries.h"
 
@@ -52,10 +52,11 @@ class BspTree
     static constexpr float PlaneEpsilon = 0.01f;
 
     public:
-        BspTree(Registry* registry);
+        BspTree(Registry* registry, Signal<>& rebuildStatics);
 
         void OnAdd(ConcaveCollider& collider);
         void OnRemove(Entity entity);
+        void Rebuild();
 
         template<Proxy ProxyType>
         void FindPairs(std::span<const ProxyType> proxies);
@@ -69,6 +70,7 @@ class BspTree
         NarrowPhysicsResult m_results;
         Connection<ConcaveCollider&> m_onAddConnection;
         Connection<Entity> m_onRemoveConnection;
+        Connection<> m_onRebuildStaticsConnection;
 
         void AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex);
         void AddToInnerNode(const TriMesh& mesh, size_t meshIndex, InnerNode* innerNode);
@@ -96,6 +98,8 @@ void BspTree::FindPairs(std::span<const ProxyType> proxies)
     for(size_t i = 0u; i < dynamicCount; ++i)
     {
         const auto& proxy = proxies[i];
+        if (proxy.Id().IsStatic())
+            continue;
 
         /** Find mesh colliders that are in the same region as the estimate. */
         narrowTestMeshIndices.clear();

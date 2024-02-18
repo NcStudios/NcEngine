@@ -23,6 +23,7 @@ namespace nc::graphics
 
             // this may need to be delayed too
             void Emit(Entity entity, size_t count);
+            void UpdateInfo(graphics::ParticleEmitter& emitter);
 
             // ComponentSystem Methods
             void Add(graphics::ParticleEmitter& emitter);

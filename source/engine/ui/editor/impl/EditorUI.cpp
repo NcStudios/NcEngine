@@ -1,5 +1,6 @@
 #include "EditorUI.h"
 #include "ui/editor/Editor.h"
+#include "ncengine/Events.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/scene/NcScene.h"
@@ -63,7 +64,7 @@ void EditorUI::Draw(EditorContext& ctx)
     RUN_ONCE(WindowLayout(g_initialGraphWidth, g_pivotLeft));
     Window("Scene Graph", ImGuiWindowFlags_MenuBar, [&]()
     {
-        DrawMenu(ncAsset);
+        DrawMenu(ctx);
         m_sceneGraph.Draw(ctx, m_createEntityDialog);
     });
 
@@ -123,7 +124,7 @@ void EditorUI::DrawDialogs(EditorContext& ctx)
         m_loadSceneDialog.Draw(ctx);
 }
 
-void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
+void EditorUI::DrawMenu(EditorContext& ctx)
 {
     if (ImGui::BeginMenuBar())
     {
@@ -132,9 +133,9 @@ void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
             if (ImGui::MenuItem("New"))
                 m_newSceneDialog.Open();
             if (ImGui::MenuItem("Save"))
-                m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
+                m_saveSceneDialog.Open(ctx.modules.Get<asset::NcAsset>()->GetLoadedAssets());
             if (ImGui::MenuItem("Load"))
-                m_loadSceneDialog.Open(&ncAsset);
+                m_loadSceneDialog.Open(ctx.modules.Get<asset::NcAsset>());
 
             ImGui::EndMenu();
         }
@@ -143,6 +144,8 @@ void EditorUI::DrawMenu(asset::NcAsset& ncAsset)
         {
             if (ImGui::MenuItem("FPS Overlay"))
                 m_fpsOverlay.ToggleOpen();
+            if (ImGui::MenuItem("Rebuild Static Entity Data"))
+                ctx.events->rebuildStatics.Emit();
 
             ImGui::EndMenu();
         }

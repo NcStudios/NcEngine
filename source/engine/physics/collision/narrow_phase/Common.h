@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ncengine/utility/MatrixUtilities.h"
+
 #include "ncmath/Geometry.h"
 #include "ncutility/NcError.h"
 #include "DirectXMath.h"
@@ -19,9 +21,6 @@ struct Supports
 };
 
 bool SameDirection(const Vector3& a, const Vector3& b);
-DirectX::XMVECTOR GetTranslation(DirectX::FXMMATRIX matrix);
-DirectX::XMVECTOR GetScale(DirectX::FXMMATRIX matrix);
-DirectX::XMVECTOR GetRotation(DirectX::FXMMATRIX matrix);
 DirectX::XMVECTOR MinkowskiSupport(const Sphere& collider, DirectX::FXMVECTOR direction_v);
 DirectX::XMVECTOR MinkowskiSupport(const Box& collider, DirectX::FXMVECTOR direction_v);
 DirectX::XMVECTOR MinkowskiSupport(const Capsule& collider, DirectX::FXMVECTOR direction_v);
@@ -40,30 +39,6 @@ Supports MinkowskiSupports(const BVA& a,
 inline bool SameDirection(const Vector3& a, const Vector3& b)
 {
     return Dot(a, b) > 0.0f;
-}
-
-inline DirectX::XMVECTOR GetTranslation(DirectX::FXMMATRIX matrix)
-{
-    return matrix.r[3];
-}
-
-inline DirectX::XMVECTOR GetScale(DirectX::FXMMATRIX matrix)
-{
-    using namespace DirectX;
-
-    const auto x = XMVector3LengthSq(matrix.r[0]);
-    const auto y = XMVector3LengthSq(matrix.r[1]);
-    const auto z = XMVector3LengthSq(matrix.r[2]);
-    auto out = XMVectorMergeXY(x, y);
-    out = XMVectorPermute<0, 1, 4, 5>(out, z);
-    return XMVectorSqrt(out);
-}
-
-inline DirectX::XMVECTOR GetRotation(DirectX::FXMMATRIX matrix)
-{
-    DirectX::XMVECTOR scl, rot, pos;
-    DirectX::XMMatrixDecompose(&scl, &rot, &pos, matrix);
-    return rot;
 }
 
 inline DirectX::XMVECTOR MinkowskiSupport(const Sphere& collider, DirectX::FXMVECTOR direction_v)
