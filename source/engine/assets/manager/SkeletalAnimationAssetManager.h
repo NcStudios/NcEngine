@@ -1,10 +1,10 @@
 #pragma once
 
 #include "assets/AssetService.h"
-#include "ncasset/AssetsFwd.h"
-#include "utility/Signal.h"
+#include "utility/StringMap.h"
+#include "ncengine/utility/Signal.h"
 
-#include <vector>
+#include "ncasset/AssetsFwd.h"
 
 namespace nc
 {
@@ -29,10 +29,9 @@ class SkeletalAnimationAssetManager : public IAssetService<SkeletalAnimationView
         auto OnUpdate() -> Signal<const asset::SkeletalAnimationUpdateEventData&>&;
 
     private:
+        StringTable m_table;
         std::string m_assetDirectory;
         uint32_t m_maxSkeletalAnimationCount;
-        std::vector<std::string> m_assetIds;
-        std::vector<asset::SkeletalAnimation> m_skeletalAnimations;
         Signal<const asset::SkeletalAnimationUpdateEventData&> m_onUpdate;
 };
 } // namespace nc

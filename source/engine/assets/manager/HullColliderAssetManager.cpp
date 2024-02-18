@@ -45,7 +45,7 @@ namespace nc
 
     bool HullColliderAssetManager::Unload(const std::string& path, asset_flags_type)
     {
-        return static_cast<bool>(m_hullColliders.erase(path));
+        return m_hullColliders.erase(path);
     }
 
     void HullColliderAssetManager::UnloadAll(asset_flags_type)
@@ -55,17 +55,12 @@ namespace nc
 
     auto HullColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConvexHullView
     {
-        const auto it = m_hullColliders.find(path);
-        if (it == m_hullColliders.end())
-        {
-            throw NcError("Asset is not loaded: " + path);
-        }
-
+        const auto& collider = m_hullColliders.at(path);
         return ConvexHullView
         {
-            .vertices = std::span<const Vector3>{it->second.vertices},
-            .extents = it->second.extents,
-            .maxExtent = it->second.maxExtent
+            .vertices = std::span<const Vector3>{collider.vertices},
+            .extents = collider.extents,
+            .maxExtent = collider.maxExtent
         };
     }
 
@@ -76,6 +71,6 @@ namespace nc
 
     auto HullColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
     {
-        return GetPaths(m_hullColliders);
+        return GetPaths(m_hullColliders.keys());
     }
 }

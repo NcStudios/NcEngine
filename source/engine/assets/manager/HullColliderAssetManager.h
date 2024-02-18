@@ -1,11 +1,11 @@
 #pragma once
 
 #include "assets/AssetService.h"
+#include "utility/StringMap.h"
 
 #include "ncasset/AssetsFwd.h"
 
 #include <string>
-#include <unordered_map>
 
 namespace nc
 {
@@ -24,7 +24,7 @@ class HullColliderAssetManager : public IAssetService<ConvexHullView, std::strin
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::HullCollider; }
 
     private:
-        std::unordered_map<std::string, asset::HullCollider> m_hullColliders;
+        StringMap<asset::HullCollider> m_hullColliders;
         std::string m_assetDirectory;
 };
 } // namespace nc

@@ -8,21 +8,15 @@
 namespace nc
 {
 TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures)
-    : m_textureData{},
-      m_assetDirectory{texturesAssetDirectory},
+    : m_assetDirectory{texturesAssetDirectory},
       m_maxTextureCount{maxTextures},
       m_onUpdate{}
 {
-    m_textureData.reserve(m_maxTextureCount);
 }
 
-TextureAssetManager::~TextureAssetManager() noexcept = default;
-
-bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
 {
-    const auto index = static_cast<uint32_t>(m_textureData.size());
-
-    if (index + 1 >= m_maxTextureCount)
+    if (m_data.size() + 1 >= m_maxTextureCount)
     {
         throw NcError("Cannot exceed max texture count.");
     }
@@ -33,27 +27,25 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_f
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
-    m_textureData.back().flags = AssetFlags::TextureTypeNormalMap;
-
+    auto texture = asset::TextureWithId{asset::ImportTexture(fullPath), path, flags};
+    m_data.emplace(path);
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
         std::vector<std::string>{path},
-        std::span<const asset::TextureWithId>{&m_textureData.back(), 1}
+        std::span<const asset::TextureWithId>{&texture, 1}
     });
 
     return true;
 }
 
-bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
 {
-    const auto newItemsIndex = m_textureData.size();
-    const auto newTextureCount = static_cast<uint32_t>(paths.size());
-    auto nextTextureIndex = static_cast<uint32_t>(newItemsIndex);
-    if (newTextureCount + nextTextureIndex >= m_maxTextureCount)
+    if (m_data.size() + paths.size() >= m_maxTextureCount)
     {
         throw NcError("Cannot exceed max texture count.");
     }
+
+    auto textures = std::vector<asset::TextureWithId>{};
 
     auto idsToLoad = std::vector<std::string>{};
     idsToLoad.reserve(paths.size());
@@ -65,10 +57,9 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
             continue;
         }
 
+        m_data.emplace(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-
-        m_textureData.emplace_back(asset::ImportTexture(fullPath), path);
-        m_textureData.back().flags = AssetFlags::TextureTypeNormalMap;
+        textures.emplace_back(asset::ImportTexture(fullPath), path, flags);
         idsToLoad.push_back(path);
     }
 
@@ -77,7 +68,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         m_onUpdate.Emit(asset::TextureUpdateEventData{
             asset::UpdateAction::Load,
             std::move(idsToLoad),
-            std::span<const asset::TextureWithId>{m_textureData.begin() + newItemsIndex, m_textureData.end()}
+            std::span<const asset::TextureWithId>{textures}
         });
     }
 
@@ -86,17 +77,9 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
 bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    const auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
-    {
-        return data.id == path;
-    });
-
-    if (pos == m_textureData.cend())
-    {
+    if (!m_data.erase(path))
         return false;
-    }
 
-    m_textureData.erase(pos);
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Unload,
         std::vector<std::string>{path},
@@ -108,34 +91,25 @@ bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
 
 void TextureAssetManager::UnloadAll(asset_flags_type)
 {
-    m_textureData.clear();
+    m_data.clear();
+    m_onUpdate.Emit(asset::TextureUpdateEventData{
+        asset::UpdateAction::UnloadAll,
+        {},
+        {}
+    });
     /** No need to send signal to GPU - no need to write an empty buffer to the GPU. **/
 }
 
 auto TextureAssetManager::Acquire(const std::string& path, asset_flags_type) const -> TextureView
 {
-    const auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
-    {
-        return data.id == path;
-    });
-
-    if (pos == m_textureData.cend())
-    {
-        throw NcError("Asset is not loaded: " + path);
-    }
-
-    auto index = static_cast<uint32_t>(std::distance(m_textureData.cbegin(), pos));
-    return TextureView{index};
+    const auto index = m_data.index(path);
+    NC_ASSERT(index != StringMap<uint32_t>::NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+    return TextureView{.index = static_cast<uint32_t>(index)};
 }
 
 bool TextureAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
-    auto pos = std::ranges::find_if(m_textureData, [&path](const auto& data)
-    {
-        return data.id == path;
-    });
-
-    return (pos != m_textureData.end());
+    return m_data.contains(path);
 }
 
 auto TextureAssetManager::OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&
@@ -145,9 +119,9 @@ auto TextureAssetManager::OnUpdate() -> Signal<const asset::TextureUpdateEventDa
 
 auto TextureAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_textureData, [](const auto& data)
+    return GetPaths(m_data.keys(), [](const auto& data)
     {
-        return std::string_view{data.id};
+        return std::string_view{data};
     });
 }
 } // namespace nc

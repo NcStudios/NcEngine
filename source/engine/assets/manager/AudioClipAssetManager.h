@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assets/AssetService.h"
+#include "utility/StringMap.h"
 
 #include "ncasset/AssetsFwd.h"
 
@@ -24,7 +25,7 @@ class AudioClipAssetManager : public IAssetService<AudioClipView, std::string>
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::AudioClip; }
 
     private:
-        std::unordered_map<std::string, asset::AudioClip> m_audioClips;
+        StringMap<asset::AudioClip> m_audioClips;
         std::string m_assetDirectory;
 };
 } // namespace nc

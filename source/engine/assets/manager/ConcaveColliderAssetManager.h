@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assets/AssetService.h"
+#include "utility/StringMap.h"
 
 #include "ncasset/AssetsFwd.h"
 
@@ -23,7 +24,7 @@ class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView, st
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::ConcaveCollider; }
 
     private:
-        std::unordered_map<std::string, asset::ConcaveCollider> m_concaveColliders;
+        StringMap<asset::ConcaveCollider> m_concaveColliders;
         std::string m_assetDirectory;
 };
 } // namespace nc

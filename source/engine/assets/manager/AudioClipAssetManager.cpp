@@ -45,7 +45,7 @@ bool AudioClipAssetManager::Load(std::span<const std::string> paths, bool isExte
 
 bool AudioClipAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    return static_cast<bool>(m_audioClips.erase(path));
+    return m_audioClips.erase(path);
 }
 
 void AudioClipAssetManager::UnloadAll(asset_flags_type)
@@ -55,17 +55,12 @@ void AudioClipAssetManager::UnloadAll(asset_flags_type)
 
 auto AudioClipAssetManager::Acquire(const std::string& path, asset_flags_type) const -> AudioClipView
 {
-    const auto it = m_audioClips.find(path);
-    if (it == m_audioClips.end())
-    {
-        throw NcError("Asset is not loaded: " + path);
-    }
-
+    const auto& clip = m_audioClips.at(path);
     return AudioClipView
     {
-        .leftChannel = std::span<const double>{it->second.leftChannel},
-        .rightChannel = std::span<const double>{it->second.rightChannel},
-        .samplesPerChannel = it->second.samplesPerChannel
+        .leftChannel = std::span<const double>{clip.leftChannel},
+        .rightChannel = std::span<const double>{clip.rightChannel},
+        .samplesPerChannel = clip.samplesPerChannel
     };
 }
 
@@ -76,6 +71,6 @@ bool AudioClipAssetManager::IsLoaded(const std::string& path, asset_flags_type) 
 
 auto AudioClipAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_audioClips);
+    return GetPaths(m_audioClips.keys());
 }
 }

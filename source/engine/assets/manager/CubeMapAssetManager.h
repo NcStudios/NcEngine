@@ -1,11 +1,10 @@
 #pragma once
 
 #include "assets/AssetService.h"
-#include "utility/Signal.h"
+#include "utility/StringMap.h"
+#include "ncengine/utility/Signal.h"
 
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace nc
 {
@@ -30,7 +29,7 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::CubeMap; }
 
     private:
-        std::vector<std::string> m_cubeMapIds;
+        StringTable m_cubeMapIds;
         std::string m_assetDirectory;
         uint32_t m_maxCubeMapsCount;
         Signal<const asset::CubeMapUpdateEventData&> m_onUpdate;
