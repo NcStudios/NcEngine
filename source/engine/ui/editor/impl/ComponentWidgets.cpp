@@ -211,16 +211,6 @@ constexpr auto rotationOverTimeFactorProp = nc::ui::Property{ getRotationOverTim
 constexpr auto scaleOverTimeFactoryProp = nc::ui::Property{ getScaleOverTime, setScaleOverTime, "scaleOverTime" };
 } // namespace particle_emitter_ext
 
-namespace tag_ext
-{
-using T = nc::Tag;
-
-constexpr auto getTag = [](auto& obj)             { return std::string{obj.Value().data()}; };
-constexpr auto setTag = [](auto& obj, auto&& str) { obj.Set(std::move(str)); };
-
-constexpr auto tagProp = nc::ui::Property{ getTag, setTag, "tag" };
-} // namespace tag_ext
-
 namespace toon_renderer_ext
 {
 using T = nc::graphics::ToonRenderer;
@@ -254,7 +244,7 @@ void FrameLogicUIWidget(FrameLogic&)
 
 void TagUIWidget(Tag& tag)
 {
-    ui::PropertyWidget(tag_ext::tagProp, tag, &ui::InputText);
+    ui::InputText(tag.value, "tag");
 }
 
 void TransformUIWidget(Transform& transform)

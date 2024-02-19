@@ -17,7 +17,7 @@ class FreeComponent;
 class CollisionLogic;
 class FixedLogic;
 class FrameLogic;
-class Tag;
+struct Tag;
 class Transform;
 struct Quaternion;
 struct Vector2;

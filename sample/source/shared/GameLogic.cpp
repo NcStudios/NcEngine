@@ -28,7 +28,7 @@ void LogOnCollisionEnter(Entity, Entity hit, Registry* registry)
     if(registry->Contains<Entity>(hit))
     {
         auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Collision Enter: "} + tag->Value().data());
+        GameLog::Log(std::string{"Collision Enter: "} + tag->value.c_str());
     }
 }
 
@@ -37,7 +37,7 @@ void LogOnCollisionExit(Entity, Entity hit, Registry* registry)
     if(registry->Contains<Entity>(hit))
     {
         auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Collision Exit: "} + tag->Value().data());
+        GameLog::Log(std::string{"Collision Exit: "} + tag->value.c_str());
     }
 }
 
@@ -46,7 +46,7 @@ void LogOnTriggerEnter(Entity, Entity hit, Registry* registry)
     if(registry->Contains<Entity>(hit))
     {
         auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Trigger Enter: "} + tag->Value().data());
+        GameLog::Log(std::string{"Trigger Enter: "} + tag->value.c_str());
     }
 }
 
@@ -55,7 +55,7 @@ void LogOnTriggerExit(Entity, Entity hit, Registry* registry)
     if(registry->Contains<Entity>(hit))
     {
         auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Trigger Exit: "} + tag->Value().data());
+        GameLog::Log(std::string{"Trigger Exit: "} + tag->value.c_str());
     }
 }
 }

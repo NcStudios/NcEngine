@@ -170,7 +170,7 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
         ogreAnim->PlayOnceImmediate("ogre//attack.nca", graphics::anim::RootState);
         if(auto* tag = reg->Get<Tag>(other); tag)
         {
-            GameLog::Log(std::string{"Collision Enter: "} + tag->Value().data());
+            GameLog::Log(std::string{"Collision Enter: "} + tag->value.c_str());
         }
     }, nullptr);
 
