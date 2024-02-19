@@ -10,6 +10,7 @@
 
 namespace nc::graphics
 {
+/** @brief Component representing an omnidirectional light. */
 struct PointLight final : public ComponentBase
 {
     explicit PointLight(Entity entity,

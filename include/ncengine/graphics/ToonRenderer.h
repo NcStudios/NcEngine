@@ -30,8 +30,6 @@ struct ToonMaterialView
 
 class ToonRenderer : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(ToonRenderer)
-
     public:
         ToonRenderer(Entity entity,
                      std::string meshUid = asset::CubeMesh,
