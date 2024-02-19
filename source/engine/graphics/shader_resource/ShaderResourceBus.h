@@ -18,13 +18,13 @@ class TextureArrayBufferHandle;
 struct ShaderResourceBus
 {
     inline static uint32_t StorageBufferUid = 0u;
-    auto CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set) -> StorageBufferHandle;
+    auto CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> StorageBufferHandle;
 
     inline static uint32_t TextureArrayBufferUid = 0u;
-    auto CreateTextureArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> TextureArrayBufferHandle;
+    auto CreateTextureArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> TextureArrayBufferHandle;
 
     inline static uint32_t UniformBufferUid = 0u;
-    auto CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set) -> UniformBufferHandle;
+    auto CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> UniformBufferHandle;
 
     Signal<const SsboUpdateEventData&> storageBufferChannel;
     Signal<const TabUpdateEventData&> textureArrayBufferChannel;

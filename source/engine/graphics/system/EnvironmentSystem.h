@@ -2,6 +2,7 @@
 
 #include "graphics/shader_resource/ShaderResourceBus.h"
 #include "graphics/shader_resource/UniformBufferHandle.h"
+#include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "utility/Signal.h"
 
 #include "ncmath/Vector.h"

@@ -7,7 +7,7 @@ namespace nc::graphics
 {
 EnvironmentSystem::EnvironmentSystem(ShaderResourceBus* shaderResourceBus)
     : m_environmentData{},
-      m_environmentDataBuffer{shaderResourceBus->CreateUniformBuffer(sizeof(EnvironmentData), ShaderStage::Fragment | ShaderStage::Vertex, 5, 0)},
+      m_environmentDataBuffer{shaderResourceBus->CreateUniformBuffer(sizeof(EnvironmentData), ShaderStage::Fragment | ShaderStage::Vertex, 5, 0, false)},
       m_useSkybox{false}
 {
 }
@@ -22,7 +22,7 @@ void EnvironmentSystem::SetSkybox(const std::string& path)
 auto EnvironmentSystem::Execute(const CameraState& cameraState, uint32_t currentFrameIndex) -> EnvironmentState
 {
     m_environmentData.cameraWorldPosition = Vector4(cameraState.position, 0.0f);
-    m_environmentDataBuffer.Update(static_cast<void*>(&m_environmentData), currentFrameIndex);
+    m_environmentDataBuffer.Update(static_cast<void*>(&m_environmentData), sizeof(m_environmentData), currentFrameIndex);
     return EnvironmentState{m_useSkybox};
 }
 

@@ -8,7 +8,7 @@ namespace nc::graphics
 {
 TextureSystem::TextureSystem(ShaderResourceBus* shaderResourceBus, Signal<const asset::TextureUpdateEventData&>& onTextureArrayBufferUpdate, uint32_t maxTextures)
     : m_textureArray{},
-      m_textureArrayBuffer{shaderResourceBus->CreateTextureArrayBuffer(maxTextures, ShaderStage::Fragment, 2, 1)},
+      m_textureArrayBuffer{shaderResourceBus->CreateTextureArrayBuffer(maxTextures, ShaderStage::Fragment, 2, 1, true)},
       m_onTextureArrayBufferUpdate{onTextureArrayBufferUpdate.Connect(this, &TextureSystem::UpdateTextureArrayBuffer)}{}
 
 void TextureSystem::UpdateTextureArrayBuffer(const asset::TextureUpdateEventData& eventData)

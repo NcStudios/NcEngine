@@ -10,9 +10,27 @@ TextureArrayBufferHandle::TextureArrayBufferHandle(uint32_t uid, shader_stage st
       m_slot{slot},
       m_set{set},
       m_stage{stage},
-      m_backendPort{std::move(backendPort)}
+      m_backendPort{backendPort}
 {
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
+}
+
+void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data, uint32_t frameIndex)
+{
+    m_backendPort->Emit(
+        TabUpdateEventData
+        {
+            data,
+            frameIndex,
+            m_uid,
+            m_slot,
+            m_set,
+            0u,
+            m_stage,
+            TabUpdateAction::Update,
+            false
+        }
+    );
 }
 
 void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data)
@@ -21,12 +39,14 @@ void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data
         TabUpdateEventData
         {
             data,
+            std::numeric_limits<uint32_t>::max(),
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            TabUpdateAction::Update
+            TabUpdateAction::Update,
+            true
         }
     );
 }
@@ -37,12 +57,14 @@ void TextureArrayBufferHandle::Clear()
         TabUpdateEventData
         {
             std::span<const asset::TextureWithId>{},
+            std::numeric_limits<uint32_t>::max(),
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            TabUpdateAction::Clear
+            TabUpdateAction::Clear,
+            false
         }
     );
 }

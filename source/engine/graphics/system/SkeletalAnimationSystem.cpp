@@ -58,7 +58,7 @@ SkeletalAnimationSystem::SkeletalAnimationSystem(Registry* registry,
       m_handlerIndices{},
       m_unitEntities{},
       m_units{},
-      m_skeletalAnimationDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(SkeletalAnimationData) * AvgBonesPerAnim * maxSkeletalAnimations, ShaderStage::Vertex, 6, 0)}
+      m_skeletalAnimationDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(SkeletalAnimationData) * AvgBonesPerAnim * maxSkeletalAnimations, ShaderStage::Vertex, 6, 0, false)}
 {}
 
 auto SkeletalAnimationSystem::Execute(uint32_t frameIndex) -> SkeletalAnimationSystemState

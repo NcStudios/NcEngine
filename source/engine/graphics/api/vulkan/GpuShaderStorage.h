@@ -21,22 +21,22 @@ struct TabUpdateEventData;
 
 namespace vulkan
 {
-struct PerFrameUboStorage
+struct UniformBufferStorage
 {
-    std::vector<uint32_t> uniformBufferUids;
-    std::vector<std::unique_ptr<UniformBuffer>> uniformBuffers;
+    std::vector<uint32_t> uids;
+    std::vector<std::unique_ptr<UniformBuffer>> buffers;
 };
 
-struct PerFrameSsboStorage
+struct StorageBufferStorage
 {
-    std::vector<uint32_t> storageBufferUids;
-    std::vector<std::unique_ptr<StorageBuffer>> storageBuffers;
+    std::vector<uint32_t> uids;
+    std::vector<std::unique_ptr<StorageBuffer>> buffers;
 };
 
 struct TextureArrayBufferStorage
 {
-    std::vector<uint32_t> textureArrayBufferUids;
-    std::vector<std::unique_ptr<TextureArrayBuffer>> textureArrayBuffers;
+    std::vector<uint32_t> uids;
+    std::vector<std::unique_ptr<TextureArrayBuffer>> buffers;
 };
 
 struct GpuShaderStorage
@@ -56,14 +56,16 @@ struct GpuShaderStorage
     GpuAllocator* m_allocator;
     ShaderDescriptorSets* m_descriptorSets;
 
-    std::array<PerFrameSsboStorage, MaxFramesInFlight> m_perFrameSsboStorage;
+    std::array<StorageBufferStorage, MaxFramesInFlight> m_perFrameSsboStorage;
+    StorageBufferStorage m_staticSsboStorage;
     nc::Connection<const SsboUpdateEventData&> m_onStorageBufferUpdate;
 
-    std::array<PerFrameUboStorage, MaxFramesInFlight> m_perFrameUboStorage;
+    std::array<UniformBufferStorage, MaxFramesInFlight> m_perFrameUboStorage;
+    UniformBufferStorage m_staticUboStorage;
     nc::Connection<const UboUpdateEventData&> m_onUniformBufferUpdate;
 
-     // Do not need a set of TextureArrayBuffers per frame: textures are shared across frames
-    TextureArrayBufferStorage m_textureArrayBufferStorage;
+    std::array<TextureArrayBufferStorage, MaxFramesInFlight> m_perFrameTabStorage;
+    TextureArrayBufferStorage m_staticTabStorage;
     nc::Connection<const TabUpdateEventData&> m_onTextureArrayBufferUpdate;
 };
 } // namespace vulkan

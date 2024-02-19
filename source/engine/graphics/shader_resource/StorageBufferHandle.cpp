@@ -29,7 +29,27 @@ void StorageBufferHandle::Bind(void* data, size_t size, uint32_t currentFrameInd
             data,
             size,
             m_stage,
-            SsboUpdateAction::Update
+            SsboUpdateAction::Update,
+            false
+        }
+    );
+}
+
+void StorageBufferHandle::Bind(void* data, size_t size)
+{
+    NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
+    m_backendPort->Emit(
+        SsboUpdateEventData
+        {
+            m_uid,
+            std::numeric_limits<uint32_t>::max(),
+            m_slot,
+            m_set,
+            data,
+            size,
+            m_stage,
+            SsboUpdateAction::Update,
+            true
         }
     );
 }
@@ -46,7 +66,8 @@ void StorageBufferHandle::Clear()
             nullptr,
             m_size,
             m_stage,
-            SsboUpdateAction::Clear
+            SsboUpdateAction::Clear,
+            false
         }
     );
 }

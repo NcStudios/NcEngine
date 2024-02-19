@@ -16,8 +16,9 @@ UniformBufferHandle::UniformBufferHandle(uint32_t uid, size_t size, shader_stage
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void UniformBufferHandle::Update(void* data, uint32_t currentFrameIndex)
+void UniformBufferHandle::Update(void* data, size_t size, uint32_t currentFrameIndex)
 {
+    NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
     m_backendPort->Emit(
         UboUpdateEventData
         {
@@ -28,7 +29,27 @@ void UniformBufferHandle::Update(void* data, uint32_t currentFrameIndex)
             data,
             m_size,
             m_stage,
-            UboUpdateAction::Update
+            UboUpdateAction::Update,
+            false
+        }
+    );
+}
+
+void UniformBufferHandle::Update(void* data, size_t size)
+{
+    NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
+    m_backendPort->Emit(
+        UboUpdateEventData
+        {
+            m_uid,
+            std::numeric_limits<uint32_t>::max(),
+            m_slot,
+            m_set,
+            data,
+            m_size,
+            m_stage,
+            UboUpdateAction::Update,
+            true
         }
     );
 }
@@ -45,7 +66,8 @@ void UniformBufferHandle::Clear()
             nullptr,
             m_size,
             m_stage,
-            UboUpdateAction::Clear
+            UboUpdateAction::Clear,
+            false
         }
     );
 }

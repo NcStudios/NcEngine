@@ -19,7 +19,7 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 namespace nc::graphics
 {
 PointLightSystem::PointLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxPointLights, bool useShadows)
-    : m_pointLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0)},
+    : m_pointLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0, false)},
       m_useShadows{useShadows}
 {
     m_pointLightData.reserve(maxPointLights);

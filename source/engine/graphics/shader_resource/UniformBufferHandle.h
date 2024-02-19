@@ -27,13 +27,15 @@ struct UboUpdateEventData
     size_t size;
     shader_stage stage;
     UboUpdateAction action;
+    bool isStatic;
 };
 
 class UniformBufferHandle
 {
     public:
         UniformBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const UboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
-        void Update(void* data, uint32_t currentFrameIndex);
+        void Update(void* data, size_t size, uint32_t currentFrameIndex);
+        void Update(void* data, size_t size);
         void Clear();
 
     private:

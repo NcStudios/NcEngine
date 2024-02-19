@@ -48,7 +48,7 @@ class ObjectSystem
 {
     public:
         ObjectSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxObjects)
-            : m_objectDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(ObjectData) * maxObjects, ShaderStage::Fragment | ShaderStage::Vertex, 0, 0)}
+            : m_objectDataBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(ObjectData) * maxObjects, ShaderStage::Fragment | ShaderStage::Vertex, 0, 0, false)}
         {
             m_objectData.reserve(maxObjects);
         }

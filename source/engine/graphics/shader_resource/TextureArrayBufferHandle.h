@@ -23,18 +23,21 @@ enum class TabUpdateAction : uint8_t
 struct TabUpdateEventData
 {
     std::span<const asset::TextureWithId> data;
+    uint32_t currentFrameIndex;
     uint32_t uid;
     uint32_t slot;
     uint32_t set;
     uint32_t capacity;
     shader_stage stage;
     TabUpdateAction action;
+    bool isStatic;
 };
 
 class TextureArrayBufferHandle
 {
     public:
         TextureArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const TabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
+        void Update(std::span<const asset::TextureWithId> data, uint32_t frameIndex);
         void Update(std::span<const asset::TextureWithId> data);
         void Clear();
 
