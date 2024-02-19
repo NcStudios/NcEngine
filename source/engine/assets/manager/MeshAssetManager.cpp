@@ -25,6 +25,7 @@ auto MeshAssetManager::ImportMesh(const std::string& path, bool isExternal) -> a
     const auto mesh = asset::ImportMesh(fullPath);
 
     auto meshView = MeshView{
+        .id = m_accessors.hash(path),
         .firstVertex = static_cast<uint32_t>(m_vertexData.size()),
         .vertexCount = static_cast<uint32_t>(mesh.vertices.size()),
         .firstIndex = static_cast<uint32_t>(m_indexData.size()),
@@ -105,7 +106,7 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
     if (index == StringTable::NullIndex)
         return false;
 
-    const auto [firstVertex, vertexCount, firstIndex, indexCount, unused] = m_accessors.at(index);
+    const auto [id, firstVertex, vertexCount, firstIndex, indexCount, unused] = m_accessors.at(index);
     m_accessors.erase(path);
 
     auto indBeg = m_indexData.begin() + firstIndex;

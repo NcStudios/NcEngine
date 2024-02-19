@@ -108,9 +108,15 @@ void CubeMapAssetManager::UnloadAll(asset_flags_type)
 
 auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type) const -> CubeMapView
 {
-    const auto index = m_cubeMapIds.index(path);
+    const auto hash = m_cubeMapIds.hash(path);
+    const auto index = m_cubeMapIds.index(hash);
     NC_ASSERT(index != m_cubeMapIds.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
-    return CubeMapView{CubeMapUsage::Skybox, static_cast<unsigned>(index)};
+    return CubeMapView
+    {
+        .id = hash,
+        .usage = CubeMapUsage::Skybox,
+        .index = static_cast<unsigned>(index)
+    };
 }
 
 bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type) const

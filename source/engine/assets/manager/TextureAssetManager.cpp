@@ -16,7 +16,7 @@ TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirecto
 
 bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type flags)
 {
-    if (m_data.size() + 1 >= m_maxTextureCount)
+    if (m_table.size() + 1 >= m_maxTextureCount)
     {
         throw NcError("Cannot exceed max texture count.");
     }
@@ -28,7 +28,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_f
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     auto texture = asset::TextureWithId{asset::ImportTexture(fullPath), path, flags};
-    m_data.emplace(path);
+    m_table.emplace(path);
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
         std::vector<std::string>{path},
@@ -40,7 +40,7 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_f
 
 bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
 {
-    if (m_data.size() + paths.size() >= m_maxTextureCount)
+    if (m_table.size() + paths.size() >= m_maxTextureCount)
     {
         throw NcError("Cannot exceed max texture count.");
     }
@@ -57,7 +57,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
             continue;
         }
 
-        m_data.emplace(path);
+        m_table.emplace(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
         textures.emplace_back(asset::ImportTexture(fullPath), path, flags);
         idsToLoad.push_back(path);
@@ -77,7 +77,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
 bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    if (!m_data.erase(path))
+    if (!m_table.erase(path))
         return false;
 
     m_onUpdate.Emit(asset::TextureUpdateEventData{
@@ -91,7 +91,7 @@ bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
 
 void TextureAssetManager::UnloadAll(asset_flags_type)
 {
-    m_data.clear();
+    m_table.clear();
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::UnloadAll,
         {},
@@ -102,14 +102,19 @@ void TextureAssetManager::UnloadAll(asset_flags_type)
 
 auto TextureAssetManager::Acquire(const std::string& path, asset_flags_type) const -> TextureView
 {
-    const auto index = m_data.index(path);
-    NC_ASSERT(index != StringMap<uint32_t>::NullIndex, fmt::format("Asset is not loaded: '{}'", path));
-    return TextureView{.index = static_cast<uint32_t>(index)};
+    const auto hash = m_table.hash(path);
+    const auto index = m_table.index(hash);
+    NC_ASSERT(index != m_table.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+    return TextureView
+    {
+        .id = hash,
+        .index = static_cast<uint32_t>(index)
+    };
 }
 
 bool TextureAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
-    return m_data.contains(path);
+    return m_table.contains(path);
 }
 
 auto TextureAssetManager::OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&
@@ -119,7 +124,7 @@ auto TextureAssetManager::OnUpdate() -> Signal<const asset::TextureUpdateEventDa
 
 auto TextureAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_data.keys(), [](const auto& data)
+    return GetPaths(m_table.keys(), [](const auto& data)
     {
         return std::string_view{data};
     });

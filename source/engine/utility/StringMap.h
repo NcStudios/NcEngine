@@ -18,23 +18,33 @@ class BasicStringTable
     public:
         static constexpr auto NullIndex = UINT64_MAX;
 
+        static auto hash(std::string_view key) noexcept
+        {
+            return std::hash<std::string_view>{}(key);
+        }
+
         void emplace(std::string_view key)
         {
-            m_ids.push_back(Hash(key));
+            m_hashes.push_back(hash(key));
             if constexpr (Policy::PreserveOriginalKeys)
                 m_keys.push_back(std::string{key});
         }
 
         auto contains(std::string_view key) const noexcept -> bool
         {
-            return std::ranges::contains(m_ids, Hash(key));
+            return std::ranges::contains(m_hashes, hash(key));
         }
 
         auto index(std::string_view key) const noexcept -> size_t
         {
-            const auto pos = std::ranges::find(m_ids, Hash(key));
-            return pos != std::ranges::cend(m_ids)
-                ? std::ranges::distance(std::ranges::begin(m_ids), pos)
+            return index(hash(key));
+        }
+
+        auto index(size_t hash) const noexcept -> size_t
+        {
+            const auto pos = std::ranges::find(m_hashes, hash);
+            return pos != std::ranges::cend(m_hashes)
+                ? std::ranges::distance(std::ranges::begin(m_hashes), pos)
                 : NullIndex;
         }
 
@@ -45,21 +55,21 @@ class BasicStringTable
 
         auto erase(size_t index) noexcept -> bool
         {
-            if (index >= m_ids.size())
+            if (index >= m_hashes.size())
                 return false;
 
             if constexpr (Policy::StableOrder)
             {
-                m_ids.erase(m_ids.begin() + index);
+                m_hashes.erase(m_hashes.begin() + index);
                 if constexpr (Policy::PreserveOriginalKeys)
                     m_keys.erase(m_keys.begin() + index);
             }
             else
             {
-                if (index != m_ids.size() - 1)
+                if (index != m_hashes.size() - 1)
                 {
-                    m_ids[index] = m_ids.back();
-                    m_ids.pop_back();
+                    m_hashes[index] = m_hashes.back();
+                    m_hashes.pop_back();
                     if constexpr (Policy::PreserveOriginalKeys)
                     {
                         m_keys[index] = std::move(m_keys.back());
@@ -68,7 +78,7 @@ class BasicStringTable
                 }
                 else
                 {
-                    m_ids.pop_back();
+                    m_hashes.pop_back();
                     if constexpr (Policy::PreserveOriginalKeys)
                         m_keys.pop_back();
                 }
@@ -79,7 +89,7 @@ class BasicStringTable
 
         void reserve(size_t count)
         {
-            m_ids.reserve(count);
+            m_hashes.reserve(count);
             if constexpr (Policy::PreserveOriginalKeys)
                 m_keys.reserve(count);
         }
@@ -92,8 +102,8 @@ class BasicStringTable
 
         void clear() noexcept
         {
-            m_ids.clear();
-            m_ids.shrink_to_fit();
+            m_hashes.clear();
+            m_hashes.shrink_to_fit();
             if constexpr (Policy::PreserveOriginalKeys)
             {
                 m_keys.clear();
@@ -101,17 +111,18 @@ class BasicStringTable
             }
         }
 
-        auto empty() const noexcept -> bool { return m_ids.empty(); }
-        auto size() const noexcept -> size_t { return m_ids.size(); }
+        auto at(size_t index) const -> std::string_view
+        {
+            NC_ASSERT(index <= m_keys.size(), fmt::format("StringTable index out of bounds '{}'", index));
+            return m_keys[index];
+        }
+
+        auto empty() const noexcept -> bool { return m_hashes.empty(); }
+        auto size() const noexcept -> size_t { return m_hashes.size(); }
 
     private:
-        std::vector<size_t> m_ids;
+        std::vector<size_t> m_hashes;
         std::vector<std::string> m_keys;
-
-        static auto Hash(std::string_view key) noexcept
-        {
-            return std::hash<std::string_view>{}(key);
-        }
 };
 
 using StringTable = BasicStringTable<DefaultStringTablePolicy>;
@@ -121,6 +132,11 @@ class StringMap
 {
     public:
         static constexpr auto NullIndex = UINT64_MAX;
+
+        static auto hash(std::string_view key) noexcept -> size_t
+        {
+            return BasicStringTable<Policy>::hash(key);
+        }
 
         auto emplace(std::string_view key, T&& value) -> T&
         {
@@ -141,9 +157,14 @@ class StringMap
             return m_table.contains(key);
         }
 
-        auto index(std::string_view key) const -> size_t
+        auto index(std::string_view key) const noexcept -> size_t
         {
             return m_table.index(key);
+        }
+
+        auto index(size_t hash) const noexcept -> size_t
+        {
+            return m_table.index(hash);
         }
 
         auto erase(std::string_view key) noexcept -> bool
@@ -199,17 +220,28 @@ class StringMap
             return m_values[index];
         }
 
+        auto at(std::string_view key) const -> const T&
+        {
+            const auto i = index(key);
+            NC_ASSERT(i != NullIndex, fmt::format("Key does not exist '{}'", key));
+            return m_values[i];
+        }
+
         auto at(size_t index) -> T&
         {
             NC_ASSERT(index != NullIndex, fmt::format("Index does not exist '{}'", index));
             return m_values[index];
         }
 
-        auto at(std::string_view key) const-> const T&
+        auto at(size_t index) const -> const T&
         {
-            const auto i = index(key);
-            NC_ASSERT(i != NullIndex, fmt::format("Key does not exist '{}'", key));
-            return m_values[i];
+            NC_ASSERT(index != NullIndex, fmt::format("Index does not exist '{}'", index));
+            return m_values[index];
+        }
+
+        auto key_at(size_t hash) const -> std::string_view
+        {
+            return m_table.at(m_table.index(hash));
         }
 
         auto begin() noexcept { return m_values.begin(); }

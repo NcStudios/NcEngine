@@ -55,9 +55,13 @@ namespace nc
 
     auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
     {
-        const auto& collider = m_concaveColliders.at(path);
+        const auto hash = m_concaveColliders.hash(path);
+        const auto index = m_concaveColliders.index(hash);
+        NC_ASSERT(index != m_concaveColliders.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+        const auto& collider = m_concaveColliders.at(index);
         return ConcaveColliderView
         {
+            .id = hash,
             .triangles = std::span<const Triangle>{collider.triangles},
             .maxExtent = collider.maxExtent
         };

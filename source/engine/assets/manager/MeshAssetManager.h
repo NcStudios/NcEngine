@@ -25,6 +25,7 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> MeshView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetPath(size_t id) const -> std::string_view override { return m_accessors.key_at(id); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::Mesh; }
         auto OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData&>&;

@@ -92,9 +92,14 @@ void SkeletalAnimationAssetManager::UnloadAll(asset_flags_type)
 
 auto SkeletalAnimationAssetManager::Acquire(const std::string& path, asset_flags_type) const -> SkeletalAnimationView
 {
-    const auto index = m_table.index(path);
-    NC_ASSERT(index != StringTable::NullIndex, fmt::format("Asset is not loaded: {}", path));
-    return SkeletalAnimationView{.index = static_cast<uint32_t>(index)};
+    const auto hash = m_table.hash(path);
+    const auto index = m_table.index(hash);
+    NC_ASSERT(index != m_table.NullIndex, fmt::format("Asset is not loaded: {}", path));
+    return SkeletalAnimationView
+    {
+        .id = hash,
+        .index = static_cast<uint32_t>(index)
+    };
 }
 
 bool SkeletalAnimationAssetManager::IsLoaded(const std::string& path, asset_flags_type) const

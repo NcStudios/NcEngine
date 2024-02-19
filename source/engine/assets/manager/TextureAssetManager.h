@@ -25,12 +25,13 @@ class TextureAssetManager : public IAssetService<TextureView, std::string>
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> TextureView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetPath(size_t id) const -> std::string_view override { return m_table.at(m_table.index(id)); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::Texture; }
         auto OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&;
 
     private:
-        StringTable m_data;
+        StringTable m_table;
         std::string m_assetDirectory;
         uint32_t m_maxTextureCount;
         Signal<const asset::TextureUpdateEventData&> m_onUpdate;

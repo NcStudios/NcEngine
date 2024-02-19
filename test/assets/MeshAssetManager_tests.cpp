@@ -150,3 +150,23 @@ TEST_F(MeshAssetManager_tests, Unload_FromEnd_UpdatesAccesors)
     EXPECT_EQ(view2.firstIndex, view1.indexCount);
     EXPECT_EQ(view2.firstVertex, view1.vertexCount);
 }
+
+TEST_F(MeshAssetManager_tests, GetPath_Loaded_ReturnsPath)
+{
+    std::array<std::string, 2u> paths{meshPath1, meshPath2};
+    assetManager->Load(paths, false);
+    const auto& expected = paths.at(0);
+    const auto view = assetManager->Acquire(expected);
+    const auto actual = assetManager->GetPath(view.id);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(MeshAssetManager_tests, GetPath_NotLoaded_Throws)
+{
+    std::array<std::string, 2u> paths{meshPath1, meshPath2};
+    assetManager->Load(paths, false);
+    const auto& expected = paths.at(0);
+    const auto view = assetManager->Acquire(expected);
+    assetManager->UnloadAll();
+    EXPECT_THROW(assetManager->GetPath(view.id), nc::NcError);
+}

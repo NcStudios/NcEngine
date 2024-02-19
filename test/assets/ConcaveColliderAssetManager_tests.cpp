@@ -106,3 +106,23 @@ TEST_F(ConcaveColliderAssetManager_tests, UnloadAll_Empty_Completes)
 {
     assetManager->UnloadAll(AssetFlags::None);
 }
+
+TEST_F(ConcaveColliderAssetManager_tests, GetPath_Loaded_ReturnsPath)
+{
+    std::array<std::string, 2u> paths{ConcavePath1, ConcavePath2};
+    assetManager->Load(paths, false);
+    const auto& expected = paths.at(0);
+    const auto view = assetManager->Acquire(expected);
+    const auto actual = assetManager->GetPath(view.id);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(ConcaveColliderAssetManager_tests, GetPath_NotLoaded_Throws)
+{
+    std::array<std::string, 2u> paths{ConcavePath1, ConcavePath2};
+    assetManager->Load(paths, false);
+    const auto& expected = paths.at(0);
+    const auto view = assetManager->Acquire(expected);
+    assetManager->UnloadAll();
+    EXPECT_THROW(assetManager->GetPath(view.id), nc::NcError);
+}

@@ -55,9 +55,13 @@ namespace nc
 
     auto HullColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConvexHullView
     {
-        const auto& collider = m_hullColliders.at(path);
+        const auto hash = m_hullColliders.hash(path);
+        const auto index = m_hullColliders.index(hash);
+        NC_ASSERT(index != m_hullColliders.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+        const auto& collider = m_hullColliders.at(index);
         return ConvexHullView
         {
+            .id = hash,
             .vertices = std::span<const Vector3>{collider.vertices},
             .extents = collider.extents,
             .maxExtent = collider.maxExtent
