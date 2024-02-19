@@ -180,9 +180,9 @@ auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& 
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, void*)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetAmbient());
-    serialize::Serialize(stream, out.GetDiffuseColor());
-    serialize::Serialize(stream, out.GetDiffuseIntensity());
+    serialize::Serialize(stream, out.ambientColor);
+    serialize::Serialize(stream, out.diffuseColor);
+    serialize::Serialize(stream, out.diffuseIntensity);
 }
 
 auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, void*) -> graphics::PointLight

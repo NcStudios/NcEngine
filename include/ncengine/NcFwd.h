@@ -47,7 +47,7 @@ struct NcGraphics;
 class Camera;
 class MeshRenderer;
 class ParticleEmitter;
-class PointLight;
+struct PointLight;
 class SceneNavigationCamera;
 class SkeletalAnimator;
 class ToonRenderer;

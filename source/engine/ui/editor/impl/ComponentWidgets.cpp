@@ -211,15 +211,6 @@ constexpr auto rotationOverTimeFactorProp = nc::ui::Property{ getRotationOverTim
 constexpr auto scaleOverTimeFactoryProp = nc::ui::Property{ getScaleOverTime, setScaleOverTime, "scaleOverTime" };
 } // namespace particle_emitter_ext
 
-namespace point_light_ext
-{
-using T = nc::graphics::PointLight;
-
-constexpr auto ambientColorProp     = nc::ui::Property{ &T::GetAmbient,          &T::SetAmbient,          "ambientColor"     };
-constexpr auto diffuseColorProp     = nc::ui::Property{ &T::GetDiffuseColor,     &T::SetDiffuseColor,     "diffuseColor"     };
-constexpr auto diffuseIntensityProp = nc::ui::Property{ &T::GetDiffuseIntensity, &T::SetDiffuseIntensity, "diffuseIntensity" };
-} // namespace point_light_ext
-
 namespace tag_ext
 {
 using T = nc::Tag;
@@ -380,9 +371,9 @@ void PointLightUIWidget(graphics::PointLight& light)
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
-    ui::PropertyWidget(point_light_ext::ambientColorProp, light, &ui::InputColor3);
-    ui::PropertyWidget(point_light_ext::diffuseColorProp, light, &ui::InputColor3);
-    ui::PropertyWidget(point_light_ext::diffuseIntensityProp, light, &ui::DragFloat, step, min, max);
+    ui::InputColor3(light.ambientColor, "ambientColor");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::DragFloat(light.diffuseIntensity, "diffuseIntensity", step, min, max);
 }
 
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)
