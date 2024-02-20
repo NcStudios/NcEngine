@@ -8,8 +8,7 @@ ShaderResources::ShaderResources(vk::Device device,
                                  GpuAllocator* ,
                                  const config::MemorySettings& memorySettings,
                                  ShaderResourceBus& )
-    : shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights},
-      cubeMapShaderResource{4, device, shaderDescriptorSets, memorySettings.maxTextures} // @todo make separate entry for cubeMaps
+    : shadowMapShaderResource{3, device, shaderDescriptorSets, memorySettings.maxPointLights}
 {
 }
 } // namespace nc::graphics

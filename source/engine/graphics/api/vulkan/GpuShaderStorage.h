@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asset/AssetData.h"
+#include "graphics/api/vulkan/buffers/CubeMapArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/StorageBuffer.h"
 #include "graphics/api/vulkan/buffers/TextureArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/UniformBuffer.h"
@@ -13,6 +14,7 @@
 
 namespace nc::graphics
 {
+struct CabUpdateEventData;
 class GpuAllocator;
 class ShaderDescriptorSets;
 struct SsboUpdateEventData;
@@ -21,6 +23,12 @@ struct TabUpdateEventData;
 
 namespace vulkan
 {
+struct CubeMapArrayBufferStorage
+{
+    std::vector<uint32_t> uids;
+    std::vector<std::unique_ptr<CubeMapArrayBuffer>> buffers;
+};
+
 struct UniformBufferStorage
 {
     std::vector<uint32_t> uids;
@@ -44,10 +52,12 @@ struct GpuShaderStorage
     GpuShaderStorage(vk::Device device,
                      GpuAllocator* allocator, 
                      ShaderDescriptorSets* descriptorSets,
+                     Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                      Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                      Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                      Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
                      
+    void UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData);
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
@@ -55,6 +65,10 @@ struct GpuShaderStorage
     vk::Device m_device;
     GpuAllocator* m_allocator;
     ShaderDescriptorSets* m_descriptorSets;
+
+    std::array<CubeMapArrayBufferStorage, MaxFramesInFlight> m_perFrameCabStorage;
+    CubeMapArrayBufferStorage m_staticCabStorage;
+    nc::Connection<const CabUpdateEventData&> m_onCubeMapArrayBufferUpdate;
 
     std::array<StorageBufferStorage, MaxFramesInFlight> m_perFrameSsboStorage;
     StorageBufferStorage m_staticSsboStorage;

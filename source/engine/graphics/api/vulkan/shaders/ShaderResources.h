@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CubeMapShaderResource.h"
 #include "ShaderDescriptorSets.h"
 #include "ShadowMapShaderResource.h"
 #include "config/Config.h"
@@ -19,6 +18,5 @@ struct ShaderResources
                     ShaderResourceBus& resourceBus);
 
     ShadowMapShaderResource shadowMapShaderResource;
-    CubeMapShaderResource cubeMapShaderResource;
 };
 } // namespace nc::graphics

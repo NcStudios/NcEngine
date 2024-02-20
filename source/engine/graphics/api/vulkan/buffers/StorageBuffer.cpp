@@ -15,7 +15,9 @@ StorageBuffer::StorageBuffer(GpuAllocator* allocator, uint32_t size)
 
 StorageBuffer::StorageBuffer(StorageBuffer&& other) noexcept
     : m_allocator{std::exchange(other.m_allocator, nullptr)},
-      m_buffer{std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{})}
+      m_buffer{std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{})},
+      m_alignedSize{other.m_alignedSize},
+      m_info{vk::DescriptorBufferInfo{m_buffer, 0, m_alignedSize}}
 {
 }
 
@@ -23,6 +25,9 @@ StorageBuffer& StorageBuffer::operator=(StorageBuffer&& other) noexcept
 {
     m_allocator = std::exchange(other.m_allocator, nullptr);
     m_buffer = std::exchange(other.m_buffer, GpuAllocation<vk::Buffer>{});
+    m_alignedSize = other.m_alignedSize;
+    m_info = vk::DescriptorBufferInfo{m_buffer, 0, m_alignedSize};
+    std::exchange(other.m_info, vk::DescriptorBufferInfo{});
     return *this;
 }
 

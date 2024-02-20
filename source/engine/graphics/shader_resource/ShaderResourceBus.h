@@ -5,6 +5,8 @@
 
 namespace nc::graphics
 {
+struct CabUpdateEventData;
+class CubeMapArrayBufferHandle;
 struct SsboUpdateEventData;
 class StorageBufferHandle;
 struct UboUpdateEventData;
@@ -17,6 +19,9 @@ class TextureArrayBufferHandle;
  *         systems to be picked up by API-specific backend handlers. */
 struct ShaderResourceBus
 {
+    inline static uint32_t CubeMapArrayBufferUid = 0u;
+    auto CreateCubeMapArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> CubeMapArrayBufferHandle;
+
     inline static uint32_t StorageBufferUid = 0u;
     auto CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> StorageBufferHandle;
 
@@ -26,6 +31,7 @@ struct ShaderResourceBus
     inline static uint32_t UniformBufferUid = 0u;
     auto CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> UniformBufferHandle;
 
+    Signal<const CabUpdateEventData&> cubeMapArrayBufferChannel;
     Signal<const SsboUpdateEventData&> storageBufferChannel;
     Signal<const TabUpdateEventData&> textureArrayBufferChannel;
     Signal<const UboUpdateEventData&> uniformBufferChannel;

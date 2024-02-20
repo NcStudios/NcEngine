@@ -1,4 +1,5 @@
 #include "ShaderResourceBus.h"
+#include "CubeMapArrayBufferHandle.h"
 #include "StorageBufferHandle.h"
 #include "TextureArrayBufferHandle.h"
 #include "UniformBufferHandle.h"
@@ -8,6 +9,49 @@
 
 namespace nc::graphics
 {
+auto ShaderResourceBus::CreateCubeMapArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> CubeMapArrayBufferHandle
+{
+    auto uid = ShaderResourceBus::CubeMapArrayBufferUid++;
+    if (isStatic)
+    {
+        cubeMapArrayBufferChannel.Emit(
+            CabUpdateEventData
+            {
+                std::span<const asset::CubeMapWithId>{},
+                std::numeric_limits<uint32_t>::max(),
+                uid,
+                slot,
+                set,
+                capacity,
+                stage,
+                CabUpdateAction::Initialize,
+                true
+            }
+        );
+    }
+    else
+    {
+        for (auto i : std::views::iota(0u, MaxFramesInFlight))
+        {
+            cubeMapArrayBufferChannel.Emit(
+                CabUpdateEventData
+                {
+                    std::span<const asset::CubeMapWithId>{},
+                    i,
+                    uid,
+                    slot,
+                    set,
+                    capacity,
+                    stage,
+                    CabUpdateAction::Initialize,
+                    false
+                }
+            );
+        }
+    }
+    return CubeMapArrayBufferHandle(uid, stage, &cubeMapArrayBufferChannel, slot, set);
+}
+
 auto ShaderResourceBus::CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> StorageBufferHandle
 {
     auto uid = ShaderResourceBus::StorageBufferUid++;
@@ -93,6 +137,7 @@ auto ShaderResourceBus::CreateTextureArrayBuffer(uint32_t capacity, shader_stage
     }
     return TextureArrayBufferHandle(uid, stage, &textureArrayBufferChannel, slot, set);
 }
+
 auto ShaderResourceBus::CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> UniformBufferHandle
 {
     auto uid = ShaderResourceBus::UniformBufferUid++;

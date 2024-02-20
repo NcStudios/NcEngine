@@ -2,6 +2,7 @@
 
 #include "GpuShaderStorage.h"
 #include "GpuAllocator.h"
+#include "graphics/shader_resource/CubeMapArrayBufferHandle.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
 #include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "graphics/shader_resource/UniformBufferHandle.h"
@@ -13,14 +14,18 @@
 namespace nc::graphics::vulkan
 {
 GpuShaderStorage::GpuShaderStorage(vk::Device device,
-                                   GpuAllocator* allocator, 
-                                   ShaderDescriptorSets* descriptorSets,
-                                   Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
-                                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
-                                   Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate)
+                  GpuAllocator* allocator, 
+                  ShaderDescriptorSets* descriptorSets,
+                  Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
+                  Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
+                  Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
+                  Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_descriptorSets{descriptorSets},
+      m_perFrameCabStorage{},
+      m_staticCabStorage{},
+      m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateCubeMapArrayBuffer)},
       m_perFrameSsboStorage{},
       m_staticSsboStorage{},
       m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &GpuShaderStorage::UpdateStorageBuffer)},
@@ -31,6 +36,99 @@ GpuShaderStorage::GpuShaderStorage(vk::Device device,
       m_staticTabStorage{},
       m_onTextureArrayBufferUpdate{onTextureArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateTextureArrayBuffer)}
 {}
+
+void GpuShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData)
+{
+    auto& storage = eventData.isStatic? m_staticCabStorage : m_perFrameCabStorage.at(eventData.currentFrameIndex);
+
+    switch (eventData.action)
+    {
+        case CabUpdateAction::Initialize:
+        {
+            if (storage.uids.size() <= eventData.uid)
+            {
+                storage.uids.emplace_back(eventData.uid);
+                storage.buffers.emplace_back(std::make_unique<CubeMapArrayBuffer>(m_device));
+            }
+            auto flags = GetStageFlags(eventData.stage);
+
+            m_descriptorSets->RegisterDescriptor
+            (
+                eventData.slot,
+                eventData.set,
+                eventData.capacity,
+                vk::DescriptorType::eCombinedImageSampler,
+                flags,
+                vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
+            );
+            break;
+        }
+        case CabUpdateAction::Update:
+        {
+            auto& sampler = storage.buffers.at(eventData.uid)->sampler.get();
+            auto& cubeMaps = storage.buffers.at(eventData.uid)->cubeMaps;
+            auto& imageInfos = storage.buffers.at(eventData.uid)->imageInfos;
+            auto& uids = storage.buffers.at(eventData.uid)->uids;
+
+            auto incomingSize = cubeMaps.size() + eventData.data.size();
+            cubeMaps.reserve(incomingSize);
+            imageInfos.reserve(incomingSize);
+            uids.reserve(incomingSize);
+
+            for (auto& cubeMapWithId : eventData.data)
+            {
+                cubeMaps.emplace_back(m_allocator, cubeMapWithId);
+                imageInfos.emplace_back(sampler, cubeMaps.back().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
+                uids.emplace_back(Image::ImageUid++);
+            }
+
+            m_descriptorSets->UpdateImage
+            (
+                eventData.set,
+                imageInfos,
+                static_cast<uint32_t>(imageInfos.size()),
+                vk::DescriptorType::eCombinedImageSampler,
+                eventData.slot
+            );
+            break;
+        }
+        case CabUpdateAction::Clear:
+        {
+            if (eventData.isStatic)
+            {
+                auto pos = std::ranges::find(m_staticCabStorage.uids, eventData.uid);
+                if (pos == m_staticCabStorage.uids.end())
+                {
+                    throw nc::NcError("Attempted to clear a CubeMap Array Buffer that doesn't exist.");
+                }
+
+                auto posIndex = static_cast<uint32_t>(std::distance(m_staticCabStorage.uids.begin(), pos));
+                m_staticCabStorage.uids.at(posIndex) = m_staticCabStorage.uids.back();
+                m_staticCabStorage.uids.pop_back();
+                m_staticCabStorage.buffers.at(posIndex) = std::move(m_staticCabStorage.buffers.back());
+                m_staticCabStorage.buffers.pop_back();
+                break;
+            }
+            for (auto i : std::views::iota(0u, MaxFramesInFlight))
+            {
+                auto& perFrameCabStorage = m_perFrameCabStorage.at(i);
+
+                auto pos = std::ranges::find(perFrameCabStorage.uids, eventData.uid);
+                if (pos == perFrameCabStorage.uids.end())
+                {
+                    throw nc::NcError("Attempted to clear a CubeMap Array Buffer that doesn't exist.");
+                }
+
+                auto posIndex = static_cast<uint32_t>(std::distance(perFrameCabStorage.uids.begin(), pos));
+                perFrameCabStorage.uids.at(posIndex) = perFrameCabStorage.uids.back();
+                perFrameCabStorage.uids.pop_back();
+                perFrameCabStorage.buffers.at(posIndex) = std::move( perFrameCabStorage.buffers.back());
+                perFrameCabStorage.buffers.pop_back();
+            }
+            break;
+        }
+    }
+}
 
 void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
 {

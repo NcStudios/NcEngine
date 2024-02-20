@@ -17,7 +17,6 @@ target_sources(${NC_ENGINE_LIB}
 
 add_subdirectory(buffers)
 add_subdirectory(core)
-add_subdirectory(cubemaps)
 add_subdirectory(meshes)
 add_subdirectory(renderpasses)
 add_subdirectory(shaders)

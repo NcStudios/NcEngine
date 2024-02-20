@@ -2,12 +2,10 @@
 
 namespace nc::graphics::vulkan
 {
-GpuAssetsStorage::GpuAssetsStorage(vk::Device device,
+GpuAssetsStorage::GpuAssetsStorage(vk::Device,
                                    nc::graphics::GpuAllocator* allocator,
-                                   Signal<const asset::CubeMapUpdateEventData&>& onCubeMapUpdate,
                                    Signal<const asset::MeshUpdateEventData&>& onMeshUpdate)
-    : cubeMapStorage{device, allocator, onCubeMapUpdate},
-      meshStorage{allocator, onMeshUpdate}
+    : meshStorage{allocator, onMeshUpdate}
 {
 }
 } // namespace nc::graphics::vulkan

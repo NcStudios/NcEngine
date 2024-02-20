@@ -35,6 +35,37 @@ namespace graphics
 {
 struct ShaderResourceBus;
 
+struct AssetResources
+{
+};
+
+struct SystemResourcesConfig
+{
+    SystemResourcesConfig(const config::GraphicsSettings& graphicsSettings,
+                          const config::MemorySettings& memorySettings);
+    uint32_t maxPointLights;
+    uint32_t maxRenderers;
+    uint32_t maxSkeletalAnimations;
+    uint32_t maxTextures;
+    bool useShadows;
+};
+
+struct SystemResources
+{
+    SystemResources(SystemResourcesConfig config, 
+                    Registry* registry,
+                    ShaderResourceBus* resourceBus,
+                    ModuleProvider modules);
+    CameraSystem cameras;
+    EnvironmentSystem environment;
+    ObjectSystem objects;
+    PointLightSystem pointLights;
+    SkeletalAnimationSystem skeletalAnimations;
+    TextureSystem textures;
+    WidgetSystem widgets;
+    UISystem ui;
+};
+
 // TODO #340: Window should be moved inside graphics instead of being passed here
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
@@ -70,15 +101,9 @@ class NcGraphicsImpl : public NcGraphics
         Registry* m_registry;
         std::unique_ptr<IGraphics> m_graphics;
         ShaderResourceBus m_shaderResourceBus;
-        CameraSystem m_cameraSystem;
-        EnvironmentSystem m_environmentSystem;
-        ObjectSystem m_objectSystem;
-        PointLightSystem m_pointLightSystem;
+        AssetResources m_assetResources;
+        SystemResources m_systemResources;
         ParticleEmitterSystem m_particleEmitterSystem;
-        SkeletalAnimationSystem m_skeletalAnimationSystem;
-        TextureSystem m_textureSystem;
-        WidgetSystem m_widgetSystem;
-        UISystem m_uiSystem;
     };
 } // namespace graphics
 } // namespace nc
