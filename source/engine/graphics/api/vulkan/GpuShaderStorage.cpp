@@ -224,100 +224,6 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
     }
 }
 
-void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
-{
-    auto& storage = eventData.isStatic? m_staticUboStorage : m_perFrameUboStorage.at(eventData.currentFrameIndex);
-
-    switch (eventData.action)
-    {
-        case UboUpdateAction::Initialize:
-        {
-            auto pos = std::ranges::find(storage.uids, eventData.uid);
-            if (pos == storage.uids.end())
-            {
-                storage.uids.push_back(std::move(eventData.uid));
-                storage.buffers.emplace_back(std::make_unique<vulkan::UniformBuffer>(m_allocator, eventData.data, static_cast<uint32_t>(eventData.size)));
-            }
-            else
-            {
-                throw nc::NcError("Attempted to initialize a Uniform Buffer when one by the same UID was already present.");
-            }
-
-            auto flags = GetStageFlags(eventData.stage);
-            m_descriptorSets->RegisterDescriptor
-            (
-                eventData.slot,
-                eventData.set,
-                1,
-                vk::DescriptorType::eUniformBuffer,
-                flags,
-                vk::DescriptorBindingFlagBitsEXT(),
-                eventData.currentFrameIndex
-            );
-
-            m_descriptorSets->UpdateBuffer
-            (
-                eventData.set,
-                storage.buffers.back()->GetInfo(),
-                1,
-                vk::DescriptorType::eUniformBuffer,
-                eventData.slot,
-                eventData.currentFrameIndex
-            );
-            break;
-        }
-        case UboUpdateAction::Update:
-        {
-            auto pos = std::ranges::find(storage.uids, eventData.uid);
-            if (pos == storage.uids.end())
-            {
-                throw nc::NcError("Attempted to update a Uniform Buffer that doesn't exist.");
-            }
-
-            auto posIndex = static_cast<uint32_t>(std::distance(storage.uids.begin(), pos));
-            auto& buffer = storage.buffers.at(posIndex);
-            buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
-            break;
-        }
-        case UboUpdateAction::Clear:
-        {
-            if (eventData.isStatic)
-            {
-                auto pos = std::ranges::find(m_staticUboStorage.uids, eventData.uid);
-                if (pos == m_staticUboStorage.uids.end())
-                {
-                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
-                }
-
-                auto posIndex = static_cast<uint32_t>(std::distance(m_staticUboStorage.uids.begin(), pos));
-                m_staticUboStorage.uids.at(posIndex) = m_staticUboStorage.uids.back();
-                m_staticUboStorage.uids.pop_back();
-                m_staticUboStorage.buffers.at(posIndex) = std::move(m_staticUboStorage.buffers.back());
-                m_staticUboStorage.buffers.pop_back();
-                break;
-            }
-
-            for (auto i : std::views::iota(0u, MaxFramesInFlight))
-            {
-                auto& perFrameUboStorage = m_perFrameUboStorage.at(i);
-
-                auto pos = std::ranges::find(perFrameUboStorage.uids, eventData.uid);
-                if (pos == perFrameUboStorage.uids.end())
-                {
-                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
-                }
-
-                auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uids.begin(), pos));
-                perFrameUboStorage.uids.at(posIndex) = perFrameUboStorage.uids.back();
-                perFrameUboStorage.uids.pop_back();
-                perFrameUboStorage.buffers.at(posIndex) = std::move(perFrameUboStorage.buffers.back());
-                perFrameUboStorage.buffers.pop_back();
-            }
-            break;
-        }
-    }
-}
-
 void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData)
 {
     auto& storage = eventData.isStatic? m_staticTabStorage : m_perFrameTabStorage.at(eventData.currentFrameIndex);
@@ -406,6 +312,100 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
                 perFrameTabStorage.uids.pop_back();
                 perFrameTabStorage.buffers.at(posIndex) = std::move( perFrameTabStorage.buffers.back());
                 perFrameTabStorage.buffers.pop_back();
+            }
+            break;
+        }
+    }
+}
+
+void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
+{
+    auto& storage = eventData.isStatic? m_staticUboStorage : m_perFrameUboStorage.at(eventData.currentFrameIndex);
+
+    switch (eventData.action)
+    {
+        case UboUpdateAction::Initialize:
+        {
+            auto pos = std::ranges::find(storage.uids, eventData.uid);
+            if (pos == storage.uids.end())
+            {
+                storage.uids.push_back(std::move(eventData.uid));
+                storage.buffers.emplace_back(std::make_unique<vulkan::UniformBuffer>(m_allocator, eventData.data, static_cast<uint32_t>(eventData.size)));
+            }
+            else
+            {
+                throw nc::NcError("Attempted to initialize a Uniform Buffer when one by the same UID was already present.");
+            }
+
+            auto flags = GetStageFlags(eventData.stage);
+            m_descriptorSets->RegisterDescriptor
+            (
+                eventData.slot,
+                eventData.set,
+                1,
+                vk::DescriptorType::eUniformBuffer,
+                flags,
+                vk::DescriptorBindingFlagBitsEXT(),
+                eventData.currentFrameIndex
+            );
+
+            m_descriptorSets->UpdateBuffer
+            (
+                eventData.set,
+                storage.buffers.back()->GetInfo(),
+                1,
+                vk::DescriptorType::eUniformBuffer,
+                eventData.slot,
+                eventData.currentFrameIndex
+            );
+            break;
+        }
+        case UboUpdateAction::Update:
+        {
+            auto pos = std::ranges::find(storage.uids, eventData.uid);
+            if (pos == storage.uids.end())
+            {
+                throw nc::NcError("Attempted to update a Uniform Buffer that doesn't exist.");
+            }
+
+            auto posIndex = static_cast<uint32_t>(std::distance(storage.uids.begin(), pos));
+            auto& buffer = storage.buffers.at(posIndex);
+            buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
+            break;
+        }
+        case UboUpdateAction::Clear:
+        {
+            if (eventData.isStatic)
+            {
+                auto pos = std::ranges::find(m_staticUboStorage.uids, eventData.uid);
+                if (pos == m_staticUboStorage.uids.end())
+                {
+                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
+                }
+
+                auto posIndex = static_cast<uint32_t>(std::distance(m_staticUboStorage.uids.begin(), pos));
+                m_staticUboStorage.uids.at(posIndex) = m_staticUboStorage.uids.back();
+                m_staticUboStorage.uids.pop_back();
+                m_staticUboStorage.buffers.at(posIndex) = std::move(m_staticUboStorage.buffers.back());
+                m_staticUboStorage.buffers.pop_back();
+                break;
+            }
+
+            for (auto i : std::views::iota(0u, MaxFramesInFlight))
+            {
+                auto& perFrameUboStorage = m_perFrameUboStorage.at(i);
+
+                auto pos = std::ranges::find(perFrameUboStorage.uids, eventData.uid);
+                if (pos == perFrameUboStorage.uids.end())
+                {
+                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
+                }
+
+                auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uids.begin(), pos));
+                perFrameUboStorage.uids.at(posIndex) = perFrameUboStorage.uids.back();
+                perFrameUboStorage.uids.pop_back();
+                perFrameUboStorage.buffers.at(posIndex) = std::move(perFrameUboStorage.buffers.back());
+                perFrameUboStorage.buffers.pop_back();
             }
             break;
         }
