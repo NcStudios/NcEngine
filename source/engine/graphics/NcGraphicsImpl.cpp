@@ -48,9 +48,7 @@ namespace nc::graphics
           environment{resourceBus},
           objects{resourceBus, config.maxRenderers},
           pointLights{resourceBus, config.maxPointLights, config.useShadows},
-          skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations,
-                                  modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
-                                  modules.Get<asset::NcAsset>()->OnBoneUpdate()},
+          skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
           textures{resourceBus, modules.Get<asset::NcAsset>()->OnTextureUpdate(), config.maxTextures},
           widgets{},
           ui{registry->GetEcs(), modules, events}
@@ -168,15 +166,15 @@ namespace nc::graphics
 
         auto cameraState = m_systemResources.cameras.Execute(m_registry);
         m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
-        auto widgetState = m_systemResources.widgets.Execute(View<physics::Collider>{m_registry});
+        auto widgetState = m_systemResources.widgets.Execute(m_registry->GetEcs());
         auto environmentState = m_systemResources.environment.Execute(cameraState, currentFrameIndex);
         auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
         auto objectState = m_systemResources.objects.Execute(currentFrameIndex,
-                                                  MultiView<MeshRenderer, Transform>{m_registry},
-                                                  MultiView<ToonRenderer, Transform>{m_registry},
-                                                  cameraState,
-                                                  environmentState,
-                                                  skeletalAnimationState);
+                                                             MultiView<MeshRenderer, Transform>{m_registry},
+                                                             MultiView<ToonRenderer, Transform>{m_registry},
+                                                             cameraState,
+                                                             environmentState,
+                                                             skeletalAnimationState);
         auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
         auto state = PerFrameRenderState
         {
