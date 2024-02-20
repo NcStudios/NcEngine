@@ -1,10 +1,10 @@
 #pragma once
 
 #include "assets/AssetService.h"
-#include "ncasset/AssetsFwd.h"
-#include "utility/Signal.h"
+#include "utility/StringMap.h"
+#include "ncengine/utility/Signal.h"
 
-#include <vector>
+#include "ncasset/AssetsFwd.h"
 
 namespace nc
 {
@@ -24,15 +24,15 @@ class SkeletalAnimationAssetManager : public IAssetService<SkeletalAnimationView
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> SkeletalAnimationView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetPath(size_t id) const -> std::string_view override { return m_table.at(m_table.index(id)); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::SkeletalAnimation; }
         auto OnUpdate() -> Signal<const asset::SkeletalAnimationUpdateEventData&>&;
 
     private:
+        StringTable m_table;
         std::string m_assetDirectory;
         uint32_t m_maxSkeletalAnimationCount;
-        std::vector<std::string> m_assetIds;
-        std::vector<asset::SkeletalAnimation> m_skeletalAnimations;
         Signal<const asset::SkeletalAnimationUpdateEventData&> m_onUpdate;
 };
 } // namespace nc

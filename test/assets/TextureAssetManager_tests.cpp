@@ -141,3 +141,23 @@ TEST_F(TextureAssetManager_tests, Unload_FromEnd_AccessorsNotUpdated)
     EXPECT_EQ(view1.index, 0u);
     EXPECT_EQ(view2.index, 1u);
 }
+
+TEST_F(TextureAssetManager_tests, GetPath_Loaded_ReturnsPath)
+{
+    std::array<std::string, 2u> paths{Texture_base, Texture_normal};
+    assetManager->Load(paths, false);
+    const auto& expected = paths.at(0);
+    const auto view = assetManager->Acquire(expected);
+    const auto actual = assetManager->GetPath(view.id);
+    EXPECT_EQ(expected, actual);
+}
+
+TEST_F(TextureAssetManager_tests, GetPath_NotLoaded_Throws)
+{
+    std::array<std::string, 2u> paths{Texture_base, Texture_normal};
+    assetManager->Load(paths, false);
+    const auto& expected = paths.at(0);
+    const auto view = assetManager->Acquire(expected);
+    assetManager->UnloadAll();
+    EXPECT_THROW(assetManager->GetPath(view.id), nc::NcError);
+}

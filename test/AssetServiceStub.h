@@ -16,12 +16,14 @@
 struct className : public nc::IAssetService<viewType, inputType>                                                            \
 {                                                                                                                           \
     viewType view;                                                                                                          \
+    const char* path = "test_path";                                                                                         \
                                                                                                                             \
     bool Load(const inputType&, bool, nc::asset_flags_type = nc::AssetFlags::None) override { return true; }                \
     bool Load(std::span<const inputType>, bool, nc::asset_flags_type = nc::AssetFlags::None) override { return true; }      \
     bool Unload(const inputType&, nc::asset_flags_type = nc::AssetFlags::None) override { return true; }                    \
     void UnloadAll(nc::asset_flags_type = nc::AssetFlags::None) override {}                                                 \
     bool IsLoaded(const inputType&, nc::asset_flags_type = nc::AssetFlags::None) const override { return true; }            \
+    auto GetPath(size_t) const -> std::string_view override { return path; }                                                \
     auto GetAllLoaded() const -> std::vector<std::string_view> override { return {}; }                                      \
     auto GetAssetType() const noexcept -> nc::asset::AssetType override { return assetType; }                               \
     auto Acquire(const inputType&, nc::asset_flags_type = nc::AssetFlags::None) const -> viewType override { return view; } \

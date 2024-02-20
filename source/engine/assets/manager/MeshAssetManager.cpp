@@ -19,19 +19,13 @@ MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
 {
 }
 
-MeshAssetManager::~MeshAssetManager() noexcept
-{
-    m_vertexData = {};
-    m_indexData = {};
-    m_accessors.clear();
-}
-
 auto MeshAssetManager::ImportMesh(const std::string& path, bool isExternal) -> asset::Mesh
 {
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     const auto mesh = asset::ImportMesh(fullPath);
 
     auto meshView = MeshView{
+        .id = m_accessors.hash(path),
         .firstVertex = static_cast<uint32_t>(m_vertexData.size()),
         .vertexCount = static_cast<uint32_t>(mesh.vertices.size()),
         .firstIndex = static_cast<uint32_t>(m_indexData.size()),
@@ -55,9 +49,9 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flag
     auto mesh = ImportMesh(path, isExternal);
     if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
     {
-        m_bonesData.push_back(std::move(mesh.bonesData.value()));
+        auto& bones = mesh.bonesData.value();
         m_onBoneUpdate.Emit(asset::BoneUpdateEventData{
-            std::span<const asset::BonesData>{&m_bonesData.back(), 1},
+            std::span<const asset::BonesData>{&bones, 1},
             std::vector<std::string>{path},
             asset::UpdateAction::Load
         });
@@ -70,6 +64,7 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flag
 bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
     auto idsToLoad = std::vector<std::string>{};
+    auto bones = std::vector<asset::BonesData>{};
     idsToLoad.reserve(paths.size());
     bool anyLoaded = false;
     bool anyBonesLoaded = false;
@@ -84,17 +79,18 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal,
         auto mesh = ImportMesh(path, isExternal);
         if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
         {
-            m_bonesData.push_back(std::move(mesh.bonesData.value()));
+            bones.push_back(std::move(mesh.bonesData.value()));
             idsToLoad.push_back(path);
             anyBonesLoaded = true;
         }
+
         anyLoaded = true;
     }
 
     if (anyBonesLoaded)
     {
         m_onBoneUpdate.Emit(asset::BoneUpdateEventData{
-            std::span<const asset::BonesData>{m_bonesData.end() - idsToLoad.size(), m_bonesData.end()},
+            std::span<const asset::BonesData>{bones},
             std::move(idsToLoad),
             asset::UpdateAction::Load
         });
@@ -106,11 +102,11 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal,
 
 bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    auto pos = m_accessors.find(path);
-    if(pos == m_accessors.end())
+    const auto index = m_accessors.index(path);
+    if (index == StringTable::NullIndex)
         return false;
 
-    const auto [firstVertex, vertexCount, firstIndex, indexCount, unused] = pos->second;
+    const auto [id, firstVertex, vertexCount, firstIndex, indexCount, unused] = m_accessors.at(index);
     m_accessors.erase(path);
 
     auto indBeg = m_indexData.begin() + firstIndex;
@@ -123,7 +119,7 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
     assert(vertEnd <= m_vertexData.end());
     m_vertexData.erase(vertBeg, vertEnd);
 
-    for(auto& [uid, accessor] : m_accessors)
+    for(auto& accessor : m_accessors)
     {
         if(accessor.firstVertex > firstVertex)
             accessor.firstVertex -= vertexCount;
@@ -152,16 +148,11 @@ void MeshAssetManager::UnloadAll(asset_flags_type)
     m_accessors.clear();
     m_vertexData.clear();
     m_indexData.clear();
-    m_bonesData.clear();
 }
 
 auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshView
 {
-    const auto it = m_accessors.find(path);
-    if(it == m_accessors.cend())
-        throw NcError("Asset not loaded: " + path);
-    
-    return it->second;
+    return m_accessors.at(path);
 }
 
 bool MeshAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
@@ -171,7 +162,7 @@ bool MeshAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 
 auto MeshAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_accessors);
+    return GetPaths(m_accessors.keys());
 }
 
 auto MeshAssetManager::OnMeshUpdate() -> Signal<const asset::MeshUpdateEventData&>&

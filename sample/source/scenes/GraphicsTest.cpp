@@ -34,25 +34,26 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
 
     std::vector<std::string> textures
     {
-        "DefaultBaseColor.nca",
-        "DefaultNormal.nca",
-        "DefaultMetallic.nca",
         "ogre\\BaseColor.nca",
-        "ogre\\Normal.nca",
         "ogre\\Roughness.nca",
         "ogre\\Metallic.nca",
         "cave\\BaseColor.nca",
-        "cave\\Normal.nca",
         "cave\\Roughness.nca",
         "cave\\Metallic.nca",
         "cave_ceiling\\BaseColor.nca",
-        "cave_ceiling\\Normal.nca",
         "cave_ceiling\\Roughness.nca",
         "cave_ceiling\\Metallic.nca",
         "skeleton\\BaseColor.nca",
-        "skeleton\\Normal.nca",
         "skeleton\\Roughness.nca",
         "skeleton\\Metallic.nca",
+    };
+
+    std::vector<std::string> normals
+    {
+        "ogre\\Normal.nca",
+        "cave\\Normal.nca",
+        "cave_ceiling\\Normal.nca",
+        "skeleton\\Normal.nca"
     };
 
     std::vector<std::string> cubemaps
@@ -81,7 +82,8 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     };
 
     LoadSkeletalAnimationAssets(animations);
-    LoadTextureAssets(textures);
+    LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
+    LoadTextureAssets(normals, false, AssetFlags::TextureTypeNormalMap);
     LoadMeshAssets(meshes);
     LoadCubeMapAssets(cubemaps);
 
