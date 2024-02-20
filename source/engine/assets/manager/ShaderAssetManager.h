@@ -25,6 +25,7 @@ class ShaderAssetManager final : public IAssetService<ShaderView, std::string>
         bool Unload(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> ShaderView override;
+        auto GetPath(size_t) const -> std::string_view override { throw NcError{"Not Implemented"};}
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::Shader; }
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;

@@ -61,6 +61,7 @@ bool LoadTextureAsset(const std::string& path, bool isExternal = false, asset_fl
 bool LoadTextureAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
 bool UnloadTextureAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllTextureAssets(asset_flags_type flags = AssetFlags::None);
+auto AcquireTextureAsset(const std::string& path) -> TextureView;
 
 /** Supported file types: .nca 
  *  @note Unloading skeletal animations invalidates all SkeletalAnimations. It is intended

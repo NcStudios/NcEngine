@@ -41,6 +41,7 @@ class FontAssetManager : public IAssetService<FontView, FontInfo>
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
         auto Acquire(const FontInfo& font, asset_flags_type flags = AssetFlags::None) const -> FontView override;
         bool IsLoaded(const FontInfo& font, asset_flags_type flags = AssetFlags::None) const override;
+        auto GetPath(size_t) const -> std::string_view override { throw NcError{"Not Implemented"}; }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
         auto OnUpdate() -> Signal<>&;
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::Font; }

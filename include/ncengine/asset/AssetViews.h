@@ -14,6 +14,7 @@ namespace nc
 {
 struct AudioClipView
 {
+    size_t id;
     std::span<const double> leftChannel;
     std::span<const double> rightChannel;
     size_t samplesPerChannel;
@@ -21,12 +22,14 @@ struct AudioClipView
 
 struct ConcaveColliderView
 {
+    size_t id;
     std::span<const Triangle> triangles;
     float maxExtent;
 };
 
 struct ConvexHullView
 {
+    size_t id;
     std::span<const Vector3> vertices;
     Vector3 extents;
     float maxExtent;
@@ -40,12 +43,14 @@ enum class CubeMapUsage
 
 struct CubeMapView
 {
+    size_t id;
     CubeMapUsage usage;
     uint32_t index;
 };
 
 struct MeshView
 {
+    size_t id;
     uint32_t firstVertex;
     uint32_t vertexCount;
     uint32_t firstIndex;
@@ -55,6 +60,7 @@ struct MeshView
 
 struct TextureView
 {
+    size_t id;
     uint32_t index;
 };
 
@@ -91,6 +97,7 @@ struct ShaderView
 
 struct SkeletalAnimationView
 {
+    size_t id;
     uint32_t index;
 };
 

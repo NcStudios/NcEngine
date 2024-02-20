@@ -8,7 +8,6 @@
 #include <cassert>
 #include <fstream>
 #include <filesystem>
-#include <iostream>
 
 namespace nc
 {
@@ -34,7 +33,7 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_f
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     const auto data = asset::CubeMapWithId{asset::ImportCubeMap(fullPath), path};
-    m_cubeMapIds.push_back(path);
+    m_cubeMapIds.emplace(path);
     m_onUpdate.Emit(asset::CubeMapUpdateEventData{
         asset::UpdateAction::Load,
         std::vector<std::string>{path},
@@ -71,7 +70,7 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
         loadedCubeMaps.push_back(asset::CubeMapWithId{asset::ImportCubeMap(fullPath), path});
         idsToLoad.push_back(path);
-        m_cubeMapIds.push_back(path);
+        m_cubeMapIds.emplace(path);
     }
 
     if (idsToLoad.empty())
@@ -90,20 +89,16 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
 bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    if (const auto pos = std::ranges::find(m_cubeMapIds, path); pos != m_cubeMapIds.cend())
-    {
-        m_cubeMapIds.erase(pos);
-        m_onUpdate.Emit(asset::CubeMapUpdateEventData
-        {
-            asset::UpdateAction::Unload,
-            std::vector<std::string>{path},
-            std::span<const asset::CubeMapWithId>{}
-        });
+    if (!m_cubeMapIds.erase(path))
+        return false;
 
-        return true;
-    }
+    m_onUpdate.Emit(asset::CubeMapUpdateEventData{
+        asset::UpdateAction::Unload,
+        std::vector<std::string>{path},
+        {}
+    });
 
-    return false;
+    return true;
 }
 
 void CubeMapAssetManager::UnloadAll(asset_flags_type)
@@ -113,24 +108,25 @@ void CubeMapAssetManager::UnloadAll(asset_flags_type)
 
 auto CubeMapAssetManager::Acquire(const std::string& path, asset_flags_type) const -> CubeMapView
 {
-    const auto pos = std::ranges::find(m_cubeMapIds, path);
-    if (pos == m_cubeMapIds.cend())
+    const auto hash = m_cubeMapIds.hash(path);
+    const auto index = m_cubeMapIds.index(hash);
+    NC_ASSERT(index != m_cubeMapIds.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+    return CubeMapView
     {
-        throw NcError("Asset is not loaded: " + path);
-    }
-
-    const auto index = static_cast<uint32_t>(std::distance(m_cubeMapIds.cbegin(), pos));
-    return CubeMapView{CubeMapUsage::Skybox, index};
+        .id = hash,
+        .usage = CubeMapUsage::Skybox,
+        .index = static_cast<unsigned>(index)
+    };
 }
 
 bool CubeMapAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
-    return m_cubeMapIds.cend() != std::ranges::find(m_cubeMapIds, path);
+    return m_cubeMapIds.contains(path);
 }
 
 auto CubeMapAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_cubeMapIds);
+    return GetPaths(m_cubeMapIds.keys());
 }
 
 auto CubeMapAssetManager::OnUpdate() -> Signal<const asset::CubeMapUpdateEventData&>&
