@@ -34,7 +34,7 @@ class EcsInterface
 
         /** @brief Emplace an entity. */
         template<std::same_as<Entity> T>
-            requires PolicyType::template HasAccess<Entity, Transform, Tag>
+            requires PolicyType::template HasAccess<Entity, Transform, Tag, Hierarchy>
         auto Emplace(EntityInfo info = {}) -> Entity
         {
             const auto handle = m_policy.template OnPool<Entity>([&info](auto&& pool) -> decltype(auto)
@@ -42,7 +42,18 @@ class EcsInterface
                 return pool.Add(info.layer, info.flags);
             });
 
-            Emplace<Transform>(handle, info.position, info.rotation, info.scale, info.parent);
+            if (info.parent.Valid())
+            {
+                auto& parentTransform = Get<Transform>(info.parent);
+                Emplace<Transform>(handle, info.position, info.rotation, info.scale, parentTransform.TransformationMatrix());
+                Get<Hierarchy>(info.parent).children.push_back(handle);
+            }
+            else
+            {
+                Emplace<Transform>(handle, info.position, info.rotation, info.scale);
+            }
+
+            Emplace<Hierarchy>(handle, info.parent, std::vector<Entity>{});
             Emplace<detail::FreeComponentGroup>(handle);
             Emplace<Tag>(handle, std::move(info.tag));
             return handle;
@@ -137,6 +148,22 @@ class EcsInterface
             }
         }
 
+        /**
+         * @brief Get the first Entity matching a Tag.
+         * @note To minimize the search cost, staged Entities are not considered. If they need to be, first call
+         *       ComponentRegistry::CommitPendingChanges(), but DO NOT do this from within the task graph (e.g.
+         *       from game logic). It is safe to commit changes inside of Scene::Load().
+         */
+        auto GetEntityByTag(std::string_view tagValue) -> Entity
+            requires PolicyType::template HasAccess<Entity>
+                  && PolicyType::template HasAccess<Tag>
+        {
+            const auto tags = GetAll<Tag>();
+            const auto pos = std::ranges::find(tags, tagValue, [](const auto& tag) { return tag.Value(); });
+            NC_ASSERT(pos != std::ranges::end(tags), fmt::format("No Entity found with Tag '{}'", tagValue));
+            return pos->ParentEntity();
+        }
+
         /** @brief Get a contiguous view of all instances of a type. */
         template<class T>
             requires PolicyType::template HasAccess<T>
@@ -170,6 +197,31 @@ class EcsInterface
             requires PolicyType::template BaseContains<FilterBase::All>
         {
             return m_policy.GetComponentPools();
+        }
+
+        /** @brief Child an Entity to another, or pass Entity::Null() to detach from an existing parent. */
+        void SetParent(Entity entity, Entity parent)
+            requires PolicyType::template HasAccess<Hierarchy>
+        {
+            auto& hierarchy = Get<Hierarchy>(entity);
+            const auto oldParent = std::exchange(hierarchy.parent, parent);
+            if (oldParent.Valid())
+            {
+                std::erase(Get<Hierarchy>(oldParent).children, entity);
+            }
+
+            if (parent.Valid())
+            {
+                Get<Hierarchy>(parent).children.push_back(entity);
+            }
+        }
+
+        /** @brief Get the root Entity in a hierarchy. */
+        auto GetRoot(Entity entity) -> Entity
+            requires PolicyType::template HasAccess<Hierarchy>
+        {
+            const auto& hierarchy = Get<Hierarchy>(entity);
+            return !hierarchy.parent.Valid() ? entity : GetRoot(hierarchy.parent);
         }
 
         /** @brief Get the parent entity a component is attached to or Entity::Null(). */
@@ -211,11 +263,16 @@ class EcsInterface
         template<bool IsRoot>
         auto RemoveNode(Entity entity) -> bool
         {
-            auto& transform = Get<Transform>(entity);
+            auto& hierarchy = Get<Hierarchy>(entity);
             if constexpr(IsRoot)
-                transform.SetParent(Entity::Null());
+            {
+                if (hierarchy.parent.Valid())
+                {
+                    std::erase(Get<Hierarchy>(hierarchy.parent).children, entity);
+                }
+            }
 
-            for (auto child : transform.Children())
+            for (auto child : hierarchy.children)
                 RemoveNode<false>(child);
 
             m_policy.template OnPool<Entity>([entity](auto&& p) { p.Remove(entity); });

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/editor/Editor.h"
+#include "dialogs/CreateEntityDialog.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
 
@@ -17,18 +19,21 @@ namespace ui::editor
 class SceneGraph
 {
     public:
-        void Draw(ecs::Ecs world);
-        auto GetSelectedEntity() const noexcept -> Entity { return m_selectedEntity; }
+        explicit SceneGraph(EditorContext& ctx);
+        void Draw(EditorContext& ctx, CreateEntityDialog& createEntity);
+        void OnClose(EditorContext& ctx);
 
     private:
-        Entity m_selectedEntity = Entity::Null();
+        Entity m_selectedEntityWireframe = Entity::Null();
+        Entity m_selectedColliderWireframe = Entity::Null();
         ImGuiTextFilter m_tagFilter;
 
-        void EnsureSelection(ecs::Ecs world);
+        void SetEntitySelection(EditorContext& ctx, Entity entity);
+        void EnsureSelection(EditorContext& ctx);
         auto PassFilter(Tag& tag) -> bool;
-        void Graph(ecs::Ecs world);
-        void GraphNode(ecs::Ecs world, Entity entity, Tag& tag, Transform& transform);
-        void GraphContextMenu(ecs::Ecs world);
+        void Graph(EditorContext& ctx, CreateEntityDialog& createEntity);
+        void GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Hierarchy& hierarchy, CreateEntityDialog& createEntity);
+        void GraphContextMenu(EditorContext& ctx, CreateEntityDialog& createEntity);
 };
 } // namespace ui::editor
 } // namespace nc

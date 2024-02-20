@@ -24,7 +24,7 @@ auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> s
 class NcAudioImpl final : public NcAudio
 {
     public:
-        NcAudioImpl(Registry* registry);
+        NcAudioImpl(const config::AudioSettings& settings, Registry* registry);
         ~NcAudioImpl() noexcept;
 
         /** NcAudio API */
@@ -53,6 +53,7 @@ class NcAudioImpl final : public NcAudio
         std::mutex m_staleMutex;
         Entity m_listener;
         Signal<const AudioDevice&> m_outputDeviceChanged;
+        unsigned m_configBufferFrames;
 
         void MixToBuffer(double* buffer);
 };

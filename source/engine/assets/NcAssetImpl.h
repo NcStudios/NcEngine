@@ -9,6 +9,7 @@ namespace nc
 class AudioClipAssetManager;
 class ConcaveColliderAssetManager;
 class CubeMapAssetManager;
+class FontAssetManager;
 class HullColliderAssetManager;
 class MeshAssetManager;
 class SkeletalAnimationAssetManager;
@@ -38,6 +39,7 @@ class NcAssetImpl : public NcAsset
         auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&> & override;
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override;
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override;
+        auto OnFontUpdate() noexcept -> Signal<>& override;
         void LoadAssets(const AssetMap& assets) override;
         auto GetLoadedAssets() const noexcept -> AssetMap override;
 
@@ -49,6 +51,7 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<MeshAssetManager> m_meshManager;
         std::unique_ptr<SkeletalAnimationAssetManager> m_skeletalAnimationManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;
+        std::unique_ptr<FontAssetManager> m_fontManager;
         AssetMap m_defaults;
 };
 } // namespace nc::asset

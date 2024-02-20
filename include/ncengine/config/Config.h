@@ -34,6 +34,7 @@ struct AssetSettings
     std::string skeletalAnimationsPath = "resources/assets/skeletal_animations/";
     std::string texturesPath = "resources/assets/textures/";
     std::string cubeMapsPath = "resources/assets/cube_maps";
+    std::string fontsPath = "resources/assets/fonts";
 };
 
 /**
@@ -83,6 +84,7 @@ struct PhysicsSettings
 struct AudioSettings
 {
     bool enabled = true;
+    unsigned bufferFrames = 512u; // must be a power of two in the range [16, 2048]
 };
 
 /** @brief A collection of all configuration options.

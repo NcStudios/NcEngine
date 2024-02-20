@@ -225,8 +225,7 @@ void SkeletalAnimationSystem::OnStateChanged(const anim::StateChange& stateChang
 void SkeletalAnimationSystem::Add(SkeletalAnimator& animator)
 {
     auto& signal = animator.Connect();
-    auto connectionState = std::make_unique<Connection<const anim::StateChange&>>(signal.Connect(this, &SkeletalAnimationSystem::OnStateChanged));
-    m_onStateChangedHandlers.emplace_back(std::move(connectionState));
+    m_onStateChangedHandlers.emplace_back(signal.Connect(this, &SkeletalAnimationSystem::OnStateChanged));
     m_handlerIndices.emplace_back(animator.ParentEntity().Index());
 }
 

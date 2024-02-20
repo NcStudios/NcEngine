@@ -1,6 +1,5 @@
 #include "BspTree.h"
 #include "assets/AssetService.h"
-#include "graphics/debug/DebugRenderer.h"
 
 #include <iostream>
 
@@ -68,13 +67,14 @@ auto KeepMaximum(Vector3 vec) -> Vector3
 
 namespace nc::physics
 {
-BspTree::BspTree(Registry* registry)
+BspTree::BspTree(Registry* registry, Signal<>& rebuildStatics)
     : m_registry{registry},
-        m_nodes{},
-        m_triMeshes{},
-        m_results{},
-        m_onAddConnection{registry->OnAdd<ConcaveCollider>().Connect(this, &BspTree::OnAdd)},
-        m_onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTree::OnRemove)}
+      m_nodes{},
+      m_triMeshes{},
+      m_results{},
+      m_onAddConnection{registry->OnAdd<ConcaveCollider>().Connect(this, &BspTree::OnAdd)},
+      m_onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTree::OnRemove)},
+      m_onRebuildStaticsConnection{rebuildStatics.Connect(this, &BspTree::Rebuild)}
 {
     m_nodes.push_back(LeafNode{});
 }
@@ -111,6 +111,18 @@ void BspTree::OnRemove(Entity entity)
     }
 }
 
+void BspTree::Rebuild()
+{
+    m_triMeshes.clear();
+    m_nodes.clear();
+    m_nodes.push_back(LeafNode{});
+    auto colliders = m_registry->StorageFor<ConcaveCollider>()->GetComponents();
+    for (auto& collider : colliders)
+    {
+        OnAdd(collider);
+    }
+}
+
 void BspTree::Clear()
 {
     m_nodes.clear();
@@ -120,9 +132,6 @@ void BspTree::Clear()
     m_results.contacts.shrink_to_fit();
     m_results.events.clear();
     m_results.events.shrink_to_fit();
-    #ifdef NC_DEBUG_RENDERING_ENABLED
-    graphics::DebugRenderer::ClearPlanes();
-    #endif
 }
 
 void BspTree::AddToTree(const TriMesh& mesh, size_t meshIndex, size_t currentNodeIndex)
@@ -241,10 +250,6 @@ void BspTree::SplitLeaf(const TriMesh& mesh, size_t meshIndex, size_t leafNodeIn
             break;
         }
     }
-
-    #ifdef NC_DEBUG_RENDERING_ENABLED
-    graphics::DebugRenderer::AddPlane(plane.normal, plane.d);
-    #endif
 }
 
 auto BspTree::FindSplitPlane(const LeafNode& node) -> Plane

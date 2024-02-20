@@ -2,13 +2,8 @@
 #pragma once
 
 #include "ecs/Component.h"
-#include "graphics/DebugWidget.h"
 #include "DirectXMath.h"
 #include "ITechnique.h"
-
-#ifdef NC_DEBUG_RENDERING_ENABLED
-#include "graphics/debug/DebugRenderer.h"
-#endif
 
 #include "vulkan/vk_mem_alloc.hpp"
 #include <vector>
@@ -48,9 +43,6 @@ namespace nc::graphics
         private:
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
-            #ifdef NC_DEBUG_RENDERING_ENABLED
-            graphics::DebugRenderer m_debugRenderer;
-            #endif
     };
 }
 #endif

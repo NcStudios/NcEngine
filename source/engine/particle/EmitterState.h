@@ -36,19 +36,21 @@ namespace nc::particle
         EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random);
 
         void Emit(size_t count);
-        void Update(float dt, const Quaternion& camRotation, const Vector3& camForward);
+        void Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward);
+        void UpdateInfo(const graphics::ParticleInfo& info);
         const ParticleSoA* GetSoA() const;
         const graphics::ParticleInfo& GetInfo() const;
         Entity GetEntity() const;
 
     private:
         void PeriodicEmission(float dt);
-        auto ComputeMvp(const Particle& particle, const Quaternion& camRotation, const Vector3& camForward) const->DirectX::XMMATRIX;
+        auto ComputeMvp(const Particle& particle, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward) const->DirectX::XMMATRIX;
 
         ParticleSoA m_soa;
         graphics::ParticleInfo m_info;
         Entity m_entity;
         float m_emissionCounter;
         Random* m_random;
+        bool m_needsResize = false;
     };
 }

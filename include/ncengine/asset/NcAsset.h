@@ -47,6 +47,9 @@ class NcAsset : public Module
         /** @brief Get the signal for Texture load and unload events. */
         virtual auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& = 0;
 
+        /** @brief Get the signal for Font load and unload events. */
+        virtual auto OnFontUpdate() noexcept -> Signal<>& = 0;
+
         /** @brief Load assets from an AssetMap. */
         virtual void LoadAssets(const AssetMap& assets) = 0;
 

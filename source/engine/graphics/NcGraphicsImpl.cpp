@@ -1,21 +1,18 @@
 #include "NcGraphicsImpl.h"
 #include "PerFrameRenderState.h"
-#include "GraphicsUtilities.h"
+#include "graphics/GraphicsUtilities.h"
 #include "shader_resource/ShaderResourceBus.h"
 #include "window/WindowImpl.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/View.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 
 #include "optick.h"
-
-#ifdef NC_DEBUG_RENDERING_ENABLED
-#include "graphics/debug/DebugRenderer.h"
-#endif
 
 namespace
 {
@@ -29,11 +26,6 @@ namespace
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
-
-        /** @todo Debug renderer is becoming a problem... */
-        #ifdef NC_DEBUG_RENDERING_ENABLED
-        nc::graphics::DebugRenderer debugRenderer;
-        #endif
     };
 } // anonymous namespace
 
@@ -50,7 +42,8 @@ namespace nc::graphics
     SystemResources::SystemResources(SystemResourcesConfig config, 
                                     Registry* registry,
                                     ShaderResourceBus* resourceBus,
-                                    ModuleProvider modules)
+                                    ModuleProvider modules,
+                                    SystemEvents& events)
         : cameras{},
           environment{resourceBus},
           objects{resourceBus, config.maxRenderers},
@@ -60,7 +53,7 @@ namespace nc::graphics
                                   modules.Get<asset::NcAsset>()->OnBoneUpdate()},
           textures{resourceBus, modules.Get<asset::NcAsset>()->OnTextureUpdate(), config.maxTextures},
           widgets{},
-          ui{registry->GetEcs(), modules}
+          ui{registry->GetEcs(), modules, events}
     {
     }
 
@@ -69,6 +62,7 @@ namespace nc::graphics
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,
                              Registry* registry,
+                             SystemEvents& events,
                              window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
@@ -82,7 +76,7 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -93,6 +87,7 @@ namespace nc::graphics
                                    const config::MemorySettings& memorySettings,
                                    Registry* registry,
                                    ModuleProvider modules,
+                                   SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus shaderResourceBus,
                                    window::WindowImpl* window)
@@ -100,7 +95,7 @@ namespace nc::graphics
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
           m_assetResources{},
-          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules},
+          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));

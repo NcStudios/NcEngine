@@ -1,21 +1,28 @@
 #pragma once
 
 #include "Common.h"
+#include "physics/PhysicsConstants.h"
 #include "physics/collision/CollisionState.h"
-
-#include <iostream> // remove once minDistance error is figured out
+#include "ncengine/platform/Platform.h"
 
 namespace nc::physics
 {
 constexpr float FloatMax = std::numeric_limits<float>::max();
-constexpr size_t EpaMaxIterations = 32u;
-constexpr float EpaTolerance = 0.001f;
 
 template<class BVA, class BVB>
 bool Epa(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* stateOut);
 
 template<class BVA>
 bool EpaVsTriangle(const BVA& a, const TriangleXM& b, DirectX::FXMMATRIX aMatrix, CollisionState* stateOut);
+
+NC_NO_INLINE void EpaExpandFailure(CollisionState* state)
+{
+    NC_LOG_COLLISION("Epa expansion failed");
+    state->contact.depth = 0.0f;
+    state->contact.lambda = 0.0f;
+    state->contact.muTangent = 0.0f;
+    state->contact.muBitangent = 0.0f;
+}
 
 template<class BVA, class BVB>
 bool Epa(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMATRIX bMatrix, CollisionState* state)
@@ -33,7 +40,10 @@ bool Epa(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
         minNorm = state->polytope.GetNormalData(minFace);
 
         if(iterations++ > EpaMaxIterations)
+        {
+            NC_LOG_COLLISION("Epa max iterations exceeded");
             break;
+        }
 
         // Find a point on the Minkowski hull in the direction of the closest face's normal.
         auto direction_v = XMLoadVector3(&minNorm.normal);
@@ -49,20 +59,14 @@ bool Epa(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
         if(abs(Dot(minNorm.normal, support) - minNorm.distance) > EpaTolerance)
         {
             // The closest face is not on the hull, so we expand towards the hull.
-            if(!state->polytope.Expand(support, state->contact, &minFace))
+            if (state->polytope.Expand(support, state->contact, &minFace)) [[likely]]
             {
-                /** @todo Need to determine if this can happen under normal circumstances.
-                 *  It has thrown here a few times, but always when there is wonk elsewhere. */
-                //throw std::runtime_error("Epa - minDistance not found");
-                std::cout << "Epa - minDistance not found\n";
-                state->contact.depth = 0.0f;
-                state->contact.lambda = 0.0f;
-                state->contact.muTangent = 0.0f;
-                state->contact.muBitangent = 0.0f;
-                return false;
+                minNorm.distance = FloatMax;
+                continue;
             }
 
-            minNorm.distance = FloatMax;
+            EpaExpandFailure(state);
+            return false;
         }
     }
 
@@ -91,7 +95,10 @@ bool EpaVsTriangle(const BVA& a, const TriangleXM& b, DirectX::FXMMATRIX aMatrix
         minNorm = stateOut->polytope.GetNormalData(minFace);
 
         if(iterations++ > EpaMaxIterations)
+        {
+            NC_LOG_COLLISION("Epa max iterations exceeded");
             break;
+        }
 
         // Find a point on the Minkowski hull in the direction of the closest face's normal.
         auto direction_v = XMLoadVector3(&minNorm.normal);
@@ -114,20 +121,14 @@ bool EpaVsTriangle(const BVA& a, const TriangleXM& b, DirectX::FXMMATRIX aMatrix
         if(abs(Dot(minNorm.normal, support) - minNorm.distance) > EpaTolerance)
         {
             // The closest face is not on the hull, so we expand towards the hull.
-            if(!stateOut->polytope.Expand(support, stateOut->contact, &minFace))
+            if (stateOut->polytope.Expand(support, stateOut->contact, &minFace)) [[likely]]
             {
-                /** @todo Need to determine if this can happen under normal circumstances.
-                 *  It has thrown here a few times, but always when there is wonk elsewhere. */
-                //throw std::runtime_error("Epa - minDistance not found");
-                std::cout << "Epa - minDistance not found\n";
-                stateOut->contact.depth = 0.0f;
-                stateOut->contact.lambda = 0.0f;
-                stateOut->contact.muTangent = 0.0f;
-                stateOut->contact.muBitangent = 0.0f;
-                return false;
+                minNorm.distance = FloatMax;
+                continue;
             }
 
-            minNorm.distance = FloatMax;
+            EpaExpandFailure(stateOut);
+            return false;
         }
     }
 

@@ -14,8 +14,8 @@
     ],
     "concave-collider": [
         {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "concave_collider/ramp"
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "concave_collider/halfpipe"
         }
     ],
     "cube-map": [
@@ -26,30 +26,18 @@
     ],
     "hull-collider": [
         {
-            "sourcePath": "raw/model/coin.fbx",
-            "assetName": "hull_collider/coin"
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "hull_collider/ramp"
         }
     ],
     "mesh": [
-        {
-            "sourcePath": "raw/model/coin.fbx",
-            "assetName": "mesh/coin"
-        },
         {
             "sourcePath": "raw/model/ogre.fbx",
             "assetName": "mesh/ogre"
         },
         {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "mesh/ramp"
-        },
-        {
-            "sourcePath": "raw/model/table.fbx",
-            "assetName": "mesh/table"
-        },
-        {
-            "sourcePath": "raw/model/token.fbx",
-            "assetName": "mesh/token"
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "mesh/halfpipe"
         },
         {
             "sourcePath": "raw/model/worm.fbx",
@@ -66,6 +54,10 @@
         {
             "sourcePath": "raw/model/cave_ceiling.fbx",
             "assetName": "mesh/cave_ceiling"
+        },
+        {
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "mesh/ramp"
         }
     ],
     "skeletal-animation": [
@@ -114,22 +106,6 @@
     ],
     "texture": [
         {
-            "sourcePath": "raw/image/blacktop/BaseColor.png",
-            "assetName": "texture/blacktop/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Normal.png",
-            "assetName": "texture/blacktop/Normal"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Roughness.png",
-            "assetName": "texture/blacktop/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/blacktop/Metallic.png",
-            "assetName": "texture/blacktop/Metallic"
-        },
-        {
             "sourcePath": "raw/image/box/BaseColor.png",
             "assetName": "texture/box/BaseColor"
         },
@@ -172,30 +148,6 @@
         {
             "sourcePath": "raw/image/cave_ceiling/Metallic.png",
             "assetName": "texture/cave_ceiling/Metallic"
-        },
-        {
-            "sourcePath": "raw/image/coin/BaseColor.png",
-            "assetName": "texture/coin/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/coin/Normal.png",
-            "assetName": "texture/coin/Normal"
-        },
-        {
-            "sourcePath": "raw/image/coin/Roughness.png",
-            "assetName": "texture/coin/Roughness"
-        },
-        {
-            "sourcePath": "raw/image/floor/BaseColor.png",
-            "assetName": "texture/floor/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/floor/Normal.png",
-            "assetName": "texture/floor/Normal"
-        },
-        {
-            "sourcePath": "raw/image/floor/Roughness.png",
-            "assetName": "texture/floor/Roughness"
         },
         {
             "sourcePath": "raw/image/logo/BaseColor.png",
@@ -258,28 +210,28 @@
             "assetName": "texture/solid_color/Green"
         },
         {
-            "sourcePath": "raw/image/table/BaseColor.png",
-            "assetName": "texture/table/BaseColor"
+            "sourcePath": "raw/image/solid_color/Orange.png",
+            "assetName": "texture/solid_color/Orange"
         },
         {
-            "sourcePath": "raw/image/table/Normal.png",
-            "assetName": "texture/table/Normal"
+            "sourcePath": "raw/image/solid_color/Purple.png",
+            "assetName": "texture/solid_color/Purple"
         },
         {
-            "sourcePath": "raw/image/table/Roughness.png",
-            "assetName": "texture/table/Roughness"
+            "sourcePath": "raw/image/solid_color/Teal.png",
+            "assetName": "texture/solid_color/Teal"
         },
         {
-            "sourcePath": "raw/image/token/BaseColor.png",
-            "assetName": "texture/token/BaseColor"
+            "sourcePath": "raw/image/solid_color/Yellow.png",
+            "assetName": "texture/solid_color/Yellow"
         },
         {
-            "sourcePath": "raw/image/token/Normal.png",
-            "assetName": "texture/token/Normal"
+            "sourcePath": "raw/image/line/hatch.jpg",
+            "assetName": "texture/line/hatch"
         },
         {
-            "sourcePath": "raw/image/token/Roughness.png",
-            "assetName": "texture/token/Roughness"
+            "sourcePath": "raw/image/line/overlay.png",
+            "assetName": "texture/line/overlay"
         }
     ]
 }

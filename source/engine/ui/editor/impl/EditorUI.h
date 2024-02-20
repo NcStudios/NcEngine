@@ -1,9 +1,11 @@
 #pragma once
 
+#include "ui/editor/Editor.h"
 #include "windows/FpsOverlay.h"
 #include "windows/Inspector.h"
-#include "windows/ModalDialog.h"
 #include "windows/SceneGraph.h"
+#include "windows/dialogs/CreateEntityDialog.h"
+#include "windows/dialogs/SceneDialogs.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/module/ModuleProvider.h"
@@ -18,9 +20,9 @@ struct EditorHotkeys;
 class EditorUI
 {
     public:
-        explicit EditorUI(ecs::Ecs world, ModuleProvider modules);
+        explicit EditorUI(EditorContext& ctx);
 
-        void Draw(const EditorHotkeys& hotkeys, ecs::Ecs world, ModuleProvider modules);
+        void Draw(EditorContext& ctx);
 
     private:
         SceneGraph m_sceneGraph;
@@ -31,13 +33,14 @@ class EditorUI
         FpsOverlay m_fpsOverlay;
 
         // dialogs
+        CreateEntityDialog m_createEntityDialog;
         NewSceneDialog m_newSceneDialog;
         SaveSceneDialog m_saveSceneDialog;
         LoadSceneDialog m_loadSceneDialog;
 
-        void ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset);
-        void DrawMenu(asset::NcAsset& ncAsset);
+        auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
+        void DrawMenu(EditorContext& ctx);
         void DrawOverlays(const ImVec2& dimensions);
-        void DrawDialogs(const ImVec2& dimensions);
+        void DrawDialogs(EditorContext& ctx);
 };
 } // namespace nc::ui::editor

@@ -23,6 +23,11 @@ void UnloadAllAudioClipAssets(asset_flags_type flags)
     AssetService<AudioClipView>::Get()->UnloadAll(flags);
 }
 
+auto AcquireAudioClipAsset(const std::string& path) -> AudioClipView
+{
+    return AssetService<AudioClipView>::Get()->Acquire(path);
+}
+
 bool LoadConvexHullAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<ConvexHullView>::Get()->Load(path, isExternal, flags);
@@ -141,5 +146,35 @@ bool UnloadTextureAsset(const std::string& path, asset_flags_type flags)
 void UnloadAllTextureAssets(asset_flags_type flags)
 {
     return AssetService<TextureView>::Get()->UnloadAll(flags);
+}
+
+auto AcquireTextureAsset(const std::string& path) -> TextureView
+{
+    return AssetService<TextureView>::Get()->Acquire(path);
+}
+
+bool LoadFont(const FontInfo& font, bool isExternal, asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->Load(font, isExternal, flags);
+}
+
+bool LoadFonts(std::span<const FontInfo> fonts, bool isExternal, asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->Load(fonts, isExternal, flags);
+}
+
+auto AcquireFont(const FontInfo& font) -> FontView
+{
+    return AssetService<FontView, FontInfo>::Get()->Acquire(font);
+}
+
+bool UnloadFont(const FontInfo& font, asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->Unload(font, flags);
+}
+
+void UnloadAllFonts(asset_flags_type flags)
+{
+    return AssetService<FontView, FontInfo>::Get()->UnloadAll(flags);
 }
 } // namespace nc

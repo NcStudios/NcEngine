@@ -1,7 +1,6 @@
 #pragma once
 #include "SpawnPropertyGenerator.h"
 #include "shared/Prefabs.h"
-#include "shared/FreeComponents.h"
 
 #include "ncengine/math/Random.h"
 
@@ -18,7 +17,6 @@ class Spawner : public FreeComponent
 
         Spawner(Entity entity,
                 Random* random,
-                prefab::Resource resource,
                 SpawnBehavior behavior,
                 SpawnExtension extension = nullptr);
         void Run(Entity, Registry*, float);
@@ -26,17 +24,13 @@ class Spawner : public FreeComponent
         void Spawn(Registry* registry, unsigned count = 1u);
         void StageDestroy(unsigned count = 1u);
         void Destroy(Registry* registry, unsigned count = 1u);
-        void SetPrefab(prefab::Resource resource);
         const std::vector<Entity>& GetHandles() const;
         int GetObjectCount() const;
-    
+
     private:
         SpawnExtension m_extension;
         std::vector<Entity> m_entities;
         SpawnPropertyGenerator m_generator;
-        prefab::Resource m_resource;
-        bool m_applyConstantVelocity;
-        bool m_applyConstantRotation;
         Entity::layer_type m_layer;
         Entity::flags_type m_flags;
         unsigned m_stagedAdditions;
@@ -45,18 +39,12 @@ class Spawner : public FreeComponent
 
 inline Spawner::Spawner(Entity entity,
                         Random* random,
-                        prefab::Resource resource,
                         SpawnBehavior behavior,
                         SpawnExtension extension)
     : FreeComponent{entity},
-      m_extension{extension},
+      m_extension{std::move(extension)},
       m_entities{},
       m_generator{behavior, random},
-      m_resource{resource},
-      m_applyConstantVelocity{Vector3::Zero() != behavior.minVelocity &&
-                              Vector3::Zero() != behavior.maxVelocity},
-      m_applyConstantRotation{Vector3::Zero() != behavior.rotationAxis ||
-                              0.0f != behavior.rotationTheta},
       m_layer{behavior.layer},
       m_flags{behavior.flags},
       m_stagedAdditions{0u},
@@ -91,33 +79,16 @@ inline void Spawner::Spawn(Registry* registry, unsigned count)
 {
     std::generate_n(std::back_inserter(m_entities), count, [this, registry]()
     {
-        auto handle = prefab::Create(registry, m_resource,
-        {
+        const auto handle = registry->Add<Entity>({
             .position = m_generator.Position(),
             .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
             .layer = m_layer,
             .flags = m_flags
         });
 
-        if(m_applyConstantVelocity)
-            registry->Add<ConstantTranslation>(handle, m_generator.Velocity());
-        if(m_applyConstantRotation)
-            registry->Add<ConstantRotation>(handle, m_generator.RotationAxis(), m_generator.Theta());
-
-        registry->Add<FrameLogic>(handle, [](Entity self, Registry* reg, float dt)
-        {
-            if(reg->Contains<ConstantTranslation>(self))
-            {
-                reg->Get<ConstantTranslation>(self)->Run(self, reg, dt);
-            }
-            if(reg->Contains<ConstantRotation>(self))
-            {
-                reg->Get<ConstantRotation>(self)->Run(self, reg, dt);
-            }
-        });
-
-        if(m_extension)
+        if (m_extension)
             m_extension(handle);
+
         return handle;
     });
 }
@@ -134,11 +105,6 @@ inline void Spawner::Destroy(Registry* registry, unsigned count)
         registry->Remove<Entity>(m_entities.back());
         m_entities.pop_back();
     }
-}
-
-inline void Spawner::SetPrefab(prefab::Resource resource)
-{
-    m_resource = resource;
 }
 
 inline const std::vector<Entity>& Spawner::GetHandles() const

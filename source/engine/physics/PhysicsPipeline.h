@@ -21,7 +21,7 @@ class PhysicsPipeline
     static_assert(ConcavePhase<concave_phase>);
 
     public:
-        PhysicsPipeline(Registry* registry, float fixedTimeStep);
+        PhysicsPipeline(Registry* registry, float fixedTimeStep, Signal<>& rebuildStatics);
 
         void Clear();
         auto GetJointSystem() -> JointSystem* { return &m_jointSystem; }
@@ -39,11 +39,11 @@ class PhysicsPipeline
 };
 
 template<class Stages>
-PhysicsPipeline<Stages>::PhysicsPipeline(Registry* registry, float fixedTimeStep)
+PhysicsPipeline<Stages>::PhysicsPipeline(Registry* registry, float fixedTimeStep, Signal<>& rebuildStatics)
     : m_proxyCache{registry},
       m_broadPhase{},
       m_narrowPhase{registry},
-      m_concavePhase{registry},
+      m_concavePhase{registry, rebuildStatics},
       m_jointSystem{registry},
       m_solver{registry},
       m_registry{registry},

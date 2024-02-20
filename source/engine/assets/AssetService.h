@@ -16,6 +16,7 @@ class IAssetServiceBase
         virtual ~IAssetServiceBase() = default;
 
         virtual auto GetAllLoaded() const -> std::vector<std::string_view> = 0;
+        virtual auto GetPath(size_t hash) const -> std::string_view = 0;
         virtual auto GetAssetType() const noexcept -> asset::AssetType = 0;
 };
 

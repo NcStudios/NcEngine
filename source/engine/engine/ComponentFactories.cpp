@@ -16,7 +16,7 @@ namespace nc
 {
 auto CreateAudioSource(Entity entity, void*) -> audio::AudioSource
 {
-    return audio::AudioSource{entity, asset::DefaultAudioClip};
+    return audio::AudioSource{entity, {asset::DefaultAudioClip}};
 }
 
 auto CreateCollisionLogic(Entity entity, void*) -> CollisionLogic
