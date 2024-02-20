@@ -53,7 +53,7 @@ struct MemorySettings
     unsigned maxPointLights = 10;
     unsigned maxSkeletalAnimations = 1000;
     unsigned maxTextures = 1000;
-    unsigned maxCubeMaps = 1000;
+    unsigned maxCubeMaps = 10;
 };
 
 /** @brief Options for configuring NcGraphics. */
