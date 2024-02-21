@@ -26,8 +26,6 @@ enum class IntegrationResult
 
 class PhysicsBody final : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(PhysicsBody)
-
     public:
         PhysicsBody(Entity entity,
                     PhysicsProperties properties = PhysicsProperties{},

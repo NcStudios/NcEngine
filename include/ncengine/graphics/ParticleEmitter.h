@@ -56,8 +56,6 @@ struct ParticleInfo
 
 class ParticleEmitter final : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(ParticleEmitter)
-
     public:
         ParticleEmitter(Entity entity, ParticleInfo info);
 

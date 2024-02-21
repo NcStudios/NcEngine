@@ -5,7 +5,6 @@
 #pragma once
 
 #include "Entity.h"
-#include "detail/EditorMacros.h"
 #include "ncengine/type/Type.h"
 #include "ncengine/utility/Signal.h"
 

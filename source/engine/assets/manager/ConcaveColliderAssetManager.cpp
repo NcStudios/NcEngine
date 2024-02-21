@@ -22,7 +22,7 @@ namespace nc
         m_concaveColliders.emplace(path, asset::ImportConcaveCollider(fullPath));
         return true;
     }
-    
+
     bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
     {
         auto anyLoaded = false;
@@ -42,10 +42,10 @@ namespace nc
 
         return anyLoaded;
     }
-    
+
     bool ConcaveColliderAssetManager::Unload(const std::string& path, asset_flags_type)
     {
-        return static_cast<bool>(m_concaveColliders.erase(path));
+        return m_concaveColliders.erase(path);
     }
 
     void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
@@ -55,26 +55,25 @@ namespace nc
 
     auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
     {
-        const auto it = m_concaveColliders.find(path);
-        if (it == m_concaveColliders.end())
-        {
-            throw NcError("Asset is not loaded: " + path);
-        }
-
+        const auto hash = m_concaveColliders.hash(path);
+        const auto index = m_concaveColliders.index(hash);
+        NC_ASSERT(index != m_concaveColliders.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+        const auto& collider = m_concaveColliders.at(index);
         return ConcaveColliderView
         {
-            .triangles = std::span<const Triangle>{it->second.triangles},
-            .maxExtent = it->second.maxExtent
+            .id = hash,
+            .triangles = std::span<const Triangle>{collider.triangles},
+            .maxExtent = collider.maxExtent
         };
     }
-    
+
     bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
     {
-        return m_concaveColliders.end() != m_concaveColliders.find(path);
+        return m_concaveColliders.contains(path);
     }
 
     auto ConcaveColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
     {
-        return GetPaths(m_concaveColliders);
+        return GetPaths(m_concaveColliders.keys());
     }
 }

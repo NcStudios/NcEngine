@@ -39,9 +39,9 @@ auto PointLightSystem::Execute(MultiView<PointLight, Transform> view) -> Lightin
         shaderBuffer.emplace_back(state.viewProjections.back(),
                                   transform->Position(),
                                   m_useShadows,
-                                  light->GetAmbient(),
-                                  light->GetDiffuseColor(),
-                                  light->GetDiffuseIntensity());
+                                  light->ambientColor,
+                                  light->diffuseColor,
+                                  light->diffuseIntensity);
     }
 
     m_backendChannel.Emit(shaderBuffer);

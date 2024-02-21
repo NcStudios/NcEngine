@@ -14,8 +14,6 @@ namespace nc::net
 {
 class NetworkDispatcher final : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(NetworkDispatcher)
-
     public:
         NetworkHandle networkHandle;
 

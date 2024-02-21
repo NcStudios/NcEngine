@@ -1,16 +1,17 @@
+/**
+ * @file ConcaveCollider.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "ncengine/ecs/Component.h"
 
 namespace nc::physics
 {
+/** @brief Component managing concave collision geometry. */
 class ConcaveCollider final : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(ConcaveCollider)
-
     public:
-        static constexpr auto ComponentId = 9ull;
-
         ConcaveCollider(Entity entity, std::string assetPath);
         auto GetPath() const -> const std::string& { return m_path; }
 

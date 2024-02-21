@@ -29,7 +29,7 @@ class Imgui;
 class Instance;
 class Lighting;
 struct PerFrameRenderState;
-class PointLight;
+struct PointLight;
 class Swapchain;
 class RenderGraph;
 class ShaderDescriptorSets;

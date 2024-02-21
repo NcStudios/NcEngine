@@ -50,7 +50,7 @@ class SkeletalAnimationSystem : public StableAddress
         // Component registration
         Connection<graphics::SkeletalAnimator&> m_onAddConnection;
         Connection<Entity> m_onRemoveConnection;
-        std::vector<std::unique_ptr<Connection<const anim::StateChange&>>> m_onStateChangedHandlers;
+        std::vector<Connection<const anim::StateChange&>> m_onStateChangedHandlers;
         std::vector<Entity::index_type> m_handlerIndices;
 
         // Animation data sandbox
