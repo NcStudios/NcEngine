@@ -10,7 +10,7 @@ using namespace nc::physics;
 
 auto CreateTriMesh(Registry* registry, const ConcaveCollider& collider) -> TriMesh
 {
-    auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetPath());
+    auto meshView = AssetService<ConcaveColliderView>::Get()->Acquire(collider.GetAssetPath());
     auto entity = collider.ParentEntity();
     auto* transform = registry->Get<Transform>(entity);
     const auto& m = transform->TransformationMatrix();
