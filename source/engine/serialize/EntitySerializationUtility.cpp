@@ -35,7 +35,7 @@ auto ReconstructEntityInfo(nc::Entity entity,
         .rotation = transform.LocalRotation(),
         .scale = transform.LocalScale(),
         .parent = hierarchy.parent,
-        .tag = std::string{tag.Value()},
+        .tag = tag.value,
         .layer = entity.Layer(),
         .flags = entity.Flags()
     };

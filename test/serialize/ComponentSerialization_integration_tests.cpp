@@ -204,9 +204,9 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
     const auto expected = nc::graphics::PointLight{g_staticEntity, nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.GetAmbient(), actual.GetAmbient());
-    EXPECT_EQ(expected.GetDiffuseColor(), actual.GetDiffuseColor());
-    EXPECT_EQ(expected.GetDiffuseIntensity(), actual.GetDiffuseIntensity());
+    EXPECT_EQ(expected.ambientColor, actual.ambientColor);
+    EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
+    EXPECT_EQ(expected.diffuseIntensity, actual.diffuseIntensity);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)

@@ -93,7 +93,7 @@ void SceneGraph::EnsureSelection(EditorContext& ctx)
 
 auto SceneGraph::PassFilter(Tag& tag) -> bool
 {
-    return m_tagFilter.PassFilter(tag.Value().data());
+    return m_tagFilter.PassFilter(tag.value.c_str());
 }
 
 void SceneGraph::Graph(EditorContext& ctx, CreateEntityDialog& createEntity)
@@ -116,7 +116,7 @@ void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Hierarch
         ? ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow
         : 0;
 
-    const auto isNodeExpanded = ImGui::TreeNodeEx(tag.Value().data(), flags);
+    const auto isNodeExpanded = ImGui::TreeNodeEx(tag.value.c_str(), flags);
 
     if (ImGui::IsItemClicked())
     {

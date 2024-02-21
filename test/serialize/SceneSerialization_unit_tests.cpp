@@ -271,7 +271,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
         EXPECT_EQ(expected.scale, actualTransform.LocalScale());
 
         const auto& actualTag = ecs.Get<nc::Tag>(actualEntity);
-        EXPECT_EQ(expected.tag, actualTag.Value());
+        EXPECT_EQ(expected.tag, actualTag.value);
     }
 }
 
@@ -293,7 +293,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     const auto filter = [&ecs = ecs](nc::Entity entity)
     {
         static constexpr auto toExclude = std::string_view{"exlude me"};
-        return ecs.Get<nc::Tag>(entity).Value() != toExclude;
+        return ecs.Get<nc::Tag>(entity).value != toExclude;
     };
 
     auto stream = std::stringstream{};

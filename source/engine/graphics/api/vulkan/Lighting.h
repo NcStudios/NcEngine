@@ -4,7 +4,7 @@
 
 namespace nc::graphics
 {
-class PointLight;
+struct PointLight;
 class RenderGraph;
 struct ShaderResources;
 
