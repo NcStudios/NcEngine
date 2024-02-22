@@ -22,7 +22,6 @@ class TextureSystem
         void UpdateTextureArrayBuffer(const asset::TextureUpdateEventData& eventData);
 
     private:
-        std::vector<asset::TextureWithId> m_textureArray;
         TextureArrayBufferHandle m_textureArrayBuffer;
         nc::Connection<const asset::TextureUpdateEventData&> m_onTextureArrayBufferUpdate;
 };

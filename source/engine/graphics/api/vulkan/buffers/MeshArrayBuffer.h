@@ -26,4 +26,10 @@ class MeshBuffer
     private:
         GpuAllocation<vk::Buffer> m_buffer;
 };
+
+struct MeshArrayBuffer
+{
+    MeshBuffer vertices;
+    MeshBuffer indices;
+};
 } // namespace nc::graphics::vulkan

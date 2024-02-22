@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/GraphicsConstants.h"
 #include "PerFrameGpuContext.h"
 
 #include <vector>
@@ -25,6 +26,8 @@ class FrameManager
         {
             return &(m_perFrameGpuContext[m_currentFrameIndex]);
         }
+
+        auto CommandBuffers() noexcept -> std::array<vk::CommandBuffer*, MaxFramesInFlight>;
 
     private:
         std::vector<PerFrameGpuContext> m_perFrameGpuContext;

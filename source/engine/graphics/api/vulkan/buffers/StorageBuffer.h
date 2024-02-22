@@ -14,7 +14,7 @@ class StorageBuffer
         StorageBuffer(const StorageBuffer&) = delete;
 
         void Clear() noexcept;
-        void Map(const void* dataToMap, uint32_t dataSize);
+        void Bind(const void* dataToMap, uint32_t dataSize);
         auto GetInfo() noexcept -> vk::DescriptorBufferInfo* {return &m_info;}
 
     private:

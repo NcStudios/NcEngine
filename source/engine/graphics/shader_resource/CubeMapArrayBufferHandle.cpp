@@ -15,38 +15,34 @@ CubeMapArrayBufferHandle::CubeMapArrayBufferHandle(uint32_t uid, shader_stage st
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void CubeMapArrayBufferHandle::Update(std::span<const asset::CubeMapWithId> data, uint32_t frameIndex)
+void CubeMapArrayBufferHandle::Add(std::span<const asset::CubeMapWithId> data)
 {
     m_backendPort->Emit(
         CabUpdateEventData
         {
             data,
-            frameIndex,
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            CabUpdateAction::Update,
-            false
+            CabUpdateAction::Add
         }
     );
 }
 
-void CubeMapArrayBufferHandle::Update(std::span<const asset::CubeMapWithId> data)
+void CubeMapArrayBufferHandle::Remove(std::span<const asset::CubeMapWithId> data)
 {
     m_backendPort->Emit(
         CabUpdateEventData
         {
             data,
-            std::numeric_limits<uint32_t>::max(),
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            CabUpdateAction::Update,
-            true
+            CabUpdateAction::Remove
         }
     );
 }
@@ -57,14 +53,12 @@ void CubeMapArrayBufferHandle::Clear()
         CabUpdateEventData
         {
             std::span<const asset::CubeMapWithId>{},
-            std::numeric_limits<uint32_t>::max(),
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            CabUpdateAction::Clear,
-            false
+            CabUpdateAction::Clear
         }
     );
 }

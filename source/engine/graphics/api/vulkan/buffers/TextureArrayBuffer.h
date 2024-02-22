@@ -7,8 +7,6 @@ namespace nc::graphics::vulkan
 class Image
 {
     public:
-        inline static uint32_t ImageUid = 0u;
-    
         Image();
         Image(GpuAllocator* allocator, const unsigned char* pixels, uint32_t width, uint32_t height, bool isNormal);
         Image(Image&&) = default;
@@ -31,6 +29,6 @@ struct TextureArrayBuffer
     vk::UniqueSampler sampler;
     std::vector<Image> images;
     std::vector<vk::DescriptorImageInfo> imageInfos;
-    std::vector<uint32_t> uids;
+    std::vector<std::string_view> uids;
 };
 } // namespace nc::graphics::vulkan

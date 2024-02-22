@@ -28,8 +28,8 @@ namespace nc::graphics::vulkan
 
     void UniformBuffer::Clear()
     {
-        m_buffer.Release();
-        m_allocator = nullptr;
+        auto zeroBuffer = std::vector<char>(m_alignedSize);
+        Bind(zeroBuffer.data(), m_alignedSize);
     }
 
     void UniformBuffer::Bind(const void* data, uint32_t size)

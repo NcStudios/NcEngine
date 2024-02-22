@@ -3,6 +3,8 @@
 
 #include "ncutility/NcError.h"
 
+#include "optick.h"
+
 namespace nc::graphics
 {
 TextureArrayBufferHandle::TextureArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const TabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set)
@@ -15,38 +17,36 @@ TextureArrayBufferHandle::TextureArrayBufferHandle(uint32_t uid, shader_stage st
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data, uint32_t frameIndex)
+void TextureArrayBufferHandle::Add(std::span<const asset::TextureWithId> data)
 {
+    OPTICK_CATEGORY("TextureArrayBufferHandle::Add", Optick::Category::Rendering);
+
     m_backendPort->Emit(
         TabUpdateEventData
         {
             data,
-            frameIndex,
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            TabUpdateAction::Update,
-            false
+            TabUpdateAction::Add
         }
     );
 }
 
-void TextureArrayBufferHandle::Update(std::span<const asset::TextureWithId> data)
+void TextureArrayBufferHandle::Remove(std::span<const asset::TextureWithId> data)
 {
     m_backendPort->Emit(
         TabUpdateEventData
         {
             data,
-            std::numeric_limits<uint32_t>::max(),
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            TabUpdateAction::Update,
-            true
+            TabUpdateAction::Remove
         }
     );
 }
@@ -57,14 +57,12 @@ void TextureArrayBufferHandle::Clear()
         TabUpdateEventData
         {
             std::span<const asset::TextureWithId>{},
-            std::numeric_limits<uint32_t>::max(),
             m_uid,
             m_slot,
             m_set,
             0u,
             m_stage,
-            TabUpdateAction::Clear,
-            false
+            TabUpdateAction::Clear
         }
     );
 }

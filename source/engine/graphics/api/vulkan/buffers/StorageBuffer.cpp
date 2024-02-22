@@ -1,5 +1,7 @@
 #include "StorageBuffer.h"
 
+#include "optick.h"
+
 namespace nc::graphics::vulkan
 {
 StorageBuffer::StorageBuffer(GpuAllocator* allocator, uint32_t size)
@@ -33,12 +35,16 @@ StorageBuffer& StorageBuffer::operator=(StorageBuffer&& other) noexcept
 
 void StorageBuffer::Clear() noexcept
 {
-    m_buffer.Release();
-    m_allocator = nullptr;
+    OPTICK_CATEGORY("StorageBuffer::Clear", Optick::Category::Rendering);
+
+    auto zeroBuffer = std::vector<char>(m_alignedSize);
+    Bind(zeroBuffer.data(), m_alignedSize);
 }
 
-void StorageBuffer::Map(const void* dataToMap, uint32_t dataSize)
+void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
 {
+    OPTICK_CATEGORY("StorageBuffer::Bind", Optick::Category::Rendering);
+    
     auto allocation = m_buffer.Allocation();
     void* dataContainer = m_allocator->Map(allocation);
     memcpy(dataContainer, dataToMap, dataSize);

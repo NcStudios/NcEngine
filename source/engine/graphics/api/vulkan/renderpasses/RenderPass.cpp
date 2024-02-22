@@ -1,6 +1,8 @@
 #include "RenderPass.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
+#include "optick.h"
+
 namespace
 {
 constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
@@ -118,6 +120,8 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
 
 void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
 {
+    OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
+
     for (const auto &technique : m_shadowMappingTechniques)
     {
         if (!technique->CanBind(frameData)) continue;

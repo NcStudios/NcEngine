@@ -2,7 +2,7 @@
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/GpuOptions.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
 #include "graphics/api/vulkan/shaders/ShaderResources.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"

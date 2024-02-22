@@ -1,7 +1,6 @@
 #include "VulkanGraphics.h"
 #include "FrameManager.h"
 #include "GpuAllocator.h"
-#include "GpuAssetsStorage.h"
 #include "GpuShaderStorage.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
 #include "Imgui.h"
@@ -45,10 +44,9 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
       m_shaderResources{ std::make_unique<ShaderResources>(m_device->VkDevice(), m_shaderDescriptorSets.get(), m_allocator.get(), config::GetMemorySettings(), shaderResourceBus)},
       m_renderGraph{std::make_unique<RenderGraph>(m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions, memorySettings.maxPointLights)},
-      m_gpuAssetsStorage{ std::make_unique<GpuAssetsStorage>(m_device->VkDevice(), m_allocator.get(), assetModule->OnMeshUpdate()) },
-      m_gpuShaderStorage{ std::make_unique<GpuShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderDescriptorSets.get(), shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
-      m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
+      m_gpuShaderStorage{ std::make_unique<GpuShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderDescriptorSets.get(), m_frameManager->CommandBuffers(), shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.meshArrayBufferChannel, shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
+      m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_lighting{std::make_unique<Lighting>(registry, m_renderGraph.get(), m_shaderResources.get())},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
@@ -137,12 +135,11 @@ void VulkanGraphics::Draw(const PerFrameRenderState& state)
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->Execute(currentFrame, state, m_gpuAssetsStorage.get()->meshStorage, m_imageIndex, m_dimensions, m_screenExtent, CurrentFrameIndex());
+    m_renderGraph->Execute(currentFrame, state, m_imageIndex, m_dimensions, m_screenExtent, CurrentFrameIndex());
 
     // Executes the command buffer to render to the image
     m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
     currentFrame->RenderFrame(m_device->VkGraphicsQueue());
-    m_device->VkDevice().waitIdle();
 
     // Returns the image to the swapchain
     bool isSwapChainValid = true;

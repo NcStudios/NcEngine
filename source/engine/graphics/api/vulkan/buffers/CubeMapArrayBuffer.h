@@ -39,7 +39,7 @@ struct CubeMapArrayBuffer
     vk::UniqueSampler sampler;
     std::vector<CubeMap> cubeMaps;
     std::vector<vk::DescriptorImageInfo> imageInfos;
-    std::vector<uint32_t> uids;
+    std::vector<std::string_view> uids;
 };
 } // namespace graphics::vulkan
 } // namespace nc

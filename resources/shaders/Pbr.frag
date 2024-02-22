@@ -46,7 +46,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
 
 layout (set = 1, binding = 2) uniform sampler2D textures[];
 // layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
-// layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
+layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
@@ -69,10 +69,10 @@ vec3 MaterialColor(uint textureIndex)
    return vec3(texture(textures[textureIndex], inUV));
 }
 
-// vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
-// {
-//     return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
-// }
+vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
+{
+    return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
+}
 
 const float PI = 3.14159265359;
 
@@ -227,15 +227,15 @@ void main()
         result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r, lightViewPos) + (pointLights.lights[i].ambientColor * 0.015);
     }
 
-//    if (environmentData.skyboxCubemapIndex > -1)
-//     {
-//         // Environment reflection
-//         vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
-//         vec3 reflected = reflect(I, N);
-//         vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
+   if (environmentData.skyboxCubemapIndex > -1)
+    {
+        // Environment reflection
+        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
+        vec3 reflected = reflect(I, N);
+        vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
 
-//         result += (F0 * (1-roughnessColor.r) * environmentReflectionColor) / 2;
-//     }
+        result += (F0 * (1-roughnessColor.r) * environmentReflectionColor) / 2;
+    }
 
-    outFragColor = vec4(pointLights.lights[0].diffuseColor, 1.0);
+    outFragColor = vec4(result, 1.0);
 }

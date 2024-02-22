@@ -28,14 +28,6 @@
 
 namespace
 {
-void BindMeshBuffers(vk::CommandBuffer* cmd, const nc::graphics::vulkan::MeshBuffer& vertexData, const nc::graphics::vulkan::MeshBuffer& indexData)
-{
-    vk::DeviceSize offsets[] = { 0 };
-    auto vertexBuffer = vertexData.GetBuffer();
-    cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
-    cmd->bindIndexBuffer(indexData.GetBuffer(), 0, vk::IndexType::eUint32);
-}
-
 void SetViewportAndScissorFullWindow(vk::CommandBuffer* cmd, const nc::Vector2& dimensions)
 {
     const auto viewport = vk::Viewport{0.0f, 0.0f, dimensions.x, dimensions.y, 0.0f, 1.0f};
@@ -157,6 +149,8 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
 
 void RenderGraph::MapShaderResources()
 {
+    OPTICK_CATEGORY("RenderGraph::MapShaderResources", Optick::Category::Rendering);
+    
     for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
         m_shadowMappingPasses[i].ClearTechniques();
@@ -177,7 +171,7 @@ void RenderGraph::MapShaderResources()
     m_litPass.RegisterTechnique<UiTechnique>(*m_device, m_descriptorSets);
 }
 
-void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, const vulkan::MeshStorage &meshStorage, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex)
+void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRenderState &frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex)
 {
     OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
@@ -188,7 +182,6 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     }
 
     const auto cmd = currentFrame->CommandBuffer();
-    BindMeshBuffers(cmd, meshStorage.GetVertexData(), meshStorage.GetIndexData());
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 

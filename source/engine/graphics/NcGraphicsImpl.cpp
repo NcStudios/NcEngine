@@ -1,5 +1,6 @@
 #include "NcGraphicsImpl.h"
 #include "PerFrameRenderState.h"
+#include "graphics/GraphicsConstants.h"
 #include "graphics/GraphicsUtilities.h"
 #include "shader_resource/ShaderResourceBus.h"
 #include "window/WindowImpl.h"
@@ -31,6 +32,67 @@ namespace
 
 namespace nc::graphics
 {
+    AssetResourcesConfig::AssetResourcesConfig(const config::MemorySettings& memorySettings)
+        : maxTextures{memorySettings.maxTextures},
+          maxCubeMaps{memorySettings.maxTextures}{} // Todo
+
+    AssetResources::AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, ModuleProvider modules)
+        : meshes{resourceBus->CreateMeshArrayBuffer()},
+          onMeshArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnMeshUpdate().Connect(this, &AssetResources::ForwardMeshAssetData)},
+          cubeMaps{resourceBus->CreateCubeMapArrayBuffer(config.maxCubeMaps, ShaderStage::Fragment, 4, 1)},
+          onCubeMapArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnCubeMapUpdate().Connect(this, &AssetResources::ForwardCubeMapAssetData)},
+          textures{resourceBus->CreateTextureArrayBuffer(config.maxTextures, ShaderStage::Fragment, 2, 1)},
+          onTextureArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnTextureUpdate().Connect(this, &AssetResources::ForwardTextureAssetData)}{}
+
+    void AssetResources::ForwardMeshAssetData(const asset::MeshUpdateEventData& assetData)
+    {
+        meshes.Initialize(assetData.vertices, assetData.indices);
+    }
+
+    void AssetResources::ForwardTextureAssetData(const asset::TextureUpdateEventData& assetData)
+    {
+        switch (assetData.updateAction)
+        {
+            case asset::UpdateAction::Load:
+            {
+                textures.Add(assetData.data);
+                break;
+            }
+            case asset::UpdateAction::Unload:
+            {
+                textures.Remove(assetData.data);
+                break;
+            }
+            case asset::UpdateAction::UnloadAll:
+            {
+                textures.Clear();
+                break;
+            }
+        }
+    }
+
+    void AssetResources::ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData& assetData)
+    {
+        switch (assetData.updateAction)
+        {
+            case asset::UpdateAction::Load:
+            {
+                cubeMaps.Add(assetData.data);
+                break;
+            }
+            case asset::UpdateAction::Unload:
+            {
+                cubeMaps.Remove(assetData.data);
+                break;
+            }
+            case asset::UpdateAction::UnloadAll:
+            {
+                cubeMaps.Clear();
+                break;
+            }
+        }
+    }
+
     SystemResourcesConfig::SystemResourcesConfig(const config::GraphicsSettings& graphicsSettings, const config::MemorySettings& memorySettings)
         : maxPointLights{memorySettings.maxPointLights},
           maxRenderers{memorySettings.maxRenderers},
@@ -92,7 +154,7 @@ namespace nc::graphics
         : m_registry{registry},
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
-          m_assetResources{},
+          m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
     {
@@ -141,7 +203,6 @@ namespace nc::graphics
         m_graphics->Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
-
         m_systemResources.skeletalAnimations.Clear();
     }
 
@@ -163,6 +224,7 @@ namespace nc::graphics
         }
 
         auto currentFrameIndex = m_graphics->CurrentFrameIndex();
+        m_assetResources.meshes.Bind(currentFrameIndex);
 
         auto cameraState = m_systemResources.cameras.Execute(m_registry);
         m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));

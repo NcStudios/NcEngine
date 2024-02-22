@@ -5,7 +5,7 @@
 #include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"

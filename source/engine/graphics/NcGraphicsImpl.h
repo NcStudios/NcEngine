@@ -3,6 +3,9 @@
 #include "IGraphics.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
+#include "shader_resource/CubeMapArrayBufferHandle.h"
+#include "shader_resource/MeshArrayBufferHandle.h"
+#include "shader_resource/TextureArrayBufferHandle.h"
 #include "system/CameraSystem.h"
 #include "system/EnvironmentSystem.h"
 #include "system/ObjectSystem.h"
@@ -36,8 +39,28 @@ namespace graphics
 {
 struct ShaderResourceBus;
 
+struct AssetResourcesConfig
+{
+    AssetResourcesConfig(const config::MemorySettings& memorySettings);
+    uint32_t maxTextures;
+    uint32_t maxCubeMaps;
+};
+
 struct AssetResources
 {
+    AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, ModuleProvider modules);
+
+    MeshArrayBufferHandle meshes;
+    nc::Connection<const asset::MeshUpdateEventData&> onMeshArrayBufferUpdate;
+    void ForwardMeshAssetData(const asset::MeshUpdateEventData& assetData);
+
+    CubeMapArrayBufferHandle cubeMaps;
+    nc::Connection<const asset::CubeMapUpdateEventData&> onCubeMapArrayBufferUpdate;
+    void ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData& assetData);
+
+    TextureArrayBufferHandle textures;
+    nc::Connection<const asset::TextureUpdateEventData&> onTextureArrayBufferUpdate;
+    void ForwardTextureAssetData(const asset::TextureUpdateEventData& assetData);
 };
 
 struct SystemResourcesConfig

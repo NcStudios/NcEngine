@@ -3,6 +3,7 @@
 
 #include "ncutility/NcError.h"
 
+#include "optick.h"
 namespace nc::graphics
 {
 UniformBufferHandle::UniformBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const UboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set)
@@ -37,6 +38,7 @@ void UniformBufferHandle::Update(void* data, size_t size, uint32_t currentFrameI
 
 void UniformBufferHandle::Update(void* data, size_t size)
 {
+    OPTICK_CATEGORY("UniformBufferHandle::Update", Optick::Category::Rendering);
     NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
     m_backendPort->Emit(
         UboUpdateEventData
