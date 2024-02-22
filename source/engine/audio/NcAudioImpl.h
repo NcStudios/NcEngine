@@ -1,30 +1,22 @@
 #pragma once
 
 #include "DeviceStream.h"
-#include "audio/NcAudio.h"
-#include "ecs/Registry.h"
-#include "task/TaskGraph.h"
+#include "ncengine/audio/NcAudio.h"
+#include "ncengine/audio/AudioSource.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/task/TaskGraph.h"
 
 #include <mutex>
 #include <queue>
 
-namespace nc
+namespace nc::audio
 {
-namespace config
-{
-struct AudioSettings;
-} // namespace config
-
-namespace audio
-{
-/** Factory to construct an audio module instance */
-auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> std::unique_ptr<NcAudio>;
-
 /** Audio module implementation */
 class NcAudioImpl final : public NcAudio
 {
     public:
-        NcAudioImpl(const config::AudioSettings& settings, Registry* registry);
+        NcAudioImpl(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState);
         ~NcAudioImpl() noexcept;
 
         /** NcAudio API */
@@ -44,7 +36,7 @@ class NcAudioImpl final : public NcAudio
         auto WriteToDeviceBuffer(double* output, uint32_t bufferFrames) -> int;
 
     private:
-        Registry* m_registry;
+        ecs::ExplicitEcs<Entity, Transform, AudioSource> m_gameState;
         DeviceStream m_deviceStream;
         std::vector<double> m_bufferMemory;
         std::queue<std::span<double>> m_readyBuffers;
@@ -57,5 +49,4 @@ class NcAudioImpl final : public NcAudio
 
         void MixToBuffer(double* buffer);
 };
-} // namespace audio
-} // namespace nc
+} // namespace nc::audio

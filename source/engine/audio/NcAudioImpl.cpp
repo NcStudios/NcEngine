@@ -78,20 +78,20 @@ struct NcAudioStub : public nc::audio::NcAudio
 
 namespace nc::audio
 {
-auto BuildAudioModule(const config::AudioSettings& settings, Registry* reg) -> std::unique_ptr<NcAudio>
+auto BuildAudioModule(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState) -> std::unique_ptr<NcAudio>
 {
     if(settings.enabled)
     {
         NC_LOG_TRACE("Building NcAudio module");
-        return std::make_unique<NcAudioImpl>(settings, reg);
+        return std::make_unique<NcAudioImpl>(settings, gameState);
     }
 
     NC_LOG_TRACE("Audio disabled - building NcAudio stub");
     return std::make_unique<NcAudioStub>();
 }
 
-NcAudioImpl::NcAudioImpl(const config::AudioSettings& settings, Registry* registry)
-    : m_registry{registry},
+NcAudioImpl::NcAudioImpl(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState)
+    : m_gameState{gameState},
       m_deviceStream{::CreateStreamParams(DefaultDeviceId, settings.bufferFrames, this)},
       m_bufferMemory(::BuildBufferPool(m_deviceStream.GetBufferFrames())),
       m_readyBuffers{},
@@ -240,16 +240,11 @@ void NcAudioImpl::MixToBuffer(double* buffer)
     const auto bufferSizeInBytes = ::IndividualBufferSize(bufferFrames) * sizeof(double);
     std::memset(buffer, 0, bufferSizeInBytes);
 
-    if(!m_registry->Contains<Entity>(m_listener))
-    {
-        throw NcError("Invalid listener registered");
-    }
+    const auto& listenerTransform = m_gameState.Get<Transform>(m_listener);
+    const auto listenerPosition = listenerTransform.Position();
+    const auto rightEar = listenerTransform.Right();
 
-    const auto* listenerTransform = m_registry->Get<Transform>(m_listener);
-    const auto listenerPosition = listenerTransform->Position();
-    const auto rightEar = listenerTransform->Right();
-
-    for(auto& source : View<AudioSource>{m_registry})
+    for(auto& source : m_gameState.GetAll<AudioSource>())
     {
         if(!source.IsPlaying())
         {
@@ -258,8 +253,8 @@ void NcAudioImpl::MixToBuffer(double* buffer)
 
         if(source.IsSpatial())
         {
-            auto* transform = m_registry->Get<Transform>(source.ParentEntity());
-            source.WriteSpatialSamples(buffer, bufferFrames, transform->Position(), listenerPosition, rightEar);
+            auto& transform = m_gameState.Get<Transform>(source.ParentEntity());
+            source.WriteSpatialSamples(buffer, bufferFrames, transform.Position(), listenerPosition, rightEar);
         }
         else
         {

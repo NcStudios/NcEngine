@@ -4,14 +4,23 @@
  */
 #pragma once
 
+#include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Entity.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Signal.h"
 
 #include <limits>
 
-namespace nc::audio
+namespace nc
+{
+namespace config
+{
+struct AudioSettings;
+} // namespace config
+
+namespace audio
 {
 /** @brief Id representing a system's default audio device. */
 constexpr auto DefaultDeviceId = std::numeric_limits<uint32_t>::max();
@@ -26,11 +35,15 @@ struct AudioDevice
     uint32_t id;
 };
 
-/** @brief Audio module interface.
- *  
- *  Component Access:
- *      Write: AudioSource
- *      Read: Transform
+/**
+ * @brief Audio module interface.
+ * 
+ * Tasks:
+ *   Process Audio
+ *     Runs During: ExecutionPhase::Free
+ *     Component Access:
+ *       Write: AudioSource
+ *       Read: Transform
 */
 struct NcAudio : public Module
 {
@@ -97,4 +110,8 @@ struct NcAudio : public Module
     */
     virtual auto OnChangeOutputDevice() noexcept -> Signal<const AudioDevice&>& = 0;
 };
-} // namespace nc::audio
+
+/** @brief Build an NcAudio module instance. */
+auto BuildAudioModule(const config::AudioSettings& settings, ecs::ExplicitEcs<Entity, Transform, AudioSource> gameState) -> std::unique_ptr<NcAudio>;
+} // namespace audio
+} // namespace nc
