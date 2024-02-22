@@ -108,7 +108,7 @@ auto DeserializeCollider(std::istream& stream, const DeserializationContext& ctx
 void SerializeConcaveCollider(std::ostream& stream, const physics::ConcaveCollider& out, const SerializationContext& ctx, void*)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetPath());
+    serialize::Serialize(stream, out.GetAssetPath());
 }
 
 auto DeserializeConcaveCollider(std::istream& stream, const DeserializationContext& ctx, void*) -> physics::ConcaveCollider

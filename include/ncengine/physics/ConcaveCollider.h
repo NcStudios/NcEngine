@@ -13,7 +13,16 @@ class ConcaveCollider final : public ComponentBase
 {
     public:
         ConcaveCollider(Entity entity, std::string assetPath);
-        auto GetPath() const -> const std::string& { return m_path; }
+
+        /** @brief Get the path to the geometry asset. */
+        auto GetAssetPath() const noexcept -> const std::string& { return m_path; }
+
+        /**
+         * @brief Set the path to the geometry asset.
+         * @note Intended for editor use. Updating the underlying geometry requires invoking SystemEvents::rebuildStatics
+         *       after updating the asset path.
+         */
+        auto SetAssetPath(std::string assetPath) { m_path = std::move(assetPath); }
 
     private:
         std::string m_path;

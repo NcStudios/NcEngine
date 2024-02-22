@@ -10,6 +10,7 @@
 
 #include <concepts>
 #include <iosfwd>
+#include <optional>
 #include <type_traits>
 
 namespace nc
@@ -98,7 +99,7 @@ template<PooledComponent T>
 struct ComponentHandler
 {
     /** @brief Function type for the Factory handler. */
-    using Factory_t = std::function<T(Entity entity, void* userData)>;
+    using Factory_t = std::function<std::optional<T>(Entity entity, void* userData)>;
 
     /** @brief Function type for the serialize handler. */
     using Serialize_t = std::function<void(std::ostream& binaryStream,

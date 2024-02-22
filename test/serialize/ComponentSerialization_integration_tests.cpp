@@ -150,7 +150,7 @@ TEST(ComponentSerializationTests, RoundTrip_concaveCollider_preservesValues)
     const auto expected = nc::physics::ConcaveCollider{g_staticEntity, "geometry.nca"};
     nc::SerializeConcaveCollider(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeConcaveCollider(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.GetPath(), actual.GetPath());
+    EXPECT_EQ(expected.GetAssetPath(), actual.GetAssetPath());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_meshRenderer_preservesValues)

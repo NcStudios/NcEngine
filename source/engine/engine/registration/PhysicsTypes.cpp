@@ -8,7 +8,8 @@ namespace nc
 void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
     Register<physics::Collider>(registry, maxEntities, ColliderId, "Collider", editor::ColliderUIWidget, CreateCollider, SerializeCollider, DeserializeCollider);
-    Register<physics::ConcaveCollider>(registry, maxEntities, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget, nullptr, SerializeConcaveCollider, DeserializeConcaveCollider);
-    Register<physics::PhysicsBody>(registry, maxEntities, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, SerializePhysicsBody, DeserializePhysicsBody, static_cast<void*>(&registry));
+    Register<physics::ConcaveCollider>(registry, maxEntities, ConcaveColliderId, "ConcaveCollider", editor::ConcaveColliderUIWidget, CreateConcaveCollider, SerializeConcaveCollider, DeserializeConcaveCollider);
+    auto colliderPool = static_cast<void*>(&registry.GetPool<physics::Collider>());
+    Register<physics::PhysicsBody>(registry, maxEntities, PhysicsBodyId, "PhysicsBody", editor::PhysicsBodyUIWidget, CreatePhysicsBody, SerializePhysicsBody, DeserializePhysicsBody, colliderPool);
 }
 } // namespace nc

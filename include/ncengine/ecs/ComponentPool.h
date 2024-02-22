@@ -339,8 +339,10 @@ auto ComponentPool<T>::AddDefault(Entity entity) -> AnyComponent
 {
     if (m_handler.factory)
     {
-        auto& comp = Insert(entity, m_handler.factory(entity, m_handler.userData));
-        return AnyComponent{&comp, &m_handler};
+        if (auto comp = m_handler.factory(entity, m_handler.userData))
+        {
+            return AnyComponent{&Insert(entity, std::move(comp.value())), &m_handler};
+        }
     }
 
     return AnyComponent{};
