@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "ecs/Registry.h"
-#include "ecs/EcsModule.h"
+#include "ecs/NcEcsImpl.h"
 #include "ncengine/Events.h"
 
 using namespace nc;

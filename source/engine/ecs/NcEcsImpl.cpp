@@ -1,4 +1,4 @@
-#include "EcsModule.h"
+#include "NcEcsImpl.h"
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Logic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
