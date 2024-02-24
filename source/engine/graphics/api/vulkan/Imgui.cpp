@@ -33,15 +33,6 @@ auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 
     return device.createDescriptorPoolUnique(imguiDescriptorPoolInfo);
 }
-
-auto MakeBuildFontHandler(const nc::graphics::Device& device)
-{
-    return [&device]()
-    {
-        device.ExecuteCommand([](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
-        ImGui_ImplVulkan_DestroyFontUploadObjects();
-    };
-}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -52,25 +43,26 @@ Imgui::Imgui(const Device& device,
              vk::RenderPass renderPass,
              Signal<>& onFontUpdate)
     : m_imguiDescriptorPool{CreateImguiDescriptorPool(device.VkDevice())},
-      m_buildFonts{onFontUpdate.Connect(::MakeBuildFontHandler(device))}
+      m_buildFonts{onFontUpdate.Connect(ImGui_ImplVulkan_CreateFontsTexture)}
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForVulkan(window, true);
-
     auto initInfo = ImGui_ImplVulkan_InitInfo{};
     initInfo.Instance = instance.VkInstance();
     initInfo.PhysicalDevice = device.VkPhysicalDevice();
     initInfo.Device = device.VkDevice();
     initInfo.Queue = device.VkGraphicsQueue();
     initInfo.DescriptorPool = m_imguiDescriptorPool.get();
+    initInfo.RenderPass = renderPass;
     initInfo.MinImageCount = 3;
     initInfo.ImageCount = 3;
     initInfo.MSAASamples = VkSampleCountFlagBits(device.GetGpuOptions().GetMaxSamplesCount());
 
-    ImGui_ImplVulkan_Init(&initInfo, renderPass);
-    device.ExecuteCommand([](vk::CommandBuffer cmd) { ImGui_ImplVulkan_CreateFontsTexture(cmd);});
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
+    ImGui_ImplVulkan_Init(&initInfo);
+    // While this is automatically called on the first frame, if we load our own fonts during engine intialization, the default
+    // font will not be in the atlas yet.
+    ImGui_ImplVulkan_CreateFontsTexture();
 }
 
 Imgui::~Imgui() noexcept
