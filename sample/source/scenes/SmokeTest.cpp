@@ -127,7 +127,9 @@ void SmokeTest::Load(Registry* registry, ModuleProvider modules)
             .initialEmissionCount = 10,
             .periodicEmissionCount = 10,
             .periodicEmissionFrequency = 0.1f
-        }
+        },
+        .init = {},
+        .kinematic = {}
     });
 
     world.Emplace<physics::Collider>(object, physics::BoxProperties{});
