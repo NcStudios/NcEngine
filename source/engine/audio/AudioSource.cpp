@@ -33,6 +33,7 @@ AudioSource::AudioSource(Entity entity,
                          AudioSourceProperties properties)
     : ComponentBase{entity},
       m_clips{::GetClips(clips)},
+      m_currentClipIndex{properties.flags & AudioSourceFlags::Play ? 0ull : NullClipIndex},
       m_properties{properties},
       m_coldData{std::make_unique<AudioSourceColdData>(std::move(clips))}
 {
