@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "utility/Signal.h"
 #include "ShaderTypes.h"
 
@@ -30,6 +31,8 @@ struct ShaderResourceBus
 
     auto CreateMeshArrayBuffer() -> MeshArrayBufferHandle;
 
+    auto CreatePPImageArrayBuffer(PostProcessImageType imageType, uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> PPImageArrayBufferHandle;
+
     inline static uint32_t StorageBufferUid = 0u;
     auto CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> StorageBufferHandle;
 
@@ -40,6 +43,7 @@ struct ShaderResourceBus
     auto CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> UniformBufferHandle;
 
     Signal<const CabUpdateEventData&> cubeMapArrayBufferChannel;
+    Signal<const PpiaUpdateEventData&> ppImageArrayBufferChannel;
     Signal<const MabUpdateEventData&> meshArrayBufferChannel;
     Signal<const SsboUpdateEventData&> storageBufferChannel;
     Signal<const TabUpdateEventData&> textureArrayBufferChannel;

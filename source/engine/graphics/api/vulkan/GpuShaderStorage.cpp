@@ -2,6 +2,7 @@
 
 #include "GpuShaderStorage.h"
 #include "GpuAllocator.h"
+#include "RenderGraph.h"
 #include "graphics/shader_resource/CubeMapArrayBufferHandle.h"
 #include "graphics/shader_resource/MeshArrayBufferHandle.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
@@ -60,20 +61,25 @@ namespace nc::graphics::vulkan
 GpuShaderStorage::GpuShaderStorage(vk::Device device,
                   GpuAllocator* allocator, 
                   ShaderDescriptorSets* descriptorSets,
+                  RenderGraph* renderGraph,
                   std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                   Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                   Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
+                  Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
                   Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                   Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_descriptorSets{descriptorSets},
+      m_renderGraph{renderGraph},
       m_perFrameCabStorage{},
       m_staticCabStorage{},
       m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateCubeMapArrayBuffer)},
       m_staticMabStorage{cmdBuffers},
       m_onMeshArrayBufferUpdate{onMeshArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateMeshArrayBuffer)},
+      m_perFramePpiaStorage{},
+      m_onPPImageArrayBufferUpdate{onPPImageArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdatePPImageArrayBuffer)},
       m_perFrameSsboStorage{},
       m_staticSsboStorage{},
       m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &GpuShaderStorage::UpdateStorageBuffer)},
@@ -192,6 +198,69 @@ void GpuShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData
             auto vertexBuffer = m_staticMabStorage.buffer.vertices.GetBuffer();
             cmd->bindVertexBuffers(0, 1, &vertexBuffer, offsets);
             cmd->bindIndexBuffer(m_staticMabStorage.buffer.indices.GetBuffer(), 0, vk::IndexType::eUint32);
+        }
+    }
+}
+
+void GpuShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
+{
+    auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
+    switch (eventData.action)
+    {
+        case PpiaUpdateAction::Initialize:
+        {
+            if (!storage.buffers.contains(eventData.imageType))
+            {
+                storage.buffers.emplace(eventData.imageType, std::make_unique<PPImageArrayBuffer>(m_device));
+            }
+            auto flags = GetStageFlags(eventData.stage);
+
+            m_descriptorSets->RegisterDescriptor
+            (
+                eventData.slot,
+                eventData.set,
+                eventData.count,
+                vk::DescriptorType::eCombinedImageSampler,
+                flags,
+                vk::DescriptorBindingFlagBitsEXT::ePartiallyBound,
+                eventData.currentFrameIndex
+            );
+            break;
+        }
+        case PpiaUpdateAction::Update:
+        {
+            OPTICK_CATEGORY("PpiaUpdateAction::Update", Optick::Category::Rendering);
+
+            auto& sampler = storage.buffers.at(eventData.imageType)->sampler.get();
+            auto& views = storage.buffers.at(eventData.imageType)->views;
+            auto& imageInfos = storage.buffers.at(eventData.imageType)->imageInfos;
+
+            views.clear();
+            imageInfos.clear();
+
+            views.reserve(eventData.count);
+            imageInfos.reserve(eventData.count);
+
+            for (auto view : m_renderGraph->GetPostProcessImages(eventData.imageType))
+            {
+                views.emplace_back(view);
+                imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
+            }
+
+            m_descriptorSets->UpdateImage
+            (
+                eventData.set,
+                imageInfos,
+                eventData.count,
+                vk::DescriptorType::eCombinedImageSampler,
+                eventData.slot,
+                eventData.currentFrameIndex
+            );
+            break;
+        }
+        case PpiaUpdateAction::Clear:
+        {
+            break;
         }
     }
 }
@@ -338,7 +407,7 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
             (
                 eventData.set,
                 imageInfos,
-                static_cast<uint32_t>(imageInfos.size()),
+                imageInfos.size(),
                 vk::DescriptorType::eCombinedImageSampler,
                 eventData.slot
             );
@@ -359,7 +428,7 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
             (
                 eventData.set,
                 imageInfos,
-                static_cast<uint32_t>(imageInfos.size()),
+                imageInfos.size(),
                 vk::DescriptorType::eCombinedImageSampler,
                 eventData.slot
             );

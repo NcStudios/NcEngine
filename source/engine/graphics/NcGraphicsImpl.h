@@ -12,7 +12,6 @@
 #include "system/ParticleEmitterSystem.h"
 #include "system/PointLightSystem.h"
 #include "system/SkeletalAnimationSystem.h"
-#include "system/TextureSystem.h"
 #include "system/UISystem.h"
 #include "system/WidgetSystem.h"
 
@@ -86,7 +85,6 @@ struct SystemResources
     ObjectSystem objects;
     PointLightSystem pointLights;
     SkeletalAnimationSystem skeletalAnimations;
-    TextureSystem textures;
     WidgetSystem widgets;
     UISystem ui;
 };

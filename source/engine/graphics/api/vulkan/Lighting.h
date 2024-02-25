@@ -1,28 +1,26 @@
 #pragma once
 
 #include "ecs/Registry.h"
+#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 
 namespace nc::graphics
 {
 class PointLight;
 class RenderGraph;
-struct ShaderResources;
 
 class Lighting
 {
     public:
         Lighting(Registry* registry,
-                 RenderGraph* renderGraph,
-                 ShaderResources* shaderResources);
+                 RenderGraph* renderGraph);
         void Clear();
-        void Resize();
 
     private:
         void OnCommitPointLightConnection();
         void OnRemovePointLightConnection();
 
         RenderGraph* m_renderGraph;
-        ShaderResources* m_shaderResources;
+        // PPImageArrayBufferHandle m_postProcessImageArrayBuffer;
         Connection<PointLight&> m_onCommitPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;
 };

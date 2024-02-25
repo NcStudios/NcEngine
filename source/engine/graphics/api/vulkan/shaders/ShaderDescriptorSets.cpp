@@ -87,7 +87,7 @@ ShaderDescriptorSets::ShaderDescriptorSets(vk::Device device)
 {
 }
 
-void ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex)
+void ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, size_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex)
 {
     NC_ASSERT(bindingSlot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 
@@ -98,7 +98,7 @@ void ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, uint32_t set
 
     auto* layout = &m_layouts.at(setIndex);
 
-    auto flattenedBindings = AddOrUpdate(bindingSlot, layout->bindings, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, descriptorCount, shaderStages));
+    auto flattenedBindings = AddOrUpdate(bindingSlot, layout->bindings, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, static_cast<uint32_t>(descriptorCount), shaderStages));
     auto flattenedFlags = AddOrUpdate(bindingSlot, layout->bindingFlags, vk::DescriptorBindingFlagsEXT(bindingFlags));
 
     layout->layout.reset();
@@ -173,13 +173,13 @@ void ShaderDescriptorSets::BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk
     cmd->bindDescriptorSets(bindPoint, pipelineLayout, setIndex, 1, set, 0, 0);
 }
 
-void ShaderDescriptorSets::UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
+void ShaderDescriptorSets::UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
 {
     vk::WriteDescriptorSet write{};
     write.setDstBinding(bindingSlot);
     write.setDstArrayElement(0);
     write.setDescriptorType(descriptorType);
-    write.setDescriptorCount(descriptorCount);
+    write.setDescriptorCount(static_cast<uint32_t>(descriptorCount));
     write.setPBufferInfo(0);
     write.setPImageInfo(imageInfos.data());
     
@@ -205,13 +205,13 @@ void ShaderDescriptorSets::UpdateImage(uint32_t setIndex, std::span<const vk::De
         isDirty.at(setIndex) = true;
 }
 
-void ShaderDescriptorSets::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
+void ShaderDescriptorSets::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
 {
     vk::WriteDescriptorSet write{};
     write.setDstBinding(bindingSlot);
     write.setDstArrayElement(0);
     write.setDescriptorType(descriptorType);
-    write.setDescriptorCount(descriptorCount);
+    write.setDescriptorCount(static_cast<uint32_t>(descriptorCount));
     write.setPImageInfo(0);
     write.setPBufferInfo(info);
 

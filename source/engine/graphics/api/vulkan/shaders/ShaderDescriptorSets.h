@@ -50,13 +50,13 @@ namespace nc::graphics
             ShaderDescriptorSets(vk::Device device);
 
             /* Resources attach themselves to a shader slot by registering themselves here. */
-            void RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, uint32_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
+            void RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, size_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
             void CommitResourceLayout();
             auto OnResourceLayoutChanged() -> Signal<const DescriptorSetLayoutsChanged&>& { return m_setLayoutsChanged; }
 
             /* Called when the data in the image or buffer changes. */
-            void UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
-            void UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, uint32_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
+            void UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
+            void UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());
 
             /* Called in the techniques to access and bind the descriptor set(s). */
             vk::DescriptorSetLayout* GetSetLayout(uint32_t setIndex);

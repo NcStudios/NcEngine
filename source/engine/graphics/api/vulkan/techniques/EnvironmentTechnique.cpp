@@ -7,7 +7,6 @@
 #include "graphics/api/vulkan/Swapchain.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderResources.h"
 #include "graphics/api/vulkan/shaders/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 
@@ -36,9 +35,10 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderDescripto
         CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
-    std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
+    std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
     {
-        *(m_descriptorSets->GetSetLayout(0))
+        *(m_descriptorSets->GetSetLayout(0)),
+        *(m_descriptorSets->GetSetLayout(1))
     };
 
     auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -98,6 +98,7 @@ void EnvironmentTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     OPTICK_CATEGORY("EnvironmentTechnique::Bind", Optick::Category::Rendering);
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+    m_descriptorSets->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
 bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)

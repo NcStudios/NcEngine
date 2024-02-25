@@ -33,6 +33,26 @@ auto ShaderResourceBus::CreateMeshArrayBuffer() -> MeshArrayBufferHandle
     return MeshArrayBufferHandle(&meshArrayBufferChannel);
 }
 
+auto ShaderResourceBus::CreatePPImageArrayBuffer(PostProcessImageType imageType, uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> PPImageArrayBufferHandle
+{
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        ppImageArrayBufferChannel.Emit(
+            PpiaUpdateEventData
+            {
+                imageType,
+                i,
+                slot,
+                set,
+                capacity,
+                stage,
+                PpiaUpdateAction::Initialize
+            }
+        );
+    }
+    return PPImageArrayBufferHandle(imageType, stage, &ppImageArrayBufferChannel, slot, set);
+}
+
 auto ShaderResourceBus::CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> StorageBufferHandle
 {
     auto uid = ShaderResourceBus::StorageBufferUid++;

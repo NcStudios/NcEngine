@@ -9,6 +9,7 @@
 namespace nc::graphics
 {
 // Resources
+auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler;
 auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler;
 vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler sampler, vk::ImageView imageView, vk::ImageLayout layout);
 

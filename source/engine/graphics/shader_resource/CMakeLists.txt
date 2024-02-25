@@ -2,6 +2,7 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         CubeMapArrayBufferHandle.cpp
         MeshArrayBufferHandle.cpp
+        PPImageArrayBufferHandle.cpp
         ShaderResourceBus.cpp
         StorageBufferHandle.cpp
         TextureArrayBufferHandle.cpp

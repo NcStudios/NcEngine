@@ -17,6 +17,24 @@ enum class SsboUpdateAction : uint8_t
     Clear
 };
 
+// struct FooAddEvent{};
+// struct FooRemoveEvent{};
+// using FooEvent = std::variant<FooAddEvent, FooRemoveEvent>;
+
+// // handler
+// void HandleEvent(const FooEvent& e)
+// {
+//     std::visit([](auto&& unpacked)
+//     {
+//         using t = std::decay_t<decltype(unpacked)>;
+//         if constexpr(std::same_as<t, FooAddEvent>)
+//         {
+
+//         }
+//         else if const
+//     }, e);
+// }
+
 struct SsboUpdateEventData
 {
     uint32_t uid;

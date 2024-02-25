@@ -3,10 +3,12 @@
 #include "asset/AssetData.h"
 #include "graphics/api/vulkan/buffers/CubeMapArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/MeshArrayBuffer.h"
+#include "graphics/api/vulkan/buffers/PPImageArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/StorageBuffer.h"
 #include "graphics/api/vulkan/buffers/TextureArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/UniformBuffer.h"
 #include "graphics/GraphicsConstants.h"
+#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "ncengine/type/StableAddress.h"
 #include "utility/Signal.h"
 
@@ -19,6 +21,8 @@ namespace nc::graphics
 struct CabUpdateEventData;
 class GpuAllocator;
 struct MabUpdateEventData;
+struct PpiaUpdateEventData;
+class RenderGraph;
 class ShaderDescriptorSets;
 struct SsboUpdateEventData;
 struct UboUpdateEventData;
@@ -37,6 +41,11 @@ struct MeshArrayBufferStorage
     MeshArrayBufferStorage(std::array<vk::CommandBuffer*, MaxFramesInFlight> bindTargets_);
     std::array<vk::CommandBuffer*, MaxFramesInFlight> bindTargets;
     MeshArrayBuffer buffer;
+};
+
+struct PPImageArrayBufferStorage
+{
+    std::unordered_map<PostProcessImageType, std::unique_ptr<PPImageArrayBuffer>> buffers;
 };
 
 struct UniformBufferStorage
@@ -62,15 +71,18 @@ struct GpuShaderStorage : StableAddress
     GpuShaderStorage(vk::Device device,
                      GpuAllocator* allocator, 
                      ShaderDescriptorSets* descriptorSets,
+                     RenderGraph* renderGraph,
                      std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                      Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                      Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
+                     Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
                      Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                      Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                      Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
 
     void UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData);
     void UpdateMeshArrayBuffer(const MabUpdateEventData& eventData);
+    void UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData);
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
@@ -78,6 +90,7 @@ struct GpuShaderStorage : StableAddress
     vk::Device m_device;
     GpuAllocator* m_allocator;
     ShaderDescriptorSets* m_descriptorSets;
+    RenderGraph* m_renderGraph;
 
     std::array<CubeMapArrayBufferStorage, MaxFramesInFlight> m_perFrameCabStorage;
     CubeMapArrayBufferStorage m_staticCabStorage;
@@ -85,6 +98,9 @@ struct GpuShaderStorage : StableAddress
 
     MeshArrayBufferStorage m_staticMabStorage;
     nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
+
+    std::array<PPImageArrayBufferStorage, MaxFramesInFlight> m_perFramePpiaStorage;
+    nc::Connection<const graphics::PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
 
     std::array<StorageBufferStorage, MaxFramesInFlight> m_perFrameSsboStorage;
     StorageBufferStorage m_staticSsboStorage;

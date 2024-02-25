@@ -25,7 +25,6 @@
 #include <ranges>
 
 #include <iostream>
-
 namespace
 {
 void SetViewportAndScissorFullWindow(vk::CommandBuffer* cmd, const nc::Vector2& dimensions)
@@ -66,7 +65,7 @@ auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::G
     }
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(vkDevice, 0u, ShadowMappingPassId + std::to_string(index), shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
+    auto renderPass = RenderPass(vkDevice, ShadowMappingPassId + std::to_string(index), shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
 
     for (auto i = 0u; i < numConcurrentAttachments; i++)
     {
@@ -103,7 +102,7 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
     attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(vkDevice, 1u, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+    auto renderPass = RenderPass(vkDevice, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
     auto &colorImageViews = swapchain->GetColorImageViews();
     auto depthImageView = renderPass.GetAttachmentView(0);
@@ -120,7 +119,6 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
         };
         renderPass.RegisterAttachmentViews(imageViews, dimensions, index++);
     }
-
     return renderPass;
 }
 }
@@ -139,12 +137,15 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
       m_activeShadowMappingPasses{},
       m_maxLights{maxLights},
       m_isDescriptorSetLayoutsDirty{true},
-      m_onDescriptorSetsChanged{m_descriptorSets->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)}
+      m_onDescriptorSetsChanged{m_descriptorSets->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
+      m_postProcessImageViews{}
 {
     for (auto i : std::views::iota(0u, m_maxLights))
     {
         m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
     }
+
+    m_postProcessImageViews.emplace(PostProcessImageType::ShadowMap, std::vector<vk::ImageView>{});
 }
 
 void RenderGraph::MapShaderResources()
@@ -185,11 +186,14 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
+    m_postProcessImageViews.at(PostProcessImageType::ShadowMap).clear();
+
     for (auto& shadowMappingPass : m_shadowMappingPasses)
     {
         shadowMappingPass.Begin(cmd, frameBufferIndex);
         shadowMappingPass.Execute(cmd, frameData, frameIndex);
         shadowMappingPass.End(cmd);
+        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).emplace_back(shadowMappingPass.GetAttachmentView(frameIndex));
     }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
@@ -200,9 +204,14 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     cmd->end();
 }
 
+auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType) -> std::vector<vk::ImageView>
+{
+    return m_postProcessImageViews.at(imageType);
+}
+
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions);
+    m_litPass = std::move(CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions));
 
     m_shadowMappingPasses.clear();
     for (auto i : std::views::iota(0u, m_maxLights))

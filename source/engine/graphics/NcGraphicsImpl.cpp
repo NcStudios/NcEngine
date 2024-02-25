@@ -111,7 +111,6 @@ namespace nc::graphics
           objects{resourceBus, config.maxRenderers},
           pointLights{resourceBus, config.maxPointLights, config.useShadows},
           skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
-          textures{resourceBus, modules.Get<asset::NcAsset>()->OnTextureUpdate(), config.maxTextures},
           widgets{},
           ui{registry->GetEcs(), modules, events}
     {

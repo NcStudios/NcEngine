@@ -2,6 +2,7 @@
 
 #include "core/GpuOptions.h"
 #include "renderpasses/RenderPass.h"
+#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 
 #include "utility/Signal.h"
 
@@ -20,6 +21,11 @@ class Swapchain;
 inline static const std::string LitPassId = "Lit Pass";
 inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
 
+namespace vulkan
+{
+    struct PpiaUpdateEventData;
+}
+
 class RenderGraph
 {
     public:
@@ -27,6 +33,8 @@ class RenderGraph
 
         void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex);
         void Resize(const Vector2 &dimensions);
+
+        auto GetPostProcessImages(PostProcessImageType imageType) -> std::vector<vk::ImageView>;
 
         auto GetShadowPasses() const noexcept -> const std::vector<RenderPass>& { return m_shadowMappingPasses; };
         auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass; };
@@ -43,6 +51,7 @@ class RenderGraph
         GpuAllocator* m_gpuAllocator;
         ShaderDescriptorSets* m_descriptorSets;
         std::vector<RenderPass> m_shadowMappingPasses;
+        std::unordered_map<PostProcessImageType, std::vector<vk::ImageView>> m_postProcessImageViews;
         RenderPass m_litPass;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;

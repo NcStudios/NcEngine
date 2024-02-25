@@ -3,6 +3,30 @@
 
 namespace nc::graphics
 {
+auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler
+{
+    constexpr auto samplerInfo = vk::SamplerCreateInfo
+    {
+        vk::SamplerCreateFlags(),               // SamplerCreateFlags
+        vk::Filter::eNearest,                   // MagFilter
+        vk::Filter::eNearest,                   // MinFilter
+        vk::SamplerMipmapMode::eLinear,         // MipMapMode
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeU
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeV
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeW
+        0.0f,                                   // MipLodBias
+        VK_TRUE,                                // AnisotropyEnable
+        1.0f,                                   // MaxAnisotropy
+        VK_FALSE,                               // CompareEnable
+        vk::CompareOp::eAlways,                 // CompareOp
+        0.0f,                                   // MinLod
+        1.0f,                                   // MaxLod
+        vk::BorderColor::eFloatOpaqueWhite,     // BorderColor
+        VK_FALSE                                // UnnormalizedCoordinates
+    };
+    return device.createSamplerUnique(samplerInfo);
+}
+
 auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler
 {
     const auto samplerInfo = vk::SamplerCreateInfo

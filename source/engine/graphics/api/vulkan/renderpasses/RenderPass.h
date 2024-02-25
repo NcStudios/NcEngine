@@ -17,7 +17,6 @@ class RenderPass
 {
     public:
         RenderPass(vk::Device device,
-                   uint8_t priority,
                    std::string uid,
                    std::span<const AttachmentSlot> attachmentSlots,
                    std::span<const Subpass> subpasses,
@@ -29,7 +28,6 @@ class RenderPass
         void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer *cmd);
 
-        auto GetPriority() const -> uint32_t;
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
         auto GetUid() const -> std::string;
         auto GetVkPass() const -> vk::RenderPass;
@@ -49,7 +47,6 @@ class RenderPass
     private:
         auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;
         vk::Device m_device;
-        uint8_t m_priority;
         std::string m_uid;
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;

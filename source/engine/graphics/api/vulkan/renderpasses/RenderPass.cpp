@@ -76,7 +76,6 @@ auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachment
 namespace nc::graphics
 {
 RenderPass::RenderPass(vk::Device device,
-                       uint8_t priority,
                        std::string uid,
                        std::span<const AttachmentSlot> attachmentSlots,
                        std::span<const Subpass> subpasses,
@@ -84,7 +83,6 @@ RenderPass::RenderPass(vk::Device device,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags)
     : m_device{device},
-      m_priority{priority},
       m_uid{std::move(uid)},
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
@@ -144,11 +142,6 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
 void RenderPass::End(vk::CommandBuffer *cmd)
 {
     cmd->endRenderPass();
-}
-
-auto RenderPass::GetPriority() const -> uint32_t
-{
-    return m_priority;
 }
 
 auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
