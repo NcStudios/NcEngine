@@ -5,8 +5,8 @@
 #pragma once
 
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/Entity.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Signal.h"

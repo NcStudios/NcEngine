@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "ecs/Registry.h"
-#include "ecs/NcEcsImpl.h"
 #include "ncengine/Events.h"
+#include "ncengine/ecs/NcEcsImpl.h"
+#include "ncengine/ecs/Registry.h"
 
 using namespace nc;
 
