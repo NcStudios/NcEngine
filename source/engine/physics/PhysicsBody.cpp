@@ -75,15 +75,15 @@ namespace nc::physics
 {
 PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 linearFreedom, Vector3 angularFreedom)
     : ComponentBase{entity},
-        m_properties{properties},
-        m_linearVelocity{},
-        m_angularVelocity{},
-        m_linearFreedom{XMLoadVector3(&linearFreedom)},
-        m_angularFreedom{XMLoadVector3(&angularFreedom)},
-        m_invInertiaWorld{},
-        m_invInertiaLocal{},
-        m_framesAtThreshold{0u},
-        m_awake{true}
+      m_properties{properties},
+      m_linearVelocity{},
+      m_angularVelocity{},
+      m_linearFreedom{XMLoadVector3(&linearFreedom)},
+      m_angularFreedom{XMLoadVector3(&angularFreedom)},
+      m_invInertiaWorld{},
+      m_invInertiaLocal{},
+      m_framesAtThreshold{0u},
+      m_awake{true}
 {
     auto* registry = ActiveRegistry();
     if(!registry->Contains<Collider>(entity))
@@ -94,6 +94,7 @@ PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 li
     {
         m_properties.mass = 0.0f;
         m_properties.useGravity = false;
+        m_properties.isKinematic = true;
     }
 
     if(m_properties.mass == 0.0f)
