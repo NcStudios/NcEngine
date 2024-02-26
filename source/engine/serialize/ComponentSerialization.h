@@ -21,6 +21,8 @@ void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmit
 auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, void*) -> graphics::ParticleEmitter;
 void SerializePhysicsBody(std::ostream& stream, const physics::PhysicsBody& out, const SerializationContext& ctx, void*);
 auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& ctx, void*) -> physics::PhysicsBody;
+void SerializePhysicsMaterial(std::ostream& stream, const physics::PhysicsMaterial& out, const SerializationContext& ctx, void*);
+auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationContext& ctx, void*) -> physics::PhysicsMaterial;
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, void*);
 auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, void*) -> graphics::PointLight;
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, void*);

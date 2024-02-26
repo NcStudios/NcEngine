@@ -11,6 +11,7 @@
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 
 namespace nc
 {
@@ -79,5 +80,10 @@ auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
     }
 
     return physics::PhysicsBody{entity};
+}
+
+auto CreatePhysicsMaterial(Entity entity, void*) -> physics::PhysicsMaterial
+{
+    return physics::PhysicsMaterial{entity};
 }
 } // namespace nc

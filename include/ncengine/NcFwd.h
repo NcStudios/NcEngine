@@ -64,5 +64,6 @@ struct NcPhysics;
 class Collider;
 class ConcaveCollider;
 class PhysicsBody;
+struct PhysicsMaterial;
 } // namespace physics
 } // namespac nc

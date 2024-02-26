@@ -13,8 +13,6 @@ struct PhysicsProperties
     float mass = 1.0f;        // Mass in kilograms (0 is infinite)
     float drag = 0.05f;       // Linear resistance
     float angularDrag = 0.1f; // Angular resistence
-    float restitution = 0.3f; // Coefficient of restitution (collision elasticity) [0, 1]
-    float friction = 0.5f;    // Coefficient of friction [0, 1]
     bool useGravity = true;   // Is the object affected by gravity
     bool isKinematic  = false;  // Prevent forces and collisions from affecting the object
 };
@@ -39,8 +37,6 @@ class PhysicsBody final : public ComponentBase
         void SetMass(float mass) noexcept { m_properties.mass = mass == 0.0f ? 0.0f : 1.0f / mass; }
         void SetDrag(float drag) noexcept { m_properties.drag = drag; }
         void SetAngularDrag(float angularDrag) noexcept { m_properties.angularDrag = angularDrag; }
-        void SetFriction(float friction) noexcept { m_properties.friction = friction; }
-        void SetRestitution(float restitution) noexcept { m_properties.restitution = restitution; }
         void SetUseGravity(bool useGravity) noexcept { m_properties.useGravity = useGravity; }
         void SetIsKinematic(bool isKinematic) noexcept { m_properties.isKinematic = isKinematic; }
 
@@ -65,8 +61,6 @@ class PhysicsBody final : public ComponentBase
         auto GetInverseMass() const noexcept -> float { return m_properties.mass; }
         auto GetDrag() const noexcept -> float { return m_properties.drag; }
         auto GetAngularDrag() const noexcept -> float { return m_properties.angularDrag; }
-        auto GetFriction() const noexcept -> float { return m_properties.friction; }
-        auto GetRestitution() const noexcept -> float { return m_properties.restitution; }
         auto GetInverseInertia() const noexcept -> DirectX::FXMMATRIX { return m_invInertiaWorld; }
         auto UseGravity() const noexcept -> bool { return m_properties.useGravity; }
         auto IsKinematic() const noexcept -> bool { return m_properties.isKinematic; }

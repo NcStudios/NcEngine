@@ -177,6 +177,24 @@ auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& 
     return physics::PhysicsBody{ctx.entityMap.at(id), properties, linearFreedom, angularFreedom};
 }
 
+void SerializePhysicsMaterial(std::ostream& stream, const physics::PhysicsMaterial& out, const SerializationContext& ctx, void*)
+{
+    serialize(stream, ctx.entityMap.at(out.ParentEntity()));
+    serialize(stream, out.friction);
+    serialize(stream, out.restitution);
+}
+
+auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationContext& ctx, void*) -> physics::PhysicsMaterial
+{
+    auto id = uint32_t{};
+    auto friction = float{};
+    auto restitution = float{};
+    serialize::Deserialize(stream, id);
+    serialize::Deserialize(stream, friction);
+    serialize::Deserialize(stream, restitution);
+    return physics::PhysicsMaterial{ctx.entityMap.at(id), friction, restitution};
+}
+
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, void*)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
