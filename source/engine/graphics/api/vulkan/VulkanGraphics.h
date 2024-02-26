@@ -27,7 +27,7 @@ class GpuAllocator;
 class Imgui;
 class Instance;
 struct PerFrameRenderState;
-class PointLight;
+struct PointLight;
 class Swapchain;
 class RenderGraph;
 class ShaderBindingManager;

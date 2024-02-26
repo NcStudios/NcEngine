@@ -11,7 +11,7 @@
 
 namespace nc
 {
-class Tag;
+struct Tag;
 class Transform;
 
 namespace ui::editor

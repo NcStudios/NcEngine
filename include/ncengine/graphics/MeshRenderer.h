@@ -36,8 +36,6 @@ enum class TechniqueType : uint8_t
 
 class MeshRenderer : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(MeshRenderer)
-
     public:
         MeshRenderer(Entity entity,
                      std::string meshUid = asset::CubeMesh,

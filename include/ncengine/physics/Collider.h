@@ -71,8 +71,6 @@ using BoundingVolume = std::variant<Box, Sphere, Capsule, ConvexHull>;
 /** @brief Component managing collision geometry. */
 class Collider final : public ComponentBase
 {
-    NC_ENABLE_IN_EDITOR(Collider)
-
     public:
         Collider(Entity entity, SphereProperties properties, bool isTrigger = false);
         Collider(Entity entity, BoxProperties properties, bool isTrigger = false);

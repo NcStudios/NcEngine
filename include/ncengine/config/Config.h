@@ -25,16 +25,15 @@ struct ProjectSettings
  */
 struct AssetSettings
 {
-    /** @todo These defaults don't make much sense since we don't know the install path. */
-    std::string audioClipsPath = "resources/assets/audio_clips/";
-    std::string concaveCollidersPath = "resources/assets/concave_colliders/";
-    std::string hullCollidersPath = "resources/assets/hull_colliders/";
-    std::string meshesPath = "resources/assets/meshes/";
-    std::string shadersPath = "resources/assets/shaders/";
-    std::string skeletalAnimationsPath = "resources/assets/skeletal_animations/";
-    std::string texturesPath = "resources/assets/textures/";
-    std::string cubeMapsPath = "resources/assets/cube_maps";
-    std::string fontsPath = "resources/assets/fonts";
+    std::string audioClipsPath = "assets/audio_clips/";
+    std::string concaveCollidersPath = "assets/concave_colliders/";
+    std::string hullCollidersPath = "assets/hull_colliders/";
+    std::string meshesPath = "assets/meshes/";
+    std::string shadersPath = "assets/shaders/";
+    std::string skeletalAnimationsPath = "assets/skeletal_animations/";
+    std::string texturesPath = "assets/textures/";
+    std::string cubeMapsPath = "assets/cube_maps";
+    std::string fontsPath = "assets/fonts";
 };
 
 /**
@@ -54,6 +53,7 @@ struct MemorySettings
     unsigned maxPointLights = 10;
     unsigned maxSkeletalAnimations = 1000;
     unsigned maxTextures = 1000;
+    unsigned maxCubeMaps = 10;
 };
 
 /** @brief Options for configuring NcGraphics. */

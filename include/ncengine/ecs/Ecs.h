@@ -159,9 +159,12 @@ class EcsInterface
                   && PolicyType::template HasAccess<Tag>
         {
             const auto tags = GetAll<Tag>();
-            const auto pos = std::ranges::find(tags, tagValue, [](const auto& tag) { return tag.Value(); });
+            const auto pos = std::ranges::find(tags, tagValue, [](const auto& tag) { return tag.value; });
             NC_ASSERT(pos != std::ranges::end(tags), fmt::format("No Entity found with Tag '{}'", tagValue));
-            return pos->ParentEntity();
+            return m_policy.template OnPool<Tag>([pos](const auto& pool)
+            {
+                return pool.GetParent(&(*pos));
+            });
         }
 
         /** @brief Get a contiguous view of all instances of a type. */

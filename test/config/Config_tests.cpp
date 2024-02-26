@@ -105,15 +105,27 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
 
     EXPECT_EQ(expected.projectSettings.projectName, actual.projectSettings.projectName);
     EXPECT_EQ(expected.projectSettings.logFilePath, actual.projectSettings.logFilePath);
+
     EXPECT_EQ(expected.assetSettings.audioClipsPath, actual.assetSettings.audioClipsPath);
     EXPECT_EQ(expected.assetSettings.concaveCollidersPath, actual.assetSettings.concaveCollidersPath);
-
     EXPECT_EQ(expected.assetSettings.hullCollidersPath, actual.assetSettings.hullCollidersPath);
     EXPECT_EQ(expected.assetSettings.meshesPath, actual.assetSettings.meshesPath);
     EXPECT_EQ(expected.assetSettings.shadersPath, actual.assetSettings.shadersPath);
     EXPECT_EQ(expected.assetSettings.skeletalAnimationsPath, actual.assetSettings.skeletalAnimationsPath);
     EXPECT_EQ(expected.assetSettings.texturesPath, actual.assetSettings.texturesPath);
     EXPECT_EQ(expected.assetSettings.cubeMapsPath, actual.assetSettings.cubeMapsPath);
+    EXPECT_EQ(expected.assetSettings.fontsPath, actual.assetSettings.fontsPath);
+
+    EXPECT_EQ(expected.memorySettings.maxDynamicColliders, actual.memorySettings.maxDynamicColliders);
+    EXPECT_EQ(expected.memorySettings.maxStaticColliders, actual.memorySettings.maxStaticColliders);
+    EXPECT_EQ(expected.memorySettings.maxNetworkDispatchers, actual.memorySettings.maxNetworkDispatchers);
+    EXPECT_EQ(expected.memorySettings.maxParticleEmitters, actual.memorySettings.maxParticleEmitters);
+    EXPECT_EQ(expected.memorySettings.maxRenderers, actual.memorySettings.maxRenderers);
+    EXPECT_EQ(expected.memorySettings.maxTransforms, actual.memorySettings.maxTransforms);
+    EXPECT_EQ(expected.memorySettings.maxPointLights, actual.memorySettings.maxPointLights);
+    EXPECT_EQ(expected.memorySettings.maxSkeletalAnimations, actual.memorySettings.maxSkeletalAnimations);
+    EXPECT_EQ(expected.memorySettings.maxTextures, actual.memorySettings.maxTextures);
+    EXPECT_EQ(expected.memorySettings.maxCubeMaps, actual.memorySettings.maxCubeMaps);
 
     EXPECT_EQ(expected.graphicsSettings.enabled, actual.graphicsSettings.enabled);
     EXPECT_EQ(expected.graphicsSettings.useNativeResolution, actual.graphicsSettings.useNativeResolution);
@@ -132,4 +144,5 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_FLOAT_EQ(expected.physicsSettings.worldspaceExtent, actual.physicsSettings.worldspaceExtent);
 
     EXPECT_EQ(expected.audioSettings.enabled, actual.audioSettings.enabled);
+    EXPECT_EQ(expected.audioSettings.bufferFrames, actual.audioSettings.bufferFrames);
 }
