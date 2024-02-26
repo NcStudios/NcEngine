@@ -5,11 +5,6 @@
 
 namespace nc::graphics
 {
-PostProcessResources::PostProcessResources(ShaderResourceBus* resourceBus, uint32_t maxPointLights)
-    : shadowMaps{resourceBus->CreatePPImageArrayBuffer(PostProcessImageType::ShadowMap, maxPointLights, ShaderStage::Fragment, 3u, 0u)},
-      maxShadows{maxPointLights}
-{}
-
 AssetResourcesConfig::AssetResourcesConfig(const config::MemorySettings& memorySettings)
     : maxTextures{memorySettings.maxTextures},
       maxCubeMaps{memorySettings.maxTextures} //todo: fix after pull
@@ -93,7 +88,7 @@ SystemResources::SystemResources(SystemResourcesConfig config,
       skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
       widgets{},
       ui{registry->GetEcs(), modules, events},
-      particleEmitterSystem{registry, getCamera}
+      particleEmitters{registry, getCamera}
 {
 }
 } // namespace nc::graphics

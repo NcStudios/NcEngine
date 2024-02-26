@@ -9,6 +9,8 @@ struct PPImageArrayBuffer
 {
     PPImageArrayBuffer(vk::Device device);
 
+    void Clear() noexcept;
+
     vk::UniqueSampler sampler;
     std::vector<vk::ImageView> views;
     std::vector<vk::DescriptorImageInfo> imageInfos;

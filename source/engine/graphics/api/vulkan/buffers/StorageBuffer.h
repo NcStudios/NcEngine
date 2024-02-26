@@ -21,6 +21,7 @@ class StorageBuffer
         GpuAllocator* m_allocator;
         GpuAllocation<vk::Buffer> m_buffer;
         uint32_t m_alignedSize;
+        uint32_t m_previousDataSize;
         vk::DescriptorBufferInfo m_info;
 };
 } // namespace nc::graphics::vulkan

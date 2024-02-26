@@ -2,7 +2,6 @@
 
 #include "graphics/shader_resource/CubeMapArrayBufferHandle.h"
 #include "graphics/shader_resource/MeshArrayBufferHandle.h"
-#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "graphics/system/CameraSystem.h"
 #include "graphics/system/EnvironmentSystem.h"
@@ -27,13 +26,6 @@ struct ProjectSettings;
 
 namespace nc::graphics
 {
-struct PostProcessResources
-{
-    PostProcessResources(ShaderResourceBus* resourceBus, uint32_t maxPointLights);
-    PPImageArrayBufferHandle shadowMaps;
-    uint32_t maxShadows;
-};
-
 struct AssetResourcesConfig
 {
     AssetResourcesConfig(const config::MemorySettings& memorySettings);
@@ -84,6 +76,6 @@ struct SystemResources
     SkeletalAnimationSystem skeletalAnimations;
     WidgetSystem widgets;
     UISystem ui;
-    ParticleEmitterSystem particleEmitterSystem;
+    ParticleEmitterSystem particleEmitters;
 };
 } // namespace nc::graphics

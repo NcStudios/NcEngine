@@ -93,6 +93,7 @@ ShaderStorage::ShaderStorage(vk::Device device,
 void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData)
 {
     auto& storage = m_staticCabStorage;
+    m_device.waitIdle();
 
     switch (eventData.action)
     {
@@ -103,7 +104,6 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
                 storage.uids.emplace_back(eventData.uid);
                 storage.buffers.emplace_back(std::make_unique<CubeMapArrayBuffer>(m_device));
             }
-            auto flags = GetStageFlags(eventData.stage);
 
             m_descriptorSets->RegisterDescriptor
             (
@@ -111,7 +111,7 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
                 eventData.set,
                 eventData.capacity,
                 vk::DescriptorType::eCombinedImageSampler,
-                flags,
+                GetStageFlags(eventData.stage),
                 vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
             );
             break;
@@ -204,16 +204,15 @@ void ShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
 
 void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
 {
+    m_device.waitIdle();
+
     auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
     switch (eventData.action)
     {
         case PpiaUpdateAction::Initialize:
         {
             if (!storage.buffers.contains(eventData.imageType))
-            {
                 storage.buffers.emplace(eventData.imageType, std::make_unique<PPImageArrayBuffer>(m_device));
-            }
-            auto flags = GetStageFlags(eventData.stage);
 
             m_descriptorSets->RegisterDescriptor
             (
@@ -221,7 +220,7 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 eventData.set,
                 eventData.count,
                 vk::DescriptorType::eCombinedImageSampler,
-                flags,
+                GetStageFlags(eventData.stage),
                 vk::DescriptorBindingFlagBitsEXT::ePartiallyBound,
                 eventData.currentFrameIndex
             );
@@ -230,7 +229,7 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         case PpiaUpdateAction::Update:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Update", Optick::Category::Rendering);
-
+            
             auto& sampler = storage.buffers.at(eventData.imageType)->sampler.get();
             auto& views = storage.buffers.at(eventData.imageType)->views;
             auto& imageInfos = storage.buffers.at(eventData.imageType)->imageInfos;
@@ -238,10 +237,8 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             views.clear();
             imageInfos.clear();
 
-            views.reserve(eventData.count);
-            imageInfos.reserve(eventData.count);
-
-            for (auto view : m_renderGraph->GetPostProcessImages(eventData.imageType))
+            auto postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType, eventData.currentFrameIndex);
+            for (auto view : postProcessViews)
             {
                 views.emplace_back(view);
                 imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
@@ -251,7 +248,7 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             (
                 eventData.set,
                 imageInfos,
-                eventData.count,
+                views.size(),
                 vk::DescriptorType::eCombinedImageSampler,
                 eventData.slot,
                 eventData.currentFrameIndex
@@ -260,6 +257,13 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         }
         case PpiaUpdateAction::Clear:
         {
+            for (auto i : std::views::iota(0u, MaxFramesInFlight))
+            {
+                if (m_perFramePpiaStorage.at(i).buffers.contains(eventData.imageType))
+                {
+                    m_perFramePpiaStorage.at(i).buffers.at(eventData.imageType)->Clear();
+                }
+            }
             break;
         }
     }
@@ -273,6 +277,8 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
     {
         case SsboUpdateAction::Initialize:
         {
+            m_device.waitIdle();
+
             auto pos = std::ranges::find(storage.uids, eventData.uid);
             if (pos == storage.uids.end())
             {
@@ -283,15 +289,13 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             {
                 throw nc::NcError("Attempted to initialize a Storage Buffer when one by the same UID was already present.");
             }
-            auto flags = GetStageFlags(eventData.stage);
-
             m_descriptorSets->RegisterDescriptor
             (
                 eventData.slot,
                 0,
                 1,
                 vk::DescriptorType::eStorageBuffer,
-                flags,
+                GetStageFlags(eventData.stage),
                 vk::DescriptorBindingFlagBitsEXT(),
                 eventData.currentFrameIndex
             );
@@ -359,6 +363,7 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
 void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData)
 {
     auto& storage = m_staticTabStorage;
+    m_device.waitIdle();
 
     switch (eventData.action)
     {
@@ -369,7 +374,6 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
                 storage.uids.emplace_back(eventData.uid);
                 storage.buffers.emplace_back(std::make_unique<TextureArrayBuffer>(m_device));
             }
-            auto flags = GetStageFlags(eventData.stage);
 
             m_descriptorSets->RegisterDescriptor
             (
@@ -377,7 +381,7 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
                 eventData.set,
                 eventData.capacity,
                 vk::DescriptorType::eCombinedImageSampler,
-                flags,
+                GetStageFlags(eventData.stage),
                 vk::DescriptorBindingFlagBitsEXT::ePartiallyBound
             );
             break;
@@ -457,6 +461,7 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
     {
         case UboUpdateAction::Initialize:
         {
+            m_device.waitIdle();
             auto pos = std::ranges::find(storage.uids, eventData.uid);
             if (pos == storage.uids.end())
             {
@@ -468,14 +473,13 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
                 throw nc::NcError("Attempted to initialize a Uniform Buffer when one by the same UID was already present.");
             }
 
-            auto flags = GetStageFlags(eventData.stage);
             m_descriptorSets->RegisterDescriptor
             (
                 eventData.slot,
                 eventData.set,
                 1,
                 vk::DescriptorType::eUniformBuffer,
-                flags,
+                GetStageFlags(eventData.stage),
                 vk::DescriptorBindingFlagBitsEXT(),
                 eventData.currentFrameIndex
             );

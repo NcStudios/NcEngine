@@ -5,7 +5,6 @@ target_sources(${NC_ENGINE_LIB}
         ShaderStorage.cpp
         Imgui.cpp
         Initializers.cpp
-        Lighting.cpp
         PerFrameGpuContext.cpp
         QueueFamily.cpp
         RenderGraph.cpp

@@ -125,7 +125,7 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights)
     : m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
@@ -138,14 +138,11 @@ RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocato
       m_maxLights{maxLights},
       m_isDescriptorSetLayoutsDirty{true},
       m_onDescriptorSetsChanged{m_descriptorSets->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
-      m_postProcessImageViews{}
+      m_postProcessImageViews{},
+      m_onCommitPointLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount();})},
+      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount();})}
 {
-    for (auto i : std::views::iota(0u, m_maxLights))
-    {
-        m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
-    }
-
-    m_postProcessImageViews.emplace(PostProcessImageType::ShadowMap, std::vector<vk::ImageView>{});
+    m_postProcessImageViews.emplace(PostProcessImageType::ShadowMap, PostProcessViews{});
 }
 
 void RenderGraph::MapShaderResources()
@@ -186,14 +183,11 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    m_postProcessImageViews.at(PostProcessImageType::ShadowMap).clear();
-
     for (auto& shadowMappingPass : m_shadowMappingPasses)
     {
         shadowMappingPass.Begin(cmd, frameBufferIndex);
         shadowMappingPass.Execute(cmd, frameData, frameIndex);
         shadowMappingPass.End(cmd);
-        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).emplace_back(shadowMappingPass.GetAttachmentView(frameIndex));
     }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
@@ -204,9 +198,9 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
     cmd->end();
 }
 
-auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType) -> std::vector<vk::ImageView>
+auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType, uint32_t frameIndex) -> std::vector<vk::ImageView>
 {
-    return m_postProcessImageViews.at(imageType);
+    return m_postProcessImageViews.at(imageType).perFrameViews.at(frameIndex);
 }
 
 void RenderGraph::Resize(const Vector2& dimensions)
@@ -214,9 +208,19 @@ void RenderGraph::Resize(const Vector2& dimensions)
     m_litPass = std::move(CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions));
 
     m_shadowMappingPasses.clear();
-    for (auto i : std::views::iota(0u, m_maxLights))
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(i).clear();
+    }
+
+    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
         m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i)));
+
+        for (auto j : std::views::iota(0u, MaxFramesInFlight))
+        {
+            m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(j).emplace_back(m_shadowMappingPasses.back().GetAttachmentView(j));
+        }
     }
     m_isDescriptorSetLayoutsDirty = true;
 }
@@ -224,12 +228,22 @@ void RenderGraph::Resize(const Vector2& dimensions)
 void RenderGraph::IncrementShadowPassCount()
 {
     NC_ASSERT(m_activeShadowMappingPasses < m_maxLights, "Tried to add a light source when max lights are registered.");
+    m_shadowMappingPasses.push_back(std::move(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, m_activeShadowMappingPasses)));
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(i).emplace_back(m_shadowMappingPasses.back().GetAttachmentView(i));
+    }
     m_activeShadowMappingPasses++;
     m_isDescriptorSetLayoutsDirty = true;
 }
 
 void RenderGraph::ClearShadowPasses()
 {
+    m_shadowMappingPasses.clear();
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(i).clear();
+    }
     m_activeShadowMappingPasses = 0u;
     m_isDescriptorSetLayoutsDirty = true;
 }
@@ -238,6 +252,11 @@ void RenderGraph::DecrementShadowPassCount()
 {
     NC_ASSERT(m_activeShadowMappingPasses > 0, "Tried to remove a light source when none are registered.");
     m_activeShadowMappingPasses--;
+    m_shadowMappingPasses.pop_back();
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(i).pop_back();
+    }
     m_isDescriptorSetLayoutsDirty = true;
 }
 } // namespace nc::graphics

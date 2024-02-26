@@ -68,7 +68,6 @@ namespace nc::graphics
         : m_registry{registry},
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
-          m_postProcessResources{&m_shaderResourceBus, memorySettings.maxPointLights},
           m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)}
     {
@@ -113,10 +112,11 @@ namespace nc::graphics
     {
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
-        m_systemResources.particleEmitterSystem.Clear();
+        m_systemResources.particleEmitters.Clear();
         m_graphics->Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
+        m_systemResources.pointLights.Clear();
         m_systemResources.skeletalAnimations.Clear();
     }
 
@@ -125,8 +125,8 @@ namespace nc::graphics
         NC_LOG_TRACE("Building NcGraphics workload");
 
         graph.Add(task::ExecutionPhase::Render, "NcGraphics", [this]{ Run(); });
-        graph.Add(task::ExecutionPhase::Free, "ParticleEmitterSystem", [this]{ m_systemResources.particleEmitterSystem.Run(); });
-        graph.Add(task::ExecutionPhase::PostFrameSync, "ProcessParticleFrameEvents", [this]{ m_systemResources.particleEmitterSystem.ProcessFrameEvents(); } );
+        graph.Add(task::ExecutionPhase::Free, "ParticleEmitterSystem", [this]{ m_systemResources.particleEmitters.Run(); });
+        graph.Add(task::ExecutionPhase::PostFrameSync, "ProcessParticleFrameEvents", [this]{ m_systemResources.particleEmitters.ProcessFrameEvents(); } );
     }
 
     void NcGraphicsImpl::Run()
@@ -159,11 +159,9 @@ namespace nc::graphics
             std::move(objectState),
             std::move(lightingState),
             std::move(widgetState),
-            m_systemResources.particleEmitterSystem.GetParticles()
+            m_systemResources.particleEmitters.GetParticles()
         };
-
         m_graphics->Draw(state);
-        m_postProcessResources.shadowMaps.Update(m_postProcessResources.maxShadows, currentFrameIndex);
         m_graphics->FrameEnd();
     }
 

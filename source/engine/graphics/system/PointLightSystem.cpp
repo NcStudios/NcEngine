@@ -20,6 +20,7 @@ namespace nc::graphics
 {
 PointLightSystem::PointLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxPointLights, bool useShadows)
     : m_pointLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0, false)},
+      m_shadowMapsBuffer{shaderResourceBus->CreatePPImageArrayBuffer(PostProcessImageType::ShadowMap, maxPointLights, ShaderStage::Fragment, 3u, 0u)},
       m_useShadows{useShadows}
 {
     m_pointLightData.reserve(maxPointLights);
@@ -29,11 +30,12 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
 {
     OPTICK_CATEGORY("PointLightSystem::Execute", Optick::Category::Rendering);
     auto state = LightingState{};
-    state.viewProjections.clear();
     m_pointLightData.clear();
 
+    auto lightsCount = 0u;
     for (const auto& [light, transform] : view)
     {
+        lightsCount++;
         state.viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
         m_pointLightData.emplace_back(state.viewProjections.back(),
                                   transform->Position(),
@@ -44,6 +46,22 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
     }
 
     m_pointLightBuffer.Bind(static_cast<void*>(m_pointLightData.data()), sizeof(PointLightData) * m_pointLightData.size(), currentFrameIndex);
+    if (m_useShadows && m_syncedLightsCount.at(currentFrameIndex) != lightsCount)
+    {
+        m_shadowMapsBuffer.Update(lightsCount, currentFrameIndex);
+    }
+    m_syncedLightsCount.at(currentFrameIndex) = lightsCount;
     return state;
+}
+
+void PointLightSystem::Clear() noexcept
+{
+    m_pointLightData.clear();
+    m_shadowMapsBuffer.Clear();
+    m_pointLightBuffer.Clear();
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_syncedLightsCount.at(i) = 0u;
+    }
 }
 } // namespace nc::graphics

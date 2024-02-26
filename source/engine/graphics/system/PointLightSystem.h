@@ -2,7 +2,9 @@
 
 #include "ecs/Transform.h"
 #include "ecs/View.h"
+#include "graphics/GraphicsConstants.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
+#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
 #include "graphics/PointLight.h"
 #include "utility/Signal.h"
@@ -62,12 +64,13 @@ class PointLightSystem
         PointLightSystem& operator=(const PointLightSystem&) = delete;
 
         auto Execute(uint32_t currentFrameIndex, MultiView<PointLight, Transform> view) -> LightingState;
-
-        void Clear() { m_pointLightBuffer.Clear(); }
+        void Clear() noexcept;
 
     private:
         std::vector<PointLightData> m_pointLightData;
         StorageBufferHandle m_pointLightBuffer;
+        PPImageArrayBufferHandle m_shadowMapsBuffer;
+        std::array<uint32_t, MaxFramesInFlight> m_syncedLightsCount;
         bool m_useShadows;
 };
 } // namespace nc::graphics
