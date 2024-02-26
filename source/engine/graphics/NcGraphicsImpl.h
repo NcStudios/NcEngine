@@ -5,6 +5,7 @@
 #include "ncengine/module/ModuleProvider.h"
 #include "shader_resource/CubeMapArrayBufferHandle.h"
 #include "shader_resource/MeshArrayBufferHandle.h"
+#include "shader_resource/PPImageArrayBufferHandle.h"
 #include "shader_resource/TextureArrayBufferHandle.h"
 #include "system/CameraSystem.h"
 #include "system/EnvironmentSystem.h"
@@ -37,6 +38,13 @@ class WindowImpl;
 namespace graphics
 {
 struct ShaderResourceBus;
+
+struct PostProcessResources
+{
+    PostProcessResources(ShaderResourceBus* resourceBus, uint32_t maxPointLights);
+    PPImageArrayBufferHandle shadowMaps;
+    uint32_t maxShadows;
+};
 
 struct AssetResourcesConfig
 {
@@ -126,6 +134,7 @@ class NcGraphicsImpl : public NcGraphics
         Registry* m_registry;
         std::unique_ptr<IGraphics> m_graphics;
         ShaderResourceBus m_shaderResourceBus;
+        PostProcessResources m_postProcessResources;
         AssetResources m_assetResources;
         SystemResources m_systemResources;
         ParticleEmitterSystem m_particleEmitterSystem;

@@ -32,6 +32,11 @@ namespace
 
 namespace nc::graphics
 {
+    PostProcessResources::PostProcessResources(ShaderResourceBus* resourceBus, uint32_t maxPointLights)
+        : shadowMaps{resourceBus->CreatePPImageArrayBuffer(PostProcessImageType::ShadowMap, maxPointLights, ShaderStage::Fragment, 3u, 0u)},
+          maxShadows{maxPointLights}
+    {}
+
     AssetResourcesConfig::AssetResourcesConfig(const config::MemorySettings& memorySettings)
         : maxTextures{memorySettings.maxTextures},
           maxCubeMaps{memorySettings.maxTextures}{} // Todo
@@ -153,6 +158,7 @@ namespace nc::graphics
         : m_registry{registry},
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
+          m_postProcessResources{&m_shaderResourceBus, memorySettings.maxPointLights},
           m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events},
           m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) }
@@ -224,7 +230,6 @@ namespace nc::graphics
 
         auto currentFrameIndex = m_graphics->CurrentFrameIndex();
         m_assetResources.meshes.Bind(currentFrameIndex);
-
         auto cameraState = m_systemResources.cameras.Execute(m_registry);
         m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
         auto widgetState = m_systemResources.widgets.Execute(m_registry->GetEcs());
@@ -248,6 +253,9 @@ namespace nc::graphics
         };
 
         m_graphics->Draw(state);
+
+        m_postProcessResources.shadowMaps.Update(m_postProcessResources.maxShadows, currentFrameIndex);
+
         m_graphics->FrameEnd();
     }
 
