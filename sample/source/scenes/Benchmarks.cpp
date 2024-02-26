@@ -74,16 +74,18 @@ auto AssetCombo(std::string& selection) -> bool
     return nc::ui::Combobox(selection, "##assetcombo", g_assets);
 }
 
-void AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh)
+auto AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::Collider&
 {
     if (mesh == nc::asset::CubeMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
     else if (mesh == nc::asset::SphereMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::SphereProperties{});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::SphereProperties{});
     else if (mesh == nc::asset::CapsuleMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::CapsuleProperties{});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::CapsuleProperties{});
     else if (mesh == nc::sample::RampMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::HullProperties{.assetPath = nc::sample::RampHullCollider});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::HullProperties{.assetPath = nc::sample::RampHullCollider});
+
+    throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
 }
 
 struct mesh_renderer
@@ -412,8 +414,8 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
             spawnBehavior,
             [world](Entity entity) mutable {
                 world.Emplace<graphics::ToonRenderer>(entity, ::physics_body::Mesh, ::RandomToonMaterial());
-                ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
-                world.Emplace<physics::PhysicsBody>(entity, physics::PhysicsProperties{.mass = 5.0f});
+                auto& collider = ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
+                world.Emplace<physics::PhysicsBody>(entity, world.Get<Transform>(entity), collider, physics::PhysicsProperties{.mass = 5.0f});
             }
         );
 

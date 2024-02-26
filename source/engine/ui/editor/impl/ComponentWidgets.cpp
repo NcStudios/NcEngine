@@ -415,14 +415,11 @@ void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
     constexpr auto max = 1000.0f;
 
     ImGui::Text("Status: %s", physicsBody.IsAwake() ? "Awake" : "Asleep");
-    if (!physicsBody.ParentEntity().IsStatic())
-    {
-        ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
-        ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
-        ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
-        ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, max);
-        ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, max);
-    }
+    ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
+    ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
+    ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
+    ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, max);
+    ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, max);
 }
 
 void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial)

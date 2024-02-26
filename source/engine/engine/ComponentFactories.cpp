@@ -74,16 +74,16 @@ auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
 {
     NC_ASSERT(userData, "Expected non-null user data.");
     auto registry = static_cast<Registry*>(userData);
-    if (!registry->Contains<physics::Collider>(entity))
-    {
-        registry->Add<physics::Collider>(entity, physics::BoxProperties{});
-    }
+    auto transform = registry->Get<Transform>(entity);
+    auto collider = registry->Contains<physics::Collider>(entity)
+        ? registry->Get<physics::Collider>(entity)
+        : registry->Add<physics::Collider>(entity, physics::BoxProperties{});
 
-    return physics::PhysicsBody{entity};
+    return physics::PhysicsBody{*transform, *collider};
 }
 
-auto CreatePhysicsMaterial(Entity entity, void*) -> physics::PhysicsMaterial
+auto CreatePhysicsMaterial(Entity, void*) -> physics::PhysicsMaterial
 {
-    return physics::PhysicsMaterial{entity};
+    return physics::PhysicsMaterial{};
 }
 } // namespace nc

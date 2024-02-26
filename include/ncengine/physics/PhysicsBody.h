@@ -22,13 +22,21 @@ enum class IntegrationResult
     Integrated, Ignored, PutToSleep
 };
 
-class PhysicsBody final : public ComponentBase
+class Collider;
+
+class PhysicsBody final
 {
     public:
-        PhysicsBody(Entity entity,
+        PhysicsBody(const Transform& transform,
+                    const Collider& collider,
                     PhysicsProperties properties = PhysicsProperties{},
                     Vector3 linearFreedom = Vector3::One(),
                     Vector3 angularFreedom = Vector3::One());
+
+        PhysicsBody(const PhysicsBody&) = delete;
+        PhysicsBody(PhysicsBody&&) = default;
+        PhysicsBody& operator=(const PhysicsBody&) = delete;
+        PhysicsBody& operator=(PhysicsBody&&) = default;
 
         void SetProperties(const PhysicsProperties& properties);
         void SetLinearFreedom(const Vector3& linearFreedom);
@@ -67,13 +75,13 @@ class PhysicsBody final : public ComponentBase
         auto IsAwake() const noexcept -> bool { return m_awake; }
 
     private:
-        PhysicsProperties m_properties;
         DirectX::XMVECTOR m_linearVelocity;
         DirectX::XMVECTOR m_angularVelocity;
+        DirectX::XMMATRIX m_invInertiaWorld;
         DirectX::XMVECTOR m_linearFreedom;
         DirectX::XMVECTOR m_angularFreedom;
-        DirectX::XMMATRIX m_invInertiaWorld;
         Vector3 m_invInertiaLocal;
+        PhysicsProperties m_properties;
         uint8_t m_framesAtThreshold;
         bool m_awake;
 };

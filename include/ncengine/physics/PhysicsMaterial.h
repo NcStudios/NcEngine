@@ -4,19 +4,18 @@
  */
 #pragma once
 
-#include "ncengine/ecs/Component.h"
-
 namespace nc::physics
 {
-/** @brief Component with material properties used in the physics solver. */
-struct PhysicsMaterial : public ComponentBase
+/**
+ * @brief Component with material properties used by the physics solver.
+ * 
+ * During collision resolution, PhysicsMaterial properties of interacting objects are combined
+ * multiplicatively. Objects without a PhysicsMaterial are assigned default values. An Entity
+ * does not need a PhysicsBody in order to have a PhysicsMaterial.
+*/
+struct PhysicsMaterial
 {
-    explicit PhysicsMaterial(Entity entity, float friction_ = 0.5f, float restitution_ = 0.3f) noexcept
-        : ComponentBase{entity}, friction{friction_}, restitution{restitution_}
-    {
-    }
-
-    float friction;
-    float restitution;
+    float friction = 0.5f;    // [0, 1]
+    float restitution = 0.3f; // [0, 1]
 };
 } // namespace nc::physics
