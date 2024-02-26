@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     struct ShadowMappingPushConstants
     {
@@ -18,7 +18,7 @@ namespace nc::graphics
     class ShadowMappingTechnique : public ITechnique
     {
         public:
-            ShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex);
+            ShadowMappingTechnique(vk::Device device, ShaderBindingManager* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex);
             ~ShadowMappingTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -28,7 +28,7 @@ namespace nc::graphics
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
-            ShaderDescriptorSets* m_descriptorSets;
+            ShaderBindingManager* m_descriptorSets;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
             bool m_enabled;

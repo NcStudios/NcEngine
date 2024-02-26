@@ -4,15 +4,15 @@
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics
 {
-ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass)
     : m_descriptorSets{descriptorSets},
         m_pipeline{nullptr},
         m_pipelineLayout{nullptr}

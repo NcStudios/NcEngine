@@ -3,15 +3,15 @@
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
 
 namespace nc::graphics
 {
-    UiTechnique::UiTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+    UiTechnique::UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
         : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {

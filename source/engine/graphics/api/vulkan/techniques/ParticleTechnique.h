@@ -12,7 +12,7 @@
 namespace nc::graphics
 {
     class Device;
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     struct ParticlePushConstants
     {
@@ -29,7 +29,7 @@ namespace nc::graphics
     class ParticleTechnique : public ITechnique
     {
     public:
-        ParticleTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+        ParticleTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass);
         ~ParticleTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
@@ -41,7 +41,7 @@ namespace nc::graphics
         void Clear() noexcept;
 
     private:
-        ShaderDescriptorSets* m_descriptorSets;
+        ShaderBindingManager* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
     };

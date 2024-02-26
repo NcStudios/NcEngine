@@ -11,7 +11,7 @@ namespace nc::graphics
 {
 class Device;
 struct PerFrameRenderState;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 
 class RenderPass
 {
@@ -35,8 +35,8 @@ class RenderPass
         void RegisterAttachmentViews(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
 
         template <std::derived_from<ITechnique> T>
-        void RegisterTechnique(const Device& device, ShaderDescriptorSets *descriptorSets);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets *descriptorSets, uint32_t shadowCasterIndex);
+        void RegisterTechnique(const Device& device, ShaderBindingManager *descriptorSets);
+        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *descriptorSets, uint32_t shadowCasterIndex);
 
         template <std::derived_from<ITechnique> T>
         void UnregisterTechnique();
@@ -58,7 +58,7 @@ class RenderPass
 };
 
 template <std::derived_from<ITechnique> T>
-void RenderPass::RegisterTechnique(const Device& device, ShaderDescriptorSets* descriptorSets)
+void RenderPass::RegisterTechnique(const Device& device, ShaderBindingManager* descriptorSets)
 {
     UnregisterTechnique<T>();
     m_litTechniques.push_back(std::make_unique<T>(device, descriptorSets, &m_renderPass.get()));

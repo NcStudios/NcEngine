@@ -2,13 +2,15 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         FrameManager.cpp
         GpuAllocator.cpp
-        GpuShaderStorage.cpp
+        ShaderStorage.cpp
         Imgui.cpp
         Initializers.cpp
         Lighting.cpp
         PerFrameGpuContext.cpp
         QueueFamily.cpp
         RenderGraph.cpp
+        ShaderBindingManager.cpp
+        ShaderUtilities.cpp
         Swapchain.cpp
         vma.cpp
         VertexDescriptions.cpp
@@ -18,5 +20,4 @@ target_sources(${NC_ENGINE_LIB}
 add_subdirectory(buffers)
 add_subdirectory(core)
 add_subdirectory(renderpasses)
-add_subdirectory(shaders)
 add_subdirectory(techniques)

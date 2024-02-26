@@ -19,7 +19,7 @@ namespace nc::graphics
 {
     struct DebugData;
     class Device;
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     struct WireframePushConstants
     {
@@ -31,7 +31,7 @@ namespace nc::graphics
     class WireframeTechnique : public ITechnique
     {
         public:
-            WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass);
+            WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass);
             ~WireframeTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;

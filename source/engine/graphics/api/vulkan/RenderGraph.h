@@ -14,7 +14,7 @@ class Device;
 class GpuAllocator;
 class GpuOptions;
 class PerFrameGpuContext;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 struct DescriptorSetLayoutsChanged;
 class Swapchain;
 
@@ -29,7 +29,7 @@ namespace vulkan
 class RenderGraph
 {
     public:
-        RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, uint32_t maxLights);
+        RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights);
 
         void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex);
         void Resize(const Vector2 &dimensions);
@@ -49,7 +49,7 @@ class RenderGraph
         const Device* m_device;
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
-        ShaderDescriptorSets* m_descriptorSets;
+        ShaderBindingManager* m_descriptorSets;
         std::vector<RenderPass> m_shadowMappingPasses;
         std::unordered_map<PostProcessImageType, std::vector<vk::ImageView>> m_postProcessImageViews;
         RenderPass m_litPass;

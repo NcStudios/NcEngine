@@ -1,15 +1,15 @@
 #include "VulkanGraphics.h"
 #include "FrameManager.h"
-#include "GpuAllocator.h"
-#include "GpuShaderStorage.h"
+#include "graphics/api/vulkan/GpuAllocator.h"
+#include "graphics/api/vulkan/Imgui.h"
+#include "graphics/api/vulkan/Lighting.h"
+#include "graphics/api/vulkan/RenderGraph.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderStorage.h"
+#include "graphics/api/vulkan/Swapchain.h"
+#include "graphics/api/vulkan/core/Device.h"
+#include "graphics/api/vulkan/core/Instance.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
-#include "Imgui.h"
-#include "Lighting.h"
-#include "RenderGraph.h"
-#include "Swapchain.h"
-#include "core/Device.h"
-#include "core/Instance.h"
-#include "shaders/ShaderDescriptorSets.h"
 #include "asset/NcAsset.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
@@ -41,9 +41,15 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_swapchain{ std::make_unique<Swapchain>(*m_device, m_surface.get(), dimensions)},
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
-      m_shaderDescriptorSets{ std::make_unique<ShaderDescriptorSets>(m_device->VkDevice())},
-      m_renderGraph{std::make_unique<RenderGraph>(m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderDescriptorSets.get(), dimensions, memorySettings.maxPointLights)},
-      m_gpuShaderStorage{std::make_unique<GpuShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderDescriptorSets.get(), m_renderGraph.get(), m_frameManager->CommandBuffers(), shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.meshArrayBufferChannel, shaderResourceBus.ppImageArrayBufferChannel, shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
+      m_shaderBindingManager{ std::make_unique<ShaderBindingManager>(m_device->VkDevice())},
+      m_renderGraph{std::make_unique<RenderGraph>(m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), dimensions, memorySettings.maxPointLights)},
+      m_shaderStorage{std::make_unique<ShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderBindingManager.get(), m_renderGraph.get(), m_frameManager->CommandBuffers(),
+                                                            shaderResourceBus.cubeMapArrayBufferChannel,
+                                                            shaderResourceBus.meshArrayBufferChannel,
+                                                            shaderResourceBus.ppImageArrayBufferChannel,
+                                                            shaderResourceBus.storageBufferChannel,
+                                                            shaderResourceBus.uniformBufferChannel,
+                                                            shaderResourceBus.textureArrayBufferChannel)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_lighting{std::make_unique<Lighting>(registry,  m_renderGraph.get())},
       m_resizingMutex{},
@@ -113,7 +119,7 @@ bool VulkanGraphics::FrameBegin()
 
 void VulkanGraphics::CommitResourceLayout()
 {
-    m_shaderDescriptorSets->CommitResourceLayout();
+    m_shaderBindingManager->CommitResourceLayout();
 }
 
 auto VulkanGraphics::CurrentFrameIndex() -> uint32_t

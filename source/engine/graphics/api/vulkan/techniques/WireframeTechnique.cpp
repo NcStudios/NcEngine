@@ -6,13 +6,13 @@
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 
 namespace nc::graphics
 {
-    WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+    WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
         : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {

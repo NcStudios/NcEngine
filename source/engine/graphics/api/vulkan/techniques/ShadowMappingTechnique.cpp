@@ -3,8 +3,8 @@
 #include "graphics/api/vulkan/core/GpuOptions.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/PerFrameRenderState.h"
 
@@ -22,7 +22,7 @@ namespace
 
 namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
         : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr},

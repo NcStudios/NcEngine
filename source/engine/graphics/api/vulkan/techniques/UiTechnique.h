@@ -7,12 +7,12 @@
 namespace nc::graphics
 {
     class Device;
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     class UiTechnique : public ITechnique
     {
         public:
-            UiTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass);
+            UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass);
             ~UiTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;

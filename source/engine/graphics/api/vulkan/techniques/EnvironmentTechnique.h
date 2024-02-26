@@ -12,12 +12,12 @@
 namespace nc::graphics
 {
 class Device;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 
 class EnvironmentTechnique : public ITechnique
 {
     public:
-        EnvironmentTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+        EnvironmentTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass);
         ~EnvironmentTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
@@ -29,7 +29,7 @@ class EnvironmentTechnique : public ITechnique
         void Clear() noexcept;
 
     private:
-        ShaderDescriptorSets* m_descriptorSets;
+        ShaderBindingManager* m_descriptorSets;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };

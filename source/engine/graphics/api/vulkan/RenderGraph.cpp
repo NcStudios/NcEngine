@@ -4,7 +4,7 @@
 #include "PerFrameGpuContext.h"
 #include "Swapchain.h"
 #include "core/Device.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/GraphicsUtilities.h"
 #include "techniques/EnvironmentTechnique.h"
 #include "techniques/OutlineTechnique.h"
@@ -125,7 +125,7 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderDescriptorSets* descriptorSets, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights)
     : m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},

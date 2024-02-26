@@ -1,4 +1,4 @@
-#include "ShaderDescriptorSets.h"
+#include "ShaderBindingManager.h"
 #include "graphics/api/vulkan/Initializers.h"
 
 #include "ncutility/NcError.h"
@@ -78,7 +78,7 @@ auto AddOrUpdate(uint32_t bindingSlot, std::unordered_map<uint32_t, T>& collecti
 
 namespace nc::graphics
 {
-ShaderDescriptorSets::ShaderDescriptorSets(vk::Device device)
+ShaderBindingManager::ShaderBindingManager(vk::Device device)
     : m_device{device},
         m_pool{CreateRenderingDescriptorPool(device)},
         m_perFrameSets{},
@@ -87,7 +87,7 @@ ShaderDescriptorSets::ShaderDescriptorSets(vk::Device device)
 {
 }
 
-void ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, size_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex)
+void ShaderBindingManager::RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, size_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex)
 {
     NC_ASSERT(bindingSlot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 
@@ -105,7 +105,7 @@ void ShaderDescriptorSets::RegisterDescriptor(uint32_t bindingSlot, uint32_t set
     layout->layout = CreateDescriptorSetLayout(m_device, flattenedBindings, flattenedFlags);
 }
 
-void ShaderDescriptorSets::CommitResourceLayout()
+void ShaderBindingManager::CommitResourceLayout()
 {
     for (auto& [setIndex, layout] : m_layouts)
     {
@@ -141,13 +141,13 @@ void ShaderDescriptorSets::CommitResourceLayout()
     m_setLayoutsChanged.Emit(DescriptorSetLayoutsChanged{});
 }
 
-vk::DescriptorSetLayout* ShaderDescriptorSets::GetSetLayout(uint32_t setIndex)
+vk::DescriptorSetLayout* ShaderBindingManager::GetSetLayout(uint32_t setIndex)
 {
     NC_ASSERT(m_layouts.contains(setIndex), fmt::format("No descriptor set layout at index: {} found. Make sure to call RegistorDescriptor to add descriptors to a set.", setIndex));
     return &m_layouts.at(setIndex).layout.get();
 }
 
-void ShaderDescriptorSets::BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t , uint32_t frameIndex)
+void ShaderBindingManager::BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t , uint32_t frameIndex)
 {
     auto& sets = GetSets(frameIndex);
     auto& isDirty = sets.isDirty.at(setIndex);
@@ -173,7 +173,7 @@ void ShaderDescriptorSets::BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk
     cmd->bindDescriptorSets(bindPoint, pipelineLayout, setIndex, 1, set, 0, 0);
 }
 
-void ShaderDescriptorSets::UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
+void ShaderBindingManager::UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
 {
     vk::WriteDescriptorSet write{};
     write.setDstBinding(bindingSlot);
@@ -205,7 +205,7 @@ void ShaderDescriptorSets::UpdateImage(uint32_t setIndex, std::span<const vk::De
         isDirty.at(setIndex) = true;
 }
 
-void ShaderDescriptorSets::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
+void ShaderBindingManager::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
 {
     vk::WriteDescriptorSet write{};
     write.setDstBinding(bindingSlot);

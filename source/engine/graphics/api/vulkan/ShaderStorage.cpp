@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GpuShaderStorage.h"
+#include "ShaderStorage.h"
 #include "GpuAllocator.h"
 #include "RenderGraph.h"
 #include "graphics/shader_resource/CubeMapArrayBufferHandle.h"
@@ -8,8 +8,8 @@
 #include "graphics/shader_resource/StorageBufferHandle.h"
 #include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "graphics/shader_resource/UniformBufferHandle.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
-#include "shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 
 #include <ranges>
 
@@ -58,9 +58,9 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-GpuShaderStorage::GpuShaderStorage(vk::Device device,
+ShaderStorage::ShaderStorage(vk::Device device,
                   GpuAllocator* allocator, 
-                  ShaderDescriptorSets* descriptorSets,
+                  ShaderBindingManager* descriptorSets,
                   RenderGraph* renderGraph,
                   std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                   Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
@@ -75,22 +75,22 @@ GpuShaderStorage::GpuShaderStorage(vk::Device device,
       m_renderGraph{renderGraph},
       m_perFrameCabStorage{},
       m_staticCabStorage{},
-      m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateCubeMapArrayBuffer)},
+      m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateCubeMapArrayBuffer)},
       m_staticMabStorage{cmdBuffers},
-      m_onMeshArrayBufferUpdate{onMeshArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateMeshArrayBuffer)},
+      m_onMeshArrayBufferUpdate{onMeshArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateMeshArrayBuffer)},
       m_perFramePpiaStorage{},
-      m_onPPImageArrayBufferUpdate{onPPImageArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdatePPImageArrayBuffer)},
+      m_onPPImageArrayBufferUpdate{onPPImageArrayBufferUpdate.Connect(this, &ShaderStorage::UpdatePPImageArrayBuffer)},
       m_perFrameSsboStorage{},
       m_staticSsboStorage{},
-      m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &GpuShaderStorage::UpdateStorageBuffer)},
+      m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &ShaderStorage::UpdateStorageBuffer)},
       m_perFrameUboStorage{},
       m_staticUboStorage{},
-      m_onUniformBufferUpdate{onUniformBufferUpdate.Connect(this, &GpuShaderStorage::UpdateUniformBuffer)},
+      m_onUniformBufferUpdate{onUniformBufferUpdate.Connect(this, &ShaderStorage::UpdateUniformBuffer)},
       m_staticTabStorage{},
-      m_onTextureArrayBufferUpdate{onTextureArrayBufferUpdate.Connect(this, &GpuShaderStorage::UpdateTextureArrayBuffer)}
+      m_onTextureArrayBufferUpdate{onTextureArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateTextureArrayBuffer)}
 {}
 
-void GpuShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData)
+void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData)
 {
     auto& storage = m_staticCabStorage;
 
@@ -180,7 +180,7 @@ MeshArrayBufferStorage::MeshArrayBufferStorage(std::array<vk::CommandBuffer*, Ma
 {
 }
 
-void GpuShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
+void ShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
 {
     switch (eventData.action)
     {
@@ -202,7 +202,7 @@ void GpuShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData
     }
 }
 
-void GpuShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
+void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
 {
     auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
     switch (eventData.action)
@@ -265,7 +265,7 @@ void GpuShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventD
     }
 }
 
-void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
+void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
 {
     auto& storage = eventData.isStatic? m_staticSsboStorage : m_perFrameSsboStorage.at(eventData.currentFrameIndex);
 
@@ -356,7 +356,7 @@ void GpuShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
     }
 }
 
-void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData)
+void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData)
 {
     auto& storage = m_staticTabStorage;
 
@@ -449,7 +449,7 @@ void GpuShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventD
     }
 }
 
-void GpuShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
+void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
 {
     auto& storage = eventData.isStatic? m_staticUboStorage : m_perFrameUboStorage.at(eventData.currentFrameIndex);
 

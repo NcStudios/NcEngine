@@ -1,19 +1,19 @@
 #pragma once
 
 #include "ITechnique.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics
 {
 class Device;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 
 class OutlineTechnique : public ITechnique
 {
 public:
-    OutlineTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+    OutlineTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass);
     ~OutlineTechnique() noexcept;
 
     bool CanBind(const PerFrameRenderState& frameData) override;
@@ -25,7 +25,7 @@ public:
     void Clear() noexcept;
 
 private:
-    ShaderDescriptorSets* m_descriptorSets;
+    ShaderBindingManager* m_descriptorSets;
     vk::UniquePipeline m_pipeline;
     vk::UniquePipelineLayout m_pipelineLayout;
 };

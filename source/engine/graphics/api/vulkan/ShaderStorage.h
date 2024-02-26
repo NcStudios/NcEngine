@@ -23,7 +23,7 @@ class GpuAllocator;
 struct MabUpdateEventData;
 struct PpiaUpdateEventData;
 class RenderGraph;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 struct SsboUpdateEventData;
 struct UboUpdateEventData;
 struct TabUpdateEventData;
@@ -66,11 +66,11 @@ struct TextureArrayBufferStorage
     std::vector<std::unique_ptr<TextureArrayBuffer>> buffers;
 };
 
-struct GpuShaderStorage : StableAddress
+struct ShaderStorage : StableAddress
 {
-    GpuShaderStorage(vk::Device device,
+    ShaderStorage(vk::Device device,
                      GpuAllocator* allocator, 
-                     ShaderDescriptorSets* descriptorSets,
+                     ShaderBindingManager* descriptorSets,
                      RenderGraph* renderGraph,
                      std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                      Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
@@ -89,7 +89,7 @@ struct GpuShaderStorage : StableAddress
 
     vk::Device m_device;
     GpuAllocator* m_allocator;
-    ShaderDescriptorSets* m_descriptorSets;
+    ShaderBindingManager* m_descriptorSets;
     RenderGraph* m_renderGraph;
 
     std::array<CubeMapArrayBufferStorage, MaxFramesInFlight> m_perFrameCabStorage;

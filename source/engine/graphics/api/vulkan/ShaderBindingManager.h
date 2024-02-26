@@ -38,16 +38,15 @@ namespace nc::graphics
         std::unordered_map<SetIndex, bool> isDirty;
     };
 
-
     struct DescriptorSetLayoutsChanged
     {
         uint32_t unused;
     };
 
-    class ShaderDescriptorSets
+    class ShaderBindingManager
     {
         public:
-            ShaderDescriptorSets(vk::Device device);
+            ShaderBindingManager(vk::Device device);
 
             /* Resources attach themselves to a shader slot by registering themselves here. */
             void RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, size_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex = std::numeric_limits<uint32_t>::max());

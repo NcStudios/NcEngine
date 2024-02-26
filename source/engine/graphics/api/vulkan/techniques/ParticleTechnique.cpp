@@ -4,8 +4,8 @@
 #include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
@@ -13,7 +13,7 @@
 
 namespace nc::graphics
 {
-    ParticleTechnique::ParticleTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
+    ParticleTechnique::ParticleTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass)
         : m_descriptorSets{descriptorSets},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
