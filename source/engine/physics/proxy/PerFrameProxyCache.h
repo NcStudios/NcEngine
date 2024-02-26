@@ -51,10 +51,10 @@ void PerFrameProxyCache<ClientData>::Update()
             if (client-> template Contains<PhysicsBody>(entity))
             {
                 auto body = client->template Get<PhysicsBody>(entity);
-                return ClientObjectProperties{entity.IsStatic(), collider.IsTrigger(), body->IsKinematic()};
+                return ClientObjectProperties{collider.IsTrigger(), body->IsKinematic()};
             }
 
-            return ClientObjectProperties{entity.IsStatic(), collider.IsTrigger()};
+            return ClientObjectProperties{collider.IsTrigger()};
         }();
 
         m_proxies.emplace_back(matrix, volume, estimate, entity, properties);

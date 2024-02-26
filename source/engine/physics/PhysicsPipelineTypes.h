@@ -30,29 +30,25 @@ class ClientObjectProperties
     static constexpr uint8_t Trigger   = 0b00000001;
     static constexpr uint8_t NoBody    = 0b00000010;
     static constexpr uint8_t Kinematic = 0b00000100;
-    static constexpr uint8_t Static    = 0b00001000;
 
     public:
-        constexpr explicit ClientObjectProperties(bool isStatic, bool isTrigger) noexcept
+        constexpr explicit ClientObjectProperties(bool isTrigger) noexcept
             : m_flags{NoBody}
         {
             if (isTrigger) m_flags |= Trigger;
-            if (isStatic) m_flags |= Static;
         }
 
-        constexpr explicit ClientObjectProperties(bool isStatic, bool isTrigger, bool isKinematic) noexcept
+        constexpr explicit ClientObjectProperties(bool isTrigger, bool isKinematic) noexcept
             : m_flags{0}
         {
             if (isTrigger) m_flags |= Trigger;
             if (isKinematic) m_flags |= Kinematic;
-            if (isStatic) m_flags |= Static;
         }
 
         auto EventType(ClientObjectProperties second) const -> CollisionEventType;
         auto IsTrigger() const noexcept -> bool { return m_flags & Trigger; }
         auto HasPhysicsBody() const noexcept -> bool { return !(m_flags & NoBody); }
         auto IsKinematic() const noexcept -> bool { return m_flags & Kinematic; }
-        auto IsStatic() const noexcept -> bool { return m_flags & Static; }
 
     private:
         uint8_t m_flags;

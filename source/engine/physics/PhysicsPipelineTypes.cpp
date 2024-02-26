@@ -90,9 +90,7 @@ namespace nc::physics
 {
 auto ClientObjectProperties::EventType(ClientObjectProperties second) const -> CollisionEventType
 {
-    return IsStatic() && second.IsStatic()
-        ? CollisionEventType::None
-        : CollisionEventTypeLookup[m_flags & ~Static][second.m_flags & ~Static];
+    return CollisionEventTypeLookup[m_flags][second.m_flags];
 }
 
 void Manifold::AddContact(const Contact& contact)
