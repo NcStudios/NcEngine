@@ -1,8 +1,8 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         Component.cpp
-        EcsModule.cpp
         FreeComponentGroup.cpp
+        NcEcsImpl.cpp
         Registry.cpp
         SoA.cpp
         Transform.cpp

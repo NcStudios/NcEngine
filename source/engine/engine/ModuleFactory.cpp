@@ -3,15 +3,15 @@
 #include "ncengine/Events.h"
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/asset/NcAsset.h"
+#include "ncengine/audio/NcAudio.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/ecs/NcEcs.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/utility/Log.h"
 
 /** @todo #363 Move factories to public headers and include those instead. */
-#include "audio/NcAudioImpl.h"
-#include "ecs/EcsModule.h"
 #include "graphics/NcGraphicsImpl.h"
 #include "physics/NcPhysicsImpl.h"
 #include "time/TimeImpl.h"
@@ -54,9 +54,9 @@ auto BuildModuleRegistry(Registry* registry,
                                                               events,
                                                               window));
     moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
-    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry));
+    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
     moduleRegistry->Register(nc::time::BuildTimeModule());
-    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry, events));
+    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));
     moduleRegistry->Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }
