@@ -48,8 +48,7 @@ class RenderGraph
 
         auto GetPostProcessImages(PostProcessImageType imageType, uint32_t frameIndex) -> std::vector<vk::ImageView>;
 
-        auto GetShadowPasses() const noexcept -> const std::vector<RenderPass>& { return m_shadowMappingPasses; };
-        auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass; };
+        auto GetLitPass() const noexcept -> const RenderPass& { return *m_litPass.get(); };
         void IncrementShadowPassCount();
         void DecrementShadowPassCount();
         void ClearShadowPasses();
@@ -62,9 +61,9 @@ class RenderGraph
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
         ShaderBindingManager* m_descriptorSets;
-        std::vector<RenderPass> m_shadowMappingPasses;
+        std::vector<std::unique_ptr<RenderPass>> m_shadowMappingPasses;
         std::unordered_map<PostProcessImageType, PostProcessViews> m_postProcessImageViews;
-        RenderPass m_litPass;
+        std::unique_ptr<RenderPass> m_litPass;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         uint32_t m_activeShadowMappingPasses;

@@ -1,5 +1,5 @@
 #include "Initializers.h"
-#include "shaders\ShaderUtilities.h"
+#include "ShaderUtilities.h"
 
 namespace nc::graphics
 {
