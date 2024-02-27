@@ -175,7 +175,7 @@ void RenderGraph::Execute(PerFrameGpuContext *currentFrame, const PerFrameRender
 
     if (m_isDescriptorSetLayoutsDirty)
     {
-        // MapShaderResources();
+        MapShaderResources();
         m_isDescriptorSetLayoutsDirty = false;
     }
 
