@@ -1,27 +1,26 @@
-#include "EcsModule.h"
-#include "ncengine/Events.h"
+#include "NcEcsImpl.h"
+#include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/detail/FreeComponentGroup.h"
 #include "ncengine/ecs/Logic.h"
 #include "ncengine/ecs/Registry.h"
-#include "ncengine/ecs/View.h"
-#include "ncengine/ecs/detail/FreeComponentGroup.h"
+#include "ncengine/Events.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/time/Time.h"
-#include "ncengine/type/EngineId.h"
 #include "ncengine/utility/Log.h"
 
 #include "optick.h"
 
 namespace nc::ecs
 {
-auto BuildEcsModule(Registry* registry, SystemEvents& events) -> std::unique_ptr<EcsModule>
+auto BuildEcsModule(ComponentRegistry& registry, SystemEvents& events) -> std::unique_ptr<NcEcs>
 {
     NC_LOG_TRACE("Creating ECS Module");
     return std::make_unique<EcsModule>(registry, events);
 }
 
-EcsModule::EcsModule(Registry* registry, SystemEvents& events) noexcept
-    : Module{NcEcsId},
-      m_registry{registry},
+EcsModule::EcsModule(ComponentRegistry& registry, SystemEvents& events) noexcept
+    : m_registry{&registry},
       m_rebuildStaticConnection{events.rebuildStatics.Connect(
           [this](){ UpdateStaticWorldSpaceMatrices(); }
       )}
@@ -34,19 +33,19 @@ void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
     graph.Add
     (
         task::ExecutionPhase::Logic,
-        "EcsModule",
+        "NcEcs - RunFrameLogic",
         [this] { RunFrameLogic(); }
     );
 
     graph.Add
     (
         task::ExecutionPhase::PreRenderSync,
-        "Commit Registry Changes",
+        "NcEcs - Commit Staged Changes",
         [this]
         {
-            m_registry->CommitStagedChanges();
-            auto groups = m_registry->StorageFor<ecs::detail::FreeComponentGroup>();
-            for (auto& group : groups->GetComponents())
+            m_registry->CommitPendingChanges();
+            auto groups = m_registry->GetPool<ecs::detail::FreeComponentGroup>().GetComponents();
+            for (auto& group : groups)
             {
                 group.CommitStagedComponents();
             }
@@ -60,15 +59,17 @@ void EcsModule::RunFrameLogic()
 {
     OPTICK_CATEGORY("RunFrameLogic", Optick::Category::GameLogic);
     const float dt = time::DeltaTime();
-    for(auto& logic : View<FrameLogic>{m_registry})
+    auto legacyRegistry = Registry{*m_registry};
+    for(auto& logic : m_registry->GetPool<FrameLogic>().GetComponents())
     {
-        logic.Run(m_registry, dt);
+        logic.Run(&legacyRegistry, dt);
     }
 }
 
 void EcsModule::UpdateWorldSpaceMatrices()
 {
-    auto world = m_registry->GetEcs();
+    OPTICK_CATEGORY("UpdateWorldSpaceMatrices", Optick::Category::GameLogic);
+    auto world = Ecs{*m_registry};
 
 #if 1 // normal update using graph traversal
     struct ParentInfo
@@ -138,7 +139,7 @@ void EcsModule::UpdateWorldSpaceMatrices()
 
 void EcsModule::UpdateStaticWorldSpaceMatrices()
 {
-    auto world = m_registry->GetEcs();
+    auto world = Ecs{*m_registry};
     for (auto entity : world.GetAll<Entity>())
     {
         if (!entity.IsStatic())
