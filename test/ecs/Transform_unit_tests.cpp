@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
-#include "ecs/Registry.h"
-#include "ecs/EcsModule.h"
 #include "ncengine/Events.h"
+#include "ncengine/ecs/Registry.h"
+#include "ecs/NcEcsImpl.h"
 
 using namespace nc;
 
@@ -12,9 +12,8 @@ Registry g_registry{g_impl};
 
 namespace ecs
 {
-EcsModule::EcsModule(Registry* registry, SystemEvents& events) noexcept
-    : Module{0ull},
-      m_registry{registry},
+EcsModule::EcsModule(ComponentRegistry& registry, SystemEvents& events) noexcept
+    : m_registry{&registry},
       m_rebuildStaticConnection{events.rebuildStatics.Connect([](){})}
 {
 }
@@ -28,7 +27,7 @@ void EcsModule::RunFrameLogic()
 // Mock for updating transform worldspace matrices
 void EcsModule::UpdateWorldSpaceMatrices()
 {
-    auto world = m_registry->GetEcs();
+    auto world = Ecs{*m_registry};
     for (auto entity : world.GetAll<Entity>())
     {
         auto& hierarchy = world.Get<Hierarchy>(entity);
@@ -75,7 +74,7 @@ class Transform_unit_tests : public ::testing::Test
 
         Transform_unit_tests()
             : registry{&g_registry},
-              ecsModule{registry, events}
+              ecsModule{g_impl, events}
         {
         }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ncengine/module/Module.h"
+#include "ncengine/ecs/NcEcs.h"
 #include "ncengine/utility/Signal.h"
 
 #include <memory>
@@ -14,21 +14,21 @@ class Registry;
 namespace nc::ecs
 {
 /** Module for updating FrameLogic components and synchronizing the Registry. */
-class EcsModule : public Module
+class EcsModule : public NcEcs
 {
     public:
-        EcsModule(Registry* registry, SystemEvents& events) noexcept;
+        EcsModule(ComponentRegistry& registry, SystemEvents& events) noexcept;
 
         void OnBuildTaskGraph(task::TaskGraph&) override;
         void RunFrameLogic();
 
     private:
-        Registry* m_registry;
+        ComponentRegistry* m_registry;
         Connection<> m_rebuildStaticConnection;
 
         void UpdateWorldSpaceMatrices();
         void UpdateStaticWorldSpaceMatrices();
 };
 
-auto BuildEcsModule(Registry* registry, SystemEvents& events) -> std::unique_ptr<EcsModule>;
+auto BuildEcsModule(ComponentRegistry* registry, SystemEvents& events) -> std::unique_ptr<NcEcs>;
 } // namespace nc::ecs

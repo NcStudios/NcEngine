@@ -15,6 +15,25 @@ const auto g_clip1 = std::string{"clip1.nca"};
 const auto g_clip2 = std::string{"clip2.nca"};
 const auto g_clip3 = std::string{"clip3.nca"};
 
+TEST(AudioSourceTests, Constructor_playFlag_handlesInitialClipSelection)
+{
+    {
+        const auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
+        EXPECT_EQ(nc::audio::NullClipIndex, uut.GetRecentClipIndex());
+    }
+
+    {
+        const auto props = nc::audio::AudioSourceProperties{.flags = nc::audio::AudioSourceFlags::Play};
+        const auto uut = nc::audio::AudioSource{g_entity, {g_clip1}, props};
+        EXPECT_EQ(0ull, uut.GetRecentClipIndex());
+    }
+
+    {
+        const auto props = nc::audio::AudioSourceProperties{.flags = nc::audio::AudioSourceFlags::Play};
+        EXPECT_THROW(nc::audio::AudioSource(g_entity, {}, props), nc::NcError);
+    }
+}
+
 TEST(AudioSourceTests, Play_validClipIndex_setsPlayState)
 {
     auto uut = nc::audio::AudioSource{g_entity, {g_clip1}};
