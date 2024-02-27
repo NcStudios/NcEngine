@@ -96,8 +96,6 @@ struct FollowCamera : public graphics::Camera
             followDistance = Clamp(followDistance + delta, -MaxDistance, -MinDistance);
         }
 
-        static auto lastPos = Vector3{};
-
         const auto targetPos = registry->Get<Transform>(target)->Position();
         const auto offset = Vector3{0.0f, followHeight, followDistance};
         const auto desiredPos = targetPos + offset;
