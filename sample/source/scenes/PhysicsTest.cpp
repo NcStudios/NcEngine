@@ -9,6 +9,7 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace nc::sample
@@ -94,6 +95,8 @@ struct FollowCamera : public graphics::Camera
             followHeight = Clamp(followHeight - delta, MinDistance, MaxDistance);
             followDistance = Clamp(followDistance + delta, -MaxDistance, -MinDistance);
         }
+
+        static auto lastPos = Vector3{};
 
         const auto targetPos = registry->Get<Transform>(target)->Position();
         const auto offset = Vector3{0.0f, followHeight, followDistance};
@@ -303,6 +306,8 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = RampHullCollider});
     auto& platform1Collider = world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
     auto& platform2Collider = world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
+    world.Emplace<physics::PhysicsMaterial>(ramp1, 0.1f, 1.0f);
+    world.Emplace<physics::PhysicsMaterial>(ramp2, 0.1f, 1.0f);
 
     auto& platform1Transform = world.Get<Transform>(platform1);
     auto& platform2Transform = world.Get<Transform>(platform2);
@@ -355,17 +360,29 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     ncPhysics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
 }
 
-void BuildHalfPipe(ecs::Ecs world)
+void BuildHalfPipes(ecs::Ecs world)
 {
-    const auto halfPipe = world.Emplace<Entity>({
-        .position = Vector3{20.0f, 3.2f, 14.0f},
+    const auto halfPipe1 = world.Emplace<Entity>({
+        .position = Vector3{20.0f, 3.45f, 14.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.7f, 0.0f),
         .scale = Vector3::Splat(4.0f),
+        .tag = "Half Pipe",
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe, HalfPipeMesh, RedToonMaterial);
-    world.Emplace<physics::ConcaveCollider>(halfPipe, HalfPipeConcaveCollider);
+    const auto halfPipe2 = world.Emplace<Entity>({
+        .position = Vector3{0.0f, 2.0f, 40.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.57f, 0.0f),
+        .scale = Vector3{10.0f, 3.0f, 15.0f},
+        .tag = "Half Pipe",
+        .flags = Entity::Flags::Static
+    });
+
+    world.Emplace<graphics::ToonRenderer>(halfPipe1, HalfPipeMesh, RedToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, BlueToonMaterial);
+
+    world.Emplace<physics::ConcaveCollider>(halfPipe1, HalfPipeConcaveCollider);
+    world.Emplace<physics::ConcaveCollider>(halfPipe2, HalfPipeConcaveCollider);
 }
 
 void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -527,7 +544,7 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     BuildHinge(world, ncPhysics);
     BuildBalancePlatform(world, ncPhysics);
     BuildSwingingBars(world, ncPhysics);
-    BuildHalfPipe(world);
+    BuildHalfPipes(world);
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
