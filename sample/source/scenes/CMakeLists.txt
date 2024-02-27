@@ -3,4 +3,5 @@ target_sources(${NC_SAMPLE_EXE}
         Benchmarks.cpp
         GraphicsTest.cpp
         PhysicsTest.cpp
+        SmokeTest.cpp
 )
