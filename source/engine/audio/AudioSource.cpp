@@ -36,6 +36,11 @@ AudioSource::AudioSource(Entity entity,
       m_properties{properties},
       m_coldData{std::make_unique<AudioSourceColdData>(std::move(clips))}
 {
+    if (IsPlaying())
+    {
+        NC_ASSERT(!m_clips.empty(), "AudioSource must have at least one clip when initialized with 'Play' flag.");
+        m_currentClipIndex = 0u;
+    }
 }
 
 void AudioSource::Play(uint32_t clipIndex)
