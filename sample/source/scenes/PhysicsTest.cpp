@@ -499,10 +499,10 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     auto ncRandom = modules.Get<Random>();
 
     // Reserve space for default objects so references don't get invalidated
-    world.GetPool<Transform>().Reserve(25);
-    world.GetPool<graphics::ToonRenderer>().Reserve(25);
-    world.GetPool<physics::Collider>().Reserve(25);
-    world.GetPool<physics::PhysicsBody>().Reserve(25);
+    world.GetPool<Transform>().Reserve(40);
+    world.GetPool<graphics::ToonRenderer>().Reserve(40);
+    world.GetPool<physics::PhysicsBody>().Reserve(40);
+    world.GetPool<physics::Collider>().Reserve(40);
 
     // Vehicle
     const auto vehicle = BuildVehicle(world, ncPhysics);
