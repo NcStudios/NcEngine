@@ -119,10 +119,10 @@ void NcAudioImpl::Clear() noexcept
     }
 }
 
-void NcAudioImpl::OnBuildTaskGraph(task::TaskGraph& graph)
+void NcAudioImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
     NC_LOG_TRACE("Building NcAudio workload");
-    graph.Add(task::ExecutionPhase::Free, "NcAudio", [this]{ Run(); });
+    update.Add(task::UpdatePhase::Free, "NcAudio", [this]{ Run(); });
 }
 
 void NcAudioImpl::RegisterListener(Entity listener) noexcept
