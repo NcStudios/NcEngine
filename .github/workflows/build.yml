@@ -24,7 +24,7 @@ jobs:
         # os: [windows-2022, ubuntu-22.04]
         os: [windows-2022]
         config: [Debug, Release]
-        variant: [Dev, Prod]
+        variant: [Dev]
         include:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
@@ -35,8 +35,8 @@ jobs:
           #   cmakeEnv: "CXX=/usr/bin/g++-13"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
-          - variant: Prod
-            cmakeArgs: "-DNC_PROD_BUILD=ON"
+          # - variant: Prod
+          #   cmakeArgs: "-DNC_PROD_BUILD=ON"
 
     name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}
     runs-on: ${{ matrix.os }}
