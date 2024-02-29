@@ -5,11 +5,13 @@
 #include "config/Version.h"
 #include "input/InputInternal.h"
 #include "scene/NcScene.h"
+#include "time/TimeImpl.h"
 #include "utility/Log.h"
 
 #include "optick.h"
 
 #include <sstream>
+#include <thread>
 
 namespace
 {
@@ -32,6 +34,27 @@ void LogConfig(const nc::config::Config& config)
 
     NC_LOG_INFO("Initializing NcEngine with Config:\n{}", configStr);
 }
+
+auto BuildTimer(const nc::config::EngineSettings& settings) -> nc::time::StepTimer
+{
+    if (settings.timeStep == 0.0f)
+    {
+        NC_LOG_INFO("Building variable step timer");
+        return nc::time::StepTimer{settings.maxTimeStep};
+    }
+
+    NC_LOG_INFO("Building fixed step timer");
+    return nc::time::StepTimer{settings.timeStep, settings.maxTimeStep};
+}
+
+
+// TODO Update Executor + add back once other branch merged
+// auto BuildExecutor(const nc::config::EngineSettings& settings, const nc::ModuleRegistry& modules) -> nc::task::Executor
+// {
+//     const auto threadCount = settings.threadCount > 0 ? settings.threadCount : std::thread::hardware_concurrency();
+//     NC_LOG_INFO("Building Executor with {} threads", threadCount);
+//     return nc::task::Executor{threadCount, nc::task::BuildContext(modules.GetAllModules())};
+// }
 } // anonymous namespace
 
 namespace nc
@@ -53,7 +76,8 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 }
 
 NcEngineImpl::NcEngineImpl(const config::Config& config)
-    : m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
+    : m_timer{::BuildTimer(config.engineSettings)},
+      m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_legacyRegistry{*m_registry},
       m_modules{BuildModuleRegistry(&m_legacyRegistry, m_events, &m_window, config)},
@@ -75,6 +99,7 @@ void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
     auto ncScene = m_modules->Get<NcScene>();
     ncScene->Queue(std::move(initialScene));
     ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
+    m_timer.Reset();
     Run();
 }
 
@@ -133,18 +158,50 @@ void NcEngineImpl::ClearScene()
 
 void NcEngineImpl::Run()
 {
+    // TODO: switch to this
+    // auto* ncScene = m_modules->Get<NcScene>();
+    // auto update = [this](float dt)
+    // {
+    //     time::SetDeltaTime(dt);
+    //     input::Flush();
+    //     m_window.ProcessSystemMessages();
+    //     m_executor.RunUpdateTasks();
+    // };
+
+    // while(m_isRunning)
+    // {
+    //     OPTICK_FRAME("Main Thread");
+    //     if (m_timer.Tick(update))
+    //     {
+    //         m_executor.RunRenderTasks();
+    //         if (ncScene->IsTransitionScheduled())
+    //         {
+    //             ClearScene();
+    //             ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
+    //         }
+    //     }
+    // }
+
+
     auto* ncScene = m_modules->Get<NcScene>();
+    auto update = [this](float dt)
+    {
+        time::SetDeltaTime(dt);
+        input::Flush();
+        m_window.ProcessSystemMessages();
+        m_executor.Run();
+    };
 
     while(m_isRunning)
     {
         OPTICK_FRAME("Main Thread");
-        input::Flush();
-        m_window.ProcessSystemMessages();
-        m_executor.Run();
-        if (ncScene->IsTransitionScheduled())
+        if (m_timer.Tick(update))
         {
-            ClearScene();
-            ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
+            if (ncScene->IsTransitionScheduled())
+            {
+                ClearScene();
+                ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
+            }
         }
     }
 

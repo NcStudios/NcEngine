@@ -14,7 +14,6 @@
 /** @todo #363 Move factories to public headers and include those instead. */
 #include "graphics/NcGraphicsImpl.h"
 #include "physics/NcPhysicsImpl.h"
-#include "time/TimeImpl.h"
 
 namespace
 {
@@ -55,7 +54,6 @@ auto BuildModuleRegistry(Registry* registry,
                                                               window));
     moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
-    moduleRegistry->Register(nc::time::BuildTimeModule());
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));
     moduleRegistry->Register(std::make_unique<nc::Random>());
     return moduleRegistry;

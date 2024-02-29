@@ -94,51 +94,7 @@ auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
 void NcPhysicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
 {
     NC_LOG_TRACE("Building NcPhysics workload");
-    const auto fixedStep = config::GetPhysicsSettings().fixedUpdateInterval;
-    auto tasks = std::make_unique<tf::Taskflow>();
-    auto pipelineModule = [&graph, &tasks, &pipeline = m_pipeline]()
-    {
-        auto pipelineGraph = pipeline.BuildTaskGraph(graph.GetExceptionContext());
-        auto pipelineTask = tasks->composed_of(*pipelineGraph).name("Physics Pipeline");
-        graph.StoreGraph(std::move(pipelineGraph));
-        return pipelineTask;
-    }();
-
-    auto init = tasks->emplace(
-        [&iterations = m_currentIterations,
-         &fixedDt = m_accumulatedTime]
-    {
-        iterations = 0u;
-        fixedDt += time::DeltaTime();
-    }).name("Init");
-
-    auto condition = tasks->emplace(
-        [&cur = m_currentIterations,
-         &fixedDt = m_accumulatedTime,
-         fixedStep]
-    {
-        constexpr auto maxIterations = physics::MaxPhysicsIterations;
-        return (cur < maxIterations && fixedDt > fixedStep) ? 1 : 0;
-    }).name("Condition");
-
-    auto update = tasks->emplace(
-        [&curIt = m_currentIterations,
-         &fixedDt = m_accumulatedTime,
-         fixedStep]
-    {
-        fixedDt -= fixedStep;
-        ++curIt;
-        return 0;
-    }).name("Update Accumulated Time");
-
-    auto finish = tasks->emplace([](){}).name("Finish");
-
-    init.precede(condition);
-    condition.precede(finish, pipelineModule);
-    pipelineModule.precede(update);
-    update.precede(condition);
-
-    graph.Add(task::ExecutionPhase::Physics, "NcPhysics", std::move(tasks));
+    graph.Add(task::ExecutionPhase::Physics, "NcPhysics", m_pipeline.BuildTaskGraph(graph.GetExceptionContext()));
 }
 
 void NcPhysicsImpl::Clear() noexcept
