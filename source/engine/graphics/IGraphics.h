@@ -34,9 +34,10 @@ class IGraphics
         virtual ~IGraphics() = default;
 
         virtual void CommitResourceLayout() = 0;
-        virtual auto FrameBegin() -> bool = 0;
+        virtual auto PrepareFrame() -> bool = 0;
+        virtual auto BeginFrame() -> bool = 0;
         virtual auto CurrentFrameIndex() -> uint32_t = 0;
-        virtual void Draw(const PerFrameRenderState& state) = 0;
+        virtual void DrawFrame(const PerFrameRenderState& state) = 0;
         virtual void FrameEnd() = 0;
         virtual void OnResize(float width, float height, bool isMinimized) = 0;
         virtual void Clear() noexcept = 0;

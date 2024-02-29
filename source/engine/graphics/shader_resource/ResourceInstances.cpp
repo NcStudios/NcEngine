@@ -7,7 +7,7 @@ namespace nc::graphics
 {
 AssetResourcesConfig::AssetResourcesConfig(const config::MemorySettings& memorySettings)
     : maxTextures{memorySettings.maxTextures},
-      maxCubeMaps{memorySettings.maxTextures} //todo: fix after pull
+      maxCubeMaps{memorySettings.maxCubeMaps}
 {}
 
 AssetResources::AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, ModuleProvider modules)
@@ -65,6 +65,11 @@ void AssetResources::ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData
             break;
         }
     }
+}
+
+PostProcessResources::PostProcessResources(uint32_t maxPointLights, ShaderResourceBus* resourceBus)
+    : shadowMaps{resourceBus->CreatePPImageArrayBuffer(PostProcessImageType::ShadowMap, maxPointLights, ShaderStage::Fragment, 3u, 0u)}
+{
 }
 
 SystemResourcesConfig::SystemResourcesConfig(const config::GraphicsSettings& graphicsSettings, const config::MemorySettings& memorySettings)

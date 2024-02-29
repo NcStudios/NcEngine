@@ -41,16 +41,17 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_allocator{ std::make_unique<GpuAllocator>(m_device.get(), *m_instance)},
       m_frameManager{std::make_unique<FrameManager>(*m_device)},
       m_shaderBindingManager{ std::make_unique<ShaderBindingManager>(m_device->VkDevice())},
-      m_renderGraph{std::make_unique<RenderGraph>(registry, m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), dimensions, memorySettings.maxPointLights)},
+      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), registry, m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), dimensions, memorySettings.maxPointLights)},
       m_shaderStorage{std::make_unique<ShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderBindingManager.get(), m_renderGraph.get(), m_frameManager->CommandBuffers(),
                                                       shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.meshArrayBufferChannel, shaderResourceBus.ppImageArrayBufferChannel,
                                                       shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
-      m_dimensions{ dimensions },
-      m_screenExtent{ screenExtent },
-      m_isMinimized{ false }
+      m_dimensions{dimensions},
+      m_screenExtent{screenExtent},
+      m_isMinimized{false},
+      m_resourceLayoutInitialized{false}
 {
 }
 
@@ -96,9 +97,9 @@ void VulkanGraphics::Clear() noexcept
     m_device->VkDevice().waitIdle();
 }
 
-bool VulkanGraphics::FrameBegin()
+bool VulkanGraphics::PrepareFrame()
 {
-    OPTICK_CATEGORY("VulkanGraphics::FrameBegin", Optick::Category::Rendering);
+    OPTICK_CATEGORY("VulkanGraphics::PrepareFrame", Optick::Category::Rendering);
     if (m_isMinimized) return false;
 
     // Gets the next image in the swapchain
@@ -107,14 +108,28 @@ bool VulkanGraphics::FrameBegin()
         Resize(m_dimensions);
     }
 
-    m_frameManager->Begin();
     m_imgui->FrameBegin();
+    return true;
+}
+
+bool VulkanGraphics::BeginFrame()
+{
+    OPTICK_CATEGORY("VulkanGraphics::BeginFrame", Optick::Category::Rendering);
+    if (m_isMinimized) return false;
+    m_frameManager->Begin();
     return true;
 }
 
 void VulkanGraphics::CommitResourceLayout()
 {
-    m_shaderBindingManager->CommitResourceLayout();
+    if (!m_resourceLayoutInitialized)
+    {
+        m_shaderBindingManager->CommitResourceLayout();
+        m_resourceLayoutInitialized = true;
+    }
+
+    m_renderGraph->CommitResourceLayout();
+    m_renderGraph->SinkPostProcessImages();
 }
 
 auto VulkanGraphics::CurrentFrameIndex() -> uint32_t
@@ -125,32 +140,34 @@ auto VulkanGraphics::CurrentFrameIndex() -> uint32_t
 // Executes the command buffer for the next swapchain image which writes to the image.
 // Then, returns the image written to to the swap chain for presentation.
 // Note: All calls below are asynchronous fire-and-forget methods. A maximum of MaxFramesInFlight sets of calls will be running at any given time.
-void VulkanGraphics::Draw(const PerFrameRenderState& state)
+void VulkanGraphics::DrawFrame(const PerFrameRenderState& state)
 {
     OPTICK_CATEGORY("VulkanGraphics::Draw", Optick::Category::Rendering);
-    auto* currentFrame = m_frameManager->CurrentFrameContext();
     if (m_isMinimized) return;
+
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->Execute(currentFrame, state, m_imageIndex, m_dimensions, m_screenExtent, CurrentFrameIndex());
+    m_renderGraph->RecordDrawCallsOnBuffer(state, m_imageIndex, m_dimensions, m_screenExtent);
+}
+
+void VulkanGraphics::FrameEnd()
+{
+    auto* currentFrame = m_frameManager->CurrentFrameContext();
+    currentFrame->CommandBuffer()->end();
 
     // Executes the command buffer to render to the image
-    m_swapchain->WaitForNextImage(currentFrame, m_imageIndex);
-    currentFrame->RenderFrame(m_device->VkGraphicsQueue());
+    m_swapchain->WaitImageReadyForBuffer(currentFrame, m_imageIndex);
+    currentFrame->SubmitBufferToQueue(m_device->VkGraphicsQueue());
 
     // Returns the image to the swapchain
     bool isSwapChainValid = true;
-    m_swapchain->Present(currentFrame, m_device->VkGraphicsQueue(), m_imageIndex, isSwapChainValid);
+    m_swapchain->PresentImageToSwapChain(currentFrame, m_device->VkGraphicsQueue(), m_imageIndex, isSwapChainValid);
 
     if (!isSwapChainValid)
     {
         Resize(m_dimensions);
     }
-}
-
-void VulkanGraphics::FrameEnd()
-{
     m_frameManager->End();
 }
 } // namespace nc::graphics::vulkan

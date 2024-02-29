@@ -18,6 +18,7 @@ class Registry;
 namespace graphics
 {
 class Device;
+class FrameManager;
 class GpuAllocator;
 class GpuOptions;
 class PerFrameGpuContext;
@@ -41,34 +42,35 @@ struct PostProcessViews
 class RenderGraph
 {
     public:
-        RenderGraph(Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights);
+        RenderGraph(FrameManager* frameManager, Registry* registry,const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights);
 
-        void Execute(PerFrameGpuContext* currentFrame, const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent, uint32_t frameIndex);
+        void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
-
-        auto GetPostProcessImages(PostProcessImageType imageType, uint32_t frameIndex) -> std::vector<vk::ImageView>;
-
+        void SinkPostProcessImages();
+        auto GetPostProcessImages(PostProcessImageType imageType) -> std::vector<vk::ImageView>;
         auto GetLitPass() const noexcept -> const RenderPass& { return *m_litPass.get(); };
+        void CommitResourceLayout();
         void IncrementShadowPassCount();
         void DecrementShadowPassCount();
         void ClearShadowPasses();
 
     private:
-        void SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&) { m_isDescriptorSetLayoutsDirty = true; }
-        void MapShaderResources();
+        void SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&);
 
+        FrameManager* m_frameManager;
         const Device* m_device;
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
         ShaderBindingManager* m_descriptorSets;
         std::vector<std::unique_ptr<RenderPass>> m_shadowMappingPasses;
+        Attachment m_dummyShadowMap;
         std::unordered_map<PostProcessImageType, PostProcessViews> m_postProcessImageViews;
         std::unique_ptr<RenderPass> m_litPass;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         uint32_t m_activeShadowMappingPasses;
         uint32_t m_maxLights;
-        bool m_isDescriptorSetLayoutsDirty;
+        std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
         Connection<PointLight&> m_onCommitPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;

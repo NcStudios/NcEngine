@@ -50,6 +50,12 @@ struct AssetResources
     void ForwardTextureAssetData(const asset::TextureUpdateEventData& assetData);
 };
 
+struct PostProcessResources
+{
+    PostProcessResources(uint32_t maxPointLights, ShaderResourceBus* resourceBus);
+    PPImageArrayBufferHandle shadowMaps;
+};
+
 struct SystemResourcesConfig
 {
     SystemResourcesConfig(const config::GraphicsSettings& graphicsSettings,

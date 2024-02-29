@@ -10,9 +10,10 @@ auto CreatePerFrameGpuContextVector(const nc::graphics::Device& device) -> std::
 {
     auto out = std::vector<nc::graphics::PerFrameGpuContext>{};
     out.reserve(nc::graphics::MaxFramesInFlight);
-    std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [&device]()
+    auto index = 0u;
+    std::generate_n(std::back_inserter(out), nc::graphics::MaxFramesInFlight, [&device, &index]()
     {
-        return nc::graphics::PerFrameGpuContext(device);
+        return nc::graphics::PerFrameGpuContext(device, index++);
     });
 
     return out;

@@ -66,6 +66,7 @@ class NcGraphicsImpl : public NcGraphics
         std::unique_ptr<IGraphics> m_graphics;
         ShaderResourceBus m_shaderResourceBus;
         AssetResources m_assetResources;
+        PostProcessResources m_postProcessResources;
         SystemResources m_systemResources;
     };
 } // namespace graphics

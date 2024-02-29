@@ -52,6 +52,7 @@ static_assert(sizeof(PointLightData) == 128, "PointLightData size must be 128 by
 struct LightingState
 {
     std::vector<DirectX::XMMATRIX> viewProjections;
+    bool updateShadows;
 };
 
 class PointLightSystem
@@ -69,7 +70,6 @@ class PointLightSystem
     private:
         std::vector<PointLightData> m_pointLightData;
         StorageBufferHandle m_pointLightBuffer;
-        PPImageArrayBufferHandle m_shadowMapsBuffer;
         std::array<uint32_t, MaxFramesInFlight> m_syncedLightsCount;
         bool m_useShadows;
 };

@@ -51,9 +51,10 @@ class VulkanGraphics : public IGraphics
         ~VulkanGraphics() noexcept;
 
         void CommitResourceLayout() override;
-        auto FrameBegin() -> bool override;
+        auto BeginFrame() -> bool override;
+        auto PrepareFrame() -> bool override;
         auto CurrentFrameIndex() -> uint32_t override;
-        void Draw(const PerFrameRenderState& state) override;
+        void DrawFrame(const PerFrameRenderState& state) override;
         void FrameEnd() override;
         void OnResize(float width, float height, bool isMinimized) override;
         void Clear() noexcept override;
@@ -77,6 +78,7 @@ class VulkanGraphics : public IGraphics
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         bool m_isMinimized;
+        bool m_resourceLayoutInitialized;
 };
 } // namespace vulkan
 } // namespace graphics

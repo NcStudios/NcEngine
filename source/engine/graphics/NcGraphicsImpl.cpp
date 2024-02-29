@@ -69,10 +69,10 @@ namespace nc::graphics
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
           m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules},
+          m_postProcessResources{memorySettings.maxPointLights, &m_shaderResourceBus},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
-        m_graphics->CommitResourceLayout();
     }
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
@@ -114,6 +114,7 @@ namespace nc::graphics
         /** @todo graphics::clear not marked noexcept */
         m_systemResources.particleEmitters.Clear();
         m_graphics->Clear();
+        m_postProcessResources.shadowMaps.Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
         m_systemResources.pointLights.Clear();
@@ -132,26 +133,43 @@ namespace nc::graphics
     void NcGraphicsImpl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
-        if (!m_graphics->FrameBegin())
+
+        // Wait until the frame is ready to be rendered, begin accepting ImGui commands
+        if (!m_graphics->PrepareFrame())
         {
             return;
         }
 
         auto currentFrameIndex = m_graphics->CurrentFrameIndex();
+
+        // Run all the systems to generate this frame's resource data.
+        auto cameraState =            m_systemResources.cameras.Execute(m_registry);
+        auto widgetState =            m_systemResources.widgets.Execute(m_registry->GetEcs());
+        auto environmentState =       m_systemResources.environment.Execute(cameraState, currentFrameIndex);
+        auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
+        auto objectState =            m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
+                                                                        cameraState, environmentState, skeletalAnimationState);
+        auto lightingState =          m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+                                      m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
+
+        // If any changes were made to resource layouts (point lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
+        m_graphics->CommitResourceLayout();
+
+        if (lightingState.updateShadows)
+        {
+            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(lightingState.viewProjections.size()), currentFrameIndex);
+        }
+
+        // Allow the frame to begin accepting draw commands.
+        if (!m_graphics->BeginFrame())
+        {
+            return;
+        }
+
+        // Bind mesh buffer to the current frame.
         m_assetResources.meshes.Bind(currentFrameIndex);
 
-        auto cameraState = m_systemResources.cameras.Execute(m_registry);
-        m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
-        auto widgetState = m_systemResources.widgets.Execute(m_registry->GetEcs());
-        auto environmentState = m_systemResources.environment.Execute(cameraState, currentFrameIndex);
-        auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
-        auto objectState = m_systemResources.objects.Execute(currentFrameIndex,
-                                                             MultiView<MeshRenderer, Transform>{m_registry},
-                                                             MultiView<ToonRenderer, Transform>{m_registry},
-                                                             cameraState,
-                                                             environmentState,
-                                                             skeletalAnimationState);
-        auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+        // Collect all the resource data for this frame.
         auto state = PerFrameRenderState
         {
             std::move(cameraState),
@@ -161,7 +179,11 @@ namespace nc::graphics
             std::move(widgetState),
             m_systemResources.particleEmitters.GetParticles()
         };
-        m_graphics->Draw(state);
+
+        // Draw all the resource data
+        m_graphics->DrawFrame(state);
+
+        // Submit the frame to be presented and increment the frame index.
         m_graphics->FrameEnd();
     }
 

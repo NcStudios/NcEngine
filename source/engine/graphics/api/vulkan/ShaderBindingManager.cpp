@@ -138,7 +138,7 @@ void ShaderBindingManager::CommitResourceLayout()
         }
     }
 
-    m_setLayoutsChanged.Emit(DescriptorSetLayoutsChanged{});
+    m_setLayoutsChanged.Emit(DescriptorSetLayoutsChanged{std::numeric_limits<uint32_t>::max()});
 }
 
 vk::DescriptorSetLayout* ShaderBindingManager::GetSetLayout(uint32_t setIndex)

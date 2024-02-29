@@ -93,7 +93,6 @@ ShaderStorage::ShaderStorage(vk::Device device,
 void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData)
 {
     auto& storage = m_staticCabStorage;
-    m_device.waitIdle();
 
     switch (eventData.action)
     {
@@ -204,8 +203,6 @@ void ShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
 
 void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
 {
-    m_device.waitIdle();
-
     auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
     switch (eventData.action)
     {
@@ -224,6 +221,30 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 vk::DescriptorBindingFlagBitsEXT::ePartiallyBound,
                 eventData.currentFrameIndex
             );
+
+            auto& sampler = storage.buffers.at(eventData.imageType)->sampler.get();
+            auto& views = storage.buffers.at(eventData.imageType)->views;
+            auto& imageInfos = storage.buffers.at(eventData.imageType)->imageInfos;
+
+            views.clear();
+            imageInfos.clear();
+
+            auto postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
+            for (auto view : postProcessViews)
+            {
+                views.emplace_back(view);
+                imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
+            }
+
+            m_descriptorSets->UpdateImage
+            (
+                eventData.set,
+                imageInfos,
+                views.size(),
+                vk::DescriptorType::eCombinedImageSampler,
+                eventData.slot,
+                eventData.currentFrameIndex
+            );
             break;
         }
         case PpiaUpdateAction::Update:
@@ -237,7 +258,7 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             views.clear();
             imageInfos.clear();
 
-            auto postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType, eventData.currentFrameIndex);
+            auto postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
             for (auto view : postProcessViews)
             {
                 views.emplace_back(view);
@@ -277,8 +298,6 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
     {
         case SsboUpdateAction::Initialize:
         {
-            m_device.waitIdle();
-
             auto pos = std::ranges::find(storage.uids, eventData.uid);
             if (pos == storage.uids.end())
             {
@@ -363,7 +382,6 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
 void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData)
 {
     auto& storage = m_staticTabStorage;
-    m_device.waitIdle();
 
     switch (eventData.action)
     {
@@ -461,7 +479,6 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
     {
         case UboUpdateAction::Initialize:
         {
-            m_device.waitIdle();
             auto pos = std::ranges::find(storage.uids, eventData.uid);
             if (pos == storage.uids.end())
             {
