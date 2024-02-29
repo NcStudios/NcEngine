@@ -2,9 +2,9 @@
 
 #include "core/GpuOptions.h"
 #include "ecs/Registry.h"
+#include "graphics/api/vulkan/renderpasses/RenderPass.h"
 #include "graphics/GraphicsConstants.h"
 #include "graphics/PointLight.h"
-#include "renderpasses/RenderPass.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 
 #include "utility/Signal.h"
@@ -17,13 +17,13 @@ class Registry;
 
 namespace graphics
 {
+struct DescriptorSetLayoutsChanged;
 class Device;
 class FrameManager;
 class GpuAllocator;
 class GpuOptions;
 class PerFrameGpuContext;
 class ShaderBindingManager;
-struct DescriptorSetLayoutsChanged;
 class Swapchain;
 
 inline static const std::string LitPassId = "Lit Pass";
@@ -42,7 +42,7 @@ struct PostProcessViews
 class RenderGraph
 {
     public:
-        RenderGraph(FrameManager* frameManager, Registry* registry,const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights);
+        RenderGraph(FrameManager* frameManager, Registry* registry,const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights);
 
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
@@ -57,23 +57,34 @@ class RenderGraph
     private:
         void SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&);
 
+        // External dependencies
         FrameManager* m_frameManager;
         const Device* m_device;
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
-        ShaderBindingManager* m_descriptorSets;
+        ShaderBindingManager* m_shaderBindingManager;
+
+        // Render Passes
         std::vector<std::unique_ptr<RenderPass>> m_shadowMappingPasses;
-        Attachment m_dummyShadowMap;
-        std::unordered_map<PostProcessImageType, PostProcessViews> m_postProcessImageViews;
         std::unique_ptr<RenderPass> m_litPass;
-        Vector2 m_dimensions;
-        Vector2 m_screenExtent;
-        uint32_t m_activeShadowMappingPasses;
-        uint32_t m_maxLights;
-        std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
+
+        // Post process images
+        std::unordered_map<PostProcessImageType, PostProcessViews> m_postProcessImageViews;
+        Attachment m_dummyShadowMap;
+
+        // Signal connections
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
         Connection<PointLight&> m_onCommitPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;
+
+        // Screen size
+        Vector2 m_dimensions;
+        Vector2 m_screenExtent;
+
+        // State tracking
+        uint32_t m_activeShadowMappingPasses;
+        uint32_t m_maxLights;
+        std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
 };
 } // namespace nc
 } // namespace graphics

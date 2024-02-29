@@ -11,4 +11,4 @@ struct ShaderStage
     static constexpr shader_stage Vertex   = 0b00000001; // Resources using this stage will bind to the vertex shader.
     static constexpr shader_stage Fragment = 0b00000010; // Resources using this stage will bind to the fragment shader.
 };
-}
+} // namespace nc::graphics

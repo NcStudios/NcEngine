@@ -2,13 +2,13 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         FrameManager.cpp
         GpuAllocator.cpp
-        ShaderStorage.cpp
         Imgui.cpp
         Initializers.cpp
         PerFrameGpuContext.cpp
         QueueFamily.cpp
         RenderGraph.cpp
         ShaderBindingManager.cpp
+        ShaderStorage.cpp
         ShaderUtilities.cpp
         Swapchain.cpp
         vma.cpp

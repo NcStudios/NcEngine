@@ -19,8 +19,8 @@ class StorageBuffer
 
     private:
         GpuAllocator* m_allocator;
-        GpuAllocation<vk::Buffer> m_buffer;
         uint32_t m_alignedSize;
+        GpuAllocation<vk::Buffer> m_buffer;
         uint32_t m_previousDataSize;
         vk::DescriptorBufferInfo m_info;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utility/Signal.h"
-#include "ShaderTypes.h"
+#include "graphics/shader_resource/ShaderTypes.h"
 
 #include "ncutility/NcError.h"
 
@@ -47,4 +47,4 @@ class PPImageArrayBufferHandle
         shader_stage m_stage;
         Signal<const PpiaUpdateEventData&>* m_backendPort;
 };
-}
+} // namespace nc::graphics

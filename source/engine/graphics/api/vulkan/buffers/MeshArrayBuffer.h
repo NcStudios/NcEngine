@@ -8,7 +8,6 @@
 
 namespace nc::graphics::vulkan
 {
-// Buffer that is intended for infrequent or one-time writes on the CPU, and frequent reads on the GPU.
 class MeshBuffer
 {
     public:

@@ -20,8 +20,8 @@ class UniformBuffer
 
     private:
         GpuAllocator* m_allocator;
-        GpuAllocation<vk::Buffer> m_buffer;
         uint32_t m_alignedSize;
+        GpuAllocation<vk::Buffer> m_buffer;
         vk::DescriptorBufferInfo m_info;
 };
 } // namespace nc::graphics::vulkan

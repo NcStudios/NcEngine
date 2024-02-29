@@ -1,31 +1,30 @@
 #include "RenderGraph.h"
-#include "FrameManager.h"
-#include "GpuAllocator.h"
-#include "PerFrameGpuContext.h"
-#include "Swapchain.h"
-#include "core/Device.h"
+#include "graphics/GraphicsUtilities.h"
+#include "graphics/api/vulkan/FrameManager.h"
+#include "graphics/api/vulkan/GpuAllocator.h"
+#include "graphics/api/vulkan/PerFrameGpuContext.h"
+#include "graphics/api/vulkan/Swapchain.h"
 #include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
-#include "graphics/GraphicsUtilities.h"
-#include "techniques/EnvironmentTechnique.h"
-#include "techniques/OutlineTechnique.h"
-#include "techniques/ParticleTechnique.h"
-#include "techniques/PbrTechnique.h"
-#include "techniques/ShadowMappingTechnique.h"
-#include "techniques/ToonTechnique.h"
-#include "techniques/UiTechnique.h"
+#include "graphics/api/vulkan/core/Device.h"
+#include "graphics/api/vulkan/techniques/EnvironmentTechnique.h"
+#include "graphics/api/vulkan/techniques/OutlineTechnique.h"
+#include "graphics/api/vulkan/techniques/ParticleTechnique.h"
+#include "graphics/api/vulkan/techniques/PbrTechnique.h"
+#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
+#include "graphics/api/vulkan/techniques/ToonTechnique.h"
+#include "graphics/api/vulkan/techniques/UiTechnique.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "techniques/WireframeTechnique.h"
+#include "graphics/api/vulkan/techniques/WireframeTechnique.h"
 #endif
 
 #include "optick.h"
 
 #include <array>
-#include <string>
 #include <ranges>
+#include <string>
 
-#include <iostream>
 namespace
 {
 void SetViewportAndScissorFullWindow(vk::CommandBuffer* cmd, const nc::Vector2& dimensions)
@@ -126,24 +125,24 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
 
 namespace nc::graphics
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* descriptorSets, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
-      m_descriptorSets{descriptorSets},
+      m_shaderBindingManager{shaderBindingManager},
       m_shadowMappingPasses{},
-      m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
       m_litPass{CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions)},
+      m_postProcessImageViews{},
+      m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
+      m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
+      m_onCommitPointLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount();})},
+      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount();})},
       m_dimensions{dimensions},
       m_screenExtent{},
       m_activeShadowMappingPasses{},
       m_maxLights{maxLights},
-      m_isDescriptorSetLayoutsDirty{std::array<bool, MaxFramesInFlight>{true, true}},
-      m_onDescriptorSetsChanged{m_descriptorSets->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
-      m_postProcessImageViews{},
-      m_onCommitPointLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount();})},
-      m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount();})}
+      m_isDescriptorSetLayoutsDirty{std::array<bool, MaxFramesInFlight>{true, true}}
 {
     auto view = m_dummyShadowMap.view.get();
     m_postProcessImageViews.emplace(PostProcessImageType::ShadowMap, PostProcessViews
@@ -161,7 +160,6 @@ void RenderGraph::SinkPostProcessImages()
     OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
 
     auto* currentFrame = m_frameManager->CurrentFrameContext();
-    currentFrame->WaitForSync();
     auto view = m_dummyShadowMap.view.get();
     m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(currentFrame->Index()) = std::vector<vk::ImageView>(m_maxLights, view);
 
@@ -195,21 +193,21 @@ void RenderGraph::CommitResourceLayout()
     {
         m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
         m_shadowMappingPasses[i]->ClearTechniques();
-        m_shadowMappingPasses[i]->RegisterShadowMappingTechnique(m_device->VkDevice(), m_descriptorSets, i);
+        m_shadowMappingPasses[i]->RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i);
     }
 
     m_litPass->ClearTechniques();
 
     #ifdef NC_EDITOR_ENABLED
-    m_litPass->RegisterTechnique<WireframeTechnique>(*m_device, m_descriptorSets);
+    m_litPass->RegisterTechnique<WireframeTechnique>(*m_device, m_shaderBindingManager);
     #endif
 
-    m_litPass->RegisterTechnique<EnvironmentTechnique>(*m_device, m_descriptorSets);
-    m_litPass->RegisterTechnique<PbrTechnique>(*m_device, m_descriptorSets);
-    m_litPass->RegisterTechnique<ToonTechnique>(*m_device, m_descriptorSets);
-    m_litPass->RegisterTechnique<OutlineTechnique>(*m_device, m_descriptorSets);
-    m_litPass->RegisterTechnique<ParticleTechnique>(*m_device, m_descriptorSets);
-    m_litPass->RegisterTechnique<UiTechnique>(*m_device, m_descriptorSets);
+    m_litPass->RegisterTechnique<EnvironmentTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass->RegisterTechnique<PbrTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass->RegisterTechnique<ToonTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass->RegisterTechnique<OutlineTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass->RegisterTechnique<ParticleTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass->RegisterTechnique<UiTechnique>(*m_device, m_shaderBindingManager);
     m_isDescriptorSetLayoutsDirty.at(currentFrame->Index()) = false;
 }
 

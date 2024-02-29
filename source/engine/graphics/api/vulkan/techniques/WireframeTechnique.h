@@ -44,5 +44,5 @@ namespace nc::graphics
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };
-}
+} // namespace nc::graphics
 #endif

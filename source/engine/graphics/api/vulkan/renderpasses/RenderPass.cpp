@@ -91,9 +91,9 @@ RenderPass::RenderPass(vk::Device device,
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* descriptorSets, uint32_t shadowCasterIndex)
+void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex)
 {
-    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex));
 }
 
 void RenderPass::UnregisterShadowMappingTechnique()

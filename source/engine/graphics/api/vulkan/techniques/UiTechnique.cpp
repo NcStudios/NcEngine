@@ -2,9 +2,9 @@
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -97,4 +97,4 @@ namespace nc::graphics
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }
-}
+} // namespace nc::graphics

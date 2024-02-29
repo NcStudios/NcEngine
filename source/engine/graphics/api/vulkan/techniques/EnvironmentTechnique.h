@@ -17,7 +17,7 @@ class ShaderBindingManager;
 class EnvironmentTechnique : public ITechnique
 {
     public:
-        EnvironmentTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass);
+        EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
         ~EnvironmentTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
@@ -29,7 +29,7 @@ class EnvironmentTechnique : public ITechnique
         void Clear() noexcept;
 
     private:
-        ShaderBindingManager* m_descriptorSets;
+        ShaderBindingManager* m_shaderBindingManager;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };

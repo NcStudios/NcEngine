@@ -2,22 +2,22 @@
 #include "asset/Assets.h"
 #include "assets/AssetService.h"
 #include "config/Config.h"
-#include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/core/Device.h"
+#include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/Swapchain.h"
-#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics
 {
-EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass)
-    : m_descriptorSets{descriptorSets},
-        m_pipeline{nullptr},
-        m_pipelineLayout{nullptr}
+EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+    : m_shaderBindingManager{shaderBindingManager},
+      m_pipeline{nullptr},
+      m_pipelineLayout{nullptr}
 {
     const auto vkDevice = device.VkDevice();
 
@@ -37,8 +37,8 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingMa
 
     std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
     {
-        *(m_descriptorSets->GetSetLayout(0)),
-        *(m_descriptorSets->GetSetLayout(1))
+        *(m_shaderBindingManager->GetSetLayout(0)),
+        *(m_shaderBindingManager->GetSetLayout(1))
     };
 
     auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -97,8 +97,8 @@ void EnvironmentTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     OPTICK_CATEGORY("EnvironmentTechnique::Bind", Optick::Category::Rendering);
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
-    m_descriptorSets->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+    m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
 bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)

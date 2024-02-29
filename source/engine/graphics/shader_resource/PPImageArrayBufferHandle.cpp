@@ -1,8 +1,6 @@
 #include "PPImageArrayBufferHandle.h"
 #include "graphics/GraphicsConstants.h"
 
-#include "ncutility/NcError.h"
-
 namespace nc::graphics
 {
 PPImageArrayBufferHandle::PPImageArrayBufferHandle(PostProcessImageType imageType, shader_stage stage, Signal<const PpiaUpdateEventData&>* backendPort, uint32_t slot, uint32_t set)

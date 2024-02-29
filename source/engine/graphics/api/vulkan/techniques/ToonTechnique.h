@@ -13,7 +13,7 @@ class ShaderBindingManager;
 class ToonTechnique : public ITechnique
 {
 public:
-    ToonTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass);
+    ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
     ~ToonTechnique() noexcept;
 
     bool CanBind(const PerFrameRenderState& frameData) override;
@@ -25,8 +25,8 @@ public:
     void Clear() noexcept;
 
 private:
-    ShaderBindingManager* m_descriptorSets;
+    ShaderBindingManager* m_shaderBindingManager;
     vk::UniquePipeline m_pipeline;
     vk::UniquePipelineLayout m_pipelineLayout;
 };
-}
+} // namespace nc::graphics

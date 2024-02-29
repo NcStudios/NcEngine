@@ -13,8 +13,8 @@
 
 namespace nc::graphics
 {
-    ParticleTechnique::ParticleTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass)
-        : m_descriptorSets{descriptorSets},
+    ParticleTechnique::ParticleTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+        : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -38,8 +38,8 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
         {
-            *(m_descriptorSets->GetSetLayout(0)),
-            *(m_descriptorSets->GetSetLayout(1))
+            *(m_shaderBindingManager->GetSetLayout(0)),
+            *(m_shaderBindingManager->GetSetLayout(1))
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
@@ -99,8 +99,8 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("ParticleTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
-        m_descriptorSets->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+        m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -129,4 +129,4 @@ namespace nc::graphics
             }
         }
     }
-}
+} // namespace nc::graphics

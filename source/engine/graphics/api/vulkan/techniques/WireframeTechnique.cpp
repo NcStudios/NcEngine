@@ -107,5 +107,6 @@ namespace nc::graphics
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
     }
-}
+} // namespace nc::graphics
+
 #endif

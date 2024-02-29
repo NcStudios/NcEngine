@@ -43,8 +43,8 @@ struct ShaderResourceBus
     auto CreateUniformBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> UniformBufferHandle;
 
     Signal<const CabUpdateEventData&> cubeMapArrayBufferChannel;
-    Signal<const PpiaUpdateEventData&> ppImageArrayBufferChannel;
     Signal<const MabUpdateEventData&> meshArrayBufferChannel;
+    Signal<const PpiaUpdateEventData&> ppImageArrayBufferChannel;
     Signal<const SsboUpdateEventData&> storageBufferChannel;
     Signal<const TabUpdateEventData&> textureArrayBufferChannel;
     Signal<const UboUpdateEventData&> uniformBufferChannel;

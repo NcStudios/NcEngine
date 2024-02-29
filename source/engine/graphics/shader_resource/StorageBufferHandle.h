@@ -1,12 +1,11 @@
 #pragma once
 
+#include "graphics/shader_resource/ShaderTypes.h"
 #include "utility/Signal.h"
-#include "ShaderTypes.h"
 
 #include "ncutility/NcError.h"
 
 #include <cstdint>
-#include <string>
 
 namespace nc::graphics
 {
@@ -16,24 +15,6 @@ enum class SsboUpdateAction : uint8_t
     Update,
     Clear
 };
-
-// struct FooAddEvent{};
-// struct FooRemoveEvent{};
-// using FooEvent = std::variant<FooAddEvent, FooRemoveEvent>;
-
-// // handler
-// void HandleEvent(const FooEvent& e)
-// {
-//     std::visit([](auto&& unpacked)
-//     {
-//         using t = std::decay_t<decltype(unpacked)>;
-//         if constexpr(std::same_as<t, FooAddEvent>)
-//         {
-
-//         }
-//         else if const
-//     }, e);
-// }
 
 struct SsboUpdateEventData
 {

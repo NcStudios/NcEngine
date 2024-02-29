@@ -9,10 +9,8 @@ CubeMap::CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data)
       m_cubeMapView{allocator->CreateCubeMapTextureView(m_image)}{}
 
 CubeMap::CubeMap(CubeMap&& other) noexcept
-        : m_image{std::exchange(other.m_image, GpuAllocation<vk::Image>{})},
-          m_cubeMapView{std::move(other.m_cubeMapView)}
-    {
-    }
+    : m_image{std::exchange(other.m_image, GpuAllocation<vk::Image>{})},
+      m_cubeMapView{std::move(other.m_cubeMapView)}{}
 
 CubeMap& CubeMap::operator=(CubeMap&& other) noexcept
 {
@@ -38,7 +36,5 @@ void CubeMap::Clear() noexcept
 }
 
 CubeMapArrayBuffer::CubeMapArrayBuffer(vk::Device device)
-    : sampler{CreateTextureSampler(device, vk::SamplerAddressMode::eRepeat)}
-{
-}
+    : sampler{CreateTextureSampler(device, vk::SamplerAddressMode::eRepeat)}{}
 } // namespace nc::graphics::vulkan

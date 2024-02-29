@@ -2,9 +2,9 @@
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/GpuOptions.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/PerFrameRenderState.h"
 
@@ -22,8 +22,8 @@ namespace
 
 namespace nc::graphics
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
-        : m_descriptorSets{descriptorSets},
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
+        : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr},
           m_enabled{false},
@@ -44,7 +44,7 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
-            *(m_descriptorSets->GetSetLayout(0))
+            *(m_shaderBindingManager->GetSetLayout(0))
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
@@ -102,7 +102,7 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+        m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     }
 
     bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)

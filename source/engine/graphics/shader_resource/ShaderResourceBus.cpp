@@ -1,10 +1,10 @@
 #include "ShaderResourceBus.h"
-#include "CubeMapArrayBufferHandle.h"
-#include "MeshArrayBufferHandle.h"
-#include "StorageBufferHandle.h"
-#include "TextureArrayBufferHandle.h"
-#include "UniformBufferHandle.h"
 #include "graphics/GraphicsConstants.h"
+#include "graphics/shader_resource/CubeMapArrayBufferHandle.h"
+#include "graphics/shader_resource/MeshArrayBufferHandle.h"
+#include "graphics/shader_resource/StorageBufferHandle.h"
+#include "graphics/shader_resource/TextureArrayBufferHandle.h"
+#include "graphics/shader_resource/UniformBufferHandle.h"
 
 #include <ranges>
 

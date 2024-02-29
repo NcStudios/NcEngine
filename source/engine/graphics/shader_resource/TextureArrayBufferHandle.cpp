@@ -1,8 +1,6 @@
 #include "TextureArrayBufferHandle.h"
 #include "graphics/GraphicsConstants.h"
 
-#include "ncutility/NcError.h"
-
 #include "optick.h"
 
 namespace nc::graphics

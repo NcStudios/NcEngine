@@ -80,10 +80,10 @@ namespace nc::graphics
 {
 ShaderBindingManager::ShaderBindingManager(vk::Device device)
     : m_device{device},
-        m_pool{CreateRenderingDescriptorPool(device)},
-        m_perFrameSets{},
-        m_globalSets{},
-        m_layouts{}
+      m_pool{CreateRenderingDescriptorPool(device)},
+      m_perFrameSets{},
+      m_globalSets{},
+      m_layouts{}
 {
 }
 
@@ -236,4 +236,4 @@ void ShaderBindingManager::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferI
     else
         isDirty.at(setIndex) = true;
 }
-}
+} // namespace nc::graphics

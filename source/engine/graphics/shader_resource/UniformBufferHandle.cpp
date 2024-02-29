@@ -1,9 +1,8 @@
 #include "UniformBufferHandle.h"
 #include "graphics/GraphicsConstants.h"
 
-#include "ncutility/NcError.h"
-
 #include "optick.h"
+
 namespace nc::graphics
 {
 UniformBufferHandle::UniformBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const UboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set)

@@ -1,15 +1,14 @@
 #pragma once
 
-#include "utility/Signal.h"
 #include "asset/AssetData.h"
-#include "ShaderTypes.h"
+#include "graphics/shader_resource/ShaderTypes.h"
+#include "utility/Signal.h"
 
 #include "ncasset/Assets.h"
 #include "ncutility/NcError.h"
 
 #include <cstdint>
 #include <span>
-#include <string>
 
 namespace nc::graphics
 {

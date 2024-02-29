@@ -1,7 +1,6 @@
 #include "NcGraphicsImpl.h"
-#include "PerFrameRenderState.h"
-
-#include "shader_resource/ShaderResourceBus.h"
+#include "graphics/PerFrameRenderState.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 #include "window/WindowImpl.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"

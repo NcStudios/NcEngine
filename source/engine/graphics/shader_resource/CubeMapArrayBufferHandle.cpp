@@ -1,8 +1,6 @@
 #include "CubeMapArrayBufferHandle.h"
 #include "graphics/GraphicsConstants.h"
 
-#include "ncutility/NcError.h"
-
 namespace nc::graphics
 {
 CubeMapArrayBufferHandle::CubeMapArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const CabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set)

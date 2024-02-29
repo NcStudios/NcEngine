@@ -3,17 +3,17 @@
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics
 {
-    PbrTechnique::PbrTechnique(const Device& device, ShaderBindingManager* descriptorSets, vk::RenderPass* renderPass)
-        : m_descriptorSets{descriptorSets},
+    PbrTechnique::PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+        : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -35,8 +35,8 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
         {
-            *(m_descriptorSets->GetSetLayout(0)),
-            *(m_descriptorSets->GetSetLayout(1)),
+            *(m_shaderBindingManager->GetSetLayout(0)),
+            *(m_shaderBindingManager->GetSetLayout(1)),
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -98,8 +98,8 @@ namespace nc::graphics
         OPTICK_CATEGORY("PbrTechnique::Bind", Optick::Category::Rendering);
 
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
-        m_descriptorSets->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+        m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool PbrTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -122,4 +122,4 @@ namespace nc::graphics
     void PbrTechnique::Clear() noexcept
     {
     }
-}
+} // namespace nc::graphics

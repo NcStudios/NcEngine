@@ -1,8 +1,6 @@
 #include "MeshArrayBufferHandle.h"
 #include "graphics/GraphicsConstants.h"
 
-#include "ncutility/NcError.h"
-
 namespace nc::graphics
 {
 MeshArrayBufferHandle::MeshArrayBufferHandle(Signal<const MabUpdateEventData&>* backendPort)

@@ -25,8 +25,8 @@ struct PpiaUpdateEventData;
 class RenderGraph;
 class ShaderBindingManager;
 struct SsboUpdateEventData;
-struct UboUpdateEventData;
 struct TabUpdateEventData;
+struct UboUpdateEventData;
 
 namespace vulkan
 {
@@ -69,16 +69,16 @@ struct TextureArrayBufferStorage
 struct ShaderStorage : StableAddress
 {
     ShaderStorage(vk::Device device,
-                     GpuAllocator* allocator, 
-                     ShaderBindingManager* descriptorSets,
-                     RenderGraph* renderGraph,
-                     std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
-                     Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
-                     Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
-                     Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
-                     Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
-                     Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
-                     Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
+                  GpuAllocator* allocator, 
+                  ShaderBindingManager* shaderBindingManager,
+                  RenderGraph* renderGraph,
+                  std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
+                  Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
+                  Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
+                  Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
+                  Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
+                  Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
+                  Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
 
     void UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData);
     void UpdateMeshArrayBuffer(const MabUpdateEventData& eventData);
@@ -89,7 +89,7 @@ struct ShaderStorage : StableAddress
 
     vk::Device m_device;
     GpuAllocator* m_allocator;
-    ShaderBindingManager* m_descriptorSets;
+    ShaderBindingManager* m_shaderBindingManager;
     RenderGraph* m_renderGraph;
 
     std::array<CubeMapArrayBufferStorage, MaxFramesInFlight> m_perFrameCabStorage;

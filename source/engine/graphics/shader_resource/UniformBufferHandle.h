@@ -1,12 +1,11 @@
 #pragma once
 
 #include "utility/Signal.h"
-#include "ShaderTypes.h"
+#include "graphics/shader_resource/ShaderTypes.h"
 
 #include "ncutility/NcError.h"
 
 #include <cstdint>
-#include <string>
 
 namespace nc::graphics
 {
