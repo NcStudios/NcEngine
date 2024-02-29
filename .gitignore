@@ -11,7 +11,7 @@
 *.log
 *.DS_store
 
-!vk_swiftshader.dll
+!vulkan-1.dll
 
 #directories
 .vs/
