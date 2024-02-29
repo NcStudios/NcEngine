@@ -57,3 +57,11 @@ if(${NC_PROFILING_ENABLED})
             DESTINATION sample
     )
 endif()
+
+install(FILES ${PROJECT_SOURCE_DIR}/vk_swiftshader_icd.json
+        DESTINATION sample
+)
+
+install(FILES ${PROJECT_SOURCE_DIR}/vk_swiftshader.dll
+        DESTINATION sample
+)

@@ -10,6 +10,8 @@
 
 int main(int argc, char** argv)
 {
+    std::cerr << "starting main\n";
+
     const auto runSmokeTest = [argc, argv]()
     {
         return argc > 1 && argv[1] == std::string_view{"--run-test"};
@@ -19,12 +21,16 @@ int main(int argc, char** argv)
 
     try
     {
+        std::cerr << "initializing engine\n";
+
         const auto config = nc::config::Load("config.ini");
         engine = nc::InitializeNcEngine(config);
         nc::sample::InitializeResources();
 
         if (runSmokeTest)
         {
+            std::cerr << "loading SmokeTest\n";
+
             engine->Start(std::make_unique<nc::sample::SmokeTest>(
                 [instance = engine.get()](){ instance->Stop(); }
             ));
@@ -44,6 +50,8 @@ int main(int argc, char** argv)
         NC_LOG_ERROR("SampleMain.cpp - unknown exception");
         std::cerr << "SampleMain.cpp - unknown exception\n";
     }
+
+    std::cerr << "exiting main\n";
 
     return 0;
 }

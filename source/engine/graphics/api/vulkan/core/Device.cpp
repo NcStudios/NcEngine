@@ -26,17 +26,17 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
     });
 
     auto deviceFeatures = vk::PhysicalDeviceFeatures{};
-    deviceFeatures.setSamplerAnisotropy(VK_TRUE);
-    deviceFeatures.setFillModeNonSolid(VK_TRUE);
-    deviceFeatures.setWideLines(VK_TRUE);
+    deviceFeatures.setSamplerAnisotropy(VK_FALSE);
+    deviceFeatures.setFillModeNonSolid(VK_FALSE);
+    deviceFeatures.setWideLines(VK_FALSE);
 
     auto vulkan11Features = vk::PhysicalDeviceVulkan11Features{};
-    vulkan11Features.setShaderDrawParameters(VK_TRUE);
+    vulkan11Features.setShaderDrawParameters(VK_FALSE);
 
     auto indexingFeatures = vk::PhysicalDeviceDescriptorIndexingFeaturesEXT{};
     indexingFeatures.setPNext(&vulkan11Features);
-    indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
-    indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
+    indexingFeatures.setDescriptorBindingPartiallyBound(VK_FALSE);
+    indexingFeatures.setRuntimeDescriptorArray(VK_FALSE);
 
     auto deviceCreateInfo = vk::DeviceCreateInfo{};
     deviceCreateInfo.setPNext(&indexingFeatures);
