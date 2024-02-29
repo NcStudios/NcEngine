@@ -11,6 +11,8 @@
 *.log
 *.DS_store
 
+!vk_swiftshader.dll
+
 #directories
 .vs/
 .vscode/
