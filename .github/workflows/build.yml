@@ -73,7 +73,6 @@ jobs:
       - name: Run Sample
         working-directory: ${{ github.workspace }}/install/sample
         run: |
-          $env:VK_ICD_FILENAMES="vk_swiftshader_icd.json"
           .\\Sample.exe --run-test 2>&1 > ".\\SampleResults.txt"
           $LastExitCode >> ".\\SampleResults.txt"
 

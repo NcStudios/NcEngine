@@ -58,10 +58,10 @@ if(${NC_PROFILING_ENABLED})
     )
 endif()
 
-install(FILES ${PROJECT_SOURCE_DIR}/vk_swiftshader_icd.json
-        DESTINATION sample
-)
+# install(FILES ${PROJECT_SOURCE_DIR}/vk_swiftshader_icd.json
+#         DESTINATION sample
+# )
 
-install(FILES ${PROJECT_SOURCE_DIR}/vk_swiftshader.dll
+install(FILES ${PROJECT_SOURCE_DIR}/vulkan-1.dll
         DESTINATION sample
 )
