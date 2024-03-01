@@ -45,7 +45,7 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, const nc::Vector2& dimensions, uint32_t index) -> std::unique_ptr<nc::graphics::RenderPass>
+auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, uint32_t frameIndex) -> std::unique_ptr<nc::graphics::RenderPass>
 {
     using namespace nc::graphics;
 
@@ -57,21 +57,14 @@ auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::G
 
     const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
 
-    std::vector<Attachment> attachments;
-    const auto numConcurrentAttachments = MaxFramesInFlight;
-    for (auto i = 0u; i < numConcurrentAttachments; i++)
-    {
-        attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
-    }
+    auto attachment = std::vector<Attachment>{};
+    attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = std::make_unique<RenderPass>(vkDevice, ShadowMappingPassId + std::to_string(index), shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth);
+    auto renderPass = std::make_unique<RenderPass>(vkDevice, ShadowMappingPassId + std::to_string(shadowCasterIndex), shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
 
-    for (auto i = 0u; i < numConcurrentAttachments; i++)
-    {
-        const auto views = std::array<vk::ImageView, 1>{renderPass->GetAttachmentView(i)};
-        renderPass->RegisterAttachmentViews(views, dimensions, i);
-    }
+    const auto views = std::array<vk::ImageView, 1>{renderPass->GetAttachmentView(0u)};
+    renderPass->RegisterAttachmentViews(views, dimensions, frameIndex);
 
     return renderPass;
 }
@@ -132,7 +125,7 @@ RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const D
       m_gpuAllocator{gpuAllocator},
       m_shaderBindingManager{shaderBindingManager},
       m_shadowMappingPasses{},
-      m_litPass{CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions)},
+      m_litPass{},
       m_postProcessImageViews{},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
       m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
@@ -144,6 +137,11 @@ RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const D
       m_maxLights{maxLights},
       m_isDescriptorSetLayoutsDirty{std::array<bool, MaxFramesInFlight>{true, true}}
 {
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    {
+        m_litPass.at(i) = CreateLitPass(device, m_gpuAllocator, m_swapchain, dimensions);
+    }
+
     auto view = m_dummyShadowMap.view.get();
     m_postProcessImageViews.emplace(PostProcessImageType::ShadowMap, PostProcessViews
     {
@@ -160,12 +158,13 @@ void RenderGraph::SinkPostProcessImages()
     OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
 
     auto* currentFrame = m_frameManager->CurrentFrameContext();
+    auto frameIndex = currentFrame->Index();
     auto view = m_dummyShadowMap.view.get();
-    m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(currentFrame->Index()) = std::vector<vk::ImageView>(m_maxLights, view);
+    m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(frameIndex) = std::vector<vk::ImageView>(m_maxLights, view);
 
     for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
-        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(currentFrame->Index()).at(i) = m_shadowMappingPasses.at(i)->GetAttachmentView(currentFrame->Index());
+        m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(frameIndex).at(i) = m_shadowMappingPasses.at(frameIndex).at(i)->GetAttachmentView(0u);
     }
 }
 
@@ -177,38 +176,36 @@ auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType) -> std::v
 
 void RenderGraph::CommitResourceLayout()
 {
-    // Wait for submission of the command buffer on the queue to be complete.
-    m_device->VkGraphicsQueue().waitIdle();
-
     auto* currentFrame = m_frameManager->CurrentFrameContext();
+    auto frameIndex = currentFrame->Index();
 
-    if (!m_isDescriptorSetLayoutsDirty.at(currentFrame->Index()))
+    if (!m_isDescriptorSetLayoutsDirty.at(frameIndex))
     {
         return;
     }
-
-    m_shadowMappingPasses.clear();
+    m_shadowMappingPasses.at(frameIndex).clear();
 
     for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
     {
-        m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
-        m_shadowMappingPasses[i]->ClearTechniques();
-        m_shadowMappingPasses[i]->RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i);
+        m_shadowMappingPasses.at(frameIndex).push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i, frameIndex));
+        m_shadowMappingPasses.at(frameIndex).at(i)->ClearTechniques();
+        m_shadowMappingPasses.at(frameIndex).at(i)->RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i);
     }
 
-    m_litPass->ClearTechniques();
+    m_litPass.at(frameIndex)->ClearTechniques();
 
     #ifdef NC_EDITOR_ENABLED
-    m_litPass->RegisterTechnique<WireframeTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass.at(frameIndex)->RegisterTechnique<WireframeTechnique>(*m_device, m_shaderBindingManager);
     #endif
 
-    m_litPass->RegisterTechnique<EnvironmentTechnique>(*m_device, m_shaderBindingManager);
-    m_litPass->RegisterTechnique<PbrTechnique>(*m_device, m_shaderBindingManager);
-    m_litPass->RegisterTechnique<ToonTechnique>(*m_device, m_shaderBindingManager);
-    m_litPass->RegisterTechnique<OutlineTechnique>(*m_device, m_shaderBindingManager);
-    m_litPass->RegisterTechnique<ParticleTechnique>(*m_device, m_shaderBindingManager);
-    m_litPass->RegisterTechnique<UiTechnique>(*m_device, m_shaderBindingManager);
-    m_isDescriptorSetLayoutsDirty.at(currentFrame->Index()) = false;
+    m_litPass.at(frameIndex)->RegisterTechnique<EnvironmentTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass.at(frameIndex)->RegisterTechnique<PbrTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass.at(frameIndex)->RegisterTechnique<ToonTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass.at(frameIndex)->RegisterTechnique<OutlineTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass.at(frameIndex)->RegisterTechnique<ParticleTechnique>(*m_device, m_shaderBindingManager);
+    m_litPass.at(frameIndex)->RegisterTechnique<UiTechnique>(*m_device, m_shaderBindingManager);
+
+    m_isDescriptorSetLayoutsDirty.at(frameIndex) = false;
 }
 
 void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent)
@@ -216,41 +213,40 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
     OPTICK_CATEGORY("RenderGraph::RecordDrawCallsOnBuffer", Optick::Category::Rendering);
 
     auto* currentFrame = m_frameManager->CurrentFrameContext();
+    auto frameIndex = currentFrame->Index();
     const auto cmd = currentFrame->CommandBuffer();
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    for (auto& shadowMappingPass : m_shadowMappingPasses)
+    for (auto& shadowMappingPass : m_shadowMappingPasses.at(frameIndex))
     {
         shadowMappingPass->Begin(cmd, frameBufferIndex);
-        shadowMappingPass->Execute(cmd, frameData, currentFrame->Index());
+        shadowMappingPass->Execute(cmd, frameData, frameIndex);
         shadowMappingPass->End(cmd);
     }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
-    m_litPass->Begin(cmd, frameBufferIndex);
-    m_litPass->Execute(cmd, frameData, currentFrame->Index());
-    m_litPass->End(cmd);
+    m_litPass.at(frameIndex)->Begin(cmd, frameBufferIndex);
+    m_litPass.at(frameIndex)->Execute(cmd, frameData, frameIndex);
+    m_litPass.at(frameIndex)->End(cmd);
 }
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    m_litPass = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions);
-
-    m_shadowMappingPasses.clear();
     for (auto i : std::views::iota(0u, MaxFramesInFlight))
     {
+        m_litPass.at(i) = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions);
+        m_shadowMappingPasses.at(i).clear();
         m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(i).clear();
     }
 
-    for (auto i : std::views::iota(0u, m_activeShadowMappingPasses))
+    for (auto i : std::views::iota(0u, MaxFramesInFlight))
     {
-        m_shadowMappingPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i));
-
-        for (auto j : std::views::iota(0u, MaxFramesInFlight))
+        for (auto j : std::views::iota(0u, m_activeShadowMappingPasses))
         {
-            m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(j).emplace_back(m_shadowMappingPasses.back()->GetAttachmentView(j));
+            m_shadowMappingPasses.at(i).push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, j, i));
+            m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews.at(i).emplace_back(m_shadowMappingPasses.at(i).back()->GetAttachmentView(0u));
         }
     }
 
@@ -270,7 +266,7 @@ void RenderGraph::IncrementShadowPassCount()
     }
 }
 
-void RenderGraph::ClearShadowPasses()
+void RenderGraph::ClearShadowPasses() noexcept
 {
     m_activeShadowMappingPasses = 0u;
     for (auto i : std::views::iota(0u, MaxFramesInFlight))
