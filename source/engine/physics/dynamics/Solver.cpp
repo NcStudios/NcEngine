@@ -1,6 +1,7 @@
 #include "Solver.h"
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 
 #include "optick.h"
 
@@ -351,6 +352,7 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         for(const auto& contact : manifold.Contacts())
         {
+            NC_PHYSICS_DRAW_CONTACT(contact);
             m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB));
         }
     }

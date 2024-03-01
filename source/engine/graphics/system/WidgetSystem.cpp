@@ -72,6 +72,17 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
 #ifdef NC_EDITOR_ENABLED
     for (auto& renderer : worldView.GetAll<WireframeRenderer>())
     {
+        if (renderer.source == WireframeSource::Internal)
+        {
+            for (const auto& matrix : renderer.instances)
+            {
+                state.wireframeData.emplace_back(matrix, renderer.mesh);
+            }
+
+            continue;
+        }
+
+
         if (!renderer.target.Valid())
             continue;
 

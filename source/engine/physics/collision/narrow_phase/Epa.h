@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 #include "physics/collision/CollisionState.h"
 #include "ncengine/platform/Platform.h"
 

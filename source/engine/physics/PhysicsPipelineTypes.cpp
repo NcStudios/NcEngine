@@ -2,6 +2,7 @@
 #include "ecs/Registry.h"
 #include "physics/PhysicsBody.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 
 #include <array>
 
