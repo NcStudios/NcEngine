@@ -40,8 +40,18 @@ enum class WireframeSource
  */
 struct WireframeRenderer
 {
-    Entity target = Entity::Null();
-    WireframeSource source = WireframeSource::Renderer;
+    explicit WireframeRenderer(WireframeSource source_, Entity target_) noexcept
+        : source{source_}, target{target_}, mesh{}, instances{}
+    {
+    }
+
+    explicit WireframeRenderer(MeshView mesh_, std::vector<DirectX::XMMATRIX> instances_) noexcept
+        : source{WireframeSource::Internal}, target{}, mesh{mesh_}, instances{std::move(instances_)}
+    {
+    }
+
+    WireframeSource source;
+    Entity target;
     MeshView mesh;
     std::vector<DirectX::XMMATRIX> instances;
 };

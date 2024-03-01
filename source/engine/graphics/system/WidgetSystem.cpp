@@ -112,6 +112,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                 state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, info), GetMeshView(info.type));
                 break;
             }
+            case WireframeSource::Internal: std::unreachable();
         }
     }
 #else

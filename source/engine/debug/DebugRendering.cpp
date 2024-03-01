@@ -48,8 +48,6 @@ void DebugRendererInitialize(ecs::BasicEcs<graphics::WireframeRenderer> gameStat
 
         gameState.Emplace<graphics::WireframeRenderer>(
             entity,
-            Entity::Null(),
-            graphics::WireframeSource::Internal,
             MeshView{},
             std::vector<DirectX::XMMATRIX>{}
         );
