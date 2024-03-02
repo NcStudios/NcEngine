@@ -45,7 +45,7 @@ layout (set = 1, binding = 2) uniform sampler2D textures[];
 layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
-    vec3 cameraWorldPosition;
+    vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
 
@@ -116,10 +116,10 @@ void main()
         result += max(vec3(0.0f), pixelColor);
     }
 
-    if (environmentData.skyboxCubemapIndex > -1)
+    if (environmentData.skyboxCubemapIndex != 4294967295)
     {
         // Environment reflection
-        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
+        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition.rgb);
         vec3 surfaceNormal = normalize(inNormal);
         vec3 reflected = reflect(I, surfaceNormal);
         vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);

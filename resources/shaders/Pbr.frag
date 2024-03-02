@@ -50,7 +50,7 @@ layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
-    vec3 cameraWorldPosition;
+    vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
 
@@ -203,7 +203,7 @@ void main()
 
     vec3 normal = 2.0 * normalColor - 1.0;
     vec3 N = (normalize(inTBN * normal));
-    vec3 V = normalize(environmentData.cameraWorldPosition - inFragPosition);
+    vec3 V = normalize(environmentData.cameraWorldPosition.rgb - inFragPosition);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -227,10 +227,10 @@ void main()
         result += CalculatePointLight(i, N, V, F0, baseColor, roughnessColor.r, metallicColor.r, lightViewPos) + (pointLights.lights[i].ambientColor * 0.015);
     }
 
-   if (environmentData.skyboxCubemapIndex > -1)
+   if (environmentData.skyboxCubemapIndex != 4294967295)
     {
         // Environment reflection
-        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
+        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition.rgb);
         vec3 reflected = reflect(I, N);
         vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
 
