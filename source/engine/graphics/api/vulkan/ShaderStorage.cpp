@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ShaderStorage.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/RenderGraph.h"
