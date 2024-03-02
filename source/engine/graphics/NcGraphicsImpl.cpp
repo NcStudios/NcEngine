@@ -142,14 +142,14 @@ namespace nc::graphics
         auto currentFrameIndex = m_graphics->CurrentFrameIndex();
 
         // Run all the systems to generate this frame's resource data.
-        auto cameraState =            m_systemResources.cameras.Execute(m_registry);
-        auto widgetState =            m_systemResources.widgets.Execute(m_registry->GetEcs());
-        auto environmentState =       m_systemResources.environment.Execute(cameraState, currentFrameIndex);
+        m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
+        auto cameraState = m_systemResources.cameras.Execute(m_registry);
+        auto widgetState = m_systemResources.widgets.Execute(m_registry->GetEcs());
+        auto environmentState = m_systemResources.environment.Execute(cameraState, currentFrameIndex);
         auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
-        auto objectState =            m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
+        auto objectState = m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
                                                                         cameraState, environmentState, skeletalAnimationState);
-        auto lightingState =          m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
-                                      m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
+        auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
 
         // If any changes were made to resource layouts (point lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
         m_graphics->CommitResourceLayout();
