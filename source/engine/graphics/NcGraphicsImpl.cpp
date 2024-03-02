@@ -136,7 +136,7 @@ namespace nc::graphics
         NC_LOG_TRACE("Building NcGraphics workload");
 
 #if NC_DEBUG_RENDERING_ENABLED
-        graph.Add(task::UpdatePhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
+        update.Add(task::UpdatePhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
 #endif
         update.Add(task::UpdatePhase::Free, "ParticleEmitterSystem", [this]{ m_particleEmitterSystem.Run(); });
         render.Add(task::RenderPhase::Render, "NcGraphics", [this]{ Run(); });
