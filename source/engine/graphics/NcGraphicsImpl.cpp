@@ -6,6 +6,7 @@
 #include "window/WindowImpl.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/debug/DebugRendering.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/View.h"
 #include "ncengine/graphics/WireframeRenderer.h"
@@ -80,6 +81,10 @@ namespace nc::graphics
           m_uiSystem{registry->GetEcs(), modules, events}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
+
+#if NC_DEBUG_RENDERING_ENABLED
+        debug::DebugRendererInitialize(registry->GetEcs());
+#endif
     }
 
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
@@ -130,6 +135,9 @@ namespace nc::graphics
     {
         NC_LOG_TRACE("Building NcGraphics workload");
 
+#if NC_DEBUG_RENDERING_ENABLED
+        update.Add(task::UpdatePhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
+#endif
         update.Add(task::UpdatePhase::Free, "ParticleEmitterSystem", [this]{ m_particleEmitterSystem.Run(); });
         render.Add(task::RenderPhase::Render, "NcGraphics", [this]{ Run(); });
         render.Add(task::RenderPhase::PostRender, "ProcessParticleFrameEvents", [this]{ m_particleEmitterSystem.ProcessFrameEvents(); } );

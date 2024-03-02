@@ -3,6 +3,7 @@
 #include "ecs/Transform.h"
 #include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 
 using namespace DirectX;
 

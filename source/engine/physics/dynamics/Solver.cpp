@@ -1,5 +1,6 @@
 #include "Solver.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 
@@ -374,6 +375,7 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         for(const auto& contact : manifold.Contacts())
         {
+            NC_PHYSICS_DRAW_CONTACT(contact);
             m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB, GetCombinedMaterialProperties(m_registry, entityA, entityB)));
         }
     }

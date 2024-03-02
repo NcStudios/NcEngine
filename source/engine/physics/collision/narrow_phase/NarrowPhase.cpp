@@ -1,5 +1,6 @@
 #include "NarrowPhase.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 #include "ecs/Logic.h"
 #include "ncutility/NcError.h"
 
