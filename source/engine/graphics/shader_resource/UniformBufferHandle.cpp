@@ -27,7 +27,7 @@ void UniformBufferHandle::Update(void* data, size_t size, uint32_t currentFrameI
             m_slot,
             m_set,
             data,
-            m_size,
+            size,
             m_stage,
             UboUpdateAction::Update,
             false
@@ -47,7 +47,7 @@ void UniformBufferHandle::Update(void* data, size_t size)
             m_slot,
             m_set,
             data,
-            m_size,
+            size,
             m_stage,
             UboUpdateAction::Update,
             true
