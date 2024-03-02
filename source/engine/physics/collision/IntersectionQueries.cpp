@@ -174,12 +174,6 @@ bool CollisionDispatch(const BoundingVolume& a, const BoundingVolume& b, FXMMATR
 
 namespace nc::physics
 {
-bool Intersect(const Sphere& a, const Sphere& b)
-{
-    auto radii = a.radius + b.radius;
-    return SquareMagnitude(a.center - b.center) < radii * radii;
-}
-
 bool Intersect(const Frustum& a, const Sphere& b)
 {
     if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)

@@ -45,7 +45,7 @@ class NcPhysicsImpl final : public NcPhysics
         void RegisterClickable(IClickable* clickable) override;
         void UnregisterClickable(IClickable* clickable) noexcept override;
         auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
-        void OnBuildTaskGraph(task::TaskGraph& graph) override;
+        void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void Clear() noexcept override;
 
     private:

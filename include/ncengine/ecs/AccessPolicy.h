@@ -95,12 +95,20 @@ class AccessPolicy
             return AccessPolicy<TargetBase, TargetIncludes...>{*m_registry};
         }
 
-        /** @brief Invoke a callable with the requested data pool. */
-        template<RegistryType T, PoolInvocable<T> F>
+        /** @brief Get the pool for a given type. */
+        template<RegistryType T>
             requires HasAccess<T>
-        auto OnPool(F&& func) const -> decltype(auto)
+        auto GetPool() const -> decltype(auto)
         {
-            return func(m_registry->GetPool<T>());
+            return m_registry->GetPool<T>();
+        }
+
+        /** @brief Get the pool for a given type. */
+        template<RegistryType T>
+            requires HasAccess<T>
+        auto GetPool() -> decltype(auto)
+        {
+            return m_registry->GetPool<T>();
         }
 
         /** @brief Get a range of pointers to all ComponentPoolBase instances. */

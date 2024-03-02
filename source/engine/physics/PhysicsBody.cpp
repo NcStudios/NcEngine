@@ -16,12 +16,12 @@ const auto VelocitySleepThreshold = XMVectorSet(physics::SleepEpsilon, physics::
 const auto AngularVelocityMin = XMVectorReplicate(-1.0f * physics::MaxAngularVelocity);
 const auto AngularVelocityMax = XMVectorReplicate(physics::MaxAngularVelocity);
 
-Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, float mass)
+Vector3 CreateInverseInertiaTensor(const Transform& transform, const Collider& collider, float mass)
 {
-    auto transformScale = transform->Scale();
-    auto colliderScale = collider->GetInfo().scale;
+    auto transformScale = transform.Scale();
+    auto colliderScale = collider.GetInfo().scale;
     auto scale = HadamardProduct(transformScale, colliderScale);
-    auto type = collider->GetType();
+    auto type = collider.GetType();
     float iX, iY, iZ;
 
     switch(type)
@@ -53,7 +53,7 @@ Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, flo
         case ColliderType::Hull:
         {
             /** Estimated with a bounding box */
-            const auto& hull = std::get<ConvexHull>(collider->GetVolume());
+            const auto& hull = std::get<ConvexHull>(collider.GetVolume());
             scale = HadamardProduct(scale, hull.extents);
             auto squareScale = HadamardProduct(scale, scale);
             auto m = mass / 12.0f;
@@ -74,36 +74,27 @@ Vector3 CreateInverseInertiaTensor(Transform* transform, Collider* collider, flo
 
 namespace nc::physics
 {
-PhysicsBody::PhysicsBody(Entity entity, PhysicsProperties properties, Vector3 linearFreedom, Vector3 angularFreedom)
-    : ComponentBase{entity},
-        m_properties{properties},
-        m_linearVelocity{},
-        m_angularVelocity{},
-        m_linearFreedom{XMLoadVector3(&linearFreedom)},
-        m_angularFreedom{XMLoadVector3(&angularFreedom)},
-        m_invInertiaWorld{},
-        m_invInertiaLocal{},
-        m_framesAtThreshold{0u},
-        m_awake{true}
+PhysicsBody::PhysicsBody(const Transform& transform,
+                         const Collider& collider,
+                         PhysicsProperties properties,
+                         Vector3 linearFreedom,
+                         Vector3 angularFreedom)
+    : m_linearVelocity{},
+      m_angularVelocity{},
+      m_invInertiaWorld{},
+      m_linearFreedom{XMLoadVector3(&linearFreedom)},
+      m_angularFreedom{XMLoadVector3(&angularFreedom)},
+      m_invInertiaLocal{},
+      m_properties{properties},
+      m_framesAtThreshold{0u},
+      m_awake{true}
 {
-    auto* registry = ActiveRegistry();
-    if(!registry->Contains<Collider>(entity))
-        throw NcError("PhysicsBody added to Entity with no Collider");
-
-    auto* collider = registry->Get<Collider>(entity);
-    if(entity.IsStatic())
-    {
-        m_properties.mass = 0.0f;
-        m_properties.useGravity = false;
-    }
-
     if(m_properties.mass == 0.0f)
     {
         m_invInertiaLocal = Vector3::Zero();
         return;
     }
 
-    auto* transform = registry->Get<Transform>(entity);
     m_invInertiaLocal = CreateInverseInertiaTensor(transform, collider, m_properties.mass);
     m_properties.mass = 1.0f / m_properties.mass;
 }
@@ -130,7 +121,7 @@ void PhysicsBody::ApplyImpulse(const Vector3& impulse)
 
 void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(XMVectorScale(impulse, m_properties.mass), m_linearFreedom));
 }
 
@@ -141,29 +132,26 @@ void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
 
 void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
     auto restrictedTorque = XMVectorMultiply(torque, m_angularFreedom);
     m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVector3Transform(restrictedTorque, m_invInertiaWorld));
 }
 
 void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(delta, m_linearFreedom));
 }
 
 void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic && !ParentEntity().IsStatic(), "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(velDelta, m_linearFreedom));
     m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVectorMultiply(angVelDelta, m_angularFreedom));
 }
 
 void PhysicsBody::UpdateWorldInertia(const Transform* transform)
 {
-    if(ParentEntity().IsStatic())
-        return;
-
     auto rot_v = transform->RotationXM();
     auto rot_m = DirectX::XMMatrixRotationQuaternion(rot_v);
     auto invInertiaLocalMatrix = DirectX::XMMatrixScaling(m_invInertiaLocal.x, m_invInertiaLocal.y, m_invInertiaLocal.z);

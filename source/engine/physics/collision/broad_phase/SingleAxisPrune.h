@@ -101,18 +101,15 @@ void SingleAxisPrune<ProxyCacheType>::FindPairs()
 
         while(m_sortedEntries[jSorted].min <= maxLimit)
         {
-            if(Intersect(m_sortedEntries[iSorted].estimate, m_sortedEntries[jSorted].estimate))
+            auto& a = m_proxies[iUnsorted];
+            auto& b = m_proxies[m_mapToUnsorted[jSorted]];
+            const auto eventType = a.Properties().EventType(b.Properties());
+            if(eventType != CollisionEventType::None && Intersect(m_sortedEntries[iSorted].estimate, m_sortedEntries[jSorted].estimate))
             {
-                auto& a = m_proxies[iUnsorted];
-                auto& b = m_proxies[m_mapToUnsorted[jSorted]];
-                const auto eventType = a.Properties().EventType(b.Properties());
-                if(eventType != CollisionEventType::None)
-                {
-                    if(eventType == CollisionEventType::Trigger)
-                        m_results.triggerPairs.emplace_back(&a, &b, eventType);
-                    else
-                        m_results.physicsPairs.emplace_back(&a, &b, eventType);
-                }
+                if(eventType == CollisionEventType::Trigger)
+                    m_results.triggerPairs.emplace_back(&a, &b, eventType);
+                else
+                    m_results.physicsPairs.emplace_back(&a, &b, eventType);
             }
 
             ++jSorted;

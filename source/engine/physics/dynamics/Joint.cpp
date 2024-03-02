@@ -134,7 +134,7 @@ void JointSystem::UpdateJoint(Joint& joint, float dt)
     /** Apply or zero out accumulated impulse */
     if constexpr(EnableJointWarmstarting)
     {
-        if (!joint.bodyA->ParentEntity().IsStatic() && !joint.bodyA->IsKinematic())
+        if (!joint.bodyA->IsKinematic())
         {
             auto vA = XMVectorScale(joint.p, invMassA * WarmstartFactor);
             vA = XMVectorNegate(XMVectorScale(vA, WarmstartFactor));
@@ -143,7 +143,7 @@ void JointSystem::UpdateJoint(Joint& joint, float dt)
             joint.bodyA->ApplyVelocities(vA, wA);
         }
 
-        if (!joint.bodyB->ParentEntity().IsStatic() && !joint.bodyB->IsKinematic())
+        if (!joint.bodyB->IsKinematic())
         {
             auto vB = XMVectorScale(joint.p, invMassB);
             vB = XMVectorScale(vB, WarmstartFactor);

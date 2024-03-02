@@ -131,16 +131,16 @@ namespace nc::graphics
         m_skeletalAnimationSystem.Clear();
     }
 
-    void NcGraphicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
+    void NcGraphicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
     {
         NC_LOG_TRACE("Building NcGraphics workload");
 
 #if NC_DEBUG_RENDERING_ENABLED
-        graph.Add(task::ExecutionPhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
+        graph.Add(task::UpdatePhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
 #endif
-        graph.Add(task::ExecutionPhase::Render, "NcGraphics", [this]{ Run(); });
-        graph.Add(task::ExecutionPhase::Free, "ParticleEmitterSystem", [this]{ m_particleEmitterSystem.Run(); });
-        graph.Add(task::ExecutionPhase::PostFrameSync, "ProcessParticleFrameEvents", [this]{ m_particleEmitterSystem.ProcessFrameEvents(); } );
+        update.Add(task::UpdatePhase::Free, "ParticleEmitterSystem", [this]{ m_particleEmitterSystem.Run(); });
+        render.Add(task::RenderPhase::Render, "NcGraphics", [this]{ Run(); });
+        render.Add(task::RenderPhase::PostRender, "ProcessParticleFrameEvents", [this]{ m_particleEmitterSystem.ProcessFrameEvents(); } );
     }
 
     void NcGraphicsImpl::Run()
