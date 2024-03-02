@@ -24,7 +24,7 @@ enum class IntegrationResult
 
 class Collider;
 
-class PhysicsBody final
+class PhysicsBody
 {
     public:
         PhysicsBody(const Transform& transform,
