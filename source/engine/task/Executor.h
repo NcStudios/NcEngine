@@ -7,7 +7,7 @@
 
 namespace nc::task
 {
-// Executor state consiting of both update and render contexts
+// Executor state consisting of both update and render contexts
 struct ExecutorContext
 {
     std::unique_ptr<TaskGraphContext> update;
