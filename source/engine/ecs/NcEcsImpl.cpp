@@ -27,19 +27,19 @@ EcsModule::EcsModule(ComponentRegistry& registry, SystemEvents& events) noexcept
 {
 }
 
-void EcsModule::OnBuildTaskGraph(task::TaskGraph& graph)
+void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
     NC_LOG_TRACE("Building EcsModule workload");
-    graph.Add
+    update.Add
     (
-        task::ExecutionPhase::Logic,
+        task::UpdatePhase::Logic,
         "NcEcs - RunFrameLogic",
         [this] { RunFrameLogic(); }
     );
 
-    graph.Add
+    update.Add
     (
-        task::ExecutionPhase::PreRenderSync,
+        task::UpdatePhase::Sync,
         "NcEcs - Commit Staged Changes",
         [this]
         {

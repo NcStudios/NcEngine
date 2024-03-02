@@ -4,17 +4,14 @@
  */
 #pragma once
 
+#include "ncengine/task/TaskFwd.h"
+
 #include <vector>
 
 namespace nc
 {
 class ModuleRegistry;
 class Registry;
-
-namespace task
-{
-class TaskGraph;
-} // namespace task
 
 /** @brief Modules are extensions that provide functionality to the engine. */
 class Module
@@ -35,8 +32,8 @@ class Module
         /** @brief Get the module's unique id. */
         auto Id() const noexcept { return m_id; }
 
-        /** @brief Called on registered modules when the task graph is constructed. */
-        virtual void OnBuildTaskGraph(task::TaskGraph&) {}
+        /** @brief Called on registered modules when the task graphs are constructed. */
+        virtual void OnBuildTaskGraph(task::UpdateTasks&, task::RenderTasks&) {}
 
         /** @brief Called on registered modules prior to loading a new scene. */
         virtual void OnBeforeSceneLoad() {}

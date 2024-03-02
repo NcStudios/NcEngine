@@ -40,7 +40,7 @@ struct AudioDevice
  * 
  * Tasks:
  *   Process Audio
- *     Runs During: ExecutionPhase::Free
+ *     Runs During: UpdatePhase::Free
  *     Component Access:
  *       Write: AudioSource
  *       Read: Transform

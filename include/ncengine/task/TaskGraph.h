@@ -1,3 +1,7 @@
+/**
+ * @file TaskGraph.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "ExceptionContext.h"
@@ -10,26 +14,34 @@
 
 namespace nc::task
 {
-/** @brief The number of execution phases in the primary task graph. */
-constexpr size_t ExecutionPhaseCount = 7ull;
-
 /**
- * @brief Identifies an execution phase in the engine's primary task graph.
+ * @brief Identifies a phase in the engine's update task graph.
  *
- * Execution of a frame is broken up into phases. Tasks and task graphs are
+ * Update loop execution is broken up into phases. Tasks and task graphs are
  * scheduled to run during particular phases. Generally, phases execute
  * sequentially, with the exception of Free, which runs parallel to other
  * update phases.
  */
-enum class ExecutionPhase : uint8_t
+enum class UpdatePhase : uint8_t
 {
     Begin,         // First phase to run
     Free,          // Runs parallel to Logic and Physics
-    Logic,         // First update phase
-    Physics,       // Second update phase - depends on Logic
-    PreRenderSync, // Point at which Registry changes are committed - depends on Free and Physics
-    Render,        // Rendering phase - depends on PreRenderSync
-    PostFrameSync  // Last phase to run
+    Logic,         // Update FrameLogic components
+    Physics,       // Run NcPhysics task graph and update FixedLogic components - depends on Logic
+    Sync,          // Commit Registry changes - depends on Free and Physics
+    Count          // Enum size helper (not a phase)
+};
+
+/**
+ * @brief Identifies a phase in the engine's render task graph.
+ * 
+ * Render phases run sequentially after all update phases have finished.
+ */
+enum class RenderPhase : uint8_t
+{
+    Render,        // Host-side rendering logic
+    PostRender,    // Runs after Render
+    Count          // Enum size helper (not a phase)
 };
 
 /** @brief Context object holding a TaskGraph's state. */
@@ -41,6 +53,7 @@ struct TaskGraphContext : StableAddress
 };
 
 /** @brief Task graph interface for building a TaskGraphContext with Module tasks. */
+template<class Phase>
 class TaskGraph
 {
     public:
@@ -55,7 +68,7 @@ class TaskGraph
          *       wrapped with a call to task::Guard().
          */
         template<std::invocable<> F>
-        auto Add(ExecutionPhase phase, std::string_view name, F&& func) -> tf::Task
+        auto Add(Phase phase, std::string_view name, F&& func) -> tf::Task
         {
             return Schedule(phase, Emplace(name, std::forward<F>(func)));
         }
@@ -70,7 +83,7 @@ class TaskGraph
          *       wrapped with task::Guard() to delay throwing until execution
          *       has finished.
          */
-        auto Add(ExecutionPhase phase, std::string_view name, std::unique_ptr<tf::Taskflow> graph) -> tf::Task
+        auto Add(Phase phase, std::string_view name, std::unique_ptr<tf::Taskflow> graph) -> tf::Task
         {
             NC_ASSERT(graph != nullptr, "Task graph should not be null.");
             return Schedule(phase, Emplace(name, std::move(graph)));
@@ -91,7 +104,7 @@ class TaskGraph
 
     protected:
         std::unique_ptr<TaskGraphContext> m_ctx;
-        std::array<std::vector<tf::Task>, ExecutionPhaseCount> m_taskBuckets;
+        std::array<std::vector<tf::Task>, static_cast<size_t>(Phase::Count)> m_taskBuckets;
 
         TaskGraph()
             : m_ctx{std::make_unique<TaskGraphContext>()}
@@ -100,7 +113,7 @@ class TaskGraph
 
         ~TaskGraph() noexcept = default;
 
-        auto Schedule(ExecutionPhase phase, tf::Task handle) -> tf::Task
+        auto Schedule(Phase phase, tf::Task handle) -> tf::Task
         {
             return m_taskBuckets.at(static_cast<size_t>(phase)).emplace_back(handle);
         }
@@ -118,4 +131,10 @@ class TaskGraph
             return handle;
         }
 };
+
+/** @brief Alias for the TaskGraph handling update tasks. */
+using UpdateTasks = TaskGraph<UpdatePhase>;
+
+/** @brief Alias for the TaskGraph handling render tasks. */
+using RenderTasks = TaskGraph<RenderPhase>;
 } // namespace nc::task

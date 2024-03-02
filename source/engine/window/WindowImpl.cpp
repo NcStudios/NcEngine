@@ -185,11 +185,6 @@ namespace nc::window
 
     void WindowImpl::ProcessSystemMessages()
     {
-        if (glfwWindowShouldClose(m_window))
-        {
-            EngineDisableRunningCallback();
-        }
-
         glfwPollEvents();
     }
 

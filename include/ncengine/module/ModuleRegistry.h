@@ -74,7 +74,7 @@ class ModuleRegistry : public StableAddress
         }
 
         /*** @brief Get the collection of all registered modules. */
-        auto GetAllModules() noexcept -> const std::vector<std::unique_ptr<Module>>&
+        auto GetAllModules() const noexcept -> const std::vector<std::unique_ptr<Module>>&
         {
             return m_modules;
         }

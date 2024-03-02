@@ -61,7 +61,7 @@ class NcGraphicsImpl : public NcGraphics
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
         void ClearEnvironment() override;
-        void OnBuildTaskGraph(task::TaskGraph&) override;
+        void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void Clear() noexcept override;
         void Run();
 

@@ -22,10 +22,10 @@ class ComponentRegistry;
  * 
  * Tasks
  *   Update FrameLogic Components
- *     Runs During: ExecutionPhase::Logic
+ *     Runs During: UpdatePhase::Logic
  *     Component Access: All
  *   Commit Pending Changes
- *     Runs During: ExecutionPhase::PreRenderSync
+ *     Runs During: UpdatePhase::Sync
  *     Component Access: All
  */
 class NcEcs : public Module
