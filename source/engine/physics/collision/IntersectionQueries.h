@@ -28,4 +28,10 @@ bool Collide(const BoundingVolume& a, const Triangle& b, DirectX::FXMMATRIX aMat
 
 /** Test a sphere's location relative to a plane. */
 auto TestHalfspace(const Plane& plane, const Sphere& sphere) -> HalfspaceContainment;
+
+inline bool Intersect(const Sphere& a, const Sphere& b)
+{
+    auto radii = a.radius + b.radius;
+    return SquareMagnitude(a.center - b.center) < radii * radii;
+}
 } // namespace nc::physics

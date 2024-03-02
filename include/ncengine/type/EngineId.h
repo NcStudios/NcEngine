@@ -34,6 +34,7 @@ constexpr size_t AudioSourceId = 15ull;
 constexpr size_t NetworkDispatcherId = 16ull;
 constexpr size_t WireframeRendererId = 17ull;
 constexpr size_t HierarchyId = 18ull;
+constexpr size_t PhysicsMaterialId = 19ull;
 /** @} */
 
 /** @{ */
