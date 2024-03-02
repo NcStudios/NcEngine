@@ -33,12 +33,12 @@ auto BuildTimeModule() -> std::unique_ptr<TimeImpl>
     return std::make_unique<TimeImpl>();
 }
 
-void TimeImpl::OnBuildTaskGraph(task::TaskGraph& graph)
+void TimeImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
     NC_LOG_TRACE("Building Time workload");
-    graph.Add
+    update.Add
     (
-        task::ExecutionPhase::Begin,
+        task::UpdatePhase::Begin,
         "TimeModule",
         [this]()
         {

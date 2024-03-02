@@ -15,7 +15,7 @@ class TimeImpl : public Module
         explicit TimeImpl() noexcept
             : Module{NcTimeId} {}
 
-        void OnBuildTaskGraph(task::TaskGraph&) override;
+        void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void Clear() noexcept override;
 
     private:

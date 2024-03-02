@@ -52,20 +52,11 @@ inline DirectX::XMVECTOR MinkowskiSupport(const Sphere& collider, DirectX::FXMVE
 
 inline DirectX::XMVECTOR MinkowskiSupport(const Box& collider, DirectX::FXMVECTOR direction_v)
 {
-    Vector3 dir;
-    DirectX::XMStoreVector3(&dir, direction_v);
-
-    auto sign = [](float n) { return n < 0.0f ? -1.0f : 1.0f; };
-
-    auto extent = Vector3
-    {
-        sign(dir.x) * collider.extents.x / 2.0f,
-        sign(dir.y) * collider.extents.y / 2.0f,
-        sign(dir.z) * collider.extents.z / 2.0f
-    };
-
-    dir = collider.center + extent;
-    return DirectX::XMLoadVector3(&dir);
+    const auto mask = DirectX::XMVectorGreater(direction_v, DirectX::g_XMZero);
+    const auto sign = DirectX::XMVectorSelect(DirectX::g_XMNegativeOne, DirectX::g_XMOne, mask);
+    auto extents = DirectX::XMLoadVector3(&collider.extents);
+    extents = DirectX::XMVectorMultiply(sign, DirectX::XMVectorScale(extents, 0.5f));
+    return DirectX::XMVectorAdd(extents, DirectX::XMLoadVector3(&collider.center));
 }
 
 inline DirectX::XMVECTOR MinkowskiSupport(const Capsule& collider, DirectX::FXMVECTOR direction_v)

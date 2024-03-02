@@ -37,11 +37,7 @@ class EcsInterface
             requires PolicyType::template HasAccess<Entity, Transform, Tag, Hierarchy>
         auto Emplace(EntityInfo info = {}) -> Entity
         {
-            const auto handle = m_policy.template OnPool<Entity>([&info](auto&& pool) -> decltype(auto)
-            {
-                return pool.Add(info.layer, info.flags);
-            });
-
+            const auto handle = m_policy.template GetPool<Entity>().Add(info.layer, info.flags);
             if (info.parent.Valid())
             {
                 auto& parentTransform = Get<Transform>(info.parent);
@@ -71,10 +67,7 @@ class EcsInterface
             }
             else
             {
-                return m_policy.template OnPool<T>([entity, ...args = std::forward<Args>(args)] (auto&& pool) mutable -> T&
-                {
-                    return pool.Emplace(entity, std::forward<decltype(args)>(args)...);
-                });
+                return m_policy.template GetPool<T>().Emplace(entity, std::forward<Args>(args)...);
             }
         }
 
@@ -96,17 +89,11 @@ class EcsInterface
 
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                return m_policy.template OnPool<detail::FreeComponentGroup>([entity](auto& pool)
-                {
-                    return pool.Get(entity).template Remove<T>();
-                });
+                return m_policy.template GetPool<detail::FreeComponentGroup>().Get(entity).template Remove<T>();
             }
             else
             {
-                return m_policy.template OnPool<T>([entity](auto& pool)
-                {
-                    return pool.Remove(entity);
-                });
+                return m_policy.template GetPool<T>().Remove(entity);
             }
         }
 
@@ -122,10 +109,7 @@ class EcsInterface
             }
             else
             {
-                return m_policy.template OnPool<T>([entity](auto&& pool) -> T&
-                {
-                    return pool.Get(entity);
-                });
+                return m_policy.template GetPool<T>().Get(entity);
             }
         }
 
@@ -141,10 +125,7 @@ class EcsInterface
             }
             else
             {
-                return m_policy.template OnPool<T>([entity](auto&& pool) -> const T&
-                {
-                    return pool.Get(entity);
-                });
+                return m_policy.template GetPool<T>().Get(entity);
             }
         }
 
@@ -161,10 +142,7 @@ class EcsInterface
             const auto tags = GetAll<Tag>();
             const auto pos = std::ranges::find(tags, tagValue, [](const auto& tag) { return tag.value; });
             NC_ASSERT(pos != std::ranges::end(tags), fmt::format("No Entity found with Tag '{}'", tagValue));
-            return m_policy.template OnPool<Tag>([pos](const auto& pool)
-            {
-                return pool.GetParent(&(*pos));
-            });
+            return m_policy.template GetPool<Tag>().GetParent(&(*pos));
         }
 
         /** @brief Get a contiguous view of all instances of a type. */
@@ -173,12 +151,7 @@ class EcsInterface
                  && (PooledComponent<T> || std::same_as<Entity, T>)
         auto GetAll() -> std::span<T>
         {
-            auto& pool = m_policy.template OnPool<T>([](auto&& p) -> decltype(auto)
-            {
-                return std::forward<decltype(p)>(p);
-            });
-
-            return std::span<T>{pool.begin(), pool.end()};
+            return std::span<T>{GetPool<T>()};
         }
 
         /** @brief Get a contiguous view of all instances of a type. */
@@ -187,12 +160,25 @@ class EcsInterface
                  && (PooledComponent<T> || std::same_as<Entity, T>)
         auto GetAll() const -> std::span<const T>
         {
-            const auto& pool = m_policy.template OnPool<T>([](auto&& p) -> decltype(auto)
-            {
-                return std::forward<decltype(p)>(p);
-            });
+            return std::span<const T>{GetPool<T>()};
+        }
 
-            return std::span<const T>{pool.begin(), pool.end()};
+        /** @brief Get the pool for a given type. */
+        template<class T>
+            requires PolicyType::template HasAccess<T>
+                && (PooledComponent<T> || std::same_as<Entity, T>)
+        auto GetPool() -> decltype(auto)
+        {
+            return m_policy.template GetPool<T>();
+        }
+
+        /** @brief Get the pool for a given type. */
+        template<class T>
+            requires PolicyType::template HasAccess<T>
+                && (PooledComponent<T> || std::same_as<Entity, T>)
+        auto GetPool() const -> decltype(auto)
+        {
+            return m_policy.template GetPool<T>();
         }
 
         /** @brief Get a range of pointers to all ComponentPoolBase instances. */
@@ -232,10 +218,7 @@ class EcsInterface
             requires PolicyType::template HasAccess<T>
         auto GetParent(const T* component) const -> Entity
         {
-            return m_policy.template OnPool<T>([component](auto&& pool)
-            {
-                return pool.GetParent(component);
-            });
+            return m_policy.template GetPool<T>().GetParent(component);
         }
 
         /** @brief Check if an entity or component exists. */
@@ -253,10 +236,7 @@ class EcsInterface
             }
             else
             {
-                return m_policy.template OnPool<T>([entity](auto&& pool)
-                {
-                    return pool.Contains(entity);
-                });
+                return m_policy.template GetPool<T>().Contains(entity);
             }
         }
 
@@ -278,7 +258,7 @@ class EcsInterface
             for (auto child : hierarchy.children)
                 RemoveNode<false>(child);
 
-            m_policy.template OnPool<Entity>([entity](auto&& p) { p.Remove(entity); });
+            m_policy.template GetPool<Entity>().Remove(entity);
             return true;
         }
 };

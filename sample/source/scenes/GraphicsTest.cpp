@@ -131,8 +131,16 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
         .tag = "ogre"
     });
     registry->Add<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
-    registry->Add<physics::Collider>(ogre, physics::SphereProperties{}, false);
-    registry->Add<physics::PhysicsBody>(ogre, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+    auto* collider = registry->Add<physics::Collider>(ogre, physics::SphereProperties{}, false);
+    registry->Add<physics::PhysicsBody>(
+        ogre,
+        *registry->Get<Transform>(ogre),
+        *collider,
+        physics::PhysicsProperties{
+            .mass = 0.0f,
+            .isKinematic = true
+        }
+    );
 
     // Ogre Animation
     {

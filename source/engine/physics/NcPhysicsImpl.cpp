@@ -91,7 +91,7 @@ auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
     return m_clickableSystem.RaycastToClickables(mask);
 }
 
-void NcPhysicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
+void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& graph, task::RenderTasks&)
 {
     NC_LOG_TRACE("Building NcPhysics workload");
     const auto fixedStep = config::GetPhysicsSettings().fixedUpdateInterval;
@@ -138,7 +138,7 @@ void NcPhysicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
     pipelineModule.precede(update);
     update.precede(condition);
 
-    graph.Add(task::ExecutionPhase::Physics, "NcPhysics", std::move(tasks));
+    graph.Add(task::UpdatePhase::Physics, "NcPhysics", std::move(tasks));
 }
 
 void NcPhysicsImpl::Clear() noexcept

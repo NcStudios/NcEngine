@@ -32,16 +32,26 @@ class ClientObjectProperties
     static constexpr uint8_t Kinematic = 0b00000100;
 
     public:
-        ClientObjectProperties(bool isTrigger, bool noBody, bool isKinematic);
-        ClientObjectProperties(bool isTrigger, const PhysicsBody* body);
+        constexpr explicit ClientObjectProperties(bool isTrigger) noexcept
+            : m_flags{NoBody}
+        {
+            if (isTrigger) m_flags |= Trigger;
+        }
+
+        constexpr explicit ClientObjectProperties(bool isTrigger, bool isKinematic) noexcept
+            : m_flags{0}
+        {
+            if (isTrigger) m_flags |= Trigger;
+            if (isKinematic) m_flags |= Kinematic;
+        }
 
         auto EventType(ClientObjectProperties second) const -> CollisionEventType;
-        auto IsTrigger() const noexcept -> bool { return m_index & Trigger; }
-        auto HasPhysicsBody() const noexcept -> bool { return !(m_index & NoBody); }
-        auto IsKinematic() const noexcept -> bool { return m_index & Kinematic; }
+        auto IsTrigger() const noexcept -> bool { return m_flags & Trigger; }
+        auto HasPhysicsBody() const noexcept -> bool { return !(m_flags & NoBody); }
+        auto IsKinematic() const noexcept -> bool { return m_flags & Kinematic; }
 
     private:
-        uint8_t m_index;
+        uint8_t m_flags;
 };
 
 /** A proxy is any object that provides access to physics-related object data. */

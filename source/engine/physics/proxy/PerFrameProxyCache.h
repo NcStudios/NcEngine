@@ -43,14 +43,20 @@ void PerFrameProxyCache<ClientData>::Update()
     for(auto& collider : colliders)
     {
         auto entity = collider.ParentEntity();
-        auto matrix = m_client->template Get<Transform>(entity)->TransformationMatrix();
-        auto volume = collider.GetVolume();
+        const auto& matrix = m_client->template Get<Transform>(entity)->TransformationMatrix();
+        const auto& volume = collider.GetVolume();
         auto estimate = collider.EstimateBoundingVolume(matrix);
-        auto body = m_client->template Contains<PhysicsBody>(entity)
-            ? m_client->template Get<PhysicsBody>(entity)
-            : nullptr;
+        auto properties = [client = m_client, &collider, entity]()
+        {
+            if (client-> template Contains<PhysicsBody>(entity))
+            {
+                auto body = client->template Get<PhysicsBody>(entity);
+                return ClientObjectProperties{collider.IsTrigger(), body->IsKinematic()};
+            }
 
-        auto properties = ClientObjectProperties(collider.IsTrigger(), body);
+            return ClientObjectProperties{collider.IsTrigger()};
+        }();
+
         m_proxies.emplace_back(matrix, volume, estimate, entity, properties);
     }
 }

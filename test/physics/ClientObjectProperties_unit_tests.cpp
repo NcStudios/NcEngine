@@ -2,152 +2,136 @@
 #include "physics/PhysicsPipelineTypes.h"
 #include "ecs/Transform.h"
 
-using namespace nc;
+#include <array>
 
 namespace
 {
-    const auto ColliderProperties                = physics::ClientObjectProperties{false, true,  false};
-    const auto ColliderTriggerProperties         = physics::ClientObjectProperties{true,  true,  false};
-    const auto PhysicsProperties                 = physics::ClientObjectProperties{false, false, false};
-    const auto PhysicsTriggerProperties          = physics::ClientObjectProperties{true,  false, false};
-    const auto PhysicsKinematicProperties        = physics::ClientObjectProperties{false, false, true};
-    const auto PhysicsKinematicTriggerProperties = physics::ClientObjectProperties{true,  false, true};
+constexpr auto ColliderProperties               = nc::physics::ClientObjectProperties{false};
+constexpr auto TriggerColliderProperties        = nc::physics::ClientObjectProperties{true};
+constexpr auto PhysicsProperties                = nc::physics::ClientObjectProperties{false, false};
+constexpr auto TriggerPhysicsProperties         = nc::physics::ClientObjectProperties{true,  false};
+constexpr auto KinematicProperties              = nc::physics::ClientObjectProperties{false, true};
+constexpr auto KinematicTriggerProperties       = nc::physics::ClientObjectProperties{true,  true};
+constexpr auto AllProperties = std::array<nc::physics::ClientObjectProperties, 6>
+{
+    ColliderProperties,
+    TriggerColliderProperties,
+    PhysicsProperties,
+    KinematicProperties,
+    TriggerPhysicsProperties,
+    KinematicTriggerProperties,
+};
+
+struct TestResults
+{
+    std::array<nc::physics::CollisionEventType, AllProperties.size()> results;
+
+    TestResults(nc::physics::ClientObjectProperties first)
+    {
+        std::ranges::transform(AllProperties, results.begin(), [first](auto&& second)
+        {
+            return first.EventType(second);
+        });
+    }
+
+    auto VsCollider()               const { return results.at(0); }
+    auto VsTriggerCollider()        const { return results.at(1); }
+    auto VsPhysics()                const { return results.at(2); }
+    auto VsKinematic()              const { return results.at(3); }
+    auto VsTriggerPhysics()         const { return results.at(4); }
+    auto VsKinematicTrigger()       const { return results.at(5); }
+};
+} // anonymous namespace
+
+TEST(ClientObjectProperties_unit_tests, FlagGetters)
+{
+    EXPECT_FALSE(ColliderProperties.IsTrigger());
+    EXPECT_FALSE(ColliderProperties.HasPhysicsBody());
+    EXPECT_FALSE(ColliderProperties.IsKinematic());
+
+    EXPECT_TRUE(TriggerColliderProperties.IsTrigger());
+    EXPECT_FALSE(TriggerColliderProperties.HasPhysicsBody());
+    EXPECT_FALSE(TriggerColliderProperties.IsKinematic());
+
+    EXPECT_FALSE(PhysicsProperties.IsTrigger());
+    EXPECT_TRUE(PhysicsProperties.HasPhysicsBody());
+    EXPECT_FALSE(PhysicsProperties.IsKinematic());
+
+    EXPECT_TRUE(TriggerPhysicsProperties.IsTrigger());
+    EXPECT_TRUE(TriggerPhysicsProperties.HasPhysicsBody());
+    EXPECT_FALSE(TriggerPhysicsProperties.IsKinematic());
+
+    EXPECT_FALSE(KinematicProperties.IsTrigger());
+    EXPECT_TRUE(KinematicProperties.HasPhysicsBody());
+    EXPECT_TRUE(KinematicProperties.IsKinematic());
+
+    EXPECT_TRUE(KinematicTriggerProperties.IsTrigger());
+    EXPECT_TRUE(KinematicTriggerProperties.HasPhysicsBody());
+    EXPECT_TRUE(KinematicTriggerProperties.IsKinematic());
 }
 
 TEST(ClientObjectProperties_unit_tests, EventType_ColliderVsOthers)
 {
-    auto colliderVsCollider = ColliderProperties.EventType(ColliderProperties);
-    auto colliderVsPhysics = ColliderProperties.EventType(PhysicsProperties);
-    auto colliderVsKinematicPhysics = ColliderProperties.EventType(PhysicsKinematicProperties);
-    auto colliderVsColliderTrigger = ColliderProperties.EventType(ColliderTriggerProperties);
-    auto colliderVsPhysicsTrigger = ColliderProperties.EventType(PhysicsTriggerProperties);
-    auto colliderVsKinematicPhysicsTrigger = ColliderProperties.EventType(PhysicsKinematicTriggerProperties);
-
-    EXPECT_EQ(colliderVsCollider, physics::CollisionEventType::None);
-    EXPECT_EQ(colliderVsPhysics, physics::CollisionEventType::SecondBodyPhysics);
-    EXPECT_EQ(colliderVsKinematicPhysics, physics::CollisionEventType::None);
-    EXPECT_EQ(colliderVsColliderTrigger, physics::CollisionEventType::None);
-    EXPECT_EQ(colliderVsPhysicsTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(colliderVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
+    const auto results = TestResults{ColliderProperties};
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsTriggerCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::SecondBodyPhysics, results.VsPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsKinematic());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematicTrigger());
 }
 
 TEST(ClientObjectProperties_unit_tests, EventType_PhysicsVsOthers)
 {
-    auto physicsVsCollider = PhysicsProperties.EventType(ColliderProperties);
-    auto physicsVsPhysics = PhysicsProperties.EventType(PhysicsProperties);
-    auto physicsVsKinematicPhysics = PhysicsProperties.EventType(PhysicsKinematicProperties);
-    auto physicsVsColliderTrigger = PhysicsProperties.EventType(ColliderTriggerProperties);
-    auto physicsVsPhysicsTrigger = PhysicsProperties.EventType(PhysicsTriggerProperties);
-    auto physicsVsKinematicPhysicsTrigger = PhysicsProperties.EventType(PhysicsKinematicTriggerProperties);
-
-    EXPECT_EQ(physicsVsCollider, physics::CollisionEventType::FirstBodyPhysics);
-    EXPECT_EQ(physicsVsPhysics, physics::CollisionEventType::TwoBodyPhysics);
-    EXPECT_EQ(physicsVsKinematicPhysics, physics::CollisionEventType::FirstBodyPhysics);
-    EXPECT_EQ(physicsVsColliderTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsVsPhysicsTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
+    const auto results = TestResults{PhysicsProperties};
+    EXPECT_EQ(nc::physics::CollisionEventType::FirstBodyPhysics, results.VsCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::TwoBodyPhysics, results.VsPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::FirstBodyPhysics, results.VsKinematic());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematicTrigger());
 }
 
-TEST(ClientObjectProperties_unit_tests, EventType_KinematicPhysicsVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_KinematicVsOthers)
 {
-    auto kinematicPhysicsVsCollider = PhysicsKinematicProperties.EventType(ColliderProperties);
-    auto kinematicPhysicsVsPhysics = PhysicsKinematicProperties.EventType(PhysicsProperties);
-    auto kinematicPhysicsVsKinematicPhysics = PhysicsKinematicProperties.EventType(PhysicsKinematicProperties);
-    auto kinematicPhysicsVsColliderTrigger = PhysicsKinematicProperties.EventType(ColliderTriggerProperties);
-    auto kinematicPhysicsVsPhysicsTrigger = PhysicsKinematicProperties.EventType(PhysicsTriggerProperties);
-    auto kinematicPhysicsVsKinematicPhysicsTrigger = PhysicsKinematicProperties.EventType(PhysicsKinematicTriggerProperties);
-
-    EXPECT_EQ(kinematicPhysicsVsCollider, physics::CollisionEventType::None);
-    EXPECT_EQ(kinematicPhysicsVsPhysics, physics::CollisionEventType::SecondBodyPhysics);
-    EXPECT_EQ(kinematicPhysicsVsKinematicPhysics, physics::CollisionEventType::None);
-    EXPECT_EQ(kinematicPhysicsVsColliderTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsVsPhysicsTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
+    const auto results = TestResults{KinematicProperties};
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::SecondBodyPhysics, results.VsPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsKinematic());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematicTrigger());
 }
 
-TEST(ClientObjectProperties_unit_tests, EventType_ColliderTriggerVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_TriggerColliderVsOthers)
 {
-    auto colliderTriggerVsCollider = ColliderTriggerProperties.EventType(ColliderProperties);
-    auto colliderTriggerVsPhysics = ColliderTriggerProperties.EventType(PhysicsProperties);
-    auto colliderTriggerVsKinematicPhysics = ColliderTriggerProperties.EventType(PhysicsKinematicProperties);
-    auto colliderTriggerVsColliderTrigger = ColliderTriggerProperties.EventType(ColliderTriggerProperties);
-    auto colliderTriggerVsPhysicsTrigger = ColliderTriggerProperties.EventType(PhysicsTriggerProperties);
-    auto colliderTriggerVsKinematicPhysicsTrigger = ColliderTriggerProperties.EventType(PhysicsKinematicTriggerProperties);
-
-    EXPECT_EQ(colliderTriggerVsCollider, physics::CollisionEventType::None);
-    EXPECT_EQ(colliderTriggerVsPhysics, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(colliderTriggerVsKinematicPhysics, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(colliderTriggerVsColliderTrigger, physics::CollisionEventType::None);
-    EXPECT_EQ(colliderTriggerVsPhysicsTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(colliderTriggerVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
+    const auto results = TestResults{TriggerColliderProperties};
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::None, results.VsTriggerCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematic());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematicTrigger());
 }
 
 TEST(ClientObjectProperties_unit_tests, EventType_PhysicsTriggerVsOthers)
 {
-    auto physicsTriggerVsCollider = PhysicsTriggerProperties.EventType(ColliderProperties);
-    auto physicsTriggerVsPhysics = PhysicsTriggerProperties.EventType(PhysicsProperties);
-    auto physicsTriggerVsKinematicPhysics = PhysicsTriggerProperties.EventType(PhysicsKinematicProperties);
-    auto physicsTriggerVsColliderTrigger = PhysicsTriggerProperties.EventType(ColliderTriggerProperties);
-    auto physicsTriggerVsPhysicsTrigger = PhysicsTriggerProperties.EventType(PhysicsTriggerProperties);
-    auto physicsTriggerVsKinematicPhysicsTrigger = PhysicsTriggerProperties.EventType(PhysicsKinematicTriggerProperties);
-
-    EXPECT_EQ(physicsTriggerVsCollider, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsTriggerVsPhysics, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsTriggerVsKinematicPhysics, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsTriggerVsColliderTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsTriggerVsPhysicsTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(physicsTriggerVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
+    const auto results = TestResults{TriggerPhysicsProperties};
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematic());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematicTrigger());
 }
 
-TEST(ClientObjectProperties_unit_tests, EventType_KinematicPhysicsTriggerVsOthers)
+TEST(ClientObjectProperties_unit_tests, EventType_KinematicTriggerVsOthers)
 {
-    auto kinematicPhysicsTriggerVsCollider = PhysicsKinematicTriggerProperties.EventType(ColliderProperties);
-    auto kinematicPhysicsTriggerVsPhysics = PhysicsKinematicTriggerProperties.EventType(PhysicsProperties);
-    auto kinematicPhysicsTriggerVsKinematicPhysics = PhysicsKinematicTriggerProperties.EventType(PhysicsKinematicProperties);
-    auto kinematicPhysicsTriggerVsColliderTrigger = PhysicsKinematicTriggerProperties.EventType(ColliderTriggerProperties);
-    auto kinematicPhysicsTriggerVsPhysicsTrigger = PhysicsKinematicTriggerProperties.EventType(PhysicsTriggerProperties);
-    auto kinematicPhysicsTriggerVsKinematicPhysicsTrigger = PhysicsKinematicTriggerProperties.EventType(PhysicsKinematicTriggerProperties);
-
-    EXPECT_EQ(kinematicPhysicsTriggerVsCollider, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsTriggerVsPhysics, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsTriggerVsKinematicPhysics, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsTriggerVsColliderTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsTriggerVsPhysicsTrigger, physics::CollisionEventType::Trigger);
-    EXPECT_EQ(kinematicPhysicsTriggerVsKinematicPhysicsTrigger, physics::CollisionEventType::Trigger);
-}
-
-TEST(ClientObjectProperties_unit_tests, IsTrigger_TriggerObject_ReturnsTrue)
-{
-    EXPECT_TRUE(ColliderTriggerProperties.IsTrigger());
-}
-
-TEST(ClientObjectProperties_unit_tests, IsTrigger_NonTriggerObject_ReturnsFalse)
-{
-    EXPECT_FALSE(PhysicsProperties.IsTrigger());
-}
-
-TEST(ClientObjectProperties_unit_tests, HasPhysicsBody_PhysicsObject_ReturnsTrue)
-{
-    EXPECT_TRUE(PhysicsProperties.HasPhysicsBody());
-}
-
-TEST(ClientObjectProperties_unit_tests, HasPhysicsBody_TriggerObject_ReturnsFalse)
-{
-    EXPECT_FALSE(ColliderProperties.HasPhysicsBody());
-}
-
-TEST(ClientObjectProperties_unit_tests, IsKinematic_KinematicObject_ReturnsTrue)
-{
-    EXPECT_TRUE(PhysicsKinematicProperties.IsKinematic());
-}
-
-TEST(ClientObjectProperties_unit_tests, IsKinematic_NonKinematicObject_ReturnsFalse)
-{
-    EXPECT_FALSE(ColliderTriggerProperties.IsKinematic());
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    const auto results = TestResults{KinematicTriggerProperties};
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerCollider());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematic());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsTriggerPhysics());
+    EXPECT_EQ(nc::physics::CollisionEventType::Trigger, results.VsKinematicTrigger());
 }
