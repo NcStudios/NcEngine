@@ -81,7 +81,6 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
     m_dimensions = dimensions;
     m_swapchain->Resize(*m_device, dimensions);
     m_renderGraph->Resize(dimensions);
-    m_device->VkDevice().waitIdle();
 }
 
 void VulkanGraphics::OnResize(float width, float height, bool isMinimized)
@@ -123,11 +122,6 @@ bool VulkanGraphics::BeginFrame()
 
 void VulkanGraphics::CommitResourceLayout()
 {
-    if (m_isMinimized)
-    {
-        return;
-    }
-
     if (!m_resourceLayoutInitialized)
     {
         m_shaderBindingManager->CommitResourceLayout();
