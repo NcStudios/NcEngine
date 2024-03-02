@@ -1,5 +1,6 @@
 #include "ComponentSerialization.h"
 #include "ncengine/audio/AudioSource.h"
+#include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
@@ -7,6 +8,7 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "physics/ColliderUtility.h"
 
@@ -156,15 +158,18 @@ auto DeserializeParticleEmitter(std::istream& stream, const DeserializationConte
     return graphics::ParticleEmitter{ctx.entityMap.at(id), particleInfo};
 }
 
-void SerializePhysicsBody(std::ostream& stream, const physics::PhysicsBody& out, const SerializationContext& ctx, void*)
+void SerializePhysicsBody(std::ostream& stream, const physics::PhysicsBody& out, const SerializationContext& ctx, void* userData)
 {
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
+    const auto registry = static_cast<Registry*>(userData);
+    const auto entity = registry->StorageFor<physics::PhysicsBody>()->GetParent(&out);
+    NC_ASSERT(entity.Valid(), "Invalid parent entity for PhysicsBody");
+    serialize::Serialize(stream, ctx.entityMap.at(entity));
     serialize::Serialize(stream, out.GetProperties());
     serialize::Serialize(stream, out.GetLinearFreedom());
     serialize::Serialize(stream, out.GetAngularFreedom());
 }
 
-auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& ctx, void*) -> physics::PhysicsBody
+auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& ctx, void* userData) -> physics::PhysicsBody
 {
     auto id = uint32_t{};
     auto properties = physics::PhysicsProperties{};
@@ -174,7 +179,24 @@ auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& 
     serialize::Deserialize(stream, properties);
     serialize::Deserialize(stream, linearFreedom);
     serialize::Deserialize(stream, angularFreedom);
-    return physics::PhysicsBody{ctx.entityMap.at(id), properties, linearFreedom, angularFreedom};
+    const auto entity = ctx.entityMap.at(id);
+    const auto registry = static_cast<Registry*>(userData);
+    return physics::PhysicsBody{*registry->Get<Transform>(entity), *registry->Get<physics::Collider>(entity), properties, linearFreedom, angularFreedom};
+}
+
+void SerializePhysicsMaterial(std::ostream& stream, const physics::PhysicsMaterial& out, const SerializationContext&, void*)
+{
+    serialize::Serialize(stream, out.friction);
+    serialize::Serialize(stream, out.restitution);
+}
+
+auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationContext&, void*) -> physics::PhysicsMaterial
+{
+    float friction;
+    float restitution;
+    serialize::Deserialize(stream, friction);
+    serialize::Deserialize(stream, restitution);
+    return physics::PhysicsMaterial{friction, restitution};
 }
 
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, void*)

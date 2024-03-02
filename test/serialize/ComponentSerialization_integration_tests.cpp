@@ -10,6 +10,7 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "graphics/system/ParticleEmitterSystem.h"
 
@@ -239,9 +240,22 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     g_registry.RegisterType<nc::Transform>(1);
     g_registry.RegisterType<nc::Hierarchy>(1);
     g_registry.RegisterType<nc::physics::Collider>(1);
+    g_registry.RegisterType<nc::physics::PhysicsBody>(1);
 
     const auto entity = g_ecs.Emplace<nc::Entity>(nc::EntityInfo{});
     g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
+
+    const auto expectedProperties = nc::physics::PhysicsProperties{};
+    const auto expectedLinearFreedom = nc::Vector3::One();
+    const auto expectedAngularFreedom = nc::Vector3::Up();
+    const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
+        entity,
+        g_ecs.Get<nc::Transform>(entity),
+        g_ecs.Get<nc::physics::Collider>(entity),
+        expectedProperties,
+        expectedLinearFreedom,
+        expectedAngularFreedom
+    );
 
     auto entityToFragmentId = nc::EntityToFragmentIdMap{ {entity, 0u} };
     auto fragmentIdToEntity = nc::FragmentIdToEntityMap{ {0u, entity} };
@@ -249,20 +263,24 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     auto deserializeCtx = nc::DeserializationContext{fragmentIdToEntity, g_ecs};
 
     auto stream = std::stringstream{};
-    const auto expectedProperties = nc::physics::PhysicsProperties{};
-    const auto expectedLinearFreedom = nc::Vector3::One();
-    const auto expectedAngularFreedom = nc::Vector3::Up();
-    const auto expected = nc::physics::PhysicsBody{entity, expectedProperties, expectedLinearFreedom, expectedAngularFreedom};
-    nc::SerializePhysicsBody(stream, expected, serializeCtx, nullptr);
-    const auto actual = nc::DeserializePhysicsBody(stream, deserializeCtx, nullptr);
+    nc::SerializePhysicsBody(stream, expected, serializeCtx, &g_legacyRegistry);
+    const auto actual = nc::DeserializePhysicsBody(stream, deserializeCtx, &g_legacyRegistry);
     const auto& actualProperties = actual.GetProperties();
     EXPECT_EQ(expectedProperties.mass, actualProperties.mass);
     EXPECT_EQ(expectedProperties.drag, actualProperties.drag);
     EXPECT_EQ(expectedProperties.angularDrag, actualProperties.angularDrag);
-    EXPECT_EQ(expectedProperties.restitution, actualProperties.restitution);
-    EXPECT_EQ(expectedProperties.friction, actualProperties.friction);
     EXPECT_EQ(expectedProperties.useGravity, actualProperties.useGravity);
     EXPECT_EQ(expectedProperties.isKinematic, actualProperties.isKinematic);
     EXPECT_EQ(expectedLinearFreedom, actual.GetLinearFreedom());
     EXPECT_EQ(expectedAngularFreedom, actual.GetAngularFreedom());
+}
+
+TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::PhysicsMaterial{0.7f, 0.1234f};
+    nc::SerializePhysicsMaterial(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializePhysicsMaterial(stream, g_deserializationContext, nullptr);
+    EXPECT_FLOAT_EQ(expected.friction, actual.friction);
+    EXPECT_FLOAT_EQ(expected.restitution, actual.restitution);
 }
