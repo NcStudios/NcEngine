@@ -56,7 +56,7 @@ class DeviceStream
         std::unique_ptr<ErrorContext> m_errorContext;
         std::unique_ptr<RtAudio> m_rtAudio;
         AudioDevice m_activeDevice;
-        uint32_t m_bufferFrames;
+        uint32_t m_bufferFrames = 0;
 
         auto FindSuitableDevice(uint32_t preferredDeviceId) noexcept -> AudioDevice;
 };

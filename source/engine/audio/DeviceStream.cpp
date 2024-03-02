@@ -133,6 +133,7 @@ auto DeviceStream::OpenStream(const StreamParameters& params) -> bool
 
 void DeviceStream::CloseStream() noexcept
 {
+    m_bufferFrames = 0;
     m_activeDevice = g_nullDevice;
     m_errorContext->SetStatus(StreamStatus::Closed);
     if (!m_rtAudio->isStreamOpen())
