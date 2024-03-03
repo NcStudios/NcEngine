@@ -23,8 +23,6 @@ namespace nc::graphics
 
     struct WireframeVertexPushConstants
     {
-        // TODO: don't exceed 128 bytes
-
         // MVP matrices
         DirectX::XMMATRIX model;
         DirectX::XMMATRIX viewProjection;
