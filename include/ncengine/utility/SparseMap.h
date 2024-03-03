@@ -129,8 +129,8 @@ class sparse_map
                 if (normalizedKey > m_maxKeyCapacity)
                     throw NcError{"Max key capacity exceeded"};
 
-                const auto growthSize = std::min(currentSize * 2ull, m_maxKeyCapacity);
-                const auto newSize = std::max(growthSize, normalizedKey + 1ull);
+                const auto growthSize = std::min<size_t>(currentSize * 2ull, m_maxKeyCapacity);
+                const auto newSize = std::max<size_t>(growthSize, normalizedKey + 1ull);
                 m_sparse.resize(newSize, NullIndex);
             }
         }
