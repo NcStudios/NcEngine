@@ -11,9 +11,16 @@
 
 namespace nc::graphics
 {
+struct WireframeRenderState
+{
+    DirectX::XMMATRIX matrix;
+    MeshView mesh;
+    Vector4 color;
+};
+
 struct WidgetState
 {
-    std::vector<std::pair<DirectX::XMMATRIX, MeshView>> wireframeData;
+    std::vector<WireframeRenderState> wireframeData;
 };
 
 class WidgetSystem

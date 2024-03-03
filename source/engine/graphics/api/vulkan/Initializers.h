@@ -24,9 +24,9 @@ vk::PipelineDepthStencilStateCreateInfo CreateDepthStencilCreateInfo(bool shadow
 vk::PipelineColorBlendAttachmentState CreateColorBlendAttachmentCreateInfo(bool useAlphaBlending);
 vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo();
 vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::PipelineColorBlendAttachmentState& colorBlendAttachment, bool useAlphaBlending);
-vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, uint32_t dataTypeSize);
+vk::PushConstantRange CreatePushConstantRange(vk::ShaderStageFlags stageFlags, uint32_t dataTypeSize, uint32_t offset = 0u);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo();
-vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
+vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::PushConstantRange> pushConstantRanges);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts);
 

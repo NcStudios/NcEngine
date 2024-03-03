@@ -193,9 +193,9 @@ vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::
     return colorBlending;
 }
 
-auto CreatePushConstantRange(vk::ShaderStageFlags stageFlags, uint32_t dataTypeSize) -> vk::PushConstantRange
+auto CreatePushConstantRange(vk::ShaderStageFlags stageFlags, uint32_t dataTypeSize, uint32_t offset) -> vk::PushConstantRange
 {
-    return vk::PushConstantRange{stageFlags, 0u, dataTypeSize};
+    return vk::PushConstantRange{stageFlags, offset, dataTypeSize};
 }
 
 auto CreatePipelineLayoutCreateInfo() -> vk::PipelineLayoutCreateInfo
@@ -203,9 +203,9 @@ auto CreatePipelineLayoutCreateInfo() -> vk::PipelineLayoutCreateInfo
     return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, 0u, nullptr, 0u, nullptr};
 }
 
-auto CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange) -> vk::PipelineLayoutCreateInfo
+auto CreatePipelineLayoutCreateInfo(std::span<const vk::PushConstantRange> pushConstantRanges) -> vk::PipelineLayoutCreateInfo
 {
-    return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, 0u, nullptr, 1u, &pushConstantRange};
+    return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, 0u, nullptr, static_cast<uint32_t>(pushConstantRanges.size()), pushConstantRanges.data()};
 }
 
 auto CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts) -> vk::PipelineLayoutCreateInfo

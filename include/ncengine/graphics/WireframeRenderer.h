@@ -40,13 +40,13 @@ enum class WireframeSource
  */
 struct WireframeRenderer
 {
-    explicit WireframeRenderer(WireframeSource source_, Entity target_) noexcept
-        : source{source_}, target{target_}, mesh{}, instances{}
+    explicit WireframeRenderer(WireframeSource source_, Entity target_, const Vector4& color_ = Vector4{0.9f, 0.25f, 0.9f, 1.0f}) noexcept
+        : source{source_}, target{target_}, mesh{}, instances{}, color{color_}
     {
     }
 
-    explicit WireframeRenderer(MeshView mesh_, std::vector<DirectX::XMMATRIX> instances_) noexcept
-        : source{WireframeSource::Internal}, target{}, mesh{mesh_}, instances{std::move(instances_)}
+    explicit WireframeRenderer(MeshView mesh_, std::vector<DirectX::XMMATRIX> instances_, const Vector4& color_ = Vector4{0.9f, 0.25f, 0.9f, 1.0f}) noexcept
+        : source{WireframeSource::Internal}, target{}, mesh{mesh_}, instances{std::move(instances_)}, color{color_}
     {
     }
 
@@ -54,5 +54,6 @@ struct WireframeRenderer
     Entity target;
     MeshView mesh;
     std::vector<DirectX::XMMATRIX> instances;
+    Vector4 color;
 };
 } // namespace nc::graphics

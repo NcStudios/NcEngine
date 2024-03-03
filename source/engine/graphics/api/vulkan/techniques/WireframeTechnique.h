@@ -21,11 +21,18 @@ namespace nc::graphics
     class Device;
     class ShaderDescriptorSets;
 
-    struct WireframePushConstants
+    struct WireframeVertexPushConstants
     {
+        // TODO: don't exceed 128 bytes
+
         // MVP matrices
         DirectX::XMMATRIX model;
         DirectX::XMMATRIX viewProjection;
+    };
+
+    struct WireframeFragmentPushConstants
+    {
+        alignas(16) Vector4 color;
     };
 
     class WireframeTechnique : public ITechnique

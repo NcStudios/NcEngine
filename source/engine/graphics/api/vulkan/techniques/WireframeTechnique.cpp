@@ -32,8 +32,12 @@ namespace nc::graphics
             CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
         };
 
-        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange);
+        auto pushConstantRanges = std::array{
+            CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframeVertexPushConstants), 0u),
+            CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(WireframeFragmentPushConstants), sizeof(WireframeVertexPushConstants))
+        };
+
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRanges);
         m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -97,13 +101,21 @@ namespace nc::graphics
 
     void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
-        auto pushConstants = WireframePushConstants{};
-        pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
+        auto vertexPushConstants = WireframeVertexPushConstants{
+            .model = {},
+            .viewProjection = frameData.cameraState.view * frameData.cameraState.projection
+        };
 
-        for (const auto& [matrix, mesh] : frameData.widgetState.wireframeData)
+        auto fragmentPushConstants = WireframeFragmentPushConstants{
+            .color = Vector4{1.0f, 0.0f, 0.0f, 1.0f}
+        };
+
+        for (const auto& [matrix, mesh, color] : frameData.widgetState.wireframeData)
         {
-            pushConstants.model = matrix;
-            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframePushConstants), &pushConstants);
+            vertexPushConstants.model = matrix;
+            fragmentPushConstants.color = color;
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframeVertexPushConstants), &vertexPushConstants);
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, sizeof(WireframeVertexPushConstants), sizeof(WireframeFragmentPushConstants), &fragmentPushConstants.color);
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
     }
