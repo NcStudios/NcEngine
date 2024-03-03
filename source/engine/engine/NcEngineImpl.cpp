@@ -47,14 +47,12 @@ auto BuildTimer(const nc::config::EngineSettings& settings) -> nc::time::StepTim
     return nc::time::StepTimer{settings.timeStep, settings.maxTimeStep};
 }
 
-
-// TODO Update Executor + add back once other branch merged
-// auto BuildExecutor(const nc::config::EngineSettings& settings, const nc::ModuleRegistry& modules) -> nc::task::Executor
-// {
-//     const auto threadCount = settings.threadCount > 0 ? settings.threadCount : std::thread::hardware_concurrency();
-//     NC_LOG_INFO("Building Executor with {} threads", threadCount);
-//     return nc::task::Executor{threadCount, nc::task::BuildContext(modules.GetAllModules())};
-// }
+auto BuildExecutor(const nc::config::EngineSettings& settings, const nc::ModuleRegistry& modules) -> nc::task::Executor
+{
+    const auto threadCount = settings.threadCount > 0 ? settings.threadCount : std::thread::hardware_concurrency();
+    NC_LOG_INFO("Building Executor with {} threads", threadCount);
+    return nc::task::Executor{threadCount, nc::task::BuildContext(modules.GetAllModules())};
+}
 } // anonymous namespace
 
 namespace nc
@@ -81,7 +79,7 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_legacyRegistry{*m_registry},
       m_modules{BuildModuleRegistry(&m_legacyRegistry, m_events, &m_window, config)},
-      m_executor{task::BuildContext(m_modules->GetAllModules())},
+      m_executor{::BuildExecutor(config.engineSettings, *m_modules)},
       m_isRunning{false}
 {
 }
@@ -180,5 +178,7 @@ void NcEngineImpl::Run()
             }
         }
     }
+
+    Shutdown();
 }
 } // namespace nc
