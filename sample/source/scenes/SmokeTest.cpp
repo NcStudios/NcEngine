@@ -16,6 +16,7 @@
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -132,8 +133,10 @@ void SmokeTest::Load(Registry* registry, ModuleProvider modules)
         .kinematic = {}
     });
 
-    world.Emplace<physics::Collider>(object, physics::BoxProperties{});
-    world.Emplace<physics::PhysicsBody>(object);
+    auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
+    auto& objectTransform = world.Get<Transform>(object);
+    world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
+    world.Emplace<physics::PhysicsMaterial>(object);
 
     world.Emplace<Entity>({.parent = object});
 }

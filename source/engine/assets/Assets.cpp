@@ -108,6 +108,11 @@ void UnloadAllMeshAssets(asset_flags_type flags)
     AssetService<MeshView>::Get()->UnloadAll(flags);
 }
 
+auto AcquireMeshAsset(const std::string& path) -> MeshView
+{
+    return AssetService<MeshView>::Get()->Acquire(path, AssetFlags::None);
+}
+
 bool LoadSkeletalAnimationAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<SkeletalAnimationView>::Get()->Load(path, isExternal, flags);

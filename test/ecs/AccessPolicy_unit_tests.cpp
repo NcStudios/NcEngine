@@ -75,14 +75,10 @@ TEST(AccessPolicyTests, BaseContains_lessRestrictive_isFalse)
     static_assert(!basicPolicy::BaseContains<nc::ecs::FilterBase::All>);
 }
 
-TEST(AccessPolicyTests, OnPool_returnsReference_preservesValueCategory)
+TEST(AccessPolicyTests, GetPool_returnsReference_preservesValueCategory)
 {
-    using op = decltype(
-        [](auto& pool) -> decltype(auto) { return pool.Handler(); }
-    );
-
     using returned = decltype(
-        std::declval<basicPolicy&>().OnPool<S1>(op{})
+        std::declval<basicPolicy&>().GetPool<S1>()
     );
 
     static_assert(std::is_lvalue_reference_v<returned>);

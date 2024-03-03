@@ -91,10 +91,10 @@ auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
     return m_clickableSystem.RaycastToClickables(mask);
 }
 
-void NcPhysicsImpl::OnBuildTaskGraph(task::TaskGraph& graph)
+void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
     NC_LOG_TRACE("Building NcPhysics workload");
-    graph.Add(task::ExecutionPhase::Physics, "NcPhysics", m_pipeline.BuildTaskGraph(graph.GetExceptionContext()));
+    update.Add(task::UpdatePhase::Physics, "NcPhysics", m_pipeline.BuildTaskGraph(update.GetExceptionContext()));
 }
 
 void NcPhysicsImpl::Clear() noexcept

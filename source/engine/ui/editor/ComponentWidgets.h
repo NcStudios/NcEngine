@@ -19,4 +19,5 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher);
 void ColliderUIWidget(physics::Collider& collider);
 void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider);
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody);
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial);
 } // namespace nc::editor

@@ -158,38 +158,13 @@ void NcEngineImpl::ClearScene()
 
 void NcEngineImpl::Run()
 {
-    // TODO: switch to this
-    // auto* ncScene = m_modules->Get<NcScene>();
-    // auto update = [this](float dt)
-    // {
-    //     time::SetDeltaTime(dt);
-    //     input::Flush();
-    //     m_window.ProcessSystemMessages();
-    //     m_executor.RunUpdateTasks();
-    // };
-
-    // while(m_isRunning)
-    // {
-    //     OPTICK_FRAME("Main Thread");
-    //     if (m_timer.Tick(update))
-    //     {
-    //         m_executor.RunRenderTasks();
-    //         if (ncScene->IsTransitionScheduled())
-    //         {
-    //             ClearScene();
-    //             ncScene->LoadQueuedScene(&m_legacyRegistry, *m_modules);
-    //         }
-    //     }
-    // }
-
-
     auto* ncScene = m_modules->Get<NcScene>();
     auto update = [this](float dt)
     {
         time::SetDeltaTime(dt);
         input::Flush();
         m_window.ProcessSystemMessages();
-        m_executor.Run();
+        m_executor.RunUpdateTasks();
     };
 
     while(m_isRunning)
@@ -197,6 +172,7 @@ void NcEngineImpl::Run()
         OPTICK_FRAME("Main Thread");
         if (m_timer.Tick(update))
         {
+            m_executor.RunRenderTasks();
             if (ncScene->IsTransitionScheduled())
             {
                 ClearScene();
@@ -204,7 +180,5 @@ void NcEngineImpl::Run()
             }
         }
     }
-
-    Shutdown();
 }
 } // namespace nc

@@ -22,7 +22,8 @@ void SetDependencies(std::vector<tf::Task>& predecessors, const std::vector<tf::
 }
 
 // Internal TaskGraph interface
-class GraphBuilder : public nc::task::TaskGraph
+template<class Phase>
+class GraphBuilder : public nc::task::TaskGraph<Phase>
 {
     public:
         GraphBuilder() = default;
@@ -31,18 +32,18 @@ class GraphBuilder : public nc::task::TaskGraph
         // calling Connect().
         void EnsureNoEmptyBuckets()
         {
-            for (auto [i, bucket] : nc::algo::Enumerate(m_taskBuckets))
+            for (auto [i, bucket] : nc::algo::Enumerate(this->m_taskBuckets))
             {
                 if (bucket.empty())
                 {
-                    const auto phase = static_cast<nc::task::ExecutionPhase>(i);
-                    Add(phase, "Placeholder Task", []() noexcept {});
+                    const auto phase = static_cast<Phase>(i);
+                    this->Add(phase, "Placeholder Task", []() noexcept {});
                 }
             }
         }
 
         // Set task dependencies between phases
-        void Connect(nc::task::ExecutionPhase before, nc::task::ExecutionPhase after)
+        void Connect(Phase before, Phase after)
         {
             SetDependencies(Bucket(before), Bucket(after));
         }
@@ -50,51 +51,53 @@ class GraphBuilder : public nc::task::TaskGraph
         // Extract TaskGraphContext - leaves this object in an invalid state.
         auto ReleaseContext()
         {
-            return std::move(m_ctx);
+            return std::move(this->m_ctx);
         }
 
     private:
-        auto Bucket(nc::task::ExecutionPhase phase) -> std::vector<tf::Task>&
+        auto Bucket(Phase phase) -> std::vector<tf::Task>&
         {
-            return m_taskBuckets.at(static_cast<size_t>(phase));
+            return this->m_taskBuckets.at(static_cast<size_t>(phase));
         }
 };
 } // anonymous namespace
 
 namespace nc::task
 {
-auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> std::unique_ptr<TaskGraphContext>
+auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> ExecutorContext
 {
-    auto builder = ::GraphBuilder{};
+    auto updateBuilder = ::GraphBuilder<UpdatePhase>{};
+    auto renderBuilder = ::GraphBuilder<RenderPhase>{};
     for (auto& mod : modules)
     {
-        mod->OnBuildTaskGraph(builder);
+        mod->OnBuildTaskGraph(updateBuilder, renderBuilder);
     }
 
-    builder.EnsureNoEmptyBuckets();
-    builder.Connect(ExecutionPhase::Begin, ExecutionPhase::Free);
-    builder.Connect(ExecutionPhase::Begin, ExecutionPhase::Logic);
-    builder.Connect(ExecutionPhase::Logic, ExecutionPhase::Physics);
-    builder.Connect(ExecutionPhase::Physics, ExecutionPhase::PreRenderSync);
-    builder.Connect(ExecutionPhase::Free, ExecutionPhase::PreRenderSync);
-    builder.Connect(ExecutionPhase::PreRenderSync, ExecutionPhase::Render);
-    builder.Connect(ExecutionPhase::Render, ExecutionPhase::PostFrameSync);
-    return builder.ReleaseContext();
+    updateBuilder.EnsureNoEmptyBuckets();
+    updateBuilder.Connect(UpdatePhase::Begin, UpdatePhase::Free);
+    updateBuilder.Connect(UpdatePhase::Begin, UpdatePhase::Logic);
+    updateBuilder.Connect(UpdatePhase::Logic, UpdatePhase::Physics);
+    updateBuilder.Connect(UpdatePhase::Physics, UpdatePhase::Sync);
+    updateBuilder.Connect(UpdatePhase::Free, UpdatePhase::Sync);
+
+    renderBuilder.EnsureNoEmptyBuckets();
+    renderBuilder.Connect(RenderPhase::Render, RenderPhase::PostRender);
+
+    return ExecutorContext{updateBuilder.ReleaseContext(), renderBuilder.ReleaseContext()};
 }
 
-Executor::Executor(std::unique_ptr<TaskGraphContext> ctx)
+Executor::Executor(ExecutorContext ctx)
     : m_executor{g_threadCount},
-      m_ctx{std::move(ctx)},
-      m_running{false}
+      m_ctx{std::move(ctx)}
 {
 #ifdef NC_OUTPUT_TASKFLOW
     WriteGraph(std::cout);
 #endif
 }
 
-void Executor::SetContext(std::unique_ptr<TaskGraphContext> ctx)
+void Executor::SetContext(ExecutorContext ctx)
 {
-    if (m_running)
+    if (m_runningUpdate || m_runningRender)
     {
         throw NcError{"Cannot set new context while Executor is running."};
     }
@@ -102,20 +105,35 @@ void Executor::SetContext(std::unique_ptr<TaskGraphContext> ctx)
     m_ctx = std::move(ctx);
 }
 
-void Executor::Run()
+void Executor::RunUpdateTasks()
 {
-    SCOPE_EXIT(m_running = false);
-    if (std::exchange(m_running, true))
+    SCOPE_EXIT(m_runningUpdate = false);
+    if (std::exchange(m_runningUpdate, true))
     {
-        throw NcError{"Executor is already running"};
+        throw NcError{"Executor is already running update tasks"};
     }
 
-    m_executor.run(m_ctx->graph).wait();
-    m_ctx->exceptionContext.ThrowIfExceptionStored();
+    m_executor.run(m_ctx.update->graph).wait();
+    m_ctx.update->exceptionContext.ThrowIfExceptionStored();
+}
+
+void Executor::RunRenderTasks()
+{
+    SCOPE_EXIT(m_runningRender = false);
+    if (std::exchange(m_runningRender, true))
+    {
+        throw NcError{"Executor is already running render tasks"};
+    }
+
+    m_executor.run(m_ctx.render->graph).wait();
+    m_ctx.render->exceptionContext.ThrowIfExceptionStored();
 }
 
 void Executor::WriteGraph(std::ostream& stream) const
 {
-    m_ctx->graph.dump(stream);
+    stream << "Update Graph:\n";
+    m_ctx.update->graph.dump(stream);
+    stream << "Render Graph:\n";
+    m_ctx.render->graph.dump(stream);
 }
 } // namespace nc::task

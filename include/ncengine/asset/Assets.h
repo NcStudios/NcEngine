@@ -53,6 +53,7 @@ bool LoadMeshAsset(const std::string& path, bool isExternal = false, asset_flags
 bool LoadMeshAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
 bool UnloadMeshAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllMeshAssets(asset_flags_type flags = AssetFlags::None);
+auto AcquireMeshAsset(const std::string& path) -> MeshView;
 
 /** Supported file types: .nca 
  *  @note Unloading textures invalidates all TextureViews. It is intended

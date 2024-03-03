@@ -13,10 +13,9 @@ namespace nc::physics
 {
 void UpdateWorldInertiaTensors(Registry* registry)
 {
-    for(auto& body : View<PhysicsBody>{registry})
+    for (auto [body, transform] : MultiView<PhysicsBody, Transform>{registry})
     {
-        const auto* transform = registry->Get<Transform>(body.ParentEntity());
-        body.UpdateWorldInertia(transform);
+        body->UpdateWorldInertia(transform);
     }
 }
 
@@ -35,15 +34,13 @@ void ApplyGravity(Registry* registry, float dt)
 
 void Integrate(Registry* registry, float dt)
 {
-    for(auto& body : View<PhysicsBody>{registry})
+    for (auto [body, transform] : MultiView<PhysicsBody, Transform>{registry})
     {
-        auto* transform = registry->Get<Transform>(body.ParentEntity());
-
-        if(body.Integrate(transform, dt) == IntegrationResult::PutToSleep)
+        if(body->Integrate(transform, dt) == IntegrationResult::PutToSleep)
         {
             if constexpr(EnableSleeping)
             {
-                auto* collider = registry->Get<Collider>(body.ParentEntity());
+                auto* collider = registry->Get<Collider>(transform->ParentEntity());
                 collider->Sleep();
             }
         }
