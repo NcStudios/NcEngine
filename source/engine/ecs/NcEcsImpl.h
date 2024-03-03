@@ -19,7 +19,7 @@ class EcsModule : public NcEcs
     public:
         EcsModule(ComponentRegistry& registry, SystemEvents& events) noexcept;
 
-        void OnBuildTaskGraph(task::TaskGraph&) override;
+        void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void RunFrameLogic();
 
     private:

@@ -22,6 +22,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                           -Wshadow
                           -Wconversion
                           -Wno-cast-function-type
+                          -Warray-bounds=0 # would like to have this, but too many false positives right now
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(NC_COMPILER_FLAGS /W4
@@ -39,7 +40,7 @@ if(NC_PROD_BUILD)
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=1)
     set(NC_ENGINE_LIB "NcEngine")
 else()
-    set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_ASSERT_ENABLED)
+    set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_EDITOR_EXE "NcEditor")
     set(NC_SAMPLE_EXE "Sample")

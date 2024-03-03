@@ -29,7 +29,7 @@ class NcAudioImpl final : public NcAudio
         auto OnChangeOutputDevice() noexcept -> Signal<const AudioDevice&>& override;
 
         /** Module API */
-        void OnBuildTaskGraph(task::TaskGraph& graph) override;
+        void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void Clear() noexcept override;
 
         void Run();

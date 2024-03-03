@@ -1,6 +1,8 @@
 #include "Solver.h"
-#include "ecs/Registry.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 
 #include "optick.h"
 
@@ -11,17 +13,50 @@ namespace
 using namespace nc;
 using namespace nc::physics;
 
-/** Default properties for entities without a PhysicsBody. */
-const auto g_StaticPhysicsProperties = PhysicsProperties{.mass = 0.0f, .useGravity = false};
-const auto g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
+struct MassProperties
+{
+    FXMMATRIX inverseInertia;
+    float inverseMass;
+};
 
-auto CreateContactConstraint(const Contact&, Transform*, Transform*, PhysicsBody*, PhysicsBody*) -> ContactConstraint;
+/** Default properties for entities without a PhysicsBody. */
+const auto g_StaticInverseInertia = XMMATRIX{g_XMZero, g_XMZero, g_XMZero, g_XMZero};
+constexpr auto g_StaticInverseMass = 0.0f;
+constexpr auto g_DefaultPhysicsMaterial = PhysicsMaterial{};
+
+auto GetCombinedMaterialProperties(Registry* registry, Entity a, Entity b) -> PhysicsMaterial;
+auto GetMassProperties(const PhysicsBody* body) -> MassProperties;
+auto CreateContactConstraint(const Contact&, Transform*, Transform*, PhysicsBody*, PhysicsBody*, const PhysicsMaterial&) -> ContactConstraint;
 void ResolveContactConstraint(ContactConstraint& constraint, float dt);
 void ResolvePositionConstraint(PositionConstraint& constraint);
 void ResolveJoint(Joint& joint);
 auto ComputeLagrangeMultipliers(ContactConstraint& c, const ConstraintMatrix& v, float biasAlongNormal) -> Vector3;
 auto ClampLambda(float newLambda, float* totalLambda) -> float;
 auto ClampMu(float newMu, float extent, float* totalMu) -> float;
+
+auto GetCombinedMaterialProperties(Registry* registry, Entity a, Entity b) -> PhysicsMaterial
+{
+    const auto& materialA = registry->Contains<PhysicsMaterial>(a)
+        ? *registry->Get<PhysicsMaterial>(a)
+        : g_DefaultPhysicsMaterial;
+
+    const auto& materialB = registry->Contains<PhysicsMaterial>(b)
+        ? *registry->Get<PhysicsMaterial>(b)
+        : g_DefaultPhysicsMaterial;
+
+    return PhysicsMaterial
+    {
+        .friction = materialA.friction * materialB.friction,
+        .restitution = materialA.restitution * materialB.restitution
+    };
+}
+
+auto GetMassProperties(const PhysicsBody* body) -> MassProperties
+{
+    return body
+        ? MassProperties{body->GetInverseInertia(), body->GetInverseMass()}
+        : MassProperties{g_StaticInverseInertia, g_StaticInverseMass};
+}
 
 XMVECTOR ComputeLinearVelocity(FXMVECTOR jNorm, FXMVECTOR jTan, FXMVECTOR jBit, float invMass, float lambda, float muTangent, float muBitangent)
 {
@@ -98,7 +133,7 @@ float ClampMu(float newMu, float extent, float* totalMu)
 
 void Warmstart(const ContactConstraint& c, PhysicsBody* bodyA, PhysicsBody* bodyB)
 {
-    if (bodyA && !c.physBodyA->ParentEntity().IsStatic() && !c.physBodyA->IsKinematic())
+    if (bodyA && !c.physBodyA->IsKinematic())
     {
         bodyA->ApplyVelocities
         (
@@ -107,7 +142,7 @@ void Warmstart(const ContactConstraint& c, PhysicsBody* bodyA, PhysicsBody* body
         );
     }
 
-    if (bodyB && !c.physBodyB->ParentEntity().IsStatic() && !c.physBodyB->IsKinematic())
+    if (bodyB && !c.physBodyB->IsKinematic())
     {
         bodyB->ApplyVelocities
         (
@@ -121,7 +156,8 @@ ContactConstraint CreateContactConstraint(const Contact& contact,
                                           Transform* transformA,
                                           Transform* transformB,
                                           PhysicsBody* physBodyA,
-                                          PhysicsBody* physBodyB)
+                                          PhysicsBody* physBodyB,
+                                          const PhysicsMaterial& combinedMaterial)
 {
     OPTICK_CATEGORY("CreateContactConstraint", Optick::Category::Physics);
 
@@ -143,16 +179,8 @@ ContactConstraint CreateContactConstraint(const Contact& contact,
     auto jBitangent = ConstraintMatrix::VelocityJacobian(rA_v, rB_v, bitangent_v);
 
     /** Get instance properties or static properties for both entities */
-    auto GetPhysicsProperties = [](const PhysicsBody* body) -> std::tuple<FXMMATRIX, float, float, float>
-    {
-        if(body)
-            return {body->GetInverseInertia(), body->GetInverseMass(), body->GetRestitution(), body->GetFriction()};
-
-        return {g_StaticInverseInertia, g_StaticPhysicsProperties.mass, g_StaticPhysicsProperties.restitution, g_StaticPhysicsProperties.friction};
-    };
-
-    const auto [invInertiaA, invMassA, restitutionA, frictionA] = GetPhysicsProperties(physBodyA);
-    const auto [invInertiaB, invMassB, restitutionB, frictionB] = GetPhysicsProperties(physBodyB);
+    const auto [invInertiaA, invMassA] = GetMassProperties(physBodyA);
+    const auto [invInertiaB, invMassB] = GetMassProperties(physBodyB);
 
     /** Compute effective mass for each impulse type */
     auto jInertiaProductA = XMVector3Transform(jNormal.wA(), invInertiaA);
@@ -172,10 +200,6 @@ ContactConstraint CreateContactConstraint(const Contact& contact,
     effectiveMass = effectiveMass + XMVectorReplicate(invMassA + invMassB);
     effectiveMass = XMVectorReciprocal(effectiveMass);
 
-    /** Combined restitution and friction */
-    float restitution = restitutionA * restitutionB;
-    float friction = frictionA * frictionB;
-
     auto constraint = ContactConstraint
     {
         physBodyA, physBodyB,
@@ -184,7 +208,7 @@ ContactConstraint CreateContactConstraint(const Contact& contact,
         normal_v, rA_v, rB_v, effectiveMass,
         contact.depth,
         invMassA, invMassB,
-        restitution, friction,
+        combinedMaterial.restitution, combinedMaterial.friction,
         0.0f, 0.0f, 0.0f
     };
 
@@ -235,14 +259,14 @@ void ResolveContactConstraint(ContactConstraint& constraint, float dt)
     /** Compute impulse factors */
     auto [lagrangeNormal, lagrangeTangent, lagrangeBitangent] = ComputeLagrangeMultipliers(constraint, v, bias);
 
-    if(constraint.physBodyA && !constraint.physBodyA->ParentEntity().IsStatic() && !constraint.physBodyA->IsKinematic())
+    if(constraint.physBodyA && !constraint.physBodyA->IsKinematic())
     {
         auto linear = ComputeLinearVelocity(constraint.jNormal.vA(), constraint.jTangent.vA(), constraint.jBitangent.vA(), constraint.invMassA, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
         auto angular = ComputeAngularVelocity(constraint.jNormal.wA(), constraint.jTangent.wA(), constraint.jBitangent.wA(), constraint.invInertiaA, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
         constraint.physBodyA->ApplyVelocities(linear, angular);
     }
 
-    if(constraint.physBodyB && !constraint.physBodyB->ParentEntity().IsStatic() && !constraint.physBodyB->IsKinematic())
+    if(constraint.physBodyB && !constraint.physBodyB->IsKinematic())
     {
         auto linear = ComputeLinearVelocity(constraint.jNormal.vB(), constraint.jTangent.vB(), constraint.jBitangent.vB(), constraint.invMassB, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
         auto angular = ComputeAngularVelocity(constraint.jNormal.wB(), constraint.jTangent.wB(), constraint.jBitangent.wB(), constraint.invInertiaB, lagrangeNormal, lagrangeTangent, lagrangeBitangent);
@@ -292,7 +316,7 @@ void ResolveJoint(Joint& joint)
 
     /** dV = +/- (impulse / mass)
      *  dW = +/- (r X impulse) * I^-1 */
-    if (!joint.bodyA->ParentEntity().IsStatic() && !joint.bodyA->IsKinematic())
+    if (!joint.bodyA->IsKinematic())
     {
         joint.bodyA->ApplyVelocities
         (
@@ -301,7 +325,7 @@ void ResolveJoint(Joint& joint)
         );
     }
 
-    if (!joint.bodyB->ParentEntity().IsStatic() && !joint.bodyB->IsKinematic())
+    if (!joint.bodyB->IsKinematic())
     {
         joint.bodyB->ApplyVelocities
         (
@@ -351,7 +375,8 @@ void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
 
         for(const auto& contact : manifold.Contacts())
         {
-            m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB));
+            NC_PHYSICS_DRAW_CONTACT(contact);
+            m_contactConstraints.push_back(CreateContactConstraint(contact, transformA, transformB, physBodyA, physBodyB, GetCombinedMaterialProperties(m_registry, entityA, entityB)));
         }
     }
 }

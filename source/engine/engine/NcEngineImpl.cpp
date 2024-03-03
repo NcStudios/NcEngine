@@ -140,7 +140,8 @@ void NcEngineImpl::Run()
         OPTICK_FRAME("Main Thread");
         input::Flush();
         m_window.ProcessSystemMessages();
-        m_executor.Run();
+        m_executor.RunUpdateTasks();
+        m_executor.RunRenderTasks();
         if (ncScene->IsTransitionScheduled())
         {
             ClearScene();

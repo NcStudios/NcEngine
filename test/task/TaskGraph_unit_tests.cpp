@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "task/TaskGraph.h"
 
-class TestTaskGraph : public nc::task::TaskGraph
+class TestTaskGraph : public nc::task::TaskGraph<nc::task::UpdatePhase>
 {
     public:
         TestTaskGraph() = default;
@@ -11,7 +11,7 @@ class TestTaskGraph : public nc::task::TaskGraph
             return m_ctx->graph;
         }
 
-        auto GetTaskBucket(nc::task::ExecutionPhase phase) -> const std::vector<tf::Task>&
+        auto GetTaskBucket(nc::task::UpdatePhase phase) -> const std::vector<tf::Task>&
         {
             return m_taskBuckets.at(static_cast<size_t>(phase));
         }
@@ -24,7 +24,7 @@ class TestTaskGraph : public nc::task::TaskGraph
 
 TEST(TaskGraphTests, Add_callableOverload_addsToPhase)
 {
-    constexpr auto phase = nc::task::ExecutionPhase::Render;
+    constexpr auto phase = nc::task::UpdatePhase::Logic;
     auto uut = TestTaskGraph{};
     ASSERT_TRUE(uut.GetTaskBucket(phase).empty());
     uut.Add(phase, "task1", [](){});
@@ -35,7 +35,7 @@ TEST(TaskGraphTests, Add_callableOverload_addsToPhase)
 
 TEST(TaskGraphTests, Add_taskflowOverload_addsToPhaseAndStorage)
 {
-    constexpr auto phase = nc::task::ExecutionPhase::Begin;
+    constexpr auto phase = nc::task::UpdatePhase::Begin;
     auto uut = TestTaskGraph{};
     ASSERT_TRUE(uut.GetTaskBucket(phase).empty());
     ASSERT_TRUE(uut.GetGraphStorage().empty());
@@ -50,7 +50,7 @@ TEST(TaskGraphTests, Add_taskflowOverload_addsToPhaseAndStorage)
 #endif
 TEST(TaskGraphTests, Add_invalidPhase_throws)
 {
-    constexpr auto phase = static_cast<nc::task::ExecutionPhase>(1000);
+    constexpr auto phase = static_cast<nc::task::UpdatePhase>(1000);
     auto uut = TestTaskGraph{};
     EXPECT_THROW(uut.Add(phase, "", [](){}), std::exception);
 }

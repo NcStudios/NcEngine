@@ -2,6 +2,7 @@
 #include "ecs/Registry.h"
 #include "physics/PhysicsBody.h"
 #include "physics/PhysicsConstants.h"
+#include "physics/PhysicsDebugging.h"
 
 #include <array>
 
@@ -88,25 +89,9 @@ float CalcArea4Points(const DirectX::FXMVECTOR& p0,
 
 namespace nc::physics
 {
-ClientObjectProperties::ClientObjectProperties(bool isTrigger, bool noBody, bool isKinematic)
-    : m_index{0u}
-{
-    if(isTrigger) m_index += Trigger;
-    if(noBody) m_index += NoBody;
-    if(isKinematic) m_index += Kinematic;
-}
-
-ClientObjectProperties::ClientObjectProperties(bool isTrigger, const PhysicsBody* body)
-    : m_index{0u}
-{
-    if(isTrigger) m_index |= ClientObjectProperties::Trigger;
-    if(!body) m_index |= ClientObjectProperties::NoBody;
-    else if(body->IsKinematic()) m_index |= ClientObjectProperties::Kinematic;
-}
-
 auto ClientObjectProperties::EventType(ClientObjectProperties second) const -> CollisionEventType
 {
-    return CollisionEventTypeLookup.at(m_index).at(second.m_index);
+    return CollisionEventTypeLookup[m_flags][second.m_flags];
 }
 
 void Manifold::AddContact(const Contact& contact)

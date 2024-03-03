@@ -9,6 +9,7 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace nc::sample
@@ -187,15 +188,20 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, GreenToonMaterial);
     world.Emplace<graphics::ToonRenderer>(segment3, asset::CubeMesh, GreenToonMaterial);
 
-    world.Emplace<physics::Collider>(head, physics::BoxProperties{}, false);
-    world.Emplace<physics::Collider>(segment1, physics::BoxProperties{}, false);
-    world.Emplace<physics::Collider>(segment2, physics::BoxProperties{}, false);
-    world.Emplace<physics::Collider>(segment3, physics::BoxProperties{}, false);
+    auto& headCollider = world.Emplace<physics::Collider>(head, physics::BoxProperties{}, false);
+    auto& segment1Collider = world.Emplace<physics::Collider>(segment1, physics::BoxProperties{}, false);
+    auto& segment2Collider = world.Emplace<physics::Collider>(segment2, physics::BoxProperties{}, false);
+    auto& segment3Collider = world.Emplace<physics::Collider>(segment3, physics::BoxProperties{}, false);
 
-    world.Emplace<physics::PhysicsBody>(head, physics::PhysicsProperties{.mass = 5.0f});
-    world.Emplace<physics::PhysicsBody>(segment1, physics::PhysicsProperties{.mass = 3.0f});
-    world.Emplace<physics::PhysicsBody>(segment2, physics::PhysicsProperties{.mass = 1.0f});
-    world.Emplace<physics::PhysicsBody>(segment3, physics::PhysicsProperties{.mass = 0.2f});
+    auto& headTransform = world.Get<Transform>(head);
+    auto& segment1Transform = world.Get<Transform>(head);
+    auto& segment2Transform = world.Get<Transform>(head);
+    auto& segment3Transform = world.Get<Transform>(head);
+
+    world.Emplace<physics::PhysicsBody>(head, headTransform, headCollider, physics::PhysicsProperties{.mass = 5.0f});
+    world.Emplace<physics::PhysicsBody>(segment1, segment1Transform, segment1Collider, physics::PhysicsProperties{.mass = 3.0f});
+    world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
+    world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
 
     constexpr auto bias = 0.2f;
     constexpr auto softness = 0.1f;
@@ -293,20 +299,27 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<graphics::ToonRenderer>(platform2, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, TealToonMaterial);
     world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, TealToonMaterial);
-    world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
+
     world.Emplace<physics::Collider>(ramp1, physics::BoxProperties{});
     world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = RampHullCollider});
-    world.Emplace<physics::PhysicsBody>(platform1, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(platform2, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+    auto& platform1Collider = world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
+    auto& platform2Collider = world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
+    world.Emplace<physics::PhysicsMaterial>(ramp1, 0.1f, 1.0f);
+    world.Emplace<physics::PhysicsMaterial>(ramp2, 0.1f, 1.0f);
+
+    auto& platform1Transform = world.Get<Transform>(platform1);
+    auto& platform2Transform = world.Get<Transform>(platform2);
+    world.Emplace<physics::PhysicsBody>(platform1, platform1Transform, platform1Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+    world.Emplace<physics::PhysicsBody>(platform2, platform2Transform, platform2Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
     // Bridge
     auto makePlank = [&](const Vector3& pos, const Vector3& scale)
     {
         const auto plank = world.Emplace<Entity>({.position = pos, .scale = scale, .tag = "Plank"});
+        auto& transform = world.Get<Transform>(plank);
         world.Emplace<graphics::ToonRenderer>(plank, asset::CubeMesh, OrangeToonMaterial);
-        world.Emplace<physics::Collider>(plank, physics::BoxProperties{}, false);
-        world.Emplace<physics::PhysicsBody>(plank, physics::PhysicsProperties{});
+        auto& collider = world.Emplace<physics::Collider>(plank, physics::BoxProperties{}, false);
+        world.Emplace<physics::PhysicsBody>(plank, transform, collider, physics::PhysicsProperties{});
         return plank;
     };
 
@@ -345,17 +358,29 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     ncPhysics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
 }
 
-void BuildHalfPipe(ecs::Ecs world)
+void BuildHalfPipes(ecs::Ecs world)
 {
-    const auto halfPipe = world.Emplace<Entity>({
-        .position = Vector3{20.0f, 3.2f, 14.0f},
+    const auto halfPipe1 = world.Emplace<Entity>({
+        .position = Vector3{20.0f, 3.45f, 14.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.7f, 0.0f),
         .scale = Vector3::Splat(4.0f),
+        .tag = "Half Pipe",
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe, HalfPipeMesh, RedToonMaterial);
-    world.Emplace<physics::ConcaveCollider>(halfPipe, HalfPipeConcaveCollider);
+    const auto halfPipe2 = world.Emplace<Entity>({
+        .position = Vector3{0.0f, 2.0f, 40.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.57f, 0.0f),
+        .scale = Vector3{10.0f, 3.0f, 15.0f},
+        .tag = "Half Pipe",
+        .flags = Entity::Flags::Static
+    });
+
+    world.Emplace<graphics::ToonRenderer>(halfPipe1, HalfPipeMesh, RedToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, BlueToonMaterial);
+
+    world.Emplace<physics::ConcaveCollider>(halfPipe1, HalfPipeConcaveCollider);
+    world.Emplace<physics::ConcaveCollider>(halfPipe2, HalfPipeConcaveCollider);
 }
 
 void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -373,11 +398,14 @@ void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<graphics::ToonRenderer>(anchor, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(panel, asset::CubeMesh, PurpleToonMaterial);
 
-    world.Emplace<physics::Collider>(anchor, physics::BoxProperties{}, false);
-    world.Emplace<physics::Collider>(panel, physics::BoxProperties{}, false);
+    auto& anchorCollider = world.Emplace<physics::Collider>(anchor, physics::BoxProperties{}, false);
+    auto& panelCollider = world.Emplace<physics::Collider>(panel, physics::BoxProperties{}, false);
 
-    world.Emplace<physics::PhysicsBody>(anchor, physics::PhysicsProperties{.isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(panel, physics::PhysicsProperties{.mass = 4.0f});
+    auto& anchorTransform = world.Get<Transform>(anchor);
+    auto& panelTransform = world.Get<Transform>(panel);
+
+    world.Emplace<physics::PhysicsBody>(anchor, anchorTransform, anchorCollider, physics::PhysicsProperties{.isKinematic = true});
+    world.Emplace<physics::PhysicsBody>(panel, panelTransform, panelCollider, physics::PhysicsProperties{.mass = 4.0f});
 
     ncPhysics->AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
     ncPhysics->AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
@@ -398,11 +426,14 @@ void BuildBalancePlatform(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<graphics::ToonRenderer>(base, asset::SphereMesh, PurpleToonMaterial);
     world.Emplace<graphics::ToonRenderer>(balancePlatform, asset::CubeMesh, OrangeToonMaterial);
 
-    world.Emplace<physics::Collider>(base, physics::SphereProperties{}, false);
-    world.Emplace<physics::Collider>(balancePlatform, physics::BoxProperties{}, false);
+    auto& baseCollider = world.Emplace<physics::Collider>(base, physics::SphereProperties{}, false);
+    auto& platformCollider = world.Emplace<physics::Collider>(balancePlatform, physics::BoxProperties{}, false);
 
-    world.Emplace<physics::PhysicsBody>(base, physics::PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
-    world.Emplace<physics::PhysicsBody>(balancePlatform, physics::PhysicsProperties{.mass = 5.0f});
+    auto& baseTransform = world.Get<Transform>(base);
+    auto& platformTransform = world.Get<Transform>(balancePlatform);
+
+    world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider, physics::PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
+    world.Emplace<physics::PhysicsBody>(balancePlatform, platformTransform, platformCollider, physics::PhysicsProperties{.mass = 5.0f});
 
     ncPhysics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
 }
@@ -428,13 +459,17 @@ void BuildSwingingBars(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<graphics::ToonRenderer>(bar1, asset::CubeMesh, YellowToonMaterial);
     world.Emplace<graphics::ToonRenderer>(bar2, asset::CubeMesh, YellowToonMaterial);
 
-    world.Emplace<physics::Collider>(pole, physics::BoxProperties{}, true);
-    world.Emplace<physics::Collider>(bar1, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(bar2, physics::BoxProperties{});
+    auto& poleCollider = world.Emplace<physics::Collider>(pole, physics::BoxProperties{}, true);
+    auto& bar1Collider = world.Emplace<physics::Collider>(bar1, physics::BoxProperties{});
+    auto& bar2Collider = world.Emplace<physics::Collider>(bar2, physics::BoxProperties{});
 
-    world.Emplace<physics::PhysicsBody>(pole, physics::PhysicsProperties{.isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(bar1, physics::PhysicsProperties{}, Vector3::One(), Vector3::Up());
-    world.Emplace<physics::PhysicsBody>(bar2, physics::PhysicsProperties{}, Vector3::One(), Vector3::Up());
+    auto& poleTransform = world.Get<Transform>(pole);
+    auto& bar1Transform = world.Get<Transform>(bar1);
+    auto& bar2Transform = world.Get<Transform>(bar2);
+
+    world.Emplace<physics::PhysicsBody>(pole, poleTransform, poleCollider, physics::PhysicsProperties{.isKinematic = true});
+    world.Emplace<physics::PhysicsBody>(bar1, bar1Transform, bar1Collider, physics::PhysicsProperties{}, Vector3::One(), Vector3::Up());
+    world.Emplace<physics::PhysicsBody>(bar2, bar2Transform, bar2Collider, physics::PhysicsProperties{}, Vector3::One(), Vector3::Up());
 
     ncPhysics->AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
     ncPhysics->AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
@@ -454,8 +489,8 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
         },
         [world](Entity handle) mutable {
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
-            world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
-            world.Emplace<physics::PhysicsBody>(handle, physics::PhysicsProperties{.mass = 5.0f});
+            auto& collider = world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
+            world.Emplace<physics::PhysicsBody>(handle, world.Get<Transform>(handle), collider, physics::PhysicsProperties{.mass = 5.0f});
         }
     );
 
@@ -477,6 +512,12 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     auto ncPhysics = modules.Get<physics::NcPhysics>();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
+
+    // Reserve space for default objects so references don't get invalidated
+    world.GetPool<Transform>().Reserve(40);
+    world.GetPool<graphics::ToonRenderer>().Reserve(40);
+    world.GetPool<physics::PhysicsBody>().Reserve(40);
+    world.GetPool<physics::Collider>().Reserve(40);
 
     // Vehicle
     const auto vehicle = BuildVehicle(world, ncPhysics);
@@ -501,7 +542,7 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     BuildHinge(world, ncPhysics);
     BuildBalancePlatform(world, ncPhysics);
     BuildSwingingBars(world, ncPhysics);
-    BuildHalfPipe(world);
+    BuildHalfPipes(world);
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
