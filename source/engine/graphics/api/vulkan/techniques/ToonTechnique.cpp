@@ -62,7 +62,7 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderDescriptorSets* descrip
     pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
-    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
     rasterizer.cullMode = vk::CullModeFlagBits::eNone;
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());

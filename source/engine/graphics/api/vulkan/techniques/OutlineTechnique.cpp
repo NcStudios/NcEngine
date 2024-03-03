@@ -62,7 +62,7 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* d
     pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
-    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
     rasterizer.cullMode = vk::CullModeFlagBits::eFront;
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());

@@ -28,7 +28,6 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
     auto deviceFeatures = vk::PhysicalDeviceFeatures{};
     deviceFeatures.setSamplerAnisotropy(VK_TRUE);
     deviceFeatures.setFillModeNonSolid(VK_TRUE);
-    deviceFeatures.setWideLines(VK_TRUE);
 
     auto vulkan11Features = vk::PhysicalDeviceVulkan11Features{};
     vulkan11Features.setShaderDrawParameters(VK_TRUE);

@@ -53,7 +53,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine, 2.0f);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
         auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
