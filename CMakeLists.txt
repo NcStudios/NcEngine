@@ -22,6 +22,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                           -Wshadow
                           -Wconversion
                           -Wno-cast-function-type
+                          -Warray-bounds=0 # would like to have this, but too many false positives right now
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(NC_COMPILER_FLAGS /W4
