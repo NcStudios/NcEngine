@@ -27,8 +27,8 @@ UniformBuffer& UniformBuffer::operator=(UniformBuffer&& other) noexcept
 
 void UniformBuffer::Clear()
 {
-    auto zeroBuffer = std::vector<char>(m_alignedSize);
-    Bind(zeroBuffer.data(), m_alignedSize);
+    void* mappedData = m_allocator->Map(m_buffer.Allocation());
+    memset(mappedData, 0u, m_alignedSize);
 }
 
 void UniformBuffer::Bind(const void* data, uint32_t size)

@@ -35,7 +35,7 @@ struct AssetResourcesConfig
 
 struct AssetResources
 {
-    AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, ModuleProvider modules);
+    AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, asset::NcAsset* ncAsset);
 
     MeshArrayBufferHandle meshes;
     nc::Connection<const asset::MeshUpdateEventData&> onMeshArrayBufferUpdate;

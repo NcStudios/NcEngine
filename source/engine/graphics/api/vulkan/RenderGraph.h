@@ -47,8 +47,8 @@ class RenderGraph
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
         void SinkPostProcessImages();
-        auto GetPostProcessImages(PostProcessImageType imageType) -> std::vector<vk::ImageView>;
-        auto GetLitPass() const noexcept -> const RenderPass& { return *m_litPass.at(0u).get(); };
+        auto GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&;
+        auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass.at(0u); };
         void CommitResourceLayout();
         void IncrementShadowPassCount();
         void DecrementShadowPassCount();
@@ -65,8 +65,8 @@ class RenderGraph
         ShaderBindingManager* m_shaderBindingManager;
 
         // Render Passes
-        std::array<std::vector<std::unique_ptr<RenderPass>>, MaxFramesInFlight> m_shadowMappingPasses;
-        std::array<std::unique_ptr<RenderPass>, MaxFramesInFlight> m_litPass;
+        std::array<std::vector<RenderPass>, MaxFramesInFlight> m_shadowMappingPasses;
+        std::array<RenderPass, MaxFramesInFlight> m_litPass;
 
         // Post process images
         std::unordered_map<PostProcessImageType, PostProcessViews> m_postProcessImageViews;

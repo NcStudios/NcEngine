@@ -10,13 +10,13 @@ AssetResourcesConfig::AssetResourcesConfig(const config::MemorySettings& memoryS
       maxCubeMaps{memorySettings.maxCubeMaps}
 {}
 
-AssetResources::AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, ModuleProvider modules)
+AssetResources::AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus,  asset::NcAsset* ncAsset)
     : meshes{resourceBus->CreateMeshArrayBuffer()},
-      onMeshArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnMeshUpdate().Connect(this, &AssetResources::ForwardMeshAssetData)},
+      onMeshArrayBufferUpdate{ncAsset->OnMeshUpdate().Connect(this, &AssetResources::ForwardMeshAssetData)},
       cubeMaps{resourceBus->CreateCubeMapArrayBuffer(config.maxCubeMaps, ShaderStage::Fragment, 4, 1)},
-      onCubeMapArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnCubeMapUpdate().Connect(this, &AssetResources::ForwardCubeMapAssetData)},
+      onCubeMapArrayBufferUpdate{ncAsset->OnCubeMapUpdate().Connect(this, &AssetResources::ForwardCubeMapAssetData)},
       textures{resourceBus->CreateTextureArrayBuffer(config.maxTextures, ShaderStage::Fragment, 2, 1)},
-      onTextureArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnTextureUpdate().Connect(this, &AssetResources::ForwardTextureAssetData)}{}
+      onTextureArrayBufferUpdate{ncAsset->OnTextureUpdate().Connect(this, &AssetResources::ForwardTextureAssetData)}{}
 
 void AssetResources::ForwardMeshAssetData(const asset::MeshUpdateEventData& assetData)
 {

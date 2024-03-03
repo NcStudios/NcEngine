@@ -67,7 +67,7 @@ namespace nc::graphics
         : m_registry{registry},
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
-          m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules},
+          m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
           m_postProcessResources{memorySettings.maxPointLights, &m_shaderResourceBus},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)}
     {

@@ -3,6 +3,8 @@
 #include "graphics/GraphicsConstants.h"
 #include "utility/Signal.h"
 
+#include "ncengine/type/StableAddress.h"
+
 #include "vulkan/vk_mem_alloc.hpp"
 
 #include <span>
@@ -43,7 +45,7 @@ struct DescriptorSetLayoutsChanged
     uint32_t unused;
 };
 
-class ShaderBindingManager
+class ShaderBindingManager : StableAddress
 {
     public:
         ShaderBindingManager(vk::Device device);

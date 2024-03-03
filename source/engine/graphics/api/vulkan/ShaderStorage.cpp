@@ -23,27 +23,28 @@ void RemoveAt(std::vector<T>& collection, uint32_t index)
 }
 
 template<typename T, typename U>
-void RemoveAt(std::vector<T>& indexCollection, T index, std::vector<U>& inSyncCollection, std::string notFound)
+auto RemoveAt(std::vector<T>& indexCollection, T index, std::vector<U>& inSyncCollection) -> bool
 {
     auto pos = std::ranges::find(indexCollection, index);
     if (pos == indexCollection.end())
     {
-        throw nc::NcError(notFound);
+        return false;
     }
 
     auto posIndex = static_cast<uint32_t>(std::distance(indexCollection.begin(), pos));
 
     RemoveAt(indexCollection, posIndex);
     RemoveAt(inSyncCollection, posIndex);
+    return true;
 }
 
 template<typename T, typename U, typename V>
-void RemoveAt(std::vector<T>& indexCollection, T index, std::vector<U>& inSyncCollection, std::vector<V>& inSyncCollection2, std::string notFound)
+auto RemoveAt(std::vector<T>& indexCollection, T index, std::vector<U>& inSyncCollection, std::vector<V>& inSyncCollection2) -> bool
 {
     auto pos = std::ranges::find(indexCollection, index);
     if (pos == indexCollection.end())
     {
-        throw nc::NcError(notFound);
+        return false;
     }
 
     auto posIndex = static_cast<uint32_t>(std::distance(indexCollection.begin(), pos));
@@ -51,6 +52,8 @@ void RemoveAt(std::vector<T>& indexCollection, T index, std::vector<U>& inSyncCo
     RemoveAt(indexCollection, posIndex);
     RemoveAt(inSyncCollection, posIndex);
     RemoveAt(inSyncCollection2, posIndex);
+
+    return true;
 }
 }
 
@@ -119,10 +122,11 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
         {
             OPTICK_CATEGORY("CabUpdateAction::Add", Optick::Category::Rendering);
 
-            auto& sampler = storage.buffers.at(eventData.uid)->sampler.get();
-            auto& cubeMaps = storage.buffers.at(eventData.uid)->cubeMaps;
-            auto& imageInfos = storage.buffers.at(eventData.uid)->imageInfos;
-            auto& uids = storage.buffers.at(eventData.uid)->uids;
+            auto& buffer = storage.buffers.at(eventData.uid);
+            auto& sampler = buffer->sampler.get();
+            auto& cubeMaps = buffer->cubeMaps;
+            auto& imageInfos = buffer->imageInfos;
+            auto& uids = buffer->uids;
 
             auto incomingSize = cubeMaps.size() + eventData.data.size();
             cubeMaps.reserve(incomingSize);
@@ -150,13 +154,17 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
         {
             OPTICK_CATEGORY("CabUpdateAction::Remove", Optick::Category::Rendering);
 
-            auto& cubeMaps = storage.buffers.at(eventData.uid)->cubeMaps;
-            auto& imageInfos = storage.buffers.at(eventData.uid)->imageInfos;
-            auto& uids = storage.buffers.at(eventData.uid)->uids;
+            auto& cubeMapArrayBuffer = storage.buffers.at(eventData.uid);
+            auto& cubeMaps = cubeMapArrayBuffer->cubeMaps;
+            auto& imageInfos = cubeMapArrayBuffer->imageInfos;
+            auto& uids = cubeMapArrayBuffer->uids;
 
             for (auto& cubeMapWithId : eventData.data)
             {
-                RemoveAt(uids, std::string_view(cubeMapWithId.id), imageInfos, cubeMaps, "Attempted to remove a CubeMap that doesn't exist.");
+                if (!RemoveAt(uids, std::string_view(cubeMapWithId.id), imageInfos, cubeMaps))
+                {
+                    throw NcError("Attempted to remove a CubeMap that doesn't exist.");
+                }
             }
 
             m_shaderBindingManager->UpdateImage
@@ -234,14 +242,15 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 eventData.currentFrameIndex
             );
 
-            auto& sampler = storage.buffers.at(eventData.imageType)->sampler.get();
-            auto& views = storage.buffers.at(eventData.imageType)->views;
-            auto& imageInfos = storage.buffers.at(eventData.imageType)->imageInfos;
+            auto& storageBuffer = storage.buffers.at(eventData.imageType);
+            auto& sampler = storageBuffer->sampler.get();
+            auto& views = storageBuffer->views;
+            auto& imageInfos = storageBuffer->imageInfos;
 
             views.clear();
             imageInfos.clear();
 
-            auto postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
+            const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
             for (auto view : postProcessViews)
             {
                 views.emplace_back(view);
@@ -270,7 +279,7 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             views.clear();
             imageInfos.clear();
 
-            auto postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
+            const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
             for (auto view : postProcessViews)
             {
                 views.emplace_back(view);
@@ -292,11 +301,11 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Clear", Optick::Category::Rendering);
 
-            for (auto i : std::views::iota(0u, MaxFramesInFlight))
+            for (auto& bufferStorage : m_perFramePpiaStorage)
             {
-                if (m_perFramePpiaStorage.at(i).buffers.contains(eventData.imageType))
+                if (bufferStorage.buffers.contains(eventData.imageType))
                 {
-                    m_perFramePpiaStorage.at(i).buffers.at(eventData.imageType)->Clear();
+                    bufferStorage.buffers.at(eventData.imageType)->Clear();
                 }
             }
             break;
@@ -378,18 +387,16 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
                 break;
             }
 
-            for (auto i : std::views::iota(0u, MaxFramesInFlight))
+            for (auto& frameStorage : m_perFrameSsboStorage)
             {
-                auto& perFrameSsboStorage = m_perFrameSsboStorage.at(i);
-
-                auto pos = std::ranges::find(perFrameSsboStorage.uids, eventData.uid);
-                if (pos == perFrameSsboStorage.uids.end())
+                auto pos = std::ranges::find(frameStorage.uids, eventData.uid);
+                if (pos == frameStorage.uids.end())
                 {
                     throw nc::NcError("Attempted to clear a Storage Buffer that doesn't exist.");
                 }
 
-                auto posIndex = static_cast<uint32_t>(std::distance(perFrameSsboStorage.uids.begin(), pos));
-                perFrameSsboStorage.buffers.at(posIndex)->Clear();
+                auto posIndex = static_cast<uint32_t>(std::distance(frameStorage.uids.begin(), pos));
+                frameStorage.buffers.at(posIndex)->Clear();
             }
             break;
         }
@@ -464,7 +471,10 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
 
             for (auto& textureWithId : eventData.data)
             {
-                RemoveAt(uids, std::string_view(textureWithId.id), images, imageInfos, "Attempted to clear a Texture Buffer that doesn't exist.");
+                if (!RemoveAt(uids, std::string_view(textureWithId.id), images, imageInfos))
+                {
+                    throw NcError("Attempted to clear a Texture Buffer that doesn't exist.");
+                }
             }
 
             m_shaderBindingManager->UpdateImage
@@ -569,18 +579,16 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
                 break;
             }
 
-            for (auto i : std::views::iota(0u, MaxFramesInFlight))
+            for (auto& uboStorage : m_perFrameUboStorage)
             {
-                auto& perFrameUboStorage = m_perFrameUboStorage.at(i);
-
-                auto pos = std::ranges::find(perFrameUboStorage.uids, eventData.uid);
-                if (pos == perFrameUboStorage.uids.end())
+                auto pos = std::ranges::find(uboStorage.uids, eventData.uid);
+                if (pos == uboStorage.uids.end())
                 {
                     throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
                 }
 
-                auto posIndex = static_cast<uint32_t>(std::distance(perFrameUboStorage.uids.begin(), pos));
-                perFrameUboStorage.buffers.at(posIndex)->Clear();
+                auto posIndex = static_cast<uint32_t>(std::distance(uboStorage.uids.begin(), pos));
+                uboStorage.buffers.at(posIndex)->Clear();
             }
             break;
         }

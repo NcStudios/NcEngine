@@ -34,8 +34,13 @@ StorageBuffer& StorageBuffer::operator=(StorageBuffer&& other) noexcept
 
 void StorageBuffer::Clear() noexcept
 {
-    auto zeroBuffer = std::vector<char>(m_alignedSize);
-    Bind(zeroBuffer.data(), m_alignedSize);
+    auto allocation = m_buffer.Allocation();
+    void* dataContainer = m_allocator->Map(allocation);
+
+    if (m_previousDataSize > 0u)
+    {
+        memset(dataContainer, 0u, m_alignedSize);
+    }
 }
 
 void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
@@ -45,8 +50,7 @@ void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
 
     if (m_previousDataSize > 0u)
     {
-        auto zeroBuffer = std::vector<char>(m_previousDataSize);
-        memcpy(dataContainer, zeroBuffer.data(), m_previousDataSize);
+        memset(dataContainer, 0u, m_previousDataSize);
     }
 
     memcpy(dataContainer, dataToMap, dataSize);

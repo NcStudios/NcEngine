@@ -15,8 +15,6 @@ namespace graphics::vulkan
 class CubeMap
 {
     public:
-        inline static uint32_t CubeMapUid = 0u;
-
         CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data);
         ~CubeMap() noexcept;
         CubeMap(CubeMap&&) noexcept;
