@@ -26,7 +26,7 @@ class sparse_map
         auto emplace(Key key, const Value& value) -> Value&
         {
             ensure_capacity(key);
-            auto& denseIndex = m_sparse.at(static_cast<uint32_t>(key));
+            auto& denseIndex = m_sparse.at(static_cast<size_t>(key));
             NC_ASSERT(denseIndex == NullIndex, "Key already exists");
             denseIndex = static_cast<uint32_t>(m_dense.size());
             m_dense.push_back(key);
@@ -37,7 +37,7 @@ class sparse_map
         auto emplace(Key key, Value&& value) -> Value&
         {
             ensure_capacity(key);
-            auto& denseIndex = m_sparse.at(static_cast<uint32_t>(key));
+            auto& denseIndex = m_sparse.at(static_cast<size_t>(key));
             NC_ASSERT(denseIndex == NullIndex, "Key already exists");
             denseIndex = static_cast<uint32_t>(m_dense.size());
             m_dense.push_back(key);
@@ -50,10 +50,11 @@ class sparse_map
             if (!contains(key))
                 return false;
 
+            const auto normalizedKey = static_cast<size_t>(key);
             const auto swappedSparse = m_dense.back();
-            const auto toRemoveDense = m_sparse.at(static_cast<uint32_t>(key));
+            const auto toRemoveDense = m_sparse.at(normalizedKey);
             m_sparse.at(swappedSparse) = static_cast<uint32_t>(key);
-            m_sparse.at(static_cast<uint32_t>(key)) = NullIndex;
+            m_sparse.at(normalizedKey) = NullIndex;
             m_dense.at(toRemoveDense) = m_dense.back();
             m_dense.pop_back();
             m_values.at(toRemoveDense) = std::move(m_values.back());
@@ -63,8 +64,9 @@ class sparse_map
 
         auto contains(Key key) const noexcept -> bool
         {
-            return static_cast<size_t>(key) < m_sparse.size()
-                ? m_sparse[static_cast<uint32_t>(key)] != NullIndex
+            const auto normalizedKey = static_cast<size_t>(key);
+            return normalizedKey < m_sparse.size()
+                ? m_sparse[normalizedKey] != NullIndex
                 : false;
         }
 
@@ -115,7 +117,7 @@ class sparse_map
 
         auto dense_index(Key key) const -> uint32_t
         {
-            return m_sparse.at(static_cast<uint32_t>(key));
+            return m_sparse.at(static_cast<size_t>(key));
         }
 
         void ensure_capacity(Key key)
