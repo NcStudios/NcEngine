@@ -5,14 +5,14 @@
 #include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 
 namespace nc::graphics
 {
-    WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+    WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
         : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -29,7 +29,7 @@ namespace nc::graphics
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframePushConstants)); // PushConstants
@@ -85,7 +85,7 @@ namespace nc::graphics
         return !frameData.widgetState.wireframeData.empty();
     }
 
-    void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
+    void WireframeTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }
@@ -107,5 +107,6 @@ namespace nc::graphics
             cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
         }
     }
-}
+} // namespace nc::graphics
+
 #endif

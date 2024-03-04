@@ -13,16 +13,17 @@ class Device;
 class PerFrameGpuContext
 {
     public:
-        PerFrameGpuContext(const Device& device);
+        PerFrameGpuContext(const Device& device, uint32_t index);
 
         void WaitForSync(); // Waits until the fence has signaled
         void ResetSync() noexcept; // Resets the fence
-        void RenderFrame(vk::Queue graphicsQueue); // Submits the recorded commands in the command buffer
+        void SubmitBufferToQueue(vk::Queue graphicsQueue); // Submits the recorded commands in the command buffer
 
         vk::Fence Fence() const noexcept { return m_inFlightFence.get(); }
         vk::Semaphore ImageAvailableSemaphore() noexcept { return m_imageAvailableSemaphore.get(); }
         vk::Semaphore RenderFinishedSemaphore() noexcept { return m_renderFinishedSemaphore.get(); }
         vk::CommandBuffer* CommandBuffer() noexcept { return &(m_commandBuffer.get()); }
+        auto Index() noexcept { return m_index; }
 
     private:
         vk::Device m_device;
@@ -35,5 +36,7 @@ class PerFrameGpuContext
         /** Buffer to record render commands to for the frame */
         vk::UniqueCommandPool m_commandPool;
         vk::UniqueCommandBuffer m_commandBuffer;
+
+        uint32_t m_index;
 };
 } // namespace nc::graphics

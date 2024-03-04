@@ -1,16 +1,15 @@
 #include "EnvironmentSystem.h"
 #include "assets/AssetService.h"
+#include "graphics/shader_resource/ShaderTypes.h"
 #include "CameraSystem.h"
 
 namespace nc::graphics
 {
-EnvironmentSystem::EnvironmentSystem(Signal<const EnvironmentData&>&& backendChannel)
-    : m_backendChannel{std::move(backendChannel)},
-      m_environmentData{},
+EnvironmentSystem::EnvironmentSystem(ShaderResourceBus* shaderResourceBus)
+    : m_environmentData{},
+      m_environmentDataBuffer{shaderResourceBus->CreateUniformBuffer(sizeof(EnvironmentData), ShaderStage::Fragment | ShaderStage::Vertex, 5, 0, false)},
       m_useSkybox{false}
 {
-    m_environmentData.cameraWorldPosition = Vector3{-0.0f, 4.0f, -6.4f};
-    m_environmentData.skyboxTextureIndex = 0u;
 }
 
 void EnvironmentSystem::SetSkybox(const std::string& path)
@@ -20,10 +19,10 @@ void EnvironmentSystem::SetSkybox(const std::string& path)
     m_environmentData.skyboxTextureIndex = skyboxView.index;
 }
 
-auto EnvironmentSystem::Execute(const CameraState& cameraState) -> EnvironmentState
+auto EnvironmentSystem::Execute(const CameraState& cameraState, uint32_t currentFrameIndex) -> EnvironmentState
 {
-    m_environmentData.cameraWorldPosition = cameraState.position;
-    m_backendChannel.Emit(m_environmentData);
+    m_environmentData.cameraWorldPosition = Vector4(cameraState.position, 0.0f);
+    m_environmentDataBuffer.Update(static_cast<void*>(&m_environmentData), sizeof(m_environmentData), currentFrameIndex);
     return EnvironmentState{m_useSkybox};
 }
 
