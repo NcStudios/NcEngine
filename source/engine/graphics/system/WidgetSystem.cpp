@@ -2,6 +2,8 @@
 #include "ncengine/asset/DefaultAssets.h"
 #include "assets/AssetService.h"
 
+#include "optick.h"
+
 namespace
 {
 [[maybe_unused]]
@@ -67,6 +69,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                                             WireframeRenderer,
                                             physics::Collider> worldView) -> WidgetState
 {
+    OPTICK_CATEGORY("WidgetSystem::Execute", Optick::Category::Rendering);
     auto state = WidgetState{};
 
 #ifdef NC_EDITOR_ENABLED
@@ -81,7 +84,6 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
 
             continue;
         }
-
 
         if (!renderer.target.Valid())
             continue;
