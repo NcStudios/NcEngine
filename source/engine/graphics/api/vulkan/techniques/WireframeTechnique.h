@@ -9,7 +9,7 @@
 namespace nc::graphics
 {
 class Device;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 
 struct WireframeVertexPushConstants
 {
