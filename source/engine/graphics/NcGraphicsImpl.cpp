@@ -1,8 +1,6 @@
 #include "NcGraphicsImpl.h"
-#include "PerFrameRenderState.h"
-#include "graphics/GraphicsUtilities.h"
-#include "shader_resource/PointLightData.h"
-#include "shader_resource/ShaderResourceBus.h"
+#include "graphics/PerFrameRenderState.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 #include "window/WindowImpl.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
@@ -52,7 +50,7 @@ namespace nc::graphics
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -60,25 +58,19 @@ namespace nc::graphics
     }
 
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                                   const config::MemorySettings& memorySettings,
                                    Registry* registry,
                                    ModuleProvider modules,
                                    SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
-                                   ShaderResourceBus&& shaderResourceBus,
+                                   ShaderResourceBus shaderResourceBus,
                                    window::WindowImpl* window)
         : m_registry{registry},
           m_graphics{std::move(graphics)},
-          m_cameraSystem{},
-          m_environmentSystem{std::move(shaderResourceBus.environmentChannel)},
-          m_objectSystem{std::move(shaderResourceBus.objectChannel)},
-          m_pointLightSystem{std::move(shaderResourceBus.pointLightChannel), graphicsSettings.useShadows},
-          m_particleEmitterSystem{ registry, std::bind_front(&NcGraphics::GetCamera, this) },
-          m_skeletalAnimationSystem{registry,
-                                    modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
-                                    modules.Get<asset::NcAsset>()->OnBoneUpdate(),
-                                    std::move(shaderResourceBus.skeletalAnimationChannel)},
-          m_widgetSystem{},
-          m_uiSystem{registry->GetEcs(), modules, events}
+          m_shaderResourceBus{std::move(shaderResourceBus)},
+          m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
+          m_postProcessResources{memorySettings.maxPointLights, &m_shaderResourceBus},
+          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
 
@@ -90,45 +82,47 @@ namespace nc::graphics
     void NcGraphicsImpl::SetCamera(Camera* camera) noexcept
     {
         NC_LOG_TRACE("Setting main camera to: {}", static_cast<void*>(camera));
-        m_cameraSystem.Set(camera);
+        m_systemResources.cameras.Set(camera);
     }
 
     auto NcGraphicsImpl::GetCamera() noexcept -> Camera*
     {
-        return m_cameraSystem.Get();
+        return m_systemResources.cameras.Get();
     }
 
     void NcGraphicsImpl::SetUi(ui::IUI* ui) noexcept
     {
         NC_LOG_TRACE("Setting UI to {}", static_cast<void*>(ui));
-        m_uiSystem.SetClientUI(ui);
+        m_systemResources.ui.SetClientUI(ui);
     }
 
     bool NcGraphicsImpl::IsUiHovered() const noexcept
     {
-        return m_uiSystem.IsHovered();
+        return m_systemResources.ui.IsHovered();
     }
 
     void NcGraphicsImpl::SetSkybox(const std::string& path)
     {
         NC_LOG_TRACE("Setting skybox to {}", path);
-        m_environmentSystem.SetSkybox(path);
+        m_systemResources.environment.SetSkybox(path);
     }
 
     void NcGraphicsImpl::ClearEnvironment()
     {
-        m_environmentSystem.Clear();
+        m_systemResources.environment.Clear();
     }
 
     void NcGraphicsImpl::Clear() noexcept
     {
         /** @note Don't clear the camera as it may be on a persistent entity. */
         /** @todo graphics::clear not marked noexcept */
+        m_systemResources.particleEmitters.Clear();
         m_graphics->Clear();
-        m_cameraSystem.Clear();
-        m_environmentSystem.Clear();
-        m_particleEmitterSystem.Clear();
-        m_skeletalAnimationSystem.Clear();
+        m_postProcessResources.shadowMaps.Clear();
+        m_systemResources.cameras.Clear();
+        m_systemResources.environment.Clear();
+        m_systemResources.pointLights.Clear();
+        m_systemResources.skeletalAnimations.Clear();
     }
 
     void NcGraphicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
@@ -138,30 +132,51 @@ namespace nc::graphics
 #if NC_DEBUG_RENDERING_ENABLED
         update.Add(task::UpdatePhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
 #endif
-        update.Add(task::UpdatePhase::Free, "ParticleEmitterSystem", [this]{ m_particleEmitterSystem.Run(); });
+        update.Add(task::UpdatePhase::Free, "ParticleEmitterSystem", [this]{ m_systemResources.particleEmitters.Run(); });
         render.Add(task::RenderPhase::Render, "NcGraphics", [this]{ Run(); });
-        render.Add(task::RenderPhase::PostRender, "ProcessParticleFrameEvents", [this]{ m_particleEmitterSystem.ProcessFrameEvents(); } );
+        render.Add(task::RenderPhase::PostRender, "ProcessParticleFrameEvents", [this]{ m_systemResources.particleEmitters.ProcessFrameEvents(); } );
     }
 
     void NcGraphicsImpl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
-        if (!m_graphics->FrameBegin())
+
+        // Wait until the frame is ready to be rendered, begin accepting ImGui commands
+        if (!m_graphics->PrepareFrame())
         {
             return;
         }
 
-        auto cameraState = m_cameraSystem.Execute(m_registry);
-        m_uiSystem.Execute(ecs::Ecs(m_registry->GetImpl()));
-        auto widgetState = m_widgetSystem.Execute(m_registry->GetEcs());
-        auto environmentState = m_environmentSystem.Execute(cameraState);
-        auto skeletalAnimationState = m_skeletalAnimationSystem.Execute();
-        auto objectState = m_objectSystem.Execute(MultiView<MeshRenderer, Transform>{m_registry},
-                                                  MultiView<ToonRenderer, Transform>{m_registry},
-                                                  cameraState,
-                                                  environmentState,
-                                                  skeletalAnimationState);
-        auto lightingState = m_pointLightSystem.Execute(MultiView<PointLight, Transform>{m_registry});
+        auto currentFrameIndex = m_graphics->CurrentFrameIndex();
+
+        // Run all the systems to generate this frame's resource data.
+        m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
+        auto cameraState = m_systemResources.cameras.Execute(m_registry);
+        auto widgetState = m_systemResources.widgets.Execute(m_registry->GetEcs());
+        auto environmentState = m_systemResources.environment.Execute(cameraState, currentFrameIndex);
+        auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
+        auto objectState = m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
+                                                                        cameraState, environmentState, skeletalAnimationState);
+        auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+
+        // If any changes were made to resource layouts (point lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
+        m_graphics->CommitResourceLayout();
+
+        if (lightingState.updateShadows)
+        {
+            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(lightingState.viewProjections.size()), currentFrameIndex);
+        }
+
+        // Allow the frame to begin accepting draw commands.
+        if (!m_graphics->BeginFrame())
+        {
+            return;
+        }
+
+        // Bind mesh buffer to the current frame.
+        m_assetResources.meshes.Bind(currentFrameIndex);
+
+        // Collect all the resource data for this frame.
         auto state = PerFrameRenderState
         {
             std::move(cameraState),
@@ -169,16 +184,19 @@ namespace nc::graphics
             std::move(objectState),
             std::move(lightingState),
             std::move(widgetState),
-            m_particleEmitterSystem.GetParticles()
+            m_systemResources.particleEmitters.GetParticles()
         };
 
-        m_graphics->Draw(state);
+        // Draw all the resource data
+        m_graphics->DrawFrame(state);
+
+        // Submit the frame to be presented and increment the frame index.
         m_graphics->FrameEnd();
     }
 
     void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
     {
-        m_cameraSystem.Get()->UpdateProjectionMatrix(width, height);
+        m_systemResources.cameras.Get()->UpdateProjectionMatrix(width, height);
         m_graphics->OnResize(width, height, isMinimized);
     }
 } // namespace nc::graphics

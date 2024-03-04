@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common.h"
+#include "graphics/shader_resource/ShaderTypes.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -9,10 +9,12 @@
 namespace nc::graphics
 {
 // Resources
+auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler;
 auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler;
+vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler sampler, vk::ImageView imageView, vk::ImageLayout layout);
 
 // Pipelines
-vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader);
+vk::PipelineShaderStageCreateInfo CreatePipelineShaderStageCreateInfo(shader_stage stage, const vk::ShaderModule& shader);
 vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo();
 vk::PipelineVertexInputStateCreateInfo CreateVertexInputCreateInfo(const vk::VertexInputBindingDescription& vertexInputDesc, std::span<const vk::VertexInputAttributeDescription> vertexAttributeDesc);
 vk::PipelineInputAssemblyStateCreateInfo CreateInputAssemblyCreateInfo();
@@ -29,9 +31,4 @@ vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo();
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts);
-
-// Descriptor sets
-vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags);
-vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout);
-vk::DescriptorImageInfo CreateDescriptorImageInfo(vk::Sampler sampler, vk::ImageView imageView, vk::ImageLayout layout);
 } // namespace nc::graphics

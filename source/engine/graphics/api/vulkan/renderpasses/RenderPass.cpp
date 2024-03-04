@@ -1,6 +1,8 @@
 #include "RenderPass.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
+#include "optick.h"
+
 namespace
 {
 constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
@@ -74,7 +76,6 @@ auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachment
 namespace nc::graphics
 {
 RenderPass::RenderPass(vk::Device device,
-                       uint8_t priority,
                        std::string uid,
                        std::span<const AttachmentSlot> attachmentSlots,
                        std::span<const Subpass> subpasses,
@@ -82,7 +83,6 @@ RenderPass::RenderPass(vk::Device device,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags)
     : m_device{device},
-      m_priority{priority},
       m_uid{std::move(uid)},
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
@@ -91,9 +91,9 @@ RenderPass::RenderPass(vk::Device device,
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
+void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex)
 {
-    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex));
 }
 
 void RenderPass::UnregisterShadowMappingTechnique()
@@ -116,12 +116,14 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
 {
+    OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
+
     for (const auto &technique : m_shadowMappingTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
-        technique->Bind(cmd);
+        technique->Bind(frameIndex, cmd);
 
         if (!technique->CanRecord(frameData)) continue;
         technique->Record(cmd, frameData);
@@ -130,7 +132,7 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
     for (const auto &technique : m_litTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
-        technique->Bind(cmd);
+        technique->Bind(frameIndex, cmd);
 
         if (!technique->CanRecord(frameData)) continue;
         technique->Record(cmd, frameData);
@@ -140,11 +142,6 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
 void RenderPass::End(vk::CommandBuffer *cmd)
 {
     cmd->endRenderPass();
-}
-
-auto RenderPass::GetPriority() const -> uint32_t
-{
-    return m_priority;
 }
 
 auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView

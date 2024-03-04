@@ -19,7 +19,7 @@ namespace nc::graphics
 {
     struct DebugData;
     class Device;
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     struct WireframePushConstants
     {
@@ -31,11 +31,11 @@ namespace nc::graphics
     class WireframeTechnique : public ITechnique
     {
         public:
-            WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass);
+            WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass);
             ~WireframeTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
-            void Bind(vk::CommandBuffer* cmd) override;
+            void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
 
             bool CanRecord(const PerFrameRenderState& frameData) override;
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
@@ -44,5 +44,5 @@ namespace nc::graphics
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };
-}
+} // namespace nc::graphics
 #endif
