@@ -131,7 +131,7 @@ auto CreateAttachmentImage(nc::graphics::GpuAllocator *allocator, vk::Format for
     constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
     constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
     const auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
-    return allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, numSamples);
+    return allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, 1, numSamples);
 }
 
 auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image image, bool isDepthStencil) -> vk::UniqueImageView

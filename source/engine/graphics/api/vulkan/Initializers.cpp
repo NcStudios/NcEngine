@@ -20,7 +20,7 @@ auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler
         VK_FALSE,                               // CompareEnable
         vk::CompareOp::eAlways,                 // CompareOp
         0.0f,                                   // MinLod
-        1.0f,                                   // MaxLod
+        VK_LOD_CLAMP_NONE,                      // MaxLod
         vk::BorderColor::eFloatOpaqueWhite,     // BorderColor
         VK_FALSE                                // UnnormalizedCoordinates
     };
