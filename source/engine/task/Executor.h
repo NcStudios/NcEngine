@@ -22,7 +22,7 @@ class Executor
 {
     public:
         // Initialize with a context object
-        explicit Executor(ExecutorContext ctx);
+        explicit Executor(uint32_t threadCount, ExecutorContext ctx);
 
         // Assign a new graph context.
         void SetContext(ExecutorContext ctx);

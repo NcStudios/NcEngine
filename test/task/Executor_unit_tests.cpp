@@ -161,7 +161,7 @@ TEST_F(ExecutorTests, BuildContext_succeeds)
 TEST_F(ExecutorTests, Run_allPhases_schedulesCorrectly)
 {
     auto modules = BuildModules<SingleTaskModule, GraphModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     EXPECT_NO_THROW(uut.RunUpdateTasks());
     EXPECT_NO_THROW(uut.RunRenderTasks());
     const auto expectedUpdateTaskCount = SingleTaskModule::UpdateTaskCount + GraphModule::UpdateTaskCount;
@@ -183,7 +183,7 @@ TEST_F(ExecutorTests, Run_allPhases_schedulesCorrectly)
 TEST_F(ExecutorTests, Run_missingPhases_schedulesCorrectly)
 {
     auto modules = BuildModules<SingleTaskModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     EXPECT_NO_THROW(uut.RunUpdateTasks());
     ASSERT_EQ(SingleTaskModule::UpdateTaskCount, s_numTasksRun);
     ASSERT_EQ(SingleTaskModule::UpdateTaskCount, s_updateInvokeOrder.size());
@@ -196,7 +196,7 @@ TEST_F(ExecutorTests, Run_missingPhases_schedulesCorrectly)
 TEST_F(ExecutorTests, Run_taskThrows_completesGraph)
 {
     auto modules = BuildModules<SingleTaskModule, ThrowingModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     EXPECT_THROW(uut.RunUpdateTasks(), std::exception);
     const auto expectedUpdateTaskCount = SingleTaskModule::UpdateTaskCount + ThrowingModule::UpdateTaskCount;
     EXPECT_EQ(expectedUpdateTaskCount, s_numTasksRun); // should still have run the other tasks
@@ -206,7 +206,7 @@ TEST_F(ExecutorTests, Run_taskThrows_completesGraph)
 TEST_F(ExecutorTests, Run_alreadyRunning_throws)
 {
     auto modules = BuildModules<GraphRebuildModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     dynamic_cast<GraphRebuildModule*>(modules.at(0).get())->executor = &uut;
     EXPECT_THROW(uut.RunUpdateTasks(), nc::NcError);
 }
@@ -214,7 +214,7 @@ TEST_F(ExecutorTests, Run_alreadyRunning_throws)
 TEST_F(ExecutorTests, SetContext_subsequentRun_succeeds)
 {
     auto modules = BuildModules<SingleTaskModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     EXPECT_NO_THROW(uut.RunUpdateTasks());
     EXPECT_NO_THROW(uut.RunRenderTasks());
     auto newModules = BuildModules<SingleTaskModule, GraphModule>();
@@ -231,7 +231,7 @@ TEST_F(ExecutorTests, SetContext_subsequentRun_succeeds)
 TEST_F(ExecutorTests, SetContext_graphRunning_throws)
 {
     auto modules = BuildModules<GraphRebuildModule>();
-    auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+    auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     dynamic_cast<GraphRebuildModule*>(modules.at(0).get())->executor = &uut;
     EXPECT_THROW(uut.RunUpdateTasks(), nc::NcError);
 }
@@ -239,7 +239,7 @@ TEST_F(ExecutorTests, SetContext_graphRunning_throws)
 TEST_F(ExecutorTests, WriteGraph_writesToStream)
 {
     auto modules = BuildModules<SingleTaskModule>();
-const auto uut = nc::task::Executor{nc::task::BuildContext(modules)};
+const auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     auto stream = std::ostringstream{};
     uut.WriteGraph(stream);
     // Just checking that it succeeded and wrote something
