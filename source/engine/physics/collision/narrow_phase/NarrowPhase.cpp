@@ -42,8 +42,8 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
     const auto count = externalResults.contacts.size();
     for(size_t i = 0u; i < count; ++i)
     {
-        const auto& [a, b, type, unused] = externalResults.events[i];
-        m_manifoldCache.Add(a, b, type, externalResults.contacts[i]);
+        const auto& [a, b, type, unused, stable] = externalResults.events[i];
+        m_manifoldCache.Add(a, b, type, stable, externalResults.contacts[i]);
     }
 
     // Should get rid of this removal and the one in notify events. UpdateManifolds should correctly clear

@@ -285,7 +285,8 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
         .position = Vector3{0.0f, 1.15f, 25.99f},
         .rotation = Quaternion::FromEulerAngles(-0.4f, 0.0f, 0.0f),
         .scale = Vector3{8.0f, 1.0f, 20.0f},
-        .tag = "Ramp"
+        .tag = "Ramp",
+        .flags = Entity::Flags::Static
     });
 
     const auto ramp2 = world.Emplace<Entity>({

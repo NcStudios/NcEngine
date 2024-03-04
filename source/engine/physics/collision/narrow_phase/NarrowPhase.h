@@ -87,7 +87,9 @@ void NarrowPhase::FindPhysicsPairs(std::span<const BroadPair<ProxyType>> physics
             //     }
             // }
 
-            results.events.emplace_back(e1, e2, eventType);
+            // should probably put stability in contact and detect in collision?
+            auto stable = StableTangents(i->Volume(), j->Volume());
+            results.events.emplace_back(e1, e2, eventType, NarrowEvent::State::New, stable);
             results.contacts.push_back(state.contact);
         }
     }
@@ -95,8 +97,8 @@ void NarrowPhase::FindPhysicsPairs(std::span<const BroadPair<ProxyType>> physics
     const auto dynamicEventCount = results.contacts.size();
     for(size_t i = 0u; i < dynamicEventCount; ++i)
     {
-        const auto& [a, b, type, unused] = results.events[i];
-        m_manifoldCache.Add(a, b, type, results.contacts[i]);
+        const auto& [a, b, type, unused, stable] = results.events[i];
+        m_manifoldCache.Add(a, b, type, stable, results.contacts[i]);
     }
 }
 

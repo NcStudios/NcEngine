@@ -112,6 +112,7 @@ struct NarrowEvent
     Entity second;
     CollisionEventType eventType;
     State state = State::New;
+    bool stableTangents = false;
 };
 
 /** Contact data for a pair of colliding objects. */
@@ -145,8 +146,8 @@ class Manifold
     static constexpr size_t MaxPointCount = 4u;
 
     public:
-        explicit Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact) noexcept
-            : m_event{a, b, type}, m_contacts{contact} {}
+        explicit Manifold(Entity a, Entity b, CollisionEventType type, bool stableContacts, const Contact& contact) noexcept
+            : m_event{a, b, type, NarrowEvent::State::New, stableContacts}, m_contacts{contact} {}
 
         void AddContact(const Contact& contact);
         void UpdateWorldPoints(const Registry* registry);

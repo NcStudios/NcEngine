@@ -202,7 +202,7 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
 
         // hack for testing:
         // good for flat sliding, worse for curves - what if we put like a 'stable contacts' bool in the NarrowEvent instead
-        if (!m_event.first.IsStatic() && !m_event.second.IsStatic() && distance2d > ContactBreakDistance * ContactBreakDistance)
+        if (( !m_event.stableTangents || (!m_event.first.IsStatic() && !m_event.second.IsStatic()) ) && distance2d > ContactBreakDistance * ContactBreakDistance)
         {
             NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
             *cur = m_contacts.at(removePosition--);

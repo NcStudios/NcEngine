@@ -14,14 +14,14 @@ class ManifoldCache : public PairCache<ManifoldCache, Manifold>
                     (a == manifold.Event().second && b == manifold.Event().first);
         }
 
-        void AddToExisting(Manifold* existing, CollisionEventType, const Contact& contact)
+        void AddToExisting(Manifold* existing, CollisionEventType, bool, const Contact& contact)
         {
             existing->AddContact(contact);
         }
 
-        auto ConstructNew(Entity a, Entity b, CollisionEventType type, const Contact& contact) -> Manifold
+        auto ConstructNew(Entity a, Entity b, CollisionEventType type, bool stable, const Contact& contact) -> Manifold
         {
-            return Manifold{a, b, type, contact};
+            return Manifold{a, b, type, stable, contact};
         }
 
         auto Hash(const Manifold& manifold) -> uint32_t
