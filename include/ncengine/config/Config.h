@@ -154,7 +154,7 @@ auto Validate(const Config& config) -> bool;
 /** @brief Get the ProjectSettings NcEngine was initialized with. */
 auto GetProjectSettings() -> const ProjectSettings&;
 
-/** @brief Get the EngineSettigns NcEngine was initialized with. */
+/** @brief Get the EngineSettings NcEngine was initialized with. */
 auto GetEngineSettings() -> const EngineSettings&;
 
 /** @brief Get the AssetSettings NcEngine was initialized with. */
