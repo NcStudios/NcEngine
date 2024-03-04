@@ -15,10 +15,6 @@ namespace graphics
     class GpuAllocator;
     class Instance;
 
-    /** @todo Add create image view (used in Attachment) */
-    auto CreateTextureView(vk::Device device, vk::Image image, bool isNormal) -> vk::UniqueImageView;
-    auto CreateCubeMapTextureView(vk::Device device, vk::Image image) -> vk::UniqueImageView;
-
     template<class T>
     class GpuAllocation
     {
@@ -62,8 +58,9 @@ namespace graphics
             auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
             auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
             auto CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, bool isNormal) -> GpuAllocation<vk::Image>;
+            auto CreateTextureView(vk::Image image, bool isNormal) -> vk::UniqueImageView;
             auto CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength) -> GpuAllocation<vk::Image>;
-
+            auto CreateCubeMapTextureView(vk::Image image) -> vk::UniqueImageView;
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
 

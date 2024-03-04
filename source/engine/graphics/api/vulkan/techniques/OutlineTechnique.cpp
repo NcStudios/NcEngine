@@ -1,23 +1,21 @@
 #include "OutlineTechnique.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderResources.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics
 {
-OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
-    : m_descriptorSets{descriptorSets},
-        m_pipeline{nullptr},
-        m_pipelineLayout{nullptr}
+OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+    : m_shaderBindingManager{shaderBindingManager},
+      m_pipeline{nullptr},
+      m_pipelineLayout{nullptr}
 {
     const auto vkDevice = device.VkDevice();
 
@@ -32,12 +30,12 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* d
     std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
     {
         CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-        CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+        CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
     std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
     {
-        *(m_descriptorSets->GetSetLayout(BindFrequency::per_frame))
+        *(m_shaderBindingManager->GetSetLayout(0))
     };
 
     auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -62,7 +60,7 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderDescriptorSets* d
     pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
-    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
     rasterizer.cullMode = vk::CullModeFlagBits::eFront;
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
@@ -96,12 +94,12 @@ bool OutlineTechnique::CanBind(const PerFrameRenderState& frameData)
     return true;
 }
 
-void OutlineTechnique::Bind(vk::CommandBuffer* cmd)
+void OutlineTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     OPTICK_CATEGORY("OutlineTechnique::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-    m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
 bool OutlineTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -124,4 +122,4 @@ void OutlineTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&
 void OutlineTechnique::Clear() noexcept
 {
 }
-}
+} // namespace nc::graphics

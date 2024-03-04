@@ -1,16 +1,9 @@
 #pragma once
 
 #include "IGraphics.h"
+#include "graphics/shader_resource/ResourceInstances.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
-#include "system/CameraSystem.h"
-#include "system/EnvironmentSystem.h"
-#include "system/ObjectSystem.h"
-#include "system/ParticleEmitterSystem.h"
-#include "system/PointLightSystem.h"
-#include "system/SkeletalAnimationSystem.h"
-#include "system/UISystem.h"
-#include "system/WidgetSystem.h"
 
 #include <memory>
 
@@ -48,11 +41,12 @@ class NcGraphicsImpl : public NcGraphics
 {
     public:
         NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
+                       const config::MemorySettings& memorySettings,
                        Registry* registry,
                        ModuleProvider modules,
                        SystemEvents& events,
                        std::unique_ptr<IGraphics> graphics,
-                       ShaderResourceBus&& shaderResourceBus,
+                       ShaderResourceBus shaderResourceBus,
                        window::WindowImpl* window);
 
         void SetCamera(Camera* camera) noexcept override;
@@ -70,14 +64,10 @@ class NcGraphicsImpl : public NcGraphics
     private:
         Registry* m_registry;
         std::unique_ptr<IGraphics> m_graphics;
-        CameraSystem m_cameraSystem;
-        EnvironmentSystem m_environmentSystem;
-        ObjectSystem m_objectSystem;
-        PointLightSystem m_pointLightSystem;
-        ParticleEmitterSystem m_particleEmitterSystem;
-        SkeletalAnimationSystem m_skeletalAnimationSystem;
-        WidgetSystem m_widgetSystem;
-        UISystem m_uiSystem;
+        ShaderResourceBus m_shaderResourceBus;
+        AssetResources m_assetResources;
+        PostProcessResources m_postProcessResources;
+        SystemResources m_systemResources;
     };
 } // namespace graphics
 } // namespace nc
