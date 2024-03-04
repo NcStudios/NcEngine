@@ -8,8 +8,6 @@
 
 namespace
 {
-constexpr auto g_threadCount = size_t{8};
-
 void SetDependencies(std::vector<tf::Task>& predecessors, const std::vector<tf::Task>& successors)
 {
     for(auto& before : predecessors)
@@ -86,8 +84,8 @@ auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> Execut
     return ExecutorContext{updateBuilder.ReleaseContext(), renderBuilder.ReleaseContext()};
 }
 
-Executor::Executor(ExecutorContext ctx)
-    : m_executor{g_threadCount},
+Executor::Executor(uint32_t threadCount, ExecutorContext ctx)
+    : m_executor{threadCount},
       m_ctx{std::move(ctx)}
 {
 #ifdef NC_OUTPUT_TASKFLOW
