@@ -52,17 +52,17 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
      *  - If a manifold isn't 'updated' I would expect UpdateManfiolds() to have removed it.
      *    Why isn't this the case?
      *  - Does this actually affect stability at all? It is hard to see a difference. */
-    auto manifolds = m_manifoldCache.Data();
-    auto end = manifolds.rend();
-    for(auto cur = manifolds.rbegin(); cur != end; ++cur)
-    {
-        if(cur->Event().state == NarrowEvent::State::Stale)
-        {
-            NC_LOG_CONTACTS("Remove stale manifold [contact not broken]");
-            m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
-            m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
-        }
-    }
+    // auto manifolds = m_manifoldCache.Data();
+    // auto end = manifolds.rend();
+    // for(auto cur = manifolds.rbegin(); cur != end; ++cur)
+    // {
+    //     if(cur->Event().state == NarrowEvent::State::Stale)
+    //     {
+    //         NC_LOG_CONTACTS("Remove stale manifold [contact not broken]");
+    //         m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
+    //         m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
+    //     }
+    // }
 }
 
 void NarrowPhase::CacheImpulses(std::span<const ContactConstraint> constraints)

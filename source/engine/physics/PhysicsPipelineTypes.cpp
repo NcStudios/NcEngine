@@ -198,12 +198,28 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         const auto projectedPoint = XMVectorSubtract(worldA, XMVectorScale(normal, depth));
         const auto projectedDifference = XMVectorSubtract(worldB, projectedPoint);
         const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
-        if (distance2d > SquareContactBreakDistance)
+        // if (distance2d > SquareContactBreakDistance)
+
+        // hack for testing:
+        // good for flat sliding, worse for curves - what if we put like a 'stable contacts' bool in the NarrowEvent instead
+        if (!m_event.first.IsStatic() && !m_event.second.IsStatic() && distance2d > ContactBreakDistance * ContactBreakDistance)
         {
+            NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
+            *cur = m_contacts.at(removePosition--);
+            ++removeCount;
+            continue;
+        }
+
+        constexpr auto SquareTangentBreakDistance = TangentContactBreakDistance * TangentContactBreakDistance;
+        constexpr auto SquareMandatoryBreakDistance = MandatoryTangentContactBreakDistance * MandatoryTangentContactBreakDistance; 
+        if (distance2d > SquareTangentBreakDistance)
+        {
+
+
             // Attempt to increase stability for sliding cases by limiting number of contact breaks per tick
             if constexpr (PreferSingleTangentContactBreak)
             {
-                if (distance2d > MandatoryTangentContactBreakDistance)
+                if (distance2d > SquareMandatoryBreakDistance)
                 {
                     NC_LOG_CONTACTS("Contact Break [Tangent - Mandatory]: ", distance2d, " > ", MandatoryTangentContactBreakDistance);
                     *cur = m_contacts.at(removePosition--);
