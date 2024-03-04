@@ -1,0 +1,11 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        CubeMapArrayBufferHandle.cpp
+        MeshArrayBufferHandle.cpp
+        PPImageArrayBufferHandle.cpp
+        ResourceInstances.cpp
+        ShaderResourceBus.cpp
+        StorageBufferHandle.cpp
+        TextureArrayBufferHandle.cpp
+        UniformBufferHandle.cpp
+)

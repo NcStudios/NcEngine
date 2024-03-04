@@ -12,7 +12,7 @@ layout(push_constant) uniform PER_OBJECT
     int baseColorIndex;
 } pc;
 
-layout (set = 0, binding = 2) uniform sampler2D textures[];
+layout (set = 1, binding = 2) uniform sampler2D textures[];
 
 layout (location = 0) in vec3 inFragWorldPos;
 layout (location = 1) in vec2 inUV;

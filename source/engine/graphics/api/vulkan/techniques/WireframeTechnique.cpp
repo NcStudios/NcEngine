@@ -5,16 +5,16 @@
 #include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics
 {
-WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
     : m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
 {
@@ -31,7 +31,7 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderDescriptorSet
     std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
     {
         CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-        CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+        CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
     m_pipelineLayout = [vkDevice]()
@@ -94,7 +94,7 @@ bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
     return !frameData.widgetState.wireframeData.empty();
 }
 
-void WireframeTechnique::Bind(vk::CommandBuffer* cmd)
+void WireframeTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
 {
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
 }
@@ -127,4 +127,5 @@ void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderStat
     }
 }
 } // namespace nc::graphics
+
 #endif

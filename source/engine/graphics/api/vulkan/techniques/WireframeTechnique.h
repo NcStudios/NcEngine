@@ -25,11 +25,11 @@ struct WireframeFragmentPushConstants
 class WireframeTechnique : public ITechnique
 {
     public:
-        WireframeTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass);
+        WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass);
         ~WireframeTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
-        void Bind(vk::CommandBuffer* cmd) override;
+        void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
 
         bool CanRecord(const PerFrameRenderState& frameData) override;
         void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;

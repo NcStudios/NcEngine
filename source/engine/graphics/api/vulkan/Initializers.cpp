@@ -1,7 +1,32 @@
 #include "Initializers.h"
+#include "ShaderUtilities.h"
 
 namespace nc::graphics
 {
+auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler
+{
+    constexpr auto samplerInfo = vk::SamplerCreateInfo
+    {
+        vk::SamplerCreateFlags(),               // SamplerCreateFlags
+        vk::Filter::eNearest,                   // MagFilter
+        vk::Filter::eNearest,                   // MinFilter
+        vk::SamplerMipmapMode::eLinear,         // MipMapMode
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeU
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeV
+        vk::SamplerAddressMode::eClampToBorder, // AddressModeW
+        0.0f,                                   // MipLodBias
+        VK_TRUE,                                // AnisotropyEnable
+        1.0f,                                   // MaxAnisotropy
+        VK_FALSE,                               // CompareEnable
+        vk::CompareOp::eAlways,                 // CompareOp
+        0.0f,                                   // MinLod
+        1.0f,                                   // MaxLod
+        vk::BorderColor::eFloatOpaqueWhite,     // BorderColor
+        VK_FALSE                                // UnnormalizedCoordinates
+    };
+    return device.createSamplerUnique(samplerInfo);
+}
+
 auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode) -> vk::UniqueSampler
 {
     const auto samplerInfo = vk::SamplerCreateInfo
@@ -27,7 +52,12 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode)
     return device.createSamplerUnique(samplerInfo);
 }
 
-auto CreatePipelineShaderStageCreateInfo(ShaderStage stage, const vk::ShaderModule& shader) -> vk::PipelineShaderStageCreateInfo
+auto CreateDescriptorImageInfo(vk::Sampler sampler, vk::ImageView imageView, vk::ImageLayout layout) -> vk::DescriptorImageInfo
+{
+    return vk::DescriptorImageInfo{sampler, imageView, layout};
+}
+
+auto CreatePipelineShaderStageCreateInfo(shader_stage stage, const vk::ShaderModule& shader) -> vk::PipelineShaderStageCreateInfo
 {
     const auto shaderStageFlags = stage == ShaderStage::Vertex ? vk::ShaderStageFlagBits::eVertex : vk::ShaderStageFlagBits::eFragment;
     return vk::PipelineShaderStageCreateInfo
@@ -219,38 +249,5 @@ auto CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRan
 {
     const auto layoutSize = static_cast<uint32_t>(layouts.size());
     return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, layoutSize, layouts.data(), 1u, &pushConstantRange};
-}
-
-vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
-{
-    vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
-    extendedInfo.setPNext(nullptr);
-    extendedInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
-    extendedInfo.setPBindingFlags(bindingFlags.data());
-
-    vk::DescriptorSetLayoutCreateInfo setInfo{};
-    setInfo.setBindingCount(static_cast<uint32_t>(layoutBindings.size()));
-    setInfo.setFlags(vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool);
-    setInfo.setPNext(&extendedInfo);
-    setInfo.setPBindings(layoutBindings.data());
-
-    return device.createDescriptorSetLayoutUnique(setInfo);
-}
-
-vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
-{
-    vk::DescriptorSetAllocateInfo allocationInfo{};
-    allocationInfo.setPNext(nullptr);
-    allocationInfo.setDescriptorPool(*descriptorPool);
-    allocationInfo.setDescriptorSetCount(descriptorSetCount);
-    allocationInfo.setPSetLayouts(descriptorSetLayout);
-
-    // @todo: return the vector rather than the indiviual item, don't use move in return values
-    return std::move(device.allocateDescriptorSetsUnique(allocationInfo)[0]);
-}
-
-auto CreateDescriptorImageInfo(vk::Sampler sampler, vk::ImageView imageView, vk::ImageLayout layout) -> vk::DescriptorImageInfo
-{
-    return vk::DescriptorImageInfo{sampler, imageView, layout};
 }
 } // namespace nc::graphics
