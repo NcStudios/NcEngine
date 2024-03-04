@@ -47,32 +47,19 @@ auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPoo
     
     vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
     renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
-    renderingDescriptorPoolInfo.setMaxSets(10);
+    renderingDescriptorPoolInfo.setMaxSets(nc::graphics::vulkan::MaxDescriptorSets);
     renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
     renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
 
     return device.createDescriptorPoolUnique(renderingDescriptorPoolInfo);
 }
 
-template<typename T> 
-auto AddOrUpdate(uint32_t bindingSlot, std::unordered_map<uint32_t, T>& collection, T itemToAdd) -> std::vector<T>
+auto CreatePerFrameSets(size_t initialKeyCapacity, size_t maxKeyCapacity = 65536ull)
 {
-    if (!collection.contains(bindingSlot))
+    return [&] <size_t... N> (std::index_sequence<N...>)
     {
-        collection.emplace(bindingSlot, itemToAdd);
-    }
-    else
-    {
-        collection.at(bindingSlot) = itemToAdd;
-    }
-
-    auto flattenedCollection = std::vector<T>{};
-    flattenedCollection.reserve(collection.size());
-    std::ranges::transform(collection, std::back_inserter(flattenedCollection), [](auto&& kvp)
-    {
-        return kvp.second;
-    });
-    return flattenedCollection;
+        return std::array{((void)N, nc::sparse_map<nc::graphics::DescriptorSet>{initialKeyCapacity, maxKeyCapacity})...};
+    }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
 }
 
@@ -81,9 +68,9 @@ namespace nc::graphics
 ShaderBindingManager::ShaderBindingManager(vk::Device device)
     : m_device{device},
       m_pool{CreateRenderingDescriptorPool(device)},
-      m_perFrameSets{},
-      m_globalSets{},
-      m_layouts{}
+      m_perFrameSets{CreatePerFrameSets(MaxSetsDivided, MaxSetsDivided)},
+      m_staticSets{MaxSetsDivided, MaxSetsDivided},
+      m_layouts{vulkan::MaxDescriptorSets, vulkan::MaxDescriptorSets}
 {
 }
 
@@ -91,54 +78,43 @@ void ShaderBindingManager::RegisterDescriptor(uint32_t bindingSlot, uint32_t set
 {
     NC_ASSERT(bindingSlot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 
-    if (!LayoutExists(setIndex))
+    if (!m_layouts.contains(setIndex))
+        m_layouts.emplace(setIndex, DescriptorSetLayout(frameIndex == StaticSet));
+
+    auto& layout = m_layouts.at(setIndex);
+    layout.bindings.erase(bindingSlot);
+    layout.bindings.emplace(bindingSlot, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, static_cast<uint32_t>(descriptorCount), shaderStages));
+    layout.bindingFlags.erase(bindingSlot);
+    layout.bindingFlags.emplace(bindingSlot, vk::DescriptorBindingFlagsEXT(bindingFlags));
+    
+    layout.layout = CreateDescriptorSetLayout(m_device, layout.bindings.values(), layout.bindingFlags.values());
+
+    auto& sets = GetSets(frameIndex);
+    if (!sets.contains(setIndex))
     {
-        m_layouts.emplace(setIndex, DescriptorSetLayout(frameIndex == std::numeric_limits<uint32_t>::max()));
+        sets.emplace(setIndex, DescriptorSet{});
     }
-
-    auto* layout = &m_layouts.at(setIndex);
-
-    auto flattenedBindings = AddOrUpdate(bindingSlot, layout->bindings, vk::DescriptorSetLayoutBinding(bindingSlot, descriptorType, static_cast<uint32_t>(descriptorCount), shaderStages));
-    auto flattenedFlags = AddOrUpdate(bindingSlot, layout->bindingFlags, vk::DescriptorBindingFlagsEXT(bindingFlags));
-
-    layout->layout.reset();
-    layout->layout = CreateDescriptorSetLayout(m_device, flattenedBindings, flattenedFlags);
 }
 
 void ShaderBindingManager::CommitResourceLayout()
 {
-    for (auto& [setIndex, layout] : m_layouts)
+    for (auto [setIndex, layout] : std::views::zip(m_layouts.keys(), m_layouts.values()))
     {
-        if (layout.isGlobal)
+        if (layout.isStatic)
         {
-            auto& sets = GetSets(std::numeric_limits<uint32_t>::max()).sets;
-            if (!sets.contains(setIndex))
-            {
-                sets.emplace(setIndex, CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get()));
-            }
-            else
-            {
-                sets.at(setIndex) = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get());
-            }
+            auto& set = GetSets(StaticSet).at(setIndex);
+            set.set = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get());
+            continue;
         }
-        else
+
+        for (auto& sets : m_perFrameSets)
         {
-            for (auto i : std::views::iota(0u, MaxFramesInFlight))
-            {
-                auto& sets = GetSets(i).sets;
-                if (!sets.contains(setIndex))
-                {
-                    sets.emplace(setIndex, CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get()));
-                }
-                else
-                {
-                    sets.at(setIndex) = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get());
-                }
-            }
+            auto& set = sets.at(setIndex);
+            set.set = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get());
         }
     }
 
-    m_setLayoutsChanged.Emit(DescriptorSetLayoutsChanged{std::numeric_limits<uint32_t>::max()});
+    m_setLayoutsChanged.Emit(DescriptorSetLayoutsChanged{StaticSet});
 }
 
 vk::DescriptorSetLayout* ShaderBindingManager::GetSetLayout(uint32_t setIndex)
@@ -149,28 +125,23 @@ vk::DescriptorSetLayout* ShaderBindingManager::GetSetLayout(uint32_t setIndex)
 
 void ShaderBindingManager::BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk::PipelineBindPoint bindPoint, vk::PipelineLayout pipelineLayout, uint32_t , uint32_t frameIndex)
 {
-    auto& sets = GetSets(frameIndex);
-    auto& isDirty = sets.isDirty.at(setIndex);
-    auto& writes = sets.writesPerSet.at(setIndex).writes;
-    auto* set = GetSet(frameIndex, setIndex);
+    auto& set = GetSets(frameIndex).at(setIndex);
+    auto& writes = set.writes;
 
     /* Only update the descriptor sets if they have changed since last bind. */
-    if (isDirty)
+    if (set.isDirty)
     {
-        auto flattenedWrites = std::vector<vk::WriteDescriptorSet>{};
-        flattenedWrites.reserve(writes.size());
-        std::ranges::transform(writes, std::back_inserter(flattenedWrites), [set](auto &&write)
+        for (auto& write : writes.values())
         {
-            write.second.setDstSet(*set);
-            return write.second;
-        });
+            write.setDstSet(*set.set);
+        }
 
-        m_device.updateDescriptorSets(static_cast<uint32_t>(flattenedWrites.size()), flattenedWrites.data(), 0, nullptr);
-        isDirty = false;
+        m_device.updateDescriptorSets(static_cast<uint32_t>(writes.size()), writes.values().data(), 0, nullptr);
+        set.isDirty = false;
     }
 
     /* Bind the set to the pipeline */
-    cmd->bindDescriptorSets(bindPoint, pipelineLayout, setIndex, 1, set, 0, 0);
+    cmd->bindDescriptorSets(bindPoint, pipelineLayout, setIndex, 1, &set.set.get(), 0, 0);
 }
 
 void ShaderBindingManager::UpdateImage(uint32_t setIndex, std::span<const vk::DescriptorImageInfo> imageInfos, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
@@ -182,27 +153,15 @@ void ShaderBindingManager::UpdateImage(uint32_t setIndex, std::span<const vk::De
     write.setDescriptorCount(static_cast<uint32_t>(descriptorCount));
     write.setPBufferInfo(0);
     write.setPImageInfo(imageInfos.data());
-    
-    auto& sets = GetSets(frameIndex);
 
-    auto& writesPerSet = sets.writesPerSet;
-    auto& isDirty = sets.isDirty;
-
-    if (!writesPerSet.contains(setIndex))
-        writesPerSet.emplace(setIndex, DescriptorWrites{});
-
-    auto& writes = writesPerSet.at(setIndex).writes;
+    auto& set = GetSets(frameIndex).at(setIndex);
+    auto& writes = set.writes;
 
     /* Add or update the write for the buffer descriptor. */
-    if (!writes.contains(bindingSlot))
-        writes.emplace(bindingSlot, write);
-    else
-        writes.at(bindingSlot) = write;
+    writes.erase(bindingSlot);
+    writes.emplace(bindingSlot, write);
 
-    if (!isDirty.contains(setIndex))
-        isDirty.emplace(setIndex, true);
-    else
-        isDirty.at(setIndex) = true;
+    set.isDirty = true;
 }
 
 void ShaderBindingManager::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferInfo* info, size_t descriptorCount, vk::DescriptorType descriptorType, uint32_t bindingSlot, uint32_t frameIndex)
@@ -215,25 +174,13 @@ void ShaderBindingManager::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferI
     write.setPImageInfo(0);
     write.setPBufferInfo(info);
 
-    auto& sets = GetSets(frameIndex);
-
-    auto& writesPerSet = sets.writesPerSet;
-    auto& isDirty = sets.isDirty;
-
-    if (!writesPerSet.contains(setIndex))
-        writesPerSet.emplace(setIndex, DescriptorWrites{});
-
-    auto& writes = writesPerSet.at(setIndex).writes;
+    auto& set = GetSets(frameIndex).at(setIndex);
+    auto& writes = set.writes;
 
     /* Add or update the write for the buffer descriptor. */
-    if (!writes.contains(bindingSlot))
-        writes.emplace(bindingSlot, write);
-    else
-        writes.at(bindingSlot) = write;
+    writes.erase(bindingSlot);
+    writes.emplace(bindingSlot, write);
 
-    if (!isDirty.contains(setIndex))
-        isDirty.emplace(setIndex, true);
-    else
-        isDirty.at(setIndex) = true;
+    set.isDirty = true;
 }
 } // namespace nc::graphics
