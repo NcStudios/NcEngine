@@ -2,6 +2,8 @@
 #include "ncengine/asset/DefaultAssets.h"
 #include "assets/AssetService.h"
 
+#include "optick.h"
+
 namespace
 {
 [[maybe_unused]]
@@ -67,6 +69,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                                             WireframeRenderer,
                                             physics::Collider> worldView) -> WidgetState
 {
+    OPTICK_CATEGORY("WidgetSystem::Execute", Optick::Category::Rendering);
     auto state = WidgetState{};
 
 #ifdef NC_EDITOR_ENABLED
@@ -76,12 +79,11 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
         {
             for (const auto& matrix : renderer.instances)
             {
-                state.wireframeData.emplace_back(matrix, renderer.mesh);
+                state.wireframeData.emplace_back(matrix, renderer.mesh, renderer.color);
             }
 
             continue;
         }
-
 
         if (!renderer.target.Valid())
             continue;
@@ -97,7 +99,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
         {
             case WireframeSource::Renderer:
             {
-                state.wireframeData.emplace_back(targetMatrix, GetMeshView(renderer.target, worldView));
+                state.wireframeData.emplace_back(targetMatrix, GetMeshView(renderer.target, worldView), renderer.color);
                 break;
             }
             case WireframeSource::Collider:
@@ -109,7 +111,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                 }
 
                 const auto& info = worldView.Get<physics::Collider>(renderer.target).GetInfo();
-                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, info), GetMeshView(info.type));
+                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, info), GetMeshView(info.type), renderer.color);
                 break;
             }
             case WireframeSource::Internal: std::unreachable();

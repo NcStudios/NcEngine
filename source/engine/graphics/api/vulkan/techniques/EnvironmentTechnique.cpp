@@ -61,7 +61,7 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingMa
     pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
-    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
     pipelineCreateInfo.setPMultisampleState(&multisampling);

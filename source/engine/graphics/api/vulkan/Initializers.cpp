@@ -105,13 +105,13 @@ vk::PipelineViewportStateCreateInfo CreateViewportCreateInfo()
     return viewportState;
 }
 
-vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, float lineWidth, bool depthBiasEnable)
+vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, bool depthBiasEnable)
 {
     vk::PipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
     rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));
     rasterizer.setPolygonMode(polygonMode);
-    rasterizer.setLineWidth(lineWidth);
+    rasterizer.setLineWidth(1.0f);
     rasterizer.setCullMode(vk::CullModeFlagBits::eBack);
     rasterizer.setFrontFace(vk::FrontFace::eClockwise);
     rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(depthBiasEnable));
@@ -121,13 +121,13 @@ vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::Polyg
     return rasterizer;
 }
 
-vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, float lineWidth, bool depthBiasEnable)
+vk::PipelineRasterizationStateCreateInfo CreateRasterizationCreateInfo(vk::PolygonMode polygonMode, vk::CullModeFlags cullMode, bool depthBiasEnable)
 {
     vk::PipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.setDepthClampEnable(static_cast<vk::Bool32>(false)); // Set to false for shadow mapping, requires enabling a GPU feature.
     rasterizer.setRasterizerDiscardEnable(static_cast<vk::Bool32>(false));
     rasterizer.setPolygonMode(polygonMode);
-    rasterizer.setLineWidth(lineWidth);
+    rasterizer.setLineWidth(1.0f);
     rasterizer.setCullMode(cullMode);
     rasterizer.setFrontFace(vk::FrontFace::eClockwise);
     rasterizer.setDepthBiasEnable(static_cast<vk::Bool32>(depthBiasEnable));
@@ -223,9 +223,9 @@ vk::PipelineColorBlendStateCreateInfo CreateColorBlendStateCreateInfo(const vk::
     return colorBlending;
 }
 
-auto CreatePushConstantRange(vk::ShaderStageFlags stageFlags, uint32_t dataTypeSize) -> vk::PushConstantRange
+auto CreatePushConstantRange(vk::ShaderStageFlags stageFlags, uint32_t dataTypeSize, uint32_t offset) -> vk::PushConstantRange
 {
-    return vk::PushConstantRange{stageFlags, 0u, dataTypeSize};
+    return vk::PushConstantRange{stageFlags, offset, dataTypeSize};
 }
 
 auto CreatePipelineLayoutCreateInfo() -> vk::PipelineLayoutCreateInfo
@@ -233,9 +233,9 @@ auto CreatePipelineLayoutCreateInfo() -> vk::PipelineLayoutCreateInfo
     return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, 0u, nullptr, 0u, nullptr};
 }
 
-auto CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange) -> vk::PipelineLayoutCreateInfo
+auto CreatePipelineLayoutCreateInfo(std::span<const vk::PushConstantRange> pushConstantRanges) -> vk::PipelineLayoutCreateInfo
 {
-    return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, 0u, nullptr, 1u, &pushConstantRange};
+    return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, 0u, nullptr, static_cast<uint32_t>(pushConstantRanges.size()), pushConstantRanges.data()};
 }
 
 auto CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts) -> vk::PipelineLayoutCreateInfo
