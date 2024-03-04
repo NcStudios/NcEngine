@@ -268,6 +268,7 @@ namespace nc::graphics
 
     bool Swapchain::GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex)
     {
+        currentFrame->WaitForSync(); // Wait until the command buffer has finished execution.
         auto [result, index] = m_device.acquireNextImageKHR(m_swapChain.get(), UINT64_MAX, currentFrame->ImageAvailableSemaphore());
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
