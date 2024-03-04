@@ -20,7 +20,7 @@ auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler
         VK_FALSE,                               // CompareEnable
         vk::CompareOp::eAlways,                 // CompareOp
         0.0f,                                   // MinLod
-        VK_LOD_CLAMP_NONE,                      // MaxLod
+        0.0f,                                   // MaxLod
         vk::BorderColor::eFloatOpaqueWhite,     // BorderColor
         VK_FALSE                                // UnnormalizedCoordinates
     };
@@ -44,7 +44,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode)
         VK_FALSE,                         // compareEnable
         vk::CompareOp::eAlways,           // compareOp
         0.0f,                             // minLod
-        0.0f,                             // maxLod
+        VK_LOD_CLAMP_NONE,                // maxLod
         vk::BorderColor::eIntOpaqueWhite, // borderColor
         VK_FALSE                          // unnormalizedCoordinates
     };
