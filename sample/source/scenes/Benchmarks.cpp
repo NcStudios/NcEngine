@@ -315,12 +315,12 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 10.0f, -12.0f},
+            .position = Vector3{0.0f, 41.0f, -12.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 0.871f, 0.6f},
         Vector3{1.0f, 0.871f, 0.6f},
-        600.0f
+        2000.0f
     );
 
     const auto cameraHandle = world.Emplace<Entity>({
@@ -433,7 +433,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::PointLight>(entity);
+                world.Emplace<graphics::PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 2000.0f);
             }
         );
 
