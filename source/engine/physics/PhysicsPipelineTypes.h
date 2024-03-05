@@ -111,7 +111,7 @@ struct NarrowEvent
     Entity first;
     Entity second;
     CollisionEventType eventType;
-    bool stickyContacts;
+    bool stickyContacts = false;
     State state = State::New;
 };
 
