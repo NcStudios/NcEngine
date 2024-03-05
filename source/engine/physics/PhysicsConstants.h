@@ -19,10 +19,10 @@ constexpr float WarmstartFactor = 0.75f;         // Percentage of previous impul
 constexpr size_t EpaMaxIterations = 32u;                     // Number of iterations aftwerwhich to give up trying to find contact points
 constexpr float EpaTolerance = 0.00001f;                     // Error threshold for finding contact points
 constexpr float ContactBreakDistance = -0.01f;               // How aggressively contact points are removed/retained
-constexpr float TangentContactBreakDistance = -0.5f;               // How aggressively contact points are removed/retained
+constexpr bool EnableStickyContacts = true;                  // Minimize how many contacts points are discarded due to tangential separation (only for dynamic box/hull vs static box/hull)
+constexpr float StickyContactBreakDistance = -0.5f;          // How aggressively sticky contact points are removed/retained
+constexpr float StickyContactMaxDistance = 0.8f;             // Always discard contacts sticky contacts beyond this threshold
 
-constexpr bool PreferSingleTangentContactBreak = true;      // Try to only discard only one contact due to tangential separation (potentially more stable for sliding scenarios)
-constexpr float MandatoryTangentContactBreakDistance = 1.0f; // Always discard contacts due to tangential separation beyond this threshold, regardless of PreferSingleTangentContactBreak
 constexpr float PenetrationSlop = 0.005f;                    // How far objects are allowed to penetrate
 constexpr bool EnableBaumgarteStabilization = true;          // Enable velocity-based position correction
 constexpr float BaumgarteFactor = 0.3f;                      // Bias factor for baumgarte stabilization [0, 1]
@@ -30,7 +30,7 @@ constexpr bool EnableDirectPositionCorrection = false;       // Enable translati
 constexpr float PositionCorrectionFactor = 0.2f;             // Percentage of mtv to use for direct position correction
 constexpr float MaxLinearPositionCorrection = 0.2f;          // Maximum translation distance for direct position correction
 constexpr bool EnableRestitutionSlop = true;                 // Enable zeroing of restitution below a threshold
-constexpr float RestitutionSlop = 0.01f;                    // Velocity threshold for applying restitution
+constexpr float RestitutionSlop = 0.01f;                     // Velocity threshold for applying restitution
 
 /** Sleeping Behavior */
 constexpr bool EnableSleeping = false;   // Allow disabling simulation of inactive bodies

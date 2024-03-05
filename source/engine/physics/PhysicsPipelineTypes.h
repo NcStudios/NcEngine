@@ -111,8 +111,8 @@ struct NarrowEvent
     Entity first;
     Entity second;
     CollisionEventType eventType;
+    bool stickyContacts;
     State state = State::New;
-    bool stableTangents = false;
 };
 
 /** Contact data for a pair of colliding objects. */
@@ -146,8 +146,8 @@ class Manifold
     static constexpr size_t MaxPointCount = 4u;
 
     public:
-        explicit Manifold(Entity a, Entity b, CollisionEventType type, bool stableContacts, const Contact& contact) noexcept
-            : m_event{a, b, type, NarrowEvent::State::New, stableContacts}, m_contacts{contact} {}
+        explicit Manifold(Entity a, Entity b, CollisionEventType type, bool stickyContacts, const Contact& contact) noexcept
+            : m_event{a, b, type, stickyContacts, NarrowEvent::State::New}, m_contacts{contact} {}
 
         void AddContact(const Contact& contact);
         void UpdateWorldPoints(const Registry* registry);
@@ -164,6 +164,29 @@ class Manifold
 
         auto SortPoints(const Contact& contact) -> size_t;
 };
+
+inline auto UseStickyContacts(Entity entityA, Entity entityB, const BoundingVolume& bva, const BoundingVolume& bvb) -> bool
+{
+    if (!entityA.IsStatic() && !entityB.IsStatic())
+        return false;
+
+    return std::visit([](auto&& a, auto&& b)
+    {
+        using bva_t = std::decay_t<decltype(a)>;
+        using bvb_t = std::decay_t<decltype(b)>;
+
+        if constexpr (std::same_as<bva_t, Box> && std::same_as<bvb_t, Box>)
+            return true;
+        else if constexpr (std::same_as<bva_t, Box> && std::same_as<bvb_t, ConvexHull>)
+            return true;
+        else if constexpr (std::same_as<bva_t, ConvexHull> && std::same_as<bvb_t, Box>)
+            return true;
+        else if constexpr (std::same_as<bva_t, ConvexHull> && std::same_as<bvb_t, ConvexHull>)
+            return true;
+        else
+            return false;
+    }, bva, bvb);
+}
 
 template<class T>
 concept ConcavePhase = requires(T phase)

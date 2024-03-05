@@ -175,8 +175,6 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
     [[maybe_unused]]bool haveBrokenAlongTangent = false;
     [[maybe_unused]]auto maxTangentBreakDistance = 0.0f;
     [[maybe_unused]]auto tangentBreakIndex = 0ull;
-
-    auto removeCount = 0ull;
     auto removePosition = m_contacts.size() - 1ull;
 
     for(auto cur = m_contacts.rbegin(), end = m_contacts.rend(); cur != end; ++cur)
@@ -191,48 +189,30 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         {
             NC_LOG_CONTACTS("Contact Break [Normal]: ", contact.depth, " < ", ContactBreakDistance);
             *cur = m_contacts.at(removePosition--);
-            ++removeCount;
             continue;
         }
 
         const auto projectedPoint = XMVectorSubtract(worldA, XMVectorScale(normal, depth));
         const auto projectedDifference = XMVectorSubtract(worldB, projectedPoint);
         const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
-        // if (distance2d > SquareContactBreakDistance)
-
-        // hack for testing:
-        // good for flat sliding, worse for curves - what if we put like a 'stable contacts' bool in the NarrowEvent instead
-        if (( !m_event.stableTangents || (!m_event.first.IsStatic() && !m_event.second.IsStatic()) ) && distance2d > ContactBreakDistance * ContactBreakDistance)
+        if constexpr (EnableStickyContacts)
         {
-            NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
-            *cur = m_contacts.at(removePosition--);
-            ++removeCount;
-            continue;
-        }
-
-        constexpr auto SquareTangentBreakDistance = TangentContactBreakDistance * TangentContactBreakDistance;
-        constexpr auto SquareMandatoryBreakDistance = MandatoryTangentContactBreakDistance * MandatoryTangentContactBreakDistance; 
-        if (distance2d > SquareTangentBreakDistance)
-        {
-
-
-            // Attempt to increase stability for sliding cases by limiting number of contact breaks per tick
-            if constexpr (PreferSingleTangentContactBreak)
+            constexpr auto stickyBreakDistance = StickyContactBreakDistance * StickyContactBreakDistance;
+            constexpr auto squareStickyMaxDistance = StickyContactMaxDistance * StickyContactMaxDistance;
+            if (m_event.stickyContacts)
             {
-                if (distance2d > SquareMandatoryBreakDistance)
+                if (distance2d > squareStickyMaxDistance)
                 {
-                    NC_LOG_CONTACTS("Contact Break [Tangent - Mandatory]: ", distance2d, " > ", MandatoryTangentContactBreakDistance);
+                    NC_LOG_CONTACTS("Contact Break [Tangent - Mandatory]: ", distance2d, " > ", squareStickyMaxDistance);
                     *cur = m_contacts.at(removePosition--);
-                    ++removeCount;
                     continue;
                 }
-                else if (distance2d > maxTangentBreakDistance)
+                else if (distance2d > stickyBreakDistance && distance2d > maxTangentBreakDistance)
                 {
                     maxTangentBreakDistance = distance2d;
                     if (!haveBrokenAlongTangent)
                     {
-                        NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
-                        ++removeCount;
+                        NC_LOG_CONTACTS("Contact Break [Tangent - Replaces Previous]: ", distance2d, " > ", maxTangentBreakDistance);
                         tangentBreakIndex = removePosition--;
                         haveBrokenAlongTangent = true;
                     }
@@ -241,11 +221,19 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
                     continue;
                 }
             }
-            else
+            else if (distance2d > SquareContactBreakDistance)
+            {
+                NC_LOG_CONTACTS("Contact Break [Tangent - Non-sticky]: ", distance2d, " > ", SquareContactBreakDistance);
+                *cur = m_contacts.at(removePosition--);
+                continue;
+            }
+        }
+        else // !EnableStickyContacts
+        {
+            if (distance2d > SquareContactBreakDistance)
             {
                 NC_LOG_CONTACTS("Contact Break [Tangent]: ", distance2d, " > ", SquareContactBreakDistance);
                 *cur = m_contacts.at(removePosition--);
-                ++removeCount;
                 continue;
             }
         }
@@ -255,6 +243,7 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         DirectX::XMStoreVector3(&contact.worldPointB, worldB);
     }
 
+    auto removeCount = m_contacts.size() - 1 - removePosition;
     while (removeCount != 0)
     {
         m_contacts.pop_back();

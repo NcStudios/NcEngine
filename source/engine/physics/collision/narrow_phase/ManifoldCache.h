@@ -19,9 +19,9 @@ class ManifoldCache : public PairCache<ManifoldCache, Manifold>
             existing->AddContact(contact);
         }
 
-        auto ConstructNew(Entity a, Entity b, CollisionEventType type, bool stable, const Contact& contact) -> Manifold
+        auto ConstructNew(Entity a, Entity b, CollisionEventType type, bool stickyContacts, const Contact& contact) -> Manifold
         {
-            return Manifold{a, b, type, stable, contact};
+            return Manifold{a, b, type, stickyContacts, contact};
         }
 
         auto Hash(const Manifold& manifold) -> uint32_t
