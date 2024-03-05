@@ -150,7 +150,7 @@ void main()
     result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
 
     vec3 col_hsv = RGBtoHSV(vec3(result.r, result.g, result.b));
-    col_hsv.y *= (0.6 * 2.0);
+    col_hsv.y *= (0.45 * 2.0);
     vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
     outFragColor = vec4(col_rgb.r, col_rgb.g, col_rgb.b, alpha);
 }
