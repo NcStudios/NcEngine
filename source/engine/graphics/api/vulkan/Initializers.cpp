@@ -44,7 +44,7 @@ auto CreateTextureSampler(vk::Device device, vk::SamplerAddressMode addressMode)
         VK_FALSE,                         // compareEnable
         vk::CompareOp::eAlways,           // compareOp
         0.0f,                             // minLod
-        0.0f,                             // maxLod
+        VK_LOD_CLAMP_NONE,                // maxLod
         vk::BorderColor::eIntOpaqueWhite, // borderColor
         VK_FALSE                          // unnormalizedCoordinates
     };
