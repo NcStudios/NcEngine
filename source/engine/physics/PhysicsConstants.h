@@ -21,7 +21,7 @@ constexpr float EpaTolerance = 0.00001f;             // Error threshold for find
 constexpr float ContactBreakDistance = -0.01f;       // How aggressively contact points are removed/retained
 constexpr bool EnableStickyContacts = true;          // Minimize how many contacts points are discarded due to tangential separation (only for dynamic box/hull vs static box/hull)
 constexpr float StickyContactBreakDistance = -0.5f;  // How aggressively sticky contact points are removed/retained
-constexpr float StickyContactMaxDistance = 0.8f;     // Always discard contacts sticky contacts beyond this threshold
+constexpr float StickyContactMaxDistance = 1.0f;     // Always discard contacts sticky contacts beyond this threshold
 
 constexpr float PenetrationSlop = 0.005f;               // How far objects are allowed to penetrate
 constexpr bool EnableBaumgarteStabilization = true;     // Enable velocity-based position correction

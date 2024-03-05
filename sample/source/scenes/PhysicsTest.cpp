@@ -547,12 +547,12 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{1.20484f, 100.0f, -8.48875f},
+            .position = Vector3{1.20484f, 47.0f, -8.48875f},
             .tag = "Point Light"
         }),
-        Vector3{0.443f, 0.412f, 0.412f},
-        Vector3{0.4751f, 0.525f, 1.0f},
-        2000.0f
+        Vector3{1.0f, 0.433f, 0.162f},
+        Vector3{1.0f, 0.433f, 0.162f},
+        800.0f
     );
 }
 

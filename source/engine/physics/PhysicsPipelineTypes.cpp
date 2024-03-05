@@ -11,7 +11,9 @@ namespace
 using namespace nc;
 using namespace nc::physics;
 
-constexpr float SquareContactBreakDistance = physics::ContactBreakDistance * physics::ContactBreakDistance;
+constexpr auto SquareContactBreakDistance = ContactBreakDistance * ContactBreakDistance;
+constexpr auto SquareStickyBreakDistance = StickyContactBreakDistance * StickyContactBreakDistance;
+constexpr auto SquareStickyMaxDistance = StickyContactMaxDistance * StickyContactMaxDistance;
 
 constexpr auto CollisionEventTypeLookup = std::array<std::array<physics::CollisionEventType, 6u>, 6u>
 {
@@ -173,7 +175,7 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
     const auto& aMatrix = transformA->TransformationMatrix();
     const auto& bMatrix = transformB->TransformationMatrix();
     [[maybe_unused]]bool haveBrokenAlongTangent = false;
-    [[maybe_unused]]auto maxTangentBreakDistance = 0.0f;
+    [[maybe_unused]]auto maxTangentDistanceSoFar = 0.0f;
     [[maybe_unused]]auto tangentBreakIndex = 0ull;
     auto removePosition = m_contacts.size() - 1ull;
 
@@ -197,22 +199,23 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
         const auto distance2d = XMVectorGetX(XMVector3LengthSq(projectedDifference));
         if constexpr (EnableStickyContacts)
         {
-            constexpr auto stickyBreakDistance = StickyContactBreakDistance * StickyContactBreakDistance;
-            constexpr auto squareStickyMaxDistance = StickyContactMaxDistance * StickyContactMaxDistance;
+            // To improve box sliding, try to preserve tangentially separated contacts longer than usual. The event must also
+            // allow it (can't involve a sphere, etc.). There's a max distance beyond which we must always discard to prevent
+            // explosions, otherwise we keep all but the furthest separated.
             if (m_event.stickyContacts)
             {
-                if (distance2d > squareStickyMaxDistance)
+                if (distance2d > SquareStickyMaxDistance)
                 {
-                    NC_LOG_CONTACTS("Contact Break [Tangent - Mandatory]: ", distance2d, " > ", squareStickyMaxDistance);
+                    NC_LOG_CONTACTS("Contact Break [Tangent - Mandatory]: ", distance2d, " > ", SquareStickyMaxDistance);
                     *cur = m_contacts.at(removePosition--);
                     continue;
                 }
-                else if (distance2d > stickyBreakDistance && distance2d > maxTangentBreakDistance)
+                else if (distance2d > SquareStickyBreakDistance && distance2d > maxTangentDistanceSoFar)
                 {
-                    maxTangentBreakDistance = distance2d;
+                    maxTangentDistanceSoFar = distance2d;
                     if (!haveBrokenAlongTangent)
                     {
-                        NC_LOG_CONTACTS("Contact Break [Tangent - Replaces Previous]: ", distance2d, " > ", maxTangentBreakDistance);
+                        NC_LOG_CONTACTS("Contact Break [Tangent - Replaces Previous]: ", distance2d, " > ", maxTangentDistanceSoFar);
                         tangentBreakIndex = removePosition--;
                         haveBrokenAlongTangent = true;
                     }
@@ -221,7 +224,7 @@ void Manifold::UpdateWorldPoints(const Registry* registry)
                     continue;
                 }
             }
-            else if (distance2d > SquareContactBreakDistance)
+            else if (distance2d > SquareContactBreakDistance) // event doesn't allow 'stickyness' (involves a sphere, etc)
             {
                 NC_LOG_CONTACTS("Contact Break [Tangent - Non-sticky]: ", distance2d, " > ", SquareContactBreakDistance);
                 *cur = m_contacts.at(removePosition--);

@@ -45,24 +45,6 @@ void NarrowPhase::MergeContacts(const NarrowPhysicsResult& externalResults)
         const auto& [a, b, type, sticky, unused] = externalResults.events[i];
         m_manifoldCache.Add(a, b, type, sticky, externalResults.contacts[i]);
     }
-
-    // Should get rid of this removal and the one in notify events. UpdateManifolds should correctly clear
-    // itself always - wackiness should be the result of bad parameters/break distance
-    /** @todo There are some questions surrounding this:
-     *  - If a manifold isn't 'updated' I would expect UpdateManfiolds() to have removed it.
-     *    Why isn't this the case?
-     *  - Does this actually affect stability at all? It is hard to see a difference. */
-    // auto manifolds = m_manifoldCache.Data();
-    // auto end = manifolds.rend();
-    // for(auto cur = manifolds.rbegin(); cur != end; ++cur)
-    // {
-    //     if(cur->Event().state == NarrowEvent::State::Stale)
-    //     {
-    //         NC_LOG_CONTACTS("Remove stale manifold [contact not broken]");
-    //         m_manifoldCache.AddToRemoved(cur->Event().first, cur->Event().second);
-    //         m_manifoldCache.Remove(cur->Event().first, cur->Event().second);
-    //     }
-    // }
 }
 
 void NarrowPhase::CacheImpulses(std::span<const ContactConstraint> constraints)
@@ -154,16 +136,9 @@ void NarrowPhase::NotifyEvents()
                 cur->Event().state = NarrowEvent::State::Stale;
                 break;
             }
-            [[unlikely]] case NarrowEvent::State::Stale:
+            case NarrowEvent::State::Stale:
             {
-                /** This isn't expected to be detected here, but just in case. */
-                NC_LOG_CONTACTS("Clear stale manifold [unexpected code path]");
-                const auto e1 = cur->Event().first;
-                const auto e2 = cur->Event().second;
-                if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionExit(e2, m_registry);
-                if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyCollisionExit(e1, m_registry);
-
-                m_manifoldCache.Remove(e1, e2);
+                // No new collision this frame, but manfifold found contacts still within break tolerances
                 break;
             }
         }
