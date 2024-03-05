@@ -271,13 +271,15 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     const auto platform1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 5.0f, 40.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
-        .tag = "Platform"
+        .tag = "Platform",
+        .flags = Entity::Flags::Static
     });
 
     const auto platform2 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 5.0f, 60.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
-        .tag = "Platform"
+        .tag = "Platform",
+        .flags = Entity::Flags::Static
     });
 
     // Ramp
