@@ -138,7 +138,7 @@ void NarrowPhase::NotifyEvents()
             }
             case NarrowEvent::State::Stale:
             {
-                // No new collision this frame, but manfifold found contacts still within break tolerances
+                // No new collision this frame, but manifold found contacts still within break tolerances
                 break;
             }
         }
