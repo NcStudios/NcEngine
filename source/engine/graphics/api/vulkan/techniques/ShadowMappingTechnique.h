@@ -5,7 +5,7 @@
 #include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     class ShaderBindingManager;
 
@@ -34,4 +34,4 @@ namespace nc::graphics
             bool m_enabled;
             uint32_t m_shadowCasterIndex;
     };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -20,7 +20,7 @@ namespace
     constexpr float DEPTH_BIAS_SLOPE = 1.75f;
 }
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
         : m_shaderBindingManager{shaderBindingManager},
@@ -141,4 +141,4 @@ namespace nc::graphics
             objectInstance++;
         }
     }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

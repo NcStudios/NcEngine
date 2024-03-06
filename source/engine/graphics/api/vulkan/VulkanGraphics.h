@@ -21,20 +21,20 @@ class NcAsset;
 
 namespace graphics
 {
+struct PerFrameRenderState;
+struct PointLight;
+struct ShaderResourceBus;
+
+namespace vulkan
+{
 class Device;
 class FrameManager;
 class GpuAllocator;
 class Imgui;
 class Instance;
-struct PerFrameRenderState;
-struct PointLight;
 class Swapchain;
 class RenderGraph;
 class ShaderBindingManager;
-struct ShaderResourceBus;
-
-namespace vulkan
-{
 struct ShaderStorage;
 
 class VulkanGraphics : public IGraphics
@@ -83,4 +83,3 @@ class VulkanGraphics : public IGraphics
 } // namespace vulkan
 } // namespace graphics
 } // namespace nc
-

@@ -20,7 +20,7 @@ namespace
     }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     GpuAllocator::GpuAllocator(const Device* device, const Instance& instance)
         : m_device{device},
@@ -411,4 +411,4 @@ namespace nc::graphics
         viewInfo.setSubresourceRange(subresourceRange);
         return m_device->VkDevice().createImageViewUnique(viewInfo);
     }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

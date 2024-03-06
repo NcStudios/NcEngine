@@ -45,9 +45,9 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, uint32_t frameIndex) -> nc::graphics::RenderPass
+auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, uint32_t frameIndex) -> nc::graphics::vulkan::RenderPass
 {
-    using namespace nc::graphics;
+    using namespace nc::graphics::vulkan;
 
     const auto vkDevice = device->VkDevice();
     const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
@@ -69,9 +69,9 @@ auto CreateShadowMappingPass(const nc::graphics::Device* device, nc::graphics::G
     return renderPass;
 }
 
-auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocator* allocator, nc::graphics::Swapchain* swapchain, const nc::Vector2& dimensions) -> nc::graphics::RenderPass
+auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
 {
-    using namespace nc::graphics;
+    using namespace nc::graphics::vulkan;
 
     const auto vkDevice = device->VkDevice();
     const auto& gpuOptions = device->GetGpuOptions();
@@ -115,9 +115,9 @@ auto CreateLitPass(const nc::graphics::Device* device, nc::graphics::GpuAllocato
     return renderPass;
 }
 
-auto CreateLitPasses(const nc::graphics::Device* device,
-                     nc::graphics::GpuAllocator* alloc,
-                     nc::graphics::Swapchain* swapchain,
+auto CreateLitPasses(const nc::graphics::vulkan::Device* device,
+                     nc::graphics::vulkan::GpuAllocator* alloc,
+                     nc::graphics::vulkan::Swapchain* swapchain,
                      const nc::Vector2& dimensions)
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
@@ -127,7 +127,7 @@ auto CreateLitPasses(const nc::graphics::Device* device,
 }
 }
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights)
     : m_frameManager{frameManager},
@@ -288,4 +288,4 @@ void RenderGraph::SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged
         isDirty = true;
     }
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

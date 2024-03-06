@@ -9,8 +9,11 @@
 
 namespace nc::graphics
 {
-class Device;
 struct PerFrameRenderState;
+
+namespace vulkan
+{
+class Device;
 class ShaderBindingManager;
 
 class RenderPass
@@ -78,3 +81,4 @@ void RenderPass::UnregisterTechnique()
     }
 }
 } // namespace nc::graphics
+} // namespace vulkan

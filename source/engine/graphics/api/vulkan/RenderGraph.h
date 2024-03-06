@@ -17,6 +17,10 @@ class Registry;
 
 namespace graphics
 {
+struct PpiaUpdateEventData;
+
+namespace vulkan
+{
 struct DescriptorSetLayoutsChanged;
 class Device;
 class FrameManager;
@@ -28,11 +32,6 @@ class Swapchain;
 
 inline static const std::string LitPassId = "Lit Pass";
 inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
-
-namespace vulkan
-{
-    struct PpiaUpdateEventData;
-}
 
 struct PostProcessViews
 {
@@ -88,3 +87,4 @@ class RenderGraph
 };
 } // namespace nc
 } // namespace graphics
+} // namespace vulkan

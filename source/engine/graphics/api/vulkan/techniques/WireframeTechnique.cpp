@@ -12,7 +12,7 @@
 
 #include "optick.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
     : m_pipeline{nullptr},
@@ -126,6 +126,6 @@ void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderStat
         cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan
 
 #endif

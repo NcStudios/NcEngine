@@ -10,7 +10,7 @@
 
 #include "optick.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
     : m_shaderBindingManager{shaderBindingManager},
@@ -125,4 +125,4 @@ void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& fr
 void ToonTechnique::Clear() noexcept
 {
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

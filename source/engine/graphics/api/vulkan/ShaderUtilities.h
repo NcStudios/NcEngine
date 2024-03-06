@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 vk::ShaderModule CreateShaderModule(vk::Device device, const std::vector<uint32_t>& code);
 std::vector<uint32_t> ReadShader(const std::string& filename);
 auto GetStageFlags(shader_stage stage) -> vk::ShaderStageFlags;
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

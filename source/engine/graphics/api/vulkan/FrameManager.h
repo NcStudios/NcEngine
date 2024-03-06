@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
 
@@ -33,4 +33,4 @@ class FrameManager
         std::vector<PerFrameGpuContext> m_perFrameGpuContext;
         uint32_t m_currentFrameIndex; // Used to select which PerFrameGpuContext to use. Each frame in MaxFramesInFlight requires its own PerFrameGpuContext.
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

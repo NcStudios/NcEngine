@@ -9,7 +9,7 @@
 namespace
 {
 auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
-                         const nc::graphics::QueueFamilyIndices& indices,
+                         const nc::graphics::vulkan::QueueFamilyIndices& indices,
                          std::span<const char* const> enabledExtensions) -> vk::UniqueDevice
 {
     const auto uniqueQueueFamilies = indices.GetUniqueIndices();
@@ -50,7 +50,7 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 auto Device::Create(const Instance& instance, vk::SurfaceKHR surface,
                     std::span<const char* const> requiredExtensions) -> std::unique_ptr<Device>
@@ -105,4 +105,4 @@ void Device::ExecuteCommand(std::function<void(vk::CommandBuffer)>&& function) c
     m_graphicsQueue.waitIdle();
     m_device->freeCommandBuffers(commandPool.get(), tempCommandBuffer);
 }
-} // namespace graphics
+} // namespace graphics::vulkan

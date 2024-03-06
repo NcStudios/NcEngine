@@ -19,17 +19,18 @@
 namespace nc::graphics
 {
 struct CabUpdateEventData;
-class GpuAllocator;
 struct MabUpdateEventData;
 struct PpiaUpdateEventData;
-class RenderGraph;
-class ShaderBindingManager;
 struct SsboUpdateEventData;
 struct TabUpdateEventData;
 struct UboUpdateEventData;
 
 namespace vulkan
 {
+class GpuAllocator;
+class RenderGraph;
+class ShaderBindingManager;
+
 struct CubeMapArrayBufferStorage
 {
     std::vector<uint32_t> uids;

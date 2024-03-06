@@ -1,7 +1,7 @@
 #include "Initializers.h"
 #include "ShaderUtilities.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler
 {
@@ -250,4 +250,4 @@ auto CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRan
     const auto layoutSize = static_cast<uint32_t>(layouts.size());
     return vk::PipelineLayoutCreateInfo{vk::PipelineLayoutCreateFlags{}, layoutSize, layouts.data(), 1u, &pushConstantRange};
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan
