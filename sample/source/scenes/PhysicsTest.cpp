@@ -271,13 +271,15 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     const auto platform1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 5.0f, 40.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
-        .tag = "Platform"
+        .tag = "Platform",
+        .flags = Entity::Flags::Static
     });
 
     const auto platform2 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 5.0f, 60.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
-        .tag = "Platform"
+        .tag = "Platform",
+        .flags = Entity::Flags::Static
     });
 
     // Ramp
@@ -285,7 +287,8 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
         .position = Vector3{0.0f, 1.15f, 25.99f},
         .rotation = Quaternion::FromEulerAngles(-0.4f, 0.0f, 0.0f),
         .scale = Vector3{8.0f, 1.0f, 20.0f},
-        .tag = "Ramp"
+        .tag = "Ramp",
+        .flags = Entity::Flags::Static
     });
 
     const auto ramp2 = world.Emplace<Entity>({
@@ -546,12 +549,12 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{1.20484f, 100.0f, -8.48875f},
+            .position = Vector3{1.20484f, 47.0f, -8.48875f},
             .tag = "Point Light"
         }),
-        Vector3{0.443f, 0.412f, 0.412f},
-        Vector3{0.4751f, 0.525f, 1.0f},
-        2000.0f
+        Vector3{1.0f, 0.433f, 0.162f},
+        Vector3{1.0f, 0.433f, 0.162f},
+        800.0f
     );
 }
 
