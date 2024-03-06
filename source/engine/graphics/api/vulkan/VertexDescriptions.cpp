@@ -2,7 +2,7 @@
 
 #include "ncasset/Assets.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     vk::VertexInputBindingDescription GetVertexBindingDescription()
     {
@@ -52,4 +52,4 @@ namespace nc::graphics
         attributeDescriptions[6].setOffset(offsetof(asset::MeshVertex, boneIds));
         return attributeDescriptions;
     }
-}
+} // namespace nc::graphics::Vulkan

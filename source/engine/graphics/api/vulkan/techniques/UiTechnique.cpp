@@ -9,7 +9,7 @@
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     UiTechnique::UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
         : m_pipeline{nullptr},
@@ -97,4 +97,4 @@ namespace nc::graphics
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

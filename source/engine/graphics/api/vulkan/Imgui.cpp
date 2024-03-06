@@ -35,7 +35,7 @@ auto CreateImguiDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 Imgui::Imgui(const Device& device,
              const Instance& instance,
@@ -83,4 +83,4 @@ void Imgui::Frame()
 {
     ImGui::Render();
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

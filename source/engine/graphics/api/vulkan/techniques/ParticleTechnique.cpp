@@ -11,7 +11,7 @@
 
 #include "optick.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     ParticleTechnique::ParticleTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
         : m_shaderBindingManager{shaderBindingManager},
@@ -129,4 +129,4 @@ namespace nc::graphics
             }
         }
     }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -5,7 +5,7 @@
 #include <optional>
 #include <set>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 enum class QueueFamilyType
 {
@@ -52,4 +52,4 @@ class QueueFamilyIndices
         std::optional<uint32_t> m_graphicsFamily;
         std::optional<uint32_t> m_presentFamily;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

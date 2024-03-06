@@ -6,7 +6,7 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
-namespace nc::graphics::detail
+namespace nc::graphics::vulkan::detail
 {
 struct PhysicalDeviceInfo
 {
@@ -17,4 +17,4 @@ struct PhysicalDeviceInfo
 auto SelectPhysicalDevice(std::span<const vk::PhysicalDevice> physicalDevices,
                           vk::SurfaceKHR surface,
                           std::span<const char* const> requiredExtensions) -> PhysicalDeviceInfo;
-} // namespace nc::graphics::detail
+} // namespace nc::graphics::vulkan::detail

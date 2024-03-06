@@ -7,16 +7,16 @@ namespace
 {
 constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
 
-auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
+auto CreateClearValues(nc::graphics::vulkan::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {
     std::vector<vk::ClearValue> clearValues;
 
-    if (clearFlags & nc::graphics::ClearValueFlags::Color) clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
-    if (clearFlags & nc::graphics::ClearValueFlags::Depth) clearValues.push_back(vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}});
+    if (clearFlags & nc::graphics::vulkan::ClearValueFlags::Color) clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
+    if (clearFlags & nc::graphics::vulkan::ClearValueFlags::Depth) clearValues.push_back(vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}});
     return clearValues;
 }
 
-auto GetAttachmentDescriptions(std::span<const nc::graphics::AttachmentSlot> slots) -> std::vector<vk::AttachmentDescription>
+auto GetAttachmentDescriptions(std::span<const nc::graphics::vulkan::AttachmentSlot> slots) -> std::vector<vk::AttachmentDescription>
 {
     auto descriptions = std::vector<vk::AttachmentDescription>{};
     descriptions.reserve(slots.size());
@@ -26,7 +26,7 @@ auto GetAttachmentDescriptions(std::span<const nc::graphics::AttachmentSlot> slo
     return descriptions;
 }
 
-auto GetSubpassDescriptions(std::span<const nc::graphics::Subpass> subpasses, size_t *dependencyCountOut) -> std::vector<vk::SubpassDescription>
+auto GetSubpassDescriptions(std::span<const nc::graphics::vulkan::Subpass> subpasses, size_t *dependencyCountOut) -> std::vector<vk::SubpassDescription>
 {
     auto depCount = size_t{0ull};
     auto descriptions = std::vector<vk::SubpassDescription>{};
@@ -41,7 +41,7 @@ auto GetSubpassDescriptions(std::span<const nc::graphics::Subpass> subpasses, si
     return descriptions;
 }
 
-auto GetSubpassDependencies(std::span<const nc::graphics::Subpass> subpasses, size_t dependencySizeHint = 0ull)
+auto GetSubpassDependencies(std::span<const nc::graphics::vulkan::Subpass> subpasses, size_t dependencySizeHint = 0ull)
 {
     auto dependencies = std::vector<vk::SubpassDependency>{};
     dependencies.reserve(dependencySizeHint);
@@ -53,8 +53,8 @@ auto GetSubpassDependencies(std::span<const nc::graphics::Subpass> subpasses, si
     return dependencies;
 }
 
-auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSlots,
-                        std::span<const nc::graphics::Subpass> subpasses,
+auto CreateVkRenderPass(std::span<const nc::graphics::vulkan::AttachmentSlot> attachmentSlots,
+                        std::span<const nc::graphics::vulkan::Subpass> subpasses,
                         vk::Device device) -> vk::UniqueRenderPass
 {
     const auto attachmentDescriptions = GetAttachmentDescriptions(attachmentSlots);
@@ -73,7 +73,7 @@ auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachment
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 RenderPass::RenderPass(vk::Device device,
                        std::string uid,
@@ -193,4 +193,4 @@ auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer
     }
     return frameBufferPos->frameBuffer.get();
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

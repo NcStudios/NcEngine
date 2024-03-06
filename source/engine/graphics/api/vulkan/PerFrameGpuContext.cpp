@@ -5,7 +5,7 @@
 
 namespace
 {
-auto CreateCommandPool(const nc::graphics::Device& device) -> vk::UniqueCommandPool
+auto CreateCommandPool(const nc::graphics::vulkan::Device& device) -> vk::UniqueCommandPool
 {
     auto poolInfo = vk::CommandPoolCreateInfo
     {
@@ -16,7 +16,7 @@ auto CreateCommandPool(const nc::graphics::Device& device) -> vk::UniqueCommandP
     return device.VkDevice().createCommandPoolUnique(poolInfo);
 }
 
-auto CreateCommandBuffer(const nc::graphics::Device& device, vk::CommandPool commandPool) -> vk::UniqueCommandBuffer
+auto CreateCommandBuffer(const nc::graphics::vulkan::Device& device, vk::CommandPool commandPool) -> vk::UniqueCommandBuffer
 {
     auto allocInfo = vk::CommandBufferAllocateInfo
     {
@@ -30,7 +30,7 @@ auto CreateCommandBuffer(const nc::graphics::Device& device, vk::CommandPool com
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 PerFrameGpuContext::PerFrameGpuContext(const Device& device, uint32_t index)
     : m_device{device.VkDevice()},
@@ -74,4 +74,4 @@ void PerFrameGpuContext::SubmitBufferToQueue(vk::Queue graphicsQueue)
     m_device.resetFences(Fence());
     graphicsQueue.submit(submitInfo, Fence());
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

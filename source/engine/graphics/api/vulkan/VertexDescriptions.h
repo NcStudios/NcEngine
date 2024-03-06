@@ -2,8 +2,8 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     auto GetVertexBindingDescription() -> vk::VertexInputBindingDescription;
     auto GetVertexAttributeDescriptions() -> std::array<vk::VertexInputAttributeDescription, 7>;
-}
+} // namespace nc::graphics::vulkan

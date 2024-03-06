@@ -6,7 +6,7 @@
 
 #include <span>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 // Resources
 auto CreateShadowMapSampler(vk::Device device) -> vk::UniqueSampler;
@@ -31,4 +31,4 @@ vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo();
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::PushConstantRange> pushConstantRanges);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(std::span<const vk::DescriptorSetLayout> layouts);
 vk::PipelineLayoutCreateInfo CreatePipelineLayoutCreateInfo(const vk::PushConstantRange& pushConstantRange, std::span<const vk::DescriptorSetLayout> layouts);
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

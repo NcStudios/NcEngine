@@ -4,7 +4,7 @@
 
 #include <fstream>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 vk::ShaderModule CreateShaderModule(vk::Device device, const std::vector<uint32_t>& code)
 {
@@ -60,4 +60,4 @@ auto GetStageFlags(shader_stage stage) -> vk::ShaderStageFlags
     }
     return vulkanFlags;
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -10,7 +10,7 @@
 #include <span>
 #include <vulkan/vulkan.hpp>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Instance;
 
@@ -71,4 +71,4 @@ class Device : public StableAddress
 
         GpuOptions m_gpuOptions;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan
