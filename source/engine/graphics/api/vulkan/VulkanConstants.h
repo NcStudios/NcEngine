@@ -68,7 +68,7 @@ constexpr uint32_t MaxDescriptorSetUpdateAfterBindUniformBuffers = 90u;
 
 /** maxPerSetDescriptors is a maximum number of descriptors (summed over all descriptor types) in a single descriptor set that is guaranteed to satisfy any implementation-dependent constraints on the size of a descriptor set itself.
  * Total Adoption: 96.8% */
-    constexpr uint32_t MaxPerSetDescriptors = 1024u;
+constexpr uint32_t MaxPerSetDescriptors = 1024u;
 
 /** maxPerStageDescriptorSampledImages is the maximum number of sampled images that can be accessible to a single shader stage in a pipeline layout.
  * Descriptors with a type of VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, or VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER count against this limit.
@@ -106,4 +106,8 @@ constexpr uint32_t MaxVertexInputBindings = 16u;
  * Pool creation may fail when this limit is exceeded, or when the space this limit represents is unable to satisfy a pool creation due to fragmentation.
  * Total Adoption: 94.5% */
 constexpr uint32_t MaxUpdateAfterBindDescriptorsInAllPools = 1048576u;
+
+constexpr uint32_t MaxPerStageDescriptorSamplers;
+constexpr uint32_t MaxDescriptorSetSamplers;
+constexpr uint32_t MaxPerStageResources;
 } // namespace nc::graphics::vulkan
