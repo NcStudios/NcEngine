@@ -551,7 +551,7 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
         }),
         Vector3{0.443f, 0.412f, 0.412f},
         Vector3{0.4751f, 0.525f, 1.0f},
-        600.0f
+        2000.0f
     );
 }
 
