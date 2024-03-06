@@ -38,7 +38,7 @@ namespace
 
 TEST(Manifold_unit_tests, AddContact_UpdatesEventStateToPersisting)
 {
-    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, CreateContact()};
+    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, false, CreateContact()};
     EXPECT_EQ(manifold.Event().state, physics::NarrowEvent::State::New);
     manifold.AddContact(CreateContact(0.1f));
     EXPECT_EQ(manifold.Event().state, physics::NarrowEvent::State::Persisting);
@@ -46,7 +46,7 @@ TEST(Manifold_unit_tests, AddContact_UpdatesEventStateToPersisting)
 
 TEST(Manifold_unit_tests, AddContact_LessThanCapacity_AppendsToContactList)
 {
-    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, CreateContact()};
+    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, false, CreateContact()};
     EXPECT_EQ(manifold.Contacts().size(), 1u);
     manifold.AddContact(CreateContact(0.1f));
     EXPECT_EQ(manifold.Contacts().size(), 2u);
@@ -59,7 +59,7 @@ TEST(Manifold_unit_tests, AddContact_GreaterThanCapacity_GoodFitReplacesWorstFit
     auto c3 = CreateContact(Vector3{-1.0f, 0.0f,  1.0f}, 0.2f);
     auto c4 = CreateContact(Vector3{ 1.0f, 0.0f, -1.0f}, 0.4f);
 
-    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, c1};
+    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, false, c1};
     manifold.AddContact(c2);
     manifold.AddContact(c3);
     manifold.AddContact(c4);
@@ -82,7 +82,7 @@ TEST(Manifold_unit_tests, AddContact_GreaterThanCapacity_BadFitReplacesFirst)
     auto c3 = CreateContact(Vector3{-1.0f, 0.0f,  1.0f}, 0.2f);
     auto c4 = CreateContact(Vector3{ 1.0f, 0.0f, -1.0f}, 0.4f);
 
-    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, c1};
+    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, false, c1};
     manifold.AddContact(c2);
     manifold.AddContact(c3);
     manifold.AddContact(c4);
@@ -101,7 +101,7 @@ TEST(Manifold_unit_tests, GetDeepestContact_FromEachPosition_ReturnsContact)
 {
     auto c1 = CreateContact(0.5f);
     auto c2 = CreateContact(0.1f);
-    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, c1};
+    auto manifold = physics::Manifold{entity1, entity2, physics::CollisionEventType::TwoBodyPhysics, false, c1};
     EXPECT_EQ(manifold.DeepestContact().depth, c1.depth);
     manifold.AddContact(c2);
     EXPECT_EQ(manifold.DeepestContact().depth, c1.depth);
@@ -109,10 +109,4 @@ TEST(Manifold_unit_tests, GetDeepestContact_FromEachPosition_ReturnsContact)
     EXPECT_EQ(manifold.DeepestContact().depth, c1.depth);
     manifold.AddContact(c2);
     EXPECT_EQ(manifold.DeepestContact().depth, c1.depth);
-}
-
-int main(int argc, char ** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
