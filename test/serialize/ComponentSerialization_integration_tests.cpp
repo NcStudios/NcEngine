@@ -9,6 +9,7 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/FreedomConstraint.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -154,6 +155,17 @@ TEST(ComponentSerializationTests, RoundTrip_concaveCollider_preservesValues)
     EXPECT_EQ(expected.GetPath(), actual.GetPath());
 }
 
+TEST(ComponentSerializationTests, RoundTrip_freedomConstraint_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::FreedomConstraint{nc::Vector3::Front(), nc::Vector3::Up(), true};
+    nc::SerializeFreedomConstraint(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeFreedomConstraint(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3::Front(), nc::ToVector3(actual.linearFreedom));
+    EXPECT_EQ(nc::Vector3::Up(), nc::ToVector3(actual.angularFreedom));
+    EXPECT_TRUE(actual.worldSpace);
+}
+
 TEST(ComponentSerializationTests, RoundTrip_meshRenderer_preservesValues)
 {
     auto stream = std::stringstream{};
@@ -246,15 +258,11 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
 
     const auto expectedProperties = nc::physics::PhysicsProperties{};
-    const auto expectedLinearFreedom = nc::Vector3::One();
-    const auto expectedAngularFreedom = nc::Vector3::Up();
     const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
         entity,
         g_ecs.Get<nc::Transform>(entity),
         g_ecs.Get<nc::physics::Collider>(entity),
-        expectedProperties,
-        expectedLinearFreedom,
-        expectedAngularFreedom
+        expectedProperties
     );
 
     auto entityToFragmentId = nc::EntityToFragmentIdMap{ {entity, 0u} };
@@ -271,8 +279,6 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     EXPECT_EQ(expectedProperties.angularDrag, actualProperties.angularDrag);
     EXPECT_EQ(expectedProperties.useGravity, actualProperties.useGravity);
     EXPECT_EQ(expectedProperties.isKinematic, actualProperties.isKinematic);
-    EXPECT_EQ(expectedLinearFreedom, actual.GetLinearFreedom());
-    EXPECT_EQ(expectedAngularFreedom, actual.GetAngularFreedom());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)

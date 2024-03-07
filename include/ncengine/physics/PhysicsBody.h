@@ -29,9 +29,7 @@ class PhysicsBody
     public:
         PhysicsBody(const Transform& transform,
                     const Collider& collider,
-                    PhysicsProperties properties = PhysicsProperties{},
-                    Vector3 linearFreedom = Vector3::One(),
-                    Vector3 angularFreedom = Vector3::One());
+                    PhysicsProperties properties = PhysicsProperties{});
 
         PhysicsBody(const PhysicsBody&) = delete;
         PhysicsBody(PhysicsBody&&) = default;
@@ -58,12 +56,13 @@ class PhysicsBody
         auto Integrate(Transform* transform, float dt) -> IntegrationResult;
         void Wake() noexcept { m_framesAtThreshold = 0u; m_awake = true; }
         void Sleep() noexcept { m_awake = false; }
+        void SetVelocities(DirectX::FXMVECTOR linear, DirectX::FXMVECTOR angular) noexcept
+        {
+            m_linearVelocity = linear;
+            m_angularVelocity = angular;
+        }
 
         auto GetProperties() const noexcept -> const PhysicsProperties& { return m_properties; }
-        auto GetLinearFreedom() const noexcept -> Vector3 { return ToVector3(GetLinearFreedomXM()); }
-        auto GetAngularFreedom() const noexcept -> Vector3 { return ToVector3(GetAngularFreedomXM()); }
-        auto GetLinearFreedomXM() const noexcept -> DirectX::FXMVECTOR { return m_linearFreedom; }
-        auto GetAngularFreedomXM() const noexcept -> DirectX::FXMVECTOR { return m_angularFreedom; }
         auto GetVelocity() const noexcept -> DirectX::FXMVECTOR { return m_linearVelocity; }
         auto GetAngularVelocity() const noexcept -> DirectX::FXMVECTOR { return m_angularVelocity; }
         auto GetInverseMass() const noexcept -> float { return m_properties.mass; }
@@ -78,8 +77,6 @@ class PhysicsBody
         DirectX::XMVECTOR m_linearVelocity;
         DirectX::XMVECTOR m_angularVelocity;
         DirectX::XMMATRIX m_invInertiaWorld;
-        DirectX::XMVECTOR m_linearFreedom;
-        DirectX::XMVECTOR m_angularFreedom;
         Vector3 m_invInertiaLocal;
         PhysicsProperties m_properties;
         uint8_t m_framesAtThreshold;

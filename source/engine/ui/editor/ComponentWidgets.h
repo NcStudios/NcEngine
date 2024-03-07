@@ -18,6 +18,7 @@ void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer);
 void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher);
 void ColliderUIWidget(physics::Collider& collider);
 void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider);
+void FreedomConstraintUIWidget(physics::FreedomConstraint& freedomConstraint);
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody);
 void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial);
 } // namespace nc::editor

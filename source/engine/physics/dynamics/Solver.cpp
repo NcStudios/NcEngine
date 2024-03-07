@@ -1,4 +1,5 @@
 #include "Solver.h"
+#include "FreedomSolver.h"
 #include "physics/PhysicsConstants.h"
 #include "physics/PhysicsDebugging.h"
 #include "ncengine/ecs/Registry.h"
@@ -397,6 +398,8 @@ void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
             ResolveJoint(joint);
         }
     }
+
+    SolveFreedomConstraints(m_registry->GetEcs());
 
     if constexpr(EnableDirectPositionCorrection)
     {

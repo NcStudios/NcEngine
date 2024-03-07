@@ -15,6 +15,7 @@ auto CreateToonRenderer(Entity entity, void*) -> graphics::ToonRenderer;
 auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator;
 auto CreateNetworkDispatcher(Entity entity, void*) -> net::NetworkDispatcher;
 auto CreateCollider(Entity entity, void*) -> physics::Collider;
+auto CreateFreedomConstraint(Entity entity, void*) -> physics::FreedomConstraint;
 auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody;
 auto CreatePhysicsMaterial(Entity entity, void*) -> physics::PhysicsMaterial;
 } // namespace nc

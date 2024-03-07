@@ -18,7 +18,7 @@ graphics::PbrMaterial PurplePbrMaterial{"solid_color\\Purple.nca", asset::Defaul
 graphics::PbrMaterial TealPbrMaterial{"solid_color\\Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial YellowPbrMaterial{"solid_color\\Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 
-constexpr auto toonOverlay = "line\\overlay.nca";
+constexpr auto toonOverlay = asset::DefaultBaseColor;
 constexpr auto toonHatch = asset::DefaultBaseColor;
 graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
 graphics::ToonMaterial RedToonMaterial{"solid_color\\Red.nca", toonOverlay, toonHatch, 8};

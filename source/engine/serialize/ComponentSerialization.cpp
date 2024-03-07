@@ -7,6 +7,7 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/FreedomConstraint.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -122,6 +123,24 @@ auto DeserializeConcaveCollider(std::istream& stream, const DeserializationConte
     return physics::ConcaveCollider{ctx.entityMap.at(id), std::move(geometry)};
 }
 
+void SerializeFreedomConstraint(std::ostream& stream, const physics::FreedomConstraint& out, const SerializationContext&, void*)
+{
+    serialize::Serialize(stream, ToVector3(out.linearFreedom));
+    serialize::Serialize(stream, ToVector3(out.angularFreedom));
+    serialize::Serialize(stream, out.worldSpace);
+}
+
+auto DeserializeFreedomConstraint(std::istream& stream, const DeserializationContext&, void*) -> physics::FreedomConstraint
+{
+    auto linearFreedom = Vector3{};
+    auto angularFreedom = Vector3{};
+    auto worldSpace = bool{};
+    serialize::Deserialize(stream, linearFreedom);
+    serialize::Deserialize(stream, angularFreedom);
+    serialize::Deserialize(stream, worldSpace);
+    return physics::FreedomConstraint{linearFreedom, angularFreedom, worldSpace};
+}
+
 void SerializeMeshRenderer(std::ostream& stream, const graphics::MeshRenderer& out, const SerializationContext& ctx, void*)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
@@ -165,8 +184,6 @@ void SerializePhysicsBody(std::ostream& stream, const physics::PhysicsBody& out,
     NC_ASSERT(entity.Valid(), "Invalid parent entity for PhysicsBody");
     serialize::Serialize(stream, ctx.entityMap.at(entity));
     serialize::Serialize(stream, out.GetProperties());
-    serialize::Serialize(stream, out.GetLinearFreedom());
-    serialize::Serialize(stream, out.GetAngularFreedom());
 }
 
 auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& ctx, void* userData) -> physics::PhysicsBody
@@ -177,11 +194,9 @@ auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& 
     auto angularFreedom = Vector3{};
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, properties);
-    serialize::Deserialize(stream, linearFreedom);
-    serialize::Deserialize(stream, angularFreedom);
     const auto entity = ctx.entityMap.at(id);
     const auto registry = static_cast<Registry*>(userData);
-    return physics::PhysicsBody{*registry->Get<Transform>(entity), *registry->Get<physics::Collider>(entity), properties, linearFreedom, angularFreedom};
+    return physics::PhysicsBody{*registry->Get<Transform>(entity), *registry->Get<physics::Collider>(entity), properties};
 }
 
 void SerializePhysicsMaterial(std::ostream& stream, const physics::PhysicsMaterial& out, const SerializationContext&, void*)

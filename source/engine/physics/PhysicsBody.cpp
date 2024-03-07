@@ -5,6 +5,8 @@
 #include "physics/PhysicsConstants.h"
 #include "physics/PhysicsDebugging.h"
 
+#include <iostream>
+
 using namespace DirectX;
 
 namespace
@@ -76,14 +78,10 @@ namespace nc::physics
 {
 PhysicsBody::PhysicsBody(const Transform& transform,
                          const Collider& collider,
-                         PhysicsProperties properties,
-                         Vector3 linearFreedom,
-                         Vector3 angularFreedom)
+                         PhysicsProperties properties)
     : m_linearVelocity{},
       m_angularVelocity{},
       m_invInertiaWorld{},
-      m_linearFreedom{XMLoadVector3(&linearFreedom)},
-      m_angularFreedom{XMLoadVector3(&angularFreedom)},
       m_invInertiaLocal{},
       m_properties{properties},
       m_framesAtThreshold{0u},
@@ -104,16 +102,6 @@ void PhysicsBody::SetProperties(const PhysicsProperties& properties)
     m_properties = properties;
 }
 
-void PhysicsBody::SetLinearFreedom(const Vector3& linearFreedom)
-{
-    m_linearFreedom = XMLoadVector3(&linearFreedom);
-}
-
-void PhysicsBody::SetAngularFreedom(const Vector3& angularFreedom)
-{
-    m_angularFreedom = XMLoadVector3(&angularFreedom);
-}
-
 void PhysicsBody::ApplyImpulse(const Vector3& impulse)
 {
     ApplyImpulse(XMLoadVector3(&impulse));
@@ -122,7 +110,7 @@ void PhysicsBody::ApplyImpulse(const Vector3& impulse)
 void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
 {
     NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
-    m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(XMVectorScale(impulse, m_properties.mass), m_linearFreedom));
+    m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorScale(impulse, m_properties.mass));
 }
 
 void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
@@ -133,21 +121,20 @@ void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
 void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
 {
     NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
-    auto restrictedTorque = XMVectorMultiply(torque, m_angularFreedom);
-    m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVector3Transform(restrictedTorque, m_invInertiaWorld));
+    m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVector3Transform(torque, m_invInertiaWorld));
 }
 
 void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
 {
     NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
-    m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(delta, m_linearFreedom));
+    m_linearVelocity = XMVectorAdd(m_linearVelocity, delta);
 }
 
 void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
 {
     NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
-    m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorMultiply(velDelta, m_linearFreedom));
-    m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVectorMultiply(angVelDelta, m_angularFreedom));
+    m_linearVelocity = XMVectorAdd(m_linearVelocity, velDelta);
+    m_angularVelocity = XMVectorAdd(m_angularVelocity, angVelDelta);
 }
 
 void PhysicsBody::UpdateWorldInertia(const Transform* transform)
@@ -173,6 +160,10 @@ IntegrationResult PhysicsBody::Integrate(Transform* transform, float dt)
     m_linearVelocity = XMVectorScale(m_linearVelocity, linearDragFactor);
     m_angularVelocity = XMVectorScale(m_angularVelocity, angularDragFactor);
     m_angularVelocity = XMVectorClamp(m_angularVelocity, AngularVelocityMin, AngularVelocityMax);
+
+    /** @todo #634 Remove when we figure out who's seting W component*/
+    m_linearVelocity = XMVectorSetW(m_linearVelocity, 0.0f);
+    m_angularVelocity = XMVectorSetW(m_angularVelocity, 0.0f);
 
     if constexpr(physics::EnableSleeping)
     {

@@ -8,6 +8,7 @@
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/physics/FreedomConstraint.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -435,8 +436,10 @@ void BuildBalancePlatform(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     auto& baseTransform = world.Get<Transform>(base);
     auto& platformTransform = world.Get<Transform>(balancePlatform);
 
-    world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider, physics::PhysicsProperties{.isKinematic = true}, Vector3::One(), Vector3::Zero());
+    world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider, physics::PhysicsProperties{.isKinematic = true});
     world.Emplace<physics::PhysicsBody>(balancePlatform, platformTransform, platformCollider, physics::PhysicsProperties{.mass = 5.0f});
+
+    world.Emplace<physics::FreedomConstraint>(base, Vector3::One(), Vector3::Zero());
 
     ncPhysics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
 }
@@ -471,8 +474,12 @@ void BuildSwingingBars(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     auto& bar2Transform = world.Get<Transform>(bar2);
 
     world.Emplace<physics::PhysicsBody>(pole, poleTransform, poleCollider, physics::PhysicsProperties{.isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(bar1, bar1Transform, bar1Collider, physics::PhysicsProperties{}, Vector3::One(), Vector3::Up());
-    world.Emplace<physics::PhysicsBody>(bar2, bar2Transform, bar2Collider, physics::PhysicsProperties{}, Vector3::One(), Vector3::Up());
+    world.Emplace<physics::PhysicsBody>(bar1, bar1Transform, bar1Collider, physics::PhysicsProperties{});
+    world.Emplace<physics::PhysicsBody>(bar2, bar2Transform, bar2Collider, physics::PhysicsProperties{});
+
+    world.Emplace<physics::FreedomConstraint>(bar1, Vector3::One(), Vector3::Up());
+    world.Emplace<physics::FreedomConstraint>(bar2, Vector3::One(), Vector3::Up());
+
 
     ncPhysics->AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
     ncPhysics->AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});

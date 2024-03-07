@@ -10,6 +10,7 @@
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/FreedomConstraint.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -405,6 +406,24 @@ void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
 {
     /** @todo #454 Allow updating asset. */
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
+}
+
+void FreedomConstraintUIWidget(physics::FreedomConstraint& freedomConstraint)
+{
+    auto linear = ToVector3(freedomConstraint.linearFreedom);
+    auto angular = ToVector3(freedomConstraint.angularFreedom);
+
+    if (ui::InputVector3(linear, "linearFreedom", 0.1f, 0.0f, 1.0f))
+    {
+        freedomConstraint.linearFreedom = ToXMVector(linear);
+    }
+
+    if (ui::InputVector3(angular, "angularFreedom", 0.1f, 0.0f, 1.0f))
+    {
+        freedomConstraint.angularFreedom = ToXMVector(angular);
+    }
+
+    ui::Checkbox(freedomConstraint.worldSpace, "worldSpace");
 }
 
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)

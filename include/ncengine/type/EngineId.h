@@ -35,6 +35,7 @@ constexpr size_t NetworkDispatcherId = 16ull;
 constexpr size_t WireframeRendererId = 17ull;
 constexpr size_t HierarchyId = 18ull;
 constexpr size_t PhysicsMaterialId = 19ull;
+constexpr size_t FreedomConstraintId = 20ull;
 /** @} */
 
 /** @{ */
