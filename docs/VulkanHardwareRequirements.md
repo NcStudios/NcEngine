@@ -1,5 +1,5 @@
 # Vulkan Hardware Requirements
-Credit goes to [vulkan.gpuinfo.org](vulkan.gpuinfo.org).
+Credit goes to [vulkan.gpuinfo.org](https://vulkan.gpuinfo.org/listdevices.php).
 
 Per Sascha Willems: Data is based on reports submitted or updated with version 3.0 or newer of the Hardware Capability Viewer (January 2021) and does not contain reports from earlier versions.
 
