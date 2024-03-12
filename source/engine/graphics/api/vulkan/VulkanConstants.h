@@ -9,25 +9,6 @@ namespace nc::graphics::vulkan
  * Information gathered March 2024
  */
 
-/**-----------------------------------
- Feature Support - Desktop Platforms
- -------------------------------------
-| Feature | Windows|Linux |
-|----------------------------------------------|--------|-------|
-| fillModeNonSolid |99.76% |99.72% |
-| samplerAnisotropy |99.18% |99.72% |
-| sampleRateShading |99.06% |99.72% |
-| descriptorBindingPartiallyBound |94.44% |91.11% |
-| descriptorBindingSampledImageUpdateAfterBind |96.82% |91.11% |
-| descriptorBindingStorageBufferUpdateAfterBind|96.82% |91.11% |
-| descriptorBindingUniformBufferUpdateAfterBind|70.27% |72.82% |
-| descriptorIndexing |96.82% |90.10% |
-| runtimeDescriptorArray |96.82% |90.10% |
-| shaderSampledImageArrayNonUniformIndexing |96.82% |90.10% |
-| shaderStorageBufferArrayNonUniformIndexing |96.82% |90.94% |
-| shaderUniformBufferArrayNonUniformIndexing |96.18% |89.43% |
-*/
-
 /** How many total descriptor sets can be created; */
 constexpr uint32_t MaxDescriptorSets = 10u;
 
