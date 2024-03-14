@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/api/vulkan/core/DeviceRequirements.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace nc::graphics::vulkan
@@ -20,8 +22,14 @@ class GpuOptions
             return m_samplesCount;
         }
 
+        auto GetDeviceRequirements() const noexcept -> const DeviceRequirements&
+        {
+            return m_deviceRequirements;
+        }
+
     private:
         vk::Format m_depthFormat;
         vk::SampleCountFlagBits m_samplesCount;
+        DeviceRequirements m_deviceRequirements;
 };
 } // namespace nc::graphics::vulkan

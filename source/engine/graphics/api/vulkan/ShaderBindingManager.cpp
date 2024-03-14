@@ -35,11 +35,26 @@ vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPoo
     return std::move(device.allocateDescriptorSetsUnique(allocationInfo)[0]);
 }
 
+/**
+ * Create the initial pool.
+ * Track the count of each descriptor type remaining in the pool.
+ * When allocating a descriptor set, validate the counts do not exceed:
+ *  A) Each descriptor type count does not exceed the pool's remaining counts per type
+ *  B) The descriptor set's counts per type plus all exising allocated counts per type do not exceed the hardware maximums
+ *  C) The  descriptor set's counts plus all exising allocated counts do not exceed MaxUpdateAfterBindDescriptorsInAllPools
+ *  D) The descriptor type count does not exceed the pool's total counts per type
+ *  E) The count of descriptor sets plus the exisint sets in the pool does not exceed the MaxSets.
+ *  F) The count of descriptors in the set does not exceed MaxPerSetDescriptors
+ * If A, B, C, D, E and F are true, allocate the descriptor set in the pool.
+ * If B is or C is or D or F is false, throw an exception.
+ * If only A and/or E is false, create a new descriptor pool and allocate from it.
+ * Increment the counts.
+ * */
+
 auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
 {
     std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
     {
-        vk::DescriptorPoolSize { vk::DescriptorType::eSampledImage, 1000 },
         vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
         vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 },
         vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 10 }

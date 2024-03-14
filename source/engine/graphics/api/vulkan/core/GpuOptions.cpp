@@ -58,13 +58,41 @@ vk::SampleCountFlagBits QueryMaxSamplesCount(vk::PhysicalDeviceProperties gpuPro
 
     return samplesCount;
 }
-}
+
+auto QueryDeviceRequirements(vk::PhysicalDevice physicalDevice) -> nc::graphics::vulkan::DeviceRequirements
+{
+    auto deviceLimits = physicalDevice.getProperties().limits;
+    auto descriptorIndexingLimits = vk::PhysicalDeviceDescriptorIndexingProperties{};
+    auto deviceMaintenance3Limits = vk::PhysicalDeviceMaintenance3Properties{};
+    auto deviceProperties2 = vk::PhysicalDeviceProperties2{};
+    descriptorIndexingLimits.pNext = &deviceMaintenance3Limits;
+    deviceProperties2.pNext = &descriptorIndexingLimits;
+
+    physicalDevice.getProperties2(&deviceProperties2);
+
+    return nc::graphics::vulkan::DeviceRequirements(
+        deviceLimits.maxBoundDescriptorSets,
+        descriptorIndexingLimits.maxDescriptorSetUpdateAfterBindSampledImages,
+        descriptorIndexingLimits.maxDescriptorSetUpdateAfterBindSamplers,
+        descriptorIndexingLimits.maxDescriptorSetUpdateAfterBindStorageBuffers,
+        descriptorIndexingLimits.maxDescriptorSetUpdateAfterBindUniformBuffers,
+        deviceMaintenance3Limits.maxPerSetDescriptors,
+        descriptorIndexingLimits.maxPerStageUpdateAfterBindResources,
+        descriptorIndexingLimits.maxPerStageDescriptorUpdateAfterBindSampledImages,
+        descriptorIndexingLimits.maxPerStageDescriptorUpdateAfterBindSamplers,
+        descriptorIndexingLimits.maxPerStageDescriptorUpdateAfterBindStorageBuffers,
+        descriptorIndexingLimits.maxPerStageDescriptorUpdateAfterBindUniformBuffers,
+        descriptorIndexingLimits.maxUpdateAfterBindDescriptorsInAllPools
+    );
+};
+} // anonymous namespace
 
 namespace nc::graphics::vulkan
 {
 GpuOptions::GpuOptions(vk::PhysicalDevice physicalDevice)
     :  m_depthFormat{QueryDepthFormatSupport(physicalDevice)},
-       m_samplesCount{QueryMaxSamplesCount(physicalDevice.getProperties())}
+       m_samplesCount{QueryMaxSamplesCount(physicalDevice.getProperties())},
+       m_deviceRequirements{QueryDeviceRequirements(physicalDevice)}
 {
 }
 }  // namespace nc::graphics::vulkan
