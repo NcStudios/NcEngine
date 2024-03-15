@@ -340,15 +340,19 @@ void ResolveJoint(Joint& joint)
 namespace nc::physics
 {
 Solver::Solver(Registry* registry)
-    : m_registry{registry},
-        m_contactConstraints{},
-        m_positionConstraints{}
+    : m_registry{registry}
 {
 }
 
-void Solver::GenerateConstraints(std::span<const Manifold> manifolds)
+void Solver::GenerateFreedomConstraints(float dt)
 {
-    OPTICK_CATEGORY("GenerateConstraints", Optick::Category::Physics);
+    auto ecs = m_registry->GetEcs();
+    m_positionClampConstraints = GeneratePositionClampConstraints(ecs, dt);
+    m_velocityRestrictionConstraints = GenerateVelocityRestrictionConstraints(ecs);
+}
+
+void Solver::GenerateContactConstraints(std::span<const Manifold> manifolds)
+{
     const auto manifoldCount = manifolds.size();
     m_contactConstraints.clear();
     m_contactConstraints.reserve(manifoldCount * 4u);
@@ -397,9 +401,10 @@ void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
         {
             ResolveJoint(joint);
         }
-    }
 
-    SolveFreedomConstraints(m_registry->GetEcs());
+        Solve(m_positionClampConstraints, dt);
+        Solve(m_velocityRestrictionConstraints);
+    }
 
     if constexpr(EnableDirectPositionCorrection)
     {

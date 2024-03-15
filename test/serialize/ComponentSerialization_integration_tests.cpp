@@ -155,17 +155,6 @@ TEST(ComponentSerializationTests, RoundTrip_concaveCollider_preservesValues)
     EXPECT_EQ(expected.GetPath(), actual.GetPath());
 }
 
-TEST(ComponentSerializationTests, RoundTrip_freedomConstraint_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::FreedomConstraint{nc::Vector3::Front(), nc::Vector3::Up(), true};
-    nc::SerializeFreedomConstraint(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeFreedomConstraint(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(nc::Vector3::Front(), nc::ToVector3(actual.linearFreedom));
-    EXPECT_EQ(nc::Vector3::Up(), nc::ToVector3(actual.angularFreedom));
-    EXPECT_TRUE(actual.worldSpace);
-}
-
 TEST(ComponentSerializationTests, RoundTrip_meshRenderer_preservesValues)
 {
     auto stream = std::stringstream{};
@@ -289,4 +278,26 @@ TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
     const auto actual = nc::DeserializePhysicsMaterial(stream, g_deserializationContext, nullptr);
     EXPECT_FLOAT_EQ(expected.friction, actual.friction);
     EXPECT_FLOAT_EQ(expected.restitution, actual.restitution);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_positionClamp_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::PositionClamp{nc::Vector3{1.0f, 42.0f, 0.0f}, 0.5f, 5.0f};
+    nc::SerializePositionClamp(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializePositionClamp(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3(1.0f, 42.0f, 0.0f), actual.targetPosition);
+    EXPECT_FLOAT_EQ(0.5f, actual.dampingRatio);
+    EXPECT_FLOAT_EQ(5.0f, actual.dampingFrequency);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_velocityRestriction_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::VelocityRestriction{nc::Vector3::Front(), nc::Vector3::Up(), true};
+    nc::SerializeVelocityRestriction(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeVelocityRestriction(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3::Front(), actual.linearFreedom);
+    EXPECT_EQ(nc::Vector3::Up(), actual.angularFreedom);
+    EXPECT_TRUE(actual.worldSpace);
 }

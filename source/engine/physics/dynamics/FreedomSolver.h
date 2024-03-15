@@ -4,39 +4,30 @@
 #include "ncengine/physics/FreedomConstraint.h"
 #include "ncengine/physics/PhysicsBody.h"
 
-#include <ranges>
-
 namespace nc::physics
 {
-void SolveFreedomConstraints(ecs::ExplicitEcs<FreedomConstraint, PhysicsBody, Transform> gameState)
+struct VelocityRestrictionConstraint
 {
-    const auto& constraintPool = gameState.GetPool<FreedomConstraint>();
-    for (const auto [entity, constraint] : std::views::zip(constraintPool.GetEntityPool(), constraintPool.GetComponents()))
-    {
-        if (!gameState.Contains<PhysicsBody>(entity))
-            continue;
+    DirectX::XMVECTOR linearFreedom;
+    DirectX::XMVECTOR angularFreedom;
+    DirectX::XMVECTOR rotation;
+    PhysicsBody* body;
+    bool worldSpace;
+};
 
-        auto& body = gameState.Get<PhysicsBody>(entity);
-        if (constraint.worldSpace)
-        {
-            body.SetVelocities
-            (
-                DirectX::XMVectorMultiply(body.GetVelocity(), constraint.linearFreedom),
-                DirectX::XMVectorMultiply(body.GetAngularVelocity(), constraint.angularFreedom)
-            );
-            continue;
-        }
+struct PositionClampConstraint
+{
+    DirectX::XMVECTOR position;
+    DirectX::XMVECTOR targetPosition;
+    PhysicsBody* body;
+    float beta;
+    float softness;
+    float totalLambda;
+};
 
-        const auto& rotation = gameState.Get<Transform>(entity).RotationXM();
-        auto localLinearVelocity = DirectX::XMVector3InverseRotate(body.GetVelocity(), rotation);
-        auto localAngularVelocity = DirectX::XMVector3InverseRotate(body.GetAngularVelocity(), rotation);
-        localLinearVelocity = DirectX::XMVectorMultiply(localLinearVelocity, constraint.linearFreedom);
-        localAngularVelocity = DirectX::XMVectorMultiply(localAngularVelocity, constraint.angularFreedom);
-        body.SetVelocities
-        (
-            DirectX::XMVector3Rotate(localLinearVelocity, rotation),
-            DirectX::XMVector3Rotate(localAngularVelocity, rotation)
-        );
-    }
-}
+auto GeneratePositionClampConstraints(ecs::ExplicitEcs<PositionClamp, PhysicsBody, Transform> gameState, float dt) -> std::vector<PositionClampConstraint>;
+auto GenerateVelocityRestrictionConstraints(ecs::ExplicitEcs<VelocityRestriction, PhysicsBody, Transform> gameState) -> std::vector<VelocityRestrictionConstraint>;
+
+void Solve(std::vector<PositionClampConstraint>& constraints, float dt);
+void Solve(std::vector<VelocityRestrictionConstraint>& constraints);
 } // namespace nc::physics

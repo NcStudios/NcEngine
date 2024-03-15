@@ -63,8 +63,9 @@ namespace physics
 struct NcPhysics;
 class Collider;
 class ConcaveCollider;
-struct FreedomConstraint;
 class PhysicsBody;
 struct PhysicsMaterial;
+struct PositionClamp;
+struct VelocityRestriction;
 } // namespace physics
 } // namespac nc

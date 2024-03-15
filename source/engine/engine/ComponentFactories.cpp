@@ -71,11 +71,6 @@ auto CreateCollider(Entity entity, void*) -> physics::Collider
     return physics::Collider{entity, physics::BoxProperties{}};
 }
 
-auto CreateFreedomConstraint(Entity, void*) -> physics::FreedomConstraint
-{
-    return physics::FreedomConstraint{};
-}
-
 auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
 {
     NC_ASSERT(userData, "Expected non-null user data.");
@@ -92,5 +87,15 @@ auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
 auto CreatePhysicsMaterial(Entity, void*) -> physics::PhysicsMaterial
 {
     return physics::PhysicsMaterial{};
+}
+
+auto CreatePositionClamp(Entity, void*) -> physics::PositionClamp
+{
+    return physics::PositionClamp{};
+}
+
+auto CreateVelocityRestriction(Entity, void*) -> physics::VelocityRestriction
+{
+    return physics::VelocityRestriction{};
 }
 } // namespace nc

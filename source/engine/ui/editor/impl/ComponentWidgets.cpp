@@ -408,24 +408,6 @@ void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 
-void FreedomConstraintUIWidget(physics::FreedomConstraint& freedomConstraint)
-{
-    auto linear = ToVector3(freedomConstraint.linearFreedom);
-    auto angular = ToVector3(freedomConstraint.angularFreedom);
-
-    if (ui::InputVector3(linear, "linearFreedom", 0.1f, 0.0f, 1.0f))
-    {
-        freedomConstraint.linearFreedom = ToXMVector(linear);
-    }
-
-    if (ui::InputVector3(angular, "angularFreedom", 0.1f, 0.0f, 1.0f))
-    {
-        freedomConstraint.angularFreedom = ToXMVector(angular);
-    }
-
-    ui::Checkbox(freedomConstraint.worldSpace, "worldSpace");
-}
-
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
 {
     constexpr auto largeStep = 0.1f;
@@ -437,13 +419,29 @@ void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
     ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
     ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
     ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
-    ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, max);
-    ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, max);
+    ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
+    ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
 }
 
 void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial)
 {
     ui::DragFloat(physicsMaterial.friction, "friction", 0.01f, 0.0f, 1.0f);
     ui::DragFloat(physicsMaterial.restitution, "restitution", 0.01f, 0.0f, 1.0f);
+}
+
+void PositionClampUIWidget(physics::PositionClamp& positionClamp)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "PositionClamp");
+    ui::InputVector3(positionClamp.targetPosition, "targetPosition", 0.1f, -1000.0f, 1000.0f);
+    ui::DragFloat(positionClamp.dampingRatio, "dampingRatio", 0.01f, 0.01f, 10.0f);
+    ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
+}
+
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "VelocityRestriction");
+    ui::InputVector3(velocityRestriction.linearFreedom, "linearFreedom", 0.1f, 0.0f, 1.0f);
+    ui::InputVector3(velocityRestriction.angularFreedom, "angularFreedom", 0.1f, 0.0f, 1.0f);
+    ui::Checkbox(velocityRestriction.worldSpace, "worldSpace");
 }
 } // namespace nc::editor

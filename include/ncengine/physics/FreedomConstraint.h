@@ -1,29 +1,44 @@
 #pragma once
 
+#include "ncengine/ecs/Entity.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
 namespace nc::physics
 {
-/** @brief Component for constraining degrees of freedom within NcPhysics.
- * 
- * Linear and angular components may be initialized to 0 or 1 to enable or disable physics-based
- * motion on a per-axis basis. A FreedomConstraint acts upon an object's velocity and does not
- * restrict translations or rotations applied directly to a Transform. It has no effect if the
- * parent Entity does not have a have a PhysicsBody.
-*/
-struct FreedomConstraint
+struct DampingRatio
 {
-    explicit FreedomConstraint(const Vector3& linearFreedom_ = Vector3::One(),
-                               const Vector3& angularFreedom_ = Vector3::One(),
-                               bool worldSpace_ = true) noexcept
-        : linearFreedom{ToXMVector(linearFreedom_)},
-          angularFreedom{ToXMVector(angularFreedom_)},
-          worldSpace{worldSpace_}
-    {
-    }
+    static constexpr auto Soft = 0.3f;
+    static constexpr auto Medium = 0.5f;
+    static constexpr auto Hard = 1.0f;
+};
 
-    DirectX::XMVECTOR linearFreedom;
-    DirectX::XMVECTOR angularFreedom;
-    bool worldSpace;
+struct DampingFrequency
+{
+    static constexpr auto Slow = 5.0f;
+    static constexpr auto Medium = 10.0f;
+    static constexpr auto Fast = 30.0f;
+};
+
+/**
+ * @brief Constraint an object's linear and angular velocities.
+ * 
+ * Degrees of freedom may be restricted by setting freedom values on a per-axis basis. Values should be in the range
+ * [0, 1] with 0 fully disabling motion, 1 fully enabling motion, and intermediate values damping motion. The constraint
+ * acts upon an object's velocities and does not restrict translations or rotations applied directly to a Transform. It
+ * has no effect if the object does not have a PhysicsBody.
+ */
+struct VelocityRestriction
+{
+    Vector3 linearFreedom = Vector3::One();
+    Vector3 angularFreedom = Vector3::One();
+    bool worldSpace = true;
+};
+
+/** @brief Fix an object's position with a harmonic oscillator. */
+struct PositionClamp
+{
+    Vector3 targetPosition = Vector3::Zero();
+    float dampingRatio = 1.0f;
+    float dampingFrequency = 10.0f;
 };
 } // namespace nc::physics

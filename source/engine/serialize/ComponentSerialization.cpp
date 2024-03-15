@@ -123,24 +123,6 @@ auto DeserializeConcaveCollider(std::istream& stream, const DeserializationConte
     return physics::ConcaveCollider{ctx.entityMap.at(id), std::move(geometry)};
 }
 
-void SerializeFreedomConstraint(std::ostream& stream, const physics::FreedomConstraint& out, const SerializationContext&, void*)
-{
-    serialize::Serialize(stream, ToVector3(out.linearFreedom));
-    serialize::Serialize(stream, ToVector3(out.angularFreedom));
-    serialize::Serialize(stream, out.worldSpace);
-}
-
-auto DeserializeFreedomConstraint(std::istream& stream, const DeserializationContext&, void*) -> physics::FreedomConstraint
-{
-    auto linearFreedom = Vector3{};
-    auto angularFreedom = Vector3{};
-    auto worldSpace = bool{};
-    serialize::Deserialize(stream, linearFreedom);
-    serialize::Deserialize(stream, angularFreedom);
-    serialize::Deserialize(stream, worldSpace);
-    return physics::FreedomConstraint{linearFreedom, angularFreedom, worldSpace};
-}
-
 void SerializeMeshRenderer(std::ostream& stream, const graphics::MeshRenderer& out, const SerializationContext& ctx, void*)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
@@ -235,6 +217,18 @@ auto DeserializePointLight(std::istream& stream, const DeserializationContext& c
     return graphics::PointLight{ctx.entityMap.at(id), ambient, diffuseColor, diffuseIntensity};
 }
 
+void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& out, const SerializationContext&, void*)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializePositionClamp(std::istream& stream, const DeserializationContext&, void*) -> physics::PositionClamp
+{
+    auto out = physics::PositionClamp{};
+    serialize::Deserialize(stream, out);
+    return out;
+}
+
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, void*)
 {
     nc::serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
@@ -253,4 +247,15 @@ auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext&
     return graphics::ToonRenderer{ctx.entityMap.at(id), std::move(mesh), std::move(material)};
 }
 
+void SerializeVelocityRestriction(std::ostream& stream, const physics::VelocityRestriction& out, const SerializationContext&, void*)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializeVelocityRestriction(std::istream& stream, const DeserializationContext&, void*) -> physics::VelocityRestriction
+{
+    auto out = physics::VelocityRestriction{};
+    serialize::Deserialize(stream, out);
+    return out;
+}
 } // namespace nc

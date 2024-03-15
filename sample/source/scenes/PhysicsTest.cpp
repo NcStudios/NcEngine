@@ -74,7 +74,7 @@ struct FollowCamera : public graphics::Camera
                  Entity target_,
                  float initialHeight = 12.0f,
                  float initialDistance = -12.0f,
-                 float initialSpeed = 5.0f)
+                 float initialSpeed = 75.0f)
         : graphics::Camera{self},
           target{target_},
           followHeight{initialHeight},
@@ -92,7 +92,8 @@ struct FollowCamera : public graphics::Camera
 
         if (auto wheel = input::MouseWheel())
         {
-            const auto delta = 0.5f * speed * dt * static_cast<float>(wheel);
+            // const auto delta = 0.5f * speed * dt * static_cast<float>(wheel);
+            const auto delta = 0.5f * 5.0f * dt * static_cast<float>(wheel);
             followHeight = Clamp(followHeight - delta, MinDistance, MaxDistance);
             followDistance = Clamp(followDistance + delta, -MaxDistance, -MinDistance);
         }
@@ -102,8 +103,18 @@ struct FollowCamera : public graphics::Camera
         const auto desiredPos = targetPos + offset;
         auto selfTransform = registry->Get<Transform>(ParentEntity());
         const auto delta = desiredPos - selfTransform->Position();
-        selfTransform->Translate(delta * (speed * dt));
-        selfTransform->LookAt(targetPos);
+        selfTransform->Translate(delta * (speed * dt * dt));
+
+
+            const auto camToTarget = targetPos - selfTransform->Position();
+    const auto forward = nc::Normalize(camToTarget);
+    const auto cosTheta = nc::Dot(nc::Vector3::Front(), forward);
+    const auto angle = std::acos(cosTheta);
+    const auto axis = nc::Normalize(nc::CrossProduct(nc::Vector3::Front(), forward));
+    const auto desiredRot = nc::Quaternion::FromAxisAngle(axis, angle);
+    const auto curRot = selfTransform->Rotation();
+    selfTransform->SetRotation(nc::Slerp(curRot, desiredRot, 0.7f));
+        // selfTransform->LookAt(targetPos);
     }
 };
 
@@ -117,6 +128,26 @@ void ForceBasedMovement(Entity self, Registry* registry)
     static auto jumpOnCooldown = false;
     static auto jumpCooldownRemaining = 0.0f;
 
+    static auto aimMode = false;
+
+    auto world = registry->GetEcs();
+
+    auto freezeConstraint = [world](const char* tag, bool freeze) mutable
+    {
+        auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag(tag));
+        if (freeze)
+        {
+            constraint.linearFreedom = Vector3::Splat(0.7f);
+            constraint.angularFreedom = Vector3{0.9f, 1.0f, 0.9f};
+        }
+        else
+        {
+            constraint.linearFreedom = Vector3::One();
+            constraint.angularFreedom = Vector3::One();
+        }
+    };
+
+
     if (jumpOnCooldown)
     {
         jumpCooldownRemaining -= 0.011667f;
@@ -127,10 +158,96 @@ void ForceBasedMovement(Entity self, Registry* registry)
         }
     }
 
+
     if(!registry->Contains<physics::PhysicsBody>(self))
         return;
 
     auto body = registry->Get<physics::PhysicsBody>(self);
+
+    if (KeyDown(input::KeyCode::LeftCtrl))
+    {
+        aimMode = true;
+        auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag("Worm Segment 3"));
+        constraint.linearFreedom = Vector3::Zero();
+        constraint.angularFreedom = Vector3::Up();
+
+        freezeConstraint("Worm Head", true);
+        freezeConstraint("Worm Segment 1", true);
+        freezeConstraint("Worm Segment 2", true);
+    }
+    else if (KeyUp(input::KeyCode::LeftCtrl))
+    {
+        aimMode = false;
+        auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag("Worm Segment 3"));
+        constraint.linearFreedom = Vector3::One();
+        constraint.angularFreedom = Vector3::One();
+
+        freezeConstraint("Worm Head", false);
+        freezeConstraint("Worm Segment 1", false);
+        freezeConstraint("Worm Segment 2", false);
+    }
+
+    if (aimMode)
+    {
+        body->SetVelocities(DirectX::g_XMZero, DirectX::g_XMZero);
+        // body->SetVelocities(DirectX::g_XMZero, body->GetAngularVelocity());
+        auto& transform = world.Get<Transform>(self);
+        auto& targetTransform = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3"));
+
+        if(KeyHeld(input::KeyCode::W))
+        {
+            body->ApplyImpulse(Vector3::Up() * force * 20.0f);
+            // transform.RotateAbout(targetTransform.Position(), targetTransform.Right(), -0.02f);
+        }
+
+        if(KeyHeld(input::KeyCode::S))
+        {
+            // body->ApplyImpulse(Vector3::Down() * force * 20.0f);
+            auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
+            transform.RotateAbout(targetTransform.Position(), targetTransform.Right(), 0.02f);
+        }
+
+        if(KeyHeld(input::KeyCode::A))
+        {
+            //body->ApplyImpulse(Vector3::Left() * force * 10.0f);
+            auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
+            transform.RotateAbout(targetPos, Vector3::Up(), -0.02f);
+            body->ApplyTorqueImpulse(transform.Up() * -1.0f);
+        }
+
+        if(KeyHeld(input::KeyCode::D))
+        {
+            // body->ApplyImpulse(Vector3::Right() * force * 10.0f);
+            auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
+            transform.RotateAbout(targetPos, Vector3::Up(), 0.02f);
+            body->ApplyTorqueImpulse(transform.Up() * 1.0f);
+        }
+
+        if(KeyHeld(input::KeyCode::Q))
+            body->ApplyTorqueImpulse(Vector3::Down() * torqueForce);
+
+        if(KeyHeld(input::KeyCode::E))
+            body->ApplyTorqueImpulse(Vector3::Up() * torqueForce);
+
+        if(!jumpOnCooldown && KeyDown(input::KeyCode::Space))
+        {
+            aimMode = false;
+            auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag("Worm Segment 3"));
+            constraint.linearFreedom = Vector3::One();
+            constraint.angularFreedom = Vector3::One();
+
+            jumpOnCooldown = true;
+            const auto dir = Normalize(registry->Get<Transform>(self)->Forward()) * jumpForce * 2.0f;
+            body->ApplyImpulse(dir);
+
+            world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 1")).ApplyImpulse(dir * 0.5f);
+            world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 2")).ApplyImpulse(dir * 0.25f);
+        }
+
+        return;
+    }
+
+
 
     if(KeyHeld(input::KeyCode::W))
         body->ApplyImpulse(Vector3::Front() * force);
@@ -147,8 +264,11 @@ void ForceBasedMovement(Entity self, Registry* registry)
     if(!jumpOnCooldown && KeyDown(input::KeyCode::Space))
     {
         jumpOnCooldown = true;
-        const auto dir = Normalize(registry->Get<Transform>(self)->Forward() + Vector3::Up());
-        body->ApplyImpulse(dir * jumpForce);
+        const auto dir = Normalize(registry->Get<Transform>(self)->Forward()) * jumpForce * 2.0f;
+        body->ApplyImpulse(dir);
+
+        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 1")).ApplyImpulse(dir * 0.5f);
+        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 2")).ApplyImpulse(dir * 0.25f);
     }
 
     if(KeyHeld(input::KeyCode::Q))
@@ -156,6 +276,17 @@ void ForceBasedMovement(Entity self, Registry* registry)
 
     if(KeyHeld(input::KeyCode::E))
         body->ApplyTorqueImpulse(Vector3::Up() * torqueForce);
+
+    if (KeyDown(input::KeyCode::LeftShift))
+    {
+        const auto dir = Vector3::Up() * jumpForce;
+        body->ApplyImpulse(dir);
+
+        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 1")).ApplyImpulse(dir * 0.5f);
+        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 2")).ApplyImpulse(dir * 0.25f);
+    }
+
+
 }
 
 auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
@@ -167,19 +298,19 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     const auto segment1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, -0.9f},
         .scale = Vector3::Splat(0.8f),
-        .tag = "Worm Segment"
+        .tag = "Worm Segment 1"
     });
 
     const auto segment2 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, -1.6f},
         .scale = Vector3::Splat(0.6f),
-        .tag = "Worm Segment"
+        .tag = "Worm Segment 2"
     });
 
     const auto segment3 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, -2.1f},
         .scale = Vector3::Splat(0.4f),
-        .tag = "Worm Segment"
+        .tag = "Worm Segment 3"
     });
 
     world.Emplace<FixedLogic>(head, ForceBasedMovement);
@@ -204,6 +335,37 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
     world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
 
+    world.Emplace<physics::VelocityRestriction>(head);
+    world.Emplace<physics::VelocityRestriction>(segment1);
+    world.Emplace<physics::VelocityRestriction>(segment2);
+    world.Emplace<physics::VelocityRestriction>(segment3);
+
+    // world.Emplace<graphics::ToonRenderer>(head, asset::CapsuleMesh, GreenToonMaterial);
+    // world.Emplace<graphics::ToonRenderer>(segment1, asset::CapsuleMesh, GreenToonMaterial);
+    // world.Emplace<graphics::ToonRenderer>(segment2, asset::CapsuleMesh, GreenToonMaterial);
+    // world.Emplace<graphics::ToonRenderer>(segment3, asset::CapsuleMesh, GreenToonMaterial);
+
+    // auto& headCollider = world.Emplace<physics::Collider>(head, physics::CapsuleProperties{}, false);
+    // auto& segment1Collider = world.Emplace<physics::Collider>(segment1, physics::CapsuleProperties{}, false);
+    // auto& segment2Collider = world.Emplace<physics::Collider>(segment2, physics::CapsuleProperties{}, false);
+    // auto& segment3Collider = world.Emplace<physics::Collider>(segment3, physics::CapsuleProperties{}, false);
+
+    // auto& headTransform = world.Get<Transform>(head);
+    // auto& segment1Transform = world.Get<Transform>(head);
+    // auto& segment2Transform = world.Get<Transform>(head);
+    // auto& segment3Transform = world.Get<Transform>(head);
+
+    // world.Emplace<physics::PhysicsBody>(head, headTransform, headCollider, physics::PhysicsProperties{.mass = 5.0f});
+    // world.Emplace<physics::PhysicsBody>(segment1, segment1Transform, segment1Collider, physics::PhysicsProperties{.mass = 3.0f});
+    // world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
+    // world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
+
+    // world.Emplace<physics::VelocityRestriction>(head, Vector3::One(), Vector3::One());
+    // world.Emplace<physics::VelocityRestriction>(segment1, Vector3::One(), Vector3::Up());
+    // world.Emplace<physics::VelocityRestriction>(segment2, Vector3::One(), Vector3::Up());
+    // world.Emplace<physics::VelocityRestriction>(segment3, Vector3::One(), Vector3::Up());
+
+    (void)ncPhysics;
     constexpr auto bias = 0.2f;
     constexpr auto softness = 0.1f;
     ncPhysics->AddJoint(head, segment1, Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
@@ -253,7 +415,8 @@ void BuildGround(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
+    auto& groundRenderer = world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueHatchedToonMaterial);
+    groundRenderer.SetHatchingTiling(32);
     world.Emplace<graphics::ToonRenderer>(backWall, asset::CubeMesh, OrangeToonMaterial);
     world.Emplace<graphics::ToonRenderer>(frontWall, asset::CubeMesh, OrangeToonMaterial);
     world.Emplace<graphics::ToonRenderer>(leftWall, asset::CubeMesh, OrangeToonMaterial);
@@ -283,6 +446,24 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
         .flags = Entity::Flags::Static
     });
 
+    const auto step1 = world.Emplace<Entity>({
+        .position = Vector3{-12.0f, 3.75f, 40.0f},
+        .scale = Vector3{10.0f, 1.0f, 10.0f},
+        .tag = "Step"
+    });
+
+    const auto step2 = world.Emplace<Entity>({
+        .position = Vector3{-12.0f, 3.75f, 60.0f},
+        .scale = Vector3{10.0f, 1.0f, 10.0f},
+        .tag = "Step"
+    });
+
+    const auto rotatingPlatform = world.Emplace<Entity>({
+        .position = Vector3{-12.0f, 3.75f, 50.0f},
+        .scale = Vector3{6.0f, 1.0f, 9.9f},
+        .tag = "Step"
+    });
+
     // Ramp
     const auto ramp1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 1.15f, 25.99f},
@@ -301,6 +482,9 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
 
     world.Emplace<graphics::ToonRenderer>(platform1, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(platform2, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(step1, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(step2, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(rotatingPlatform, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, TealToonMaterial);
     world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, TealToonMaterial);
 
@@ -308,13 +492,27 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = RampHullCollider});
     auto& platform1Collider = world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
     auto& platform2Collider = world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
+    auto& step1Collider = world.Emplace<physics::Collider>(step1, physics::BoxProperties{});
+    auto& step2Collider = world.Emplace<physics::Collider>(step2, physics::BoxProperties{});
+    auto& rotatingPlatformCollider = world.Emplace<physics::Collider>(rotatingPlatform, physics::BoxProperties{});
     world.Emplace<physics::PhysicsMaterial>(ramp1, 0.1f, 1.0f);
     world.Emplace<physics::PhysicsMaterial>(ramp2, 0.1f, 1.0f);
 
     auto& platform1Transform = world.Get<Transform>(platform1);
     auto& platform2Transform = world.Get<Transform>(platform2);
+    auto& step1Transform = world.Get<Transform>(step1);
+    auto& step2Transform = world.Get<Transform>(step2);
+    auto& rotatingPlatformTransform = world.Get<Transform>(rotatingPlatform);
     world.Emplace<physics::PhysicsBody>(platform1, platform1Transform, platform1Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
     world.Emplace<physics::PhysicsBody>(platform2, platform2Transform, platform2Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+    world.Emplace<physics::PhysicsBody>(step1, step1Transform, step1Collider);
+    world.Emplace<physics::PhysicsBody>(step2, step2Transform, step2Collider);
+    world.Emplace<physics::PhysicsBody>(rotatingPlatform, rotatingPlatformTransform, rotatingPlatformCollider);
+
+    world.Emplace<physics::PositionClamp>(step1, step1Transform.Position(), 0.2f, 3.0f);
+    world.Emplace<physics::VelocityRestriction>(step1, Vector3::Up(), Vector3::Zero());
+    world.Emplace<physics::PositionClamp>(step2, step2Transform.Position(), 0.2f, 3.0f);
+    world.Emplace<physics::VelocityRestriction>(rotatingPlatform, Vector3::Zero(), Vector3::Vector3::Zero());
 
     // Bridge
     auto makePlank = [&](const Vector3& pos, const Vector3& scale)
@@ -360,30 +558,46 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
 
     ncPhysics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
     ncPhysics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
+
+
+
+    // disks
+    auto makeDisk = [world](const Vector3& position) mutable
+    {
+        auto disk = world.Emplace<Entity>({
+            .position = position,
+            .scale = Vector3{6.0f, 1.0f, 6.0f},
+            .tag = "Disk"
+        });
+
+        world.Emplace<graphics::ToonRenderer>(disk, asset::CubeMesh, DefaultHatchedToonMaterial);
+        // world.Emplace<graphics::ToonRenderer>(disk, "ramp.nca", DefaultHatchedToonMaterial);
+        auto& diskCollider = world.Emplace<physics::Collider>(disk, physics::BoxProperties{});
+        // auto& diskCollider = world.Emplace<physics::Collider>(disk, physics::HullProperties{"ramp.nca"});
+        auto& diskTransform = world.Get<Transform>(disk);
+        world.Emplace<physics::PhysicsBody>(disk, diskTransform, diskCollider);
+        world.Emplace<physics::VelocityRestriction>(disk, Vector3::Zero(), Vector3{0.7f, 0.7f, 0.7f});
+    };
+
+    makeDisk(Vector3{20.0f, 0.0f, 15.0f});
+    makeDisk(Vector3{25.0f, 1.0f, 25.0f});
+    makeDisk(Vector3{25.0f, 2.0f, 35.0f});
+
+
 }
 
 void BuildHalfPipes(ecs::Ecs world)
 {
-    const auto halfPipe1 = world.Emplace<Entity>({
-        .position = Vector3{20.0f, 3.45f, 14.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.7f, 0.0f),
-        .scale = Vector3::Splat(4.0f),
-        .tag = "Half Pipe",
-        .flags = Entity::Flags::Static
-    });
-
     const auto halfPipe2 = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 2.0f, 40.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.57f, 0.0f),
-        .scale = Vector3{10.0f, 3.0f, 15.0f},
+        .position = Vector3{15.0f, 3.7f, 40.5f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, -0.173f),
+        .scale = Vector3{10.0f, 3.0f, 5.0f},
         .tag = "Half Pipe",
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe1, HalfPipeMesh, RedToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, BlueToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, BlueHatchedToonMaterial);
 
-    world.Emplace<physics::ConcaveCollider>(halfPipe1, HalfPipeConcaveCollider);
     world.Emplace<physics::ConcaveCollider>(halfPipe2, HalfPipeConcaveCollider);
 }
 
@@ -439,7 +653,7 @@ void BuildBalancePlatform(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider, physics::PhysicsProperties{.isKinematic = true});
     world.Emplace<physics::PhysicsBody>(balancePlatform, platformTransform, platformCollider, physics::PhysicsProperties{.mass = 5.0f});
 
-    world.Emplace<physics::FreedomConstraint>(base, Vector3::One(), Vector3::Zero());
+    world.Emplace<physics::VelocityRestriction>(base, Vector3::One(), Vector3::Zero());
 
     ncPhysics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
 }
@@ -477,8 +691,8 @@ void BuildSwingingBars(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<physics::PhysicsBody>(bar1, bar1Transform, bar1Collider, physics::PhysicsProperties{});
     world.Emplace<physics::PhysicsBody>(bar2, bar2Transform, bar2Collider, physics::PhysicsProperties{});
 
-    world.Emplace<physics::FreedomConstraint>(bar1, Vector3::One(), Vector3::Up());
-    world.Emplace<physics::FreedomConstraint>(bar2, Vector3::One(), Vector3::Up());
+    world.Emplace<physics::VelocityRestriction>(bar1, Vector3::One(), Vector3::Up());
+    world.Emplace<physics::VelocityRestriction>(bar2, Vector3::One(), Vector3::Up());
 
 
     ncPhysics->AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
@@ -556,12 +770,52 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{1.20484f, 47.0f, -8.48875f},
+            .position = Vector3{40.0f, 25.0f, 30.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 0.433f, 0.162f},
         Vector3{1.0f, 0.433f, 0.162f},
-        800.0f
+        55.0f
+    );
+
+    world.Emplace<graphics::PointLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{-40.0f, 25.0f, 30.0f},
+            .tag = "Point Light"
+        }),
+        Vector3{1.0f, 0.433f, 0.162f},
+        Vector3{1.0f, 0.433f, 0.162f},
+        55.0f
+    );
+
+    world.Emplace<graphics::PointLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{0.0f, 25.0f, -30.0f},
+            .tag = "Point Light"
+        }),
+        Vector3{1.0f, 0.433f, 0.162f},
+        Vector3{1.0f, 0.433f, 0.162f},
+        55.0f
+    );
+
+    // world.Emplace<graphics::PointLight>(
+    //     world.Emplace<Entity>({
+    //         .position = Vector3{-40.0f, 25.0f, -30.0f},
+    //         .tag = "Point Light"
+    //     }),
+    //     Vector3{1.0f, 0.433f, 0.162f},
+    //     Vector3{1.0f, 0.433f, 0.162f},
+    //     55.0f
+    // );
+
+    world.Emplace<graphics::PointLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{0.0f, 327.0f, 0.0f},
+            .tag = "Point Light"
+        }),
+        Vector3{1.0f, 0.9f, 0.9f},
+        Vector3{1.0f, 0.9f, 0.9f},
+        334.0f
     );
 }
 
