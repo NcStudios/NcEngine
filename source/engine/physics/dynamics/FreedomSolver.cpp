@@ -74,11 +74,14 @@ auto GenerateVelocityRestrictionConstraints(ecs::ExplicitEcs<VelocityRestriction
             continue;
 
         auto& body = gameState.Get<PhysicsBody>(entity);
-        auto& transform = gameState.Get<Transform>(entity);
+        const auto& rotation = restriction.worldSpace
+            ? g_XMZero
+            : gameState.Get<Transform>(entity).RotationXM();
+
         out.emplace_back(
             XMLoadVector3(&restriction.linearFreedom),
             XMLoadVector3(&restriction.angularFreedom),
-            restriction.worldSpace ? g_XMZero : transform.RotationXM(), // can optimize away for worldspace
+            rotation,
             &body,
             restriction.worldSpace
         );
@@ -136,7 +139,7 @@ void Solve(std::vector<VelocityRestrictionConstraint>& constraints)
         auto localLinear = XMVector3InverseRotate(linearVelocity, constraint.rotation);
         localLinear = XMVectorMultiply(localLinear, constraint.linearFreedom);
         auto localAngular = XMVector3InverseRotate(angularVelocity, constraint.rotation);
-        localLinear = XMVectorMultiply(localAngular, constraint.angularFreedom);
+        localAngular = XMVectorMultiply(localAngular, constraint.angularFreedom);
         constraint.body->SetVelocities(
             XMVector3Rotate(localLinear, constraint.rotation),
             XMVector3Rotate(localAngular, constraint.rotation)

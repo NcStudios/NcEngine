@@ -8,7 +8,7 @@
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
-#include "ncengine/physics/FreedomConstraint.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -204,14 +204,14 @@ void ForceBasedMovement(Entity self, Registry* registry)
         {
             // body->ApplyImpulse(Vector3::Down() * force * 20.0f);
             auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
-            transform.RotateAbout(targetTransform.Position(), targetTransform.Right(), 0.02f);
+            transform.RotateAround(targetTransform.Position(), targetTransform.Right(), 0.02f);
         }
 
         if(KeyHeld(input::KeyCode::A))
         {
             //body->ApplyImpulse(Vector3::Left() * force * 10.0f);
             auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
-            transform.RotateAbout(targetPos, Vector3::Up(), -0.02f);
+            transform.RotateAround(targetPos, Vector3::Up(), -0.02f);
             body->ApplyTorqueImpulse(transform.Up() * -1.0f);
         }
 
@@ -219,7 +219,7 @@ void ForceBasedMovement(Entity self, Registry* registry)
         {
             // body->ApplyImpulse(Vector3::Right() * force * 10.0f);
             auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
-            transform.RotateAbout(targetPos, Vector3::Up(), 0.02f);
+            transform.RotateAround(targetPos, Vector3::Up(), 0.02f);
             body->ApplyTorqueImpulse(transform.Up() * 1.0f);
         }
 

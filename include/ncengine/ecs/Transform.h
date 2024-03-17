@@ -145,7 +145,8 @@ class Transform final : public ComponentBase
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
 
-        void RotateAbout(const Vector3& point, const Vector3& axis, float radians);
+        /** @brief Apply a rotation about an axis passing through a point. */
+        void RotateAround(const Vector3& point, const Vector3& axis, float radians);
 
         /** @brief Rotate to point towards a target position. */
         void LookAt(const Vector3& target);
@@ -170,8 +171,7 @@ class Transform final : public ComponentBase
         void UpdateWorldMatrix(DirectX::FXMMATRIX parentMatrix)
         {
             m_dirty = false;
-            // m_worldMatrix = m_localMatrix * parentMatrix;
-            m_worldMatrix = parentMatrix * m_localMatrix;
+            m_worldMatrix = m_localMatrix * parentMatrix;
         }
 };
 } //end namespace nc

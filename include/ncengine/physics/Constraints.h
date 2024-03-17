@@ -1,24 +1,9 @@
 #pragma once
 
-#include "ncengine/ecs/Entity.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
 namespace nc::physics
 {
-struct DampingRatio
-{
-    static constexpr auto Soft = 0.3f;
-    static constexpr auto Medium = 0.5f;
-    static constexpr auto Hard = 1.0f;
-};
-
-struct DampingFrequency
-{
-    static constexpr auto Slow = 5.0f;
-    static constexpr auto Medium = 10.0f;
-    static constexpr auto Fast = 30.0f;
-};
-
 /**
  * @brief Constraint an object's linear and angular velocities.
  * 
@@ -34,7 +19,13 @@ struct VelocityRestriction
     bool worldSpace = true;
 };
 
-/** @brief Fix an object's position with a harmonic oscillator. */
+/**
+ * @brief Fix an object's position with a harmonic oscillator.
+ * 
+ * A PositionClamp fixes an object's position using a spring-damper-based velocity response. The damping ratio controls
+ * the oscillation decay (usually in the range [0, 1], or greater for overdamping), and the damping frequency controls
+ * the rate of oscillation in hertz. The clamp has no effect if the object does not have a PhysicsBody.
+ */
 struct PositionClamp
 {
     Vector3 targetPosition = Vector3::Zero();

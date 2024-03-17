@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/physics/FreedomConstraint.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 
 namespace nc::physics

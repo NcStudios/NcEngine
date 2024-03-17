@@ -1,11 +1,9 @@
 #pragma once
 
 #include "Constraint.h"
+#include "FreedomSolver.h"
 #include "Joint.h"
 #include "physics/PhysicsPipelineTypes.h"
-
-
-#include "FreedomSolver.h"
 
 namespace nc::physics
 {

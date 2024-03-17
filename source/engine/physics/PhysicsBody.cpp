@@ -5,8 +5,6 @@
 #include "physics/PhysicsConstants.h"
 #include "physics/PhysicsDebugging.h"
 
-#include <iostream>
-
 using namespace DirectX;
 
 namespace

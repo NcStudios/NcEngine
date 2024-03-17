@@ -140,7 +140,7 @@ namespace nc
         m_dirty = true;
     }
 
-    void Transform::RotateAbout(const Vector3& point, const Vector3& axis, float radians)
+    void Transform::RotateAround(const Vector3& point, const Vector3& axis, float radians)
     {
         using namespace DirectX;
         auto translation = XMVectorSubtract(m_localMatrix.r[3], DirectX::XMLoadVector3(&point));
