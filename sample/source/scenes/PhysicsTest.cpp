@@ -92,7 +92,6 @@ struct FollowCamera : public graphics::Camera
 
         if (auto wheel = input::MouseWheel())
         {
-            // const auto delta = 0.5f * speed * dt * static_cast<float>(wheel);
             const auto delta = 0.5f * 5.0f * dt * static_cast<float>(wheel);
             followHeight = Clamp(followHeight - delta, MinDistance, MaxDistance);
             followDistance = Clamp(followDistance + delta, -MaxDistance, -MinDistance);
@@ -105,189 +104,172 @@ struct FollowCamera : public graphics::Camera
         const auto delta = desiredPos - selfTransform->Position();
         selfTransform->Translate(delta * (speed * dt * dt));
 
-
-            const auto camToTarget = targetPos - selfTransform->Position();
-    const auto forward = nc::Normalize(camToTarget);
-    const auto cosTheta = nc::Dot(nc::Vector3::Front(), forward);
-    const auto angle = std::acos(cosTheta);
-    const auto axis = nc::Normalize(nc::CrossProduct(nc::Vector3::Front(), forward));
-    const auto desiredRot = nc::Quaternion::FromAxisAngle(axis, angle);
-    const auto curRot = selfTransform->Rotation();
-    selfTransform->SetRotation(nc::Slerp(curRot, desiredRot, 0.7f));
-        // selfTransform->LookAt(targetPos);
+        const auto camToTarget = targetPos - selfTransform->Position();
+        const auto forward = nc::Normalize(camToTarget);
+        const auto cosTheta = nc::Dot(nc::Vector3::Front(), forward);
+        const auto angle = std::acos(cosTheta);
+        const auto axis = nc::Normalize(nc::CrossProduct(nc::Vector3::Front(), forward));
+        const auto desiredRot = nc::Quaternion::FromAxisAngle(axis, angle);
+        const auto curRot = selfTransform->Rotation();
+        selfTransform->SetRotation(nc::Slerp(curRot, desiredRot, 0.7f));
     }
 };
 
-void ForceBasedMovement(Entity self, Registry* registry)
+class VehicleController : public FreeComponent
 {
     static constexpr auto force = 0.7f;
     static constexpr auto torqueForce = 0.6f;
     static constexpr auto jumpForce = 30.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
-    static auto jumpOnCooldown = false;
-    static auto jumpCooldownRemaining = 0.0f;
-
-    static auto aimMode = false;
-
-    auto world = registry->GetEcs();
-
-    auto freezeConstraint = [world](const char* tag, bool freeze) mutable
-    {
-        auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag(tag));
-        if (freeze)
+    public:
+        VehicleController(Entity self, Entity node1, Entity node2, Entity node3)
+            : FreeComponent{self}, m_node1{node1}, m_node2{node2}, m_node3{node3}
         {
-            constraint.linearFreedom = Vector3::Splat(0.7f);
-            constraint.angularFreedom = Vector3{0.9f, 1.0f, 0.9f};
-        }
-        else
-        {
-            constraint.linearFreedom = Vector3::One();
-            constraint.angularFreedom = Vector3::One();
-        }
-    };
-
-
-    if (jumpOnCooldown)
-    {
-        jumpCooldownRemaining -= 0.011667f;
-        if (jumpCooldownRemaining < 0.0f)
-        {
-            jumpCooldownRemaining = jumpCooldownTime;
-            jumpOnCooldown = false;
-        }
-    }
-
-
-    if(!registry->Contains<physics::PhysicsBody>(self))
-        return;
-
-    auto body = registry->Get<physics::PhysicsBody>(self);
-
-    if (KeyDown(input::KeyCode::LeftCtrl))
-    {
-        aimMode = true;
-        auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag("Worm Segment 3"));
-        constraint.linearFreedom = Vector3::Zero();
-        constraint.angularFreedom = Vector3::Up();
-
-        freezeConstraint("Worm Head", true);
-        freezeConstraint("Worm Segment 1", true);
-        freezeConstraint("Worm Segment 2", true);
-    }
-    else if (KeyUp(input::KeyCode::LeftCtrl))
-    {
-        aimMode = false;
-        auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag("Worm Segment 3"));
-        constraint.linearFreedom = Vector3::One();
-        constraint.angularFreedom = Vector3::One();
-
-        freezeConstraint("Worm Head", false);
-        freezeConstraint("Worm Segment 1", false);
-        freezeConstraint("Worm Segment 2", false);
-    }
-
-    if (aimMode)
-    {
-        body->SetVelocities(DirectX::g_XMZero, DirectX::g_XMZero);
-        // body->SetVelocities(DirectX::g_XMZero, body->GetAngularVelocity());
-        auto& transform = world.Get<Transform>(self);
-        auto& targetTransform = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3"));
-
-        if(KeyHeld(input::KeyCode::W))
-        {
-            body->ApplyImpulse(Vector3::Up() * force * 20.0f);
-            // transform.RotateAbout(targetTransform.Position(), targetTransform.Right(), -0.02f);
         }
 
-        if(KeyHeld(input::KeyCode::S))
+        void Run(Entity self, Registry* registry, float dt)
         {
-            // body->ApplyImpulse(Vector3::Down() * force * 20.0f);
-            auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
-            transform.RotateAround(targetTransform.Position(), targetTransform.Right(), 0.02f);
+            auto world = registry->GetEcs();
+
+            if (m_jumpOnCooldown)
+            {
+                m_jumpCooldownRemaining -= dt;
+                if (m_jumpCooldownRemaining < 0.0f)
+                {
+                    m_jumpCooldownRemaining = jumpCooldownTime;
+                    m_jumpOnCooldown = false;
+                }
+            }
+
+            if(!world.Contains<physics::PhysicsBody>(self))
+                return;
+
+            auto& body = world.Get<physics::PhysicsBody>(self);
+
+            if (KeyDown(input::KeyCode::LeftCtrl))
+                ToggleAimModeOn(world, true);
+            else if (KeyUp(input::KeyCode::LeftCtrl))
+                ToggleAimModeOn(world, false);
+
+            if (m_aimMode)
+                AimController(world, body);
+            else
+                MoveController(world, body);
         }
 
-        if(KeyHeld(input::KeyCode::A))
+    private:
+        Entity m_node1;
+        Entity m_node2;
+        Entity m_node3;
+        float m_jumpCooldownRemaining = 0.0f;
+        bool m_jumpOnCooldown = false;
+        bool m_aimMode = false;
+
+        void ToggleAimModeOn(ecs::Ecs world, bool on)
         {
-            //body->ApplyImpulse(Vector3::Left() * force * 10.0f);
-            auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
-            transform.RotateAround(targetPos, Vector3::Up(), -0.02f);
-            body->ApplyTorqueImpulse(transform.Up() * -1.0f);
+            m_aimMode = on;
+            auto getConstraint = [&world](Entity e) { return &world.Get<physics::VelocityRestriction>(e); };
+            auto bodyConstraints = {getConstraint(ParentEntity()), getConstraint(m_node1), getConstraint(m_node2)};
+            auto tailConstraint = getConstraint(m_node3);
+            if (on)
+            {
+                tailConstraint->linearFreedom = Vector3::Zero();
+                tailConstraint->angularFreedom = Vector3::Up();
+                for (auto constraint : bodyConstraints)
+                {
+                    constraint->linearFreedom = Vector3::Splat(0.7f);
+                    constraint->angularFreedom = Vector3{0.9f, 1.0f, 0.9f};
+                }
+            }
+            else
+            {
+                tailConstraint->linearFreedom = Vector3::One();
+                tailConstraint->angularFreedom = Vector3::One();
+                for (auto constraint : bodyConstraints)
+                {
+                    constraint->linearFreedom = Vector3::One();
+                    constraint->angularFreedom = Vector3::One();
+                }
+            }
         }
 
-        if(KeyHeld(input::KeyCode::D))
+        void MoveController(ecs::Ecs world, physics::PhysicsBody& body)
         {
-            // body->ApplyImpulse(Vector3::Right() * force * 10.0f);
-            auto targetPos = world.Get<Transform>(world.GetEntityByTag("Worm Segment 3")).Position();
-            transform.RotateAround(targetPos, Vector3::Up(), 0.02f);
-            body->ApplyTorqueImpulse(transform.Up() * 1.0f);
+            if(KeyHeld(input::KeyCode::W)) body.ApplyImpulse(Vector3::Front() * force);
+            if(KeyHeld(input::KeyCode::S)) body.ApplyImpulse(Vector3::Back() * force);
+            if(KeyHeld(input::KeyCode::A)) body.ApplyImpulse(Vector3::Left() * force);
+            if(KeyHeld(input::KeyCode::D)) body.ApplyImpulse(Vector3::Right() * force);
+            if(KeyHeld(input::KeyCode::Q)) body.ApplyTorqueImpulse(Vector3::Down() * torqueForce);
+            if(KeyHeld(input::KeyCode::E)) body.ApplyTorqueImpulse(Vector3::Up() * torqueForce);
+
+            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
+            {
+                m_jumpOnCooldown = true;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                body.ApplyImpulse(dir);
+                world.Get<physics::PhysicsBody>(m_node1).ApplyImpulse(dir * 0.5f);
+                world.Get<physics::PhysicsBody>(m_node2).ApplyImpulse(dir * 0.25f);
+            }
+
+            if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
+            {
+                m_jumpOnCooldown = true;
+                const auto dir = Vector3::Up() * jumpForce;
+                body.ApplyImpulse(dir);
+                world.Get<physics::PhysicsBody>(m_node1).ApplyImpulse(dir * 0.5f);
+                world.Get<physics::PhysicsBody>(m_node2).ApplyImpulse(dir * 0.25f);
+            }
         }
 
-        if(KeyHeld(input::KeyCode::Q))
-            body->ApplyTorqueImpulse(Vector3::Down() * torqueForce);
-
-        if(KeyHeld(input::KeyCode::E))
-            body->ApplyTorqueImpulse(Vector3::Up() * torqueForce);
-
-        if(!jumpOnCooldown && KeyDown(input::KeyCode::Space))
+        void AimController(ecs::Ecs world, physics::PhysicsBody& body)
         {
-            aimMode = false;
-            auto& constraint = world.Get<physics::VelocityRestriction>(world.GetEntityByTag("Worm Segment 3"));
-            constraint.linearFreedom = Vector3::One();
-            constraint.angularFreedom = Vector3::One();
+            body.SetVelocities(DirectX::g_XMZero, DirectX::g_XMZero);
+            auto& transform = world.Get<Transform>(ParentEntity());
+            auto& targetTransform = world.Get<Transform>(m_node3);
 
-            jumpOnCooldown = true;
-            const auto dir = Normalize(registry->Get<Transform>(self)->Forward()) * jumpForce * 2.0f;
-            body->ApplyImpulse(dir);
+            if(KeyHeld(input::KeyCode::W))
+            {
+                body.ApplyImpulse(Vector3::Up() * force * 20.0f);
+            }
 
-            world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 1")).ApplyImpulse(dir * 0.5f);
-            world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 2")).ApplyImpulse(dir * 0.25f);
+            if(KeyHeld(input::KeyCode::S))
+            {
+                auto targetPos = world.Get<Transform>(m_node3).Position();
+                transform.RotateAround(targetTransform.Position(), targetTransform.Right(), 0.02f);
+            }
+
+            if(KeyHeld(input::KeyCode::A))
+            {
+                auto targetPos = world.Get<Transform>(m_node3).Position();
+                transform.RotateAround(targetPos, Vector3::Up(), -0.02f);
+                body.ApplyTorqueImpulse(transform.Up() * -1.0f);
+            }
+
+            if(KeyHeld(input::KeyCode::D))
+            {
+                auto targetPos = world.Get<Transform>(m_node3).Position();
+                transform.RotateAround(targetPos, Vector3::Up(), 0.02f);
+                body.ApplyTorqueImpulse(transform.Up() * 1.0f);
+            }
+
+            if(KeyHeld(input::KeyCode::Q))
+                body.ApplyTorqueImpulse(Vector3::Down() * torqueForce);
+
+            if(KeyHeld(input::KeyCode::E))
+                body.ApplyTorqueImpulse(Vector3::Up() * torqueForce);
+
+            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
+            {
+                ToggleAimModeOn(world, false);
+                m_jumpOnCooldown = true;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                body.ApplyImpulse(dir);
+                world.Get<physics::PhysicsBody>(m_node1).ApplyImpulse(dir * 0.5f);
+                world.Get<physics::PhysicsBody>(m_node2).ApplyImpulse(dir * 0.25f);
+            }
         }
-
-        return;
-    }
-
-
-
-    if(KeyHeld(input::KeyCode::W))
-        body->ApplyImpulse(Vector3::Front() * force);
-
-    if(KeyHeld(input::KeyCode::S))
-        body->ApplyImpulse(Vector3::Back() * force);
-
-    if(KeyHeld(input::KeyCode::A))
-        body->ApplyImpulse(Vector3::Left() * force);
-
-    if(KeyHeld(input::KeyCode::D))
-        body->ApplyImpulse(Vector3::Right() * force);
-
-    if(!jumpOnCooldown && KeyDown(input::KeyCode::Space))
-    {
-        jumpOnCooldown = true;
-        const auto dir = Normalize(registry->Get<Transform>(self)->Forward()) * jumpForce * 2.0f;
-        body->ApplyImpulse(dir);
-
-        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 1")).ApplyImpulse(dir * 0.5f);
-        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 2")).ApplyImpulse(dir * 0.25f);
-    }
-
-    if(KeyHeld(input::KeyCode::Q))
-        body->ApplyTorqueImpulse(Vector3::Down() * torqueForce);
-
-    if(KeyHeld(input::KeyCode::E))
-        body->ApplyTorqueImpulse(Vector3::Up() * torqueForce);
-
-    if (KeyDown(input::KeyCode::LeftShift))
-    {
-        const auto dir = Vector3::Up() * jumpForce;
-        body->ApplyImpulse(dir);
-
-        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 1")).ApplyImpulse(dir * 0.5f);
-        world.Get<physics::PhysicsBody>(world.GetEntityByTag("Worm Segment 2")).ApplyImpulse(dir * 0.25f);
-    }
-
-
-}
+};
 
 auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
 {
@@ -313,7 +295,8 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
         .tag = "Worm Segment 3"
     });
 
-    world.Emplace<FixedLogic>(head, ForceBasedMovement);
+    world.Emplace<VehicleController>(head, segment1, segment2, segment3);
+    world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
     world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, GreenToonMaterial);
     world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, GreenToonMaterial);
