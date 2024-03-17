@@ -3,8 +3,6 @@
 #include <chrono>
 #include <utility>
 
-#include <iostream>
-
 namespace nc::time
 {
 class StepTimer
@@ -56,22 +54,13 @@ class StepTimer
             if (m_useFixedStep)
             {
                 if (WithinFixedStepEpsilon(ticks))
-                {
-                    std::cout << "within epsilon: " << ticks << '\n';
                     ticks = m_fixedStepTicks;
-                }
 
                 m_accumulatedTicks += ticks;
                 m_framesThisTick = 0ull;
                 while (m_accumulatedTicks >= m_fixedStepTicks)
                 {
                     ++m_framesThisTick;
-
-                    if (m_framesThisTick > 1)
-                    {
-                        std::cout << "multiple frames: " << m_framesThisTick << '\n';
-                    }
-
                     m_deltaTicks = m_fixedStepTicks;
                     m_totalTicks += m_fixedStepTicks;
                     m_accumulatedTicks -= m_fixedStepTicks;

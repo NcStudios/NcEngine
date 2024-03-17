@@ -21,43 +21,23 @@ graphics::PbrMaterial YellowPbrMaterial{"solid_color\\Yello.nca", asset::Default
 // constexpr auto toonOverlay = asset::DefaultBaseColor;
 constexpr auto toonOverlay = "line\\overlay.nca";
 constexpr auto toonHatch = "line\\Hatch3.nca";
-// constexpr auto toonHatch = asset::DefaultBaseColor;
-// graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial RedToonMaterial{"solid_color\\Red.nca", toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial GreenToonMaterial{"solid_color\\Green.nca", toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial BlueToonMaterial{"solid_color\\Blue.nca", toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial OrangeToonMaterial{"solid_color\\Orange.nca", toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial PurpleToonMaterial{"solid_color\\Purple.nca", toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial TealToonMaterial{"solid_color\\Teal.nca", toonOverlay, asset::DefaultBaseColor, 8};
-// graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay, asset::DefaultBaseColor, 8};
-
-// graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial RedHatchedToonMaterial{"solid_color\\Red.nca", toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color\\Green.nca", toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color\\Blue.nca", toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color\\Orange.nca", toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color\\Purple.nca", toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial TealHatchedToonMaterial{"solid_color\\Teal.nca", toonOverlay, toonHatch, 8};
-// graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color\\Yellow.nca", toonOverlay, toonHatch, 8};
-
 graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial RedToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial GreenToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial BlueToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial OrangeToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial PurpleToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial TealToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial YellowToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial RedToonMaterial{"solid_color\\Red.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial GreenToonMaterial{"solid_color\\Green.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial BlueToonMaterial{"solid_color\\Blue.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial OrangeToonMaterial{"solid_color\\Orange.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial PurpleToonMaterial{"solid_color\\Purple.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial TealToonMaterial{"solid_color\\Teal.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay, asset::DefaultBaseColor, 8};
 
 graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial RedHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial GreenHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial BlueHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial OrangeHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial PurpleHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial TealHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial YellowHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-
+graphics::ToonMaterial RedHatchedToonMaterial{"solid_color\\Red.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color\\Green.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color\\Blue.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color\\Orange.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color\\Purple.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial TealHatchedToonMaterial{"solid_color\\Teal.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color\\Yellow.nca", toonOverlay, toonHatch, 8};
 
 FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 

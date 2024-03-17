@@ -340,32 +340,6 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::VelocityRestriction>(segment2);
     world.Emplace<physics::VelocityRestriction>(segment3);
 
-    // world.Emplace<graphics::ToonRenderer>(head, asset::CapsuleMesh, GreenToonMaterial);
-    // world.Emplace<graphics::ToonRenderer>(segment1, asset::CapsuleMesh, GreenToonMaterial);
-    // world.Emplace<graphics::ToonRenderer>(segment2, asset::CapsuleMesh, GreenToonMaterial);
-    // world.Emplace<graphics::ToonRenderer>(segment3, asset::CapsuleMesh, GreenToonMaterial);
-
-    // auto& headCollider = world.Emplace<physics::Collider>(head, physics::CapsuleProperties{}, false);
-    // auto& segment1Collider = world.Emplace<physics::Collider>(segment1, physics::CapsuleProperties{}, false);
-    // auto& segment2Collider = world.Emplace<physics::Collider>(segment2, physics::CapsuleProperties{}, false);
-    // auto& segment3Collider = world.Emplace<physics::Collider>(segment3, physics::CapsuleProperties{}, false);
-
-    // auto& headTransform = world.Get<Transform>(head);
-    // auto& segment1Transform = world.Get<Transform>(head);
-    // auto& segment2Transform = world.Get<Transform>(head);
-    // auto& segment3Transform = world.Get<Transform>(head);
-
-    // world.Emplace<physics::PhysicsBody>(head, headTransform, headCollider, physics::PhysicsProperties{.mass = 5.0f});
-    // world.Emplace<physics::PhysicsBody>(segment1, segment1Transform, segment1Collider, physics::PhysicsProperties{.mass = 3.0f});
-    // world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
-    // world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
-
-    // world.Emplace<physics::VelocityRestriction>(head, Vector3::One(), Vector3::One());
-    // world.Emplace<physics::VelocityRestriction>(segment1, Vector3::One(), Vector3::Up());
-    // world.Emplace<physics::VelocityRestriction>(segment2, Vector3::One(), Vector3::Up());
-    // world.Emplace<physics::VelocityRestriction>(segment3, Vector3::One(), Vector3::Up());
-
-    (void)ncPhysics;
     constexpr auto bias = 0.2f;
     constexpr auto softness = 0.1f;
     ncPhysics->AddJoint(head, segment1, Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
@@ -415,12 +389,12 @@ void BuildGround(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    auto& groundRenderer = world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueHatchedToonMaterial);
+    auto& groundRenderer = world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, DefaultHatchedToonMaterial);
     groundRenderer.SetHatchingTiling(32);
-    world.Emplace<graphics::ToonRenderer>(backWall, asset::CubeMesh, OrangeToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(frontWall, asset::CubeMesh, OrangeToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(leftWall, asset::CubeMesh, OrangeToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(rightWall, asset::CubeMesh, OrangeToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(backWall, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(frontWall, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(leftWall, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(rightWall, asset::CubeMesh, DefaultToonMaterial);
 
     world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
     world.Emplace<physics::Collider>(backWall, physics::BoxProperties{});
@@ -446,24 +420,6 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
         .flags = Entity::Flags::Static
     });
 
-    const auto step1 = world.Emplace<Entity>({
-        .position = Vector3{-12.0f, 3.75f, 40.0f},
-        .scale = Vector3{10.0f, 1.0f, 10.0f},
-        .tag = "Step"
-    });
-
-    const auto step2 = world.Emplace<Entity>({
-        .position = Vector3{-12.0f, 3.75f, 60.0f},
-        .scale = Vector3{10.0f, 1.0f, 10.0f},
-        .tag = "Step"
-    });
-
-    const auto rotatingPlatform = world.Emplace<Entity>({
-        .position = Vector3{-12.0f, 3.75f, 50.0f},
-        .scale = Vector3{6.0f, 1.0f, 9.9f},
-        .tag = "Step"
-    });
-
     // Ramp
     const auto ramp1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 1.15f, 25.99f},
@@ -482,42 +438,32 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
 
     world.Emplace<graphics::ToonRenderer>(platform1, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(platform2, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(step1, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(step2, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(rotatingPlatform, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, DefaultToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, DefaultToonMaterial);
 
     world.Emplace<physics::Collider>(ramp1, physics::BoxProperties{});
     world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = RampHullCollider});
     auto& platform1Collider = world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
     auto& platform2Collider = world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
-    auto& step1Collider = world.Emplace<physics::Collider>(step1, physics::BoxProperties{});
-    auto& step2Collider = world.Emplace<physics::Collider>(step2, physics::BoxProperties{});
-    auto& rotatingPlatformCollider = world.Emplace<physics::Collider>(rotatingPlatform, physics::BoxProperties{});
     world.Emplace<physics::PhysicsMaterial>(ramp1, 0.1f, 1.0f);
     world.Emplace<physics::PhysicsMaterial>(ramp2, 0.1f, 1.0f);
 
     auto& platform1Transform = world.Get<Transform>(platform1);
     auto& platform2Transform = world.Get<Transform>(platform2);
-    auto& step1Transform = world.Get<Transform>(step1);
-    auto& step2Transform = world.Get<Transform>(step2);
-    auto& rotatingPlatformTransform = world.Get<Transform>(rotatingPlatform);
     world.Emplace<physics::PhysicsBody>(platform1, platform1Transform, platform1Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
     world.Emplace<physics::PhysicsBody>(platform2, platform2Transform, platform2Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(step1, step1Transform, step1Collider);
-    world.Emplace<physics::PhysicsBody>(step2, step2Transform, step2Collider);
-    world.Emplace<physics::PhysicsBody>(rotatingPlatform, rotatingPlatformTransform, rotatingPlatformCollider);
-
-    world.Emplace<physics::PositionClamp>(step1, step1Transform.Position(), 0.2f, 3.0f);
-    world.Emplace<physics::VelocityRestriction>(step1, Vector3::Up(), Vector3::Zero());
-    world.Emplace<physics::PositionClamp>(step2, step2Transform.Position(), 0.2f, 3.0f);
-    world.Emplace<physics::VelocityRestriction>(rotatingPlatform, Vector3::Zero(), Vector3::Vector3::Zero());
 
     // Bridge
-    auto makePlank = [&](const Vector3& pos, const Vector3& scale)
+    const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
+    auto makePlank = [&world, bridgeParent](const Vector3& pos, const Vector3& scale)
     {
-        const auto plank = world.Emplace<Entity>({.position = pos, .scale = scale, .tag = "Plank"});
+        const auto plank = world.Emplace<Entity>({
+            .position = pos,
+            .scale = scale,
+            .parent = bridgeParent,
+            .tag = "Plank"}
+        );
+
         auto& transform = world.Get<Transform>(plank);
         world.Emplace<graphics::ToonRenderer>(plank, asset::CubeMesh, OrangeToonMaterial);
         auto& collider = world.Emplace<physics::Collider>(plank, physics::BoxProperties{}, false);
@@ -558,32 +504,76 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
 
     ncPhysics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
     ncPhysics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
+}
 
+void BuildSteps(ecs::Ecs world)
+{
+    const auto stepParent = world.Emplace<Entity>({.tag = "Steps"});
+    auto buildStep = [&world, stepParent](const Vector3& position, const Vector3& scale, uint32_t hatchTiling = 8u)
+    {
+        const auto step = world.Emplace<Entity>({
+            .position = position,
+            .scale = scale,
+            .parent = stepParent,
+            .tag = "Step"
+        });
 
+        auto& renderer = world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, TealToonMaterial);
+        renderer.SetHatchingTiling(hatchTiling);
+        auto& transform = world.Get<Transform>(step);
+        auto& collider = world.Emplace<physics::Collider>(step, physics::BoxProperties{});
+        world.Emplace<physics::PhysicsBody>(step, transform, collider);
+        world.Emplace<physics::PositionClamp>(step, position, 0.1f, 2.0f);
+        world.Emplace<physics::VelocityRestriction>(step, Vector3::Up(), Vector3::Zero());
+    };
 
-    // disks
-    auto makeDisk = [world](const Vector3& position) mutable
+    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f});
+
+    constexpr auto smallStepScale = Vector3{1.0f, 0.5f, 1.0f};
+    constexpr auto smallStepBasePosition = Vector3{-5.5f, 5.0f, 36.0f};
+    for (auto i = 0ull; i < 9ull; ++i)
+    {
+        for (auto j = 0ull; j < 9ull; ++j)
+        {
+            const auto offset = Vector3{-1.01f * i, -0.3f * i, 1.01f * j};
+            buildStep(smallStepBasePosition + offset, smallStepScale, 2);
+        }
+    }
+
+    const auto rotatingBridge = world.Emplace<Entity>({
+        .position = Vector3{-19.1f, 2.0f, 40.0f},
+        .rotation = Quaternion::FromAxisAngle(Vector3::Up(), 1.57f),
+        .scale = Vector3{4.0f, 1.0f, 9.9f},
+        .tag = "Rotating Bridge"
+    });
+
+    world.Emplace<graphics::ToonRenderer>(rotatingBridge, asset::CubeMesh, RedToonMaterial);
+    auto& transform = world.Get<Transform>(rotatingBridge);
+    auto& collider = world.Emplace<physics::Collider>(rotatingBridge, physics::BoxProperties{});
+    world.Emplace<physics::PhysicsBody>(rotatingBridge, transform, collider);
+    world.Emplace<physics::VelocityRestriction>(rotatingBridge, Vector3::Zero(), Vector3::Right() * 0.7f);
+}
+
+void BuildRotatingSteps(ecs::Ecs world)
+{
+    auto build = [world](const Vector3& position) mutable
     {
         auto disk = world.Emplace<Entity>({
             .position = position,
-            .scale = Vector3{6.0f, 1.0f, 6.0f},
+            .scale = Vector3{7.0f, 1.0f, 7.0f},
             .tag = "Disk"
         });
 
-        world.Emplace<graphics::ToonRenderer>(disk, asset::CubeMesh, DefaultHatchedToonMaterial);
-        // world.Emplace<graphics::ToonRenderer>(disk, "ramp.nca", DefaultHatchedToonMaterial);
+        world.Emplace<graphics::ToonRenderer>(disk, asset::CubeMesh, YellowToonMaterial);
         auto& diskCollider = world.Emplace<physics::Collider>(disk, physics::BoxProperties{});
-        // auto& diskCollider = world.Emplace<physics::Collider>(disk, physics::HullProperties{"ramp.nca"});
         auto& diskTransform = world.Get<Transform>(disk);
         world.Emplace<physics::PhysicsBody>(disk, diskTransform, diskCollider);
         world.Emplace<physics::VelocityRestriction>(disk, Vector3::Zero(), Vector3{0.7f, 0.7f, 0.7f});
     };
 
-    makeDisk(Vector3{20.0f, 0.0f, 15.0f});
-    makeDisk(Vector3{25.0f, 1.0f, 25.0f});
-    makeDisk(Vector3{25.0f, 2.0f, 35.0f});
-
-
+    build(Vector3{-29.0f, 2.5f, 50.0f});
+    build(Vector3{-20.0f, 3.0f, 55.0f});
+    build(Vector3{-11.0f, 3.5f, 60.0f});
 }
 
 void BuildHalfPipes(ecs::Ecs world)
@@ -609,7 +599,7 @@ void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     });
 
     const auto panel = world.Emplace<Entity>({
-        .position = Vector3{-15.0f, 3.5f, 15.0f},
+        .position = Vector3{-15.0f, 1.5f, 15.0f},
         .scale = Vector3{3.0f, 3.0f, 0.1f}
     });
 
@@ -738,10 +728,10 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     auto ncRandom = modules.Get<Random>();
 
     // Reserve space for default objects so references don't get invalidated
-    world.GetPool<Transform>().Reserve(40);
-    world.GetPool<graphics::ToonRenderer>().Reserve(40);
-    world.GetPool<physics::PhysicsBody>().Reserve(40);
-    world.GetPool<physics::Collider>().Reserve(40);
+    world.GetPool<Transform>().Reserve(140);
+    world.GetPool<graphics::ToonRenderer>().Reserve(140);
+    world.GetPool<physics::PhysicsBody>().Reserve(140);
+    world.GetPool<physics::Collider>().Reserve(140);
 
     // Vehicle
     const auto vehicle = BuildVehicle(world, ncPhysics);
@@ -763,6 +753,8 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     // Environment
     BuildGround(world);
     BuildBridge(world, ncPhysics);
+    BuildSteps(world);
+    BuildRotatingSteps(world);
     BuildHinge(world, ncPhysics);
     BuildBalancePlatform(world, ncPhysics);
     BuildSwingingBars(world, ncPhysics);
@@ -770,52 +762,12 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{40.0f, 25.0f, 30.0f},
+            .position = Vector3{0.0f, 40.0f, 0.0f},
             .tag = "Point Light"
         }),
-        Vector3{1.0f, 0.433f, 0.162f},
-        Vector3{1.0f, 0.433f, 0.162f},
-        55.0f
-    );
-
-    world.Emplace<graphics::PointLight>(
-        world.Emplace<Entity>({
-            .position = Vector3{-40.0f, 25.0f, 30.0f},
-            .tag = "Point Light"
-        }),
-        Vector3{1.0f, 0.433f, 0.162f},
-        Vector3{1.0f, 0.433f, 0.162f},
-        55.0f
-    );
-
-    world.Emplace<graphics::PointLight>(
-        world.Emplace<Entity>({
-            .position = Vector3{0.0f, 25.0f, -30.0f},
-            .tag = "Point Light"
-        }),
-        Vector3{1.0f, 0.433f, 0.162f},
-        Vector3{1.0f, 0.433f, 0.162f},
-        55.0f
-    );
-
-    // world.Emplace<graphics::PointLight>(
-    //     world.Emplace<Entity>({
-    //         .position = Vector3{-40.0f, 25.0f, -30.0f},
-    //         .tag = "Point Light"
-    //     }),
-    //     Vector3{1.0f, 0.433f, 0.162f},
-    //     Vector3{1.0f, 0.433f, 0.162f},
-    //     55.0f
-    // );
-
-    world.Emplace<graphics::PointLight>(
-        world.Emplace<Entity>({
-            .position = Vector3{0.0f, 327.0f, 0.0f},
-            .tag = "Point Light"
-        }),
-        Vector3{1.0f, 0.9f, 0.9f},
-        Vector3{1.0f, 0.9f, 0.9f},
-        334.0f
+        Vector3{1.0f, 1.0f, 1.0f},
+        Vector3{1.0f, 1.0f, 1.0f},
+        90.0f
     );
 }
 
