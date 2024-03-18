@@ -52,15 +52,11 @@ class PhysicsBody
         void ApplyTorqueImpulse(DirectX::FXMVECTOR torque);
         void ApplyVelocity(DirectX::FXMVECTOR delta);
         void ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta);
+        void SetVelocities(DirectX::FXMVECTOR linear, DirectX::FXMVECTOR angular);
         void UpdateWorldInertia(const Transform* transform);
         auto Integrate(Transform* transform, float dt) -> IntegrationResult;
         void Wake() noexcept { m_framesAtThreshold = 0u; m_awake = true; }
         void Sleep() noexcept { m_awake = false; }
-        void SetVelocities(DirectX::FXMVECTOR linear, DirectX::FXMVECTOR angular) noexcept
-        {
-            m_linearVelocity = linear;
-            m_angularVelocity = angular;
-        }
 
         auto GetProperties() const noexcept -> const PhysicsProperties& { return m_properties; }
         auto GetVelocity() const noexcept -> DirectX::FXMVECTOR { return m_linearVelocity; }

@@ -1,3 +1,7 @@
+/**
+ * @file Constraints.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "ncengine/utility/MatrixUtilities.h"
@@ -5,7 +9,7 @@
 namespace nc::physics
 {
 /**
- * @brief Constraint an object's linear and angular velocities.
+ * @brief Constrain an object's linear and angular velocities.
  * 
  * Degrees of freedom may be restricted by setting freedom values on a per-axis basis. Values should be in the range
  * [0, 1] with 0 fully disabling motion, 1 fully enabling motion, and intermediate values damping motion. The constraint
@@ -20,11 +24,12 @@ struct VelocityRestriction
 };
 
 /**
- * @brief Fix an object's position with a harmonic oscillator.
+ * @brief Constrain an object's position with a harmonic oscillator.
  * 
- * A PositionClamp fixes an object's position using a spring-damper-based velocity response. The damping ratio controls
- * the oscillation decay (usually in the range [0, 1], or greater for overdamping), and the damping frequency controls
- * the rate of oscillation in hertz. The clamp has no effect if the object does not have a PhysicsBody.
+ * A PositionClamp keeps an object at a fixed worldspace position using a spring-damper system, allowing for some sag
+ * and bounciness in the response. The damping ratio controls the oscillation decay (usually in the range [0, 1], or
+ * greater for overdamping), and the damping frequency controls the rate of oscillation in hertz. The clamp acts on
+ * velocities and has no effect if the object does not have a PhysicsBody.
  */
 struct PositionClamp
 {

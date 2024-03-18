@@ -135,6 +135,13 @@ void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTO
     m_angularVelocity = XMVectorAdd(m_angularVelocity, angVelDelta);
 }
 
+void PhysicsBody::SetVelocities(DirectX::FXMVECTOR linear, DirectX::FXMVECTOR angular)
+{
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
+    m_linearVelocity = linear;
+    m_angularVelocity = angular;
+}
+
 void PhysicsBody::UpdateWorldInertia(const Transform* transform)
 {
     auto rot_v = transform->RotationXM();
