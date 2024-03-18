@@ -140,7 +140,7 @@ auto BuildMergeContactsTask(task::ExceptionContext& ctx, NarrowPhase& narrow, Co
     });
 }
 
-inline auto BuildGenerateContactConstraintsTask(task::ExceptionContext& ctx, Solver& solver, float fixedTimeStep)
+inline auto BuildGenerateFreedomConstraintsTask(task::ExceptionContext& ctx, Solver& solver, float fixedTimeStep)
 {
     return task::Guard(ctx, [&solver, fixedTimeStep]
     {

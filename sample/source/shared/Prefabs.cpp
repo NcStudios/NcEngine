@@ -18,9 +18,7 @@ graphics::PbrMaterial PurplePbrMaterial{"solid_color\\Purple.nca", asset::Defaul
 graphics::PbrMaterial TealPbrMaterial{"solid_color\\Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial YellowPbrMaterial{"solid_color\\Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 
-// constexpr auto toonOverlay = asset::DefaultBaseColor;
 constexpr auto toonOverlay = "line\\overlay.nca";
-constexpr auto toonHatch = "line\\Hatch3.nca";
 graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
 graphics::ToonMaterial RedToonMaterial{"solid_color\\Red.nca", toonOverlay, asset::DefaultBaseColor, 8};
 graphics::ToonMaterial GreenToonMaterial{"solid_color\\Green.nca", toonOverlay, asset::DefaultBaseColor, 8};
@@ -30,6 +28,7 @@ graphics::ToonMaterial PurpleToonMaterial{"solid_color\\Purple.nca", toonOverlay
 graphics::ToonMaterial TealToonMaterial{"solid_color\\Teal.nca", toonOverlay, asset::DefaultBaseColor, 8};
 graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay, asset::DefaultBaseColor, 8};
 
+constexpr auto toonHatch = "line\\Hatch3.nca";
 graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
 graphics::ToonMaterial RedHatchedToonMaterial{"solid_color\\Red.nca", toonOverlay, toonHatch, 8};
 graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color\\Green.nca", toonOverlay, toonHatch, 8};

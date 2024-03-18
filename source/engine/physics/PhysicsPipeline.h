@@ -128,7 +128,7 @@ auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) ->
 
     auto generateFreedomConstraints = builder.Add(
         "Solver - Generate Freedom Constraints",
-        BuildGenerateContactConstraintsTask(context, m_solver, m_fixedTimeStep),
+        BuildGenerateFreedomConstraintsTask(context, m_solver, m_fixedTimeStep),
         {updateInertia, applyGravity}
     );
 

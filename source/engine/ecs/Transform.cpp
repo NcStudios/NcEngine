@@ -143,17 +143,15 @@ namespace nc
     void Transform::RotateAround(const Vector3& point, const Vector3& axis, float radians)
     {
         using namespace DirectX;
-        auto translation = XMVectorSubtract(m_localMatrix.r[3], DirectX::XMLoadVector3(&point));
-
-        auto rotationAxis = DirectX::XMLoadVector3(&axis);
-        auto rotationQuaternion = XMQuaternionRotationAxis(rotationAxis, radians);
-        auto rotatedTranslation = XMVector3Rotate(translation, rotationQuaternion);
-
-        m_localMatrix.r[3] = XMVectorSetW(XMVectorAdd(rotatedTranslation, DirectX::XMLoadVector3(&point)), 1.0f);
-
-        Rotate(axis, radians);
+        const auto rotationPoint = XMLoadVector3(&point);
+        const auto translation = XMVectorSubtract(m_localMatrix.r[3], rotationPoint);
+        const auto rotationMatrix = ToRotMatrix(axis, radians);
+        auto rotatedTranslation = XMVector3TransformCoord(translation, rotationMatrix);
+        rotatedTranslation = XMVectorAdd(rotatedTranslation, rotationPoint);
+        m_localMatrix.r[3] = g_XMIdentityR3;
+        XMMatrixMultiply(m_localMatrix, rotationMatrix);
+        m_localMatrix.r[3] = rotatedTranslation;
         m_dirty = true;
-
     }
 
     void Transform::LookAt(const Vector3& target)

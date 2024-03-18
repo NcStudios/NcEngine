@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include "ncengine/utility/MatrixUtilities.h"
+#include "ncmath/Vector.h"
 
 namespace nc::physics
 {
