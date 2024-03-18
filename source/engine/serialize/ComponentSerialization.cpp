@@ -172,8 +172,6 @@ auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& 
 {
     auto id = uint32_t{};
     auto properties = physics::PhysicsProperties{};
-    auto linearFreedom = Vector3{};
-    auto angularFreedom = Vector3{};
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, properties);
     const auto entity = ctx.entityMap.at(id);

@@ -235,21 +235,18 @@ class VehicleController : public FreeComponent
 
             if(KeyHeld(input::KeyCode::S))
             {
-                auto targetPos = world.Get<Transform>(m_node3).Position();
                 transform.RotateAround(targetTransform.Position(), targetTransform.Right(), 0.02f);
             }
 
             if(KeyHeld(input::KeyCode::A))
             {
-                auto targetPos = world.Get<Transform>(m_node3).Position();
-                transform.RotateAround(targetPos, Vector3::Up(), -0.02f);
+                transform.RotateAround(targetTransform.Position(), Vector3::Up(), -0.02f);
                 body.ApplyTorqueImpulse(transform.Up() * -1.0f);
             }
 
             if(KeyHeld(input::KeyCode::D))
             {
-                auto targetPos = world.Get<Transform>(m_node3).Position();
-                transform.RotateAround(targetPos, Vector3::Up(), 0.02f);
+                transform.RotateAround(targetTransform.Position(), Vector3::Up(), 0.02f);
                 body.ApplyTorqueImpulse(transform.Up() * 1.0f);
             }
 
@@ -518,8 +515,10 @@ void BuildSteps(ecs::Ecs world)
     {
         for (auto j = 0ull; j < 9ull; ++j)
         {
-            const auto offset = Vector3{-1.01f * i, -0.3f * i, 1.01f * j};
-            buildStep(smallStepBasePosition + offset, smallStepScale, 2);
+            const auto x = -1.01f * static_cast<float>(i);
+            const auto y = -0.3f * static_cast<float>(i);
+            const auto z = 1.01f* static_cast<float>(j);
+            buildStep(smallStepBasePosition + Vector3{x, y, z}, smallStepScale, 2);
         }
     }
 
