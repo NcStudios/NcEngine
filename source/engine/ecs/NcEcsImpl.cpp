@@ -34,8 +34,7 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
     (
         update_task_id::FrameLogicUpdate,
         "FrameLogicUpdate",
-        [this] { RunFrameLogic(); },
-        {update_task_id::DebugRendererNewFrame}
+        [this] { RunFrameLogic(); }
     );
 
     update.Add

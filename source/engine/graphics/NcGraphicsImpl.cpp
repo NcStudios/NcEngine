@@ -152,10 +152,14 @@ namespace nc::graphics
         NC_LOG_TRACE("Building NcGraphics Tasks");
 
 #if NC_DEBUG_RENDERING_ENABLED
+         // We must express FrameLogicUpdate dependency here (as a predecessor) so we don't have
+         // a missing task id in prod builds where this is excluded.
         update.Add(
             update_task_id::DebugRendererNewFrame,
             "DebugRendererNewFrame",
-            debug::DebugRendererNewFrame
+            debug::DebugRendererNewFrame,
+            {},
+            {update_task_id::FrameLogicUpdate}
         );
 #endif
         update.Add(

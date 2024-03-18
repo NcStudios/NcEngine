@@ -21,6 +21,7 @@ struct TaskGraphContext : StableAddress
     std::vector<std::unique_ptr<tf::Taskflow>> storage;
 };
 
+/** @brief Task state for an item scheduled on a TaskGraph. */
 struct Task
 {
     tf::Task task;

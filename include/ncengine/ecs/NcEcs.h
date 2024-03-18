@@ -22,7 +22,7 @@ class ComponentRegistry;
  * 
  * Tasks
  *   FrameLogicUpdate
- *     Depends On: DebugRendererNewFrame
+ *     Depends On: DebugRendererNewFrame (only in dev builds)
  *     Component Access: All
  *   CommitPendingChanges
  *     Depends On: ParticleEmitterUpdate, AudioSourceUpdate, FrameLogicUpdate
