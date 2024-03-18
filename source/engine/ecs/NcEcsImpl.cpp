@@ -29,18 +29,19 @@ EcsModule::EcsModule(ComponentRegistry& registry, SystemEvents& events) noexcept
 
 void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
-    NC_LOG_TRACE("Building EcsModule workload");
+    NC_LOG_TRACE("Building EcsModule Tasks");
     update.Add
     (
-        task::UpdatePhase::Logic,
-        "NcEcs - RunFrameLogic",
-        [this] { RunFrameLogic(); }
+        update_task_id::FrameLogicUpdate,
+        "FrameLogicUpdate",
+        [this] { RunFrameLogic(); },
+        {update_task_id::DebugRendererNewFrame}
     );
 
     update.Add
     (
-        task::UpdatePhase::Sync,
-        "NcEcs - Commit Staged Changes",
+        update_task_id::CommitStagedChanges,
+        "CommitStagedChanges",
         [this]
         {
             m_registry->CommitPendingChanges();
@@ -51,6 +52,11 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
             }
 
             UpdateWorldSpaceMatrices();
+        },
+        {
+            update_task_id::AudioSourceUpdate,
+            update_task_id::ParticleEmitterUpdate,
+            update_task_id::PhysicsPipeline
         }
     );
 }

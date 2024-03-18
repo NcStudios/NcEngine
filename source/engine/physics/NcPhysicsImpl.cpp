@@ -34,6 +34,16 @@ class NcPhysicsStub : public nc::physics::NcPhysics
         void UnregisterClickable(IClickable*) noexcept override {}
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr;}
 
+        void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
+        {
+            update.Add(
+                nc::update_task_id::PhysicsPipeline,
+                "PhysicsPipeline(stub)",
+                []{},
+                {nc::update_task_id::FrameLogicUpdate}
+            );
+        }
+
     private:
         BspTreeStub m_bspStub;
 };
@@ -93,8 +103,13 @@ auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
 
 void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
-    NC_LOG_TRACE("Building NcPhysics workload");
-    update.Add(task::UpdatePhase::Physics, "NcPhysics", m_pipeline.BuildTaskGraph(update.GetExceptionContext()));
+    NC_LOG_TRACE("Building NcPhysics Tasks");
+    update.Add(
+        update_task_id::PhysicsPipeline,
+        "PhysicsPipeline",
+        m_pipeline.BuildTaskGraph(update.GetExceptionContext()),
+        {update_task_id::FrameLogicUpdate}
+    );
 }
 
 void NcPhysicsImpl::Clear() noexcept
