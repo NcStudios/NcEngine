@@ -622,10 +622,10 @@ void BuildBalancePlatform(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     auto& baseTransform = world.Get<Transform>(base);
     auto& platformTransform = world.Get<Transform>(balancePlatform);
 
-    world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider, physics::PhysicsProperties{.isKinematic = true});
+    world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider);
     world.Emplace<physics::PhysicsBody>(balancePlatform, platformTransform, platformCollider, physics::PhysicsProperties{.mass = 5.0f});
 
-    world.Emplace<physics::VelocityRestriction>(base, Vector3::One(), Vector3::Zero());
+    world.Emplace<physics::VelocityRestriction>(base, Vector3::Zero(), Vector3::Zero());
 
     ncPhysics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
 }
