@@ -6,17 +6,18 @@ namespace nc::ui::editor
 {
 auto GetLoadedAssets(asset::AssetType type) -> std::vector<std::string_view>
 {
+    using namespace nc::asset;
     switch(type)
     {
-        case asset::AssetType::AudioClip:         return AssetService<AudioClipView>::Get()->GetAllLoaded();
-        case asset::AssetType::ConcaveCollider:   return AssetService<ConcaveColliderView>::Get()->GetAllLoaded();
-        case asset::AssetType::CubeMap:           return AssetService<CubeMapView>::Get()->GetAllLoaded();
-        case asset::AssetType::HullCollider:      return AssetService<ConvexHullView>::Get()->GetAllLoaded();
-        case asset::AssetType::Mesh:              return AssetService<MeshView>::Get()->GetAllLoaded();
-        case asset::AssetType::Shader:            return AssetService<ShaderView>::Get()->GetAllLoaded();
-        case asset::AssetType::SkeletalAnimation: return std::vector<std::string_view>(); // @todo: UI for editor
-        case asset::AssetType::Texture:           return AssetService<TextureView>::Get()->GetAllLoaded();
-        case asset::AssetType::Font:              return AssetService<FontView, FontInfo>::Get()->GetAllLoaded();
+        case AssetType::AudioClip:         return AssetService<AudioClipView>::Get()->GetAllLoaded();
+        case AssetType::ConcaveCollider:   return AssetService<ConcaveColliderView>::Get()->GetAllLoaded();
+        case AssetType::CubeMap:           return AssetService<CubeMapView>::Get()->GetAllLoaded();
+        case AssetType::HullCollider:      return AssetService<ConvexHullView>::Get()->GetAllLoaded();
+        case AssetType::Mesh:              return AssetService<MeshView>::Get()->GetAllLoaded();
+        case AssetType::Shader:            return AssetService<ShaderView>::Get()->GetAllLoaded();
+        case AssetType::SkeletalAnimation: return std::vector<std::string_view>(); // @todo: UI for editor
+        case AssetType::Texture:           return AssetService<TextureView>::Get()->GetAllLoaded();
+        case AssetType::Font:              return AssetService<FontView, FontInfo>::Get()->GetAllLoaded();
     }
 
     throw NcError{fmt::format("Unknown AssetType: {}", static_cast<unsigned>(type))};

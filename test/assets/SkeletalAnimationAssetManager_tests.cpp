@@ -5,7 +5,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto test_animation = "test_animation.nca";
 const auto test_animation_2 = "test_animation_2.nca";

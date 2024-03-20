@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace nc
+namespace nc::asset
 {
 auto HasValidAssetExtension(const std::string& path) -> bool;
 
@@ -48,4 +48,4 @@ auto GetPaths(const std::vector<T>& vec, Proj&& proj) -> std::vector<std::string
 
     return out;
 }
-} // namespace nc
+} // namespace nc::asset

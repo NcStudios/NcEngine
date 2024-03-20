@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace nc
+namespace nc::asset
 {
 SkeletalAnimationAssetManager::SkeletalAnimationAssetManager(const std::string& skeletalAnimationAssetDirectory, uint32_t maxSkeletalAnimations)
     : m_assetDirectory{skeletalAnimationAssetDirectory},
@@ -116,4 +116,4 @@ auto SkeletalAnimationAssetManager::OnUpdate() -> Signal<const asset::SkeletalAn
 {
     return m_onUpdate;
 }
-} // namespace nc
+} // namespace nc::asset

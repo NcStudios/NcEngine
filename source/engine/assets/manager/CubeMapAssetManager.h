@@ -6,12 +6,9 @@
 
 #include <string>
 
-namespace nc
-{
-namespace asset
+namespace nc::asset
 {
 struct CubeMapUpdateEventData;
-} // namespace asset
 
 class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
 {
@@ -35,5 +32,5 @@ class CubeMapAssetManager : public IAssetService<CubeMapView, std::string>
         uint32_t m_maxCubeMapsCount;
         Signal<const asset::CubeMapUpdateEventData&> m_onUpdate;
 };
-} // namesapce nc
+} // namesapce nc::asset
 

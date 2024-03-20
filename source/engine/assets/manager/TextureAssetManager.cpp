@@ -5,7 +5,7 @@
 
 #include "ncasset/Import.h"
 
-namespace nc
+namespace nc::asset
 {
 TextureAssetManager::TextureAssetManager(const std::string& texturesAssetDirectory, uint32_t maxTextures)
     : m_assetDirectory{texturesAssetDirectory},
@@ -80,10 +80,10 @@ bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
     if (!m_table.erase(path))
         return false;
 
-    m_onUpdate.Emit(asset::TextureUpdateEventData{
-        asset::UpdateAction::Unload,
+    m_onUpdate.Emit(TextureUpdateEventData{
+        UpdateAction::Unload,
         std::vector<std::string>{path},
-        std::span<const asset::TextureWithId>{}
+        std::span<const TextureWithId>{}
     });
 
     return true;
@@ -92,8 +92,8 @@ bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
 void TextureAssetManager::UnloadAll(asset_flags_type)
 {
     m_table.clear();
-    m_onUpdate.Emit(asset::TextureUpdateEventData{
-        asset::UpdateAction::UnloadAll,
+    m_onUpdate.Emit(TextureUpdateEventData{
+        UpdateAction::UnloadAll,
         {},
         {}
     });
@@ -117,7 +117,7 @@ bool TextureAssetManager::IsLoaded(const std::string& path, asset_flags_type) co
     return m_table.contains(path);
 }
 
-auto TextureAssetManager::OnUpdate() -> Signal<const asset::TextureUpdateEventData&>&
+auto TextureAssetManager::OnUpdate() -> Signal<const TextureUpdateEventData&>&
 {
     return m_onUpdate;
 }
@@ -129,4 +129,4 @@ auto TextureAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
         return std::string_view{data};
     });
 }
-} // namespace nc
+} // namespace nc::asset

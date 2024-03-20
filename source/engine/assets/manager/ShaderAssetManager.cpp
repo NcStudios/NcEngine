@@ -38,8 +38,8 @@ namespace
         file.close();
         return buffer;
     }
-    
-    auto ReadDescriptor(std::ifstream& file) -> nc::DescriptorManifest
+
+    auto ReadDescriptor(std::ifstream& file) -> nc::asset::DescriptorManifest
     {
         uint32_t set;
         file >> set;
@@ -49,41 +49,41 @@ namespace
 
         std::string descriptorTypeFromFile;
         file >> descriptorTypeFromFile;
-        auto descriptorType = nc::DescriptorType::None;
+        auto descriptorType = nc::asset::DescriptorType::None;
         if (descriptorTypeFromFile == "UniformBuffer")
         {
-            descriptorType = nc::DescriptorType::UniformBuffer;
+            descriptorType = nc::asset::DescriptorType::UniformBuffer;
         }
         else if (descriptorTypeFromFile == "StorageBuffer")
         {
-            descriptorType = nc::DescriptorType::StorageBuffer;
+            descriptorType = nc::asset::DescriptorType::StorageBuffer;
         }
         else if (descriptorTypeFromFile == "CombinedImageSampler")
         {
-            descriptorType = nc::DescriptorType::CombinedImageSampler;
+            descriptorType = nc::asset::DescriptorType::CombinedImageSampler;
         }
-        if (descriptorType == nc::DescriptorType::None)
+        if (descriptorType == nc::asset::DescriptorType::None)
         {
             throw nc::NcError("No valid descriptor type found.");
         }
 
         std::string stagesFromFile;
         file >> stagesFromFile;
-        auto stages = nc::ShaderStages::None;
+        auto stages = nc::asset::ShaderStages::None;
         if (stagesFromFile.find("Vertex") != std::string::npos) 
         {
-            stages = stages | nc::ShaderStages::Vertex;
+            stages = stages | nc::asset::ShaderStages::Vertex;
         }
         if (stagesFromFile.find("Fragment") != std::string::npos) 
         {
-            stages = stages | nc::ShaderStages::Fragment;
+            stages = stages | nc::asset::ShaderStages::Fragment;
         }
-        if (stages == nc::ShaderStages::None)
+        if (stages == nc::asset::ShaderStages::None)
         {
             throw nc::NcError("No valid shader stages found.");
         }
 
-        return nc::DescriptorManifest
+        return nc::asset::DescriptorManifest
         {
             .setIndex = set,
             .slotIndex = binding,
@@ -92,11 +92,11 @@ namespace
         };
     }
 
-    auto ReadShader(const std::string& path, const std::string& uid) -> nc::ShaderFlyweight
+    auto ReadShader(const std::string& path, const std::string& uid) -> nc::asset::ShaderFlyweight
     {
         const auto ncaString = (std::filesystem::path(path) / std::filesystem::path("shader.nca")).string();
 
-        if (!nc::HasValidAssetExtension(ncaString)) throw nc::NcError("Invalid extension: " + ncaString);
+        if (!nc::asset::HasValidAssetExtension(ncaString)) throw nc::NcError("Invalid extension: " + ncaString);
 
         std::ifstream file{ncaString};
         if (!file.is_open()) throw nc::NcError("Could not open file: " + ncaString);
@@ -109,7 +109,7 @@ namespace
         file >> fragmentShaderPath;
         fragmentShaderPath = (std::filesystem::path(path) / std::filesystem::path(fragmentShaderPath)).string();
 
-        auto shaderFlyweight = nc::ShaderFlyweight
+        auto shaderFlyweight = nc::asset::ShaderFlyweight
         {
             .uid ="",
             .vertexByteCode = ReadSpirvIntoBytes(vertexShaderPath),
@@ -131,7 +131,7 @@ namespace
     }
 }
 
-namespace nc
+namespace nc::asset
 {
     ShaderAssetManager::ShaderAssetManager(const std::string& assetDirectory)
         : m_shaderFlyweights{},
@@ -236,4 +236,4 @@ namespace nc
             return std::string_view{item.uid};
         });
     }
-}
+} // namespace nc::asset

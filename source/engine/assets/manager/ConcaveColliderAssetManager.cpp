@@ -3,7 +3,7 @@
 
 #include "ncasset/Import.h"
 
-namespace nc
+namespace nc::asset
 {
     ConcaveColliderAssetManager::ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory)
         : m_concaveColliders{},
@@ -76,4 +76,4 @@ namespace nc
     {
         return GetPaths(m_concaveColliders.keys());
     }
-}
+} // namespace nc::asset

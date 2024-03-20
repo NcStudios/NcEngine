@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace nc
+namespace nc::asset
 {
 struct FontHash
 {
@@ -51,4 +51,4 @@ class FontAssetManager : public IAssetService<FontView, FontInfo>
         std::string m_assetDirectory;
         Signal<> m_onUpdate;
 };
-} // namespace nc
+} // namespace nc::asset

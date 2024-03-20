@@ -15,7 +15,7 @@ EnvironmentSystem::EnvironmentSystem(ShaderResourceBus* shaderResourceBus)
 void EnvironmentSystem::SetSkybox(const std::string& path)
 {
     m_useSkybox = true;
-    auto skyboxView = AssetService<CubeMapView>::Get()->Acquire(path);
+    auto skyboxView = asset::AssetService<asset::CubeMapView>::Get()->Acquire(path);
     m_environmentData.skyboxTextureIndex = skyboxView.index;
 }
 

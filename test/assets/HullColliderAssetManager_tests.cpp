@@ -6,7 +6,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto HullPath1 = "hull_collider1.nca";
 const auto HullPath2 = "hull_collider2.nca";

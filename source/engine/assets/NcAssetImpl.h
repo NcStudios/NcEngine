@@ -6,6 +6,14 @@
 
 namespace nc
 {
+namespace config
+{
+struct AssetSettings;
+struct MemorySettings;
+} // namespace config
+
+namespace asset
+{
 class AudioClipAssetManager;
 class ConcaveColliderAssetManager;
 class CubeMapAssetManager;
@@ -15,15 +23,6 @@ class MeshAssetManager;
 class SkeletalAnimationAssetManager;
 class TextureAssetManager;
 
-namespace config
-{
-struct AssetSettings;
-struct MemorySettings;
-} // namespace config
-}
-
-namespace nc::asset
-{
 class NcAssetImpl : public NcAsset
 {
     public:
@@ -54,4 +53,5 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<FontAssetManager> m_fontManager;
         AssetMap m_defaults;
 };
-} // namespace nc::asset
+} // namespace asset
+} // namespace nc

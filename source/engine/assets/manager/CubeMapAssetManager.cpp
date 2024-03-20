@@ -9,7 +9,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace nc
+namespace nc::asset
 {
 CubeMapAssetManager::CubeMapAssetManager(const std::string& cubeMapAssetDirectory, uint32_t maxCubeMapsCount)
     : m_cubeMapIds{},
@@ -133,4 +133,4 @@ auto CubeMapAssetManager::OnUpdate() -> Signal<const asset::CubeMapUpdateEventDa
 {
     return m_onUpdate;
 }
-}
+} // namespace nc::asset

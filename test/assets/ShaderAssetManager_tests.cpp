@@ -4,7 +4,7 @@
 #include <array>
 #include <filesystem>
 
-using namespace nc;
+using namespace nc::asset;
 
 class ShaderAssetManager_tests : public ::testing::Test
 {

@@ -6,7 +6,7 @@ namespace
 {
 auto MakeMaterialView(const nc::graphics::ToonMaterial& material) -> nc::graphics::ToonMaterialView
 {
-    const auto textureService = nc::AssetService<nc::TextureView>::Get();
+    const auto textureService = nc::asset::AssetService<nc::asset::TextureView>::Get();
     return nc::graphics::ToonMaterialView
     {
         textureService->Acquire(material.baseColor),
@@ -21,7 +21,7 @@ namespace nc::graphics
 {
 ToonRenderer::ToonRenderer(Entity entity, std::string meshUid, ToonMaterial material)
     : ComponentBase{entity},
-      m_meshView{AssetService<MeshView>::Get()->Acquire(meshUid)},
+      m_meshView{asset::AssetService<asset::MeshView>::Get()->Acquire(meshUid)},
       m_materialView{::MakeMaterialView(material)},
       m_coldData{std::make_unique<ToonRendererColdData>(std::move(meshUid), std::move(material))}
 {
@@ -29,7 +29,7 @@ ToonRenderer::ToonRenderer(Entity entity, std::string meshUid, ToonMaterial mate
 
 void ToonRenderer::SetMesh(std::string meshUid)
 {
-    m_meshView = AssetService<MeshView>::Get()->Acquire(meshUid);
+    m_meshView = asset::AssetService<asset::MeshView>::Get()->Acquire(meshUid);
     m_coldData->meshPath = std::move(meshUid);
 }
 
@@ -41,19 +41,19 @@ void ToonRenderer::SetMaterial(ToonMaterial material)
 
 void ToonRenderer::SetBaseColor(std::string texturePath)
 {
-    m_materialView.baseColor = AssetService<TextureView>::Get()->Acquire(texturePath);
+    m_materialView.baseColor = asset::AssetService<asset::TextureView>::Get()->Acquire(texturePath);
     m_coldData->material.baseColor = std::move(texturePath);
 }
 
 void ToonRenderer::SetOverlay(std::string texturePath)
 {
-    m_materialView.overlay = AssetService<TextureView>::Get()->Acquire(texturePath);
+    m_materialView.overlay = asset::AssetService<asset::TextureView>::Get()->Acquire(texturePath);
     m_coldData->material.overlay = std::move(texturePath);
 }
 
 void ToonRenderer::SetHatching(std::string texturePath)
 {
-    m_materialView.hatching = AssetService<TextureView>::Get()->Acquire(texturePath);
+    m_materialView.hatching = asset::AssetService<asset::TextureView>::Get()->Acquire(texturePath);
     m_coldData->material.hatching = std::move(texturePath);
 }
 

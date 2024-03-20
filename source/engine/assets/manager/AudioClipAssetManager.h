@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace nc
+namespace nc::asset
 {
 class AudioClipAssetManager : public IAssetService<AudioClipView, std::string>
 {
@@ -23,11 +23,11 @@ class AudioClipAssetManager : public IAssetService<AudioClipView, std::string>
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
         auto GetPath(size_t id) const -> std::string_view override { return m_audioClips.key_at(id); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::AudioClip; }
+        auto GetAssetType() const noexcept -> AssetType override { return AssetType::AudioClip; }
 
     private:
-        StringMap<asset::AudioClip> m_audioClips;
+        StringMap<AudioClip> m_audioClips;
         std::string m_assetDirectory;
 };
-} // namespace nc
+} // namespace nc::asset
 

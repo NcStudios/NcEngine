@@ -5,7 +5,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto Texture_base = "texture_base.nca";
 const auto Texture_normal = "texture_normal.nca";

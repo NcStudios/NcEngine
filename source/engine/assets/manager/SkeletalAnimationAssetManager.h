@@ -6,12 +6,9 @@
 
 #include "ncasset/AssetsFwd.h"
 
-namespace nc
-{
-namespace asset
+namespace nc::asset
 {
 struct SkeletalAnimationUpdateEventData;
-} // namespace asset
 
 class SkeletalAnimationAssetManager : public IAssetService<SkeletalAnimationView, std::string>
 {
@@ -33,6 +30,6 @@ class SkeletalAnimationAssetManager : public IAssetService<SkeletalAnimationView
         StringTable m_table;
         std::string m_assetDirectory;
         uint32_t m_maxSkeletalAnimationCount;
-        Signal<const asset::SkeletalAnimationUpdateEventData&> m_onUpdate;
+        Signal<const SkeletalAnimationUpdateEventData&> m_onUpdate;
 };
-} // namespace nc
+} // namespace nc::asset

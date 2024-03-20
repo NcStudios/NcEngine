@@ -7,7 +7,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 namespace nc::window
 {

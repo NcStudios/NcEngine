@@ -1,6 +1,6 @@
 #include "AssetUtilities.h"
 
-namespace nc
+namespace nc::asset
 {
 auto HasValidAssetExtension(const std::string& path) -> bool
 {
@@ -13,4 +13,4 @@ auto HasValidAssetExtension(const std::string& path) -> bool
     const auto fileExtension = path.substr(periodPosition+1);
     return fileExtension == "nca" ? true : false;
 }
-} // namespace nc
+} // namespace nc::asset

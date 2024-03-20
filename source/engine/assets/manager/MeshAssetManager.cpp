@@ -7,7 +7,7 @@
 #include <cassert>
 #include <fstream>
 
-namespace nc
+namespace nc::asset
 {
 MeshAssetManager::MeshAssetManager(const std::string& assetDirectory)
     : m_vertexData{},
@@ -174,4 +174,4 @@ auto MeshAssetManager::OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData
 {
     return m_onBoneUpdate;
 }
-} // namespace nc
+} // namespace nc::asset

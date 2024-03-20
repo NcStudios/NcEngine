@@ -1,7 +1,7 @@
 #include "asset/Assets.h"
 #include "AssetService.h"
 
-namespace nc
+namespace nc::asset
 {
 bool LoadAudioClipAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
@@ -182,4 +182,4 @@ void UnloadAllFonts(asset_flags_type flags)
 {
     return AssetService<FontView, FontInfo>::Get()->UnloadAll(flags);
 }
-} // namespace nc
+} // namespace nc::asset

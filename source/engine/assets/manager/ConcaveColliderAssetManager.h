@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 
-namespace nc
+namespace nc::asset
 {
 class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView, std::string>
 {
@@ -22,10 +22,10 @@ class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView, st
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
         auto GetPath(size_t id) const -> std::string_view override { return m_concaveColliders.key_at(id); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::ConcaveCollider; }
+        auto GetAssetType() const noexcept -> AssetType override { return AssetType::ConcaveCollider; }
 
     private:
-        StringMap<asset::ConcaveCollider> m_concaveColliders;
+        StringMap<ConcaveCollider> m_concaveColliders;
         std::string m_assetDirectory;
 };
-} // namespace nc
+} // namespace nc::asset

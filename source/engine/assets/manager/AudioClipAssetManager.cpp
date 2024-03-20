@@ -3,7 +3,7 @@
 
 #include "ncasset/Import.h"
 
-namespace nc
+namespace nc::asset
 {
 AudioClipAssetManager::AudioClipAssetManager(const std::string& assetDirectory)
     : m_audioClips{},
@@ -77,4 +77,4 @@ auto AudioClipAssetManager::GetAllLoaded() const -> std::vector<std::string_view
 {
     return GetPaths(m_audioClips.keys());
 }
-}
+} //namespace nc::asset

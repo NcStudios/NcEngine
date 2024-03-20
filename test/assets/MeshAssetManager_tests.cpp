@@ -6,7 +6,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto meshPath1 = "mesh1.nca";
 const auto meshPath2 = "mesh2.nca";

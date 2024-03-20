@@ -7,9 +7,9 @@
 namespace
 {
 [[maybe_unused]]
-auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRenderer, nc::graphics::ToonRenderer> worldView) -> nc::MeshView
+auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRenderer, nc::graphics::ToonRenderer> worldView) -> nc::asset::MeshView
 {
-    static const auto defaultMeshView = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::CubeMesh);
+    static const auto defaultMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(nc::asset::CubeMesh);
 
     if (worldView.Contains<nc::graphics::MeshRenderer>(target))
         return worldView.Get<nc::graphics::MeshRenderer>(target).GetMeshView();
@@ -20,29 +20,30 @@ auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRende
 }
 
 [[maybe_unused]]
-auto GetMeshView(nc::physics::ColliderType type) -> nc::MeshView
+auto GetMeshView(nc::physics::ColliderType type) -> nc::asset::MeshView
 {
+    using namespace nc::asset;
     switch(type)
     {
         case nc::physics::ColliderType::Box:
         {
-            static const auto view = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::CubeMesh);
+            static const auto view = AssetService<MeshView>::Get()->Acquire(CubeMesh);
             return view;
         }
         case nc::physics::ColliderType::Sphere:
         {
-            static const auto view = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::SphereMesh);
+            static const auto view = AssetService<MeshView>::Get()->Acquire(SphereMesh);
             return view;
         }
         case nc::physics::ColliderType::Capsule:
         {
-            static const auto view = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::CapsuleMesh);
+            static const auto view = AssetService<MeshView>::Get()->Acquire(CapsuleMesh);
             return view;
         }
         case nc::physics::ColliderType::Hull:
         {
             // @todo #567: Eventually not have sphere here.
-            static const auto view = nc::AssetService<nc::MeshView>::Get()->Acquire(nc::asset::SphereMesh);
+            static const auto view = AssetService<MeshView>::Get()->Acquire(SphereMesh);
             return view;
         }
         default:

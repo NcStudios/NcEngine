@@ -6,7 +6,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto SoundPath1 = "sound1.nca";
 const auto SoundPath2 = "sound2.nca";

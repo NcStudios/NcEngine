@@ -37,7 +37,7 @@ void ClearFontAtlas()
 #endif
 } // anonymous namespace
 
-namespace nc
+namespace nc::asset
 {
 FontAssetManager::FontAssetManager(const std::string& assetDirectory)
     : m_fonts{}, m_assetDirectory{assetDirectory}
@@ -132,4 +132,4 @@ auto FontAssetManager::OnUpdate() -> Signal<>&
 {
     return m_onUpdate;
 }
-} // namespace nc
+} // namespace nc::asset

@@ -6,7 +6,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto ConcavePath1 = "concave_collider1.nca";
 const auto ConcavePath2 = "concave_collider2.nca";

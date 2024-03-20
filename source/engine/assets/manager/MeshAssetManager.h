@@ -6,13 +6,10 @@
 
 #include "ncasset/AssetsFwd.h"
 
-namespace nc
-{
-namespace asset
+namespace nc::asset
 {
 struct MeshUpdateEventData;
 struct BoneUpdateEventData;
-} // namespace asset
 
 class MeshAssetManager : public IAssetService<MeshView, std::string>
 {
@@ -41,4 +38,4 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
 
         asset::Mesh ImportMesh(const std::string& path, bool isExternal);
 };
-} // namespace nc
+} // namespace nc::asset

@@ -22,9 +22,9 @@ struct ToonMaterial
 
 struct ToonMaterialView
 {
-    TextureView baseColor;
-    TextureView overlay;
-    TextureView hatching;
+    asset::TextureView baseColor;
+    asset::TextureView overlay;
+    asset::TextureView hatching;
     uint32_t hatchingTiling;
 };
 
@@ -35,7 +35,7 @@ class ToonRenderer : public ComponentBase
                      std::string meshUid = asset::CubeMesh,
                      ToonMaterial material = {});
 
-        auto GetMeshView() const noexcept -> const MeshView&
+        auto GetMeshView() const noexcept -> const asset::MeshView&
         {
             return m_meshView;
         }
@@ -63,7 +63,7 @@ class ToonRenderer : public ComponentBase
         void SetHatchingTiling(uint32_t tiling);
 
     private:
-        MeshView m_meshView;
+        asset::MeshView m_meshView;
         ToonMaterialView m_materialView;
 
         struct ToonRendererColdData

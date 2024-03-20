@@ -4,7 +4,7 @@
 #include <array>
 #include <string>
 
-using namespace nc;
+using namespace nc::asset;
 
 const auto skybox1 = "skybox1.nca";
 const auto skybox2 = "skybox2.nca";

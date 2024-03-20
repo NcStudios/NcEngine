@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace nc
+namespace nc::asset
 {
 class HullColliderAssetManager : public IAssetService<ConvexHullView, std::string>
 {
@@ -28,4 +28,4 @@ class HullColliderAssetManager : public IAssetService<ConvexHullView, std::strin
         StringMap<asset::HullCollider> m_hullColliders;
         std::string m_assetDirectory;
 };
-} // namespace nc
+} // namespace nc::asset

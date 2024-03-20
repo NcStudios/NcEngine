@@ -3,13 +3,13 @@
 
 namespace
 {
-auto GetClips(const std::vector<std::string>& paths) -> std::vector<nc::AudioClipView>
+auto GetClips(const std::vector<std::string>& paths) -> std::vector<nc::asset::AudioClipView>
 {
-    auto out = std::vector<nc::AudioClipView>{};
+    auto out = std::vector<nc::asset::AudioClipView>{};
     out.reserve(paths.size());
     std::ranges::transform(paths, std::back_inserter(out), [](const auto& path)
     {
-        return nc::AcquireAudioClipAsset(path);
+        return nc::asset::AcquireAudioClipAsset(path);
     });
 
     return out;
@@ -65,7 +65,7 @@ void AudioSource::PlayNext()
 
 auto AudioSource::AddClip(std::string clip) -> uint32_t
 {
-    m_clips.push_back(AcquireAudioClipAsset(clip));
+    m_clips.push_back(asset::AcquireAudioClipAsset(clip));
     m_coldData->assetPaths.push_back(std::move(clip));
     return static_cast<uint32_t>(m_clips.size() - 1);
 }
@@ -73,7 +73,7 @@ auto AudioSource::AddClip(std::string clip) -> uint32_t
 void AudioSource::SetClip(uint32_t clipIndex, std::string path)
 {
     NC_ASSERT(clipIndex < m_clips.size(), "Audio clip index out of bounds");
-    m_clips[clipIndex] = AcquireAudioClipAsset(path);
+    m_clips[clipIndex] = asset::AcquireAudioClipAsset(path);
     m_coldData->assetPaths.at(clipIndex) = std::move(path);
     if (m_currentClipIndex == clipIndex && IsPlaying())
     {

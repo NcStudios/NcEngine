@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace nc
+namespace nc::asset
 {
 struct ShaderFlyweight
 {
@@ -34,4 +34,4 @@ class ShaderAssetManager final : public IAssetService<ShaderView, std::string>
         std::vector<ShaderFlyweight> m_shaderFlyweights;
         std::string m_assetDirectory;
 };
-} // namespace nc
+} // namespace nc::asset

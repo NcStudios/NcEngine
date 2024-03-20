@@ -3,7 +3,7 @@
 
 #include "ncasset/Import.h"
 
-namespace nc
+namespace nc::asset
 {
     HullColliderAssetManager::HullColliderAssetManager(const std::string& assetDirectory)
         : m_hullColliders{},
@@ -77,4 +77,4 @@ namespace nc
     {
         return GetPaths(m_hullColliders.keys());
     }
-}
+} // namespace nc::asset

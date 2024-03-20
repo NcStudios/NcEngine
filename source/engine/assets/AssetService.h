@@ -8,7 +8,7 @@
 #include <string_view>
 #include <vector>
 
-namespace nc
+namespace nc::asset
 {
 class IAssetServiceBase
 {
@@ -46,4 +46,4 @@ IAssetService<T, InputType>::IAssetService()
 {
     AssetService<T, InputType>::Register(this);
 }
-} // namespace nc
+} // namespace nc::asset

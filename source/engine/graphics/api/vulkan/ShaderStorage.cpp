@@ -446,7 +446,7 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
             for (auto& textureWithId : eventData.data)
             {
                 auto& texture = textureWithId.texture;
-                images.emplace_back(m_allocator, texture.pixelData.data(), texture.width, texture.height, textureWithId.flags == AssetFlags::TextureTypeNormalMap);
+                images.emplace_back(m_allocator, texture.pixelData.data(), texture.width, texture.height, textureWithId.flags == asset::AssetFlags::TextureTypeNormalMap);
                 imageInfos.emplace_back(sampler, images.back().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
                 uids.emplace_back(textureWithId.id);
             }

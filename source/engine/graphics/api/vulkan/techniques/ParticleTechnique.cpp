@@ -113,7 +113,7 @@ namespace nc::graphics::vulkan
         OPTICK_CATEGORY("ParticleTechnique::Record", Optick::Category::Rendering);
         auto pushConstants = ParticlePushConstants{};
         pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::PlaneMesh);
+        const auto meshAccessor = asset::AssetService<asset::MeshView>::Get()->Acquire(nc::asset::PlaneMesh);
 
         for (auto& emitterState : frameData.emitterStates)
         {
@@ -122,7 +122,7 @@ namespace nc::graphics::vulkan
             for (; index.Valid(); ++index)
             {
                 pushConstants.model = models[index];
-                pushConstants.baseColorIndex = AssetService<TextureView>::Get()->Acquire(emitterState.GetInfo().init.particleTexturePath).index;
+                pushConstants.baseColorIndex = asset::AssetService<asset::TextureView>::Get()->Acquire(emitterState.GetInfo().init.particleTexturePath).index;
 
                 cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
                 cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
