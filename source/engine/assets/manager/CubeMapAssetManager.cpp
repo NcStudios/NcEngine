@@ -32,12 +32,12 @@ bool CubeMapAssetManager::Load(const std::string& path, bool isExternal, asset_f
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    const auto data = asset::CubeMapWithId{asset::ImportCubeMap(fullPath), path};
+    const auto data = CubeMapWithId{ImportCubeMap(fullPath), path};
     m_cubeMapIds.emplace(path);
-    m_onUpdate.Emit(asset::CubeMapUpdateEventData{
-        asset::UpdateAction::Load,
+    m_onUpdate.Emit(CubeMapUpdateEventData{
+        UpdateAction::Load,
         std::vector<std::string>{path},
-        std::span<const asset::CubeMapWithId>{&data, 1}
+        std::span<const CubeMapWithId>{&data, 1}
     });
 
     return true;
@@ -78,10 +78,10 @@ bool CubeMapAssetManager::Load(std::span<const std::string> paths, bool isExtern
         return false;
     }
 
-    m_onUpdate.Emit(asset::CubeMapUpdateEventData{
-        asset::UpdateAction::Load,
+    m_onUpdate.Emit(CubeMapUpdateEventData{
+        UpdateAction::Load,
         std::move(idsToLoad),
-        std::span<const asset::CubeMapWithId>{loadedCubeMaps}
+        std::span<const CubeMapWithId>{loadedCubeMaps}
     });
 
     return true;
@@ -92,8 +92,8 @@ bool CubeMapAssetManager::Unload(const std::string& path, asset_flags_type)
     if (!m_cubeMapIds.erase(path))
         return false;
 
-    m_onUpdate.Emit(asset::CubeMapUpdateEventData{
-        asset::UpdateAction::Unload,
+    m_onUpdate.Emit(CubeMapUpdateEventData{
+        UpdateAction::Unload,
         std::vector<std::string>{path},
         {}
     });

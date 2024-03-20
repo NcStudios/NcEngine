@@ -50,21 +50,21 @@ bool MeshAssetManager::Load(const std::string& path, bool isExternal, asset_flag
     if (mesh.bonesData.has_value() && mesh.bonesData.value().vertexSpaceToBoneSpace.size() > 0)
     {
         auto& bones = mesh.bonesData.value();
-        m_onBoneUpdate.Emit(asset::BoneUpdateEventData{
-            std::span<const asset::BonesData>{&bones, 1},
+        m_onBoneUpdate.Emit(BoneUpdateEventData{
+            std::span<const BonesData>{&bones, 1},
             std::vector<std::string>{path},
-            asset::UpdateAction::Load
+            UpdateAction::Load
         });
     }
 
-    m_onMeshUpdate.Emit(asset::MeshUpdateEventData{m_vertexData, m_indexData});
+    m_onMeshUpdate.Emit(MeshUpdateEventData{m_vertexData, m_indexData});
     return true;
 }
 
 bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
     auto idsToLoad = std::vector<std::string>{};
-    auto bones = std::vector<asset::BonesData>{};
+    auto bones = std::vector<BonesData>{};
     idsToLoad.reserve(paths.size());
     bool anyLoaded = false;
     bool anyBonesLoaded = false;
@@ -89,14 +89,14 @@ bool MeshAssetManager::Load(std::span<const std::string> paths, bool isExternal,
 
     if (anyBonesLoaded)
     {
-        m_onBoneUpdate.Emit(asset::BoneUpdateEventData{
-            std::span<const asset::BonesData>{bones},
+        m_onBoneUpdate.Emit(BoneUpdateEventData{
+            std::span<const BonesData>{bones},
             std::move(idsToLoad),
-            asset::UpdateAction::Load
+            UpdateAction::Load
         });
     }
 
-    m_onMeshUpdate.Emit(asset::MeshUpdateEventData{m_vertexData, m_indexData});
+    m_onMeshUpdate.Emit(MeshUpdateEventData{m_vertexData, m_indexData});
     return anyLoaded;
 }
 
@@ -132,7 +132,7 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
     {
         m_onMeshUpdate.Emit
         (
-            asset::MeshUpdateEventData
+            MeshUpdateEventData
             {
                 m_vertexData,
                 m_indexData

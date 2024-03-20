@@ -45,7 +45,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
         throw NcError("Cannot exceed max texture count.");
     }
 
-    auto textures = std::vector<asset::TextureWithId>{};
+    auto textures = std::vector<TextureWithId>{};
 
     auto idsToLoad = std::vector<std::string>{};
     idsToLoad.reserve(paths.size());
@@ -59,16 +59,16 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
         m_table.emplace(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        textures.emplace_back(asset::ImportTexture(fullPath), path, flags);
+        textures.emplace_back(ImportTexture(fullPath), path, flags);
         idsToLoad.push_back(path);
     }
 
     if (!idsToLoad.empty())
     {
-        m_onUpdate.Emit(asset::TextureUpdateEventData{
-            asset::UpdateAction::Load,
+        m_onUpdate.Emit(TextureUpdateEventData{
+            UpdateAction::Load,
             std::move(idsToLoad),
-            std::span<const asset::TextureWithId>{textures}
+            std::span<const TextureWithId>{textures}
         });
     }
 

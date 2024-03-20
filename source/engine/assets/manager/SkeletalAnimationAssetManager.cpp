@@ -29,11 +29,11 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExterna
 
     m_table.emplace(path);
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    auto animation = asset::ImportSkeletalAnimation(fullPath);
-    m_onUpdate.Emit(asset::SkeletalAnimationUpdateEventData{
+    auto animation = ImportSkeletalAnimation(fullPath);
+    m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
         std::span<const std::string>{m_table.keys()},
-        std::span<const asset::SkeletalAnimation>{&animation, 1},
-        asset::UpdateAction::Load
+        std::span<const SkeletalAnimation>{&animation, 1},
+        UpdateAction::Load
     });
     return true;
 }
@@ -45,7 +45,7 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
         throw NcError("Cannot exceed max skeletal animations count.");
     }
 
-    auto animations = std::vector<asset::SkeletalAnimation>{};
+    auto animations = std::vector<SkeletalAnimation>{};
     for(const auto& path : paths)
     {
         if (IsLoaded(path))
@@ -55,15 +55,15 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
 
         m_table.emplace(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        animations.push_back(asset::ImportSkeletalAnimation(fullPath));
+        animations.push_back(ImportSkeletalAnimation(fullPath));
     }
 
     if (!animations.empty())
     {
-        m_onUpdate.Emit(asset::SkeletalAnimationUpdateEventData{
+        m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
             std::span<const std::string>{m_table.keys()},
-            std::span<const asset::SkeletalAnimation>{animations},
-            asset::UpdateAction::Load
+            std::span<const SkeletalAnimation>{animations},
+            UpdateAction::Load
         });
 
         return true;
@@ -77,10 +77,10 @@ bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_
     if (!m_table.erase(path))
         return false;
 
-    m_onUpdate.Emit(asset::SkeletalAnimationUpdateEventData{
+    m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
         std::span<const std::string>{&path, 1},
         {},
-        asset::UpdateAction::Unload
+        UpdateAction::Unload
     });
     return true;
 }
@@ -112,7 +112,7 @@ auto SkeletalAnimationAssetManager::GetAllLoaded() const -> std::vector<std::str
     return GetPaths(m_table.keys());
 }
 
-auto SkeletalAnimationAssetManager::OnUpdate() -> Signal<const asset::SkeletalAnimationUpdateEventData&>&
+auto SkeletalAnimationAssetManager::OnUpdate() -> Signal<const SkeletalAnimationUpdateEventData&>&
 {
     return m_onUpdate;
 }
