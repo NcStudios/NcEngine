@@ -40,9 +40,12 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
     OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
     const auto viewProjection = cameraState.view * cameraState.projection;
     auto frontendState = ObjectState{};
+    const auto maxPbrRenderers = pbrRenderers.size_upper_bound();
+    const auto maxToonRenderers = toonRenderers.size_upper_bound();
+    frontendState.pbrMeshes.reserve(maxPbrRenderers);
+    frontendState.toonMeshes.reserve(maxToonRenderers);
     m_objectData.clear();
-    frontendState.pbrMeshes.reserve(pbrRenderers.size_upper_bound());
-    frontendState.toonMeshes.reserve(toonRenderers.size_upper_bound());
+    m_objectData.reserve(maxPbrRenderers + maxToonRenderers);
 
     for (const auto& [renderer, transform] : pbrRenderers)
     {
