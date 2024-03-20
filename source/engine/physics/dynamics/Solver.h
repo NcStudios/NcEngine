@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constraint.h"
+#include "FreedomSolver.h"
 #include "Joint.h"
 #include "physics/PhysicsPipelineTypes.h"
 
@@ -11,9 +12,12 @@ class Solver
     public:
         Solver(Registry* registry);
 
+        /** Create constraints for VelocityRestriction, PositionClamp, and OrientationClamp components. */
+        void GenerateFreedomConstraints(float dt);
+
         /** Create contact constraints for every contact point in each manifold. Also creates
         *  position constraints for each manifold if EnableDirectPositionCorrection == true. */
-        void GenerateConstraints(std::span<const Manifold> manifolds);
+        void GenerateContactConstraints(std::span<const Manifold> manifolds);
 
         /** Resolve contact, position, and joint constraints. For contacts and joints, linear
          *  and angular velocities will be updated, but positions must be integrated separately.
@@ -27,5 +31,7 @@ class Solver
         Registry* m_registry;
         std::vector<ContactConstraint> m_contactConstraints;
         std::vector<PositionConstraint> m_positionConstraints;
+        std::vector<PositionClampConstraint> m_positionClampConstraints;
+        std::vector<VelocityRestrictionConstraint> m_velocityRestrictionConstraints;
 };
 } // namespace nc::physics

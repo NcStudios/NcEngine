@@ -140,12 +140,21 @@ auto BuildMergeContactsTask(task::ExceptionContext& ctx, NarrowPhase& narrow, Co
     });
 }
 
-inline auto BuildGenerateConstraintsTask(task::ExceptionContext& ctx, Solver& solver, NarrowPhase& narrow)
+inline auto BuildGenerateFreedomConstraintsTask(task::ExceptionContext& ctx, Solver& solver, float fixedTimeStep)
+{
+    return task::Guard(ctx, [&solver, fixedTimeStep]
+    {
+        OPTICK_CATEGORY("Solver::GenerateFreedomConstraints", Optick::Category::Physics);
+        solver.GenerateFreedomConstraints(fixedTimeStep);
+    });
+}
+
+inline auto BuildGenerateContactConstraintsTask(task::ExceptionContext& ctx, Solver& solver, NarrowPhase& narrow)
 {
     return task::Guard(ctx, [&solver, &narrow]
     {
-        OPTICK_CATEGORY("Solver::GenerateConstraints", Optick::Category::Physics);
-        solver.GenerateConstraints(narrow.Manifolds());
+        OPTICK_CATEGORY("Solver::GenerateContactConstraints", Optick::Category::Physics);
+        solver.GenerateContactConstraints(narrow.Manifolds());
     });
 }
 

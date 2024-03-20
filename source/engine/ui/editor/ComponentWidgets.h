@@ -20,4 +20,6 @@ void ColliderUIWidget(physics::Collider& collider);
 void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider);
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody);
 void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial);
+void PositionClampUIWidget(physics::PositionClamp& positionClamp);
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction);
 } // namespace nc::editor

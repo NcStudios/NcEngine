@@ -9,6 +9,7 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -246,15 +247,11 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
 
     const auto expectedProperties = nc::physics::PhysicsProperties{};
-    const auto expectedLinearFreedom = nc::Vector3::One();
-    const auto expectedAngularFreedom = nc::Vector3::Up();
     const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
         entity,
         g_ecs.Get<nc::Transform>(entity),
         g_ecs.Get<nc::physics::Collider>(entity),
-        expectedProperties,
-        expectedLinearFreedom,
-        expectedAngularFreedom
+        expectedProperties
     );
 
     auto entityToFragmentId = nc::EntityToFragmentIdMap{ {entity, 0u} };
@@ -271,8 +268,6 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     EXPECT_EQ(expectedProperties.angularDrag, actualProperties.angularDrag);
     EXPECT_EQ(expectedProperties.useGravity, actualProperties.useGravity);
     EXPECT_EQ(expectedProperties.isKinematic, actualProperties.isKinematic);
-    EXPECT_EQ(expectedLinearFreedom, actual.GetLinearFreedom());
-    EXPECT_EQ(expectedAngularFreedom, actual.GetAngularFreedom());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
@@ -283,4 +278,26 @@ TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
     const auto actual = nc::DeserializePhysicsMaterial(stream, g_deserializationContext, nullptr);
     EXPECT_FLOAT_EQ(expected.friction, actual.friction);
     EXPECT_FLOAT_EQ(expected.restitution, actual.restitution);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_positionClamp_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::PositionClamp{nc::Vector3{1.0f, 42.0f, 0.0f}, 0.5f, 5.0f};
+    nc::SerializePositionClamp(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializePositionClamp(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3(1.0f, 42.0f, 0.0f), actual.targetPosition);
+    EXPECT_FLOAT_EQ(0.5f, actual.dampingRatio);
+    EXPECT_FLOAT_EQ(5.0f, actual.dampingFrequency);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_velocityRestriction_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::VelocityRestriction{nc::Vector3::Front(), nc::Vector3::Up(), true};
+    nc::SerializeVelocityRestriction(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeVelocityRestriction(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3::Front(), actual.linearFreedom);
+    EXPECT_EQ(nc::Vector3::Up(), actual.angularFreedom);
+    EXPECT_TRUE(actual.worldSpace);
 }

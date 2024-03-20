@@ -25,6 +25,10 @@ void SerializePhysicsMaterial(std::ostream& stream, const physics::PhysicsMateri
 auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationContext& ctx, void*) -> physics::PhysicsMaterial;
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, void*);
 auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, void*) -> graphics::PointLight;
+void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& out, const SerializationContext&, void*);
+auto DeserializePositionClamp(std::istream& stream, const DeserializationContext&, void*) -> physics::PositionClamp;
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, void*);
 auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext& ctx, void*) -> graphics::ToonRenderer;
+void SerializeVelocityRestriction(std::ostream& stream, const physics::VelocityRestriction& out, const SerializationContext&, void*);
+auto DeserializeVelocityRestriction(std::istream& stream, const DeserializationContext&, void*) -> physics::VelocityRestriction;
 } // namespace nc

@@ -2,7 +2,7 @@
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Logic.h"
-#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
@@ -10,6 +10,7 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 
@@ -73,17 +74,28 @@ auto CreateCollider(Entity entity, void*) -> physics::Collider
 auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
 {
     NC_ASSERT(userData, "Expected non-null user data.");
-    auto registry = static_cast<Registry*>(userData);
-    auto transform = registry->Get<Transform>(entity);
-    auto collider = registry->Contains<physics::Collider>(entity)
-        ? registry->Get<physics::Collider>(entity)
-        : registry->Add<physics::Collider>(entity, physics::BoxProperties{});
+    auto registry = static_cast<ecs::ComponentRegistry*>(userData);
+    auto& transform = registry->GetPool<Transform>().Get(entity);
+    auto& colliderPool = registry->GetPool<physics::Collider>();
+    auto& collider = colliderPool.Contains(entity)
+        ? colliderPool.Get(entity)
+        : colliderPool.Emplace(entity, physics::BoxProperties{});
 
-    return physics::PhysicsBody{*transform, *collider};
+    return physics::PhysicsBody{transform, collider};
 }
 
 auto CreatePhysicsMaterial(Entity, void*) -> physics::PhysicsMaterial
 {
     return physics::PhysicsMaterial{};
+}
+
+auto CreatePositionClamp(Entity, void*) -> physics::PositionClamp
+{
+    return physics::PositionClamp{};
+}
+
+auto CreateVelocityRestriction(Entity, void*) -> physics::VelocityRestriction
+{
+    return physics::VelocityRestriction{};
 }
 } // namespace nc

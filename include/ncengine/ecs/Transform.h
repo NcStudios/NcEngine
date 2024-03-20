@@ -145,6 +145,9 @@ class Transform final : public ComponentBase
         /** @brief Apply a rotation about an axis to local rotation */
         void Rotate(const Vector3& axis, float radians);
 
+        /** @brief Apply a rotation about an axis passing through a point. */
+        void RotateAround(const Vector3& point, const Vector3& axis, float radians);
+
         /** @brief Rotate to point towards a target position. */
         void LookAt(const Vector3& target);
 

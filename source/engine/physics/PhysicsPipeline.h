@@ -126,9 +126,15 @@ auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) ->
         {narrowPhasePhysics, concavePhase}
     );
 
-    auto generateConstraints = builder.Add(
-        "Solver - Generate Constraints",
-        BuildGenerateConstraintsTask(context, m_solver, m_narrowPhase),
+    auto generateFreedomConstraints = builder.Add(
+        "Solver - Generate Freedom Constraints",
+        BuildGenerateFreedomConstraintsTask(context, m_solver, m_fixedTimeStep),
+        {updateInertia, applyGravity}
+    );
+
+    auto generateContactConstraints = builder.Add(
+        "Solver - Generate Contact Constraints",
+        BuildGenerateContactConstraintsTask(context, m_solver, m_narrowPhase),
         {updateInertia, applyGravity, mergeContacts}
     );
 
@@ -141,7 +147,7 @@ auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) ->
     auto resolveConstraints = builder.Add(
         "Solver - Resolve Constraints",
         BuildResolveConstraintsTask(context, m_solver, m_jointSystem, m_fixedTimeStep),
-        {generateConstraints, updateJoints}
+        {generateFreedomConstraints, generateContactConstraints, updateJoints}
     );
 
     auto cacheImpulses = builder.Add(

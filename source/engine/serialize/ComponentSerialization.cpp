@@ -7,6 +7,7 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -165,23 +166,17 @@ void SerializePhysicsBody(std::ostream& stream, const physics::PhysicsBody& out,
     NC_ASSERT(entity.Valid(), "Invalid parent entity for PhysicsBody");
     serialize::Serialize(stream, ctx.entityMap.at(entity));
     serialize::Serialize(stream, out.GetProperties());
-    serialize::Serialize(stream, out.GetLinearFreedom());
-    serialize::Serialize(stream, out.GetAngularFreedom());
 }
 
 auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& ctx, void* userData) -> physics::PhysicsBody
 {
     auto id = uint32_t{};
     auto properties = physics::PhysicsProperties{};
-    auto linearFreedom = Vector3{};
-    auto angularFreedom = Vector3{};
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, properties);
-    serialize::Deserialize(stream, linearFreedom);
-    serialize::Deserialize(stream, angularFreedom);
     const auto entity = ctx.entityMap.at(id);
     const auto registry = static_cast<Registry*>(userData);
-    return physics::PhysicsBody{*registry->Get<Transform>(entity), *registry->Get<physics::Collider>(entity), properties, linearFreedom, angularFreedom};
+    return physics::PhysicsBody{*registry->Get<Transform>(entity), *registry->Get<physics::Collider>(entity), properties};
 }
 
 void SerializePhysicsMaterial(std::ostream& stream, const physics::PhysicsMaterial& out, const SerializationContext&, void*)
@@ -220,6 +215,18 @@ auto DeserializePointLight(std::istream& stream, const DeserializationContext& c
     return graphics::PointLight{ctx.entityMap.at(id), ambient, diffuseColor, diffuseIntensity};
 }
 
+void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& out, const SerializationContext&, void*)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializePositionClamp(std::istream& stream, const DeserializationContext&, void*) -> physics::PositionClamp
+{
+    auto out = physics::PositionClamp{};
+    serialize::Deserialize(stream, out);
+    return out;
+}
+
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, void*)
 {
     nc::serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
@@ -238,4 +245,15 @@ auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext&
     return graphics::ToonRenderer{ctx.entityMap.at(id), std::move(mesh), std::move(material)};
 }
 
+void SerializeVelocityRestriction(std::ostream& stream, const physics::VelocityRestriction& out, const SerializationContext&, void*)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializeVelocityRestriction(std::istream& stream, const DeserializationContext&, void*) -> physics::VelocityRestriction
+{
+    auto out = physics::VelocityRestriction{};
+    serialize::Deserialize(stream, out);
+    return out;
+}
 } // namespace nc
