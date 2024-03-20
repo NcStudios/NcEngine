@@ -153,7 +153,7 @@ inline auto BuildGenerateContactConstraintsTask(task::ExceptionContext& ctx, Sol
 {
     return task::Guard(ctx, [&solver, &narrow]
     {
-        OPTICK_CATEGORY("Solver::GenerateFreedomConstraints", Optick::Category::Physics);
+        OPTICK_CATEGORY("Solver::GenerateContactConstraints", Optick::Category::Physics);
         solver.GenerateContactConstraints(narrow.Manifolds());
     });
 }

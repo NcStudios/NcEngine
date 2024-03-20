@@ -107,7 +107,7 @@ void PhysicsBody::ApplyImpulse(const Vector3& impulse)
 
 void PhysicsBody::ApplyImpulse(DirectX::FXMVECTOR impulse)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, XMVectorScale(impulse, m_properties.mass));
 }
 
@@ -118,26 +118,26 @@ void PhysicsBody::ApplyTorqueImpulse(const Vector3& torque)
 
 void PhysicsBody::ApplyTorqueImpulse(DirectX::FXMVECTOR torque)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object");
     m_angularVelocity = XMVectorAdd(m_angularVelocity, XMVector3Transform(torque, m_invInertiaWorld));
 }
 
 void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, delta);
 }
 
 void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object");
     m_linearVelocity = XMVectorAdd(m_linearVelocity, velDelta);
     m_angularVelocity = XMVectorAdd(m_angularVelocity, angVelDelta);
 }
 
 void PhysicsBody::SetVelocities(DirectX::FXMVECTOR linear, DirectX::FXMVECTOR angular)
 {
-    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Attempting to move immovable object");
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object");
     m_linearVelocity = linear;
     m_angularVelocity = angular;
 }
