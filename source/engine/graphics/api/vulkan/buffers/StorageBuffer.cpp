@@ -41,6 +41,9 @@ void StorageBuffer::Clear() noexcept
     {
         memset(dataContainer, 0u, m_alignedSize);
     }
+
+    m_allocator->Unmap(allocation);
+    m_previousDataSize = 0u;
 }
 
 void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
@@ -48,9 +51,11 @@ void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
     auto allocation = m_buffer.Allocation();
     void* dataContainer = m_allocator->Map(allocation);
 
-    if (m_previousDataSize > 0u)
+    if (m_previousDataSize > dataSize)
     {
-        memset(dataContainer, 0u, m_previousDataSize);
+        const auto tailStart = reinterpret_cast<char*>(dataContainer) + dataSize;
+        const auto tailLen = m_previousDataSize - dataSize;
+        memset(tailStart, 0u, tailLen);
     }
 
     memcpy(dataContainer, dataToMap, dataSize);
