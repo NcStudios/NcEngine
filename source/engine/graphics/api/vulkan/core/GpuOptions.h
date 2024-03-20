@@ -22,9 +22,9 @@ class GpuOptions
             return m_samplesCount;
         }
 
-        auto GetDeviceRequirements() const noexcept -> const DeviceRequirements&
+        auto GetDeviceRequirements() const noexcept -> const DeviceRequirements*
         {
-            return m_deviceRequirements;
+            return &m_deviceRequirements;
         }
 
     private:

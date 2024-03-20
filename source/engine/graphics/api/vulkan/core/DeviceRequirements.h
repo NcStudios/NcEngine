@@ -4,6 +4,11 @@
 
 namespace nc::graphics::vulkan
 {
+constexpr uint32_t SampledImagesPerPoolCount = 2048u; // This is a best estimate. Can be adjusted.
+constexpr uint32_t StorageBuffersPerPoolCount = 128u; // This is a best estimate. Can be adjusted.
+constexpr uint32_t UniformBuffersPerPoolCount = 128u; // This is a best estimate. Can be adjusted.
+constexpr uint32_t MaxSetsPerPool = 1000; // This is a best estimate. Can be adjusted.
+
 struct DeviceRequirements
 {
     DeviceRequirements(uint32_t maxBoundDescriptorSets,

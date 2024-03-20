@@ -14,8 +14,39 @@
 
 namespace nc::graphics::vulkan
 {
+struct DeviceRequirements;
+
 constexpr auto MaxSetsDivided = vulkan::MaxDescriptorSets/(MaxFramesInFlight+1);
 constexpr auto StaticSet = std::numeric_limits<uint32_t>::max();
+
+struct DescriptorPool
+{
+    DescriptorPool(vk::Device device);
+
+    vk::UniqueDescriptorPool pool;
+    uint32_t setsCount;
+    uint32_t currentSampledImagesCount;
+    uint32_t currentStorageBuffersCount;
+    uint32_t currentUniformBuffersCount;
+};
+
+class DescriptorAllocator
+{
+    public:
+        DescriptorAllocator(vk::Device device, const DeviceRequirements* deviceRequirements);
+        auto Allocate(DescriptorSetLayout* layout, vk::DescriptorPoolCreateFlags flags) -> vk::UniqueDescriptorSet;
+
+    private:
+        auto GetFreePool(uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount) -> DescriptorPool*
+
+        vk::Device m_device;
+        DeviceRequirements* m_deviceRequirements;
+        uint32_t m_totalSampledImagesCount;
+        uint32_t m_totalStorageBuffersCount;
+        uint32_t m_totalUniformBuffersCount;
+        std::vector<struct DescriptorPool> m_pools;
+
+};
 
 struct DescriptorSetLayout
 {
@@ -26,6 +57,7 @@ struct DescriptorSetLayout
           isStatic{isStatic_}
     {
     }
+
     vk::UniqueDescriptorSetLayout layout;
     nc::sparse_map<vk::DescriptorSetLayoutBinding> bindings;
     nc::sparse_map<vk::DescriptorBindingFlagsEXT> bindingFlags;
@@ -47,7 +79,7 @@ struct DescriptorSetLayoutsChanged
 class ShaderBindingManager : StableAddress
 {
     public:
-        ShaderBindingManager(vk::Device device);
+        ShaderBindingManager(vk::Device device, const DeviceRequirements* deviceRequirements);
 
         /* Resources attach themselves to a shader slot by registering themselves here. */
         void RegisterDescriptor(uint32_t bindingSlot, uint32_t setIndex, size_t descriptorCount, vk::DescriptorType descriptorType, vk::ShaderStageFlags shaderStages, vk::DescriptorBindingFlagBitsEXT bindingFlags, uint32_t frameIndex = StaticSet);
@@ -67,7 +99,8 @@ class ShaderBindingManager : StableAddress
         auto GetDescriptorSet(uint32_t frameIndex, uint32_t setIndex) -> vk::DescriptorSet* { return &GetSets(frameIndex).at(setIndex).set.get(); }
 
         vk::Device m_device;
-        vk::UniqueDescriptorPool m_pool;
+        const DeviceRequirements* m_deviceRequirements;
+        DescriptorAllocator m_allocator;
         std::array<nc::sparse_map<DescriptorSet>, MaxFramesInFlight> m_perFrameSets;
         nc::sparse_map<DescriptorSet> m_staticSets;
         nc::sparse_map<DescriptorSetLayout> m_layouts;

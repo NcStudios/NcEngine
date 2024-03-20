@@ -41,6 +41,9 @@ void StorageBuffer::Clear() noexcept
     {
         memset(dataContainer, 0u, m_alignedSize);
     }
+
+    m_previousDataSize = 0u;
+    m_allocator->Unmap(allocation);
 }
 
 void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
@@ -48,7 +51,7 @@ void StorageBuffer::Bind(const void* dataToMap, uint32_t dataSize)
     auto allocation = m_buffer.Allocation();
     void* dataContainer = m_allocator->Map(allocation);
 
-    if (m_previousDataSize > 0u)
+    if (m_previousDataSize > dataSize)
     {
         memset(dataContainer, 0u, m_previousDataSize);
     }

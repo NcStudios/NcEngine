@@ -1,4 +1,5 @@
 #include "ShaderBindingManager.h"
+#include "graphics/api/vulkan/core/DeviceRequirements.h"
 #include "graphics/api/vulkan/Initializers.h"
 
 #include "ncutility/NcError.h"
@@ -7,7 +8,7 @@
 
 namespace
 {
-vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags)
+auto CreateDescriptorSetLayout(vk::Device device, std::span<const vk::DescriptorSetLayoutBinding> layoutBindings, std::span<vk::DescriptorBindingFlagsEXT> bindingFlags) -> vk::UniqueDescriptorSetLayout
 {
     vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
     extendedInfo.setPNext(nullptr);
@@ -23,7 +24,7 @@ vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(vk::Device device, std::
     return device.createDescriptorSetLayoutUnique(setInfo);
 }
 
-vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout)
+auto CreateDescriptorSet(vk::Device device, vk::DescriptorPool* descriptorPool, uint32_t descriptorSetCount, vk::DescriptorSetLayout* descriptorSetLayout) -> vk::UniqueDescriptorSet
 {
     vk::DescriptorSetAllocateInfo allocationInfo{};
     allocationInfo.setPNext(nullptr);
@@ -35,36 +36,21 @@ vk::UniqueDescriptorSet CreateDescriptorSet(vk::Device device, vk::DescriptorPoo
     return std::move(device.allocateDescriptorSetsUnique(allocationInfo)[0]);
 }
 
-/**
- * Create the initial pool.
- * Track the count of each descriptor type remaining in the pool.
- * When allocating a descriptor set, validate the counts do not exceed:
- *  A) Each descriptor type count does not exceed the pool's remaining counts per type
- *  B) The descriptor set's counts per type plus all exising allocated counts per type do not exceed the hardware maximums
- *  C) The  descriptor set's counts plus all exising allocated counts do not exceed MaxUpdateAfterBindDescriptorsInAllPools
- *  D) The descriptor type count does not exceed the pool's total counts per type
- *  E) The count of descriptor sets plus the exisint sets in the pool does not exceed the MaxSets.
- *  F) The count of descriptors in the set does not exceed MaxPerSetDescriptors
- * If A, B, C, D, E and F are true, allocate the descriptor set in the pool.
- * If B is or C is or D or F is false, throw an exception.
- * If only A and/or E is false, create a new descriptor pool and allocate from it.
- * Increment the counts.
- * */
-
-auto CreateRenderingDescriptorPool(vk::Device device) -> vk::UniqueDescriptorPool
+auto CreateDescriptorPool(vk::Device device, vk::DescriptorPoolCreateFlags flags) -> vk::UniqueDescriptorPool
 {
-    std::array<vk::DescriptorPoolSize, 4> renderingPoolSizes =
+    static constexpr auto renderingPoolSizes = std::array
     {
-        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, 1000 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer, 10 },
-        vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer, 10 }
+        vk::DescriptorPoolSize { vk::DescriptorType::eCombinedImageSampler, nc::graphics::vulkan::SampledImagesPerPoolCount },
+        vk::DescriptorPoolSize { vk::DescriptorType::eStorageBuffer,  nc::graphics::vulkan::StorageBuffersPerPoolCount },
+        vk::DescriptorPoolSize { vk::DescriptorType::eUniformBuffer,  nc::graphics::vulkan::UniformBuffersPerPoolCount }
     };
-    
-    vk::DescriptorPoolCreateInfo renderingDescriptorPoolInfo = {};
-    renderingDescriptorPoolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind);
-    renderingDescriptorPoolInfo.setMaxSets(nc::graphics::vulkan::MaxDescriptorSets);
-    renderingDescriptorPoolInfo.setPoolSizeCount(static_cast<uint32_t>(renderingPoolSizes.size()));
-    renderingDescriptorPoolInfo.setPPoolSizes(renderingPoolSizes.data());
+
+    auto renderingDescriptorPoolInfo = vk::DescriptorPoolCreateInfo(
+        flags,
+        nc::graphics::vulkan::MaxSetsPerPool,
+        static_cast<uint32_t>(renderingPoolSizes.size()),
+        renderingPoolSizes.data()
+    );
 
     return device.createDescriptorPoolUnique(renderingDescriptorPoolInfo);
 }
@@ -76,13 +62,123 @@ auto CreatePerFrameSets(size_t initialKeyCapacity, size_t maxKeyCapacity = 65536
         return std::array{((void)N, nc::sparse_map<nc::graphics::vulkan::DescriptorSet>{initialKeyCapacity, maxKeyCapacity})...};
     }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
+
 }
 
 namespace nc::graphics::vulkan
 {
-ShaderBindingManager::ShaderBindingManager(vk::Device device)
+DescriptorPool::DescriptorPool(vk::Device device, vk::DescriptorPoolCreateFlags flags, uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount)
+    : pool{CreateDescriptorPool(device, flags)},
+      currentSampledImagesCount{currentSampledImagesCount + sampledImagesCount},
+      currentStorageBuffersCount{currentStorageBuffersCount + storageBuffersCount},
+      currentUniformBuffersCount{currentUniformBuffersCount + uniformBuffersCount},
+
+DescriptorAllocator::DescriptorAllocator(vk::Device device, const DeviceRequirements* deviceRequirements)
     : m_device{device},
-      m_pool{CreateRenderingDescriptorPool(device)},
+      m_deviceRequirements{deviceRequirements},
+      m_totalSampledImagesCount{0u},
+      m_totalStorageBuffersCount{0u},
+      m_totalUniformBuffersCount{0u}
+{
+}
+
+auto DescriptorAllocator::GetFreePool(uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount) -> DescriptorPool*
+{
+    auto pos = std::ranges::find(m_pools, [sampledImagesCount, storageBuffersCount, uniformBuffersCount](auto&& pool)
+    {
+        return pool.currentSampledImagesCount + sampledImagesCount <= SampledImagesPerPoolCount &&
+               pool.currentStorageBuffersCount + storageBuffersCount <= StorageBuffersPerPoolCount &&
+               pool.currentUniformBuffersCount + uniformBuffersCount <= UniformBuffersPerPoolCount;
+    });
+
+    if (pos == m_pools.end() || pos->setsCount >= MaxSetsPerPool)
+    {
+        return nullptr;
+    }
+
+    pos->setsCount++;
+    return *pos;
+}
+
+/**
+ * Create the initial pool.
+ * Track the count of each descriptor type remaining in the pool.
+ * When allocating a descriptor set, validate the counts do not exceed:
+ *  A) Each descriptor type count does not exceed the pool's remaining counts per type
+ *  B) The descriptor set's counts per type plus all existing allocated counts per type do not exceed the hardware maximums
+ *  C) The descriptor set's counts plus all existing allocated counts do not exceed MaxUpdateAfterBindDescriptorsInAllPools
+ *  D) The descriptor type count does not exceed the pool's total counts per type
+ *  E) The count of descriptor sets plus the existing sets in the pool does not exceed the MaxSets.
+ *  F) The count of descriptors in the set does not exceed MaxPerSetDescriptors
+ * If A, B, C, D, E and F are true, allocate the descriptor set in the pool.
+ * If B is or C is or D or F is false, throw an exception.
+ * If only A and/or E is false, create a new descriptor pool and allocate from it.
+ * Increment the counts.
+ * */
+auto DescriptorAllocator::Allocate(DescriptorSetLayout* layout, vk::DescriptorPoolCreateFlags flags) ->  vk::UniqueDescriptorSet
+{
+    auto sampledImagesCount = 0u;
+    auto storageBuffersCount = 0u;
+    auto uniformBuffersCount = 0u;
+
+    for (auto& binding : layout.bindings.values())
+    {
+        switch (binding.descriptorType)
+        {
+            case vk::DescriptorType::eSampledImage:
+            {
+                sampledImagesCount += binding.descriptorCount;
+                break;
+            }
+            case vk::DescriptorType::eStorageBuffer:
+            {
+                storageBuffersCount += binding.descriptorCount;
+                break;
+            }
+            case vk::DescriptorType::eUniformBuffer:
+            {
+                uniformBuffersCount += binding.descriptorCount;
+                break;
+            }
+            default:
+            {
+                throw NcError("Descriptor type not supported.");
+            }
+        }
+    }
+
+    NC_ASSERT(sampledImagesCount <= SampledImagesPerPoolCount, "Cannot allocate a descriptor set with {} sampled images. The limit per pool is {}. Consider splitting sampled images into multiple descriptor sets.", sampledImagesCount, SampledImagesPerPoolCount);
+    NC_ASSERT(storageBuffersCount <= StorageBuffersPerPoolCount, "Cannot allocate a descriptor set with {} storage buffers. The limit per pool is {}. Consider splitting storage buffers into multiple descriptor sets.", storageBuffersCount, StorageBuffersPerPoolCount);
+    NC_ASSERT(uniformBuffersCount <= UniformBuffersPerPoolCount, "Cannot allocate a descriptor set with {} uniform buffers. The limit per pool is {}. Consider splitting uniform buffers into multiple descriptor sets.", uniformBuffersCount, UniformBuffersPerPoolCount);
+
+    NC_ASSERT(sampledImagesCount <= m_deviceRequirements.MaxDescriptorSetUpdateAfterBindSampledImages, "Cannot allocate a descriptor set with {} sampled images. This descriptor set could never be bound as the maximum count of sampled images bound per stage is: {}", sampledImagesCount, m_deviceRequirements.MaxPerStageDescriptorUpdateAfterBindSampledImages);
+    NC_ASSERT(storageBuffersCount <= m_deviceRequirements.MaxDescriptorSetUpdateAfterBindStorageBuffers, "Cannot allocate a descriptor set with {} storage buffers. This descriptor set could never be bound as the maximum count of storage buffers bound per stage is: {}", storageBuffersCount, m_deviceRequirements.MaxPerStageDescriptorUpdateAfterBindStorageBuffers);
+    NC_ASSERT(uniformBuffersCount <= m_deviceRequirements.MaxDescriptorSetUpdateAfterBindUniformBuffers, "Cannot allocate a descriptor set with {} uniform buffers. This descriptor set could never be bound as the maximum count of uniform buffers bound per stage is: {}", uniformBuffersCount, m_deviceRequirements.MaxPerStageDescriptorUpdateAfterBindUniformBuffers);
+
+    NC_ASSERT(sampledImagesCount + storageBuffersCount + uniformBuffersCount <= m_deviceRequirements.MaxPerSetDescriptors, "Cannot allocate a descriptor set with {} descriptors. The maximum per MaxPerSetDescriptors is: {}.", sampledImagesCount + storageBuffersCount + uniformBuffersCount, m_deviceRequirements.MaxPerSetDescriptors );
+
+    auto newSampledImagesTotal = sampledImagesCount + m_totalSampledImagesCount;
+    auto newStorageBuffersTotal = storageBuffersCount + m_totalStorageBuffersCount;
+    auto newUniformBuffersTotal = uniformBuffersCount + m_totalUniformBuffersCount;
+    NC_ASSERT(newSampledImagesTotal + newStorageBuffersTotal + newUniformBuffersTotal <= m_deviceRequirements.MaxUpdateAfterBindDescriptorsInAllPools, "This descriptor set cannot be allocated as the total count of descriptors {} would exceed the total allowed descriptors across all pools: {}.", newSampledImagesTotal + newStorageBuffersTotal + newUniformBuffersTotal, m_deviceRequirements.MaxUpdateAfterBindDescriptorsInAllPools);
+
+    auto* pool = GetFreePool(sampledImagesCount, storageBuffersCount, uniformBuffersCount);
+    if (pool == nullptr)
+    {
+        m_totalSampledImagesCount = newSampledImagesTotal;
+        m_totalStorageBuffersCount = newStorageBuffersTotal;
+        m_totalUniformBuffersCount = newUniformBuffersTotal;
+        m_pools.emplace_back(m_device, flags);
+        pool = &m_pools.back();
+    }
+
+    return CreateDescriptorSet(m_device, pool->pool.get(), 1, layout);
+}
+
+ShaderBindingManager::ShaderBindingManager(vk::Device device, const DeviceRequirements* deviceRequirements)
+    : m_device{device},
+      m_deviceRequirements{deviceRequirements},
+      m_allocator{DescriptorAllocator(device, m_deviceRequirements)},
       m_perFrameSets{CreatePerFrameSets(MaxSetsDivided, MaxSetsDivided)},
       m_staticSets{MaxSetsDivided, MaxSetsDivided},
       m_layouts{vulkan::MaxDescriptorSets, vulkan::MaxDescriptorSets}
@@ -102,8 +198,6 @@ void ShaderBindingManager::RegisterDescriptor(uint32_t bindingSlot, uint32_t set
     layout.bindingFlags.erase(bindingSlot);
     layout.bindingFlags.emplace(bindingSlot, vk::DescriptorBindingFlagsEXT(bindingFlags));
     
-    layout.layout = CreateDescriptorSetLayout(m_device, layout.bindings.values(), layout.bindingFlags.values());
-
     auto& sets = GetSets(frameIndex);
     if (!sets.contains(setIndex))
     {
@@ -115,10 +209,12 @@ void ShaderBindingManager::CommitResourceLayout()
 {
     for (auto [setIndex, layout] : std::views::zip(m_layouts.keys(), m_layouts.values()))
     {
+        auto poolFlags = layout.bindingFlags & vk::DescriptorBindingFlagBits::eUpdateAfterBind != vk::DescriptorBindingFlags() ? vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind : vk::DescriptorPoolCreateFlags();
         if (layout.isStatic)
         {
             auto& set = GetSets(StaticSet).at(setIndex);
-            set.set = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get());
+            layout.layout = CreateDescriptorSetLayout(m_device, layout.bindings.values(), layout.bindingFlags.values());
+            set.set = m_pools.Allocate(&layout->layout.get(), poolFlags, )
             continue;
         }
 
