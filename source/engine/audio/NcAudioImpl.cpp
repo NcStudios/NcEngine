@@ -66,6 +66,15 @@ struct NcAudioStub : public nc::audio::NcAudio
     nc::audio::AudioDevice nullDevice{"NoDevice", nc::audio::InvalidDeviceId};
     nc::Signal<const nc::audio::AudioDevice&> nullSignal;
 
+    void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
+    {
+        update.Add(
+            nc::update_task_id::AudioSourceUpdate,
+            "AudioSourceUpdate(stub)",
+            []{}
+        );
+    }
+
     void RegisterListener(nc::Entity) noexcept override{}
     auto GetStreamTime() const noexcept -> double override { return 0.0; }
     void SetStreamTime(double) noexcept override {}
@@ -121,8 +130,12 @@ void NcAudioImpl::Clear() noexcept
 
 void NcAudioImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
-    NC_LOG_TRACE("Building NcAudio workload");
-    update.Add(task::UpdatePhase::Free, "NcAudio", [this]{ Run(); });
+    NC_LOG_TRACE("Building NcAudio Tasks");
+    update.Add(
+        update_task_id::AudioSourceUpdate,
+        "AudioSourceUpdate",
+        [this]{ Run(); }
+    );
 }
 
 void NcAudioImpl::RegisterListener(Entity listener) noexcept

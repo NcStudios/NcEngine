@@ -8,17 +8,6 @@
 
 namespace
 {
-void SetDependencies(std::vector<tf::Task>& predecessors, const std::vector<tf::Task>& successors)
-{
-    for(auto& before : predecessors)
-    {
-        for(const auto& after : successors)
-        {
-            before.precede(after);
-        }
-    }
-}
-
 // Internal TaskGraph interface
 template<class Phase>
 class GraphBuilder : public nc::task::TaskGraph<Phase>
@@ -26,36 +15,39 @@ class GraphBuilder : public nc::task::TaskGraph<Phase>
     public:
         GraphBuilder() = default;
 
-        // Add necessary placeholder tasks. Call after adding tasks but before
-        // calling Connect().
-        void EnsureNoEmptyBuckets()
+        // Set task dependencies
+        void Connect()
         {
-            for (auto [i, bucket] : nc::algo::Enumerate(this->m_taskBuckets))
+            for (auto& [task, id, predecessors, successors] : this->m_tasks)
             {
-                if (bucket.empty())
+                for (auto predecessor : predecessors)
                 {
-                    const auto phase = static_cast<Phase>(i);
-                    this->Add(phase, "Placeholder Task", []() noexcept {});
+                    auto pos = std::ranges::find(this->m_tasks, predecessor, &nc::task::Task::id);
+                    if (pos == this->m_tasks.cend())
+                    {
+                        throw nc::NcError(fmt::format("Did not find predecessor task with id '{}'", predecessor));
+                    }
+
+                    pos->task.precede(task);
+                }
+
+                for (auto successor : successors)
+                {
+                    auto pos = std::ranges::find(this->m_tasks, successor, &nc::task::Task::id);
+                    if (pos == this->m_tasks.cend())
+                    {
+                        throw nc::NcError(fmt::format("Did not find successor task with id '{}'", successor));
+                    }
+
+                    task.precede(pos->task);
                 }
             }
-        }
-
-        // Set task dependencies between phases
-        void Connect(Phase before, Phase after)
-        {
-            SetDependencies(Bucket(before), Bucket(after));
         }
 
         // Extract TaskGraphContext - leaves this object in an invalid state.
         auto ReleaseContext()
         {
             return std::move(this->m_ctx);
-        }
-
-    private:
-        auto Bucket(Phase phase) -> std::vector<tf::Task>&
-        {
-            return this->m_taskBuckets.at(static_cast<size_t>(phase));
         }
 };
 } // anonymous namespace
@@ -71,16 +63,8 @@ auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> Execut
         mod->OnBuildTaskGraph(updateBuilder, renderBuilder);
     }
 
-    updateBuilder.EnsureNoEmptyBuckets();
-    updateBuilder.Connect(UpdatePhase::Begin, UpdatePhase::Free);
-    updateBuilder.Connect(UpdatePhase::Begin, UpdatePhase::Logic);
-    updateBuilder.Connect(UpdatePhase::Logic, UpdatePhase::Physics);
-    updateBuilder.Connect(UpdatePhase::Physics, UpdatePhase::Sync);
-    updateBuilder.Connect(UpdatePhase::Free, UpdatePhase::Sync);
-
-    renderBuilder.EnsureNoEmptyBuckets();
-    renderBuilder.Connect(RenderPhase::Render, RenderPhase::PostRender);
-
+    updateBuilder.Connect();
+    renderBuilder.Connect();
     return ExecutorContext{updateBuilder.ReleaseContext(), renderBuilder.ReleaseContext()};
 }
 

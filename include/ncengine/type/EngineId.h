@@ -8,10 +8,10 @@
 
 namespace nc
 {
-/** @brief Marks the beginning of the component and module id range reserved for engine use. */
+/** @brief Marks the beginning of the component, module, and task id range reserved for engine use. */
 constexpr size_t EngineIdRangeBegin = 1ull;
 
-/** @brief Marks the end of the component and module id range reserved for engine use. */
+/** @brief Marks the end of the component, module, and task id range reserved for engine use. */
 constexpr size_t EngineIdRangeEnd = 100ull;
 
 /** @{ */
@@ -50,4 +50,24 @@ constexpr size_t NcTimeId = 6ull;
 constexpr size_t NcRandomId = 7ull;
 constexpr size_t NcSceneId = 8ull;
 /** @} */
+
+namespace update_task_id
+{
+/** @brief Unique engine task id for update phase. */
+constexpr size_t DebugRendererNewFrame = 1ull;
+constexpr size_t ParticleEmitterUpdate = 2ull;
+constexpr size_t AudioSourceUpdate = 3ull;
+constexpr size_t FrameLogicUpdate = 4ull; // Depends on DebugRendererNewFrame
+constexpr size_t PhysicsPipeline = 5ull; // Depends on FrameLogicUpdate
+constexpr size_t CommitStagedChanges = 6ull; // Depends on all other update tasks
+constexpr size_t ParticleEmitterSync = 7ull; // Depends on CommitStagedChanges
+/** @} */
+} // namespace update_task_id
+
+namespace render_task_id
+{
+/** @brief Unique engine task id for render phase. */
+constexpr size_t Render = 50ull;
+/** @} */
+} // namespace render_task_id
 } // namespace nc
