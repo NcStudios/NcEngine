@@ -5,19 +5,28 @@
 #include <sstream>
 
 auto s_numTasksRun = size_t{};
-auto s_updateInvokeOrder = std::vector<nc::task::UpdatePhase>{};
-auto s_renderInvokeOrder = std::vector<nc::task::RenderPhase>{};
+auto s_updateInvokeOrder = std::vector<size_t>{};
+auto s_renderInvokeOrder = std::vector<size_t>{};
 auto s_taskMutex = std::mutex{}; // for safety in case scheduling is broken
 
+constexpr size_t g_updateId1 = 1ull;
+constexpr size_t g_updateId2 = 2ull;
+constexpr size_t g_updateId3 = 3ull;
+constexpr size_t g_updateId4 = 4ull;
+constexpr size_t g_updateId5 = 5ull;
+
+constexpr size_t g_renderId1 = 10ull;
+constexpr size_t g_renderId2 = 11ull;
+
 // Test tasks should call this to track that/when they're invoked.
-void RegisterTaskInvocation(nc::task::UpdatePhase taskId)
+void RegisterUpdateTaskInvocation(size_t taskId)
 {
     auto lock = std::lock_guard{s_taskMutex};
     ++s_numTasksRun;
     s_updateInvokeOrder.push_back(taskId);
 }
 
-void RegisterTaskInvocation(nc::task::RenderPhase taskId)
+void RegisterRenderTaskInvocation(size_t taskId)
 {
     auto lock = std::lock_guard{s_taskMutex};
     ++s_numTasksRun;
@@ -44,17 +53,24 @@ struct SingleTaskModule : nc::Module
         // Note: If setting dependencies is totally stripped from the executor,
         // tasks tend to finish in the order they're added. Tasks should be
         // added in reverse phase order to prevent false positives.
-        update.Add(nc::task::UpdatePhase::Sync, "", [] {
-            RegisterTaskInvocation(nc::task::UpdatePhase::Sync); }
+        update.Add(
+            g_updateId2,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId2); },
+            {g_updateId1}
         );
 
-        update.Add(nc::task::UpdatePhase::Logic, "", [] {
-            RegisterTaskInvocation(nc::task::UpdatePhase::Logic);
-        });
+        update.Add(
+            g_updateId1,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId1); }
+        );
 
-        render.Add(nc::task::RenderPhase::Render, "", [] {
-            RegisterTaskInvocation(nc::task::RenderPhase::Render);
-        });
+        render.Add(
+            g_renderId1,
+            "",
+            [] { RegisterRenderTaskInvocation(g_renderId1); }
+        );
     }
 };
 
@@ -67,20 +83,68 @@ struct GraphModule : nc::Module
     void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks& render) override
     {
         auto tf1 = std::make_unique<tf::Taskflow>();
-        tf1->emplace([] { RegisterTaskInvocation(nc::task::UpdatePhase::Sync); });
-        update.Add(nc::task::UpdatePhase::Sync, "", std::move(tf1));
+        tf1->emplace([] { RegisterUpdateTaskInvocation(g_updateId5); });
+        update.Add(g_updateId5, "", std::move(tf1), {g_updateId4});
 
         auto tf2 = std::make_unique<tf::Taskflow>();
-        tf2->emplace([] { RegisterTaskInvocation(nc::task::UpdatePhase::Physics); });
-        update.Add(nc::task::UpdatePhase::Physics, "", std::move(tf2));
+        tf2->emplace([] { RegisterUpdateTaskInvocation(g_updateId4); });
+        update.Add(g_updateId4, "", std::move(tf2), {g_updateId3});
 
         auto tf3 = std::make_unique<tf::Taskflow>();
-        tf3->emplace([] { RegisterTaskInvocation(nc::task::UpdatePhase::Begin); });
-        update.Add(nc::task::UpdatePhase::Begin, "", std::move(tf3));
+        tf3->emplace([] { RegisterUpdateTaskInvocation(g_updateId3); });
+        update.Add(g_updateId3, "", std::move(tf3), {g_updateId2});
 
         auto tf4 = std::make_unique<tf::Taskflow>();
-        tf4->emplace([] { RegisterTaskInvocation(nc::task::RenderPhase::PostRender); });
-        render.Add(nc::task::RenderPhase::PostRender, "", std::move(tf4));
+        tf4->emplace([] { RegisterRenderTaskInvocation(g_renderId2); });
+        render.Add(g_renderId2, "", std::move(tf4), {g_renderId1});
+    }
+};
+
+// Module that schedules tasks using predecessors and successors
+struct PredecessorAndSuccessorModule : nc::Module
+{
+    static constexpr auto UpdateTaskCount = 5ull;
+    static constexpr auto RenderTaskCount = 0ull;
+
+    void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&) override
+    {
+        update.Add(
+            g_updateId5,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId5); },
+            {g_updateId4}
+        );
+
+        update.Add(
+            g_updateId4,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId4); },
+            {},
+            {g_updateId5}
+        );
+
+        update.Add(
+            g_updateId3,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId3); },
+            {g_updateId2},
+            {g_updateId4}
+        );
+
+        update.Add(
+            g_updateId2,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId2); },
+            {g_updateId1}
+        );
+
+        update.Add(
+            g_updateId1,
+            "",
+            [] { RegisterUpdateTaskInvocation(g_updateId1); },
+            {},
+            {g_updateId2}
+        );
     }
 };
 
@@ -92,8 +156,8 @@ struct ThrowingModule : nc::Module
 
     void OnBuildTaskGraph(nc::task::UpdateTasks& graph, nc::task::RenderTasks&) override
     {
-        graph.Add(nc::task::UpdatePhase::Begin, "", [] {
-            RegisterTaskInvocation(nc::task::UpdatePhase::Begin);
+        graph.Add(g_updateId1, "", [] {
+            RegisterUpdateTaskInvocation(g_updateId1);
             throw std::runtime_error("failed task");
         });
     }
@@ -108,7 +172,7 @@ struct DoubleRunModule : nc::Module
     nc::task::Executor* executor = nullptr;
     void OnBuildTaskGraph(nc::task::UpdateTasks& graph, nc::task::RenderTasks&) override
     {
-        graph.Add(nc::task::UpdatePhase::Begin, "", [this] {
+        graph.Add(g_updateId1, "", [this] {
             if (!executor)
             {
                 FAIL() << "Bad test setup";
@@ -128,7 +192,7 @@ struct GraphRebuildModule : nc::Module
     nc::task::Executor* executor = nullptr;
     void OnBuildTaskGraph(nc::task::UpdateTasks& graph, nc::task::RenderTasks&) override
     {
-        graph.Add(nc::task::UpdatePhase::Begin, "", [this] {
+        graph.Add(g_updateId1, "", [this] {
             if (!executor)
             {
                 FAIL() << "Bad test setup";
@@ -158,7 +222,7 @@ TEST_F(ExecutorTests, BuildContext_succeeds)
     EXPECT_NO_THROW(nc::task::BuildContext(modules));
 }
 
-TEST_F(ExecutorTests, Run_allPhases_schedulesCorrectly)
+TEST_F(ExecutorTests, Run_validGraph_schedulesCorrectly)
 {
     auto modules = BuildModules<SingleTaskModule, GraphModule>();
     auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
@@ -169,28 +233,38 @@ TEST_F(ExecutorTests, Run_allPhases_schedulesCorrectly)
     EXPECT_EQ(expectedUpdateTaskCount + expectedRenderTaskCount, s_numTasksRun);
     ASSERT_EQ(expectedUpdateTaskCount, s_updateInvokeOrder.size());
     ASSERT_EQ(expectedRenderTaskCount, s_renderInvokeOrder.size());
-    // Not adding Free phase tasks so that the order is predicable
-    EXPECT_EQ(nc::task::UpdatePhase::Begin, s_updateInvokeOrder.at(0));
-    EXPECT_EQ(nc::task::UpdatePhase::Logic, s_updateInvokeOrder.at(1));
-    EXPECT_EQ(nc::task::UpdatePhase::Physics, s_updateInvokeOrder.at(2));
-    EXPECT_EQ(nc::task::UpdatePhase::Sync, s_updateInvokeOrder.at(3));
-    EXPECT_EQ(nc::task::UpdatePhase::Sync, s_updateInvokeOrder.at(4));
+    EXPECT_EQ(g_updateId1, s_updateInvokeOrder.at(0));
+    EXPECT_EQ(g_updateId2, s_updateInvokeOrder.at(1));
+    EXPECT_EQ(g_updateId3, s_updateInvokeOrder.at(2));
+    EXPECT_EQ(g_updateId4, s_updateInvokeOrder.at(3));
+    EXPECT_EQ(g_updateId5, s_updateInvokeOrder.at(4));
 
-    EXPECT_EQ(nc::task::RenderPhase::Render, s_renderInvokeOrder.at(0));
-    EXPECT_EQ(nc::task::RenderPhase::PostRender, s_renderInvokeOrder.at(1));
+    EXPECT_EQ(g_renderId1, s_renderInvokeOrder.at(0));
+    EXPECT_EQ(g_renderId2, s_renderInvokeOrder.at(1));
 }
 
-TEST_F(ExecutorTests, Run_missingPhases_schedulesCorrectly)
+TEST_F(ExecutorTests, Run_graphScheduledWithPredecessorsAndSuccessors_schedulesCorrectly)
 {
-    auto modules = BuildModules<SingleTaskModule>();
+    auto modules = BuildModules<PredecessorAndSuccessorModule>();
     auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     EXPECT_NO_THROW(uut.RunUpdateTasks());
-    ASSERT_EQ(SingleTaskModule::UpdateTaskCount, s_numTasksRun);
-    ASSERT_EQ(SingleTaskModule::UpdateTaskCount, s_updateInvokeOrder.size());
-    // Test dependencies propagate across empty phases - i.e. with no physics
-    // tasks, sync tasks are still scheduled after logic
-    EXPECT_EQ(nc::task::UpdatePhase::Logic, s_updateInvokeOrder.at(0));
-    EXPECT_EQ(nc::task::UpdatePhase::Sync, s_updateInvokeOrder.at(1));
+    EXPECT_NO_THROW(uut.RunRenderTasks());
+    const auto expectedUpdateTaskCount = PredecessorAndSuccessorModule::UpdateTaskCount;
+    const auto expectedRenderTaskCount = PredecessorAndSuccessorModule::RenderTaskCount;
+    EXPECT_EQ(expectedUpdateTaskCount + expectedRenderTaskCount, s_numTasksRun);
+    ASSERT_EQ(expectedUpdateTaskCount, s_updateInvokeOrder.size());
+    ASSERT_EQ(expectedRenderTaskCount, s_renderInvokeOrder.size());
+    EXPECT_EQ(g_updateId1, s_updateInvokeOrder.at(0));
+    EXPECT_EQ(g_updateId2, s_updateInvokeOrder.at(1));
+    EXPECT_EQ(g_updateId3, s_updateInvokeOrder.at(2));
+    EXPECT_EQ(g_updateId4, s_updateInvokeOrder.at(3));
+    EXPECT_EQ(g_updateId5, s_updateInvokeOrder.at(4));
+}
+
+TEST_F(ExecutorTests, Run_missingDependencies_throws)
+{
+    auto modules = BuildModules<GraphModule>();
+    EXPECT_THROW(nc::task::Executor(4, nc::task::BuildContext(modules)), nc::NcError);
 }
 
 TEST_F(ExecutorTests, Run_taskThrows_completesGraph)

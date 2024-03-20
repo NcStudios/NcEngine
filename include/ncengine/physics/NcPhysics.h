@@ -12,8 +12,12 @@ namespace nc::physics
 {
 /** @brief Physics module interface
  * 
- *  Component Access:
- *      Write: Collider, ConcaveCollider, PhysicsBody, Transform
+ * Tasks
+ *   PhysicsPipeline
+ *     Depends On: FrameLogicUpdate
+ *     Component Access:
+ *       Write: Collider, PhysicsBody, Transform
+ *       Read: ConcaveCollider, PhysicsMaterial, PositionClamp, VelocityRestriction
  */
 struct NcPhysics : public Module
 {

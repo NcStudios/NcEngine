@@ -39,8 +39,8 @@ struct AudioDevice
  * @brief Audio module interface.
  * 
  * Tasks:
- *   Process Audio
- *     Runs During: UpdatePhase::Free
+ *   AudioSourceUpdate
+ *     Depends On: None
  *     Component Access:
  *       Write: AudioSource
  *       Read: Transform

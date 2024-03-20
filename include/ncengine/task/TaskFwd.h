@@ -11,8 +11,8 @@ namespace nc::task
 template<class Phase>
 class TaskGraph;
 
-enum class UpdatePhase : uint8_t;
-enum class RenderPhase : uint8_t;
+struct UpdatePhase;
+struct RenderPhase;
 using UpdateTasks = TaskGraph<UpdatePhase>;
 using RenderTasks = TaskGraph<RenderPhase>;
 } // namespace nc::task

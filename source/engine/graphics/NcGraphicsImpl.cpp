@@ -20,6 +20,28 @@ namespace
     {
         NcGraphicsStub(nc::Registry*) {}
 
+        void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks& render)
+        {
+            update.Add(
+                nc::update_task_id::ParticleEmitterUpdate,
+                "ParticleEmitterUpdate(stub)",
+                []{}
+            );
+
+            render.Add(
+                nc::update_task_id::ParticleEmitterSync,
+                "ParticleEmitterSync(stub)",
+                []{},
+                {nc::update_task_id::CommitStagedChanges}
+            );
+
+            render.Add(
+                nc::render_task_id::Render,
+                "Render(stub)",
+                []{}
+            );
+        }
+
         void SetCamera(nc::graphics::Camera*) noexcept override {}
         auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
         void SetUi(nc::ui::IUI*) noexcept override {}
@@ -127,14 +149,37 @@ namespace nc::graphics
 
     void NcGraphicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
     {
-        NC_LOG_TRACE("Building NcGraphics workload");
+        NC_LOG_TRACE("Building NcGraphics Tasks");
 
 #if NC_DEBUG_RENDERING_ENABLED
-        update.Add(task::UpdatePhase::Begin, "DebugRenderer", debug::DebugRendererNewFrame);
+         // We must express FrameLogicUpdate dependency here (as a predecessor) so we don't have
+         // a missing task id in prod builds where this is excluded.
+        update.Add(
+            update_task_id::DebugRendererNewFrame,
+            "DebugRendererNewFrame",
+            debug::DebugRendererNewFrame,
+            {},
+            {update_task_id::FrameLogicUpdate}
+        );
 #endif
-        update.Add(task::UpdatePhase::Free, "ParticleEmitterSystem", [this]{ m_systemResources.particleEmitters.Run(); });
-        render.Add(task::RenderPhase::Render, "NcGraphics", [this]{ Run(); });
-        render.Add(task::RenderPhase::PostRender, "ProcessParticleFrameEvents", [this]{ m_systemResources.particleEmitters.ProcessFrameEvents(); } );
+        update.Add(
+            update_task_id::ParticleEmitterUpdate,
+            "ParticleEmitterUpdate",
+            [this]{ m_systemResources.particleEmitters.Run(); }
+        );
+
+        update.Add(
+            update_task_id::ParticleEmitterSync,
+            "ParticleEmitterSync",
+            [this]{ m_systemResources.particleEmitters.ProcessFrameEvents(); },
+            {update_task_id::CommitStagedChanges}
+        );
+
+        render.Add(
+            render_task_id::Render,
+            "Render",
+            [this]{ Run(); }
+        );
     }
 
     void NcGraphicsImpl::Run()
