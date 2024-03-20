@@ -1,6 +1,6 @@
 find_package(Vulkan REQUIRED)
 
-set(NC_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/test/assets/collateral/)
+set(NC_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/test/asset/collateral/)
 
 ### AssetId Tests ###
 add_executable(AssetId_tests
