@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/HullColliderAssetManager.h"
+#include "asset/manager/HullColliderAssetManager.h"
 
 #include "ncasset/Assets.h"
 

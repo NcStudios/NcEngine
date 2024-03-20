@@ -1,5 +1,5 @@
 #include "EnvironmentSystem.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 #include "graphics/shader_resource/ShaderTypes.h"
 #include "CameraSystem.h"
 

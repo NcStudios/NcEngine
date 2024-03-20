@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/ShaderAssetManager.h"
+#include "asset/manager/ShaderAssetManager.h"
 
 #include <array>
 #include <filesystem>

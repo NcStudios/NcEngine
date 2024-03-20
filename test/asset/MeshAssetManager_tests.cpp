@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/MeshAssetManager.h"
+#include "asset/manager/MeshAssetManager.h"
 
 #include "ncasset/Assets.h"
 

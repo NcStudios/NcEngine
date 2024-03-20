@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/AssetUtilities.h"
+#include "asset/manager/AssetUtilities.h"
 
 #include "ncutility/Algorithm.h"
 

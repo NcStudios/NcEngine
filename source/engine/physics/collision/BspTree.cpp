@@ -1,5 +1,5 @@
 #include "BspTree.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 
 #include <iostream>
 

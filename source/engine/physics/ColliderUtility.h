@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ncengine/physics/Collider.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 
 namespace nc::physics
 {

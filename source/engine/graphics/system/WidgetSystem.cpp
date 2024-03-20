@@ -1,6 +1,6 @@
 #include "WidgetSystem.h"
 #include "ncengine/asset/DefaultAssets.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 
 #include "optick.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 #include "utility/StringMap.h"
 
 #include "ncasset/AssetsFwd.h"

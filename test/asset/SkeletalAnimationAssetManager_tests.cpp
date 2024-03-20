@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "asset/AssetData.h"
-#include "assets/manager/SkeletalAnimationAssetManager.h"
+#include "asset/manager/SkeletalAnimationAssetManager.h"
 
 #include <array>
 #include <string>

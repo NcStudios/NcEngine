@@ -1,6 +1,6 @@
 #pragma once
 
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 
 /**
  * Helper to define and create an IAssetService instance. The name of the instance is the provided
@@ -15,7 +15,6 @@
 #define DEFINE_ASSET_SERVICE_STUB(className, assetType, viewType, inputType)                                                              \
 struct className : public nc::asset::IAssetService<viewType, inputType>                                                                   \
 {                                                                                                                                         \
-                                                                                                                                          \
     viewType view;                                                                                                                        \
     const char* path = "test_path";                                                                                                       \
                                                                                                                                           \

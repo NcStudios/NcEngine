@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/AudioClipAssetManager.h"
+#include "asset/manager/AudioClipAssetManager.h"
 
 #include "ncasset/Assets.h"
 

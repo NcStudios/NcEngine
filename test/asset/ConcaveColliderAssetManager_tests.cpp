@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/ConcaveColliderAssetManager.h"
+#include "asset/manager/ConcaveColliderAssetManager.h"
 
 #include "ncasset/Assets.h"
 

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "assets/manager/CubeMapAssetManager.h"
+#include "asset/manager/CubeMapAssetManager.h"
 
 #include <array>
 #include <string>

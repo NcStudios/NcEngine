@@ -1,6 +1,6 @@
 #include "AssetWrapper.h"
 #include "asset/Assets.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 
 namespace nc::ui::editor
 {
