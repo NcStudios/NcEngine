@@ -6,7 +6,7 @@
 #include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
 class ShaderBindingManager;
@@ -38,5 +38,5 @@ class WireframeTechnique : public ITechnique
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan
 #endif

@@ -41,15 +41,15 @@ constexpr auto colorAndDepthWriteAfterPrevious = vk::SubpassDependency
     vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
 };
 
-auto CreateAttachmentDescription(nc::graphics::AttachmentType type,
+auto CreateAttachmentDescription(nc::graphics::vulkan::AttachmentType type,
                                  vk::Format format,
                                  vk::SampleCountFlagBits numSamples,
                                  vk::AttachmentLoadOp loadOp,
                                  vk::AttachmentStoreOp storeOp) -> vk::AttachmentDescription
 {
-    using nc::graphics::AttachmentType;
+    using nc::graphics::vulkan::AttachmentType;
     const auto stencilLoadOp = type == AttachmentType::Depth ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eDontCare;
-    const auto finalLayout = [](nc::graphics::AttachmentType attachmentType)
+    const auto finalLayout = [](nc::graphics::vulkan::AttachmentType attachmentType)
     {
         switch (attachmentType)
         {
@@ -76,9 +76,9 @@ auto CreateAttachmentDescription(nc::graphics::AttachmentType type,
     };
 }
 
-auto CreateAttachmentReference(nc::graphics::AttachmentType type, uint32_t attachmentIndex) -> vk::AttachmentReference
+auto CreateAttachmentReference(nc::graphics::vulkan::AttachmentType type, uint32_t attachmentIndex) -> vk::AttachmentReference
 {
-    using nc::graphics::AttachmentType;
+    using nc::graphics::vulkan::AttachmentType;
     const auto layout = [](AttachmentType attachmentType)
     {
         switch (attachmentType)
@@ -94,9 +94,9 @@ auto CreateAttachmentReference(nc::graphics::AttachmentType type, uint32_t attac
     return vk::AttachmentReference{attachmentIndex, layout};
 }
 
-auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& colorAttachment,
-                              const nc::graphics::AttachmentSlot& depthAttachment,
-                              const nc::graphics::AttachmentSlot& resolveAttachment) -> vk::SubpassDescription
+auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& colorAttachment,
+                              const nc::graphics::vulkan::AttachmentSlot& depthAttachment,
+                              const nc::graphics::vulkan::AttachmentSlot& resolveAttachment) -> vk::SubpassDescription
 {
     return vk::SubpassDescription
     {
@@ -111,7 +111,7 @@ auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& colorAttachmen
     };
 }
 
-auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& depthAttachment) -> vk::SubpassDescription
+auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& depthAttachment) -> vk::SubpassDescription
 {
     return vk::SubpassDescription
     {
@@ -126,7 +126,7 @@ auto CreateSubpassDescription(const nc::graphics::AttachmentSlot& depthAttachmen
     };
 }
 
-auto CreateAttachmentImage(nc::graphics::GpuAllocator *allocator, vk::Format format, nc::Vector2 dimensions, vk::SampleCountFlagBits numSamples, bool isDepthStencil) -> nc::graphics::GpuAllocation<vk::Image>
+auto CreateAttachmentImage(nc::graphics::vulkan::GpuAllocator *allocator, vk::Format format, nc::Vector2 dimensions, vk::SampleCountFlagBits numSamples, bool isDepthStencil) -> nc::graphics::vulkan::GpuAllocation<vk::Image>
 {
     constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
     constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
@@ -161,7 +161,7 @@ auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image i
 
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex, AttachmentType attachmentType, vk::Format format, vk::AttachmentLoadOp loadOp,
                                vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples)
@@ -187,4 +187,4 @@ Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimen
     : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, isDepthStencil)},
       view{CreateAttachmentImageView(device, format, image, isDepthStencil)}{}
 
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

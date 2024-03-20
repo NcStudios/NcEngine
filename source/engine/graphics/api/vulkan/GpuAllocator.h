@@ -7,9 +7,7 @@
 
 #include <utility>
 
-namespace nc
-{
-namespace graphics
+namespace nc::graphics::vulkan
 {
     class Device;
     class GpuAllocator;
@@ -147,5 +145,4 @@ namespace graphics
     {
         return m_allocator->GetAllocationInfo(*this);
     }
-} // namespace graphics
-} // namespace nc
+} // namespace nc::graphics::vulkan

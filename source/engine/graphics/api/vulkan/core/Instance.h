@@ -7,7 +7,7 @@
 
 struct GLFWwindow;
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Instance
 {
@@ -31,4 +31,4 @@ class Instance
     private:
         vk::UniqueInstance m_instance;
 };
-} // nc::graphics
+} // nc::graphics::vulkan

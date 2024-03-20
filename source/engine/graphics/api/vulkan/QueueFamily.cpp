@@ -1,7 +1,7 @@
 #include "QueueFamily.h"
 #include "ncutility/NcError.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
 {
@@ -38,4 +38,4 @@ QueueFamilyIndices::QueueFamilyIndices(const vk::PhysicalDevice& device, const v
         ++i;
     }
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -10,7 +10,7 @@
 
 #include "optick.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
     : m_shaderBindingManager{shaderBindingManager},
@@ -122,4 +122,4 @@ void OutlineTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&
 void OutlineTechnique::Clear() noexcept
 {
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

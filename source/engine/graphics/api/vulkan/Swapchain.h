@@ -4,7 +4,7 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     struct SwapChainSupportDetails
     {
@@ -48,4 +48,4 @@ namespace nc::graphics
             std::vector<vk::UniqueImageView> m_swapChainImageViews;
             std::vector<vk::Fence> m_imagesInFlightFences;
     };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

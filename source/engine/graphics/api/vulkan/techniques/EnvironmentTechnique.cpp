@@ -12,7 +12,7 @@
 
 #include "optick.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
     : m_shaderBindingManager{shaderBindingManager},
@@ -128,4 +128,4 @@ void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderSt
 void EnvironmentTechnique::Clear() noexcept
 {
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

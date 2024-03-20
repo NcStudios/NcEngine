@@ -12,7 +12,7 @@
 #include <span>
 #include <unordered_map>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 constexpr auto MaxSetsDivided = vulkan::MaxDescriptorSets/(MaxFramesInFlight+1);
 constexpr auto StaticSet = std::numeric_limits<uint32_t>::max();
@@ -74,4 +74,4 @@ class ShaderBindingManager : StableAddress
         Signal<const DescriptorSetLayoutsChanged&> m_setLayoutsChanged;
 
 };
-}
+} // namespace nc::graphics::vulkan

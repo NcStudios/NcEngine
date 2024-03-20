@@ -5,7 +5,7 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     class Device;
     class ShaderBindingManager;
@@ -29,4 +29,4 @@ namespace nc::graphics
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
     };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -20,7 +20,7 @@ auto UsageFlags<nc::asset::MeshVertex>() -> vk::BufferUsageFlags
 }
 
 template<class T>
-auto CreateBuffer(nc::graphics::GpuAllocator* allocator, std::span<const T> data) -> nc::graphics::GpuAllocation<vk::Buffer>
+auto CreateBuffer(nc::graphics::vulkan::GpuAllocator* allocator, std::span<const T> data) -> nc::graphics::vulkan::GpuAllocation<vk::Buffer>
 {
     const auto size = static_cast<uint32_t>(sizeof(T) * data.size());
 

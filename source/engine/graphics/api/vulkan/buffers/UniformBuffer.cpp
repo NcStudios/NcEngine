@@ -29,6 +29,7 @@ void UniformBuffer::Clear()
 {
     void* mappedData = m_allocator->Map(m_buffer.Allocation());
     memset(mappedData, 0u, m_alignedSize);
+    m_allocator->Unmap(m_buffer.Allocation());
 }
 
 void UniformBuffer::Bind(const void* data, uint32_t size)
@@ -37,4 +38,4 @@ void UniformBuffer::Bind(const void* data, uint32_t size)
     memcpy(mappedData, data, size);
     m_allocator->Unmap(m_buffer.Allocation());
 }
-}
+} // namespace nc::graphics::vulkan

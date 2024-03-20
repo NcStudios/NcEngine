@@ -5,7 +5,8 @@
 namespace nc::graphics
 {
 struct PerFrameRenderState;
-
+namespace vulkan
+{
 class ITechnique
 {
     public:
@@ -18,3 +19,4 @@ class ITechnique
         virtual void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) = 0;
 };
 } // namespace nc::graphics
+} // namespace vulkan

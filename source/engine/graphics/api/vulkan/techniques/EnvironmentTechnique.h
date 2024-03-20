@@ -9,7 +9,7 @@
 #include <vector>
 #include <span>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
 class ShaderBindingManager;
@@ -33,4 +33,4 @@ class EnvironmentTechnique : public ITechnique
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

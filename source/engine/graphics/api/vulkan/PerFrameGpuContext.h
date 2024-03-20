@@ -2,7 +2,7 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
 
@@ -39,4 +39,4 @@ class PerFrameGpuContext
 
         uint32_t m_index;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -107,7 +107,7 @@ auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device 
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
@@ -279,4 +279,4 @@ namespace nc::graphics
         Cleanup();
         Create(device, m_surface, dimensions);
     }
-}
+} // namespace nc::graphics::vulkan

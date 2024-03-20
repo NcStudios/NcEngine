@@ -58,12 +58,12 @@ auto CreatePerFrameSets(size_t initialKeyCapacity, size_t maxKeyCapacity = 65536
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
     {
-        return std::array{((void)N, nc::sparse_map<nc::graphics::DescriptorSet>{initialKeyCapacity, maxKeyCapacity})...};
+        return std::array{((void)N, nc::sparse_map<nc::graphics::vulkan::DescriptorSet>{initialKeyCapacity, maxKeyCapacity})...};
     }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
 }
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 ShaderBindingManager::ShaderBindingManager(vk::Device device)
     : m_device{device},
@@ -183,4 +183,4 @@ void ShaderBindingManager::UpdateBuffer(uint32_t setIndex, vk::DescriptorBufferI
 
     set.isDirty = true;
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan
