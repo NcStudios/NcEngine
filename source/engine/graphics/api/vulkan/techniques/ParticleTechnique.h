@@ -16,14 +16,7 @@ namespace nc::graphics::vulkan
 
     struct ParticlePushConstants
     {
-        // N MVP matrices
-        DirectX::XMMATRIX model;
         DirectX::XMMATRIX viewProjection;
-
-        // Indices into texture array
-        uint32_t baseColorIndex;
-        uint32_t normalColorIndex;
-        uint32_t roughnessColorIndex;
     };
 
     class ParticleTechnique : public ITechnique

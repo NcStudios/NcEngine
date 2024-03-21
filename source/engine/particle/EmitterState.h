@@ -42,6 +42,11 @@ namespace nc::particle
         const graphics::ParticleInfo& GetInfo() const;
         Entity GetEntity() const;
 
+        auto GetTexture() const noexcept -> const std::string&
+        {
+            return m_info.init.particleTexturePath;
+        }
+
     private:
         void PeriodicEmission(float dt);
         auto ComputeMvp(const Particle& particle, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward) const->DirectX::XMMATRIX;

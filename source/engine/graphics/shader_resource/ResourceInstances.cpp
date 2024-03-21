@@ -93,7 +93,7 @@ SystemResources::SystemResources(SystemResourcesConfig config,
       skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
       widgets{},
       ui{registry->GetEcs(), modules, events},
-      particleEmitters{registry, getCamera}
+      particleEmitters{registry, resourceBus, getCamera}
 {
 }
 } // namespace nc::graphics

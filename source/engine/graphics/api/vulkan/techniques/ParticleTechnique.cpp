@@ -92,7 +92,8 @@ namespace nc::graphics::vulkan
 
     bool ParticleTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates.size() > 0;
+        return frameData.particleState.count > 0;
+        // return frameData.emitterStates.size() > 0;
     }
 
     void ParticleTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
@@ -105,28 +106,16 @@ namespace nc::graphics::vulkan
 
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates.size() > 0;
+        return frameData.particleState.count > 0;
+        // return frameData.emitterStates.size() > 0;
     }
 
     void ParticleTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("ParticleTechnique::Record", Optick::Category::Rendering);
-        auto pushConstants = ParticlePushConstants{};
-        pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::PlaneMesh);
-
-        for (auto& emitterState : frameData.emitterStates)
-        {
-            auto [index, models] = emitterState.GetSoA()->View<particle::EmitterState::ModelMatrixIndex>();
-
-            for (; index.Valid(); ++index)
-            {
-                pushConstants.model = models[index];
-                pushConstants.baseColorIndex = AssetService<TextureView>::Get()->Acquire(emitterState.GetInfo().init.particleTexturePath).index;
-
-                cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            }
-        }
+        const auto& meshAccessor = frameData.particleState.mesh;
+        auto pushConstants = ParticlePushConstants{ .viewProjection = frameData.cameraState.view * frameData.cameraState.projection };
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
+        cmd->drawIndexed(meshAccessor.indexCount, frameData.particleState.count, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
 } // namespace nc::graphics::vulkan
