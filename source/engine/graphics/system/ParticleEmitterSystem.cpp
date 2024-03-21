@@ -7,9 +7,14 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 namespace nc::graphics
 {
-ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, ShaderResourceBus* shaderResourceBus, std::function<nc::graphics::Camera* ()> getCamera)
+ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry,
+                                             ShaderResourceBus* shaderResourceBus,
+                                             std::function<nc::graphics::Camera* ()> getCamera,
+                                             unsigned maxParticles)
     : m_emitterStates{},
       m_toAdd{},
       m_toRemove{},
@@ -19,7 +24,8 @@ ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, ShaderResourceB
       m_onAddConnection{ registry->OnAdd<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
       m_onRemoveConnection{ registry->OnRemove<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)},
       // fix max size
-      m_particleDataDeviceBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(ParticleData) * 1000, ShaderStage::Fragment | ShaderStage::Vertex, 7, 0, false)}
+      m_particleDataDeviceBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(ParticleData) * maxParticles, ShaderStage::Fragment | ShaderStage::Vertex, 7, 0, false)},
+      m_maxParticles{maxParticles}
 {
 }
 
@@ -149,13 +155,15 @@ auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
         }
     }
 
-    auto out = ParticleState
+    const auto numberToBind = std::min(static_cast<uint32_t>(m_particleDataHostBuffer.size()), m_maxParticles); // we don't want to crash when exceeding maxParticles, just discard
+
+    std::cerr << "numberToBind: " << numberToBind << '\n';
+
+    m_particleDataDeviceBuffer.Bind(static_cast<void*>(m_particleDataHostBuffer.data()), sizeof(ParticleData) * numberToBind, frameIndex);
+    return ParticleState
     {
         .mesh = AssetService<MeshView>::Get()->Acquire(nc::asset::PlaneMesh),
-        .count = static_cast<uint32_t>(m_particleDataHostBuffer.size())
+        .count = numberToBind
     };
-
-    m_particleDataDeviceBuffer.Bind(static_cast<void*>(m_particleDataHostBuffer.data()), sizeof(ParticleData) * out.count, frameIndex);
-    return out;
 }
 } // namespace nc::graphics

@@ -77,10 +77,11 @@ SystemResourcesConfig::SystemResourcesConfig(const config::GraphicsSettings& gra
       maxRenderers{memorySettings.maxRenderers},
       maxSkeletalAnimations{memorySettings.maxSkeletalAnimations},
       maxTextures{memorySettings.maxTextures},
+      maxParticles{memorySettings.maxParticles},
       useShadows{graphicsSettings.useShadows}
 {}
 
-SystemResources::SystemResources(SystemResourcesConfig config, 
+SystemResources::SystemResources(SystemResourcesConfig config,
                                 Registry* registry,
                                 ShaderResourceBus* resourceBus,
                                 ModuleProvider modules,
@@ -93,7 +94,7 @@ SystemResources::SystemResources(SystemResourcesConfig config,
       skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
       widgets{},
       ui{registry->GetEcs(), modules, events},
-      particleEmitters{registry, resourceBus, getCamera}
+      particleEmitters{registry, resourceBus, getCamera, config.maxParticles}
 {
 }
 } // namespace nc::graphics

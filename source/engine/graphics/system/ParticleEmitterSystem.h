@@ -27,7 +27,10 @@ struct ParticleState
 class ParticleEmitterSystem
 {
     public:
-        ParticleEmitterSystem(Registry* registry, ShaderResourceBus* shaderResourceBus, std::function<graphics::Camera* ()> getCamera);
+        ParticleEmitterSystem(Registry* registry,
+                              ShaderResourceBus* shaderResourceBus,
+                              std::function<graphics::Camera* ()> getCamera,
+                              unsigned maxParticles);
 
         /** Run is able to be run from the JobSystem, but it must finish before
          *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
@@ -60,5 +63,6 @@ class ParticleEmitterSystem
         Connection<Entity> m_onRemoveConnection;
         std::vector<ParticleData> m_particleDataHostBuffer;
         StorageBufferHandle m_particleDataDeviceBuffer;
+        unsigned m_maxParticles;
 };
 } // namespace nc::graphics
