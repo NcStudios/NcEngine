@@ -93,7 +93,6 @@ namespace nc::graphics::vulkan
     bool ParticleTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         return frameData.particleState.count > 0;
-        // return frameData.emitterStates.size() > 0;
     }
 
     void ParticleTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
@@ -107,7 +106,6 @@ namespace nc::graphics::vulkan
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
         return frameData.particleState.count > 0;
-        // return frameData.emitterStates.size() > 0;
     }
 
     void ParticleTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)

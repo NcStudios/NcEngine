@@ -23,7 +23,6 @@ ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry,
       m_registry{ registry },
       m_onAddConnection{ registry->OnAdd<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
       m_onRemoveConnection{ registry->OnRemove<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)},
-      // fix max size
       m_particleDataDeviceBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(ParticleData) * maxParticles, ShaderStage::Fragment | ShaderStage::Vertex, 7, 0, false)},
       m_maxParticles{maxParticles}
 {
@@ -138,17 +137,11 @@ void ParticleEmitterSystem::Clear()
 
 auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
 {
-    // getting exit code 1 
-
     m_particleDataHostBuffer.clear();
-
-
     for (const auto& state : m_emitterStates)
     {
         const auto texture = AssetService<TextureView>::Get()->Acquire(state.GetTexture());
         auto [index, matrices] = state.GetSoA()->View<particle::EmitterState::ModelMatrixIndex>();
-        if (matrices.empty()) return ParticleState{{}, 0};
-
         for (; index.Valid(); ++index)
         {
             m_particleDataHostBuffer.emplace_back(matrices[index], texture.index);
@@ -156,9 +149,6 @@ auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
     }
 
     const auto numberToBind = std::min(static_cast<uint32_t>(m_particleDataHostBuffer.size()), m_maxParticles); // we don't want to crash when exceeding maxParticles, just discard
-
-    std::cerr << "numberToBind: " << numberToBind << '\n';
-
     m_particleDataDeviceBuffer.Bind(static_cast<void*>(m_particleDataHostBuffer.data()), sizeof(ParticleData) * numberToBind, frameIndex);
     return ParticleState
     {
