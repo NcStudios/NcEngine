@@ -1,7 +1,8 @@
 #pragma once
 
+#include "graphics/shader_resource/BufferConcepts.h"
 #include "graphics/shader_resource/ShaderTypes.h"
-#include "utility/Signal.h"
+#include "ncengine/utility/Signal.h"
 
 #include "ncutility/NcError.h"
 
@@ -22,7 +23,7 @@ struct SsboUpdateEventData
     uint32_t currentFrameIndex;
     uint32_t slot;
     uint32_t set;
-    void* data;
+    const void* data;
     size_t size;
     shader_stage stage;
     SsboUpdateAction action;
@@ -33,8 +34,14 @@ class StorageBufferHandle
 {
     public:
         StorageBufferHandle(uint32_t uid, size_t size, shader_stage stage, Signal<const SsboUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
-        void Bind(void* data, size_t size, uint32_t currentFrameIndex);
-        void Bind(void* data, size_t size);
+
+        template<TriviallyCopyableRange Rng>
+        void Bind(const Rng& data, uint32_t currentFrameIndex = UINT32_MAX)
+        {
+            using T = std::remove_cvref_t<std::ranges::range_value_t<Rng>>;
+            BindImpl(data.data(), data.size() * sizeof(T), currentFrameIndex);
+        }
+
         void Clear();
 
     private:
@@ -44,5 +51,7 @@ class StorageBufferHandle
         size_t m_size;
         shader_stage m_stage;
         Signal<const SsboUpdateEventData&>* m_backendPort;
+
+        void BindImpl(const void* data, size_t size, uint32_t currentFrameIndex);
 };
 } // namespace nc::graphics

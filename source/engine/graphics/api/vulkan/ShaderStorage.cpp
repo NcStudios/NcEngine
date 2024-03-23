@@ -326,7 +326,7 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             auto pos = std::ranges::find(storage.uids, eventData.uid);
             if (pos == storage.uids.end())
             {
-                storage.uids.push_back(std::move(eventData.uid));
+                storage.uids.push_back(eventData.uid);
                 storage.buffers.emplace_back(std::make_unique<vulkan::StorageBuffer>(m_allocator, static_cast<uint32_t>(eventData.size)));
             }
             else
