@@ -67,6 +67,7 @@ namespace nc::graphics::vulkan
         auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
+        depthStencil.setDepthWriteEnable(VK_FALSE);
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
         auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
         auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
