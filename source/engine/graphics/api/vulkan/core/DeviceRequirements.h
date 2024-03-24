@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/GraphicsConstants.h"
+
 #include <cstdint>
 
 namespace nc::graphics::vulkan
@@ -8,6 +10,8 @@ constexpr uint32_t SampledImagesPerPoolCount = 2048u; // This is a best estimate
 constexpr uint32_t StorageBuffersPerPoolCount = 128u; // This is a best estimate. Can be adjusted.
 constexpr uint32_t UniformBuffersPerPoolCount = 128u; // This is a best estimate. Can be adjusted.
 constexpr uint32_t MaxSetsPerPool = 1000; // This is a best estimate. Can be adjusted.
+constexpr uint32_t MaxSets = 40; // This is a best estimate. Can be adjusted.
+constexpr uint32_t MaxSetsDivided = MaxSets/(MaxFramesInFlight+1);
 
 struct DeviceRequirements
 {

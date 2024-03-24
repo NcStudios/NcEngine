@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/api/vulkan/VulkanConstants.h"
 #include "graphics/GraphicsConstants.h"
 #include "utility/Signal.h"
 
@@ -16,36 +15,17 @@ namespace nc::graphics::vulkan
 {
 struct DeviceRequirements;
 
-constexpr auto MaxSetsDivided = vulkan::MaxDescriptorSets/(MaxFramesInFlight+1);
 constexpr auto StaticSet = std::numeric_limits<uint32_t>::max();
 
 struct DescriptorPool
 {
-    DescriptorPool(vk::Device device);
+    DescriptorPool(vk::Device device, vk::DescriptorPoolCreateFlags flags, uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount);
 
     vk::UniqueDescriptorPool pool;
     uint32_t setsCount;
     uint32_t currentSampledImagesCount;
     uint32_t currentStorageBuffersCount;
     uint32_t currentUniformBuffersCount;
-};
-
-class DescriptorAllocator
-{
-    public:
-        DescriptorAllocator(vk::Device device, const DeviceRequirements* deviceRequirements);
-        auto Allocate(DescriptorSetLayout* layout, vk::DescriptorPoolCreateFlags flags) -> vk::UniqueDescriptorSet;
-
-    private:
-        auto GetFreePool(uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount) -> DescriptorPool*
-
-        vk::Device m_device;
-        DeviceRequirements* m_deviceRequirements;
-        uint32_t m_totalSampledImagesCount;
-        uint32_t m_totalStorageBuffersCount;
-        uint32_t m_totalUniformBuffersCount;
-        std::vector<struct DescriptorPool> m_pools;
-
 };
 
 struct DescriptorSetLayout
@@ -62,6 +42,24 @@ struct DescriptorSetLayout
     nc::sparse_map<vk::DescriptorSetLayoutBinding> bindings;
     nc::sparse_map<vk::DescriptorBindingFlagsEXT> bindingFlags;
     bool isStatic;
+};
+
+class DescriptorAllocator
+{
+    public:
+        DescriptorAllocator(vk::Device device, const DeviceRequirements* deviceRequirements);
+        auto Allocate(DescriptorSetLayout* layout, vk::DescriptorPoolCreateFlags flags) -> vk::UniqueDescriptorSet;
+
+    private:
+        auto GetFreePool(vk::DescriptorPoolCreateFlags flags, uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount) -> DescriptorPool&;
+
+        vk::Device m_device;
+        const DeviceRequirements* m_deviceRequirements;
+        uint32_t m_totalSampledImagesCount;
+        uint32_t m_totalStorageBuffersCount;
+        uint32_t m_totalUniformBuffersCount;
+        std::vector<struct DescriptorPool> m_pools;
+
 };
 
 struct DescriptorSet

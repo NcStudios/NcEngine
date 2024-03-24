@@ -71,7 +71,8 @@ DescriptorPool::DescriptorPool(vk::Device device, vk::DescriptorPoolCreateFlags 
     : pool{CreateDescriptorPool(device, flags)},
       currentSampledImagesCount{currentSampledImagesCount + sampledImagesCount},
       currentStorageBuffersCount{currentStorageBuffersCount + storageBuffersCount},
-      currentUniformBuffersCount{currentUniformBuffersCount + uniformBuffersCount},
+      currentUniformBuffersCount{currentUniformBuffersCount + uniformBuffersCount}
+{}
 
 DescriptorAllocator::DescriptorAllocator(vk::Device device, const DeviceRequirements* deviceRequirements)
     : m_device{device},
@@ -82,9 +83,9 @@ DescriptorAllocator::DescriptorAllocator(vk::Device device, const DeviceRequirem
 {
 }
 
-auto DescriptorAllocator::GetFreePool(uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount) -> DescriptorPool*
+auto DescriptorAllocator::GetFreePool(vk::DescriptorPoolCreateFlags flags, uint32_t sampledImagesCount, uint32_t storageBuffersCount, uint32_t uniformBuffersCount) -> DescriptorPool&
 {
-    auto pos = std::ranges::find(m_pools, [sampledImagesCount, storageBuffersCount, uniformBuffersCount](auto&& pool)
+    auto pos = std::find(m_pools.begin(), m_pools.end(), [sampledImagesCount, storageBuffersCount, uniformBuffersCount](auto&& pool)
     {
         return pool.currentSampledImagesCount + sampledImagesCount <= SampledImagesPerPoolCount &&
                pool.currentStorageBuffersCount + storageBuffersCount <= StorageBuffersPerPoolCount &&
@@ -93,11 +94,10 @@ auto DescriptorAllocator::GetFreePool(uint32_t sampledImagesCount, uint32_t stor
 
     if (pos == m_pools.end() || pos->setsCount >= MaxSetsPerPool)
     {
-        return nullptr;
+        m_pools.emplace_back(m_device, flags);
     }
 
-    pos->setsCount++;
-    return *pos;
+    return m_pools.back();
 }
 
 /**
@@ -121,7 +121,7 @@ auto DescriptorAllocator::Allocate(DescriptorSetLayout* layout, vk::DescriptorPo
     auto storageBuffersCount = 0u;
     auto uniformBuffersCount = 0u;
 
-    for (auto& binding : layout.bindings.values())
+    for (auto& binding : layout->bindings.values())
     {
         switch (binding.descriptorType)
         {
@@ -147,32 +147,28 @@ auto DescriptorAllocator::Allocate(DescriptorSetLayout* layout, vk::DescriptorPo
         }
     }
 
-    NC_ASSERT(sampledImagesCount <= SampledImagesPerPoolCount, "Cannot allocate a descriptor set with {} sampled images. The limit per pool is {}. Consider splitting sampled images into multiple descriptor sets.", sampledImagesCount, SampledImagesPerPoolCount);
-    NC_ASSERT(storageBuffersCount <= StorageBuffersPerPoolCount, "Cannot allocate a descriptor set with {} storage buffers. The limit per pool is {}. Consider splitting storage buffers into multiple descriptor sets.", storageBuffersCount, StorageBuffersPerPoolCount);
-    NC_ASSERT(uniformBuffersCount <= UniformBuffersPerPoolCount, "Cannot allocate a descriptor set with {} uniform buffers. The limit per pool is {}. Consider splitting uniform buffers into multiple descriptor sets.", uniformBuffersCount, UniformBuffersPerPoolCount);
+    NC_ASSERT(sampledImagesCount <= SampledImagesPerPoolCount, fmt::format("Cannot allocate a descriptor set with {} sampled images. The limit per pool is {}. Consider splitting sampled images into multiple descriptor sets.", sampledImagesCount, SampledImagesPerPoolCount));
+    NC_ASSERT(storageBuffersCount <= StorageBuffersPerPoolCount, fmt::format("Cannot allocate a descriptor set with {} storage buffers. The limit per pool is {}. Consider splitting storage buffers into multiple descriptor sets.", storageBuffersCount, StorageBuffersPerPoolCount));
+    NC_ASSERT(uniformBuffersCount <= UniformBuffersPerPoolCount, fmt::format("Cannot allocate a descriptor set with {} uniform buffers. The limit per pool is {}. Consider splitting uniform buffers into multiple descriptor sets.", uniformBuffersCount, UniformBuffersPerPoolCount));
 
-    NC_ASSERT(sampledImagesCount <= m_deviceRequirements.MaxDescriptorSetUpdateAfterBindSampledImages, "Cannot allocate a descriptor set with {} sampled images. This descriptor set could never be bound as the maximum count of sampled images bound per stage is: {}", sampledImagesCount, m_deviceRequirements.MaxPerStageDescriptorUpdateAfterBindSampledImages);
-    NC_ASSERT(storageBuffersCount <= m_deviceRequirements.MaxDescriptorSetUpdateAfterBindStorageBuffers, "Cannot allocate a descriptor set with {} storage buffers. This descriptor set could never be bound as the maximum count of storage buffers bound per stage is: {}", storageBuffersCount, m_deviceRequirements.MaxPerStageDescriptorUpdateAfterBindStorageBuffers);
-    NC_ASSERT(uniformBuffersCount <= m_deviceRequirements.MaxDescriptorSetUpdateAfterBindUniformBuffers, "Cannot allocate a descriptor set with {} uniform buffers. This descriptor set could never be bound as the maximum count of uniform buffers bound per stage is: {}", uniformBuffersCount, m_deviceRequirements.MaxPerStageDescriptorUpdateAfterBindUniformBuffers);
+    NC_ASSERT(sampledImagesCount <= m_deviceRequirements->MaxDescriptorSetUpdateAfterBindSampledImages, fmt::format("Cannot allocate a descriptor set with {} sampled images. This descriptor set could never be bound as the maximum count of sampled images bound per stage is: {}", sampledImagesCount, m_deviceRequirements->MaxPerStageDescriptorUpdateAfterBindSampledImages));
+    NC_ASSERT(storageBuffersCount <= m_deviceRequirements->MaxDescriptorSetUpdateAfterBindStorageBuffers, fmt::format("Cannot allocate a descriptor set with {} storage buffers. This descriptor set could never be bound as the maximum count of storage buffers bound per stage is: {}", storageBuffersCount, m_deviceRequirements->MaxPerStageDescriptorUpdateAfterBindStorageBuffers));
+    NC_ASSERT(uniformBuffersCount <= m_deviceRequirements->MaxDescriptorSetUpdateAfterBindUniformBuffers, fmt::format("Cannot allocate a descriptor set with {} uniform buffers. This descriptor set could never be bound as the maximum count of uniform buffers bound per stage is: {}", uniformBuffersCount, m_deviceRequirements->MaxPerStageDescriptorUpdateAfterBindUniformBuffers));
 
-    NC_ASSERT(sampledImagesCount + storageBuffersCount + uniformBuffersCount <= m_deviceRequirements.MaxPerSetDescriptors, "Cannot allocate a descriptor set with {} descriptors. The maximum per MaxPerSetDescriptors is: {}.", sampledImagesCount + storageBuffersCount + uniformBuffersCount, m_deviceRequirements.MaxPerSetDescriptors );
+    NC_ASSERT(sampledImagesCount + storageBuffersCount + uniformBuffersCount <= m_deviceRequirements->MaxPerSetDescriptors, fmt::format("Cannot allocate a descriptor set with {} descriptors. The maximum per MaxPerSetDescriptors is: {}.", sampledImagesCount + storageBuffersCount + uniformBuffersCount, m_deviceRequirements->MaxPerSetDescriptors));
 
     auto newSampledImagesTotal = sampledImagesCount + m_totalSampledImagesCount;
     auto newStorageBuffersTotal = storageBuffersCount + m_totalStorageBuffersCount;
     auto newUniformBuffersTotal = uniformBuffersCount + m_totalUniformBuffersCount;
-    NC_ASSERT(newSampledImagesTotal + newStorageBuffersTotal + newUniformBuffersTotal <= m_deviceRequirements.MaxUpdateAfterBindDescriptorsInAllPools, "This descriptor set cannot be allocated as the total count of descriptors {} would exceed the total allowed descriptors across all pools: {}.", newSampledImagesTotal + newStorageBuffersTotal + newUniformBuffersTotal, m_deviceRequirements.MaxUpdateAfterBindDescriptorsInAllPools);
+    NC_ASSERT(newSampledImagesTotal + newStorageBuffersTotal + newUniformBuffersTotal <= m_deviceRequirements->MaxUpdateAfterBindDescriptorsInAllPools, fmt::format("This descriptor set cannot be allocated as the total count of descriptors {} would exceed the total allowed descriptors across all pools: {}.", newSampledImagesTotal + newStorageBuffersTotal + newUniformBuffersTotal, m_deviceRequirements->MaxUpdateAfterBindDescriptorsInAllPools));
 
-    auto* pool = GetFreePool(sampledImagesCount, storageBuffersCount, uniformBuffersCount);
-    if (pool == nullptr)
-    {
-        m_totalSampledImagesCount = newSampledImagesTotal;
-        m_totalStorageBuffersCount = newStorageBuffersTotal;
-        m_totalUniformBuffersCount = newUniformBuffersTotal;
-        m_pools.emplace_back(m_device, flags);
-        pool = &m_pools.back();
-    }
+    m_totalSampledImagesCount = newSampledImagesTotal;
+    m_totalStorageBuffersCount = newStorageBuffersTotal;
+    m_totalUniformBuffersCount = newUniformBuffersTotal;
 
-    return CreateDescriptorSet(m_device, pool->pool.get(), 1, layout);
+    auto& pool = GetFreePool(flags, sampledImagesCount, storageBuffersCount, uniformBuffersCount);
+
+    return CreateDescriptorSet(m_device, &pool.pool.get(), 1, &layout->layout.get());
 }
 
 ShaderBindingManager::ShaderBindingManager(vk::Device device, const DeviceRequirements* deviceRequirements)
@@ -221,7 +217,8 @@ void ShaderBindingManager::CommitResourceLayout()
         for (auto& sets : m_perFrameSets)
         {
             auto& set = sets.at(setIndex);
-            set.set = CreateDescriptorSet(m_device, &m_pool.get(), 1, &layout.layout.get());
+            layout.layout = CreateDescriptorSetLayout(m_device, layout.bindings.values(), layout.bindingFlags.values());
+            set.set = m_pools.Allocate(&layout->layout.get(), poolFlags, )
         }
     }
 
