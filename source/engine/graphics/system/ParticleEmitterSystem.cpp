@@ -7,7 +7,21 @@
 
 #include <algorithm>
 
-#include <iostream>
+namespace
+{
+struct CameraProperties
+{
+    DirectX::XMVECTOR position = DirectX::g_XMZero;
+    DirectX::XMVECTOR rotation = DirectX::XMQuaternionIdentity();
+    DirectX::XMVECTOR forward = DirectX::g_XMIdentityR2;
+};
+
+struct PermutationData
+{
+    int index;
+    float distance;
+};
+} // anonymous namespace
 
 namespace nc::graphics
 {
@@ -28,30 +42,72 @@ ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry,
 {
 }
 
-void ParticleEmitterSystem::Run()
+void ParticleEmitterSystem::UpdateParticles()
 {
-    OPTICK_CATEGORY("ParticleModule", Optick::Category::VFX);
+    OPTICK_CATEGORY("ParticleEmitterSystem::UpdateParticles", Optick::Category::VFX);
     const float dt = time::DeltaTime();
-    const auto [camRotation, camForward] = [this]()
+    const auto [camPosition, camRotation, camForward] = [this]()
     {
         if (auto camera = m_getCamera())
         {
             const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
-            return std::make_pair(transform->RotationXM(), transform->ForwardXM());
+            return ::CameraProperties
+            {
+                .position = transform->PositionXM(),
+                .rotation = transform->RotationXM(),
+                .forward = transform->ForwardXM()
+            };
         }
 
-        return std::make_pair(DirectX::XMQuaternionIdentity(), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+        return ::CameraProperties{};
     }();
 
     for (auto& state : m_emitterStates)
     {
         state.Update(dt, camRotation, camForward);
     }
+
+    SortEmitters(camPosition);
+}
+
+void ParticleEmitterSystem::SortEmitters(DirectX::FXMVECTOR cameraPosition)
+{
+    OPTICK_CATEGORY("ParticleEmitterSystem::SortEmitters", Optick::Category::VFX);
+
+    // Build up an index array for sorting to help minimize number of swaps and distance calculations
+    const auto emitterCount = m_emitterStates.size();
+    auto permutation = std::vector<PermutationData>{};
+    permutation.reserve(emitterCount);
+    for (auto i = 0; i < (int)emitterCount; ++i)
+    {
+        const auto offsetFromCamera = DirectX::XMVectorSubtract(cameraPosition, m_emitterStates[i].GetLastPosition());
+        const auto sqLength = DirectX::XMVector3LengthSq(offsetFromCamera);
+        permutation.emplace_back(i, DirectX::XMVectorGetX(sqLength));
+    }
+
+    // Sort back to front based on distance from camera
+    std::ranges::sort(permutation, std::greater<>{}, &PermutationData::distance);
+
+    // Apply the permutation by walking cycles
+    for (int cycleStart = 0; cycleStart < (int)emitterCount; ++cycleStart)
+    {
+        auto cycleCurrent = cycleStart;
+        while (permutation[cycleCurrent].index >= 0)
+        {
+            const auto emitterIndex = permutation[cycleCurrent].index;
+            if (cycleCurrent != emitterIndex && permutation[emitterIndex].index >= 0)
+            {
+                std::swap(m_emitterStates[cycleCurrent], m_emitterStates[emitterIndex]);
+            }
+
+            cycleCurrent = std::exchange(permutation[cycleCurrent].index, -1);
+        }
+    }
 }
 
 void ParticleEmitterSystem::ProcessFrameEvents()
 {
-    // Could use linear allocator for add/remove vectors 
+    OPTICK_CATEGORY("ParticleEmitterSystem::ProcessFrameEvents", Optick::Category::VFX);
     m_emitterStates.insert
     (
         m_emitterStates.cend(),
@@ -109,11 +165,6 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
     pos->UpdateInfo(emitter.GetInfo());
 }
 
-std::span<const particle::EmitterState> ParticleEmitterSystem::GetParticles() const
-{
-    return m_emitterStates;
-}
-
 void ParticleEmitterSystem::Add(graphics::ParticleEmitter& emitter)
 {
     m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_random);
@@ -137,14 +188,14 @@ void ParticleEmitterSystem::Clear()
 
 auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
 {
+    OPTICK_CATEGORY("ParticleEmitterSystem::Execute", Optick::Category::Rendering);
     m_particleDataHostBuffer.clear();
     for (const auto& state : m_emitterStates)
     {
         const auto texture = AssetService<TextureView>::Get()->Acquire(state.GetTexture());
-        auto [index, matrices] = state.GetSoA()->View<particle::EmitterState::ModelMatrixIndex>();
-        for (; index.Valid(); ++index)
+        for (const auto& m : state.GetMatrices())
         {
-            m_particleDataHostBuffer.emplace_back(matrices[index], texture.index);
+            m_particleDataHostBuffer.emplace_back(m, texture.index);
         }
     }
 

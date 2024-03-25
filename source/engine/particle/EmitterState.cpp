@@ -3,151 +3,140 @@
 #include "math/Random.h"
 #include "ncmath/Math.h"
 
+#include <ranges>
+
 namespace
 {
-    using namespace nc;
+using namespace nc;
 
-    DirectX::XMMATRIX ComposeMatrix(float scale, const DirectX::XMVECTOR& r, const Vector3& pos)
-    {
-        return DirectX::XMMatrixScaling(scale, scale, scale) *
-               DirectX::XMMatrixRotationQuaternion(r) *
-               DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadVector3(&pos));
-    }
-
-    particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
-    {
-        const auto& [emission, init, kinematic] = info;
-
-
-        return particle::Particle
-        {
-            .maxLifetime = init.lifetime,
-            .currentLifetime = 0.0f,
-            .position = positionOffset + random->Between(init.positionMin, init.positionMax),
-            .linearVelocity = random->Between(kinematic.velocityMin, kinematic.velocityMax),
-            .rotation = random->Between(init.rotationMin, init.rotationMax),
-            .angularVelocity = random->Between(kinematic.rotationMin, kinematic.rotationMax),
-            .scale = random->Between(init.scaleMin, init.scaleMax)
-        };
-    }
-
-    void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
-    {
-        auto& vel = particle->linearVelocity;
-        vel = vel + vel * velOverTimeFactor;
-        particle->position = particle->position + vel * dt;
-
-        auto& angVel = particle->angularVelocity;
-        angVel += angVel * rotOverTimeFactor;
-        particle->rotation += angVel * dt;
-
-        auto& scale = particle->scale;
-        scale = Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
-    }
+auto ComputeMvp(const particle::Particle& particle,
+                const DirectX::FXMVECTOR& camRotation,
+                const DirectX::FXMVECTOR& camForward) -> DirectX::XMMATRIX
+{
+    const auto rotationRelativeToCamera = DirectX::XMQuaternionRotationAxis(camForward, particle.rotation);
+    const auto rotation = DirectX::XMQuaternionMultiply(camRotation, rotationRelativeToCamera);
+    return DirectX::XMMatrixScaling(particle.scale, particle.scale, particle.scale) *
+           DirectX::XMMatrixRotationQuaternion(rotation) *
+           DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadVector3(&particle.position));
 }
+
+particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
+{
+    const auto& [emission, init, kinematic] = info;
+    return particle::Particle
+    {
+        .maxLifetime = init.lifetime,
+        .currentLifetime = 0.0f,
+        .position = positionOffset + random->Between(init.positionMin, init.positionMax),
+        .linearVelocity = random->Between(kinematic.velocityMin, kinematic.velocityMax),
+        .rotation = random->Between(init.rotationMin, init.rotationMax),
+        .angularVelocity = random->Between(kinematic.rotationMin, kinematic.rotationMax),
+        .scale = random->Between(init.scaleMin, init.scaleMax)
+    };
+}
+
+void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+{
+    auto& vel = particle->linearVelocity;
+    vel = vel + vel * velOverTimeFactor;
+    particle->position = particle->position + vel * dt;
+
+    auto& angVel = particle->angularVelocity;
+    angVel += angVel * rotOverTimeFactor;
+    particle->rotation += angVel * dt;
+
+    auto& scale = particle->scale;
+    scale = Clamp(scale + scale * sclOverTimeFactor * dt, 0.000001f, 5000.0f); // defaults?
+}
+} // anonymous namespace
 
 namespace nc::particle
 {
-    EmitterState::EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random)
-        : m_soa{ info.emission.maxParticleCount },
-          m_info{ info },
-          m_entity{ entity },
-          m_emissionCounter{ 0.0f },
-          m_random{ random }
+EmitterState::EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random)
+    : m_info{ info },
+      m_entity{ entity },
+      m_random{ random }
+{
+    m_particles.reserve(info.emission.maxParticleCount);
+    Emit(m_info.emission.initialEmissionCount);
+}
+
+void EmitterState::Emit(size_t count)
+{
+    m_lastPosition = ActiveRegistry()->Get<Transform>(m_entity)->PositionXM();
+    auto parentPosition = Vector3{};
+    DirectX::XMStoreVector3(&parentPosition, m_lastPosition);
+    const auto particleCount = Min(count, m_particles.capacity() - m_particles.size());
+    std::ranges::generate_n(
+        std::back_inserter(m_particles),
+        particleCount,
+        [this, &parentPosition]()
+        {
+            return CreateParticle(m_info, parentPosition, m_random);
+        }
+    );
+}
+
+void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward)
+{
+    if (m_needsResize)
     {
-        Emit(m_info.emission.initialEmissionCount);
+        // We can't just reserve because the capacity is logically important. In the case of shrinking, we'd need
+        // to be careful to handle that correctly. Since this functionality is only intended for the editor, we
+        // can get away with a simple 'kill everything' approach.
+        m_particles.clear();
+        m_particles.shrink_to_fit();
+        m_particles.reserve(m_info.emission.maxParticleCount);
+        m_needsResize = false;
     }
 
-    void EmitterState::Emit(size_t count)
+    PeriodicEmission(dt);
+    m_matrices.clear();
+
+    if (m_particles.empty())
+        return;
+
+    const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
+    const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
+    const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
+
+    for (auto& particle : std::views::reverse(m_particles))
     {
-        auto parentPosition = ActiveRegistry()->Get<Transform>(m_entity)->Position();
-        auto particleCount = Min(count, m_soa.GetRemainingSpace());
-        for (size_t i = 0; i < particleCount; ++i)
+        particle.currentLifetime += dt;
+        if (particle.currentLifetime >= particle.maxLifetime)
         {
-            m_soa.Add(CreateParticle(m_info, parentPosition, m_random), {});
+            particle = m_particles.back();
+            m_particles.pop_back();
+        }
+        else
+        {
+            ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
+            m_matrices.push_back(::ComputeMvp(particle, camRotation, camForward));
         }
     }
+}
 
-    void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward)
+void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
+{
+    // delay resize so we don't blow up the particle task
+    if (info.emission.maxParticleCount != m_info.emission.maxParticleCount)
     {
-        if (m_needsResize)
+        m_needsResize = true;
+    }
+
+    m_info = info;
+}
+
+void EmitterState::PeriodicEmission(float dt)
+{
+    if (m_info.emission.periodicEmissionFrequency > 0.0f)
+    {
+        m_emissionCounter += dt;
+        if (m_emissionCounter > m_info.emission.periodicEmissionFrequency)
         {
-            m_needsResize = false;
-            m_soa = ParticleSoA{m_info.emission.maxParticleCount};
-        }
-
-        PeriodicEmission(dt);
-
-        std::vector<unsigned> toRemove; // linear allocator?
-        const auto velOverTimeFactor = m_info.kinematic.velocityOverTimeFactor * dt;
-        const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
-        const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
-        auto [index, particles, matrices] = m_soa.View<ParticlesIndex, ModelMatrixIndex>();
-
-        for (; index.Valid(); ++index)
-        {
-            auto& particle = particles[index];
-            particle.currentLifetime += dt;
-            if (particle.currentLifetime >= particle.maxLifetime)
-                toRemove.push_back(static_cast<uint32_t>(index));
-            else
-            {
-                ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
-                matrices[index] = ComputeMvp(particle, camRotation, camForward);
-            }
-        }
-
-        for (auto i : toRemove)
-            m_soa.RemoveAtIndex(i);
-    }
-
-    void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
-    {
-        // delay resize so we don't blow up the particle task
-        if (info.emission.maxParticleCount != m_info.emission.maxParticleCount)
-        {
-            m_needsResize = true;
-        }
-
-        m_info = info;
-    }
-
-    const graphics::ParticleInfo& EmitterState::GetInfo() const
-    {
-        return m_info;
-    }
-
-    auto EmitterState::GetSoA() const -> const ParticleSoA*
-    {
-        return &m_soa;
-    }
-
-    Entity EmitterState::GetEntity() const
-    {
-        return m_entity;
-    }
-
-    void EmitterState::PeriodicEmission(float dt)
-    {
-        if (m_info.emission.periodicEmissionFrequency > 0.0f)
-        {
-            m_emissionCounter += dt;
-            if (m_emissionCounter > m_info.emission.periodicEmissionFrequency)
-            {
-                m_emissionCounter = 0.0f;
-                Emit(m_info.emission.periodicEmissionCount);
-            }
+            m_emissionCounter = 0.0f;
+            Emit(m_info.emission.periodicEmissionCount);
         }
     }
-
-    auto EmitterState::ComputeMvp(const Particle& particle, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward) const -> DirectX::XMMATRIX
-    {
-        auto rot = DirectX::XMQuaternionMultiply(camRotation, DirectX::XMQuaternionRotationAxis(camForward, particle.rotation));
-        return ::ComposeMatrix
-        (
-            particle.scale,
-            rot,
-            particle.position
-        );
-    }
+}
 } // namespace nc::particle

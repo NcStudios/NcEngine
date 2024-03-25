@@ -165,7 +165,7 @@ namespace nc::graphics
         update.Add(
             update_task_id::ParticleEmitterUpdate,
             "ParticleEmitterUpdate",
-            [this]{ m_systemResources.particleEmitters.Run(); }
+            [this]{ m_systemResources.particleEmitters.UpdateParticles(); }
         );
 
         update.Add(

@@ -1,14 +1,13 @@
 #pragma once
 
-#include "ncengine/asset/AssetViews.h"
-#include "ecs/Registry.h"
-#include "graphics/ParticleEmitter.h"
-#include "graphics/Camera.h"
-#include "particle/EmitterState.h"
-#include "math/Random.h"
-
 #include "graphics/shader_resource/ShaderResourceBus.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
+#include "particle/EmitterState.h"
+#include "ncengine/asset/AssetViews.h"
+#include "ncengine/ecs/Registry.h"
+#include "ncengine/graphics/ParticleEmitter.h"
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/math/Random.h"
 
 namespace nc::graphics
 {
@@ -32,23 +31,14 @@ class ParticleEmitterSystem
                               std::function<graphics::Camera* ()> getCamera,
                               unsigned maxParticles);
 
-        /** Run is able to be run from the JobSystem, but it must finish before
-         *  RenderParticles is called. ProcessFrameEvents should be called after rendering to
-         *  finalize requests from game logic (additions/deletions). A side effect of this is
-         *  particles won't be rendered until the frame after they are created. */
-        void Run();
-        std::span<const particle::EmitterState> GetParticles() const;
+        void UpdateParticles();
         void ProcessFrameEvents();
-
-        // this may need to be delayed too
         void Emit(Entity entity, size_t count);
         void UpdateInfo(graphics::ParticleEmitter& emitter);
 
-        // ComponentSystem Methods
         void Add(graphics::ParticleEmitter& emitter);
         void Remove(Entity entity);
         void Clear();
-
 
         auto Execute(uint32_t frameIndex) -> ParticleState;
 
@@ -64,5 +54,7 @@ class ParticleEmitterSystem
         std::vector<ParticleData> m_particleDataHostBuffer;
         StorageBufferHandle m_particleDataDeviceBuffer;
         unsigned m_maxParticles;
+
+        void SortEmitters(DirectX::FXMVECTOR cameraPosition);
 };
 } // namespace nc::graphics
