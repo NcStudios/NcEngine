@@ -75,21 +75,21 @@ void ParticleEmitterSystem::SortEmitters(DirectX::FXMVECTOR cameraPosition)
     OPTICK_CATEGORY("ParticleEmitterSystem::SortEmitters", Optick::Category::VFX);
 
     // Build up an index array for sorting to help minimize number of swaps and distance calculations
-    const auto emitterCount = m_emitterStates.size();
     auto permutation = std::vector<PermutationData>{};
-    permutation.reserve(emitterCount);
-    for (auto i = 0; i < (int)emitterCount; ++i)
+    permutation.reserve(m_emitterStates.size());
+    for (auto [i, emitter] : std::views::enumerate(m_emitterStates))
     {
-        const auto offsetFromCamera = DirectX::XMVectorSubtract(cameraPosition, m_emitterStates[i].GetLastPosition());
+        const auto offsetFromCamera = DirectX::XMVectorSubtract(cameraPosition, emitter.GetLastPosition());
         const auto sqLength = DirectX::XMVector3LengthSq(offsetFromCamera);
-        permutation.emplace_back(i, DirectX::XMVectorGetX(sqLength));
+        permutation.emplace_back(static_cast<int>(i), DirectX::XMVectorGetX(sqLength));
     }
 
     // Sort back to front based on distance from camera
     std::ranges::sort(permutation, std::greater<>{}, &PermutationData::distance);
 
     // Apply the permutation by walking cycles
-    for (int cycleStart = 0; cycleStart < (int)emitterCount; ++cycleStart)
+    const auto emitterCount = static_cast<int>(m_emitterStates.size());
+    for (int cycleStart = 0; cycleStart < emitterCount; ++cycleStart)
     {
         auto cycleCurrent = cycleStart;
         while (permutation[cycleCurrent].index >= 0)

@@ -38,10 +38,10 @@ public:
 private:
     void PeriodicEmission(float dt);
 
+    DirectX::XMVECTOR m_lastPosition = DirectX::g_XMZero;
     std::vector<Particle> m_particles;
     std::vector<DirectX::XMMATRIX> m_matrices;
     graphics::ParticleInfo m_info;
-    DirectX::XMVECTOR m_lastPosition = DirectX::g_XMZero;
     Entity m_entity;
     Random* m_random;
     float m_emissionCounter = 0.0f;
