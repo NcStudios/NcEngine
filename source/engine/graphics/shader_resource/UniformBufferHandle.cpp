@@ -16,9 +16,10 @@ UniformBufferHandle::UniformBufferHandle(uint32_t uid, size_t size, shader_stage
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void UniformBufferHandle::Update(void* data, size_t size, uint32_t currentFrameIndex)
+void UniformBufferHandle::UpdateImpl(const void* data, size_t size, uint32_t currentFrameIndex)
 {
     NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
+    OPTICK_CATEGORY("UniformBufferHandle::Update", Optick::Category::Rendering);
     m_backendPort->Emit(
         UboUpdateEventData
         {
@@ -30,27 +31,7 @@ void UniformBufferHandle::Update(void* data, size_t size, uint32_t currentFrameI
             size,
             m_stage,
             UboUpdateAction::Update,
-            false
-        }
-    );
-}
-
-void UniformBufferHandle::Update(void* data, size_t size)
-{
-    OPTICK_CATEGORY("UniformBufferHandle::Update", Optick::Category::Rendering);
-    NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
-    m_backendPort->Emit(
-        UboUpdateEventData
-        {
-            m_uid,
-            std::numeric_limits<uint32_t>::max(),
-            m_slot,
-            m_set,
-            data,
-            size,
-            m_stage,
-            UboUpdateAction::Update,
-            true
+            currentFrameIndex == UINT32_MAX
         }
     );
 }

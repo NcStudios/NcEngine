@@ -94,7 +94,7 @@ auto SkeletalAnimationSystem::Execute(uint32_t frameIndex) -> SkeletalAnimationS
         stateIndex = static_cast<uint32_t>(buffer.size());
     }
 
-    m_skeletalAnimationDataBuffer.Bind(static_cast<void*>(buffer.data()), sizeof(SkeletalAnimationData) * buffer.size(), frameIndex);
+    m_skeletalAnimationDataBuffer.Bind(buffer, frameIndex);
     return state;
 }
 

@@ -28,7 +28,7 @@ class SampleUI : public ui::IUI, public window::IOnResizeReceiver
         std::function<void()> m_widgetCallback;
         Vector2 m_windowDimensions;
         Vector2 m_screenExtent;
-        FontView m_font;
+        asset::FontView m_font;
 
         void CheckInput();
         void DrawDefaultWidget();

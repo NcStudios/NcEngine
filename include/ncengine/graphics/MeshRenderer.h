@@ -22,10 +22,10 @@ struct PbrMaterial
 
 struct PbrMaterialView
 {
-    TextureView baseColor;
-    TextureView normal;
-    TextureView roughness;
-    TextureView metallic;
+    asset::TextureView baseColor;
+    asset::TextureView normal;
+    asset::TextureView roughness;
+    asset::TextureView metallic;
 };
 
 enum class TechniqueType : uint8_t
@@ -42,7 +42,7 @@ class MeshRenderer : public ComponentBase
                      PbrMaterial material = {},
                      TechniqueType techniqueType = TechniqueType::PhongAndUi);
 
-        auto GetMeshView() const noexcept -> const MeshView&
+        auto GetMeshView() const noexcept -> const asset::MeshView&
         {
             return m_meshView;
         }
@@ -75,7 +75,7 @@ class MeshRenderer : public ComponentBase
         void SetMetallic(std::string texturePath);
 
     private:
-        MeshView m_meshView;
+        asset::MeshView m_meshView;
         PbrMaterialView m_materialView;
         TechniqueType m_techniqueType;
 

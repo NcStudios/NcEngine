@@ -1,3 +1,7 @@
+/**
+ * @file AssetViews.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "ncengine/utility/EnumUtilities.h"
@@ -10,7 +14,7 @@
 
 struct ImFont;
 
-namespace nc
+namespace nc::asset
 {
 struct AudioClipView
 {
@@ -125,4 +129,4 @@ concept AssetView = std::same_as<T, AudioClipView>         ||
                     std::same_as<T, ShaderView>            ||
                     std::same_as<T, SkeletalAnimationView> ||
                     std::same_as<T, FontView>;
-} // namespace nc
+} // namespace nc::asset

@@ -45,5 +45,5 @@ extern graphics::ToonMaterial TealHatchedToonMaterial;
 extern graphics::ToonMaterial YellowHatchedToonMaterial;
 
 // Fonts
-extern FontInfo UIFont;
+extern asset::FontInfo UIFont;
 } // namespace nc::sample

@@ -44,7 +44,7 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
                                   light->diffuseIntensity);
     }
 
-    m_pointLightBuffer.Bind(static_cast<void*>(m_pointLightData.data()), sizeof(PointLightData) * m_pointLightData.size(), currentFrameIndex);
+    m_pointLightBuffer.Bind(m_pointLightData, currentFrameIndex);
     if (m_useShadows && m_syncedLightsCount.at(currentFrameIndex) != lightsCount)
     {
         state.updateShadows = true;

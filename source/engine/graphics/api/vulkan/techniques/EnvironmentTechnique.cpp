@@ -1,6 +1,6 @@
 #include "EnvironmentTechnique.h"
 #include "asset/Assets.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
@@ -114,7 +114,7 @@ void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderSt
         return;
     }
 
-    const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::SkyboxMesh);
+    const auto meshAccessor = asset::AssetService<asset::MeshView>::Get()->Acquire(nc::asset::SkyboxMesh);
     cmd->drawIndexed
     (
         meshAccessor.indexCount,                          // indexCount
