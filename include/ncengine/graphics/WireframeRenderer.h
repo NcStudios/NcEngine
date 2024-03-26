@@ -45,14 +45,14 @@ struct WireframeRenderer
     {
     }
 
-    explicit WireframeRenderer(MeshView mesh_, std::vector<DirectX::XMMATRIX> instances_, const Vector4& color_ = Vector4{0.9f, 0.25f, 0.9f, 1.0f}) noexcept
+    explicit WireframeRenderer(asset::MeshView mesh_, std::vector<DirectX::XMMATRIX> instances_, const Vector4& color_ = Vector4{0.9f, 0.25f, 0.9f, 1.0f}) noexcept
         : source{WireframeSource::Internal}, target{}, mesh{mesh_}, instances{std::move(instances_)}, color{color_}
     {
     }
 
     WireframeSource source;
     Entity target;
-    MeshView mesh;
+    asset::MeshView mesh;
     std::vector<DirectX::XMMATRIX> instances;
     Vector4 color;
 };

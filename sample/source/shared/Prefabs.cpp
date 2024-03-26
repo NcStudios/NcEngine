@@ -38,10 +38,10 @@ graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color\\Purple.nca", toon
 graphics::ToonMaterial TealHatchedToonMaterial{"solid_color\\Teal.nca", toonOverlay, toonHatch, 8};
 graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color\\Yellow.nca", toonOverlay, toonHatch, 8};
 
-FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
+asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
 template<class LoadFunc>
-void LoadAssets(const std::filesystem::path& rootDir, asset_flags_type flags, LoadFunc load)
+void LoadAssets(const std::filesystem::path& rootDir, asset::asset_flags_type flags, LoadFunc load)
 {
     auto paths = std::vector<std::string>{};
     for (auto&& entry : std::filesystem::recursive_directory_iterator{rootDir})
@@ -76,11 +76,11 @@ void InitializeResources()
     IsInitialized = true;
 
     const auto& assetSettings = config::GetAssetSettings();
-    LoadAssets(assetSettings.audioClipsPath, AssetFlags::None, &LoadAudioClipAssets);
-    LoadAssets(assetSettings.concaveCollidersPath, AssetFlags::None, &LoadConcaveColliderAssets);
-    LoadAssets(assetSettings.cubeMapsPath, AssetFlags::None, &LoadCubeMapAssets);
-    LoadAssets(assetSettings.hullCollidersPath, AssetFlags::None, &LoadConvexHullAssets);
-    LoadAssets(assetSettings.meshesPath, AssetFlags::None, &LoadMeshAssets);
+    LoadAssets(assetSettings.audioClipsPath, asset::AssetFlags::None, &asset::LoadAudioClipAssets);
+    LoadAssets(assetSettings.concaveCollidersPath, asset::AssetFlags::None, &asset::LoadConcaveColliderAssets);
+    LoadAssets(assetSettings.cubeMapsPath, asset::AssetFlags::None, &asset::LoadCubeMapAssets);
+    LoadAssets(assetSettings.hullCollidersPath, asset::AssetFlags::None, &asset::LoadConvexHullAssets);
+    LoadAssets(assetSettings.meshesPath, asset::AssetFlags::None, &asset::LoadMeshAssets);
     LoadFont(UIFont);
 
     std::vector<std::string> textures
@@ -102,13 +102,13 @@ void InitializeResources()
         "solid_color\\Yellow.nca",
         "tree\\BaseColor.nca"
     };
-    LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
+    asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
 
     std::vector<std::string> normalMaps 
     {
         "box\\Normal.nca",
         "logo\\Normal.nca"
     };
-    LoadTextureAssets(normalMaps, false, AssetFlags::TextureTypeNormalMap);
+    asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 }
 } // namespace sample

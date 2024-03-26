@@ -78,7 +78,7 @@ class AudioSource : public ComponentBase
          */
         void RemoveClip(uint32_t clipIndex);
 
-        auto GetClips() const noexcept -> const std::vector<AudioClipView>& { return m_clips; }
+        auto GetClips() const noexcept -> const std::vector<asset::AudioClipView>& { return m_clips; }
         auto GetAssetPaths() const noexcept -> const std::vector<std::string>& { return m_coldData->assetPaths; }
         auto GetProperties() const noexcept -> const AudioSourceProperties& { return m_properties; }
         auto GetGain() const noexcept -> float { return m_properties.gain; }
@@ -112,7 +112,7 @@ class AudioSource : public ComponentBase
             std::vector<std::string> assetPaths;
         };
 
-        std::vector<AudioClipView> m_clips;
+        std::vector<asset::AudioClipView> m_clips;
         uint32_t m_currentClipIndex = NullClipIndex;
         uint32_t m_currentSampleIndex = 0u;
         AudioSourceProperties m_properties;

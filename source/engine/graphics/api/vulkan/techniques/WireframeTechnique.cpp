@@ -1,6 +1,6 @@
 #ifdef NC_EDITOR_ENABLED
 #include "WireframeTechnique.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
