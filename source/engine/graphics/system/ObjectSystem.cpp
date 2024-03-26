@@ -86,7 +86,7 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
         frontendState.skyboxInstanceIndex = static_cast<uint32_t>(m_objectData.size() - 1);
     }
 
-    m_objectDataBuffer.Bind(static_cast<void*>(m_objectData.data()), sizeof(ObjectData) * m_objectData.size(), frameIndex);
+    m_objectDataBuffer.Bind(m_objectData, frameIndex);
     return frontendState;
 }
 } // namespace nc::graphics
