@@ -1,5 +1,5 @@
 #include "ParticleEmitterSystem.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 #include "ecs/Transform.h"
 #include "time/Time.h"
 
@@ -192,7 +192,7 @@ auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
     m_particleDataHostBuffer.clear();
     for (const auto& state : m_emitterStates)
     {
-        const auto texture = AssetService<TextureView>::Get()->Acquire(state.GetTexture());
+        const auto texture = asset::AssetService<asset::TextureView>::Get()->Acquire(state.GetTexture());
         for (const auto& m : state.GetMatrices())
         {
             m_particleDataHostBuffer.emplace_back(m, texture.index);
@@ -200,10 +200,11 @@ auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
     }
 
     const auto numberToBind = std::min(static_cast<uint32_t>(m_particleDataHostBuffer.size()), m_maxParticles); // we don't want to crash when exceeding maxParticles, just discard
-    m_particleDataDeviceBuffer.Bind(static_cast<void*>(m_particleDataHostBuffer.data()), sizeof(ParticleData) * numberToBind, frameIndex);
+    const auto rangeToRender = std::span{m_particleDataHostBuffer.data(), numberToBind};
+    m_particleDataDeviceBuffer.Bind(rangeToRender, frameIndex);
     return ParticleState
     {
-        .mesh = AssetService<MeshView>::Get()->Acquire(nc::asset::PlaneMesh),
+        .mesh = asset::AssetService<asset::MeshView>::Get()->Acquire(asset::PlaneMesh),
         .count = numberToBind
     };
 }

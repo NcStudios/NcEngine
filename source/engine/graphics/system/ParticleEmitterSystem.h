@@ -19,7 +19,7 @@ struct ParticleData
 
 struct ParticleState
 {
-    MeshView mesh;
+    asset::MeshView mesh;
     uint32_t count;
 };
 
