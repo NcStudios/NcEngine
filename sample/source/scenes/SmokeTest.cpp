@@ -91,13 +91,13 @@ void SmokeTest::Load(Registry* registry, ModuleProvider modules)
 
     if (isSecondPass)
     {
-        UnloadAllAudioClipAssets();
-        UnloadAllConcaveColliderAssets();
-        UnloadAllConvexHullAssets();
-        UnloadAllCubeMapAssets();
-        UnloadAllMeshAssets();
-        UnloadAllTextureAssets();
-        UnloadAllSkeletalAnimationAssets();
+        asset::UnloadAllAudioClipAssets();
+        asset::UnloadAllConcaveColliderAssets();
+        asset::UnloadAllConvexHullAssets();
+        asset::UnloadAllCubeMapAssets();
+        asset::UnloadAllMeshAssets();
+        asset::UnloadAllTextureAssets();
+        asset::UnloadAllSkeletalAnimationAssets();
         ::LoadScene(world, *modules.Get<asset::NcAsset>());
     }
 

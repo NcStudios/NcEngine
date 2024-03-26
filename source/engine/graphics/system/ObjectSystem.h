@@ -21,9 +21,9 @@ struct SkeletalAnimationSystemState;
 
 struct ObjectState
 {
-    std::vector<MeshView> pbrMeshes;
+    std::vector<asset::MeshView> pbrMeshes;
     uint32_t pbrMeshStartingIndex;
-    std::vector<MeshView> toonMeshes;
+    std::vector<asset::MeshView> toonMeshes;
     uint32_t toonMeshStartingIndex;
     std::optional<uint32_t> skyboxInstanceIndex = std::nullopt;
 };

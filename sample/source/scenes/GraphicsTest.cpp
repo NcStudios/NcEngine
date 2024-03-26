@@ -81,11 +81,11 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
         "skeleton//jump.nca",
     };
 
-    LoadSkeletalAnimationAssets(animations);
-    LoadTextureAssets(textures, false, AssetFlags::TextureTypeImage);
-    LoadTextureAssets(normals, false, AssetFlags::TextureTypeNormalMap);
-    LoadMeshAssets(meshes);
-    LoadCubeMapAssets(cubemaps);
+    asset::LoadSkeletalAnimationAssets(animations);
+    asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
+    asset::LoadTextureAssets(normals, false, asset::AssetFlags::TextureTypeNormalMap);
+    asset::LoadMeshAssets(meshes);
+    asset::LoadCubeMapAssets(cubemaps);
 
     auto ogreMaterial = graphics::PbrMaterial{
         .baseColor  = "ogre\\BaseColor.nca",
