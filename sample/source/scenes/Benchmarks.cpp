@@ -500,6 +500,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
 
 void Benchmarks::Unload()
 {
+    g_currentEntities = 0u;
     m_sampleUI->SetWidgetCallback(nullptr);
 }
 } // namespace nc::sample
