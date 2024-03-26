@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ncengine/physics/Collider.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 
 namespace nc::physics
 {
@@ -62,7 +62,7 @@ inline auto MakeBoundingVolume(const CapsuleProperties& in) -> BoundingVolume
 
 inline auto MakeBoundingVolume(const HullProperties& in) -> BoundingVolume
 {
-    auto hull = AssetService<ConvexHullView>::Get()->Acquire(in.assetPath);
+    auto hull = asset::AssetService<asset::ConvexHullView>::Get()->Acquire(in.assetPath);
     return { ConvexHull{hull.vertices, hull.extents, hull.maxExtent} };
 }
 

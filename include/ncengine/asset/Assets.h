@@ -2,7 +2,7 @@
 
 #include "ncengine/asset/AssetViews.h"
 
-namespace nc
+namespace nc::asset
 {
 /** Asset flags are used to pass parameters to the asset loading/unloading functions. */
 using asset_flags_type = uint64_t;
@@ -78,4 +78,4 @@ bool LoadFonts(std::span<const FontInfo> font, bool isExternal = false, asset_fl
 bool UnloadFont(const FontInfo& font, asset_flags_type flags = AssetFlags::None);
 void UnloadAllFonts(asset_flags_type flags = AssetFlags::None);
 auto AcquireFont(const FontInfo& font) -> FontView;
-} // namespace nc
+} // namespace nc::asset

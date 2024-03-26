@@ -14,7 +14,7 @@ namespace nc::graphics
 struct WireframeRenderState
 {
     DirectX::XMMATRIX matrix;
-    MeshView mesh;
+    asset::MeshView mesh;
     Vector4 color;
 };
 

@@ -326,7 +326,7 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             auto pos = std::ranges::find(storage.uids, eventData.uid);
             if (pos == storage.uids.end())
             {
-                storage.uids.push_back(std::move(eventData.uid));
+                storage.uids.push_back(eventData.uid);
                 storage.buffers.emplace_back(std::make_unique<vulkan::StorageBuffer>(m_allocator, static_cast<uint32_t>(eventData.size)));
             }
             else
@@ -446,7 +446,7 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
             for (auto& textureWithId : eventData.data)
             {
                 auto& texture = textureWithId.texture;
-                images.emplace_back(m_allocator, texture.pixelData.data(), texture.width, texture.height, textureWithId.flags == AssetFlags::TextureTypeNormalMap);
+                images.emplace_back(m_allocator, texture.pixelData.data(), texture.width, texture.height, textureWithId.flags == asset::AssetFlags::TextureTypeNormalMap);
                 imageInfos.emplace_back(sampler, images.back().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
                 uids.emplace_back(textureWithId.id);
             }

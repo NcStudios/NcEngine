@@ -16,7 +16,7 @@ StorageBufferHandle::StorageBufferHandle(uint32_t uid, size_t size, shader_stage
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void StorageBufferHandle::Bind(void* data, size_t size, uint32_t currentFrameIndex)
+void StorageBufferHandle::BindImpl(const void* data, size_t size, uint32_t currentFrameIndex)
 {
     OPTICK_CATEGORY("StorageBufferHandle::Bind", Optick::Category::Rendering);
 
@@ -32,26 +32,7 @@ void StorageBufferHandle::Bind(void* data, size_t size, uint32_t currentFrameInd
             size,
             m_stage,
             SsboUpdateAction::Update,
-            false
-        }
-    );
-}
-
-void StorageBufferHandle::Bind(void* data, size_t size)
-{
-    NC_ASSERT(size <= m_size, "Cannot bind more data to the buffer than the buffer was allocated with.");
-    m_backendPort->Emit(
-        SsboUpdateEventData
-        {
-            m_uid,
-            std::numeric_limits<uint32_t>::max(),
-            m_slot,
-            m_set,
-            data,
-            size,
-            m_stage,
-            SsboUpdateAction::Update,
-            true
+            currentFrameIndex == UINT32_MAX
         }
     );
 }

@@ -48,7 +48,7 @@ void DebugRendererInitialize(ecs::BasicEcs<graphics::WireframeRenderer> gameStat
 
         gameState.Emplace<graphics::WireframeRenderer>(
             entity,
-            MeshView{},
+            asset::MeshView{},
             std::vector<DirectX::XMMATRIX>{}
         );
     }
@@ -61,7 +61,7 @@ void DebugRendererNewFrame()
     {
         const auto type = static_cast<WireframeType>(i);
         auto& renderer = g_gameState.value().Get<graphics::WireframeRenderer>(entity);
-        renderer.mesh = AcquireMeshAsset(ToMeshPath(type));
+        renderer.mesh = asset::AcquireMeshAsset(ToMeshPath(type));
         renderer.instances.clear();
     }
 }
