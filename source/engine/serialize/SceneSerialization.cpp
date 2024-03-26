@@ -67,7 +67,7 @@ void SaveEntities(std::ostream& stream,
     const auto entities = nc::BuildFragmentEntityList(ctx.ecs.GetAll<nc::Entity>(), entityFilter, ctx.ecs);
     ctx.entityMap = nc::BuildEntityToFragmentIdMap(entities);
     const auto entityInfos = nc::BuildFragmentEntityInfos(entities, ctx.ecs, ctx.entityMap);
-    NC_LOG_TRACE("Saving '{}' Entities to SceneFragment", entityInfos.size());
+    NC_LOG_TRACE("Saving {} Entities to SceneFragment", entityInfos.size());
     nc::serialize::Serialize(stream, entityInfos);
 }
 
@@ -75,7 +75,7 @@ void LoadEntities(std::istream& stream, nc::DeserializationContext& ctx)
 {
     auto entities = std::vector<nc::FragmentEntityInfo>{};
     nc::serialize::Deserialize(stream, entities);
-    NC_LOG_TRACE("Loading '{}' Entities from SceneFragment", entities.size());
+    NC_LOG_TRACE("Loading {} Entities from SceneFragment", entities.size());
     std::ranges::for_each(entities, [&ctx](auto& entityData)
     {
         nc::RemapEntity(entityData.info.parent, ctx.entityMap);
