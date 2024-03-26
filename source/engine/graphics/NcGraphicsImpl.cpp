@@ -165,7 +165,7 @@ namespace nc::graphics
         update.Add(
             update_task_id::ParticleEmitterUpdate,
             "ParticleEmitterUpdate",
-            [this]{ m_systemResources.particleEmitters.Run(); }
+            [this]{ m_systemResources.particleEmitters.UpdateParticles(); }
         );
 
         update.Add(
@@ -203,6 +203,7 @@ namespace nc::graphics
         auto objectState = m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
                                                                         cameraState, environmentState, skeletalAnimationState);
         auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+        auto particleState = m_systemResources.particleEmitters.Execute(currentFrameIndex);
 
         // If any changes were made to resource layouts (point lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
         m_graphics->CommitResourceLayout();
@@ -229,7 +230,7 @@ namespace nc::graphics
             std::move(objectState),
             std::move(lightingState),
             std::move(widgetState),
-            m_systemResources.particleEmitters.GetParticles()
+            std::move(particleState)
         };
 
         // Draw all the resource data

@@ -64,6 +64,7 @@ struct SystemResourcesConfig
     uint32_t maxRenderers;
     uint32_t maxSkeletalAnimations;
     uint32_t maxTextures;
+    uint32_t maxParticles;
     bool useShadows;
 };
 
