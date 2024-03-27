@@ -24,7 +24,7 @@ namespace nc::graphics::vulkan
             ~Swapchain() noexcept;
 
             // Swap chain
-            void PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid);
+            auto PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool;
             void Cleanup() noexcept;
             void Resize(const Device& device, const Vector2& dimensions);
 
