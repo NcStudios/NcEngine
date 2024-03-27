@@ -168,7 +168,7 @@ void VulkanGraphics::FrameEnd()
 
     // Returns the image to the swapchain
     bool isSwapChainValid = true;
-    m_swapchain->PresentImageToSwapChain(currentFrame, m_device->VkGraphicsQueue(), m_imageIndex, isSwapChainValid);
+    m_swapchain->PresentImageToSwapChain(currentFrame, m_device->VkPresentQueue(), m_imageIndex, isSwapChainValid);
 
     if (!isSwapChainValid)
     {
