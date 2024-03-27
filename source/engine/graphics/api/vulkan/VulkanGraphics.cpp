@@ -166,14 +166,11 @@ void VulkanGraphics::FrameEnd()
     m_swapchain->WaitImageReadyForBuffer(currentFrame, m_imageIndex);
     currentFrame->SubmitBufferToQueue(m_device->VkGraphicsQueue());
 
-    // Returns the image to the swapchain
-    bool isSwapChainValid = true;
-    m_swapchain->PresentImageToSwapChain(currentFrame, m_device->VkPresentQueue(), m_imageIndex, isSwapChainValid);
-
-    if (!isSwapChainValid)
+    if (!m_swapchain->PresentImageToSwapChain(currentFrame, m_device->VkPresentQueue(), m_imageIndex))
     {
         Resize(m_dimensions);
     }
+
     m_frameManager->End();
 }
 } // namespace nc::graphics::vulkan
