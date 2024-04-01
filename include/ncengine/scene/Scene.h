@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/module/ModuleProvider.h"
 
 #include <filesystem>
@@ -17,7 +18,7 @@ class Scene
 {
     public:
         virtual ~Scene() = default;
-        virtual void Load(Registry* registry, ModuleProvider modules) = 0;
+        virtual void Load(ecs::Ecs world, ModuleProvider modules) = 0;
         virtual void Unload() {}
 };
 } // namespace nc

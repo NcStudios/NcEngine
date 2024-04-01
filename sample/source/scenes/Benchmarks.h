@@ -10,7 +10,7 @@ class Benchmarks : public Scene
 {
     public:
         Benchmarks(SampleUI* ui);
-        void Load(Registry* registry, ModuleProvider modules) override;
+        void Load(ecs::Ecs world, ModuleProvider modules) override;
         void Unload() override;
 
     private:

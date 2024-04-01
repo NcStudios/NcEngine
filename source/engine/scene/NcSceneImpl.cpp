@@ -1,4 +1,5 @@
 #include "NcSceneImpl.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/module/ModuleProvider.h"
 #include "ncengine/utility/Log.h"
 
@@ -56,7 +57,7 @@ auto SceneManager::UnloadActiveScene() -> bool
     return true;
 }
 
-auto SceneManager::LoadQueuedScene(Registry* registry, ModuleRegistry& modules)-> bool
+auto SceneManager::LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules)-> bool
 {
     NC_LOG_TRACE("Starting scene change");
     m_transitionScheduled = false;
@@ -76,7 +77,7 @@ auto SceneManager::LoadQueuedScene(Registry* registry, ModuleRegistry& modules)-
     NC_LOG_TRACE("Loading scene");
     m_activeScene = std::move(m_sceneQueue.front());
     m_sceneQueue.erase(m_sceneQueue.begin());
-    m_activeScene->Load(registry, ModuleProvider{&modules});
+    m_activeScene->Load(world, ModuleProvider{&modules});
     return true;
 }
 } // namespace nc::scene
