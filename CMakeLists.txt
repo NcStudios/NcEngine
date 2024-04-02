@@ -46,9 +46,6 @@ else()
     set(NC_SAMPLE_EXE "Sample")
 endif()
 
-# TODO: #383 RtAudio uses deprecated wchar_t conversion
-add_definitions(-D_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
-
 # TODO: #494 Remove usage of aligned_storage
 add_definitions(-D_SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING)
 
