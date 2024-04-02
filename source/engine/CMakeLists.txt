@@ -76,7 +76,7 @@ target_include_directories(${NC_ENGINE_LIB}
 )
 
 # Install
-install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} NcMath NcUtility NcAsset RtAudio
+install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio
         EXPORT      NcEngine-export
         DESTINATION lib
 )
