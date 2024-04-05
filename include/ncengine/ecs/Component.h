@@ -127,7 +127,7 @@ struct ComponentHandler
     std::string name = "User Component";
 
     /** @brief Optional user data, which is passed to the factory, serialize, and deserialize handlers. */
-    std::any userData;
+    std::any userData = std::any{};
 
     /** @brief Callback for creating an instance of T.
      *  @note This enables adding/removing types through the editor. */
