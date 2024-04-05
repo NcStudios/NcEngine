@@ -8,6 +8,7 @@
 #include "ncengine/type/Type.h"
 #include "ncengine/utility/Signal.h"
 
+#include <any>
 #include <concepts>
 #include <iosfwd>
 #include <type_traits>
@@ -98,18 +99,18 @@ template<PooledComponent T>
 struct ComponentHandler
 {
     /** @brief Function type for the Factory handler. */
-    using Factory_t = std::function<T(Entity entity, void* userData)>;
+    using Factory_t = std::function<T(Entity entity, const std::any& userData)>;
 
     /** @brief Function type for the serialize handler. */
     using Serialize_t = std::function<void(std::ostream& binaryStream,
                                            const T& component,
                                            const SerializationContext& ctx,
-                                           void* userData)>;
+                                           const std::any& userData)>;
 
     /** @brief Function type for the deserialize handler. */
     using Deserialize_t = std::function<T(std::istream& binaryStream,
                                           const DeserializationContext& ctx,
-                                          void* userData)>;
+                                          const std::any& userData)>;
 
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T& component)>;
@@ -125,8 +126,8 @@ struct ComponentHandler
     /** @brief A name for the component with no uniqueness constraints. */
     std::string name = "User Component";
 
-    /** @brief Optional pointer to user data, which is passed to the factory, serialize, and deserialize handlers. */
-    void* userData = nullptr;
+    /** @brief Optional user data, which is passed to the factory, serialize, and deserialize handlers. */
+    std::any userData;
 
     /** @brief Callback for creating an instance of T.
      *  @note This enables adding/removing types through the editor. */

@@ -204,7 +204,7 @@ class ComponentPool final : public ComponentPoolBase
         auto GetEntityPool() const noexcept -> std::span<const Entity> override { return m_storage.GetEntities(); }
         auto GetComponentName() const noexcept -> std::string_view override { return m_handler.name; }
         auto HasFactory() const noexcept -> bool override { return m_handler.factory != nullptr; }
-        auto HasUserData() const noexcept -> bool override { return m_handler.userData != nullptr; }
+        auto HasUserData() const noexcept -> bool override { return m_handler.userData.has_value(); }
         auto HasSerialize() const noexcept -> bool override { return m_handler.serialize && m_handler.deserialize; }
         auto HasDrawUI() const noexcept -> bool override { return m_handler.drawUI != nullptr; }
         auto Id() const noexcept -> size_t override { return m_handler.id; };

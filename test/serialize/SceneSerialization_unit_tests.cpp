@@ -59,14 +59,14 @@ struct TestComponent1
     static void Serialize(std::ostream& stream,
                           const TestComponent1& obj,
                           const nc::SerializationContext&,
-                          void*)
+                          const std::any&)
     {
         nc::serialize::Serialize(stream, obj.value);
     }
 
     static auto Deserialize(std::istream& stream,
                             const nc::DeserializationContext&,
-                            void*) -> TestComponent1
+                            const std::any&) -> TestComponent1
     {
         auto obj = TestComponent1{};
         nc::serialize::Deserialize(stream, obj.value);
@@ -81,14 +81,14 @@ struct TestComponent2
     static void Serialize(std::ostream& stream,
                           const TestComponent2& obj,
                           const nc::SerializationContext&,
-                          void*)
+                          const std::any&)
     {
         nc::serialize::Serialize(stream, obj.value);
     }
 
     static auto Deserialize(std::istream& stream,
                             const nc::DeserializationContext&,
-                            void*) -> TestComponent2
+                            const std::any&) -> TestComponent2
     {
         auto obj = TestComponent2{};
         nc::serialize::Deserialize(stream, obj.value);
