@@ -107,7 +107,6 @@ class Collider final : public ComponentBase
         {
             VolumeInfo info;
             std::string assetPath;
-            bool selectedInEditor = false;
         };
 
         std::unique_ptr<ColliderColdData> m_coldData;
