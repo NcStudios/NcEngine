@@ -298,7 +298,7 @@ Benchmarks::Benchmarks(SampleUI* ui)
 {
 }
 
-void Benchmarks::Load(Registry* registry, ModuleProvider modules)
+void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 {
     {
         const auto& config = config::GetMemorySettings();
@@ -307,7 +307,6 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
-    auto world = registry->GetEcs();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
 

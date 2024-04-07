@@ -1,8 +1,8 @@
 #include "NcAudioImpl.h"
-#include "audio/AudioSource.h"
-#include "config/Config.h"
-#include "ecs/View.h"
-#include "utility/Log.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/View.h"
+#include "ncengine/utility/Log.h"
 
 #include "optick.h"
 

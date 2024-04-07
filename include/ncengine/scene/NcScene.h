@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/Scene.h"
 #include "ncengine/type/EngineId.h"
@@ -64,7 +65,7 @@ class NcScene : public Module
          * @throw NcError if there is an active scene loaded.
          * @note Loading is automatically handled internally when ScheduleTransition() is used.
          */
-        virtual auto LoadQueuedScene(Registry* registry, ModuleRegistry& modules) -> bool = 0;
+        virtual auto LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules) -> bool = 0;
 };
 
 /** @brief Build an NcScene instance. */

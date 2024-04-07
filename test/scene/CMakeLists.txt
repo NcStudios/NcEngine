@@ -20,6 +20,7 @@ target_compile_options(NcScene_unit_tests
 target_link_libraries(NcScene_unit_tests
     PRIVATE
         gtest_main
+        NcMath
         NcUtility
 )
 
