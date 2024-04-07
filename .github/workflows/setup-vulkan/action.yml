@@ -14,7 +14,7 @@ runs:
       run: echo "VK_INSTALL_PATH=${{ github.workspace }}/VulkanSDK/${{ inputs.version }}" >> $GITHUB_ENV
 
     - name: Checkout Vulkan-Headers
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: KhronosGroup/Vulkan-Headers
         ref: 'sdk-${{ inputs.version }}'
@@ -27,7 +27,7 @@ runs:
         cmake --install Vulkan-Headers/build --prefix $VK_INSTALL_PATH
 
     - name: Checkout Vulkan-Loader
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: KhronosGroup/Vulkan-Loader
         ref: 'sdk-${{ inputs.version }}'
