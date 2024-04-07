@@ -17,13 +17,13 @@ void Register(nc::ecs::ComponentRegistry& registry,
               typename nc::ComponentHandler<T>::Factory_t&& factory = nullptr,
               typename nc::ComponentHandler<T>::Serialize_t&& serialize = nullptr,
               typename nc::ComponentHandler<T>::Deserialize_t&& deserialize = nullptr,
-              void* userData = nullptr)
+              std::any userData = std::any{})
 {
     registry.RegisterType<T>(maxEntities, nc::ComponentHandler<T>
     {
         .id = id,
         .name = name,
-        .userData = userData,
+        .userData = std::move(userData),
         .factory = std::move(factory),
         .serialize = std::move(serialize),
         .deserialize = std::move(deserialize),

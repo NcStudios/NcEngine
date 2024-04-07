@@ -16,65 +16,64 @@
 
 namespace nc
 {
-auto CreateAudioSource(Entity entity, void*) -> audio::AudioSource
+auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource
 {
     return audio::AudioSource{entity, {asset::DefaultAudioClip}};
 }
 
-auto CreateCollisionLogic(Entity entity, void*) -> CollisionLogic
+auto CreateCollisionLogic(Entity entity, const std::any&) -> CollisionLogic
 {
     return CollisionLogic{entity, nullptr, nullptr, nullptr, nullptr};
 }
 
-auto CreateFixedLogic(Entity entity, void*) -> FixedLogic
+auto CreateFixedLogic(Entity entity, const std::any&) -> FixedLogic
 {
     return FixedLogic{entity, nullptr};
 }
 
-auto CreateFrameLogic(Entity entity, void*) -> FrameLogic
+auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic
 {
     return FrameLogic{entity, nullptr};
 }
 
-auto CreateParticleEmitter(Entity entity, void*) -> graphics::ParticleEmitter
+auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::ParticleEmitter
 {
     return graphics::ParticleEmitter{entity, graphics::ParticleInfo{}};
 }
 
-auto CreatePointLight(Entity entity, void*) -> graphics::PointLight
+auto CreatePointLight(Entity entity, const std::any&) -> graphics::PointLight
 {
     return graphics::PointLight{entity};
 }
 
-auto CreateMeshRenderer(Entity entity, void*) -> graphics::MeshRenderer
+auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRenderer
 {
     return graphics::MeshRenderer{entity};
 }
 
-auto CreateToonRenderer(Entity entity, void*) -> graphics::ToonRenderer
+auto CreateToonRenderer(Entity entity, const std::any&) -> graphics::ToonRenderer
 {
     return graphics::ToonRenderer{entity};
 }
 
-auto CreateSkeletalAnimator(Entity entity, void*) -> graphics::SkeletalAnimator
+auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::SkeletalAnimator
 {
     return graphics::SkeletalAnimator{entity, "dummyMesh", "dummyAnimation"};
 }
 
-auto CreateNetworkDispatcher(Entity entity, void*) -> net::NetworkDispatcher
+auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher
 {
     return net::NetworkDispatcher{entity};
 }
 
-auto CreateCollider(Entity entity, void*) -> physics::Collider
+auto CreateCollider(Entity entity, const std::any&) -> physics::Collider
 {
     return physics::Collider{entity, physics::BoxProperties{}};
 }
 
-auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
+auto CreatePhysicsBody(Entity entity, const std::any& userData) -> physics::PhysicsBody
 {
-    NC_ASSERT(userData, "Expected non-null user data.");
-    auto registry = static_cast<ecs::ComponentRegistry*>(userData);
+    auto registry = std::any_cast<ecs::ComponentRegistry*>(userData);
     auto& transform = registry->GetPool<Transform>().Get(entity);
     auto& colliderPool = registry->GetPool<physics::Collider>();
     auto& collider = colliderPool.Contains(entity)
@@ -84,17 +83,17 @@ auto CreatePhysicsBody(Entity entity, void* userData) -> physics::PhysicsBody
     return physics::PhysicsBody{transform, collider};
 }
 
-auto CreatePhysicsMaterial(Entity, void*) -> physics::PhysicsMaterial
+auto CreatePhysicsMaterial(Entity, const std::any&) -> physics::PhysicsMaterial
 {
     return physics::PhysicsMaterial{};
 }
 
-auto CreatePositionClamp(Entity, void*) -> physics::PositionClamp
+auto CreatePositionClamp(Entity, const std::any&) -> physics::PositionClamp
 {
     return physics::PositionClamp{};
 }
 
-auto CreateVelocityRestriction(Entity, void*) -> physics::VelocityRestriction
+auto CreateVelocityRestriction(Entity, const std::any&) -> physics::VelocityRestriction
 {
     return physics::VelocityRestriction{};
 }
