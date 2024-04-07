@@ -15,7 +15,7 @@ class SceneManager : public NcScene
         void ScheduleTransition() noexcept override;
         auto IsTransitionScheduled() const noexcept -> bool override;
         auto UnloadActiveScene() -> bool override;
-        auto LoadQueuedScene(Registry* registry, ModuleRegistry& modules) -> bool override;
+        auto LoadQueuedScene(ecs::Ecs world, ModuleRegistry& modules) -> bool override;
 
     private:
         std::unique_ptr<Scene> m_activeScene;

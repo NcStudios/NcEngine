@@ -72,17 +72,12 @@ auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) ->
         BuildFixedUpdateTask(context, registry)
     );
 
-    auto updateInertia = builder.Add(
-        "Update World Inertia Tensors",
-        BuildUpdateInertiaTask(context, registry),
+    auto updatePhysicsBodies = builder.Add(
+        "Update World Physics Bodies",
+        BuildUpdatePhysicsBodiesTask(context, registry, m_fixedTimeStep),
         {fixedUpdate}
     );
 
-    auto applyGravity = builder.Add(
-        "Apply Gravity",
-        BuildApplyGravityTask(context, registry, m_fixedTimeStep),
-        {fixedUpdate}
-    );
 
     auto updateManifolds = builder.Add(
         "Update Contact Manifolds",
@@ -129,19 +124,19 @@ auto PhysicsPipeline<Stages>::BuildTaskGraph(task::ExceptionContext& context) ->
     auto generateFreedomConstraints = builder.Add(
         "Solver - Generate Freedom Constraints",
         BuildGenerateFreedomConstraintsTask(context, m_solver, m_fixedTimeStep),
-        {updateInertia, applyGravity}
+        {updatePhysicsBodies}
     );
 
     auto generateContactConstraints = builder.Add(
         "Solver - Generate Contact Constraints",
         BuildGenerateContactConstraintsTask(context, m_solver, m_narrowPhase),
-        {updateInertia, applyGravity, mergeContacts}
+        {updatePhysicsBodies, mergeContacts}
     );
 
     auto updateJoints = builder.Add(
         "Joint System - Update",
         BuildUpdateJointsTask(context, m_jointSystem, m_fixedTimeStep),
-        {applyGravity, updateInertia}
+        {updatePhysicsBodies}
     );
 
     auto resolveConstraints = builder.Add(

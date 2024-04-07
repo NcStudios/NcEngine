@@ -1,4 +1,7 @@
 #include "FreedomSolver.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/physics/Constraints.h"
+#include "ncengine/physics/PhysicsBody.h"
 
 #include <ranges>
 
