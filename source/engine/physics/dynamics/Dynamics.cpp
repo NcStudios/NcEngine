@@ -11,25 +11,18 @@ const auto GravityVector = DirectX::XMVectorSet(0.0f, nc::physics::Gravity, 0.0f
 
 namespace nc::physics
 {
-void UpdateWorldInertiaTensors(Registry* registry)
+void UpdatePhysicsBodies(Registry* registry, float dt)
 {
+    const auto g = DirectX::XMVectorScale(GravityVector, dt);
     for (auto [body, transform] : MultiView<PhysicsBody, Transform>{registry})
     {
         body->UpdateWorldInertia(transform);
-    }
-}
-
-void ApplyGravity(Registry* registry, float dt)
-{
-    const auto g = DirectX::XMVectorScale(GravityVector, dt);
-
-    for(auto& body : View<PhysicsBody>{registry})
-    {
-        if(body.UseGravity() && !body.IsKinematic())
+        if(body->UseGravity() && !body->IsKinematic())
         {
-            body.ApplyVelocity(g);
+            body->ApplyVelocity(g);
         }
     }
+
 }
 
 void Integrate(Registry* registry, float dt)

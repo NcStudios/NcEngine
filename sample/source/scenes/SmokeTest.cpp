@@ -57,13 +57,12 @@ SmokeTest::SmokeTest(std::function<void()> quitEngineCallback)
 {
 }
 
-void SmokeTest::Load(Registry* registry, ModuleProvider modules)
+void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     // Set up for a course integration test. We add a few components and set module state so that each system runs
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
-    auto world = registry->GetEcs();
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),

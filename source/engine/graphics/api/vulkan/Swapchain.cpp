@@ -174,7 +174,7 @@ namespace nc::graphics::vulkan
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
 
-    void Swapchain::PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
+    auto Swapchain::PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool
     {
         const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
@@ -192,16 +192,17 @@ namespace nc::graphics::vulkan
         const auto result = queue.presentKHR(&presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
-            isSwapChainValid = false;
-            return;
+            return false;
         }
-        
+
         if (result != vk::Result::eSuccess)
         {
             throw NcError("Could not present to the swapchain.");
         }
+
+        return true;
     }
-    
+
     void Swapchain::WaitImageReadyForBuffer(PerFrameGpuContext* currentFrame, uint32_t imageIndex)
     {
         if (m_imagesInFlightFences[imageIndex])

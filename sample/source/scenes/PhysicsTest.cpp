@@ -700,11 +700,10 @@ PhysicsTest::PhysicsTest(SampleUI* ui)
 {
 }
 
-void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
+void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(Widget);
 
-    auto world = registry->GetEcs();
     auto ncPhysics = modules.Get<physics::NcPhysics>();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
@@ -719,7 +718,7 @@ void PhysicsTest::Load(Registry* registry, ModuleProvider modules)
     const auto vehicle = BuildVehicle(world, ncPhysics);
 
     // Camera
-    auto cameraHandle = registry->Add<Entity>({
+    auto cameraHandle = world.Emplace<Entity>({
         .position = Vector3{0.0f, 12.0f, -12.0f},
         .rotation = Quaternion::FromEulerAngles(0.7f, 0.0f, 0.0f),
         .tag = "Main Camera"

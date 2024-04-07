@@ -43,12 +43,12 @@ inline auto ToCapsuleProperties(const VolumeInfo& in) noexcept -> CapsulePropert
 
 inline auto MakeBoundingVolume(const BoxProperties& in) -> BoundingVolume
 {
-    return { Box{in.center, in.extents, Magnitude(in.extents / 2.0f)} };
+    return BoundingVolume{ std::in_place_type_t<Box>{}, in.center, in.extents, Magnitude(in.extents / 2.0f) };
 }
 
 inline auto MakeBoundingVolume(const SphereProperties& in) -> BoundingVolume
 {
-    return { Sphere{in.center, in.radius} };
+    return BoundingVolume{ std::in_place_type_t<Sphere>{}, in.center, in.radius };
 }
 
 inline auto MakeBoundingVolume(const CapsuleProperties& in) -> BoundingVolume
@@ -57,13 +57,13 @@ inline auto MakeBoundingVolume(const CapsuleProperties& in) -> BoundingVolume
     const auto pointOffset = Vector3::Up() * (halfHeight - in.radius);
     const auto a = in.center + pointOffset;
     const auto b = in.center - pointOffset;
-    return { Capsule{a, b, in.radius, halfHeight} };
+    return BoundingVolume{ std::in_place_type_t<Capsule>{}, a, b, in.radius, halfHeight };
 }
 
 inline auto MakeBoundingVolume(const HullProperties& in) -> BoundingVolume
 {
-    auto hull = asset::AssetService<asset::ConvexHullView>::Get()->Acquire(in.assetPath);
-    return { ConvexHull{hull.vertices, hull.extents, hull.maxExtent} };
+    const auto hull = asset::AssetService<asset::ConvexHullView>::Get()->Acquire(in.assetPath);
+    return BoundingVolume{ std::in_place_type_t<ConvexHull>{}, hull.vertices, hull.extents, hull.maxExtent };
 }
 
 inline auto MakeBoundingSphere(const Sphere& sphere, const Vector3& translation, float scale) noexcept -> Sphere
