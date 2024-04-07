@@ -161,7 +161,7 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
 
             for (auto& cubeMapWithId : eventData.data)
             {
-                if (!RemoveAt(uids, std::string_view(cubeMapWithId.id), imageInfos, cubeMaps))
+                if (!RemoveAt(uids, cubeMapWithId.id, imageInfos, cubeMaps))
                 {
                     throw NcError("Attempted to remove a CubeMap that doesn't exist.");
                 }
@@ -471,7 +471,7 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
 
             for (auto& textureWithId : eventData.data)
             {
-                if (!RemoveAt(uids, std::string_view(textureWithId.id), images, imageInfos))
+                if (!RemoveAt(uids, textureWithId.id, images, imageInfos))
                 {
                     throw NcError("Attempted to clear a Texture Buffer that doesn't exist.");
                 }

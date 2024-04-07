@@ -33,17 +33,15 @@ struct BoneUpdateEventData
 struct CubeMapWithId
 {
     asset::CubeMap cubeMap;
-    std::string id;
+    size_t id;
 };
 
 /** @brief Event data for cubemap load and unload operations. */
 struct CubeMapUpdateEventData
 {
     CubeMapUpdateEventData(UpdateAction updateAction_,
-                           std::vector<std::string> ids_,
                            std::span<const CubeMapWithId> data_);
 
-    std::vector<std::string> ids;
     std::span<const CubeMapWithId> data;
     UpdateAction updateAction;
 };
@@ -67,7 +65,7 @@ struct SkeletalAnimationUpdateEventData
 struct TextureWithId
 {
     asset::Texture texture;
-    std::string id;
+    size_t id;
     asset_flags_type flags;
 };
 
@@ -75,10 +73,8 @@ struct TextureWithId
 struct TextureUpdateEventData
 {
     TextureUpdateEventData(UpdateAction updateAction_,
-                           std::vector<std::string> ids_,
                            std::span<const TextureWithId> data_);
 
-    std::vector<std::string> ids;
     std::span<const TextureWithId> data;
     UpdateAction updateAction;
 };
