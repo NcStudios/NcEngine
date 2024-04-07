@@ -15,12 +15,6 @@ target_compile_definitions(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/ImGuiConversion.h">
 )
 
-if(WIN32)
-    target_compile_definitions(${NC_ENGINE_LIB} PRIVATE __WINDOWS_WASAPI__)
-elseif(APPLE)
-    target_compile_definitions(${NC_ENGINE_LIB} PRIVATE __MACOSX_CORE__)
-endif()
-
 if(NOT NC_PROD_BUILD)
     add_definitions(-DNC_ASSERT_ENABLED)
 endif()
@@ -43,6 +37,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         Taskflow
         glfw
         OptickCore
+        RtAudio
 )
 
 if(WIN32)
@@ -81,7 +76,7 @@ target_include_directories(${NC_ENGINE_LIB}
 )
 
 # Install
-install(TARGETS     ${NC_ENGINE_LIB} ${IMGUI_LIB} NcMath NcUtility NcAsset
+install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio
         EXPORT      NcEngine-export
         DESTINATION lib
 )
