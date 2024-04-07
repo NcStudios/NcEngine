@@ -1,11 +1,21 @@
 #pragma once
 
-#include "ncengine/ecs/Ecs.h"
-#include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/ecs/EcsFwd.h"
 
-namespace nc::physics
+#include "DirectXMath.h"
+
+#include <vector>
+
+namespace nc
 {
+class Transform;
+
+namespace physics
+{
+class PhysicsBody;
+struct PositionClamp;
+struct VelocityRestriction;
+
 struct VelocityRestrictionConstraint
 {
     DirectX::XMVECTOR linearFreedom;
@@ -30,4 +40,5 @@ auto GenerateVelocityRestrictionConstraints(ecs::ExplicitEcs<VelocityRestriction
 
 void Solve(std::vector<PositionClampConstraint>& constraints, float dt);
 void Solve(std::vector<VelocityRestrictionConstraint>& constraints);
-} // namespace nc::physics
+} // namespace physics
+} // namespace nc

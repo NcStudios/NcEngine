@@ -28,7 +28,7 @@ GraphicsTest::GraphicsTest(SampleUI* ui)
 {
 }
 
-void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
+void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
 
@@ -118,24 +118,24 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
 
     //Lights
-    auto lvHandle = registry->Add<Entity>({.position = Vector3{-4.5f, 7.0f, -12.6f}, .tag = "Point Light 1"});
-    registry->Add<graphics::PointLight>(lvHandle, Vector3(.238f, .441f, .334f), Vector3(.131f, .260f, .0495f), 88.6f);
-    auto lv2Handle = registry->Add<Entity>({.position = Vector3{-4.5f, 5.0f, 7.6f}, .tag = "Point Light 2"});
-    registry->Add<graphics::PointLight>(lv2Handle, Vector3(.279f, .036f, .036f), Vector3(.219f, .206f, .417f), 180.4f);
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 7.0f, -12.6f}, .tag = "Point Light 1"});
+    world.Emplace<graphics::PointLight>(lvHandle, Vector3(.238f, .441f, .334f), Vector3(.131f, .260f, .0495f), 88.6f);
+    auto lv2Handle = world.Emplace<Entity>({.position = Vector3{-4.5f, 5.0f, 7.6f}, .tag = "Point Light 2"});
+    world.Emplace<graphics::PointLight>(lv2Handle, Vector3(.279f, .036f, .036f), Vector3(.219f, .206f, .417f), 180.4f);
 
     // Ogre
-    auto ogre = registry->Add<Entity>({
+    auto ogre = world.Emplace<Entity>({
         .position = Vector3{-5.0f, 0.0f, 12.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
         .scale = Vector3{3.0f, 3.0f, 3.0f},
         .tag = "ogre"
     });
-    registry->Add<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
-    auto* collider = registry->Add<physics::Collider>(ogre, physics::SphereProperties{}, false);
-    registry->Add<physics::PhysicsBody>(
+    world.Emplace<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
+    auto& collider = world.Emplace<physics::Collider>(ogre, physics::SphereProperties{}, false);
+    world.Emplace<physics::PhysicsBody>(
         ogre,
-        *registry->Get<Transform>(ogre),
-        *collider,
+        world.Get<Transform>(ogre),
+        collider,
         physics::PhysicsProperties{
             .mass = 0.0f,
             .isKinematic = true
@@ -145,14 +145,14 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     // Ogre Animation
     {
         using namespace graphics;
-        auto ogreAnimator = registry->Add<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
-        auto stopState = ogreAnimator->AddState(anim::Stop
+        auto& ogreAnimator = world.Emplace<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
+        auto stopState = ogreAnimator.AddState(anim::Stop
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
         });
 
-        ogreAnimator->AddState(anim::Loop
+        ogreAnimator.AddState(anim::Loop
         {
             .enterFrom = stopState,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
@@ -163,17 +163,17 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     }
 
     // Skeleton
-    auto skeleton = registry->Add<Entity>({
+    auto skeleton = world.Emplace<Entity>({
         .position = Vector3{5.3f, 0.0f, -6.4f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
         .scale = Vector3{2.0f, 2.0f, 2.0f},
         .tag = "skeleton"
     });
 
-    registry->Add<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
-    registry->Add<FrameLogic>(skeleton, WasdBasedMovement);
-    registry->Add<physics::Collider>(skeleton, physics::SphereProperties{}, true);
-    registry->Add<CollisionLogic>(skeleton, nullptr, nullptr,
+    world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
+    world.Emplace<FrameLogic>(skeleton, WasdBasedMovement);
+    world.Emplace<physics::Collider>(skeleton, physics::SphereProperties{}, true);
+    world.Emplace<CollisionLogic>(skeleton, nullptr, nullptr,
     [](Entity, Entity other, Registry* reg)
     {
         auto ogreAnim = reg->Get<graphics::SkeletalAnimator>(other);
@@ -187,8 +187,8 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     // Skeleton Animation
     {
         using namespace graphics;
-        auto skelAnim = registry->Add<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
-        skelAnim->AddState(anim::Loop
+        auto& skelAnim = world.Emplace<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
+        skelAnim.AddState(anim::Loop
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
@@ -196,7 +196,7 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
         });
 
-        skelAnim->AddState(anim::Loop
+        skelAnim.AddState(anim::Loop
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
@@ -204,7 +204,7 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
         });
 
-        skelAnim->AddState(anim::Loop
+        skelAnim.AddState(anim::Loop
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
@@ -212,7 +212,7 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
         });
 
-        skelAnim->AddState(anim::Loop
+        skelAnim.AddState(anim::Loop
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
@@ -220,7 +220,7 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
         });
 
-        skelAnim->AddState(anim::PlayOnce
+        skelAnim.AddState(anim::PlayOnce
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
@@ -229,31 +229,31 @@ void GraphicsTest::Load(Registry* registry, ModuleProvider modules)
     }
 
     // Cave
-    auto cave_floor = registry->Add<Entity>({
+    auto cave_floor = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
         .scale = Vector3{1.5f, 1.5f, 1.5f},
         .tag = "cave_floor"
     });
-    registry->Add<graphics::MeshRenderer>(cave_floor, "cave.nca", caveMaterial);
+    world.Emplace<graphics::MeshRenderer>(cave_floor, "cave.nca", caveMaterial);
 
-    auto cave_ceiling = registry->Add<Entity>({
+    auto cave_ceiling = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
         .scale = Vector3{1.5f, 1.5f, 1.5f},
         .tag = "cave_ceiling"
     });
-    registry->Add<graphics::MeshRenderer>(cave_ceiling, "cave_ceiling.nca", caveCeilingMaterial);
+    world.Emplace<graphics::MeshRenderer>(cave_ceiling, "cave_ceiling.nca", caveCeilingMaterial);
 
     // Camera
-    auto cameraHandle = registry->Add<Entity>({
+    auto cameraHandle = world.Emplace<Entity>({
         .position = Vector3{-0.6f, 6.562f, -18.848f},
         .rotation = Quaternion::FromEulerAngles(0.239f, 0.0f, 0.021f),
         .tag = "Main Camera"
     });
-    auto camera = registry->Add<graphics::SceneNavigationCamera>(cameraHandle);
-    registry->Add<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-    modules.Get<graphics::NcGraphics>()->SetCamera(camera);
+    auto& camera = world.Emplace<graphics::SceneNavigationCamera>(cameraHandle);
+    world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
+    modules.Get<graphics::NcGraphics>()->SetCamera(&camera);
 }
 
 void GraphicsTest::Unload()
