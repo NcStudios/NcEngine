@@ -10,7 +10,8 @@
 #include "graphics/GraphicsConstants.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "ncengine/type/StableAddress.h"
-#include "utility/Signal.h"
+#include "ncengine/utility/Signal.h"
+#include "ncengine/utility/SparseMap.h"
 
 #include <string>
 #include <memory>
@@ -49,11 +50,11 @@ struct PPImageArrayBufferStorage
     std::unordered_map<PostProcessImageType, std::unique_ptr<PPImageArrayBuffer>> buffers;
 };
 
-struct UniformBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<UniformBuffer>> buffers;
-};
+// struct UniformBufferStorage
+// {
+//     std::vector<uint32_t> uids;
+//     std::vector<std::unique_ptr<UniformBuffer>> buffers;
+// };
 
 struct StorageBufferStorage
 {
@@ -61,11 +62,11 @@ struct StorageBufferStorage
     std::vector<std::unique_ptr<StorageBuffer>> buffers;
 };
 
-struct TextureArrayBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<TextureArrayBuffer>> buffers;
-};
+// struct TextureArrayBufferStorage
+// {
+//     std::vector<uint32_t> uids;
+//     std::vector<std::unique_ptr<TextureArrayBuffer>> buffers;
+// };
 
 struct ShaderStorage : StableAddress
 {
@@ -88,6 +89,8 @@ struct ShaderStorage : StableAddress
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
 
+    private:
+
     vk::Device m_device;
     GpuAllocator* m_allocator;
     ShaderBindingManager* m_shaderBindingManager;
@@ -107,11 +110,14 @@ struct ShaderStorage : StableAddress
     StorageBufferStorage m_staticSsboStorage;
     nc::Connection<const SsboUpdateEventData&> m_onStorageBufferUpdate;
 
-    std::array<UniformBufferStorage, MaxFramesInFlight> m_perFrameUboStorage;
-    UniformBufferStorage m_staticUboStorage;
+    // std::array<UniformBufferStorage, MaxFramesInFlight> m_perFrameUboStorage;
+    // UniformBufferStorage m_staticUboStorage;
+    std::array<sparse_map<std::unique_ptr<UniformBuffer>>, MaxFramesInFlight> m_perFrameUboStorage;
+    sparse_map<std::unique_ptr<UniformBuffer>> m_staticUboStorage;
     nc::Connection<const UboUpdateEventData&> m_onUniformBufferUpdate;
 
-    TextureArrayBufferStorage m_staticTabStorage;
+    sparse_map<std::unique_ptr<TextureArrayBuffer>> m_staticTabStorage;
+    // TextureArrayBufferStorage m_staticTabStorage;
     nc::Connection<const TabUpdateEventData&> m_onTextureArrayBufferUpdate;
 };
 } // namespace vulkan
