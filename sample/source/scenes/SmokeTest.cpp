@@ -15,6 +15,7 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/physics/Collider.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -99,6 +100,19 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllSkeletalAnimationAssets();
         ::LoadScene(world, *modules.Get<asset::NcAsset>());
     }
+    else
+    {
+        const auto ground = world.Emplace<Entity>({
+            .position = Vector3::Up() * -2.5f,
+            .scale = Vector3{3.0f, 1.0f, 3.0f}
+        });
+
+        world.Emplace<graphics::ToonRenderer>(ground);
+        auto& groundCollider = world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
+        auto& groundTransform = world.Get<Transform>(ground);
+        world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
+        world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
+    }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
     auto& camera = world.Emplace<graphics::Camera>(cameraHandle);
@@ -136,6 +150,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& objectTransform = world.Get<Transform>(object);
     world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
     world.Emplace<physics::PhysicsMaterial>(object);
+    world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
 
     world.Emplace<Entity>({.parent = object});
 }
