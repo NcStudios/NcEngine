@@ -53,7 +53,7 @@ class sparse_map
             const auto normalizedKey = static_cast<size_t>(key);
             const auto swappedSparse = m_dense.back();
             const auto toRemoveDense = m_sparse.at(normalizedKey);
-            m_sparse.at(swappedSparse) = static_cast<uint32_t>(key);
+            m_sparse.at(swappedSparse) = toRemoveDense;
             m_sparse.at(normalizedKey) = NullIndex;
             m_dense.at(toRemoveDense) = m_dense.back();
             m_dense.pop_back();

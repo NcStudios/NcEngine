@@ -52,6 +52,25 @@ TEST(SparseMapTests, erase_exists_returnsTrueAndRemoves)
     EXPECT_FALSE(uut.contains(1));
 }
 
+TEST(SparseMapTests, erase_multiple_succeeds)
+{
+    auto uut = nc::sparse_map<std::string>{10};
+    uut.emplace(1, "test1");
+    uut.emplace(2, "test2");
+    uut.emplace(3, "test3");
+    uut.emplace(4, "test4");
+
+    EXPECT_TRUE(uut.erase(2));
+    EXPECT_TRUE(uut.erase(1));
+    EXPECT_TRUE(uut.erase(4));
+    EXPECT_TRUE(uut.erase(3));
+
+    EXPECT_FALSE(uut.contains(1));
+    EXPECT_FALSE(uut.contains(2));
+    EXPECT_FALSE(uut.contains(3));
+    EXPECT_FALSE(uut.contains(4));
+}
+
 TEST(SparseMapTests, erase_doesNotexist_returnsFalse)
 {
     auto uut = nc::sparse_map<std::string>{10};
