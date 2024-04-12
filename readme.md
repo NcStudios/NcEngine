@@ -7,7 +7,32 @@
   <img src="docs/Logo.png" />
 </p>
 
-NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively being developed but is still in very early stages. Features are in varying stages of completeness.
+NcEngine is a 3D game engine written in C++23 using Vulkan. It is primarily for Windows but Linux support is in development.
+It is actively being developed but is still in very early stages.
+
+Currently featuring:
+* Built-in, live editor
+* Custom 3D physics
+* Entity component system
+* Modular architecture
+* Skeletal animation
+* Real time shadows
+* Particle system
+
+
+
+<p align="center">
+  <img src="docs/demo.gif" />
+</p>
+
+<p align="center">
+  <img src="docs/demo2.gif" />
+</p>
+
+<p align="center">
+  <img src="docs/demo3.gif" />
+</p>
+
 
 -------------------
 * Getting Started
@@ -24,7 +49,7 @@ NcEngine is a 3D game engine written in C++20 targeting Windows. It is actively 
 * Windows
 * Vulkan SDK 1.3.211.0 or higher
 * CMake 3.20
-* Compiler with c++20 support:
+* Compiler with c++23 support:
     * Visual Studio 17 2022
     * MinGW-w64 9.0.0
 
