@@ -18,19 +18,11 @@ Currently featuring:
 * Skeletal animation
 * Real time shadows
 * Particle system
-
+-------------------
 
 
 <p align="center">
   <img src="docs/demo.gif" />
-</p>
-
-<p align="center">
-  <img src="docs/demo2.gif" />
-</p>
-
-<p align="center">
-  <img src="docs/demo3.gif" />
 </p>
 
 
