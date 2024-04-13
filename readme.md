@@ -46,7 +46,7 @@ Currently featuring:
 ----------------
 Interested in getting involved?
 
-The best way to help is to grab an issue that looks interesting an attempt to tackle it. Or, take the engine for a test drive and submit any found bugs.
+The best way to help is to grab an issue that looks interesting and attempt to tackle it. Or, make a game with the engine and let us know any shortcomings, bugs, or feature requests you discover along the way!
 
 Otherwise:
 
