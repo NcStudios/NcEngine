@@ -19,7 +19,7 @@ The purpose behind NcEngine:
 
 What NcEngine is not:
 
-> The purpose of NcEngine was never to be a product for others to purchase or pay for, or a general purpose game engine to compete with Unity, Unreal, Godot or others. We made this for our personal use, but it is now developed enough that we are happy to share with others. This repo is currently run by a two-person team 'nights and weekends' team, so if you encounter a bug - please make an issue for it, but it will likely not be fixed soon (depending on severity). 
+> The purpose of NcEngine was never to be a product for others to purchase or pay for, or a general purpose game engine to compete with Unity, Unreal, Godot or others. We made this for our personal use, but it is now developed enough that we are happy to share with others. This repo is currently run by a two-person 'nights and weekends' team, so if you encounter a bug - please make an issue for it, but it will likely not be fixed soon (depending on severity). 
 
 
 Currently featuring:
