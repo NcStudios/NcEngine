@@ -7,8 +7,20 @@
   <img src="docs/Logo.png" />
 </p>
 
-NcEngine is a 3D game engine written in C++23 using Vulkan. It is primarily for Windows but Linux support is in development.
-It is actively being developed but is still in very early stages.
+### About NcEngine
+----------------
+NcEngine is an open-source 3D game engine written in C++23 using Vulkan, primarily for Windows but Linux support is in development.
+It is actively being developed but is still in early stages.
+
+The purpose behind NcEngine:
+1. To have access to a game engine that is completely free and open source and always will be. 
+2. To own the entire game development pipeline, with minimal external dependencies. 
+3. To learn exactly how games run, to be able to make architecture-informed decisions when making them.
+
+What NcEngine is not:
+
+> The purpose of NcEngine was never to be a product for others to purchase or pay for, or a general purpose game engine to compete with Unity, Unreal, Godot or others. We made this for our personal use, but it is now developed enough that we are happy to share with others. This repo is currently run by a two-person team, so if you encounter a bug - please make an issue for it, but it will likely not be fixed soon (depending on severity). 
+
 
 Currently featuring:
 * Built-in, live editor
@@ -16,17 +28,37 @@ Currently featuring:
 * Entity component system
 * Modular architecture
 * Skeletal animation
+* Bindless rendering
 * Real time shadows
 * Particle system
+* Audio clips
+* PBR and toon shaders
+* Custom asset types
 -------------------
 
 
 <p align="center">
-  <img src="docs/demo.gif" />
+  <img src="docs/demo_scene.gif" />
 </p>
 
 
--------------------
+### Getting Involved
+----------------
+Interested in getting involved?
+
+The best way to help is to grab an issue that looks interesting an attempt to tackle it. Or, take the engine for a test drive and submit any found bugs.
+
+Otherwise:
+
+* [Support us on Patreon!](https://patreon.com/NCStudios499?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink)
+* [X](https://twitter.com/ElrondHubbard01)
+* [itch.io](https://ncstudios.itch.io/)
+* [YouTube](https://www.youtube.com/@NightcrawlerGames)
+
+
+
+### Getting Started
+----------------
 * Getting Started
     * [Requirements](#requirements)
     * [Building](#building)
@@ -42,8 +74,8 @@ Currently featuring:
 * Vulkan SDK 1.3.211.0 or higher
 * CMake 3.20
 * Compiler with c++23 support:
-    * Visual Studio 17 2022
-    * MinGW-w64 9.0.0
+    * Visual Studio 17.2 2022
+    * GCC 13
 
 ## Building
 ---
