@@ -33,7 +33,7 @@ Currently featuring:
 * Particle system
 * Audio clips
 * PBR and toon shaders
-* Custom asset types
+* Custom asset types 
 -------------------
 
 
@@ -82,10 +82,18 @@ cmake -S ./ -B build -DCMAKE_INSTALL_PREFIX=NcSdk
 cmake --build build --target install --config Release
 ```
 
+### Dependencies
+All dependencies are fetched during the CMake generate step. 
+There are two other first party repos:
+* [NcCommon](https://github.com/NcStudios/NcCommon)
+  * Containing math and utility libraries.
+* [NcTools](https://github.com/NcStudios/NcTools)
+  * Containing a library and CMD line utility for handling assets.
+
 ### Installation Items
 * NcEngine: Engine libraries and headers.
   * To include in a CMake project use: `find_package(NcEngine PATHS install-path)` and link against `Nc::NcEngine-dev`.
-  * Application and utilities are installed to `install-path/bin`.
+  * CMD line utilities are installed to `install-path/bin`.
 * Sample: Application containing demo, test, and benchmark scenes.
   * Installed to `install-path/sample`.
 
@@ -96,11 +104,11 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
 ---------------
 #### NC_BUILD_TESTS
     Default: OFF
-    Include tests when building the NcSdk project.
+    Include tests when building.
 
 #### NC_PROD_BUILD
     Default: OFF
-    Build binaries with debug, utility, and profiling code stripped. Only NcEngine is built, and its target name is changed to 'Nc::NcEngine' (dropping the '-dev' suffix). 
+    Build engine binaries for use in production releases. This excludes the editor layer, sample app, removes some runtime checks, and limits logging. The engine target name is changed to 'Nc::NcEngine' (dropping the '-dev' suffix).
 
 #### NC_PROFILING_ENABLED
     Default: OFF
