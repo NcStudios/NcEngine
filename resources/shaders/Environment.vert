@@ -37,7 +37,7 @@ out gl_PerVertex {
 
 void main() 
 {
-    ObjectData object = objectBuffer.objects[gl_BaseInstance];
+    ObjectData object = objectBuffer.objects[gl_InstanceIndex];
     outUVW = inPos;
     gl_Position = object.viewProjection * object.model * vec4(inPos, 1.0);
 }
