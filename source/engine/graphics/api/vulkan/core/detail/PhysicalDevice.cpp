@@ -42,7 +42,7 @@ auto DeviceSupportsFeatures(vk::PhysicalDevice physicalDevice) -> bool
 }
 } // anonymous namespace
 
-namespace nc::graphics::detail
+namespace nc::graphics::vulkan::detail
 {
 auto SelectPhysicalDevice(std::span<const vk::PhysicalDevice> physicalDevices,
                           vk::SurfaceKHR surface,
@@ -77,4 +77,4 @@ auto SelectPhysicalDevice(std::span<const vk::PhysicalDevice> physicalDevices,
 
     throw NcError("Could not find a suitable physical device.");
 }
-} // namespace nc::graphics::detail
+} // namespace nc::graphics::vulkan::detail

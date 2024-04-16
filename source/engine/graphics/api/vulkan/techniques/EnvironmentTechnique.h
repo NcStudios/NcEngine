@@ -9,19 +9,19 @@
 #include <vector>
 #include <span>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 
 class EnvironmentTechnique : public ITechnique
 {
     public:
-        EnvironmentTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+        EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
         ~EnvironmentTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
-        void Bind(vk::CommandBuffer* cmd) override;
+        void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
 
         bool CanRecord(const PerFrameRenderState& frameData) override;
         void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
@@ -29,8 +29,8 @@ class EnvironmentTechnique : public ITechnique
         void Clear() noexcept;
 
     private:
-        ShaderDescriptorSets* m_descriptorSets;
+        ShaderBindingManager* m_shaderBindingManager;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

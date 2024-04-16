@@ -49,21 +49,12 @@ inline auto BuildFixedUpdateTask(task::ExceptionContext& ctx, Registry* registry
     });
 }
 
-inline auto BuildUpdateInertiaTask(task::ExceptionContext& ctx, Registry* registry)
-{
-    return task::Guard(ctx, [registry]
-    {
-        OPTICK_CATEGORY("UpdateWorldInertiaTensors", Optick::Category::Physics);
-        UpdateWorldInertiaTensors(registry);
-    });
-}
-
-inline auto BuildApplyGravityTask(task::ExceptionContext& ctx, Registry* registry, float fixedTimeStep)
+inline auto BuildUpdatePhysicsBodiesTask(task::ExceptionContext& ctx, Registry* registry, float fixedTimeStep)
 {
     return task::Guard(ctx, [registry, fixedTimeStep]
     {
-        OPTICK_CATEGORY("ApplyGravity", Optick::Category::Physics);
-        ApplyGravity(registry, fixedTimeStep);
+        OPTICK_CATEGORY("UpdatePhysicsBodies", Optick::Category::Physics);
+        UpdatePhysicsBodies(registry, fixedTimeStep);
     });
 }
 
@@ -140,12 +131,21 @@ auto BuildMergeContactsTask(task::ExceptionContext& ctx, NarrowPhase& narrow, Co
     });
 }
 
-inline auto BuildGenerateConstraintsTask(task::ExceptionContext& ctx, Solver& solver, NarrowPhase& narrow)
+inline auto BuildGenerateFreedomConstraintsTask(task::ExceptionContext& ctx, Solver& solver, float fixedTimeStep)
+{
+    return task::Guard(ctx, [&solver, fixedTimeStep]
+    {
+        OPTICK_CATEGORY("Solver::GenerateFreedomConstraints", Optick::Category::Physics);
+        solver.GenerateFreedomConstraints(fixedTimeStep);
+    });
+}
+
+inline auto BuildGenerateContactConstraintsTask(task::ExceptionContext& ctx, Solver& solver, NarrowPhase& narrow)
 {
     return task::Guard(ctx, [&solver, &narrow]
     {
-        OPTICK_CATEGORY("Solver::GenerateConstraints", Optick::Category::Physics);
-        solver.GenerateConstraints(narrow.Manifolds());
+        OPTICK_CATEGORY("Solver::GenerateContactConstraints", Optick::Category::Physics);
+        solver.GenerateContactConstraints(narrow.Manifolds());
     });
 }
 

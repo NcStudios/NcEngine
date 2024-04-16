@@ -1,4 +1,5 @@
 #include "ParticleEmitterSystem.h"
+#include "asset/AssetService.h"
 #include "ecs/Transform.h"
 #include "time/Time.h"
 
@@ -6,124 +7,205 @@
 
 #include <algorithm>
 
+namespace
+{
+struct CameraProperties
+{
+    DirectX::XMVECTOR position = DirectX::g_XMZero;
+    DirectX::XMVECTOR rotation = DirectX::XMQuaternionIdentity();
+    DirectX::XMVECTOR forward = DirectX::g_XMIdentityR2;
+};
+
+struct PermutationData
+{
+    int index;
+    float distance;
+};
+} // anonymous namespace
+
 namespace nc::graphics
 {
-    ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry, std::function<nc::graphics::Camera* ()> getCamera)
-        : m_emitterStates{},
-          m_toAdd{},
-          m_toRemove{},
-          m_random{ Random() },
-          m_getCamera{ getCamera },
-          m_registry{ registry },
-          m_onAddConnection{ registry->OnAdd<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
-          m_onRemoveConnection{ registry->OnRemove<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)}
+ParticleEmitterSystem::ParticleEmitterSystem(Registry* registry,
+                                             ShaderResourceBus* shaderResourceBus,
+                                             std::function<nc::graphics::Camera* ()> getCamera,
+                                             unsigned maxParticles)
+    : m_emitterStates{},
+      m_toAdd{},
+      m_toRemove{},
+      m_random{ Random() },
+      m_getCamera{ getCamera },
+      m_registry{ registry },
+      m_onAddConnection{ registry->OnAdd<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Add) },
+      m_onRemoveConnection{ registry->OnRemove<graphics::ParticleEmitter>().Connect(this, &ParticleEmitterSystem::Remove)},
+      m_particleDataDeviceBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(ParticleData) * maxParticles, ShaderStage::Fragment | ShaderStage::Vertex, 7, 0, false)},
+      m_maxParticles{maxParticles}
+{
+}
+
+void ParticleEmitterSystem::UpdateParticles()
+{
+    OPTICK_CATEGORY("ParticleEmitterSystem::UpdateParticles", Optick::Category::VFX);
+    const float dt = time::DeltaTime();
+    const auto [camPosition, camRotation, camForward] = [this]()
     {
+        if (auto camera = m_getCamera())
+        {
+            const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
+            return ::CameraProperties
+            {
+                .position = transform->PositionXM(),
+                .rotation = transform->RotationXM(),
+                .forward = transform->ForwardXM()
+            };
+        }
+
+        return ::CameraProperties{};
+    }();
+
+    for (auto& state : m_emitterStates)
+    {
+        state.Update(dt, camRotation, camForward);
     }
 
-    void ParticleEmitterSystem::Run()
+    SortEmitters(camPosition);
+}
+
+void ParticleEmitterSystem::SortEmitters(DirectX::FXMVECTOR cameraPosition)
+{
+    OPTICK_CATEGORY("ParticleEmitterSystem::SortEmitters", Optick::Category::VFX);
+
+    // Build up an index array for sorting to help minimize number of swaps and distance calculations
+    auto permutation = std::vector<PermutationData>{};
+    permutation.reserve(m_emitterStates.size());
+    for (auto [i, emitter] : std::views::enumerate(m_emitterStates))
     {
-        OPTICK_CATEGORY("ParticleModule", Optick::Category::VFX);
-        const float dt = time::DeltaTime();
-        const auto [camRotation, camForward] = [this]()
+        const auto offsetFromCamera = DirectX::XMVectorSubtract(cameraPosition, emitter.GetLastPosition());
+        const auto sqLength = DirectX::XMVector3LengthSq(offsetFromCamera);
+        permutation.emplace_back(static_cast<int>(i), DirectX::XMVectorGetX(sqLength));
+    }
+
+    // Sort back to front based on distance from camera
+    std::ranges::sort(permutation, std::greater<>{}, &PermutationData::distance);
+
+    // Apply the permutation by walking cycles
+    const auto emitterCount = static_cast<int>(m_emitterStates.size());
+    for (int cycleStart = 0; cycleStart < emitterCount; ++cycleStart)
+    {
+        auto cycleCurrent = cycleStart;
+        while (permutation[cycleCurrent].index >= 0)
         {
-            if (auto camera = m_getCamera())
+            const auto emitterIndex = permutation[cycleCurrent].index;
+            if (cycleCurrent != emitterIndex && permutation[emitterIndex].index >= 0)
             {
-                const auto* transform = m_registry->Get<Transform>(camera->ParentEntity());
-                return std::make_pair(transform->RotationXM(), transform->ForwardXM());
+                std::swap(m_emitterStates[cycleCurrent], m_emitterStates[emitterIndex]);
             }
 
-            return std::make_pair(DirectX::XMQuaternionIdentity(), DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
-        }();
-
-        for (auto& state : m_emitterStates)
-        {
-            state.Update(dt, camRotation, camForward);
+            cycleCurrent = std::exchange(permutation[cycleCurrent].index, -1);
         }
     }
+}
 
-    void ParticleEmitterSystem::ProcessFrameEvents()
+void ParticleEmitterSystem::ProcessFrameEvents()
+{
+    OPTICK_CATEGORY("ParticleEmitterSystem::ProcessFrameEvents", Optick::Category::VFX);
+    m_emitterStates.insert
+    (
+        m_emitterStates.cend(),
+        std::make_move_iterator(m_toAdd.begin()),
+        std::make_move_iterator(m_toAdd.end())
+    );
+
+    m_toAdd.clear();
+
+    for (auto entity : m_toRemove)
     {
-        // Could use linear allocator for add/remove vectors 
-        m_emitterStates.insert
-        (
-            m_emitterStates.cend(),
-            std::make_move_iterator(m_toAdd.begin()),
-            std::make_move_iterator(m_toAdd.end())
-        );
-
-        m_toAdd.clear();
-
-        for (auto entity : m_toRemove)
-        {
-            std::erase_if(m_emitterStates, [entity](auto& state)
-            {
-                return state.GetEntity() == entity;
-            });
-        }
-
-        m_toRemove.clear();
-    }
-
-    void ParticleEmitterSystem::Emit(Entity entity, size_t count)
-    {
-        auto findPred = [entity](particle::EmitterState& state)
+        std::erase_if(m_emitterStates, [entity](auto& state)
         {
             return state.GetEntity() == entity;
-        };
+        });
+    }
 
-        auto pos = std::ranges::find_if(m_emitterStates, findPred);
+    m_toRemove.clear();
+}
 
-        if (pos == m_emitterStates.end())
+void ParticleEmitterSystem::Emit(Entity entity, size_t count)
+{
+    auto findPred = [entity](particle::EmitterState& state)
+    {
+        return state.GetEntity() == entity;
+    };
+
+    auto pos = std::ranges::find_if(m_emitterStates, findPred);
+
+    if (pos == m_emitterStates.end())
+    {
+        pos = std::ranges::find_if(m_toAdd, findPred);
+        if (pos == m_toAdd.end())
+            throw NcError("Particle emitter does not exist");
+    }
+
+    pos->Emit(count);
+}
+
+void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
+{
+    auto findPred = [entity = emitter.ParentEntity()](particle::EmitterState& state)
+    {
+        return state.GetEntity() == entity;
+    };
+
+    auto pos = std::ranges::find_if(m_emitterStates, findPred);
+    if (pos == m_emitterStates.end())
+    {
+        pos = std::ranges::find_if(m_toAdd, findPred);
+        if (pos == m_toAdd.end())
+            throw NcError("Particle emitter does not exist");
+    }
+
+    pos->UpdateInfo(emitter.GetInfo());
+}
+
+void ParticleEmitterSystem::Add(graphics::ParticleEmitter& emitter)
+{
+    m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_random);
+    emitter.RegisterSystem(this);
+}
+
+void ParticleEmitterSystem::Remove(Entity entity)
+{
+    m_toRemove.push_back(entity);
+}
+
+void ParticleEmitterSystem::Clear()
+{
+    m_emitterStates.clear();
+    m_emitterStates.shrink_to_fit();
+    m_toAdd.clear();
+    m_toAdd.shrink_to_fit();
+    m_toRemove.clear();
+    m_toRemove.shrink_to_fit();
+}
+
+auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
+{
+    OPTICK_CATEGORY("ParticleEmitterSystem::Execute", Optick::Category::Rendering);
+    m_particleDataHostBuffer.clear();
+    for (const auto& state : m_emitterStates)
+    {
+        const auto texture = asset::AssetService<asset::TextureView>::Get()->Acquire(state.GetTexture());
+        for (const auto& m : state.GetMatrices())
         {
-            pos = std::ranges::find_if(m_toAdd, findPred);
-            if (pos == m_toAdd.end())
-                throw NcError("Particle emitter does not exist");
+            m_particleDataHostBuffer.emplace_back(m, texture.index);
         }
-
-        pos->Emit(count);
     }
 
-    void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
+    const auto numberToBind = std::min(static_cast<uint32_t>(m_particleDataHostBuffer.size()), m_maxParticles); // we don't want to crash when exceeding maxParticles, just discard
+    const auto rangeToRender = std::span{m_particleDataHostBuffer.data(), numberToBind};
+    m_particleDataDeviceBuffer.Bind(rangeToRender, frameIndex);
+    return ParticleState
     {
-        auto findPred = [entity = emitter.ParentEntity()](particle::EmitterState& state)
-        {
-            return state.GetEntity() == entity;
-        };
-
-        auto pos = std::ranges::find_if(m_emitterStates, findPred);
-        if (pos == m_emitterStates.end())
-        {
-            pos = std::ranges::find_if(m_toAdd, findPred);
-            if (pos == m_toAdd.end())
-                throw NcError("Particle emitter does not exist");
-        }
-
-        pos->UpdateInfo(emitter.GetInfo());
-    }
-
-    std::span<const particle::EmitterState> ParticleEmitterSystem::GetParticles() const
-    {
-        return m_emitterStates;
-    }
-
-    void ParticleEmitterSystem::Add(graphics::ParticleEmitter& emitter)
-    {
-        m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_random);
-        emitter.RegisterSystem(this);
-    }
-
-    void ParticleEmitterSystem::Remove(Entity entity)
-    {
-        m_toRemove.push_back(entity);
-    }
-
-    void ParticleEmitterSystem::Clear()
-    {
-        m_emitterStates.clear();
-        m_emitterStates.shrink_to_fit();
-        m_toAdd.clear();
-        m_toAdd.shrink_to_fit();
-        m_toRemove.clear();
-        m_toRemove.shrink_to_fit();
-    }
+        .mesh = asset::AssetService<asset::MeshView>::Get()->Acquire(asset::PlaneMesh),
+        .count = numberToBind
+    };
+}
 } // namespace nc::graphics

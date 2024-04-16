@@ -107,7 +107,7 @@ auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device 
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     SwapChainSupportDetails QuerySwapChainSupport(const vk::PhysicalDevice& device, const vk::SurfaceKHR& surface)
     {
@@ -174,7 +174,7 @@ namespace nc::graphics
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
 
-    void Swapchain::Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid)
+    auto Swapchain::PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool
     {
         const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
@@ -192,17 +192,18 @@ namespace nc::graphics
         const auto result = queue.presentKHR(&presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
-            isSwapChainValid = false;
-            return;
+            return false;
         }
-        
+
         if (result != vk::Result::eSuccess)
         {
             throw NcError("Could not present to the swapchain.");
         }
+
+        return true;
     }
-    
-    void Swapchain::WaitForNextImage(PerFrameGpuContext* currentFrame, uint32_t imageIndex)
+
+    void Swapchain::WaitImageReadyForBuffer(PerFrameGpuContext* currentFrame, uint32_t imageIndex)
     {
         if (m_imagesInFlightFences[imageIndex])
         {
@@ -268,6 +269,7 @@ namespace nc::graphics
 
     bool Swapchain::GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex)
     {
+        currentFrame->WaitForSync(); // Wait until the command buffer has finished execution.
         auto [result, index] = m_device.acquireNextImageKHR(m_swapChain.get(), UINT64_MAX, currentFrame->ImageAvailableSemaphore());
         *imageIndex = index;
         return result != vk::Result::eErrorOutOfDateKHR;
@@ -278,4 +280,4 @@ namespace nc::graphics
         Cleanup();
         Create(device, m_surface, dimensions);
     }
-}
+} // namespace nc::graphics::vulkan

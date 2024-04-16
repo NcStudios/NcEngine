@@ -9,7 +9,9 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "graphics/system/ParticleEmitterSystem.h"
 
@@ -17,14 +19,14 @@
 
 #include <sstream>
 
-DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::ConcaveCollider, nc::ConcaveColliderView, std::string);
-DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::HullCollider, nc::ConvexHullView, std::string);
-DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::MeshView, std::string);
-DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::TextureView, std::string);
+DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::ConcaveCollider, nc::asset::ConcaveColliderView, std::string);
+DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::HullCollider, nc::asset::ConvexHullView, std::string);
+DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
+DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::asset::TextureView, std::string);
 
 namespace nc
 {
-auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
+auto asset::AcquireAudioClipAsset(const std::string&) -> asset::AudioClipView
 {
     static auto view = AudioClipView{};
     return view;
@@ -39,7 +41,6 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
 
 // We only need the old Registry here so that it sets the ptr for ActiveRegistry(), which is only used by PhysicsBody.
 auto g_registry = nc::ecs::ComponentRegistry{10ull};
-auto g_legacyRegistry = nc::Registry{g_registry};
 auto g_ecs = nc::ecs::Ecs{g_registry};
 constexpr auto g_entity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::None};
 constexpr auto g_staticEntity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::Static};
@@ -239,9 +240,18 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     g_registry.RegisterType<nc::Transform>(1);
     g_registry.RegisterType<nc::Hierarchy>(1);
     g_registry.RegisterType<nc::physics::Collider>(1);
+    g_registry.RegisterType<nc::physics::PhysicsBody>(1);
 
     const auto entity = g_ecs.Emplace<nc::Entity>(nc::EntityInfo{});
     g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
+
+    const auto expectedProperties = nc::physics::PhysicsProperties{};
+    const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
+        entity,
+        g_ecs.Get<nc::Transform>(entity),
+        g_ecs.Get<nc::physics::Collider>(entity),
+        expectedProperties
+    );
 
     auto entityToFragmentId = nc::EntityToFragmentIdMap{ {entity, 0u} };
     auto fragmentIdToEntity = nc::FragmentIdToEntityMap{ {0u, entity} };
@@ -249,20 +259,44 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     auto deserializeCtx = nc::DeserializationContext{fragmentIdToEntity, g_ecs};
 
     auto stream = std::stringstream{};
-    const auto expectedProperties = nc::physics::PhysicsProperties{};
-    const auto expectedLinearFreedom = nc::Vector3::One();
-    const auto expectedAngularFreedom = nc::Vector3::Up();
-    const auto expected = nc::physics::PhysicsBody{entity, expectedProperties, expectedLinearFreedom, expectedAngularFreedom};
-    nc::SerializePhysicsBody(stream, expected, serializeCtx, nullptr);
-    const auto actual = nc::DeserializePhysicsBody(stream, deserializeCtx, nullptr);
+    nc::SerializePhysicsBody(stream, expected, serializeCtx, &g_registry);
+    const auto actual = nc::DeserializePhysicsBody(stream, deserializeCtx, &g_registry);
     const auto& actualProperties = actual.GetProperties();
     EXPECT_EQ(expectedProperties.mass, actualProperties.mass);
     EXPECT_EQ(expectedProperties.drag, actualProperties.drag);
     EXPECT_EQ(expectedProperties.angularDrag, actualProperties.angularDrag);
-    EXPECT_EQ(expectedProperties.restitution, actualProperties.restitution);
-    EXPECT_EQ(expectedProperties.friction, actualProperties.friction);
     EXPECT_EQ(expectedProperties.useGravity, actualProperties.useGravity);
     EXPECT_EQ(expectedProperties.isKinematic, actualProperties.isKinematic);
-    EXPECT_EQ(expectedLinearFreedom, actual.GetLinearFreedom());
-    EXPECT_EQ(expectedAngularFreedom, actual.GetAngularFreedom());
+}
+
+TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::PhysicsMaterial{0.7f, 0.1234f};
+    nc::SerializePhysicsMaterial(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializePhysicsMaterial(stream, g_deserializationContext, nullptr);
+    EXPECT_FLOAT_EQ(expected.friction, actual.friction);
+    EXPECT_FLOAT_EQ(expected.restitution, actual.restitution);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_positionClamp_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::PositionClamp{nc::Vector3{1.0f, 42.0f, 0.0f}, 0.5f, 5.0f};
+    nc::SerializePositionClamp(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializePositionClamp(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3(1.0f, 42.0f, 0.0f), actual.targetPosition);
+    EXPECT_FLOAT_EQ(0.5f, actual.dampingRatio);
+    EXPECT_FLOAT_EQ(5.0f, actual.dampingFrequency);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_velocityRestriction_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::VelocityRestriction{nc::Vector3::Front(), nc::Vector3::Up(), true};
+    nc::SerializeVelocityRestriction(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeVelocityRestriction(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3::Front(), actual.linearFreedom);
+    EXPECT_EQ(nc::Vector3::Up(), actual.angularFreedom);
+    EXPECT_TRUE(actual.worldSpace);
 }

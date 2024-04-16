@@ -1,9 +1,11 @@
 #include "ncengine/serialize/SceneSerialization.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/Tag.h"
+#include "ncengine/utility/Log.h"
 #include "EntitySerializationUtility.h"
 
 #include "ncutility/BinarySerialization.h"
+#include "fmt/ranges.h"
 
 #include <iostream>
 #include <ranges>
@@ -33,6 +35,13 @@ void LoadHeader(std::istream& stream)
 
 void SaveAssets(std::ostream& stream, const nc::asset::AssetMap& assets)
 {
+#if NC_LOG_LEVEL >= 2
+    for (const auto& [type, list] : assets)
+    {
+        NC_LOG_TRACE("Saving assets (AssetType {}): {}", std::to_underlying(type), fmt::join(list, ", "));
+    }
+#endif
+
     nc::serialize::Serialize(stream, assets);
 }
 
@@ -40,6 +49,14 @@ void LoadAssets(std::istream& stream, nc::asset::NcAsset& assetModule)
 {
     auto assets = nc::asset::AssetMap{};
     nc::serialize::Deserialize(stream, assets);
+
+#if NC_LOG_LEVEL >= 2
+    for (const auto& [type, list] : assets)
+    {
+        NC_LOG_TRACE("Loading assets (AssetType {}): {}", std::to_underlying(type), fmt::join(list, ", "));
+    }
+#endif
+
     assetModule.LoadAssets(assets);
 }
 
@@ -50,6 +67,7 @@ void SaveEntities(std::ostream& stream,
     const auto entities = nc::BuildFragmentEntityList(ctx.ecs.GetAll<nc::Entity>(), entityFilter, ctx.ecs);
     ctx.entityMap = nc::BuildEntityToFragmentIdMap(entities);
     const auto entityInfos = nc::BuildFragmentEntityInfos(entities, ctx.ecs, ctx.entityMap);
+    NC_LOG_TRACE("Saving {} Entities to SceneFragment", entityInfos.size());
     nc::serialize::Serialize(stream, entityInfos);
 }
 
@@ -57,6 +75,7 @@ void LoadEntities(std::istream& stream, nc::DeserializationContext& ctx)
 {
     auto entities = std::vector<nc::FragmentEntityInfo>{};
     nc::serialize::Deserialize(stream, entities);
+    NC_LOG_TRACE("Loading {} Entities from SceneFragment", entities.size());
     std::ranges::for_each(entities, [&ctx](auto& entityData)
     {
         nc::RemapEntity(entityData.info.parent, ctx.entityMap);
@@ -96,6 +115,7 @@ void SaveComponents(std::ostream& stream,
                     const nc::SerializationContext& ctx)
 {
     const auto poolEntities = FilterEntitiesForPool(ctx.entityMap, pool);
+    NC_LOG_TRACE("Saving components for pool {} (id {}, count {})", pool->GetComponentName(), pool->Id(), poolEntities.size());
     nc::serialize::Serialize(stream, pool->Id());
     nc::serialize::Serialize(stream, poolEntities.size());
     std::ranges::for_each(poolEntities, [&stream, &pool, &ctx](auto entity)
@@ -114,7 +134,7 @@ void LoadComponents(std::istream& stream,
     nc::serialize::Deserialize(stream, poolId);
     nc::serialize::Deserialize(stream, entityIdCount);
     auto pool = FindPoolById(pools, poolId);
-
+    NC_LOG_TRACE("Loading components for pool {} (id {}, count {})", pool->GetComponentName(), poolId, entityIdCount);
     std::ranges::for_each(
         std::views::iota(0ull, entityIdCount),
         [&stream, &pool, &ctx](auto)
@@ -158,6 +178,7 @@ void SaveSceneFragment(std::ostream& stream,
                        const asset::AssetMap& assets,
                        std::function<bool(Entity)> entityFilter)
 {
+    NC_LOG_TRACE("Saving SceneFragment");
     static constexpr auto defaultEntityFilter = [](Entity){ return true; };
     if (!entityFilter)
         entityFilter = defaultEntityFilter;
@@ -173,6 +194,7 @@ void LoadSceneFragment(std::istream& stream,
                        ecs::Ecs ecs,
                        asset::NcAsset& assetModule)
 {
+    NC_LOG_TRACE("Loading SceneFragment");
     auto ctx = DeserializationContext{.entityMap = {}, .ecs = ecs};
     LoadHeader(stream);
     LoadAssets(stream, assetModule);

@@ -1,23 +1,23 @@
 #pragma once
 
 #include "ITechnique.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
-class ShaderDescriptorSets;
+class ShaderBindingManager;
 
 class ToonTechnique : public ITechnique
 {
 public:
-    ToonTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass);
+    ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
     ~ToonTechnique() noexcept;
 
     bool CanBind(const PerFrameRenderState& frameData) override;
-    void Bind(vk::CommandBuffer* cmd) override;
+    void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
 
     bool CanRecord(const PerFrameRenderState& frameData) override;
     void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
@@ -25,8 +25,8 @@ public:
     void Clear() noexcept;
 
 private:
-    ShaderDescriptorSets* m_descriptorSets;
+    ShaderBindingManager* m_shaderBindingManager;
     vk::UniquePipeline m_pipeline;
     vk::UniquePipelineLayout m_pipelineLayout;
 };
-}
+} // namespace nc::graphics::vulkan

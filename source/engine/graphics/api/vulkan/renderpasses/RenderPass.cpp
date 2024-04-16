@@ -1,20 +1,22 @@
 #include "RenderPass.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
+#include "optick.h"
+
 namespace
 {
 constexpr std::array<float, 4> ClearColor = {0.1f, 0.1f, 0.1f, 0.1f};
 
-auto CreateClearValues(nc::graphics::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
+auto CreateClearValues(nc::graphics::vulkan::ClearValueFlags_t clearFlags) -> std::vector<vk::ClearValue>
 {
     std::vector<vk::ClearValue> clearValues;
 
-    if (clearFlags & nc::graphics::ClearValueFlags::Color) clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
-    if (clearFlags & nc::graphics::ClearValueFlags::Depth) clearValues.push_back(vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}});
+    if (clearFlags & nc::graphics::vulkan::ClearValueFlags::Color) clearValues.push_back(vk::ClearValue{vk::ClearColorValue{ClearColor}});
+    if (clearFlags & nc::graphics::vulkan::ClearValueFlags::Depth) clearValues.push_back(vk::ClearValue{vk::ClearDepthStencilValue{1.0f, 0}});
     return clearValues;
 }
 
-auto GetAttachmentDescriptions(std::span<const nc::graphics::AttachmentSlot> slots) -> std::vector<vk::AttachmentDescription>
+auto GetAttachmentDescriptions(std::span<const nc::graphics::vulkan::AttachmentSlot> slots) -> std::vector<vk::AttachmentDescription>
 {
     auto descriptions = std::vector<vk::AttachmentDescription>{};
     descriptions.reserve(slots.size());
@@ -24,7 +26,7 @@ auto GetAttachmentDescriptions(std::span<const nc::graphics::AttachmentSlot> slo
     return descriptions;
 }
 
-auto GetSubpassDescriptions(std::span<const nc::graphics::Subpass> subpasses, size_t *dependencyCountOut) -> std::vector<vk::SubpassDescription>
+auto GetSubpassDescriptions(std::span<const nc::graphics::vulkan::Subpass> subpasses, size_t *dependencyCountOut) -> std::vector<vk::SubpassDescription>
 {
     auto depCount = size_t{0ull};
     auto descriptions = std::vector<vk::SubpassDescription>{};
@@ -39,7 +41,7 @@ auto GetSubpassDescriptions(std::span<const nc::graphics::Subpass> subpasses, si
     return descriptions;
 }
 
-auto GetSubpassDependencies(std::span<const nc::graphics::Subpass> subpasses, size_t dependencySizeHint = 0ull)
+auto GetSubpassDependencies(std::span<const nc::graphics::vulkan::Subpass> subpasses, size_t dependencySizeHint = 0ull)
 {
     auto dependencies = std::vector<vk::SubpassDependency>{};
     dependencies.reserve(dependencySizeHint);
@@ -51,8 +53,8 @@ auto GetSubpassDependencies(std::span<const nc::graphics::Subpass> subpasses, si
     return dependencies;
 }
 
-auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachmentSlots,
-                        std::span<const nc::graphics::Subpass> subpasses,
+auto CreateVkRenderPass(std::span<const nc::graphics::vulkan::AttachmentSlot> attachmentSlots,
+                        std::span<const nc::graphics::vulkan::Subpass> subpasses,
                         vk::Device device) -> vk::UniqueRenderPass
 {
     const auto attachmentDescriptions = GetAttachmentDescriptions(attachmentSlots);
@@ -71,10 +73,9 @@ auto CreateVkRenderPass(std::span<const nc::graphics::AttachmentSlot> attachment
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 RenderPass::RenderPass(vk::Device device,
-                       uint8_t priority,
                        std::string uid,
                        std::span<const AttachmentSlot> attachmentSlots,
                        std::span<const Subpass> subpasses,
@@ -82,7 +83,6 @@ RenderPass::RenderPass(vk::Device device,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags)
     : m_device{device},
-      m_priority{priority},
       m_uid{std::move(uid)},
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
@@ -91,9 +91,9 @@ RenderPass::RenderPass(vk::Device device,
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, uint32_t shadowCasterIndex)
+void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex)
 {
-    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, descriptorSets, m_renderPass.get(), shadowCasterIndex));
+    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex));
 }
 
 void RenderPass::UnregisterShadowMappingTechnique()
@@ -116,12 +116,14 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
 {
+    OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
+
     for (const auto &technique : m_shadowMappingTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
-        technique->Bind(cmd);
+        technique->Bind(frameIndex, cmd);
 
         if (!technique->CanRecord(frameData)) continue;
         technique->Record(cmd, frameData);
@@ -130,7 +132,7 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
     for (const auto &technique : m_litTechniques)
     {
         if (!technique->CanBind(frameData)) continue;
-        technique->Bind(cmd);
+        technique->Bind(frameIndex, cmd);
 
         if (!technique->CanRecord(frameData)) continue;
         technique->Record(cmd, frameData);
@@ -140,11 +142,6 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
 void RenderPass::End(vk::CommandBuffer *cmd)
 {
     cmd->endRenderPass();
-}
-
-auto RenderPass::GetPriority() const -> uint32_t
-{
-    return m_priority;
 }
 
 auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
@@ -196,4 +193,4 @@ auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer
     }
     return frameBufferPos->frameBuffer.get();
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

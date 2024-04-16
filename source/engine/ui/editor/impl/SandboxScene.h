@@ -23,7 +23,7 @@ class SandboxScene : public Scene
         {
         }
 
-        void Load(Registry* registry, ModuleProvider modules) override;
+        void Load(ecs::Ecs world, ModuleProvider modules) override;
 
     private:
         Entity m_bucket;

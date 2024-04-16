@@ -1,14 +1,14 @@
 #include "gtest/gtest.h"
 #include "ncengine/audio/AudioSource.h"
 
-namespace nc
+namespace nc::asset
 {
 auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
 {
     static auto view = AudioClipView{}; // tests don't actually view clip data
     return view;
 }
-} // namespace nc
+} // namespace nc::asset
 
 constexpr auto g_entity = nc::Entity{0, 0, 0};
 const auto g_clip1 = std::string{"clip1.nca"};

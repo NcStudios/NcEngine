@@ -105,6 +105,11 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
 
     EXPECT_EQ(expected.projectSettings.projectName, actual.projectSettings.projectName);
     EXPECT_EQ(expected.projectSettings.logFilePath, actual.projectSettings.logFilePath);
+    EXPECT_EQ(expected.projectSettings.logMaxFileSize, actual.projectSettings.logMaxFileSize);
+
+    EXPECT_FLOAT_EQ(expected.engineSettings.timeStep, actual.engineSettings.timeStep);
+    EXPECT_FLOAT_EQ(expected.engineSettings.maxTimeStep, actual.engineSettings.maxTimeStep);
+    EXPECT_EQ(expected.engineSettings.threadCount, actual.engineSettings.threadCount);
 
     EXPECT_EQ(expected.assetSettings.audioClipsPath, actual.assetSettings.audioClipsPath);
     EXPECT_EQ(expected.assetSettings.concaveCollidersPath, actual.assetSettings.concaveCollidersPath);
@@ -126,6 +131,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.memorySettings.maxSkeletalAnimations, actual.memorySettings.maxSkeletalAnimations);
     EXPECT_EQ(expected.memorySettings.maxTextures, actual.memorySettings.maxTextures);
     EXPECT_EQ(expected.memorySettings.maxCubeMaps, actual.memorySettings.maxCubeMaps);
+    EXPECT_EQ(expected.memorySettings.maxParticles, actual.memorySettings.maxParticles);
 
     EXPECT_EQ(expected.graphicsSettings.enabled, actual.graphicsSettings.enabled);
     EXPECT_EQ(expected.graphicsSettings.useNativeResolution, actual.graphicsSettings.useNativeResolution);

@@ -74,16 +74,18 @@ auto AssetCombo(std::string& selection) -> bool
     return nc::ui::Combobox(selection, "##assetcombo", g_assets);
 }
 
-void AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh)
+auto AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::Collider&
 {
     if (mesh == nc::asset::CubeMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
     else if (mesh == nc::asset::SphereMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::SphereProperties{});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::SphereProperties{});
     else if (mesh == nc::asset::CapsuleMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::CapsuleProperties{});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::CapsuleProperties{});
     else if (mesh == nc::sample::RampMesh)
-        world.Emplace<nc::physics::Collider>(entity, nc::physics::HullProperties{.assetPath = nc::sample::RampHullCollider});
+        return world.Emplace<nc::physics::Collider>(entity, nc::physics::HullProperties{.assetPath = nc::sample::RampHullCollider});
+
+    throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
 }
 
 struct mesh_renderer
@@ -296,7 +298,7 @@ Benchmarks::Benchmarks(SampleUI* ui)
 {
 }
 
-void Benchmarks::Load(Registry* registry, ModuleProvider modules)
+void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 {
     {
         const auto& config = config::GetMemorySettings();
@@ -305,7 +307,6 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
-    auto world = registry->GetEcs();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
 
@@ -313,12 +314,12 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 10.0f, -12.0f},
+            .position = Vector3{0.0f, 41.0f, -12.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 0.871f, 0.6f},
         Vector3{1.0f, 0.871f, 0.6f},
-        600.0f
+        2000.0f
     );
 
     const auto cameraHandle = world.Emplace<Entity>({
@@ -412,8 +413,8 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
             spawnBehavior,
             [world](Entity entity) mutable {
                 world.Emplace<graphics::ToonRenderer>(entity, ::physics_body::Mesh, ::RandomToonMaterial());
-                ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
-                world.Emplace<physics::PhysicsBody>(entity, physics::PhysicsProperties{.mass = 5.0f});
+                auto& collider = ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
+                world.Emplace<physics::PhysicsBody>(entity, world.Get<Transform>(entity), collider, physics::PhysicsProperties{.mass = 5.0f});
             }
         );
 
@@ -431,7 +432,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::PointLight>(entity);
+                world.Emplace<graphics::PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 2000.0f);
             }
         );
 
@@ -498,6 +499,7 @@ void Benchmarks::Load(Registry* registry, ModuleProvider modules)
 
 void Benchmarks::Unload()
 {
+    g_currentEntities = 0u;
     m_sampleUI->SetWidgetCallback(nullptr);
 }
 } // namespace nc::sample

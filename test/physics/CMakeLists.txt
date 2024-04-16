@@ -20,7 +20,7 @@ target_compile_options(Manifold_unit_tests
 target_link_libraries(Manifold_unit_tests
     PRIVATE
         NcMath
-        gtest
+        gtest_main
 )
 
 add_test(Manifold_unit_tests Manifold_unit_tests)
@@ -47,7 +47,7 @@ target_compile_options(ClientObjectProperties_unit_tests
 target_link_libraries(ClientObjectProperties_unit_tests
     PRIVATE
         NcMath
-        gtest
+        gtest_main
 )
 
 add_test(ClientObjectProperties_unit_tests ClientObjectProperties_unit_tests)

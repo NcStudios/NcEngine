@@ -4,7 +4,7 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     struct SwapChainSupportDetails
     {
@@ -24,7 +24,7 @@ namespace nc::graphics
             ~Swapchain() noexcept;
 
             // Swap chain
-            void Present(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex, bool& isSwapChainValid);
+            auto PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool;
             void Cleanup() noexcept;
             void Resize(const Device& device, const Vector2& dimensions);
 
@@ -34,7 +34,7 @@ namespace nc::graphics
 
             // Image synchronization
             bool GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex);
-            void WaitForNextImage(PerFrameGpuContext* currentFrame, uint32_t imageIndex);
+            void WaitImageReadyForBuffer(PerFrameGpuContext* currentFrame, uint32_t imageIndex);
 
         private:
             void Create(const Device& device, vk::SurfaceKHR surface, Vector2 dimensions);
@@ -48,4 +48,4 @@ namespace nc::graphics
             std::vector<vk::UniqueImageView> m_swapChainImageViews;
             std::vector<vk::Fence> m_imagesInFlightFences;
     };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

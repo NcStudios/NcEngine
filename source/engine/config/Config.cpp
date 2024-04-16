@@ -21,6 +21,11 @@ constexpr auto ProjectNameKey = "project_name"sv;
 constexpr auto LogFilePathKey = "log_file_path"sv;
 constexpr auto LogMaxFileSizeKey = "log_max_file_size"sv;
 
+// engine
+constexpr auto TimeStepKey = "time_step"sv;
+constexpr auto MaxTimeStepKey = "max_time_step"sv;
+constexpr auto ThreadCountKey = "thread_count"sv;
+
 // asset
 constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
 constexpr auto ConcaveCollidersKey = "concave_colliders_path"sv;
@@ -43,6 +48,7 @@ constexpr auto MaxPointLightsKey = "max_point_lights"sv;
 constexpr auto MaxSkeletalAnimationsKey = "max_skeletal_animations"sv;
 constexpr auto MaxTexturesKey = "max_textures"sv;
 constexpr auto MaxCubeMapsKey = "max_cubemaps"sv;
+constexpr auto MaxParticlesKey = "max_particles"sv;
 
 // physics
 constexpr auto PhysicsEnabledKey = "physics_enabled"sv;
@@ -168,6 +174,12 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.logFilePath, LogFilePathKey, kvPairs);
         ParseValueIfExists(out.logMaxFileSize, LogMaxFileSizeKey, kvPairs);
     }
+    else if constexpr (std::same_as<Struct_t, nc::config::EngineSettings>)
+    {
+        ParseValueIfExists(out.timeStep, TimeStepKey, kvPairs);
+        ParseValueIfExists(out.maxTimeStep, MaxTimeStepKey, kvPairs);
+        ParseValueIfExists(out.threadCount, ThreadCountKey, kvPairs);
+    }
     else if constexpr (std::same_as<Struct_t, nc::config::AssetSettings>)
     {
         ParseValueIfExists(out.audioClipsPath, AudioClipsPathKey, kvPairs);
@@ -192,6 +204,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.maxSkeletalAnimations, MaxSkeletalAnimationsKey, kvPairs);
         ParseValueIfExists(out.maxTextures, MaxTexturesKey, kvPairs);
         ParseValueIfExists(out.maxCubeMaps, MaxCubeMapsKey, kvPairs);
+        ParseValueIfExists(out.maxParticles, MaxParticlesKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::GraphicsSettings>)
     {
@@ -236,6 +249,11 @@ const ProjectSettings& GetProjectSettings()
     return g_config.projectSettings;
 }
 
+const EngineSettings& GetEngineSettings()
+{
+    return g_config.engineSettings;
+}
+
 const AssetSettings& GetAssetSettings()
 {
     return g_config.assetSettings;
@@ -278,6 +296,7 @@ auto Read(std::istream& stream) -> Config
     return Config
     {
         ::BuildFromConfigMap<ProjectSettings>(kvPairs),
+        ::BuildFromConfigMap<EngineSettings>(kvPairs),
         ::BuildFromConfigMap<AssetSettings>(kvPairs),
         ::BuildFromConfigMap<MemorySettings>(kvPairs),
         ::BuildFromConfigMap<GraphicsSettings>(kvPairs),
@@ -304,6 +323,11 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, LogFilePathKey, config.projectSettings.logFilePath);
     ::WriteKVPair(stream, LogMaxFileSizeKey, config.projectSettings.logMaxFileSize);
 
+    if (writeSections) stream << "[engine_settings]\n";
+    ::WriteKVPair(stream, TimeStepKey, config.engineSettings.timeStep);
+    ::WriteKVPair(stream, MaxTimeStepKey, config.engineSettings.maxTimeStep);
+    ::WriteKVPair(stream, ThreadCountKey, config.engineSettings.threadCount);
+
     if (writeSections) stream << "[asset_settings]\n";
     ::WriteKVPair(stream, AudioClipsPathKey, config.assetSettings.audioClipsPath);
     ::WriteKVPair(stream, ConcaveCollidersKey, config.assetSettings.concaveCollidersPath);
@@ -325,6 +349,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, MaxSkeletalAnimationsKey, config.memorySettings.maxSkeletalAnimations);
     ::WriteKVPair(stream, MaxTexturesKey, config.memorySettings.maxTextures);
     ::WriteKVPair(stream, MaxCubeMapsKey, config.memorySettings.maxCubeMaps);
+    ::WriteKVPair(stream, MaxParticlesKey, config.memorySettings.maxParticles);
 
     if (writeSections) stream << "[physics_settings]\n";
     ::WriteKVPair(stream, PhysicsEnabledKey, config.physicsSettings.enabled);
@@ -354,6 +379,8 @@ bool Validate(const Config& config)
     return (config.projectSettings.projectName != "") &&
            (config.projectSettings.logFilePath != "") &&
            (config.projectSettings.logMaxFileSize > 0) &&
+           (config.engineSettings.timeStep >= 0.0f) &&
+           (config.engineSettings.maxTimeStep > 0.0f) &&
            (config.assetSettings.audioClipsPath != "") &&
            (config.assetSettings.concaveCollidersPath != "") &&
            (config.assetSettings.hullCollidersPath != "") &&

@@ -5,9 +5,9 @@
 #include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     struct ShadowMappingPushConstants
     {
@@ -18,20 +18,20 @@ namespace nc::graphics
     class ShadowMappingTechnique : public ITechnique
     {
         public:
-            ShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex);
+            ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex);
             ~ShadowMappingTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
-            void Bind(vk::CommandBuffer* cmd) override;
+            void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
             
             bool CanRecord(const PerFrameRenderState& frameData) override;
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
         private:
-            ShaderDescriptorSets* m_descriptorSets;
+            ShaderBindingManager* m_shaderBindingManager;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
             bool m_enabled;
             uint32_t m_shadowCasterIndex;
     };
-}
+} // namespace nc::graphics::vulkan

@@ -16,6 +16,7 @@
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -56,13 +57,12 @@ SmokeTest::SmokeTest(std::function<void()> quitEngineCallback)
 {
 }
 
-void SmokeTest::Load(Registry* registry, ModuleProvider modules)
+void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     // Set up for a course integration test. We add a few components and set module state so that each system runs
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
-    auto world = registry->GetEcs();
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),
@@ -90,13 +90,13 @@ void SmokeTest::Load(Registry* registry, ModuleProvider modules)
 
     if (isSecondPass)
     {
-        UnloadAllAudioClipAssets();
-        UnloadAllConcaveColliderAssets();
-        UnloadAllConvexHullAssets();
-        UnloadAllCubeMapAssets();
-        UnloadAllMeshAssets();
-        UnloadAllTextureAssets();
-        UnloadAllSkeletalAnimationAssets();
+        asset::UnloadAllAudioClipAssets();
+        asset::UnloadAllConcaveColliderAssets();
+        asset::UnloadAllConvexHullAssets();
+        asset::UnloadAllCubeMapAssets();
+        asset::UnloadAllMeshAssets();
+        asset::UnloadAllTextureAssets();
+        asset::UnloadAllSkeletalAnimationAssets();
         ::LoadScene(world, *modules.Get<asset::NcAsset>());
     }
 
@@ -132,8 +132,10 @@ void SmokeTest::Load(Registry* registry, ModuleProvider modules)
         .kinematic = {}
     });
 
-    world.Emplace<physics::Collider>(object, physics::BoxProperties{});
-    world.Emplace<physics::PhysicsBody>(object);
+    auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
+    auto& objectTransform = world.Get<Transform>(object);
+    world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
+    world.Emplace<physics::PhysicsMaterial>(object);
 
     world.Emplace<Entity>({.parent = object});
 }

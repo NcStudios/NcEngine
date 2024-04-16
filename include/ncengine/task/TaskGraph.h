@@ -1,3 +1,7 @@
+/**
+ * @file TaskGraph.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "ExceptionContext.h"
@@ -5,33 +9,10 @@
 #include "taskflow/taskflow.hpp"
 #include "ncutility/NcError.h"
 
-#include <array>
 #include <vector>
 
 namespace nc::task
 {
-/** @brief The number of execution phases in the primary task graph. */
-constexpr size_t ExecutionPhaseCount = 7ull;
-
-/**
- * @brief Identifies an execution phase in the engine's primary task graph.
- *
- * Execution of a frame is broken up into phases. Tasks and task graphs are
- * scheduled to run during particular phases. Generally, phases execute
- * sequentially, with the exception of Free, which runs parallel to other
- * update phases.
- */
-enum class ExecutionPhase : uint8_t
-{
-    Begin,         // First phase to run
-    Free,          // Runs parallel to Logic and Physics
-    Logic,         // First update phase
-    Physics,       // Second update phase - depends on Logic
-    PreRenderSync, // Point at which Registry changes are committed - depends on Free and Physics
-    Render,        // Rendering phase - depends on PreRenderSync
-    PostFrameSync  // Last phase to run
-};
-
 /** @brief Context object holding a TaskGraph's state. */
 struct TaskGraphContext : StableAddress
 {
@@ -40,40 +21,62 @@ struct TaskGraphContext : StableAddress
     std::vector<std::unique_ptr<tf::Taskflow>> storage;
 };
 
+/** @brief Task state for an item scheduled on a TaskGraph. */
+struct Task
+{
+    tf::Task task;
+    size_t id;
+    std::vector<size_t> predecessors;
+    std::vector<size_t> successors;
+};
+
 /** @brief Task graph interface for building a TaskGraphContext with Module tasks. */
+template<class Phase>
 class TaskGraph
 {
     public:
         /**
          * @brief Schedule a single task to run during a phase.
          * @tparam F A callable of the form void(*)().
-         * @param phase The target phase.
+         * @param id A unique id for the task.
          * @param name A user-friendly name for the task.
          * @param func The callable to schedule.
+         * @param predecessors An optional list of task ids to be scheduled before the task.
+         * @param successors An optional list of task ids to be scheduled after the task.
          * @return A handle to a scheduled task.
          * @note If func doesn't satisfy std::is_nothrow_invocable, it will be
          *       wrapped with a call to task::Guard().
          */
         template<std::invocable<> F>
-        auto Add(ExecutionPhase phase, std::string_view name, F&& func) -> tf::Task
+        auto Add(size_t id,
+                 std::string_view name,
+                 F&& func,
+                 std::vector<size_t> predecessors = {},
+                 std::vector<size_t> successors = {}) -> tf::Task
         {
-            return Schedule(phase, Emplace(name, std::forward<F>(func)));
+            return Schedule(id, Emplace(name, std::forward<F>(func)), std::move(predecessors), std::move(successors));
         }
 
         /**
          * @brief Schedule a tf::Taskflow to run during a phase.
-         * @param phase The target phase.
+         * @param id A unique id for the task.
          * @param name A user-friendly name for the task graph.
          * @param graph The graph to be composed.
+         * @param predecessors An optional list of task ids to be scheduled before the task.
+         * @param successors An optional list of task ids to be scheduled after the task.
          * @return A handle to a scheduled task composed from the Taskflow.
          * @note Ensure exceptions cannot leak from the graph. Tasks may be
          *       wrapped with task::Guard() to delay throwing until execution
          *       has finished.
          */
-        auto Add(ExecutionPhase phase, std::string_view name, std::unique_ptr<tf::Taskflow> graph) -> tf::Task
+        auto Add(size_t id,
+                 std::string_view name,
+                 std::unique_ptr<tf::Taskflow> graph,
+                 std::vector<size_t> predecessors = {},
+                 std::vector<size_t> successors = {}) -> tf::Task
         {
             NC_ASSERT(graph != nullptr, "Task graph should not be null.");
-            return Schedule(phase, Emplace(name, std::move(graph)));
+            return Schedule(id, Emplace(name, std::move(graph)), std::move(predecessors), std::move(successors));
         }
 
         /** @brief Take ownership of a tf::Tasflow without scheduling anything. Useful for
@@ -91,7 +94,7 @@ class TaskGraph
 
     protected:
         std::unique_ptr<TaskGraphContext> m_ctx;
-        std::array<std::vector<tf::Task>, ExecutionPhaseCount> m_taskBuckets;
+        std::vector<Task> m_tasks;
 
         TaskGraph()
             : m_ctx{std::make_unique<TaskGraphContext>()}
@@ -100,9 +103,9 @@ class TaskGraph
 
         ~TaskGraph() noexcept = default;
 
-        auto Schedule(ExecutionPhase phase, tf::Task handle) -> tf::Task
+        auto Schedule(size_t id, tf::Task handle, std::vector<size_t> predecessors, std::vector<size_t> successors) -> tf::Task
         {
-            return m_taskBuckets.at(static_cast<size_t>(phase)).emplace_back(handle);
+            return m_tasks.emplace_back(handle, id, std::move(predecessors), std::move(successors)).task;
         }
 
         template<std::invocable<> F>
@@ -118,4 +121,16 @@ class TaskGraph
             return handle;
         }
 };
+
+/** @brief Tag type to identify the update graph. */
+struct UpdatePhase;
+
+/** @brief Tag type to identify the render graph. */
+struct RenderPhase;
+
+/** @brief Alias for the TaskGraph handling update tasks. */
+using UpdateTasks = TaskGraph<UpdatePhase>;
+
+/** @brief Alias for the TaskGraph handling render tasks. */
+using RenderTasks = TaskGraph<RenderPhase>;
 } // namespace nc::task

@@ -1,19 +1,37 @@
 #pragma once
 
-#include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/ToonRenderer.h"
-#include "ncengine/graphics/WireframeRenderer.h"
-#include "ncengine/physics/Collider.h"
+#include "ncengine/ecs/EcsFwd.h"
+#include "ncengine/asset/AssetViews.h"
+
+#include "DirectXMath.h"
 
 #include <vector>
 
-namespace nc::graphics
+namespace nc
 {
+class Transform;
+
+namespace physics
+{
+class Collider;
+} // namespace physics
+
+namespace graphics
+{
+class MeshRenderer;
+class ToonRenderer;
+struct WireframeRenderer;
+
+struct WireframeRenderState
+{
+    DirectX::XMMATRIX matrix;
+    asset::MeshView mesh;
+    Vector4 color;
+};
+
 struct WidgetState
 {
-    std::vector<std::pair<DirectX::XMMATRIX, MeshView>> wireframeData;
+    std::vector<WireframeRenderState> wireframeData;
 };
 
 class WidgetSystem
@@ -25,4 +43,5 @@ class WidgetSystem
                                       WireframeRenderer,
                                       physics::Collider> worldView) -> WidgetState;
 };
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

@@ -1,14 +1,12 @@
 #pragma once
 
+#include "graphics/GraphicsConstants.h"
 #include "PerFrameGpuContext.h"
 
 #include <vector>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-/** How many frames can be rendered concurrently. */
-constexpr uint32_t MaxFramesInFlight = 2u;
-
 class Device;
 
 class FrameManager
@@ -29,8 +27,10 @@ class FrameManager
             return &(m_perFrameGpuContext[m_currentFrameIndex]);
         }
 
+        auto CommandBuffers() noexcept -> std::array<vk::CommandBuffer*, MaxFramesInFlight>;
+
     private:
         std::vector<PerFrameGpuContext> m_perFrameGpuContext;
         uint32_t m_currentFrameIndex; // Used to select which PerFrameGpuContext to use. Each frame in MaxFramesInFlight requires its own PerFrameGpuContext.
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

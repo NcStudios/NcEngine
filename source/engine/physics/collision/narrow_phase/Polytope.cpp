@@ -2,7 +2,6 @@
 #include "ncutility/NcError.h"
 
 #include <algorithm>
-
 namespace
 {
 const auto InitialFaces = std::vector<size_t>{0u,1u,2u,  0u,3u,1u,  0u,2u,3u,  1u,3u,2u};
@@ -143,6 +142,14 @@ Vector3 BarycentricProjection(const Vector3& point, const Vector3& a, const Vect
     float d20 = Dot(v2, v0);
     float d21 = Dot(v2, v1);
     float denom = d00 * d11 - d01 * d01;
+
+    // Curved shapes can result in small triangles, making projection results insignificant. Just use equal vertex weights.
+    // if (denom == 0.0f)
+    if (FloatEqual(denom, 0.0f))
+    {
+        return Vector3::Splat(1.0f / 3.0f);
+    }
+
     float v = (d11 * d20 - d01 * d21) / denom;
     float w = (d00 * d21 - d01 * d20) / denom;
     float u = 1.0f - v - w;
@@ -161,13 +168,6 @@ bool Polytope::GetContacts(size_t minFace, Contact* contact) const
     const auto& cso2 = m_vertices.at(i2);
     const auto& cso3 = m_vertices.at(i3);
     auto [u, v, w] = BarycentricProjection(normal * distanceFromOrigin, cso1, cso2, cso3);
-
-    /** @todo Still leaving this check. Checking for duplicate vertices in Gjk
-     *  before moving to Epa hopefully fixed this. */
-    if(std::isnan(u) || std::isnan(v) || std::isnan(w))
-    {
-        throw NcError("NaN in Barycentric Projection");
-    }
 
     const auto& [worldA1, worldB1] = m_worldSupports.at(i1);
     const auto& [worldA2, worldB2] = m_worldSupports.at(i2);

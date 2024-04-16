@@ -41,11 +41,11 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 0, binding = 2) uniform sampler2D textures[];
-layout (set = 0, binding = 4) uniform samplerCube cubeMaps[];
+layout (set = 1, binding = 2) uniform sampler2D textures[];
+layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
-    vec3 cameraWorldPosition;
+    vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
 
@@ -56,19 +56,52 @@ layout (location = 3) in flat int inObjectInstance;
 
 layout (location = 0) out vec4 outFragColor;
 
-vec3 MaterialColor(uint textureIndex, uint scale)
+vec4 MaterialColor(uint textureIndex, uint scale)
 {
-    return vec3(texture(textures[textureIndex], inUV * scale));
+    return vec4(texture(textures[textureIndex], inUV * scale));
 }
 
-vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
+vec4 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 {
-    return vec3(texture(cubeMaps[cubeMapIndex], angleVector));
+    return vec4(texture(cubeMaps[cubeMapIndex], angleVector));
+}
+
+const float Epsilon = 1e-10;
+
+vec3 RGBtoHSV(in vec3 RGB)
+{
+    vec4  P   = (RGB.g < RGB.b) ? vec4(RGB.bg, -1.0, 2.0/3.0) : vec4(RGB.gb, 0.0, -1.0/3.0);
+    vec4  Q   = (RGB.r < P.x) ? vec4(P.xyw, RGB.r) : vec4(RGB.r, P.yzx);
+    float C   = Q.x - min(Q.w, Q.y);
+    float H   = abs((Q.w - Q.y) / (6.0 * C + Epsilon) + Q.z);
+    vec3  HCV = vec3(H, C, Q.x);
+    float S   = HCV.y / (HCV.z + Epsilon);
+    return vec3(HCV.x, S, HCV.z);
+}
+
+vec3 HSVtoRGB(in vec3 HSV)
+{
+    float H   = HSV.x;
+    float R   = abs(H * 6.0 - 3.0) - 1.0;
+    float G   = 2.0 - abs(H * 6.0 - 2.0);
+    float B   = 2.0 - abs(H * 6.0 - 4.0);
+    vec3  RGB = clamp( vec3(R,G,B), 0.0, 1.0 );
+    return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
 }
 
 void main() 
 {
-    vec3 result = vec3(0.0);
+    vec4 result = vec4(0.0);
+    float alpha = 1.0f;
+
+    // Material data
+    vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
+    alpha = baseColor.a;
+    float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
+    if (hatchingTexture < 0.6)
+    {
+        hatchingTexture = 0.0f;
+    }
 
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
@@ -78,19 +111,19 @@ void main()
         PointLight light = pointLights.lights[i];
         vec3 lightDir = normalize(light.lightPos - inFragPosition);
         float lightIntensity = dot(lightDir, normalize(inNormal));
-        vec3 lightColor = light.diffuseColor;
-        vec3 lightAmbient = light.ambientColor;
+        float distanceToLight = length(light.lightPos - inFragPosition);
+        float lightRadius = light.specularIntensity;
+        float lightAttenuated = max(0.0, 1.0 - distanceToLight / lightRadius) * dot(lightDir, normalize(inNormal));
 
-        // Material data
-        vec3 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
-        float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
+        vec4 lightColor = vec4(light.diffuseColor, 1.0);
+        vec4 lightAmbient = vec4(light.ambientColor, 1.0);
 
         // Cel shading levels
-        float highlightLevel = 0.85f;
-        float hatchingLevel = 0.4f;
+        float highlightLevel = 0.83f;
+        float hatchingLevel = 0.5f;
         float darkestLevel = 0.0f;
-        float blurAmount = 0.05f;
-        vec3 pixelColor = baseColor;
+        float blurAmount = 0.0025f;
+        vec4 pixelColor = baseColor;
 
         if (lightIntensity <= darkestLevel + blurAmount)
         {
@@ -99,10 +132,6 @@ void main()
         else if (lightIntensity <= hatchingLevel)
         {
             pixelColor *= lightColor * hatchingTexture;
-        }
-        else if (lightIntensity <= hatchingLevel + blurAmount)
-        {
-            pixelColor = pixelColor * lightColor * mix(hatchingTexture, 1.0f, (lightIntensity - hatchingLevel) * 1/(blurAmount));
         }
         else if (lightIntensity <= highlightLevel)
         {
@@ -113,20 +142,15 @@ void main()
             pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
         }
         else pixelColor *= lightColor + lightAmbient;
-        result += max(vec3(0.0f), pixelColor);
-    }
-
-    if (environmentData.skyboxCubemapIndex > -1)
-    {
-        // Environment reflection
-        vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition);
-        vec3 surfaceNormal = normalize(inNormal);
-        vec3 reflected = reflect(I, surfaceNormal);
-        vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
-        result = mix(result, result + environmentReflectionColor, 0.01f);
+        float snappedLight = round(lightAttenuated / 0.3) * 0.3;
+        result += max(vec4(0.0f), pixelColor) * mix(snappedLight, lightAttenuated, 0.8);
     }
 
     // Overlay
-    result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, 1), 0.25f);
-    outFragColor = vec4(result, 1.0f);
+    result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
+
+    vec3 col_hsv = RGBtoHSV(vec3(result.r, result.g, result.b));
+    col_hsv.y *= (0.45 * 2.0);
+    vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
+    outFragColor = vec4(col_rgb.r, col_rgb.g, col_rgb.b, alpha);
 }

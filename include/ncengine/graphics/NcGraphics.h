@@ -17,10 +17,24 @@ class Registry;
 namespace nc::graphics
 {
 /** @brief Graphics module interface.
- *  
- *  Component Access:
- *      Write: Camera, MeshRenderer, ToonRenderer, ParticleEmitter, PointLight
- *      Read: Transform
+ * 
+ * Update Tasks
+ *   DebugRendererNewFrame (only in dev builds)
+ *     Depends On: None
+ *     Component Access: WireframeRenderer
+ *   ParticleEmitterUpdate
+ *     Depends On: None
+ *     Component Access: None
+ *  ParticleEmitterSync
+ *     Depends On: CommitStagedChanges
+ *     Component Access: ParticleEmitter
+ * 
+ * Render Tasks
+ *   Render
+ *     Depends On: None
+ *     Component Access:
+ *       Write: Camera, SkeletalAnimator, WireframeRenderer
+ *       Read: MeshRenderer, ToonRenderer, PointLight, Transform
 */
 struct NcGraphics : public Module
 {

@@ -18,8 +18,9 @@ auto MakeSelectedEntityWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::E
 
     world.Emplace<nc::graphics::WireframeRenderer>(
         entity,
+        nc::graphics::WireframeSource::Renderer,
         nc::Entity::Null(),
-        nc::graphics::WireframeSource::Renderer
+        nc::Vector4{1.0f, 0.0f, 0.0f, 1.0f}
     );
 
     return entity;
@@ -35,8 +36,9 @@ auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc:
 
     world.Emplace<nc::graphics::WireframeRenderer>(
         entity,
+        nc::graphics::WireframeSource::Collider,
         nc::Entity::Null(),
-        nc::graphics::WireframeSource::Collider
+        nc::Vector4{0.0f, 1.0f, 0.0f, 1.0f}
     );
 
     return entity;

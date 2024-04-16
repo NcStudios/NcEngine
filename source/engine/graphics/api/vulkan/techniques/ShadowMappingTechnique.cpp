@@ -2,10 +2,9 @@
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/GpuOptions.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderResources.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/MeshRenderer.h"
 #include "graphics/PerFrameRenderState.h"
 
@@ -21,10 +20,10 @@ namespace
     constexpr float DEPTH_BIAS_SLOPE = 1.75f;
 }
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderDescriptorSets* descriptorSets, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
-        : m_descriptorSets{descriptorSets},
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
+        : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr},
           m_enabled{false},
@@ -45,7 +44,7 @@ namespace nc::graphics
 
         std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
         {
-            *(m_descriptorSets->GetSetLayout(BindFrequency::per_frame))
+            *(m_shaderBindingManager->GetSetLayout(0))
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
@@ -68,7 +67,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, vk::CullModeFlagBits::eFront, 1.0f, true);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, vk::CullModeFlagBits::eFront, true);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
         auto multisampling = CreateMultisampleCreateInfo(vk::SampleCountFlagBits::e1);
         pipelineCreateInfo.setPMultisampleState(&multisampling);
@@ -99,11 +98,11 @@ namespace nc::graphics
         return m_enabled = useShadows && !frameData.lightingState.viewProjections.empty();
     }
 
-    void ShadowMappingTechnique::Bind(vk::CommandBuffer* cmd)
+    void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     }
 
     bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -142,4 +141,4 @@ namespace nc::graphics
             objectInstance++;
         }
     }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

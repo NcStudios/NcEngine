@@ -30,7 +30,7 @@ class Entity
             static constexpr Entity::flags_type Internal                 = 0b00010000; // Entity was created by the engine/editor
         };
 
-        explicit constexpr Entity() noexcept
+        constexpr Entity() noexcept
             : m_index{NullIndex}, m_layer{0}, m_flags{Flags::None}
         {
         }

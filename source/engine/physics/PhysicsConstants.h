@@ -16,69 +16,24 @@ constexpr bool EnableJointWarmstarting  = true;  // Start joint resolution from 
 constexpr float WarmstartFactor = 0.75f;         // Percentage of previous impulse used to initialize constraints
 
 /** Contact Behavior */
-constexpr size_t EpaMaxIterations = 32u;                     // Number of iterations aftwerwhich to give up trying to find contact points
-constexpr float EpaTolerance = 0.00001f;                     // Error threshold for finding contact points
-constexpr float ContactBreakDistance = -0.01f;               // How aggressively contact points are removed/retained
-constexpr bool PreferSingleTangentContactBreak = false;      // Try to only discard only one contact due to tangential separation (potentially more stable for sliding scenarios)
-constexpr float MandatoryTangentContactBreakDistance = 0.1f; // Always discard contacts due to tangential separation beyond this threshold, regardless of PreferSingleTangentContactBreak
-constexpr float PenetrationSlop = 0.005f;                    // How far objects are allowed to penetrate
-constexpr bool EnableBaumgarteStabilization = true;          // Enable velocity-based position correction
-constexpr float BaumgarteFactor = 0.2f;                      // Bias factor for baumgarte stabilization [0, 1]
-constexpr bool EnableDirectPositionCorrection = true;        // Enable translation-based position correction
-constexpr float PositionCorrectionFactor = 0.2f;             // Percentage of mtv to use for direct position correction
-constexpr float MaxLinearPositionCorrection = 0.2f;          // Maximum translation distance for direct position correction
-constexpr bool EnableRestitutionSlop = true;                 // Enable zeroing of restitution below a threshold
-constexpr float RestitutionSlop = 0.001f;                    // Velocity threshold for applying restitution
+constexpr size_t EpaMaxIterations = 32u;             // Number of iterations aftwer which to give up trying to find contact points
+constexpr float EpaTolerance = 0.00001f;             // Error threshold for finding contact points (> 0)
+constexpr float ContactBreakDistance = -0.01f;       // How aggressively contact points are removed/retained (< 0)
+constexpr bool EnableStickyContacts = true;          // Minimize how many contacts points are discarded due to tangential separation (only for dynamic box/hull vs static box/hull)
+constexpr float StickyContactBreakDistance = -0.5f;  // How aggressively sticky contact points are removed/retained (< 0)
+constexpr float StickyContactMaxDistance = -1.0f;    // Always discard contacts sticky contacts beyond this threshold (< StickyContactBreakDistance)
+
+constexpr float PenetrationSlop = 0.005f;               // How far objects are allowed to penetrate (>= 0)
+constexpr bool EnableBaumgarteStabilization = true;     // Enable velocity-based position correction
+constexpr float BaumgarteFactor = 0.3f;                 // Bias factor for baumgarte stabilization [0, 1]
+constexpr bool EnableDirectPositionCorrection = false;  // Enable translation-based position correction
+constexpr float PositionCorrectionFactor = 0.2f;        // Percentage of minimum translation vector to use for direct position correction [0, 1]
+constexpr float MaxLinearPositionCorrection = 0.2f;     // Maximum translation distance for direct position correction (> 0)
+constexpr bool EnableRestitutionSlop = true;            // Enable zeroing of restitution below a threshold
+constexpr float RestitutionSlop = 0.01f;                // Velocity threshold for applying restitution (>= 0)
 
 /** Sleeping Behavior */
 constexpr bool EnableSleeping = false;   // Allow disabling simulation of inactive bodies
 constexpr float SleepEpsilon = 0.01f;    // Velocity threshold for physics sleeping
 constexpr uint8_t FramesUntilSleep = 5u; // How many frames below epsilon until an object sleeps
 } // namespace nc::physics
-
-#define NC_PHYSICS_DEBUGGING 0
-#define NC_PHYSICS_DRAW_CONTACT_POINTS 0
-#define NC_PHYSICS_COLLISION_LOGGING 0
-#define NC_PHYSICS_CONTACT_LOGGING 0
-#define NC_PHYSICS_SOLVER_LOGGING 0
-
-#if NC_PHYSICS_DEBUGGING
-
-#define NC_PHYSICS_ASSERT(expr, msg) NC_ASSERT(expr, msg)
-
-#include <iostream>
-
-inline void PhysicsDebugLog() {}
-
-template<typename... Args>
-void PhysicsDebugLog(const Args&... args)
-{
-    (std::cout << ... << args) << '\n';
-}
-
-#else
-#define NC_PHYSICS_ASSERT(expr, msg)
-
-inline void PhysicsDebugLog() {}
-
-template<typename... Args>
-void PhysicsDebugLog(const Args&...) {}
-#endif
-
-#if NC_PHYSICS_COLLISION_LOGGING
-#define NC_LOG_COLLISION(...) PhysicsDebugLog(__VA_ARGS__);
-#else
-#define NC_LOG_COLLISION(...)
-#endif
-
-#if NC_PHYSICS_CONTACT_LOGGING
-#define NC_LOG_CONTACTS(...) PhysicsDebugLog(__VA_ARGS__);
-#else
-#define NC_LOG_CONTACTS(...)
-#endif
-
-#if NC_PHYSICS_SOLVER_LOGGING
-#define NC_LOG_SOLVER(...) PhysicsDebugLog(__VA_ARGS__);
-#else
-#define NC_LOG_SOLVER(...)
-#endif

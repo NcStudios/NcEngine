@@ -63,31 +63,17 @@ void NarrowPhase::FindPhysicsPairs(std::span<const BroadPair<ProxyType>> physics
     results.contacts.reserve(broadEventCount);
     results.events.reserve(broadEventCount);
     CollisionState state;
-    //auto colliders = registry->ViewAll<Collider>();
 
     for(auto& [i, j, eventType] : physicsPairs)
     {
-        if(Collide(i->Volume(), j->Volume(), i->Matrix(), j->Matrix(), &state))
+        const auto& bva = i->Volume();
+        const auto& bvb = j->Volume();
+        if(Collide(bva, bvb, i->Matrix(), j->Matrix(), &state))
         {
-            auto e1 = i->entity;
-            auto e2 = j->entity;
-
-            // if constexpr(EnableSleeping)
-            // {
-            //     if(!collider1.IsAwake())
-            //     {
-            //         collider1.Wake();
-            //         registry->Get<PhysicsBody>(e1)->Wake();
-            //     }
-
-            //     if(!collider2.IsAwake())
-            //     {
-            //         collider2.Wake();
-            //         registry->Get<PhysicsBody>(e2)->Wake();
-            //     }
-            // }
-
-            results.events.emplace_back(e1, e2, eventType);
+            const auto e1 = i->entity;
+            const auto e2 = j->entity;
+            const auto useStickyContacts = UseStickyContacts(e1, e2, bva, bvb);
+            results.events.emplace_back(e1, e2, eventType, useStickyContacts, NarrowEvent::State::New);
             results.contacts.push_back(state.contact);
         }
     }
@@ -95,8 +81,8 @@ void NarrowPhase::FindPhysicsPairs(std::span<const BroadPair<ProxyType>> physics
     const auto dynamicEventCount = results.contacts.size();
     for(size_t i = 0u; i < dynamicEventCount; ++i)
     {
-        const auto& [a, b, type, unused] = results.events[i];
-        m_manifoldCache.Add(a, b, type, results.contacts[i]);
+        const auto& [a, b, type, sticky, unused] = results.events[i];
+        m_manifoldCache.Add(a, b, type, sticky, results.contacts[i]);
     }
 }
 

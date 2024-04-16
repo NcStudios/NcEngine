@@ -4,19 +4,19 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
     class Device;
-    class ShaderDescriptorSets;
+    class ShaderBindingManager;
 
     class UiTechnique : public ITechnique
     {
         public:
-            UiTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass);
+            UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass);
             ~UiTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
-            void Bind(vk::CommandBuffer* cmd) override;
+            void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
 
             bool CanRecord(const PerFrameRenderState& frameData) override;
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
@@ -25,4 +25,4 @@ namespace nc::graphics
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
     };
-}
+} // namespace nc::graphics::vulkan

@@ -21,11 +21,11 @@ class ComponentRegistry;
  * @brief Module managing ComponentRegistry operations.
  * 
  * Tasks
- *   Update FrameLogic Components
- *     Runs During: ExecutionPhase::Logic
+ *   FrameLogicUpdate
+ *     Depends On: DebugRendererNewFrame (only in dev builds)
  *     Component Access: All
- *   Commit Pending Changes
- *     Runs During: ExecutionPhase::PreRenderSync
+ *   CommitPendingChanges
+ *     Depends On: ParticleEmitterUpdate, AudioSourceUpdate, FrameLogicUpdate
  *     Component Access: All
  */
 class NcEcs : public Module

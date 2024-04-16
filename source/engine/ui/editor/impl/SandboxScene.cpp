@@ -7,9 +7,8 @@
 
 namespace nc::ui::editor
 {
-void SandboxScene::Load(Registry* registry, ModuleProvider modules)
+void SandboxScene::Load(ecs::Ecs world, ModuleProvider modules)
 {
-    auto world = registry->GetEcs();
     world.Get<EditorCamera>(m_editorCamera).Enable();
     if (!m_fragmentPath.empty())
     {

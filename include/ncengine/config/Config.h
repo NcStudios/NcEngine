@@ -17,6 +17,14 @@ struct ProjectSettings
     size_t logMaxFileSize = 1000000ull;
 };
 
+/** @brief Settings for configuring the engine run loop and executor. */
+struct EngineSettings
+{
+    float timeStep = 0.01667f; // Set to 0 for variable time step
+    float maxTimeStep = 0.1f;  // Clamp delta time below this value
+    unsigned threadCount = 8u; // Set to 0 to use std::hardware_concurrency
+};
+
 /**
  * @brief Options for configuring NcAsset.
  * 
@@ -54,6 +62,7 @@ struct MemorySettings
     unsigned maxSkeletalAnimations = 1000;
     unsigned maxTextures = 1000;
     unsigned maxCubeMaps = 10;
+    unsigned maxParticles = 100000;
 };
 
 /** @brief Options for configuring NcGraphics. */
@@ -95,6 +104,7 @@ struct AudioSettings
 struct Config
 {
     ProjectSettings projectSettings;
+    EngineSettings engineSettings;
     AssetSettings assetSettings;
     MemorySettings memorySettings;
     GraphicsSettings graphicsSettings;
@@ -144,6 +154,9 @@ auto Validate(const Config& config) -> bool;
 
 /** @brief Get the ProjectSettings NcEngine was initialized with. */
 auto GetProjectSettings() -> const ProjectSettings&;
+
+/** @brief Get the EngineSettings NcEngine was initialized with. */
+auto GetEngineSettings() -> const EngineSettings&;
 
 /** @brief Get the AssetSettings NcEngine was initialized with. */
 auto GetAssetSettings() -> const AssetSettings&;

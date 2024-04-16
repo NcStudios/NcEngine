@@ -32,16 +32,26 @@ class ClientObjectProperties
     static constexpr uint8_t Kinematic = 0b00000100;
 
     public:
-        ClientObjectProperties(bool isTrigger, bool noBody, bool isKinematic);
-        ClientObjectProperties(bool isTrigger, const PhysicsBody* body);
+        constexpr explicit ClientObjectProperties(bool isTrigger) noexcept
+            : m_flags{NoBody}
+        {
+            if (isTrigger) m_flags |= Trigger;
+        }
+
+        constexpr explicit ClientObjectProperties(bool isTrigger, bool isKinematic) noexcept
+            : m_flags{0}
+        {
+            if (isTrigger) m_flags |= Trigger;
+            if (isKinematic) m_flags |= Kinematic;
+        }
 
         auto EventType(ClientObjectProperties second) const -> CollisionEventType;
-        auto IsTrigger() const noexcept -> bool { return m_index & Trigger; }
-        auto HasPhysicsBody() const noexcept -> bool { return !(m_index & NoBody); }
-        auto IsKinematic() const noexcept -> bool { return m_index & Kinematic; }
+        auto IsTrigger() const noexcept -> bool { return m_flags & Trigger; }
+        auto HasPhysicsBody() const noexcept -> bool { return !(m_flags & NoBody); }
+        auto IsKinematic() const noexcept -> bool { return m_flags & Kinematic; }
 
     private:
-        uint8_t m_index;
+        uint8_t m_flags;
 };
 
 /** A proxy is any object that provides access to physics-related object data. */
@@ -101,6 +111,7 @@ struct NarrowEvent
     Entity first;
     Entity second;
     CollisionEventType eventType;
+    bool stickyContacts = false;
     State state = State::New;
 };
 
@@ -135,8 +146,8 @@ class Manifold
     static constexpr size_t MaxPointCount = 4u;
 
     public:
-        explicit Manifold(Entity a, Entity b, CollisionEventType type, const Contact& contact) noexcept
-            : m_event{a, b, type}, m_contacts{contact} {}
+        explicit Manifold(Entity a, Entity b, CollisionEventType type, bool stickyContacts, const Contact& contact) noexcept
+            : m_event{a, b, type, stickyContacts, NarrowEvent::State::New}, m_contacts{contact} {}
 
         void AddContact(const Contact& contact);
         void UpdateWorldPoints(const Registry* registry);
@@ -153,6 +164,29 @@ class Manifold
 
         auto SortPoints(const Contact& contact) -> size_t;
 };
+
+inline auto UseStickyContacts(Entity entityA, Entity entityB, const BoundingVolume& bva, const BoundingVolume& bvb) -> bool
+{
+    if (!entityA.IsStatic() && !entityB.IsStatic())
+        return false;
+
+    return std::visit([](auto&& a, auto&& b)
+    {
+        using bva_t = std::decay_t<decltype(a)>;
+        using bvb_t = std::decay_t<decltype(b)>;
+
+        if constexpr (std::same_as<bva_t, Box> && std::same_as<bvb_t, Box>)
+            return true;
+        else if constexpr (std::same_as<bva_t, Box> && std::same_as<bvb_t, ConvexHull>)
+            return true;
+        else if constexpr (std::same_as<bva_t, ConvexHull> && std::same_as<bvb_t, Box>)
+            return true;
+        else if constexpr (std::same_as<bva_t, ConvexHull> && std::same_as<bvb_t, ConvexHull>)
+            return true;
+        else
+            return false;
+    }, bva, bvb);
+}
 
 template<class T>
 concept ConcavePhase = requires(T phase)

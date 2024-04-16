@@ -1,10 +1,11 @@
 /**
  * @file AccessPolicy.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
 
 #include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/ecs/EcsFilter.h"
 #include "ncengine/ecs/Hierarchy.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -15,17 +16,6 @@
 
 namespace nc::ecs
 {
-/**
- * @brief Filter option for AccessPolicy providing coarse control over type access.
- * @internal Values are required to be ordered by increasing permissiveness.
-*/
-enum class FilterBase
-{
-    None  = 0, // Include only explicitly listed types and those derived from FreeComponent.
-    Basic = 1, // Include common types needed to enable operations and any explicitly requested types.
-    All   = 2  // Include all types.
-};
-
 /** @brief Specifies a type satisfies the requirements to be managed by the ComponentRegistry. */
 template<class T>
 concept RegistryType = Component<T> || std::same_as<Entity, T>;
@@ -33,24 +23,6 @@ concept RegistryType = Component<T> || std::same_as<Entity, T>;
 /** @brief Specifies a type is invocable with a data pool of type T. */
 template<class F, class T>
 concept PoolInvocable = std::invocable<F, decltype(std::declval<ComponentRegistry*>()->GetPool<T>())>;
-
-/** @cond internal */
-namespace detail
-{
-template<class... Ts>
-struct MatchFilter
-{
-    template<class T>
-    static constexpr auto included = (std::is_same_v<T, Ts> || ...);
-};
-
-struct AllFilter
-{
-    template<class T>
-    static constexpr auto included = true;
-};
-} // namespace detail
-/** @endcond */
 
 /**
  * @brief A proxy for ComponentRegistry providing filtered access to data pools.
@@ -95,12 +67,20 @@ class AccessPolicy
             return AccessPolicy<TargetBase, TargetIncludes...>{*m_registry};
         }
 
-        /** @brief Invoke a callable with the requested data pool. */
-        template<RegistryType T, PoolInvocable<T> F>
+        /** @brief Get the pool for a given type. */
+        template<RegistryType T>
             requires HasAccess<T>
-        auto OnPool(F&& func) const -> decltype(auto)
+        auto GetPool() const -> decltype(auto)
         {
-            return func(m_registry->GetPool<T>());
+            return m_registry->GetPool<T>();
+        }
+
+        /** @brief Get the pool for a given type. */
+        template<RegistryType T>
+            requires HasAccess<T>
+        auto GetPool() -> decltype(auto)
+        {
+            return m_registry->GetPool<T>();
         }
 
         /** @brief Get a range of pointers to all ComponentPoolBase instances. */

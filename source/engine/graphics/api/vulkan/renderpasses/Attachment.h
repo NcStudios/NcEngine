@@ -9,7 +9,7 @@
 #include <vector>
 #include "vulkan/vk_mem_alloc.hpp"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 using ClearValueFlags_t = uint8_t;
 
@@ -62,4 +62,4 @@ struct AttachmentSize
     Vector2 dimensions;
     vk::Extent2D extent;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

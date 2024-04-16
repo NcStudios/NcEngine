@@ -1,22 +1,20 @@
 #include "ParticleTechnique.h"
-#include "assets/AssetService.h"
+#include "asset/AssetService.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderResources.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-    ParticleTechnique::ParticleTechnique(const Device& device, ShaderDescriptorSets* descriptorSets, vk::RenderPass* renderPass)
-        : m_descriptorSets{descriptorSets},
+    ParticleTechnique::ParticleTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+        : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -33,14 +31,15 @@ namespace nc::graphics
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
         };
 
         auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(ParticlePushConstants)); // PushConstants
 
-        std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
+        std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
         {
-            *(m_descriptorSets->GetSetLayout(BindFrequency::per_frame))
+            *(m_shaderBindingManager->GetSetLayout(0)),
+            *(m_shaderBindingManager->GetSetLayout(1))
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
@@ -63,11 +62,12 @@ namespace nc::graphics
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
         auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
+        depthStencil.setDepthWriteEnable(VK_FALSE);
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
         auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
         auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
@@ -93,40 +93,28 @@ namespace nc::graphics
 
     bool ParticleTechnique::CanBind(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates.size() > 0;
+        return frameData.particleState.count > 0;
     }
 
-    void ParticleTechnique::Bind(vk::CommandBuffer* cmd)
+    void ParticleTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
         OPTICK_CATEGORY("ParticleTechnique::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
-        m_descriptorSets->BindSet(BindFrequency::per_frame, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+        m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+        m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
     }
 
     bool ParticleTechnique::CanRecord(const PerFrameRenderState& frameData)
     {
-        return frameData.emitterStates.size() > 0;
+        return frameData.particleState.count > 0;
     }
 
     void ParticleTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("ParticleTechnique::Record", Optick::Category::Rendering);
-        auto pushConstants = ParticlePushConstants{};
-        pushConstants.viewProjection = frameData.cameraState.view * frameData.cameraState.projection;
-        const auto meshAccessor = AssetService<MeshView>::Get()->Acquire(nc::asset::PlaneMesh);
-
-        for (auto& emitterState : frameData.emitterStates)
-        {
-            auto [index, models] = emitterState.GetSoA()->View<particle::EmitterState::ModelMatrixIndex>();
-
-            for (; index.Valid(); ++index)
-            {
-                pushConstants.model = models[index];
-                pushConstants.baseColorIndex = AssetService<TextureView>::Get()->Acquire(emitterState.GetInfo().init.particleTexturePath).index;
-
-                cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
-                cmd->drawIndexed(meshAccessor.indexCount, 1, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            }
-        }
+        const auto& meshAccessor = frameData.particleState.mesh;
+        auto pushConstants = ParticlePushConstants{ .viewProjection = frameData.cameraState.view * frameData.cameraState.projection };
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
+        cmd->drawIndexed(meshAccessor.indexCount, frameData.particleState.count, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
-}
+} // namespace nc::graphics::vulkan

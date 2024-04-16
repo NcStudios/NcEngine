@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/type/EngineId.h"
@@ -15,6 +15,8 @@
 
 namespace nc
 {
+class Transform;
+
 namespace config
 {
 struct AudioSettings;
@@ -39,8 +41,8 @@ struct AudioDevice
  * @brief Audio module interface.
  * 
  * Tasks:
- *   Process Audio
- *     Runs During: ExecutionPhase::Free
+ *   AudioSourceUpdate
+ *     Depends On: None
  *     Component Access:
  *       Write: AudioSource
  *       Read: Transform

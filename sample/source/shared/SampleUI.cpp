@@ -43,7 +43,7 @@ namespace nc::sample
           m_widgetCallback{},
           m_windowDimensions{window::GetDimensions()},
           m_screenExtent{window::GetScreenExtent()},
-          m_font{nc::AcquireFont(UIFont)}
+          m_font{nc::asset::AcquireFont(UIFont)}
     {
         ui::SetDefaultUIStyle();
         window::RegisterOnResizeReceiver(this);

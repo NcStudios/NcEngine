@@ -4,5 +4,3 @@ target_sources(${NC_ENGINE_LIB}
         DeviceStream.cpp
         NcAudioImpl.cpp
 )
-
-add_subdirectory(rtaudio)

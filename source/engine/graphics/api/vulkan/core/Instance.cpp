@@ -80,7 +80,7 @@ auto CreateInstance(std::string_view appName, uint32_t appVersion,
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 Instance::Instance(std::string_view appName, uint32_t appVersion,
                    uint32_t apiVersion, bool enableValidationLayers)
@@ -114,4 +114,4 @@ auto Instance::GetPhysicalDevices() const -> std::vector<vk::PhysicalDevice>
     }
     return devices;
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

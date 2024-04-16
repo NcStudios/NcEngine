@@ -60,11 +60,11 @@ vk::SampleCountFlagBits QueryMaxSamplesCount(vk::PhysicalDeviceProperties gpuPro
 }
 }
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 GpuOptions::GpuOptions(vk::PhysicalDevice physicalDevice)
     :  m_depthFormat{QueryDepthFormatSupport(physicalDevice)},
        m_samplesCount{QueryMaxSamplesCount(physicalDevice.getProperties())}
 {
 }
-}  // namespace nc::graphics
+}  // namespace nc::graphics::vulkan

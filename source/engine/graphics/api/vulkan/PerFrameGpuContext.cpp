@@ -5,7 +5,7 @@
 
 namespace
 {
-auto CreateCommandPool(const nc::graphics::Device& device) -> vk::UniqueCommandPool
+auto CreateCommandPool(const nc::graphics::vulkan::Device& device) -> vk::UniqueCommandPool
 {
     auto poolInfo = vk::CommandPoolCreateInfo
     {
@@ -16,7 +16,7 @@ auto CreateCommandPool(const nc::graphics::Device& device) -> vk::UniqueCommandP
     return device.VkDevice().createCommandPoolUnique(poolInfo);
 }
 
-auto CreateCommandBuffer(const nc::graphics::Device& device, vk::CommandPool commandPool) -> vk::UniqueCommandBuffer
+auto CreateCommandBuffer(const nc::graphics::vulkan::Device& device, vk::CommandPool commandPool) -> vk::UniqueCommandBuffer
 {
     auto allocInfo = vk::CommandBufferAllocateInfo
     {
@@ -30,15 +30,16 @@ auto CreateCommandBuffer(const nc::graphics::Device& device, vk::CommandPool com
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-PerFrameGpuContext::PerFrameGpuContext(const Device& device)
+PerFrameGpuContext::PerFrameGpuContext(const Device& device, uint32_t index)
     : m_device{device.VkDevice()},
       m_imageAvailableSemaphore{m_device.createSemaphoreUnique(vk::SemaphoreCreateInfo{})},
       m_renderFinishedSemaphore{m_device.createSemaphoreUnique(vk::SemaphoreCreateInfo{})},
       m_inFlightFence{m_device.createFenceUnique(vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled})},
       m_commandPool{::CreateCommandPool(device)},
-      m_commandBuffer{::CreateCommandBuffer(device, m_commandPool.get())}
+      m_commandBuffer{::CreateCommandBuffer(device, m_commandPool.get())},
+      m_index{index}
 {
 }
 
@@ -55,7 +56,7 @@ void PerFrameGpuContext::ResetSync() noexcept
     m_device.resetFences(m_inFlightFence.get());
 }
 
-void PerFrameGpuContext::RenderFrame(vk::Queue graphicsQueue)
+void PerFrameGpuContext::SubmitBufferToQueue(vk::Queue graphicsQueue)
 {
     vk::Semaphore waitSemaphores[] = {ImageAvailableSemaphore()}; // Which semaphore to wait on before execution begins
     vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput }; // Which stage of the pipeline to wait in
@@ -73,4 +74,4 @@ void PerFrameGpuContext::RenderFrame(vk::Queue graphicsQueue)
     m_device.resetFences(Fence());
     graphicsQueue.submit(submitInfo, Fence());
 }
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -10,7 +10,9 @@
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 #include <array>
@@ -132,8 +134,6 @@ constexpr auto getMass = [](T& obj)
 constexpr auto massProp        = nc::ui::Property{ getMass,            &T::SetMass,        "mass"        };
 constexpr auto dragProp        = nc::ui::Property{ &T::GetDrag,        &T::SetDrag,        "drag"        };
 constexpr auto angularDragProp = nc::ui::Property{ &T::GetAngularDrag, &T::SetAngularDrag, "angularDrag" };
-constexpr auto frictionProp    = nc::ui::Property{ &T::GetFriction,    &T::SetFriction,    "friction"    };
-constexpr auto restitutionProp = nc::ui::Property{ &T::GetRestitution, &T::SetRestitution, "restitution" };
 constexpr auto useGravityProp  = nc::ui::Property{ &T::UseGravity,     &T::SetUseGravity,  "useGravity"  };
 constexpr auto isKinematicProp = nc::ui::Property{ &T::IsKinematic,    &T::SetIsKinematic, "isKinematic" };
 } // namespace physics_body_ext
@@ -416,16 +416,32 @@ void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
     constexpr auto max = 1000.0f;
 
     ImGui::Text("Status: %s", physicsBody.IsAwake() ? "Awake" : "Asleep");
-    if (!physicsBody.ParentEntity().IsStatic())
-    {
-        ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
-        ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
-        ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
-        ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, max);
-        ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, max);
-    }
+    ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
+    ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
+    ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
+    ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
+    ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
+}
 
-    ui::PropertyWidget(physics_body_ext::frictionProp,    physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
-    ui::PropertyWidget(physics_body_ext::restitutionProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial)
+{
+    ui::DragFloat(physicsMaterial.friction, "friction", 0.01f, 0.0f, 1.0f);
+    ui::DragFloat(physicsMaterial.restitution, "restitution", 0.01f, 0.0f, 1.0f);
+}
+
+void PositionClampUIWidget(physics::PositionClamp& positionClamp)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "PositionClamp");
+    ui::InputVector3(positionClamp.targetPosition, "targetPosition", 0.1f, -1000.0f, 1000.0f);
+    ui::DragFloat(positionClamp.dampingRatio, "dampingRatio", 0.01f, 0.01f, 10.0f);
+    ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
+}
+
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "VelocityRestriction");
+    ui::InputVector3(velocityRestriction.linearFreedom, "linearFreedom", 0.1f, 0.0f, 1.0f);
+    ui::InputVector3(velocityRestriction.angularFreedom, "angularFreedom", 0.1f, 0.0f, 1.0f);
+    ui::Checkbox(velocityRestriction.worldSpace, "worldSpace");
 }
 } // namespace nc::editor

@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 /** This class deals with rendering options that are dependent on properties of the GPU (the physical device). */
 class GpuOptions
@@ -24,4 +24,4 @@ class GpuOptions
         vk::Format m_depthFormat;
         vk::SampleCountFlagBits m_samplesCount;
 };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

@@ -6,7 +6,7 @@
 
 struct GLFWwindow;
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
 class Device;
 class Instance;
@@ -28,4 +28,4 @@ class Imgui
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
         Connection<> m_buildFonts;
     };
-} // namespace nc::graphics
+} // namespace nc::graphics::vulkan

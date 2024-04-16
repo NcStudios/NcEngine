@@ -1,5 +1,9 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        ImmutableBuffer.cpp
+        CubeMapArrayBuffer.cpp
+        MeshArrayBuffer.cpp
+        PPImageArrayBuffer.cpp
+        StorageBuffer.cpp
+        TextureArrayBuffer.cpp
         UniformBuffer.cpp
 )

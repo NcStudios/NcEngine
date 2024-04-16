@@ -19,11 +19,8 @@ auto GraphicsFactory(const config::ProjectSettings& projectSettings,
     constexpr auto apiVersion = VK_API_VERSION_1_3;
     NC_LOG_TRACE("Creating VulkanGraphics");
     return std::make_unique<vulkan::VulkanGraphics>(projectSettings, graphicsSettings, memorySettings,
-                                                    assetModule, shaderResourceBus,
-                                                    apiVersion, registry,
-                                                    window->GetWindow(),
-                                                    window->GetDimensions(),
-                                                    window->GetScreenExtent()
+                                                    assetModule, shaderResourceBus, apiVersion, registry,
+                                                    window->GetWindow(), window->GetDimensions(), window->GetScreenExtent()
     );
 }
 } // namespace nc::graphics

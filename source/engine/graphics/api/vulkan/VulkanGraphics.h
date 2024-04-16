@@ -21,23 +21,22 @@ class NcAsset;
 
 namespace graphics
 {
-class Device;
-class FrameManager;
-class GpuAllocator;
-struct GpuAssetsStorage;
-class Imgui;
-class Instance;
-class Lighting;
 struct PerFrameRenderState;
 struct PointLight;
-class Swapchain;
-class RenderGraph;
-class ShaderDescriptorSets;
-struct ShaderResources;
 struct ShaderResourceBus;
 
 namespace vulkan
 {
+class Device;
+class FrameManager;
+class GpuAllocator;
+class Imgui;
+class Instance;
+class Swapchain;
+class RenderGraph;
+class ShaderBindingManager;
+struct ShaderStorage;
+
 class VulkanGraphics : public IGraphics
 {
     public:
@@ -51,8 +50,11 @@ class VulkanGraphics : public IGraphics
 
         ~VulkanGraphics() noexcept;
 
-        auto FrameBegin() -> bool override;
-        void Draw(const PerFrameRenderState& state) override;
+        void CommitResourceLayout() override;
+        auto BeginFrame() -> bool override;
+        auto PrepareFrame() -> bool override;
+        auto CurrentFrameIndex() -> uint32_t override;
+        void DrawFrame(const PerFrameRenderState& state) override;
         void FrameEnd() override;
         void OnResize(float width, float height, bool isMinimized) override;
         void Clear() noexcept override;
@@ -65,21 +67,19 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<Device> m_device;
         std::unique_ptr<Swapchain> m_swapchain;
         std::unique_ptr<GpuAllocator> m_allocator;
-        std::unique_ptr<ShaderDescriptorSets> m_shaderDescriptorSets;
-        std::unique_ptr<ShaderResources> m_shaderResources;
-        std::unique_ptr<GpuAssetsStorage> m_gpuAssetsStorage;
-        std::unique_ptr<RenderGraph> m_renderGraph;
-        std::unique_ptr<Imgui> m_imgui;
         std::unique_ptr<FrameManager> m_frameManager;
-        std::unique_ptr<Lighting> m_lighting;
+        std::unique_ptr<ShaderBindingManager> m_shaderBindingManager;
+        std::unique_ptr<RenderGraph> m_renderGraph;
+        std::unique_ptr<ShaderStorage> m_shaderStorage;
+        std::unique_ptr<Imgui> m_imgui;
 
         std::mutex m_resizingMutex;
         uint32_t m_imageIndex;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         bool m_isMinimized;
+        bool m_resourceLayoutInitialized;
 };
 } // namespace vulkan
 } // namespace graphics
 } // namespace nc
-

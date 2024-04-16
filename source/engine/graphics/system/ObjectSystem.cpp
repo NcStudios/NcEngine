@@ -3,7 +3,6 @@
 #include "EnvironmentSystem.h"
 #include "SkeletalAnimationSystem.h"
 #include "graphics/Camera.h"
-#include "graphics/shader_resource/ObjectData.h"
 #include "physics/collision/IntersectionQueries.h"
 
 #include "optick.h"
@@ -31,7 +30,8 @@ uint32_t GetSkeletalAnimationIndex(const T* renderer, const nc::graphics::Skelet
 
 namespace nc::graphics
 {
-auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
+auto ObjectSystem::Execute(uint32_t frameIndex,
+                           MultiView<MeshRenderer, Transform> pbrRenderers,
                            MultiView<ToonRenderer, Transform> toonRenderers,
                            const CameraState& cameraState,
                            const EnvironmentState& environmentState,
@@ -39,11 +39,13 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
 {
     OPTICK_CATEGORY("ObjectSystem::Execute", Optick::Category::Rendering);
     const auto viewProjection = cameraState.view * cameraState.projection;
-    auto objectData = std::vector<ObjectData>{};
-    objectData.reserve(pbrRenderers.size_upper_bound() + toonRenderers.size_upper_bound());
     auto frontendState = ObjectState{};
-    frontendState.pbrMeshes.reserve(pbrRenderers.size_upper_bound());
-    frontendState.toonMeshes.reserve(toonRenderers.size_upper_bound());
+    const auto maxPbrRenderers = pbrRenderers.size_upper_bound();
+    const auto maxToonRenderers = toonRenderers.size_upper_bound();
+    frontendState.pbrMeshes.reserve(maxPbrRenderers);
+    frontendState.toonMeshes.reserve(maxToonRenderers);
+    m_objectData.clear();
+    m_objectData.reserve(maxPbrRenderers + maxToonRenderers);
 
     for (const auto& [renderer, transform] : pbrRenderers)
     {
@@ -55,7 +57,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
+        m_objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
         frontendState.pbrMeshes.push_back(renderer->GetMeshView());
     }
 
@@ -71,7 +73,7 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
-        objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
+        m_objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, viewProjection, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
@@ -80,11 +82,11 @@ auto ObjectSystem::Execute(MultiView<MeshRenderer, Transform> pbrRenderers,
     {
         auto skyboxMatrix = DirectX::XMMatrixScaling(200.0f, 200.0f, 200.0f);
         skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraState.position), DirectX::g_XMIdentityR3);
-        objectData.emplace_back(skyboxMatrix, skyboxMatrix * cameraState.view, viewProjection, 0, 0, 0, 0);
-        frontendState.skyboxInstanceIndex = static_cast<uint32_t>(objectData.size() - 1);
+        m_objectData.emplace_back(skyboxMatrix, skyboxMatrix * cameraState.view, viewProjection, 0, 0, 0, 0);
+        frontendState.skyboxInstanceIndex = static_cast<uint32_t>(m_objectData.size() - 1);
     }
 
-    m_backendPort.Emit(objectData);
+    m_objectDataBuffer.Bind(m_objectData, frameIndex);
     return frontendState;
 }
 } // namespace nc::graphics

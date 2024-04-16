@@ -1,18 +1,17 @@
 #include "UiTechnique.h"
 #include "config/Config.h"
-#include "graphics/api/vulkan/buffers/ImmutableBuffer.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/meshes/VertexDescriptions.h"
-#include "graphics/api/vulkan/shaders/ShaderDescriptorSets.h"
-#include "graphics/api/vulkan/shaders/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
 
-namespace nc::graphics
+namespace nc::graphics::vulkan
 {
-    UiTechnique::UiTechnique(const Device& device, ShaderDescriptorSets*, vk::RenderPass* renderPass)
+    UiTechnique::UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
         : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -29,7 +28,7 @@ namespace nc::graphics
         std::array<vk::PipelineShaderStageCreateInfo, 2u> shaderStages
         {
             CreatePipelineShaderStageCreateInfo(ShaderStage::Vertex, vertexShaderModule),
-            CreatePipelineShaderStageCreateInfo(ShaderStage::Pixel, fragmentShaderModule)
+            CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo();
@@ -52,7 +51,7 @@ namespace nc::graphics
         pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
         auto viewportState = CreateViewportCreateInfo();
         pipelineCreateInfo.setPViewportState(&viewportState);
-        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill, 1.0f);
+        auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
         pipelineCreateInfo.setPRasterizationState(&rasterizer);
         auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
@@ -84,7 +83,7 @@ namespace nc::graphics
         return true;
     }
 
-    void UiTechnique::Bind(vk::CommandBuffer* cmd)
+    void UiTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }
@@ -98,4 +97,4 @@ namespace nc::graphics
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }
-}
+} // namespace nc::graphics::vulkan

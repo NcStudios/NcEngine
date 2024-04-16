@@ -35,6 +35,15 @@ extern graphics::ToonMaterial PurpleToonMaterial;
 extern graphics::ToonMaterial TealToonMaterial;
 extern graphics::ToonMaterial YellowToonMaterial;
 
+extern graphics::ToonMaterial DefaultHatchedToonMaterial;
+extern graphics::ToonMaterial RedHatchedToonMaterial;
+extern graphics::ToonMaterial GreenHatchedToonMaterial;
+extern graphics::ToonMaterial BlueHatchedToonMaterial;
+extern graphics::ToonMaterial OrangeHatchedToonMaterial;
+extern graphics::ToonMaterial PurpleHatchedToonMaterial;
+extern graphics::ToonMaterial TealHatchedToonMaterial;
+extern graphics::ToonMaterial YellowHatchedToonMaterial;
+
 // Fonts
-extern FontInfo UIFont;
+extern asset::FontInfo UIFont;
 } // namespace nc::sample

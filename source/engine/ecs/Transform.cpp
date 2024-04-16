@@ -140,6 +140,20 @@ namespace nc
         m_dirty = true;
     }
 
+    void Transform::RotateAround(const Vector3& point, const Vector3& axis, float radians)
+    {
+        using namespace DirectX;
+        const auto rotationPoint = XMLoadVector3(&point);
+        const auto translation = XMVectorSubtract(m_localMatrix.r[3], rotationPoint);
+        const auto rotationMatrix = ToRotMatrix(axis, radians);
+        auto rotatedTranslation = XMVector3TransformCoord(translation, rotationMatrix);
+        rotatedTranslation = XMVectorAdd(rotatedTranslation, rotationPoint);
+        m_localMatrix.r[3] = g_XMIdentityR3;
+        XMMatrixMultiply(m_localMatrix, rotationMatrix);
+        m_localMatrix.r[3] = rotatedTranslation;
+        m_dirty = true;
+    }
+
     void Transform::LookAt(const Vector3& target)
     {
         const auto selfToTarget = target - Position();

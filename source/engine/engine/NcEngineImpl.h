@@ -1,10 +1,12 @@
 #pragma once
 
-#include "NcEngine.h"
-#include "ecs/ComponentRegistry.h"
-#include "math/Random.h"
 #include "task/Executor.h"
+#include "time/StepTimer.h"
 #include "window/WindowImpl.h"
+
+#include "ncengine/NcEngine.h"
+#include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/math/Random.h"
 
 namespace nc
 {
@@ -22,6 +24,7 @@ namespace nc
             void RebuildTaskGraph() override;
 
         private:
+            time::StepTimer m_timer;
             SystemEvents m_events;
             window::WindowImpl m_window;
             std::unique_ptr<ecs::ComponentRegistry> m_registry;
