@@ -49,19 +49,8 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
 install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
         DESTINATION sample
 )
-install(FILES       ${PROJECT_SOURCE_DIR}/sample/vk_layer_settings.txt
-        DESTINATION sample
-)
 if(${NC_PROFILING_ENABLED})
     install(FILES       $<TARGET_FILE:OptickCore>
             DESTINATION sample
     )
 endif()
-
-# install(FILES ${PROJECT_SOURCE_DIR}/vk_swiftshader_icd.json
-#         DESTINATION sample
-# )
-
-install(FILES ${PROJECT_SOURCE_DIR}/vulkan-1.dll
-        DESTINATION sample
-)

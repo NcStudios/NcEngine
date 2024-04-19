@@ -5,6 +5,7 @@
 #include "ncutility/NcError.h"
 
 #include <algorithm>
+#include <iostream>
 
 namespace
 {
@@ -31,8 +32,8 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
 
     auto indexingFeatures = vk::PhysicalDeviceDescriptorIndexingFeaturesEXT{};
     indexingFeatures.setPNext(nullptr);
-    indexingFeatures.setDescriptorBindingPartiallyBound(VK_FALSE);
-    indexingFeatures.setRuntimeDescriptorArray(VK_FALSE);
+    indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
+    indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
 
     auto deviceCreateInfo = vk::DeviceCreateInfo{};
     deviceCreateInfo.setPNext(&indexingFeatures);
@@ -55,6 +56,9 @@ auto Device::Create(const Instance& instance, vk::SurfaceKHR surface,
     const auto [physicalDevice, queueIndices] = detail::SelectPhysicalDevice(
         instance.GetPhysicalDevices(), surface, requiredExtensions
     );
+
+    auto properties = physicalDevice.getProperties();
+    std::cout << "Physical Device: " << properties.deviceName << std::endl;
 
     return std::make_unique<Device>(physicalDevice, queueIndices, requiredExtensions);
 }
