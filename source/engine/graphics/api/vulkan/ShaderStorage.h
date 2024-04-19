@@ -45,11 +45,6 @@ struct MeshArrayBufferStorage
     MeshArrayBuffer buffer;
 };
 
-struct PPImageArrayBufferStorage
-{
-    std::unordered_map<PostProcessImageType, std::unique_ptr<PPImageArrayBuffer>> buffers;
-};
-
 struct ShaderStorage : StableAddress
 {
     ShaderStorage(vk::Device device,
@@ -85,7 +80,7 @@ struct ShaderStorage : StableAddress
     MeshArrayBufferStorage m_staticMabStorage;
     nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
 
-    std::array<PPImageArrayBufferStorage, MaxFramesInFlight> m_perFramePpiaStorage;
+    std::array<sparse_map<PPImageArrayBuffer>, MaxFramesInFlight> m_perFramePpiaStorage;
     nc::Connection<const PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
 
     std::array<sparse_map<StorageBuffer>, MaxFramesInFlight> m_perFrameSsboStorage;

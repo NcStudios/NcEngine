@@ -79,7 +79,7 @@ ShaderStorage::ShaderStorage(vk::Device device,
       m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateCubeMapArrayBuffer)},
       m_staticMabStorage{cmdBuffers},
       m_onMeshArrayBufferUpdate{onMeshArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateMeshArrayBuffer)},
-      m_perFramePpiaStorage{},
+      m_perFramePpiaStorage{sparse_map<PPImageArrayBuffer>{20, 20}, sparse_map<PPImageArrayBuffer>{20, 20}}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
       m_onPPImageArrayBufferUpdate{onPPImageArrayBufferUpdate.Connect(this, &ShaderStorage::UpdatePPImageArrayBuffer)},
       m_perFrameSsboStorage{sparse_map<StorageBuffer>{100, 100}, sparse_map<StorageBuffer>{100, 100}},
       m_staticSsboStorage{100, 100}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
@@ -222,14 +222,14 @@ void ShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
 void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
 {
     auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
+    auto uid = static_cast<uint32_t>(eventData.imageType);
+
     switch (eventData.action)
     {
         case PpiaUpdateAction::Initialize:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Initialize", Optick::Category::Rendering);
-
-            if (!storage.buffers.contains(eventData.imageType))
-                storage.buffers.emplace(eventData.imageType, std::make_unique<PPImageArrayBuffer>(m_device));
+            storage.emplace(uid, PPImageArrayBuffer{m_device});
 
             m_shaderBindingManager->RegisterDescriptor
             (
@@ -242,10 +242,10 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 eventData.currentFrameIndex
             );
 
-            auto& storageBuffer = storage.buffers.at(eventData.imageType);
-            auto& sampler = storageBuffer->sampler.get();
-            auto& views = storageBuffer->views;
-            auto& imageInfos = storageBuffer->imageInfos;
+            auto& storageBuffer = storage.at(uid);
+            auto& sampler = storageBuffer.sampler.get();
+            auto& views = storageBuffer.views;
+            auto& imageInfos = storageBuffer.imageInfos;
 
             views.clear();
             imageInfos.clear();
@@ -271,13 +271,12 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         case PpiaUpdateAction::Update:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Update", Optick::Category::Rendering);
+            auto& storageBuffer = storage.at(uid);
+            auto& sampler = storageBuffer.sampler.get();
+            auto& views = storageBuffer.views;
+            auto& imageInfos = storageBuffer.imageInfos;
             
-            auto& sampler = storage.buffers.at(eventData.imageType)->sampler.get();
-            auto& views = storage.buffers.at(eventData.imageType)->views;
-            auto& imageInfos = storage.buffers.at(eventData.imageType)->imageInfos;
-
-            views.clear();
-            imageInfos.clear();
+            storageBuffer.Clear();
 
             const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
             for (auto view : postProcessViews)
@@ -300,13 +299,10 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         case PpiaUpdateAction::Clear:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Clear", Optick::Category::Rendering);
-
-            for (auto& bufferStorage : m_perFramePpiaStorage)
+            for (auto& storagePerFrame : m_perFramePpiaStorage)
             {
-                if (bufferStorage.buffers.contains(eventData.imageType))
-                {
-                    bufferStorage.buffers.at(eventData.imageType)->Clear();
-                }
+                if (storagePerFrame.contains(uid))
+                    storagePerFrame.at(uid).Clear();
             }
             break;
         }
