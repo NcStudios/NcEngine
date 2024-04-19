@@ -50,24 +50,6 @@ struct PPImageArrayBufferStorage
     std::unordered_map<PostProcessImageType, std::unique_ptr<PPImageArrayBuffer>> buffers;
 };
 
-// struct UniformBufferStorage
-// {
-//     std::vector<uint32_t> uids;
-//     std::vector<std::unique_ptr<UniformBuffer>> buffers;
-// };
-
-struct StorageBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<StorageBuffer>> buffers;
-};
-
-// struct TextureArrayBufferStorage
-// {
-//     std::vector<uint32_t> uids;
-//     std::vector<std::unique_ptr<TextureArrayBuffer>> buffers;
-// };
-
 struct ShaderStorage : StableAddress
 {
     ShaderStorage(vk::Device device,
@@ -77,14 +59,14 @@ struct ShaderStorage : StableAddress
                   std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                   Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                   Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
-                  Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
+                  Signal<const PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
                   Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                   Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
 
     void UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData);
     void UpdateMeshArrayBuffer(const MabUpdateEventData& eventData);
-    void UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData);
+    void UpdatePPImageArrayBuffer(const PpiaUpdateEventData& eventData);
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
@@ -104,20 +86,17 @@ struct ShaderStorage : StableAddress
     nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
 
     std::array<PPImageArrayBufferStorage, MaxFramesInFlight> m_perFramePpiaStorage;
-    nc::Connection<const graphics::PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
+    nc::Connection<const PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
 
-    std::array<StorageBufferStorage, MaxFramesInFlight> m_perFrameSsboStorage;
-    StorageBufferStorage m_staticSsboStorage;
+    std::array<sparse_map<StorageBuffer>, MaxFramesInFlight> m_perFrameSsboStorage;
+    sparse_map<StorageBuffer> m_staticSsboStorage;
     nc::Connection<const SsboUpdateEventData&> m_onStorageBufferUpdate;
 
-    // std::array<UniformBufferStorage, MaxFramesInFlight> m_perFrameUboStorage;
-    // UniformBufferStorage m_staticUboStorage;
-    std::array<sparse_map<std::unique_ptr<UniformBuffer>>, MaxFramesInFlight> m_perFrameUboStorage;
-    sparse_map<std::unique_ptr<UniformBuffer>> m_staticUboStorage;
+    std::array<sparse_map<UniformBuffer>, MaxFramesInFlight> m_perFrameUboStorage;
+    sparse_map<UniformBuffer> m_staticUboStorage;
     nc::Connection<const UboUpdateEventData&> m_onUniformBufferUpdate;
 
-    sparse_map<std::unique_ptr<TextureArrayBuffer>> m_staticTabStorage;
-    // TextureArrayBufferStorage m_staticTabStorage;
+    sparse_map<TextureArrayBuffer> m_staticTabStorage;
     nc::Connection<const TabUpdateEventData&> m_onTextureArrayBufferUpdate;
 };
 } // namespace vulkan
