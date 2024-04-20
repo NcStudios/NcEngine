@@ -32,18 +32,19 @@ class GpuAllocator;
 class RenderGraph;
 class ShaderBindingManager;
 
-struct CubeMapArrayBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<CubeMapArrayBuffer>> buffers;
-};
-
 struct MeshArrayBufferStorage
 {
     MeshArrayBufferStorage(std::array<vk::CommandBuffer*, MaxFramesInFlight> bindTargets_);
     std::array<vk::CommandBuffer*, MaxFramesInFlight> bindTargets;
     MeshArrayBuffer buffer;
 };
+
+/** @todo: Remove unique_ptr upon resolution of #656 */
+using UniqueCabMap = sparse_map<std::unique_ptr<CubeMapArrayBuffer>>;
+using UniquePpiaMap = sparse_map<std::unique_ptr<PPImageArrayBuffer>>;
+using UniqueSsboMap = sparse_map<std::unique_ptr<StorageBuffer>>;
+using UniqueUboMap = sparse_map<std::unique_ptr<UniformBuffer>>;
+using UniqueTabMap = sparse_map<std::unique_ptr<TextureArrayBuffer>>;
 
 struct ShaderStorage : StableAddress
 {
@@ -73,25 +74,25 @@ struct ShaderStorage : StableAddress
     ShaderBindingManager* m_shaderBindingManager;
     RenderGraph* m_renderGraph;
 
-    std::array<CubeMapArrayBufferStorage, MaxFramesInFlight> m_perFrameCabStorage;
-    CubeMapArrayBufferStorage m_staticCabStorage;
+    std::array<UniqueCabMap, MaxFramesInFlight> m_perFrameCabStorage;
+    UniqueCabMap m_staticCabStorage;
     nc::Connection<const CabUpdateEventData&> m_onCubeMapArrayBufferUpdate;
 
     MeshArrayBufferStorage m_staticMabStorage;
     nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
 
-    std::array<sparse_map<PPImageArrayBuffer>, MaxFramesInFlight> m_perFramePpiaStorage;
+    std::array<UniquePpiaMap, MaxFramesInFlight> m_perFramePpiaStorage;
     nc::Connection<const PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
 
-    std::array<sparse_map<StorageBuffer>, MaxFramesInFlight> m_perFrameSsboStorage;
-    sparse_map<StorageBuffer> m_staticSsboStorage;
+    std::array<UniqueSsboMap, MaxFramesInFlight> m_perFrameSsboStorage;
+    UniqueSsboMap m_staticSsboStorage;
     nc::Connection<const SsboUpdateEventData&> m_onStorageBufferUpdate;
 
-    std::array<sparse_map<UniformBuffer>, MaxFramesInFlight> m_perFrameUboStorage;
-    sparse_map<UniformBuffer> m_staticUboStorage;
+    std::array<UniqueUboMap, MaxFramesInFlight> m_perFrameUboStorage;
+    UniqueUboMap m_staticUboStorage;
     nc::Connection<const UboUpdateEventData&> m_onUniformBufferUpdate;
 
-    sparse_map<TextureArrayBuffer> m_staticTabStorage;
+    UniqueTabMap m_staticTabStorage;
     nc::Connection<const TabUpdateEventData&> m_onTextureArrayBufferUpdate;
 };
 } // namespace vulkan
