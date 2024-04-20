@@ -60,7 +60,7 @@ SmokeTest::SmokeTest(std::function<void()> quitEngineCallback)
 
 void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
-    // Set up for a course integration test. We add a few components and set module state so that each system runs
+    // Set up for a coarse integration test. We add a few components and set module state so that each system runs
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
@@ -135,6 +135,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::MeshRenderer>(object);
     world.Emplace<graphics::ToonRenderer>(object);
+    world.Emplace<graphics::SkeletalAnimator>(object, "DefaultCube.nca", "DefaultCubeAnimation.nca");
     world.Emplace<graphics::PointLight>(object);
     world.Emplace<graphics::ParticleEmitter>(object, graphics::ParticleInfo{
         .emission = {
