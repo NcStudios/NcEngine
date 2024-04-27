@@ -27,7 +27,7 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
         { AssetType::CubeMap,           { DefaultSkyboxCubeMap } },
         { AssetType::HullCollider,      { DefaultHullCollider } },
         { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh } },
-        // { AssetType::SkeletalAnimation, { DefaultSkeletalAnimation } },
+        { AssetType::SkeletalAnimation, { DefaultSkeletalAnimation } },
         { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
     };
 }
