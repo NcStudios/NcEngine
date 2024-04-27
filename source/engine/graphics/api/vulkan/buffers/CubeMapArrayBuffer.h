@@ -15,14 +15,13 @@ namespace graphics::vulkan
 class CubeMap
 {
     public:
-        CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data);
-        ~CubeMap() noexcept;
-        CubeMap(CubeMap&&) noexcept;
-        CubeMap& operator=(CubeMap&&) noexcept;
-        CubeMap& operator=(const CubeMap&) = delete;
-        CubeMap(const CubeMap&) = delete;
+        explicit CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data);
 
-        const vk::ImageView& GetImageView() const noexcept;
+        auto GetImageView() const noexcept -> const vk::ImageView&
+        {
+            return m_cubeMapView.get();
+        }
+
         void Clear() noexcept;
 
     private:
@@ -32,12 +31,12 @@ class CubeMap
 
 struct CubeMapArrayBuffer
 {
-    CubeMapArrayBuffer(vk::Device device);
+    explicit CubeMapArrayBuffer(vk::Device device);
 
     vk::UniqueSampler sampler;
     std::vector<CubeMap> cubeMaps;
     std::vector<vk::DescriptorImageInfo> imageInfos;
-    std::vector<std::string_view> uids;
+    std::vector<size_t> uids;
 };
 } // namespace graphics::vulkan
 } // namespace nc

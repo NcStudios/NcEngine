@@ -22,12 +22,13 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
     using namespace nc::asset;
     return AssetMap
     {
-        { AssetType::AudioClip,       { DefaultAudioClip } },
-        { AssetType::ConcaveCollider, { DefaultConcaveCollider } },
-        { AssetType::CubeMap,         { DefaultSkyboxCubeMap } },
-        { AssetType::HullCollider,    { DefaultHullCollider } },
-        { AssetType::Mesh,            { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh } },
-        { AssetType::Texture,         { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
+        { AssetType::AudioClip,         { DefaultAudioClip } },
+        { AssetType::ConcaveCollider,   { DefaultConcaveCollider } },
+        { AssetType::CubeMap,           { DefaultSkyboxCubeMap } },
+        { AssetType::HullCollider,      { DefaultHullCollider } },
+        { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh } },
+        { AssetType::SkeletalAnimation, { DefaultSkeletalAnimation } },
+        { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
     };
 }
 } // anonymous namespace

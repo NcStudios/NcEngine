@@ -10,7 +10,8 @@
 #include "graphics/GraphicsConstants.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "ncengine/type/StableAddress.h"
-#include "utility/Signal.h"
+#include "ncengine/utility/Signal.h"
+#include "ncengine/utility/SparseMap.h"
 
 #include <string>
 #include <memory>
@@ -31,12 +32,6 @@ class GpuAllocator;
 class RenderGraph;
 class ShaderBindingManager;
 
-struct CubeMapArrayBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<CubeMapArrayBuffer>> buffers;
-};
-
 struct MeshArrayBufferStorage
 {
     MeshArrayBufferStorage(std::array<vk::CommandBuffer*, MaxFramesInFlight> bindTargets_);
@@ -44,28 +39,12 @@ struct MeshArrayBufferStorage
     MeshArrayBuffer buffer;
 };
 
-struct PPImageArrayBufferStorage
-{
-    std::unordered_map<PostProcessImageType, std::unique_ptr<PPImageArrayBuffer>> buffers;
-};
-
-struct UniformBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<UniformBuffer>> buffers;
-};
-
-struct StorageBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<StorageBuffer>> buffers;
-};
-
-struct TextureArrayBufferStorage
-{
-    std::vector<uint32_t> uids;
-    std::vector<std::unique_ptr<TextureArrayBuffer>> buffers;
-};
+/** @todo: Remove unique_ptr upon resolution of #656 */
+using UniqueCabMap = sparse_map<std::unique_ptr<CubeMapArrayBuffer>>;
+using UniquePpiaMap = sparse_map<std::unique_ptr<PPImageArrayBuffer>>;
+using UniqueSsboMap = sparse_map<std::unique_ptr<StorageBuffer>>;
+using UniqueUboMap = sparse_map<std::unique_ptr<UniformBuffer>>;
+using UniqueTabMap = sparse_map<std::unique_ptr<TextureArrayBuffer>>;
 
 struct ShaderStorage : StableAddress
 {
@@ -76,42 +55,44 @@ struct ShaderStorage : StableAddress
                   std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                   Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                   Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
-                  Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
+                  Signal<const PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
                   Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                   Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
 
     void UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData);
     void UpdateMeshArrayBuffer(const MabUpdateEventData& eventData);
-    void UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData);
+    void UpdatePPImageArrayBuffer(const PpiaUpdateEventData& eventData);
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
+
+    private:
 
     vk::Device m_device;
     GpuAllocator* m_allocator;
     ShaderBindingManager* m_shaderBindingManager;
     RenderGraph* m_renderGraph;
 
-    std::array<CubeMapArrayBufferStorage, MaxFramesInFlight> m_perFrameCabStorage;
-    CubeMapArrayBufferStorage m_staticCabStorage;
+    std::array<UniqueCabMap, MaxFramesInFlight> m_perFrameCabStorage;
+    UniqueCabMap m_staticCabStorage;
     nc::Connection<const CabUpdateEventData&> m_onCubeMapArrayBufferUpdate;
 
     MeshArrayBufferStorage m_staticMabStorage;
     nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
 
-    std::array<PPImageArrayBufferStorage, MaxFramesInFlight> m_perFramePpiaStorage;
-    nc::Connection<const graphics::PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
+    std::array<UniquePpiaMap, MaxFramesInFlight> m_perFramePpiaStorage;
+    nc::Connection<const PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
 
-    std::array<StorageBufferStorage, MaxFramesInFlight> m_perFrameSsboStorage;
-    StorageBufferStorage m_staticSsboStorage;
+    std::array<UniqueSsboMap, MaxFramesInFlight> m_perFrameSsboStorage;
+    UniqueSsboMap m_staticSsboStorage;
     nc::Connection<const SsboUpdateEventData&> m_onStorageBufferUpdate;
 
-    std::array<UniformBufferStorage, MaxFramesInFlight> m_perFrameUboStorage;
-    UniformBufferStorage m_staticUboStorage;
+    std::array<UniqueUboMap, MaxFramesInFlight> m_perFrameUboStorage;
+    UniqueUboMap m_staticUboStorage;
     nc::Connection<const UboUpdateEventData&> m_onUniformBufferUpdate;
 
-    TextureArrayBufferStorage m_staticTabStorage;
+    UniqueTabMap m_staticTabStorage;
     nc::Connection<const TabUpdateEventData&> m_onTextureArrayBufferUpdate;
 };
 } // namespace vulkan

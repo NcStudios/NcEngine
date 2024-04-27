@@ -27,11 +27,10 @@ bool TextureAssetManager::Load(const std::string& path, bool isExternal, asset_f
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    auto texture = asset::TextureWithId{asset::ImportTexture(fullPath), path, flags};
+    auto texture = asset::TextureWithId{asset::ImportTexture(fullPath), m_table.hash(path), flags};
     m_table.emplace(path);
     m_onUpdate.Emit(asset::TextureUpdateEventData{
         asset::UpdateAction::Load,
-        std::vector<std::string>{path},
         std::span<const asset::TextureWithId>{&texture, 1}
     });
 
@@ -46,9 +45,7 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
     }
 
     auto textures = std::vector<TextureWithId>{};
-
-    auto idsToLoad = std::vector<std::string>{};
-    idsToLoad.reserve(paths.size());
+    textures.reserve(paths.size());
 
     for (const auto& path : paths)
     {
@@ -59,15 +56,13 @@ bool TextureAssetManager::Load(std::span<const std::string> paths, bool isExtern
 
         m_table.emplace(path);
         const auto fullPath = isExternal ? path : m_assetDirectory + path;
-        textures.emplace_back(ImportTexture(fullPath), path, flags);
-        idsToLoad.push_back(path);
+        textures.emplace_back(ImportTexture(fullPath), m_table.hash(path), flags);
     }
 
-    if (!idsToLoad.empty())
+    if (!textures.empty())
     {
         m_onUpdate.Emit(TextureUpdateEventData{
             UpdateAction::Load,
-            std::move(idsToLoad),
             std::span<const TextureWithId>{textures}
         });
     }
@@ -82,7 +77,6 @@ bool TextureAssetManager::Unload(const std::string& path, asset_flags_type)
 
     m_onUpdate.Emit(TextureUpdateEventData{
         UpdateAction::Unload,
-        std::vector<std::string>{path},
         std::span<const TextureWithId>{}
     });
 
@@ -94,10 +88,8 @@ void TextureAssetManager::UnloadAll(asset_flags_type)
     m_table.clear();
     m_onUpdate.Emit(TextureUpdateEventData{
         UpdateAction::UnloadAll,
-        {},
         {}
     });
-    /** No need to send signal to GPU - no need to write an empty buffer to the GPU. **/
 }
 
 auto TextureAssetManager::Acquire(const std::string& path, asset_flags_type) const -> TextureView

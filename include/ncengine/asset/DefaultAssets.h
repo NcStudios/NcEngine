@@ -39,6 +39,9 @@ constexpr auto DefaultMetallic = DefaultRoughness;
 /** @brief Name of the default particle texture asset. */
 constexpr auto DefaultParticle = "DefaultParticle.nca";
 
+/** @brief Name of the default skeletal animation asset; a spinning cube. */
+constexpr auto DefaultSkeletalAnimation = "DefaultCubeAnimation.nca";
+
 /** @brief Name of the default skybox cubemap asset. */
 constexpr auto DefaultSkyboxCubeMap = "DefaultSkyboxCubeMap.nca";
 

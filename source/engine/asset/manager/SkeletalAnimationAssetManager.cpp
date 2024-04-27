@@ -17,6 +17,7 @@ SkeletalAnimationAssetManager::SkeletalAnimationAssetManager(const std::string& 
 
 bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
 {
+    auto previousTableSize = m_table.size();
     if (m_table.size() + 1 >= m_maxSkeletalAnimationCount)
     {
         throw NcError("Cannot exceed max skeletal animations count.");
@@ -31,7 +32,7 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExterna
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
     auto animation = ImportSkeletalAnimation(fullPath);
     m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
-        std::span<const std::string>{m_table.keys()},
+        std::span<const std::string>{m_table.keys().begin() + previousTableSize, m_table.keys().end()},
         std::span<const SkeletalAnimation>{&animation, 1},
         UpdateAction::Load
     });
@@ -40,6 +41,7 @@ bool SkeletalAnimationAssetManager::Load(const std::string& path, bool isExterna
 
 bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
+    auto previousTableSize = m_table.size();
     if (m_table.size() + paths.size() >= m_maxSkeletalAnimationCount)
     {
         throw NcError("Cannot exceed max skeletal animations count.");
@@ -61,7 +63,7 @@ bool SkeletalAnimationAssetManager::Load(std::span<const std::string> paths, boo
     if (!animations.empty())
     {
         m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
-            std::span<const std::string>{m_table.keys()},
+            std::span<const std::string>{m_table.keys().begin() + previousTableSize, m_table.keys().end()},
             std::span<const SkeletalAnimation>{animations},
             UpdateAction::Load
         });
