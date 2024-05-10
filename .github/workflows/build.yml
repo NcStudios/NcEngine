@@ -65,7 +65,7 @@ jobs:
         uses: robinraju/release-downloader@v1.10
         with:
           repository: 'NcStudios/swiftshader'
-          tag: '1.0.5-nc'
+          tag: 'v1.0.5-nc'
           filename: ${{ matrix.swiftshaderArtifact }}.zip
           out-file-path: 'swiftshader'
           extract: true
