@@ -29,6 +29,6 @@ struct TextureArrayBuffer
     vk::UniqueSampler sampler;
     std::vector<Image> images;
     std::vector<vk::DescriptorImageInfo> imageInfos;
-    std::vector<std::string_view> uids;
+    std::vector<size_t> uids;
 };
 } // namespace nc::graphics::vulkan

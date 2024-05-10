@@ -65,5 +65,16 @@
             "sourcePath": "raw\\image\\DefaultParticle.png",
             "assetName": "texture\\DefaultParticle"
         }
+    ],
+    "skeletal-animation": [
+        {
+            "sourcePath": "raw\\skeletal_animation\\DefaultCube.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Armature|DefaultCubeAnimation",
+                    "assetName" : "skeletal_animation\\DefaultCubeAnimation"
+                }
+            ]
+        }
     ]
 }

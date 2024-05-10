@@ -74,20 +74,20 @@ ShaderStorage::ShaderStorage(vk::Device device,
       m_allocator{allocator},
       m_shaderBindingManager{shaderBindingManager},
       m_renderGraph{renderGraph},
-      m_perFrameCabStorage{},
-      m_staticCabStorage{},
+      m_perFrameCabStorage{UniqueCabMap{20, 20}, UniqueCabMap{20, 20}},
+      m_staticCabStorage{20, 20},
       m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateCubeMapArrayBuffer)},
       m_staticMabStorage{cmdBuffers},
       m_onMeshArrayBufferUpdate{onMeshArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateMeshArrayBuffer)},
-      m_perFramePpiaStorage{},
+      m_perFramePpiaStorage{UniquePpiaMap{20, 20}, UniquePpiaMap{20, 20}}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
       m_onPPImageArrayBufferUpdate{onPPImageArrayBufferUpdate.Connect(this, &ShaderStorage::UpdatePPImageArrayBuffer)},
-      m_perFrameSsboStorage{},
-      m_staticSsboStorage{},
+      m_perFrameSsboStorage{UniqueSsboMap{100, 100}, UniqueSsboMap{100, 100}},
+      m_staticSsboStorage{100, 100}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
       m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &ShaderStorage::UpdateStorageBuffer)},
-      m_perFrameUboStorage{},
-      m_staticUboStorage{},
+      m_perFrameUboStorage{UniqueUboMap{20, 20}, UniqueUboMap{20, 20}}, // add factory
+      m_staticUboStorage{20, 20}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
       m_onUniformBufferUpdate{onUniformBufferUpdate.Connect(this, &ShaderStorage::UpdateUniformBuffer)},
-      m_staticTabStorage{},
+      m_staticTabStorage{20, 20}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
       m_onTextureArrayBufferUpdate{onTextureArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateTextureArrayBuffer)}
 {}
 
@@ -100,11 +100,9 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
         case CabUpdateAction::Initialize:
         {
             OPTICK_CATEGORY("CabUpdateAction::Initialize", Optick::Category::Rendering);
-
-            if (storage.uids.size() <= eventData.uid)
+            if (!storage.contains(eventData.uid))
             {
-                storage.uids.emplace_back(eventData.uid);
-                storage.buffers.emplace_back(std::make_unique<CubeMapArrayBuffer>(m_device));
+                storage.emplace(eventData.uid, std::make_unique<CubeMapArrayBuffer>(m_device));
             }
 
             m_shaderBindingManager->RegisterDescriptor
@@ -121,8 +119,7 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
         case CabUpdateAction::Add:
         {
             OPTICK_CATEGORY("CabUpdateAction::Add", Optick::Category::Rendering);
-
-            auto& buffer = storage.buffers.at(eventData.uid);
+            auto& buffer = storage.at(eventData.uid);
             auto& sampler = buffer->sampler.get();
             auto& cubeMaps = buffer->cubeMaps;
             auto& imageInfos = buffer->imageInfos;
@@ -153,15 +150,14 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
         case CabUpdateAction::Remove:
         {
             OPTICK_CATEGORY("CabUpdateAction::Remove", Optick::Category::Rendering);
-
-            auto& cubeMapArrayBuffer = storage.buffers.at(eventData.uid);
+            auto& cubeMapArrayBuffer = storage.at(eventData.uid);
             auto& cubeMaps = cubeMapArrayBuffer->cubeMaps;
             auto& imageInfos = cubeMapArrayBuffer->imageInfos;
             auto& uids = cubeMapArrayBuffer->uids;
 
             for (auto& cubeMapWithId : eventData.data)
             {
-                if (!RemoveAt(uids, std::string_view(cubeMapWithId.id), imageInfos, cubeMaps))
+                if (!RemoveAt(uids, cubeMapWithId.id, imageInfos, cubeMaps))
                 {
                     throw NcError("Attempted to remove a CubeMap that doesn't exist.");
                 }
@@ -180,9 +176,10 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
         case CabUpdateAction::Clear:
         {
             OPTICK_CATEGORY("CabUpdateAction::Clear", Optick::Category::Rendering);
-
-            m_staticCabStorage.uids.clear();
-            m_staticCabStorage.buffers.clear();
+            auto& buffer = storage.at(eventData.uid);
+            buffer->imageInfos.clear();
+            buffer->cubeMaps.clear();
+            buffer->uids.clear();
             break;
         }
     }
@@ -222,14 +219,14 @@ void ShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
 void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
 {
     auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
+    auto uid = static_cast<uint32_t>(eventData.imageType);
+
     switch (eventData.action)
     {
         case PpiaUpdateAction::Initialize:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Initialize", Optick::Category::Rendering);
-
-            if (!storage.buffers.contains(eventData.imageType))
-                storage.buffers.emplace(eventData.imageType, std::make_unique<PPImageArrayBuffer>(m_device));
+            storage.emplace(uid, std::make_unique<PPImageArrayBuffer>(m_device));
 
             m_shaderBindingManager->RegisterDescriptor
             (
@@ -242,7 +239,7 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 eventData.currentFrameIndex
             );
 
-            auto& storageBuffer = storage.buffers.at(eventData.imageType);
+            auto& storageBuffer = storage.at(uid);
             auto& sampler = storageBuffer->sampler.get();
             auto& views = storageBuffer->views;
             auto& imageInfos = storageBuffer->imageInfos;
@@ -271,13 +268,12 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         case PpiaUpdateAction::Update:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Update", Optick::Category::Rendering);
+            auto& storageBuffer = storage.at(uid);
+            auto& sampler = storageBuffer->sampler.get();
+            auto& views = storageBuffer->views;
+            auto& imageInfos = storageBuffer->imageInfos;
             
-            auto& sampler = storage.buffers.at(eventData.imageType)->sampler.get();
-            auto& views = storage.buffers.at(eventData.imageType)->views;
-            auto& imageInfos = storage.buffers.at(eventData.imageType)->imageInfos;
-
-            views.clear();
-            imageInfos.clear();
+            storageBuffer->Clear();
 
             const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
             for (auto view : postProcessViews)
@@ -300,13 +296,10 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         case PpiaUpdateAction::Clear:
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Clear", Optick::Category::Rendering);
-
-            for (auto& bufferStorage : m_perFramePpiaStorage)
+            for (auto& storagePerFrame : m_perFramePpiaStorage)
             {
-                if (bufferStorage.buffers.contains(eventData.imageType))
-                {
-                    bufferStorage.buffers.at(eventData.imageType)->Clear();
-                }
+                if (storagePerFrame.contains(uid))
+                    storagePerFrame.at(uid)->Clear();
             }
             break;
         }
@@ -322,17 +315,8 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
         case SsboUpdateAction::Initialize:
         {
             OPTICK_CATEGORY("SsboUpdateAction::Initialize", Optick::Category::Rendering);
+            auto& buffer = storage.emplace(eventData.uid, std::make_unique<StorageBuffer>(m_allocator, static_cast<uint32_t>(eventData.size)));
 
-            auto pos = std::ranges::find(storage.uids, eventData.uid);
-            if (pos == storage.uids.end())
-            {
-                storage.uids.push_back(eventData.uid);
-                storage.buffers.emplace_back(std::make_unique<vulkan::StorageBuffer>(m_allocator, static_cast<uint32_t>(eventData.size)));
-            }
-            else
-            {
-                throw nc::NcError("Attempted to initialize a Storage Buffer when one by the same UID was already present.");
-            }
             m_shaderBindingManager->RegisterDescriptor
             (
                 eventData.slot,
@@ -347,7 +331,7 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
             m_shaderBindingManager->UpdateBuffer
             (
                 0,
-                storage.buffers.back()->GetInfo(),
+                buffer->GetInfo(),
                 1,
                 vk::DescriptorType::eStorageBuffer,
                 eventData.slot,
@@ -358,45 +342,22 @@ void ShaderStorage::UpdateStorageBuffer(const SsboUpdateEventData& eventData)
         case SsboUpdateAction::Update:
         {
             OPTICK_CATEGORY("SsboUpdateAction::Update", Optick::Category::Rendering);
-            
-            auto pos = std::ranges::find(storage.uids, eventData.uid);
-            if (pos == storage.uids.end())
-            {
-                throw nc::NcError("Attempted to update a Storage Buffer that doesn't exist.");
-            }
-
-            auto posIndex = static_cast<uint32_t>(std::distance(storage.uids.begin(), pos));
-            auto& buffer = storage.buffers.at(posIndex);
+            auto& buffer = storage.at(eventData.uid);
             buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
             break;
         }
         case SsboUpdateAction::Clear:
         {
             OPTICK_CATEGORY("SsboUpdateAction::Clear", Optick::Category::Rendering);
-
             if (eventData.isStatic)
             {
-                auto pos = std::ranges::find(m_staticSsboStorage.uids, eventData.uid);
-                if (pos == m_staticSsboStorage.uids.end())
-                {
-                    throw nc::NcError("Attempted to clear a Storage Buffer that doesn't exist.");
-                }
-
-                auto posIndex = static_cast<uint32_t>(std::distance(m_staticSsboStorage.uids.begin(), pos));
-                m_staticSsboStorage.buffers.at(posIndex)->Clear();
+                m_staticSsboStorage.at(eventData.uid)->Clear();
                 break;
             }
 
-            for (auto& frameStorage : m_perFrameSsboStorage)
+            for (auto& ssboStorage : m_perFrameSsboStorage)
             {
-                auto pos = std::ranges::find(frameStorage.uids, eventData.uid);
-                if (pos == frameStorage.uids.end())
-                {
-                    throw nc::NcError("Attempted to clear a Storage Buffer that doesn't exist.");
-                }
-
-                auto posIndex = static_cast<uint32_t>(std::distance(frameStorage.uids.begin(), pos));
-                frameStorage.buffers.at(posIndex)->Clear();
+                ssboStorage.at(eventData.uid)->Clear();
             }
             break;
         }
@@ -412,11 +373,9 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
         case TabUpdateAction::Initialize:
         {
             OPTICK_CATEGORY("TabUpdateAction::Initialize", Optick::Category::Rendering);
-
-            if (storage.uids.size() <= eventData.uid)
+            if (!storage.contains(eventData.uid))
             {
-                storage.uids.emplace_back(eventData.uid);
-                storage.buffers.emplace_back(std::make_unique<TextureArrayBuffer>(m_device));
+                storage.emplace(eventData.uid, std::make_unique<TextureArrayBuffer>(m_device));
             }
 
             m_shaderBindingManager->RegisterDescriptor
@@ -433,11 +392,11 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
         case TabUpdateAction::Add:
         {
             OPTICK_CATEGORY("TabUpdateAction::Add", Optick::Category::Rendering);
-
-            auto& sampler = storage.buffers.at(eventData.uid)->sampler.get();
-            auto& images = storage.buffers.at(eventData.uid)->images;
-            auto& imageInfos = storage.buffers.at(eventData.uid)->imageInfos;
-            auto& uids = storage.buffers.at(eventData.uid)->uids;
+            auto& buffer = storage.at(eventData.uid);
+            auto& sampler = buffer->sampler.get();
+            auto& images = buffer->images;
+            auto& imageInfos = buffer->imageInfos;
+            auto& uids = buffer->uids;
 
             auto incomingSize = images.size() + eventData.data.size();
             images.reserve(incomingSize);
@@ -464,16 +423,16 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
         case TabUpdateAction::Remove:
         {
             OPTICK_CATEGORY("TabUpdateAction::Remove", Optick::Category::Rendering);
-
-            auto& images = storage.buffers.at(eventData.uid)->images;
-            auto& imageInfos = storage.buffers.at(eventData.uid)->imageInfos;
-            auto& uids = storage.buffers.at(eventData.uid)->uids;
+            auto& buffer = storage.at(eventData.uid);
+            auto& images = buffer->images;
+            auto& imageInfos = buffer->imageInfos;
+            auto& uids = buffer->uids;
 
             for (auto& textureWithId : eventData.data)
             {
-                if (!RemoveAt(uids, std::string_view(textureWithId.id), images, imageInfos))
+                if (!RemoveAt(uids, textureWithId.id, images, imageInfos))
                 {
-                    throw NcError("Attempted to clear a Texture Buffer that doesn't exist.");
+                    throw NcError("Attempted to remove a texture that doesn't exist.");
                 }
             }
 
@@ -491,14 +450,10 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
         {
             OPTICK_CATEGORY("TabUpdateAction::Clear", Optick::Category::Rendering);
 
-            auto pos = std::ranges::find(m_staticTabStorage.uids, eventData.uid);
-            if (pos == m_staticTabStorage.uids.end())
-            {
-                throw nc::NcError("Attempted to clear a Texture Array Buffer that doesn't exist.");
-            }
-
-            m_staticTabStorage.uids.clear();
-            m_staticTabStorage.buffers.clear();
+            auto& buffer = storage.at(eventData.uid);
+            buffer->imageInfos.clear();
+            buffer->images.clear();
+            buffer->uids.clear();
             break;
         }
     }
@@ -506,24 +461,14 @@ void ShaderStorage::UpdateTextureArrayBuffer(const TabUpdateEventData& eventData
 
 void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
 {
-    auto& storage = eventData.isStatic? m_staticUboStorage : m_perFrameUboStorage.at(eventData.currentFrameIndex);
+    auto& storage = eventData.isStatic ? m_staticUboStorage : m_perFrameUboStorage.at(eventData.currentFrameIndex);
 
     switch (eventData.action)
     {
         case UboUpdateAction::Initialize:
         {
             OPTICK_CATEGORY("UboUpdateAction::Initialize", Optick::Category::Rendering);
-
-            auto pos = std::ranges::find(storage.uids, eventData.uid);
-            if (pos == storage.uids.end())
-            {
-                storage.uids.push_back(std::move(eventData.uid));
-                storage.buffers.emplace_back(std::make_unique<vulkan::UniformBuffer>(m_allocator, eventData.data, static_cast<uint32_t>(eventData.size)));
-            }
-            else
-            {
-                throw nc::NcError("Attempted to initialize a Uniform Buffer when one by the same UID was already present.");
-            }
+            auto& buffer = storage.emplace(eventData.uid, std::make_unique<UniformBuffer>(m_allocator, eventData.data, static_cast<uint32_t>(eventData.size)));
 
             m_shaderBindingManager->RegisterDescriptor
             (
@@ -539,7 +484,7 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
             m_shaderBindingManager->UpdateBuffer
             (
                 eventData.set,
-                storage.buffers.back()->GetInfo(),
+                buffer->GetInfo(),
                 1,
                 vk::DescriptorType::eUniformBuffer,
                 eventData.slot,
@@ -550,15 +495,7 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
         case UboUpdateAction::Update:
         {
             OPTICK_CATEGORY("UboUpdateAction::Update", Optick::Category::Rendering);
-
-            auto pos = std::ranges::find(storage.uids, eventData.uid);
-            if (pos == storage.uids.end())
-            {
-                throw nc::NcError("Attempted to update a Uniform Buffer that doesn't exist.");
-            }
-
-            auto posIndex = static_cast<uint32_t>(std::distance(storage.uids.begin(), pos));
-            auto& buffer = storage.buffers.at(posIndex);
+            auto& buffer = storage.at(eventData.uid);
             buffer->Bind(eventData.data, static_cast<uint32_t>(eventData.size));
             break;
         }
@@ -568,27 +505,13 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
 
             if (eventData.isStatic)
             {
-                auto pos = std::ranges::find(m_staticUboStorage.uids, eventData.uid);
-                if (pos == m_staticUboStorage.uids.end())
-                {
-                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
-                }
-
-                auto posIndex = static_cast<uint32_t>(std::distance(m_staticUboStorage.uids.begin(), pos));
-                m_staticUboStorage.buffers.at(posIndex)->Clear();
+                m_staticUboStorage.at(eventData.uid)->Clear();
                 break;
             }
 
             for (auto& uboStorage : m_perFrameUboStorage)
             {
-                auto pos = std::ranges::find(uboStorage.uids, eventData.uid);
-                if (pos == uboStorage.uids.end())
-                {
-                    throw nc::NcError("Attempted to clear a Uniform Buffer that doesn't exist.");
-                }
-
-                auto posIndex = static_cast<uint32_t>(std::distance(uboStorage.uids.begin(), pos));
-                uboStorage.buffers.at(posIndex)->Clear();
+                uboStorage.at(eventData.uid)->Clear();
             }
             break;
         }
