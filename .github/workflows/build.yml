@@ -70,6 +70,13 @@ jobs:
           out-file-path: 'swiftshader'
           extract: true
 
+      - name: Testing
+        shell: bash
+        run: |
+          ls "swiftshader/"
+          ls "swiftshader/swiftshader-windows-x64"
+
+
       - name: Configure
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install
 
