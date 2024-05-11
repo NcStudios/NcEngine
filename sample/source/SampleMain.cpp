@@ -44,11 +44,13 @@ int main(int argc, char** argv)
     catch(std::exception& e)
     {
         NC_LOG_EXCEPTION(e);
+        return -1;
     }
     catch(...)
     {
         NC_LOG_ERROR("SampleMain.cpp - unknown exception");
         std::cerr << "SampleMain.cpp - unknown exception\n";
+        return -1;
     }
 
     std::cerr << "exiting main\n";

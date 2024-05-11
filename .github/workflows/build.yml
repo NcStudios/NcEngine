@@ -80,12 +80,17 @@ jobs:
       #   working-directory: ${{github.workspace}}/build/test
       #   run: ctest -V --output-on-failure --output-junit TestResults.xml
 
-      - name: Run Sample
+      # - name: Run Sample
+      #   working-directory: ${{ github.workspace }}/install/sample
+      #   run: |
+      #     $env:VK_ICD_FILENAMES="swiftshader/${{ matrix.swiftshaderArtifact }}=vk_swiftshader_icd.json"
+      #     .\\Sample.exe --run-test 2>&1 > ".\\SampleResults.txt"
+      #     $LastExitCode >> ".\\SampleResults.txt"
+
+      - name: Smoke Test
         working-directory: ${{ github.workspace }}/install/sample
-        run: |
-          $env:VK_ICD_FILENAMES="swiftshader/${{ matrix.swiftshaderArtifact }}=vk_swiftshader_icd.json"
-          .\\Sample.exe --run-test 2>&1 > ".\\SampleResults.txt"
-          $LastExitCode >> ".\\SampleResults.txt"
+        shell: bash
+        run: script/run_smoke_test.sh "swiftshader/${{ matrix.swiftshaderArtifact }}"
 
       - name: Upload Sample Results
         if: always()
