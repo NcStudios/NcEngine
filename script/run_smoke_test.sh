@@ -14,12 +14,13 @@ echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
 echo "OUT_FILE: $OUT_FILE"
 
 cd "$ENGINE_INSTALL_DIR/Sample"
-cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader_icd.json" .
-cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader.dll" .
-export VK_ICD_FILENAMES="./vk_swiftshader_icd.json"
+# cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader_icd.json" .
+# cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader.dll" .
+# export VK_ICD_FILENAMES="./vk_swiftshader_icd.json"
+
+cp "$SWIFTSHADER_INSTALL_DIR/vulkan-1.dll" .
 
 ./Sample --run-test > "$OUT_FILE" 2>&1
 EXIT_CODE=$?
 echo $EXIT_CODE
-echo $EXIT_CODE >> "$OUT_FILE"
 exit $EXIT_CODE
