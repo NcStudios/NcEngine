@@ -89,14 +89,16 @@ jobs:
 
       - name: Run Smoke Test
         shell: bash
-        run: script/run_smoke_test.sh "swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader_icd.json" "${{ github.workspace }}/install" "./SmokeTestResults.txt"
+        run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader_icd.json" "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
-      - name: Upload Sample Results
+      - name: Upload Smoke Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults
-          path: install/sample/SmokeTestResults.txt
+          path: |
+            install/sample/SmokeTestResults.txt
+            install/sample/Sample.log
 
   #     - name: Upload Test Results
   #       if: always()
