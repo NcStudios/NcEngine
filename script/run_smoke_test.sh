@@ -5,19 +5,19 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
-ICD_FILE_PATH="$1"
-INSTALL_DIR="$2"
+SWIFTSHADER_INSTALL_DIR="$1"
+ENGINE_INSTALL_DIR="$2"
 OUT_FILE="$3"
 
-# export VK_ICD_FILENAMES="$ICD_FILE_PATH"
-
-cat $ICD_FILE_PATH
-
-echo "VK_ICD_FILENAMES: $VK_ICD_FILENAMES"
-echo "INSTALL_DIR: $INSTALL_DIR"
+echo "SWIFTSHADER_INSTALL_DIR: $SWIFTSHADER_INSTALL_DIR"
+echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
 echo "OUT_FILE: $OUT_FILE"
 
-cd "$INSTALL_DIR/sample"
+cd "$ENGINE_INSTALL_DIR/Sample"
+cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader_icd.json" .
+cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader.dll" .
+export VK_ICD_FILENAMES="./vk_swiftshader_icd.json"
+
 ./Sample --run-test > "$OUT_FILE" 2>&1
 EXIT_CODE=$?
 echo $EXIT_CODE
