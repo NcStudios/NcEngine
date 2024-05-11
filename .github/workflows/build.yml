@@ -83,21 +83,20 @@ jobs:
       # - name: Run Sample
       #   working-directory: ${{ github.workspace }}/install/sample
       #   run: |
-      #     $env:VK_ICD_FILENAMES="swiftshader/${{ matrix.swiftshaderArtifact }}=vk_swiftshader_icd.json"
-      #     .\\Sample.exe --run-test 2>&1 > ".\\SampleResults.txt"
-      #     $LastExitCode >> ".\\SampleResults.txt"
+      #     $env:VK_ICD_FILENAMES="swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader_icd.json"
+      #     .\\Sample.exe --run-test 2>&1 > ".\\SmokeTestResults.txt"
+      #     $LastExitCode >> ".\\SmokeTestResults.txt"
 
-      - name: Smoke Test
-        working-directory: ${{ github.workspace }}/install/sample
+      - name: Run Smoke Test
         shell: bash
-        run: script/run_smoke_test.sh "swiftshader/${{ matrix.swiftshaderArtifact }}"
+        run: script/run_smoke_test.sh "swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader_icd.json" "${{ github.workspace }}/install" "./SmokeTestResults.txt"
 
       - name: Upload Sample Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SampleResults
-          path: install/sample/SampleResults.txt
+          name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults
+          path: install/sample/SmokeTestResults.txt
 
   #     - name: Upload Test Results
   #       if: always()
