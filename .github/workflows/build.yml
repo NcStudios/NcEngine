@@ -23,7 +23,7 @@ jobs:
       matrix:
         # os: [windows-2022, ubuntu-22.04]
         os: [windows-2022]
-        config: [Debug, Release]
+        config: [Debug]
         variant: [Dev]
         include:
           - os: windows-2022
