@@ -76,7 +76,7 @@ void EcsModule::UpdateWorldSpaceMatrices()
     OPTICK_CATEGORY("UpdateWorldSpaceMatrices", Optick::Category::GameLogic);
     auto world = Ecs{*m_registry};
 
-#if 1 // normal update using graph traversal
+#if 0 // normal update using graph traversal
     struct ParentInfo
     {
         Transform* transform;
