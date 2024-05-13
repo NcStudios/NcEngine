@@ -20,16 +20,15 @@ struct ObjectData
 
 struct PointLight
 {
-    mat4 lightViewProj;
-    vec3 lightPos;
-    int castShadows;
+    mat4 viewProjection;
+    vec3 position;
+    int castsShadows;
     vec3 ambientColor;
-    float attLin;
-    vec3 diffuseColor;
-    float attQuad;
-    float specularIntensity;
     int isInitialized;
+    vec3 diffuseColor;
+    float radius;
 };
+
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
@@ -109,10 +108,10 @@ void main()
 
         // Light data
         PointLight light = pointLights.lights[i];
-        vec3 lightDir = normalize(light.lightPos - inFragPosition);
+        vec3 lightDir = normalize(light.position - inFragPosition);
         float lightIntensity = dot(lightDir, normalize(inNormal));
-        float distanceToLight = length(light.lightPos - inFragPosition);
-        float lightRadius = light.specularIntensity;
+        float distanceToLight = length(light.position - inFragPosition);
+        float lightRadius = light.radius;
         float lightAttenuated = max(0.0, 1.0 - distanceToLight / lightRadius) * dot(lightDir, normalize(inNormal));
 
         vec4 lightColor = vec4(light.diffuseColor, 1.0);

@@ -199,7 +199,7 @@ void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, 
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
     serialize::Serialize(stream, out.ambientColor);
     serialize::Serialize(stream, out.diffuseColor);
-    serialize::Serialize(stream, out.diffuseIntensity);
+    serialize::Serialize(stream, out.radius);
 }
 
 auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::PointLight
@@ -207,12 +207,12 @@ auto DeserializePointLight(std::istream& stream, const DeserializationContext& c
     auto id = uint32_t{};
     auto ambient = Vector3{};
     auto diffuseColor = Vector3{};
-    auto diffuseIntensity = 0.0f;
+    auto radius = 0.0f;
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, ambient);
     serialize::Deserialize(stream, diffuseColor);
-    serialize::Deserialize(stream, diffuseIntensity);
-    return graphics::PointLight{ctx.entityMap.at(id), ambient, diffuseColor, diffuseIntensity};
+    serialize::Deserialize(stream, radius);
+    return graphics::PointLight{ctx.entityMap.at(id), ambient, diffuseColor, radius};
 }
 
 void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& out, const SerializationContext&, const std::any&)

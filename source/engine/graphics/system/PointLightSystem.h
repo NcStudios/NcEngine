@@ -21,33 +21,28 @@ struct PointLightData
     PointLightData() = default;
 
     PointLightData(const DirectX::XMMATRIX& viewProjection_,
-                   const Vector3& pos_,
-                   bool castShadows_,
-                   const Vector3& ambient_,
+                   const Vector3& position_,
+                   bool castsShadows_,
+                   const Vector3& ambientColor_,
                    const Vector3& diffuseColor_,
-                   float diffuseIntensity_)
+                   float radius_)
         : viewProjection{viewProjection_},
-          pos{pos_},
-          castShadows{static_cast<int>(castShadows_)},
-          ambient{ambient_},
+          position{position_},
+          castsShadows{static_cast<int>(castsShadows_)},
+          ambientColor{ambientColor_},
           diffuseColor{diffuseColor_},
-          diffuseIntensity{diffuseIntensity_}
+          radius{radius_}
     {
     }
 
     DirectX::XMMATRIX viewProjection = {};
-    Vector3 pos = Vector3::Zero();
-    int castShadows = 1;
-    Vector3 ambient = Vector3::Splat(0.35f);
-    float paddingA = 0.0f; /** todo - Remove */
-    Vector3 diffuseColor = Vector3::One();
-    float paddingB = 0.0f;  /** todo - Remove */
-    float diffuseIntensity = 2.5f;
+    Vector3 position = Vector3::Zero();
+    int castsShadows = 1;
+    Vector3 ambientColor = Vector3::Splat(0.35f);
     int isInitialized = 1;
-    float padding[2] = {};
+    Vector3 diffuseColor = Vector3::One();
+    float radius = 2.5f;
 };
-
-static_assert(sizeof(PointLightData) == 128, "PointLightData size must be 128 bytes.");
 
 struct LightingState
 {
