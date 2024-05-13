@@ -119,9 +119,9 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     //Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 7.0f, -12.6f}, .tag = "Point Light 1"});
-    world.Emplace<graphics::PointLight>(lvHandle, Vector3(.238f, .441f, .334f), Vector3(.131f, .260f, .0495f), 88.6f);
+    world.Emplace<graphics::PointLight>(lvHandle, Vector3(.238f, .441f, .334f), Vector3(.131f, .260f, .0495f), 15.0f);
     auto lv2Handle = world.Emplace<Entity>({.position = Vector3{-4.5f, 5.0f, 7.6f}, .tag = "Point Light 2"});
-    world.Emplace<graphics::PointLight>(lv2Handle, Vector3(.279f, .036f, .036f), Vector3(.219f, .206f, .417f), 180.4f);
+    world.Emplace<graphics::PointLight>(lv2Handle, Vector3(.279f, .036f, .036f), Vector3(.219f, .206f, .417f), 15.0f);
 
     // Ogre
     auto ogre = world.Emplace<Entity>({
