@@ -66,6 +66,8 @@ namespace nc::window
             throw NcError(fmt::format("Failed to initialize GLFW: {} ({}).", error, code));
         }
 
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
