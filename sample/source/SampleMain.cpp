@@ -8,8 +8,21 @@
 
 #include <iostream>
 
+
+#include <windows.h>
+#include <sstream>
+
+LONG handler(_EXCEPTION_POINTERS* ExceptionInfo)
+{
+    std::cerr << "Fatal: Unhandled exception 0x" << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << '\n';
+
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
 int main(int argc, char** argv)
 {
+    SetUnhandledExceptionFilter(handler);
+
     std::cerr << "starting main\n";
 
     const auto runSmokeTest = [argc, argv]()
