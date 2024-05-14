@@ -22,6 +22,7 @@
 #include "optick.h"
 
 #include <array>
+#include <iostream>
 #include <ranges>
 #include <string>
 
@@ -243,6 +244,7 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
+    std::cerr << "resize called in rendergraph. " << std::endl;
     for (auto frameIndex : std::views::iota(0u, MaxFramesInFlight))
     {
         m_litPass[frameIndex] = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions);
