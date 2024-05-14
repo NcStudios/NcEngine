@@ -180,6 +180,8 @@ namespace nc::graphics::vulkan
     {
         std::cerr << "begin PresentImageToSwapChain\n";
 
+        std::cerr << "queue: " << queue.operator bool() << '\n';
+
         std::cerr << "RenderFinishedSemaphore\n";
 
         const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
@@ -206,7 +208,7 @@ namespace nc::graphics::vulkan
 
         std::cerr << "set PresentKHR\n";
 
-        const auto result = queue.presentKHR(&presentInfo);
+        const auto result = queue.presentKHR(presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
             std::cerr << "end PresentImageToSwapChain\n";
