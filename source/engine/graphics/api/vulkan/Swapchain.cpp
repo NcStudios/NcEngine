@@ -8,6 +8,8 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 namespace
 {
 auto DetermineFormat(std::span<const vk::SurfaceFormatKHR> availableFormats) -> vk::SurfaceFormatKHR
@@ -176,8 +178,17 @@ namespace nc::graphics::vulkan
 
     auto Swapchain::PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool
     {
+        std::cerr << "begin PresentImageToSwapChain\n";
+
+        std::cerr << "RenderFinishedSemaphore\n";
+
         const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
+
+        std::cerr << "m_swapChain: " << (bool)m_swapChain << '\n';
+
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
+
+        std::cerr << "create PresentInfoKHR\n";
 
         const auto presentInfo = vk::PresentInfoKHR
         (
@@ -189,9 +200,13 @@ namespace nc::graphics::vulkan
             nullptr         // PResults
         );
 
+        std::cerr << "set PresentKHR\n";
+
         const auto result = queue.presentKHR(&presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
+            std::cerr << "end PresentImageToSwapChain\n";
+
             return false;
         }
 
@@ -199,6 +214,8 @@ namespace nc::graphics::vulkan
         {
             throw NcError("Could not present to the swapchain.");
         }
+
+        std::cerr << "end PresentImageToSwapChain\n";
 
         return true;
     }
