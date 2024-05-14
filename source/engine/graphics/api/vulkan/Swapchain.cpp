@@ -188,7 +188,11 @@ namespace nc::graphics::vulkan
 
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
 
-        std::cerr << "create PresentInfoKHR\n";
+        std::cerr << "create PresentInfoKHR\n"
+                  << "  waitSemaphore: " << waitSemaphore.operator bool() << '\n'
+                  << "  swapChains: " << (bool)swapChains << '\n'
+                  << "  wapChains[0]: " << swapChains[0].operator bool() << '\n'
+                  << "  imageIndex: " << imageIndex << '\n';
 
         const auto presentInfo = vk::PresentInfoKHR
         (
@@ -212,6 +216,7 @@ namespace nc::graphics::vulkan
 
         if (result != vk::Result::eSuccess)
         {
+            std::cerr << "result != eSuccess\n";
             throw NcError("Could not present to the swapchain.");
         }
 
