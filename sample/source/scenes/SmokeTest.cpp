@@ -24,6 +24,8 @@
 
 #include <fstream>
 
+#include <iostream>
+
 namespace
 {
 constexpr auto g_sceneFragment = "smokeTestScene";
@@ -64,12 +66,18 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
+    std::cerr << "SmokeTest::Load\n";
+
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),
         [world, modules, quit = m_quitEngine](Entity, Registry*, float) mutable
         {
             static auto framesRun = 0ull;
+            
+            std::cerr << "frame" << framesRun << "\n";
+            
+
             constexpr auto framesUntilSceneChange = 60ull;
             constexpr auto framesUntilQuit = 120ull;
             ++framesRun;
@@ -91,6 +99,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     if (isSecondPass)
     {
+        std::cerr << "second pass unload assets\n";
+
         asset::UnloadAllAudioClipAssets();
         asset::UnloadAllConcaveColliderAssets();
         asset::UnloadAllConvexHullAssets();
@@ -98,10 +108,14 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllMeshAssets();
         asset::UnloadAllTextureAssets();
         asset::UnloadAllSkeletalAnimationAssets();
+        std::cerr << "second pass load scene\n";
+
         ::LoadScene(world, *modules.Get<asset::NcAsset>());
     }
     else
     {
+        std::cerr << "first pass one time init\n";
+
         const auto ground = world.Emplace<Entity>({
             .position = Vector3::Up() * -2.5f,
             .scale = Vector3{3.0f, 1.0f, 3.0f}
@@ -114,10 +128,13 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
     }
 
+    std::cerr << "adding camera\n";
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
     auto& camera = world.Emplace<graphics::Camera>(cameraHandle);
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
+    std::cerr << "setting camera\n";
     ncGraphics->SetCamera(&camera);
+    std::cerr << "setting skybox\n";
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
     modules.Get<audio::NcAudio>()->RegisterListener(cameraHandle);
 
@@ -147,12 +164,15 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .kinematic = {}
     });
 
+    std::cerr << "adding physics components\n";
+
     auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
     auto& objectTransform = world.Get<Transform>(object);
     world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
     world.Emplace<physics::PhysicsMaterial>(object);
     world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
 
+    std::cerr << "adding child\n";
     world.Emplace<Entity>({.parent = object});
 }
 } // namespace nc::sample

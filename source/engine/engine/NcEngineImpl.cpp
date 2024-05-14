@@ -13,6 +13,8 @@
 #include <sstream>
 #include <thread>
 
+#include <iostream>
+
 namespace
 {
 void LogConfig(const nc::config::Config& config)
@@ -171,9 +173,12 @@ void NcEngineImpl::Run()
         OPTICK_FRAME("Main Thread");
         if (m_timer.Tick(update))
         {
+            std::cerr << "main thread tick\n";
+
             m_executor.RunRenderTasks();
             if (ncScene->IsTransitionScheduled())
             {
+                std::cerr << "changing scene\n";
                 ClearScene();
                 ncScene->LoadQueuedScene(ecs::Ecs{*m_registry}, *m_modules);
             }
