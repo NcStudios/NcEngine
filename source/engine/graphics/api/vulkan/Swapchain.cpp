@@ -72,6 +72,8 @@ auto GetSwapChainImages(vk::Device device, vk::SwapchainKHR swapChain) -> std::v
         throw nc::NcError("Could not get swapchain images.");
     }
 
+    std::cerr << "--image count-- " << imageCount << '\n';
+
     auto images = std::vector<vk::Image>(imageCount);
     if (device.getSwapchainImagesKHR(swapChain, &imageCount, images.data()) != vk::Result::eSuccess)
     {
