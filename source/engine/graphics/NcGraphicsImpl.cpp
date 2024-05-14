@@ -14,6 +14,8 @@
 
 #include "optick.h"
 
+#include <iostream>
+
 namespace
 {
     struct NcGraphicsStub : nc::graphics::NcGraphics
