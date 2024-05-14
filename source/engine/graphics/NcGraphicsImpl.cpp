@@ -262,6 +262,8 @@ namespace nc::graphics
 
         // Submit the frame to be presented and increment the frame index.
         m_graphics->FrameEnd();
+
+        std::cerr << "End NcGraphics::Run()\n";
     }
 
     void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)

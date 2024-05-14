@@ -20,6 +20,8 @@
 
 #include "GLFW/glfw3.h"
 
+#include <iostream>
+
 namespace
 {
 constexpr auto g_requiredDeviceExtensions = std::array<const char*, 1>{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
@@ -159,18 +161,27 @@ void VulkanGraphics::DrawFrame(const PerFrameRenderState& state)
 
 void VulkanGraphics::FrameEnd()
 {
+    std::cerr << "begin FrameEnd()\n";
+    std::cerr << "CurrentFrameContext\n";
     auto* currentFrame = m_frameManager->CurrentFrameContext();
+    std::cerr << "CommandBuffer()->end()\n";
     currentFrame->CommandBuffer()->end();
 
     // Executes the command buffer to render to the image
+    std::cerr << "WaitImageReadyForBuffer\n";
     m_swapchain->WaitImageReadyForBuffer(currentFrame, m_imageIndex);
+    std::cerr << "SubmitBufferToQueue\n";
     currentFrame->SubmitBufferToQueue(m_device->VkGraphicsQueue());
 
+    std::cerr << "PresentImageToSwapChain\n";
     if (!m_swapchain->PresentImageToSwapChain(currentFrame, m_device->VkPresentQueue(), m_imageIndex))
     {
+        std::cerr << "Resize\n";
         Resize(m_dimensions);
     }
 
+    std::cerr << "End()\n";
     m_frameManager->End();
+    std::cerr << "end FrameEnd()\n";
 }
 } // namespace nc::graphics::vulkan

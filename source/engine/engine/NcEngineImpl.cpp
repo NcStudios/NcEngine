@@ -162,10 +162,14 @@ void NcEngineImpl::Run()
     auto* ncScene = m_modules->Get<NcScene>();
     auto update = [this](float dt)
     {
+        std::cerr << "update callback\n";
         time::SetDeltaTime(dt);
         input::Flush();
         m_window.ProcessSystemMessages();
+
+        std::cerr << "RunUpdateTasks\n";
         m_executor.RunUpdateTasks();
+        std::cerr << "End update callback\n";
     };
 
     while(m_isRunning)
