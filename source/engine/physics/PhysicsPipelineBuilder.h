@@ -13,6 +13,8 @@
 
 #include "optick.h"
 
+#include <iostream>
+
 namespace nc::physics
 {
 class PipelineBuilder
@@ -43,6 +45,8 @@ inline auto BuildFixedUpdateTask(task::ExceptionContext& ctx, Registry* registry
 {
     return task::Guard(ctx, [registry]
     {
+        std::cerr << "FixedUpdate\n";
+
         OPTICK_CATEGORY("SendFixedUpdate", Optick::Category::Physics);
         for(auto& fixedLogic : View<FixedLogic>{registry})
             fixedLogic.Run(registry);
@@ -53,6 +57,8 @@ inline auto BuildUpdatePhysicsBodiesTask(task::ExceptionContext& ctx, Registry* 
 {
     return task::Guard(ctx, [registry, fixedTimeStep]
     {
+        std::cerr << "UpdatePhysicsBodies\n";
+
         OPTICK_CATEGORY("UpdatePhysicsBodies", Optick::Category::Physics);
         UpdatePhysicsBodies(registry, fixedTimeStep);
     });
@@ -62,6 +68,8 @@ inline auto BuildUpdateManifoldsTask(task::ExceptionContext& ctx, NarrowPhase& p
 {
     return task::Guard(ctx, [&phase]
     {
+        std::cerr << "UpdateManifolds\n";
+
         OPTICK_CATEGORY("NarrowPhase::UpdateManifolds", Optick::Category::Physics);
         phase.UpdateManifolds();
     });
@@ -72,6 +80,8 @@ auto BuildUpdateProxyCacheTask(task::ExceptionContext& ctx, Cache& cache)
 {
     return task::Guard(ctx, [&cache]
     {
+        std::cerr << "ProxyCache::Update\n";
+
         OPTICK_CATEGORY("ProxyCache::Update", Optick::Category::Physics);
         cache.Update();
     });
@@ -82,6 +92,8 @@ auto BuildBroadPhaseDetectionTask(task::ExceptionContext& ctx, Broad& phase, Cac
 {
     return task::Guard(ctx, [&phase, &cache]
     {
+        std::cerr << "BroadPhase\n";
+
         OPTICK_CATEGORY("BroadPhase", Optick::Category::Physics);
         phase.Update(&cache);
         phase.FindPairs();
@@ -93,6 +105,8 @@ auto BuildNarrowPhasePhysicsTask(task::ExceptionContext& ctx, NarrowPhase& narro
 {
     return task::Guard(ctx, [&narrow, &broad]
     {
+        std::cerr << "FindPhysicsPairs1\n";
+
         OPTICK_CATEGORY("NarrowPhase::FindPhysicsPairs1", Optick::Category::Physics);
         using proxy = typename Broad::proxy_type;
         narrow.FindPhysicsPairs<proxy>(broad.PhysicsPairs());
@@ -104,6 +118,8 @@ auto BuildNarrowPhaseTriggerTask(task::ExceptionContext& ctx, NarrowPhase& narro
 {
     return task::Guard(ctx, [&narrow, &broad]
     {
+        std::cerr << "FindTriggerPairs\n";
+
         OPTICK_CATEGORY("NarrowPhase::FindTriggerPairs", Optick::Category::Physics);
         using proxy = typename Broad::proxy_type;
         narrow.FindTriggerPairs<proxy>(broad.TriggerPairs());
@@ -115,6 +131,8 @@ auto BuildConcavePhaseTask(task::ExceptionContext& ctx, Concave& concave, Cache&
 {
     return task::Guard(ctx, [&concave, &cache]
     {
+        std::cerr << "FindPairs\n";
+
         OPTICK_CATEGORY("Concave::FindPairs", Optick::Category::Physics);
         using proxy = typename Cache::proxy_type;
         concave.template FindPairs<proxy>(cache.Proxies());
@@ -126,6 +144,8 @@ auto BuildMergeContactsTask(task::ExceptionContext& ctx, NarrowPhase& narrow, Co
 {
     return task::Guard(ctx, [&narrow, &concave]
     {
+        std::cerr << "MergeContacts\n";
+
         OPTICK_CATEGORY("NarrowPhase::MergeContacts", Optick::Category::Physics);
         narrow.MergeContacts(concave.Pairs());
     });
@@ -135,6 +155,8 @@ inline auto BuildGenerateFreedomConstraintsTask(task::ExceptionContext& ctx, Sol
 {
     return task::Guard(ctx, [&solver, fixedTimeStep]
     {
+        std::cerr << "GenerateFreedomConstraints\n";
+
         OPTICK_CATEGORY("Solver::GenerateFreedomConstraints", Optick::Category::Physics);
         solver.GenerateFreedomConstraints(fixedTimeStep);
     });
@@ -144,6 +166,8 @@ inline auto BuildGenerateContactConstraintsTask(task::ExceptionContext& ctx, Sol
 {
     return task::Guard(ctx, [&solver, &narrow]
     {
+        std::cerr << "GenerateContactConstraints\n";
+
         OPTICK_CATEGORY("Solver::GenerateContactConstraints", Optick::Category::Physics);
         solver.GenerateContactConstraints(narrow.Manifolds());
     });
@@ -153,6 +177,8 @@ inline auto BuildUpdateJointsTask(task::ExceptionContext& ctx, JointSystem& join
 {
     return task::Guard(ctx, [&joints, fixedTimeStep]
     {
+        std::cerr << "UpdateJoints\n";
+
         OPTICK_CATEGORY("JointSystem::UpdateJoints", Optick::Category::Physics);
         joints.UpdateJoints(fixedTimeStep);
     });
@@ -162,6 +188,8 @@ inline auto BuildResolveConstraintsTask(task::ExceptionContext& ctx, Solver& sol
 {
     return task::Guard(ctx, [&solver, &joints, fixedTimeStep]
     {
+        std::cerr << "ResolveConstraints\n";
+
         OPTICK_CATEGORY("Solver::ResolveConstraints", Optick::Category::Physics);
         solver.ResolveConstraints(joints.Joints(), fixedTimeStep);
     });
@@ -171,6 +199,8 @@ inline auto BuildCacheImpulsesTask(task::ExceptionContext& ctx, Solver& solver, 
 {
     return task::Guard(ctx, [&solver, &narrow]
     {
+        std::cerr << "CacheImpulses\n";
+
         OPTICK_CATEGORY("NarrowPhase::CacheImpulses", Optick::Category::Physics);
         if constexpr(EnableContactWarmstarting)
             narrow.CacheImpulses(solver.ContactConstraints());
@@ -181,6 +211,8 @@ inline auto BuildIntegrateTask(task::ExceptionContext& ctx, Registry* registry, 
 {
     return task::Guard(ctx, [registry, fixedTimeStep]
     {
+        std::cerr << "Integrate\n";
+
         OPTICK_CATEGORY("Integrate", Optick::Category::Physics);
         Integrate(registry, fixedTimeStep);
     });
@@ -190,6 +222,8 @@ inline auto BuildNotifyEventsTask(task::ExceptionContext& ctx, NarrowPhase& narr
 {
     return task::Guard(ctx, [&narrow]
     {
+        std::cerr << "NarrowPhase::NotifyEvents\n";
+
         OPTICK_CATEGORY("NarrowPhase::NotifyEvents", Optick::Category::Physics);
         narrow.NotifyEvents();
     });

@@ -186,32 +186,48 @@ namespace nc::graphics
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
 
+        std::cerr << "NcGraphics::Run()\n";
+
         // Wait until the frame is ready to be rendered, begin accepting ImGui commands
         if (!m_graphics->PrepareFrame())
         {
             return;
         }
 
+        std::cerr << "NcGraphics - get CurrentFrameIndex\n";
         auto currentFrameIndex = m_graphics->CurrentFrameIndex();
 
         // Run all the systems to generate this frame's resource data.
+        std::cerr << "Execute UISystem()\n";
+
         m_systemResources.ui.Execute(ecs::Ecs(m_registry->GetImpl()));
+        std::cerr << "Execute CameraSystem\n";
         auto cameraState = m_systemResources.cameras.Execute(m_registry);
+        std::cerr << "Execute WidgetSystem\n";
         auto widgetState = m_systemResources.widgets.Execute(m_registry->GetEcs());
+        std::cerr << "Execute EnvironmentSystem\n";
         auto environmentState = m_systemResources.environment.Execute(cameraState, currentFrameIndex);
+        std::cerr << "Execute AnimationSystem\n";
         auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
+        std::cerr << "Execute ObjectSystem\n";
         auto objectState = m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
                                                                         cameraState, environmentState, skeletalAnimationState);
+        std::cerr << "Execute PointLightSystem\n";
         auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+        std::cerr << "Execute ParticleSystem\n";
         auto particleState = m_systemResources.particleEmitters.Execute(currentFrameIndex);
 
+        std::cerr << "CommitResourceLayout\n";
         // If any changes were made to resource layouts (point lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
         m_graphics->CommitResourceLayout();
 
         if (lightingState.updateShadows)
         {
+        std::cerr << "Update Shadow Maps\n";
             m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(lightingState.viewProjections.size()), currentFrameIndex);
         }
+
+        std::cerr << "BeginFrame\n";
 
         // Allow the frame to begin accepting draw commands.
         if (!m_graphics->BeginFrame())
@@ -219,6 +235,7 @@ namespace nc::graphics
             return;
         }
 
+        std::cerr << "Bind\n";
         // Bind mesh buffer to the current frame.
         m_assetResources.meshes.Bind(currentFrameIndex);
 
@@ -233,8 +250,13 @@ namespace nc::graphics
             std::move(particleState)
         };
 
+        std::cerr << "DrawFrame\n";
+
         // Draw all the resource data
         m_graphics->DrawFrame(state);
+
+
+        std::cerr << "FrameEnd\n";
 
         // Submit the frame to be presented and increment the frame index.
         m_graphics->FrameEnd();
