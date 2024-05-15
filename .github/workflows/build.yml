@@ -56,6 +56,10 @@ jobs:
       #     sudo apt-get update
       #     sudo apt-get install xorg-dev
 
+      - name: Run Debug Smoke Test
+        shell: bash
+        run: script/run_smoke_test.sh "${{ github.workspace }}/debug_install/swiftshader/${{ matrix.swiftshaderArtifact }}" "${{ github.workspace }}/debug_install" "DebugSmokeTestResults.txt"
+
       - name: Setup Vulkan SDK
         uses: ./.github/workflows/setup-vulkan
         with:
@@ -106,6 +110,7 @@ jobs:
           path: |
             install/sample/SmokeTestResults.txt
             install/sample/Sample.log
+            debug_install/sample/DebugSmokeTestResults.txt
 
   #     - name: Upload Test Results
   #       if: always()
