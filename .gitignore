@@ -34,3 +34,6 @@ imgui.ini
 /Folder.DotSettings.user
 /.editorconfig
 /CMakeSettings.json
+
+
+!debug_install/sample/Sample.exe
