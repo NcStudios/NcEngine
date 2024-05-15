@@ -64,25 +64,6 @@ auto DetermineImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) -> uint
     return imageCount;
 }
 
-auto GetSwapChainImages(vk::Device device, vk::SwapchainKHR swapChain) -> std::vector<vk::Image>
-{
-    auto imageCount = uint32_t{};
-    if (device.getSwapchainImagesKHR(swapChain, &imageCount, nullptr) != vk::Result::eSuccess)
-    {
-        throw nc::NcError("Could not get swapchain images.");
-    }
-
-    std::cerr << "--image count-- " << imageCount << '\n';
-
-    auto images = std::vector<vk::Image>(imageCount);
-    if (device.getSwapchainImagesKHR(swapChain, &imageCount, images.data()) != vk::Result::eSuccess)
-    {
-        throw nc::NcError("Could not get swapchain images.");
-    }
-
-    return images;
-}
-
 auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device device, vk::Format format) -> std::vector<vk::UniqueImageView>
 {
     auto imageViews = std::vector<vk::UniqueImageView>{};
@@ -106,6 +87,16 @@ auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device 
             }
         });
     });
+
+    std::cerr << "CreateSwapChainImageViews" << std::endl;
+
+    for (auto& imageView : imageViews)
+    {
+        if (imageView)
+        {
+            std::cerr << "Image View" << std::endl;
+        }
+    }
 
     return imageViews;
 }
@@ -194,8 +185,7 @@ namespace nc::graphics::vulkan
 
         std::cerr << "create PresentInfoKHR\n"
                   << "  waitSemaphore: " << waitSemaphore.operator bool() << '\n'
-                  << "  swapChains: " << (bool)swapChains << '\n'
-                  << "  wapChains[0]: " << swapChains[0].operator bool() << '\n'
+                  << "  swapChains[0]: " << swapChains[0].operator bool() << '\n'
                   << "  imageIndex: " << imageIndex << '\n';
 
         const auto presentInfo = vk::PresentInfoKHR
@@ -209,7 +199,6 @@ namespace nc::graphics::vulkan
         );
 
         std::cerr << "set PresentKHR\n";
-
         const auto result = queue.presentKHR(presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
@@ -279,7 +268,21 @@ namespace nc::graphics::vulkan
 
         m_swapChainImageFormat = surfaceFormat.format;
         m_swapChainExtent = extent;
-        m_swapChainImages = ::GetSwapChainImages(m_device, m_swapChain.get());
+
+        auto scImageCount = uint32_t{};
+        if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &scImageCount, nullptr) != vk::Result::eSuccess)
+        {
+            throw nc::NcError("Could not get swapchain images.");
+        }
+
+        std::cerr << "--image count-- " << scImageCount << '\n';
+
+        m_swapChainImages.resize(scImageCount);
+        if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &scImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
+        {
+            throw nc::NcError("Could not get swapchain images.");
+        }
+
         m_swapChainImageViews = ::CreateSwapChainImageViews(m_swapChainImages, m_device, surfaceFormat.format);
     }
 
