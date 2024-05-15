@@ -46,6 +46,30 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         "skeleton\\BaseColor.nca",
         "skeleton\\Roughness.nca",
         "skeleton\\Metallic.nca",
+        "denim\\BaseColor.nca",
+        "denim\\Roughness.nca",
+        "denim\\Metallic.nca",
+        "marble\\BaseColor.nca",
+        "marble\\Roughness.nca",
+        "marble\\Metallic.nca",
+        "metal\\BaseColor.nca",
+        "metal\\Roughness.nca",
+        "metal\\Metallic.nca",
+        "plastic\\BaseColor.nca",
+        "plastic\\Roughness.nca",
+        "plastic\\Metallic.nca",
+        "silver\\BaseColor.nca",
+        "silver\\Roughness.nca",
+        "silver\\Metallic.nca",
+        "stone\\BaseColor.nca",
+        "stone\\Roughness.nca",
+        "stone\\Metallic.nca",
+        "tile\\BaseColor.nca",
+        "tile\\Roughness.nca",
+        "tile\\Metallic.nca",
+        "wood\\BaseColor.nca",
+        "wood\\Roughness.nca",
+        "wood\\Metallic.nca"
     };
 
     std::vector<std::string> normals
@@ -53,7 +77,15 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         "ogre\\Normal.nca",
         "cave\\Normal.nca",
         "cave_ceiling\\Normal.nca",
-        "skeleton\\Normal.nca"
+        "skeleton\\Normal.nca",
+        "denim\\Normal.nca",
+        "marble\\Normal.nca",
+        "metal\\Normal.nca",
+        "plastic\\Normal.nca",
+        "silver\\Normal.nca",
+        "stone\\Normal.nca",
+        "tile\\Normal.nca",
+        "wood\\Normal.nca"
     };
 
     std::vector<std::string> cubemaps
