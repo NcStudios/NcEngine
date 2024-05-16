@@ -31,7 +31,7 @@ jobs:
           - os: ubuntu-22.04
             shortName: Linux
             generator: "Unix Makefiles"
-            cmakeEnv: "CXX=/usr/bin/g++-13"
+            cmakeEnv: "CXX=/usr/bin/g++-12"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
