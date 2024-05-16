@@ -14,15 +14,27 @@ echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
 echo "OUT_FILE: $OUT_FILE"
 
 cd "$ENGINE_INSTALL_DIR/sample"
+
+
+cat <<'EOF' > vk_swiftshader_driver.json
+{
+  "file_format_version": "1.0.0",
+  "ICD": {
+    "library_path": "vk_swiftshader.dll",
+    "api_version": "1.3"
+  }
+}
+EOF
+
 #cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader_icd.json" .
-cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader_driver.json" .
+# cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader_driver.json" .
 cp "$SWIFTSHADER_INSTALL_DIR/vk_swiftshader.dll" .
 #export VK_ICD_FILENAMES="./vk_swiftshader_icd.json"
 export VK_DRIVER_FILES=./vk_swiftshader_driver.json
 
 #echo $VK_ICD_FILENAMES
 #cat $VK_ICD_FILENAMES
-echo $VK_DRIVER_FILES
+echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
 cat $VK_DRIVER_FILES
 
 # cp "$SWIFTSHADER_INSTALL_DIR/vulkan-1.dll" .
