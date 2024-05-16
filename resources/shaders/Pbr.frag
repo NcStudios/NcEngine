@@ -72,7 +72,7 @@ layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec2 inUV;
 layout (location = 2) in mat3 inTBN;
-layout (location = 5) in flat int  inObjectInstance;
+layout (location = 5) in flat int inObjectInstance;
 
 layout (location = 0) out vec4 outFragColor;
 
