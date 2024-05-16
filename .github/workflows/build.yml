@@ -28,10 +28,10 @@ jobs:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
             shortName: Windows
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             shortName: Linux
             generator: "Unix Makefiles"
-            cmakeEnv: "CXX=/usr/bin/g++-12"
+            cmakeEnv: "CXX=/usr/bin/g++-14"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
