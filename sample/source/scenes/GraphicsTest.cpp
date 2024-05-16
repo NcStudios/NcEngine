@@ -147,13 +147,57 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .metallic   = "cave_ceiling\\Metallic.nca"
     };
 
+    auto marbleMaterial = graphics::PbrMaterial{
+        .baseColor  = "marble\\BaseColor.nca",
+        .normal     = "marble\\Normal.nca",
+        .roughness  = "marble\\Roughness.nca",
+        .metallic   = "marble\\Metallic.nca"
+    };
+
+    auto metalMaterial = graphics::PbrMaterial{
+        .baseColor  = "metal\\BaseColor.nca",
+        .normal     = "metal\\Normal.nca",
+        .roughness  = "metal\\Roughness.nca",
+        .metallic   = "metal\\Metallic.nca"
+    };
+
+    auto denimMaterial = graphics::PbrMaterial{
+        .baseColor  = "denim\\BaseColor.nca",
+        .normal     = "denim\\Normal.nca",
+        .roughness  = "denim\\Roughness.nca",
+        .metallic   = "denim\\Metallic.nca"
+    };
+
+    auto plasticMaterial = graphics::PbrMaterial{
+        .baseColor  = "plastic\\BaseColor.nca",
+        .normal     = "plastic\\Normal.nca",
+        .roughness  = "plastic\\Roughness.nca",
+        .metallic   = "plastic\\Metallic.nca"
+    };
+
+    auto stoneMaterial = graphics::PbrMaterial{
+        .baseColor  = "stone\\BaseColor.nca",
+        .normal     = "stone\\Normal.nca",
+        .roughness  = "stone\\Roughness.nca",
+        .metallic   = "stone\\Metallic.nca"
+    };
+
+    auto tileMaterial = graphics::PbrMaterial{
+        .baseColor  = "tile\\BaseColor.nca",
+        .normal     = "tile\\Normal.nca",
+        .roughness  = "tile\\Roughness.nca",
+        .metallic   = "tile\\Metallic.nca"
+    };
+
     modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
 
     //Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 7.0f, -12.6f}, .tag = "Point Light 1"});
-    world.Emplace<graphics::PointLight>(lvHandle, Vector3(.238f, .441f, .334f), Vector3(.131f, .260f, .0495f), 15.0f);
-    auto lv2Handle = world.Emplace<Entity>({.position = Vector3{-4.5f, 5.0f, 7.6f}, .tag = "Point Light 2"});
-    world.Emplace<graphics::PointLight>(lv2Handle, Vector3(.279f, .036f, .036f), Vector3(.219f, .206f, .417f), 15.0f);
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
+    world.Emplace<graphics::PointLight>(lvHandle, Vector3(0.0f, 0.0f, 0.0f), Vector3(0.299f, 0.262f, 0.047f), 17.7f);
+    auto lv2Handle = world.Emplace<Entity>({.position = Vector3{6.5f, 9.0f, 9.6f}, .tag = "Point Light 2"});
+    world.Emplace<graphics::PointLight>(lv2Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 0.723f, 0.608f), 13.4f);
+    auto lv3Handle = world.Emplace<Entity>({.position = Vector3{4.5f, 6.0f, -8.4f}, .tag = "Point Light 3"});
+    world.Emplace<graphics::PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
 
     // Ogre
     auto ogre = world.Emplace<Entity>({
@@ -276,6 +320,54 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "cave_ceiling"
     });
     world.Emplace<graphics::MeshRenderer>(cave_ceiling, "cave_ceiling.nca", caveCeilingMaterial);
+
+    auto marbleSphere = world.Emplace<Entity>({
+        .position = Vector3{6.0f, 3.0f, 13.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "marble"
+    });
+    world.Emplace<graphics::MeshRenderer>(marbleSphere, "DefaultSphere.nca", marbleMaterial);
+
+    auto metalSphere = world.Emplace<Entity>({
+        .position = Vector3{8.0f, 3.0f, 12.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "metal"
+    });
+    world.Emplace<graphics::MeshRenderer>(metalSphere, "DefaultSphere.nca", metalMaterial);
+
+    auto denimSphere = world.Emplace<Entity>({
+        .position = Vector3{9.0f, 3.0f, 10.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "denim"
+    });
+    world.Emplace<graphics::MeshRenderer>(denimSphere, "DefaultSphere.nca", denimMaterial);
+
+    auto plasticSphere = world.Emplace<Entity>({
+        .position = Vector3{6.0f, 5.0f, 13.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "plastic"
+    });
+    world.Emplace<graphics::MeshRenderer>(plasticSphere, "DefaultSphere.nca", plasticMaterial);
+
+    auto stoneSphere = world.Emplace<Entity>({
+        .position = Vector3{8.0f, 5.0f, 12.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "stone"
+    });
+    world.Emplace<graphics::MeshRenderer>(stoneSphere, "DefaultSphere.nca", stoneMaterial);
+
+    auto tileSphere = world.Emplace<Entity>({
+        .position = Vector3{9.0f, 5.0f, 10.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "tile"
+    });
+    world.Emplace<graphics::MeshRenderer>(tileSphere, "DefaultSphere.nca", tileMaterial);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

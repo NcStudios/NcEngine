@@ -11,8 +11,8 @@ F₀               | Reflectivity                                               
 V                | Vector from camera to fragment                                  |    
 H                | Half vector                                                     |   
 specularFunction | (D * G * F) / 4(V ⋅ N) * (L ⋅ N)                                 | Cook-Torrance
-D                | GGX      Normal Distribution Function                           | NDF - The distribution of microfacet normals compared to the half vector, aka, the roughness
-G                | Schlick-Beckmann Geometry Shadowing Function                    | GSF - The attenuation of light due to microfacet self-shadowing
+D                | Normal Distribution Function                                    | NDF - The distribution of microfacet normals compared to the half vector, aka, the roughness
+G                | Geometry Shadowing Function                                     | GSF - The attenuation of light due to microfacet self-shadowing
 F                | F₀ + (1 - F₀)(1 - (V ⋅ H))^5                                    | Fresnel function, but it's already in our specularK so we don't need it twice.
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **/
@@ -88,23 +88,18 @@ vec3 SkyboxColor(int cubeMapIndex, vec3 angleVector)
 
 const float PI = 3.14159265359;
 
-// D: Normal Distribution Function (GGX)
+// D: Normal Distribution Function (Trowbridge-Reitz)
 float D(float roughness, float NdotH)
 {
     float roughnessSqr = roughness*roughness;
-    float NdotHSqr = NdotH*NdotH;
-    float TanNdotHSqr = (1-NdotHSqr)/NdotHSqr;
-    return (1.0/PI) * pow(roughness/(NdotHSqr * (roughnessSqr + TanNdotHSqr)), 2);
+    float Distribution = NdotH*NdotH * (roughnessSqr-1.0) + 1.0;
+    return roughnessSqr / (PI * Distribution*Distribution);
 }
 
-// G: Geometry Shadowing Function (Schlick-Beckmann)
+// G: Geometry Shadowing Function (Implicit)
 float G(float NDotL, float NDotV, float roughness)
 {
-    float roughnessSqr = roughness * roughness;
-    float k = roughnessSqr * 0.79788456;
-    float smithL = (NDotL) / (NDotL * (1 - k) + k);
-    float smithV = (NDotV) / (NDotV * (1 - k) + k);
-    return smithL * smithV;
+    return NDotL * NDotV;
 }
 
 // F: Fresnel-Schlick Function
@@ -234,14 +229,14 @@ void main()
         result += CalculatePointLight(i, light, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
     }
 
+    // Environment reflection
     if (environmentData.skyboxCubemapIndex != 4294967295)
     {
-        // Environment reflection
         vec3 I = normalize(inFragPosition - environmentData.cameraWorldPosition.xyz);
         vec3 reflected = reflect(I, N);
         vec3 environmentReflectionColor = SkyboxColor(environmentData.skyboxCubemapIndex, reflected);
 
-        result += (F0 * (1.0f - roughness) * environmentReflectionColor) / 2;
+        result += (F0 * (1.0f - roughness) * environmentReflectionColor);
     }
 
     // Ambient lighting
