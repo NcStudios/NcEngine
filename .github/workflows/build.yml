@@ -21,7 +21,7 @@ jobs:
   Build:
     strategy:
       matrix:
-        os: [windows-2022, ubuntu-22.04]
+        os: [windows-2022, ubuntu-24.04]
         config: [Debug, Release]
         variant: [Dev, Prod]
         include:
