@@ -11,7 +11,7 @@ option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Variables
 
-string(APPEND CMAKE_CXX_FLAGS " /fsanitize=address")
+# string(APPEND CMAKE_CXX_FLAGS " /fsanitize=address")
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
