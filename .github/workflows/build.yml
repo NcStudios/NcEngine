@@ -70,6 +70,9 @@ jobs:
           out-file-path: 'swiftshader'
           extract: true
 
+      - name: Debug
+        uses: mxshmitt/action-tmate@v3
+
       - name: Run VkCube
         shell: bash
         run: |
