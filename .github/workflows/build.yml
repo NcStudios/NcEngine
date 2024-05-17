@@ -70,30 +70,30 @@ jobs:
           out-file-path: 'swiftshader'
           extract: true
 
-      - name: Debug
-        uses: mxschmitt/action-tmate@v3
+      # - name: Debug
+      #   uses: mxschmitt/action-tmate@v3
 
-      - name: Run VkCube
-        shell: bash
-        run: |
-          cat <<'EOF' > vk_swiftshader_driver.json
-          {
-            "file_format_version": "1.0.0",
-            "ICD": {
-              "library_path": "${{ github.workspace }}/swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader.dll",
-              "api_version": "1.3"
-            }
-          }
-          EOF
+      # - name: Run VkCube
+      #   shell: bash
+      #   run: |
+      #     cat <<'EOF' > vk_swiftshader_driver.json
+      #     {
+      #       "file_format_version": "1.0.0",
+      #       "ICD": {
+      #         "library_path": "${{ github.workspace }}/swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader.dll",
+      #         "api_version": "1.3"
+      #       }
+      #     }
+      #     EOF
 
-          export VK_DRIVER_FILES="${{ github.workspace }}/vk_swiftshader_driver.json"
-          echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
-          cat $VK_DRIVER_FILES
+      #     export VK_DRIVER_FILES="${{ github.workspace }}/vk_swiftshader_driver.json"
+      #     echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
+      #     cat $VK_DRIVER_FILES
 
-          ./vkcube.exe --c 10
-          EXIT_CODE=$?
-          echo $EXIT_CODE
-          exit $EXIT_CODE
+      #     ./vkcube.exe --c 10
+      #     EXIT_CODE=$?
+      #     echo $EXIT_CODE
+      #     exit $EXIT_CODE
 
       - name: Testing
         shell: bash
