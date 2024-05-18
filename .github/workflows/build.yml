@@ -91,7 +91,7 @@ jobs:
           cat $VK_DRIVER_FILES
 
           mkdir vk_out
-          vkia.exe --output_path vk_out
+          vkvia.exe --output_path vk_out
           # ./vkcube.exe --c 10 --suppress_popups
 
       - name: Testing
