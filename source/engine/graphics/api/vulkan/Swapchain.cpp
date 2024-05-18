@@ -9,6 +9,10 @@
 #include <algorithm>
 
 #include <iostream>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
 
 namespace
 {
@@ -169,6 +173,19 @@ namespace nc::graphics::vulkan
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
 
+    auto do_present(vk::Queue& queue, const vk::PresentInfoKHR& info) -> vk::Result
+    {
+        __try
+        {
+            return queue.presentKHR(info);
+        }
+        __except(EXCEPTION_EXECUTE_HANDLER)
+        {
+            std::cerr << "caught exception\n";
+            std::terminate();
+        }
+    }
+
     auto Swapchain::PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool
     {
         std::cerr << "begin PresentImageToSwapChain\n";
@@ -199,7 +216,8 @@ namespace nc::graphics::vulkan
         );
 
         std::cerr << "set PresentKHR\n";
-        const auto result = queue.presentKHR(presentInfo);
+        const auto result = do_present(queue, presentInfo);
+        // const auto result = queue.presentKHR(presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
             std::cerr << "end PresentImageToSwapChain\n";

@@ -14,14 +14,21 @@
 
 LONG handler(_EXCEPTION_POINTERS* ExceptionInfo)
 {
-    std::cerr << "Fatal: Unhandled exception 0x" << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << '\n';
+    std::cerr << "handler -- Fatal: Unhandled exception 0x" << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << '\n';
 
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+LONG vectored_handler(_EXCEPTION_POINTERS* ExceptionInfo)
+{
+    std::cerr << "vectored_handler -- Fatal: Unhandled exception 0x" << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << '\n';
     return EXCEPTION_CONTINUE_SEARCH;
 }
 
 int main(int argc, char** argv)
 {
     SetUnhandledExceptionFilter(handler);
+    AddVectoredExceptionHandler(1, vectored_handler);
 
     std::cerr << "starting main\n";
 
