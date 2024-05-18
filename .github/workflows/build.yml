@@ -86,7 +86,7 @@ jobs:
           }
           EOF
 
-          cp ./vkcube.exe $VULKAN_SDK/$VULKAN_SDK_VERSION/bin
+          cp ./vkcube.exe $VULKAN_SDK/bin
 
           export VK_DRIVER_FILES="${{ github.workspace }}/vk_swiftshader_driver.json"
           echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
