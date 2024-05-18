@@ -90,10 +90,9 @@ jobs:
           echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
           cat $VK_DRIVER_FILES
 
-          ./vkcube.exe --c 10 --suppress_popups
-          EXIT_CODE=$?
-          echo $EXIT_CODE
-          exit $EXIT_CODE
+          mkdir vk_out
+          vkia.exe --output_path vk_out
+          # ./vkcube.exe --c 10 --suppress_popups
 
       - name: Testing
         shell: bash
@@ -132,6 +131,7 @@ jobs:
             install/sample/SmokeTestResults.txt
             install/sample/Sample.log
             debug_install/sample/DebugSmokeTestResults.txt
+            vk_out/vkvia.html
 
   #     - name: Upload Test Results
   #       if: always()
