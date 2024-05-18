@@ -36,3 +36,4 @@ imgui.ini
 /CMakeSettings.json
 
 !vkcube.exe
+!vkvia.exe
