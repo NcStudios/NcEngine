@@ -17,7 +17,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: KhronosGroup/Vulkan-Headers
-        ref: '${{ inputs.version }}'
+        ref: 'v${{ inputs.version }}'
         path: 'Vulkan-Headers'
 
     - name: Build Vulkan-Headers
@@ -30,7 +30,7 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: KhronosGroup/Vulkan-Loader
-        ref: '${{ inputs.version }}'
+        ref: 'v${{ inputs.version }}'
         path: 'Vulkan-Loader'
 
     - name: Build Vulkan-Loader
