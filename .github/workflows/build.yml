@@ -59,7 +59,7 @@ jobs:
       - name: Setup Vulkan SDK
         uses: ./.github/workflows/setup-vulkan
         with:
-          version: 1.3.261.1
+          version: 1.3.266
 
       - name: Download SwiftShader
         uses: robinraju/release-downloader@v1.10
