@@ -28,12 +28,13 @@ cat <<EOF > vk_swiftshader_icd.json
 {
   "file_format_version": "1.0.0",
   "ICD": {
-    "library_path": "$SWIFTSHADER_INSTALL_DIR/$SWIFTSHADER_LIB",
+    "library_path": "./$SWIFTSHADER_LIB",
     "api_version": "1.3"
   }
 }
 EOF
 
+cp "$SWIFTSHADER_INSTALL_DIR/$SWIFTSHADER_LIB" .
 export VK_DRIVER_FILES="$ENGINE_INSTALL_DIR/sample/vk_swiftshader_icd.json"
 
 echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
