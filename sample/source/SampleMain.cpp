@@ -7,7 +7,6 @@
 #include "ncengine/utility/Log.h"
 
 #include <iostream>
-#include <sstream>
 
 int main(int argc, char** argv)
 {

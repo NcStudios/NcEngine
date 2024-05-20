@@ -22,15 +22,14 @@ jobs:
     strategy:
       matrix:
         os: [windows-2022, ubuntu-24.04]
-        os: [windows-2022]
-        config: [Debug]
-        variant: [Dev]
+        config: [Debug, Release]
+        variant: [Dev, Prod]
         include:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
             shortName: Windows
             swiftshaderArtifact: "swiftshader-windows-x64"
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             shortName: Linux
             generator: "Unix Makefiles"
             cmakeEnv: "CXX=/usr/bin/g++-14"
@@ -71,7 +70,7 @@ jobs:
           extract: true
 
       - name: Configure
-        run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install
+        run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
       - name: Build and Install
         run: cmake --build build --target install --config ${{ matrix.config }}
@@ -86,7 +85,7 @@ jobs:
         run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader/${{ matrix.swiftshaderArtifact }}" "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
       - name: Upload Smoke Test Results
-        if: always()
+        if: ${{ matrix.shortName == 'Windows' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults

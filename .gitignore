@@ -11,8 +11,6 @@
 *.log
 *.DS_store
 
-!vulkan-1.dll
-
 #directories
 .vs/
 .vscode/

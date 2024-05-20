@@ -8,7 +8,7 @@
 
 namespace
 {
-constexpr auto g_validationLayers = std::array<const char*, 1>{ "VK_LAYER_KHRONOS_validation"};
+constexpr auto g_validationLayers = std::array<const char*, 1>{ "VK_LAYER_KHRONOS_validation" };
 
 auto CheckValidationLayerSupport() -> bool
 {

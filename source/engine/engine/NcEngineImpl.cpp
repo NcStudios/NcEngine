@@ -163,7 +163,6 @@ void NcEngineImpl::Run()
         time::SetDeltaTime(dt);
         input::Flush();
         m_window.ProcessSystemMessages();
-
         m_executor.RunUpdateTasks();
     };
 

@@ -64,20 +64,12 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
-    std::cerr << "SmokeTest::Load\n";
-
-    (void)world;
-    (void)modules;
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),
         [world, modules, quit = m_quitEngine](Entity, Registry*, float) mutable
         {
             static auto framesRun = 0ull;
-            
-            std::cerr << "frame" << framesRun << "\n";
-            
-
             constexpr auto framesUntilSceneChange = 60ull;
             constexpr auto framesUntilQuit = 120ull;
             ++framesRun;
