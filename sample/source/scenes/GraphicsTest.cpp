@@ -34,26 +34,26 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     std::vector<std::string> textures
     {
-        "ogre\\BaseColor.nca",
-        "ogre\\Roughness.nca",
-        "ogre\\Metallic.nca",
-        "cave\\BaseColor.nca",
-        "cave\\Roughness.nca",
-        "cave\\Metallic.nca",
-        "cave_ceiling\\BaseColor.nca",
-        "cave_ceiling\\Roughness.nca",
-        "cave_ceiling\\Metallic.nca",
-        "skeleton\\BaseColor.nca",
-        "skeleton\\Roughness.nca",
-        "skeleton\\Metallic.nca",
+        "ogre/BaseColor.nca",
+        "ogre/Roughness.nca",
+        "ogre/Metallic.nca",
+        "cave/BaseColor.nca",
+        "cave/Roughness.nca",
+        "cave/Metallic.nca",
+        "cave_ceiling/BaseColor.nca",
+        "cave_ceiling/Roughness.nca",
+        "cave_ceiling/Metallic.nca",
+        "skeleton/BaseColor.nca",
+        "skeleton/Roughness.nca",
+        "skeleton/Metallic.nca",
     };
 
     std::vector<std::string> normals
     {
-        "ogre\\Normal.nca",
-        "cave\\Normal.nca",
-        "cave_ceiling\\Normal.nca",
-        "skeleton\\Normal.nca"
+        "ogre/Normal.nca",
+        "cave/Normal.nca",
+        "cave_ceiling/Normal.nca",
+        "skeleton/Normal.nca"
     };
 
     std::vector<std::string> cubemaps
@@ -71,14 +71,14 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     std::vector<std::string> animations
     {
-        "ogre//idle.nca",
-        "ogre//attack.nca",
-        "skeleton//idle.nca",
-        "skeleton//walk_right.nca",
-        "skeleton//walk_back.nca",
-        "skeleton//walk_forward.nca",
-        "skeleton//walk_left.nca",
-        "skeleton//jump.nca",
+        "ogre/idle.nca",
+        "ogre/attack.nca",
+        "skeleton/idle.nca",
+        "skeleton/walk_right.nca",
+        "skeleton/walk_back.nca",
+        "skeleton/walk_forward.nca",
+        "skeleton/walk_left.nca",
+        "skeleton/jump.nca",
     };
 
     asset::LoadSkeletalAnimationAssets(animations);
@@ -88,31 +88,31 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     asset::LoadCubeMapAssets(cubemaps);
 
     auto ogreMaterial = graphics::PbrMaterial{
-        .baseColor  = "ogre\\BaseColor.nca",
-        .normal     = "ogre\\Normal.nca",
-        .roughness  = "ogre\\Roughness.nca",
-        .metallic   = "ogre\\Metallic.nca"
+        .baseColor  = "ogre/BaseColor.nca",
+        .normal     = "ogre/Normal.nca",
+        .roughness  = "ogre/Roughness.nca",
+        .metallic   = "ogre/Metallic.nca"
     };
 
     auto skeletonMaterial = graphics::PbrMaterial{
-        .baseColor  = "skeleton\\BaseColor.nca",
-        .normal     = "skeleton\\Normal.nca",
-        .roughness  = "skeleton\\Roughness.nca",
-        .metallic   = "skeleton\\Metallic.nca"
+        .baseColor  = "skeleton/BaseColor.nca",
+        .normal     = "skeleton/Normal.nca",
+        .roughness  = "skeleton/Roughness.nca",
+        .metallic   = "skeleton/Metallic.nca"
     };
 
     auto caveMaterial = graphics::PbrMaterial{
-        .baseColor  = "cave\\BaseColor.nca",
-        .normal     = "cave\\Normal.nca",
-        .roughness  = "cave\\Roughness.nca",
-        .metallic   = "cave\\Metallic.nca"
+        .baseColor  = "cave/BaseColor.nca",
+        .normal     = "cave/Normal.nca",
+        .roughness  = "cave/Roughness.nca",
+        .metallic   = "cave/Metallic.nca"
     };
 
     auto caveCeilingMaterial = graphics::PbrMaterial{
-        .baseColor  = "cave_ceiling\\BaseColor.nca",
-        .normal     = "cave_ceiling\\Normal.nca",
-        .roughness  = "cave_ceiling\\Roughness.nca",
-        .metallic   = "cave_ceiling\\Metallic.nca"
+        .baseColor  = "cave_ceiling/BaseColor.nca",
+        .normal     = "cave_ceiling/Normal.nca",
+        .roughness  = "cave_ceiling/Roughness.nca",
+        .metallic   = "cave_ceiling/Metallic.nca"
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
@@ -145,7 +145,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     // Ogre Animation
     {
         using namespace graphics;
-        auto& ogreAnimator = world.Emplace<SkeletalAnimator>(ogre, "ogre.nca", "ogre//idle.nca");
+        auto& ogreAnimator = world.Emplace<SkeletalAnimator>(ogre, "ogre.nca", "ogre/idle.nca");
         auto stopState = ogreAnimator.AddState(anim::Stop
         {
             .enterFrom = anim::RootState,
@@ -156,7 +156,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         {
             .enterFrom = stopState,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-            .animUid = "ogre//idle.nca",
+            .animUid = "ogre/idle.nca",
             .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .exitTo = stopState
         });
@@ -177,7 +177,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     [](Entity, Entity other, Registry* reg)
     {
         auto ogreAnim = reg->Get<graphics::SkeletalAnimator>(other);
-        ogreAnim->PlayOnceImmediate("ogre//attack.nca", graphics::anim::RootState);
+        ogreAnim->PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);
         if(auto* tag = reg->Get<Tag>(other); tag)
         {
             GameLog::Log(std::string{"Collision Enter: "} + tag->value.c_str());
@@ -187,12 +187,12 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     // Skeleton Animation
     {
         using namespace graphics;
-        auto& skelAnim = world.Emplace<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton//idle.nca");
+        auto& skelAnim = world.Emplace<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton/idle.nca");
         skelAnim.AddState(anim::Loop
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
-            .animUid = "skeleton//walk_forward.nca",
+            .animUid = "skeleton/walk_forward.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
         });
 
@@ -200,7 +200,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
-            .animUid = "skeleton//walk_left.nca",
+            .animUid = "skeleton/walk_left.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
         });
 
@@ -208,7 +208,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
-            .animUid = "skeleton//walk_back.nca",
+            .animUid = "skeleton/walk_back.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
         });
 
@@ -216,7 +216,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
-            .animUid = "skeleton//walk_right.nca",
+            .animUid = "skeleton/walk_right.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
         });
 
@@ -224,7 +224,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         {
             .enterFrom = anim::RootState,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
-            .animUid = "skeleton//jump.nca"
+            .animUid = "skeleton/jump.nca"
         });
     }
 

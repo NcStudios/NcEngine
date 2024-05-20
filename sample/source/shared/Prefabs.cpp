@@ -10,33 +10,33 @@ namespace nc::sample
 bool IsInitialized = false;
 
 graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial RedPbrMaterial{"solid_color\\Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial GreenPbrMaterial{"solid_color\\Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial BluePbrMaterial{"solid_color\\Blue.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial OrangePbrMaterial{"solid_color\\Orange.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial PurplePbrMaterial{"solid_color\\Purple.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial TealPbrMaterial{"solid_color\\Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial YellowPbrMaterial{"solid_color\\Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial RedPbrMaterial{"solid_color/Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial GreenPbrMaterial{"solid_color/Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial BluePbrMaterial{"solid_color/Blue.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial OrangePbrMaterial{"solid_color/Orange.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial PurplePbrMaterial{"solid_color/Purple.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial TealPbrMaterial{"solid_color/Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+graphics::PbrMaterial YellowPbrMaterial{"solid_color/Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 
-constexpr auto toonOverlay = "line\\overlay.nca";
+constexpr auto toonOverlay = "line/overlay.nca";
 graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial RedToonMaterial{"solid_color\\Red.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial GreenToonMaterial{"solid_color\\Green.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial BlueToonMaterial{"solid_color\\Blue.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial OrangeToonMaterial{"solid_color\\Orange.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial PurpleToonMaterial{"solid_color\\Purple.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial TealToonMaterial{"solid_color\\Teal.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial YellowToonMaterial{"solid_color\\Yellow.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial RedToonMaterial{"solid_color/Red.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial GreenToonMaterial{"solid_color/Green.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial BlueToonMaterial{"solid_color/Blue.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial OrangeToonMaterial{"solid_color/Orange.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial PurpleToonMaterial{"solid_color/Purple.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial TealToonMaterial{"solid_color/Teal.nca", toonOverlay, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial YellowToonMaterial{"solid_color/Yellow.nca", toonOverlay, asset::DefaultBaseColor, 8};
 
-constexpr auto toonHatch = "line\\Hatch3.nca";
+constexpr auto toonHatch = "line/Hatch3.nca";
 graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial RedHatchedToonMaterial{"solid_color\\Red.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color\\Green.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color\\Blue.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color\\Orange.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color\\Purple.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial TealHatchedToonMaterial{"solid_color\\Teal.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color\\Yellow.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial RedHatchedToonMaterial{"solid_color/Red.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color/Green.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color/Blue.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color/Orange.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color/Purple.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial TealHatchedToonMaterial{"solid_color/Teal.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color/Yellow.nca", toonOverlay, toonHatch, 8};
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
@@ -85,29 +85,29 @@ void InitializeResources()
 
     std::vector<std::string> textures
     {
-        "box\\BaseColor.nca",
-        "box\\Roughness.nca",
-        "line\\Hatch3.nca",
-        "line\\hatch.nca",
-        "line\\overlay.nca",
-        "logo\\BaseColor.nca",
-        "logo\\Metallic.nca",
-        "logo\\Roughness.nca",
-        "solid_color\\Blue.nca",
-        "solid_color\\Green.nca",
-        "solid_color\\Red.nca",
-        "solid_color\\Orange.nca",
-        "solid_color\\Purple.nca",
-        "solid_color\\Teal.nca",
-        "solid_color\\Yellow.nca",
-        "tree\\BaseColor.nca"
+        "box/BaseColor.nca",
+        "box/Roughness.nca",
+        "line/Hatch3.nca",
+        "line/hatch.nca",
+        "line/overlay.nca",
+        "logo/BaseColor.nca",
+        "logo/Metallic.nca",
+        "logo/Roughness.nca",
+        "solid_color/Blue.nca",
+        "solid_color/Green.nca",
+        "solid_color/Red.nca",
+        "solid_color/Orange.nca",
+        "solid_color/Purple.nca",
+        "solid_color/Teal.nca",
+        "solid_color/Yellow.nca",
+        "tree/BaseColor.nca"
     };
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
 
     std::vector<std::string> normalMaps 
     {
-        "box\\Normal.nca",
-        "logo\\Normal.nca"
+        "box/Normal.nca",
+        "logo/Normal.nca"
     };
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 }
