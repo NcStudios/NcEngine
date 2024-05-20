@@ -71,6 +71,7 @@ jobs:
           extract: true
 
       - name: Test
+        if: ${{ matrix.shortName == 'Windows' }}
         shell: bash
         run: ls -R swiftshader
 
