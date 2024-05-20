@@ -34,6 +34,3 @@ imgui.ini
 /Folder.DotSettings.user
 /.editorconfig
 /CMakeSettings.json
-
-!vkcube.exe
-!vkvia.exe
