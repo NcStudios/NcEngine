@@ -12,6 +12,9 @@ class Registry;
 /** @deprecated Use NcEngine::Registry() instead. */
 auto ActiveRegistry() -> Registry*;
 
+/** @deprecated */
+void SetActiveRegistry(Registry* registry);
+
 /** @brief Requirements for views over the registry. */
 template<class T>
 concept Viewable = PooledComponent<T> || std::same_as<T, Entity>;

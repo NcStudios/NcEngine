@@ -161,11 +161,6 @@ auto RenderPass::GetVkPass() const ->vk::RenderPass
 
 void RenderPass::RegisterAttachmentViews(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
 {
-    std::erase_if(m_frameBuffers, [index](const auto& frameBuffer)
-    {
-        return frameBuffer.index == index;
-    });
-
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
         vk::FramebufferCreateFlags(),           // FramebufferCreateFlags

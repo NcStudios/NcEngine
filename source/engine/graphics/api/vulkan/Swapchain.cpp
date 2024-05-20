@@ -62,23 +62,6 @@ auto DetermineImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) -> uint
     return imageCount;
 }
 
-auto GetSwapChainImages(vk::Device device, vk::SwapchainKHR swapChain) -> std::vector<vk::Image>
-{
-    auto imageCount = uint32_t{};
-    if (device.getSwapchainImagesKHR(swapChain, &imageCount, nullptr) != vk::Result::eSuccess)
-    {
-        throw nc::NcError("Could not get swapchain images.");
-    }
-
-    auto images = std::vector<vk::Image>(imageCount);
-    if (device.getSwapchainImagesKHR(swapChain, &imageCount, images.data()) != vk::Result::eSuccess)
-    {
-        throw nc::NcError("Could not get swapchain images.");
-    }
-
-    return images;
-}
-
 auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device device, vk::Format format) -> std::vector<vk::UniqueImageView>
 {
     auto imageViews = std::vector<vk::UniqueImageView>{};
@@ -178,7 +161,6 @@ namespace nc::graphics::vulkan
     {
         const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
-
         const auto presentInfo = vk::PresentInfoKHR
         (
             1u,             // WaitSemaphoreCount
@@ -189,7 +171,7 @@ namespace nc::graphics::vulkan
             nullptr         // PResults
         );
 
-        const auto result = queue.presentKHR(&presentInfo);
+        const auto result = queue.presentKHR(presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
             return false;
@@ -253,7 +235,19 @@ namespace nc::graphics::vulkan
 
         m_swapChainImageFormat = surfaceFormat.format;
         m_swapChainExtent = extent;
-        m_swapChainImages = ::GetSwapChainImages(m_device, m_swapChain.get());
+
+        auto scImageCount = uint32_t{};
+        if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &scImageCount, nullptr) != vk::Result::eSuccess)
+        {
+            throw nc::NcError("Could not get swapchain images.");
+        }
+
+        m_swapChainImages.resize(scImageCount);
+        if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &scImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)
+        {
+            throw nc::NcError("Could not get swapchain images.");
+        }
+
         m_swapChainImageViews = ::CreateSwapChainImageViews(m_swapChainImages, m_device, surfaceFormat.format);
     }
 

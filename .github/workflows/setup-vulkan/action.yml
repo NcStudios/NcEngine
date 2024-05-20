@@ -36,7 +36,7 @@ runs:
     - name: Build Vulkan-Loader
       shell: bash
       run: |
-        cmake -S Vulkan-Loader -B Vulkan-Loader/build -DVULKAN_HEADERS_INSTALL_DIR=$VK_INSTALL_PATH
+        cmake -S Vulkan-Loader -B Vulkan-Loader/build -DVULKAN_HEADERS_INSTALL_DIR=$VK_INSTALL_PATH -DLOADER_USE_UNSAFE_FILE_SEARCH=ON
         cmake --build Vulkan-Loader/build --config Release
         cmake --install Vulkan-Loader/build --prefix $VK_INSTALL_PATH
 

@@ -72,7 +72,7 @@ mat4 ApplyAnimation(uint animIndex)
 
 void main() 
 {
-    ObjectData object = objectBuffer.objects[gl_BaseInstance];
+    ObjectData object = objectBuffer.objects[gl_InstanceIndex];
 
     vec4 animatedPos = vec4(1.0f);
     mat4 boneTransform = mat4(1.0f);
