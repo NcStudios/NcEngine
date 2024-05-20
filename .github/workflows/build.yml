@@ -56,12 +56,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xorg-dev xvfb
 
-      - name: Setup Display
-        if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
-        run: |
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          echo "DISPLAY=:99" >> $GITHUB_ENV
-
       - name: Setup Vulkan SDK
         uses: ./.github/workflows/setup-vulkan
         with:
@@ -93,6 +87,12 @@ jobs:
         with:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-TestResults
           path: build/test/TestResults.xml
+
+      - name: Setup Display
+        if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Run Smoke Test
         if: ${{ matrix.variant == 'Dev' }}
