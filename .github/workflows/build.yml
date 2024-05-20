@@ -50,11 +50,17 @@ jobs:
         if: ${{ matrix.shortName == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install X11
+      - name: Install dependencies
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install xorg-dev
+          sudo apt-get install -y xorg-dev xvfb
+
+      - name: Setup Display
+        if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Setup Vulkan SDK
         uses: ./.github/workflows/setup-vulkan
