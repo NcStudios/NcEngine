@@ -363,7 +363,7 @@ void PointLightUIWidget(graphics::PointLight& light)
     constexpr auto max = 1200.0f;
     ui::InputColor3(light.ambientColor, "ambientColor");
     ui::InputColor3(light.diffuseColor, "diffuseColor");
-    ui::DragFloat(light.diffuseIntensity, "diffuseIntensity", step, min, max);
+    ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)

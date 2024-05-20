@@ -16,17 +16,17 @@ struct PointLight final : public ComponentBase
     explicit PointLight(Entity entity,
                         const Vector3& ambientColor_ = Vector3{1.0f, 0.9f, 0.9f},
                         const Vector3& diffuseColor_ = Vector3{1.0f, 0.9f, 0.9f},
-                        float diffuseIntensity_ = 600.0f) noexcept
+                        float radius_ = 600.0f) noexcept
         : ComponentBase{entity},
           ambientColor{ambientColor_},
           diffuseColor{diffuseColor_},
-          diffuseIntensity{diffuseIntensity_}
+          radius{radius_}
     {
     }
 
     Vector3 ambientColor;
     Vector3 diffuseColor;
-    float diffuseIntensity;
+    float radius;
 };
 } // namespace nc::graphics
 
