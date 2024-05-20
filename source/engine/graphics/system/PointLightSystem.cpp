@@ -41,7 +41,7 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
                                   m_useShadows,
                                   light->ambientColor,
                                   light->diffuseColor,
-                                  light->diffuseIntensity);
+                                  light->radius);
     }
 
     m_pointLightBuffer.Bind(m_pointLightData, currentFrameIndex);

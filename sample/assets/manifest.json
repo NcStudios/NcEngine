@@ -197,6 +197,7 @@
             "sourcePath": "raw/image/skeleton/Metallic.png",
             "assetName": "texture/skeleton/Metallic"
         },
+        
         {
             "sourcePath": "raw/image/solid_color/Blue.png",
             "assetName": "texture/solid_color/Blue"
@@ -224,6 +225,134 @@
         {
             "sourcePath": "raw/image/solid_color/Yellow.png",
             "assetName": "texture/solid_color/Yellow"
+        },
+        {
+            "sourcePath": "raw/image/sphere/denim/BaseColor.png",
+            "assetName": "texture/denim/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/denim/Normal.png",
+            "assetName": "texture/denim/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/denim/Roughness.png",
+            "assetName": "texture/denim/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/denim/Metallic.png",
+            "assetName": "texture/denim/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/marble/BaseColor.png",
+            "assetName": "texture/marble/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/marble/Normal.png",
+            "assetName": "texture/marble/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/marble/Roughness.png",
+            "assetName": "texture/marble/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/marble/Metallic.png",
+            "assetName": "texture/marble/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/metal/BaseColor.png",
+            "assetName": "texture/metal/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/metal/Normal.png",
+            "assetName": "texture/metal/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/metal/Roughness.png",
+            "assetName": "texture/metal/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/metal/Metallic.png",
+            "assetName": "texture/metal/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/plastic/BaseColor.png",
+            "assetName": "texture/plastic/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/plastic/Normal.png",
+            "assetName": "texture/plastic/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/plastic/Roughness.png",
+            "assetName": "texture/plastic/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/plastic/Metallic.png",
+            "assetName": "texture/plastic/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/silver/BaseColor.png",
+            "assetName": "texture/silver/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/silver/Normal.png",
+            "assetName": "texture/silver/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/silver/Roughness.png",
+            "assetName": "texture/silver/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/silver/Metallic.png",
+            "assetName": "texture/silver/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/stone/BaseColor.png",
+            "assetName": "texture/stone/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/stone/Normal.png",
+            "assetName": "texture/stone/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/stone/Roughness.png",
+            "assetName": "texture/stone/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/stone/Metallic.png",
+            "assetName": "texture/stone/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/tile/BaseColor.png",
+            "assetName": "texture/tile/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/tile/Normal.png",
+            "assetName": "texture/tile/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/tile/Roughness.png",
+            "assetName": "texture/tile/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/tile/Metallic.png",
+            "assetName": "texture/tile/Metallic"
+        },
+        {
+            "sourcePath": "raw/image/sphere/wood/BaseColor.png",
+            "assetName": "texture/wood/BaseColor"
+        },
+        {
+            "sourcePath": "raw/image/sphere/wood/Normal.png",
+            "assetName": "texture/wood/Normal"
+        },
+        {
+            "sourcePath": "raw/image/sphere/wood/Roughness.png",
+            "assetName": "texture/wood/Roughness"
+        },
+        {
+            "sourcePath": "raw/image/sphere/wood/Metallic.png",
+            "assetName": "texture/wood/Metallic"
         },
         {
             "sourcePath": "raw/image/line/hatch.jpg",

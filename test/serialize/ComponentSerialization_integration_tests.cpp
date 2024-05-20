@@ -207,7 +207,7 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.ambientColor, actual.ambientColor);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
-    EXPECT_EQ(expected.diffuseIntensity, actual.diffuseIntensity);
+    EXPECT_EQ(expected.radius, actual.radius);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
