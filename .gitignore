@@ -6,6 +6,7 @@
 *.a
 *.lib
 *.pdb
+*.so
 *.exe
 *.out
 *.log
