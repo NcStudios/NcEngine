@@ -29,11 +29,8 @@ auto CreateLogicalDevice(vk::PhysicalDevice physicalDevice,
     deviceFeatures.setSamplerAnisotropy(VK_TRUE);
     deviceFeatures.setFillModeNonSolid(VK_TRUE);
 
-    auto vulkan11Features = vk::PhysicalDeviceVulkan11Features{};
-    vulkan11Features.setShaderDrawParameters(VK_TRUE);
-
     auto indexingFeatures = vk::PhysicalDeviceDescriptorIndexingFeaturesEXT{};
-    indexingFeatures.setPNext(&vulkan11Features);
+    indexingFeatures.setPNext(nullptr);
     indexingFeatures.setDescriptorBindingPartiallyBound(VK_TRUE);
     indexingFeatures.setRuntimeDescriptorArray(VK_TRUE);
 
