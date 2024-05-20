@@ -70,6 +70,10 @@ jobs:
           out-file-path: 'swiftshader'
           extract: true
 
+      - name: Test
+        shell: bash
+        run: ls -R swiftshader
+
       - name: Configure
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
@@ -93,7 +97,7 @@ jobs:
         run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader/${{ matrix.swiftshaderArtifact }}" "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
       - name: Upload Smoke Test Results
-        if: ${{ matrix.shortName == 'Windows' && matrix.variant == 'Dev' }}
+        if: ${{ !cancelled() && matrix.shortName == 'Windows' && matrix.variant == 'Dev' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults
