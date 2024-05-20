@@ -19,6 +19,7 @@ if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
     SWIFTSHADER_LIB=vk_swiftshader.dll
 elif [[ "$OSTYPE" == "linux-gnu" ]]; then
     SWIFTSHADER_LIB=libvk_swiftshader.so
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ENGINE_INSTALL_DIR/sample"
 else
   echo "Unknown OS: $OSTYPE"
   exit 1
