@@ -8,12 +8,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-
 namespace
 {
 auto DetermineFormat(std::span<const vk::SurfaceFormatKHR> availableFormats) -> vk::SurfaceFormatKHR
@@ -92,16 +86,6 @@ auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device 
         });
     });
 
-    std::cerr << "CreateSwapChainImageViews" << std::endl;
-
-    for (auto& imageView : imageViews)
-    {
-        if (imageView)
-        {
-            std::cerr << "Image View" << std::endl;
-        }
-    }
-
     return imageViews;
 }
 } // anonymous namespace
@@ -173,38 +157,10 @@ namespace nc::graphics::vulkan
         m_imagesInFlightFences.resize(m_swapChainImages.size(), nullptr);
     }
 
-    auto do_present(vk::Queue& queue, const vk::PresentInfoKHR& info) -> vk::Result
-    {
-        __try
-        {
-            return queue.presentKHR(info);
-        }
-        __except(EXCEPTION_EXECUTE_HANDLER)
-        {
-            std::cerr << "caught exception\n";
-            std::terminate();
-        }
-    }
-
     auto Swapchain::PresentImageToSwapChain(PerFrameGpuContext* currentFrame, vk::Queue queue, uint32_t imageIndex) -> bool
     {
-        std::cerr << "begin PresentImageToSwapChain\n";
-
-        std::cerr << "queue: " << queue.operator bool() << '\n';
-
-        std::cerr << "RenderFinishedSemaphore\n";
-
         const auto waitSemaphore = currentFrame->RenderFinishedSemaphore();
-
-        std::cerr << "m_swapChain: " << (bool)m_swapChain << '\n';
-
         vk::SwapchainKHR swapChains[] = {m_swapChain.get()};
-
-        std::cerr << "create PresentInfoKHR\n"
-                  << "  waitSemaphore: " << waitSemaphore.operator bool() << '\n'
-                  << "  swapChains[0]: " << swapChains[0].operator bool() << '\n'
-                  << "  imageIndex: " << imageIndex << '\n';
-
         const auto presentInfo = vk::PresentInfoKHR
         (
             1u,             // WaitSemaphoreCount
@@ -215,23 +171,16 @@ namespace nc::graphics::vulkan
             nullptr         // PResults
         );
 
-        std::cerr << "set PresentKHR\n";
-        const auto result = do_present(queue, presentInfo);
-        // const auto result = queue.presentKHR(presentInfo);
+        const auto result = queue.presentKHR(presentInfo);
         if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         {
-            std::cerr << "end PresentImageToSwapChain\n";
-
             return false;
         }
 
         if (result != vk::Result::eSuccess)
         {
-            std::cerr << "result != eSuccess\n";
             throw NcError("Could not present to the swapchain.");
         }
-
-        std::cerr << "end PresentImageToSwapChain\n";
 
         return true;
     }
@@ -292,8 +241,6 @@ namespace nc::graphics::vulkan
         {
             throw nc::NcError("Could not get swapchain images.");
         }
-
-        std::cerr << "--image count-- " << scImageCount << '\n';
 
         m_swapChainImages.resize(scImageCount);
         if (m_device.getSwapchainImagesKHR(m_swapChain.get(), &scImageCount, m_swapChainImages.data()) != vk::Result::eSuccess)

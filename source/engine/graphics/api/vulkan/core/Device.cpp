@@ -5,7 +5,6 @@
 #include "ncutility/NcError.h"
 
 #include <algorithm>
-#include <iostream>
 
 namespace
 {
@@ -56,9 +55,6 @@ auto Device::Create(const Instance& instance, vk::SurfaceKHR surface,
     const auto [physicalDevice, queueIndices] = detail::SelectPhysicalDevice(
         instance.GetPhysicalDevices(), surface, requiredExtensions
     );
-
-    auto properties = physicalDevice.getProperties();
-    std::cout << "Physical Device: " << properties.deviceName << std::endl;
 
     return std::make_unique<Device>(physicalDevice, queueIndices, requiredExtensions);
 }

@@ -13,8 +13,6 @@
 #include <sstream>
 #include <thread>
 
-#include <iostream>
-
 namespace
 {
 void LogConfig(const nc::config::Config& config)
@@ -162,14 +160,11 @@ void NcEngineImpl::Run()
     auto* ncScene = m_modules->Get<NcScene>();
     auto update = [this](float dt)
     {
-        std::cerr << "update callback\n";
         time::SetDeltaTime(dt);
         input::Flush();
         m_window.ProcessSystemMessages();
 
-        std::cerr << "RunUpdateTasks\n";
         m_executor.RunUpdateTasks();
-        std::cerr << "End update callback\n";
     };
 
     while(m_isRunning)
@@ -177,12 +172,9 @@ void NcEngineImpl::Run()
         OPTICK_FRAME("Main Thread");
         if (m_timer.Tick(update))
         {
-            std::cerr << "main thread tick\n";
-
             m_executor.RunRenderTasks();
             if (ncScene->IsTransitionScheduled())
             {
-                std::cerr << "changing scene\n";
                 ClearScene();
                 ncScene->LoadQueuedScene(ecs::Ecs{*m_registry}, *m_modules);
             }

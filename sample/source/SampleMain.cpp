@@ -7,31 +7,10 @@
 #include "ncengine/utility/Log.h"
 
 #include <iostream>
-
-
-#include <windows.h>
 #include <sstream>
-
-LONG handler(_EXCEPTION_POINTERS* ExceptionInfo)
-{
-    std::cerr << "handler -- Fatal: Unhandled exception 0x" << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << '\n';
-
-    return EXCEPTION_CONTINUE_SEARCH;
-}
-
-LONG vectored_handler(_EXCEPTION_POINTERS* ExceptionInfo)
-{
-    std::cerr << "vectored_handler -- Fatal: Unhandled exception 0x" << std::hex << ExceptionInfo->ExceptionRecord->ExceptionCode << '\n';
-    return EXCEPTION_CONTINUE_SEARCH;
-}
 
 int main(int argc, char** argv)
 {
-    SetUnhandledExceptionFilter(handler);
-    AddVectoredExceptionHandler(1, vectored_handler);
-
-    std::cerr << "starting main\n";
-
     const auto runSmokeTest = [argc, argv]()
     {
         return argc > 1 && argv[1] == std::string_view{"--run-test"};
@@ -41,16 +20,12 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cerr << "initializing engine\n";
-
         const auto config = nc::config::Load("config.ini");
         engine = nc::InitializeNcEngine(config);
         nc::sample::InitializeResources();
 
         if (runSmokeTest)
         {
-            std::cerr << "loading SmokeTest\n";
-
             engine->Start(std::make_unique<nc::sample::SmokeTest>(
                 [instance = engine.get()](){ instance->Stop(); }
             ));
@@ -72,8 +47,6 @@ int main(int argc, char** argv)
         std::cerr << "SampleMain.cpp - unknown exception\n";
         return -1;
     }
-
-    std::cerr << "exiting main\n";
 
     return 0;
 }

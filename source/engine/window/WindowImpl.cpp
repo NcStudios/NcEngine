@@ -62,11 +62,9 @@ namespace nc::window
         if (!glfwInit())
         {
             const char* error = nullptr;
-            auto code = glfwGetError(&error);
+            const auto code = glfwGetError(&error);
             throw NcError(fmt::format("Failed to initialize GLFW: {} ({}).", error, code));
         }
-
-        // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

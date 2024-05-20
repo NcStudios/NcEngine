@@ -21,7 +21,7 @@ jobs:
   Build:
     strategy:
       matrix:
-        # os: [windows-2022, ubuntu-24.04]
+        os: [windows-2022, ubuntu-24.04]
         os: [windows-2022]
         config: [Debug]
         variant: [Dev]
@@ -30,14 +30,14 @@ jobs:
             generator: "Visual Studio 17 2022"
             shortName: Windows
             swiftshaderArtifact: "swiftshader-windows-x64"
-          # - os: ubuntu-22.04
-          #   shortName: Linux
-          #   generator: "Unix Makefiles"
-          #   cmakeEnv: "CXX=/usr/bin/g++-14"
+          - os: ubuntu-22.04
+            shortName: Linux
+            generator: "Unix Makefiles"
+            cmakeEnv: "CXX=/usr/bin/g++-14"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
-          # - variant: Prod
-          #   cmakeArgs: "-DNC_PROD_BUILD=ON"
+          - variant: Prod
+            cmakeArgs: "-DNC_PROD_BUILD=ON"
 
     name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}
     runs-on: ${{ matrix.os }}
@@ -50,16 +50,16 @@ jobs:
         if: ${{ matrix.shortName == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1
 
-      # - name: Install X11
-      #   if: ${{ matrix.shortName == 'Linux' }}
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install xorg-dev
+      - name: Install X11
+        if: ${{ matrix.shortName == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install xorg-dev
 
       - name: Setup Vulkan SDK
         uses: ./.github/workflows/setup-vulkan
         with:
-          version: 1.3.266
+          version: 1.3.261.1
 
       - name: Download SwiftShader
         uses: robinraju/release-downloader@v1.10
@@ -70,57 +70,18 @@ jobs:
           out-file-path: 'swiftshader'
           extract: true
 
-      # - name: Debug
-      #   uses: mxschmitt/action-tmate@v3
-
-      # - name: Run VkCube
-      #   shell: bash
-      #   run: |
-      #     cat <<'EOF' > vk_swiftshader_driver.json
-      #     {
-      #       "file_format_version": "1.0.0",
-      #       "ICD": {
-      #         "library_path": "D:/a/NcEngine/NcEngine/swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader.dll",
-      #         "api_version": "1.3"
-      #       }
-      #     }
-      #     EOF
-
-      #     cp ./vkcube.exe $VULKAN_SDK/bin
-
-      #     export VK_DRIVER_FILES="${{ github.workspace }}/vk_swiftshader_driver.json"
-      #     echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
-      #     cat $VK_DRIVER_FILES
-
-      #     mkdir vk_out
-      #     ./vkvia.exe --output_path vk_out
-      #     # ./vkcube.exe --c 10 --suppress_popups
-
-      - name: Testing
-        shell: bash
-        run: |
-          ls "swiftshader/"
-          ls "swiftshader/swiftshader-windows-x64"
-
-
       - name: Configure
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build and Install
         run: cmake --build build --target install --config ${{ matrix.config }}
 
-      # - name: Run Tests
-      #   working-directory: ${{github.workspace}}/build/test
-      #   run: ctest -V --output-on-failure --output-junit TestResults.xml
-
-      # - name: Run Sample
-      #   working-directory: ${{ github.workspace }}/install/sample
-      #   run: |
-      #     $env:VK_ICD_FILENAMES="swiftshader/${{ matrix.swiftshaderArtifact }}/vk_swiftshader_icd.json"
-      #     .\\Sample.exe --run-test 2>&1 > ".\\SmokeTestResults.txt"
-      #     $LastExitCode >> ".\\SmokeTestResults.txt"
+      - name: Run Tests
+        working-directory: ${{github.workspace}}/build/test
+        run: ctest -V --output-on-failure --output-junit TestResults.xml
 
       - name: Run Smoke Test
+        if: ${{ matrix.shortName == 'Windows' }}
         shell: bash
         run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader/${{ matrix.swiftshaderArtifact }}" "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
@@ -132,32 +93,30 @@ jobs:
           path: |
             install/sample/SmokeTestResults.txt
             install/sample/Sample.log
-            debug_install/sample/DebugSmokeTestResults.txt
-            vk_out/vkvia.html
 
-  #     - name: Upload Test Results
-  #       if: always()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-TestResults
-  #         path: build/test/TestResults.xml
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-TestResults
+          path: build/test/TestResults.xml
 
-  # Publish-Test-Results:
-  #   runs-on: ubuntu-latest
-  #   needs: [Build]
-  #   permissions:
-  #     checks: write
-  #     pull-requests: write
-  #   if: always()
+  Publish-Test-Results:
+    runs-on: ubuntu-latest
+    needs: [Build]
+    permissions:
+      checks: write
+      pull-requests: write
+    if: always()
 
-  #   steps:
-  #   - name: Download Results
-  #     uses: actions/download-artifact@v4
-  #     with:
-  #       path: artifacts
+    steps:
+    - name: Download Results
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
 
-  #   - name: Publish Results
-  #     uses: mikepenz/action-junit-report@v4
-  #     if: always()
-  #     with:
-  #       report_paths: 'artifacts/**/*.xml'
+    - name: Publish Results
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        report_paths: 'artifacts/**/*.xml'
