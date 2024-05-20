@@ -76,7 +76,7 @@ void main()
 {
     // Calculate the vertex's position in the view space of the point light
     // Take the world space position of the vertex (vertex position * model matrix for that vertex's object), then multiply by the view projection of the light.
-    ObjectData object = objectBuffer.objects[gl_BaseInstance];
+    ObjectData object = objectBuffer.objects[gl_InstanceIndex];
     vec4 animatedPos = vec4(1.0f);
     mat4 boneTransform = mat4(1.0f);
     
@@ -90,6 +90,6 @@ void main()
         animatedPos = vec4(inPos, 1.0);
     }
 
-    vec4 worldPosOfVertex = objectBuffer.objects[gl_BaseInstance].model * animatedPos;
+    vec4 worldPosOfVertex = objectBuffer.objects[gl_InstanceIndex].model * animatedPos;
     gl_Position = pc.lightViewProj * worldPosOfVertex;
 }

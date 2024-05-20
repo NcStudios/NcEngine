@@ -13,10 +13,14 @@ auto ActiveRegistry() -> Registry*
     return g_registry;
 }
 
+void SetActiveRegistry(Registry* registry)
+{
+    g_registry = registry;
+}
+
 Registry::Registry(ecs::ComponentRegistry& impl)
     : m_impl{&impl},
       m_ecs{impl}
 {
-    g_registry = this;
 }
 } // namespace nc
