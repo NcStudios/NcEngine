@@ -47,6 +47,7 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
         FILES_MATCHING REGEX ".*\.(spv)"
 )
 install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
+                    ${PROJECT_SOURCE_DIR}/sample/smoke_test_config.ini
         DESTINATION sample
 )
 if(${NC_PROFILING_ENABLED})

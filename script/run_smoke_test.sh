@@ -31,7 +31,7 @@ export VK_DRIVER_FILES="$ENGINE_INSTALL_DIR/sample/vk_swiftshader_driver.json"
 echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
 cat $VK_DRIVER_FILES
 
-./Sample --run-test > "$OUT_FILE" 2>&1
+./Sample --run-test --config-path smoke_test_config.ini > "$OUT_FILE" 2>&1
 EXIT_CODE=$?
 echo $EXIT_CODE
 exit $EXIT_CODE

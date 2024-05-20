@@ -99,7 +99,7 @@ jobs:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults
           path: |
             install/sample/SmokeTestResults.txt
-            install/sample/Sample.log
+            install/sample/SmokeTest.log
 
   Publish-Test-Results:
     runs-on: ubuntu-latest
