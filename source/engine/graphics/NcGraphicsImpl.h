@@ -41,8 +41,7 @@ class NcGraphicsImpl : public NcGraphics
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void Clear() noexcept override;
         void Run();
-
-        void OnResize(float width, float height, bool isMinimized);
+        void OnResize(const Vector2& dimensions, bool isMinimized);
 
     private:
         Registry* m_registry;
@@ -51,7 +50,7 @@ class NcGraphicsImpl : public NcGraphics
         AssetResources m_assetResources;
         PostProcessResources m_postProcessResources;
         SystemResources m_systemResources;
-        Connection<float, float, bool> m_onResizeConnection;
+        Connection<const Vector2&, bool> m_onResizeConnection;
     };
 } // namespace graphics
 } // namespace nc

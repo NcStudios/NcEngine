@@ -61,7 +61,7 @@ namespace nc::window
                            Signal<>& quit)
         : m_onResizeReceivers{},
           m_dimensions{},
-          EngineDisableRunningCallback{&quit}
+          m_quit{&quit}
     {
         g_instance = this;
 
@@ -126,6 +126,14 @@ namespace nc::window
     {
         m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+        glfwSetWindowSize(m_window, width, height);
+        const auto minimized = static_cast<bool>(glfwGetWindowAttrib(m_window, GLFW_ICONIFIED));
+        m_onResize.Emit(m_dimensions, minimized);
+
+        for(auto receiver : m_onResizeReceivers)
+        {
+            receiver->OnResize(m_dimensions);
+        }
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -143,22 +151,9 @@ namespace nc::window
         }
     }
 
-    void WindowImpl::InvokeResizeReceivers(GLFWwindow* window, int width, int height)
-    {
-        int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
-        m_onResize.Emit(static_cast<float>(width), static_cast<float>(height), minimized);
-
-        for(auto receiver : m_onResizeReceivers)
-        {
-            receiver->OnResize(m_dimensions);
-        }
-    }
-
-    void WindowImpl::ProcessResizeEvent(GLFWwindow* window, int width, int height)
+    void WindowImpl::ProcessResizeEvent(GLFWwindow*, int width, int height)
     {
         g_instance->SetDimensions(width, height);
-        glfwSetWindowSize(window, width, height);
-        g_instance->InvokeResizeReceivers(window, width, height);
     }
 
     void WindowImpl::ProcessSetContentScaleEvent(GLFWwindow*, float x, float y)
@@ -225,6 +220,6 @@ namespace nc::window
     void WindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)
     {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-        g_instance->EngineDisableRunningCallback->Emit();
+        g_instance->m_quit->Emit();
     }
 } // end namespace nc::window

@@ -53,9 +53,7 @@ class NcWindow : public Module
 
         virtual auto GetWindowHandle() const noexcept -> GLFWwindow* = 0;
 
-        virtual auto OnResize() noexcept -> Signal<float, float, bool>& = 0;
-        // virtual void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept = 0;
-
+        virtual auto OnResize() noexcept -> Signal<const Vector2&, bool>& = 0;
 
         virtual void ProcessSystemMessages() = 0;
 };

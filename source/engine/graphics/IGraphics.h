@@ -5,6 +5,7 @@
 namespace nc
 {
 class Registry;
+struct Vector2;
 
 namespace asset
 {
@@ -39,7 +40,7 @@ class IGraphics
         virtual auto CurrentFrameIndex() -> uint32_t = 0;
         virtual void DrawFrame(const PerFrameRenderState& state) = 0;
         virtual void FrameEnd() = 0;
-        virtual void OnResize(float width, float height, bool isMinimized) = 0;
+        virtual void OnResize(const Vector2& dimensions, bool isMinimized) = 0;
         virtual auto PrepareFrame() -> bool = 0;
 };
 

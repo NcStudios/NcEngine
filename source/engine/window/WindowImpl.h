@@ -38,12 +38,10 @@ class WindowImpl : public NcWindow
         auto GetDimensions() const noexcept -> const Vector2& override { return m_dimensions; }
         auto GetScreenExtent() const noexcept -> const Vector2& override { return m_screenExtent; }
         auto GetContentScale() const noexcept -> const Vector2& override { return m_contentScale; }
-        auto OnResize() noexcept -> Signal<float, float, bool>& override { return m_onResize; }
+        auto OnResize() noexcept -> Signal<const Vector2&, bool>& override { return m_onResize; }
 
-        // void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept override;
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
-        void InvokeResizeReceivers(GLFWwindow* window, int width, int height);
 
         void ProcessSystemMessages() override;
 
@@ -63,8 +61,8 @@ class WindowImpl : public NcWindow
         Vector2 m_screenExtent;
         Vector2 m_contentScale;
         GLFWwindow* m_window;
-        Signal<float, float, bool> m_onResize;
-        Signal<>* EngineDisableRunningCallback;
+        Signal<const Vector2&, bool> m_onResize;
+        Signal<>* m_quit;
 };
 } // end namespace window
 } // end namespace nc

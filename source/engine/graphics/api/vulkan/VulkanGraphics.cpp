@@ -84,9 +84,9 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
     m_device->VkDevice().waitIdle();
 }
 
-void VulkanGraphics::OnResize(float width, float height, bool isMinimized)
+void VulkanGraphics::OnResize(const Vector2& dimensions, bool isMinimized)
 {
-    m_dimensions = Vector2{ width, height };
+    m_dimensions = dimensions;
     m_isMinimized = isMinimized;
     Resize(m_dimensions);
 }

@@ -240,9 +240,9 @@ namespace nc::graphics
         m_graphics->FrameEnd();
     }
 
-    void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
+    void NcGraphicsImpl::OnResize(const Vector2& dimensions, bool isMinimized)
     {
-        m_systemResources.cameras.Get()->UpdateProjectionMatrix(width, height);
-        m_graphics->OnResize(width, height, isMinimized);
+        m_systemResources.cameras.Get()->UpdateProjectionMatrix(dimensions.x, dimensions.y);
+        m_graphics->OnResize(dimensions, isMinimized);
     }
 } // namespace nc::graphics
