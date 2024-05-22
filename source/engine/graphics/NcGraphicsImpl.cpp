@@ -12,13 +12,23 @@
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 
+#include "imgui/imgui.h"
 #include "optick.h"
 
 namespace
 {
     struct NcGraphicsStub : nc::graphics::NcGraphics
     {
-        NcGraphicsStub(nc::Registry*) {}
+        NcGraphicsStub(nc::Registry*)
+        {
+            // client app may still make imgui calls (font loading, etc.), so we need a context
+            ImGui::CreateContext();
+        }
+
+        ~NcGraphicsStub() noexcept
+        {
+            ImGui::DestroyContext();
+        }
 
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks& render)
         {
@@ -28,7 +38,7 @@ namespace
                 []{}
             );
 
-            render.Add(
+            update.Add(
                 nc::update_task_id::ParticleEmitterSync,
                 "ParticleEmitterSync(stub)",
                 []{},

@@ -1,78 +1,78 @@
 {
     "globalOptions": {
-        "outputDirectory": ".\\nca"
+        "outputDirectory": "./nca"
     },
     "audio-clip": [
         {
-            "sourcePath": "raw\\sound\\DefaultAudioClip.wav",
-            "assetName": "audio_clip\\DefaultAudioClip"
+            "sourcePath": "raw/sound/DefaultAudioClip.wav",
+            "assetName": "audio_clip/DefaultAudioClip"
         }
     ],
     "concave-collider": [
         {
-            "sourcePath": "raw\\model\\DefaultPlane.fbx",
-            "assetName": "concave_collider\\DefaultConcaveCollider"
+            "sourcePath": "raw/model/DefaultPlane.fbx",
+            "assetName": "concave_collider/DefaultConcaveCollider"
         }
     ],
     "cube-map": [
         {
-            "sourcePath": "raw\\image\\DefaultSkybox.png",
-            "assetName": "cube_map\\DefaultSkyboxCubeMap"
+            "sourcePath": "raw/image/DefaultSkybox.png",
+            "assetName": "cube_map/DefaultSkyboxCubeMap"
         }
     ],
     "hull-collider": [
         {
-            "sourcePath": "raw\\model\\DefaultCube.fbx",
-            "assetName": "hull_collider\\DefaultHullCollider"
+            "sourcePath": "raw/model/DefaultCube.fbx",
+            "assetName": "hull_collider/DefaultHullCollider"
         }
     ],
     "mesh": [
         {
-            "sourcePath": "raw\\model\\DefaultCapsule.fbx",
-            "assetName": "mesh\\DefaultCapsule"
+            "sourcePath": "raw/model/DefaultCapsule.fbx",
+            "assetName": "mesh/DefaultCapsule"
         },
         {
-            "sourcePath": "raw\\model\\DefaultCube.fbx",
-            "assetName": "mesh\\DefaultCube"
+            "sourcePath": "raw/model/DefaultCube.fbx",
+            "assetName": "mesh/DefaultCube"
         },
         {
-            "sourcePath": "raw\\model\\DefaultPlane.fbx",
-            "assetName": "mesh\\DefaultPlane"
+            "sourcePath": "raw/model/DefaultPlane.fbx",
+            "assetName": "mesh/DefaultPlane"
         },
         {
-            "sourcePath": "raw\\model\\DefaultSphere.fbx",
-            "assetName": "mesh\\DefaultSphere"
+            "sourcePath": "raw/model/DefaultSphere.fbx",
+            "assetName": "mesh/DefaultSphere"
         },
         {
-            "sourcePath": "raw\\model\\DefaultSkybox.fbx",
-            "assetName": "mesh\\DefaultSkyboxMesh"
+            "sourcePath": "raw/model/DefaultSkybox.fbx",
+            "assetName": "mesh/DefaultSkyboxMesh"
         }
     ],
     "texture": [
         {
-            "sourcePath": "raw\\image\\DefaultBaseColor.png",
-            "assetName": "texture\\DefaultBaseColor"
+            "sourcePath": "raw/image/DefaultBaseColor.png",
+            "assetName": "texture/DefaultBaseColor"
         },
         {
-            "sourcePath": "raw\\image\\DefaultMetallic.png",
-            "assetName": "texture\\DefaultMetallic"
+            "sourcePath": "raw/image/DefaultMetallic.png",
+            "assetName": "texture/DefaultMetallic"
         },
         {
-            "sourcePath": "raw\\image\\DefaultNormal.png",
-            "assetName": "texture\\DefaultNormal"
+            "sourcePath": "raw/image/DefaultNormal.png",
+            "assetName": "texture/DefaultNormal"
         },
         {
-            "sourcePath": "raw\\image\\DefaultParticle.png",
-            "assetName": "texture\\DefaultParticle"
+            "sourcePath": "raw/image/DefaultParticle.png",
+            "assetName": "texture/DefaultParticle"
         }
     ],
     "skeletal-animation": [
         {
-            "sourcePath": "raw\\skeletal_animation\\DefaultCube.fbx",
+            "sourcePath": "raw/skeletal_animation/DefaultCube.fbx",
             "assetNames": [
                 {
                     "subResourceName" : "Armature|DefaultCubeAnimation",
-                    "assetName" : "skeletal_animation\\DefaultCubeAnimation"
+                    "assetName" : "skeletal_animation/DefaultCubeAnimation"
                 }
             ]
         }
