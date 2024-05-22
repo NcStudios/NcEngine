@@ -7,12 +7,13 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/NcEcs.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/math/Random.h"
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/utility/Log.h"
 
 /** @todo #363 Move factories to public headers and include those instead. */
-#include "graphics/NcGraphicsImpl.h"
 #include "physics/NcPhysicsImpl.h"
 
 namespace
@@ -37,11 +38,13 @@ namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
                          SystemEvents& events,
-                         window::WindowImpl* window,
                          const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = std::make_unique<nc::ModuleRegistry>();
+    moduleRegistry->Register(nc::window::BuildWindowModule(config.projectSettings,
+                                                           config.graphicsSettings,
+                                                           events.quit));
     moduleRegistry->Register(nc::BuildSceneModule());
     moduleRegistry->Register(nc::asset::BuildAssetModule(config.assetSettings,
                                                         config.memorySettings,
@@ -51,8 +54,7 @@ auto BuildModuleRegistry(Registry* registry,
                                                               config.memorySettings,
                                                               ModuleProvider{moduleRegistry.get()},
                                                               registry,
-                                                              events,
-                                                              window));
+                                                              events));
     moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));

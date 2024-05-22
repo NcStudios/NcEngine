@@ -1,7 +1,7 @@
 #include "IGraphics.h"
 #include "api/vulkan/VulkanGraphics.h"
 #include "utility/Log.h"
-#include "window/WindowImpl.h"
+#include "window/Window.h"
 
 #include "ncutility/NcError.h"
 
@@ -13,14 +13,14 @@ auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      asset::NcAsset* assetModule,
                      ShaderResourceBus& shaderResourceBus,
                      Registry* registry,
-                     window::WindowImpl* window) -> std::unique_ptr<IGraphics>
+                     window::NcWindow& window) -> std::unique_ptr<IGraphics>
 {
     // TODO: #343 Provide an API/version switch in GraphicsSettings. Continue using Vulkan v1.3 for now.
     constexpr auto apiVersion = VK_API_VERSION_1_3;
     NC_LOG_TRACE("Creating VulkanGraphics");
     return std::make_unique<vulkan::VulkanGraphics>(projectSettings, graphicsSettings, memorySettings,
                                                     assetModule, shaderResourceBus, apiVersion, registry,
-                                                    window->GetWindow(), window->GetDimensions(), window->GetScreenExtent()
+                                                    window.GetWindowHandle(), window.GetDimensions(), window.GetScreenExtent()
     );
 }
 } // namespace nc::graphics

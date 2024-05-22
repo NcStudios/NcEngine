@@ -9,33 +9,16 @@
 
 namespace nc
 {
-struct SystemEvents;
 class Scene;
-
-namespace config
-{
-struct GraphicsSettings;
-struct MemorySettings;
-struct ProjectSettings;
-} // namespace config
 
 namespace window
 {
-class WindowImpl;
+class NcWindow;
 } // namespace window
 
 namespace graphics
 {
 struct ShaderResourceBus;
-
-// TODO #340: Window should be moved inside graphics instead of being passed here
-auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
-                         const config::GraphicsSettings& graphicsSettings,
-                         const config::MemorySettings& memorySettings,
-                         ModuleProvider modules,
-                         Registry* registry,
-                         SystemEvents& events,
-                         window::WindowImpl* window) -> std::unique_ptr<NcGraphics>;
 
 class NcGraphicsImpl : public NcGraphics
 {
@@ -47,7 +30,7 @@ class NcGraphicsImpl : public NcGraphics
                        SystemEvents& events,
                        std::unique_ptr<IGraphics> graphics,
                        ShaderResourceBus shaderResourceBus,
-                       window::WindowImpl* window);
+                       window::NcWindow& window);
 
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
@@ -68,6 +51,7 @@ class NcGraphicsImpl : public NcGraphics
         AssetResources m_assetResources;
         PostProcessResources m_postProcessResources;
         SystemResources m_systemResources;
+        Connection<float, float, bool> m_onResizeConnection;
     };
 } // namespace graphics
 } // namespace nc

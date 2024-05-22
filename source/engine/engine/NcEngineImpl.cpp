@@ -7,6 +7,7 @@
 #include "scene/NcScene.h"
 #include "time/TimeImpl.h"
 #include "utility/Log.h"
+#include "window/Window.h"
 
 #include "optick.h"
 
@@ -75,11 +76,11 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_timer{::BuildTimer(config.engineSettings)},
-      m_window{config.projectSettings, config.graphicsSettings, std::bind_front(&NcEngineImpl::Stop, this)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_legacyRegistry{*m_registry},
-      m_modules{BuildModuleRegistry(&m_legacyRegistry, m_events, &m_window, config)},
+      m_modules{BuildModuleRegistry(&m_legacyRegistry, m_events, config)},
       m_executor{::BuildExecutor(config.engineSettings, *m_modules)},
+      m_onQuitConnection{m_events.quit.Connect(this, &NcEngineImpl::Stop, SignalPriority::Lowest)},
       m_isRunning{false}
 {
     SetActiveRegistry(&m_legacyRegistry);
@@ -158,11 +159,11 @@ void NcEngineImpl::ClearScene()
 void NcEngineImpl::Run()
 {
     auto* ncScene = m_modules->Get<NcScene>();
-    auto update = [this](float dt)
+    auto update = [this, ncWindow = m_modules->Get<window::NcWindow>()](float dt)
     {
         time::SetDeltaTime(dt);
         input::Flush();
-        m_window.ProcessSystemMessages();
+        ncWindow->ProcessSystemMessages();
         m_executor.RunUpdateTasks();
     };
 

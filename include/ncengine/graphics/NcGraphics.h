@@ -6,12 +6,22 @@
 
 #include "Camera.h"
 #include "ncengine/module/Module.h"
+#include "ncengine/module/ModuleProvider.h"
 #include "ncengine/type/EngineId.h"
 #include "ncengine/ui/IUI.h"
 
 namespace nc
 {
 class Registry;
+struct SystemEvents;
+
+namespace config
+{
+struct GraphicsSettings;
+struct MemorySettings;
+struct ProjectSettings;
+} // namespace config
+
 } // namespace nc
 
 namespace nc::graphics
@@ -82,4 +92,16 @@ struct NcGraphics : public Module
      */
     virtual void ClearEnvironment() = 0;
 };
+
+/**
+ * @brief Build an NcGraphics instance.
+ * 
+ * The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
+ */
+auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                         const config::GraphicsSettings& graphicsSettings,
+                         const config::MemorySettings& memorySettings,
+                         ModuleProvider modules,
+                         Registry* registry,
+                         SystemEvents& events) -> std::unique_ptr<NcGraphics>;
 } // namespace nc::graphics

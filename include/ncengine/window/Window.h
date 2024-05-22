@@ -4,11 +4,24 @@
  */
 #pragma once
 
+#include "ncengine/module/Module.h"
+#include "ncengine/type/EngineId.h"
+#include "ncengine/utility/Signal.h"
 #include "ncengine/window/IOnResizeReceiver.h"
 
 #include "ncmath/Vector.h"
 
-namespace nc::window
+struct GLFWwindow;
+
+namespace nc
+{
+namespace config
+{
+struct ProjectSettings;
+struct GraphicsSettings;
+} // namespace config
+
+namespace window
 {
 /** @brief Get the window dimensions */
 auto GetDimensions() -> Vector2;
@@ -24,4 +37,32 @@ void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
 
 /** @brief Unregister an object from receiving window resize events. */
 void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
-} //namespace nc::window
+
+/** @brief */
+class NcWindow : public Module
+{
+    public:
+        explicit NcWindow() noexcept
+            : Module{NcWindowId} {}
+
+        virtual auto GetDimensions() const noexcept -> const Vector2& = 0;
+
+        virtual auto GetScreenExtent() const noexcept -> const Vector2& = 0;
+
+        virtual auto GetContentScale() const noexcept -> const Vector2& = 0;
+
+        virtual auto GetWindowHandle() const noexcept -> GLFWwindow* = 0;
+
+        virtual auto OnResize() noexcept -> Signal<float, float, bool>& = 0;
+        // virtual void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept = 0;
+
+
+        virtual void ProcessSystemMessages() = 0;
+};
+
+/** @brief Build an NcWindow module instance. */
+auto BuildWindowModule(const config::ProjectSettings& projectSettings,
+                       const config::GraphicsSettings& graphicsSettings,
+                       Signal<>& quit) -> std::unique_ptr<NcWindow>;
+} // namespace window
+} // namespace nc

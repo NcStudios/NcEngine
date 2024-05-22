@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ncengine/window/Window.h"
+
 #include "ncmath/Vector.h"
 
 #define GLFW_INCLUDE_NONE
@@ -20,29 +22,30 @@ namespace window
 {
 class IOnResizeReceiver;
 
-class WindowImpl
+class WindowImpl : public NcWindow
 {
     public:
         WindowImpl(const config::ProjectSettings& projectSettings,
                    const config::GraphicsSettings& graphicsSettings,
-                   std::function<void()> onQuit);
+                   Signal<>& quit);
         ~WindowImpl() noexcept;
         WindowImpl(const WindowImpl& other) = delete;
         WindowImpl(WindowImpl&& other) = delete;
         WindowImpl& operator=(const WindowImpl& other) = delete;
         WindowImpl& operator=(WindowImpl&& other) = delete;
 
-        auto GetWindow() -> GLFWwindow*;
-        auto GetDimensions() const noexcept -> Vector2;
-        auto GetScreenExtent() const noexcept -> Vector2;
-        auto GetContentScale() const noexcept -> Vector2;
+        auto GetWindowHandle() const noexcept -> GLFWwindow* override { return m_window; }
+        auto GetDimensions() const noexcept -> const Vector2& override { return m_dimensions; }
+        auto GetScreenExtent() const noexcept -> const Vector2& override { return m_screenExtent; }
+        auto GetContentScale() const noexcept -> const Vector2& override { return m_contentScale; }
+        auto OnResize() noexcept -> Signal<float, float, bool>& override { return m_onResize; }
 
-        void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept;
+        // void BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept override;
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
         void InvokeResizeReceivers(GLFWwindow* window, int width, int height);
 
-        void ProcessSystemMessages();
+        void ProcessSystemMessages() override;
 
     private:
         void SetDimensions(int width, int height) noexcept;
@@ -60,8 +63,8 @@ class WindowImpl
         Vector2 m_screenExtent;
         Vector2 m_contentScale;
         GLFWwindow* m_window;
-        std::function<void(float,float,bool)> GraphicsOnResizeCallback;
-        std::function<void()> EngineDisableRunningCallback;
+        Signal<float, float, bool> m_onResize;
+        Signal<>* EngineDisableRunningCallback;
 };
 } // end namespace window
 } // end namespace nc

@@ -48,14 +48,20 @@ namespace nc::window
         g_instance->UnregisterOnResizeReceiver(receiver);
     }
 
+    auto BuildWindowModule(const config::ProjectSettings& projectSettings,
+                           const config::GraphicsSettings& graphicsSettings,
+                           Signal<>& quit) -> std::unique_ptr<NcWindow>
+    {
+        return std::make_unique<WindowImpl>(projectSettings, graphicsSettings, quit);
+    }
+
     /* WindowImpl */
     WindowImpl::WindowImpl(const config::ProjectSettings& projectSettings,
                            const config::GraphicsSettings& graphicsSettings,
-                           std::function<void()> onQuit)
+                           Signal<>& quit)
         : m_onResizeReceivers{},
           m_dimensions{},
-          GraphicsOnResizeCallback{nullptr},
-          EngineDisableRunningCallback{std::move(onQuit)}
+          EngineDisableRunningCallback{&quit}
     {
         g_instance = this;
 
@@ -115,35 +121,11 @@ namespace nc::window
         glfwTerminate();
     }
 
-    auto WindowImpl::GetWindow() -> GLFWwindow*
-    {
-        return m_window;
-    }
-
-    Vector2 WindowImpl::GetDimensions() const noexcept
-    {
-        return m_dimensions;
-    }
-
-    Vector2 WindowImpl::GetScreenExtent() const noexcept
-    {
-        return m_screenExtent;
-    }
-
-    Vector2 WindowImpl::GetContentScale() const noexcept
-    {
-        return m_contentScale;
-    }
 
     void WindowImpl::SetDimensions(int width, int height) noexcept
     {
         m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
-    }
-
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept
-    {
-        GraphicsOnResizeCallback = std::move(callback);
     }
 
     void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
@@ -163,13 +145,8 @@ namespace nc::window
 
     void WindowImpl::InvokeResizeReceivers(GLFWwindow* window, int width, int height)
     {
-        if(!(GraphicsOnResizeCallback))
-        {
-            return;
-        }
-
         int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
-        GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), minimized);
+        m_onResize.Emit(static_cast<float>(width), static_cast<float>(height), minimized);
 
         for(auto receiver : m_onResizeReceivers)
         {
@@ -248,6 +225,6 @@ namespace nc::window
     void WindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)
     {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-        g_instance->EngineDisableRunningCallback();
+        g_instance->EngineDisableRunningCallback->Emit();
     }
 } // end namespace nc::window
