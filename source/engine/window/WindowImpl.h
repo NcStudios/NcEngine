@@ -22,17 +22,17 @@ namespace window
 {
 class IOnResizeReceiver;
 
-class WindowImpl : public NcWindow
+class NcWindowImpl : public NcWindow
 {
     public:
-        WindowImpl(const config::ProjectSettings& projectSettings,
+        NcWindowImpl(const config::ProjectSettings& projectSettings,
                    const config::GraphicsSettings& graphicsSettings,
                    Signal<>& quit);
-        ~WindowImpl() noexcept;
-        WindowImpl(const WindowImpl& other) = delete;
-        WindowImpl(WindowImpl&& other) = delete;
-        WindowImpl& operator=(const WindowImpl& other) = delete;
-        WindowImpl& operator=(WindowImpl&& other) = delete;
+        ~NcWindowImpl() noexcept;
+        NcWindowImpl(const NcWindowImpl& other) = delete;
+        NcWindowImpl(NcWindowImpl&& other) = delete;
+        NcWindowImpl& operator=(const NcWindowImpl& other) = delete;
+        NcWindowImpl& operator=(NcWindowImpl&& other) = delete;
 
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
