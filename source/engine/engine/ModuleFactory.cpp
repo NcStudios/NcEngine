@@ -10,11 +10,9 @@
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/math/Random.h"
 #include "ncengine/module/ModuleRegistry.h"
+#include "ncengine/physics/NcPhysics.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/utility/Log.h"
-
-/** @todo #363 Move factories to public headers and include those instead. */
-#include "physics/NcPhysicsImpl.h"
 
 namespace
 {

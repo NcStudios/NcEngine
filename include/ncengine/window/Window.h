@@ -44,7 +44,7 @@ void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
  */
 void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
 
-/** @brief */
+/** @brief Window module interface. */
 class NcWindow : public Module
 {
     public:
