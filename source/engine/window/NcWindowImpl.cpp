@@ -1,4 +1,4 @@
-#include "WindowImpl.h"
+#include "NcWindowImpl.h"
 #include "NcEngine.h"
 #include "config/Config.h"
 #include "graphics/GraphicsUtilities.h"
@@ -60,7 +60,6 @@ namespace nc::window
                            const config::GraphicsSettings& graphicsSettings,
                            Signal<>& quit)
         : m_onResizeReceivers{},
-        //   m_dimensions{},
           m_quit{&quit}
     {
         g_instance = this;
