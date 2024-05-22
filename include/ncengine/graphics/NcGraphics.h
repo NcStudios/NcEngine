@@ -22,9 +22,7 @@ struct MemorySettings;
 struct ProjectSettings;
 } // namespace config
 
-} // namespace nc
-
-namespace nc::graphics
+namespace graphics
 {
 /** @brief Graphics module interface.
  * 
@@ -104,4 +102,5 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          ModuleProvider modules,
                          Registry* registry,
                          SystemEvents& events) -> std::unique_ptr<NcGraphics>;
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

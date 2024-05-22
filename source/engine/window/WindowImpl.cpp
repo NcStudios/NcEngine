@@ -60,7 +60,7 @@ namespace nc::window
                            const config::GraphicsSettings& graphicsSettings,
                            Signal<>& quit)
         : m_onResizeReceivers{},
-          m_dimensions{},
+        //   m_dimensions{},
           m_quit{&quit}
     {
         g_instance = this;

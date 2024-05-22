@@ -34,15 +34,8 @@ class WindowImpl : public NcWindow
         WindowImpl& operator=(const WindowImpl& other) = delete;
         WindowImpl& operator=(WindowImpl&& other) = delete;
 
-        auto GetWindowHandle() const noexcept -> GLFWwindow* override { return m_window; }
-        auto GetDimensions() const noexcept -> const Vector2& override { return m_dimensions; }
-        auto GetScreenExtent() const noexcept -> const Vector2& override { return m_screenExtent; }
-        auto GetContentScale() const noexcept -> const Vector2& override { return m_contentScale; }
-        auto OnResize() noexcept -> Signal<const Vector2&, bool>& override { return m_onResize; }
-
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
-
         void ProcessSystemMessages() override;
 
     private:
@@ -57,11 +50,6 @@ class WindowImpl : public NcWindow
         static void ProcessWindowCloseEvent(GLFWwindow* window);
 
         std::vector<IOnResizeReceiver*> m_onResizeReceivers;
-        Vector2 m_dimensions;
-        Vector2 m_screenExtent;
-        Vector2 m_contentScale;
-        GLFWwindow* m_window;
-        Signal<const Vector2&, bool> m_onResize;
         Signal<>* m_quit;
 };
 } // end namespace window
