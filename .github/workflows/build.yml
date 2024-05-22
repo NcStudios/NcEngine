@@ -33,6 +33,7 @@ jobs:
             shortName: Linux
             generator: "Unix Makefiles"
             cmakeEnv: "CXX=/usr/bin/g++-14"
+            swiftshaderArtifact: "swiftshader-ubuntu24.04-x64"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
@@ -49,11 +50,17 @@ jobs:
         if: ${{ matrix.shortName == 'Windows' }}
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install X11
+      - name: Install dependencies
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install xorg-dev
+          sudo apt-get install -y xorg-dev xvfb
+
+      - name: Setup Display
+        if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Setup Vulkan SDK
         uses: ./.github/workflows/setup-vulkan
@@ -61,7 +68,7 @@ jobs:
           version: 1.3.261.1
 
       - name: Download SwiftShader
-        if: ${{ matrix.shortName == 'Windows' && matrix.variant == 'Dev' }}
+        if: ${{ matrix.variant == 'Dev' }}
         uses: robinraju/release-downloader@v1.10
         with:
           repository: 'NcStudios/swiftshader'
@@ -88,12 +95,12 @@ jobs:
           path: build/test/TestResults.xml
 
       - name: Run Smoke Test
-        if: ${{ matrix.shortName == 'Windows' && matrix.variant == 'Dev' }}
+        if: ${{ matrix.variant == 'Dev' }}
         shell: bash
-        run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader" "${{ github.workspace }}/install" "SmokeTestResults.txt"
+        run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader" "1.3" "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
       - name: Upload Smoke Test Results
-        if: ${{ !cancelled() && matrix.shortName == 'Windows' && matrix.variant == 'Dev' }}
+        if: ${{ !cancelled() && matrix.variant == 'Dev' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults
