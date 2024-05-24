@@ -18,7 +18,7 @@ runs:
       with:
         repository: 'NcStudios/VulkanCI'
         tag: 'v${{ inputs.version }}'
-        filename: ${{ matrix.file }}
+        filename: '${{ matrix.file }}'
         out-file-path: 'VulkanSDK'
         extract: true
 
