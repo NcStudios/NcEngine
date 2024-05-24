@@ -64,7 +64,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
     auto renderPass = RenderPass(vkDevice, ShadowMappingPassId + std::to_string(shadowCasterIndex), shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
 
     const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
-    renderPass.RegisterAttachmentViews(views, dimensions, frameIndex);
+    renderPass.CreateFrameBuffers(views, dimensions, frameIndex);
 
     return renderPass;
 }
@@ -110,7 +110,7 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
             depthImageView, // Depth View
             imageView.get()
         };
-        renderPass.RegisterAttachmentViews(imageViews, dimensions, index++);
+        renderPass.CreateFrameBuffers(imageViews, dimensions, index++);
     }
     return renderPass;
 }
@@ -142,6 +142,8 @@ RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const D
       m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
       m_onCommitPointLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount();})},
       m_onRemovePointLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount();})},
+      m_onCommitSpotLightConnection{registry->OnCommit<SpotLight>().Connect([this](graphics::SpotLight&){IncrementShadowPassCount();})},
+      m_onRemoveSpotLightConnection{registry->OnRemove<SpotLight>().Connect([this](Entity){DecrementShadowPassCount();})},
       m_dimensions{dimensions},
       m_screenExtent{},
       m_activeShadowMappingPasses{},

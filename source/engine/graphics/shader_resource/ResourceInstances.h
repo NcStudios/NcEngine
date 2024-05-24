@@ -9,6 +9,7 @@
 #include "graphics/system/ParticleEmitterSystem.h"
 #include "graphics/system/PointLightSystem.h"
 #include "graphics/system/SkeletalAnimationSystem.h"
+#include "graphics/system/SpotLightSystem.h"
 #include "graphics/system/UISystem.h"
 #include "graphics/system/WidgetSystem.h"
 
@@ -63,6 +64,7 @@ struct SystemResourcesConfig
     uint32_t maxPointLights;
     uint32_t maxRenderers;
     uint32_t maxSkeletalAnimations;
+    uint32_t maxSpotLights;
     uint32_t maxTextures;
     uint32_t maxParticles;
     bool useShadows;
@@ -81,6 +83,7 @@ struct SystemResources
     ObjectSystem objects;
     PointLightSystem pointLights;
     SkeletalAnimationSystem skeletalAnimations;
+    SpotLightSystem spotLights;
     WidgetSystem widgets;
     UISystem ui;
     ParticleEmitterSystem particleEmitters;

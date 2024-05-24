@@ -4,6 +4,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -225,6 +226,27 @@ auto DeserializePositionClamp(std::istream& stream, const DeserializationContext
     auto out = physics::PositionClamp{};
     serialize::Deserialize(stream, out);
     return out;
+}
+
+void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext& ctx, const std::any&)
+{
+    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
+    serialize::Serialize(stream, out.ambientColor);
+    serialize::Serialize(stream, out.diffuseColor);
+    serialize::Serialize(stream, out.radius);
+}
+
+auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::SpotLight
+{
+    auto id = uint32_t{};
+    auto ambient = Vector3{};
+    auto diffuseColor = Vector3{};
+    auto radius = 0.0f;
+    serialize::Deserialize(stream, id);
+    serialize::Deserialize(stream, ambient);
+    serialize::Deserialize(stream, diffuseColor);
+    serialize::Deserialize(stream, radius);
+    return graphics::SpotLight{ctx.entityMap.at(id), ambient, diffuseColor, radius};
 }
 
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&)

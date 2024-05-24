@@ -6,6 +6,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -209,6 +210,18 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
     EXPECT_EQ(expected.radius, actual.radius);
 }
+
+TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::graphics::SpotLight{g_staticEntity, nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
+    nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(expected.ambientColor, actual.ambientColor);
+    EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
+    EXPECT_EQ(expected.radius, actual.radius);
+}
+
 
 TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
 {

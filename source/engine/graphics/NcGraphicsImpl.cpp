@@ -101,7 +101,7 @@ namespace nc::graphics
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
           m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
-          m_postProcessResources{memorySettings.maxPointLights, &m_shaderResourceBus},
+          m_postProcessResources{memorySettings.maxPointLights + memorySettings.maxSpotLights, &m_shaderResourceBus},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)}
     {
         window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
@@ -155,6 +155,7 @@ namespace nc::graphics
         m_systemResources.environment.Clear();
         m_systemResources.pointLights.Clear();
         m_systemResources.skeletalAnimations.Clear();
+        m_systemResources.spotLights.Clear();
     }
 
     void NcGraphicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
@@ -212,15 +213,21 @@ namespace nc::graphics
         auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
         auto objectState = m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
                                                                         cameraState, environmentState, skeletalAnimationState);
-        auto lightingState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+        auto pointLightState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
+        auto spotLightState = m_systemResources.spotLights.Execute(currentFrameIndex, MultiView<SpotLight, Transform>{m_registry});
         auto particleState = m_systemResources.particleEmitters.Execute(currentFrameIndex);
 
-        // If any changes were made to resource layouts (point lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
+        // If any changes were made to resource layouts (lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
         m_graphics->CommitResourceLayout();
 
-        if (lightingState.updateShadows)
+        if (pointLightState.updateShadows)
         {
-            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(lightingState.viewProjections.size()), currentFrameIndex);
+            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(pointLightState.viewProjections.size()), currentFrameIndex);
+        }
+
+        if (spotLightState.updateShadows)
+        {
+            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(spotLightState.viewProjections.size()), currentFrameIndex);
         }
 
         // Allow the frame to begin accepting draw commands.
@@ -238,7 +245,8 @@ namespace nc::graphics
             std::move(cameraState),
             std::move(environmentState),
             std::move(objectState),
-            std::move(lightingState),
+            std::move(pointLightState),
+            std::move(spotLightState),
             std::move(widgetState),
             std::move(particleState)
         };

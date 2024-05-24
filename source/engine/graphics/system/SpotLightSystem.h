@@ -6,7 +6,7 @@
 #include "graphics/shader_resource/ShaderResourceBus.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
-#include "graphics/PointLight.h"
+#include "graphics/SpotLight.h"
 #include "utility/Signal.h"
 
 #include "DirectXMath.h"
@@ -15,12 +15,12 @@
 
 namespace nc::graphics
 {
-/** @brief Device-mapped properties of a PointLight. */
-struct PointLightData
+/** @brief Device-mapped properties of a SpotLight. */
+struct SpotLightData
 {
-    PointLightData() = default;
+    SpotLightData() = default;
 
-    PointLightData(const DirectX::XMMATRIX& viewProjection_,
+    SpotLightData(const DirectX::XMMATRIX& viewProjection_,
                    const Vector3& position_,
                    bool castsShadows_,
                    const Vector3& ambientColor_,
@@ -44,27 +44,27 @@ struct PointLightData
     float radius = 2.5f;
 };
 
-struct PointLightState
+struct SpotLightState
 {
     std::vector<DirectX::XMMATRIX> viewProjections;
     bool updateShadows;
 };
 
-class PointLightSystem
+class SpotLightSystem
 {
     public:
-        PointLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxPointLights, bool useShadows);
-        PointLightSystem(PointLightSystem&&) = delete;
-        PointLightSystem(const PointLightSystem&) = delete;
-        PointLightSystem& operator=(PointLightSystem&&) = delete;
-        PointLightSystem& operator=(const PointLightSystem&) = delete;
+        SpotLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxSpotLights, bool useShadows);
+        SpotLightSystem(SpotLightSystem&&) = delete;
+        SpotLightSystem(const SpotLightSystem&) = delete;
+        SpotLightSystem& operator=(SpotLightSystem&&) = delete;
+        SpotLightSystem& operator=(const SpotLightSystem&) = delete;
 
-        auto Execute(uint32_t currentFrameIndex, MultiView<PointLight, Transform> view) -> PointLightState;
+        auto Execute(uint32_t currentFrameIndex, MultiView<SpotLight, Transform> view) -> SpotLightState;
         void Clear() noexcept;
 
     private:
-        std::vector<PointLightData> m_pointLightData;
-        StorageBufferHandle m_pointLightBuffer;
+        std::vector<SpotLightData> m_spotLightData;
+        StorageBufferHandle m_spotLightBuffer;
         std::array<uint32_t, MaxFramesInFlight> m_syncedLightsCount;
         bool m_useShadows;
 };

@@ -6,6 +6,7 @@
 #include "graphics/GraphicsConstants.h"
 #include "graphics/PointLight.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/SpotLight.h"
 
 #include "utility/Signal.h"
 
@@ -75,6 +76,8 @@ class RenderGraph
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
         Connection<PointLight&> m_onCommitPointLightConnection;
         Connection<Entity> m_onRemovePointLightConnection;
+        Connection<SpotLight&> m_onCommitSpotLightConnection;
+        Connection<Entity> m_onRemoveSpotLightConnection;
 
         // Screen size
         Vector2 m_dimensions;

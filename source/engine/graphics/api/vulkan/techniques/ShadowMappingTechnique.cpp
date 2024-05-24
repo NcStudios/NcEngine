@@ -18,6 +18,10 @@ namespace
 
     // Slope depth bias factor, applied depending on polygon's slope
     constexpr float DEPTH_BIAS_SLOPE = 1.75f;
+
+    constexpr float DEPTH_RANGE_NEAR = 0.1f;
+
+    constexpr float DEPTH_RANGE_FAR = 1024.0f;
 }
 
 namespace nc::graphics::vulkan
@@ -95,7 +99,7 @@ namespace nc::graphics::vulkan
     bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         static const auto useShadows = config::GetGraphicsSettings().useShadows;
-        return m_enabled = useShadows && !frameData.lightingState.viewProjections.empty();
+        return m_enabled = useShadows && !frameData.pointLightState.viewProjections.empty();
     }
 
     void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
@@ -124,8 +128,8 @@ namespace nc::graphics::vulkan
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        NC_ASSERT(m_shadowCasterIndex < frameData.lightingState.viewProjections.size(), "Shadow caster index is out of bounds.");
-        pushConstants.lightViewProjection = frameData.lightingState.viewProjections[m_shadowCasterIndex];
+        NC_ASSERT(m_shadowCasterIndex < frameData.pointLightState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        pushConstants.lightViewProjection = frameData.pointLightState.viewProjections[m_shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 

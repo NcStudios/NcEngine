@@ -159,7 +159,7 @@ auto RenderPass::GetVkPass() const ->vk::RenderPass
     return m_renderPass.get();
 }
 
-void RenderPass::RegisterAttachmentViews(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
+void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {

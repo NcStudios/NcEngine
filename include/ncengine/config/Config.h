@@ -59,6 +59,7 @@ struct MemorySettings
     unsigned maxRenderers = 100000;
     unsigned maxTransforms = 100000;
     unsigned maxPointLights = 10;
+    unsigned maxSpotLights = 10;
     unsigned maxSkeletalAnimations = 1000;
     unsigned maxTextures = 1000;
     unsigned maxCubeMaps = 10;

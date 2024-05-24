@@ -1,4 +1,4 @@
-#include "PointLightSystem.h"
+#include "SpotLightSystem.h"
 
 #include "optick.h"
 
@@ -18,25 +18,25 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 
 namespace nc::graphics
 {
-PointLightSystem::PointLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxPointLights, bool useShadows)
-    : m_pointLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(PointLightData) * maxPointLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0, false)},
+SpotLightSystem::SpotLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxSpotLights, bool useShadows)
+    : m_spotLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(SpotLightData) * maxSpotLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0, false)},
       m_useShadows{useShadows}
 {
-    m_pointLightData.reserve(maxPointLights);
+    m_spotLightData.reserve(maxSpotLights);
 }
 
-auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Transform> view) -> PointLightState
+auto SpotLightSystem::Execute(uint32_t currentFrameIndex, MultiView<SpotLight, Transform> view) -> SpotLightState
 {
-    OPTICK_CATEGORY("PointLightSystem::Execute", Optick::Category::Rendering);
-    auto state = PointLightState{};
-    m_pointLightData.clear();
+    OPTICK_CATEGORY("SpotLightSystem::Execute", Optick::Category::Rendering);
+    auto state = SpotLightState{};
+    m_spotLightData.clear();
 
     auto lightsCount = 0u;
     for (const auto& [light, transform] : view)
     {
         lightsCount++;
         state.viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-        m_pointLightData.emplace_back(state.viewProjections.back(),
+        m_spotLightData.emplace_back(state.viewProjections.back(),
                                   transform->Position(),
                                   m_useShadows,
                                   light->ambientColor,
@@ -44,7 +44,7 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
                                   light->radius);
     }
 
-    m_pointLightBuffer.Bind(m_pointLightData, currentFrameIndex);
+    m_spotLightBuffer.Bind(m_spotLightData, currentFrameIndex);
     if (m_useShadows && m_syncedLightsCount.at(currentFrameIndex) != lightsCount)
     {
         state.updateShadows = true;
@@ -53,10 +53,10 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
     return state;
 }
 
-void PointLightSystem::Clear() noexcept
+void SpotLightSystem::Clear() noexcept
 {
-    m_pointLightData.clear();
-    m_pointLightBuffer.Clear();
+    m_spotLightData.clear();
+    m_spotLightBuffer.Clear();
     for (auto i : std::views::iota(0u, MaxFramesInFlight))
     {
         m_syncedLightsCount.at(i) = 0u;

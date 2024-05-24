@@ -6,6 +6,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
@@ -357,6 +358,16 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
 }
 
 void PointLightUIWidget(graphics::PointLight& light)
+{
+    constexpr auto step = 0.1f;
+    constexpr auto min = 0.0f;
+    constexpr auto max = 1200.0f;
+    ui::InputColor3(light.ambientColor, "ambientColor");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::DragFloat(light.radius, "radius", step, min, max);
+}
+
+void SpotLightUIWidget(graphics::SpotLight& light)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;

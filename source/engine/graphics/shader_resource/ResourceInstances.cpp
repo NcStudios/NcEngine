@@ -76,6 +76,7 @@ SystemResourcesConfig::SystemResourcesConfig(const config::GraphicsSettings& gra
     : maxPointLights{memorySettings.maxPointLights},
       maxRenderers{memorySettings.maxRenderers},
       maxSkeletalAnimations{memorySettings.maxSkeletalAnimations},
+      maxSpotLights{memorySettings.maxSpotLights},
       maxTextures{memorySettings.maxTextures},
       maxParticles{memorySettings.maxParticles},
       useShadows{graphicsSettings.useShadows}
@@ -92,6 +93,7 @@ SystemResources::SystemResources(SystemResourcesConfig config,
       objects{resourceBus, config.maxRenderers},
       pointLights{resourceBus, config.maxPointLights, config.useShadows},
       skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
+      spotLights{resourceBus, config.maxSpotLights, config.useShadows},
       widgets{},
       ui{registry->GetEcs(), modules, events},
       particleEmitters{registry, resourceBus, getCamera, config.maxParticles}

@@ -13,6 +13,7 @@ void AudioSourceUIWidget(audio::AudioSource&) {}
 void MeshRendererUIWidget(graphics::MeshRenderer&) {}
 void ParticleEmitterUIWidget(graphics::ParticleEmitter&) {}
 void PointLightUIWidget(graphics::PointLight&) {}
+void SpotLightUIWidget(graphics::SpotLight&) {}
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&) {}
 void ToonRendererUIWidget(graphics::ToonRenderer&) {}
 void NetworkDispatcherUIWidget(net::NetworkDispatcher&) {}

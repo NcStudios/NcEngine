@@ -46,6 +46,7 @@ constexpr auto MaxRenderersKey = "max_renderers"sv;
 constexpr auto MaxTransformsKey = "max_transforms"sv;
 constexpr auto MaxPointLightsKey = "max_point_lights"sv;
 constexpr auto MaxSkeletalAnimationsKey = "max_skeletal_animations"sv;
+constexpr auto MaxSpotLightsKey = "max_spot_lights"sv;
 constexpr auto MaxTexturesKey = "max_textures"sv;
 constexpr auto MaxCubeMapsKey = "max_cubemaps"sv;
 constexpr auto MaxParticlesKey = "max_particles"sv;
@@ -202,6 +203,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.maxTransforms, MaxTransformsKey, kvPairs);
         ParseValueIfExists(out.maxPointLights, MaxPointLightsKey, kvPairs);
         ParseValueIfExists(out.maxSkeletalAnimations, MaxSkeletalAnimationsKey, kvPairs);
+        ParseValueIfExists(out.maxSpotLights, MaxSpotLightsKey, kvPairs);
         ParseValueIfExists(out.maxTextures, MaxTexturesKey, kvPairs);
         ParseValueIfExists(out.maxCubeMaps, MaxCubeMapsKey, kvPairs);
         ParseValueIfExists(out.maxParticles, MaxParticlesKey, kvPairs);
@@ -344,9 +346,11 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, MaxStaticCollidersKey, config.memorySettings.maxStaticColliders);
     ::WriteKVPair(stream, MaxNetworkDispatchersKey, config.memorySettings.maxNetworkDispatchers);
     ::WriteKVPair(stream, MaxParticleEmittersKey, config.memorySettings.maxParticleEmitters);
+    ::WriteKVPair(stream, MaxPointLightsKey, config.memorySettings.maxPointLights);
     ::WriteKVPair(stream, MaxRenderersKey, config.memorySettings.maxRenderers);
     ::WriteKVPair(stream, MaxTransformsKey, config.memorySettings.maxTransforms);
     ::WriteKVPair(stream, MaxSkeletalAnimationsKey, config.memorySettings.maxSkeletalAnimations);
+    ::WriteKVPair(stream, MaxSpotLightsKey, config.memorySettings.maxSpotLights);
     ::WriteKVPair(stream, MaxTexturesKey, config.memorySettings.maxTextures);
     ::WriteKVPair(stream, MaxCubeMapsKey, config.memorySettings.maxCubeMaps);
     ::WriteKVPair(stream, MaxParticlesKey, config.memorySettings.maxParticles);

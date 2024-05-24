@@ -22,7 +22,6 @@ class NcAsset;
 namespace graphics
 {
 struct PerFrameRenderState;
-struct PointLight;
 struct ShaderResourceBus;
 
 namespace vulkan
