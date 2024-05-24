@@ -2,47 +2,32 @@ name: Setup-Vulkan
 
 inputs:
   version:
-    description: Vulkan SDK Version
+    description: VulkanSDK version
+    required: true
+    type: string
+  file:
+    description: File to download
     required: true
     type: string
 
 runs:
   using: "composite"
   steps:
-    - name: Set Install Path Variable
-      shell: bash
-      run: echo "VK_INSTALL_PATH=${{ github.workspace }}/VulkanSDK/${{ inputs.version }}" >> $GITHUB_ENV
-
-    - name: Checkout Vulkan-Headers
-      uses: actions/checkout@v4
+    - name: Download VulkanCI
+      uses: robinraju/release-downloader@v1.10
       with:
-        repository: KhronosGroup/Vulkan-Headers
-        ref: 'sdk-${{ inputs.version }}'
-        path: 'Vulkan-Headers'
-
-    - name: Build Vulkan-Headers
-      shell: bash
-      run: |
-        cmake -S Vulkan-Headers -B Vulkan-Headers/build
-        cmake --install Vulkan-Headers/build --prefix $VK_INSTALL_PATH
-
-    - name: Checkout Vulkan-Loader
-      uses: actions/checkout@v4
-      with:
-        repository: KhronosGroup/Vulkan-Loader
-        ref: 'sdk-${{ inputs.version }}'
-        path: 'Vulkan-Loader'
-
-    - name: Build Vulkan-Loader
-      shell: bash
-      run: |
-        cmake -S Vulkan-Loader -B Vulkan-Loader/build -DVULKAN_HEADERS_INSTALL_DIR=$VK_INSTALL_PATH -DLOADER_USE_UNSAFE_FILE_SEARCH=ON
-        cmake --build Vulkan-Loader/build --config Release
-        cmake --install Vulkan-Loader/build --prefix $VK_INSTALL_PATH
+        repository: 'NcStudios/VulkanCI'
+        tag: 'v${{ inputs.version }}'
+        filename: ${{ matrix.file }}
+        out-file-path: 'VulkanSDK'
+        extract: true
 
     - name: Setup Environment Variables
       shell: bash
       run: |
-        echo "VULKAN_SDK=$VK_INSTALL_PATH" >> "$GITHUB_ENV"
+        INSTALL_PATH="${{ github.workspace }}/VulkanSDK/${{ inputs.version }}"
+        echo "VULKAN_SDK=$INSTALL_PATH" >> "$GITHUB_ENV"
         echo "VULKAN_SDK_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
-        echo "$VK_INSTALL_PATH/bin" >> "$GITHUB_PATH"
+        echo "SWIFTSHADER_INSTALL_PATH=$INSTALL_PATH/Swiftshader" >> "$GITHUB_ENV"
+        echo "$INSTALL_PATH/bin" >> "$GITHUB_PATH"
+        echo "$INSTALL_PATH/lib" >> "$GITHUB_PATH"

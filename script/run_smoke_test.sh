@@ -1,14 +1,13 @@
 #!/bin/bash
 
-if [ "$#" -ne 4 ]; then
-    echo "usage: $0 <SWIFTSHADER_INSTALL_DIR> <VK_API_VERSION> <ENGINE_INSTALL_DIR> <OUT_FILE>"
+if [ "$#" -ne 3 ]; then
+    echo "usage: $0 <SWIFTSHADER_INSTALL_DIR> <ENGINE_INSTALL_DIR> <OUT_FILE>"
     exit 1
 fi
 
 SWIFTSHADER_INSTALL_DIR="$1"
-VK_API_VERSION="$2"
-ENGINE_INSTALL_DIR="$3"
-OUT_FILE="$4"
+ENGINE_INSTALL_DIR="$2"
+OUT_FILE="$3"
 
 echo "SWIFTSHADER_INSTALL_DIR: $SWIFTSHADER_INSTALL_DIR"
 echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
@@ -30,17 +29,16 @@ cat <<EOF > vk_swiftshader_icd.json
 {
   "file_format_version": "1.0.0",
   "ICD": {
-    "library_path": "./$SWIFTSHADER_LIB",
-    "api_version": "$VK_API_VERSION"
+    "library_path": "$SWIFTSHADER_INSTALL_DIR/$SWIFTSHADER_LIB",
+    "api_version": "1.0.5"
   }
 }
 EOF
 
-cp "$SWIFTSHADER_INSTALL_DIR/$SWIFTSHADER_LIB" .
 export VK_DRIVER_FILES="$ENGINE_INSTALL_DIR/sample/vk_swiftshader_icd.json"
 
 echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
-echo "generated driver manifest:"
+echo "driver manifest:"
 cat $VK_DRIVER_FILES
 
 ./Sample --run-test --config-path smoke_test_config.ini > "$OUT_FILE" 2>&1
