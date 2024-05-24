@@ -5,20 +5,30 @@ inputs:
     description: VulkanSDK version
     required: true
     type: string
-  file:
-    description: File to download
+  os:
+    description: Operating system
     required: true
     type: string
 
 runs:
   using: "composite"
   steps:
+    - name: Setup Windows Filename
+      if: ${{ inputs.os == 'Windows' }}
+      shell: bash
+      run: echo "FILENAME=vulkanCI-windows-x64.zip" >> $GITHUB_ENV
+
+    - name: Setup Linux Filename
+      if: ${{ inputs.os == 'Linux' }}
+      shell: bash
+      run: echo "FILENAME=vulkanCI-ubuntu24.04-x64.zip" >> $GITHUB_ENV
+
     - name: Download VulkanCI
       uses: robinraju/release-downloader@v1.10
       with:
         repository: 'NcStudios/VulkanCI'
         tag: 'v${{ inputs.version }}'
-        filename: '${{ inputs.file }}'
+        filename: '${{ env.FILENAME }}'
         out-file-path: 'VulkanSDK'
         extract: true
 
@@ -29,5 +39,18 @@ runs:
         echo "VULKAN_SDK=$INSTALL_PATH" >> "$GITHUB_ENV"
         echo "VULKAN_SDK_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
         echo "SWIFTSHADER_INSTALL_PATH=$INSTALL_PATH/Swiftshader" >> "$GITHUB_ENV"
-        echo "$INSTALL_PATH/bin" >> "$GITHUB_PATH"
-        echo "$INSTALL_PATH/lib" >> "$GITHUB_PATH"
+
+    - name: Setup Windows Environment Variables
+      if: ${{ inputs.os == 'Windows' }}
+      shell: bash
+      run: |
+        echo "${{ env.VULKAN_SDK }}/bin" >> "$GITHUB_PATH"
+        echo "VK_LAYER_PATH=${{ env.VULKAN_SDK }}/bin" >> "$GITHUB_ENV"
+
+    - name: Setup Linux Environment Variables
+      if: ${{ inputs.os == 'Linux' }}
+      shell: bash
+      run: |
+        echo "${{ env.VULKAN_SDK }}/lib" >> "$GITHUB_PATH"
+        echo "VK_LAYER_PATH=${{ env.VULKAN_SDK }}/lib" >> "$GITHUB_ENV"
+
