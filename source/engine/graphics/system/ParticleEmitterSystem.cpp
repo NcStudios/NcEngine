@@ -167,7 +167,7 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
 
 void ParticleEmitterSystem::Add(graphics::ParticleEmitter& emitter)
 {
-    m_toAdd.emplace_back(emitter.ParentEntity(), emitter.GetInfo(), &m_random);
+    m_toAdd.emplace_back(m_registry->GetEcs(), emitter.ParentEntity(), emitter.GetInfo(), &m_random);
     emitter.RegisterSystem(this);
 }
 
