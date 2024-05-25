@@ -64,7 +64,6 @@ EmitterState::EmitterState(ecs::ExplicitEcs<Transform> transforms, Entity entity
 
 void EmitterState::Emit(size_t count)
 {
-    // m_lastPosition = ActiveRegistry()->Get<Transform>(m_entity)->PositionXM();
     m_lastPosition = m_transforms.Get<Transform>(m_entity).PositionXM();
     auto parentPosition = Vector3{};
     DirectX::XMStoreVector3(&parentPosition, m_lastPosition);

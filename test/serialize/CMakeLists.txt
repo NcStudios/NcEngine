@@ -3,7 +3,6 @@ add_executable(ComponentSerialization_integration_tests
     ComponentSerialization_integration_tests.cpp
     ${NC_SOURCE_DIR}/serialize/ComponentSerialization.cpp
     ${NC_SOURCE_DIR}/audio/AudioSource.cpp
-    ${NC_SOURCE_DIR}/ecs/Registry.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/graphics/components/MeshRenderer.cpp
     ${NC_SOURCE_DIR}/graphics/components/ParticleEmitter.cpp
@@ -39,7 +38,6 @@ add_executable(SceneSerialization_unit_tests
     SceneSerialization_unit_tests.cpp
     ${NC_SOURCE_DIR}/serialize/SceneSerialization.cpp
     ${NC_SOURCE_DIR}/serialize/EntitySerializationUtility.cpp
-    ${NC_SOURCE_DIR}/ecs/Registry.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
 )
 

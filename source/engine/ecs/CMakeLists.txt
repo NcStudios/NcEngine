@@ -3,7 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         Component.cpp
         FreeComponentGroup.cpp
         NcEcsImpl.cpp
-        Registry.cpp
         SoA.cpp
         Transform.cpp
 )

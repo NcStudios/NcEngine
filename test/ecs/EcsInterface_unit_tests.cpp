@@ -1,12 +1,6 @@
 #include "gtest/gtest.h"
 #include "ncengine/ecs/Ecs.h"
 
-namespace nc
-{
-class Registry;
-auto ActiveRegistry() -> Registry* { return nullptr; };
-} // namespace nc
-
 struct S1 {};
 struct S2 {};
 
