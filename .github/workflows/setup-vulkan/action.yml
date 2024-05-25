@@ -29,21 +29,11 @@ runs:
         elif [[ "${{ inputs.os }}" == "Linux" ]]; then
           echo "VULKAN_CI_ARTIFACT=vulkanCI-ubuntu24.04-x64.zip" >> $GITHUB_ENV
           echo "VK_LAYER_PATH=$INSTALL_PATH/share/vulkan/explicit_layer.d" >> "$GITHUB_ENV"
-          echo "$INSTALL_PATH/lib" >> "$GITHUB_PATH"
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/lib" >> "$GITHUB_ENV"
         else
           echo "Unknown OS: ${{ inputs.os }}"
           exit 1
         fi
-
-    # - name: Setup Windows Filename
-    #   if: ${{ inputs.os == 'Windows' }}
-    #   shell: bash
-    #   run: echo "VULKAN_CI_ARTIFACT=vulkanCI-windows-x64.zip" >> $GITHUB_ENV
-
-    # - name: Setup Linux Filename
-    #   if: ${{ inputs.os == 'Linux' }}
-    #   shell: bash
-    #   run: echo "VULKAN_CI_ARTIFACT=vulkanCI-ubuntu24.04-x64.zip" >> $GITHUB_ENV
 
     - name: Download VulkanCI
       uses: robinraju/release-downloader@v1.10
@@ -53,26 +43,3 @@ runs:
         filename: '${{ env.VULKAN_CI_ARTIFACT }}'
         out-file-path: 'VulkanSDK'
         extract: true
-
-    # - name: Setup Environment Variables
-    #   shell: bash
-    #   run: |
-    #     INSTALL_PATH="${{ github.workspace }}/VulkanSDK/${{ inputs.version }}"
-    #     echo "VULKAN_SDK=$INSTALL_PATH" >> "$GITHUB_ENV"
-    #     echo "VULKAN_SDK_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
-    #     echo "SWIFTSHADER_INSTALL_PATH=$INSTALL_PATH/Swiftshader" >> "$GITHUB_ENV"
-
-    # - name: Setup Windows Environment Variables
-    #   if: ${{ inputs.os == 'Windows' }}
-    #   shell: bash
-    #   run: |
-    #     echo "${{ env.VULKAN_SDK }}/bin" >> "$GITHUB_PATH"
-    #     echo "VK_LAYER_PATH=${{ env.VULKAN_SDK }}/bin" >> "$GITHUB_ENV"
-
-    # - name: Setup Linux Environment Variables
-    #   if: ${{ inputs.os == 'Linux' }}
-    #   shell: bash
-    #   run: |
-    #     echo "${{ env.VULKAN_SDK }}/lib" >> "$GITHUB_PATH"
-    #     echo "VK_LAYER_PATH=${{ env.VULKAN_SDK }}/share/vulkan/explicit_layer.d" >> "$GITHUB_ENV"
-
