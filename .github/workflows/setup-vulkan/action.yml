@@ -20,7 +20,7 @@ runs:
         INSTALL_PATH="${{ github.workspace }}/VulkanSDK/${{ inputs.version }}"
         echo "VULKAN_SDK=$INSTALL_PATH" >> "$GITHUB_ENV"
         echo "VULKAN_SDK_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
-        echo "SWIFTSHADER_INSTALL_PATH=$INSTALL_PATH/Swiftshader" >> "$GITHUB_ENV"
+        echo "SWIFTSHADER_INSTALL_PATH=$INSTALL_PATH/swiftshader" >> "$GITHUB_ENV"
 
         if [[ "${{ inputs.os }}" == "Windows" ]]; then
           echo "VULKAN_CI_ARTIFACT=vulkanCI-windows-x64.zip" >> $GITHUB_ENV
