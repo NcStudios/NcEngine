@@ -18,12 +18,10 @@ Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     UpdateProjectionMatrix(width, height);
 }
 
-void Camera::UpdateViewMatrix()
+void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix)
 {
-    const auto* transform = ActiveRegistry()->Get<Transform>(ParentEntity());
-    const auto& m = transform->TransformationMatrix();
-    const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m);
-    m_view = DirectX::XMMatrixLookAtRH(m.r[3], look, DirectX::g_XMNegIdentityR1);
+    const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformationMatrix);
+    m_view = DirectX::XMMatrixLookAtRH(transformationMatrix.r[3], look, DirectX::g_XMNegIdentityR1);
 }
 
 void Camera::UpdateProjectionMatrix(float width, float height)

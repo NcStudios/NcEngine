@@ -51,7 +51,7 @@ class Camera : public FreeComponent
         auto CalculateFrustum() const noexcept -> Frustum;
 
         /** @brief Construct a new view matrix based on the current transform. */
-        virtual void UpdateViewMatrix();
+        virtual void UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix);
 
         /**
          * @brief Construct a new projection matrix based on input values.
