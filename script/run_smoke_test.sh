@@ -19,7 +19,7 @@ if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
     SWIFTSHADER_LIB=vk_swiftshader.dll
 elif [[ "$OSTYPE" == "linux-gnu" ]]; then
     SWIFTSHADER_LIB=libvk_swiftshader.so
-    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SWIFTSHADER_INSTALL_DIR:$ENGINE_INSTALL_DIR/sample"
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ENGINE_INSTALL_DIR/sample"
 else
   echo "Unknown OS: $OSTYPE"
   exit 1
@@ -29,11 +29,13 @@ cat <<EOF > vk_swiftshader_icd.json
 {
   "file_format_version": "1.0.0",
   "ICD": {
-    "library_path": "$SWIFTSHADER_INSTALL_DIR/$SWIFTSHADER_LIB",
+    "library_path": "./$SWIFTSHADER_LIB",
     "api_version": "1.0.5"
   }
 }
 EOF
+
+cp "$SWIFTSHADER_INSTALL_DIR/$SWIFTSHADER_LIB" .
 
 export VK_DRIVER_FILES="$ENGINE_INSTALL_DIR/sample/vk_swiftshader_icd.json"
 
