@@ -52,5 +52,5 @@ runs:
       shell: bash
       run: |
         echo "${{ env.VULKAN_SDK }}/lib" >> "$GITHUB_PATH"
-        echo "VK_LAYER_PATH=${{ env.VULKAN_SDK }}/lib" >> "$GITHUB_ENV"
+        echo "VK_LAYER_PATH=${{ env.VULKAN_SDK }}/share/vulkan/explicit_layer.d" >> "$GITHUB_ENV"
 
