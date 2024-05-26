@@ -7,14 +7,6 @@
 
 namespace nc
 {
-class Registry;
-
-/** @deprecated Use NcEngine::Registry() instead. */
-auto ActiveRegistry() -> Registry*;
-
-/** @deprecated */
-void SetActiveRegistry(Registry* registry);
-
 /** @brief Requirements for views over the registry. */
 template<class T>
 concept Viewable = PooledComponent<T> || std::same_as<T, Entity>;
@@ -27,7 +19,11 @@ class Registry : public StableAddress
     using index_type = Entity::index_type;
 
     public:
-        explicit Registry(ecs::ComponentRegistry& impl);
+        explicit Registry(ecs::ComponentRegistry& impl)
+            : m_impl{&impl},
+              m_ecs{impl}
+        {
+        }
 
         /** Entity Functions */
         template<std::same_as<Entity> T>

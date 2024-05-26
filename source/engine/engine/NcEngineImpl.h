@@ -2,7 +2,6 @@
 
 #include "task/Executor.h"
 #include "time/StepTimer.h"
-#include "window/WindowImpl.h"
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/ComponentRegistry.h"
@@ -26,11 +25,11 @@ namespace nc
         private:
             time::StepTimer m_timer;
             SystemEvents m_events;
-            window::WindowImpl m_window;
             std::unique_ptr<ecs::ComponentRegistry> m_registry;
             Registry m_legacyRegistry; // delete once all usage is cutover
             std::unique_ptr<ModuleRegistry> m_modules;
             task::Executor m_executor;
+            Connection<> m_onQuitConnection;
             bool m_isRunning;
 
             void ClearScene();

@@ -19,9 +19,6 @@ struct PhysicsSettings;
 
 namespace physics
 {
-/** @brief Factor for creating a physics module instance */
-auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events) -> std::unique_ptr<NcPhysics>;
-
 /** @brief Physics module implementation.
  * 
  * Handles the internal processing of Collider, ConcaveCollider, PhysicsBody, Joint, and IClickable types. */

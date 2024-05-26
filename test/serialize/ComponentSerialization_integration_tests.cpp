@@ -40,7 +40,6 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
 } // namespace graphics
 } // namespace nc
 
-// We only need the old Registry here so that it sets the ptr for ActiveRegistry(), which is only used by PhysicsBody.
 auto g_registry = nc::ecs::ComponentRegistry{10ull};
 auto g_ecs = nc::ecs::Ecs{g_registry};
 constexpr auto g_entity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::None};
@@ -239,8 +238,7 @@ TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
 
 TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
 {
-    // We actually need a Collider in the Registry for this test b/c PhysicsBody calls ActiveRegistry() :(
-    // Best to keep it last, but we'll still be good citizens and clean up
+    // We actually need a Collider in the Registry for this test, so we want to clean up for next tests.
     SCOPE_EXIT
     (
         g_registry.CommitPendingChanges();

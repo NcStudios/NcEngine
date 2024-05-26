@@ -50,6 +50,7 @@ constexpr size_t NcPhysicsId = 5ull;
 constexpr size_t NcTimeId = 6ull;
 constexpr size_t NcRandomId = 7ull;
 constexpr size_t NcSceneId = 8ull;
+constexpr size_t NcWindowId = 9ull;
 /** @} */
 
 namespace update_task_id

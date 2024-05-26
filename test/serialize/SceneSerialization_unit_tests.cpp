@@ -106,13 +106,11 @@ class SceneSerializationTests : public ::testing::Test
     public:
         static constexpr auto maxEntities = 10ull;
         nc::ecs::ComponentRegistry registry;
-        nc::Registry legacyRegistry; // unfortunately we need this around for ActiveRegistry() usage inside Transform
         nc::ecs::Ecs ecs;
         std::unique_ptr<nc::asset::NcAsset> assetModule;
 
         SceneSerializationTests()
             : registry{maxEntities},
-              legacyRegistry{registry},
               ecs{registry},
               assetModule{nc::asset::BuildAssetModule(nc::config::AssetSettings{},
                                                       nc::config::MemorySettings{},
@@ -146,7 +144,7 @@ class SceneSerializationTests : public ::testing::Test
 
         ~SceneSerializationTests()
         {
-            legacyRegistry.Reset();
+            registry.Clear();
         }
 };
 
