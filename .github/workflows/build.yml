@@ -28,12 +28,9 @@ jobs:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
             shortName: Windows
-            swiftshaderArtifact: "swiftshader-windows-x64"
           - os: ubuntu-24.04
             shortName: Linux
             generator: "Unix Makefiles"
-            cmakeEnv: "CXX=/usr/bin/g++-14"
-            swiftshaderArtifact: "swiftshader-ubuntu24.04-x64"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
@@ -66,16 +63,7 @@ jobs:
         uses: ./.github/workflows/setup-vulkan
         with:
           version: 1.3.261.1
-
-      - name: Download SwiftShader
-        if: ${{ matrix.variant == 'Dev' }}
-        uses: robinraju/release-downloader@v1.10
-        with:
-          repository: 'NcStudios/swiftshader'
-          tag: 'v5.0.0-nc'
-          filename: ${{ matrix.swiftshaderArtifact }}.zip
-          out-file-path: 'swiftshader'
-          extract: true
+          os: ${{ matrix.shortName }}
 
       - name: Configure
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
@@ -97,7 +85,7 @@ jobs:
       - name: Run Smoke Test
         if: ${{ matrix.variant == 'Dev' }}
         shell: bash
-        run: script/run_smoke_test.sh "${{ github.workspace }}/swiftshader" "1.3" "${{ github.workspace }}/install" "SmokeTestResults.txt"
+        run: script/run_smoke_test.sh "${{ env.SWIFTSHADER_INSTALL_PATH }}" "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
       - name: Upload Smoke Test Results
         if: ${{ !cancelled() && matrix.variant == 'Dev' }}
