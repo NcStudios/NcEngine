@@ -11,7 +11,6 @@ struct ObjectData
     // N MVP matrices
     mat4 model;
     mat4 modelView;
-    mat4 viewProjection;
 
     // Textures
     uint unused1;
