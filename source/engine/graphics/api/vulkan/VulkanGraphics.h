@@ -56,7 +56,7 @@ class VulkanGraphics : public IGraphics
         auto CurrentFrameIndex() -> uint32_t override;
         void DrawFrame(const PerFrameRenderState& state) override;
         void FrameEnd() override;
-        void OnResize(float width, float height, bool isMinimized) override;
+        void OnResize(const Vector2& dimensions, bool isMinimized) override;
         void Clear() noexcept override;
 
     private:

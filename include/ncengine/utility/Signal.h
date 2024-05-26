@@ -51,6 +51,13 @@ class Connection
         std::weak_ptr<ConnectionState_t> m_state;
 };
 
+/** @brief Priority values for controlling call order from a Signal. */
+struct SignalPriority
+{
+    static constexpr size_t Highest = 0ull;
+    static constexpr size_t Lowest = std::numeric_limits<size_t>::max();
+};
+
 /** @brief An event source supporting multiple Connections. */
 template<class... Args>
 class Signal
@@ -66,7 +73,7 @@ class Signal
         Signal& operator=(const Signal&) = delete;
 
         /** Connect a std::function */
-        [[nodiscard]] auto Connect(std::function<void(Args...)> func, size_t priority = 0ull) -> Connection_t
+        [[nodiscard]] auto Connect(std::function<void(Args...)> func, size_t priority = SignalPriority::Highest) -> Connection_t
         {
             const auto pos = std::ranges::find_if(m_slots, [priority](auto&& slot)
             {
@@ -85,14 +92,14 @@ class Signal
 
         /** Connect a member function */
         template<class T>
-        [[nodiscard]] auto Connect(T *inst, void (T::*func)(Args...), size_t priority = 0ull) -> Connection_t
+        [[nodiscard]] auto Connect(T *inst, void (T::*func)(Args...), size_t priority = SignalPriority::Highest) -> Connection_t
         {
             return Connect([=](Args... args){ (inst->*func)(args...); }, priority);
         }
 
         /** Connect a const member function */
         template<class T>
-        [[nodiscard]] auto Connect(const T *inst, void (T::*func)(Args...) const, size_t priority = 0ull) -> Connection_t
+        [[nodiscard]] auto Connect(const T *inst, void (T::*func)(Args...) const, size_t priority = SignalPriority::Highest) -> Connection_t
         {
             return Connect([=](Args... args){ (inst->*func)(args...); }, priority);
         }

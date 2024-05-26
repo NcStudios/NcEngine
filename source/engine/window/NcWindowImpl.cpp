@@ -1,4 +1,4 @@
-#include "WindowImpl.h"
+#include "NcWindowImpl.h"
 #include "NcEngine.h"
 #include "config/Config.h"
 #include "graphics/GraphicsUtilities.h"
@@ -13,7 +13,7 @@
 
 namespace
 {
-    nc::window::WindowImpl* g_instance = nullptr;
+    nc::window::NcWindowImpl* g_instance = nullptr;
 }
 
 namespace nc::window
@@ -48,14 +48,19 @@ namespace nc::window
         g_instance->UnregisterOnResizeReceiver(receiver);
     }
 
-    /* WindowImpl */
-    WindowImpl::WindowImpl(const config::ProjectSettings& projectSettings,
+    auto BuildWindowModule(const config::ProjectSettings& projectSettings,
                            const config::GraphicsSettings& graphicsSettings,
-                           std::function<void()> onQuit)
+                           Signal<>& quit) -> std::unique_ptr<NcWindow>
+    {
+        return std::make_unique<NcWindowImpl>(projectSettings, graphicsSettings, quit);
+    }
+
+    /* NcWindowImpl */
+    NcWindowImpl::NcWindowImpl(const config::ProjectSettings& projectSettings,
+                           const config::GraphicsSettings& graphicsSettings,
+                           Signal<>& quit)
         : m_onResizeReceivers{},
-          m_dimensions{},
-          GraphicsOnResizeCallback{nullptr},
-          EngineDisableRunningCallback{std::move(onQuit)}
+          m_quit{&quit}
     {
         g_instance = this;
 
@@ -109,49 +114,33 @@ namespace nc::window
         glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
     }
 
-    WindowImpl::~WindowImpl() noexcept
+    NcWindowImpl::~NcWindowImpl() noexcept
     {
         glfwDestroyWindow(m_window);
         glfwTerminate();
     }
 
-    auto WindowImpl::GetWindow() -> GLFWwindow*
-    {
-        return m_window;
-    }
 
-    Vector2 WindowImpl::GetDimensions() const noexcept
-    {
-        return m_dimensions;
-    }
-
-    Vector2 WindowImpl::GetScreenExtent() const noexcept
-    {
-        return m_screenExtent;
-    }
-
-    Vector2 WindowImpl::GetContentScale() const noexcept
-    {
-        return m_contentScale;
-    }
-
-    void WindowImpl::SetDimensions(int width, int height) noexcept
+    void NcWindowImpl::SetDimensions(int width, int height) noexcept
     {
         m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+        glfwSetWindowSize(m_window, width, height);
+        const auto minimized = static_cast<bool>(glfwGetWindowAttrib(m_window, GLFW_ICONIFIED));
+        m_onResize.Emit(m_dimensions, minimized);
+
+        for(auto receiver : m_onResizeReceivers)
+        {
+            receiver->OnResize(m_dimensions);
+        }
     }
 
-    void WindowImpl::BindGraphicsOnResizeCallback(std::function<void(float,float,bool)> callback) noexcept
-    {
-        GraphicsOnResizeCallback = std::move(callback);
-    }
-
-    void WindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
+    void NcWindowImpl::RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
         m_onResizeReceivers.push_back(receiver);
     }
 
-    void WindowImpl::UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept
+    void NcWindowImpl::UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept
     {
         auto pos = std::find(m_onResizeReceivers.begin(), m_onResizeReceivers.end(), receiver);
         if(pos != m_onResizeReceivers.end())
@@ -161,40 +150,22 @@ namespace nc::window
         }
     }
 
-    void WindowImpl::InvokeResizeReceivers(GLFWwindow* window, int width, int height)
-    {
-        if(!(GraphicsOnResizeCallback))
-        {
-            return;
-        }
-
-        int minimized = glfwGetWindowAttrib(window, GLFW_ICONIFIED);
-        GraphicsOnResizeCallback(static_cast<float>(width), static_cast<float>(height), minimized);
-
-        for(auto receiver : m_onResizeReceivers)
-        {
-            receiver->OnResize(m_dimensions);
-        }
-    }
-
-    void WindowImpl::ProcessResizeEvent(GLFWwindow* window, int width, int height)
+    void NcWindowImpl::ProcessResizeEvent(GLFWwindow*, int width, int height)
     {
         g_instance->SetDimensions(width, height);
-        glfwSetWindowSize(window, width, height);
-        g_instance->InvokeResizeReceivers(window, width, height);
     }
 
-    void WindowImpl::ProcessSetContentScaleEvent(GLFWwindow*, float x, float y)
+    void NcWindowImpl::ProcessSetContentScaleEvent(GLFWwindow*, float x, float y)
     {
         g_instance->m_contentScale = Vector2{x, y};
     }
 
-    void WindowImpl::ProcessSystemMessages()
+    void NcWindowImpl::ProcessSystemMessages()
     {
         glfwPollEvents();
     }
 
-    void WindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
+    void NcWindowImpl::ProcessKeyEvent(GLFWwindow*, int key, int, int action, int)
     {
         if (ui::IsCapturingKeyboard())
         {
@@ -205,12 +176,12 @@ namespace nc::window
         nc::input::AddKeyToQueue(keyCode, action);
     }
 
-    void WindowImpl::ProcessMouseCursorPosEvent(GLFWwindow*, double xPos, double yPos)
+    void NcWindowImpl::ProcessMouseCursorPosEvent(GLFWwindow*, double xPos, double yPos)
     {
         nc::input::UpdateMousePosition(static_cast<int>(xPos), static_cast<int>(yPos));
     }
 
-    void WindowImpl::ProcessMouseButtonEvent(GLFWwindow*, int button, int action, int)
+    void NcWindowImpl::ProcessMouseButtonEvent(GLFWwindow*, int button, int action, int)
     {
         using namespace nc::input;
 
@@ -235,7 +206,7 @@ namespace nc::window
         AddKeyToQueue(mouseButton, action);
     }
 
-    void WindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
+    void NcWindowImpl::ProcessMouseScrollEvent(GLFWwindow*, double, double yOffset)
     {
         if (ui::IsCapturingMouse())
         {
@@ -245,9 +216,9 @@ namespace nc::window
         input::SetMouseWheel(static_cast<int>(yOffset));
     }
 
-    void WindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)
+    void NcWindowImpl::ProcessWindowCloseEvent(GLFWwindow* window)
     {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-        g_instance->EngineDisableRunningCallback();
+        g_instance->m_quit->Emit();
     }
 } // end namespace nc::window

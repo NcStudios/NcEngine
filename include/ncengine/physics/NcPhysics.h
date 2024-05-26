@@ -8,7 +8,19 @@
 #include "ncengine/module/Module.h"
 #include "ncengine/type/EngineId.h"
 
-namespace nc::physics
+#include <memory>
+
+namespace nc
+{
+struct SystemEvents;
+class Registry;
+
+namespace config
+{
+struct PhysicsSettings;
+} // namespace config
+
+namespace physics
 {
 /** @brief Physics module interface
  * 
@@ -57,4 +69,10 @@ struct NcPhysics : public Module
     virtual void UnregisterClickable(IClickable* clickable) noexcept = 0;
     virtual auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* = 0;
 };
-} // namespace nc::physics
+
+/** @brief Build an NcPhysics module instance. */
+auto BuildPhysicsModule(const config::PhysicsSettings& settings,
+                        Registry* registry,
+                        SystemEvents& events) -> std::unique_ptr<NcPhysics>;
+} // namespace physics
+} // namespace nc

@@ -52,7 +52,7 @@ int main(int argc, char** argv)
         if (args.runSmokeTest)
         {
             engine->Start(std::make_unique<nc::sample::SmokeTest>(
-                [instance = engine.get()](){ instance->Stop(); }
+                [&quit = engine->GetSystemEvents().quit](){ quit.Emit(); }
             ));
         }
         else

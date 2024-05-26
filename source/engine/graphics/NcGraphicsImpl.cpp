@@ -1,7 +1,6 @@
 #include "NcGraphicsImpl.h"
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
-#include "window/WindowImpl.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/DebugRendering.h"
@@ -11,6 +10,7 @@
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
+#include "ncengine/window/Window.h"
 
 #include "imgui/imgui.h"
 #include "optick.h"
@@ -68,21 +68,22 @@ namespace nc::graphics
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,
                              Registry* registry,
-                             SystemEvents& events,
-                             window::WindowImpl* window) -> std::unique_ptr<NcGraphics>
+                             SystemEvents& events) -> std::unique_ptr<NcGraphics>
     {
         if (graphicsSettings.enabled)
         {
             auto ncAsset = modules.Get<asset::NcAsset>();
+            auto ncWindow = modules.Get<window::NcWindow>();
             NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
+            NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, window);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, *ncWindow);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), window);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -96,16 +97,15 @@ namespace nc::graphics
                                    SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
                                    ShaderResourceBus shaderResourceBus,
-                                   window::WindowImpl* window)
+                                   window::NcWindow& window)
         : m_registry{registry},
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
           m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
           m_postProcessResources{memorySettings.maxPointLights, &m_shaderResourceBus},
-          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)}
+          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)},
+          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl::OnResize)}
     {
-        window->BindGraphicsOnResizeCallback(std::bind_front(&NcGraphicsImpl::OnResize, this));
-
 #if NC_DEBUG_RENDERING_ENABLED
         debug::DebugRendererInitialize(registry->GetEcs());
 #endif
@@ -250,9 +250,9 @@ namespace nc::graphics
         m_graphics->FrameEnd();
     }
 
-    void NcGraphicsImpl::OnResize(float width, float height, bool isMinimized)
+    void NcGraphicsImpl::OnResize(const Vector2& dimensions, bool isMinimized)
     {
-        m_systemResources.cameras.Get()->UpdateProjectionMatrix(width, height);
-        m_graphics->OnResize(width, height, isMinimized);
+        m_systemResources.cameras.Get()->UpdateProjectionMatrix(dimensions.x, dimensions.y);
+        m_graphics->OnResize(dimensions, isMinimized);
     }
 } // namespace nc::graphics
