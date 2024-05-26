@@ -16,6 +16,7 @@ struct CameraState;
 #endif
 struct EnvironmentData
 {
+    DirectX::XMMATRIX cameraViewProjection = DirectX::XMMATRIX{};
     alignas(16)Vector4 cameraWorldPosition = Vector4(0.0f, 4.0f, -6.4f, 0.0f);
     alignas(16)uint32_t skyboxTextureIndex = std::numeric_limits<uint32_t>::max();
 };
