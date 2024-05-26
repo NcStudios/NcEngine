@@ -34,17 +34,19 @@ auto GetContentScale() -> Vector2;
 
 /**
  * @brief Allow an object to receive window resize events. Receivers must be unregistered before they are destroyed.
- * @deprecated Prefer subscribing to NcWindow::OnResize().
+ * @deprecated Prefer using NcWindow::OnResize().
  */
 void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
 
 /**
  * @brief Unregister an object from receiving window resize events.
- * @deprecated Prefer subscribing to NcWindow::OnResize().
+ * @deprecated Prefer using NcWindow::OnResize().
  */
 void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
 
-/** @brief Window module interface. */
+/** @brief Window module interface.
+ * 
+ */
 class NcWindow : public Module
 {
     public:
@@ -57,7 +59,7 @@ class NcWindow : public Module
         /** @brief Get the dimensions of the renderable window region. */
         auto GetScreenExtent() const noexcept -> const Vector2& { return m_screenExtent; }
 
-        /** @brief Get the ration between the current DPI and the platform's default DPI. */
+        /** @brief Get the ratio between the current DPI and the platform's default DPI. */
         auto GetContentScale() const noexcept -> const Vector2& { return m_contentScale; }
 
         /** @brief Get the GLFW window handle. */
