@@ -371,10 +371,10 @@ void SpotLightUIWidget(graphics::SpotLight& light)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
-    constexpr auto max = 1200.0f;
-    ui::InputColor3(light.ambientColor, "ambientColor");
-    ui::InputColor3(light.diffuseColor, "diffuseColor");
-    ui::DragFloat(light.radius, "radius", step, min, max);
+    constexpr auto max = 360.0f;
+    ui::InputColor3(light.color, "color");
+    ui::DragFloat(light.innerAngle, "innerAngle", step, min, max);
+    ui::DragFloat(light.outerAngle, "outerAngle", step, min, max);
 }
 
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)

@@ -37,11 +37,11 @@ auto SpotLightSystem::Execute(uint32_t currentFrameIndex, MultiView<SpotLight, T
         lightsCount++;
         state.viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
         m_spotLightData.emplace_back(state.viewProjections.back(),
-                                  transform->Position(),
-                                  m_useShadows,
-                                  light->ambientColor,
-                                  light->diffuseColor,
-                                  light->radius);
+                                     transform->Position(),
+                                     m_useShadows,
+                                     light->color,
+                                     light->innerAngle,
+                                     light->outerAngle);
     }
 
     m_spotLightBuffer.Bind(m_spotLightData, currentFrameIndex);

@@ -37,11 +37,11 @@ auto PointLightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight,
         lightsCount++;
         state.viewProjections.push_back(::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
         m_pointLightData.emplace_back(state.viewProjections.back(),
-                                  transform->Position(),
-                                  m_useShadows,
-                                  light->ambientColor,
-                                  light->diffuseColor,
-                                  light->radius);
+                                      transform->Position(),
+                                      m_useShadows,
+                                      light->ambientColor,
+                                      light->diffuseColor,
+                                      light->radius);
     }
 
     m_pointLightBuffer.Bind(m_pointLightData, currentFrameIndex);

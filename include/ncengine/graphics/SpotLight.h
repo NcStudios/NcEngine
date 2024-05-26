@@ -10,22 +10,22 @@
 
 namespace nc::graphics
 {
-/** @brief Component representing a light pointing in a single direction with a radius. */
+/** @brief Component representing a light pointing in a single direction with an angle specifying the radius. */
 struct SpotLight final : public ComponentBase
 {
     explicit SpotLight(Entity entity,
-                       const Vector3& direction_ = Vector3::Front(),
                        const Vector3& color_ = Vector3{1.0f, 0.9f, 0.9f},
-                       float radius_ = 20.0f) noexcept
+                       float innerAngle_ = 20.0f,
+                       float outerAngle_ = 30.0f) noexcept
         : ComponentBase{entity},
-          direction{direction_},
           color{color_},
-          radius{radius_}
+          innerAngle{innerAngle_},
+          outerAngle{outerAngle_}
     {
     }
-    Vector3 direction;
     Vector3 color;
-    float radius;
+    float innerAngle;
+    float outerAngle;
 };
 } // namespace nc::graphics
 

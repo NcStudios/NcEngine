@@ -21,27 +21,27 @@ struct SpotLightData
     SpotLightData() = default;
 
     SpotLightData(const DirectX::XMMATRIX& viewProjection_,
-                   const Vector3& position_,
-                   bool castsShadows_,
-                   const Vector3& ambientColor_,
-                   const Vector3& diffuseColor_,
-                   float radius_)
+                  const Vector3& position_,
+                  bool castsShadows_,
+                  const Vector3& color_,
+                  float innerAngle_,
+                  float outerAngle_)
         : viewProjection{viewProjection_},
           position{position_},
           castsShadows{static_cast<int>(castsShadows_)},
-          ambientColor{ambientColor_},
-          diffuseColor{diffuseColor_},
-          radius{radius_}
+          color{color_},
+          innerAngle{innerAngle_},
+          outerAngle{outerAngle_}
     {
     }
 
     DirectX::XMMATRIX viewProjection = {};
     Vector3 position = Vector3::Zero();
     int castsShadows = 1;
-    Vector3 ambientColor = Vector3::Splat(0.35f);
+    Vector3 color = Vector3::Splat(0.35f);
     int isInitialized = 1;
-    Vector3 diffuseColor = Vector3::One();
-    float radius = 2.5f;
+    float innerAngle = 20.0f;
+    float outerAngle = 30.0f;
 };
 
 struct SpotLightState

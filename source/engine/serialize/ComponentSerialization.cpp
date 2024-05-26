@@ -231,22 +231,22 @@ auto DeserializePositionClamp(std::istream& stream, const DeserializationContext
 void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.ambientColor);
-    serialize::Serialize(stream, out.diffuseColor);
-    serialize::Serialize(stream, out.radius);
+    serialize::Serialize(stream, out.color);
+    serialize::Serialize(stream, out.innerAngle);
+    serialize::Serialize(stream, out.outerAngle);
 }
 
 auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::SpotLight
 {
     auto id = uint32_t{};
-    auto ambient = Vector3{};
-    auto diffuseColor = Vector3{};
-    auto radius = 0.0f;
+    auto color = Vector3{};
+    auto innerAngle = 0.0f;
+    auto outerAngle = 0.0f;
     serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, ambient);
-    serialize::Deserialize(stream, diffuseColor);
-    serialize::Deserialize(stream, radius);
-    return graphics::SpotLight{ctx.entityMap.at(id), ambient, diffuseColor, radius};
+    serialize::Deserialize(stream, color);
+    serialize::Deserialize(stream, innerAngle);
+    serialize::Deserialize(stream, outerAngle);
+    return graphics::SpotLight{ctx.entityMap.at(id), color, innerAngle, outerAngle};
 }
 
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&)

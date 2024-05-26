@@ -37,6 +37,7 @@ constexpr size_t HierarchyId = 18ull;
 constexpr size_t PhysicsMaterialId = 19ull;
 constexpr size_t VelocityRestrictionId = 20ull;
 constexpr size_t PositionClampId = 21ull;
+constexpr size_t SpotLightId = 22ull;
 /** @} */
 
 /** @{ */
