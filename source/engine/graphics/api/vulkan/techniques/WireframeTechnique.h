@@ -14,7 +14,6 @@ class ShaderBindingManager;
 struct WireframeVertexPushConstants
 {
     DirectX::XMMATRIX model;
-    DirectX::XMMATRIX viewProjection;
 };
 
 struct WireframeFragmentPushConstants
@@ -25,7 +24,7 @@ struct WireframeFragmentPushConstants
 class WireframeTechnique : public ITechnique
 {
     public:
-        WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass);
+        WireframeTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
         ~WireframeTechnique() noexcept;
 
         bool CanBind(const PerFrameRenderState& frameData) override;
@@ -35,6 +34,7 @@ class WireframeTechnique : public ITechnique
         void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
 
     private:
+        ShaderBindingManager* m_shaderBindingManager;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
 };

@@ -2,11 +2,16 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_EXT_nonuniform_qualifier : enable
 
+layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
+{
+    mat4 cameraViewProjection;
+    vec4 cameraWorldPosition;
+    int skyboxCubemapIndex;
+} environmentData;
+
 layout(push_constant) uniform PER_OBJECT
 {
-    // MVP matrices
     mat4 model;
-    mat4 viewProjection;
 } pc;
 
 layout (location = 0) in vec3 inPos;
@@ -16,10 +21,10 @@ layout (location = 3) in vec3 inTangent;
 layout (location = 4) in vec3 inBitangent;
 
 out gl_PerVertex {
-	vec4 gl_Position;
+    vec4 gl_Position;
 };
 
 void main() 
 {
-    gl_Position = pc.viewProjection * pc.model * vec4(inPos, 1.0);
+    gl_Position = environmentData.cameraViewProjection * pc.model * vec4(inPos, 1.0);
 }
