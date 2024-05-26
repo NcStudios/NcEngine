@@ -85,7 +85,7 @@ jobs:
       - name: Run Smoke Test
         if: ${{ matrix.variant == 'Dev' }}
         shell: bash
-        run: script/run_smoke_test.sh "${{ env.SWIFTSHADER_INSTALL_PATH }}" "${{ github.workspace }}/install" "SmokeTestResults.txt"
+        run: test/smoke_test/run_smoke_test.sh "${{ env.SWIFTSHADER_INSTALL_PATH }}" "${{ github.workspace }}/install"
 
       - name: Upload Smoke Test Results
         if: ${{ !cancelled() && matrix.variant == 'Dev' }}
@@ -93,7 +93,7 @@ jobs:
         with:
           name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}-SmokeTestResults
           path: |
-            install/sample/SmokeTestResults.txt
+            install/sample/ValidationLayers.log
             install/sample/SmokeTest.log
 
   Publish-Test-Results:
