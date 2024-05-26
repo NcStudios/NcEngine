@@ -82,7 +82,6 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
       m_executor{::BuildExecutor(config.engineSettings, *m_modules)},
       m_isRunning{false}
 {
-    SetActiveRegistry(&m_legacyRegistry);
 }
 
 NcEngineImpl::~NcEngineImpl() noexcept
