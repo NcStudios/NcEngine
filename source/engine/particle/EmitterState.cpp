@@ -52,8 +52,9 @@ void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFa
 
 namespace nc::particle
 {
-EmitterState::EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random)
+EmitterState::EmitterState(ecs::ExplicitEcs<Transform> transforms, Entity entity, const graphics::ParticleInfo& info, Random* random)
     : m_info{ info },
+      m_transforms{ transforms },
       m_entity{ entity },
       m_random{ random }
 {
@@ -63,7 +64,7 @@ EmitterState::EmitterState(Entity entity, const graphics::ParticleInfo& info, Ra
 
 void EmitterState::Emit(size_t count)
 {
-    m_lastPosition = ActiveRegistry()->Get<Transform>(m_entity)->PositionXM();
+    m_lastPosition = m_transforms.Get<Transform>(m_entity).PositionXM();
     auto parentPosition = Vector3{};
     DirectX::XMStoreVector3(&parentPosition, m_lastPosition);
     const auto particleCount = Min(count, m_particles.capacity() - m_particles.size());

@@ -83,7 +83,6 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
       m_onQuitConnection{m_events.quit.Connect(this, &NcEngineImpl::Stop, SignalPriority::Lowest)},
       m_isRunning{false}
 {
-    SetActiveRegistry(&m_legacyRegistry);
 }
 
 NcEngineImpl::~NcEngineImpl() noexcept

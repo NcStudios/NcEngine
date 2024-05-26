@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/math/Random.h"
 
@@ -23,7 +24,7 @@ struct Particle
 class EmitterState
 {
 public:
-    EmitterState(Entity entity, const graphics::ParticleInfo& info, Random* random);
+    EmitterState(ecs::ExplicitEcs<Transform> transforms, Entity entity, const graphics::ParticleInfo& info, Random* random);
 
     void Emit(size_t count);
     void Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward);
@@ -42,6 +43,7 @@ private:
     std::vector<Particle> m_particles;
     std::vector<DirectX::XMMATRIX> m_matrices;
     graphics::ParticleInfo m_info;
+    ecs::ExplicitEcs<Transform> m_transforms;
     Entity m_entity;
     Random* m_random;
     float m_emissionCounter = 0.0f;

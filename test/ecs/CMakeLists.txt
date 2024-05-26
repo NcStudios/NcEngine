@@ -201,7 +201,6 @@ add_test(FreeComponentGroup_unit_test FreeComponentGroup_unit_test)
 ### Registry Tests ###
 add_executable(Registry_unit_tests
     Registry_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/Registry.cpp
 )
 
 target_include_directories(Registry_unit_tests
@@ -255,7 +254,6 @@ add_test(SparseSet_unit_tests SparseSet_unit_tests)
 add_executable(Transform_unit_tests
     Transform_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/ecs/Registry.cpp
 )
 
 target_include_directories(Transform_unit_tests
@@ -283,7 +281,6 @@ add_test(Transform_unit_tests Transform_unit_tests)
 ### View Tests ###
 add_executable(View_unit_tests
     View_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/Registry.cpp
 )
 
 target_include_directories(View_unit_tests
