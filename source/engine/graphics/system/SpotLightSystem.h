@@ -24,12 +24,14 @@ struct SpotLightData
                   const Vector3& position_,
                   bool castsShadows_,
                   const Vector3& color_,
+                  const Vector3& direction_,
                   float innerAngle_,
                   float outerAngle_)
         : viewProjection{viewProjection_},
           position{position_},
           castsShadows{static_cast<int>(castsShadows_)},
           color{color_},
+          direction{direction_},
           innerAngle{innerAngle_},
           outerAngle{outerAngle_}
     {
@@ -40,6 +42,7 @@ struct SpotLightData
     int castsShadows = 1;
     Vector3 color = Vector3::Splat(0.35f);
     int isInitialized = 1;
+    Vector3 direction = Vector3::Front();
     float innerAngle = 20.0f;
     float outerAngle = 30.0f;
 };

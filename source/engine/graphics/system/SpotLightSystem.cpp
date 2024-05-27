@@ -19,7 +19,7 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 namespace nc::graphics
 {
 SpotLightSystem::SpotLightSystem(ShaderResourceBus* shaderResourceBus, uint32_t maxSpotLights, bool useShadows)
-    : m_spotLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(SpotLightData) * maxSpotLights, ShaderStage::Fragment | ShaderStage::Vertex, 1, 0, false)},
+    : m_spotLightBuffer{shaderResourceBus->CreateStorageBuffer(sizeof(SpotLightData) * maxSpotLights, ShaderStage::Fragment | ShaderStage::Vertex, 8, 0, false)},
       m_useShadows{useShadows}
 {
     m_spotLightData.reserve(maxSpotLights);
@@ -40,8 +40,9 @@ auto SpotLightSystem::Execute(uint32_t currentFrameIndex, MultiView<SpotLight, T
                                      transform->Position(),
                                      m_useShadows,
                                      light->color,
-                                     light->innerAngle,
-                                     light->outerAngle);
+                                     transform->Rotation().ToEulerAngles(),
+                                     std::cos(light->innerAngle),
+                                     std::cos(light->outerAngle));
     }
 
     m_spotLightBuffer.Bind(m_spotLightData, currentFrameIndex);
