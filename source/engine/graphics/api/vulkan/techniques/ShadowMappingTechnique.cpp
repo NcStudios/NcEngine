@@ -99,7 +99,7 @@ namespace nc::graphics::vulkan
     bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         static const auto useShadows = config::GetGraphicsSettings().useShadows;
-        return m_enabled = useShadows && !frameData.pointLightState.viewProjections.empty();
+        return m_enabled = useShadows && (!frameData.pointLightState.viewProjections.empty() || !frameData.spotLightState.viewProjections.empty()) ;
     }
 
     void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
@@ -127,8 +127,10 @@ namespace nc::graphics::vulkan
 
         auto pushConstants = ShadowMappingPushConstants{};
 
+        // Why can't we just render every light?
+
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        NC_ASSERT(m_shadowCasterIndex < frameData.pointLightState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        NC_ASSERT(m_shadowCasterIndex < frameData.pointLightState.viewProjections.size() + frameData.spotLightState.viewProjections.size(), "Shadow caster index is out of bounds.");
         pushConstants.lightViewProjection = frameData.pointLightState.viewProjections[m_shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);

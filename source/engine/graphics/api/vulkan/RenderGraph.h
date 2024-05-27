@@ -50,8 +50,8 @@ class RenderGraph
         auto GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&;
         auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass.at(0u); };
         void CommitResourceLayout();
-        void IncrementShadowPassCount();
-        void DecrementShadowPassCount();
+        void IncrementShadowPassCount(bool isOmniDirectional);
+        void DecrementShadowPassCount(bool isOmniDirectional);
         void ClearShadowPasses() noexcept;
 
     private:
@@ -74,17 +74,18 @@ class RenderGraph
 
         // Signal connections
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
-        Connection<PointLight&> m_onCommitPointLightConnection;
-        Connection<Entity> m_onRemovePointLightConnection;
-        Connection<SpotLight&> m_onCommitSpotLightConnection;
-        Connection<Entity> m_onRemoveSpotLightConnection;
+        Connection<PointLight&> m_onCommitOmniLightConnection;
+        Connection<Entity> m_onRemoveOmniLightConnection;
+        Connection<SpotLight&> m_onCommitUniLightConnection;
+        Connection<Entity> m_onRemoveUniLightConnection;
 
         // Screen size
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
 
         // State tracking
-        uint32_t m_activeShadowMappingPasses;
+        uint32_t m_uniDirShadowPasses;
+        uint32_t m_omniDirShadowPasses;
         uint32_t m_maxLights;
         std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
 };
