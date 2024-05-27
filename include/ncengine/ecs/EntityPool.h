@@ -7,6 +7,7 @@
 #include "ncengine/ecs/detail/HandleManager.h"
 #include "ncengine/ecs/detail/PoolUtility.h"
 #include "ncengine/type/StableAddress.h"
+#include "ncengine/utility/SparseMap.h"
 
 #include "ncutility/NcError.h"
 
@@ -24,11 +25,14 @@ class EntityPool : public StableAddress
         using const_iterator = std::vector<Entity>::const_iterator;
         using reverse_iterator = std::vector<Entity>::reverse_iterator;
 
+        explicit EntityPool(size_t maxEntities)
+            : m_entities{maxEntities / 4u, maxEntities} {}
+
         /** @brief Add an entity. */
         auto Add(Entity::layer_type layer, Entity::flags_type flags) -> Entity
         {
-            auto handle = m_handleManager.GenerateNewHandle(layer, flags);
-            m_entities.push_back(handle);
+            const auto handle = m_handleManager.GenerateNewHandle(layer, flags);
+            m_entities.emplace(handle.Index(), handle);
             if(handle.IsPersistent())
                 m_persistent.push_back(handle);
 
@@ -39,7 +43,7 @@ class EntityPool : public StableAddress
         void Remove(Entity entity)
         {
             m_toRemove.push_back(entity);
-            detail::EraseUnstable(m_entities, entity);
+            m_entities.erase(entity.Index());
             if (entity.IsPersistent())
                 detail::EraseUnstable(m_persistent, entity);
         }
@@ -47,7 +51,7 @@ class EntityPool : public StableAddress
         /** @brief Check if an entity exists. */
         bool Contains(Entity entity) const
         {
-            return m_entities.cend() != std::ranges::find(m_entities, entity);
+            return m_entities.contains(entity.Index());
         }
 
         /** @brief Get the number of entities in the pool. */
@@ -67,7 +71,6 @@ class EntityPool : public StableAddress
         void Clear()
         {
             m_entities.clear();
-            m_entities.shrink_to_fit();
             m_toRemove.clear();
             m_toRemove.shrink_to_fit();
             m_persistent.clear();
@@ -80,7 +83,12 @@ class EntityPool : public StableAddress
         {
             m_toRemove.shrink_to_fit();
             m_persistent.shrink_to_fit();
-            m_entities = m_persistent;
+            m_entities.clear();
+            for (auto entity : m_persistent)
+            {
+                m_entities.emplace(entity.Index(), entity);
+            }
+
             m_handleManager.Reset(m_persistent);
         }
 
@@ -103,25 +111,41 @@ class EntityPool : public StableAddress
         [[nodiscard]] auto empty() const noexcept { return m_entities.empty(); }
 
         /** @brief Get a reference to the entity at the specified position. */
-        auto operator[](size_t pos) noexcept -> Entity& { return m_entities[pos]; }
+        auto operator[](size_t pos) noexcept -> Entity& { return m_entities.values()[pos]; }
 
         /** @brief Get a const reference to the entity at the specified position. */
-        auto operator[](size_t pos) const noexcept -> const Entity& { return m_entities[pos]; }
+        auto operator[](size_t pos) const noexcept -> const Entity& { return m_entities.values()[pos]; }
 
         /** @brief Get a reference to the entity at the specified position with bounds checking. */
-        auto at(size_t pos) -> Entity& { return m_entities.at(pos); }
+        auto at(size_t pos) -> Entity&
+        {
+            if (pos >= m_entities.size())
+            {
+                throw NcError{"Access out of bounds"};
+            }
+
+            return m_entities.values()[pos];
+        }
 
         /** @brief Get a const reference to the entity at the specified position with bounds checking. */
-        auto at(size_t pos) const -> const Entity& { return m_entities.at(pos); }
+        auto at(size_t pos) const -> const Entity&
+        {
+            if (pos >= m_entities.size())
+            {
+                throw NcError{"Access out of bounds"};
+            }
+
+            return m_entities.values()[pos];
+        }
 
         /** @brief Get a pointer to the underlying entity array. */
-        auto data() noexcept { return m_entities.data(); }
+        auto data() noexcept { return m_entities.values().data(); }
 
         /** @brief Get a pointer to the underlying entity array. */
-        auto data() const noexcept { return m_entities.data(); }
+        auto data() const noexcept { return m_entities.values().data(); }
 
     private:
-        std::vector<Entity> m_entities;
+        sparse_map<Entity> m_entities;
         std::vector<Entity> m_toRemove;
         std::vector<Entity> m_persistent;
         detail::HandleManager m_handleManager;
