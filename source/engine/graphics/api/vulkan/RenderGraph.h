@@ -84,8 +84,8 @@ class RenderGraph
         Vector2 m_screenExtent;
 
         // State tracking
-        uint32_t m_uniDirShadowPasses;
-        uint32_t m_omniDirShadowPasses;
+        uint32_t m_uniDirShadowCastersCount;
+        uint32_t m_omniDirShadowCastersCount;
         uint32_t m_maxLights;
         std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
 };

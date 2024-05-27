@@ -26,12 +26,13 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex)
+    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex, bool isOmniDirectional)
         : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr},
+          m_shadowCasterIndex{shadowCasterIndex},
           m_enabled{false},
-          m_shadowCasterIndex{shadowCasterIndex}
+          m_isOmniDirectional{isOmniDirectional}
     {
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
@@ -118,6 +119,8 @@ namespace nc::graphics::vulkan
     void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Record", Optick::Category::Rendering);
+        NC_ASSERT(m_shadowCasterIndex < frameData.pointLightState.viewProjections.size() + frameData.spotLightState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        
         cmd->setDepthBias
         (
             DEPTH_BIAS_CONSTANT,
@@ -127,11 +130,29 @@ namespace nc::graphics::vulkan
 
         auto pushConstants = ShadowMappingPushConstants{};
 
-        // Why can't we just render every light?
-
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        NC_ASSERT(m_shadowCasterIndex < frameData.pointLightState.viewProjections.size() + frameData.spotLightState.viewProjections.size(), "Shadow caster index is out of bounds.");
-        pushConstants.lightViewProjection = frameData.pointLightState.viewProjections[m_shadowCasterIndex];
+        if (m_isOmniDirectional)
+        {
+            pushConstants.lightViewProjection = frameData.pointLightState.viewProjections[m_shadowCasterIndex];
+
+            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
+
+            uint32_t objectInstance = 0;
+            for (const auto& mesh : frameData.objectState.pbrMeshes)
+            {
+                cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                objectInstance++;
+            }
+            for (const auto& mesh : frameData.objectState.toonMeshes)
+            {
+                cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+                objectInstance++;
+            }
+            return;
+        }
+
+        // Shadow is uni-directional (spotlight, directional light)
+        pushConstants.lightViewProjection = frameData.spotLightState.viewProjections[m_shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 

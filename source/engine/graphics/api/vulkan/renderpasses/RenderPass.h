@@ -39,7 +39,7 @@ class RenderPass
 
         template <std::derived_from<ITechnique> T>
         void RegisterTechnique(const Device& device, ShaderBindingManager *shaderBindingManager);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex);
+        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
 
         template <std::derived_from<ITechnique> T>
         void UnregisterTechnique();
