@@ -7,7 +7,6 @@ struct ObjectData
     // N MVP matrices
     mat4 model;
     mat4 modelView;
-    mat4 viewProjection;
 
     // Textures
     uint unused1;
@@ -22,6 +21,13 @@ layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
     ObjectData objects[];
 } objectBuffer;
+
+layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
+{
+    mat4 cameraViewProjection;
+    vec4 cameraWorldPosition;
+    int skyboxCubemapIndex;
+} environmentData;
 
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
@@ -39,5 +45,5 @@ void main()
 {
     ObjectData object = objectBuffer.objects[gl_InstanceIndex];
     outUVW = inPos;
-    gl_Position = object.viewProjection * object.model * vec4(inPos, 1.0);
+    gl_Position = environmentData.cameraViewProjection * object.model * vec4(inPos, 1.0);
 }
