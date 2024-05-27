@@ -28,13 +28,10 @@ struct ObjectState
     std::optional<uint32_t> skyboxInstanceIndex = std::nullopt;
 };
 
-/** @todo We probably don't want the viewProjection in this struct. We only need
- *  1 copy, not 1 per renderer. */
 struct ObjectData
 {
     DirectX::XMMATRIX model;
     DirectX::XMMATRIX modelView;
-    DirectX::XMMATRIX viewProjection;
 
     uint32_t materialParameterA; // Todo: Make this more generic for materials
     uint32_t materialParameterB; // Todo: Make this more generic for materials

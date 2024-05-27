@@ -7,7 +7,6 @@ struct ObjectData
     // N MVP matrices
     mat4 model;
     mat4 modelView;
-    mat4 viewProjection;
 
     // Textures
     uint baseColorIndex;
@@ -27,6 +26,13 @@ layout(std140, set=0, binding=0) readonly buffer ObjectBuffer
 {
     ObjectData objects[];
 } objectBuffer;
+
+layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
+{
+    mat4 cameraViewProjection;
+    vec4 cameraWorldPosition;
+    int skyboxCubemapIndex;
+} environmentData;
 
 layout (std140, set=0, binding=6) readonly buffer AnimatedBoneTransforms
 {
@@ -105,5 +111,5 @@ void main()
 
     outObjectInstance = gl_InstanceIndex;
     outFragPosition = vec3(object.model * animatedPos);
-    gl_Position = object.viewProjection * object.model * animatedPos;
+    gl_Position = environmentData.cameraViewProjection * object.model * animatedPos;
 }

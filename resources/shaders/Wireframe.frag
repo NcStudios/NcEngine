@@ -4,7 +4,7 @@
 
 layout(push_constant) uniform PER_OBJECT
 {
-    layout(offset = 128) vec4 color;
+    layout(offset = 64) vec4 color;
 } pc;
 
 layout (location = 0) out vec4 outFragColor;

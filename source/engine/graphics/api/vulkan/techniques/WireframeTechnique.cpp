@@ -14,8 +14,9 @@
 
 namespace nc::graphics::vulkan
 {
-WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
-    : m_pipeline{nullptr},
+WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+    : m_shaderBindingManager{shaderBindingManager},
+      m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
 {
     const auto vkDevice = device.VkDevice();
@@ -34,14 +35,22 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManage
         CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
-    m_pipelineLayout = [vkDevice]()
+    m_pipelineLayout = [vkDevice, shaderBindingManager]()
     {
-        auto pushConstantRanges = std::array{
+        const auto descriptorLayout = *(shaderBindingManager->GetSetLayout(0));
+        const auto pushConstantRanges = std::array{
             CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframeVertexPushConstants), 0u),
             CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(WireframeFragmentPushConstants), sizeof(WireframeVertexPushConstants))
         };
 
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRanges);
+        const auto pipelineLayoutInfo = vk::PipelineLayoutCreateInfo{
+            vk::PipelineLayoutCreateFlags{},
+            1u,
+            &descriptorLayout,
+            static_cast<uint32_t>(pushConstantRanges.size()),
+            pushConstantRanges.data()
+        };
+
         return vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
     }();
 
@@ -94,9 +103,10 @@ bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
     return !frameData.widgetState.wireframeData.empty();
 }
 
-void WireframeTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
+void WireframeTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
+    m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
 bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
@@ -108,11 +118,7 @@ void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderStat
 {
     OPTICK_CATEGORY("WireframeTechnique::Record", Optick::Category::Rendering);
 
-    auto vertexPushConstants = WireframeVertexPushConstants{
-        .model = {},
-        .viewProjection = frameData.cameraState.view * frameData.cameraState.projection
-    };
-
+    auto vertexPushConstants = WireframeVertexPushConstants{};
     auto fragmentPushConstants = WireframeFragmentPushConstants{
         .color = Vector4{1.0f, 0.0f, 0.0f, 1.0f}
     };
