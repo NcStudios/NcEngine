@@ -23,6 +23,7 @@ void EnvironmentSystem::SetSkybox(const std::string& path)
 
 auto EnvironmentSystem::Execute(const CameraState& cameraState, uint32_t currentFrameIndex) -> EnvironmentState
 {
+    m_environmentData.cameraViewProjection = cameraState.view * cameraState.projection;
     m_environmentData.cameraWorldPosition = Vector4(cameraState.position, 0.0f);
     m_environmentDataBuffer.Update(std::span{&m_environmentData, 1}, currentFrameIndex);
     return EnvironmentState{m_useSkybox};

@@ -7,7 +7,6 @@ struct ObjectData
     // N MVP matrices
     mat4 model;
     mat4 modelView;
-    mat4 viewProjection;
 
     // Textures
     uint baseColorIndex;
@@ -40,13 +39,15 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 1, binding = 2) uniform sampler2D textures[];
-layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
+    mat4 cameraViewProjection;
     vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
+
+layout (set = 1, binding = 2) uniform sampler2D textures[];
+layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec3 inNormal;

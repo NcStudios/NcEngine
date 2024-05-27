@@ -9,6 +9,7 @@ layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
+    mat4 cameraViewProjection;
     vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
