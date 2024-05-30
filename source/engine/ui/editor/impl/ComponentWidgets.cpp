@@ -369,12 +369,12 @@ void PointLightUIWidget(graphics::PointLight& light)
 
 void SpotLightUIWidget(graphics::SpotLight& light)
 {
-    constexpr auto step = 0.1f;
+    constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
-    constexpr auto max = 360.0f;
+    constexpr auto max = 3.14159f;
     ui::InputColor3(light.color, "color");
-    ui::DragFloat(light.innerAngle, "innerAngle", step, min, max);
-    ui::DragFloat(light.outerAngle, "outerAngle", step, min, max);
+    ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
+    ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
 }
 
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)

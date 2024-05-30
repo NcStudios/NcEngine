@@ -220,14 +220,9 @@ namespace nc::graphics
         // If any changes were made to resource layouts (lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
         m_graphics->CommitResourceLayout();
 
-        if (pointLightState.updateShadows)
+        if (pointLightState.updateShadows || spotLightState.updateShadows)
         {
-            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(pointLightState.viewProjections.size()), currentFrameIndex);
-        }
-
-        if (spotLightState.updateShadows)
-        {
-            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(spotLightState.viewProjections.size()), currentFrameIndex);
+            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(pointLightState.viewProjections.size() + spotLightState.viewProjections.size()), currentFrameIndex);
         }
 
         // Allow the frame to begin accepting draw commands.

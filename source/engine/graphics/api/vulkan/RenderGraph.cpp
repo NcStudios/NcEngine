@@ -175,6 +175,11 @@ void RenderGraph::SinkPostProcessImages()
     {
         perFrameShadowMapViews[i] = shadowPasses[i].GetAttachmentView(0u);
     }
+
+    for (auto i : std::views::iota(m_omniDirShadowCastersCount, m_omniDirShadowCastersCount + m_uniDirShadowCastersCount))
+    {
+        perFrameShadowMapViews[i] = shadowPasses[i].GetAttachmentView(0u);
+    }
 }
 
 auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&
@@ -202,7 +207,7 @@ void RenderGraph::CommitResourceLayout()
         perFramePasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i, true);
     }
 
-    for (auto i : std::views::iota(0u, m_uniDirShadowCastersCount))
+    for (auto i : std::views::iota(m_omniDirShadowCastersCount, m_omniDirShadowCastersCount + m_uniDirShadowCastersCount))
     {
         perFramePasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i, frameIndex));
         perFramePasses[i].ClearTechniques();
@@ -267,7 +272,7 @@ void RenderGraph::Resize(const Vector2& dimensions)
             shadowMapViews.emplace_back(shadowPasses.back().GetAttachmentView(0u));
         }
 
-        for (auto shadowPassIndex : std::views::iota(0u, m_uniDirShadowCastersCount))
+        for (auto shadowPassIndex : std::views::iota(m_omniDirShadowCastersCount,m_omniDirShadowCastersCount +  m_uniDirShadowCastersCount))
         {
             shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, shadowPassIndex, frameIndex));
             shadowMapViews.emplace_back(shadowPasses.back().GetAttachmentView(0u));

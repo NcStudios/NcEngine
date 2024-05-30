@@ -5,8 +5,8 @@
 namespace
 {
 constexpr float g_lightFieldOfView = nc::DegreesToRadians(60.0f);
-constexpr float g_nearClip = 0.25f;
-constexpr float g_farClip = 96.0f;
+constexpr float g_nearClip = 1.0f;
+constexpr float g_farClip = 100.0f;
 const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
 
 auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix) -> DirectX::XMMATRIX
@@ -40,7 +40,7 @@ auto SpotLightSystem::Execute(uint32_t currentFrameIndex, MultiView<SpotLight, T
                                      transform->Position(),
                                      m_useShadows,
                                      light->color,
-                                     transform->Rotation().ToEulerAngles(),
+                                     transform->Forward(),
                                      std::cos(light->innerAngle),
                                      std::cos(light->outerAngle));
     }

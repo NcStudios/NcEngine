@@ -43,9 +43,10 @@ struct SpotLightData
     Vector3 color = Vector3::Splat(0.35f);
     int isInitialized = 1;
     Vector3 direction = Vector3::Front();
-    float innerAngle = 20.0f;
-    float outerAngle = 30.0f;
+    float innerAngle = 0.3491f;
+    float outerAngle = 0.5236f;
 };
+
 
 struct SpotLightState
 {

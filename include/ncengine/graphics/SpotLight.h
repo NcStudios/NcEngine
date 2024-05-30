@@ -15,8 +15,8 @@ struct SpotLight final : public ComponentBase
 {
     explicit SpotLight(Entity entity,
                        const Vector3& color_ = Vector3{1.0f, 0.9f, 0.9f},
-                       float innerAngle_ = 20.0f,
-                       float outerAngle_ = 30.0f) noexcept
+                       float innerAngle_ = 0.3491f,
+                       float outerAngle_ = 0.5236f) noexcept
         : ComponentBase{entity},
           color{color_},
           innerAngle{innerAngle_},

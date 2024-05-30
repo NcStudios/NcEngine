@@ -234,6 +234,7 @@ void main()
     vec3 result = vec3(0.0f);
 
     // Calculate each point light's impact on the scene
+    int activePointLights = 0;
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
         PointLight light = pointLights.lights[i];
@@ -242,6 +243,7 @@ void main()
             break;
         }
 
+        activePointLights++;
         vec3 radiance = PointLightRadiance(light, inFragPosition);
         result += BRDF(light.position, radiance, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
 
@@ -259,13 +261,13 @@ void main()
         {
             break;
         }
-
         vec3 radiance = SpotLightRadiance(light, inFragPosition);
         result += BRDF(light.position, radiance, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
 
         if (light.castsShadows == 1)
         {
-            result *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), i));
+            int shadowMapIndex = activePointLights + i; // The point light and spot light shadowmaps share a buffer, point lights are first.
+            result *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), shadowMapIndex)); 
         }
     }
 

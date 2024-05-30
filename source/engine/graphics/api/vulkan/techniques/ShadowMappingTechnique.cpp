@@ -152,7 +152,7 @@ namespace nc::graphics::vulkan
         }
 
         // Shadow is uni-directional (spotlight, directional light)
-        pushConstants.lightViewProjection = frameData.spotLightState.viewProjections[m_shadowCasterIndex];
+        pushConstants.lightViewProjection = frameData.spotLightState.viewProjections[m_shadowCasterIndex - frameData.pointLightState.viewProjections.size()];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
