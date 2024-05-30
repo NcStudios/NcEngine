@@ -179,16 +179,11 @@ vec3 PointLightRadiance(PointLight light, vec3 fragPosition)
 vec3 SpotLightRadiance(SpotLight light, vec3 fragPosition)
 {
     // Calculate the radiance for the light source
-    float distance = length(light.position - fragPosition);
     vec3 L = normalize(light.position - fragPosition); // The vector from the light to the fragment. Note, for directional lights, L would just be the position.
     float theta = dot(L, normalize(-light.direction));
 
-    if (theta > light.innerAngle)
-    {
-        return light.color;
-    }
-
-    return vec3(0.0f);
+    float falloff = clamp((theta - light.outerAngle) / (light.innerAngle - light.outerAngle), 0.0f, 1.0f);
+    return light.color * falloff;
 }
 
 vec3 BRDF(vec3 lightPosition, vec3 radiance, vec3 fragPosition, vec3 baseColor, float roughness, float metallic, vec3 emissivityColor, vec3 N, vec3 V, vec3 F0)
