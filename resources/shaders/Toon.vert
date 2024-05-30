@@ -4,9 +4,7 @@
 
 struct ObjectData
 {
-    // N MVP matrices
     mat4 model;
-    mat4 modelView;
 
     // Textures
     uint unused1;

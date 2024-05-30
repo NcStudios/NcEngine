@@ -31,7 +31,6 @@ struct ObjectState
 struct ObjectData
 {
     DirectX::XMMATRIX model;
-    DirectX::XMMATRIX modelView;
 
     uint32_t materialParameterA; // Todo: Make this more generic for materials
     uint32_t materialParameterB; // Todo: Make this more generic for materials
