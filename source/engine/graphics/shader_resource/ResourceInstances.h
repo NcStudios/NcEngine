@@ -5,11 +5,10 @@
 #include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "graphics/system/CameraSystem.h"
 #include "graphics/system/EnvironmentSystem.h"
+#include "graphics/system/LightSystem.h"
 #include "graphics/system/ObjectSystem.h"
 #include "graphics/system/ParticleEmitterSystem.h"
-#include "graphics/system/PointLightSystem.h"
 #include "graphics/system/SkeletalAnimationSystem.h"
-#include "graphics/system/SpotLightSystem.h"
 #include "graphics/system/UISystem.h"
 #include "graphics/system/WidgetSystem.h"
 
@@ -80,10 +79,9 @@ struct SystemResources
                     std::function<graphics::Camera* ()> getCamera);
     CameraSystem cameras;
     EnvironmentSystem environment;
+    LightSystem lights;
     ObjectSystem objects;
-    PointLightSystem pointLights;
     SkeletalAnimationSystem skeletalAnimations;
-    SpotLightSystem spotLights;
     WidgetSystem widgets;
     UISystem ui;
     ParticleEmitterSystem particleEmitters;

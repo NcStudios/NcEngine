@@ -18,10 +18,6 @@ namespace
 
     // Slope depth bias factor, applied depending on polygon's slope
     constexpr float DEPTH_BIAS_SLOPE = 1.75f;
-
-    constexpr float DEPTH_RANGE_NEAR = 0.1f;
-
-    constexpr float DEPTH_RANGE_FAR = 1024.0f;
 }
 
 namespace nc::graphics::vulkan
@@ -100,7 +96,7 @@ namespace nc::graphics::vulkan
     bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         static const auto useShadows = config::GetGraphicsSettings().useShadows;
-        return m_enabled = useShadows && (!frameData.pointLightState.viewProjections.empty() || !frameData.spotLightState.viewProjections.empty()) ;
+        return m_enabled = useShadows && (!frameData.lightState.viewProjections.empty()) ;
     }
 
     void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
@@ -119,7 +115,7 @@ namespace nc::graphics::vulkan
     void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
     {
         OPTICK_CATEGORY("ShadowMappingTechnique::Record", Optick::Category::Rendering);
-        NC_ASSERT(m_shadowCasterIndex < frameData.pointLightState.viewProjections.size() + frameData.spotLightState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        NC_ASSERT(m_shadowCasterIndex < frameData.lightState.viewProjections.size(), "Shadow caster index is out of bounds.");
         
         cmd->setDepthBias
         (
@@ -133,7 +129,7 @@ namespace nc::graphics::vulkan
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
         if (m_isOmniDirectional)
         {
-            pushConstants.lightViewProjection = frameData.pointLightState.viewProjections[m_shadowCasterIndex];
+            pushConstants.lightViewProjection = frameData.lightState.viewProjections[m_shadowCasterIndex];
 
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
@@ -152,7 +148,7 @@ namespace nc::graphics::vulkan
         }
 
         // Shadow is uni-directional (spotlight, directional light)
-        pushConstants.lightViewProjection = frameData.spotLightState.viewProjections[m_shadowCasterIndex - frameData.pointLightState.viewProjections.size()];
+        pushConstants.lightViewProjection = frameData.lightState.viewProjections[m_shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 

@@ -375,6 +375,7 @@ void SpotLightUIWidget(graphics::SpotLight& light)
     ui::InputColor3(light.color, "color");
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
+    ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);
 }
 
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)

@@ -213,12 +213,13 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::SpotLight{g_staticEntity, nc::Vector3::Splat(1.0f), 15.0f, 70.0f};
+    const auto expected = nc::graphics::SpotLight{g_staticEntity, nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
     nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.color, actual.color);
     EXPECT_EQ(expected.innerAngle, actual.innerAngle);
     EXPECT_EQ(expected.outerAngle, actual.outerAngle);
+    EXPECT_EQ(expected.radius, actual.radius);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)

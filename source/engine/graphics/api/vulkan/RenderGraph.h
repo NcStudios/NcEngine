@@ -74,18 +74,18 @@ class RenderGraph
 
         // Signal connections
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
-        Connection<PointLight&> m_onCommitOmniLightConnection;
-        Connection<Entity> m_onRemoveOmniLightConnection;
-        Connection<SpotLight&> m_onCommitUniLightConnection;
-        Connection<Entity> m_onRemoveUniLightConnection;
+        Connection<PointLight&> m_onCommitOmniLight;
+        Connection<Entity> m_onRemoveOmniLight;
+        Connection<SpotLight&> m_onCommitUniLight;
+        Connection<Entity> m_onRemoveUniLight;
 
         // Screen size
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
 
         // State tracking
-        uint32_t m_omniDirShadowCastersCount;
-        uint32_t m_uniDirShadowCastersCount;
+        uint32_t m_omniDirLightCount;
+        uint32_t m_uniDirLightCount;
         uint32_t m_maxLights;
         std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
 };

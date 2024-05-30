@@ -90,10 +90,9 @@ SystemResources::SystemResources(SystemResourcesConfig config,
                                 std::function<graphics::Camera* ()> getCamera)
     : cameras{},
       environment{resourceBus},
+      lights{resourceBus, config.maxPointLights, config.maxSpotLights, config.useShadows},
       objects{resourceBus, config.maxRenderers},
-      pointLights{resourceBus, config.maxPointLights, config.useShadows},
       skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
-      spotLights{resourceBus, config.maxSpotLights, config.useShadows},
       widgets{},
       ui{registry->GetEcs(), modules, events},
       particleEmitters{registry, resourceBus, getCamera, config.maxParticles}

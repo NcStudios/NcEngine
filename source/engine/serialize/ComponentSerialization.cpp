@@ -242,11 +242,13 @@ auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ct
     auto color = Vector3{};
     auto innerAngle = 0.0f;
     auto outerAngle = 0.0f;
+    auto radius = 0.0f;
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, color);
     serialize::Deserialize(stream, innerAngle);
     serialize::Deserialize(stream, outerAngle);
-    return graphics::SpotLight{ctx.entityMap.at(id), color, innerAngle, outerAngle};
+    serialize::Deserialize(stream, radius);
+    return graphics::SpotLight{ctx.entityMap.at(id), color, innerAngle, outerAngle, radius};
 }
 
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&)

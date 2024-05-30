@@ -140,14 +140,14 @@ RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const D
       m_postProcessImageViews{},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
       m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
-      m_onCommitOmniLightConnection{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount(true);})},
-      m_onRemoveOmniLightConnection{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount(true);})},
-      m_onCommitUniLightConnection{registry->OnCommit<SpotLight>().Connect([this](graphics::SpotLight&){IncrementShadowPassCount(false);})},
-      m_onRemoveUniLightConnection{registry->OnRemove<SpotLight>().Connect([this](Entity){DecrementShadowPassCount(false);})},
+      m_onCommitOmniLight{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount(true);})},
+      m_onRemoveOmniLight{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount(true);})},
+      m_onCommitUniLight{registry->OnCommit<SpotLight>().Connect([this](graphics::SpotLight&){IncrementShadowPassCount(false);})},
+      m_onRemoveUniLight{registry->OnRemove<SpotLight>().Connect([this](Entity){DecrementShadowPassCount(false);})},
       m_dimensions{dimensions},
       m_screenExtent{},
-      m_omniDirShadowCastersCount{},
-      m_uniDirShadowCastersCount{},
+      m_omniDirLightCount{},
+      m_uniDirLightCount{},
       m_maxLights{maxLights},
       m_isDescriptorSetLayoutsDirty{std::array<bool, MaxFramesInFlight>{true, true}}
 {
@@ -171,12 +171,12 @@ void RenderGraph::SinkPostProcessImages()
     perFrameShadowMapViews = std::vector<vk::ImageView>(m_maxLights, m_dummyShadowMap.view.get());
     auto& shadowPasses = m_shadowMappingPasses[currentFrame->Index()];
 
-    for (auto i : std::views::iota(0u, m_omniDirShadowCastersCount))
+    for (auto i : std::views::iota(0u, m_omniDirLightCount))
     {
         perFrameShadowMapViews[i] = shadowPasses[i].GetAttachmentView(0u);
     }
 
-    for (auto i : std::views::iota(m_omniDirShadowCastersCount, m_omniDirShadowCastersCount + m_uniDirShadowCastersCount))
+    for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
     {
         perFrameShadowMapViews[i] = shadowPasses[i].GetAttachmentView(0u);
     }
@@ -200,14 +200,14 @@ void RenderGraph::CommitResourceLayout()
     auto& perFramePasses =  m_shadowMappingPasses.at(frameIndex);
     perFramePasses.clear();
 
-    for (auto i : std::views::iota(0u, m_omniDirShadowCastersCount))
+    for (auto i : std::views::iota(0u, m_omniDirLightCount))
     {
         perFramePasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i, frameIndex));
         perFramePasses[i].ClearTechniques();
         perFramePasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i, true);
     }
 
-    for (auto i : std::views::iota(m_omniDirShadowCastersCount, m_omniDirShadowCastersCount + m_uniDirShadowCastersCount))
+    for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
     {
         perFramePasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i, frameIndex));
         perFramePasses[i].ClearTechniques();
@@ -266,13 +266,13 @@ void RenderGraph::Resize(const Vector2& dimensions)
         shadowPasses.clear();
         shadowMapViews.clear();
 
-        for (auto shadowPassIndex : std::views::iota(0u, m_omniDirShadowCastersCount))
+        for (auto shadowPassIndex : std::views::iota(0u, m_omniDirLightCount))
         {
             shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, shadowPassIndex, frameIndex));
             shadowMapViews.emplace_back(shadowPasses.back().GetAttachmentView(0u));
         }
 
-        for (auto shadowPassIndex : std::views::iota(m_omniDirShadowCastersCount,m_omniDirShadowCastersCount +  m_uniDirShadowCastersCount))
+        for (auto shadowPassIndex : std::views::iota(m_omniDirLightCount, m_omniDirLightCount +  m_uniDirLightCount))
         {
             shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, shadowPassIndex, frameIndex));
             shadowMapViews.emplace_back(shadowPasses.back().GetAttachmentView(0u));
@@ -284,15 +284,15 @@ void RenderGraph::Resize(const Vector2& dimensions)
 
 void RenderGraph::IncrementShadowPassCount(bool isOmniDirectional)
 {
-    NC_ASSERT(m_omniDirShadowCastersCount + m_uniDirShadowCastersCount < m_maxLights, "Tried to add a light source when max lights are registered.");
+    NC_ASSERT(m_omniDirLightCount + m_uniDirLightCount < m_maxLights, "Tried to add a light source when max lights are registered.");
 
     if (isOmniDirectional)
     {
-        m_omniDirShadowCastersCount++;
+        m_omniDirLightCount++;
     }
     else
     {
-        m_uniDirShadowCastersCount++;
+        m_uniDirLightCount++;
     }
     
     SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
@@ -300,8 +300,8 @@ void RenderGraph::IncrementShadowPassCount(bool isOmniDirectional)
 
 void RenderGraph::ClearShadowPasses() noexcept
 {
-    m_omniDirShadowCastersCount = 0u;
-    m_uniDirShadowCastersCount = 0u;
+    m_omniDirLightCount = 0u;
+    m_uniDirLightCount = 0u;
     SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
 }
 
@@ -309,13 +309,13 @@ void RenderGraph::DecrementShadowPassCount(bool isOmniDirectional)
 {
     if (isOmniDirectional)
     {
-        NC_ASSERT(m_omniDirShadowCastersCount > 0, "Tried to remove a light source when none are registered.");
-        m_omniDirShadowCastersCount--;
+        NC_ASSERT(m_omniDirLightCount > 0, "Tried to remove a light source when none are registered.");
+        m_omniDirLightCount--;
     }
     else
     {
-        NC_ASSERT(m_uniDirShadowCastersCount > 0, "Tried to remove a light source when none are registered.");
-        m_uniDirShadowCastersCount--;
+        NC_ASSERT(m_uniDirLightCount > 0, "Tried to remove a light source when none are registered.");
+        m_uniDirLightCount--;
     }
 
     SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});

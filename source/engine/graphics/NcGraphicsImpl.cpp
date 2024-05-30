@@ -153,9 +153,8 @@ namespace nc::graphics
         m_postProcessResources.shadowMaps.Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
-        m_systemResources.pointLights.Clear();
+        m_systemResources.lights.Clear();
         m_systemResources.skeletalAnimations.Clear();
-        m_systemResources.spotLights.Clear();
     }
 
     void NcGraphicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
@@ -213,16 +212,15 @@ namespace nc::graphics
         auto skeletalAnimationState = m_systemResources.skeletalAnimations.Execute(currentFrameIndex);
         auto objectState = m_systemResources.objects.Execute(currentFrameIndex, MultiView<MeshRenderer, Transform>{m_registry}, MultiView<ToonRenderer, Transform>{m_registry},
                                                                         cameraState, environmentState, skeletalAnimationState);
-        auto pointLightState = m_systemResources.pointLights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry});
-        auto spotLightState = m_systemResources.spotLights.Execute(currentFrameIndex, MultiView<SpotLight, Transform>{m_registry});
+        auto lightState = m_systemResources.lights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry}, MultiView<SpotLight, Transform>{m_registry});
         auto particleState = m_systemResources.particleEmitters.Execute(currentFrameIndex);
 
         // If any changes were made to resource layouts (lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
         m_graphics->CommitResourceLayout();
 
-        if (pointLightState.updateShadows || spotLightState.updateShadows)
+        if (lightState.updateShadows)
         {
-            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(pointLightState.viewProjections.size() + spotLightState.viewProjections.size()), currentFrameIndex);
+            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(lightState.viewProjections.size()), currentFrameIndex);
         }
 
         // Allow the frame to begin accepting draw commands.
@@ -239,9 +237,8 @@ namespace nc::graphics
         {
             std::move(cameraState),
             std::move(environmentState),
+            std::move(lightState),
             std::move(objectState),
-            std::move(pointLightState),
-            std::move(spotLightState),
             std::move(widgetState),
             std::move(particleState)
         };

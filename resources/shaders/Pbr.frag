@@ -42,6 +42,7 @@ struct SpotLight
     vec3 direction;
     float innerAngle;
     float outerAngle;
+    float radius;
 };
 
 struct ObjectData
@@ -179,9 +180,10 @@ vec3 SpotLightRadiance(SpotLight light, vec3 fragPosition)
     // Calculate the radiance for the light source
     vec3 L = normalize(light.position - fragPosition); // The vector from the light to the fragment. Note, for directional lights, L would just be the position.
     float theta = dot(L, normalize(-light.direction));
-
+    float distance = length(light.position - fragPosition);
+    float attenuation = clamp(1/(pow(distance, 4.0f)), 0.0, 1.0);
     float falloff = clamp((theta - light.outerAngle) / (light.innerAngle - light.outerAngle), 0.0f, 1.0f);
-    return light.color * falloff;
+    return light.color * falloff * attenuation * pow(light.radius, 3);
 }
 
 vec3 BRDF(vec3 lightPosition, vec3 radiance, vec3 fragPosition, vec3 baseColor, float roughness, float metallic, vec3 emissivityColor, vec3 N, vec3 V, vec3 F0)
