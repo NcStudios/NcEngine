@@ -8,9 +8,7 @@ layout (location = 6) in ivec4 inBoneIDs;
 
 struct ObjectData
 {
-    // N MVP matrices
     mat4 model;
-    mat4 modelView;
 
     // Textures
     uint unused1;
