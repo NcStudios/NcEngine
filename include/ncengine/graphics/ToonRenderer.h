@@ -15,7 +15,7 @@ namespace nc::graphics
 struct ToonMaterial
 {
     std::string baseColor = asset::DefaultBaseColor;
-    std::string overlay = asset::DefaultBaseColor;
+    uint32_t outlineWidth = 2;
     std::string hatching = asset::DefaultBaseColor;
     uint32_t hatchingTiling = 1;
 };
@@ -23,7 +23,7 @@ struct ToonMaterial
 struct ToonMaterialView
 {
     asset::TextureView baseColor;
-    asset::TextureView overlay;
+    uint32_t outlineWidth;
     asset::TextureView hatching;
     uint32_t hatchingTiling;
 };
@@ -58,7 +58,7 @@ class ToonRenderer : public ComponentBase
         void SetMesh(std::string meshUid);
         void SetMaterial(ToonMaterial material);
         void SetBaseColor(std::string texturePath);
-        void SetOverlay(std::string texturePath);
+        void SetOutlineWidth(uint32_t outlineWidth);
         void SetHatching(std::string texturePath);
         void SetHatchingTiling(uint32_t tiling);
 

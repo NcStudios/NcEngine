@@ -8,7 +8,7 @@ struct ObjectData
 
     // Textures
     uint baseColorIndex;
-    uint overlayIndex;
+    uint outlineWidth;
     uint hatchingIndex;
     uint hatchingTiling;
 
@@ -110,9 +110,8 @@ void main()
     vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
     float alpha = baseColor.a;
     float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
-    // hatchingTexture *= step(0.6f, hatchingTexture);
 
-    vec4 result = vec4(0.0);
+    vec4 result = vec4(0.0f);
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
         PointLight light = pointLights.lights[i];
@@ -129,19 +128,13 @@ void main()
         vec4 lightColor = vec4(light.diffuseColor, 1.0);
         vec4 lightAmbient = vec4(light.ambientColor, 1.0);
 
-        // // Cel shading levels
-        // float highlightLevel = 0.9995f;
-        // float midLevel = 0.75f;
-        // float darkestLevel = 0.025f;
-        // float falloff = 0.1f;
-
-        if (intensity > 0.95)
+        if (intensity > 0.82)
         {
             result += lightColor;
         }
         else if (intensity > 0.5)
         {
-            float t = smoothstep(0.93, 0.95, intensity);
+            float t = smoothstep(0.80, 0.82, intensity);
             result += mix(lightColor * 0.6f, lightColor, t);
         }
         else if (intensity > 0.25)
@@ -152,41 +145,21 @@ void main()
         else
         {
             float t = smoothstep(0.23, 0.25, intensity);
-            result += mix(lightColor * 0.15f * hatchingTexture, lightColor * 0.3f, t);
+            result += mix(lightColor * 0.15f, lightColor * 0.3f, t);
         }
+
+        if (intensity <= 0.5)
+        {
+            float t = smoothstep(0.0f, 0.5, intensity);
+            result *= mix(hatchingTexture, 1.0, t);
+        }
+        result += mix(vec4(0.0f), lightColor * intensity, 0.2f) + (lightAmbient * 0.2f);
     }
 
-    
-        // if ()
+    result *= baseColor;
 
-
-        // if (NDotL & <= darkestLevel + blurAmount)
-        // {
-        //     pixelColor = pixelColor * lightColor * mix(darkestLevel, hatchingTexture, (NDotL - darkestLevel) * 1/(blurAmount));
-        // }
-        // else if (NDotL <= hatchingLevel)
-        // {
-        //     pixelColor *= lightColor * hatchingTexture;
-        // }
-        // else if (NDotL <= highlightLevel)
-        // {
-        //     pixelColor *= lightColor;
-        // }
-        // else if (NDotL <= highlightLevel + blurAmount)
-        // {
-        //     pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (NDotL - highlightLevel) * 1/(blurAmount));
-        // }
-        // else pixelColor *= lightColor + lightAmbient;
-        // float snappedLight = round(attenuation / 0.3) * 0.3;
-        // result += max(vec4(0.0f), pixelColor) * mix(snappedLight, attenuation, 0.8);
-    // }
-
-    // // Overlay
-    // result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
-
-    // vec3 col_hsv = RGBtoHSV(vec3(result.r, result.g, result.b));
-    // col_hsv.y *= (0.45 * 2.0);
-    // vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
-    // outFragColor = vec4(col_rgb.r, col_rgb.g, col_rgb.b, alpha);
-    outFragColor = vec4(result);
+    vec3 col_hsv = RGBtoHSV(vec3(result.r, result.g, result.b));
+    col_hsv.y *= (0.45 * 2.0);
+    vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
+    outFragColor = vec4(col_rgb.r, col_rgb.g, col_rgb.b, alpha);
 }
