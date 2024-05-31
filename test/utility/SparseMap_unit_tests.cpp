@@ -124,6 +124,16 @@ TEST(SparseMapTests, at_doesNotExist_throws)
     EXPECT_THROW(uut.at(0), std::exception);
 }
 
+TEST(SparseMapTests, empty_returnsExpectedValue)
+{
+    auto uut = nc::sparse_map<std::string>{10};
+    EXPECT_TRUE(uut.empty());
+    uut.emplace(0, "test");
+    EXPECT_FALSE(uut.empty());
+    uut.erase(0);
+    EXPECT_TRUE(uut.empty());
+}
+
 TEST(SparseMapTests, size_returnsSize)
 {
     auto uut = nc::sparse_map<std::string>{10};

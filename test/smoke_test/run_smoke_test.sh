@@ -1,17 +1,17 @@
 #!/bin/bash
 
-if [ "$#" -ne 3 ]; then
-    echo "usage: $0 <SWIFTSHADER_INSTALL_DIR> <ENGINE_INSTALL_DIR> <OUT_FILE>"
+if [ "$#" -ne 2 ]; then
+    echo "usage: $0 <SWIFTSHADER_INSTALL_DIR> <ENGINE_INSTALL_DIR>"
     exit 1
 fi
 
 SWIFTSHADER_INSTALL_DIR="${1//\\//}"
 ENGINE_INSTALL_DIR="${2//\\//}"
-OUT_FILE="$3"
+SMOKE_TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 echo "SWIFTSHADER_INSTALL_DIR: $SWIFTSHADER_INSTALL_DIR"
 echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
-echo "OUT_FILE: $OUT_FILE"
+echo "SMOKE_TEST_DIR: $SMOKE_TEST_DIR"
 
 cd "$ENGINE_INSTALL_DIR/sample"
 
@@ -36,12 +36,19 @@ cat <<EOF > vk_swiftshader_icd.json
 EOF
 
 export VK_DRIVER_FILES="$ENGINE_INSTALL_DIR/sample/vk_swiftshader_icd.json"
+export VK_LAYER_SETTINGS_PATH="$SMOKE_TEST_DIR"
 
 echo "VK_DRIVER_FILES: " $VK_DRIVER_FILES
 echo "generated driver manifest:"
 cat $VK_DRIVER_FILES
 
-./Sample --run-test --config-path smoke_test_config.ini > "$OUT_FILE" 2>&1
+./Sample --run-test --config-path "$SMOKE_TEST_DIR/smoke_test_config.ini"
 EXIT_CODE=$?
 echo "smoke test exit code: $EXIT_CODE"
+
+if [ -s "ValidationLayers.log" ]; then
+  echo "errors detected in ValidationLayers.log"
+  exit 1
+fi
+
 exit $EXIT_CODE
