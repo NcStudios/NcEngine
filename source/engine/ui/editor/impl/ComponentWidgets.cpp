@@ -216,16 +216,16 @@ namespace toon_renderer_ext
 {
 using T = nc::graphics::ToonRenderer;
 
-constexpr auto getBaseColor = [](auto& obj) { return obj.GetMaterial().baseColor;      };
-constexpr auto getOverlay   = [](auto& obj) { return obj.GetMaterial().overlay;        };
-constexpr auto getHatching  = [](auto& obj) { return obj.GetMaterial().hatching;       };
-constexpr auto getTiling    = [](auto& obj) { return obj.GetMaterial().hatchingTiling; };
+constexpr auto getBaseColor    = [](auto& obj) { return obj.GetMaterial().baseColor;      };
+constexpr auto getOutlineWidth = [](auto& obj) { return obj.GetMaterial().outlineWidth;        };
+constexpr auto getHatching     = [](auto& obj) { return obj.GetMaterial().hatching;       };
+constexpr auto getTiling       = [](auto& obj) { return obj.GetMaterial().hatchingTiling; };
 
-constexpr auto meshProp           = nc::ui::Property{ &T::GetMeshPath, &T::SetMesh,           "mesh"      };
-constexpr auto baseColorProp      = nc::ui::Property{ getBaseColor,    &T::SetBaseColor,      "baseColor" };
-constexpr auto overlayProp        = nc::ui::Property{ getOverlay,      &T::SetOverlay,        "overlay"   };
-constexpr auto hatchingProp       = nc::ui::Property{ getHatching,     &T::SetHatching,       "hatching"  };
-constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHatchingTiling, "tiling"    };
+constexpr auto meshProp           = nc::ui::Property{ &T::GetMeshPath, &T::SetMesh,           "mesh"         };
+constexpr auto baseColorProp      = nc::ui::Property{ getBaseColor,    &T::SetBaseColor,      "baseColor"    };
+constexpr auto outlineWidthProp   = nc::ui::Property{ getOutlineWidth, &T::SetOutlineWidth,   "outlineWidthPercentage" };
+constexpr auto hatchingProp       = nc::ui::Property{ getHatching,     &T::SetHatching,       "hatching"     };
+constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHatchingTiling, "tiling"       };
 } // namespace toon_renderer_ext
 } // anonymous namespace
 
@@ -388,7 +388,7 @@ void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
     ui::PropertyWidget(toon_renderer_ext::meshProp, renderer, &ui::Combobox, meshes);
     ui::PropertyWidget(toon_renderer_ext::baseColorProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(toon_renderer_ext::overlayProp, renderer, &ui::Combobox, textures);
+    ui::PropertyWidget(toon_renderer_ext::outlineWidthProp, renderer, &ui::InputU32);
     ui::PropertyWidget(toon_renderer_ext::hatchingProp, renderer, &ui::Combobox, textures);
     ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
 }

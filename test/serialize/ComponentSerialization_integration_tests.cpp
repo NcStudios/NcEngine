@@ -225,14 +225,14 @@ TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expectedMaterial = nc::graphics::ToonMaterial{"base", "overlay", "hatch", 2};
+    const auto expectedMaterial = nc::graphics::ToonMaterial{"base", 2, "hatch", 2};
     const auto expected = nc::graphics::ToonRenderer{g_staticEntity, "mesh.nca", expectedMaterial};
     nc::SerializeToonRenderer(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeToonRenderer(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.GetMeshPath(), actual.GetMeshPath());
     const auto& actualMaterial = actual.GetMaterial();
     EXPECT_EQ(expectedMaterial.baseColor, actualMaterial.baseColor);
-    EXPECT_EQ(expectedMaterial.overlay, actualMaterial.overlay);
+    EXPECT_EQ(expectedMaterial.outlineWidth, actualMaterial.outlineWidth);
     EXPECT_EQ(expectedMaterial.hatching, actualMaterial.hatching);
     EXPECT_EQ(expectedMaterial.hatchingTiling, actualMaterial.hatchingTiling);
 }

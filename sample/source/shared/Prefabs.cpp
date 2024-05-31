@@ -18,25 +18,25 @@ graphics::PbrMaterial PurplePbrMaterial{"solid_color/Purple.nca", asset::Default
 graphics::PbrMaterial TealPbrMaterial{"solid_color/Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial YellowPbrMaterial{"solid_color/Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 
-constexpr auto toonOverlay = "line/overlay.nca";
-graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial RedToonMaterial{"solid_color/Red.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial GreenToonMaterial{"solid_color/Green.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial BlueToonMaterial{"solid_color/Blue.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial OrangeToonMaterial{"solid_color/Orange.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial PurpleToonMaterial{"solid_color/Purple.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial TealToonMaterial{"solid_color/Teal.nca", toonOverlay, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial YellowToonMaterial{"solid_color/Yellow.nca", toonOverlay, asset::DefaultBaseColor, 8};
+constexpr auto outlineWidth = 2;
+graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial RedToonMaterial{"solid_color/Red.nca", outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial GreenToonMaterial{"solid_color/Green.nca", outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial BlueToonMaterial{"solid_color/Blue.nca", outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial OrangeToonMaterial{"solid_color/Orange.nca", outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial PurpleToonMaterial{"solid_color/Purple.nca", outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial TealToonMaterial{"solid_color/Teal.nca", outlineWidth, asset::DefaultBaseColor, 8};
+graphics::ToonMaterial YellowToonMaterial{"solid_color/Yellow.nca", outlineWidth, asset::DefaultBaseColor, 8};
 
 constexpr auto toonHatch = "line/Hatch3.nca";
-graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, toonOverlay, toonHatch, 8};
-graphics::ToonMaterial RedHatchedToonMaterial{"solid_color/Red.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color/Green.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color/Blue.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color/Orange.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color/Purple.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial TealHatchedToonMaterial{"solid_color/Teal.nca", toonOverlay, toonHatch, 8};
-graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color/Yellow.nca", toonOverlay, toonHatch, 8};
+graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, outlineWidth, toonHatch, 8};
+graphics::ToonMaterial RedHatchedToonMaterial{"solid_color/Red.nca", outlineWidth, toonHatch, 8};
+graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color/Green.nca", outlineWidth, toonHatch, 8};
+graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color/Blue.nca", outlineWidth, toonHatch, 8};
+graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color/Orange.nca", outlineWidth, toonHatch, 8};
+graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color/Purple.nca", outlineWidth, toonHatch, 8};
+graphics::ToonMaterial TealHatchedToonMaterial{"solid_color/Teal.nca", outlineWidth, toonHatch, 8};
+graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color/Yellow.nca", outlineWidth, toonHatch, 8};
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
@@ -89,7 +89,6 @@ void InitializeResources()
         "box/Roughness.nca",
         "line/Hatch3.nca",
         "line/hatch.nca",
-        "line/overlay.nca",
         "logo/BaseColor.nca",
         "logo/Metallic.nca",
         "logo/Roughness.nca",

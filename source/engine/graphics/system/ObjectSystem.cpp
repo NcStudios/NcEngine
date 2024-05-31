@@ -71,8 +71,8 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
         }
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
-        const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
-        m_objectData.emplace_back(modelMatrix, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
+        const auto& [baseColor, outlineWidth, hatching, hatchingTiling] = renderer->GetMaterialView();
+        m_objectData.emplace_back(modelMatrix, baseColor.index, outlineWidth, hatching.index, hatchingTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
