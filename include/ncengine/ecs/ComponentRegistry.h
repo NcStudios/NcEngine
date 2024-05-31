@@ -31,7 +31,8 @@ class ComponentRegistry : public StableAddress
          *       initialization of the NcEngine instance.
          */
         explicit ComponentRegistry(size_t entityCapacity)
-            : m_maxEntities{entityCapacity}
+            : m_entities{entityCapacity},
+              m_maxEntities{entityCapacity}
         {
             NC_ASSERT(!s_init, "There may only be one ComponentRegistry instance.");
             s_init = true;

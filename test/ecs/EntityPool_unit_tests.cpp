@@ -3,7 +3,7 @@
 
 TEST(EntityPoolTests, Add_returnsNewEntities)
 {
-    auto uut = nc::ecs::EntityPool{};
+    auto uut = nc::ecs::EntityPool{5ull};
     const auto a = uut.Add(0, 0);
     const auto b = uut.Add(0, 0);
     const auto c = uut.Add(1, 2);
@@ -20,7 +20,7 @@ TEST(EntityPoolTests, Add_returnsNewEntities)
 
 TEST(EntityPoolTests, Remove_removesFromPool)
 {
-    auto uut = nc::ecs::EntityPool{};
+    auto uut = nc::ecs::EntityPool{5ull};
     const auto a = uut.Add(0, 0);
     EXPECT_TRUE(uut.Contains(a));
     uut.Remove(a);
@@ -29,7 +29,7 @@ TEST(EntityPoolTests, Remove_removesFromPool)
 
 TEST(EntityPoolTests, RecycleDeadEntities_reclaimsHandles)
 {
-    auto uut = nc::ecs::EntityPool{};
+    auto uut = nc::ecs::EntityPool{5ull};
     const auto a = uut.Add(0, 0);
     const auto b = uut.Add(0, 0);
     uut.Remove(a);
@@ -50,7 +50,7 @@ TEST(EntityPoolTests, RecycleDeadEntities_reclaimsHandles)
 
 TEST(EntityPoolTests, ClearNonPersistent_leavesPersistentEntities)
 {
-    auto uut = nc::ecs::EntityPool{};
+    auto uut = nc::ecs::EntityPool{5ull};
     const auto a = uut.Add(0, 0);
     const auto b = uut.Add(0, nc::Entity::Flags::Persistent);
     const auto c = uut.Add(0, 0);
@@ -73,7 +73,7 @@ TEST(EntityPoolTests, ClearNonPersistent_leavesPersistentEntities)
 
 TEST(EntityPoolTests, Clear_clearsAll)
 {
-    auto uut = nc::ecs::EntityPool{};
+    auto uut = nc::ecs::EntityPool{5ull};
     const auto a = uut.Add(0, 0);
     const auto b = uut.Add(0, nc::Entity::Flags::Persistent);
     const auto c = uut.Add(0, 0);
@@ -97,7 +97,7 @@ TEST(EntityPoolTests, Clear_clearsAll)
 
 TEST(EntityPoolTests, StlViewInterface_hasExpectedFunctions)
 {
-    auto uut = nc::ecs::EntityPool{};
+    auto uut = nc::ecs::EntityPool{5ull};
     auto entities = std::vector<nc::Entity>{ uut.Add(0, 0) };
 
     ASSERT_EQ(entities.size(), uut.size());

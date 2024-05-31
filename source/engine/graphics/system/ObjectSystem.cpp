@@ -56,7 +56,7 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [base, normal, roughness, metallic] = renderer->GetMaterialView();
-        m_objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
+        m_objectData.emplace_back(modelMatrix, base.index, normal.index, roughness.index, metallic.index, skeletalAnimationIndex);
         frontendState.pbrMeshes.push_back(renderer->GetMeshView());
     }
 
@@ -72,7 +72,7 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, overlay, hatching, hatchingTiling] = renderer->GetMaterialView();
-        m_objectData.emplace_back(modelMatrix, modelMatrix * cameraState.view, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
+        m_objectData.emplace_back(modelMatrix, baseColor.index, overlay.index, hatching.index, hatchingTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());
@@ -81,7 +81,7 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
     {
         auto skyboxMatrix = DirectX::XMMatrixScaling(200.0f, 200.0f, 200.0f);
         skyboxMatrix.r[3] = DirectX::XMVectorAdd(DirectX::XMLoadVector3(&cameraState.position), DirectX::g_XMIdentityR3);
-        m_objectData.emplace_back(skyboxMatrix, skyboxMatrix * cameraState.view, 0, 0, 0, 0);
+        m_objectData.emplace_back(skyboxMatrix, 0, 0, 0, 0);
         frontendState.skyboxInstanceIndex = static_cast<uint32_t>(m_objectData.size() - 1);
     }
 

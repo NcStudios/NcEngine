@@ -97,6 +97,7 @@ class sparse_map
         auto values() noexcept -> std::span<Value> { return m_values; }
         auto values() const noexcept -> std::span<const Value> { return m_values; }
         auto size() const noexcept -> size_t { return m_values.size(); }
+        auto empty() const noexcept -> bool { return m_values.empty(); }
         auto size_keys() const noexcept { return m_sparse.size(); }
         auto capacity() const noexcept { return m_values.capacity(); }
         auto capacity_keys() const noexcept { return m_sparse.capacity(); }
