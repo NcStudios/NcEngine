@@ -5,7 +5,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-ENGINE_INSTALL_DIR="${2//\\//}"
+ENGINE_INSTALL_DIR="${1//\\//}"
 SMOKE_TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
@@ -15,9 +15,6 @@ cd "$ENGINE_INSTALL_DIR/sample"
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ENGINE_INSTALL_DIR/sample"
-else
-  echo "Unknown OS: $OSTYPE"
-  exit 1
 fi
 
 ./Sample --run-test --config-path "$SMOKE_TEST_DIR/smoke_test_config.ini"
