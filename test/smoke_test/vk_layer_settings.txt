@@ -56,24 +56,6 @@ khronos_validation.disables = VK_VALIDATION_FEATURE_DISABLE_THREAD_SAFETY_EXT
 # Setting an option here will enable specialized areas of validation
 khronos_validation.enables =
 
-# Redirect Printf messages to stdout
-# =====================
-# <LayerIdentifier>.printf_to_stdout
-# Enable redirection of Debug Printf messages from the debug callback to stdout
-#khronos_validation.printf_to_stdout = true
-
-# Printf verbose
-# =====================
-# <LayerIdentifier>.printf_verbose
-# Set the verbosity of debug printf messages
-#khronos_validation.printf_verbose = false
-
-# Printf buffer size
-# =====================
-# <LayerIdentifier>.printf_buffer_size
-# Set the size in bytes of the buffer used by debug printf
-#khronos_validation.printf_buffer_size = 1024
-
 # Check descriptor indexing accesses
 # =====================
 # <LayerIdentifier>.gpuav_descriptor_checks
@@ -91,6 +73,31 @@ khronos_validation.gpuav_validate_indirect_buffer = true
 # <LayerIdentifier>.gpuav_validate_copies
 # Enable copy commands checking
 khronos_validation.gpuav_validate_copies = true
+
+# Fine Grained Locking
+# =====================
+# <LayerIdentifier>.fine_grained_locking
+# Enable fine grained locking for Core Validation, which should improve
+# performance in multithreaded applications.
+khronos_validation.fine_grained_locking = true
+
+# Redirect Printf messages to stdout
+# =====================
+# <LayerIdentifier>.printf_to_stdout
+# Enable redirection of Debug Printf messages from the debug callback to stdout
+#khronos_validation.printf_to_stdout = true
+
+# Printf verbose
+# =====================
+# <LayerIdentifier>.printf_verbose
+# Set the verbosity of debug printf messages
+#khronos_validation.printf_verbose = false
+
+# Printf buffer size
+# =====================
+# <LayerIdentifier>.printf_buffer_size
+# Set the size in bytes of the buffer used by debug printf
+#khronos_validation.printf_buffer_size = 1024
 
 # Validate RayQuery SPIR-V Instructions
 # =====================
@@ -127,13 +134,6 @@ khronos_validation.gpuav_validate_copies = true
 # <LayerIdentifier>.gpuav_max_buffer_device_addresses
 # Specify the maximum number of buffer device addresses to allow GPU-AV allocate resources
 #khronos_validation.gpuav_max_buffer_device_addresses = 10000
-
-# Fine Grained Locking
-# =====================
-# <LayerIdentifier>.fine_grained_locking
-# Enable fine grained locking for Core Validation, which should improve
-# performance in multithreaded applications.
-khronos_validation.fine_grained_locking = true
 
 # Display Application Name
 # =====================
