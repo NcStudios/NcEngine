@@ -747,8 +747,8 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
-        Vector3{1.0f, 1.0f, 1.0f},
-        90.0f
+        Vector3{0.8f, 0.8f, 0.8f},
+        180.0f
     );
 }
 

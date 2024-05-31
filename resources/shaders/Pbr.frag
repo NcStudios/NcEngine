@@ -69,9 +69,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 1, binding = 2) uniform sampler2D textures[];
 layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
-layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
@@ -84,6 +82,9 @@ layout (std140, set=0, binding=8) readonly buffer SpotLightsArray
 {
     SpotLight lights[];
 } spotLights;
+
+layout (set = 1, binding = 2) uniform sampler2D textures[];
+layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec2 inUV;
@@ -178,7 +179,7 @@ vec3 PointLightRadiance(PointLight light, vec3 fragPosition)
 vec3 SpotLightRadiance(SpotLight light, vec3 fragPosition)
 {
     // Calculate the radiance for the light source
-    vec3 L = normalize(light.position - fragPosition); // The vector from the light to the fragment. Note, for directional lights, L would just be the position.
+    vec3 L = normalize(light.position - fragPosition); // The vector from the light to the fragment.
     float theta = dot(L, normalize(-light.direction));
     float distance = length(light.position - fragPosition);
     float attenuation = clamp(1/(pow(distance, 4.0f)), 0.0, 1.0);
@@ -188,14 +189,12 @@ vec3 SpotLightRadiance(SpotLight light, vec3 fragPosition)
 
 vec3 BRDF(vec3 lightPosition, vec3 radiance, vec3 fragPosition, vec3 baseColor, float roughness, float metallic, vec3 emissivityColor, vec3 N, vec3 V, vec3 F0)
 {
-    vec3 L = normalize(lightPosition - fragPosition); // The vector from the light to the fragment. Note, for directional lights, L would just be the position.
+    vec3 L = normalize(lightPosition - fragPosition); // The vector from the light to the fragment.
     vec3 H = normalize(V + L); // The half-vector between the vector from the light to the fragment and the vector from the camera to the fragment.
 
     float NDotH = max(dot(N, H), 0.0f);
     float NDotL = max(dot(N, L), 0.0f);
     float NDotV = max(dot(N, V), 0.0f);
-    float VDotN = max(dot(V, N), 0.0f);
-    float LDotN = max(dot(L, N), 0.0f);
 
     vec3 Ks = F(F0, V, H); // The specular component
     vec3 Kd = (vec3(1.0f) - Ks) * (1.0f - metallic); // The diffuse component
@@ -203,11 +202,11 @@ vec3 BRDF(vec3 lightPosition, vec3 radiance, vec3 fragPosition, vec3 baseColor, 
     vec3 diffuseBrdf = baseColor / PI; // Lambertian BRDF for diffuse lighting
 
     vec3 specularBrdfNumerator = D(roughness, NDotH) * G(NDotL, NDotV, roughness) * F(F0, V, H); // The numerator of the Cook-Torrance BRDF (Normal Distribution * Geometric Shadowing * Fresnel)
-    float specularBrdfDenominator = max(4.0f * VDotN * LDotN, 0.000001f);
+    float specularBrdfDenominator = max(4.0f * NDotV * NDotL, 0.000001f);
     vec3 specularBrdf = specularBrdfNumerator / specularBrdfDenominator;
 
     vec3 brdf = Kd * diffuseBrdf + specularBrdf; // No need to multiply by Ks because we already multiplied our numerator by F in the specularBrdfNumerator
-    return emissivityColor + brdf * radiance * LDotN;;
+    return emissivityColor + brdf * radiance * NDotL;;
 }
 
 void main() 

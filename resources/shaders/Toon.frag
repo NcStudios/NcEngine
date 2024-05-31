@@ -26,6 +26,18 @@ struct PointLight
     float radius;
 };
 
+struct SpotLight
+{
+    mat4 viewProjection;
+    vec3 position;
+    int castsShadows;
+    vec3 color;
+    int isInitialized;
+    vec3 direction;
+    float innerAngle;
+    float outerAngle;
+    float radius;
+};
 
 layout(std140, set=0, binding = 0) readonly buffer ObjectBuffer
 {
@@ -43,6 +55,11 @@ layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
     vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
+
+layout (std140, set=0, binding=8) readonly buffer SpotLightsArray
+{
+    SpotLight lights[];
+} spotLights;
 
 layout (set = 1, binding = 2) uniform sampler2D textures[];
 layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
@@ -89,66 +106,87 @@ vec3 HSVtoRGB(in vec3 HSV)
 
 void main() 
 {
-    vec4 result = vec4(0.0);
-    float alpha = 1.0f;
-
-    // Material data
+    // Import material textures
     vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
-    alpha = baseColor.a;
+    float alpha = baseColor.a;
     float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
-    if (hatchingTexture < 0.6)
-    {
-        hatchingTexture = 0.0f;
-    }
+    // hatchingTexture *= step(0.6f, hatchingTexture);
 
+    vec4 result = vec4(0.0);
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
-        if (pointLights.lights[i].isInitialized == 0) continue;
+        PointLight light = pointLights.lights[i];
+        if (light.isInitialized == 0) continue;
 
         // Light data
-        PointLight light = pointLights.lights[i];
-        vec3 lightDir = normalize(light.position - inFragPosition);
-        float lightIntensity = dot(lightDir, normalize(inNormal));
-        float distanceToLight = length(light.position - inFragPosition);
-        float lightRadius = light.radius;
-        float lightAttenuated = max(0.0, 1.0 - distanceToLight / lightRadius) * dot(lightDir, normalize(inNormal));
+        vec3 L = normalize(light.position - inFragPosition); // The vector from the light to the fragment.
+        vec3 N = normalize(inNormal); // Vertex normals
+        float NDotL = max(dot(N, L), 0.0f); // The intensity of the light
+        float distance = length(light.position - inFragPosition);
+        float attenuation = clamp(1/(pow(distance, 4.0f)), 0.0, 1.0) * pow(light.radius, 3);
+        float intensity = NDotL * attenuation;
 
         vec4 lightColor = vec4(light.diffuseColor, 1.0);
         vec4 lightAmbient = vec4(light.ambientColor, 1.0);
 
-        // Cel shading levels
-        float highlightLevel = 0.83f;
-        float hatchingLevel = 0.5f;
-        float darkestLevel = 0.0f;
-        float blurAmount = 0.0025f;
-        vec4 pixelColor = baseColor;
+        // // Cel shading levels
+        // float highlightLevel = 0.9995f;
+        // float midLevel = 0.75f;
+        // float darkestLevel = 0.025f;
+        // float falloff = 0.1f;
 
-        if (lightIntensity <= darkestLevel + blurAmount)
+        if (intensity > 0.95)
         {
-            pixelColor = pixelColor * lightColor * mix(darkestLevel, hatchingTexture, (lightIntensity - darkestLevel) * 1/(blurAmount));
+            result += lightColor;
         }
-        else if (lightIntensity <= hatchingLevel)
+        else if (intensity > 0.5)
         {
-            pixelColor *= lightColor * hatchingTexture;
+            float t = smoothstep(0.93, 0.95, intensity);
+            result += mix(lightColor * 0.6f, lightColor, t);
         }
-        else if (lightIntensity <= highlightLevel)
+        else if (intensity > 0.25)
         {
-            pixelColor *= lightColor;
+            float t = smoothstep(0.48, 0.5, intensity);
+            result += mix(lightColor * 0.3f, lightColor * 0.6f, t);
         }
-        else if (lightIntensity <= highlightLevel + blurAmount)
+        else
         {
-            pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (lightIntensity - highlightLevel) * 1/(blurAmount));
+            float t = smoothstep(0.23, 0.25, intensity);
+            result += mix(lightColor * 0.15f * hatchingTexture, lightColor * 0.3f, t);
         }
-        else pixelColor *= lightColor + lightAmbient;
-        float snappedLight = round(lightAttenuated / 0.3) * 0.3;
-        result += max(vec4(0.0f), pixelColor) * mix(snappedLight, lightAttenuated, 0.8);
     }
 
-    // Overlay
-    result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
+    
+        // if ()
 
-    vec3 col_hsv = RGBtoHSV(vec3(result.r, result.g, result.b));
-    col_hsv.y *= (0.45 * 2.0);
-    vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
-    outFragColor = vec4(col_rgb.r, col_rgb.g, col_rgb.b, alpha);
+
+        // if (NDotL & <= darkestLevel + blurAmount)
+        // {
+        //     pixelColor = pixelColor * lightColor * mix(darkestLevel, hatchingTexture, (NDotL - darkestLevel) * 1/(blurAmount));
+        // }
+        // else if (NDotL <= hatchingLevel)
+        // {
+        //     pixelColor *= lightColor * hatchingTexture;
+        // }
+        // else if (NDotL <= highlightLevel)
+        // {
+        //     pixelColor *= lightColor;
+        // }
+        // else if (NDotL <= highlightLevel + blurAmount)
+        // {
+        //     pixelColor *=  mix(lightColor, (lightColor + lightAmbient), (NDotL - highlightLevel) * 1/(blurAmount));
+        // }
+        // else pixelColor *= lightColor + lightAmbient;
+        // float snappedLight = round(attenuation / 0.3) * 0.3;
+        // result += max(vec4(0.0f), pixelColor) * mix(snappedLight, attenuation, 0.8);
+    // }
+
+    // // Overlay
+    // result = mix(result, result * MaterialColor(objectBuffer.objects[inObjectInstance].overlayIndex, objectBuffer.objects[inObjectInstance].hatchingTiling/2), 0.9f);
+
+    // vec3 col_hsv = RGBtoHSV(vec3(result.r, result.g, result.b));
+    // col_hsv.y *= (0.45 * 2.0);
+    // vec3 col_rgb = HSVtoRGB(col_hsv.rgb);
+    // outFragColor = vec4(col_rgb.r, col_rgb.g, col_rgb.b, alpha);
+    outFragColor = vec4(result);
 }
