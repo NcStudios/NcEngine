@@ -90,7 +90,7 @@ jobs:
       - name: Run Smoke Test
         if: ${{ matrix.variant == 'Dev' }}
         shell: bash
-        run: script/run_smoke_test.sh "${{ env.SWIFTSHADER_INSTALL_PATH }}" "${{ github.workspace }}/install" "SmokeTestResults.txt"
+        run: script/run_smoke_test.sh "${{ github.workspace }}/install" "SmokeTestResults.txt"
 
       - name: Upload Smoke Test Results
         if: ${{ !cancelled() && matrix.variant == 'Dev' }}
