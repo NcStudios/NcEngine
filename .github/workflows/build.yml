@@ -60,7 +60,7 @@ jobs:
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Setup VulkanCI
-        uses: NcStudios/VulkanCI@v1
+        uses: NcStudios/VulkanCI@690ba4664bf81d93ac30fb4772137943c8d1488e
         with:
           sdkVersion: 1.3.261.1
 
