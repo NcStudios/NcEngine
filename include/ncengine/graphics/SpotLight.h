@@ -10,7 +10,7 @@
 
 namespace nc::graphics
 {
-/** @brief Component representing a light pointing in a single direction with an angle specifying the radius. */
+/** @brief Component representing a light pointing in a single direction with a radius for attenuation, and an inner and outer angle to specify both cone size and falloff. */
 struct SpotLight final : public ComponentBase
 {
     explicit SpotLight(Entity entity,
