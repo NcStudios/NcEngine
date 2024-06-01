@@ -21,6 +21,7 @@ constexpr auto g_buttonWidth = 100.0f;
 constexpr auto g_buttonHeight = 20.0f;
 auto g_maxEntities = 0u;
 auto g_maxPointLights = 0u;
+auto g_maxSpotLights = 0u;
 auto g_currentEntities = 0u;
 
 constexpr auto g_assets = std::array{
@@ -140,6 +141,17 @@ struct point_light
 {
     static constexpr auto name = "Point Light";
     static inline const auto& maxCount = g_maxPointLights;
+    static inline std::function<int()> GetObjectCountCallback = nullptr;
+    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
+    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
+    static inline unsigned SpawnCount = 1;
+    static inline unsigned DestroyCount = 1;
+};
+
+struct spot_light
+{
+    static constexpr auto name = "Spot Light";
+    static inline const auto& maxCount = g_maxSpotLights;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -276,7 +288,7 @@ void Widget()
             InnerWidget<point_light>(halfCellWidth, [](){});
 
             ImGui::TableNextColumn();
-            InnerWidget<particle_emitter>(halfCellWidth, [](){});
+            InnerWidget<spot_light>(halfCellWidth, [](){});
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -284,6 +296,9 @@ void Widget()
                 ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
             });
+
+            ImGui::TableNextColumn();
+            InnerWidget<particle_emitter>(halfCellWidth, [](){});
 
             ImGui::EndTable();
         }
@@ -304,6 +319,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         const auto& config = config::GetMemorySettings();
         ::g_maxEntities = config.maxTransforms;
         ::g_maxPointLights = config.maxPointLights - 1u;
+        ::g_maxSpotLights = config.maxSpotLights - 1u;
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
@@ -432,7 +448,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 2000.0f);
+                world.Emplace<graphics::PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 50.0f);
             }
         );
 
@@ -440,6 +456,24 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::point_light::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
         ::point_light::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
         ::point_light::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+    }
+
+    // Spot Light
+    {
+        const auto handle = world.Emplace<Entity>({.tag = "SpotLight Spawner"});
+        auto& spawner = world.Emplace<Spawner>(
+            handle,
+            ncRandom,
+            spawnBehavior,
+            [world](Entity entity) mutable {
+                world.Emplace<graphics::SpotLight>(entity);
+            }
+        );
+
+        world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
+        ::spot_light::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::spot_light::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::spot_light::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
     // Particle Emitter
