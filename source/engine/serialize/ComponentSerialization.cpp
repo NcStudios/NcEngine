@@ -197,23 +197,13 @@ auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationConte
 
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext&, const std::any&)
 {
-    serialize::Serialize(stream, out.ambientColor);
-    serialize::Serialize(stream, out.diffuseColor);
-    serialize::Serialize(stream, out.radius);
+    serialize::Serialize(stream, out);
 }
 
 auto DeserializePointLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::PointLight
 {
     auto out = graphics::PointLight{};
-    auto ambient = Vector3{};
-    auto diffuseColor = Vector3{};
-    auto radius = 0.0f;
-    serialize::Deserialize(stream, ambient);
-    serialize::Deserialize(stream, diffuseColor);
-    serialize::Deserialize(stream, radius);
-    out.ambientColor = ambient;
-    out.diffuseColor = diffuseColor;
-    out.radius = radius;
+    serialize::Deserialize(stream, out);
     return out;
 }
 
@@ -231,28 +221,14 @@ auto DeserializePositionClamp(std::istream& stream, const DeserializationContext
 
 void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext&, const std::any&)
 {
-    serialize::Serialize(stream, out.color);
-    serialize::Serialize(stream, out.innerAngle);
-    serialize::Serialize(stream, out.outerAngle);
-    serialize::Serialize(stream, out.radius);
+    serialize::Serialize(stream, out);
 }
 
 auto DeserializeSpotLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::SpotLight
 {
-    auto spotLight = graphics::SpotLight{};
-    auto color = Vector3{};
-    auto innerAngle = 0.0f;
-    auto outerAngle = 0.0f;
-    auto radius = 0.0f;
-    serialize::Deserialize(stream, color);
-    serialize::Deserialize(stream, innerAngle);
-    serialize::Deserialize(stream, outerAngle);
-    serialize::Deserialize(stream, radius);
-    spotLight.color = color;
-    spotLight.innerAngle = innerAngle;
-    spotLight.outerAngle = outerAngle;
-    spotLight.radius = radius;
-    return spotLight;
+    auto out = graphics::SpotLight{};
+    serialize::Deserialize(stream, out);
+    return out;
 }
 
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&)
