@@ -97,9 +97,9 @@ void LightSystem::Clear() noexcept
     m_pointLightBuffer.Clear();
     m_spotLightData.clear();
     m_spotLightBuffer.Clear();
-    for (auto i : std::views::iota(0u, MaxFramesInFlight))
+    for (auto& lightCount : m_syncedLightsCount)
     {
-        m_syncedLightsCount.at(i) = 0u;
+        lightCount = 0u;
     }
 }
 } // namespace nc::graphics

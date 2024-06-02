@@ -195,25 +195,26 @@ auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationConte
     return physics::PhysicsMaterial{friction, restitution};
 }
 
-void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, const std::any&)
+void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext&, const std::any&)
 {
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
     serialize::Serialize(stream, out.ambientColor);
     serialize::Serialize(stream, out.diffuseColor);
     serialize::Serialize(stream, out.radius);
 }
 
-auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::PointLight
+auto DeserializePointLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::PointLight
 {
-    auto id = uint32_t{};
+    auto out = graphics::PointLight{};
     auto ambient = Vector3{};
     auto diffuseColor = Vector3{};
     auto radius = 0.0f;
-    serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, ambient);
     serialize::Deserialize(stream, diffuseColor);
     serialize::Deserialize(stream, radius);
-    return graphics::PointLight{ctx.entityMap.at(id), ambient, diffuseColor, radius};
+    out.ambientColor = ambient;
+    out.diffuseColor = diffuseColor;
+    out.radius = radius;
+    return out;
 }
 
 void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& out, const SerializationContext&, const std::any&)
@@ -228,27 +229,30 @@ auto DeserializePositionClamp(std::istream& stream, const DeserializationContext
     return out;
 }
 
-void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext& ctx, const std::any&)
+void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext&, const std::any&)
 {
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
     serialize::Serialize(stream, out.color);
     serialize::Serialize(stream, out.innerAngle);
     serialize::Serialize(stream, out.outerAngle);
+    serialize::Serialize(stream, out.radius);
 }
 
-auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::SpotLight
+auto DeserializeSpotLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::SpotLight
 {
-    auto id = uint32_t{};
+    auto spotLight = graphics::SpotLight{};
     auto color = Vector3{};
     auto innerAngle = 0.0f;
     auto outerAngle = 0.0f;
     auto radius = 0.0f;
-    serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, color);
     serialize::Deserialize(stream, innerAngle);
     serialize::Deserialize(stream, outerAngle);
     serialize::Deserialize(stream, radius);
-    return graphics::SpotLight{ctx.entityMap.at(id), color, innerAngle, outerAngle, radius};
+    spotLight.color = color;
+    spotLight.innerAngle = innerAngle;
+    spotLight.outerAngle = outerAngle;
+    spotLight.radius = radius;
+    return spotLight;
 }
 
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&)

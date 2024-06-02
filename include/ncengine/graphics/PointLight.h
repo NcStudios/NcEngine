@@ -11,14 +11,12 @@
 namespace nc::graphics
 {
 /** @brief Component representing an omnidirectional light. */
-struct PointLight final : public ComponentBase
+struct PointLight
 {
-    explicit PointLight(Entity entity,
-                        const Vector3& ambientColor_ = Vector3{0.25f, 0.25f, 0.25f},
+    explicit PointLight(const Vector3& ambientColor_ = Vector3{0.25f, 0.25f, 0.25f},
                         const Vector3& diffuseColor_ = Vector3{1.0f, 0.9f, 0.9f},
                         float radius_ = 25.0f) noexcept
-        : ComponentBase{entity},
-          ambientColor{ambientColor_},
+        : ambientColor{ambientColor_},
           diffuseColor{diffuseColor_},
           radius{radius_}
     {

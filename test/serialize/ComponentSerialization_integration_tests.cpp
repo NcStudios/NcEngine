@@ -202,7 +202,7 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::PointLight{g_staticEntity, nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
+    const auto expected = nc::graphics::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.ambientColor, actual.ambientColor);
@@ -213,7 +213,7 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::SpotLight{g_staticEntity, nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
+    const auto expected = nc::graphics::SpotLight{nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
     nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.color, actual.color);

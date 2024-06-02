@@ -38,10 +38,10 @@ struct PointLightData
     DirectX::XMMATRIX viewProjection = {};
     Vector3 position = Vector3::Zero();
     int castsShadows = 1;
-    Vector3 ambientColor;
+    Vector3 ambientColor = Vector3{0.25f, 0.25f, 0.25f};
     int isInitialized = 1;
-    Vector3 diffuseColor;
-    float radius;
+    Vector3 diffuseColor = Vector3{1.0f, 0.9f, 0.9f};
+    float radius = 25.0f;
 };
 
 /** @brief Device-mapped properties of a SpotLight. */
@@ -67,21 +67,22 @@ struct SpotLightData
           radius{radius_}
     {
     }
+
     DirectX::XMMATRIX viewProjection = {};
     Vector3 position = Vector3::Zero();
     int castsShadows = 1;
-    Vector3 color;
+    Vector3 color = Vector3{1.0f, 0.9f, 0.9f};
     int isInitialized = 1;
     Vector3 direction = Vector3::Front();
-    float innerAngle;
-    float outerAngle;
-    float radius;
+    float innerAngle = 0.3491f;
+    float outerAngle = 0.5236f;
+    float radius = 25.0f;
 };
 
 struct LightState
 {
-    std::vector<DirectX::XMMATRIX> viewProjections;
-    bool updateShadows;
+    std::vector<DirectX::XMMATRIX> viewProjections = {};
+    bool updateShadows = false;
 };
 
 class LightSystem

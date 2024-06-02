@@ -15,7 +15,7 @@ namespace nc
 constexpr auto g_sceneFragmentMagicNumber = 0x3ff0e17b;
 
 /** @brief Version number serialized with a scene fragment. */
-constexpr auto g_currentSceneFragmentVersion = 1u;
+constexpr auto g_currentSceneFragmentVersion = 2u;
 
 /** @brief Header for a binary scene fragment blob. */
 struct SceneFragmentHeader

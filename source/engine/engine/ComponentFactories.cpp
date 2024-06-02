@@ -42,9 +42,9 @@ auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::Particle
     return graphics::ParticleEmitter{entity, graphics::ParticleInfo{}};
 }
 
-auto CreatePointLight(Entity entity, const std::any&) -> graphics::PointLight
+auto CreatePointLight(Entity, const std::any&) -> graphics::PointLight
 {
-    return graphics::PointLight{entity};
+    return graphics::PointLight{};
 }
 
 auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRenderer
@@ -62,9 +62,9 @@ auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::Skeleta
     return graphics::SkeletalAnimator{entity, "dummyMesh", "dummyAnimation"};
 }
 
-auto CreateSpotLight(Entity entity, const std::any&) -> graphics::SpotLight
+auto CreateSpotLight(Entity, const std::any&) -> graphics::SpotLight
 {
-    return graphics::SpotLight{entity};
+    return graphics::SpotLight{};
 }
 
 auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher

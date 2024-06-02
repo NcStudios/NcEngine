@@ -11,15 +11,13 @@
 namespace nc::graphics
 {
 /** @brief Component representing a light pointing in a single direction with a radius for attenuation, and an inner and outer angle to specify both cone size and falloff. */
-struct SpotLight final : public ComponentBase
+struct SpotLight
 {
-    explicit SpotLight(Entity entity,
-                       const Vector3& color_ = Vector3{1.0f, 0.9f, 0.9f},
+    explicit SpotLight(const Vector3& color_ = Vector3{1.0f, 0.9f, 0.9f},
                        float innerAngle_ = 0.3491f,
                        float outerAngle_ = 0.5236f,
                        float radius_ = 25.0f) noexcept
-        : ComponentBase{entity},
-          color{color_},
+        : color{color_},
           innerAngle{innerAngle_},
           outerAngle{outerAngle_},
           radius{radius_}
