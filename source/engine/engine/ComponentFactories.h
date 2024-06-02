@@ -15,6 +15,7 @@ auto CreatePointLight(Entity entity, const std::any&) -> graphics::PointLight;
 auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRenderer;
 auto CreateToonRenderer(Entity entity, const std::any&) -> graphics::ToonRenderer;
 auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::SkeletalAnimator;
+auto CreateSpotLight(Entity entity, const std::any&) -> graphics::SpotLight;
 auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher;
 auto CreateCollider(Entity entity, const std::any&) -> physics::Collider;
 auto CreatePhysicsBody(Entity entity, const std::any& userData) -> physics::PhysicsBody;

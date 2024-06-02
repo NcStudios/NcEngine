@@ -5,9 +5,9 @@
 #include "graphics/shader_resource/TextureArrayBufferHandle.h"
 #include "graphics/system/CameraSystem.h"
 #include "graphics/system/EnvironmentSystem.h"
+#include "graphics/system/LightSystem.h"
 #include "graphics/system/ObjectSystem.h"
 #include "graphics/system/ParticleEmitterSystem.h"
-#include "graphics/system/PointLightSystem.h"
 #include "graphics/system/SkeletalAnimationSystem.h"
 #include "graphics/system/UISystem.h"
 #include "graphics/system/WidgetSystem.h"
@@ -63,6 +63,7 @@ struct SystemResourcesConfig
     uint32_t maxPointLights;
     uint32_t maxRenderers;
     uint32_t maxSkeletalAnimations;
+    uint32_t maxSpotLights;
     uint32_t maxTextures;
     uint32_t maxParticles;
     bool useShadows;
@@ -78,8 +79,8 @@ struct SystemResources
                     std::function<graphics::Camera* ()> getCamera);
     CameraSystem cameras;
     EnvironmentSystem environment;
+    LightSystem lights;
     ObjectSystem objects;
-    PointLightSystem pointLights;
     SkeletalAnimationSystem skeletalAnimations;
     WidgetSystem widgets;
     UISystem ui;

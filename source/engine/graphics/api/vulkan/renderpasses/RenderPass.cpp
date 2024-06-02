@@ -91,9 +91,9 @@ RenderPass::RenderPass(vk::Device device,
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex)
+void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional)
 {
-    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex));
+    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex, isOmniDirectional));
 }
 
 void RenderPass::UnregisterShadowMappingTechnique()
@@ -159,7 +159,7 @@ auto RenderPass::GetVkPass() const ->vk::RenderPass
     return m_renderPass.get();
 }
 
-void RenderPass::RegisterAttachmentViews(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
+void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {

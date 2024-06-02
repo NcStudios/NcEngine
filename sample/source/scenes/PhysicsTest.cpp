@@ -295,10 +295,12 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<VehicleController>(head, segment1, segment2, segment3);
     world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
-    world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, GreenToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, GreenToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, GreenToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(segment3, asset::CubeMesh, GreenToonMaterial);
+    auto wormMaterial = GreenToonMaterial;
+    wormMaterial.outlineWidth = 6;
+    world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, wormMaterial);
+    world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, wormMaterial);
+    world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, wormMaterial);
+    world.Emplace<graphics::ToonRenderer>(segment3, asset::CubeMesh, wormMaterial);
 
     auto& headCollider = world.Emplace<physics::Collider>(head, physics::BoxProperties{}, false);
     auto& segment1Collider = world.Emplace<physics::Collider>(segment1, physics::BoxProperties{}, false);
@@ -370,7 +372,7 @@ void BuildGround(ecs::Ecs world)
     });
 
     auto& groundRenderer = world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, DefaultHatchedToonMaterial);
-    groundRenderer.SetHatchingTiling(32);
+    groundRenderer.SetHatchingTiling(60);
     world.Emplace<graphics::ToonRenderer>(backWall, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(frontWall, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(leftWall, asset::CubeMesh, DefaultToonMaterial);
@@ -498,7 +500,9 @@ void BuildSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        auto& renderer = world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, TealToonMaterial);
+        auto stepMaterial = TealToonMaterial;
+        stepMaterial.outlineWidth = 3;
+        auto& renderer = world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, stepMaterial);
         renderer.SetHatchingTiling(hatchTiling);
         auto& transform = world.Get<Transform>(step);
         auto& collider = world.Emplace<physics::Collider>(step, physics::BoxProperties{});
@@ -567,8 +571,10 @@ void BuildHalfPipes(ecs::Ecs world)
         .tag = "Half Pipe",
         .flags = Entity::Flags::Static
     });
+    auto halfPipeMaterial = BlueHatchedToonMaterial;
+    halfPipeMaterial.outlineWidth = 2;
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, BlueHatchedToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, halfPipeMaterial);
 
     world.Emplace<physics::ConcaveCollider>(halfPipe2, HalfPipeConcaveCollider);
 }
@@ -747,8 +753,8 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
-        Vector3{1.0f, 1.0f, 1.0f},
-        90.0f
+        Vector3{0.8f, 0.8f, 0.8f},
+        180.0f
     );
 }
 

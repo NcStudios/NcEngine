@@ -42,7 +42,7 @@ namespace graphics
  *     Depends On: None
  *     Component Access:
  *       Write: Camera, SkeletalAnimator, WireframeRenderer
- *       Read: MeshRenderer, ToonRenderer, PointLight, Transform
+ *       Read: MeshRenderer, ToonRenderer, PointLight, SpotLight, Transform
 */
 struct NcGraphics : public Module
 {
