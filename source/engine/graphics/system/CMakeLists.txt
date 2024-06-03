@@ -4,10 +4,10 @@ target_sources(${NC_ENGINE_LIB}
         EnvironmentSystem.cpp
         ObjectSystem.cpp
         ParticleEmitterSystem.cpp
-        PointLightSystem.cpp
         SkeletalAnimationCalculations.cpp
         SkeletalAnimationTypes.cpp
         SkeletalAnimationSystem.cpp
+        LightSystem.cpp
         UISystem.cpp
         WidgetSystem.cpp
 )

@@ -171,6 +171,11 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "PointLight"});
                 ctx.world.Emplace<graphics::PointLight>(ctx.selectedEntity);
             }
+            if (ImGui::Selectable("SpotLight"))
+            {
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "SpotLight"});
+                ctx.world.Emplace<graphics::SpotLight>(ctx.selectedEntity);
+            }
             else if (ImGui::Selectable("Cube"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Cube"});

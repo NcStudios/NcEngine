@@ -32,6 +32,19 @@ struct PointLight
     float radius;
 };
 
+struct SpotLight
+{
+    mat4 viewProjection;
+    vec3 position;
+    int castsShadows;
+    vec3 color;
+    int isInitialized;
+    vec3 direction;
+    float innerAngle;
+    float outerAngle;
+    float radius;
+};
+
 struct ObjectData
 {
     mat4 model;
@@ -56,9 +69,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 1, binding = 2) uniform sampler2D textures[];
 layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
-layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
@@ -66,6 +77,14 @@ layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
     vec4 cameraWorldPosition;
     int skyboxCubemapIndex;
 } environmentData;
+
+layout (std140, set=0, binding=8) readonly buffer SpotLightsArray
+{
+    SpotLight lights[];
+} spotLights;
+
+layout (set = 1, binding = 2) uniform sampler2D textures[];
+layout (set = 1, binding = 4) uniform samplerCube cubeMaps[];
 
 layout (location = 0) in vec3 inFragPosition;
 layout (location = 1) in vec2 inUV;
@@ -149,16 +168,33 @@ const mat4 biasMat = mat4(
     0.5, 0.5, 0.0, 1.0 
 );
 
-vec3 CalculatePointLight(int index, PointLight light, vec3 fragPosition, vec3 baseColor, float roughness, float metallic, vec3 emissivityColor, vec3 N, vec3 V, vec3 F0)
+vec3 PointLightRadiance(PointLight light, vec3 fragPosition)
 {
-    vec3 L = normalize(light.position - fragPosition); // The vector from the light to the fragment. Note, for directional lights, L would just be the position.
+    // Calculate the radiance for the light source
+    float distance = length(light.position - fragPosition);
+    float attenuation = clamp(1/(pow(distance, 4.0f)), 0.0, 1.0);
+    return light.diffuseColor * attenuation * pow(light.radius, 3);
+}
+
+vec3 SpotLightRadiance(SpotLight light, vec3 fragPosition)
+{
+    // Calculate the radiance for the light source
+    vec3 L = normalize(light.position - fragPosition); // The vector from the light to the fragment.
+    float theta = dot(L, normalize(-light.direction));
+    float distance = length(light.position - fragPosition);
+    float attenuation = clamp(1/(pow(distance, 4.0f)), 0.0, 1.0);
+    float falloff = clamp((theta - light.outerAngle) / (light.innerAngle - light.outerAngle), 0.0f, 1.0f);
+    return light.color * falloff * attenuation * pow(light.radius, 3);
+}
+
+vec3 BRDF(vec3 lightPosition, vec3 radiance, vec3 fragPosition, vec3 baseColor, float roughness, float metallic, vec3 emissivityColor, vec3 N, vec3 V, vec3 F0)
+{
+    vec3 L = normalize(lightPosition - fragPosition); // The vector from the light to the fragment.
     vec3 H = normalize(V + L); // The half-vector between the vector from the light to the fragment and the vector from the camera to the fragment.
 
     float NDotH = max(dot(N, H), 0.0f);
     float NDotL = max(dot(N, L), 0.0f);
     float NDotV = max(dot(N, V), 0.0f);
-    float VDotN = max(dot(V, N), 0.0f);
-    float LDotN = max(dot(L, N), 0.0f);
 
     vec3 Ks = F(F0, V, H); // The specular component
     vec3 Kd = (vec3(1.0f) - Ks) * (1.0f - metallic); // The diffuse component
@@ -166,28 +202,11 @@ vec3 CalculatePointLight(int index, PointLight light, vec3 fragPosition, vec3 ba
     vec3 diffuseBrdf = baseColor / PI; // Lambertian BRDF for diffuse lighting
 
     vec3 specularBrdfNumerator = D(roughness, NDotH) * G(NDotL, NDotV, roughness) * F(F0, V, H); // The numerator of the Cook-Torrance BRDF (Normal Distribution * Geometric Shadowing * Fresnel)
-    float specularBrdfDenominator = max(4.0f * VDotN * LDotN, 0.000001f);
+    float specularBrdfDenominator = max(4.0f * NDotV * NDotL, 0.000001f);
     vec3 specularBrdf = specularBrdfNumerator / specularBrdfDenominator;
 
     vec3 brdf = Kd * diffuseBrdf + specularBrdf; // No need to multiply by Ks because we already multiplied our numerator by F in the specularBrdfNumerator
-
-    // Calculate the radiance for the light source
-    float distance = length(light.position - fragPosition);
-    float attenuation = clamp(1/(pow(distance, 4.0f)), 0.0, 1.0);
-    vec3 radiance = light.diffuseColor * attenuation * pow(light.radius, 3);
-
-    vec3 perLightResult = emissivityColor + brdf * radiance * LDotN;
-
-    float shadow = 0.0;
-
-    // Shadow
-    if (light.castsShadows == 1)
-    {
-        shadow = ShadowCalculation(biasMat * light.viewProjection * vec4(fragPosition, 1.0), index);
-    }
-
-    perLightResult *= (1.0 - shadow);
-    return perLightResult;
+    return emissivityColor + brdf * radiance * NDotL;;
 }
 
 void main() 
@@ -215,16 +234,42 @@ void main()
 
     vec3 result = vec3(0.0f);
 
-    // Calculate each light's impact on the scene
+    // Calculate each point light's impact on the scene
+    int activePointLights = 0;
     for (int i = 0; i < pointLights.lights.length(); i++)
     {
-        if (pointLights.lights[i].isInitialized == 0)
+        PointLight light = pointLights.lights[i];
+        if (light.isInitialized == 0)
         {
             break;
         }
 
-        PointLight light = pointLights.lights[i];
-        result += CalculatePointLight(i, light, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
+        activePointLights++;
+        vec3 radiance = PointLightRadiance(light, inFragPosition);
+        result += BRDF(light.position, radiance, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
+
+        if (light.castsShadows == 1)
+        {
+            result *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), i));
+        }
+    }
+
+    // Calculate each spot light's impact on the scene
+    for (int i = 0; i < spotLights.lights.length(); i++)
+    {
+        SpotLight light = spotLights.lights[i];
+        if (light.isInitialized == 0)
+        {
+            break;
+        }
+        vec3 radiance = SpotLightRadiance(light, inFragPosition);
+        result += BRDF(light.position, radiance, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
+
+        if (light.castsShadows == 1)
+        {
+            int shadowMapIndex = activePointLights + i; // The point light and spot light shadowmaps share a buffer, point lights are first.
+            result *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), shadowMapIndex)); 
+        }
     }
 
     // Environment reflection

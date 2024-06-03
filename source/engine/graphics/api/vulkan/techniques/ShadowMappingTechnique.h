@@ -18,7 +18,7 @@ namespace nc::graphics::vulkan
     class ShadowMappingTechnique : public ITechnique
     {
         public:
-            ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex);
+            ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex, bool isOmniDirectional);
             ~ShadowMappingTechnique() noexcept;
 
             bool CanBind(const PerFrameRenderState& frameData) override;
@@ -31,7 +31,8 @@ namespace nc::graphics::vulkan
             ShaderBindingManager* m_shaderBindingManager;
             vk::UniquePipeline m_pipeline;
             vk::UniquePipelineLayout m_pipelineLayout;
-            bool m_enabled;
             uint32_t m_shadowCasterIndex;
+            bool m_enabled;
+            bool m_isOmniDirectional;
     };
 } // namespace nc::graphics::vulkan

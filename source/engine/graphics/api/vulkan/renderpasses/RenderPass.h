@@ -35,11 +35,11 @@ class RenderPass
         auto GetUid() const -> std::string;
         auto GetVkPass() const -> vk::RenderPass;
 
-        void RegisterAttachmentViews(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
+        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
 
         template <std::derived_from<ITechnique> T>
         void RegisterTechnique(const Device& device, ShaderBindingManager *shaderBindingManager);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex);
+        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
 
         template <std::derived_from<ITechnique> T>
         void UnregisterTechnique();

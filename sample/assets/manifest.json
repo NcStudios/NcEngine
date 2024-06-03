@@ -357,10 +357,6 @@
         {
             "sourcePath": "raw/image/line/hatch.jpg",
             "assetName": "texture/line/hatch"
-        },
-        {
-            "sourcePath": "raw/image/line/overlay.png",
-            "assetName": "texture/line/overlay"
         }
     ]
 }

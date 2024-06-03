@@ -8,9 +8,9 @@ struct ObjectData
 
     // Textures
     uint unused1;
+    uint outlineWidthPercentage;
     uint unused2;
     uint unused3;
-    uint tiling;
 
     uint skeletalAnimationIndex;
 };
@@ -91,6 +91,11 @@ void main()
         animatedPos = vec4(inPos, 1.0);
     }
 
-    vec4 animatedNormal = boneTransform * vec4(inNormal, 1.0);
-    gl_Position = environmentData.cameraViewProjection * object.model * (animatedPos + animatedNormal * 1/(20*(object.tiling + 0.0001f)));
+    mat4 scaleMatrix = mat4(1.0);
+    scaleMatrix[0][0] = 1 + object.outlineWidthPercentage * 0.01;
+    scaleMatrix[1][1] = 1 + object.outlineWidthPercentage * 0.01;
+    scaleMatrix[2][2] = 1 + object.outlineWidthPercentage * 0.01;
+
+    animatedPos = scaleMatrix * animatedPos;
+    gl_Position = environmentData.cameraViewProjection * object.model * animatedPos;
 }

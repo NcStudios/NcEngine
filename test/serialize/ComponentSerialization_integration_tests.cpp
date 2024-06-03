@@ -6,6 +6,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -201,7 +202,7 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::PointLight{g_staticEntity, nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
+    const auto expected = nc::graphics::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.ambientColor, actual.ambientColor);
@@ -209,17 +210,29 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
     EXPECT_EQ(expected.radius, actual.radius);
 }
 
+TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::graphics::SpotLight{nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
+    nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(expected.color, actual.color);
+    EXPECT_EQ(expected.innerAngle, actual.innerAngle);
+    EXPECT_EQ(expected.outerAngle, actual.outerAngle);
+    EXPECT_EQ(expected.radius, actual.radius);
+}
+
 TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expectedMaterial = nc::graphics::ToonMaterial{"base", "overlay", "hatch", 2};
+    const auto expectedMaterial = nc::graphics::ToonMaterial{"base", 2, "hatch", 2};
     const auto expected = nc::graphics::ToonRenderer{g_staticEntity, "mesh.nca", expectedMaterial};
     nc::SerializeToonRenderer(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeToonRenderer(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.GetMeshPath(), actual.GetMeshPath());
     const auto& actualMaterial = actual.GetMaterial();
     EXPECT_EQ(expectedMaterial.baseColor, actualMaterial.baseColor);
-    EXPECT_EQ(expectedMaterial.overlay, actualMaterial.overlay);
+    EXPECT_EQ(expectedMaterial.outlineWidth, actualMaterial.outlineWidth);
     EXPECT_EQ(expectedMaterial.hatching, actualMaterial.hatching);
     EXPECT_EQ(expectedMaterial.hatchingTiling, actualMaterial.hatchingTiling);
 }

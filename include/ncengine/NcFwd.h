@@ -50,6 +50,7 @@ class ParticleEmitter;
 struct PointLight;
 class SceneNavigationCamera;
 class SkeletalAnimator;
+struct SpotLight;
 class ToonRenderer;
 } // namespace graphics
 

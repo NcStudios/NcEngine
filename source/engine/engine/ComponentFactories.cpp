@@ -7,6 +7,7 @@
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
+#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
@@ -41,9 +42,9 @@ auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::Particle
     return graphics::ParticleEmitter{entity, graphics::ParticleInfo{}};
 }
 
-auto CreatePointLight(Entity entity, const std::any&) -> graphics::PointLight
+auto CreatePointLight(Entity, const std::any&) -> graphics::PointLight
 {
-    return graphics::PointLight{entity};
+    return graphics::PointLight{};
 }
 
 auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRenderer
@@ -59,6 +60,11 @@ auto CreateToonRenderer(Entity entity, const std::any&) -> graphics::ToonRendere
 auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::SkeletalAnimator
 {
     return graphics::SkeletalAnimator{entity, "dummyMesh", "dummyAnimation"};
+}
+
+auto CreateSpotLight(Entity, const std::any&) -> graphics::SpotLight
+{
+    return graphics::SpotLight{};
 }
 
 auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher

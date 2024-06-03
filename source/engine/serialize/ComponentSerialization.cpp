@@ -4,6 +4,7 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -194,25 +195,16 @@ auto DeserializePhysicsMaterial(std::istream& stream, const DeserializationConte
     return physics::PhysicsMaterial{friction, restitution};
 }
 
-void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, const std::any&)
+void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext&, const std::any&)
 {
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.ambientColor);
-    serialize::Serialize(stream, out.diffuseColor);
-    serialize::Serialize(stream, out.radius);
+    serialize::Serialize(stream, out);
 }
 
-auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::PointLight
+auto DeserializePointLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::PointLight
 {
-    auto id = uint32_t{};
-    auto ambient = Vector3{};
-    auto diffuseColor = Vector3{};
-    auto radius = 0.0f;
-    serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, ambient);
-    serialize::Deserialize(stream, diffuseColor);
-    serialize::Deserialize(stream, radius);
-    return graphics::PointLight{ctx.entityMap.at(id), ambient, diffuseColor, radius};
+    auto out = graphics::PointLight{};
+    serialize::Deserialize(stream, out);
+    return out;
 }
 
 void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& out, const SerializationContext&, const std::any&)
@@ -223,6 +215,18 @@ void SerializePositionClamp(std::ostream& stream, const physics::PositionClamp& 
 auto DeserializePositionClamp(std::istream& stream, const DeserializationContext&, const std::any&) -> physics::PositionClamp
 {
     auto out = physics::PositionClamp{};
+    serialize::Deserialize(stream, out);
+    return out;
+}
+
+void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext&, const std::any&)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializeSpotLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::SpotLight
+{
+    auto out = graphics::SpotLight{};
     serialize::Deserialize(stream, out);
     return out;
 }

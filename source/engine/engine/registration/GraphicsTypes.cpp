@@ -3,8 +3,9 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
+#include "ncengine/graphics/SpotLight.h"
+#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 
 namespace nc
@@ -17,5 +18,6 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
     Register<graphics::SkeletalAnimator>(registry, maxEntities, SkeletalAnimatorId, "SkeletalAnimator", editor::SkeletalAnimatorUIWidget, CreateSkeletalAnimator);
     Register<graphics::PointLight>(registry, maxEntities, PointLightId, "PointLight", editor::PointLightUIWidget, CreatePointLight, SerializePointLight, DeserializePointLight);
     Register<graphics::ParticleEmitter>(registry, maxEntities, ParticleEmitterId, "ParticleEmitter", editor::ParticleEmitterUIWidget, CreateParticleEmitter, SerializeParticleEmitter, DeserializeParticleEmitter);
+    Register<graphics::SpotLight>(registry, maxEntities, SpotLightId, "SpotLight", editor::SpotLightUIWidget, CreateSpotLight, SerializeSpotLight, DeserializeSpotLight);
 }
 } // namespace nc

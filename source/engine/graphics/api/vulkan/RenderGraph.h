@@ -6,6 +6,7 @@
 #include "graphics/GraphicsConstants.h"
 #include "graphics/PointLight.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/SpotLight.h"
 
 #include "utility/Signal.h"
 
@@ -49,8 +50,8 @@ class RenderGraph
         auto GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&;
         auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass.at(0u); };
         void CommitResourceLayout();
-        void IncrementShadowPassCount();
-        void DecrementShadowPassCount();
+        void IncrementShadowPassCount(bool isOmniDirectional);
+        void DecrementShadowPassCount(bool isOmniDirectional);
         void ClearShadowPasses() noexcept;
 
     private:
@@ -73,15 +74,18 @@ class RenderGraph
 
         // Signal connections
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
-        Connection<PointLight&> m_onCommitPointLightConnection;
-        Connection<Entity> m_onRemovePointLightConnection;
+        Connection<PointLight&> m_onCommitOmniLight;
+        Connection<Entity> m_onRemoveOmniLight;
+        Connection<SpotLight&> m_onCommitUniLight;
+        Connection<Entity> m_onRemoveUniLight;
 
         // Screen size
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
 
         // State tracking
-        uint32_t m_activeShadowMappingPasses;
+        uint32_t m_omniDirLightCount;
+        uint32_t m_uniDirLightCount;
         uint32_t m_maxLights;
         std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
 };

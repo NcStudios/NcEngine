@@ -76,6 +76,7 @@ SystemResourcesConfig::SystemResourcesConfig(const config::GraphicsSettings& gra
     : maxPointLights{memorySettings.maxPointLights},
       maxRenderers{memorySettings.maxRenderers},
       maxSkeletalAnimations{memorySettings.maxSkeletalAnimations},
+      maxSpotLights{memorySettings.maxSpotLights},
       maxTextures{memorySettings.maxTextures},
       maxParticles{memorySettings.maxParticles},
       useShadows{graphicsSettings.useShadows}
@@ -89,8 +90,8 @@ SystemResources::SystemResources(SystemResourcesConfig config,
                                 std::function<graphics::Camera* ()> getCamera)
     : cameras{},
       environment{resourceBus},
+      lights{resourceBus, config.maxPointLights, config.maxSpotLights, config.useShadows},
       objects{resourceBus, config.maxRenderers},
-      pointLights{resourceBus, config.maxPointLights, config.useShadows},
       skeletalAnimations{registry, resourceBus, config.maxSkeletalAnimations, modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(), modules.Get<asset::NcAsset>()->OnBoneUpdate()},
       widgets{},
       ui{registry->GetEcs(), modules, events},

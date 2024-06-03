@@ -10,7 +10,7 @@ auto MakeMaterialView(const nc::graphics::ToonMaterial& material) -> nc::graphic
     return nc::graphics::ToonMaterialView
     {
         textureService->Acquire(material.baseColor),
-        textureService->Acquire(material.overlay),
+        material.outlineWidth,
         textureService->Acquire(material.hatching),
         material.hatchingTiling
     };
@@ -45,10 +45,10 @@ void ToonRenderer::SetBaseColor(std::string texturePath)
     m_coldData->material.baseColor = std::move(texturePath);
 }
 
-void ToonRenderer::SetOverlay(std::string texturePath)
+void ToonRenderer::SetOutlineWidth(uint32_t width)
 {
-    m_materialView.overlay = asset::AssetService<asset::TextureView>::Get()->Acquire(texturePath);
-    m_coldData->material.overlay = std::move(texturePath);
+    m_materialView.outlineWidth = width;
+    m_coldData->material.outlineWidth = width;
 }
 
 void ToonRenderer::SetHatching(std::string texturePath)
