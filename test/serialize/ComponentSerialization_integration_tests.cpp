@@ -290,6 +290,17 @@ TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
     EXPECT_FLOAT_EQ(expected.restitution, actual.restitution);
 }
 
+TEST(ComponentSerializationTests, RoundTrip_orientationClamp_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::physics::OrientationClamp{nc::Vector3{1.0f, 0.0f, 0.0f}, 0.5f, 5.0f};
+    nc::SerializeOrientationClamp(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeOrientationClamp(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(nc::Vector3(1.0f, 0.0f, 0.0f), actual.targetOrientation);
+    EXPECT_FLOAT_EQ(0.5f, actual.dampingRatio);
+    EXPECT_FLOAT_EQ(5.0f, actual.dampingFrequency);
+}
+
 TEST(ComponentSerializationTests, RoundTrip_positionClamp_preservesValues)
 {
     auto stream = std::stringstream{};
