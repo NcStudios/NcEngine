@@ -16,6 +16,8 @@ void SerializeCollider(std::ostream& stream, const physics::Collider& out, const
 auto DeserializeCollider(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> physics::Collider;
 void SerializeConcaveCollider(std::ostream& stream, const physics::ConcaveCollider& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeConcaveCollider(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> physics::ConcaveCollider;
+void SerializeOrientationClamp(std::ostream& stream, const physics::OrientationClamp& out, const SerializationContext&, const std::any&);
+auto DeserializeOrientationClamp(std::istream& stream, const DeserializationContext&, const std::any&) -> physics::OrientationClamp;
 void SerializeMeshRenderer(std::ostream& stream, const graphics::MeshRenderer& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeMeshRenderer(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::MeshRenderer;
 void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&);

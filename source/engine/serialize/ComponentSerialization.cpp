@@ -145,6 +145,18 @@ auto DeserializeMeshRenderer(std::istream& stream, const DeserializationContext&
     return graphics::MeshRenderer{ctx.entityMap.at(id), std::move(mesh), std::move(material), technique};
 }
 
+void SerializeOrientationClamp(std::ostream& stream, const physics::OrientationClamp& out, const SerializationContext&, const std::any&)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializeOrientationClamp(std::istream& stream, const DeserializationContext&, const std::any&) -> physics::OrientationClamp
+{
+    auto out = physics::OrientationClamp{};
+    serialize::Deserialize(stream, out);
+    return out;
+}
+
 void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
