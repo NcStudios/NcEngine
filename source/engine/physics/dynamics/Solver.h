@@ -31,6 +31,7 @@ class Solver
         Registry* m_registry;
         std::vector<ContactConstraint> m_contactConstraints;
         std::vector<PositionConstraint> m_positionConstraints;
+        std::vector<OrientationClampConstraint> m_orientationClampConstraints;
         std::vector<PositionClampConstraint> m_positionClampConstraints;
         std::vector<VelocityRestrictionConstraint> m_velocityRestrictionConstraints;
 };

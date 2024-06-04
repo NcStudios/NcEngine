@@ -347,6 +347,7 @@ Solver::Solver(Registry* registry)
 void Solver::GenerateFreedomConstraints(float dt)
 {
     auto ecs = m_registry->GetEcs();
+    m_orientationClampConstraints = GenerateOrientationClampConstraints(ecs, dt);
     m_positionClampConstraints = GeneratePositionClampConstraints(ecs, dt);
     m_velocityRestrictionConstraints = GenerateVelocityRestrictionConstraints(ecs);
 }
@@ -402,6 +403,7 @@ void Solver::ResolveConstraints(std::span<Joint> joints, float dt)
             ResolveJoint(joint);
         }
 
+        Solve(m_orientationClampConstraints, dt);
         Solve(m_positionClampConstraints, dt);
         Solve(m_velocityRestrictionConstraints);
     }

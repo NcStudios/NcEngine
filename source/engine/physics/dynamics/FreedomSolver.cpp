@@ -32,6 +32,46 @@ auto ComputeSoftConstraintTerms(float dampingRatio, float dampingFrequency, floa
 
 namespace nc::physics
 {
+auto GenerateOrientationClampConstraints(ecs::ExplicitEcs<OrientationClamp, PhysicsBody, Transform> gameState, float dt) -> std::vector<OrientationClampConstraint>
+{
+    using namespace DirectX;
+    auto& pool = gameState.GetPool<OrientationClamp>();
+    auto out = std::vector<OrientationClampConstraint>{};
+    out.reserve(pool.size());
+    for (auto [entity, clamp] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
+    {
+        if (!gameState.Contains<PhysicsBody>(entity))
+            continue;
+
+        const auto& currentUp = gameState.Get<Transform>(entity).UpXM();
+        const auto targetUp = ToXMVector(clamp.targetOrientation);
+        const auto axisOfRotation = XMVector3Normalize(XMVector3Cross(XMVectorNegate(currentUp), targetUp));
+        auto& body = gameState.Get<PhysicsBody>(entity);
+        const auto effectiveMass = [&axisOfRotation, &body]()
+        {
+            // with u as normalized rotation axis: u^T I U == 1 / (u^T I^-1 u)
+            auto effMass = XMVector3Transform(axisOfRotation, body.GetInverseInertia());
+            effMass = XMVector3Dot(axisOfRotation, effMass);
+            effMass = XMVectorReciprocal(effMass);
+            return XMVectorGetX(effMass);
+        }();
+
+        const auto [beta, gamma] = ComputeSoftConstraintTerms(clamp.dampingRatio, clamp.dampingFrequency, effectiveMass, dt);
+        out.emplace_back(
+            currentUp,
+            targetUp,
+            axisOfRotation,
+            &body,
+            effectiveMass,
+            beta,
+            gamma / dt,
+            0.0f
+        );
+    }
+
+    return out;
+}
+
 auto GeneratePositionClampConstraints(ecs::ExplicitEcs<PositionClamp, PhysicsBody, Transform> gameState, float dt) -> std::vector<PositionClampConstraint>
 {
     using namespace DirectX;
@@ -91,6 +131,32 @@ auto GenerateVelocityRestrictionConstraints(ecs::ExplicitEcs<VelocityRestriction
     }
 
     return out;
+}
+
+void Solve(std::vector<OrientationClampConstraint>& constraints, float dt)
+{
+    using namespace DirectX;
+    constexpr auto errorEpsilon = 0.001f;
+    for (auto& constraint : constraints)
+    {
+        const auto& velocity = constraint.body->GetAngularVelocity();
+        const auto rotationError = [&constraint, &velocity, dt]()
+        {
+            const auto scaledVelocity = XMVectorScale(velocity, dt * constraint.body->GetAngularDrag());
+            const auto tentativeRotation = XMQuaternionRotationRollPitchYawFromVector(scaledVelocity);
+            const auto tentativeUp = XMVector3Rotate(constraint.currentUp, tentativeRotation);
+            return XMVectorGetX(XMVector3AngleBetweenVectors(tentativeUp, constraint.targetUp));
+        }();
+
+        if (std::fabs(rotationError) < errorEpsilon)
+            continue;
+
+        const auto bias = constraint.beta / dt * rotationError;
+        const auto jv = XMVectorGetX(XMVector3Dot(velocity, constraint.axisOfRotation));
+        const auto lambda = -(jv + bias + constraint.softness * constraint.totalLambda) / (constraint.effectiveMass + constraint.softness);
+        constraint.totalLambda += lambda;
+        constraint.body->ApplyAngularVelocity(XMVectorScale(constraint.axisOfRotation, lambda * constraint.effectiveMass));
+    }
 }
 
 void Solve(std::vector<PositionClampConstraint>& constraints, float dt)

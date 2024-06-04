@@ -51,6 +51,7 @@ class PhysicsBody
         void ApplyTorqueImpulse(const Vector3& torque);
         void ApplyTorqueImpulse(DirectX::FXMVECTOR torque);
         void ApplyVelocity(DirectX::FXMVECTOR delta);
+        void ApplyAngularVelocity(DirectX::FXMVECTOR delta);
         void ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta);
         void SetVelocities(DirectX::FXMVECTOR linear, DirectX::FXMVECTOR angular);
         void UpdateWorldInertia(const Transform* transform);
