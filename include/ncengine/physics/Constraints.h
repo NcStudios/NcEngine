@@ -37,4 +37,19 @@ struct PositionClamp
     float dampingRatio = 1.0f;
     float dampingFrequency = 10.0f;
 };
+
+/**
+ * @brief Constrain an object's orientation with a harmonic oscillator.
+ * 
+ * An OrientationClamp keeps an object's local up axis fixed to a target direction using a spring-damper system, allowing
+ * for some sag and bounciness in the response. The damping ratio controls the oscillation decay (usually in the range
+ * [0, 1], or greater for overdamping), and the damping frequency controls the rate of oscillation in hertz. The clamp
+ * acts on velocities and has no effect if the object does not have a PhysicsBody.
+ */
+struct OrientationClamp
+{
+    Vector3 targetOrientation = Vector3::Up();
+    float dampingRatio = 0.1f;
+    float dampingFrequency = 10.0f;
+};
 } // namespace nc::physics

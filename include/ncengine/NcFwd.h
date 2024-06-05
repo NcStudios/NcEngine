@@ -64,6 +64,7 @@ namespace physics
 struct NcPhysics;
 class Collider;
 class ConcaveCollider;
+struct OrientationClamp;
 class PhysicsBody;
 struct PhysicsMaterial;
 struct PositionClamp;

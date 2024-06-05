@@ -112,6 +112,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         auto& groundTransform = world.Get<Transform>(ground);
         world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
         world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
+        world.Emplace<physics::OrientationClamp>(ground, Vector3::Up(), 1.0f, 5.0f);
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});

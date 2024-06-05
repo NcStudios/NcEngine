@@ -77,6 +77,11 @@ auto CreateCollider(Entity entity, const std::any&) -> physics::Collider
     return physics::Collider{entity, physics::BoxProperties{}};
 }
 
+auto CreateOrientationClamp(Entity, const std::any&) -> physics::OrientationClamp
+{
+    return physics::OrientationClamp{};
+}
+
 auto CreatePhysicsBody(Entity entity, const std::any& userData) -> physics::PhysicsBody
 {
     auto registry = std::any_cast<ecs::ComponentRegistry*>(userData);

@@ -420,6 +420,14 @@ void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 
+void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "OrientationClamp");
+    ui::InputVector3(orientationClamp.targetOrientation, "targetOrientation", 0.1f, -1.0f, 1.0f);
+    ui::DragFloat(orientationClamp.dampingRatio, "dampingRatio", 0.01f, 0.01f, 10.0f);
+    ui::DragFloat(orientationClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
+}
+
 void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
 {
     constexpr auto largeStep = 0.1f;

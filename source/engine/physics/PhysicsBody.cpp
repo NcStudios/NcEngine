@@ -128,6 +128,12 @@ void PhysicsBody::ApplyVelocity(DirectX::FXMVECTOR delta)
     m_linearVelocity = XMVectorAdd(m_linearVelocity, delta);
 }
 
+void PhysicsBody::ApplyAngularVelocity(DirectX::FXMVECTOR delta)
+{
+    NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object")
+    m_angularVelocity = XMVectorAdd(m_angularVelocity, delta);
+}
+
 void PhysicsBody::ApplyVelocities(DirectX::FXMVECTOR velDelta, DirectX::FXMVECTOR angVelDelta)
 {
     NC_PHYSICS_ASSERT(!m_properties.isKinematic, "Cannot move a kinematic object");
