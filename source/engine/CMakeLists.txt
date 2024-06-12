@@ -19,6 +19,10 @@ if(NOT NC_PROD_BUILD)
     add_definitions(-DNC_ASSERT_ENABLED)
 endif()
 
+if(NC_PHYSICS_CONFIG)
+    add_definitions(-DNC_PHYSICS_CONFIG="${NC_PHYSICS_CONFIG}")
+endif()
+
 # Compile Options
 target_compile_options(${NC_ENGINE_LIB}
     PRIVATE
