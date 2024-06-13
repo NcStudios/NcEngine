@@ -31,12 +31,21 @@ class PerFrameGpuContext;
 class ShaderBindingManager;
 class Swapchain;
 
-inline static const std::string LitPassId = "Lit Pass";
-inline static const std::string ShadowMappingPassId = "Shadow Mapping Pass";
-
-struct PostProcessViews
+struct PerFrameRenderGraph
 {
-    std::array<std::vector<vk::ImageView>, MaxFramesInFlight> perFrameViews;
+    PerFrameRenderGraph(const Device& device,
+                        Swapchain* swapchain,
+                        ShaderBindingManager* shaderBindingManager,
+                        GpuAllocator* gpuAllocator,
+                        Vector2 dimensions,
+                        uint32_t maxLights,
+                        uint32_t index,
+                        vk::ImageView dummyShadowMap);
+
+    std::vector<RenderPass> shadowPasses; // One per light
+    RenderPass litPass;
+    std::unordered_map<PostProcessImageType, std::vector<vk::ImageView>> postProcessImages;
+    bool isDirty;
 };
 
 class RenderGraph
@@ -44,11 +53,11 @@ class RenderGraph
     public:
         RenderGraph(FrameManager* frameManager, Registry* registry,const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights);
 
-        void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent);
+        void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
         void SinkPostProcessImages();
         auto GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&;
-        auto GetLitPass() const noexcept -> const RenderPass& { return m_litPass.at(0u); };
+        auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
         void CommitResourceLayout();
         void IncrementShadowPassCount(bool isOmniDirectional);
         void DecrementShadowPassCount(bool isOmniDirectional);
@@ -64,13 +73,8 @@ class RenderGraph
         GpuAllocator* m_gpuAllocator;
         ShaderBindingManager* m_shaderBindingManager;
 
-        // Render Passes
-        std::array<std::vector<RenderPass>, MaxFramesInFlight> m_shadowMappingPasses;
-        std::array<RenderPass, MaxFramesInFlight> m_litPass;
-
-        // Post process images
-        std::unordered_map<PostProcessImageType, PostProcessViews> m_postProcessImageViews;
         Attachment m_dummyShadowMap;
+        std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
 
         // Signal connections
         Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
@@ -87,7 +91,6 @@ class RenderGraph
         uint32_t m_omniDirLightCount;
         uint32_t m_uniDirLightCount;
         uint32_t m_maxLights;
-        std::array<bool, MaxFramesInFlight> m_isDescriptorSetLayoutsDirty;
 };
 } // namespace nc
 } // namespace graphics

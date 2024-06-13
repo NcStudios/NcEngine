@@ -76,14 +76,12 @@ auto CreateVkRenderPass(std::span<const nc::graphics::vulkan::AttachmentSlot> at
 namespace nc::graphics::vulkan
 {
 RenderPass::RenderPass(vk::Device device,
-                       std::string uid,
                        std::span<const AttachmentSlot> attachmentSlots,
                        std::span<const Subpass> subpasses,
                        std::vector<Attachment> attachments,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags)
     : m_device{device},
-      m_uid{std::move(uid)},
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
@@ -93,13 +91,12 @@ RenderPass::RenderPass(vk::Device device,
 
 void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional)
 {
-    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex, isOmniDirectional));
+    m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex, isOmniDirectional);
 }
 
 void RenderPass::UnregisterShadowMappingTechnique()
 {
-    if (!m_shadowMappingTechniques.empty())
-        m_shadowMappingTechniques.pop_back();
+    m_shadowMappingTechnique.reset();
 }
 
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
@@ -108,7 +105,7 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     const auto renderPassInfo = vk::RenderPassBeginInfo
     {
         m_renderPass.get(),
-        GetFrameBuffer(attachmentIndex),
+        m_frameBuffers.at(attachmentIndex).get(),
         vk::Rect2D{vk::Offset2D{0, 0}, m_attachmentSize.extent},
         static_cast<uint32_t>(clearValues.size()),
         clearValues.data()
@@ -120,13 +117,13 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
 {
     OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
 
-    for (const auto &technique : m_shadowMappingTechniques)
+    if (m_shadowMappingTechnique)
     {
-        if (!technique->CanBind(frameData)) continue;
-        technique->Bind(frameIndex, cmd);
+        if (!m_shadowMappingTechnique->CanBind(frameData)) break;
+        m_shadowMappingTechnique->Bind(frameIndex, cmd);
 
-        if (!technique->CanRecord(frameData)) continue;
-        technique->Record(cmd, frameData);
+        if (!m_shadowMappingTechnique->CanRecord(frameData)) break;
+        m_shadowMappingTechnique->Record(cmd, frameData);
     }
 
     for (const auto &technique : m_litTechniques)
@@ -149,17 +146,12 @@ auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
     return m_attachments.at(index).view.get();
 }
 
-auto RenderPass::GetUid() const -> std::string
-{
-    return m_uid;
-}
-
 auto RenderPass::GetVkPass() const ->vk::RenderPass
 {
     return m_renderPass.get();
 }
 
-void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
+void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
@@ -172,20 +164,6 @@ void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector
         1                                       // Layers
     };
 
-    m_frameBuffers.emplace_back(index, m_device.createFramebufferUnique(framebufferInfo));
-}
-
-auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer
-{
-    const auto frameBufferPos = std::ranges::find_if(m_frameBuffers, [index](const auto &frameBuffer)
-    {
-        return (frameBuffer.index == index);
-    });
-
-    if (frameBufferPos == m_frameBuffers.end())
-    {
-        return m_frameBuffers.at(0).frameBuffer.get();
-    }
-    return frameBufferPos->frameBuffer.get();
+    m_frameBuffers.emplace_back(m_device.createFramebufferUnique(framebufferInfo));
 }
 } // namespace nc::graphics::vulkan

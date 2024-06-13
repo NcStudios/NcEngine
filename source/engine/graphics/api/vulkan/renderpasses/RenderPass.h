@@ -20,22 +20,20 @@ class RenderPass
 {
     public:
         RenderPass(vk::Device device,
-                   std::string uid,
                    std::span<const AttachmentSlot> attachmentSlots,
                    std::span<const Subpass> subpasses,
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
 
-        void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex);
+        void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex = 0u);
         void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer *cmd);
 
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
-        auto GetUid() const -> std::string;
         auto GetVkPass() const -> vk::RenderPass;
 
-        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
+        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions);
 
         template <std::derived_from<ITechnique> T>
         void RegisterTechnique(const Device& device, ShaderBindingManager *shaderBindingManager);
@@ -45,19 +43,15 @@ class RenderPass
         void UnregisterTechnique();
         void UnregisterShadowMappingTechnique();
 
-        void ClearTechniques() { m_litTechniques.clear(); m_shadowMappingTechniques.clear(); }
-
     private:
-        auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;
         vk::Device m_device;
-        std::string m_uid;
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;
         ClearValueFlags_t m_clearFlags;
         std::vector<std::unique_ptr<ITechnique>> m_litTechniques;
-        std::vector<std::unique_ptr<ShadowMappingTechnique>> m_shadowMappingTechniques;
+        std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
-        std::vector<FrameBuffer> m_frameBuffers;
+        std::vector<vk::UniqueFramebuffer> m_frameBuffers;
 };
 
 template <std::derived_from<ITechnique> T>

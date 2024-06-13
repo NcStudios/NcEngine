@@ -28,12 +28,6 @@ enum class AttachmentType : uint8_t
     Resolve
 };
 
-struct FrameBuffer
-{
-    uint32_t index;
-    vk::UniqueFramebuffer frameBuffer;
-};
-
 struct Attachment
 {
     Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat);

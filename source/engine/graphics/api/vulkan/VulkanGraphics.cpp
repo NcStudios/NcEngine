@@ -154,7 +154,7 @@ void VulkanGraphics::DrawFrame(const PerFrameRenderState& state)
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->RecordDrawCallsOnBuffer(state, m_imageIndex, m_dimensions, m_screenExtent);
+    m_renderGraph->RecordDrawCallsOnBuffer(state, m_dimensions, m_screenExtent);
 }
 
 void VulkanGraphics::FrameEnd()
