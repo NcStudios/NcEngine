@@ -37,6 +37,7 @@ void Inspector::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
         DragAndDropSource<Entity>(&entity);
         ImGui::Text("Index: %d", entity.Index());
         ImGui::Text("Layer: %d", entity.Layer());
+        ImGui::Text("UserData: %d", entity.UserData());
         if (ImGui::TreeNodeEx("Flags"))
         {
             ImGui::BeginDisabled(true);

@@ -43,7 +43,7 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
 auto g_registry = nc::ecs::ComponentRegistry{10ull};
 auto g_ecs = nc::ecs::Ecs{g_registry};
 constexpr auto g_entity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::None};
-constexpr auto g_staticEntity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::Static};
+constexpr auto g_staticEntity = nc::Entity{43u, nc::Entity::layer_type{}, nc::Entity::Flags::Static};
 auto g_entityToFragmentIdMap = nc::EntityToFragmentIdMap
 {
     {g_entity, 0u},

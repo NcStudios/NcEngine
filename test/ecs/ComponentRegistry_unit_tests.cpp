@@ -113,8 +113,8 @@ TEST(ComponentRegistryTests, CommitPendingChanges_updatesState)
     uut.RegisterType<S1>(10);
     auto& entities = uut.GetPool<nc::Entity>();
     auto& components = uut.GetPool<S1>();
-    const auto a = entities.Add(0, 0);
-    const auto b = entities.Add(0, 0);
+    const auto a = entities.Add(0, 0, 0);
+    const auto b = entities.Add(0, 0, 0);
     components.Emplace(a);
     components.Emplace(b);
     entities.Remove(b);
@@ -123,7 +123,7 @@ TEST(ComponentRegistryTests, CommitPendingChanges_updatesState)
     EXPECT_TRUE(components.Contains(a));
     EXPECT_FALSE(entities.Contains(b));
     EXPECT_FALSE(components.Contains(b));
-    const auto next = entities.Add(0, 0);
+    const auto next = entities.Add(0, 0, 0);
     EXPECT_EQ(next, b);
 }
 
@@ -133,9 +133,9 @@ TEST(ComponentRegistryTests, ClearSceneData)
     uut.RegisterType<S1>(10);
     auto& entities = uut.GetPool<nc::Entity>();
     auto& components = uut.GetPool<S1>();
-    const auto a = entities.Add(0, 0);
-    const auto b = entities.Add(0, nc::Entity::Flags::Persistent);
-    const auto c = entities.Add(0, 0);
+    const auto a = entities.Add(0, 0, 0);
+    const auto b = entities.Add(0, nc::Entity::Flags::Persistent, 0);
+    const auto c = entities.Add(0, 0, 0);
     components.Emplace(a);
     components.Emplace(b);
     components.Emplace(c);
@@ -157,9 +157,9 @@ TEST(ComponentRegistryTests, Clear)
     uut.RegisterType<S1>(10);
     auto& entities = uut.GetPool<nc::Entity>();
     auto& components = uut.GetPool<S1>();
-    const auto a = entities.Add(0, 0);
-    const auto b = entities.Add(0, nc::Entity::Flags::Persistent);
-    const auto c = entities.Add(0, 0);
+    const auto a = entities.Add(0, 0,0 );
+    const auto b = entities.Add(0, nc::Entity::Flags::Persistent, 0);
+    const auto c = entities.Add(0, 0, 0);
     components.Emplace(a);
     components.Emplace(b);
     components.Emplace(c);

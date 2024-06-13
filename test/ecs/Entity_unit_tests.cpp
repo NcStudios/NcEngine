@@ -63,6 +63,14 @@ TEST(Entity_unit_tests, Flags_ExtractsFlags)
     EXPECT_EQ(actual, expected);
 }
 
+TEST(Entity_unit_tests, UserData_ExtractsUserData)
+{
+    Entity::user_data_type expected = 2u;
+    auto handle = Entity{0u, 1u, 0u, expected};
+    Entity::user_data_type actual = handle.UserData();
+    EXPECT_EQ(actual, expected);
+}
+
 TEST(Entity_unit_tests, IsStatic_FlagSet_ReturnsTrue)
 {
     auto flags = Entity::Flags::Static;
@@ -121,9 +129,9 @@ TEST(Entity_unit_tests, IsInternal_FlagNotSet_ReturnsFalse)
 
 TEST(Entity_unit_tests, Hash_AllValues_ReturnsExpectedHash)
 {
-    constexpr auto handle = Entity{uint32_t{0x01234567}, uint8_t{0x89}, uint8_t{0xAB}};
+    constexpr auto handle = Entity{uint32_t{0x01234567}, uint8_t{0x89}, uint8_t{0xAB}, uint8_t{0xCD}};
     constexpr auto uut = Entity::Hash();
     constexpr auto actual = uut(handle);
-    constexpr auto expected = size_t{0x00000123456789AB}; // top 4 bytes empty | index | layer | flags
+    constexpr auto expected = size_t{0x000123456789ABCD}; // top 4 bytes empty | index | layer | flags
     EXPECT_EQ(expected, actual);
 }

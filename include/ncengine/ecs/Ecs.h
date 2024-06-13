@@ -37,7 +37,7 @@ class EcsInterface
             requires PolicyType::template HasAccess<Entity, Transform, Tag, Hierarchy>
         auto Emplace(EntityInfo info = {}) -> Entity
         {
-            const auto handle = m_policy.template GetPool<Entity>().Add(info.layer, info.flags);
+            const auto handle = m_policy.template GetPool<Entity>().Add(info.layer, info.flags, info.userData);
             if (info.parent.Valid())
             {
                 auto& parentTransform = Get<Transform>(info.parent);

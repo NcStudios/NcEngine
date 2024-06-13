@@ -233,7 +233,10 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
             .layer = nc::Entity::layer_type{2},
             .flags = nc::Entity::Flags::Static
         },
-        {.flags = nc::Entity::Flags::NoCollisionNotifications}
+        {
+            .flags = nc::Entity::Flags::NoCollisionNotifications,
+            .userData = 3u
+        }
     };
 
     const auto unexpectedInfos = std::vector<nc::EntityInfo>
@@ -262,6 +265,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
     {
         EXPECT_EQ(expected.layer, actualEntity.Layer());
         EXPECT_EQ(expected.flags, actualEntity.Flags());
+        EXPECT_EQ(expected.userData, actualEntity.UserData());
 
         const auto& actualTransform = ecs.Get<nc::Transform>(actualEntity);
         EXPECT_EQ(expected.position, actualTransform.LocalPosition());

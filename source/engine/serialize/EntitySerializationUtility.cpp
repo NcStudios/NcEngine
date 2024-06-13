@@ -37,7 +37,8 @@ auto ReconstructEntityInfo(nc::Entity entity,
         .parent = hierarchy.parent,
         .tag = tag.value,
         .layer = entity.Layer(),
-        .flags = entity.Flags()
+        .flags = entity.Flags(),
+        .userData = entity.UserData()
     };
 }
 } // anonymous namespace
@@ -82,7 +83,7 @@ auto BuildEntityToFragmentIdMap(std::span<const Entity> entities) -> EntityToFra
 void RemapEntity(Entity& entity, const EntityToFragmentIdMap& map)
 {
     if (entity != Entity::Null())
-        entity = Entity{map.at(entity), uint8_t{}, uint8_t{}};
+        entity = Entity{map.at(entity)};
 }
 
 void RemapEntity(Entity& entity, const FragmentIdToEntityMap& map)
@@ -106,5 +107,4 @@ auto BuildFragmentEntityInfos(std::span<const Entity> entities,
 
     return out;
 }
-
 } // namespace nc

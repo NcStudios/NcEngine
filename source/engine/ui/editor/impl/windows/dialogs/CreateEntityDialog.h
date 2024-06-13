@@ -28,6 +28,7 @@ class CreateEntityDialog : public ModalDialog
         bool m_persistentFlag = false;
         bool m_noCollisionFlag = false;
         bool m_noSerializeFlag = false;
+        uint8_t m_userData = 0;
         Vector3 m_position;
         Vector3 m_rotation;
         Vector3 m_scale = Vector3::One();

@@ -18,14 +18,14 @@ class HandleManager
         {
         }
 
-        Entity GenerateNewHandle(Entity::layer_type layer, Entity::flags_type flags)
+        Entity GenerateNewHandle(Entity::layer_type layer, Entity::flags_type engineFlags, Entity::flags_type userFlags)
         {
             if(m_freeHandles.empty())
-                return Entity{m_nextIndex++, layer, flags};
+                return Entity{m_nextIndex++, layer, engineFlags, userFlags};
 
             auto index = m_freeHandles.back();
             m_freeHandles.pop_back();
-            return Entity{index, layer, flags};
+            return Entity{index, layer, engineFlags, userFlags};
         }
 
         void ReclaimHandle(Entity handle)
