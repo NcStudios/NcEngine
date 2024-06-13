@@ -24,6 +24,9 @@ class Executor
         // Initialize with a context object
         explicit Executor(uint32_t threadCount, ExecutorContext ctx);
 
+        // Check if graph contexts are valid.
+        auto IsContextInitialized() const noexcept { return m_ctx.update && m_ctx.render; }
+
         // Assign a new graph context.
         void SetContext(ExecutorContext ctx);
 
