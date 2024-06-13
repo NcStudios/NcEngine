@@ -65,7 +65,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
 
     const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
     renderPass.CreateFrameBuffers(views, dimensions);
-    renderPass.RegisterShadowMappingTechnique(device->VkDevice(), shaderBindingManager, shadowCasterIndex, isOmniDirectional);
+    renderPass.RegisterShadowMappingTechnique(vkDevice, shaderBindingManager, shadowCasterIndex, isOmniDirectional);
 
     return renderPass;
 }
@@ -113,20 +113,20 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
 
     // Create all the lit pass pipelines
     #ifdef NC_EDITOR_ENABLED
-    renderPass.RegisterTechnique<WireframeTechnique>(*device, shaderBindingManager);
+    renderPass.RegisterTechnique<WireframeTechnique>(device, shaderBindingManager);
     #endif
 
-    renderPass.RegisterTechnique<EnvironmentTechnique>(*device, shaderBindingManager);
-    renderPass.RegisterTechnique<PbrTechnique>(*device, shaderBindingManager);
-    renderPass.RegisterTechnique<ToonTechnique>(*device, shaderBindingManager);
-    renderPass.RegisterTechnique<OutlineTechnique>(*device, shaderBindingManager);
-    renderPass.RegisterTechnique<ParticleTechnique>(*device, shaderBindingManager);
-    renderPass.RegisterTechnique<UiTechnique>(*device, shaderBindingManager);
+    renderPass.RegisterTechnique<EnvironmentTechnique>(device, shaderBindingManager);
+    renderPass.RegisterTechnique<PbrTechnique>(device, shaderBindingManager);
+    renderPass.RegisterTechnique<ToonTechnique>(device, shaderBindingManager);
+    renderPass.RegisterTechnique<OutlineTechnique>(device, shaderBindingManager);
+    renderPass.RegisterTechnique<ParticleTechnique>(device, shaderBindingManager);
+    renderPass.RegisterTechnique<UiTechnique>(device, shaderBindingManager);
 
     return renderPass;
 }
 
-auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device& device,
+auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
                         nc::graphics::vulkan::Swapchain* swapchain,
                         nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
                         nc::graphics::vulkan::GpuAllocator* gpuAllocator,
@@ -150,7 +150,7 @@ RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const D
       m_gpuAllocator{gpuAllocator},
       m_shaderBindingManager{shaderBindingManager},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
-      m_perFrameRenderGraphs{CreatePerFrameGraphs(*device, swapchain, shaderBindingManager, gpuAllocator, dimensions, maxLights, m_dummyShadowMap.view.get())},
+      m_perFrameRenderGraphs{CreatePerFrameGraphs(device, swapchain, shaderBindingManager, gpuAllocator, dimensions, maxLights, m_dummyShadowMap.view.get())},
       m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
       m_onCommitOmniLight{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount(true);})},
       m_onRemoveOmniLight{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount(true);})},
@@ -174,7 +174,7 @@ void RenderGraph::SinkPostProcessImages()
     auto& shadowMapsSink = renderGraph.postProcessImages.at(PostProcessImageType::ShadowMap);
     std::ranges::transform(renderGraph.shadowPasses, std::back_inserter(shadowMapsSink), [](auto& shadowPass)
     {
-        shadowPass.GetAttachmentView(0u);
+        return shadowPass.GetAttachmentView(0u);
     });
 }
 
@@ -232,19 +232,19 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    m_perFrameRenderGraphs = CreatePerFrameGraphs(*m_device, m_swapchain, m_shaderBindingManager, m_gpuAllocator, m_dimensions, m_maxLights, m_dummyShadowMap.view.get());
+    m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_shaderBindingManager, m_gpuAllocator, dimensions, m_maxLights, m_dummyShadowMap.view.get());
 
     for (auto& renderGraph : m_perFrameRenderGraphs)
     {
         renderGraph.shadowPasses.clear();
         for (auto i : std::views::iota(0u, m_omniDirLightCount))
         {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, dimensions, i, true));
         }
 
         for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
         {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, dimensions, i, false));
         }
     }
 }
@@ -296,7 +296,7 @@ void RenderGraph::SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged
     }
 }
 
-PerFrameRenderGraph::PerFrameRenderGraph(const Device& device,
+PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
                                          Swapchain* swapchain,
                                          ShaderBindingManager* shaderBindingManager,
                                          GpuAllocator* gpuAllocator,
@@ -304,11 +304,10 @@ PerFrameRenderGraph::PerFrameRenderGraph(const Device& device,
                                          uint32_t maxLights,
                                          uint32_t index,
                                          vk::ImageView dummyShadowMap)
+    : shadowPasses{},
+      litPass{CreateLitPass(device, gpuAllocator, swapchain, shaderBindingManager, index, dimensions)},
+      postProcessImages{{PostProcessImageType::ShadowMap, std::vector<vk::ImageView>(maxLights, dummyShadowMap)}},
+      isDirty{false}
 {
-    // Populate the post process images with dummy images
-    postProcessImages.emplace(PostProcessImageType::ShadowMap, std::vector<vk::ImageView>(maxLights, dummyShadowMap));
-
-    // Create the lit pass
-    renderGraph.litPass = CreateLitPass(device, gpuAllocator, swapchain, shaderBindingManager, index, dimensions);
 }
 } // namespace nc::graphics::vulkan

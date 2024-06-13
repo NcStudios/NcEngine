@@ -119,11 +119,15 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
 
     if (m_shadowMappingTechnique)
     {
-        if (!m_shadowMappingTechnique->CanBind(frameData)) break;
-        m_shadowMappingTechnique->Bind(frameIndex, cmd);
+        if (m_shadowMappingTechnique->CanBind(frameData))
+        {
+            m_shadowMappingTechnique->Bind(frameIndex, cmd);
 
-        if (!m_shadowMappingTechnique->CanRecord(frameData)) break;
-        m_shadowMappingTechnique->Record(cmd, frameData);
+            if (m_shadowMappingTechnique->CanRecord(frameData))
+            {
+                m_shadowMappingTechnique->Record(cmd, frameData);
+            }
+        }
     }
 
     for (const auto &technique : m_litTechniques)

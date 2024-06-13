@@ -33,7 +33,7 @@ class Swapchain;
 
 struct PerFrameRenderGraph
 {
-    PerFrameRenderGraph(const Device& device,
+    PerFrameRenderGraph(const Device* device,
                         Swapchain* swapchain,
                         ShaderBindingManager* shaderBindingManager,
                         GpuAllocator* gpuAllocator,
@@ -51,7 +51,7 @@ struct PerFrameRenderGraph
 class RenderGraph
 {
     public:
-        RenderGraph(FrameManager* frameManager, Registry* registry,const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights);
+        RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights);
 
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);

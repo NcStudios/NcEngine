@@ -26,9 +26,9 @@ class RenderPass
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
 
-        void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex = 0u);
-        void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const;
-        void End(vk::CommandBuffer *cmd);
+        void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
+        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, uint32_t frameIndex) const;
+        void End(vk::CommandBuffer* cmd);
 
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
         auto GetVkPass() const -> vk::RenderPass;
@@ -36,8 +36,8 @@ class RenderPass
         void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions);
 
         template <std::derived_from<ITechnique> T>
-        void RegisterTechnique(const Device& device, ShaderBindingManager *shaderBindingManager);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
+        void RegisterTechnique(const Device* device, ShaderBindingManager* shaderBindingManager);
+        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
 
         template <std::derived_from<ITechnique> T>
         void UnregisterTechnique();
@@ -55,10 +55,10 @@ class RenderPass
 };
 
 template <std::derived_from<ITechnique> T>
-void RenderPass::RegisterTechnique(const Device& device, ShaderBindingManager* shaderBindingManager)
+void RenderPass::RegisterTechnique(const Device* device, ShaderBindingManager* shaderBindingManager)
 {
     UnregisterTechnique<T>();
-    m_litTechniques.push_back(std::make_unique<T>(device, shaderBindingManager, &m_renderPass.get()));
+    m_litTechniques.push_back(std::make_unique<T>(*device, shaderBindingManager, &m_renderPass.get()));
 }
 
 template <std::derived_from<ITechnique> T>
