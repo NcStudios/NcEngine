@@ -6,6 +6,7 @@
 #include "graphics/api/vulkan/Swapchain.h"
 #include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "graphics/api/vulkan/ShaderStorage.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/techniques/EnvironmentTechnique.h"
 #include "graphics/api/vulkan/techniques/OutlineTechnique.h"
@@ -130,27 +131,26 @@ auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
                         nc::graphics::vulkan::Swapchain* swapchain,
                         nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
                         nc::graphics::vulkan::GpuAllocator* gpuAllocator,
-                        nc::Vector2 dimensions,
-                        uint32_t maxLights,
-                        vk::ImageView dummyShadowMap)
+                        nc::Vector2 dimensions)
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
     {
-        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, shaderBindingManager, gpuAllocator, dimensions, maxLights, N, dummyShadowMap))...};
+        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, shaderBindingManager, gpuAllocator, dimensions, N))...};
     }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
 }
 
 namespace nc::graphics::vulkan
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
       m_shaderBindingManager{shaderBindingManager},
+      m_shaderStorage{shaderStorage},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
-      m_perFrameRenderGraphs{CreatePerFrameGraphs(device, swapchain, shaderBindingManager, gpuAllocator, dimensions, maxLights, m_dummyShadowMap.view.get())},
+      m_perFrameRenderGraphs{CreatePerFrameGraphs(device, swapchain, shaderBindingManager, gpuAllocator, dimensions)},
       m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
       m_onCommitOmniLight{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount(true);})},
       m_onRemoveOmniLight{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount(true);})},
@@ -168,20 +168,19 @@ void RenderGraph::SinkPostProcessImages()
 {
     OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
 
-    auto& renderGraph = m_perFrameRenderGraphs.at(m_frameManager->CurrentFrameContext()->Index());
+    auto frameIndex = m_frameManager->CurrentFrameContext()->Index();
+    auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
 
     // Sink shadow maps from the render target of each shadow pass into a vector of post process images.
-    auto& shadowMapsSink = renderGraph.postProcessImages.at(PostProcessImageType::ShadowMap);
+    auto shadowMapsSink = std::vector<vk::ImageView>{};
+    shadowMapsSink.reserve(renderGraph.shadowPasses.size());
+
     std::ranges::transform(renderGraph.shadowPasses, std::back_inserter(shadowMapsSink), [](auto& shadowPass)
     {
         return shadowPass.GetAttachmentView(0u);
     });
-}
 
-auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&
-{
-    auto& renderGraph = m_perFrameRenderGraphs.at(m_frameManager->CurrentFrameContext()->Index());
-    return renderGraph.postProcessImages.at(imageType);
+    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, frameIndex);
 }
 
 void RenderGraph::CommitResourceLayout()
@@ -232,7 +231,7 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_shaderBindingManager, m_gpuAllocator, dimensions, m_maxLights, m_dummyShadowMap.view.get());
+    m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_shaderBindingManager, m_gpuAllocator, dimensions);
 
     for (auto& renderGraph : m_perFrameRenderGraphs)
     {
@@ -301,12 +300,9 @@ PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
                                          ShaderBindingManager* shaderBindingManager,
                                          GpuAllocator* gpuAllocator,
                                          Vector2 dimensions,
-                                         uint32_t maxLights,
-                                         uint32_t index,
-                                         vk::ImageView dummyShadowMap)
+                                         uint32_t index)
     : shadowPasses{},
       litPass{CreateLitPass(device, gpuAllocator, swapchain, shaderBindingManager, index, dimensions)},
-      postProcessImages{{PostProcessImageType::ShadowMap, std::vector<vk::ImageView>(maxLights, dummyShadowMap)}},
       isDirty{false}
 {
 }

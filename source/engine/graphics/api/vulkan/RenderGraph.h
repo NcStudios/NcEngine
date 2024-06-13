@@ -29,6 +29,7 @@ class GpuAllocator;
 class GpuOptions;
 class PerFrameGpuContext;
 class ShaderBindingManager;
+class ShaderStorage;
 class Swapchain;
 
 struct PerFrameRenderGraph
@@ -38,25 +39,21 @@ struct PerFrameRenderGraph
                         ShaderBindingManager* shaderBindingManager,
                         GpuAllocator* gpuAllocator,
                         Vector2 dimensions,
-                        uint32_t maxLights,
-                        uint32_t index,
-                        vk::ImageView dummyShadowMap);
+                        uint32_t index);
 
     std::vector<RenderPass> shadowPasses; // One per light
     RenderPass litPass;
-    std::unordered_map<PostProcessImageType, std::vector<vk::ImageView>> postProcessImages;
     bool isDirty;
 };
 
 class RenderGraph
 {
     public:
-        RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights);
+        RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights);
 
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
         void SinkPostProcessImages();
-        auto GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&;
         auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
         void CommitResourceLayout();
         void IncrementShadowPassCount(bool isOmniDirectional);
@@ -72,6 +69,7 @@ class RenderGraph
         Swapchain* m_swapchain;
         GpuAllocator* m_gpuAllocator;
         ShaderBindingManager* m_shaderBindingManager;
+        ShaderStorage* m_shaderStorage;
 
         Attachment m_dummyShadowMap;
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;

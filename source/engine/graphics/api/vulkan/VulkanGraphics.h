@@ -68,8 +68,8 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<GpuAllocator> m_allocator;
         std::unique_ptr<FrameManager> m_frameManager;
         std::unique_ptr<ShaderBindingManager> m_shaderBindingManager;
-        std::unique_ptr<RenderGraph> m_renderGraph;
         std::unique_ptr<ShaderStorage> m_shaderStorage;
+        std::unique_ptr<RenderGraph> m_renderGraph;
         std::unique_ptr<Imgui> m_imgui;
 
         std::mutex m_resizingMutex;

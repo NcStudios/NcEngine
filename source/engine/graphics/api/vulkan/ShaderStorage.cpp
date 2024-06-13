@@ -62,7 +62,6 @@ namespace nc::graphics::vulkan
 ShaderStorage::ShaderStorage(vk::Device device,
                              GpuAllocator* allocator, 
                              ShaderBindingManager* shaderBindingManager,
-                             RenderGraph* renderGraph,
                              std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                              Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                              Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
@@ -73,7 +72,6 @@ ShaderStorage::ShaderStorage(vk::Device device,
     : m_device{device},
       m_allocator{allocator},
       m_shaderBindingManager{shaderBindingManager},
-      m_renderGraph{renderGraph},
       m_perFrameCabStorage{UniqueCabMap{20, 20}, UniqueCabMap{20, 20}},
       m_staticCabStorage{20, 20},
       m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateCubeMapArrayBuffer)},
@@ -240,19 +238,8 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             );
 
             auto& storageBuffer = storage.at(uid);
-            auto& sampler = storageBuffer->sampler.get();
             auto& views = storageBuffer->views;
             auto& imageInfos = storageBuffer->imageInfos;
-
-            views.clear();
-            imageInfos.clear();
-
-            const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
-            for (auto view : postProcessViews)
-            {
-                views.emplace_back(view);
-                imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
-            }
 
             m_shaderBindingManager->UpdateImage
             (
@@ -269,18 +256,8 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
         {
             OPTICK_CATEGORY("PpiaUpdateAction::Update", Optick::Category::Rendering);
             auto& storageBuffer = storage.at(uid);
-            auto& sampler = storageBuffer->sampler.get();
             auto& views = storageBuffer->views;
             auto& imageInfos = storageBuffer->imageInfos;
-            
-            storageBuffer->Clear();
-
-            const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
-            for (auto view : postProcessViews)
-            {
-                views.emplace_back(view);
-                imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
-            }
 
             m_shaderBindingManager->UpdateImage
             (
@@ -517,4 +494,21 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
         }
     }
 }
+
+void ShaderStorage::SinkPostProcessImages(std::vector<vk::ImageView> postProcessImages, PostProcessImageType imageType, uint32_t frameIndex)
+{
+    auto& storageBuffer =  m_perFramePpiaStorage.at(frameIndex).at(static_cast<uint32_t>(imageType));
+    auto& sampler = storageBuffer->sampler.get();
+    auto& views = storageBuffer->views;
+    auto& imageInfos = storageBuffer->imageInfos;
+    
+    storageBuffer->Clear();
+
+    for (auto view : postProcessImages)
+    {
+        views.emplace_back(view);
+        imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
+    }
+}
+
 } // namespace nc::graphics::vulkan
