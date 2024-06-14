@@ -4,6 +4,7 @@
 #include "ecs/Registry.h"
 #include "graphics/api/vulkan/renderpasses/RenderPass.h"
 #include "graphics/GraphicsConstants.h"
+#include "graphics/PerFrameRenderState.h"
 #include "graphics/PointLight.h"
 #include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 #include "graphics/SpotLight.h"
@@ -22,46 +23,40 @@ struct PpiaUpdateEventData;
 
 namespace vulkan
 {
-struct DescriptorSetLayoutsChanged;
 class Device;
 class FrameManager;
 class GpuAllocator;
 class GpuOptions;
 class PerFrameGpuContext;
 class ShaderBindingManager;
-class ShaderStorage;
+struct ShaderStorage;
 class Swapchain;
 
 struct PerFrameRenderGraph
 {
     PerFrameRenderGraph(const Device* device,
                         Swapchain* swapchain,
-                        ShaderBindingManager* shaderBindingManager,
                         GpuAllocator* gpuAllocator,
                         Vector2 dimensions,
                         uint32_t index);
 
     std::vector<RenderPass> shadowPasses; // One per light
     RenderPass litPass;
-    bool isDirty;
+    PerFrameRenderStateData stateData;
 };
 
 class RenderGraph
 {
     public:
-        RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights);
+        RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights);
 
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent);
         void Resize(const Vector2 &dimensions);
         void SinkPostProcessImages();
         auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
-        void CommitResourceLayout();
-        void IncrementShadowPassCount(bool isOmniDirectional);
-        void DecrementShadowPassCount(bool isOmniDirectional);
-        void ClearShadowPasses() noexcept;
+        void BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t frameIndex);
 
     private:
-        void SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&);
 
         // External dependencies
         FrameManager* m_frameManager;
@@ -74,20 +69,11 @@ class RenderGraph
         Attachment m_dummyShadowMap;
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
 
-        // Signal connections
-        Connection<const DescriptorSetLayoutsChanged&> m_onDescriptorSetsChanged;
-        Connection<PointLight&> m_onCommitOmniLight;
-        Connection<Entity> m_onRemoveOmniLight;
-        Connection<SpotLight&> m_onCommitUniLight;
-        Connection<Entity> m_onRemoveUniLight;
-
         // Screen size
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
 
         // State tracking
-        uint32_t m_omniDirLightCount;
-        uint32_t m_uniDirLightCount;
         uint32_t m_maxLights;
 };
 } // namespace nc

@@ -71,7 +71,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
     return renderPass;
 }
 
-auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager, uint32_t swapchainImageIndex, const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
+auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, uint32_t swapchainImageIndex, const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
 
@@ -112,37 +112,24 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
 
     renderPass.CreateFrameBuffers(imageViews, dimensions);
 
-    // Create all the lit pass pipelines
-    #ifdef NC_EDITOR_ENABLED
-    renderPass.RegisterTechnique<WireframeTechnique>(device, shaderBindingManager);
-    #endif
-
-    renderPass.RegisterTechnique<EnvironmentTechnique>(device, shaderBindingManager);
-    renderPass.RegisterTechnique<PbrTechnique>(device, shaderBindingManager);
-    renderPass.RegisterTechnique<ToonTechnique>(device, shaderBindingManager);
-    renderPass.RegisterTechnique<OutlineTechnique>(device, shaderBindingManager);
-    renderPass.RegisterTechnique<ParticleTechnique>(device, shaderBindingManager);
-    renderPass.RegisterTechnique<UiTechnique>(device, shaderBindingManager);
-
     return renderPass;
 }
 
 auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
                         nc::graphics::vulkan::Swapchain* swapchain,
-                        nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
                         nc::graphics::vulkan::GpuAllocator* gpuAllocator,
                         nc::Vector2 dimensions)
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
     {
-        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, shaderBindingManager, gpuAllocator, dimensions, N))...};
+        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, gpuAllocator, dimensions, N))...};
     }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
 }
 
 namespace nc::graphics::vulkan
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
@@ -150,16 +137,9 @@ RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const D
       m_shaderBindingManager{shaderBindingManager},
       m_shaderStorage{shaderStorage},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
-      m_perFrameRenderGraphs{CreatePerFrameGraphs(device, swapchain, shaderBindingManager, gpuAllocator, dimensions)},
-      m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
-      m_onCommitOmniLight{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount(true);})},
-      m_onRemoveOmniLight{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount(true);})},
-      m_onCommitUniLight{registry->OnCommit<SpotLight>().Connect([this](graphics::SpotLight&){IncrementShadowPassCount(false);})},
-      m_onRemoveUniLight{registry->OnRemove<SpotLight>().Connect([this](Entity){DecrementShadowPassCount(false);})},
+      m_perFrameRenderGraphs{CreatePerFrameGraphs(device, swapchain, gpuAllocator, dimensions)},
       m_dimensions{dimensions},
       m_screenExtent{},
-      m_omniDirLightCount{},
-      m_uniDirLightCount{},
       m_maxLights{maxLights}
 {
 }
@@ -183,26 +163,55 @@ void RenderGraph::SinkPostProcessImages()
     m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, frameIndex);
 }
 
-void RenderGraph::CommitResourceLayout()
+void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t frameIndex)
 {
-    auto& renderGraph = m_perFrameRenderGraphs.at(m_frameManager->CurrentFrameContext()->Index());
-    if (!renderGraph.isDirty)
+    auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
+
+    // If lights have been added or removed we need to add or remove shadow passes (one per light)
+    if (stateData.omniDirLightsCount != renderGraph.stateData.omniDirLightsCount || 
+        stateData.uniDirLightsCount  != renderGraph.stateData.uniDirLightsCount)
     {
-        return;
+        renderGraph.shadowPasses.clear();
+        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
+        {
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
+        }
+
+        // Note: These are currently identical loops but will be split out when the pass details change for omnidirectional shadow maps.
+        for (auto i : std::views::iota(stateData.omniDirLightsCount, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
+        {
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
+        }
     }
 
-    renderGraph.shadowPasses.clear();
-    for (auto i : std::views::iota(0u, m_omniDirLightCount))
+    // All other state data pertains to the lit pass. If any of the comparisons have changed, we'll need to register the appropriate pipelines
+    if (stateData != renderGraph.stateData)
     {
-        renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
+        renderGraph.litPass.ClearTechniques();
     }
 
-    for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
+    #ifdef NC_EDITOR_ENABLED
+    if (stateData.widgetsCount)
+        renderGraph.litPass.RegisterTechnique<WireframeTechnique>(m_device, m_shaderBindingManager);
+    #endif
+
+    if (stateData.useSkybox)
+        renderGraph.litPass.RegisterTechnique<EnvironmentTechnique>(m_device, m_shaderBindingManager);
+
+    if (stateData.meshRenderersCount)
+        renderGraph.litPass.RegisterTechnique<PbrTechnique>(m_device, m_shaderBindingManager);
+
+    if (stateData.toonRenderersCount)
     {
-        renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
+        renderGraph.litPass.RegisterTechnique<ToonTechnique>(m_device, m_shaderBindingManager);
+        renderGraph.litPass.RegisterTechnique<OutlineTechnique>(m_device, m_shaderBindingManager);
     }
 
-    renderGraph.isDirty = false;
+    if (stateData.particlesCount)
+        renderGraph.litPass.RegisterTechnique<ParticleTechnique>(m_device, m_shaderBindingManager);
+
+    renderGraph.litPass.RegisterTechnique<UiTechnique>(m_device, m_shaderBindingManager);
+    renderGraph.stateData = stateData;
 }
 
 void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent)
@@ -231,79 +240,28 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_shaderBindingManager, m_gpuAllocator, dimensions);
+    auto renderStateCaches = std::vector<PerFrameRenderStateData>{};
+    renderStateCaches.reserve(m_perFrameRenderGraphs.size());
 
     for (auto& renderGraph : m_perFrameRenderGraphs)
     {
-        renderGraph.shadowPasses.clear();
-        for (auto i : std::views::iota(0u, m_omniDirLightCount))
-        {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, dimensions, i, true));
-        }
-
-        for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
-        {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, dimensions, i, false));
-        }
-    }
-}
-
-void RenderGraph::IncrementShadowPassCount(bool isOmniDirectional)
-{
-    NC_ASSERT(m_omniDirLightCount + m_uniDirLightCount < m_maxLights, "Tried to add a light source when max lights are registered.");
-
-    if (isOmniDirectional)
-    {
-        m_omniDirLightCount++;
-    }
-    else
-    {
-        m_uniDirLightCount++;
-    }
-    
-    SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
-}
-
-void RenderGraph::ClearShadowPasses() noexcept
-{
-    m_omniDirLightCount = 0u;
-    m_uniDirLightCount = 0u;
-    SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
-}
-
-void RenderGraph::DecrementShadowPassCount(bool isOmniDirectional)
-{
-    if (isOmniDirectional)
-    {
-        NC_ASSERT(m_omniDirLightCount > 0, "Tried to remove a light source when none are registered.");
-        m_omniDirLightCount--;
-    }
-    else
-    {
-        NC_ASSERT(m_uniDirLightCount > 0, "Tried to remove a light source when none are registered.");
-        m_uniDirLightCount--;
+        renderStateCaches.push_back(renderGraph.stateData);
     }
 
-    SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
-}
-
-void RenderGraph::SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&)
-{
-    for (auto& renderGraph : m_perFrameRenderGraphs)
+    m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions);
+    for (auto i  : std::views::iota(0u, renderStateCaches.size()))
     {
-        renderGraph.isDirty = true;
+        BuildRenderGraph(renderStateCaches.at(i), i);
     }
 }
 
 PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
                                          Swapchain* swapchain,
-                                         ShaderBindingManager* shaderBindingManager,
                                          GpuAllocator* gpuAllocator,
                                          Vector2 dimensions,
                                          uint32_t index)
     : shadowPasses{},
-      litPass{CreateLitPass(device, gpuAllocator, swapchain, shaderBindingManager, index, dimensions)},
-      isDirty{false}
+      litPass{CreateLitPass(device, gpuAllocator, swapchain, index, dimensions)}
 {
 }
 } // namespace nc::graphics::vulkan

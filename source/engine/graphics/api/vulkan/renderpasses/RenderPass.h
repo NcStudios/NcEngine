@@ -39,9 +39,9 @@ class RenderPass
         void RegisterTechnique(const Device* device, ShaderBindingManager* shaderBindingManager);
         void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
 
-        template <std::derived_from<ITechnique> T>
-        void UnregisterTechnique();
         void UnregisterShadowMappingTechnique();
+
+        void ClearTechniques() { m_litTechniques.clear(); m_shadowMappingTechnique.reset(); }
 
     private:
         vk::Device m_device;
@@ -57,22 +57,8 @@ class RenderPass
 template <std::derived_from<ITechnique> T>
 void RenderPass::RegisterTechnique(const Device* device, ShaderBindingManager* shaderBindingManager)
 {
-    UnregisterTechnique<T>();
     m_litTechniques.push_back(std::make_unique<T>(*device, shaderBindingManager, &m_renderPass.get()));
 }
 
-template <std::derived_from<ITechnique> T>
-void RenderPass::UnregisterTechnique()
-{
-    const auto &techniqueType = typeid(T);
-    auto techniquePos = std::ranges::find_if(m_litTechniques, [&techniqueType](const auto &foundTechnique)
-                                             { return (typeid(foundTechnique) == techniqueType); });
-
-    if (techniquePos != m_litTechniques.end())
-    {
-        *techniquePos = std::move(m_litTechniques.back());
-        m_litTechniques.pop_back();
-    }
-}
 } // namespace nc::graphics
 } // namespace vulkan

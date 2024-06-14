@@ -22,6 +22,7 @@ class NcAsset;
 namespace graphics
 {
 struct PerFrameRenderState;
+struct PerFrameRenderStateData;
 struct ShaderResourceBus;
 
 namespace vulkan
@@ -44,12 +45,11 @@ class VulkanGraphics : public IGraphics
                        const config::MemorySettings& memorySettings,
                        asset::NcAsset* assetModule,
                        ShaderResourceBus& shaderResourceBus,
-                       uint32_t apiVersion, Registry* registry, 
-                       GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);
+                       uint32_t apiVersion, GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);
 
         ~VulkanGraphics() noexcept;
 
-        void CommitResourceLayout() override;
+        void BuildRenderGraph(PerFrameRenderStateData stateData) override;
         auto BeginFrame() -> bool override;
         auto PrepareFrame() -> bool override;
         auto CurrentFrameIndex() -> uint32_t override;

@@ -2,6 +2,7 @@
 #include "asset/NcAsset.h"
 #include "config/Config.h"
 #include "ecs/Registry.h"
+#include "graphics/PerFrameRenderState.h"
 #include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/Imgui.h"
@@ -32,8 +33,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::MemorySettings& memorySettings,
                                asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
-                               uint32_t apiVersion, Registry* registry,
-                               GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent)
+                               uint32_t apiVersion, GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent)
     : m_instance{std::make_unique<Instance>(projectSettings.projectName, 1, apiVersion, graphicsSettings.useValidationLayers)},
       m_surface{m_instance->CreateSurface(window)},
       m_device{Device::Create(*m_instance, m_surface.get(), g_requiredDeviceExtensions)},
@@ -44,7 +44,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderStorage{std::make_unique<ShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderBindingManager.get(), m_frameManager->CommandBuffers(),
                                                       shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.meshArrayBufferChannel, shaderResourceBus.ppImageArrayBufferChannel,
                                                       shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
-      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), registry, m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), dimensions, memorySettings.maxPointLights + memorySettings.maxSpotLights)},
+      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), dimensions, memorySettings.maxPointLights + memorySettings.maxSpotLights)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
@@ -93,9 +93,6 @@ void VulkanGraphics::OnResize(const Vector2& dimensions, bool isMinimized)
 
 void VulkanGraphics::Clear() noexcept
 {
-    m_device->VkDevice().waitIdle();
-    m_renderGraph->ClearShadowPasses();
-    m_device->VkDevice().waitIdle();
 }
 
 bool VulkanGraphics::PrepareFrame()
@@ -121,7 +118,7 @@ bool VulkanGraphics::BeginFrame()
     return true;
 }
 
-void VulkanGraphics::CommitResourceLayout()
+void VulkanGraphics::BuildRenderGraph(PerFrameRenderStateData stateData)
 {
     if (m_isMinimized)
     {
@@ -134,7 +131,7 @@ void VulkanGraphics::CommitResourceLayout()
         m_resourceLayoutInitialized = true;
     }
 
-    m_renderGraph->CommitResourceLayout();
+    m_renderGraph->BuildRenderGraph(stateData, CurrentFrameIndex());
     m_renderGraph->SinkPostProcessImages();
 }
 
