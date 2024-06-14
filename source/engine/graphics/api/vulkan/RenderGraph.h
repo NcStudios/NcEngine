@@ -37,8 +37,7 @@ struct PerFrameRenderGraph
     PerFrameRenderGraph(const Device* device,
                         Swapchain* swapchain,
                         GpuAllocator* gpuAllocator,
-                        Vector2 dimensions,
-                        uint32_t index);
+                        Vector2 dimensions);
 
     std::vector<RenderPass> shadowPasses; // One per light
     RenderPass litPass;
@@ -50,7 +49,7 @@ class RenderGraph
     public:
         RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights);
 
-        void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent);
+        void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex);
         void Resize(const Vector2 &dimensions);
         void SinkPostProcessImages();
         auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
@@ -66,14 +65,11 @@ class RenderGraph
         ShaderBindingManager* m_shaderBindingManager;
         ShaderStorage* m_shaderStorage;
 
+        // Internal data
         Attachment m_dummyShadowMap;
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
-
-        // Screen size
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
-
-        // State tracking
         uint32_t m_maxLights;
 };
 } // namespace nc

@@ -71,7 +71,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
     return renderPass;
 }
 
-auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, uint32_t swapchainImageIndex, const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
+auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
 
@@ -99,18 +99,21 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
-    auto colorResolveView = renderPass.GetAttachmentView(1);
-    auto depthImageView   = renderPass.GetAttachmentView(0);
-    auto colorImageView   = swapchain->GetColorImageViews().at(swapchainImageIndex).get();
+    auto colorResolveView    = renderPass.GetAttachmentView(1);
+    auto depthImageView      = renderPass.GetAttachmentView(0);
+    auto& swapchainImageViews = swapchain->GetColorImageViews();
 
-    auto imageViews = std::array<vk::ImageView, 3>
+    for (auto& swapchainImageView : swapchainImageViews)
     {
-        colorResolveView, // Color Resolve View
-        depthImageView, // Depth View
-        colorImageView // Swapchain Image at index <swapchainImageIndex>
-    };
+        auto imageViews = std::array<vk::ImageView, 3>
+        {
+            colorResolveView, // Color Resolve View
+            depthImageView, // Depth View
+            swapchainImageView.get() // Swapchain Image at index <swapchainImageIndex>
+        };
 
-    renderPass.CreateFrameBuffers(imageViews, dimensions);
+        renderPass.CreateFrameBuffers(imageViews, dimensions);
+    }
 
     return renderPass;
 }
@@ -122,7 +125,7 @@ auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
     {
-        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, gpuAllocator, dimensions, N))...};
+        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, gpuAllocator, dimensions))...};
     }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
 }
@@ -188,33 +191,33 @@ void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t f
     if (stateData != renderGraph.stateData)
     {
         renderGraph.litPass.ClearTechniques();
+
+        #ifdef NC_EDITOR_ENABLED
+        if (stateData.widgetsCount)
+            renderGraph.litPass.RegisterTechnique<WireframeTechnique>(m_device, m_shaderBindingManager);
+        #endif
+
+        if (stateData.useSkybox)
+            renderGraph.litPass.RegisterTechnique<EnvironmentTechnique>(m_device, m_shaderBindingManager);
+
+        if (stateData.meshRenderersCount)
+            renderGraph.litPass.RegisterTechnique<PbrTechnique>(m_device, m_shaderBindingManager);
+
+        if (stateData.toonRenderersCount)
+        {
+            renderGraph.litPass.RegisterTechnique<ToonTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterTechnique<OutlineTechnique>(m_device, m_shaderBindingManager);
+        }
+
+        if (stateData.particlesCount)
+            renderGraph.litPass.RegisterTechnique<ParticleTechnique>(m_device, m_shaderBindingManager);
+
+        renderGraph.litPass.RegisterTechnique<UiTechnique>(m_device, m_shaderBindingManager);
     }
-
-    #ifdef NC_EDITOR_ENABLED
-    if (stateData.widgetsCount)
-        renderGraph.litPass.RegisterTechnique<WireframeTechnique>(m_device, m_shaderBindingManager);
-    #endif
-
-    if (stateData.useSkybox)
-        renderGraph.litPass.RegisterTechnique<EnvironmentTechnique>(m_device, m_shaderBindingManager);
-
-    if (stateData.meshRenderersCount)
-        renderGraph.litPass.RegisterTechnique<PbrTechnique>(m_device, m_shaderBindingManager);
-
-    if (stateData.toonRenderersCount)
-    {
-        renderGraph.litPass.RegisterTechnique<ToonTechnique>(m_device, m_shaderBindingManager);
-        renderGraph.litPass.RegisterTechnique<OutlineTechnique>(m_device, m_shaderBindingManager);
-    }
-
-    if (stateData.particlesCount)
-        renderGraph.litPass.RegisterTechnique<ParticleTechnique>(m_device, m_shaderBindingManager);
-
-    renderGraph.litPass.RegisterTechnique<UiTechnique>(m_device, m_shaderBindingManager);
     renderGraph.stateData = stateData;
 }
 
-void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent)
+void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex)
 {
     OPTICK_CATEGORY("RenderGraph::RecordDrawCallsOnBuffer", Optick::Category::Rendering);
 
@@ -233,7 +236,7 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
-    renderGraph.litPass.Begin(cmd);
+    renderGraph.litPass.Begin(cmd, swapchainImageIndex);
     renderGraph.litPass.Execute(cmd, frameData, frameIndex);
     renderGraph.litPass.End(cmd);
 }
@@ -258,10 +261,9 @@ void RenderGraph::Resize(const Vector2& dimensions)
 PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
                                          Swapchain* swapchain,
                                          GpuAllocator* gpuAllocator,
-                                         Vector2 dimensions,
-                                         uint32_t index)
+                                         Vector2 dimensions)
     : shadowPasses{},
-      litPass{CreateLitPass(device, gpuAllocator, swapchain, index, dimensions)}
+      litPass{CreateLitPass(device, gpuAllocator, swapchain, dimensions)}
 {
 }
 } // namespace nc::graphics::vulkan
