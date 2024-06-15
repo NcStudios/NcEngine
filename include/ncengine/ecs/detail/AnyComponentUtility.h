@@ -4,6 +4,11 @@
 
 #include <string_view>
 
+namespace nc::ui::editor
+{
+struct EditorContext;
+} // namespace nc::ui::editor
+
 namespace nc::detail
 {
 class AnyImplStorage;
@@ -16,7 +21,7 @@ struct AnyImplBase
     virtual auto Id() const noexcept -> size_t = 0;
     virtual auto Name() const noexcept -> std::string_view = 0;
     virtual auto HasDrawUI() const noexcept -> bool = 0;
-    virtual void DrawUI() = 0;
+    virtual void DrawUI(Entity self, ui::editor::EditorContext& ctx) = 0;
 };
 
 template<PooledComponent T>
@@ -31,7 +36,7 @@ class AnyImplConcrete : public AnyImplBase
         auto Id() const noexcept -> size_t override;
         auto Name() const noexcept -> std::string_view override;
         auto HasDrawUI() const noexcept -> bool override;
-        void DrawUI() override;
+        void DrawUI(Entity self, ui::editor::EditorContext& ctx) override;
 
     private:
         T* m_instance;
@@ -120,9 +125,9 @@ auto AnyImplConcrete<T>::HasDrawUI() const noexcept -> bool
 }
 
 template<PooledComponent T>
-void AnyImplConcrete<T>::DrawUI()
+void AnyImplConcrete<T>::DrawUI(Entity self, ui::editor::EditorContext& ctx)
 {
-    m_handler->drawUI(*m_instance);
+    m_handler->drawUI(*m_instance, self, ctx);
 }
 
 template<PooledComponent T>

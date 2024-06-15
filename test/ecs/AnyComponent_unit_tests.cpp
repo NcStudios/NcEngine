@@ -1,6 +1,13 @@
 #include "ncengine/ecs/AnyComponent.h"
 #include "gtest/gtest.h"
 
+namespace nc::ui::editor
+{
+struct EditorContext{};
+};
+
+auto g_mockEditorCtx = nc::ui::editor::EditorContext{};
+
 struct TestComponent{};
 struct AlternativeComponent{};
 
@@ -154,7 +161,7 @@ TEST(AnyComponentTest, Name_nameSet_retrievesValue)
 TEST(AnyComponentTest, HasDrawUI_funcSet_returnsTrue)
 {
     auto component = TestComponent{};
-    auto handler = nc::ComponentHandler<TestComponent>{ .drawUI = [](TestComponent&){} };
+    auto handler = nc::ComponentHandler<TestComponent>{ .drawUI = [](TestComponent&, nc::Entity, nc::ui::editor::EditorContext&){} };
     auto uut = nc::AnyComponent{&component, &handler};
     EXPECT_TRUE(uut.HasDrawUI());
 }
@@ -173,12 +180,12 @@ TEST(AnyComponentTest, DrawUI_validCall_dispatchesToHandler)
     auto component = TestComponent{};
     auto handler = nc::ComponentHandler<TestComponent>
     {
-        .drawUI = [&numCalls](TestComponent&) { ++numCalls; }
+        .drawUI = [&numCalls](TestComponent&, nc::Entity, nc::ui::editor::EditorContext&) { ++numCalls; }
     };
 
     auto uut = nc::AnyComponent{&component, &handler};
-    uut.DrawUI();
-    uut.DrawUI();
+    uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx);
+    uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx);
     EXPECT_EQ(2, numCalls);
 }
 
@@ -188,11 +195,11 @@ TEST(AnyComponentTest, DrawUI_nullFunc_succeeds)
     auto handler = nc::ComponentHandler<TestComponent>{ .drawUI = nullptr };
     auto uut = nc::AnyComponent{&component, &handler};
     EXPECT_FALSE(uut.HasDrawUI());
-    EXPECT_NO_THROW(uut.DrawUI());
+    EXPECT_NO_THROW(uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx));
 }
 
 TEST(AnyComponentTest, DrawUI_nullObject_throws)
 {
     auto uut = nc::AnyComponent{};
-    EXPECT_THROW(uut.DrawUI(), nc::NcError);
+    EXPECT_THROW(uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx), nc::NcError);
 }

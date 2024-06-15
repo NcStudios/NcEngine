@@ -40,6 +40,8 @@ target_compile_options(AnyComponent_unit_test
 
 target_link_libraries(AnyComponent_unit_test
     PRIVATE
+        NcAsset
+        NcMath
         NcUtility
         gtest_main
 )

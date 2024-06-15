@@ -5,6 +5,6 @@ namespace nc
 {
 void RegisterAudioTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
-    Register<audio::AudioSource>(registry, maxEntities, AudioSourceId, "AudioSource", editor::AudioSourceUIWidget, CreateAudioSource, SerializeAudioSource, DeserializeAudioSource);
+    Register<audio::AudioSource>(registry, maxEntities, AudioSourceId, "AudioSource", ui::editor::AudioSourceUIWidget, CreateAudioSource, SerializeAudioSource, DeserializeAudioSource);
 }
 } // namespace nc

@@ -2,26 +2,28 @@
 
 #include "ncengine/NcFwd.h"
 
-namespace nc::editor
+namespace nc::ui::editor
 {
-void CollisionLogicUIWidget(CollisionLogic& logic);
-void FixedLogicUIWidget(FixedLogic& logic);
-void FrameLogicUIWidget(FrameLogic& logic);
-void TagUIWidget(Tag& tag);
-void TransformUIWidget(Transform& transform);
-void AudioSourceUIWidget(audio::AudioSource& audioSource);
-void MeshRendererUIWidget(graphics::MeshRenderer& meshRenderer);
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& particleEmitter);
-void PointLightUIWidget(graphics::PointLight& pointLight);
-void SpotLightUIWidget(graphics::SpotLight& spotLight);
-void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator& skeletalAnimator);
-void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer);
-void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher);
-void ColliderUIWidget(physics::Collider& collider);
-void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider);
-void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp);
-void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody);
-void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial);
-void PositionClampUIWidget(physics::PositionClamp& positionClamp);
-void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction);
-} // namespace nc::editor
+struct EditorContext;
+
+void CollisionLogicUIWidget(CollisionLogic& logic, Entity, EditorContext&);
+void FixedLogicUIWidget(FixedLogic& logic, Entity, EditorContext&);
+void FrameLogicUIWidget(FrameLogic& logic, Entity, EditorContext&);
+void TagUIWidget(Tag& tag, Entity, EditorContext&);
+void TransformUIWidget(Transform& transform, Entity, EditorContext&);
+void AudioSourceUIWidget(audio::AudioSource& audioSource, Entity, EditorContext&);
+void MeshRendererUIWidget(graphics::MeshRenderer& meshRenderer, Entity, EditorContext&);
+void ParticleEmitterUIWidget(graphics::ParticleEmitter& particleEmitter, Entity, EditorContext&);
+void PointLightUIWidget(graphics::PointLight& pointLight, Entity, EditorContext&);
+void SpotLightUIWidget(graphics::SpotLight& spotLight, Entity, EditorContext&);
+void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator& skeletalAnimator, Entity, EditorContext&);
+void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer, Entity, EditorContext&);
+void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher, Entity, EditorContext&);
+void ColliderUIWidget(physics::Collider& collider, Entity, EditorContext&);
+void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, Entity, EditorContext&);
+void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, Entity, EditorContext&);
+void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, Entity, EditorContext&);
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, Entity, EditorContext&);
+void PositionClampUIWidget(physics::PositionClamp& positionClamp, Entity, EditorContext&);
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, Entity, EditorContext&);
+} // namespace nc::ui::editor

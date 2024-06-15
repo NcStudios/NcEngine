@@ -229,26 +229,26 @@ constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHa
 } // namespace toon_renderer_ext
 } // anonymous namespace
 
-namespace nc::editor
+namespace nc::ui::editor
 {
-void CollisionLogicUIWidget(CollisionLogic&)
-{
-}
-
-void FixedLogicUIWidget(FixedLogic&)
+void CollisionLogicUIWidget(CollisionLogic&, Entity, EditorContext&)
 {
 }
 
-void FrameLogicUIWidget(FrameLogic&)
+void FixedLogicUIWidget(FixedLogic&, Entity, EditorContext&)
 {
 }
 
-void TagUIWidget(Tag& tag)
+void FrameLogicUIWidget(FrameLogic&, Entity, EditorContext&)
+{
+}
+
+void TagUIWidget(Tag& tag, Entity, EditorContext&)
 {
     ui::InputText(tag.value, "tag");
 }
 
-void TransformUIWidget(Transform& transform)
+void TransformUIWidget(Transform& transform, Entity, EditorContext&)
 {
     auto scl_v = DirectX::XMVECTOR{};
     auto rot_v = DirectX::XMVECTOR{};
@@ -276,7 +276,7 @@ void TransformUIWidget(Transform& transform)
     if (ui::InputScale(scl, "scale")) transform.SetScale(scl);
 }
 
-void AudioSourceUIWidget(audio::AudioSource& audioSource)
+void AudioSourceUIWidget(audio::AudioSource& audioSource, Entity, EditorContext&)
 {
     ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
@@ -307,7 +307,7 @@ void AudioSourceUIWidget(audio::AudioSource& audioSource)
         audioSource.AddClip(asset::DefaultAudioClip);
 }
 
-void MeshRendererUIWidget(graphics::MeshRenderer& renderer)
+void MeshRendererUIWidget(graphics::MeshRenderer& renderer, Entity, EditorContext&)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
@@ -318,7 +318,7 @@ void MeshRendererUIWidget(graphics::MeshRenderer& renderer)
     ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
 }
 
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
+void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, Entity, EditorContext&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
@@ -357,7 +357,7 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
     ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
 }
 
-void PointLightUIWidget(graphics::PointLight& light)
+void PointLightUIWidget(graphics::PointLight& light, Entity, EditorContext&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
@@ -367,7 +367,7 @@ void PointLightUIWidget(graphics::PointLight& light)
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
-void SpotLightUIWidget(graphics::SpotLight& light)
+void SpotLightUIWidget(graphics::SpotLight& light, Entity, EditorContext&)
 {
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
@@ -378,11 +378,11 @@ void SpotLightUIWidget(graphics::SpotLight& light)
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);
 }
 
-void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)
+void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, Entity, EditorContext&)
 {
 }
 
-void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
+void ToonRendererUIWidget(graphics::ToonRenderer& renderer, Entity, EditorContext&)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
@@ -393,11 +393,11 @@ void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
     ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
 }
 
-void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
+void NetworkDispatcherUIWidget(net::NetworkDispatcher&, Entity, EditorContext&)
 {
 }
 
-void ColliderUIWidget(physics::Collider& collider)
+void ColliderUIWidget(physics::Collider& collider, Entity, EditorContext&)
 {
     using namespace std::string_view_literals;
     constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
@@ -414,13 +414,13 @@ void ColliderUIWidget(physics::Collider& collider)
     ui::PropertyWidget(collider_ext::triggerProp, collider, &ui::Checkbox);
 }
 
-void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
+void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, Entity, EditorContext&)
 {
     /** @todo #454 Allow updating asset. */
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 
-void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp)
+void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, Entity, EditorContext&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "OrientationClamp");
     ui::InputVector3(orientationClamp.targetOrientation, "targetOrientation", 0.1f, -1.0f, 1.0f);
@@ -428,7 +428,7 @@ void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp)
     ui::DragFloat(orientationClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
 }
 
-void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
+void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, Entity, EditorContext&)
 {
     constexpr auto largeStep = 0.1f;
     constexpr auto smallStep = 0.01f;
@@ -443,13 +443,13 @@ void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
     ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
 }
 
-void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial)
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, Entity, EditorContext&)
 {
     ui::DragFloat(physicsMaterial.friction, "friction", 0.01f, 0.0f, 1.0f);
     ui::DragFloat(physicsMaterial.restitution, "restitution", 0.01f, 0.0f, 1.0f);
 }
 
-void PositionClampUIWidget(physics::PositionClamp& positionClamp)
+void PositionClampUIWidget(physics::PositionClamp& positionClamp, Entity, EditorContext&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "PositionClamp");
     ui::InputVector3(positionClamp.targetPosition, "targetPosition", 0.1f, -1000.0f, 1000.0f);
@@ -457,11 +457,11 @@ void PositionClampUIWidget(physics::PositionClamp& positionClamp)
     ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
 }
 
-void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction)
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, Entity, EditorContext&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "VelocityRestriction");
     ui::InputVector3(velocityRestriction.linearFreedom, "linearFreedom", 0.1f, 0.0f, 1.0f);
     ui::InputVector3(velocityRestriction.angularFreedom, "angularFreedom", 0.1f, 0.0f, 1.0f);
     ui::Checkbox(velocityRestriction.worldSpace, "worldSpace");
 }
-} // namespace nc::editor
+} // namespace nc::ui::editor
