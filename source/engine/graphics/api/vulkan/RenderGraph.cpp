@@ -190,29 +190,29 @@ void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t f
     // All other state data pertains to the lit pass. If any of the comparisons have changed, we'll need to register the appropriate pipelines
     if (stateData != renderGraph.stateData)
     {
-        renderGraph.litPass.ClearTechniques();
+        renderGraph.litPass.UnregisterPipelines();
 
         #ifdef NC_EDITOR_ENABLED
         if (stateData.widgetsCount)
-            renderGraph.litPass.RegisterTechnique<WireframeTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<WireframeTechnique>(m_device, m_shaderBindingManager);
         #endif
 
         if (stateData.useSkybox)
-            renderGraph.litPass.RegisterTechnique<EnvironmentTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<EnvironmentTechnique>(m_device, m_shaderBindingManager);
 
         if (stateData.meshRenderersCount)
-            renderGraph.litPass.RegisterTechnique<PbrTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<PbrTechnique>(m_device, m_shaderBindingManager);
 
         if (stateData.toonRenderersCount)
         {
-            renderGraph.litPass.RegisterTechnique<ToonTechnique>(m_device, m_shaderBindingManager);
-            renderGraph.litPass.RegisterTechnique<OutlineTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<ToonTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<OutlineTechnique>(m_device, m_shaderBindingManager);
         }
 
         if (stateData.particlesCount)
-            renderGraph.litPass.RegisterTechnique<ParticleTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<ParticleTechnique>(m_device, m_shaderBindingManager);
 
-        renderGraph.litPass.RegisterTechnique<UiTechnique>(m_device, m_shaderBindingManager);
+        renderGraph.litPass.RegisterPipeline<UiTechnique>(m_device, m_shaderBindingManager);
     }
     renderGraph.stateData = stateData;
 }

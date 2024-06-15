@@ -85,6 +85,7 @@ RenderPass::RenderPass(vk::Device device,
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
+      m_litPipelines{},
       m_attachments{std::move(attachments)}
 {
 }
@@ -97,6 +98,14 @@ void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBinding
 void RenderPass::UnregisterShadowMappingTechnique()
 {
     m_shadowMappingTechnique.reset();
+}
+
+void RenderPass::UnregisterPipelines()
+{
+    for (auto& [uid, pipeline] : m_litPipelines)
+    {
+        pipeline.isActive = false;
+    }
 }
 
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
@@ -130,13 +139,13 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
         }
     }
 
-    for (const auto &technique : m_litTechniques)
+    for (const auto& [uid, pipeline] : m_litPipelines)
     {
-        if (!technique->CanBind(frameData)) continue;
-        technique->Bind(frameIndex, cmd);
-
-        if (!technique->CanRecord(frameData)) continue;
-        technique->Record(cmd, frameData);
+        if (pipeline.isActive)
+        {
+            pipeline.pipeline->Bind(frameIndex, cmd);
+            pipeline.pipeline->Record(cmd, frameData);
+        }
     }
 }
 
