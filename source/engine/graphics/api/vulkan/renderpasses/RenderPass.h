@@ -21,6 +21,7 @@ class ShaderBindingManager;
 
 struct Pipeline
 {
+    size_t uid;
     std::unique_ptr<ITechnique> pipeline;
     bool isActive;
 };
@@ -59,7 +60,7 @@ class RenderPass
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;
         ClearValueFlags_t m_clearFlags;
-        std::unordered_map<size_t, Pipeline> m_litPipelines;
+        std::vector<Pipeline> m_litPipelines;
         std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
@@ -71,9 +72,14 @@ void RenderPass::UnregisterPipeline()
     const auto& techniqueType = typeid(T);
     const auto uid = techniqueType.hash_code();
 
-    if (m_litPipelines.contains(uid))
+    auto pos = std::ranges::find_if(m_litPipelines, [uid](auto& pipeline)
     {
-        m_litPipelines.at(uid).isActive = false;
+        return pipeline.uid == uid;
+    });
+
+    if (pos != m_litPipelines.end())
+    {
+        pos->isActive = false;
     }
 }
 
@@ -83,19 +89,24 @@ void RenderPass::RegisterPipeline(const Device* device, ShaderBindingManager* sh
     const auto& techniqueType = typeid(T);
     auto uid = techniqueType.hash_code();
 
-    if (!m_litPipelines.contains(uid))
+    auto pos = std::ranges::find_if(m_litPipelines, [uid](Pipeline& pipeline)
+    {
+        return pipeline.uid == uid;
+    });
+
+    if (pos == m_litPipelines.end())
     {
         auto pipeline = Pipeline
         {
+            uid,
             std::make_unique<T>(*device, shaderBindingManager, &m_renderPass.get()),
             true
         };
-        m_litPipelines.emplace(uid, std::move(pipeline));
+        m_litPipelines.push_back(std::move(pipeline));
         return;
     }
 
-    m_litPipelines.at(uid).isActive = true;
-
+    pos->isActive = true;
 }
 } // namespace nc::graphics
 } // namespace vulkan

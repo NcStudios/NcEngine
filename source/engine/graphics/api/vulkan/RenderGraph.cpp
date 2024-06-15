@@ -188,33 +188,34 @@ void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t f
     }
 
     // All other state data pertains to the lit pass. If any of the comparisons have changed, we'll need to register the appropriate pipelines
-    if (stateData != renderGraph.stateData)
+    if (stateData != renderGraph.stateData || !renderGraph.isInitialized)
     {
         renderGraph.litPass.UnregisterPipelines();
 
         #ifdef NC_EDITOR_ENABLED
-        if (stateData.widgetsCount)
+        if (!renderGraph.isInitialized || stateData.widgetsCount)
             renderGraph.litPass.RegisterPipeline<WireframeTechnique>(m_device, m_shaderBindingManager);
         #endif
 
-        if (stateData.useSkybox)
+        if (!renderGraph.isInitialized || stateData.useSkybox)
             renderGraph.litPass.RegisterPipeline<EnvironmentTechnique>(m_device, m_shaderBindingManager);
 
-        if (stateData.meshRenderersCount)
+        if (!renderGraph.isInitialized || stateData.meshRenderersCount)
             renderGraph.litPass.RegisterPipeline<PbrTechnique>(m_device, m_shaderBindingManager);
 
-        if (stateData.toonRenderersCount)
+        if (!renderGraph.isInitialized || stateData.toonRenderersCount)
         {
             renderGraph.litPass.RegisterPipeline<ToonTechnique>(m_device, m_shaderBindingManager);
             renderGraph.litPass.RegisterPipeline<OutlineTechnique>(m_device, m_shaderBindingManager);
         }
 
-        if (stateData.particlesCount)
+        if (!renderGraph.isInitialized || stateData.particlesCount)
             renderGraph.litPass.RegisterPipeline<ParticleTechnique>(m_device, m_shaderBindingManager);
 
         renderGraph.litPass.RegisterPipeline<UiTechnique>(m_device, m_shaderBindingManager);
     }
     renderGraph.stateData = stateData;
+    renderGraph.isInitialized = true;
 }
 
 void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex)
@@ -243,6 +244,7 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
+    Clear();
     auto renderStateCaches = std::vector<PerFrameRenderStateData>{};
     renderStateCaches.reserve(m_perFrameRenderGraphs.size());
 
@@ -258,12 +260,22 @@ void RenderGraph::Resize(const Vector2& dimensions)
     }
 }
 
+void RenderGraph::Clear()
+{
+    for (auto& renderGraph : m_perFrameRenderGraphs)
+    {
+        renderGraph.litPass.UnregisterPipelines();
+        renderGraph.isInitialized = false;
+    }
+}
+
 PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
                                          Swapchain* swapchain,
                                          GpuAllocator* gpuAllocator,
                                          Vector2 dimensions)
     : shadowPasses{},
-      litPass{CreateLitPass(device, gpuAllocator, swapchain, dimensions)}
+      litPass{CreateLitPass(device, gpuAllocator, swapchain, dimensions)},
+      isInitialized{false}
 {
 }
 } // namespace nc::graphics::vulkan

@@ -87,12 +87,19 @@ void VulkanGraphics::Resize(const Vector2& dimensions)
 void VulkanGraphics::OnResize(const Vector2& dimensions, bool isMinimized)
 {
     m_dimensions = dimensions;
+    if (m_isMinimized == true && isMinimized == false)
+    {
+        m_isMinimized = false;
+        return;
+    }
     m_isMinimized = isMinimized;
     Resize(m_dimensions);
 }
 
 void VulkanGraphics::Clear() noexcept
 {
+    m_device->VkDevice().waitIdle();
+    m_renderGraph->Clear();
 }
 
 bool VulkanGraphics::PrepareFrame()

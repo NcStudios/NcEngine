@@ -102,7 +102,7 @@ void RenderPass::UnregisterShadowMappingTechnique()
 
 void RenderPass::UnregisterPipelines()
 {
-    for (auto& [uid, pipeline] : m_litPipelines)
+    for (auto& pipeline : m_litPipelines)
     {
         pipeline.isActive = false;
     }
@@ -139,7 +139,7 @@ void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &fram
         }
     }
 
-    for (const auto& [uid, pipeline] : m_litPipelines)
+    for (const auto& pipeline : m_litPipelines)
     {
         if (pipeline.isActive)
         {

@@ -42,6 +42,7 @@ struct PerFrameRenderGraph
     std::vector<RenderPass> shadowPasses; // One per light
     RenderPass litPass;
     PerFrameRenderStateData stateData;
+    bool isInitialized;
 };
 
 class RenderGraph
@@ -51,6 +52,7 @@ class RenderGraph
 
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex);
         void Resize(const Vector2 &dimensions);
+        void Clear();
         void SinkPostProcessImages();
         auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
         void BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t frameIndex);
