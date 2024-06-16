@@ -16,69 +16,94 @@ namespace vulkan
 class Device;
 class ShaderBindingManager;
 
+struct Pipeline
+{
+    size_t uid;
+    std::unique_ptr<ITechnique> pipeline;
+    bool isActive;
+};
+
 class RenderPass
 {
     public:
         RenderPass(vk::Device device,
-                   std::string uid,
                    std::span<const AttachmentSlot> attachmentSlots,
                    std::span<const Subpass> subpasses,
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
 
-        void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex);
-        void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const;
-        void End(vk::CommandBuffer *cmd);
+        void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
+        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, uint32_t frameIndex) const;
+        void End(vk::CommandBuffer* cmd);
 
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
-        auto GetUid() const -> std::string;
         auto GetVkPass() const -> vk::RenderPass;
 
-        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
+        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions);
 
         template <std::derived_from<ITechnique> T>
-        void RegisterTechnique(const Device& device, ShaderBindingManager *shaderBindingManager);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
-
+        void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);
+        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
+        
         template <std::derived_from<ITechnique> T>
-        void UnregisterTechnique();
+        void UnregisterPipeline();
         void UnregisterShadowMappingTechnique();
 
-        void ClearTechniques() { m_litTechniques.clear(); m_shadowMappingTechniques.clear(); }
+        void UnregisterPipelines();
 
     private:
-        auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;
         vk::Device m_device;
-        std::string m_uid;
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;
         ClearValueFlags_t m_clearFlags;
-        std::vector<std::unique_ptr<ITechnique>> m_litTechniques;
-        std::vector<std::unique_ptr<ShadowMappingTechnique>> m_shadowMappingTechniques;
+        std::vector<Pipeline> m_litPipelines;
+        std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
-        std::vector<FrameBuffer> m_frameBuffers;
+        std::vector<vk::UniqueFramebuffer> m_frameBuffers;
 };
 
 template <std::derived_from<ITechnique> T>
-void RenderPass::RegisterTechnique(const Device& device, ShaderBindingManager* shaderBindingManager)
+void RenderPass::UnregisterPipeline()
 {
-    UnregisterTechnique<T>();
-    m_litTechniques.push_back(std::make_unique<T>(device, shaderBindingManager, &m_renderPass.get()));
+    const auto& techniqueType = typeid(T);
+    const auto uid = techniqueType.hash_code();
+
+    auto pos = std::ranges::find_if(m_litPipelines, [uid](auto& pipeline)
+    {
+        return pipeline.uid == uid;
+    });
+
+    if (pos != m_litPipelines.end())
+    {
+        pos->isActive = false;
+    }
 }
 
 template <std::derived_from<ITechnique> T>
-void RenderPass::UnregisterTechnique()
+void RenderPass::RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager)
 {
-    const auto &techniqueType = typeid(T);
-    auto techniquePos = std::ranges::find_if(m_litTechniques, [&techniqueType](const auto &foundTechnique)
-                                             { return (typeid(foundTechnique) == techniqueType); });
+    const auto& techniqueType = typeid(T);
+    auto uid = techniqueType.hash_code();
 
-    if (techniquePos != m_litTechniques.end())
+    auto pos = std::ranges::find_if(m_litPipelines, [uid](Pipeline& pipeline)
     {
-        *techniquePos = std::move(m_litTechniques.back());
-        m_litTechniques.pop_back();
+        return pipeline.uid == uid;
+    });
+
+    if (pos == m_litPipelines.end())
+    {
+        auto pipeline = Pipeline
+        {
+            uid,
+            std::make_unique<T>(*device, shaderBindingManager, &m_renderPass.get()),
+            true
+        };
+        m_litPipelines.push_back(std::move(pipeline));
+        return;
     }
+
+    pos->isActive = true;
 }
 } // namespace nc::graphics
 } // namespace vulkan

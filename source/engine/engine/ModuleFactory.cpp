@@ -45,14 +45,14 @@ auto BuildModuleRegistry(Registry* registry,
                                                            events.quit));
     moduleRegistry->Register(nc::BuildSceneModule());
     moduleRegistry->Register(nc::asset::BuildAssetModule(config.assetSettings,
-                                                        config.memorySettings,
-                                                        BuildDefaultAssetMap()));
+                                                         config.memorySettings,
+                                                         BuildDefaultAssetMap()));
     moduleRegistry->Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
-                                                              config.graphicsSettings,
-                                                              config.memorySettings,
-                                                              ModuleProvider{moduleRegistry.get()},
-                                                              registry,
-                                                              events));
+                                                               config.graphicsSettings,
+                                                               config.memorySettings,
+                                                               ModuleProvider{moduleRegistry.get()},
+                                                               registry,
+                                                               events));
     moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));
