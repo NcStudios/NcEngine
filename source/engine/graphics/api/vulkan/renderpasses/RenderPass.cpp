@@ -1,5 +1,4 @@
 #include "RenderPass.h"
-#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
 #include "optick.h"
 

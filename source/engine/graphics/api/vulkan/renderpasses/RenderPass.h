@@ -4,10 +4,7 @@
 #include "graphics/api/vulkan/techniques/ITechnique.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
-#include "utility/SparseMap.h"
-
 #include <span>
-#include <unordered_map>
 #include <vector>
 
 namespace nc::graphics

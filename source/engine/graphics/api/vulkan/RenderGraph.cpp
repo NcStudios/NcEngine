@@ -168,9 +168,14 @@ void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t f
         stateData.uniDirLightsCount  != renderGraph.stateData.uniDirLightsCount)
     {
         renderGraph.shadowPasses.clear();
-        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
+        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
         {
             renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
+        }
+
+        for (auto i : std::views::iota(stateData.omniDirLightsCount, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
+        {
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
         }
     }
 
@@ -243,9 +248,9 @@ void RenderGraph::Resize(const Vector2& dimensions)
     }
 
     m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions);
-    for (auto i  : std::views::iota(0u, renderStateCaches.size()))
+    for (const auto& [index, cache] : std::views::enumerate(renderStateCaches))
     {
-        BuildRenderGraph(renderStateCaches.at(i), i);
+        BuildRenderGraph(cache, static_cast<uint32_t>(index));
     }
 }
 
@@ -253,7 +258,6 @@ void RenderGraph::Clear()
 {
     for (auto& renderGraph : m_perFrameRenderGraphs)
     {
-        renderGraph.shadowPasses.clear();
         renderGraph.litPass.UnregisterPipelines();
         renderGraph.isInitialized = false;
     }
