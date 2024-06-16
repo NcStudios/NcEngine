@@ -80,7 +80,7 @@ namespace nc::graphics
 
             NC_LOG_TRACE("Selecting Graphics API");
             auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, *ncWindow);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, resourceBus, *ncWindow);
 
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), *ncWindow);

@@ -30,7 +30,6 @@ namespace nc::graphics::vulkan
 {
 VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
                                const config::GraphicsSettings& graphicsSettings,
-                               const config::MemorySettings& memorySettings,
                                asset::NcAsset* assetModule,
                                ShaderResourceBus& shaderResourceBus,
                                uint32_t apiVersion, GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent)
@@ -44,7 +43,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderStorage{std::make_unique<ShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderBindingManager.get(), m_frameManager->CommandBuffers(),
                                                       shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.meshArrayBufferChannel, shaderResourceBus.ppImageArrayBufferChannel,
                                                       shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
-      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), dimensions, memorySettings.maxPointLights + memorySettings.maxSpotLights)},
+      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},

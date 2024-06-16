@@ -1,13 +1,10 @@
 #include "RenderGraph.h"
-#include "graphics/GraphicsUtilities.h"
-#include "graphics/api/vulkan/FrameManager.h"
+#include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/PerFrameGpuContext.h"
-#include "graphics/api/vulkan/Swapchain.h"
-#include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderStorage.h"
-#include "graphics/api/vulkan/core/Device.h"
+#include "graphics/api/vulkan/Swapchain.h"
 #include "graphics/api/vulkan/techniques/EnvironmentTechnique.h"
 #include "graphics/api/vulkan/techniques/OutlineTechnique.h"
 #include "graphics/api/vulkan/techniques/ParticleTechnique.h"
@@ -24,7 +21,6 @@
 
 #include <array>
 #include <ranges>
-#include <string>
 
 namespace
 {
@@ -99,8 +95,8 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
-    auto colorResolveView    = renderPass.GetAttachmentView(1);
-    auto depthImageView      = renderPass.GetAttachmentView(0);
+    auto colorResolveView     = renderPass.GetAttachmentView(1);
+    auto depthImageView       = renderPass.GetAttachmentView(0);
     auto& swapchainImageViews = swapchain->GetColorImageViews();
 
     for (auto& swapchainImageView : swapchainImageViews)
@@ -119,9 +115,9 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
 }
 
 auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
-                        nc::graphics::vulkan::Swapchain* swapchain,
-                        nc::graphics::vulkan::GpuAllocator* gpuAllocator,
-                        nc::Vector2 dimensions)
+                          nc::graphics::vulkan::Swapchain* swapchain,
+                          nc::graphics::vulkan::GpuAllocator* gpuAllocator,
+                          nc::Vector2 dimensions)
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
     {
@@ -132,7 +128,7 @@ auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
 
 namespace nc::graphics::vulkan
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
@@ -140,21 +136,17 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
       m_shaderBindingManager{shaderBindingManager},
       m_shaderStorage{shaderStorage},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
-      m_perFrameRenderGraphs{CreatePerFrameGraphs(device, swapchain, gpuAllocator, dimensions)},
+      m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
       m_dimensions{dimensions},
-      m_screenExtent{},
-      m_maxLights{maxLights}
+      m_screenExtent{}
 {
 }
 
+// Sink shadow maps from the render target of each shadow pass into a vector of post process images.
 void RenderGraph::SinkPostProcessImages()
 {
     OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
-
-    auto frameIndex = m_frameManager->CurrentFrameContext()->Index();
-    auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
-
-    // Sink shadow maps from the render target of each shadow pass into a vector of post process images.
+    auto& renderGraph = GetCurrentFrameGraph();
     auto shadowMapsSink = std::vector<vk::ImageView>{};
     shadowMapsSink.reserve(renderGraph.shadowPasses.size());
 
@@ -163,11 +155,12 @@ void RenderGraph::SinkPostProcessImages()
         return shadowPass.GetAttachmentView(0u);
     });
 
-    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, frameIndex);
+    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, m_frameManager->CurrentFrameContext()->Index());
 }
 
 void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t frameIndex)
 {
+    OPTICK_CATEGORY("RenderGraph::BuildRenderGraph", Optick::Category::Rendering);
     auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
 
     // If lights have been added or removed we need to add or remove shadow passes (one per light)
@@ -175,15 +168,9 @@ void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t f
         stateData.uniDirLightsCount  != renderGraph.stateData.uniDirLightsCount)
     {
         renderGraph.shadowPasses.clear();
-        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
+        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
         {
             renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
-        }
-
-        // Note: These are currently identical loops but will be split out when the pass details change for omnidirectional shadow maps.
-        for (auto i : std::views::iota(stateData.omniDirLightsCount, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
-        {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
         }
     }
 
@@ -214,6 +201,7 @@ void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t f
 
         renderGraph.litPass.RegisterPipeline<UiTechnique>(m_device, m_shaderBindingManager);
     }
+
     renderGraph.stateData = stateData;
     renderGraph.isInitialized = true;
 }
@@ -222,9 +210,10 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 {
     OPTICK_CATEGORY("RenderGraph::RecordDrawCallsOnBuffer", Optick::Category::Rendering);
 
-    auto frameIndex = m_frameManager->CurrentFrameContext()->Index();
-    auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
-    const auto cmd = m_frameManager->CurrentFrameContext()->CommandBuffer();
+    auto frame = m_frameManager->CurrentFrameContext();
+    auto frameIndex = frame->Index();
+    const auto cmd = frame->CommandBuffer();
+    auto& renderGraph = GetCurrentFrameGraph();
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
@@ -264,6 +253,7 @@ void RenderGraph::Clear()
 {
     for (auto& renderGraph : m_perFrameRenderGraphs)
     {
+        renderGraph.shadowPasses.clear();
         renderGraph.litPass.UnregisterPipelines();
         renderGraph.isInitialized = false;
     }
