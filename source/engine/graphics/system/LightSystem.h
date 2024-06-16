@@ -82,8 +82,8 @@ struct SpotLightData
 struct LightState
 {
     std::vector<DirectX::XMMATRIX> viewProjections = {};
-    uint32_t omniDirectionalLightCount;
-    uint32_t uniDirectionalLightCount;
+    uint32_t omniDirectionalLightCount = 0u;
+    uint32_t uniDirectionalLightCount = 0u;
     bool updateShadows = false;
 };
 

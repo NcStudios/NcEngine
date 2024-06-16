@@ -495,7 +495,7 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
     }
 }
 
-void ShaderStorage::SinkPostProcessImages(std::vector<vk::ImageView> postProcessImages, PostProcessImageType imageType, uint32_t frameIndex)
+void ShaderStorage::SinkPostProcessImages(const std::vector<vk::ImageView>& postProcessImages, PostProcessImageType imageType, uint32_t frameIndex)
 {
     auto& storageBuffer =  m_perFramePpiaStorage.at(frameIndex).at(static_cast<uint32_t>(imageType));
     auto& sampler = storageBuffer->sampler.get();

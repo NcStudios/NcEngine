@@ -36,7 +36,7 @@ class IGraphics
         virtual ~IGraphics() = default;
 
         virtual auto BeginFrame() -> bool = 0;
-        virtual void BuildRenderGraph(PerFrameRenderStateData state) = 0;
+        virtual void BuildRenderGraph(const PerFrameRenderStateData& stateData) = 0;
         virtual void Clear() noexcept = 0;
         virtual auto CurrentFrameIndex() -> uint32_t = 0;
         virtual void DrawFrame(const PerFrameRenderState& state) = 0;

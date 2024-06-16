@@ -41,7 +41,7 @@ class RenderGraph
         void Clear();
         void SinkPostProcessImages();
         auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
-        void BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t frameIndex);
+        void BuildRenderGraph(const PerFrameRenderStateData& stateData, uint32_t frameIndex);
 
     private:
         auto GetCurrentFrameGraph() -> PerFrameRenderGraph& { return m_perFrameRenderGraphs.at(m_frameManager->CurrentFrameContext()->Index()); }

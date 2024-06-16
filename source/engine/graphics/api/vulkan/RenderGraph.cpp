@@ -155,10 +155,10 @@ void RenderGraph::SinkPostProcessImages()
         return shadowPass.GetAttachmentView(0u);
     });
 
-    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, m_frameManager->CurrentFrameContext()->Index());
+    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, m_frameManager->Index());
 }
 
-void RenderGraph::BuildRenderGraph(PerFrameRenderStateData stateData, uint32_t frameIndex)
+void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uint32_t frameIndex)
 {
     OPTICK_CATEGORY("RenderGraph::BuildRenderGraph", Optick::Category::Rendering);
     auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
@@ -216,8 +216,8 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
     OPTICK_CATEGORY("RenderGraph::RecordDrawCallsOnBuffer", Optick::Category::Rendering);
 
     auto frame = m_frameManager->CurrentFrameContext();
-    auto frameIndex = frame->Index();
     const auto cmd = frame->CommandBuffer();
+    auto frameIndex = frame->Index();
     auto& renderGraph = GetCurrentFrameGraph();
 
     SetViewportAndScissorFullWindow(cmd, dimensions);

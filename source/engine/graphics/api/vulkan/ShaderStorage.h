@@ -65,7 +65,7 @@ struct ShaderStorage : StableAddress
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
-    void SinkPostProcessImages(std::vector<vk::ImageView> postProcessImages, PostProcessImageType imageType, uint32_t frameIndex);
+    void SinkPostProcessImages(const std::vector<vk::ImageView>& postProcessImages, PostProcessImageType imageType, uint32_t frameIndex);
 
     private:
 

@@ -124,7 +124,7 @@ bool VulkanGraphics::BeginFrame()
     return true;
 }
 
-void VulkanGraphics::BuildRenderGraph(PerFrameRenderStateData stateData)
+void VulkanGraphics::BuildRenderGraph(const PerFrameRenderStateData& stateData)
 {
     if (m_isMinimized)
     {

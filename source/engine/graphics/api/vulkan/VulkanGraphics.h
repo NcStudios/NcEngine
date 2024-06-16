@@ -48,7 +48,7 @@ class VulkanGraphics : public IGraphics
 
         ~VulkanGraphics() noexcept;
 
-        void BuildRenderGraph(PerFrameRenderStateData stateData) override;
+        void BuildRenderGraph(const PerFrameRenderStateData& stateData) override;
         auto BeginFrame() -> bool override;
         auto PrepareFrame() -> bool override;
         auto CurrentFrameIndex() -> uint32_t override;
