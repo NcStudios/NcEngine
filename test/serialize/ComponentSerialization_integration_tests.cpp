@@ -256,7 +256,14 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     const auto entity = g_ecs.Emplace<nc::Entity>(nc::EntityInfo{});
     g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
 
-    const auto expectedProperties = nc::physics::PhysicsProperties{};
+    const auto expectedProperties = nc::physics::PhysicsProperties{
+        .mass = 2.0f,
+        .drag = 0.5f,
+        .angularDrag = 0.5f,
+        .useGravity = false,
+        .isKinematic = true
+    };
+
     const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
         entity,
         g_ecs.Get<nc::Transform>(entity),
@@ -273,7 +280,7 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     nc::SerializePhysicsBody(stream, expected, serializeCtx, &g_registry);
     const auto actual = nc::DeserializePhysicsBody(stream, deserializeCtx, &g_registry);
     const auto& actualProperties = actual.GetProperties();
-    EXPECT_EQ(expectedProperties.mass, actualProperties.mass);
+    EXPECT_EQ(expectedProperties.mass, 1.0f / actualProperties.mass); // is inverse mass once stored in member
     EXPECT_EQ(expectedProperties.drag, actualProperties.drag);
     EXPECT_EQ(expectedProperties.angularDrag, actualProperties.angularDrag);
     EXPECT_EQ(expectedProperties.useGravity, actualProperties.useGravity);

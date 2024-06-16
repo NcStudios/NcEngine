@@ -178,7 +178,13 @@ void SerializePhysicsBody(std::ostream& stream, const physics::PhysicsBody& out,
     const auto entity = registry->GetPool<physics::PhysicsBody>().GetParent(&out);
     NC_ASSERT(entity.Valid(), "Invalid parent entity for PhysicsBody");
     serialize::Serialize(stream, ctx.entityMap.at(entity));
-    serialize::Serialize(stream, out.GetProperties());
+    auto properties = out.GetProperties();
+    if (properties.mass != 0.0f)
+    {
+        properties.mass = 1.0f / properties.mass;
+    }
+
+    serialize::Serialize(stream, properties);
 }
 
 auto DeserializePhysicsBody(std::istream& stream, const DeserializationContext& ctx, const std::any& userData) -> physics::PhysicsBody
