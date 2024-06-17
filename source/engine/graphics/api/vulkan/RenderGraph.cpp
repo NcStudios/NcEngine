@@ -1,12 +1,10 @@
 #include "RenderGraph.h"
-#include "graphics/GraphicsUtilities.h"
-#include "graphics/api/vulkan/FrameManager.h"
+#include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
 #include "graphics/api/vulkan/PerFrameGpuContext.h"
-#include "graphics/api/vulkan/Swapchain.h"
-#include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
-#include "graphics/api/vulkan/core/Device.h"
+#include "graphics/api/vulkan/ShaderStorage.h"
+#include "graphics/api/vulkan/Swapchain.h"
 #include "graphics/api/vulkan/techniques/EnvironmentTechnique.h"
 #include "graphics/api/vulkan/techniques/OutlineTechnique.h"
 #include "graphics/api/vulkan/techniques/ParticleTechnique.h"
@@ -23,7 +21,6 @@
 
 #include <array>
 #include <ranges>
-#include <string>
 
 namespace
 {
@@ -45,7 +42,7 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, uint32_t frameIndex) -> nc::graphics::vulkan::RenderPass
+auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, bool isOmniDirectional) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
 
@@ -73,10 +70,11 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
     attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format));
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(vkDevice, ShadowMappingPassId + std::to_string(shadowCasterIndex), shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
+    auto renderPass = RenderPass(vkDevice, shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
 
     const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
-    renderPass.CreateFrameBuffers(views, dimensions, frameIndex);
+    renderPass.CreateFrameBuffers(views, dimensions);
+    renderPass.RegisterShadowMappingTechnique(vkDevice, shaderBindingManager, shadowCasterIndex, isOmniDirectional);
 
     return renderPass;
 }
@@ -143,237 +141,183 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
     attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, litAttachmentSlots[0].numSamples, litAttachmentSlots[0].format)); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(vkDevice, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+    auto renderPass = RenderPass(vkDevice, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
-    auto &colorImageViews = swapchain->GetColorImageViews();
-    auto depthImageView = renderPass.GetAttachmentView(0);
-    auto colorResolveView = renderPass.GetAttachmentView(1);
+    auto colorResolveView     = renderPass.GetAttachmentView(1);
+    auto depthImageView       = renderPass.GetAttachmentView(0);
+    auto& swapchainImageViews = swapchain->GetColorImageViews();
 
-    uint32_t index = 0;
-    for (auto &imageView : colorImageViews)
+    for (auto& swapchainImageView : swapchainImageViews)
     {
-        std::vector<vk::ImageView> imageViews
+        auto imageViews = std::array<vk::ImageView, 3>
         {
             colorResolveView, // Color Resolve View
             depthImageView, // Depth View
-            imageView.get()
+            swapchainImageView.get() // Swapchain Image at index <swapchainImageIndex>
         };
-        renderPass.CreateFrameBuffers(imageViews, dimensions, index++);
+
+        renderPass.CreateFrameBuffers(imageViews, dimensions);
     }
+
     return renderPass;
 }
 
-auto CreateLitPasses(const nc::graphics::vulkan::Device* device,
-                     nc::graphics::vulkan::GpuAllocator* alloc,
-                     nc::graphics::vulkan::Swapchain* swapchain,
-                     const nc::Vector2& dimensions)
+auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
+                          nc::graphics::vulkan::Swapchain* swapchain,
+                          nc::graphics::vulkan::GpuAllocator* gpuAllocator,
+                          nc::Vector2 dimensions)
 {
     return [&] <size_t... N> (std::index_sequence<N...>)
     {
-        return std::array{((void)N, CreateLitPass(device, alloc, swapchain, dimensions))...};
+        return std::array{((void)N, nc::graphics::vulkan::PerFrameRenderGraph(device, swapchain, gpuAllocator, dimensions))...};
     }(std::make_index_sequence<nc::graphics::MaxFramesInFlight>());
 }
 }
 
 namespace nc::graphics::vulkan
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, Registry* registry, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, Vector2 dimensions, uint32_t maxLights)
+RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
       m_shaderBindingManager{shaderBindingManager},
-      m_shadowMappingPasses{},
-      m_litPass{CreateLitPasses(m_device, m_gpuAllocator, m_swapchain, dimensions)},
-      m_postProcessImageViews{},
+      m_shaderStorage{shaderStorage},
       m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
-      m_onDescriptorSetsChanged{m_shaderBindingManager->OnResourceLayoutChanged().Connect(this, &RenderGraph::SetDescriptorSetLayoutsDirty)},
-      m_onCommitOmniLight{registry->OnCommit<PointLight>().Connect([this](graphics::PointLight&){IncrementShadowPassCount(true);})},
-      m_onRemoveOmniLight{registry->OnRemove<PointLight>().Connect([this](Entity){DecrementShadowPassCount(true);})},
-      m_onCommitUniLight{registry->OnCommit<SpotLight>().Connect([this](graphics::SpotLight&){IncrementShadowPassCount(false);})},
-      m_onRemoveUniLight{registry->OnRemove<SpotLight>().Connect([this](Entity){DecrementShadowPassCount(false);})},
+      m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
       m_dimensions{dimensions},
-      m_screenExtent{},
-      m_omniDirLightCount{},
-      m_uniDirLightCount{},
-      m_maxLights{maxLights},
-      m_isDescriptorSetLayoutsDirty{std::array<bool, MaxFramesInFlight>{true, true}}
+      m_screenExtent{}
 {
-    auto dummyView = m_dummyShadowMap.view.get();
-    m_postProcessImageViews.emplace(PostProcessImageType::ShadowMap, PostProcessViews
-    {
-        .perFrameViews = std::array<std::vector<vk::ImageView>, MaxFramesInFlight>
-        {
-            std::vector<vk::ImageView>(m_maxLights, dummyView),
-            std::vector<vk::ImageView>(m_maxLights, dummyView)
-        }
-    });
 }
 
+// Sink shadow maps from the render target of each shadow pass into a vector of post process images.
 void RenderGraph::SinkPostProcessImages()
 {
     OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
+    auto& renderGraph = GetCurrentFrameGraph();
+    auto shadowMapsSink = std::vector<vk::ImageView>{};
+    shadowMapsSink.reserve(renderGraph.shadowPasses.size());
 
-    auto* currentFrame = m_frameManager->CurrentFrameContext();
-    auto& perFrameShadowMapViews = m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews[currentFrame->Index()];
-    perFrameShadowMapViews = std::vector<vk::ImageView>(m_maxLights, m_dummyShadowMap.view.get());
-    auto& shadowPasses = m_shadowMappingPasses[currentFrame->Index()];
-
-    for (auto i : std::views::iota(0u, m_omniDirLightCount))
+    std::ranges::transform(renderGraph.shadowPasses, std::back_inserter(shadowMapsSink), [](auto& shadowPass)
     {
-        perFrameShadowMapViews[i] = shadowPasses[i].GetAttachmentView(0u);
-    }
+        return shadowPass.GetAttachmentView(0u);
+    });
 
-    for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
-    {
-        perFrameShadowMapViews[i] = shadowPasses[i].GetAttachmentView(0u);
-    }
+    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, m_frameManager->Index());
 }
 
-auto RenderGraph::GetPostProcessImages(PostProcessImageType imageType) -> const std::vector<vk::ImageView>&
+void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uint32_t frameIndex)
 {
-    return m_postProcessImageViews.at(imageType).perFrameViews.at(m_frameManager->CurrentFrameContext()->Index());
+    OPTICK_CATEGORY("RenderGraph::BuildRenderGraph", Optick::Category::Rendering);
+    auto& renderGraph = m_perFrameRenderGraphs.at(frameIndex);
+
+    // If lights have been added or removed we need to add or remove shadow passes (one per light)
+    if (stateData.omniDirLightsCount != renderGraph.stateData.omniDirLightsCount || 
+        stateData.uniDirLightsCount  != renderGraph.stateData.uniDirLightsCount)
+    {
+        renderGraph.shadowPasses.clear();
+        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
+        {
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
+        }
+
+        for (auto i : std::views::iota(stateData.omniDirLightsCount, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
+        {
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
+        }
+    }
+
+    // All other state data pertains to the lit pass. If any of the comparisons have changed, we'll need to register the appropriate pipelines
+    if (stateData != renderGraph.stateData || !renderGraph.isInitialized)
+    {
+        renderGraph.litPass.UnregisterPipelines();
+
+        #ifdef NC_EDITOR_ENABLED
+        if (!renderGraph.isInitialized || stateData.widgetsCount)
+            renderGraph.litPass.RegisterPipeline<WireframeTechnique>(m_device, m_shaderBindingManager);
+        #endif
+
+        if (!renderGraph.isInitialized || stateData.useSkybox)
+            renderGraph.litPass.RegisterPipeline<EnvironmentTechnique>(m_device, m_shaderBindingManager);
+
+        if (!renderGraph.isInitialized || stateData.meshRenderersCount)
+            renderGraph.litPass.RegisterPipeline<PbrTechnique>(m_device, m_shaderBindingManager);
+
+        if (!renderGraph.isInitialized || stateData.toonRenderersCount)
+        {
+            renderGraph.litPass.RegisterPipeline<ToonTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<OutlineTechnique>(m_device, m_shaderBindingManager);
+        }
+
+        if (!renderGraph.isInitialized || stateData.particlesCount)
+            renderGraph.litPass.RegisterPipeline<ParticleTechnique>(m_device, m_shaderBindingManager);
+
+        renderGraph.litPass.RegisterPipeline<UiTechnique>(m_device, m_shaderBindingManager);
+    }
+
+    renderGraph.stateData = stateData;
+    renderGraph.isInitialized = true;
 }
 
-void RenderGraph::CommitResourceLayout()
-{
-    auto* currentFrame = m_frameManager->CurrentFrameContext();
-    const auto frameIndex = currentFrame->Index();
-
-    if (!m_isDescriptorSetLayoutsDirty.at(frameIndex))
-    {
-        return;
-    }
-
-    auto& perFramePasses =  m_shadowMappingPasses.at(frameIndex);
-    perFramePasses.clear();
-
-    for (auto i : std::views::iota(0u, m_omniDirLightCount))
-    {
-        perFramePasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i, frameIndex));
-        perFramePasses[i].ClearTechniques();
-        perFramePasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i, true);
-    }
-
-    for (auto i : std::views::iota(m_omniDirLightCount, m_omniDirLightCount + m_uniDirLightCount))
-    {
-        perFramePasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, i, frameIndex));
-        perFramePasses[i].ClearTechniques();
-        perFramePasses[i].RegisterShadowMappingTechnique(m_device->VkDevice(), m_shaderBindingManager, i, false);
-    }
-
-    auto& litPass = m_litPass.at(frameIndex);
-    litPass.ClearTechniques();
-
-    #ifdef NC_EDITOR_ENABLED
-    litPass.RegisterTechnique<WireframeTechnique>(*m_device, m_shaderBindingManager);
-    #endif
-
-    litPass.RegisterTechnique<EnvironmentTechnique>(*m_device, m_shaderBindingManager);
-    litPass.RegisterTechnique<PbrTechnique>(*m_device, m_shaderBindingManager);
-    litPass.RegisterTechnique<ToonTechnique>(*m_device, m_shaderBindingManager);
-    litPass.RegisterTechnique<OutlineTechnique>(*m_device, m_shaderBindingManager);
-    litPass.RegisterTechnique<ParticleTechnique>(*m_device, m_shaderBindingManager);
-    litPass.RegisterTechnique<UiTechnique>(*m_device, m_shaderBindingManager);
-
-    m_isDescriptorSetLayoutsDirty.at(frameIndex) = false;
-}
-
-void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, uint32_t frameBufferIndex, const Vector2& dimensions, const Vector2& screenExtent)
+void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex)
 {
     OPTICK_CATEGORY("RenderGraph::RecordDrawCallsOnBuffer", Optick::Category::Rendering);
 
-    auto* currentFrame = m_frameManager->CurrentFrameContext();
-    const auto frameIndex = currentFrame->Index();
-    const auto cmd = currentFrame->CommandBuffer();
+    auto frame = m_frameManager->CurrentFrameContext();
+    const auto cmd = frame->CommandBuffer();
+    auto frameIndex = frame->Index();
+    auto& renderGraph = GetCurrentFrameGraph();
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    for (auto& shadowMappingPass : m_shadowMappingPasses.at(frameIndex))
+    for (auto& shadowMappingPass : renderGraph.shadowPasses)
     {
-        shadowMappingPass.Begin(cmd, frameBufferIndex);
+        shadowMappingPass.Begin(cmd);
         shadowMappingPass.Execute(cmd, frameData, frameIndex);
         shadowMappingPass.End(cmd);
     }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
-    auto& litPass = m_litPass.at(frameIndex);
-    litPass.Begin(cmd, frameBufferIndex);
-    litPass.Execute(cmd, frameData, frameIndex);
-    litPass.End(cmd);
+    renderGraph.litPass.Begin(cmd, swapchainImageIndex);
+    renderGraph.litPass.Execute(cmd, frameData, frameIndex);
+    renderGraph.litPass.End(cmd);
 }
 
 void RenderGraph::Resize(const Vector2& dimensions)
 {
-    for (auto frameIndex : std::views::iota(0u, MaxFramesInFlight))
+    Clear();
+    auto renderStateCaches = std::vector<PerFrameRenderStateData>{};
+    renderStateCaches.reserve(m_perFrameRenderGraphs.size());
+
+    for (auto& renderGraph : m_perFrameRenderGraphs)
     {
-        m_litPass[frameIndex] = CreateLitPass(m_device, m_gpuAllocator, m_swapchain, dimensions);
-        auto& shadowPasses = m_shadowMappingPasses[frameIndex];
-        auto& shadowMapViews = m_postProcessImageViews.at(PostProcessImageType::ShadowMap).perFrameViews[frameIndex];
-        shadowPasses.clear();
-        shadowMapViews.clear();
+        renderStateCaches.push_back(renderGraph.stateData);
+    }
 
-        for (auto shadowPassIndex : std::views::iota(0u, m_omniDirLightCount))
-        {
-            shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, shadowPassIndex, frameIndex));
-            shadowMapViews.emplace_back(shadowPasses.back().GetAttachmentView(0u));
-        }
-
-        for (auto shadowPassIndex : std::views::iota(m_omniDirLightCount, m_omniDirLightCount +  m_uniDirLightCount))
-        {
-            shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_dimensions, shadowPassIndex, frameIndex));
-            shadowMapViews.emplace_back(shadowPasses.back().GetAttachmentView(0u));
-        }
-
-        m_isDescriptorSetLayoutsDirty[frameIndex] = true;
+    m_perFrameRenderGraphs = CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions);
+    for (const auto& [index, cache] : std::views::enumerate(renderStateCaches))
+    {
+        BuildRenderGraph(cache, static_cast<uint32_t>(index));
     }
 }
 
-void RenderGraph::IncrementShadowPassCount(bool isOmniDirectional)
+void RenderGraph::Clear()
 {
-    NC_ASSERT(m_omniDirLightCount + m_uniDirLightCount < m_maxLights, "Tried to add a light source when max lights are registered.");
-
-    if (isOmniDirectional)
+    for (auto& renderGraph : m_perFrameRenderGraphs)
     {
-        m_omniDirLightCount++;
+        renderGraph.litPass.UnregisterPipelines();
+        renderGraph.isInitialized = false;
     }
-    else
-    {
-        m_uniDirLightCount++;
-    }
-    
-    SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
 }
 
-void RenderGraph::ClearShadowPasses() noexcept
+PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
+                                         Swapchain* swapchain,
+                                         GpuAllocator* gpuAllocator,
+                                         Vector2 dimensions)
+    : shadowPasses{},
+      litPass{CreateLitPass(device, gpuAllocator, swapchain, dimensions)},
+      isInitialized{false}
 {
-    m_omniDirLightCount = 0u;
-    m_uniDirLightCount = 0u;
-    SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
-}
-
-void RenderGraph::DecrementShadowPassCount(bool isOmniDirectional)
-{
-    if (isOmniDirectional)
-    {
-        NC_ASSERT(m_omniDirLightCount > 0, "Tried to remove a light source when none are registered.");
-        m_omniDirLightCount--;
-    }
-    else
-    {
-        NC_ASSERT(m_uniDirLightCount > 0, "Tried to remove a light source when none are registered.");
-        m_uniDirLightCount--;
-    }
-
-    SetDescriptorSetLayoutsDirty(DescriptorSetLayoutsChanged{});
-}
-
-void RenderGraph::SetDescriptorSetLayoutsDirty(const DescriptorSetLayoutsChanged&)
-{
-    for (auto& isDirty :  m_isDescriptorSetLayoutsDirty)
-    {
-        isDirty = true;
-    }
 }
 } // namespace nc::graphics::vulkan

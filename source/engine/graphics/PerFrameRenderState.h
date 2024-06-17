@@ -20,4 +20,17 @@ struct PerFrameRenderState
     WidgetState widgetState;
     ParticleState particleState;
 };
+
+struct PerFrameRenderStateData
+{
+    auto operator<=>(const PerFrameRenderStateData&) const = default;
+
+    bool useSkybox = false;
+    uint32_t omniDirLightsCount = 0u;
+    uint32_t uniDirLightsCount = 0u;
+    uint32_t meshRenderersCount = 0u;
+    uint32_t toonRenderersCount = 0u;
+    uint32_t widgetsCount = 0u;
+    uint32_t particlesCount = 0u;
+};
 } // namespace nc::graphics

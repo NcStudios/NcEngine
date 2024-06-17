@@ -51,7 +51,6 @@ struct ShaderStorage : StableAddress
     ShaderStorage(vk::Device device,
                   GpuAllocator* allocator, 
                   ShaderBindingManager* shaderBindingManager,
-                  RenderGraph* renderGraph,
                   std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                   Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                   Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
@@ -66,6 +65,7 @@ struct ShaderStorage : StableAddress
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
+    void SinkPostProcessImages(const std::vector<vk::ImageView>& postProcessImages, PostProcessImageType imageType, uint32_t frameIndex);
 
     private:
 

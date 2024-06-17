@@ -96,7 +96,7 @@ namespace nc::graphics::vulkan
     bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
     {
         static const auto useShadows = config::GetGraphicsSettings().useShadows;
-        return m_enabled = useShadows && (!frameData.lightState.viewProjections.empty()) ;
+        return m_enabled = useShadows && (!frameData.lightState.viewProjections.empty());
     }
 
     void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
