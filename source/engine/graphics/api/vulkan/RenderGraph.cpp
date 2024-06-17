@@ -52,13 +52,25 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
     const auto vkDevice = device->VkDevice();
     const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
     {
-        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+        AttachmentSlot
+        {
+            0,
+            vk::Format::eD16Unorm,                                   // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal,         // Initial subpass layout
+            vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal, // Final layout
+            vk::AttachmentLoadOp::eClear,                            // Attachment load
+            vk::AttachmentStoreOp::eStore,                           // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                         // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            vk::SampleCountFlagBits::e1                              // Sample count
+        }
     };
 
     const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
 
     auto attachment = std::vector<Attachment>{};
-    attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
+    attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format));
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, ShadowMappingPassId + std::to_string(shadowCasterIndex), shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
@@ -80,9 +92,45 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
 
     const auto litAttachmentSlots = std::array<AttachmentSlot, 3>
     {
-        AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, numSamples},
-        AttachmentSlot{1, AttachmentType::Depth, gpuOptions.GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
-        AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+        AttachmentSlot // Swapchain Image (Color)
+        {
+            0,
+            swapchain->GetFormat(),                                  // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eColorAttachmentOptimal,                // Initial subpass layout
+            vk::ImageLayout::eColorAttachmentOptimal,                // Final layout
+            vk::AttachmentLoadOp::eClear,                            // Attachment load
+            vk::AttachmentStoreOp::eStore,                           // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                         // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            numSamples                                               // Sample count
+        },
+        AttachmentSlot // Depth
+        {
+            1,
+            gpuOptions.GetDepthFormat(),                             // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal,         // Initial subpass layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal,         // Final layout
+            vk::AttachmentLoadOp::eClear,                            // Attachment load
+            vk::AttachmentStoreOp::eDontCare,                        // Attachment store
+            vk::AttachmentLoadOp::eClear,                            // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            numSamples                                               // Sample count
+        },
+        AttachmentSlot // MSAA Color Resolve
+        {
+            2,
+            swapchain->GetFormat(),                                  // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eColorAttachmentOptimal,                // Initial subpass layout
+            vk::ImageLayout::ePresentSrcKHR,                         // Final layout
+            vk::AttachmentLoadOp::eDontCare,                         // Attachment load
+            vk::AttachmentStoreOp::eStore,                           // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                         // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            vk::SampleCountFlagBits::e1                              // Sample count
+        },
     };
 
     const auto litSubpasses = std::array<Subpass, 1>
@@ -91,8 +139,8 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
     };
 
     std::vector<Attachment> attachments;
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, numSamples, gpuOptions.GetDepthFormat())); // Depth Stencil
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, litAttachmentSlots[1].numSamples, litAttachmentSlots[1].format)); // Depth Stencil
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, litAttachmentSlots[0].numSamples, litAttachmentSlots[0].format)); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, LitPassId, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);

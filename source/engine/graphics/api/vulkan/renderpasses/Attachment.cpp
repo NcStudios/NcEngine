@@ -41,59 +41,6 @@ constexpr auto colorAndDepthWriteAfterPrevious = vk::SubpassDependency
     vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
 };
 
-auto CreateAttachmentDescription(nc::graphics::vulkan::AttachmentType type,
-                                 vk::Format format,
-                                 vk::SampleCountFlagBits numSamples,
-                                 vk::AttachmentLoadOp loadOp,
-                                 vk::AttachmentStoreOp storeOp) -> vk::AttachmentDescription
-{
-    using nc::graphics::vulkan::AttachmentType;
-    const auto stencilLoadOp = type == AttachmentType::Depth ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eDontCare;
-    const auto finalLayout = [](nc::graphics::vulkan::AttachmentType attachmentType)
-    {
-        switch (attachmentType)
-        {
-            case AttachmentType::Color:       return vk::ImageLayout::eColorAttachmentOptimal;
-            case AttachmentType::Resolve:     return vk::ImageLayout::ePresentSrcKHR;
-            case AttachmentType::Depth:       return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-            case AttachmentType::ShadowDepth: return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
-        }
-
-        throw nc::NcError("Unknown AttachmentType");
-    }(type);
-
-    return vk::AttachmentDescription
-    {
-        vk::AttachmentDescriptionFlags{}, // flags
-        format,                           // format
-        numSamples,                       // samples
-        loadOp,                           // loadOp
-        storeOp,                          // storeOp
-        stencilLoadOp,                    // stencilLoadOp
-        vk::AttachmentStoreOp::eDontCare, // stencilStoreOp
-        vk::ImageLayout::eUndefined,      // initialLayout
-        finalLayout                       // finalLayout
-    };
-}
-
-auto CreateAttachmentReference(nc::graphics::vulkan::AttachmentType type, uint32_t attachmentIndex) -> vk::AttachmentReference
-{
-    using nc::graphics::vulkan::AttachmentType;
-    const auto layout = [](AttachmentType attachmentType)
-    {
-        switch (attachmentType)
-        {
-            case AttachmentType::Resolve:     [[fallthrough]];
-            case AttachmentType::Color:       return vk::ImageLayout::eColorAttachmentOptimal;
-            case AttachmentType::Depth:       [[fallthrough]];
-            case AttachmentType::ShadowDepth: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-        }
-        throw nc::NcError("Unknown AttachmentType");
-    }(type);
-
-    return vk::AttachmentReference{attachmentIndex, layout};
-}
-
 auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& colorAttachment,
                               const nc::graphics::vulkan::AttachmentSlot& depthAttachment,
                               const nc::graphics::vulkan::AttachmentSlot& resolveAttachment) -> vk::SubpassDescription
@@ -163,11 +110,31 @@ auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image i
 
 namespace nc::graphics::vulkan
 {
-AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex, AttachmentType attachmentType, vk::Format format, vk::AttachmentLoadOp loadOp,
-                               vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples)
-    : description{CreateAttachmentDescription(attachmentType, format, numSamples, loadOp, storeOp)},
-      reference{CreateAttachmentReference(attachmentType, attachmentIndex)},
-      type{attachmentType}
+AttachmentSlot::AttachmentSlot(uint32_t attachmentIndex,
+                               vk::Format format_,
+                               vk::ImageLayout initialLayout,
+                               vk::ImageLayout subpassLayout,
+                               vk::ImageLayout finalLayout,
+                               vk::AttachmentLoadOp loadOp,
+                               vk::AttachmentStoreOp storeOp,
+                               vk::AttachmentLoadOp stencilLoadOp,
+                               vk::AttachmentStoreOp stencilStoreOp,
+                               vk::SampleCountFlagBits numSamples_)
+    : description{vk::AttachmentDescription
+                  {
+                      vk::AttachmentDescriptionFlags{}, // flags
+                      format_,                          // format
+                      numSamples_,                      // samples
+                      loadOp,                           // loadOp
+                      storeOp,                          // storeOp
+                      stencilLoadOp,                    // stencilLoadOp
+                      stencilStoreOp,                   // stencilStoreOp
+                      initialLayout,                    // initialLayout
+                      finalLayout                       // finalLayout
+                  }},
+      reference{vk::AttachmentReference{attachmentIndex, subpassLayout}},
+      numSamples{numSamples_},
+      format{format_}
 {
 }
 
