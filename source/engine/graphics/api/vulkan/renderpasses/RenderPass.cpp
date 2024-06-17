@@ -163,7 +163,7 @@ auto RenderPass::GetVkPass() const ->vk::RenderPass
     return m_renderPass.get();
 }
 
-void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions)
+void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2 dimensions)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {

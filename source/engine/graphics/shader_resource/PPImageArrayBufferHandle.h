@@ -11,7 +11,7 @@ namespace nc::graphics
 {
 enum class PostProcessImageType : uint8_t
 {
-    ShadowMap
+    UniDirShadowMap
 };
 
 enum class PpiaUpdateAction : uint8_t

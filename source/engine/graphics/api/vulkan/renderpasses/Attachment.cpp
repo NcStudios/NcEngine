@@ -58,6 +58,22 @@ auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& colorA
     };
 }
 
+auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& colorAttachment,
+                              const nc::graphics::vulkan::AttachmentSlot& depthAttachment) -> vk::SubpassDescription
+{
+    return vk::SubpassDescription
+    {
+        vk::SubpassDescriptionFlags{},
+        vk::PipelineBindPoint::eGraphics,
+        0u,
+        nullptr,
+        1u,
+        &colorAttachment.reference,
+        nullptr,
+        &depthAttachment.reference
+    };
+}
+
 auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& depthAttachment) -> vk::SubpassDescription
 {
     return vk::SubpassDescription
@@ -73,12 +89,9 @@ auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& depthA
     };
 }
 
-auto CreateAttachmentImage(nc::graphics::vulkan::GpuAllocator *allocator, vk::Format format, nc::Vector2 dimensions, vk::SampleCountFlagBits numSamples, bool isDepthStencil) -> nc::graphics::vulkan::GpuAllocation<vk::Image>
+auto CreateAttachmentImage(nc::graphics::vulkan::GpuAllocator *allocator, vk::Format format, nc::Vector2 dimensions, vk::SampleCountFlagBits numSamples, vk::ImageUsageFlags imageUsageFlags) -> nc::graphics::vulkan::GpuAllocation<vk::Image>
 {
-    constexpr auto depthStencilImageUsage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled;
-    constexpr auto colorImageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment;
-    const auto imageUseFlags = isDepthStencil ? depthStencilImageUsage : colorImageUsage;
-    return allocator->CreateImage(format, dimensions, imageUseFlags, vk::ImageCreateFlags(), 1, 1, numSamples);
+    return allocator->CreateImage(format, dimensions, imageUsageFlags, vk::ImageCreateFlags(), 1, 1, numSamples);
 }
 
 auto CreateAttachmentImageView(vk::Device device, vk::Format format, vk::Image image, bool isDepthStencil) -> vk::UniqueImageView
@@ -144,14 +157,20 @@ Subpass::Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& de
 {
 }
 
+Subpass::Subpass(const AttachmentSlot& colorAttachment, const AttachmentSlot& depthAttachment)
+    : description{CreateSubpassDescription(colorAttachment, depthAttachment)},
+      dependencies{::colorAndDepthWriteAfterPrevious}
+{
+}
+
 Subpass::Subpass(const AttachmentSlot& depthAttachment)
     : description{CreateSubpassDescription(depthAttachment)},
       dependencies{::earlyFragStencilWriteAfterFragRead, ::lateFragStencilWriteBeforeFragRead}
 {
 }
 
-Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format)
-    : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, isDepthStencil)},
+Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageUsageFlags imageUsageFlags)
+    : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, imageUsageFlags)},
       view{CreateAttachmentImageView(device, format, image, isDepthStencil)}{}
 
 } // namespace nc::graphics::vulkan

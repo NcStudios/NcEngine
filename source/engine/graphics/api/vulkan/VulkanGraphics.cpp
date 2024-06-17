@@ -138,7 +138,7 @@ void VulkanGraphics::BuildRenderGraph(const PerFrameRenderStateData& stateData)
     }
 
     m_renderGraph->BuildRenderGraph(stateData, CurrentFrameIndex());
-    m_renderGraph->SinkPostProcessImages();
+    m_renderGraph->SinkRenderTargets();
 }
 
 auto VulkanGraphics::CurrentFrameIndex() -> uint32_t

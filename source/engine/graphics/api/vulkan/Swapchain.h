@@ -30,7 +30,7 @@ namespace nc::graphics::vulkan
 
             auto GetExtent() const noexcept -> const vk::Extent2D &;
             auto GetFormat() const noexcept -> const vk::Format&;
-            auto GetColorImageViews() const noexcept -> const std::vector<vk::UniqueImageView> &;
+            auto GetSwapchainImageViews() const noexcept -> std::span<const vk::ImageView>;
 
             // Image synchronization
             bool GetNextRenderReadyImageIndex(PerFrameGpuContext* currentFrame, uint32_t* imageIndex);
@@ -45,7 +45,7 @@ namespace nc::graphics::vulkan
             std::vector<vk::Image> m_swapChainImages;
             vk::Format m_swapChainImageFormat;
             vk::Extent2D m_swapChainExtent;
-            std::vector<vk::UniqueImageView> m_swapChainImageViews;
+            std::vector<vk::ImageView> m_swapChainImageViews;
             std::vector<vk::Fence> m_imagesInFlightFences;
     };
 } // namespace nc::graphics::vulkan

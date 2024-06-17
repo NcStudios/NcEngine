@@ -53,7 +53,7 @@ struct AssetResources
 struct PostProcessResources
 {
     PostProcessResources(uint32_t maxPointLights, ShaderResourceBus* resourceBus);
-    PPImageArrayBufferHandle shadowMaps;
+    PPImageArrayBufferHandle uniDirShadowMaps;
 };
 
 struct SystemResourcesConfig

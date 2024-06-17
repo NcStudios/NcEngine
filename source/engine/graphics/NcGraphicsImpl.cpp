@@ -150,7 +150,7 @@ namespace nc::graphics
         /** @todo graphics::clear not marked noexcept */
         m_systemResources.particleEmitters.Clear();
         m_graphics->Clear();
-        m_postProcessResources.shadowMaps.Clear();
+        m_postProcessResources.uniDirShadowMaps.Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
         m_systemResources.lights.Clear();
@@ -242,7 +242,7 @@ namespace nc::graphics
 
         if (state.lightState.updateShadows)
         {
-            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(state.lightState.omniDirectionalLightCount + state.lightState.uniDirectionalLightCount), currentFrameIndex);
+            m_postProcessResources.uniDirShadowMaps.Update(static_cast<uint32_t>(state.lightState.omniDirectionalLightCount + state.lightState.uniDirectionalLightCount), currentFrameIndex);
         }
 
         // Allow the frame to begin accepting draw commands.

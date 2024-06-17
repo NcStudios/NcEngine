@@ -42,6 +42,64 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
     cmd->setScissor(0, 1, &scissor);
 }
 
+auto CreateShadowMappingPassOmni(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain*, nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager, const nc::Vector2& , uint32_t shadowCasterIndex, bool isOmniDirectional) -> nc::graphics::vulkan::RenderPass
+{
+    using namespace nc::graphics::vulkan;
+
+    const auto vkDevice = device->VkDevice();
+    const auto& gpuOptions = device->GetGpuOptions();
+    const auto shadowAttachmentSlots = std::array<AttachmentSlot, 2>
+    {
+        AttachmentSlot // Color blit source
+        {
+            0,
+            vk::Format::eR32Sfloat,                   // Image format
+            vk::ImageLayout::eShaderReadOnlyOptimal,  // Initial layout
+            vk::ImageLayout::eColorAttachmentOptimal, // Initial subpass layout
+            vk::ImageLayout::eShaderReadOnlyOptimal,  // Final layout
+            vk::AttachmentLoadOp::eClear,             // Attachment load
+            vk::AttachmentStoreOp::eStore,            // Attachment store
+            vk::AttachmentLoadOp::eDontCare,          // Stencil load
+            vk::AttachmentStoreOp::eDontCare,         // Stencil store
+            vk::SampleCountFlagBits::e1               // Sample count
+        },
+        AttachmentSlot // Depth image
+        {
+            1,
+            gpuOptions.GetDepthFormat(),                     // Image format
+            vk::ImageLayout::eDepthStencilAttachmentOptimal, // Initial layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal, // Initial subpass layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal, // Final layout
+            vk::AttachmentLoadOp::eClear,                    // Attachment load
+            vk::AttachmentStoreOp::eStore,                   // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                 // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                // Stencil store
+            vk::SampleCountFlagBits::e1                      // Sample count
+        }
+    };
+
+    auto shadowMapResolution = nc::Vector2{1024, 1024};
+    auto shadowMapExtent = vk::Extent2D{1024, 1024};
+
+    const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots.at(0), shadowAttachmentSlots.at(1)}};
+
+    auto attachments = std::vector<Attachment>{};
+    attachments.push_back(Attachment(vkDevice, allocator, shadowMapResolution, false, shadowAttachmentSlots.at(0).numSamples, shadowAttachmentSlots.at(0).format, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc));
+    attachments.push_back(Attachment(vkDevice, allocator, shadowMapResolution, true, shadowAttachmentSlots.at(1).numSamples, shadowAttachmentSlots.at(1).format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc));
+
+    const auto size = AttachmentSize{shadowMapResolution, shadowMapExtent};
+    auto renderPass = RenderPass(vkDevice, shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
+
+    auto attachmentViews = std::array<vk::ImageView, 2>{};
+    attachmentViews.at(1) = renderPass.GetAttachmentView(1);
+
+    for
+    renderPass.CreateFrameBuffer(views, shadowMapResolution); // Create a cube map PPIA with six views. Get them here
+    renderPass.RegisterShadowMappingTechnique(vkDevice, shaderBindingManager, shadowCasterIndex, isOmniDirectional);
+
+    return renderPass;
+}
+
 auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, bool isOmniDirectional) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
@@ -67,13 +125,13 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::gra
     const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
 
     auto attachment = std::vector<Attachment>{};
-    attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format));
+    attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled));
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
 
     const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
-    renderPass.CreateFrameBuffers(views, dimensions);
+    renderPass.CreateFrameBuffer(views, dimensions);
     renderPass.RegisterShadowMappingTechnique(vkDevice, shaderBindingManager, shadowCasterIndex, isOmniDirectional);
 
     return renderPass;
@@ -137,15 +195,15 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
     };
 
     std::vector<Attachment> attachments;
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, litAttachmentSlots[1].numSamples, litAttachmentSlots[1].format)); // Depth Stencil
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, litAttachmentSlots[0].numSamples, litAttachmentSlots[0].format)); // Color Buffer
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, litAttachmentSlots[1].numSamples, litAttachmentSlots[1].format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled)); // Depth Stencil
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, litAttachmentSlots[0].numSamples, litAttachmentSlots[0].format, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment)); // Color Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
-    auto colorResolveView     = renderPass.GetAttachmentView(1);
-    auto depthImageView       = renderPass.GetAttachmentView(0);
-    auto& swapchainImageViews = swapchain->GetColorImageViews();
+    auto colorResolveView    = renderPass.GetAttachmentView(1);
+    auto depthImageView      = renderPass.GetAttachmentView(0);
+    auto swapchainImageViews = swapchain->GetSwapchainImageViews();
 
     for (auto& swapchainImageView : swapchainImageViews)
     {
@@ -153,10 +211,10 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
         {
             colorResolveView, // Color Resolve View
             depthImageView, // Depth View
-            swapchainImageView.get() // Swapchain Image at index <swapchainImageIndex>
+            swapchainImageView // Swapchain Image at index <swapchainImageIndex>
         };
 
-        renderPass.CreateFrameBuffers(imageViews, dimensions);
+        renderPass.CreateFrameBuffer(imageViews, dimensions);
     }
 
     return renderPass;
@@ -183,18 +241,20 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
       m_gpuAllocator{gpuAllocator},
       m_shaderBindingManager{shaderBindingManager},
       m_shaderStorage{shaderStorage},
-      m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
+      m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled)},
       m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
       m_dimensions{dimensions},
       m_screenExtent{}
 {
 }
 
-// Sink shadow maps from the render target of each shadow pass into a vector of post process images.
-void RenderGraph::SinkPostProcessImages()
+// Sink outputs from the render graph into shader storage
+void RenderGraph::SinkRenderTargets()
 {
-    OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
+    OPTICK_CATEGORY("RenderGraph::SinkRenderTargets", Optick::Category::Rendering);
     auto& renderGraph = GetCurrentFrameGraph();
+
+    // Sink shadow maps
     auto shadowMapsSink = std::vector<vk::ImageView>{};
     shadowMapsSink.reserve(renderGraph.shadowPasses.size());
 
@@ -203,7 +263,7 @@ void RenderGraph::SinkPostProcessImages()
         return shadowPass.GetAttachmentView(0u);
     });
 
-    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, m_frameManager->Index());
+    m_shaderStorage->SinkRenderTargets(shadowMapsSink, PostProcessImageType::UniDirShadowMap, m_frameManager->Index());
 }
 
 void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uint32_t frameIndex)

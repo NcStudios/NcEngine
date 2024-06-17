@@ -40,7 +40,7 @@ class RenderPass
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
         auto GetVkPass() const -> vk::RenderPass;
 
-        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions);
+        void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
 
         template <std::derived_from<ITechnique> T>
         void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);

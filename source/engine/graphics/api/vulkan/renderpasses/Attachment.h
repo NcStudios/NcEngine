@@ -22,7 +22,7 @@ struct ClearValueFlags
 
 struct Attachment
 {
-    Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat);
+    Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat, vk::ImageUsageFlags imageUsageFlags);
     GpuAllocation<vk::Image> image;
     vk::UniqueImageView view;
 };
@@ -48,6 +48,7 @@ struct AttachmentSlot
 struct Subpass
 {
     Subpass(const AttachmentSlot &colorAttachment, const AttachmentSlot &depthAttachment, const AttachmentSlot &resolveAttachment);
+    explicit Subpass(const AttachmentSlot &colorAttachment, const AttachmentSlot &depthAttachment);
     explicit Subpass(const AttachmentSlot &depthAttachment);
     vk::SubpassDescription description;
     std::vector<vk::SubpassDependency> dependencies{};
