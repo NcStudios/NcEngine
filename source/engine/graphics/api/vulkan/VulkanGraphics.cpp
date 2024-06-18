@@ -43,7 +43,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderStorage{std::make_unique<ShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderBindingManager.get(), m_frameManager->CommandBuffers(),
                                                       shaderResourceBus.cubeMapArrayBufferChannel, shaderResourceBus.meshArrayBufferChannel, shaderResourceBus.ppImageArrayBufferChannel,
                                                       shaderResourceBus.storageBufferChannel, shaderResourceBus.uniformBufferChannel, shaderResourceBus.textureArrayBufferChannel)},
-      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), dimensions)},
+      m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), shaderResourceBus, dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
       m_resizingMutex{},
       m_imageIndex{UINT32_MAX},
@@ -138,7 +138,6 @@ void VulkanGraphics::BuildRenderGraph(const PerFrameRenderStateData& stateData)
     }
 
     m_renderGraph->BuildRenderGraph(stateData, CurrentFrameIndex());
-    m_renderGraph->SinkRenderTargets();
 }
 
 auto VulkanGraphics::CurrentFrameIndex() -> uint32_t

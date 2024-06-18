@@ -268,6 +268,8 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 eventData.slot,
                 eventData.currentFrameIndex
             );
+
+            storageBuffer->Clear();
             break;
         }
         case PpiaUpdateAction::Clear:
@@ -501,8 +503,6 @@ void ShaderStorage::SinkRenderTargets(std::span<const vk::ImageView> postProcess
     auto& sampler = storageBuffer->sampler.get();
     auto& views = storageBuffer->views;
     auto& imageInfos = storageBuffer->imageInfos;
-    
-    storageBuffer->Clear();
 
     for (auto view : postProcessImages)
     {

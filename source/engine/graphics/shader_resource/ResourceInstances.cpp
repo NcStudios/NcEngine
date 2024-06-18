@@ -67,11 +67,6 @@ void AssetResources::ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData
     }
 }
 
-PostProcessResources::PostProcessResources(uint32_t maxPointLights, ShaderResourceBus* resourceBus)
-    : uniDirShadowMaps{resourceBus->CreatePPImageArrayBuffer(PostProcessImageType::UniDirShadowMap, maxPointLights, ShaderStage::Fragment, 3u, 0u)}
-{
-}
-
 SystemResourcesConfig::SystemResourcesConfig(const config::GraphicsSettings& graphicsSettings, const config::MemorySettings& memorySettings)
     : maxPointLights{memorySettings.maxPointLights},
       maxRenderers{memorySettings.maxRenderers},

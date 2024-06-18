@@ -3,6 +3,7 @@
 #include "Attachment.h"
 #include "graphics/api/vulkan/techniques/ITechnique.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
+#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
 
 #include <span>
 #include <vector>
@@ -33,11 +34,20 @@ class RenderPass
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
 
+        RenderPass(vk::Device device,
+                   std::span<const AttachmentSlot> attachmentSlots,
+                   std::span<const Subpass> subpasses,
+                   std::vector<Attachment> attachments,
+                   const AttachmentSize &size,
+                   ClearValueFlags_t clearFlags,
+                   PostProcessImageType renderTargetsType,
+                   std::vector<vk::ImageView> renderTargets,
+                   uint32_t sourceSinkPartition);
+
         void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
         void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer* cmd);
 
-        auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
         auto GetVkPass() const -> vk::RenderPass;
 
         void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
@@ -52,6 +62,9 @@ class RenderPass
 
         void UnregisterPipelines();
 
+        auto GetRenderTargetsType() const noexcept -> PostProcessImageType { return m_renderTargetsType; }
+        auto GetRenderTargets() const -> std::span<const vk::ImageView>;
+
     private:
         vk::Device m_device;
         vk::UniqueRenderPass m_renderPass;
@@ -61,6 +74,9 @@ class RenderPass
         std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
+        PostProcessImageType m_renderTargetsType;
+        std::vector<vk::ImageView> m_renderTargets;
+        uint32_t m_sourceSinkPartition;
 };
 
 template <std::derived_from<ITechnique> T>

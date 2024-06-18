@@ -13,7 +13,7 @@ PPImageArrayBufferHandle::PPImageArrayBufferHandle(PostProcessImageType imageTyp
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void PPImageArrayBufferHandle::Update(uint32_t count, uint32_t currentFrameIndex)
+void PPImageArrayBufferHandle::Update(uint32_t currentFrameIndex)
 {
     m_backendPort->Emit(
         PpiaUpdateEventData
@@ -22,7 +22,7 @@ void PPImageArrayBufferHandle::Update(uint32_t count, uint32_t currentFrameIndex
             currentFrameIndex,
             m_slot,
             m_set,
-            count,
+            0u,
             m_stage,
             PpiaUpdateAction::Update
         }

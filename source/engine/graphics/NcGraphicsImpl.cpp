@@ -102,7 +102,6 @@ namespace nc::graphics
           m_graphics{std::move(graphics)},
           m_shaderResourceBus{std::move(shaderResourceBus)},
           m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
-          m_postProcessResources{memorySettings.maxPointLights + memorySettings.maxSpotLights, &m_shaderResourceBus},
           m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl::OnResize)}
     {
@@ -150,7 +149,6 @@ namespace nc::graphics
         /** @todo graphics::clear not marked noexcept */
         m_systemResources.particleEmitters.Clear();
         m_graphics->Clear();
-        m_postProcessResources.uniDirShadowMaps.Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
         m_systemResources.lights.Clear();
@@ -240,10 +238,10 @@ namespace nc::graphics
         // Build the pipelines and renderpasses depending on which render state was generated.
         m_graphics->BuildRenderGraph(stateData);
 
-        if (state.lightState.updateShadows)
-        {
-            m_postProcessResources.uniDirShadowMaps.Update(static_cast<uint32_t>(state.lightState.omniDirectionalLightCount + state.lightState.uniDirectionalLightCount), currentFrameIndex);
-        }
+        // if (state.lightState.updateShadows)
+        // {
+        //     m_postProcessResources.uniDirShadowMaps.Update(static_cast<uint32_t>(state.lightState.omniDirectionalLightCount + state.lightState.uniDirectionalLightCount), currentFrameIndex);
+        // }
 
         // Allow the frame to begin accepting draw commands.
         if (!m_graphics->BeginFrame())

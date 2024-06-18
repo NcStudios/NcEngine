@@ -85,7 +85,31 @@ RenderPass::RenderPass(vk::Device device,
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
       m_litPipelines{},
-      m_attachments{std::move(attachments)}
+      m_attachments{std::move(attachments)},
+      m_renderTargetsType{PostProcessImageType::None},
+      m_renderTargets{},
+      m_sourceSinkPartition{0u}
+{
+}
+
+RenderPass::RenderPass(vk::Device device,
+                       std::span<const AttachmentSlot> attachmentSlots,
+                       std::span<const Subpass> subpasses,
+                       std::vector<Attachment> attachments,
+                       const AttachmentSize &size,
+                       ClearValueFlags_t clearFlags,
+                       PostProcessImageType renderTargetsType,
+                       std::vector<vk::ImageView> renderTargets,
+                       uint32_t sourceSinkPartition)
+    : m_device{device},
+      m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
+      m_attachmentSize{size},
+      m_clearFlags{clearFlags},
+      m_litPipelines{},
+      m_attachments{std::move(attachments)},
+      m_renderTargetsType{renderTargetsType},
+      m_renderTargets{std::move(renderTargets)},
+      m_sourceSinkPartition{sourceSinkPartition}
 {
 }
 
@@ -153,11 +177,6 @@ void RenderPass::End(vk::CommandBuffer *cmd)
     cmd->endRenderPass();
 }
 
-auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
-{
-    return m_attachments.at(index).view.get();
-}
-
 auto RenderPass::GetVkPass() const ->vk::RenderPass
 {
     return m_renderPass.get();
@@ -178,4 +197,15 @@ void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2
 
     m_frameBuffers.emplace_back(m_device.createFramebufferUnique(framebufferInfo));
 }
+
+auto RenderPass::GetRenderTargets() const -> std::span<const vk::ImageView>
+{
+    if (m_sourceSinkPartition > m_renderTargets.size())
+    {
+        return {};
+    }
+
+    return std::span<const vk::ImageView>{m_renderTargets.data() + m_sourceSinkPartition, m_renderTargets.data() - m_sourceSinkPartition};
+}
+
 } // namespace nc::graphics::vulkan

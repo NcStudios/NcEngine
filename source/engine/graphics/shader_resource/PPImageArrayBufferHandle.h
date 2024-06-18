@@ -11,7 +11,8 @@ namespace nc::graphics
 {
 enum class PostProcessImageType : uint8_t
 {
-    UniDirShadowMap
+    None,
+    ShadowMap
 };
 
 enum class PpiaUpdateAction : uint8_t
@@ -36,14 +37,13 @@ class PPImageArrayBufferHandle
 {
     public:
         PPImageArrayBufferHandle(PostProcessImageType imageType, shader_stage stage, Signal<const PpiaUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
-        void Update(uint32_t count, uint32_t currentFrameIndex);
+        void Update(uint32_t currentFrameIndex);
         void Clear();
 
     private:
         PostProcessImageType m_imageType;
         uint32_t m_slot;
         uint32_t m_set;
-        uint32_t m_count;
         shader_stage m_stage;
         Signal<const PpiaUpdateEventData&>* m_backendPort;
 };
