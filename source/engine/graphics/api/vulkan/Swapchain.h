@@ -4,6 +4,8 @@
 
 #include "vulkan/vk_mem_alloc.hpp"
 
+#include <span>
+
 namespace nc::graphics::vulkan
 {
     struct SwapChainSupportDetails
