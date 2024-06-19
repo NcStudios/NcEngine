@@ -40,8 +40,8 @@ class RenderPass
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags,
-                   PostProcessImageType renderTargetsType,
-                   std::vector<vk::ImageView> renderTargets,
+                   PostProcessImageType sinkViewsType,
+                   std::vector<vk::ImageView> sinkViews,
                    uint32_t sourceSinkPartition);
 
         void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
@@ -49,9 +49,9 @@ class RenderPass
         void End(vk::CommandBuffer* cmd);
 
         auto GetVkPass() const -> vk::RenderPass;
+        auto GetAttachmentView(uint32_t index) const -> vk::ImageView { return m_attachments.at(index).view.get(); }
 
         void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
-
         template <std::derived_from<ITechnique> T>
         void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);
         void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
@@ -62,8 +62,8 @@ class RenderPass
 
         void UnregisterPipelines();
 
-        auto GetRenderTargetsType() const noexcept -> PostProcessImageType { return m_renderTargetsType; }
-        auto GetRenderTargets() const -> std::span<const vk::ImageView>;
+        auto GetSinkViewsType() const noexcept -> PostProcessImageType { return m_sinkViewsType; }
+        auto GetSinkViews() const -> std::span<const vk::ImageView>;
 
     private:
         vk::Device m_device;
@@ -74,7 +74,7 @@ class RenderPass
         std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
-        PostProcessImageType m_renderTargetsType;
+        PostProcessImageType m_sinkViewsType;
         std::vector<vk::ImageView> m_renderTargets;
         uint32_t m_sourceSinkPartition;
 };

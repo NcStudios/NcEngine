@@ -8,6 +8,7 @@
 namespace nc::graphics
 {
 struct PpiaUpdateEventData;
+struct ShaderResourceBus;
 
 namespace vulkan
 {
@@ -15,7 +16,6 @@ class Device;
 class GpuAllocator;
 class PerFrameGpuContext;
 class ShaderBindingManager;
-class ShaderResourceBus;
 struct ShaderStorage;
 class Swapchain;
 
@@ -29,7 +29,7 @@ struct PerFrameRenderGraph
     std::vector<RenderPass> shadowPasses; // One per light
     RenderPass litPass;
     PerFrameRenderStateData stateData;
-    std::unordered_map<PostProcessImageType, bool> updateRenderTargets;
+    std::unordered_map<PostProcessImageType, bool> renderTargetsDirty;
     bool isInitialized;
 };
 
@@ -57,7 +57,6 @@ class RenderGraph
         ShaderStorage* m_shaderStorage;
 
         // Internal data
-        Attachment m_dummyShadowMap;
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
         std::unordered_map<PostProcessImageType, PPImageArrayBufferHandle> m_renderTargetsBuffers;
         Vector2 m_dimensions;

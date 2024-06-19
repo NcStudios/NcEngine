@@ -86,7 +86,7 @@ RenderPass::RenderPass(vk::Device device,
       m_clearFlags{clearFlags},
       m_litPipelines{},
       m_attachments{std::move(attachments)},
-      m_renderTargetsType{PostProcessImageType::None},
+      m_sinkViewsType{PostProcessImageType::None},
       m_renderTargets{},
       m_sourceSinkPartition{0u}
 {
@@ -107,7 +107,7 @@ RenderPass::RenderPass(vk::Device device,
       m_clearFlags{clearFlags},
       m_litPipelines{},
       m_attachments{std::move(attachments)},
-      m_renderTargetsType{renderTargetsType},
+      m_sinkViewsType{renderTargetsType},
       m_renderTargets{std::move(renderTargets)},
       m_sourceSinkPartition{sourceSinkPartition}
 {
@@ -198,7 +198,7 @@ void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2
     m_frameBuffers.emplace_back(m_device.createFramebufferUnique(framebufferInfo));
 }
 
-auto RenderPass::GetRenderTargets() const -> std::span<const vk::ImageView>
+auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
 {
     if (m_sourceSinkPartition > m_renderTargets.size())
     {
