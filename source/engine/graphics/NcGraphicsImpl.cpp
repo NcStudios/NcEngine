@@ -79,11 +79,10 @@ namespace nc::graphics
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             NC_LOG_TRACE("Selecting Graphics API");
-            auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, resourceBus, *ncWindow);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, *ncWindow);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), *ncWindow);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -96,13 +95,11 @@ namespace nc::graphics
                                    ModuleProvider modules,
                                    SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
-                                   ShaderResourceBus shaderResourceBus,
                                    window::NcWindow& window)
         : m_registry{registry},
           m_graphics{std::move(graphics)},
-          m_shaderResourceBus{std::move(shaderResourceBus)},
-          m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
-          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)},
+          m_assetResources{AssetResourcesConfig{memorySettings}, m_graphics->ResourceBus(), modules.Get<asset::NcAsset>()},
+          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, m_graphics->ResourceBus(), modules, events, std::bind_front(&NcGraphics::GetCamera, this)},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl::OnResize)}
     {
 #if NC_DEBUG_RENDERING_ENABLED

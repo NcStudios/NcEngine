@@ -43,12 +43,12 @@ class IGraphics
         virtual void FrameEnd() = 0;
         virtual void OnResize(const Vector2& dimensions, bool isMinimized) = 0;
         virtual auto PrepareFrame() -> bool = 0;
+        virtual auto ResourceBus() noexcept -> ShaderResourceBus* = 0;
 };
 
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
                      asset::NcAsset* assetModule,
-                     ShaderResourceBus& shaderResourceBus,
                      window::NcWindow& window) -> std::unique_ptr<IGraphics>;
 } // namespace graphics
 } // namespace nc

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/IGraphics.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 
 #include "ncmath/Vector.h"
 
@@ -23,7 +24,6 @@ namespace graphics
 {
 struct PerFrameRenderState;
 struct PerFrameRenderStateData;
-struct ShaderResourceBus;
 
 namespace vulkan
 {
@@ -43,7 +43,6 @@ class VulkanGraphics : public IGraphics
         VulkanGraphics(const config::ProjectSettings& projectSettings,
                        const config::GraphicsSettings& graphicsSettings,
                        asset::NcAsset* assetModule,
-                       ShaderResourceBus& shaderResourceBus,
                        uint32_t apiVersion, GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);
 
         ~VulkanGraphics() noexcept;
@@ -56,6 +55,7 @@ class VulkanGraphics : public IGraphics
         void FrameEnd() override;
         void OnResize(const Vector2& dimensions, bool isMinimized) override;
         void Clear() noexcept override;
+        auto ResourceBus() noexcept -> ShaderResourceBus* override { return &m_shaderResourceBus; }
 
     private:
         void Resize(const Vector2& dimensions);
@@ -66,6 +66,7 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<Swapchain> m_swapchain;
         std::unique_ptr<GpuAllocator> m_allocator;
         std::unique_ptr<FrameManager> m_frameManager;
+        ShaderResourceBus m_shaderResourceBus;
         std::unique_ptr<ShaderBindingManager> m_shaderBindingManager;
         std::unique_ptr<ShaderStorage> m_shaderStorage;
         std::unique_ptr<RenderGraph> m_renderGraph;

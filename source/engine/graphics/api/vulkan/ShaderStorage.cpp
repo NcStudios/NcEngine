@@ -268,8 +268,6 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
                 eventData.slot,
                 eventData.currentFrameIndex
             );
-
-            storageBuffer->Clear();
             break;
         }
         case PpiaUpdateAction::Clear:

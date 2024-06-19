@@ -36,7 +36,7 @@ struct PerFrameRenderGraph
 class RenderGraph
 {
     public:
-        RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, ShaderResourceBus& shaderResourceBus, Vector2 dimensions);
+        RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, ShaderResourceBus* shaderResourceBus, Vector2 dimensions);
 
         void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex);
         void Resize(const Vector2 &dimensions);

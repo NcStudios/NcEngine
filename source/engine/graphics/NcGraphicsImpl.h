@@ -29,7 +29,6 @@ class NcGraphicsImpl : public NcGraphics
                        ModuleProvider modules,
                        SystemEvents& events,
                        std::unique_ptr<IGraphics> graphics,
-                       ShaderResourceBus shaderResourceBus,
                        window::NcWindow& window);
 
         void SetCamera(Camera* camera) noexcept override;
@@ -46,7 +45,6 @@ class NcGraphicsImpl : public NcGraphics
     private:
         Registry* m_registry;
         std::unique_ptr<IGraphics> m_graphics;
-        ShaderResourceBus m_shaderResourceBus;
         AssetResources m_assetResources;
         SystemResources m_systemResources;
         Connection<const Vector2&, bool> m_onResizeConnection;

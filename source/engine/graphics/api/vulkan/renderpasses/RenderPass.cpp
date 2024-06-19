@@ -205,7 +205,7 @@ auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
         return {};
     }
 
-    return std::span<const vk::ImageView>{m_renderTargets.data() + m_sourceSinkPartition, m_renderTargets.data() - m_sourceSinkPartition};
+    return std::span<const vk::ImageView>{m_renderTargets.data() + m_sourceSinkPartition, m_renderTargets.size() - m_sourceSinkPartition};
 }
 
 } // namespace nc::graphics::vulkan

@@ -246,7 +246,7 @@ auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
 
 namespace nc::graphics::vulkan
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, ShaderResourceBus& shaderResourceBus, Vector2 dimensions)
+RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, ShaderResourceBus* shaderResourceBus, Vector2 dimensions)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
@@ -254,7 +254,7 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
       m_shaderBindingManager{shaderBindingManager},
       m_shaderStorage{shaderStorage},
       m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
-      m_renderTargetsBuffers{{PostProcessImageType::ShadowMap, shaderResourceBus.CreatePPImageArrayBuffer(PostProcessImageType::ShadowMap, 20u, ShaderStage::Fragment, 3u, 2u)}},
+      m_renderTargetsBuffers{{PostProcessImageType::ShadowMap, shaderResourceBus->CreatePPImageArrayBuffer(PostProcessImageType::ShadowMap, 20u, ShaderStage::Fragment, 3u, 2u)}},
       m_dimensions{dimensions},
       m_screenExtent{}
 {
@@ -264,14 +264,14 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
 void RenderGraph::SinkRenderTargets(const RenderPass& renderPass)
 {
     OPTICK_CATEGORY("RenderGraph::SinkRenderTargets", Optick::Category::Rendering);
-    auto& renderGraph = GetCurrentFrameGraph();
     auto renderTargetsType = renderPass.GetSinkViewsType();
-    auto& renderTargetsBuffer = m_renderTargetsBuffers.at(renderTargetsType);
-    m_shaderStorage->SinkRenderTargets(renderPass.GetSinkViews(), renderTargetsType, m_frameManager->Index());
+    auto renderPassSink = renderPass.GetSinkViews();
 
-    if (renderGraph.renderTargetsDirty.at(renderTargetsType))
+    m_shaderStorage->SinkRenderTargets(renderPassSink, renderTargetsType, m_frameManager->Index());
+
+    if (GetCurrentFrameGraph().renderTargetsDirty.at(renderTargetsType) && renderPassSink.size() > 0)
     {
-        renderTargetsBuffer.Update(m_frameManager->Index());
+        m_renderTargetsBuffers.at(renderTargetsType).Update(m_frameManager->Index());
     }
 }
 
@@ -285,6 +285,7 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
         stateData.uniDirLightsCount  != renderGraph.stateData.uniDirLightsCount)
     {
         renderGraph.renderTargetsDirty.at(PostProcessImageType::ShadowMap) = true;
+        m_renderTargetsBuffers.at(PostProcessImageType::ShadowMap).Clear();
 
         renderGraph.shadowPasses.clear();
         for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
@@ -381,6 +382,11 @@ void RenderGraph::Clear()
     {
         renderGraph.litPass.UnregisterPipelines();
         renderGraph.isInitialized = false;
+        renderGraph.stateData = PerFrameRenderStateData{};
+        for (auto& [renderPassSinkType, renderPassSinkBuffer] : m_renderTargetsBuffers)
+        {
+            renderPassSinkBuffer.Clear();
+        }
     }
 }
 
