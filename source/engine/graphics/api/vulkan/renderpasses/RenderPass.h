@@ -3,7 +3,7 @@
 #include "Attachment.h"
 #include "graphics/api/vulkan/techniques/ITechnique.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
-#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 #include <span>
 #include <vector>
@@ -40,7 +40,7 @@ class RenderPass
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags,
-                   PostProcessImageType sinkViewsType,
+                   RenderPassSinkType sinkViewsType,
                    std::vector<vk::ImageView> sinkViews,
                    uint32_t sourceSinkPartition);
 
@@ -62,7 +62,7 @@ class RenderPass
 
         void UnregisterPipelines();
 
-        auto GetSinkViewsType() const noexcept -> PostProcessImageType { return m_sinkViewsType; }
+        auto GetSinkViewsType() const noexcept -> RenderPassSinkType { return m_sinkViewsType; }
         auto GetSinkViews() const -> std::span<const vk::ImageView>;
 
     private:
@@ -74,8 +74,8 @@ class RenderPass
         std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
-        PostProcessImageType m_sinkViewsType;
-        std::vector<vk::ImageView> m_renderTargets;
+        RenderPassSinkType m_sinkViewsType;
+        std::vector<vk::ImageView> m_sinkViews;
         uint32_t m_sourceSinkPartition;
 };
 

@@ -9,42 +9,42 @@
 
 namespace nc::graphics
 {
-enum class PostProcessImageType : uint8_t
+enum class RenderPassSinkType : uint8_t
 {
     None,
     ShadowMap
 };
 
-enum class PpiaUpdateAction : uint8_t
+enum class RpsUpdateAction : uint8_t
 {
     Initialize,
     Update,
     Clear
 };
 
-struct PpiaUpdateEventData
+struct RpsUpdateEventData
 {
-    PostProcessImageType imageType;
+    RenderPassSinkType sinkType;
     uint32_t currentFrameIndex;
     uint32_t slot;
     uint32_t set;
     uint32_t count;
     shader_stage stage;
-    PpiaUpdateAction action;
+    RpsUpdateAction action;
 };
 
-class PPImageArrayBufferHandle
+class RenderPassSinkBufferHandle
 {
     public:
-        PPImageArrayBufferHandle(PostProcessImageType imageType, shader_stage stage, Signal<const PpiaUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
+        RenderPassSinkBufferHandle(RenderPassSinkType sinkType, shader_stage stage, Signal<const RpsUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
         void Update(uint32_t currentFrameIndex);
         void Clear();
 
     private:
-        PostProcessImageType m_imageType;
+        RenderPassSinkType m_sinkType;
         uint32_t m_slot;
         uint32_t m_set;
         shader_stage m_stage;
-        Signal<const PpiaUpdateEventData&>* m_backendPort;
+        Signal<const RpsUpdateEventData&>* m_backendPort;
 };
 } // namespace nc::graphics

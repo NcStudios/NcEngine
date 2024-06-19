@@ -5,9 +5,9 @@
 
 namespace nc::graphics::vulkan
 {
-struct PPImageArrayBuffer
+struct RenderPassSinkBuffer
 {
-    PPImageArrayBuffer(vk::Device device);
+    RenderPassSinkBuffer(vk::Device device);
 
     void Clear() noexcept;
 

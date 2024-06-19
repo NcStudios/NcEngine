@@ -33,12 +33,12 @@ auto ShaderResourceBus::CreateMeshArrayBuffer() -> MeshArrayBufferHandle
     return MeshArrayBufferHandle(&meshArrayBufferChannel);
 }
 
-auto ShaderResourceBus::CreatePPImageArrayBuffer(PostProcessImageType imageType, uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> PPImageArrayBufferHandle
+auto ShaderResourceBus::CreateRenderPassSinkBuffer(RenderPassSinkType imageType, uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> RenderPassSinkBufferHandle
 {
     for (auto i : std::views::iota(0u, MaxFramesInFlight))
     {
-        ppImageArrayBufferChannel.Emit(
-            PpiaUpdateEventData
+        renderPassSinkBufferChannel.Emit(
+            RpsUpdateEventData
             {
                 imageType,
                 i,
@@ -46,11 +46,11 @@ auto ShaderResourceBus::CreatePPImageArrayBuffer(PostProcessImageType imageType,
                 set,
                 capacity,
                 stage,
-                PpiaUpdateAction::Initialize
+                RpsUpdateAction::Initialize
             }
         );
     }
-    return PPImageArrayBufferHandle(imageType, stage, &ppImageArrayBufferChannel, slot, set);
+    return RenderPassSinkBufferHandle(imageType, stage, &renderPassSinkBufferChannel, slot, set);
 }
 
 auto ShaderResourceBus::CreateStorageBuffer(size_t size, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> StorageBufferHandle

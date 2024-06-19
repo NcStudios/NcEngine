@@ -3,11 +3,11 @@
 #include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/renderpasses/RenderPass.h"
 #include "graphics/PerFrameRenderState.h"
-#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 namespace nc::graphics
 {
-struct PpiaUpdateEventData;
+struct RpsUpdateEventData;
 struct ShaderResourceBus;
 
 namespace vulkan
@@ -29,7 +29,7 @@ struct PerFrameRenderGraph
     std::vector<RenderPass> shadowPasses; // One per light
     RenderPass litPass;
     PerFrameRenderStateData stateData;
-    std::unordered_map<PostProcessImageType, bool> renderTargetsDirty;
+    std::unordered_map<RenderPassSinkType, bool> isSinkDirty;
     bool isInitialized;
 };
 
@@ -38,10 +38,10 @@ class RenderGraph
     public:
         RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, ShaderResourceBus* shaderResourceBus, Vector2 dimensions);
 
-        void RecordDrawCallsOnBuffer(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex);
+        void Execute(const PerFrameRenderState& frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex);
         void Resize(const Vector2 &dimensions);
         void Clear();
-        void SinkRenderTargets(const RenderPass& renderPass);
+        void Sink(const RenderPass& renderPass);
         auto GetLitPass() const noexcept -> const RenderPass& { return m_perFrameRenderGraphs.at(0).litPass; };
         void BuildRenderGraph(const PerFrameRenderStateData& stateData, uint32_t frameIndex);
 
@@ -58,7 +58,7 @@ class RenderGraph
 
         // Internal data
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
-        std::unordered_map<PostProcessImageType, PPImageArrayBufferHandle> m_renderTargetsBuffers;
+        std::unordered_map<RenderPassSinkType, RenderPassSinkBufferHandle> m_sinkBuffers;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         uint32_t m_maxLights;

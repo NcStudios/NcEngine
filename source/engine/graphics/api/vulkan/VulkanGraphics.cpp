@@ -41,7 +41,7 @@ VulkanGraphics::VulkanGraphics(const config::ProjectSettings& projectSettings,
       m_shaderResourceBus{},
       m_shaderBindingManager{ std::make_unique<ShaderBindingManager>(m_device->VkDevice())},
       m_shaderStorage{std::make_unique<ShaderStorage>(m_device->VkDevice(), m_allocator.get(), m_shaderBindingManager.get(), m_frameManager->CommandBuffers(),
-                                                      m_shaderResourceBus.cubeMapArrayBufferChannel, m_shaderResourceBus.meshArrayBufferChannel, m_shaderResourceBus.ppImageArrayBufferChannel,
+                                                      m_shaderResourceBus.cubeMapArrayBufferChannel, m_shaderResourceBus.meshArrayBufferChannel, m_shaderResourceBus.renderPassSinkBufferChannel,
                                                       m_shaderResourceBus.storageBufferChannel, m_shaderResourceBus.uniformBufferChannel, m_shaderResourceBus.textureArrayBufferChannel)},
       m_renderGraph{std::make_unique<RenderGraph>(m_frameManager.get(), m_device.get(), m_swapchain.get(), m_allocator.get(), m_shaderBindingManager.get(), m_shaderStorage.get(), &m_shaderResourceBus, dimensions)},
       m_imgui{std::make_unique<Imgui>(*m_device, *m_instance, window, m_renderGraph->GetLitPass().GetVkPass(), assetModule->OnFontUpdate())},
@@ -156,7 +156,7 @@ void VulkanGraphics::DrawFrame(const PerFrameRenderState& state)
     m_imgui->Frame();
 
     // Executes the draw commands for the graph (recording them into the command buffer for the given frame)
-    m_renderGraph->RecordDrawCallsOnBuffer(state, m_dimensions, m_screenExtent, m_imageIndex);
+    m_renderGraph->Execute(state, m_dimensions, m_screenExtent, m_imageIndex);
 }
 
 void VulkanGraphics::FrameEnd()

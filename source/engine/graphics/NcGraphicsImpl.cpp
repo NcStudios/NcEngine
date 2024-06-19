@@ -235,11 +235,6 @@ namespace nc::graphics
         // Build the pipelines and renderpasses depending on which render state was generated.
         m_graphics->BuildRenderGraph(stateData);
 
-        // if (state.lightState.updateShadows)
-        // {
-        //     m_postProcessResources.uniDirShadowMaps.Update(static_cast<uint32_t>(state.lightState.omniDirectionalLightCount + state.lightState.uniDirectionalLightCount), currentFrameIndex);
-        // }
-
         // Allow the frame to begin accepting draw commands.
         if (!m_graphics->BeginFrame())
         {
