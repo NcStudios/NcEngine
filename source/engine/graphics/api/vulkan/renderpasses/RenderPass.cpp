@@ -200,7 +200,7 @@ void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2
 
 auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
 {
-    if (m_sourceSinkPartition > m_sinkViews.size())
+    if (m_sourceSinkPartition >= m_sinkViews.size())
     {
         return {};
     }
