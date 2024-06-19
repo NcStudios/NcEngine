@@ -3,6 +3,7 @@
 #include "Attachment.h"
 #include "graphics/api/vulkan/techniques/ITechnique.h"
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 #include <span>
 #include <vector>
@@ -33,15 +34,24 @@ class RenderPass
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
 
+        RenderPass(vk::Device device,
+                   std::span<const AttachmentSlot> attachmentSlots,
+                   std::span<const Subpass> subpasses,
+                   std::vector<Attachment> attachments,
+                   const AttachmentSize &size,
+                   ClearValueFlags_t clearFlags,
+                   RenderPassSinkType sinkViewsType,
+                   std::vector<vk::ImageView> sinkViews,
+                   uint32_t sourceSinkPartition);
+
         void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
         void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer* cmd);
 
-        auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
         auto GetVkPass() const -> vk::RenderPass;
+        auto GetAttachmentView(uint32_t index) const -> vk::ImageView { return m_attachments.at(index).view.get(); }
 
-        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions);
-
+        void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
         template <std::derived_from<ITechnique> T>
         void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);
         void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
@@ -52,6 +62,9 @@ class RenderPass
 
         void UnregisterPipelines();
 
+        auto GetSinkViewsType() const noexcept -> RenderPassSinkType { return m_sinkViewsType; }
+        auto GetSinkViews() const -> std::span<const vk::ImageView>;
+
     private:
         vk::Device m_device;
         vk::UniqueRenderPass m_renderPass;
@@ -61,6 +74,9 @@ class RenderPass
         std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
+        RenderPassSinkType m_sinkViewsType;
+        std::vector<vk::ImageView> m_sinkViews;
+        uint32_t m_sourceSinkPartition;
 };
 
 template <std::derived_from<ITechnique> T>

@@ -20,32 +20,35 @@ struct ClearValueFlags
     static constexpr ClearValueFlags_t Depth = 1 << 2;
 };
 
-enum class AttachmentType : uint8_t
-{
-    Color,
-    Depth,
-    ShadowDepth,
-    Resolve
-};
-
 struct Attachment
 {
-    Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat);
+    Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat, vk::ImageUsageFlags imageUsageFlags);
     GpuAllocation<vk::Image> image;
     vk::UniqueImageView view;
 };
 
 struct AttachmentSlot
 {
-    AttachmentSlot(uint32_t attachmentIndex, AttachmentType type, vk::Format format, vk::AttachmentLoadOp loadOp, vk::AttachmentStoreOp storeOp, vk::SampleCountFlagBits numSamples);
+    AttachmentSlot(uint32_t attachmentIndex,
+                   vk::Format format_,
+                   vk::ImageLayout initialLayout,
+                   vk::ImageLayout subpassLayout,
+                   vk::ImageLayout finalLayout,
+                   vk::AttachmentLoadOp loadOp,
+                   vk::AttachmentStoreOp storeOp,
+                   vk::AttachmentLoadOp stencilLoadOp,
+                   vk::AttachmentStoreOp stencilStoreOp,
+                   vk::SampleCountFlagBits numSamples_);
     vk::AttachmentDescription description;
     vk::AttachmentReference reference;
-    AttachmentType type;
+    vk::SampleCountFlagBits numSamples;
+    vk::Format format;
 };
 
 struct Subpass
 {
     Subpass(const AttachmentSlot &colorAttachment, const AttachmentSlot &depthAttachment, const AttachmentSlot &resolveAttachment);
+    explicit Subpass(const AttachmentSlot &colorAttachment, const AttachmentSlot &depthAttachment);
     explicit Subpass(const AttachmentSlot &depthAttachment);
     vk::SubpassDescription description;
     std::vector<vk::SubpassDependency> dependencies{};

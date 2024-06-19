@@ -108,6 +108,7 @@ namespace nc::graphics::vulkan
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
         imageInfo.setUsage(usageFlags);
         imageInfo.setFlags(imageFlags);
+        imageInfo.setInitialLayout(vk::ImageLayout::eUndefined);
 
         vma::AllocationCreateInfo allocationInfo{};
         allocationInfo.usage = vma::MemoryUsage::eGpuOnly;

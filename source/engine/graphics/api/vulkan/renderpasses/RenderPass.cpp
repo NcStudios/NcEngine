@@ -85,7 +85,31 @@ RenderPass::RenderPass(vk::Device device,
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
       m_litPipelines{},
-      m_attachments{std::move(attachments)}
+      m_attachments{std::move(attachments)},
+      m_sinkViewsType{RenderPassSinkType::None},
+      m_sinkViews{},
+      m_sourceSinkPartition{0u}
+{
+}
+
+RenderPass::RenderPass(vk::Device device,
+                       std::span<const AttachmentSlot> attachmentSlots,
+                       std::span<const Subpass> subpasses,
+                       std::vector<Attachment> attachments,
+                       const AttachmentSize &size,
+                       ClearValueFlags_t clearFlags,
+                       RenderPassSinkType renderTargetsType,
+                       std::vector<vk::ImageView> renderTargets,
+                       uint32_t sourceSinkPartition)
+    : m_device{device},
+      m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
+      m_attachmentSize{size},
+      m_clearFlags{clearFlags},
+      m_litPipelines{},
+      m_attachments{std::move(attachments)},
+      m_sinkViewsType{renderTargetsType},
+      m_sinkViews{std::move(renderTargets)},
+      m_sourceSinkPartition{sourceSinkPartition}
 {
 }
 
@@ -153,17 +177,12 @@ void RenderPass::End(vk::CommandBuffer *cmd)
     cmd->endRenderPass();
 }
 
-auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
-{
-    return m_attachments.at(index).view.get();
-}
-
 auto RenderPass::GetVkPass() const ->vk::RenderPass
 {
     return m_renderPass.get();
 }
 
-void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions)
+void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2 dimensions)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
@@ -178,4 +197,15 @@ void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector
 
     m_frameBuffers.emplace_back(m_device.createFramebufferUnique(framebufferInfo));
 }
+
+auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
+{
+    if (m_sourceSinkPartition >= m_sinkViews.size())
+    {
+        return {};
+    }
+
+    return std::span<const vk::ImageView>{m_sinkViews.data() + m_sourceSinkPartition, m_sinkViews.size() - m_sourceSinkPartition};
+}
+
 } // namespace nc::graphics::vulkan

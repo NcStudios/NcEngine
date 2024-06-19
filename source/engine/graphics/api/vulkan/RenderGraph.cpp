@@ -12,6 +12,8 @@
 #include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 #include "graphics/api/vulkan/techniques/ToonTechnique.h"
 #include "graphics/api/vulkan/techniques/UiTechnique.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "graphics/api/vulkan/techniques/WireframeTechnique.h"
@@ -42,26 +44,52 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
     cmd->setScissor(0, 1, &scissor);
 }
 
-auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device, nc::graphics::vulkan::GpuAllocator* allocator, nc::graphics::vulkan::Swapchain* swapchain, nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager, const nc::Vector2& dimensions, uint32_t shadowCasterIndex, bool isOmniDirectional) -> nc::graphics::vulkan::RenderPass
+auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
+                             nc::graphics::vulkan::GpuAllocator* allocator,
+                             nc::graphics::vulkan::Swapchain* swapchain,
+                             nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
+                             const nc::Vector2& dimensions,
+                             uint32_t shadowCasterIndex,
+                             bool isOmniDirectional) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
 
     const auto vkDevice = device->VkDevice();
     const auto shadowAttachmentSlots = std::array<AttachmentSlot, 1>
     {
-        AttachmentSlot{0, AttachmentType::ShadowDepth, vk::Format::eD16Unorm, vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+        AttachmentSlot
+        {
+            0,
+            vk::Format::eD16Unorm,                                   // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal,         // Initial subpass layout
+            vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal, // Final layout
+            vk::AttachmentLoadOp::eClear,                            // Attachment load
+            vk::AttachmentStoreOp::eStore,                           // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                         // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            vk::SampleCountFlagBits::e1                              // Sample count
+        }
     };
 
     const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
 
-    auto attachment = std::vector<Attachment>{};
-    attachment.push_back(Attachment(vkDevice, allocator, dimensions, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm));
+    auto attachments = std::vector<Attachment>{};
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled));
 
-    const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
-    auto renderPass = RenderPass(vkDevice, shadowAttachmentSlots, shadowSubpasses, std::move(attachment), size, ClearValueFlags::Depth);
+    auto sinkViews = std::vector<vk::ImageView>{attachments.at(0).view.get()};
+    auto renderPass = RenderPass(vkDevice,
+                                 shadowAttachmentSlots,
+                                 shadowSubpasses,
+                                 std::move(attachments),
+                                 AttachmentSize{dimensions, swapchain->GetExtent()},
+                                 ClearValueFlags::Depth,
+                                 nc::graphics::RenderPassSinkType::ShadowMap,
+                                 std::move(sinkViews),
+                                 0u);
 
-    const auto views = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
-    renderPass.CreateFrameBuffers(views, dimensions);
+    const auto attachmentViews = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
+    renderPass.CreateFrameBuffer(attachmentViews, dimensions);
     renderPass.RegisterShadowMappingTechnique(vkDevice, shaderBindingManager, shadowCasterIndex, isOmniDirectional);
 
     return renderPass;
@@ -78,9 +106,45 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
 
     const auto litAttachmentSlots = std::array<AttachmentSlot, 3>
     {
-        AttachmentSlot{0, AttachmentType::Color, swapchain->GetFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore, numSamples},
-        AttachmentSlot{1, AttachmentType::Depth, gpuOptions.GetDepthFormat(), vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eDontCare, numSamples},
-        AttachmentSlot{2, AttachmentType::Resolve, swapchain->GetFormat(), vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eStore, vk::SampleCountFlagBits::e1}
+        AttachmentSlot // Swapchain Image (Color)
+        {
+            0,
+            swapchain->GetFormat(),                                  // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eColorAttachmentOptimal,                // Initial subpass layout
+            vk::ImageLayout::eColorAttachmentOptimal,                // Final layout
+            vk::AttachmentLoadOp::eClear,                            // Attachment load
+            vk::AttachmentStoreOp::eStore,                           // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                         // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            numSamples                                               // Sample count
+        },
+        AttachmentSlot // Depth
+        {
+            1,
+            gpuOptions.GetDepthFormat(),                             // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal,         // Initial subpass layout
+            vk::ImageLayout::eDepthStencilAttachmentOptimal,         // Final layout
+            vk::AttachmentLoadOp::eClear,                            // Attachment load
+            vk::AttachmentStoreOp::eDontCare,                        // Attachment store
+            vk::AttachmentLoadOp::eClear,                            // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            numSamples                                               // Sample count
+        },
+        AttachmentSlot // AA Color Resolve
+        {
+            2,
+            swapchain->GetFormat(),                                  // Image format
+            vk::ImageLayout::eUndefined,                             // Initial layout
+            vk::ImageLayout::eColorAttachmentOptimal,                // Initial subpass layout
+            vk::ImageLayout::ePresentSrcKHR,                         // Final layout
+            vk::AttachmentLoadOp::eDontCare,                         // Attachment load
+            vk::AttachmentStoreOp::eStore,                           // Attachment store
+            vk::AttachmentLoadOp::eDontCare,                         // Stencil load
+            vk::AttachmentStoreOp::eDontCare,                        // Stencil store
+            vk::SampleCountFlagBits::e1                              // Sample count
+        },
     };
 
     const auto litSubpasses = std::array<Subpass, 1>
@@ -89,26 +153,22 @@ auto CreateLitPass(const nc::graphics::vulkan::Device* device, nc::graphics::vul
     };
 
     std::vector<Attachment> attachments;
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, numSamples, gpuOptions.GetDepthFormat())); // Depth Stencil
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, numSamples, swapchain->GetFormat())); // Color Buffer
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, litAttachmentSlots[1].numSamples, litAttachmentSlots[1].format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled)); // Depth Stencil
+    attachments.push_back(Attachment(vkDevice, allocator, dimensions, false, litAttachmentSlots[0].numSamples, litAttachmentSlots[0].format, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransientAttachment)); // AA Color Resolve Buffer
 
     const auto size = AttachmentSize{dimensions, swapchain->GetExtent()};
     auto renderPass = RenderPass(vkDevice, litAttachmentSlots, litSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
-    auto colorResolveView     = renderPass.GetAttachmentView(1);
-    auto depthImageView       = renderPass.GetAttachmentView(0);
-    auto& swapchainImageViews = swapchain->GetColorImageViews();
-
-    for (auto& swapchainImageView : swapchainImageViews)
+    auto swapchainImageViews = swapchain->GetSwapchainImageViews();
+    for (auto& swapchainImageView : swapchainImageViews) // We need a framebuffer with all three views (depth, AA resolve, swapchain) per swapchain image view.
     {
-        auto imageViews = std::array<vk::ImageView, 3>
+        auto attachmentViews = std::array<vk::ImageView, 3>
         {
-            colorResolveView, // Color Resolve View
-            depthImageView, // Depth View
-            swapchainImageView.get() // Swapchain Image at index <swapchainImageIndex>
+            renderPass.GetAttachmentView(1), // Color Resolve View
+            renderPass.GetAttachmentView(0), // Depth View
+            swapchainImageView // Swapchain Image at index <swapchainImageIndex>
         };
-
-        renderPass.CreateFrameBuffers(imageViews, dimensions);
+        renderPass.CreateFrameBuffer(attachmentViews, dimensions);
     }
 
     return renderPass;
@@ -128,34 +188,33 @@ auto CreatePerFrameGraphs(const nc::graphics::vulkan::Device* device,
 
 namespace nc::graphics::vulkan
 {
-RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, Vector2 dimensions)
+RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapchain* swapchain, GpuAllocator* gpuAllocator, ShaderBindingManager* shaderBindingManager, ShaderStorage* shaderStorage, ShaderResourceBus* shaderResourceBus, Vector2 dimensions)
     : m_frameManager{frameManager},
       m_device{device},
       m_swapchain{swapchain},
       m_gpuAllocator{gpuAllocator},
       m_shaderBindingManager{shaderBindingManager},
       m_shaderStorage{shaderStorage},
-      m_dummyShadowMap{Attachment(m_device->VkDevice(), m_gpuAllocator, Vector2{1.0f, 1.0f}, true, vk::SampleCountFlagBits::e1, vk::Format::eD16Unorm)},
       m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
+      m_sinkBuffers{{RenderPassSinkType::ShadowMap, shaderResourceBus->CreateRenderPassSinkBuffer(RenderPassSinkType::ShadowMap, 20u, ShaderStage::Fragment, 3u, 2u)}},
       m_dimensions{dimensions},
       m_screenExtent{}
 {
 }
 
-// Sink shadow maps from the render target of each shadow pass into a vector of post process images.
-void RenderGraph::SinkPostProcessImages()
+// Sink outputs from the render graph into shader storage to be consumed by shaders
+void RenderGraph::Sink(const RenderPass& renderPass)
 {
-    OPTICK_CATEGORY("RenderGraph::SinkPostProcessImages", Optick::Category::Rendering);
-    auto& renderGraph = GetCurrentFrameGraph();
-    auto shadowMapsSink = std::vector<vk::ImageView>{};
-    shadowMapsSink.reserve(renderGraph.shadowPasses.size());
+    OPTICK_CATEGORY("RenderGraph::Sink", Optick::Category::Rendering);
+    auto sinkType = renderPass.GetSinkViewsType();
+    auto sinkViews = renderPass.GetSinkViews();
 
-    std::ranges::transform(renderGraph.shadowPasses, std::back_inserter(shadowMapsSink), [](auto& shadowPass)
+    m_shaderStorage->Sink(sinkViews, sinkType, m_frameManager->Index());
+
+    if (GetCurrentFrameGraph().isSinkDirty.at(sinkType) && sinkViews.size() > 0)
     {
-        return shadowPass.GetAttachmentView(0u);
-    });
-
-    m_shaderStorage->SinkPostProcessImages(shadowMapsSink, PostProcessImageType::ShadowMap, m_frameManager->Index());
+        m_sinkBuffers.at(sinkType).Update(m_frameManager->Index());
+    }
 }
 
 void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uint32_t frameIndex)
@@ -167,6 +226,9 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
     if (stateData.omniDirLightsCount != renderGraph.stateData.omniDirLightsCount || 
         stateData.uniDirLightsCount  != renderGraph.stateData.uniDirLightsCount)
     {
+        renderGraph.isSinkDirty.at(RenderPassSinkType::ShadowMap) = true;
+        m_sinkBuffers.at(RenderPassSinkType::ShadowMap).Clear();
+
         renderGraph.shadowPasses.clear();
         for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
         {
@@ -211,9 +273,9 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
     renderGraph.isInitialized = true;
 }
 
-void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex)
+void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& dimensions, const Vector2& screenExtent, uint32_t swapchainImageIndex)
 {
-    OPTICK_CATEGORY("RenderGraph::RecordDrawCallsOnBuffer", Optick::Category::Rendering);
+    OPTICK_CATEGORY("RenderGraph::Execute", Optick::Category::Rendering);
 
     auto frame = m_frameManager->CurrentFrameContext();
     const auto cmd = frame->CommandBuffer();
@@ -227,7 +289,9 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
         shadowMappingPass.Begin(cmd);
         shadowMappingPass.Execute(cmd, frameData, frameIndex);
         shadowMappingPass.End(cmd);
+        Sink(shadowMappingPass);
     }
+    renderGraph.isSinkDirty.at(RenderPassSinkType::ShadowMap) = false;
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
@@ -260,6 +324,11 @@ void RenderGraph::Clear()
     {
         renderGraph.litPass.UnregisterPipelines();
         renderGraph.isInitialized = false;
+        renderGraph.stateData = PerFrameRenderStateData{};
+        for (auto& [renderPassSinkType, renderPassSinkBuffer] : m_sinkBuffers)
+        {
+            renderPassSinkBuffer.Clear();
+        }
     }
 }
 
@@ -269,6 +338,7 @@ PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
                                          Vector2 dimensions)
     : shadowPasses{},
       litPass{CreateLitPass(device, gpuAllocator, swapchain, dimensions)},
+      isSinkDirty{{RenderPassSinkType::ShadowMap, false}},
       isInitialized{false}
 {
 }

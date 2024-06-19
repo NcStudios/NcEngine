@@ -1,14 +1,14 @@
-#include "PPImageArrayBuffer.h"
+#include "RenderPassSinkBuffer.h"
 #include "graphics/api/vulkan/Initializers.h"
 
 namespace nc::graphics::vulkan
 {
-PPImageArrayBuffer::PPImageArrayBuffer(vk::Device device)
+RenderPassSinkBuffer::RenderPassSinkBuffer(vk::Device device)
     : sampler{CreateShadowMapSampler(device)}
 {
 }
 
-void PPImageArrayBuffer::Clear() noexcept
+void RenderPassSinkBuffer::Clear() noexcept
 {
     views.clear();
     imageInfos.clear();

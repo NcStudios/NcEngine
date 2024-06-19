@@ -3,12 +3,12 @@
 #include "asset/AssetData.h"
 #include "graphics/api/vulkan/buffers/CubeMapArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/MeshArrayBuffer.h"
-#include "graphics/api/vulkan/buffers/PPImageArrayBuffer.h"
+#include "graphics/api/vulkan/buffers/RenderPassSinkBuffer.h"
 #include "graphics/api/vulkan/buffers/StorageBuffer.h"
 #include "graphics/api/vulkan/buffers/TextureArrayBuffer.h"
 #include "graphics/api/vulkan/buffers/UniformBuffer.h"
 #include "graphics/GraphicsConstants.h"
-#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 #include "ncengine/type/StableAddress.h"
 #include "ncengine/utility/Signal.h"
 #include "ncengine/utility/SparseMap.h"
@@ -21,7 +21,7 @@ namespace nc::graphics
 {
 struct CabUpdateEventData;
 struct MabUpdateEventData;
-struct PpiaUpdateEventData;
+struct RpsUpdateEventData;
 struct SsboUpdateEventData;
 struct TabUpdateEventData;
 struct UboUpdateEventData;
@@ -41,7 +41,7 @@ struct MeshArrayBufferStorage
 
 /** @todo: Remove unique_ptr upon resolution of #656 */
 using UniqueCabMap = sparse_map<std::unique_ptr<CubeMapArrayBuffer>>;
-using UniquePpiaMap = sparse_map<std::unique_ptr<PPImageArrayBuffer>>;
+using UniqueRpsMap = sparse_map<std::unique_ptr<RenderPassSinkBuffer>>;
 using UniqueSsboMap = sparse_map<std::unique_ptr<StorageBuffer>>;
 using UniqueUboMap = sparse_map<std::unique_ptr<UniformBuffer>>;
 using UniqueTabMap = sparse_map<std::unique_ptr<TextureArrayBuffer>>;
@@ -54,18 +54,18 @@ struct ShaderStorage : StableAddress
                   std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                   Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                   Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
-                  Signal<const PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
+                  Signal<const RpsUpdateEventData&>& onRenderPassSinkBufferUpdate,
                   Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                   Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                   Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate);
 
     void UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData);
     void UpdateMeshArrayBuffer(const MabUpdateEventData& eventData);
-    void UpdatePPImageArrayBuffer(const PpiaUpdateEventData& eventData);
+    void UpdateRenderPassSinkBuffer(const RpsUpdateEventData& eventData);
     void UpdateStorageBuffer(const SsboUpdateEventData& eventData);
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
-    void SinkPostProcessImages(const std::vector<vk::ImageView>& postProcessImages, PostProcessImageType imageType, uint32_t frameIndex);
+    void Sink(std::span<const vk::ImageView> sinkViews, RenderPassSinkType sinkType, uint32_t frameIndex);
 
     private:
 
@@ -81,8 +81,8 @@ struct ShaderStorage : StableAddress
     MeshArrayBufferStorage m_staticMabStorage;
     nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
 
-    std::array<UniquePpiaMap, MaxFramesInFlight> m_perFramePpiaStorage;
-    nc::Connection<const PpiaUpdateEventData&> m_onPPImageArrayBufferUpdate;
+    std::array<UniqueRpsMap, MaxFramesInFlight> m_perFrameRpsStorage;
+    nc::Connection<const RpsUpdateEventData&> m_onRenderPassSinkBufferUpdate;
 
     std::array<UniqueSsboMap, MaxFramesInFlight> m_perFrameSsboStorage;
     UniqueSsboMap m_staticSsboStorage;
