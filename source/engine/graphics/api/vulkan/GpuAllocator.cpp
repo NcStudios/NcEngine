@@ -4,6 +4,8 @@
 
 #include "ncutility/NcError.h"
 
+#include <ranges>
+
 namespace
 {
     auto CreateAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance) -> vma::Allocator
@@ -411,5 +413,32 @@ namespace nc::graphics::vulkan
 
         viewInfo.setSubresourceRange(subresourceRange);
         return m_device->VkDevice().createImageViewUnique(viewInfo);
+    }
+
+    auto GpuAllocator::CreateCubeMapFaceViews(vk::Image image) -> std::vector<vk::UniqueImageView>
+    {
+        auto faceViews = std::vector<vk::UniqueImageView>{};
+        faceViews.reserve(6);
+
+        vk::ImageViewCreateInfo viewInfo{};
+        viewInfo.setImage(image);
+        viewInfo.setViewType(vk::ImageViewType::e2D);
+        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
+
+        vk::ImageSubresourceRange subresourceRange{};
+        subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+        subresourceRange.setBaseMipLevel(0);
+        subresourceRange.setLevelCount(1);
+        subresourceRange.setBaseArrayLayer(0);
+        subresourceRange.setLayerCount(1);
+
+        for (auto i : std::views::iota(0, 5))
+        {
+            subresourceRange.setBaseArrayLayer(i);
+            viewInfo.setSubresourceRange(subresourceRange);
+            faceViews.emplace_back(m_device->VkDevice().createImageView(viewInfo));
+        }
+
+        return faceViews;
     }
 } // namespace nc::graphics::vulkan

@@ -59,6 +59,7 @@ namespace nc::graphics::vulkan
             auto CreateTextureView(vk::Image image, uint32_t mipLevels, bool isNormal) -> vk::UniqueImageView;
             auto CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength) -> GpuAllocation<vk::Image>;
             auto CreateCubeMapTextureView(vk::Image image) -> vk::UniqueImageView;
+            auto CreateCubeMapFaceViews(vk::Image image) -> std::vector<vk::UniqueImageView>;
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
 

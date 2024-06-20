@@ -91,7 +91,7 @@ ShaderStorage::ShaderStorage(vk::Device device,
 
 void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData)
 {
-    auto& storage = m_staticCabStorage;
+    auto& storage = eventData.isStatic? m_staticCabStorage : m_perFrameCabStorage.at(eventData.currentFrameIndex);
 
     switch (eventData.action)
     {
@@ -507,6 +507,13 @@ void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSin
         views.emplace_back(view);
         imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
     }
+}
+
+auto ShaderStorage::Source(uint32_t uid, uint32_t frameIndex) -> std::span<const vk::ImageView>
+{
+    auto& storage = m_perFrameCabStorage.at(frameIndex);
+    auto& buffer = storage.at(uid);
+    return buffer->cubeMaps.at(0).GetFaceViews();
 }
 
 } // namespace nc::graphics::vulkan

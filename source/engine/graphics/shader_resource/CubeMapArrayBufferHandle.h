@@ -23,21 +23,24 @@ enum class CabUpdateAction : uint8_t
 struct CabUpdateEventData
 {
     std::span<const asset::CubeMapWithId> data;
+    uint32_t currentFrameIndex;
     uint32_t uid;
     uint32_t slot;
     uint32_t set;
     uint32_t capacity;
     shader_stage stage;
     CabUpdateAction action;
+    bool isStatic;
 };
 
 class CubeMapArrayBufferHandle
 {
     public:
         CubeMapArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const CabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
-        void Add(std::span<const asset::CubeMapWithId> data);
-        void Remove(std::span<const asset::CubeMapWithId> data);
+        void Add(std::span<const asset::CubeMapWithId> data, uint32_t frameIndex);
+        void Remove(std::span<const asset::CubeMapWithId> data, uint32_t frameIndex);
         void Clear();
+        auto Uid() const noexcept -> uint32_t { return m_uid; }
 
     private:
         uint32_t m_uid;

@@ -22,11 +22,14 @@ class CubeMap
             return m_cubeMapView.get();
         }
 
+        auto GetFaceViews() const noexcept -> std::vector<vk::ImageView>;
+
         void Clear() noexcept;
 
     private:
         GpuAllocation<vk::Image> m_image;
         vk::UniqueImageView m_cubeMapView;
+        std::vector<vk::UniqueImageView> m_faceViews;
 };
 
 struct CubeMapArrayBuffer

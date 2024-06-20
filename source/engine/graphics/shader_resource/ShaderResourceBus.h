@@ -27,7 +27,7 @@ class TextureArrayBufferHandle;
 struct ShaderResourceBus
 {
     uint32_t CubeMapArrayBufferUid = 0u;
-    auto CreateCubeMapArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set) -> CubeMapArrayBufferHandle;
+    auto CreateCubeMapArrayBuffer(uint32_t capacity, shader_stage stage, uint32_t slot, uint32_t set, bool isStatic) -> CubeMapArrayBufferHandle;
 
     auto CreateMeshArrayBuffer() -> MeshArrayBufferHandle;
 

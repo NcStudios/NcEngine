@@ -13,7 +13,7 @@ AssetResourcesConfig::AssetResourcesConfig(const config::MemorySettings& memoryS
 AssetResources::AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus,  asset::NcAsset* ncAsset)
     : meshes{resourceBus->CreateMeshArrayBuffer()},
       onMeshArrayBufferUpdate{ncAsset->OnMeshUpdate().Connect(this, &AssetResources::ForwardMeshAssetData)},
-      cubeMaps{resourceBus->CreateCubeMapArrayBuffer(config.maxCubeMaps, ShaderStage::Fragment, 4, 1)},
+      cubeMaps{resourceBus->CreateCubeMapArrayBuffer(config.maxCubeMaps, ShaderStage::Fragment, 4, 1, true)},
       onCubeMapArrayBufferUpdate{ncAsset->OnCubeMapUpdate().Connect(this, &AssetResources::ForwardCubeMapAssetData)},
       textures{resourceBus->CreateTextureArrayBuffer(config.maxTextures, ShaderStage::Fragment, 2, 1)},
       onTextureArrayBufferUpdate{ncAsset->OnTextureUpdate().Connect(this, &AssetResources::ForwardTextureAssetData)}{}
@@ -51,12 +51,12 @@ void AssetResources::ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData
     {
         case asset::UpdateAction::Load:
         {
-            cubeMaps.Add(assetData.data);
+            cubeMaps.Add(assetData.data, std::numeric_limits<uint32_t>::max());
             break;
         }
         case asset::UpdateAction::Unload:
         {
-            cubeMaps.Remove(assetData.data);
+            cubeMaps.Remove(assetData.data, std::numeric_limits<uint32_t>::max());
             break;
         }
         case asset::UpdateAction::UnloadAll:

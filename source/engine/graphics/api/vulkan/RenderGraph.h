@@ -3,6 +3,7 @@
 #include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/renderpasses/RenderPass.h"
 #include "graphics/PerFrameRenderState.h"
+#include "graphics/shader_resource/CubeMapArrayBufferHandle.h"
 #include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 namespace nc::graphics
@@ -59,6 +60,7 @@ class RenderGraph
         // Internal data
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
         std::unordered_map<RenderPassSinkType, RenderPassSinkBufferHandle> m_sinkBuffers;
+        std::unordered_map<RenderPassSinkType, CubeMapArrayBufferHandle> m_sourceCubeMaps;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         uint32_t m_maxLights;
