@@ -509,7 +509,7 @@ void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSin
     }
 }
 
-auto ShaderStorage::Source(uint32_t uid, uint32_t frameIndex) -> std::span<const vk::ImageView>
+auto ShaderStorage::SourceCubeMapViews(uint32_t uid, uint32_t frameIndex) -> std::span<const vk::ImageView>
 {
     auto& storage = m_perFrameCabStorage.at(frameIndex);
     auto& buffer = storage.at(uid);

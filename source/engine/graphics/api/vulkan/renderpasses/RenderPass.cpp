@@ -145,7 +145,7 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, const PerFrameInstanceData& instanceData, uint32_t frameIndex) const
 {
     OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
 

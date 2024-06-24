@@ -66,7 +66,7 @@ struct ShaderStorage : StableAddress
     void UpdateUniformBuffer(const UboUpdateEventData& eventData);
     void UpdateTextureArrayBuffer(const TabUpdateEventData& eventData);
     void Sink(std::span<const vk::ImageView> sinkViews, RenderPassSinkType sinkType, uint32_t frameIndex);
-    auto Source(uint32_t uid, uint32_t frameIndex) -> std::span<const vk::ImageView>;
+    auto SourceCubeMapViews(uint32_t uid, uint32_t frameIndex) -> std::span<const vk::ImageView>;
 
     private:
 

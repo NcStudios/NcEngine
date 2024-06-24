@@ -12,7 +12,8 @@ namespace nc::graphics
 enum class RenderPassSinkType : uint8_t
 {
     None,
-    ShadowMap
+    UniDirShadowMap,
+    OmniDirShadowMap
 };
 
 enum class RpsUpdateAction : uint8_t

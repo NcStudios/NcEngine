@@ -45,7 +45,7 @@ class RenderPass
                    uint32_t sourceSinkPartition);
 
         void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
-        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, uint32_t frameIndex) const;
+        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData,  const PerFrameInstanceData& instanceData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer* cmd);
 
         auto GetVkPass() const -> vk::RenderPass;
