@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ITechnique.h"
+#include "IPipeline.h"
 #include "ecs/Component.h"
 
 #include "DirectXMath.h"
@@ -14,18 +14,13 @@ namespace nc::graphics::vulkan
 class Device;
 class ShaderBindingManager;
 
-class EnvironmentTechnique : public ITechnique
+class EnvironmentPipeline : public IPipeline
 {
     public:
-        EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
-        ~EnvironmentTechnique() noexcept;
-
-        bool CanBind(const PerFrameRenderState& frameData) override;
+        EnvironmentPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
+        ~EnvironmentPipeline() noexcept;
         void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
-
-        bool CanRecord(const PerFrameRenderState& frameData) override;
-        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
-        
+        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;
         void Clear() noexcept;
 
     private:

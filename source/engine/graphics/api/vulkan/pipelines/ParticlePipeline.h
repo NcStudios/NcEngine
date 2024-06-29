@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ITechnique.h"
+#include "IPipeline.h"
 #include "ecs/Component.h"
 #include "particle/EmitterState.h"
 
@@ -19,18 +19,14 @@ namespace nc::graphics::vulkan
         DirectX::XMMATRIX viewProjection;
     };
 
-    class ParticleTechnique : public ITechnique
+    class ParticlePipeline : public IPipeline
     {
     public:
-        ParticleTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
-        ~ParticleTechnique() noexcept;
+        ParticlePipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
+        ~ParticlePipeline() noexcept;
 
-        bool CanBind(const PerFrameRenderState& frameData) override;
         void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
-
-        bool CanRecord(const PerFrameRenderState& frameData) override;
-        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
-
+        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;
         void Clear() noexcept;
 
     private:

@@ -84,7 +84,7 @@ RenderPass::RenderPass(vk::Device device,
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
-      m_litPipelines{},
+      m_pipelines{},
       m_attachments{std::move(attachments)},
       m_sinkViewsType{RenderPassSinkType::None},
       m_sinkViews{},
@@ -105,7 +105,7 @@ RenderPass::RenderPass(vk::Device device,
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
-      m_litPipelines{},
+      m_pipelines{},
       m_attachments{std::move(attachments)},
       m_sinkViewsType{renderTargetsType},
       m_sinkViews{std::move(renderTargets)},
@@ -113,19 +113,9 @@ RenderPass::RenderPass(vk::Device device,
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional)
-{
-    m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex, isOmniDirectional);
-}
-
-void RenderPass::UnregisterShadowMappingTechnique()
-{
-    m_shadowMappingTechnique.reset();
-}
-
 void RenderPass::UnregisterPipelines()
 {
-    for (auto& pipeline : m_litPipelines)
+    for (auto& pipeline : m_pipelines)
     {
         pipeline.isActive = false;
     }
@@ -145,29 +135,16 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, const PerFrameInstanceData& instanceData, uint32_t frameIndex) const
 {
     OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
 
-    if (m_shadowMappingTechnique)
-    {
-        if (m_shadowMappingTechnique->CanBind(frameData))
-        {
-            m_shadowMappingTechnique->Bind(frameIndex, cmd);
-
-            if (m_shadowMappingTechnique->CanRecord(frameData))
-            {
-                m_shadowMappingTechnique->Record(cmd, frameData);
-            }
-        }
-    }
-
-    for (const auto& pipeline : m_litPipelines)
+    for (const auto& pipeline : m_pipelines)
     {
         if (pipeline.isActive)
         {
             pipeline.pipeline->Bind(frameIndex, cmd);
-            pipeline.pipeline->Record(cmd, frameData);
+            pipeline.pipeline->Record(cmd, frameData, instanceData);
         }
     }
 }

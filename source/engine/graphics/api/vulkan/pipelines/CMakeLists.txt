@@ -1,0 +1,11 @@
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        EnvironmentPipeline.cpp
+        OutlinePipeline.cpp
+        ParticlePipeline.cpp
+        PbrPipeline.cpp
+        ShadowMappingPipeline.cpp
+        ToonPipeline.cpp
+        UiPipeline.cpp
+        WireframePipeline.cpp
+)

@@ -33,4 +33,11 @@ struct PerFrameRenderStateData
     uint32_t widgetsCount = 0u;
     uint32_t particlesCount = 0u;
 };
+
+struct PerFrameInstanceData
+{
+    uint32_t shadowCasterIndex = 0u;
+    uint32_t passIndex = 0u;
+    bool isOmniDirectional = false;
+};
 } // namespace nc::graphics
