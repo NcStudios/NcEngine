@@ -1,39 +1,28 @@
-#ifdef NC_EDITOR_ENABLED
 #pragma once
 
-#include "ITechnique.h"
+#include "IPipeline.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 
-#include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics::vulkan
 {
-class Device;
-class ShaderBindingManager;
+    class Device;
+    class ShaderBindingManager;
 
-struct WireframeVertexPushConstants
-{
-    DirectX::XMMATRIX model;
-};
-
-struct WireframeFragmentPushConstants
-{
-    alignas(16) Vector4 color;
-};
-
-class WireframeTechnique : public ITechnique
-{
+    class PbrPipeline : public IPipeline
+    {
     public:
-        WireframeTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
-        ~WireframeTechnique() noexcept;
+        PbrPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
+        ~PbrPipeline() noexcept;
 
         void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
         void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;
+        void Clear() noexcept;
 
     private:
         ShaderBindingManager* m_shaderBindingManager;
         vk::UniquePipeline m_pipeline;
         vk::UniquePipelineLayout m_pipelineLayout;
-};
+    };
 } // namespace nc::graphics::vulkan
-#endif

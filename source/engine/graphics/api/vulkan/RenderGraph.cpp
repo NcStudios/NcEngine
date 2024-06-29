@@ -5,18 +5,18 @@
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderStorage.h"
 #include "graphics/api/vulkan/Swapchain.h"
-#include "graphics/api/vulkan/techniques/EnvironmentTechnique.h"
-#include "graphics/api/vulkan/techniques/OutlineTechnique.h"
-#include "graphics/api/vulkan/techniques/ParticleTechnique.h"
-#include "graphics/api/vulkan/techniques/PbrTechnique.h"
-#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
-#include "graphics/api/vulkan/techniques/ToonTechnique.h"
-#include "graphics/api/vulkan/techniques/UiTechnique.h"
+#include "graphics/api/vulkan/pipelines/EnvironmentPipeline.h"
+#include "graphics/api/vulkan/pipelines/OutlinePipeline.h"
+#include "graphics/api/vulkan/pipelines/ParticlePipeline.h"
+#include "graphics/api/vulkan/pipelines/PbrPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingPipeline.h"
+#include "graphics/api/vulkan/pipelines/ToonPipeline.h"
+#include "graphics/api/vulkan/pipelines/UiPipeline.h"
 #include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "graphics/api/vulkan/techniques/WireframeTechnique.h"
+#include "graphics/api/vulkan/pipelines/WireframePipeline.h"
 #endif
 
 #include "optick.h"
@@ -88,7 +88,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
 
     const auto attachmentViews = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
     renderPass.CreateFrameBuffer(attachmentViews, dimensions);
-    renderPass.RegisterPipeline<ShadowMappingTechnique>(device, shaderBindingManager);
+    renderPass.RegisterPipeline<ShadowMappingPipeline>(device, shaderBindingManager);
 
     return renderPass;
 }
@@ -245,25 +245,25 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
 
         #ifdef NC_EDITOR_ENABLED
         if (!renderGraph.isInitialized || stateData.widgetsCount)
-            renderGraph.litPass.RegisterPipeline<WireframeTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<WireframePipeline>(m_device, m_shaderBindingManager);
         #endif
 
         if (!renderGraph.isInitialized || stateData.useSkybox)
-            renderGraph.litPass.RegisterPipeline<EnvironmentTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<EnvironmentPipeline>(m_device, m_shaderBindingManager);
 
         if (!renderGraph.isInitialized || stateData.meshRenderersCount)
-            renderGraph.litPass.RegisterPipeline<PbrTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<PbrPipeline>(m_device, m_shaderBindingManager);
 
         if (!renderGraph.isInitialized || stateData.toonRenderersCount)
         {
-            renderGraph.litPass.RegisterPipeline<ToonTechnique>(m_device, m_shaderBindingManager);
-            renderGraph.litPass.RegisterPipeline<OutlineTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<ToonPipeline>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<OutlinePipeline>(m_device, m_shaderBindingManager);
         }
 
         if (!renderGraph.isInitialized || stateData.particlesCount)
-            renderGraph.litPass.RegisterPipeline<ParticleTechnique>(m_device, m_shaderBindingManager);
+            renderGraph.litPass.RegisterPipeline<ParticlePipeline>(m_device, m_shaderBindingManager);
 
-        renderGraph.litPass.RegisterPipeline<UiTechnique>(m_device, m_shaderBindingManager);
+        renderGraph.litPass.RegisterPipeline<UiPipeline>(m_device, m_shaderBindingManager);
     }
 
     renderGraph.stateData = stateData;

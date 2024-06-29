@@ -1,10 +1,11 @@
-#include "PbrTechnique.h"
-#include "asset/Assets.h"
+#include "ParticlePipeline.h"
+#include "asset/AssetService.h"
 #include "config/Config.h"
+#include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
@@ -12,7 +13,7 @@
 
 namespace nc::graphics::vulkan
 {
-    PbrTechnique::PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+    ParticlePipeline::ParticlePipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
         : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
@@ -21,8 +22,8 @@ namespace nc::graphics::vulkan
 
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "PbrVertex.spv");
-        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "PbrFragment.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ParticleVertex.spv");
+        auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ParticleFragment.spv");
 
         auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
         auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -33,14 +34,15 @@ namespace nc::graphics::vulkan
             CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
         };
 
-        std::array<vk::DescriptorSetLayout, 3u> descriptorLayouts
+        auto pushConstantRange = CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, sizeof(ParticlePushConstants)); // PushConstants
+
+        std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
         {
             *(m_shaderBindingManager->GetSetLayout(0)),
-            *(m_shaderBindingManager->GetSetLayout(1)),
-            *(m_shaderBindingManager->GetSetLayout(2)),
+            *(m_shaderBindingManager->GetSetLayout(1))
         };
 
-        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
+        auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
         m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
@@ -65,9 +67,10 @@ namespace nc::graphics::vulkan
         auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
+        depthStencil.setDepthWriteEnable(VK_FALSE);
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
-        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(true);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, true);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
@@ -82,34 +85,25 @@ namespace nc::graphics::vulkan
         vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    PbrTechnique::~PbrTechnique() noexcept
+    ParticlePipeline::~ParticlePipeline() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    void PbrTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+    void ParticlePipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
-        OPTICK_CATEGORY("PbrTechnique::Bind", Optick::Category::Rendering);
-
+        OPTICK_CATEGORY("ParticlePipeline::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
         m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
-        m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     }
-
-    void PbrTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
+    void ParticlePipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
     {
-        OPTICK_CATEGORY("PbrTechnique::Record", Optick::Category::Rendering);
-        uint32_t objectInstance = 0;
-        for (const auto& mesh : frameData.objectState.pbrMeshes)
-        {
-            cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance + frameData.objectState.pbrMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-            ++objectInstance;
-        }
-    }
-
-    void PbrTechnique::Clear() noexcept
-    {
+        OPTICK_CATEGORY("ParticlePipeline::Record", Optick::Category::Rendering);
+        const auto& meshAccessor = frameData.particleState.mesh;
+        auto pushConstants = ParticlePushConstants{ .viewProjection = frameData.cameraState.view * frameData.cameraState.projection };
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex, 0, sizeof(ParticlePushConstants), &pushConstants);
+        cmd->drawIndexed(meshAccessor.indexCount, frameData.particleState.count, meshAccessor.firstIndex, meshAccessor.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
 } // namespace nc::graphics::vulkan

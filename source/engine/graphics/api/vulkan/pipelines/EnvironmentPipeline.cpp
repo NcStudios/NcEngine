@@ -1,4 +1,4 @@
-#include "EnvironmentTechnique.h"
+#include "EnvironmentPipeline.h"
 #include "asset/Assets.h"
 #include "asset/AssetService.h"
 #include "config/Config.h"
@@ -14,7 +14,7 @@
 
 namespace nc::graphics::vulkan
 {
-EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+EnvironmentPipeline::EnvironmentPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -82,23 +82,23 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingMa
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-EnvironmentTechnique::~EnvironmentTechnique() noexcept
+EnvironmentPipeline::~EnvironmentPipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-void EnvironmentTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+void EnvironmentPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
-    OPTICK_CATEGORY("EnvironmentTechnique::Bind", Optick::Category::Rendering);
+    OPTICK_CATEGORY("EnvironmentPipeline::Bind", Optick::Category::Rendering);
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
-void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
+void EnvironmentPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
+    OPTICK_CATEGORY("EnvironmentPipeline::Record", Optick::Category::Rendering);
     if (!frameData.environmentState.useSkybox)
     {
         return;
@@ -115,7 +115,7 @@ void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderSt
     );
 }
 
-void EnvironmentTechnique::Clear() noexcept
+void EnvironmentPipeline::Clear() noexcept
 {
 }
 } // namespace nc::graphics::vulkan

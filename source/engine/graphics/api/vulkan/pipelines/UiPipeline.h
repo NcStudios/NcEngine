@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ITechnique.h"
+#include "IPipeline.h"
 
 #include "vulkan/vk_mem_alloc.hpp"
 
@@ -9,11 +9,11 @@ namespace nc::graphics::vulkan
     class Device;
     class ShaderBindingManager;
 
-    class UiTechnique : public ITechnique
+    class UiPipeline : public IPipeline
     {
         public:
-            UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass renderPass);
-            ~UiTechnique() noexcept;
+            UiPipeline(const Device& device, ShaderBindingManager*, vk::RenderPass renderPass);
+            ~UiPipeline() noexcept;
 
             void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;

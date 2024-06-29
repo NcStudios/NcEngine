@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Attachment.h"
-#include "graphics/api/vulkan/techniques/ITechnique.h"
-#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
+#include "graphics/api/vulkan/pipelines/IPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingPipeline.h"
 #include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 #include <span>
@@ -21,7 +21,7 @@ class ShaderBindingManager;
 struct Pipeline
 {
     size_t uid;
-    std::unique_ptr<ITechnique> pipeline;
+    std::unique_ptr<IPipeline> pipeline;
     bool isActive;
 };
 
@@ -53,10 +53,10 @@ class RenderPass
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView { return m_attachments.at(index).view.get(); }
 
         void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
-        template <std::derived_from<ITechnique> T>
+        template <std::derived_from<IPipeline> T>
         void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);
         
-        template <std::derived_from<ITechnique> T>
+        template <std::derived_from<IPipeline> T>
         void UnregisterPipeline();
         void UnregisterPipelines();
 
@@ -76,7 +76,7 @@ class RenderPass
         uint32_t m_sourceSinkPartition;
 };
 
-template <std::derived_from<ITechnique> T>
+template <std::derived_from<IPipeline> T>
 void RenderPass::UnregisterPipeline()
 {
     const auto& techniqueType = typeid(T);
@@ -93,7 +93,7 @@ void RenderPass::UnregisterPipeline()
     }
 }
 
-template <std::derived_from<ITechnique> T>
+template <std::derived_from<IPipeline> T>
 void RenderPass::RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager)
 {
     const auto& techniqueType = typeid(T);

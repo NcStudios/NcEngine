@@ -1,20 +1,29 @@
 #pragma once
 
-#include "ITechnique.h"
-#include "graphics/api/vulkan/ShaderBindingManager.h"
+#include "IPipeline.h"
+#include "ecs/Component.h"
+#include "particle/EmitterState.h"
 
+#include "DirectXMath.h"
 #include "vulkan/vk_mem_alloc.hpp"
+
+#include <vector>
 
 namespace nc::graphics::vulkan
 {
     class Device;
     class ShaderBindingManager;
 
-    class PbrTechnique : public ITechnique
+    struct ParticlePushConstants
+    {
+        DirectX::XMMATRIX viewProjection;
+    };
+
+    class ParticlePipeline : public IPipeline
     {
     public:
-        PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
-        ~PbrTechnique() noexcept;
+        ParticlePipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
+        ~ParticlePipeline() noexcept;
 
         void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
         void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;

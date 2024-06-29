@@ -1,20 +1,18 @@
-#ifdef NC_EDITOR_ENABLED
-#include "WireframeTechnique.h"
-#include "asset/AssetService.h"
+#include "OutlinePipeline.h"
+#include "asset/Assets.h"
 #include "config/Config.h"
-#include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
-#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics::vulkan
 {
-WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+OutlinePipeline::OutlinePipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -23,8 +21,8 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManage
 
     // Shaders
     auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
-    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
+    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "OutlineVertex.spv");
+    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "OutlineFragment.spv");
 
     auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
     auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -35,29 +33,20 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManage
         CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
-    m_pipelineLayout = [vkDevice, shaderBindingManager]()
+    std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
     {
-        const auto descriptorLayout = *(shaderBindingManager->GetSetLayout(0));
-        const auto pushConstantRanges = std::array{
-            CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframeVertexPushConstants), 0u),
-            CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(WireframeFragmentPushConstants), sizeof(WireframeVertexPushConstants))
-        };
+        *(m_shaderBindingManager->GetSetLayout(0))
+    };
 
-        const auto pipelineLayoutInfo = vk::PipelineLayoutCreateInfo{
-            vk::PipelineLayoutCreateFlags{},
-            1u,
-            &descriptorLayout,
-            static_cast<uint32_t>(pushConstantRanges.size()),
-            pushConstantRanges.data()
-        };
-
-        return vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
-    }();
+    auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
+    m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
 
     std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
     vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
     dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
     dynamicStateInfo.setDynamicStates(dynamicStates);
+
+    auto depthStencil = CreateDepthStencilCreateInfo(true);
 
     // Graphics pipeline
     vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
@@ -71,11 +60,11 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManage
     pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
-    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine);
+    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
+    rasterizer.cullMode = vk::CullModeFlagBits::eFront;
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
     pipelineCreateInfo.setPMultisampleState(&multisampling);
-    auto depthStencil = CreateDepthStencilCreateInfo();
     pipelineCreateInfo.setPDepthStencilState(&depthStencil);
     auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
     auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
@@ -88,40 +77,37 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManage
     pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
     m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+
     vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-WireframeTechnique::~WireframeTechnique() noexcept
+OutlinePipeline::~OutlinePipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-void WireframeTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+void OutlinePipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
+    OPTICK_CATEGORY("OutlinePipeline::Bind", Optick::Category::Rendering);
+
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
-void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
+void OutlinePipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    OPTICK_CATEGORY("WireframeTechnique::Record", Optick::Category::Rendering);
-
-    auto vertexPushConstants = WireframeVertexPushConstants{};
-    auto fragmentPushConstants = WireframeFragmentPushConstants{
-        .color = Vector4{1.0f, 0.0f, 0.0f, 1.0f}
-    };
-
-    for (const auto& [matrix, mesh, color] : frameData.widgetState.wireframeData)
+    OPTICK_CATEGORY("OutlinePipeline::Record", Optick::Category::Rendering);
+    uint32_t objectInstance = 0;
+    for (const auto& mesh : frameData.objectState.toonMeshes)
     {
-        vertexPushConstants.model = matrix;
-        fragmentPushConstants.color = color;
-        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframeVertexPushConstants), &vertexPushConstants);
-        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, sizeof(WireframeVertexPushConstants), sizeof(WireframeFragmentPushConstants), &fragmentPushConstants.color);
-        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance + frameData.objectState.toonMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        ++objectInstance;
     }
 }
-} // namespace nc::graphics::vulkan
 
-#endif
+void OutlinePipeline::Clear() noexcept
+{
+}
+} // namespace nc::graphics::vulkan

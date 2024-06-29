@@ -1,4 +1,4 @@
-#include "ToonTechnique.h"
+#include "ToonPipeline.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
@@ -12,7 +12,7 @@
 
 namespace nc::graphics::vulkan
 {
-ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+ToonPipeline::ToonPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -85,15 +85,15 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderB
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-ToonTechnique::~ToonTechnique() noexcept
+ToonPipeline::~ToonPipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+void ToonPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
-    OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
+    OPTICK_CATEGORY("ToonPipeline::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
@@ -101,9 +101,9 @@ void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
-void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
+void ToonPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    OPTICK_CATEGORY("ToonTechnique::Record", Optick::Category::Rendering);
+    OPTICK_CATEGORY("ToonPipeline::Record", Optick::Category::Rendering);
     uint32_t objectInstance = 0;
     for (const auto& mesh : frameData.objectState.toonMeshes)
     {
@@ -112,7 +112,7 @@ void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& fr
     }
 }
 
-void ToonTechnique::Clear() noexcept
+void ToonPipeline::Clear() noexcept
 {
 }
 } // namespace nc::graphics::vulkan

@@ -1,4 +1,4 @@
-#include "UiTechnique.h"
+#include "UiPipeline.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
@@ -11,7 +11,7 @@
 
 namespace nc::graphics::vulkan
 {
-    UiTechnique::UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass renderPass)
+    UiPipeline::UiPipeline(const Device& device, ShaderBindingManager*, vk::RenderPass renderPass)
         : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -72,18 +72,18 @@ namespace nc::graphics::vulkan
         vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    UiTechnique::~UiTechnique() noexcept
+    UiPipeline::~UiPipeline() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    void UiTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
+    void UiPipeline::Bind(uint32_t, vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }
 
-    void UiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&, const PerFrameInstanceData&)
+    void UiPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&, const PerFrameInstanceData&)
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }

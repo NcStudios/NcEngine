@@ -1,4 +1,4 @@
-#include "ShadowMappingTechnique.h"
+#include "ShadowMappingPipeline.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/core/GpuOptions.h"
@@ -23,7 +23,7 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+    ShadowMappingPipeline::ShadowMappingPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
         : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
@@ -87,22 +87,22 @@ namespace nc::graphics::vulkan
         vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    ShadowMappingTechnique::~ShadowMappingTechnique() noexcept
+    ShadowMappingPipeline::~ShadowMappingPipeline() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+    void ShadowMappingPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
-        OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ShadowMappingPipeline::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     }
 
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData)
+    void ShadowMappingPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData)
     {
-        OPTICK_CATEGORY("ShadowMappingTechnique::Record", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ShadowMappingPipeline::Record", Optick::Category::Rendering);
         NC_ASSERT(instanceData.shadowCasterIndex < frameData.lightState.viewProjections.size(), "Shadow caster index is out of bounds.");
         
         cmd->setDepthBias
