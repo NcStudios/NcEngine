@@ -48,9 +48,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
                              nc::graphics::vulkan::GpuAllocator* allocator,
                              nc::graphics::vulkan::Swapchain* swapchain,
                              nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
-                             const nc::Vector2& dimensions,
-                             uint32_t shadowCasterIndex,
-                             bool isOmniDirectional) -> nc::graphics::vulkan::RenderPass
+                             const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
 
@@ -90,7 +88,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
 
     const auto attachmentViews = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
     renderPass.CreateFrameBuffer(attachmentViews, dimensions);
-    renderPass.RegisterShadowMappingTechnique(vkDevice, shaderBindingManager, shadowCasterIndex, isOmniDirectional);
+    renderPass.RegisterPipeline<ShadowMappingTechnique>(device, shaderBindingManager);
 
     return renderPass;
 }
@@ -229,15 +227,14 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
         renderGraph.isSinkDirty.at(RenderPassSinkType::ShadowMap) = true;
         m_sinkBuffers.at(RenderPassSinkType::ShadowMap).Clear();
 
-        renderGraph.shadowPasses.clear();
-        for (auto i : std::views::iota(0u, stateData.omniDirLightsCount))
+        while (renderGraph.shadowPasses.size() < stateData.omniDirLightsCount + stateData.uniDirLightsCount)
         {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, true));
+            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions));
         }
 
-        for (auto i : std::views::iota(stateData.omniDirLightsCount, stateData.omniDirLightsCount + stateData.uniDirLightsCount))
+        while (renderGraph.shadowPasses.size() > stateData.omniDirLightsCount + stateData.uniDirLightsCount)
         {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, i, false));
+            renderGraph.shadowPasses.pop_back();
         }
     }
 
@@ -284,10 +281,14 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    for (auto& shadowMappingPass : renderGraph.shadowPasses)
+    auto instanceData = PerFrameInstanceData{};
+
+    for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.shadowPasses))
     {
+        instanceData.isOmniDirectional = index < renderGraph.stateData.omniDirLightsCount ? true : false;
+        instanceData.shadowCasterIndex = static_cast<uint32_t>(index);
         shadowMappingPass.Begin(cmd);
-        shadowMappingPass.Execute(cmd, frameData, frameIndex);
+        shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
         shadowMappingPass.End(cmd);
         Sink(shadowMappingPass);
     }
@@ -296,7 +297,7 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
     renderGraph.litPass.Begin(cmd, swapchainImageIndex);
-    renderGraph.litPass.Execute(cmd, frameData, frameIndex);
+    renderGraph.litPass.Execute(cmd, frameData, instanceData, frameIndex);
     renderGraph.litPass.End(cmd);
 }
 

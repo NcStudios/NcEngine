@@ -12,7 +12,7 @@
 
 namespace nc::graphics::vulkan
 {
-    PbrTechnique::PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+    PbrTechnique::PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
         : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
@@ -71,7 +71,7 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-        pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+        pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
@@ -88,12 +88,6 @@ namespace nc::graphics::vulkan
         m_pipelineLayout.reset();
     }
 
-    bool PbrTechnique::CanBind(const PerFrameRenderState& frameData)
-    {
-        (void)frameData;
-        return true;
-    }
-
     void PbrTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
         OPTICK_CATEGORY("PbrTechnique::Bind", Optick::Category::Rendering);
@@ -102,16 +96,9 @@ namespace nc::graphics::vulkan
         m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
         m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
         m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
-
     }
 
-    bool PbrTechnique::CanRecord(const PerFrameRenderState& frameData)
-    {
-        (void)frameData;
-        return true;
-    }
-
-    void PbrTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+    void PbrTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
     {
         OPTICK_CATEGORY("PbrTechnique::Record", Optick::Category::Rendering);
         uint32_t objectInstance = 0;

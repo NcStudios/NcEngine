@@ -14,7 +14,7 @@
 
 namespace nc::graphics::vulkan
 {
-WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -82,7 +82,7 @@ WireframeTechnique::WireframeTechnique(const Device& device, ShaderBindingManage
     pipelineCreateInfo.setPColorBlendState(&colorBlending);
     pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
     pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-    pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+    pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
     pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
     pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
     pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
@@ -98,23 +98,13 @@ WireframeTechnique::~WireframeTechnique() noexcept
     m_pipelineLayout.reset();
 }
 
-bool WireframeTechnique::CanBind(const PerFrameRenderState& frameData)
-{
-    return !frameData.widgetState.wireframeData.empty();
-}
-
 void WireframeTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
-bool WireframeTechnique::CanRecord(const PerFrameRenderState& frameData)
-{
-    return !frameData.widgetState.wireframeData.empty();
-}
-
-void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+void WireframeTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
     OPTICK_CATEGORY("WireframeTechnique::Record", Optick::Category::Rendering);
 

@@ -12,7 +12,7 @@
 
 namespace nc::graphics::vulkan
 {
-ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -74,7 +74,7 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderB
     pipelineCreateInfo.setPColorBlendState(&colorBlending);
     pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
     pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-    pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+    pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
     pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
     pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
     pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
@@ -91,12 +91,6 @@ ToonTechnique::~ToonTechnique() noexcept
     m_pipelineLayout.reset();
 }
 
-bool ToonTechnique::CanBind(const PerFrameRenderState& frameData)
-{
-    (void)frameData;
-    return true;
-}
-
 void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
     OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
@@ -107,13 +101,7 @@ void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
-bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)
-{
-    (void)frameData;
-    return true;
-}
-
-void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
+void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
     OPTICK_CATEGORY("ToonTechnique::Record", Optick::Category::Rendering);
     uint32_t objectInstance = 0;

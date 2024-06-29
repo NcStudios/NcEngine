@@ -22,15 +22,11 @@ namespace nc::graphics::vulkan
     class ParticleTechnique : public ITechnique
     {
     public:
-        ParticleTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
+        ParticleTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
         ~ParticleTechnique() noexcept;
 
-        bool CanBind(const PerFrameRenderState& frameData) override;
         void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
-
-        bool CanRecord(const PerFrameRenderState& frameData) override;
-        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
-
+        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;
         void Clear() noexcept;
 
     private:

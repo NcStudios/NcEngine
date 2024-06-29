@@ -13,15 +13,11 @@ class ShaderBindingManager;
 class OutlineTechnique : public ITechnique
 {
 public:
-    OutlineTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
+    OutlineTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
     ~OutlineTechnique() noexcept;
 
-    bool CanBind(const PerFrameRenderState& frameData) override;
     void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
-
-    bool CanRecord(const PerFrameRenderState& frameData) override;
-    void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
-
+    void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;
     void Clear() noexcept;
 
 private:

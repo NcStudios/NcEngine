@@ -13,15 +13,11 @@ namespace nc::graphics::vulkan
     class PbrTechnique : public ITechnique
     {
     public:
-        PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass);
+        PbrTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
         ~PbrTechnique() noexcept;
 
-        bool CanBind(const PerFrameRenderState& frameData) override;
         void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
-
-        bool CanRecord(const PerFrameRenderState& frameData) override;
-        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData) override;
-
+        void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&) override;
         void Clear() noexcept;
 
     private:
