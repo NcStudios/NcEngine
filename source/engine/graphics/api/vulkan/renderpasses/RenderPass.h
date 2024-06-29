@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Attachment.h"
-#include "graphics/api/vulkan/techniques/ITechnique.h"
-#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
+#include "graphics/api/vulkan/pipelines/IPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingPipeline.h"
 #include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 #include <span>
@@ -11,6 +11,7 @@
 namespace nc::graphics
 {
 struct PerFrameRenderState;
+struct PerFrameInstanceData;
 
 namespace vulkan
 {
@@ -20,7 +21,7 @@ class ShaderBindingManager;
 struct Pipeline
 {
     size_t uid;
-    std::unique_ptr<ITechnique> pipeline;
+    std::unique_ptr<IPipeline> pipeline;
     bool isActive;
 };
 
@@ -45,21 +46,18 @@ class RenderPass
                    uint32_t sourceSinkPartition);
 
         void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
-        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData,  const PerFrameInstanceData& instanceData, uint32_t frameIndex) const;
+        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData, uint32_t frameIndex) const;
         void End(vk::CommandBuffer* cmd);
 
         auto GetVkPass() const -> vk::RenderPass;
         auto GetAttachmentView(uint32_t index) const -> vk::ImageView { return m_attachments.at(index).view.get(); }
 
         void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
-        template <std::derived_from<ITechnique> T>
+        template <std::derived_from<IPipeline> T>
         void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
         
-        template <std::derived_from<ITechnique> T>
+        template <std::derived_from<IPipeline> T>
         void UnregisterPipeline();
-        void UnregisterShadowMappingTechnique();
-
         void UnregisterPipelines();
 
         auto GetSinkViewsType() const noexcept -> RenderPassSinkType { return m_sinkViewsType; }
@@ -70,8 +68,7 @@ class RenderPass
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;
         ClearValueFlags_t m_clearFlags;
-        std::vector<Pipeline> m_litPipelines;
-        std::unique_ptr<ShadowMappingTechnique> m_shadowMappingTechnique;
+        std::vector<Pipeline> m_pipelines;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
         RenderPassSinkType m_sinkViewsType;
@@ -79,43 +76,43 @@ class RenderPass
         uint32_t m_sourceSinkPartition;
 };
 
-template <std::derived_from<ITechnique> T>
+template <std::derived_from<IPipeline> T>
 void RenderPass::UnregisterPipeline()
 {
     const auto& techniqueType = typeid(T);
     const auto uid = techniqueType.hash_code();
 
-    auto pos = std::ranges::find_if(m_litPipelines, [uid](auto& pipeline)
+    auto pos = std::ranges::find_if(m_pipelines, [uid](auto& pipeline)
     {
         return pipeline.uid == uid;
     });
 
-    if (pos != m_litPipelines.end())
+    if (pos != m_pipelines.end())
     {
         pos->isActive = false;
     }
 }
 
-template <std::derived_from<ITechnique> T>
+template <std::derived_from<IPipeline> T>
 void RenderPass::RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager)
 {
     const auto& techniqueType = typeid(T);
     auto uid = techniqueType.hash_code();
 
-    auto pos = std::ranges::find_if(m_litPipelines, [uid](Pipeline& pipeline)
+    auto pos = std::ranges::find_if(m_pipelines, [uid](Pipeline& pipeline)
     {
         return pipeline.uid == uid;
     });
 
-    if (pos == m_litPipelines.end())
+    if (pos == m_pipelines.end())
     {
         auto pipeline = Pipeline
         {
             uid,
-            std::make_unique<T>(*device, shaderBindingManager, &m_renderPass.get()),
+            std::make_unique<T>(*device, shaderBindingManager, m_renderPass.get()),
             true
         };
-        m_litPipelines.push_back(std::move(pipeline));
+        m_pipelines.push_back(std::move(pipeline));
         return;
     }
 

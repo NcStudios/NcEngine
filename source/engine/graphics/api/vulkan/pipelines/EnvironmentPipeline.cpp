@@ -1,4 +1,4 @@
-#include "EnvironmentTechnique.h"
+#include "EnvironmentPipeline.h"
 #include "asset/Assets.h"
 #include "asset/AssetService.h"
 #include "config/Config.h"
@@ -14,7 +14,7 @@
 
 namespace nc::graphics::vulkan
 {
-EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+EnvironmentPipeline::EnvironmentPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -72,7 +72,7 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingMa
     pipelineCreateInfo.setPColorBlendState(&colorBlending);
     pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
     pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-    pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+    pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
     pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
     pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
     pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
@@ -82,33 +82,23 @@ EnvironmentTechnique::EnvironmentTechnique(const Device& device, ShaderBindingMa
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-EnvironmentTechnique::~EnvironmentTechnique() noexcept
+EnvironmentPipeline::~EnvironmentPipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-bool EnvironmentTechnique::CanBind(const PerFrameRenderState& frameData)
+void EnvironmentPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
-    return frameData.environmentState.useSkybox;
-}
-
-void EnvironmentTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
-{
-    OPTICK_CATEGORY("EnvironmentTechnique::Bind", Optick::Category::Rendering);
+    OPTICK_CATEGORY("EnvironmentPipeline::Bind", Optick::Category::Rendering);
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
-bool EnvironmentTechnique::CanRecord(const PerFrameRenderState& frameData)
+void EnvironmentPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    return frameData.environmentState.useSkybox;
-}
-
-void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
-{
-    OPTICK_CATEGORY("EnvironmentTechnique::Record", Optick::Category::Rendering);
+    OPTICK_CATEGORY("EnvironmentPipeline::Record", Optick::Category::Rendering);
     if (!frameData.environmentState.useSkybox)
     {
         return;
@@ -125,7 +115,7 @@ void EnvironmentTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderSt
     );
 }
 
-void EnvironmentTechnique::Clear() noexcept
+void EnvironmentPipeline::Clear() noexcept
 {
 }
 } // namespace nc::graphics::vulkan

@@ -27,8 +27,8 @@ struct PerFrameRenderGraph
                         GpuAllocator* gpuAllocator,
                         Vector2 dimensions);
 
-    std::vector<RenderPass> uniDirShadowPasses; // One per spot light
     std::vector<RenderPass> omniDirShadowPasses; // One per point light
+    std::vector<RenderPass> uniDirShadowPasses; // One per spot light
     RenderPass litPass;
     PerFrameRenderStateData stateData;
     std::unordered_map<RenderPassSinkType, bool> isSinkDirty;
