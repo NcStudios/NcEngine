@@ -227,14 +227,22 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
         renderGraph.isSinkDirty.at(RenderPassSinkType::ShadowMap) = true;
         m_sinkBuffers.at(RenderPassSinkType::ShadowMap).Clear();
 
-        while (renderGraph.shadowPasses.size() < stateData.omniDirLightsCount + stateData.uniDirLightsCount)
-        {
-            renderGraph.shadowPasses.push_back(CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions));
-        }
+        auto totalLightsCount = stateData.omniDirLightsCount + stateData.uniDirLightsCount;
 
-        while (renderGraph.shadowPasses.size() > stateData.omniDirLightsCount + stateData.uniDirLightsCount)
+        if (renderGraph.shadowPasses.size() < totalLightsCount)
         {
-            renderGraph.shadowPasses.pop_back();
+            renderGraph.shadowPasses.reserve(totalLightsCount);
+            std::generate_n(std::back_inserter(renderGraph.shadowPasses), totalLightsCount - renderGraph.shadowPasses.size(), [this]()
+            {
+                return CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions);
+            });
+        }
+        else
+        {
+            while (renderGraph.shadowPasses.size() > totalLightsCount)
+            {
+                renderGraph.shadowPasses.pop_back();
+            }
         }
     }
 
@@ -285,7 +293,7 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
 
     for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.shadowPasses))
     {
-        instanceData.isOmniDirectional = index < renderGraph.stateData.omniDirLightsCount ? true : false;
+        instanceData.isOmniDirectional = index < renderGraph.stateData.omniDirLightsCount;
         instanceData.shadowCasterIndex = static_cast<uint32_t>(index);
         shadowMappingPass.Begin(cmd);
         shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
