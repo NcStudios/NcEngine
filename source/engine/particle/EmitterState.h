@@ -21,6 +21,12 @@ struct Particle
     float scale;
 };
 
+struct Doohickey
+{
+    DirectX::XMMATRIX matrix;
+    Vector4 color;
+};
+
 class EmitterState
 {
 public:
@@ -33,7 +39,7 @@ public:
     auto GetInfo() const noexcept -> const graphics::ParticleInfo& { return m_info; }
     auto GetEntity() const noexcept -> Entity { return m_entity; }
     auto GetTexture() const noexcept -> const std::string& { return m_info.init.particleTexturePath; }
-    auto GetMatrices() const noexcept -> const std::vector<DirectX::XMMATRIX>& { return m_matrices; }
+    auto GetMatrices() const noexcept -> const std::vector<Doohickey>& { return m_matrices; }
     auto GetLastPosition() const noexcept -> DirectX::FXMVECTOR { return m_lastPosition; }
 
 private:
@@ -41,7 +47,8 @@ private:
 
     DirectX::XMVECTOR m_lastPosition = DirectX::g_XMZero;
     std::vector<Particle> m_particles;
-    std::vector<DirectX::XMMATRIX> m_matrices;
+    std::vector<Doohickey> m_matrices;
+    std::vector<Vector4> m_colors;
     graphics::ParticleInfo m_info;
     ecs::ExplicitEcs<Transform> m_transforms;
     Entity m_entity;

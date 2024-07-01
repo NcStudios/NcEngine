@@ -22,7 +22,7 @@ auto ComputeMvp(const particle::Particle& particle,
 
 particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
 {
-    const auto& [emission, init, kinematic] = info;
+    const auto& [emission, init, kinematic, color] = info;
     return particle::Particle
     {
         .maxLifetime = init.lifetime,
@@ -112,7 +112,10 @@ void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const
         else
         {
             ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
-            m_matrices.push_back(::ComputeMvp(particle, camRotation, camForward));
+            m_matrices.emplace_back(
+                ::ComputeMvp(particle, camRotation, camForward),
+                Lerp(m_info.color.start, m_info.color.end, particle.currentLifetime / particle.maxLifetime)
+            );
         }
     }
 }

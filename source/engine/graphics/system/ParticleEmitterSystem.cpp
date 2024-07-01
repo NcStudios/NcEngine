@@ -193,9 +193,9 @@ auto ParticleEmitterSystem::Execute(uint32_t frameIndex) -> ParticleState
     for (const auto& state : m_emitterStates)
     {
         const auto texture = asset::AssetService<asset::TextureView>::Get()->Acquire(state.GetTexture());
-        for (const auto& m : state.GetMatrices())
+        for (const auto& [matrix, color] : state.GetMatrices())
         {
-            m_particleDataHostBuffer.emplace_back(m, texture.index);
+            m_particleDataHostBuffer.emplace_back(matrix, color, texture.index);
         }
     }
 

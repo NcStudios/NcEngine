@@ -47,11 +47,18 @@ struct ParticleKinematicInfo
     float scaleOverTimeFactor = 0.0f;
 };
 
+struct ParticleColor
+{
+    Vector4 start = Vector4::One();
+    Vector4 end = Vector4::One();
+};
+
 struct ParticleInfo
 {
     ParticleEmissionInfo emission;
     ParticleInitInfo init;
     ParticleKinematicInfo kinematic;
+    ParticleColor color;
 };
 
 class ParticleEmitter final : public ComponentBase

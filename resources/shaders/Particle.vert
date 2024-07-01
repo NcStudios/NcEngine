@@ -5,6 +5,7 @@
 struct ParticleData
 {
     mat4 model;
+    vec4 color;
     uint textureIndex;
 };
 

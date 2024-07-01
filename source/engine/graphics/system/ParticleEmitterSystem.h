@@ -14,6 +14,7 @@ namespace nc::graphics
 struct ParticleData
 {
     DirectX::XMMATRIX model;
+    Vector4 color;
     uint32_t textureIndex;
 };
 

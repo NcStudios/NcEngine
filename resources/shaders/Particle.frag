@@ -5,6 +5,7 @@
 struct ParticleData
 {
     mat4 model;
+    vec4 color;
     uint textureIndex;
 };
 
@@ -28,7 +29,7 @@ layout (location = 0) out vec4 outFragColor;
 
 vec4 MaterialColor(uint textureIndex)
 {
-   return vec4(texture(textures[textureIndex], inUV));
+   return vec4(texture(textures[textureIndex], inUV)) * particleBuffer.particles[inInstanceIndex].color;
 }
 
 void main()
