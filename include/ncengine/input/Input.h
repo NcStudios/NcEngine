@@ -9,6 +9,14 @@ namespace nc::input
     using KeyCode_t = uint32_t;
     enum class KeyCode : KeyCode_t;
 
+    enum class KeyState
+    {
+        None,
+        Pressed,
+        Held,
+        Released
+    };
+
     auto MouseX() -> uint32_t;
     auto MouseY() -> uint32_t;
     auto MousePos() -> Vector2;
@@ -18,6 +26,7 @@ namespace nc::input
     auto GetYAxis() -> float;  // GetKey W & S; returns -1, 0, 1
     auto GetAxis() -> Vector2; // WASD results as a pair
 
+    auto Key(KeyCode keyCode) -> KeyState;
     auto KeyDown(KeyCode keyCode) -> bool; // true when key is first pressed
     auto KeyUp(KeyCode keyCode) -> bool;   // true when key is released
     auto KeyHeld(KeyCode keyCode) -> bool; // true while key is held
