@@ -49,7 +49,8 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 2, binding = 3) uniform sampler2D shadowMaps[];
+layout (set = 0, binding = 3) uniform samplerCube omniDirShadowMaps[];
+layout (set = 2, binding = 3) uniform sampler2D uniDirShadowMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {
@@ -116,7 +117,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, int index)
 
     // Check whether current frag pos is in shadow
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMaps[index], 0);
+    vec2 texelSize = 1.0 / textureSize(uniDirShadowMaps[index], 0);
     int sampleRadius = 2;
 
     for(int y = -sampleRadius; y <= sampleRadius; y++)
@@ -124,7 +125,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, int index)
         for (int x = - sampleRadius; x <= sampleRadius; x++)
         {
             // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-            float closestDepth = texture(shadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r; 
+            float closestDepth = texture(uniDirShadowMaps[index], projCoords.xy + vec2(x, y) * texelSize).r; 
             if (currentDepth > closestDepth)
             {
                 shadow += 1.0f;

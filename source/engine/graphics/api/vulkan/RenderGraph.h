@@ -35,6 +35,8 @@ struct PerFrameRenderGraph
     bool isInitialized;
 };
 
+constexpr auto ShadowMapDimensions = nc::Vector2(1000, 1000);
+
 class RenderGraph
 {
     public:

@@ -14,6 +14,7 @@
 #include "graphics/api/vulkan/pipelines/UiPipeline.h"
 #include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
+#include "ncengine/asset/AssetData.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "graphics/api/vulkan/pipelines/WireframePipeline.h"
@@ -46,9 +47,7 @@ void SetViewportAndScissorAspectRatio(vk::CommandBuffer* cmd, const nc::Vector2&
 
 auto CreateShadowMappingPassOmni(const nc::graphics::vulkan::Device* device,
                                  nc::graphics::vulkan::GpuAllocator* allocator,
-                                 nc::graphics::vulkan::Swapchain*,
                                  nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
-                                 const nc::Vector2& ,
                                  std::span<const vk::ImageView> sourceViews) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
@@ -85,16 +84,15 @@ auto CreateShadowMappingPassOmni(const nc::graphics::vulkan::Device* device,
         }
     };
 
-    auto shadowMapResolution = nc::Vector2{1024, 1024};
-    auto shadowMapExtent = vk::Extent2D{1024, 1024};
+    auto shadowMapExtent = vk::Extent2D{static_cast<uint32_t>(ShadowMapDimensions.x), static_cast<uint32_t>(ShadowMapDimensions.y)};
 
     const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots.at(0), shadowAttachmentSlots.at(1)}};
 
     auto attachments = std::vector<Attachment>{};
-    attachments.push_back(Attachment(vkDevice, allocator, shadowMapResolution, false, shadowAttachmentSlots.at(0).numSamples, shadowAttachmentSlots.at(0).format, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc)); // Attachment to be blitted to a cube face
-    attachments.push_back(Attachment(vkDevice, allocator, shadowMapResolution, true, shadowAttachmentSlots.at(1).numSamples, shadowAttachmentSlots.at(1).format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc));
+    attachments.push_back(Attachment(vkDevice, allocator, ShadowMapDimensions, false, shadowAttachmentSlots.at(0).numSamples, shadowAttachmentSlots.at(0).format, vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc)); // Attachment to be blitted to a cube face
+    attachments.push_back(Attachment(vkDevice, allocator, ShadowMapDimensions, true, shadowAttachmentSlots.at(1).numSamples, shadowAttachmentSlots.at(1).format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc));
 
-    const auto size = AttachmentSize{shadowMapResolution, shadowMapExtent};
+    const auto size = AttachmentSize{ShadowMapDimensions, shadowMapExtent};
     auto renderPass = RenderPass(vkDevice, shadowAttachmentSlots, shadowSubpasses, std::move(attachments), size, ClearValueFlags::Depth | ClearValueFlags::Color);
 
     auto attachmentViews = std::array<vk::ImageView, 2>{};
@@ -103,7 +101,7 @@ auto CreateShadowMappingPassOmni(const nc::graphics::vulkan::Device* device,
     for (auto cubeMapFaceView : sourceViews)
     {
         attachmentViews.at(0) = cubeMapFaceView;
-        renderPass.CreateFrameBuffer(attachmentViews, shadowMapResolution);
+        renderPass.CreateFrameBuffer(attachmentViews, ShadowMapDimensions);
 
     }
     renderPass.RegisterPipeline<ShadowMappingPipeline>(device, shaderBindingManager);
@@ -113,9 +111,7 @@ auto CreateShadowMappingPassOmni(const nc::graphics::vulkan::Device* device,
 
 auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
                              nc::graphics::vulkan::GpuAllocator* allocator,
-                             nc::graphics::vulkan::Swapchain* swapchain,
-                             nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager,
-                             const nc::Vector2& dimensions) -> nc::graphics::vulkan::RenderPass
+                             nc::graphics::vulkan::ShaderBindingManager* shaderBindingManager) -> nc::graphics::vulkan::RenderPass
 {
     using namespace nc::graphics::vulkan;
 
@@ -137,24 +133,25 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
         }
     };
 
+    auto shadowMapExtent = vk::Extent2D{static_cast<uint32_t>(ShadowMapDimensions.x), static_cast<uint32_t>(ShadowMapDimensions.y)};
     const auto shadowSubpasses = std::array<Subpass, 1>{Subpass{shadowAttachmentSlots[0]}};
 
     auto attachments = std::vector<Attachment>{};
-    attachments.push_back(Attachment(vkDevice, allocator, dimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled));
+    attachments.push_back(Attachment(vkDevice, allocator, ShadowMapDimensions, true, shadowAttachmentSlots[0].numSamples, shadowAttachmentSlots[0].format, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled));
 
     auto sinkViews = std::vector<vk::ImageView>{attachments.at(0).view.get()};
     auto renderPass = RenderPass(vkDevice,
                                  shadowAttachmentSlots,
                                  shadowSubpasses,
                                  std::move(attachments),
-                                 AttachmentSize{dimensions, swapchain->GetExtent()},
+                                 AttachmentSize{ShadowMapDimensions, shadowMapExtent},
                                  ClearValueFlags::Depth,
                                  nc::graphics::RenderPassSinkType::UniDirShadowMap,
                                  std::move(sinkViews),
                                  0u);
 
     const auto attachmentViews = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
-    renderPass.CreateFrameBuffer(attachmentViews, dimensions);
+    renderPass.CreateFrameBuffer(attachmentViews, ShadowMapDimensions);
     renderPass.RegisterPipeline<ShadowMappingPipeline>(device, shaderBindingManager);
 
     return renderPass;
@@ -291,15 +288,34 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
     // If lights have been added or removed we need to add or remove shadow passes (one per light)
     if (stateData.omniDirLightsCount != renderGraph.stateData.omniDirLightsCount)
     {
-        renderGraph.isSinkDirty.at(RenderPassSinkType::OmniDirShadowMap) = true;
-        m_sinkBuffers.at(RenderPassSinkType::OmniDirShadowMap).Clear();
-
         if (renderGraph.omniDirShadowPasses.size() < stateData.omniDirLightsCount)
         {
+            auto shadowCubeMaps = std::vector<nc::asset::CubeMapWithId>{};
+            shadowCubeMaps.reserve(renderGraph.omniDirShadowPasses.size());
+
+            while (shadowCubeMaps.size() < stateData.omniDirLightsCount)
+            {
+                shadowCubeMaps.push_back(nc::asset::CubeMapWithId
+                {
+                    .cubeMap = nc::asset::CubeMap
+                    {
+                        .faceSideLength = static_cast<uint32_t>(ShadowMapDimensions.x),
+                        .pixelData = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+                    },
+                    .id = renderGraph.omniDirShadowPasses.size()
+                });
+            }
+            m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Add(shadowCubeMaps, frameIndex);
+
             renderGraph.omniDirShadowPasses.reserve(stateData.omniDirLightsCount);
+
+            
             std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount, [this, frameIndex]()
             {
-                return CreateShadowMappingPassOmni(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions, m_shaderStorage->SourceCubeMapViews(m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex));
+                return CreateShadowMappingPassOmni(m_device,
+                                                   m_gpuAllocator,
+                                                   m_shaderBindingManager,
+                                                   m_shaderStorage->SourceCubeMapViews(m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex)); // Need cubemap index here too
             });
         }
         else
@@ -308,6 +324,7 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
             {
                 renderGraph.omniDirShadowPasses.pop_back();
             }
+            // m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Remove(, frameIndex); // @todo
         }
     }
 
@@ -322,7 +339,9 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
             renderGraph.uniDirShadowPasses.reserve(stateData.uniDirLightsCount);
             std::generate_n(std::back_inserter(renderGraph.uniDirShadowPasses), stateData.uniDirLightsCount - renderGraph.stateData.uniDirLightsCount, [this]()
             {
-                return CreateShadowMappingPass(m_device, m_gpuAllocator, m_swapchain, m_shaderBindingManager, m_dimensions);
+                return CreateShadowMappingPass(m_device,
+                                               m_gpuAllocator,
+                                               m_shaderBindingManager);
             });
         }
         else
@@ -447,7 +466,7 @@ PerFrameRenderGraph::PerFrameRenderGraph(const Device* device,
     : omniDirShadowPasses{},
       uniDirShadowPasses{},
       litPass{CreateLitPass(device, gpuAllocator, swapchain, dimensions)},
-      isSinkDirty{{RenderPassSinkType::OmniDirShadowMap, false}, {RenderPassSinkType::UniDirShadowMap, false}},
+      isSinkDirty{{RenderPassSinkType::UniDirShadowMap, false}},
       isInitialized{false}
 {
 }

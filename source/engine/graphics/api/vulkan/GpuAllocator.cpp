@@ -432,7 +432,7 @@ namespace nc::graphics::vulkan
         subresourceRange.setBaseArrayLayer(0);
         subresourceRange.setLayerCount(1);
 
-        for (auto i : std::views::iota(0, 5))
+        for (auto i : std::views::iota(0, 6))
         {
             subresourceRange.setBaseArrayLayer(i);
             viewInfo.setSubresourceRange(subresourceRange);
