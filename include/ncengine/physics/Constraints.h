@@ -36,6 +36,8 @@ struct PositionClamp
     Vector3 targetPosition = Vector3::Zero();
     float dampingRatio = 1.0f;
     float dampingFrequency = 10.0f;
+    float slackDistance = 0.0f;
+    float slackDamping = 0.25f;
 };
 
 /**

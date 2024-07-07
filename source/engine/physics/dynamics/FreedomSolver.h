@@ -45,6 +45,8 @@ struct PositionClampConstraint
     PhysicsBody* body;
     float beta;
     float softness;
+    float slackDistance;
+    float slackDamping;
     float totalLambda;
 };
 

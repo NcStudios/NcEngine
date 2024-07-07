@@ -98,6 +98,8 @@ auto GeneratePositionClampConstraints(ecs::ExplicitEcs<PositionClamp, PhysicsBod
             &body,
             beta,
             gamma / dt,
+            clamp.slackDistance,
+            clamp.slackDamping,
             0.0f
         );
     }
@@ -174,8 +176,9 @@ void Solve(std::vector<PositionClampConstraint>& constraints, float dt)
         const auto tentativePosition = XMVectorAdd(constraint.position, XMVectorScale(velocity, dt));
         const auto offset = XMVectorSubtract(tentativePosition, constraint.targetPosition);
         const auto normal = XMVector3Normalize(offset);
-        const auto positionError = XMVectorGetX(XMVector3Length(offset));
-        const auto bias = constraint.beta / dt * positionError;
+        const auto actualError = XMVectorGetX(XMVector3Length(offset));
+        const auto adjustedError =  actualError >= constraint.slackDistance ? actualError : actualError * constraint.slackDamping;
+        const auto bias = constraint.beta / dt * adjustedError;
 
         // Solve for lambda in the usual way, but with gamma added to effective mass
         //     lambda = (effMass + gamma) * -(JV + B)
