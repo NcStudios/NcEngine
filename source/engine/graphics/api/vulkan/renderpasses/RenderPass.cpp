@@ -70,6 +70,17 @@ auto CreateVkRenderPass(std::span<const nc::graphics::vulkan::AttachmentSlot> at
 
     return device.createRenderPassUnique(renderPassInfo);
 }
+
+auto InitSinkViews(nc::graphics::RenderPassSinkType sinkType, std::vector<vk::ImageView>&& renderTargets, vk::ImageLayout layout)
+{
+    return nc::graphics::vulkan::SinkViews
+    {
+        sinkType,
+        std::move(renderTargets),
+        layout
+    };
+};
+
 } // anonymous namespace
 
 namespace nc::graphics::vulkan
@@ -86,7 +97,6 @@ RenderPass::RenderPass(vk::Device device,
       m_clearFlags{clearFlags},
       m_pipelines{},
       m_attachments{std::move(attachments)},
-      m_sinkViewsType{RenderPassSinkType::None},
       m_sinkViews{},
       m_sourceSinkPartition{0u}
 {
@@ -99,7 +109,8 @@ RenderPass::RenderPass(vk::Device device,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags,
                        RenderPassSinkType renderTargetsType,
-                       std::vector<vk::ImageView> renderTargets,
+                       std::vector<vk::ImageView>&& renderTargets,
+                       vk::ImageLayout renderTargetsLayout,
                        uint32_t sourceSinkPartition)
     : m_device{device},
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
@@ -107,8 +118,7 @@ RenderPass::RenderPass(vk::Device device,
       m_clearFlags{clearFlags},
       m_pipelines{},
       m_attachments{std::move(attachments)},
-      m_sinkViewsType{renderTargetsType},
-      m_sinkViews{std::move(renderTargets)},
+      m_sinkViews{InitSinkViews(renderTargetsType, std::move(renderTargets), renderTargetsLayout)},
       m_sourceSinkPartition{sourceSinkPartition}
 {
 }
@@ -177,12 +187,12 @@ void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2
 
 auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
 {
-    if (m_sourceSinkPartition >= m_sinkViews.size())
+    if (m_sourceSinkPartition >= m_sinkViews.views.size())
     {
         return {};
     }
 
-    return std::span<const vk::ImageView>{m_sinkViews.data() + m_sourceSinkPartition, m_sinkViews.size() - m_sourceSinkPartition};
+    return std::span<const vk::ImageView>{m_sinkViews.views.data() + m_sourceSinkPartition, m_sinkViews.views.size() - m_sourceSinkPartition};
 }
 
 } // namespace nc::graphics::vulkan

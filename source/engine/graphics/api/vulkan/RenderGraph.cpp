@@ -148,6 +148,7 @@ auto CreateShadowMappingPass(const nc::graphics::vulkan::Device* device,
                                  ClearValueFlags::Depth,
                                  nc::graphics::RenderPassSinkType::UniDirShadowMap,
                                  std::move(sinkViews),
+                                 vk::ImageLayout::e
                                  0u);
 
     const auto attachmentViews = std::array<vk::ImageView, 1>{renderPass.GetAttachmentView(0u)};
@@ -271,8 +272,9 @@ void RenderGraph::Sink(const RenderPass& renderPass)
     OPTICK_CATEGORY("RenderGraph::Sink", Optick::Category::Rendering);
     auto sinkType = renderPass.GetSinkViewsType();
     auto sinkViews = renderPass.GetSinkViews();
+    auto sinkLayout = renderPass.GetSinkViewsLayout();
 
-    m_shaderStorage->Sink(sinkViews, sinkType, m_frameManager->Index());
+    m_shaderStorage->Sink(sinkViews, sinkType, sinkLayout, m_frameManager->Index());
 
     if (GetCurrentFrameGraph().isSinkDirty.at(sinkType) && sinkViews.size() > 0)
     {

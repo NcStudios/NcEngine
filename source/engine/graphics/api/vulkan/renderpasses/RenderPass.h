@@ -25,6 +25,13 @@ struct Pipeline
     bool isActive;
 };
 
+struct SinkViews
+{
+    RenderPassSinkType vType;
+    std::vector<vk::ImageView> views;
+    vk::ImageLayout layout;
+};
+
 class RenderPass
 {
     public:
@@ -41,8 +48,9 @@ class RenderPass
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags,
-                   RenderPassSinkType sinkViewsType,
-                   std::vector<vk::ImageView> sinkViews,
+                   RenderPassSinkType renderTargetsType,
+                   std::vector<vk::ImageView>&& renderTargets,
+                   vk::ImageLayout renderTargetsLayout,
                    uint32_t sourceSinkPartition);
 
         void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
@@ -60,8 +68,9 @@ class RenderPass
         void UnregisterPipeline();
         void UnregisterPipelines();
 
-        auto GetSinkViewsType() const noexcept -> RenderPassSinkType { return m_sinkViewsType; }
+        auto GetSinkViewsType() const noexcept -> RenderPassSinkType { return m_sinkViews.vType; }
         auto GetSinkViews() const -> std::span<const vk::ImageView>;
+        auto GetSinkViewsLayout() const noexcept -> vk::ImageLayout { return m_sinkViews.layout; };
 
     private:
         vk::Device m_device;
@@ -71,8 +80,7 @@ class RenderPass
         std::vector<Pipeline> m_pipelines;
         std::vector<Attachment> m_attachments;
         std::vector<vk::UniqueFramebuffer> m_frameBuffers;
-        RenderPassSinkType m_sinkViewsType;
-        std::vector<vk::ImageView> m_sinkViews;
+        SinkViews m_sinkViews;
         uint32_t m_sourceSinkPartition;
 };
 

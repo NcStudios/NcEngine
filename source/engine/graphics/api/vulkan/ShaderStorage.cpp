@@ -495,7 +495,7 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
     }
 }
 
-void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSinkType sinkType, uint32_t frameIndex)
+void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSinkType sinkType, vk::ImageLayout layout, uint32_t frameIndex)
 {
     auto& storageBuffer =  m_perFrameRpsStorage.at(frameIndex).at(static_cast<uint32_t>(sinkType));
     auto& sampler = storageBuffer->sampler.get();
@@ -505,7 +505,7 @@ void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSin
     for (auto view : sinkViews)
     {
         views.emplace_back(view);
-        imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
+        imageInfos.emplace_back(sampler, views.back(), layout); // @todo expand for future post process image layouts.
     }
 }
 
