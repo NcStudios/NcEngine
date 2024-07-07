@@ -12,6 +12,13 @@ namespace nc
 {
 class Registry;
 
+struct CollisionInfo
+{
+    Vector3 contactFirst;
+    Vector3 contactSecond;
+    float depth;
+};
+
 /** @brief FrameLogic callable member type */
 using FrameLogicCallable_t = std::function<void(Entity self, Registry* registry, float dt)>;
 
@@ -19,7 +26,10 @@ using FrameLogicCallable_t = std::function<void(Entity self, Registry* registry,
 using FixedLogicCallable_t = std::function<void(Entity self, Registry* registry)>;
 
 /** @brief CollisionLogic callable member type */
+using CollisionEnterCallable_t = std::function<void(Entity self, Entity other, const CollisionInfo& info, Registry* registry)>;
+
 using CollisionLogicCallable_t = std::function<void(Entity self, Entity other, Registry* registry)>;
+
 
 /** @brief FrameLogic callable type requirements */
 template<class Func>
@@ -32,6 +42,9 @@ concept FixedLogicCallable = std::convertible_to<Func, FixedLogicCallable_t>;
 /** @brief CollisionLogic callable type requirements */
 template<class Func>
 concept CollisionLogicCallable = std::convertible_to<Func, CollisionLogicCallable_t>;
+
+template<class Func>
+concept CollisionEnterCallable = std::convertible_to<Func, CollisionEnterCallable_t>;
 
 /** @brief Component that runs a custom callable during each logic phase. */
 class FrameLogic final : public ComponentBase
@@ -91,7 +104,7 @@ class FixedLogic final : public ComponentBase
 class CollisionLogic final : public ComponentBase
 {
     public:
-        template<CollisionLogicCallable CollisionEnterFunc,
+        template<CollisionEnterCallable CollisionEnterFunc,
                  CollisionLogicCallable CollisionExitFunc,
                  CollisionLogicCallable TriggerEnterFunc,
                  CollisionLogicCallable TriggerExitFunc>
@@ -109,7 +122,7 @@ class CollisionLogic final : public ComponentBase
         }
 
         /** @brief Set a new on collision enter callable. */
-        template<CollisionLogicCallable Func>
+        template<CollisionEnterCallable Func>
         void SetOnCollisionEnter(Func&& func)
         {
             m_onCollisionEnter = std::forward<Func>(func);
@@ -136,9 +149,9 @@ class CollisionLogic final : public ComponentBase
             m_onTriggerExit = std::forward<Func>(func);
         }
 
-        void NotifyCollisionEnter(Entity other, Registry* registry)
+        void NotifyCollisionEnter(Entity other, const CollisionInfo& info, Registry* registry)
         {
-            if(m_onCollisionEnter) m_onCollisionEnter(ParentEntity(), other, registry);
+            if(m_onCollisionEnter) m_onCollisionEnter(ParentEntity(), other, info, registry);
         }
 
         void NotifyCollisionExit(Entity other, Registry* registry)
@@ -157,7 +170,7 @@ class CollisionLogic final : public ComponentBase
         }
 
     private:
-        CollisionLogicCallable_t m_onCollisionEnter;
+        CollisionEnterCallable_t m_onCollisionEnter;
         CollisionLogicCallable_t m_onCollisionExit;
         CollisionLogicCallable_t m_onTriggerEnter;
         CollisionLogicCallable_t m_onTriggerExit;

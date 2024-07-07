@@ -130,8 +130,19 @@ void NarrowPhase::NotifyEvents()
             {
                 const auto e1 = cur->Event().first;
                 const auto e2 = cur->Event().second;
-                if(auto* logic = TryGetCollisionLogic(e1)) logic->NotifyCollisionEnter(e2, m_registry);
-                if(auto* logic = TryGetCollisionLogic(e2)) logic->NotifyCollisionEnter(e1, m_registry);
+                if(auto* logic = TryGetCollisionLogic(e1))
+                {
+                    const auto& contact = cur->DeepestContact();
+                    const auto info = CollisionInfo{contact.worldPointA, contact.worldPointB, contact.depth};
+                    logic->NotifyCollisionEnter(e2, info, m_registry);
+                }
+
+                if(auto* logic = TryGetCollisionLogic(e2))
+                {
+                    const auto& contact = cur->DeepestContact();
+                    const auto info = CollisionInfo{contact.worldPointA, contact.worldPointB, contact.depth};
+                    logic->NotifyCollisionEnter(e1, info, m_registry);
+                }
 
                 cur->Event().state = NarrowEvent::State::Stale;
                 break;
