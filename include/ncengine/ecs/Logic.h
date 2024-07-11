@@ -14,8 +14,9 @@ class Registry;
 
 struct CollisionInfo
 {
-    Vector3 contactFirst;
-    Vector3 contactSecond;
+    Vector3 contactSelf;
+    Vector3 contactOther;
+    Vector3 normal;
     float depth;
 };
 
