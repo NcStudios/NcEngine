@@ -46,7 +46,6 @@ struct PositionClampConstraint
     float beta;
     float softness;
     float slackDistance;
-    float slackDamping;
     float totalLambda;
 };
 

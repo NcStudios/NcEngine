@@ -37,7 +37,6 @@ struct PositionClamp
     float dampingRatio = 1.0f;
     float dampingFrequency = 10.0f;
     float slackDistance = 0.0f;
-    float slackDamping = 0.25f;
 };
 
 /**

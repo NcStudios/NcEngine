@@ -456,7 +456,6 @@ void PositionClampUIWidget(physics::PositionClamp& positionClamp, Entity, Editor
     ui::DragFloat(positionClamp.dampingRatio, "dampingRatio", 0.01f, 0.01f, 10.0f);
     ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
     ui::DragFloat(positionClamp.slackDistance, "slackDistance", 0.1f, 0.0f, 100.0f);
-    ui::DragFloat(positionClamp.slackDamping, "slackDamping", 0.01f, 0.0f, 1.0f);
 }
 
 void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, Entity, EditorContext&)
