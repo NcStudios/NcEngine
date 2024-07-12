@@ -1,4 +1,4 @@
-#include "ShadowMappingPipeline.h"
+#include "ShadowMappingUniPipeline.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/core/GpuOptions.h"
@@ -23,7 +23,7 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    ShadowMappingPipeline::ShadowMappingPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+    ShadowMappingUniPipeline::ShadowMappingUniPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
         : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
@@ -32,7 +32,7 @@ namespace nc::graphics::vulkan
 
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
+        auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingUniVertex.spv");
         auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
 
         std::array<vk::PipelineShaderStageCreateInfo, 1u> shaderStages
@@ -74,7 +74,8 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPMultisampleState(&multisampling);
         auto depthStencil = CreateDepthStencilCreateInfo();
         pipelineCreateInfo.setPDepthStencilState(&depthStencil);
-        auto colorBlending = CreateColorBlendStateCreateInfo();
+        auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
+        auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
@@ -87,22 +88,22 @@ namespace nc::graphics::vulkan
         vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    ShadowMappingPipeline::~ShadowMappingPipeline() noexcept
+    ShadowMappingUniPipeline::~ShadowMappingUniPipeline() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    void ShadowMappingPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+    void ShadowMappingUniPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
-        OPTICK_CATEGORY("ShadowMappingPipeline::Bind", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ShadowMappingUniPipeline::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     }
 
-    void ShadowMappingPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData)
+    void ShadowMappingUniPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData)
     {
-        OPTICK_CATEGORY("ShadowMappingPipeline::Record", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ShadowMappingUniPipeline::Record", Optick::Category::Rendering);
         NC_ASSERT(instanceData.shadowCasterIndex < frameData.lightState.viewProjections.size(), "Shadow caster index is out of bounds.");
         
         cmd->setDepthBias
@@ -113,27 +114,6 @@ namespace nc::graphics::vulkan
         );
 
         auto pushConstants = ShadowMappingPushConstants{};
-
-        // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        if (instanceData.isOmniDirectional)
-        {
-            pushConstants.lightViewProjection = frameData.lightState.viewProjections[instanceData.shadowCasterIndex];
-
-            cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
-
-            uint32_t objectInstance = 0;
-            for (const auto& mesh : frameData.objectState.pbrMeshes)
-            {
-                cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                objectInstance++;
-            }
-            for (const auto& mesh : frameData.objectState.toonMeshes)
-            {
-                cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-                objectInstance++;
-            }
-            return;
-        }
 
         // Shadow is uni-directional (spotlight, directional light)
         pushConstants.lightViewProjection = frameData.lightState.viewProjections[instanceData.shadowCasterIndex];

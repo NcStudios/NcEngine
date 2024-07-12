@@ -5,7 +5,7 @@
 #include "graphics/api/vulkan/pipelines/OutlinePipeline.h"
 #include "graphics/api/vulkan/pipelines/ParticlePipeline.h"
 #include "graphics/api/vulkan/pipelines/PbrPipeline.h"
-#include "graphics/api/vulkan/pipelines/ShadowMappingPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingUniPipeline.h"
 #include "graphics/api/vulkan/pipelines/ToonPipeline.h"
 #include "graphics/api/vulkan/pipelines/UiPipeline.h"
 #include "graphics/api/vulkan/renderpasses/RenderPassFactories.h"
@@ -65,10 +65,13 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
       m_shaderStorage{shaderStorage},
       m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
       m_sinkBuffers{{RenderPassSinkType::UniDirShadowMap, shaderResourceBus->CreateRenderPassSinkBuffer(RenderPassSinkType::UniDirShadowMap, 20u, ShaderStage::Fragment, 3u, 2u)}},
-      m_sourceCubeMaps{{RenderPassSinkType::OmniDirShadowMap, shaderResourceBus->CreateCubeMapArrayBuffer(10, ShaderStage::Fragment, 0u, 2u, false)}},
+      m_sourceCubeMaps{CreateDummyShadowMaps(10u)},
+      m_sourceCubeMapBuffers{{RenderPassSinkType::OmniDirShadowMap, shaderResourceBus->CreateCubeMapArrayBuffer(10, ShaderStage::Fragment, 0u, 2u, false)}},
       m_dimensions{dimensions},
       m_screenExtent{}
 {
+    m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled | CubeMapUsage::TransferDst, 0u);
+    m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled | CubeMapUsage::TransferDst, 1u); // @todo array-based initialization
 }
 
 // Sink outputs from the render graph into shader storage to be consumed by shaders
@@ -97,32 +100,13 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
     {
         if (renderGraph.omniDirShadowPasses.size() < stateData.omniDirLightsCount)
         {
-            auto shadowCubeMaps = std::vector<nc::asset::CubeMapWithId>{};
-            shadowCubeMaps.reserve(renderGraph.omniDirShadowPasses.size());
-
-            while (shadowCubeMaps.size() < stateData.omniDirLightsCount)
-            {
-                shadowCubeMaps.push_back(nc::asset::CubeMapWithId
-                {
-                    .cubeMap = nc::asset::CubeMap
-                    {
-                        .faceSideLength = static_cast<uint32_t>(ShadowMapDimensions.x),
-                        .pixelData = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-                    },
-                    .id = renderGraph.omniDirShadowPasses.size()
-                });
-            }
-            m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Add(shadowCubeMaps, frameIndex);
-
             renderGraph.omniDirShadowPasses.reserve(stateData.omniDirLightsCount);
-
-            
-            std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount, [this, frameIndex]()
+            std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), (stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount) * 6u, [this, frameIndex]()
             {
                 return CreateShadowMappingPassOmni(m_device,
                                                    m_gpuAllocator,
                                                    m_shaderBindingManager,
-                                                   m_shaderStorage->SourceCubeMapViews(m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex)); // Need cubemap index here too
+                                                   std::move(m_shaderStorage->SourceCubeMapViews(m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex))); // Need cubemap index here too
             });
         }
         else
@@ -131,7 +115,7 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
             {
                 renderGraph.omniDirShadowPasses.pop_back();
             }
-            // m_sourceCubeMaps.at(RenderPassSinkType::OmniDirShadowMap).Remove(, frameIndex); // @todo
+            // m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Remove(, frameIndex); // @todo
         }
     }
 
@@ -205,21 +189,19 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
 
     auto instanceData = PerFrameInstanceData{};
 
-    for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.omniDirShadowPasses))
+    for (auto [shadowCubeFaceIndex, shadowMappingPass] : std::views::enumerate(renderGraph.omniDirShadowPasses))
     {
         instanceData.isOmniDirectional = true;
-        instanceData.shadowCasterIndex = static_cast<uint32_t>(index);
-        shadowMappingPass.Begin(cmd);
+        instanceData.shadowCasterIndex = static_cast<uint32_t>(shadowCubeFaceIndex);
+        shadowMappingPass.Begin(cmd, static_cast<uint32_t>(shadowCubeFaceIndex));
         shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
         shadowMappingPass.End(cmd);
-        Sink(shadowMappingPass);
     }
-    renderGraph.isSinkDirty.at(RenderPassSinkType::OmniDirShadowMap) = false;
 
     for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.uniDirShadowPasses))
     {
         instanceData.isOmniDirectional = false;
-        instanceData.shadowCasterIndex = static_cast<uint32_t>(renderGraph.stateData.omniDirLightsCount + index);
+        instanceData.shadowCasterIndex = static_cast<uint32_t>(renderGraph.stateData.omniDirLightsCount + index); //@ todo: multiply omniDirLightsCount by 6 here?
         shadowMappingPass.Begin(cmd);
         shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
         shadowMappingPass.End(cmd);

@@ -130,7 +130,7 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
 
             for (auto& cubeMapWithId : eventData.data)
             {
-                cubeMaps.emplace_back(m_allocator, cubeMapWithId);
+                cubeMaps.emplace_back(m_allocator, cubeMapWithId, GetCubeMapFormat(eventData.format), GetCubeMapUsage(eventData.usage));
                 imageInfos.emplace_back(sampler, cubeMaps.back().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal);
                 uids.emplace_back(cubeMapWithId.id);
             }
@@ -509,7 +509,7 @@ void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSin
     }
 }
 
-auto ShaderStorage::SourceCubeMapViews(uint32_t uid, uint32_t frameIndex) -> std::span<const vk::ImageView>
+auto ShaderStorage::SourceCubeMapViews(uint32_t uid, uint32_t frameIndex) -> std::vector<vk::ImageView>
 {
     auto& storage = m_perFrameCabStorage.at(frameIndex);
     auto& buffer = storage.at(uid);

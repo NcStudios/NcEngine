@@ -89,8 +89,12 @@ auto CreateSubpassDescription(const nc::graphics::vulkan::AttachmentSlot& depthA
     };
 }
 
-auto CreateAttachmentImage(nc::graphics::vulkan::GpuAllocator *allocator, vk::Format format, nc::Vector2 dimensions, vk::SampleCountFlagBits numSamples, vk::ImageUsageFlags imageUsageFlags) -> nc::graphics::vulkan::GpuAllocation<vk::Image>
+auto CreateAttachmentImage(nc::graphics::vulkan::GpuAllocator *allocator, vk::Format format, nc::Vector2 dimensions, vk::SampleCountFlagBits numSamples, vk::ImageUsageFlags imageUsageFlags, bool isCustomDepthStencil) -> nc::graphics::vulkan::GpuAllocation<vk::Image>
 {
+    if (isCustomDepthStencil)
+    {
+        return allocator->CreateDepthTexture(format, static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y), 1);
+    }
     return allocator->CreateImage(format, dimensions, imageUsageFlags, vk::ImageCreateFlags(), 1, 1, numSamples);
 }
 
@@ -169,8 +173,8 @@ Subpass::Subpass(const AttachmentSlot& depthAttachment)
 {
 }
 
-Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageUsageFlags imageUsageFlags)
-    : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, imageUsageFlags)},
+Attachment::Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, bool isCustomDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageUsageFlags imageUsageFlags)
+    : image{CreateAttachmentImage(allocator, format, dimensions, numSamples, imageUsageFlags, isCustomDepthStencil)},
       view{CreateAttachmentImageView(device, format, image, isDepthStencil)}{}
 
 } // namespace nc::graphics::vulkan

@@ -53,7 +53,41 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
     for (const auto& [light, transform] : pointLights)
     {
         pointLightsCount++;
-        state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+        if (m_useShadows)
+        {
+            // Cache the current rotation
+            const auto currentRotation = transform->Rotation();
+            const auto& up = transform->Up();
+            const auto& right = transform->Right();
+
+            // Front
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+
+            // Back
+            transform->Rotate(up, DirectX::XM_PI);
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+            transform->SetRotation(currentRotation); // Reset the rotation
+
+            // Left
+            transform->Rotate(up, DirectX::XM_PIDIV2);
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+            transform->SetRotation(currentRotation); // Reset the rotation
+
+            // Right
+            transform->Rotate(up, -DirectX::XM_PIDIV2);
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+            transform->SetRotation(currentRotation); // Reset the rotation
+
+            // Up
+            transform->Rotate(right, DirectX::XM_PIDIV2);
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+            transform->SetRotation(currentRotation); // Reset the rotation
+
+            // Down
+            transform->Rotate(right, -DirectX::XM_PIDIV2);
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+            transform->SetRotation(currentRotation); // Reset the rotation
+        }
         m_pointLightData.emplace_back(state.viewProjections.back(),
                                       transform->Position(),
                                       m_useShadows,

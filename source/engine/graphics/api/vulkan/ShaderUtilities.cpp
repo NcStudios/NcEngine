@@ -60,4 +60,27 @@ auto GetStageFlags(shader_stage stage) -> vk::ShaderStageFlags
     }
     return vulkanFlags;
 }
+
+auto GetCubeMapFormat(CubeMapFormat format) -> vk::Format
+{
+    return format == CubeMapFormat::R32_SFLOAT ? vk::Format::eR32Sfloat : vk::Format::eR8G8B8A8Srgb;
+}
+
+auto GetCubeMapUsage(CubeMapUsage usage) -> vk::ImageUsageFlags
+{
+    auto vulkanFlags = vk::ImageUsageFlags();
+    if ((usage & CubeMapUsage::ColorAttachment) == CubeMapUsage::ColorAttachment)
+    {
+        vulkanFlags |= vk::ImageUsageFlagBits::eColorAttachment;
+    }
+    if ((usage & CubeMapUsage::TransferDst) == CubeMapUsage::TransferDst)
+    {
+        vulkanFlags |= vk::ImageUsageFlagBits::eTransferDst;
+    }
+    if ((usage & CubeMapUsage::Sampled) == CubeMapUsage::Sampled)
+    {
+        vulkanFlags |= vk::ImageUsageFlagBits::eSampled;
+    }
+    return vulkanFlags;
+}
 } // namespace nc::graphics::vulkan

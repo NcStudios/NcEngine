@@ -2,7 +2,7 @@
 
 #include "Attachment.h"
 #include "graphics/api/vulkan/pipelines/IPipeline.h"
-#include "graphics/api/vulkan/pipelines/ShadowMappingPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingUniPipeline.h"
 #include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 #include <span>

@@ -61,7 +61,8 @@ class RenderGraph
         // Internal data
         std::array<PerFrameRenderGraph, MaxFramesInFlight> m_perFrameRenderGraphs;
         std::unordered_map<RenderPassSinkType, RenderPassSinkBufferHandle> m_sinkBuffers;
-        std::unordered_map<RenderPassSinkType, CubeMapArrayBufferHandle> m_sourceCubeMaps;
+        std::vector<asset::CubeMapWithId> m_sourceCubeMaps;
+        std::unordered_map<RenderPassSinkType, CubeMapArrayBufferHandle> m_sourceCubeMapBuffers;
         Vector2 m_dimensions;
         Vector2 m_screenExtent;
         uint32_t m_maxLights;

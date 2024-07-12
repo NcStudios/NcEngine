@@ -26,6 +26,8 @@ auto ShaderResourceBus::CreateCubeMapArrayBuffer(uint32_t capacity, shader_stage
                 capacity,
                 stage,
                 CabUpdateAction::Initialize,
+                CubeMapFormat::None,
+                CubeMapUsage::None,
                 true
             }
         );
@@ -45,6 +47,8 @@ auto ShaderResourceBus::CreateCubeMapArrayBuffer(uint32_t capacity, shader_stage
                     capacity,
                     stage,
                     CabUpdateAction::Initialize,
+                    CubeMapFormat::None,
+                    CubeMapUsage::None,
                     false
                 }
             );

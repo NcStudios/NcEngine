@@ -51,7 +51,7 @@ void AssetResources::ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData
     {
         case asset::UpdateAction::Load:
         {
-            cubeMaps.Add(assetData.data, std::numeric_limits<uint32_t>::max());
+            cubeMaps.Add(assetData.data, CubeMapFormat::R8G8B8A8_SRGB, CubeMapUsage::Sampled | CubeMapUsage::TransferDst, std::numeric_limits<uint32_t>::max());
             break;
         }
         case asset::UpdateAction::Unload:

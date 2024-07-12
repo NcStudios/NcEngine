@@ -16,11 +16,11 @@ namespace nc::graphics::vulkan
         DirectX::XMMATRIX lightViewProjection;
     };
 
-    class ShadowMappingPipeline : public IPipeline
+    class ShadowMappingUniPipeline : public IPipeline
     {
         public:
-            ShadowMappingPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
-            ~ShadowMappingPipeline() noexcept;
+            ShadowMappingUniPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass);
+            ~ShadowMappingUniPipeline() noexcept;
 
             void Bind(uint32_t frameIndex, vk::CommandBuffer* cmd) override;
             void Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData) override;

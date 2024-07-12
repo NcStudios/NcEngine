@@ -22,7 +22,7 @@ struct ClearValueFlags
 
 struct Attachment
 {
-    Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat, vk::ImageUsageFlags imageUsageFlags);
+    Attachment(vk::Device device, GpuAllocator* allocator, Vector2 dimensions, bool isDepthStencil, bool isCustomDepthStencil, vk::SampleCountFlagBits numSamples, vk::Format depthFormat, vk::ImageUsageFlags imageUsageFlags);
     GpuAllocation<vk::Image> image;
     vk::UniqueImageView view;
 };

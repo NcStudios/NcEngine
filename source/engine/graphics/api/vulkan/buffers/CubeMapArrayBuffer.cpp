@@ -8,10 +8,10 @@ namespace
 }
 namespace nc::graphics::vulkan
 {
-CubeMap::CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data)
-    : m_image{allocator->CreateCubeMapTexture(data.cubeMap.pixelData.data(), static_cast<uint32_t>(data.cubeMap.pixelData.size()), data.cubeMap.faceSideLength)},
-      m_cubeMapView{allocator->CreateCubeMapTextureView(m_image)},
-      m_faceViews{allocator->CreateCubeMapFaceViews(m_image)} {}
+CubeMap::CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data, vk::Format format, vk::ImageUsageFlags usage)
+    : m_image{allocator->CreateCubeMapTexture(data.cubeMap.pixelData.data(), static_cast<uint32_t>(data.cubeMap.pixelData.size()), data.cubeMap.faceSideLength, format, usage)},
+      m_cubeMapView{allocator->CreateCubeMapTextureView(m_image, format)},
+      m_faceViews{allocator->CreateCubeMapFaceViews(m_image, format)} {}
 
 void CubeMap::Clear() noexcept
 {

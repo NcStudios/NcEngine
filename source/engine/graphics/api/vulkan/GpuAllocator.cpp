@@ -125,6 +125,21 @@ namespace nc::graphics::vulkan
         return GpuAllocation<vk::Image>{image, allocation, this};
     }
 
+    auto GpuAllocator::CreateDepthTexture(vk::Format format, uint32_t width, uint32_t height, uint32_t mipLevels) -> GpuAllocation<vk::Image>
+    {
+        const auto imageSize = width * height * 4u;
+        auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+
+        auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
+        auto imageAllocation = CreateImage(format, dimensions, vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst, vk::ImageCreateFlags(), 1, mipLevels, vk::SampleCountFlagBits::e1);
+
+        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, mipLevels, vk::ImageLayout::eTransferDstOptimal, vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
+        CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height, vk::ImageAspectFlagBits::eDepth);
+        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, 1, vk::ImageLayout::eDepthStencilAttachmentOptimal, vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil);
+        stagingBuffer.Release();
+        return imageAllocation;
+    }
+
     auto GpuAllocator::CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, uint32_t mipLevels, bool isNormal) -> GpuAllocation<vk::Image>
     {
         auto format = isNormal ? vk::Format::eR8G8B8A8Unorm : vk::Format::eR8G8B8A8Srgb;
@@ -146,13 +161,13 @@ namespace nc::graphics::vulkan
         auto dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
         auto imageAllocation = CreateImage(format, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc, vk::ImageCreateFlags(), 1, mipLevels, vk::SampleCountFlagBits::e1);
 
-        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, mipLevels, vk::ImageLayout::eTransferDstOptimal);
-        CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height);
+        TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eUndefined, 1, mipLevels, vk::ImageLayout::eTransferDstOptimal, vk::ImageAspectFlagBits::eColor);
+        CopyBufferToImage(stagingBuffer.Data(), imageAllocation.Data(), width, height, vk::ImageAspectFlagBits::eColor);
         stagingBuffer.Release();
 
         if (mipLevels == 1)
         {
-            TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
+            TransitionImageLayout(imageAllocation.Data(), vk::ImageLayout::eTransferDstOptimal, 1, 1, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
         }
         else
         {
@@ -163,7 +178,7 @@ namespace nc::graphics::vulkan
         return imageAllocation;
     }
 
-    auto GpuAllocator::CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength) -> GpuAllocation<vk::Image>
+    auto GpuAllocator::CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength, vk::Format format, vk::ImageUsageFlags usage) -> GpuAllocation<vk::Image>
     {
         auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
         auto* mappedData = Map(stagingBuffer.Allocation());
@@ -171,11 +186,11 @@ namespace nc::graphics::vulkan
 
         Unmap(stagingBuffer.Allocation());
         auto dimensions = Vector2{static_cast<float>(sideLength), static_cast<float>(sideLength)};
-        auto imageBuffer = CreateImage(vk::Format::eR8G8B8A8Srgb, dimensions, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::ImageCreateFlagBits::eCubeCompatible, 6, 1, vk::SampleCountFlagBits::e1);
+        auto imageBuffer = CreateImage(format, dimensions, usage, vk::ImageCreateFlagBits::eCubeCompatible, 6, 1, vk::SampleCountFlagBits::e1);
 
-        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, 1, vk::ImageLayout::eTransferDstOptimal);
+        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, 1, vk::ImageLayout::eTransferDstOptimal, vk::ImageAspectFlagBits::eColor);
         CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), sideLength, sideLength, 6);
-        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, 1, vk::ImageLayout::eShaderReadOnlyOptimal);
+        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, 1, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
 
         stagingBuffer.Release();
         return imageBuffer;
@@ -286,7 +301,7 @@ namespace nc::graphics::vulkan
         });
     }
 
-    void GpuAllocator::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height)
+    void GpuAllocator::CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, vk::ImageAspectFlags imageAspectFlags)
     {
         m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         {
@@ -296,7 +311,7 @@ namespace nc::graphics::vulkan
             region.setBufferImageHeight(0);
 
             vk::ImageSubresourceLayers subresource{};
-            subresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresource.setAspectMask(imageAspectFlags);
             subresource.setMipLevel(0);
             subresource.setBaseArrayLayer(0);
             subresource.setLayerCount(1);
@@ -332,7 +347,7 @@ namespace nc::graphics::vulkan
         });
     }
 
-    void GpuAllocator::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, uint32_t mipLevels, vk::ImageLayout newLayout)
+    void GpuAllocator::TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, uint32_t mipLevels, vk::ImageLayout newLayout, vk::ImageAspectFlags imageAspectMask)
     {
         m_device->ExecuteCommand([&](vk::CommandBuffer cmd) 
         { 
@@ -344,7 +359,7 @@ namespace nc::graphics::vulkan
             barrier.setImage(image);
 
             vk::ImageSubresourceRange subresourceRange{};
-            subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+            subresourceRange.setAspectMask(imageAspectMask);
             subresourceRange.setBaseMipLevel(0);
             subresourceRange.setLevelCount(mipLevels);
             subresourceRange.setBaseArrayLayer(0);
@@ -361,6 +376,13 @@ namespace nc::graphics::vulkan
                 barrier.setDstAccessMask(vk::AccessFlagBits::eTransferWrite);
                 sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
                 destinationStage = vk::PipelineStageFlagBits::eTransfer;
+            }
+            else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
+            {
+                barrier.setSrcAccessMask(vk::AccessFlags());
+                barrier.setDstAccessMask(vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+                sourceStage = vk::PipelineStageFlagBits::eAllCommands;
+                destinationStage = vk::PipelineStageFlagBits::eAllCommands;
             }
             else if (oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
             {
@@ -397,12 +419,12 @@ namespace nc::graphics::vulkan
         return m_device->VkDevice().createImageViewUnique(viewInfo);
     }
 
-    auto GpuAllocator::CreateCubeMapTextureView(vk::Image image) -> vk::UniqueImageView
+    auto GpuAllocator::CreateCubeMapTextureView(vk::Image image, vk::Format format) -> vk::UniqueImageView
     {
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
         viewInfo.setViewType(vk::ImageViewType::eCube);
-        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
+        viewInfo.setFormat(format);
 
         vk::ImageSubresourceRange subresourceRange{};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
@@ -415,7 +437,7 @@ namespace nc::graphics::vulkan
         return m_device->VkDevice().createImageViewUnique(viewInfo);
     }
 
-    auto GpuAllocator::CreateCubeMapFaceViews(vk::Image image) -> std::vector<vk::UniqueImageView>
+    auto GpuAllocator::CreateCubeMapFaceViews(vk::Image image, vk::Format format) -> std::vector<vk::UniqueImageView>
     {
         auto faceViews = std::vector<vk::UniqueImageView>{};
         faceViews.reserve(6);
@@ -423,7 +445,7 @@ namespace nc::graphics::vulkan
         vk::ImageViewCreateInfo viewInfo{};
         viewInfo.setImage(image);
         viewInfo.setViewType(vk::ImageViewType::e2D);
-        viewInfo.setFormat(vk::Format::eR8G8B8A8Srgb);
+        viewInfo.setFormat(format);
 
         vk::ImageSubresourceRange subresourceRange{};
         subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);

@@ -15,7 +15,7 @@ namespace graphics::vulkan
 class CubeMap
 {
     public:
-        explicit CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data);
+        explicit CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data, vk::Format format, vk::ImageUsageFlags usage);
 
         auto GetImageView() const noexcept -> const vk::ImageView&
         {

@@ -13,7 +13,7 @@ CubeMapArrayBufferHandle::CubeMapArrayBufferHandle(uint32_t uid, shader_stage st
     NC_ASSERT(slot < MaxResourceSlotsPerShader, "Binding slot exceeds the maximum allowed resource bindings.");
 }
 
-void CubeMapArrayBufferHandle::Add(std::span<const asset::CubeMapWithId> data, uint32_t frameIndex)
+void CubeMapArrayBufferHandle::Add(std::span<const asset::CubeMapWithId> data, CubeMapFormat format, CubeMapUsage usage, uint32_t frameIndex)
 {
     m_backendPort->Emit(
         CabUpdateEventData
@@ -26,6 +26,8 @@ void CubeMapArrayBufferHandle::Add(std::span<const asset::CubeMapWithId> data, u
             0u,
             m_stage,
             CabUpdateAction::Add,
+            format,
+            usage,
             frameIndex == std::numeric_limits<uint32_t>::max() ? true : false
         }
     );
@@ -44,6 +46,8 @@ void CubeMapArrayBufferHandle::Remove(std::span<const asset::CubeMapWithId> data
             0u,
             m_stage,
             CabUpdateAction::Remove,
+            CubeMapFormat::None,
+            CubeMapUsage::None,
             frameIndex == std::numeric_limits<uint32_t>::max() ? true : false
         }
     );
@@ -62,6 +66,8 @@ void CubeMapArrayBufferHandle::Clear()
             0u,
             m_stage,
             CabUpdateAction::Clear,
+            CubeMapFormat::None,
+            CubeMapUsage::None,
             false
         }
     );
