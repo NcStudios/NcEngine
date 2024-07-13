@@ -49,7 +49,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 0, binding = 3) uniform samplerCube omniDirShadowMaps[];
+layout (set = 2, binding = 0) uniform samplerCube omniDirShadowMaps[];
 layout (set = 2, binding = 3) uniform sampler2D uniDirShadowMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
@@ -107,7 +107,7 @@ vec3 HSVtoRGB(in vec3 HSV)
     return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
 }
 
-float ShadowCalculation(vec4 fragPosLightSpace, int index)
+float UniShadowCalc(vec4 fragPosLightSpace, int index)
 {
     // Perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -143,6 +143,15 @@ float ShadowCalculation(vec4 fragPosLightSpace, int index)
     return shadow;
 }
 
+float OmniShadowCalc(vec3 lightPos, vec3 fragPos, uint lightIndex)
+{
+    vec3 lightVec = fragPos-lightPos;
+    float sampledDistance = texture(omniDirShadowMaps[lightIndex], lightVec).r;
+    float distance = length(lightVec);
+
+    return (distance <= sampledDistance + 0.15) ? 1.0 : 0.0f;
+}
+
 const mat4 biasMat = mat4( 
     0.5, 0.0, 0.0, 0.0,
     0.0, 0.5, 0.0, 0.0,
@@ -160,7 +169,7 @@ float PointLightRadiance(PointLight light, vec3 fragPosition, vec3 normal, int s
 
     if (light.castsShadows == 1)
     {
-        intensity *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(fragPosition, 1.0), shadowIndex));
+        intensity *= OmniShadowCalc(light.position, fragPosition, shadowIndex);
     }
 
     return intensity;
@@ -178,7 +187,7 @@ float SpotLightRadiance(SpotLight light, vec3 fragPosition, int shadowIndex)
 
     if (light.castsShadows == 1)
     {
-        intensity *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(fragPosition, 1.0), shadowIndex));
+        intensity *= (1.0f - UniShadowCalc(biasMat * light.viewProjection * vec4(fragPosition, 1.0), shadowIndex));
     }
 
     return intensity;

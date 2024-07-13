@@ -103,10 +103,11 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
             renderGraph.omniDirShadowPasses.reserve(stateData.omniDirLightsCount);
             std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), (stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount) * 6u, [this, frameIndex]()
             {
+                static uint32_t index = 0u;
                 return CreateShadowMappingPassOmni(m_device,
                                                    m_gpuAllocator,
                                                    m_shaderBindingManager,
-                                                   std::move(m_shaderStorage->SourceCubeMapViews(m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex))); // Need cubemap index here too
+                                                   std::move(m_shaderStorage->SourceCubeMapViews(m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex, (index++/6)))); // Need cubemap index here too
             });
         }
         else
@@ -198,16 +199,16 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
         shadowMappingPass.End(cmd);
     }
 
-    for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.uniDirShadowPasses))
-    {
-        instanceData.isOmniDirectional = false;
-        instanceData.shadowCasterIndex = static_cast<uint32_t>(renderGraph.stateData.omniDirLightsCount + index); //@ todo: multiply omniDirLightsCount by 6 here?
-        shadowMappingPass.Begin(cmd);
-        shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
-        shadowMappingPass.End(cmd);
-        Sink(shadowMappingPass);
-    }
-    renderGraph.isSinkDirty.at(RenderPassSinkType::UniDirShadowMap) = false;
+    // for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.uniDirShadowPasses))
+    // {
+    //     instanceData.isOmniDirectional = false;
+    //     instanceData.shadowCasterIndex = static_cast<uint32_t>(renderGraph.stateData.omniDirLightsCount + index);
+    //     shadowMappingPass.Begin(cmd);
+    //     shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
+    //     shadowMappingPass.End(cmd);
+    //     Sink(shadowMappingPass);
+    // }
+    // renderGraph.isSinkDirty.at(RenderPassSinkType::UniDirShadowMap) = false;
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 

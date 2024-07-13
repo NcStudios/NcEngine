@@ -50,43 +50,43 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
     m_pointLightData.clear();
     auto pointLightsCount = 0u;
 
+    auto front = DirectX::XMMatrixIdentity();
+    auto back = DirectX::XMMatrixRotationAxis(DirectX::g_XMIdentityR1, DirectX::XM_PI);
+    auto left = DirectX::XMMatrixRotationAxis(DirectX::g_XMIdentityR1, DirectX::XM_PIDIV2);
+    auto right = DirectX::XMMatrixRotationAxis(DirectX::g_XMIdentityR1, -DirectX::XM_PIDIV2);
+    auto up = DirectX::XMMatrixRotationAxis(DirectX::g_XMIdentityR0, DirectX::XM_PIDIV2);
+    auto down = DirectX::XMMatrixRotationAxis(DirectX::g_XMIdentityR0, -DirectX::XM_PIDIV2);
+
     for (const auto& [light, transform] : pointLights)
     {
         pointLightsCount++;
         if (m_useShadows)
         {
-            // Cache the current rotation
-            const auto currentRotation = transform->Rotation();
-            const auto& up = transform->Up();
-            const auto& right = transform->Right();
+            const auto& worldPos = transform->PositionXM();
+            front.r[3] = worldPos;
+            back.r[3] = worldPos;
+            left.r[3] = worldPos;
+            right.r[3] = worldPos;
+            up.r[3] = worldPos;
+            down.r[3] = worldPos;
 
             // Front
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(front));
 
             // Back
-            transform->Rotate(up, DirectX::XM_PI);
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-            transform->SetRotation(currentRotation); // Reset the rotation
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(back));
 
             // Left
-            transform->Rotate(up, DirectX::XM_PIDIV2);
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-            transform->SetRotation(currentRotation); // Reset the rotation
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(left));
 
             // Right
-            transform->Rotate(up, -DirectX::XM_PIDIV2);
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-            transform->SetRotation(currentRotation); // Reset the rotation
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(right));
 
             // Up
-            transform->Rotate(right, DirectX::XM_PIDIV2);
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-            transform->SetRotation(currentRotation); // Reset the rotation
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(up));
 
             // Down
-            transform->Rotate(right, -DirectX::XM_PIDIV2);
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(transform->TransformationMatrix()));
-            transform->SetRotation(currentRotation); // Reset the rotation
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(down));
         }
         m_pointLightData.emplace_back(state.viewProjections.back(),
                                       transform->Position(),

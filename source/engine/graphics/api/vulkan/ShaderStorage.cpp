@@ -237,19 +237,19 @@ void ShaderStorage::UpdateRenderPassSinkBuffer(const graphics::RpsUpdateEventDat
                 eventData.currentFrameIndex
             );
 
-            auto& storageBuffer = storage.at(uid);
-            auto& views = storageBuffer->views;
-            auto& imageInfos = storageBuffer->imageInfos;
+            // auto& storageBuffer = storage.at(uid);
+            // auto& views = storageBuffer->views;
+            // auto& imageInfos = storageBuffer->imageInfos;
 
-            m_shaderBindingManager->UpdateImage
-            (
-                eventData.set,
-                imageInfos,
-                views.size(),
-                vk::DescriptorType::eCombinedImageSampler,
-                eventData.slot,
-                eventData.currentFrameIndex
-            );
+            // m_shaderBindingManager->UpdateImage
+            // (
+            //     eventData.set,
+            //     imageInfos,
+            //     views.size(),
+            //     vk::DescriptorType::eCombinedImageSampler,
+            //     eventData.slot,
+            //     eventData.currentFrameIndex
+            // );
             break;
         }
         case RpsUpdateAction::Update:
@@ -509,11 +509,10 @@ void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSin
     }
 }
 
-auto ShaderStorage::SourceCubeMapViews(uint32_t uid, uint32_t frameIndex) -> std::vector<vk::ImageView>
+auto ShaderStorage::SourceCubeMapViews(uint32_t uid, uint32_t frameIndex, uint32_t cubeMapIndex) -> std::vector<vk::ImageView>
 {
     auto& storage = m_perFrameCabStorage.at(frameIndex);
     auto& buffer = storage.at(uid);
-    return buffer->cubeMaps.at(0).GetFaceViews();
+    return buffer->cubeMaps.at(cubeMapIndex).GetFaceViews();
 }
-
 } // namespace nc::graphics::vulkan

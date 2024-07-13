@@ -61,7 +61,7 @@ namespace nc::graphics::vulkan
         dynamicStateInfo.setDynamicStates(dynamicStates);
 
         vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
-        pipelineCreateInfo.setStageCount(1); // Shader stages
+        pipelineCreateInfo.setStageCount(2); // Shader stages
         pipelineCreateInfo.setPStages(shaderStages.data()); // Shader stages
         auto vertexBindingDescription = GetVertexBindingDescription();
         auto vertexAttributeDescription = GetVertexAttributeDescriptions();

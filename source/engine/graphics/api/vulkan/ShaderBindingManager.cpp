@@ -129,7 +129,7 @@ void ShaderBindingManager::BindSet(uint32_t setIndex, vk::CommandBuffer* cmd, vk
     auto& writes = set.writes;
 
     /* Only update the descriptor sets if they have changed since last bind. */
-    if (set.isDirty)
+    if (set.isDirty || setIndex == 2) // hack, remove
     {
         for (auto& write : writes.values())
         {
