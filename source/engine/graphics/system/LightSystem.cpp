@@ -4,16 +4,20 @@
 
 namespace pointlight
 {
-constexpr float g_lightFieldOfView = nc::DegreesToRadians(60.0f);
-constexpr float g_nearClip = 0.25f;
-constexpr float g_farClip = 96.0f;
+constexpr float g_lightFieldOfView = nc::DegreesToRadians(90.0f);
+constexpr float g_nearClip = 1.0f;
+constexpr float g_farClip = 100.f;
 const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
 
 auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix) -> DirectX::XMMATRIX
 {
-    const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * g_lightProjectionMatrix;
+    const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, transformMatrix); // Transform normal for direction
+    const auto eyePosition = transformMatrix.r[3];          // Extract translation component
+    return DirectX::XMMatrixLookAtRH(eyePosition,
+                                     DirectX::XMVectorAdd(eyePosition, look),
+                                     DirectX::g_XMIdentityR1) *  g_lightProjectionMatrix;
 }
+
 } // namespace pointlight
 
 namespace spotlight
@@ -70,23 +74,23 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
             up.r[3] = worldPos;
             down.r[3] = worldPos;
 
-            // Front
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(front));
-
-            // Back
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(back));
-
             // Left
             state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(left));
 
             // Right
             state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(right));
 
+            // Down
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(down));
+
             // Up
             state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(up));
 
-            // Down
-            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(down));
+            // Front
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(front));
+
+            // Back
+            state.viewProjections.push_back(pointlight::CalculateLightViewProjectionMatrix(back));
         }
         m_pointLightData.emplace_back(state.viewProjections.back(),
                                       transform->Position(),

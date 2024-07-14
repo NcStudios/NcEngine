@@ -141,7 +141,25 @@ void ShaderStorage::UpdateCubeMapArrayBuffer(const CabUpdateEventData& eventData
                 imageInfos,
                 static_cast<uint32_t>(imageInfos.size()),
                 vk::DescriptorType::eCombinedImageSampler,
-                eventData.slot
+                eventData.slot, 
+                eventData.currentFrameIndex
+            );
+            break;
+        }
+        case CabUpdateAction::Update:
+        {
+            OPTICK_CATEGORY("CabUpdateAction::Update", Optick::Category::Rendering);
+            auto& buffer = storage.at(eventData.uid);
+            auto& imageInfos = buffer->imageInfos;
+
+            m_shaderBindingManager->UpdateImage
+            (
+                eventData.set,
+                imageInfos,
+                static_cast<uint32_t>(imageInfos.size()),
+                vk::DescriptorType::eCombinedImageSampler,
+                eventData.slot,
+                eventData.currentFrameIndex
             );
             break;
         }

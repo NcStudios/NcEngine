@@ -16,6 +16,7 @@ enum class CabUpdateAction : uint8_t
 {
     Initialize,
     Add,
+    Update,
     Remove,
     Clear
 };
@@ -69,8 +70,9 @@ class CubeMapArrayBufferHandle
     public:
         CubeMapArrayBufferHandle(uint32_t uid, shader_stage stage, Signal<const CabUpdateEventData&>* backendPort, uint32_t slot, uint32_t set = 0u);
         void Add(std::span<const asset::CubeMapWithId> data, CubeMapFormat format, CubeMapUsage usage, uint32_t frameIndex);
+        void Update(uint32_t currentFrameIndex);
         void Remove(std::span<const asset::CubeMapWithId> data, uint32_t frameIndex);
-        void Clear();
+        void Clear(uint32_t currentFrameIndex = std::numeric_limits<uint32_t>::max());
         auto Uid() const noexcept -> uint32_t { return m_uid; }
 
     private:

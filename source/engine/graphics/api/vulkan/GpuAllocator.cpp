@@ -188,9 +188,16 @@ namespace nc::graphics::vulkan
         auto dimensions = Vector2{static_cast<float>(sideLength), static_cast<float>(sideLength)};
         auto imageBuffer = CreateImage(format, dimensions, usage, vk::ImageCreateFlagBits::eCubeCompatible, 6, 1, vk::SampleCountFlagBits::e1);
 
-        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, 1, vk::ImageLayout::eTransferDstOptimal, vk::ImageAspectFlagBits::eColor);
-        CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), sideLength, sideLength, 6);
-        TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, 1, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+        if (usage & vk::ImageUsageFlagBits::eColorAttachment)
+        {
+            TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, 1, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+        }
+        else
+        {
+            TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eUndefined, 6, 1, vk::ImageLayout::eTransferDstOptimal, vk::ImageAspectFlagBits::eColor);
+            CopyBufferToImage(stagingBuffer.Data(), imageBuffer.Data(), sideLength, sideLength, 6);
+            TransitionImageLayout(imageBuffer.Data(), vk::ImageLayout::eTransferDstOptimal, 6, 1, vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageAspectFlagBits::eColor);
+        }
 
         stagingBuffer.Release();
         return imageBuffer;
@@ -391,6 +398,13 @@ namespace nc::graphics::vulkan
                 sourceStage = vk::PipelineStageFlagBits::eTransfer;
                 destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
             }
+            else if (oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
+            {
+                barrier.setSrcAccessMask(vk::AccessFlags(0));
+                barrier.setDstAccessMask(vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostWrite);
+                sourceStage = vk::PipelineStageFlagBits::eAllCommands;
+                destinationStage = vk::PipelineStageFlagBits::eAllCommands;
+            }
             else 
             {
                 throw nc::NcError("Unsupported layout transition.");
@@ -458,7 +472,7 @@ namespace nc::graphics::vulkan
         {
             subresourceRange.setBaseArrayLayer(i);
             viewInfo.setSubresourceRange(subresourceRange);
-            faceViews.emplace_back(m_device->VkDevice().createImageView(viewInfo));
+            faceViews.emplace_back(m_device->VkDevice().createImageViewUnique(viewInfo));
         }
 
         return faceViews;

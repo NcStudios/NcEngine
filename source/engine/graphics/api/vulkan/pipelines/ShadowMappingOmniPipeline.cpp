@@ -15,10 +15,10 @@ namespace
 {
     // Depth bias (and slope) are used to avoid shadowing artifacts
     // Constant depth bias factor (always applied)
-    constexpr float DEPTH_BIAS_CONSTANT = 1.25f;
+    constexpr float DEPTH_BIAS_CONSTANT = 1.0f;
 
     // Slope depth bias factor, applied depending on polygon's slope
-    constexpr float DEPTH_BIAS_SLOPE = 1.75f;
+    constexpr float DEPTH_BIAS_SLOPE = 1.0f;
 }
 
 namespace nc::graphics::vulkan
@@ -55,7 +55,7 @@ namespace nc::graphics::vulkan
         m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline
-        std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
+        std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor  };
         vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
         dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
         dynamicStateInfo.setDynamicStates(dynamicStates);
@@ -89,6 +89,7 @@ namespace nc::graphics::vulkan
 
         m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
         vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
+        vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
     ShadowMappingOmniPipeline::~ShadowMappingOmniPipeline() noexcept
@@ -107,14 +108,18 @@ namespace nc::graphics::vulkan
     void ShadowMappingOmniPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData)
     {
         OPTICK_CATEGORY("ShadowMappingOmniPipeline::Record", Optick::Category::Rendering);
-        NC_ASSERT(instanceData.shadowCasterIndex < frameData.lightState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        if (instanceData.shadowCasterIndex >= frameData.lightState.viewProjections.size())
+        {
+            return;
+           // throw std::runtime_error("Shadow caster index is out of bounds.");
+        }
         
-        cmd->setDepthBias
-        (
-            DEPTH_BIAS_CONSTANT,
-            0.0f,
-            DEPTH_BIAS_SLOPE
-        );
+        // cmd->setDepthBias
+        // (
+        //     DEPTH_BIAS_CONSTANT,
+        //     0.0f,
+        //     DEPTH_BIAS_SLOPE
+        // );
 
         auto pushConstants = ShadowMappingOmniPushConstants{};
 

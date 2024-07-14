@@ -33,6 +33,26 @@ void CubeMapArrayBufferHandle::Add(std::span<const asset::CubeMapWithId> data, C
     );
 }
 
+void CubeMapArrayBufferHandle::Update(uint32_t frameIndex)
+{
+    m_backendPort->Emit(
+        CabUpdateEventData
+        {
+            std::span<const asset::CubeMapWithId>{},
+            frameIndex,
+            m_uid,
+            m_slot,
+            m_set,
+            0u,
+            m_stage,
+            CabUpdateAction::Update,
+            CubeMapFormat::None,
+            CubeMapUsage::None,
+            frameIndex == std::numeric_limits<uint32_t>::max() ? true : false
+        }
+    );
+}
+
 void CubeMapArrayBufferHandle::Remove(std::span<const asset::CubeMapWithId> data, uint32_t frameIndex)
 {
     m_backendPort->Emit(
@@ -53,13 +73,13 @@ void CubeMapArrayBufferHandle::Remove(std::span<const asset::CubeMapWithId> data
     );
 }
 
-void CubeMapArrayBufferHandle::Clear()
+void CubeMapArrayBufferHandle::Clear(uint32_t frameIndex)
 {
     m_backendPort->Emit(
         CabUpdateEventData
         {
             std::span<const asset::CubeMapWithId>{},
-            0u,
+            frameIndex,
             m_uid,
             m_slot,
             m_set,
@@ -68,7 +88,7 @@ void CubeMapArrayBufferHandle::Clear()
             CabUpdateAction::Clear,
             CubeMapFormat::None,
             CubeMapUsage::None,
-            false
+            frameIndex == std::numeric_limits<uint32_t>::max() ? true : false
         }
     );
 }

@@ -16,6 +16,11 @@ class CubeMap
 {
     public:
         explicit CubeMap(GpuAllocator* allocator, const asset::CubeMapWithId& data, vk::Format format, vk::ImageUsageFlags usage);
+        CubeMap(const CubeMap&) = delete;
+        CubeMap& operator=(const CubeMap&) = delete;
+        CubeMap(CubeMap&&) = default;
+        CubeMap& operator=(CubeMap&&) = default;
+        ~CubeMap() noexcept;
 
         auto GetImageView() const noexcept -> const vk::ImageView&
         {

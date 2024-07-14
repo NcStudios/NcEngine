@@ -69,7 +69,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 0, binding = 3) uniform samplerCube omniDirShadowMaps[];
+layout (set = 2, binding = 0) uniform samplerCube omniDirShadowMaps[];
 layout (set = 2, binding = 3) uniform sampler2D uniDirShadowMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
@@ -126,7 +126,7 @@ vec3 F(vec3 F0, vec3 V, vec3 H)
     return F0 + (vec3(1.0f) - F0) * pow(1 - max(dot(V, H), 0.0f), 5.0f);
 }
 
-float ShadowCalculation(vec4 fragPosLightSpace, int index)
+float UniShadowCalc(vec4 fragPosLightSpace, int index)
 {
     // Perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -160,6 +160,15 @@ float ShadowCalculation(vec4 fragPosLightSpace, int index)
     }
 
     return shadow;
+}
+
+float OmniShadowCalc(vec3 lightPos, vec3 fragPos, uint lightIndex)
+{
+    vec3 lightVec = fragPos-lightPos;
+    float sampledDistance = texture(omniDirShadowMaps[lightIndex], lightVec).r;
+    float distance = length(lightVec);
+
+    return (distance <= sampledDistance + 0.15) ? 0.0 : 1.0f;
 }
 
 const mat4 biasMat = mat4( 
@@ -251,7 +260,7 @@ void main()
 
         if (light.castsShadows == 1)
         {
-            result *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), i));
+            result *= OmniShadowCalc(light.position, inFragPosition, i);
         }
     }
 
@@ -269,7 +278,7 @@ void main()
         if (light.castsShadows == 1)
         {
             int shadowMapIndex = activePointLights + i; // The point light and spot light shadowmaps share a buffer, point lights are first.
-            result *= (1.0f - ShadowCalculation(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), shadowMapIndex)); 
+            result *= (1.0f - UniShadowCalc(biasMat * light.viewProjection * vec4(inFragPosition, 1.0), shadowMapIndex)); 
         }
     }
 
