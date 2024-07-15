@@ -149,7 +149,7 @@ float OmniShadowCalc(vec3 lightPos, vec3 fragPos, uint lightIndex)
     float sampledDistance = texture(omniDirShadowMaps[lightIndex], lightVec).r;
     float distance = length(lightVec);
 
-    return (distance <= sampledDistance + 0.15) ? 0.0 : 1.0f;
+    return (distance <= sampledDistance + 0.15) ? 1.0 : 0.0f;
 }
 
 const mat4 biasMat = mat4( 

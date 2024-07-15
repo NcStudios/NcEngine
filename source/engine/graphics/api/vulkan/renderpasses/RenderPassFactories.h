@@ -11,7 +11,7 @@ class RenderPass;
 class ShaderBindingManager;
 class Swapchain;
 
-constexpr auto ShadowMapDimensions = nc::Vector2(1000, 1000);
+constexpr auto ShadowMapDimensions = nc::Vector2(1024, 1024);
 
 auto CreateShadowMappingPassOmni(const Device* device,
                                  GpuAllocator* allocator,

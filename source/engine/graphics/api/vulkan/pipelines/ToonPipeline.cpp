@@ -98,7 +98,7 @@ void ToonPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
-    m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+    m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, 0u);
 }
 
 void ToonPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)

@@ -88,6 +88,13 @@ mat4 ApplyAnimation(uint animIndex)
     return boneTransform;
 }
 
+mat4 translate(vec3 translation) {
+    return mat4(1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                translation.x, translation.y, translation.z, 1.0);
+}
+
 void main()
 {
     // Calculate the vertex's position in the view space of the point light
@@ -108,6 +115,6 @@ void main()
 
     vec4 worldPosOfVertex = objectBuffer.objects[gl_InstanceIndex].model * animatedPos;
     gl_Position = pc.lightViewProj * worldPosOfVertex;
-    outPos = vec4(inPos, 1.0);
+    outPos = worldPosOfVertex;
     outLightPos = pointLights.lights[pc.lightIndex].position;
 }

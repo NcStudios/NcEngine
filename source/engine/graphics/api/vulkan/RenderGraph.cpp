@@ -72,7 +72,6 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
 {
         m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled, 0u);
         m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled, 1u);
-
 }
 
 // Sink outputs from the render graph into shader storage to be consumed by shaders
@@ -108,7 +107,7 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
                 return CreateShadowMappingPassOmni(m_device,
                                                    m_gpuAllocator,
                                                    m_shaderBindingManager,
-                                                   std::move(m_shaderStorage->SourceCubeMapViews(m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex, cubeMapIndex++))); // Need cubemap index here too
+                                                   m_shaderStorage->SourceCubeMapViews(m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Uid(), frameIndex, cubeMapIndex++)); // Need cubemap index here too
             });
         }
         else
@@ -187,7 +186,7 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
     auto frameIndex = frame->Index();
     auto& renderGraph = GetCurrentFrameGraph();
 
-    SetViewportAndScissorFullWindow(cmd, dimensions);
+    SetViewportAndScissorFullWindow(cmd, nc::Vector2(1024, 1024));
 
     auto instanceData = PerFrameInstanceData{};
 
