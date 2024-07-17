@@ -65,13 +65,13 @@ RenderGraph::RenderGraph(FrameManager* frameManager, const Device* device, Swapc
       m_shaderStorage{shaderStorage},
       m_perFrameRenderGraphs{CreatePerFrameGraphs(m_device, m_swapchain, m_gpuAllocator, dimensions)},
       m_sinkBuffers{{RenderPassSinkType::UniDirShadowMap, shaderResourceBus->CreateRenderPassSinkBuffer(RenderPassSinkType::UniDirShadowMap, 20u, ShaderStage::Fragment, 3u, 2u)}},
-      m_sourceCubeMaps{CreateDummyShadowMaps(10u)},
+      m_sourceCubeMaps{CreateDummyShadowMaps(1u)},
       m_sourceCubeMapBuffers{{RenderPassSinkType::OmniDirShadowMap, shaderResourceBus->CreateCubeMapArrayBuffer(10, ShaderStage::Fragment, 0u, 2u, false)}},
       m_dimensions{dimensions},
       m_screenExtent{}
 {
-        m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled, 0u);
-        m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled, 1u);
+    m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled, 0u);
+    m_sourceCubeMapBuffers.at(RenderPassSinkType::OmniDirShadowMap).Add(m_sourceCubeMaps, CubeMapFormat::R32_SFLOAT, CubeMapUsage::ColorAttachment | CubeMapUsage::Sampled, 1u);
 }
 
 // Sink outputs from the render graph into shader storage to be consumed by shaders
@@ -101,9 +101,9 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
         if (renderGraph.omniDirShadowPasses.size() < stateData.omniDirLightsCount)
         {
             renderGraph.omniDirShadowPasses.reserve(stateData.omniDirLightsCount);
-            std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), (stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount), [this, frameIndex]()
+            uint32_t cubeMapIndex = 0u;
+            std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), (stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount), [this, frameIndex, &cubeMapIndex]()
             {
-                static uint32_t cubeMapIndex = 0u;
                 return CreateShadowMappingPassOmni(m_device,
                                                    m_gpuAllocator,
                                                    m_shaderBindingManager,
