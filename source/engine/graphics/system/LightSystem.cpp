@@ -23,6 +23,17 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
                                      DirectX::g_XMIdentityR1) *  g_lightProjectionMatrix;
 }
 
+auto GetLightViewMatrix(const DirectX::XMVECTOR& lookAtDir, const DirectX::XMVECTOR& upDir, const DirectX::XMMATRIX& transformMatrix, bool negateZ) -> DirectX::XMMATRIX
+{
+    DirectX::XMVECTOR lookAt = DirectX::XMVector3TransformCoord(lookAtDir, transformMatrix);
+    DirectX::XMVECTOR up = DirectX::XMVector3TransformCoord(upDir, transformMatrix);
+    DirectX::XMVECTOR position = DirectX::XMVector3TransformCoord(DirectX::XMVectorZero(), transformMatrix);
+
+    if (negateZ)
+        up = DirectX::XMVectorNegate(up);
+    return DirectX::XMMatrixLookAtRH(position, lookAt, up);
+}
+
 } // namespace pointlight
 
 namespace spotlight
@@ -70,14 +81,30 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
     };
 
     DirectX::XMVECTOR upDirs[6] = {
-        DirectX::XMVectorSet( 0.0f, -1.0f,  0.0f, 0.0f), // Positive X
-        DirectX::XMVectorSet( 0.0f, -1.0f,  0.0f, 0.0f), // Negative X
+        DirectX::XMVectorSet( 0.0f, 1.0f,  0.0f, 0.0f), // Positive X
+        DirectX::XMVectorSet( 0.0f, 1.0f,  0.0f, 0.0f), // Negative X
         DirectX::XMVectorSet( 0.0f,  0.0f,  1.0f, 0.0f), // Positive Y
         DirectX::XMVectorSet( 0.0f,  0.0f, -1.0f, 0.0f), // Negative Y
         DirectX::XMVectorSet( 0.0f, -1.0f,  0.0f, 0.0f), // Positive Z
         DirectX::XMVectorSet( 0.0f, -1.0f,  0.0f, 0.0f)  // Negative Z
     };
 
+    // DirectX::XMVECTOR posX = DirectX::XMVectorSet( 1.0f,  0.0f,  0.0f, 0.0f);
+    // DirectX::XMVECTOR negX = DirectX::XMVectorSet(-1.0f,  0.0f,  0.0f, 0.0f);
+    // DirectX::XMVECTOR posY = DirectX::XMVectorSet( 0.0f,  1.0f,  0.0f, 0.0f);
+    // DirectX::XMVECTOR negY = DirectX::XMVectorSet( 0.0f, -1.0f,  0.0f, 0.0f);
+    // DirectX::XMVECTOR posZ = DirectX::XMVectorSet( 0.0f,  0.0f,  1.0f, 0.0f);
+    // DirectX::XMVECTOR negZ = DirectX::XMVectorSet( 0.0f,  0.0f, -1.0f, 0.0f);
+/*
+		case 0: // POSITIVE_X
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			break;
+		case 1:	// NEGATIVE_X
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			viewMatrix = glm::rotate(viewMatrix, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			break;
+*/
     for (const auto& [light, transform] : pointLights)
     {
         pointLightsCount++;
@@ -89,11 +116,7 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
             // Compute the view-projection matrices for each direction
             for (int i = 0; i < 6; ++i)
             {
-                // Compute the view matrix
-                DirectX::XMVECTOR lookAt = DirectX::XMVector3TransformCoord(lookDirs[i], transform->TransformationMatrix());
-                DirectX::XMVECTOR up = DirectX::XMVector3TransformCoord(upDirs[i], transform->TransformationMatrix());
-                DirectX::XMVECTOR position = DirectX::XMVector3TransformCoord(DirectX::XMVectorZero(), transform->TransformationMatrix());
-                DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtRH(position, lookAt, up);
+                auto viewMatrix = pointlight::GetLightViewMatrix(lookDirs[i], upDirs[i], transform->TransformationMatrix(), transform->Position().z > 0);
 
                 // Combine the view and projection matrices
                 state.viewProjections.push_back(viewMatrix * projMatrix);
