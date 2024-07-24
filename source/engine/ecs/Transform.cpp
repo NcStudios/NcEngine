@@ -36,6 +36,12 @@ namespace nc
         return DirectX::XMVector3Normalize(out_v);
     }
 
+    void Transform::Set(DirectX::FXMMATRIX matrix)
+    {
+        m_localMatrix = matrix;
+        m_dirty = true;
+    }
+
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
     {
         NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");

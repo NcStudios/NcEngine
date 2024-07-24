@@ -109,6 +109,9 @@ class Transform final : public ComponentBase
         /** @brief Get the right axis of the transform as an XMVECTOR */
         auto RightXM() const noexcept -> DirectX::XMVECTOR;
 
+        /** @brief Set all local values [Matrix] */
+        void Set(DirectX::FXMMATRIX matrix);
+
         /** @brief Set all local values [Quaternion] */
         void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
 
