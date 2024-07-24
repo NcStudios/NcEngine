@@ -112,6 +112,9 @@ class Transform final : public ComponentBase
         /** @brief Set all local values [Matrix] */
         void Set(DirectX::FXMMATRIX matrix);
 
+        /** @brief Set all local values [XM] */
+        void Set(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR rot, DirectX::FXMVECTOR scale);
+
         /** @brief Set all local values [Quaternion] */
         void Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale);
 

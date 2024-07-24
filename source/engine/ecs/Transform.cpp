@@ -42,6 +42,13 @@ namespace nc
         m_dirty = true;
     }
 
+    void Transform::Set(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR rot, DirectX::FXMVECTOR scale)
+    {
+        m_localMatrix = XMMatrixScalingFromVector(scale) * XMMatrixRotationQuaternion(rot);
+        m_localMatrix.r[3] = XMVectorSelect(g_XMIdentityR3.v, pos, g_XMSelect1110.v);
+        m_dirty = true;
+    }
+
     void Transform::Set(const Vector3& pos, const Quaternion& quat, const Vector3& scale)
     {
         NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
