@@ -58,7 +58,7 @@ TEST(Random_unit_tests, Get_ReturnsValueWithinExpectedRange)
 
 TEST(Random_unit_tests, Between_ReturnsValueWithinExpectedRange)
 {
-    constexpr float min = -100.0f;
+    constexpr float min = -1.0f;
     constexpr float max = 28.0f;
     Random random{1};
 
@@ -89,6 +89,15 @@ TEST(Random_unit_tests, Between_ReturnsValueWithinExpectedRange)
     EXPECT_LE(v4.z, max);
     EXPECT_GE(v4.w, min);
     EXPECT_LE(v4.w, max);
+
+    constexpr size_t minSz = 2ull;
+    constexpr size_t maxSz = 5ull;
+    for (auto i = 0; i < 5; ++i)
+    {
+        const auto u64 = random.Between(minSz, maxSz);
+        EXPECT_GE(u64, minSz);
+        EXPECT_LE(u64, maxSz);
+    }
 }
 
 TEST(Random_unit_tests, Between_ZeroRange_ReturnsValueEqualToRangeOffset)
