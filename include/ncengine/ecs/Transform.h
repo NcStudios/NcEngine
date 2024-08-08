@@ -95,22 +95,41 @@ class Transform final : public ComponentBase
         auto Up() const noexcept -> Vector3 { return ToVector3(UpXM()); }
 
         /** @brief Get the up axis of the transform as an XMVECTOR */
-        auto UpXM() const noexcept -> DirectX::XMVECTOR;
+        auto UpXM() const noexcept -> DirectX::XMVECTOR
+        {
+            auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR1, m_worldMatrix);
+            out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
+            return DirectX::XMVector3Normalize(out_v);
+        }
 
         /** @brief Get the forward axis of the transform */
         auto Forward() const noexcept -> Vector3 { return ToVector3(ForwardXM()); }
 
         /** @brief Get the forward axis of the transform as an XMVECTOR */
-        auto ForwardXM() const noexcept -> DirectX::XMVECTOR;
+        auto ForwardXM() const noexcept -> DirectX::XMVECTOR
+        {
+            auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, m_worldMatrix);
+            out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
+            return DirectX::XMVector3Normalize(out_v);
+        }
 
         /** @brief Get the right axis of the transform */
         auto Right() const noexcept -> Vector3 { return ToVector3(RightXM()); }
 
         /** @brief Get the right axis of the transform as an XMVECTOR */
-        auto RightXM() const noexcept -> DirectX::XMVECTOR;
+        auto RightXM() const noexcept -> DirectX::XMVECTOR
+        {
+            auto out_v = DirectX::XMVector3Transform(DirectX::g_XMIdentityR0, m_worldMatrix);
+            out_v = DirectX::XMVectorSubtract(out_v, m_worldMatrix.r[3]);
+            return DirectX::XMVector3Normalize(out_v);
+        }
 
         /** @brief Set all local values [Matrix] */
-        void Set(DirectX::FXMMATRIX matrix);
+        void Set(DirectX::FXMMATRIX matrix)
+        {
+            m_localMatrix = matrix;
+            m_dirty = true;
+        }
 
         /** @brief Set all local values [XM] */
         void Set(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR rot, DirectX::FXMVECTOR scale);
@@ -122,34 +141,101 @@ class Transform final : public ComponentBase
         void Set(const Vector3& pos, const Vector3& angles, const Vector3& scale);
 
         /** @brief Set local position */
-        void SetPosition(const Vector3& pos);
+        void SetPosition(const Vector3& pos)
+        {
+            SetPosition(ToXMVectorHomogeneous(pos));
+        }
+
+        /** @brief Set local position [XM] */
+        void SetPosition(DirectX::FXMVECTOR pos)
+        {
+            m_localMatrix.r[3] = pos;
+            m_dirty = true;
+        }
 
         /** @brief Set local rotation [Quaternion] */
-        void SetRotation(const Quaternion& quat);
+        void SetRotation(const Quaternion& quaternion)
+        {
+            SetRotation(ToRotMatrix(quaternion));
+        }
 
         /** @brief Set local rotation [Angles] */
-        void SetRotation(const Vector3& angles);
+        void SetRotation(const Vector3& angles)
+        {
+            SetRotation(ToRotMatrix(angles));
+        }
+
+        /** @brief Set local rotation [XM Quaternion] */
+        void SetRotation(DirectX::FXMVECTOR quaternion)
+        {
+            SetRotation(DirectX::XMMatrixRotationQuaternion(quaternion));
+        }
+
+        /** @brief Set local rotation [XM Matrix] */
+        void SetRotation(DirectX::FXMMATRIX rotation)
+        {
+            DirectX::XMVECTOR scl_v, rot_v, pos_v;
+            DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
+            m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
+                            rotation *
+                            DirectX::XMMatrixTranslationFromVector(pos_v);
+            m_dirty = true;
+        }
 
         /** @brief Set local scale */
-        void SetScale(const Vector3& scale);
+        void SetScale(const Vector3& scale)
+        {
+            NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
+            DirectX::XMVECTOR scl_v, rot_v, pos_v;
+            DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
+            m_localMatrix = ToScaleMatrix(scale) *
+                            DirectX::XMMatrixRotationQuaternion(rot_v) *
+                            DirectX::XMMatrixTranslationFromVector(pos_v);
+            m_dirty = true;
+        }
 
         /** @brief Add to local position */
-        void Translate(const Vector3& vec);
+        void Translate(const Vector3& translation)
+        {
+            Translate(ToXMVector(translation));
+        }
 
         /** @brief Add to local position [XMVECTOR] */
-        void Translate(DirectX::FXMVECTOR translation);
+        void Translate(DirectX::FXMVECTOR translation)
+        {
+            m_localMatrix.r[3] = DirectX::XMVectorAdd(m_localMatrix.r[3], translation);
+            m_dirty = true;
+        }
 
         /** @brief Rotate a vector into local space and add it to local position */
         void TranslateLocalSpace(const Vector3& vec);
 
         /** @brief Apply rotation quaternion to local rotation */
-        void Rotate(const Quaternion& quat);
-
-        /** @brief Apply a rotation quaternion to local rotation [XMVECTOR] */
-        void Rotate(DirectX::FXMVECTOR quaternion);
+        void Rotate(const Quaternion& quat)
+        {
+            Rotate(ToRotMatrix(quat));
+        }
 
         /** @brief Apply a rotation about an axis to local rotation */
-        void Rotate(const Vector3& axis, float radians);
+        void Rotate(const Vector3& axis, float radians)
+        {
+            Rotate(ToRotMatrix(axis, radians));
+        }
+
+        /** @brief Apply a rotation quaternion to local rotation [XMVECTOR] */
+        void Rotate(DirectX::FXMVECTOR quaternion)
+        {
+            Rotate(DirectX::XMMatrixRotationQuaternion(quaternion));
+        }
+
+        /** @brief Apply a rotation quaternion to local rotation [XMMATRIX] */
+        void Rotate(DirectX::FXMMATRIX rotation)
+        {
+            const auto pos_v = std::exchange(m_localMatrix.r[3], DirectX::g_XMIdentityR3);
+            m_localMatrix *= rotation;
+            m_localMatrix.r[3] = pos_v;
+            m_dirty = true;
+        }
 
         /** @brief Apply a rotation about an axis passing through a point. */
         void RotateAround(const Vector3& point, const Vector3& axis, float radians);
