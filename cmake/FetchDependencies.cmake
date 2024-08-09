@@ -2,10 +2,42 @@
 ### Required Dependencies ###
 #############################
 
+include(FetchContent)
+
+function(file_exists FILE)
+    if(EXISTS ${FILE})
+        set(file_exists_RESULT TRUE PARENT_SCOPE)
+    else()
+        set(file_exists_RESULT FALSE PARENT_SCOPE)
+    endif()
+endfunction()
+
 # Vulkan
 find_package(Vulkan REQUIRED)
 
-include(FetchContent)
+# Vulkan Memory Allocator
+set(_DEFAULT_SDK_VMA_PATH "${Vulkan_INCLUDE_DIR}/vma/vk_mem_alloc.h")
+
+file_exists(${_DEFAULT_SDK_VMA_PATH})
+set(_DEFAULT_SDK_VMA_EXISTS ${file_exists_RESULT})
+
+if(NC_VMA_PATH)
+    file_exists(${NC_VMA_PATH})
+    set(_OVERRIDE_VMA_EXISTS ${file_exists_RESULT})
+else()
+    set(_OVERRIDE_VMA_EXISTS FALSE)
+endif()
+
+if(_OVERRIDE_VMA_EXISTS)
+    message(STATUS "Using user-specified VMA path: ${NC_VMA_PATH}")
+    set(VMA_HEADER_PATH ${NC_VMA_PATH})
+elseif(_DEFAULT_SDK_VMA_EXISTS)
+    message(STATUS "Using VMA from Vulkan SDK: ${_DEFAULT_SDK_VMA_PATH}")
+    set(VMA_HEADER_PATH ${_DEFAULT_SDK_VMA_PATH})
+else()
+    message(STATUS "Using vendored fallback VMA header")
+    set(VMA_HEADER_PATH "${CMAKE_SOURCE_DIR}/source/external/vma_fallback/vk_mem_alloc.h")
+endif()
 
 # NcCommon
 FetchContent_Declare(NcCommon

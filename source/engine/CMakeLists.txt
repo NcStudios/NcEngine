@@ -13,6 +13,7 @@ target_compile_definitions(${NC_ENGINE_LIB}
         WIN32_LEAN_AND_MEAN
         $<INSTALL_INTERFACE:IMGUI_USER_CONFIG="$ncengine/ui/ImGuiConversion.h">
         $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/ImGuiConversion.h">
+        $<BUILD_INTERFACE:VMA_HEADER_PATH="${VMA_HEADER_PATH}">
 )
 
 if(NOT NC_PROD_BUILD)
