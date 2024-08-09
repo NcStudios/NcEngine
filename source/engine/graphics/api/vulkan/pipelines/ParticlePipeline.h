@@ -1,11 +1,12 @@
 #pragma once
 
 #include "IPipeline.h"
-#include "ecs/Component.h"
+#include "graphics/api/vulkan/NcVulkan.h"
+
+#include "ncengine/ecs/Component.h"
 #include "particle/EmitterState.h"
 
 #include "DirectXMath.h"
-#include "vulkan/vk_mem_alloc.hpp"
 
 #include <vector>
 

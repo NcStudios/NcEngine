@@ -1,13 +1,13 @@
 #pragma once
 
 #include "graphics/api/vulkan/GpuAllocator.h"
+#include "graphics/api/vulkan/NcVulkan.h"
 
 #include "ncmath/Vector.h"
 
 #include <memory>
 #include <span>
 #include <vector>
-#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics::vulkan
 {

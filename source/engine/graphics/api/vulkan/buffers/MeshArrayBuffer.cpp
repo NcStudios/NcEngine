@@ -25,7 +25,7 @@ auto CreateBuffer(nc::graphics::vulkan::GpuAllocator* allocator, std::span<const
     const auto size = static_cast<uint32_t>(sizeof(T) * data.size());
 
     // Create staging buffer (lives on CPU).
-    auto stagingBuffer = allocator->CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+    auto stagingBuffer = allocator->CreateBuffer(size, vk::BufferUsageFlagBits::eTransferSrc, VMA_MEMORY_USAGE_CPU_ONLY);
 
     // Map the data onto the staging buffer.
     void* mappedData = allocator->Map(stagingBuffer.Allocation());
@@ -33,7 +33,7 @@ auto CreateBuffer(nc::graphics::vulkan::GpuAllocator* allocator, std::span<const
     allocator->Unmap(stagingBuffer.Allocation());
 
     // Create immutable buffer (lives on GPU).
-    auto buffer = allocator->CreateBuffer(size, UsageFlags<T>(), vma::MemoryUsage::eGpuOnly);
+    auto buffer = allocator->CreateBuffer(size, UsageFlags<T>(), VMA_MEMORY_USAGE_GPU_ONLY);
 
     // Copy staging into immutable buffer.
     allocator->CopyBuffer(stagingBuffer, buffer.Data(), size);

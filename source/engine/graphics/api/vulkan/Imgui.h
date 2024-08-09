@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ncengine/utility/Signal.h"
+#include "NcVulkan.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
+#include "ncengine/utility/Signal.h"
 
 struct GLFWwindow;
 

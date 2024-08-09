@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         GpuAllocator.cpp
         Imgui.cpp
         Initializers.cpp
+        NcVulkan.cpp
         PerFrameGpuContext.cpp
         QueueFamily.cpp
         RenderGraph.cpp
@@ -11,7 +12,6 @@ target_sources(${NC_ENGINE_LIB}
         ShaderStorage.cpp
         ShaderUtilities.cpp
         Swapchain.cpp
-        vma.cpp
         VertexDescriptions.cpp
         VulkanGraphics.cpp
 )

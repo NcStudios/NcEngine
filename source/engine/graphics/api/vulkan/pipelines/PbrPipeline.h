@@ -1,9 +1,8 @@
 #pragma once
 
 #include "IPipeline.h"
+#include "graphics/api/vulkan/NcVulkan.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
-
-#include "vulkan/vk_mem_alloc.hpp"
 
 namespace nc::graphics::vulkan
 {
