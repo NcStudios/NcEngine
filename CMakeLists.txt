@@ -8,7 +8,6 @@ project("NcSdk"
 option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
-set(NC_VMA_PATH "" CACHE STRING "Override the path to the vulkan memory allocator.")
 
 # Variables
 set(CMAKE_CXX_STANDARD 23)

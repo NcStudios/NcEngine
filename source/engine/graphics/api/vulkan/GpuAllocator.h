@@ -34,7 +34,6 @@ namespace nc::graphics::vulkan
 
         private:
             T m_data;
-
             VmaAllocation m_allocation;
             GpuAllocator* m_allocator;
     };
@@ -133,10 +132,4 @@ namespace nc::graphics::vulkan
         m_allocation = VmaAllocation{};
         m_allocator = nullptr;
     }
-
-    // template<class T>
-    // auto GpuAllocation<T>::GetInfo() const -> VmaAllocationInfo
-    // {
-    //     return m_allocator->GetAllocationInfo(*this);
-    // }
 } // namespace nc::graphics::vulkan
