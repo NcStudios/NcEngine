@@ -101,10 +101,6 @@ namespace nc::graphics::vulkan
     void PbrPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
     {
         OPTICK_CATEGORY("PbrPipeline::Record", Optick::Category::Rendering);
-        if (frameData.environmentState.useShadowTest)
-        {
-            return;
-        }
         uint32_t objectInstance = 0;
         for (const auto& mesh : frameData.objectState.pbrMeshes)
         {

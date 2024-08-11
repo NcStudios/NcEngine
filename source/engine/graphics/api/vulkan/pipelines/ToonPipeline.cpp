@@ -104,10 +104,6 @@ void ToonPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 void ToonPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
     OPTICK_CATEGORY("ToonPipeline::Record", Optick::Category::Rendering);
-    if (frameData.environmentState.useShadowTest)
-    {
-        return;
-    }
     uint32_t objectInstance = 0;
 
     for (const auto& mesh : frameData.objectState.toonMeshes)

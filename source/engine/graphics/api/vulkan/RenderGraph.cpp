@@ -167,10 +167,10 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
             renderGraph.litPass.RegisterPipeline<OutlinePipeline>(m_device, m_shaderBindingManager);
         }
 
-        if (!renderGraph.isInitialized || stateData.toonRenderersCount || stateData.meshRenderersCount)
-        {
-            renderGraph.litPass.RegisterPipeline<ShadowMappingTestPipeline>(m_device, m_shaderBindingManager);
-        }
+        // if (!renderGraph.isInitialized || stateData.toonRenderersCount || stateData.meshRenderersCount)
+        // {
+        //     renderGraph.litPass.RegisterPipeline<ShadowMappingTestPipeline>(m_device, m_shaderBindingManager);
+        // }
 
         if (!renderGraph.isInitialized || stateData.particlesCount)
             renderGraph.litPass.RegisterPipeline<ParticlePipeline>(m_device, m_shaderBindingManager);

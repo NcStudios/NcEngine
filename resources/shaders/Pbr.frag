@@ -164,13 +164,42 @@ float UniShadowCalc(vec4 fragPosLightSpace, int index)
 
 float OmniShadowCalc(vec3 lightPos, vec3 fragPos, uint lightIndex)
 {
-    vec3 lightVec = fragPos-lightPos;
-    float sampledDistance = texture(omniDirShadowMaps[lightIndex], lightVec).r;
+    vec3 lightVec = fragPos - lightPos;
     float distance = length(lightVec);
 
-    return (distance <= sampledDistance + 0.15) ? 1.0 : 0.0f;
-}
+    // Calculate texel size for the cube map
+    float texelSize = 1.0 / float(textureSize(omniDirShadowMaps[lightIndex], 0));
 
+    // Sample radius for PCF
+    int sampleRadius = 2;
+    float shadow = 0.0;
+    int samples = 0;
+
+    // PCF loop over the surrounding texels
+    for(int z = -sampleRadius; z <= sampleRadius; z++)
+    {
+        for(int y = -sampleRadius; y <= sampleRadius; y++)
+        {
+            for(int x = -sampleRadius; x <= sampleRadius; x++)
+            {
+                vec3 offset = vec3(x, y, z) * texelSize;
+                float closestDepth = texture(omniDirShadowMaps[lightIndex], lightVec + offset).r;
+                
+                if (distance <= closestDepth + 0.15)
+                {
+                    shadow += 1.0;
+                }
+                
+                samples++;
+            }
+        }
+    }
+    
+    // Average the shadow value
+    shadow /= samples;
+
+    return shadow;
+}
 const mat4 biasMat = mat4( 
     0.5, 0.0, 0.0, 0.0,
     0.0, 0.5, 0.0, 0.0,
@@ -216,7 +245,7 @@ vec3 BRDF(vec3 lightPosition, vec3 radiance, vec3 fragPosition, vec3 baseColor, 
     vec3 specularBrdf = specularBrdfNumerator / specularBrdfDenominator;
 
     vec3 brdf = Kd * diffuseBrdf + specularBrdf; // No need to multiply by Ks because we already multiplied our numerator by F in the specularBrdfNumerator
-    return emissivityColor + brdf * radiance * NDotL;;
+    return emissivityColor + brdf * radiance * NDotL;
 }
 
 void main() 
@@ -258,10 +287,10 @@ void main()
         vec3 radiance = PointLightRadiance(light, inFragPosition);
         result += BRDF(light.position, radiance, inFragPosition, baseColor, roughness, metallic, emissivityColor, N, V, F0);
 
-        if (light.castsShadows == 1)
-        {
-            result *= OmniShadowCalc(light.position, inFragPosition, i);
-        }
+        // if (light.castsShadows == 1)
+        // {
+        //     result *= (OmniShadowCalc(light.position, inFragPosition, i) + 0.25f);
+        // }
     }
 
     // Calculate each spot light's impact on the scene

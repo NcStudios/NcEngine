@@ -731,14 +731,14 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Lantern"});
     world.Emplace<graphics::ToonRenderer>(lantern, "lantern.nca", DefaultToonMaterial);
 
-    world.Emplace<FrameLogic>(lantern, [ncGraphics, isEnabled = false](nc::Entity, Registry*, float) mutable
-    {
-        if (KeyDown(input::KeyCode::H))
-        {
-            isEnabled = !isEnabled;
-            ncGraphics->EnableShadowTest(isEnabled);
-        }
-    });
+    // world.Emplace<FrameLogic>(lantern, [ncGraphics, isEnabled = false](nc::Entity, Registry*, float) mutable
+    // {
+    //     if (KeyDown(input::KeyCode::H))
+    //     {
+    //         isEnabled = !isEnabled;
+    //         ncGraphics->EnableShadowTest(isEnabled);
+    //     }
+    // });
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

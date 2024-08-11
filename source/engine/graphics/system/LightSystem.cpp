@@ -5,7 +5,7 @@
 namespace pointlight
 {
 constexpr float g_lightFieldOfView = DirectX::XM_PIDIV2; // 90 degrees
-constexpr float g_nearClip = 0.1f;
+constexpr float g_nearClip = 0.001f;
 constexpr float g_farClip = 1024.0f;
 const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveFovRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
 

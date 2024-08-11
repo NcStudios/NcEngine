@@ -190,7 +190,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
-    auto ncGraphics = modules.Get<graphics::NcGraphics>();
+    // auto ncGraphics = modules.Get<graphics::NcGraphics>();
 
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, 0.0f}, .tag = "Point Light 1"});
@@ -247,14 +247,14 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "skeleton"
     });
 
-    world.Emplace<FrameLogic>(lvHandle, [ncGraphics, isEnabled = false](nc::Entity, Registry*, float) mutable
-    {
-        if (KeyDown(input::KeyCode::H))
-        {
-            isEnabled = !isEnabled;
-            ncGraphics->EnableShadowTest(isEnabled);
-        }
-    });
+    // world.Emplace<FrameLogic>(lvHandle, [ncGraphics, isEnabled = false](nc::Entity, Registry*, float) mutable
+    // {
+    //     if (KeyDown(input::KeyCode::H))
+    //     {
+    //         isEnabled = !isEnabled;
+    //         ncGraphics->EnableShadowTest(isEnabled);
+    //     }
+    // });
 
 
     world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
