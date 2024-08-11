@@ -56,6 +56,10 @@
             "assetName": "mesh/cave_ceiling"
         },
         {
+            "sourcePath": "raw/model/lantern.fbx",
+            "assetName": "mesh/lantern"
+        },
+        {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "mesh/ramp"
         }

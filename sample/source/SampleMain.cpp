@@ -1,4 +1,4 @@
-#include "scenes/GraphicsTest.h"
+#include "scenes/PhysicsTest.h"
 #include "scenes/SmokeTest.h"
 #include "shared/SampleUI.h"
 #include "shared/Prefabs.h"
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
         else
         {
             auto ui = nc::sample::InitializeSampleUI(engine.get());
-            engine->Start(std::make_unique<nc::sample::GraphicsTest>(ui.get()));
+            engine->Start(std::make_unique<nc::sample::PhysicsTest>(ui.get()));
         }
     }
     catch(std::exception& e)

@@ -27,6 +27,7 @@ struct EnvironmentData
 struct EnvironmentState
 {
     bool useSkybox;
+    bool useShadowTest;
 };
 
 class EnvironmentSystem
@@ -35,6 +36,7 @@ class EnvironmentSystem
         EnvironmentSystem(ShaderResourceBus* shaderResourceBus);
 
         void SetSkybox(const std::string& path);
+        void EnableShadowTest(bool isEnabled) {m_useShadowTest = isEnabled;}
         void Clear();
 
         auto Execute(const CameraState& cameraState, uint32_t currentFrame) -> EnvironmentState;
@@ -43,5 +45,6 @@ class EnvironmentSystem
         EnvironmentData m_environmentData;
         UniformBufferHandle m_environmentDataBuffer;
         bool m_useSkybox;
+        bool m_useShadowTest;
 };
 } // namespace nc::graphics

@@ -190,9 +190,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     };
 
     modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
+    auto ncGraphics = modules.Get<graphics::NcGraphics>();
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, 0.0f}, .tag = "Point Light 1"});
     world.Emplace<graphics::PointLight>(lvHandle, Vector3(0.0f, 0.0f, 0.0f), Vector3(0.946f, 0.671f, 0.278f), 26.6f);
     // auto lv2Handle = world.Emplace<Entity>({.position = Vector3{6.5f, 9.0f, 9.6f}, .tag = "Point Light 2"});
     // world.Emplace<graphics::PointLight>(lv2Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 0.723f, 0.608f), 13.4f);
@@ -245,6 +246,16 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .scale = Vector3{2.0f, 2.0f, 2.0f},
         .tag = "skeleton"
     });
+
+    world.Emplace<FrameLogic>(lvHandle, [ncGraphics, isEnabled = false](nc::Entity, Registry*, float) mutable
+    {
+        if (KeyDown(input::KeyCode::H))
+        {
+            isEnabled = !isEnabled;
+            ncGraphics->EnableShadowTest(isEnabled);
+        }
+    });
+
 
     world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
     world.Emplace<FrameLogic>(skeleton, WasdBasedMovement);

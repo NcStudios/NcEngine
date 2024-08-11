@@ -82,6 +82,8 @@ struct NcGraphics : public Module
      */
     virtual void SetSkybox(const std::string& path) = 0;
 
+    virtual void EnableShadowTest(bool isEnabled) = 0;
+
     /**
      * @brief Clear all environment data (currently only the skybox).
      * 

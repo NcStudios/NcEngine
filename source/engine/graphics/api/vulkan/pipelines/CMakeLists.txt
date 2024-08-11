@@ -5,6 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         ParticlePipeline.cpp
         PbrPipeline.cpp
         ShadowMappingOmniPipeline.cpp
+        ShadowMappingTestPipeline.cpp
         ShadowMappingUniPipeline.cpp
         ToonPipeline.cpp
         UiPipeline.cpp

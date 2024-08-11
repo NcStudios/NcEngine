@@ -36,6 +36,7 @@ class NcGraphicsImpl : public NcGraphics
         void SetUi(ui::IUI* ui) noexcept override;
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
+        void EnableShadowTest(bool isEnabled) override;
         void ClearEnvironment() override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void Clear() noexcept override;

@@ -57,6 +57,7 @@ namespace
         void SetUi(nc::ui::IUI*) noexcept override {}
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
+        void EnableShadowTest(bool) override {}
         void ClearEnvironment() override {}
     };
 } // anonymous namespace
@@ -133,6 +134,11 @@ namespace nc::graphics
     {
         NC_LOG_TRACE("Setting skybox to {}", path);
         m_systemResources.environment.SetSkybox(path);
+    }
+
+    void NcGraphicsImpl::EnableShadowTest(bool isEnabled)
+    {
+        m_systemResources.environment.EnableShadowTest(isEnabled);
     }
 
     void NcGraphicsImpl::ClearEnvironment()

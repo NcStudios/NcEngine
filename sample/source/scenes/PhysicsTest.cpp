@@ -126,6 +126,7 @@ class VehicleController : public FreeComponent
         VehicleController(Entity self, Entity node1, Entity node2, Entity node3)
             : FreeComponent{self}, m_node1{node1}, m_node2{node2}, m_node3{node3}
         {
+            asset::LoadMeshAsset("lantern.nca");
         }
 
         void Run(Entity self, Registry* registry, float dt)
@@ -723,6 +724,22 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     // Vehicle
     const auto vehicle = BuildVehicle(world, ncPhysics);
 
+    const auto lantern = world.Emplace<Entity>({
+        .position = Vector3{0.0f, -1.0f, 0.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{3.5f, 2.5f, 3.5f},
+        .tag = "Lantern"});
+    world.Emplace<graphics::ToonRenderer>(lantern, "lantern.nca", DefaultToonMaterial);
+
+    world.Emplace<FrameLogic>(lantern, [ncGraphics, isEnabled = false](nc::Entity, Registry*, float) mutable
+    {
+        if (KeyDown(input::KeyCode::H))
+        {
+            isEnabled = !isEnabled;
+            ncGraphics->EnableShadowTest(isEnabled);
+        }
+    });
+
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
         .position = Vector3{0.0f, 12.0f, -12.0f},
@@ -749,7 +766,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 40.0f, 0.0f},
+            .position = Vector3{0.0f, 0.0f, 0.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},

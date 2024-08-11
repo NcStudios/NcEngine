@@ -5,6 +5,7 @@
 #include "graphics/api/vulkan/pipelines/OutlinePipeline.h"
 #include "graphics/api/vulkan/pipelines/ParticlePipeline.h"
 #include "graphics/api/vulkan/pipelines/PbrPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingTestPipeline.h"
 #include "graphics/api/vulkan/pipelines/ShadowMappingUniPipeline.h"
 #include "graphics/api/vulkan/pipelines/ToonPipeline.h"
 #include "graphics/api/vulkan/pipelines/UiPipeline.h"
@@ -101,8 +102,7 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
         if (renderGraph.omniDirShadowPasses.size() < stateData.omniDirLightsCount)
         {
             renderGraph.omniDirShadowPasses.reserve(stateData.omniDirLightsCount);
-            uint32_t cubeMapIndex = 0u;
-            std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), (stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount), [this, frameIndex, &cubeMapIndex]()
+            std::generate_n(std::back_inserter(renderGraph.omniDirShadowPasses), (stateData.omniDirLightsCount - renderGraph.stateData.omniDirLightsCount), [this, frameIndex, cubeMapIndex = 0u]() mutable
             {
                 return CreateShadowMappingPassOmni(m_device,
                                                    m_gpuAllocator,
@@ -165,6 +165,11 @@ void RenderGraph::BuildRenderGraph(const PerFrameRenderStateData& stateData, uin
         {
             renderGraph.litPass.RegisterPipeline<ToonPipeline>(m_device, m_shaderBindingManager);
             renderGraph.litPass.RegisterPipeline<OutlinePipeline>(m_device, m_shaderBindingManager);
+        }
+
+        if (!renderGraph.isInitialized || stateData.toonRenderersCount || stateData.meshRenderersCount)
+        {
+            renderGraph.litPass.RegisterPipeline<ShadowMappingTestPipeline>(m_device, m_shaderBindingManager);
         }
 
         if (!renderGraph.isInitialized || stateData.particlesCount)

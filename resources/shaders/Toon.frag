@@ -146,10 +146,15 @@ float UniShadowCalc(vec4 fragPosLightSpace, int index)
 float OmniShadowCalc(vec3 lightPos, vec3 fragPos, uint lightIndex)
 {
     vec3 lightVec = fragPos-lightPos;
+    // if (abs(lightVec.y) > abs(lightVec.x) || abs(lightVec.z) > abs(lightVec.x) || (lightVec.x > 0))
+    // {
+    //     return 0.0f;
+    // }
+
     float sampledDistance = texture(omniDirShadowMaps[lightIndex], lightVec).r;
     float distance = length(lightVec);
 
-    return (distance <= sampledDistance + 0.15) ? 1.0 : 0.0f;
+    return (distance <= sampledDistance + 0.015) ? 1.0 : 0.0f;
 }
 
 const mat4 biasMat = mat4( 

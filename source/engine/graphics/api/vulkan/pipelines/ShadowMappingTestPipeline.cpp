@@ -1,4 +1,4 @@
-#include "ToonPipeline.h"
+#include "ShadowMappingTestPipeline.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
@@ -12,7 +12,7 @@
 
 namespace nc::graphics::vulkan
 {
-ToonPipeline::ToonPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
+ShadowMappingTestPipeline::ShadowMappingTestPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -21,8 +21,8 @@ ToonPipeline::ToonPipeline(const Device& device, ShaderBindingManager* shaderBin
 
     // Shaders
     auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ToonVertex.spv");
-    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ToonFragment.spv");
+    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingTestVertex.spv");
+    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingTestFragment.spv");
 
     auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
     auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -85,15 +85,15 @@ ToonPipeline::ToonPipeline(const Device& device, ShaderBindingManager* shaderBin
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-ToonPipeline::~ToonPipeline() noexcept
+ShadowMappingTestPipeline::~ShadowMappingTestPipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-void ToonPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
+void ShadowMappingTestPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
-    OPTICK_CATEGORY("ToonPipeline::Bind", Optick::Category::Rendering);
+    OPTICK_CATEGORY("ShadowMappingTestPipeline::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
@@ -101,23 +101,28 @@ void ToonPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
-void ToonPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
+void ShadowMappingTestPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    OPTICK_CATEGORY("ToonPipeline::Record", Optick::Category::Rendering);
-    if (frameData.environmentState.useShadowTest)
+    OPTICK_CATEGORY("ShadowMappingTestPipeline::Record", Optick::Category::Rendering);
+
+    if (!frameData.environmentState.useShadowTest)
     {
         return;
     }
     uint32_t objectInstance = 0;
-
+    for (const auto& mesh : frameData.objectState.pbrMeshes)
+    {
+        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        objectInstance++;
+    }
     for (const auto& mesh : frameData.objectState.toonMeshes)
     {
-        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance + frameData.objectState.toonMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-        ++objectInstance;
+        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
+        objectInstance++;
     }
 }
 
-void ToonPipeline::Clear() noexcept
+void ShadowMappingTestPipeline::Clear() noexcept
 {
 }
 } // namespace nc::graphics::vulkan
