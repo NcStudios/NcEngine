@@ -61,6 +61,7 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
                                       light->diffuseColor,
                                       light->radius);
     }
+    state.omniDirectionalLightCount += pointLightsCount;
 
     m_pointLightBuffer.Bind(m_pointLightData, currentFrameIndex);
 
@@ -81,6 +82,7 @@ auto LightSystem::Execute(uint32_t currentFrameIndex, MultiView<PointLight, Tran
                                      std::cos(light->outerAngle),
                                      light->radius);
     }
+    state.uniDirectionalLightCount += spotLightsCount;
 
     m_spotLightBuffer.Bind(m_spotLightData, currentFrameIndex);
     if (m_useShadows && m_syncedLightsCount.at(currentFrameIndex) != pointLightsCount + spotLightsCount)

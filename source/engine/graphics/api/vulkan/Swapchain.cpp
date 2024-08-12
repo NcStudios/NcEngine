@@ -62,13 +62,13 @@ auto DetermineImageCount(const vk::SurfaceCapabilitiesKHR& capabilities) -> uint
     return imageCount;
 }
 
-auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device device, vk::Format format) -> std::vector<vk::UniqueImageView>
+auto CreateSwapChainImageViews(const std::vector<vk::Image>& images, vk::Device device, vk::Format format) -> std::vector<vk::ImageView>
 {
-    auto imageViews = std::vector<vk::UniqueImageView>{};
+    auto imageViews = std::vector<vk::ImageView>{};
     imageViews.reserve(images.size());
     std::ranges::transform(images, std::back_inserter(imageViews), [device, &format](auto&& image)
     {
-        return device.createImageViewUnique(vk::ImageViewCreateInfo
+        return device.createImageView(vk::ImageViewCreateInfo
         {
             vk::ImageViewCreateFlags(), // ImageViewCreateFlags
             image,                      // Image
@@ -150,7 +150,7 @@ namespace nc::graphics::vulkan
     {
         for (auto& imageView : m_swapChainImageViews)
         {
-           imageView.reset();
+           m_device.destroyImageView(imageView);
         }
         m_swapChainImageViews.clear();
         m_swapChain.reset();
@@ -256,7 +256,7 @@ namespace nc::graphics::vulkan
         return m_swapChainExtent;
     }
 
-    const std::vector<vk::UniqueImageView>& Swapchain::GetColorImageViews() const noexcept
+    auto Swapchain::GetSwapchainImageViews() const noexcept -> std::span<const vk::ImageView>
     {
         return m_swapChainImageViews;
     }

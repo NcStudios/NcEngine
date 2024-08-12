@@ -49,7 +49,7 @@ layout (std140, set=0, binding=1) readonly buffer PointLightsArray
     PointLight lights[];
 } pointLights;
 
-layout (set = 0, binding = 3) uniform sampler2D shadowMaps[];
+layout (set = 2, binding = 3) uniform sampler2D shadowMaps[];
 
 layout (set = 0, binding = 5) uniform EnvironmentDataBuffer
 {

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Attachment.h"
-#include "graphics/api/vulkan/techniques/ITechnique.h"
-#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
+#include "graphics/api/vulkan/pipelines/IPipeline.h"
+#include "graphics/api/vulkan/pipelines/ShadowMappingPipeline.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 
 #include <span>
 #include <vector>
@@ -10,75 +11,112 @@
 namespace nc::graphics
 {
 struct PerFrameRenderState;
+struct PerFrameInstanceData;
 
 namespace vulkan
 {
 class Device;
 class ShaderBindingManager;
 
+struct Pipeline
+{
+    size_t uid;
+    std::unique_ptr<IPipeline> pipeline;
+    bool isActive;
+};
+
 class RenderPass
 {
     public:
         RenderPass(vk::Device device,
-                   std::string uid,
                    std::span<const AttachmentSlot> attachmentSlots,
                    std::span<const Subpass> subpasses,
                    std::vector<Attachment> attachments,
                    const AttachmentSize &size,
                    ClearValueFlags_t clearFlags);
 
-        void Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex);
-        void Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const;
-        void End(vk::CommandBuffer *cmd);
+        RenderPass(vk::Device device,
+                   std::span<const AttachmentSlot> attachmentSlots,
+                   std::span<const Subpass> subpasses,
+                   std::vector<Attachment> attachments,
+                   const AttachmentSize &size,
+                   ClearValueFlags_t clearFlags,
+                   RenderPassSinkType sinkViewsType,
+                   std::vector<vk::ImageView> sinkViews,
+                   uint32_t sourceSinkPartition);
 
-        auto GetAttachmentView(uint32_t index) const -> vk::ImageView;
-        auto GetUid() const -> std::string;
+        void Begin(vk::CommandBuffer* cmd, uint32_t attachmentIndex = 0u);
+        void Execute(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData, uint32_t frameIndex) const;
+        void End(vk::CommandBuffer* cmd);
+
         auto GetVkPass() const -> vk::RenderPass;
+        auto GetAttachmentView(uint32_t index) const -> vk::ImageView { return m_attachments.at(index).view.get(); }
 
-        void CreateFrameBuffers(std::span<const vk::ImageView>, Vector2 dimensions, uint32_t index);
+        void CreateFrameBuffer(std::span<const vk::ImageView>, Vector2 dimensions);
+        template <std::derived_from<IPipeline> T>
+        void RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager);
+        
+        template <std::derived_from<IPipeline> T>
+        void UnregisterPipeline();
+        void UnregisterPipelines();
 
-        template <std::derived_from<ITechnique> T>
-        void RegisterTechnique(const Device& device, ShaderBindingManager *shaderBindingManager);
-        void RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager *shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional);
-
-        template <std::derived_from<ITechnique> T>
-        void UnregisterTechnique();
-        void UnregisterShadowMappingTechnique();
-
-        void ClearTechniques() { m_litTechniques.clear(); m_shadowMappingTechniques.clear(); }
+        auto GetSinkViewsType() const noexcept -> RenderPassSinkType { return m_sinkViewsType; }
+        auto GetSinkViews() const -> std::span<const vk::ImageView>;
 
     private:
-        auto GetFrameBuffer(uint32_t index) -> vk::Framebuffer;
         vk::Device m_device;
-        std::string m_uid;
         vk::UniqueRenderPass m_renderPass;
         AttachmentSize m_attachmentSize;
         ClearValueFlags_t m_clearFlags;
-        std::vector<std::unique_ptr<ITechnique>> m_litTechniques;
-        std::vector<std::unique_ptr<ShadowMappingTechnique>> m_shadowMappingTechniques;
+        std::vector<Pipeline> m_pipelines;
         std::vector<Attachment> m_attachments;
-        std::vector<FrameBuffer> m_frameBuffers;
+        std::vector<vk::UniqueFramebuffer> m_frameBuffers;
+        RenderPassSinkType m_sinkViewsType;
+        std::vector<vk::ImageView> m_sinkViews;
+        uint32_t m_sourceSinkPartition;
 };
 
-template <std::derived_from<ITechnique> T>
-void RenderPass::RegisterTechnique(const Device& device, ShaderBindingManager* shaderBindingManager)
+template <std::derived_from<IPipeline> T>
+void RenderPass::UnregisterPipeline()
 {
-    UnregisterTechnique<T>();
-    m_litTechniques.push_back(std::make_unique<T>(device, shaderBindingManager, &m_renderPass.get()));
+    const auto& techniqueType = typeid(T);
+    const auto uid = techniqueType.hash_code();
+
+    auto pos = std::ranges::find_if(m_pipelines, [uid](auto& pipeline)
+    {
+        return pipeline.uid == uid;
+    });
+
+    if (pos != m_pipelines.end())
+    {
+        pos->isActive = false;
+    }
 }
 
-template <std::derived_from<ITechnique> T>
-void RenderPass::UnregisterTechnique()
+template <std::derived_from<IPipeline> T>
+void RenderPass::RegisterPipeline(const Device* device, ShaderBindingManager* shaderBindingManager)
 {
-    const auto &techniqueType = typeid(T);
-    auto techniquePos = std::ranges::find_if(m_litTechniques, [&techniqueType](const auto &foundTechnique)
-                                             { return (typeid(foundTechnique) == techniqueType); });
+    const auto& techniqueType = typeid(T);
+    auto uid = techniqueType.hash_code();
 
-    if (techniquePos != m_litTechniques.end())
+    auto pos = std::ranges::find_if(m_pipelines, [uid](Pipeline& pipeline)
     {
-        *techniquePos = std::move(m_litTechniques.back());
-        m_litTechniques.pop_back();
+        return pipeline.uid == uid;
+    });
+
+    if (pos == m_pipelines.end())
+    {
+        auto pipeline = Pipeline
+        {
+            uid,
+            std::make_unique<T>(*device, shaderBindingManager, m_renderPass.get()),
+            true
+        };
+        m_pipelines.push_back(std::move(pipeline));
+        return;
     }
+
+    pos->isActive = true;
 }
 } // namespace nc::graphics
 } // namespace vulkan

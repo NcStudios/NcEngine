@@ -1,5 +1,6 @@
-#include "ShadowMappingTechnique.h"
+#include "ShadowMappingPipeline.h"
 #include "config/Config.h"
+#include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/core/GpuOptions.h"
 #include "graphics/api/vulkan/Initializers.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
@@ -22,18 +23,17 @@ namespace
 
 namespace nc::graphics::vulkan
 {
-    ShadowMappingTechnique::ShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass, uint32_t shadowCasterIndex, bool isOmniDirectional)
+    ShadowMappingPipeline::ShadowMappingPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
         : m_shaderBindingManager{shaderBindingManager},
           m_pipeline{nullptr},
-          m_pipelineLayout{nullptr},
-          m_shadowCasterIndex{shadowCasterIndex},
-          m_enabled{false},
-          m_isOmniDirectional{isOmniDirectional}
+          m_pipelineLayout{nullptr}
     {
+        const auto vkDevice = device.VkDevice();
+
         // Shaders
         auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
         auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ShadowMappingVertex.spv");
-        auto vertexShaderModule = CreateShaderModule(device, vertexShaderByteCode);
+        auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
 
         std::array<vk::PipelineShaderStageCreateInfo, 1u> shaderStages
         {
@@ -49,7 +49,7 @@ namespace nc::graphics::vulkan
         };
 
         auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(pushConstantRange, descriptorLayouts);
-        m_pipelineLayout = device.createPipelineLayoutUnique(pipelineLayoutInfo);
+        m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
 
         // Graphics pipeline
         std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
@@ -83,39 +83,27 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
-        m_pipeline = device.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-        device.destroyShaderModule(vertexShaderModule, nullptr);
+        m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
+        vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
     }
 
-    ShadowMappingTechnique::~ShadowMappingTechnique() noexcept
+    ShadowMappingPipeline::~ShadowMappingPipeline() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    bool ShadowMappingTechnique::CanBind(const PerFrameRenderState& frameData)
+    void ShadowMappingPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
     {
-        static const auto useShadows = config::GetGraphicsSettings().useShadows;
-        return m_enabled = useShadows && (!frameData.lightState.viewProjections.empty()) ;
-    }
-
-    void ShadowMappingTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
-    {
-        OPTICK_CATEGORY("ShadowMappingTechnique::Bind", Optick::Category::Rendering);
+        OPTICK_CATEGORY("ShadowMappingPipeline::Bind", Optick::Category::Rendering);
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
         m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
     }
 
-    bool ShadowMappingTechnique::CanRecord(const PerFrameRenderState& frameData)
+    void ShadowMappingPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData& instanceData)
     {
-        (void)frameData;
-        return m_enabled;
-    }
-
-    void ShadowMappingTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
-    {
-        OPTICK_CATEGORY("ShadowMappingTechnique::Record", Optick::Category::Rendering);
-        NC_ASSERT(m_shadowCasterIndex < frameData.lightState.viewProjections.size(), "Shadow caster index is out of bounds.");
+        OPTICK_CATEGORY("ShadowMappingPipeline::Record", Optick::Category::Rendering);
+        NC_ASSERT(instanceData.shadowCasterIndex < frameData.lightState.viewProjections.size(), "Shadow caster index is out of bounds.");
         
         cmd->setDepthBias
         (
@@ -127,9 +115,9 @@ namespace nc::graphics::vulkan
         auto pushConstants = ShadowMappingPushConstants{};
 
         // We are rendering the position of each mesh renderer's vertex in respect to each point light's view space.
-        if (m_isOmniDirectional)
+        if (instanceData.isOmniDirectional)
         {
-            pushConstants.lightViewProjection = frameData.lightState.viewProjections[m_shadowCasterIndex];
+            pushConstants.lightViewProjection = frameData.lightState.viewProjections[instanceData.shadowCasterIndex];
 
             cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 
@@ -148,7 +136,7 @@ namespace nc::graphics::vulkan
         }
 
         // Shadow is uni-directional (spotlight, directional light)
-        pushConstants.lightViewProjection = frameData.lightState.viewProjections[m_shadowCasterIndex];
+        pushConstants.lightViewProjection = frameData.lightState.viewProjections[instanceData.shadowCasterIndex];
 
         cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(ShadowMappingPushConstants), &pushConstants);
 

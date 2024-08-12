@@ -62,25 +62,23 @@ namespace nc::graphics::vulkan
 ShaderStorage::ShaderStorage(vk::Device device,
                              GpuAllocator* allocator, 
                              ShaderBindingManager* shaderBindingManager,
-                             RenderGraph* renderGraph,
                              std::array<vk::CommandBuffer*, MaxFramesInFlight> cmdBuffers,
                              Signal<const CabUpdateEventData&>& onCubeMapArrayBufferUpdate,
                              Signal<const MabUpdateEventData&>& onMeshArrayBufferUpdate,
-                             Signal<const graphics::PpiaUpdateEventData&>& onPPImageArrayBufferUpdate,
+                             Signal<const graphics::RpsUpdateEventData&>& onRenderPassSinkBufferUpdate,
                              Signal<const SsboUpdateEventData&>& onStorageBufferUpdate,
                              Signal<const UboUpdateEventData&>& onUniformBufferUpdate,
                              Signal<const TabUpdateEventData&>& onTextureArrayBufferUpdate)
     : m_device{device},
       m_allocator{allocator},
       m_shaderBindingManager{shaderBindingManager},
-      m_renderGraph{renderGraph},
       m_perFrameCabStorage{UniqueCabMap{20, 20}, UniqueCabMap{20, 20}},
       m_staticCabStorage{20, 20},
       m_onCubeMapArrayBufferUpdate{onCubeMapArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateCubeMapArrayBuffer)},
       m_staticMabStorage{cmdBuffers},
       m_onMeshArrayBufferUpdate{onMeshArrayBufferUpdate.Connect(this, &ShaderStorage::UpdateMeshArrayBuffer)},
-      m_perFramePpiaStorage{UniquePpiaMap{20, 20}, UniquePpiaMap{20, 20}}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
-      m_onPPImageArrayBufferUpdate{onPPImageArrayBufferUpdate.Connect(this, &ShaderStorage::UpdatePPImageArrayBuffer)},
+      m_perFrameRpsStorage{UniqueRpsMap{20, 20}, UniqueRpsMap{20, 20}}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
+      m_onRenderPassSinkBufferUpdate{onRenderPassSinkBufferUpdate.Connect(this, &ShaderStorage::UpdateRenderPassSinkBuffer)},
       m_perFrameSsboStorage{UniqueSsboMap{100, 100}, UniqueSsboMap{100, 100}},
       m_staticSsboStorage{100, 100}, /** @todo Update limits when PR updating VulkanConstants.h is complete */
       m_onStorageBufferUpdate{onStorageBufferUpdate.Connect(this, &ShaderStorage::UpdateStorageBuffer)},
@@ -216,17 +214,17 @@ void ShaderStorage::UpdateMeshArrayBuffer(const MabUpdateEventData& eventData)
     }
 }
 
-void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData& eventData)
+void ShaderStorage::UpdateRenderPassSinkBuffer(const graphics::RpsUpdateEventData& eventData)
 {
-    auto& storage = m_perFramePpiaStorage.at(eventData.currentFrameIndex);
-    auto uid = static_cast<uint32_t>(eventData.imageType);
+    auto& storage = m_perFrameRpsStorage.at(eventData.currentFrameIndex);
+    auto uid = static_cast<uint32_t>(eventData.sinkType);
 
     switch (eventData.action)
     {
-        case PpiaUpdateAction::Initialize:
+        case RpsUpdateAction::Initialize:
         {
-            OPTICK_CATEGORY("PpiaUpdateAction::Initialize", Optick::Category::Rendering);
-            storage.emplace(uid, std::make_unique<PPImageArrayBuffer>(m_device));
+            OPTICK_CATEGORY("RpsUpdateAction::Initialize", Optick::Category::Rendering);
+            storage.emplace(uid, std::make_unique<RenderPassSinkBuffer>(m_device));
 
             m_shaderBindingManager->RegisterDescriptor
             (
@@ -240,19 +238,8 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             );
 
             auto& storageBuffer = storage.at(uid);
-            auto& sampler = storageBuffer->sampler.get();
             auto& views = storageBuffer->views;
             auto& imageInfos = storageBuffer->imageInfos;
-
-            views.clear();
-            imageInfos.clear();
-
-            const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
-            for (auto view : postProcessViews)
-            {
-                views.emplace_back(view);
-                imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
-            }
 
             m_shaderBindingManager->UpdateImage
             (
@@ -265,22 +252,12 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             );
             break;
         }
-        case PpiaUpdateAction::Update:
+        case RpsUpdateAction::Update:
         {
-            OPTICK_CATEGORY("PpiaUpdateAction::Update", Optick::Category::Rendering);
+            OPTICK_CATEGORY("RpsUpdateAction::Update", Optick::Category::Rendering);
             auto& storageBuffer = storage.at(uid);
-            auto& sampler = storageBuffer->sampler.get();
             auto& views = storageBuffer->views;
             auto& imageInfos = storageBuffer->imageInfos;
-            
-            storageBuffer->Clear();
-
-            const auto& postProcessViews = m_renderGraph->GetPostProcessImages(eventData.imageType);
-            for (auto view : postProcessViews)
-            {
-                views.emplace_back(view);
-                imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
-            }
 
             m_shaderBindingManager->UpdateImage
             (
@@ -293,10 +270,10 @@ void ShaderStorage::UpdatePPImageArrayBuffer(const graphics::PpiaUpdateEventData
             );
             break;
         }
-        case PpiaUpdateAction::Clear:
+        case RpsUpdateAction::Clear:
         {
-            OPTICK_CATEGORY("PpiaUpdateAction::Clear", Optick::Category::Rendering);
-            for (auto& storagePerFrame : m_perFramePpiaStorage)
+            OPTICK_CATEGORY("RpsUpdateAction::Clear", Optick::Category::Rendering);
+            for (auto& storagePerFrame : m_perFrameRpsStorage)
             {
                 if (storagePerFrame.contains(uid))
                     storagePerFrame.at(uid)->Clear();
@@ -517,4 +494,19 @@ void ShaderStorage::UpdateUniformBuffer(const UboUpdateEventData& eventData)
         }
     }
 }
+
+void ShaderStorage::Sink(std::span<const vk::ImageView> sinkViews, RenderPassSinkType sinkType, uint32_t frameIndex)
+{
+    auto& storageBuffer =  m_perFrameRpsStorage.at(frameIndex).at(static_cast<uint32_t>(sinkType));
+    auto& sampler = storageBuffer->sampler.get();
+    auto& views = storageBuffer->views;
+    auto& imageInfos = storageBuffer->imageInfos;
+
+    for (auto view : sinkViews)
+    {
+        views.emplace_back(view);
+        imageInfos.emplace_back(sampler, views.back(), vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal); // @todo expand for future post process image layouts.
+    }
+}
+
 } // namespace nc::graphics::vulkan

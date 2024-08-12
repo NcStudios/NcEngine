@@ -27,6 +27,7 @@ class NcWindow;
 namespace graphics
 {
 struct PerFrameRenderState;
+struct PerFrameRenderStateData;
 struct ShaderResourceBus;
 
 class IGraphics
@@ -35,21 +36,19 @@ class IGraphics
         virtual ~IGraphics() = default;
 
         virtual auto BeginFrame() -> bool = 0;
-        virtual void CommitResourceLayout() = 0;
+        virtual void BuildRenderGraph(const PerFrameRenderStateData& stateData) = 0;
         virtual void Clear() noexcept = 0;
         virtual auto CurrentFrameIndex() -> uint32_t = 0;
         virtual void DrawFrame(const PerFrameRenderState& state) = 0;
         virtual void FrameEnd() = 0;
         virtual void OnResize(const Vector2& dimensions, bool isMinimized) = 0;
         virtual auto PrepareFrame() -> bool = 0;
+        virtual auto ResourceBus() noexcept -> ShaderResourceBus* = 0;
 };
 
 auto GraphicsFactory(const config::ProjectSettings& projectSettings,
                      const config::GraphicsSettings& graphicsSettings,
-                     const config::MemorySettings& memorySettings,
                      asset::NcAsset* assetModule,
-                     ShaderResourceBus& shaderResourceBus,
-                     Registry* registry,
                      window::NcWindow& window) -> std::unique_ptr<IGraphics>;
 } // namespace graphics
 } // namespace nc

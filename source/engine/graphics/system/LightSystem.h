@@ -4,7 +4,7 @@
 #include "ecs/View.h"
 #include "graphics/GraphicsConstants.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
-#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
 #include "graphics/PointLight.h"
 #include "graphics/SpotLight.h"
@@ -82,6 +82,8 @@ struct SpotLightData
 struct LightState
 {
     std::vector<DirectX::XMMATRIX> viewProjections = {};
+    uint32_t omniDirectionalLightCount = 0u;
+    uint32_t uniDirectionalLightCount = 0u;
     bool updateShadows = false;
 };
 

@@ -1,18 +1,20 @@
-#include "ToonTechnique.h"
-#include "asset/Assets.h"
+#ifdef NC_EDITOR_ENABLED
+#include "WireframePipeline.h"
+#include "asset/AssetService.h"
 #include "config/Config.h"
+#include "ecs/Registry.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
+#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderUtilities.h"
-#include "graphics/api/vulkan/VertexDescriptions.h"
 #include "graphics/PerFrameRenderState.h"
 
 #include "optick.h"
 
 namespace nc::graphics::vulkan
 {
-ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+WireframePipeline::WireframePipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -21,8 +23,8 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderB
 
     // Shaders
     auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ToonVertex.spv");
-    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ToonFragment.spv");
+    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "WireframeVertex.spv");
+    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "WireframeFragment.spv");
 
     auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
     auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -33,21 +35,29 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderB
         CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
-    std::array<vk::DescriptorSetLayout, 2u> descriptorLayouts
+    m_pipelineLayout = [vkDevice, shaderBindingManager]()
     {
-        *(m_shaderBindingManager->GetSetLayout(0)),
-        *(m_shaderBindingManager->GetSetLayout(1))
-    };
+        const auto descriptorLayout = *(shaderBindingManager->GetSetLayout(0));
+        const auto pushConstantRanges = std::array{
+            CreatePushConstantRange(vk::ShaderStageFlagBits::eVertex, sizeof(WireframeVertexPushConstants), 0u),
+            CreatePushConstantRange(vk::ShaderStageFlagBits::eFragment, sizeof(WireframeFragmentPushConstants), sizeof(WireframeVertexPushConstants))
+        };
 
-    auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
-    m_pipelineLayout = vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
+        const auto pipelineLayoutInfo = vk::PipelineLayoutCreateInfo{
+            vk::PipelineLayoutCreateFlags{},
+            1u,
+            &descriptorLayout,
+            static_cast<uint32_t>(pushConstantRanges.size()),
+            pushConstantRanges.data()
+        };
+
+        return vkDevice.createPipelineLayoutUnique(pipelineLayoutInfo);
+    }();
 
     std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
     vk::PipelineDynamicStateCreateInfo dynamicStateInfo{};
     dynamicStateInfo.setDynamicStateCount(static_cast<uint32_t>(dynamicStates.size()));
     dynamicStateInfo.setDynamicStates(dynamicStates);
-
-    auto depthStencil = CreateDepthStencilCreateInfo(true);
 
     // Graphics pipeline
     vk::GraphicsPipelineCreateInfo pipelineCreateInfo{};
@@ -61,68 +71,57 @@ ToonTechnique::ToonTechnique(const Device& device, ShaderBindingManager* shaderB
     pipelineCreateInfo.setPInputAssemblyState(&inputAssembly);
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
-    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
-    rasterizer.cullMode = vk::CullModeFlagBits::eNone;
+    auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eLine);
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
     pipelineCreateInfo.setPMultisampleState(&multisampling);
-    
+    auto depthStencil = CreateDepthStencilCreateInfo();
     pipelineCreateInfo.setPDepthStencilState(&depthStencil);
     auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
     auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
     pipelineCreateInfo.setPColorBlendState(&colorBlending);
     pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
     pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-    pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+    pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
     pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
     pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
     pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
 
     m_pipeline = vkDevice.createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value;
-
     vkDevice.destroyShaderModule(vertexShaderModule, nullptr);
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-ToonTechnique::~ToonTechnique() noexcept
+WireframePipeline::~WireframePipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-bool ToonTechnique::CanBind(const PerFrameRenderState& frameData)
+void WireframePipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
-    (void)frameData;
-    return true;
-}
-
-void ToonTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
-{
-    OPTICK_CATEGORY("ToonTechnique::Bind", Optick::Category::Rendering);
-
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
-    m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
 }
 
-bool ToonTechnique::CanRecord(const PerFrameRenderState& frameData)
+void WireframePipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    (void)frameData;
-    return true;
-}
+    OPTICK_CATEGORY("WireframePipeline::Record", Optick::Category::Rendering);
 
-void ToonTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
-{
-    OPTICK_CATEGORY("ToonTechnique::Record", Optick::Category::Rendering);
-    uint32_t objectInstance = 0;
-    for (const auto& mesh : frameData.objectState.toonMeshes)
+    auto vertexPushConstants = WireframeVertexPushConstants{};
+    auto fragmentPushConstants = WireframeFragmentPushConstants{
+        .color = Vector4{1.0f, 0.0f, 0.0f, 1.0f}
+    };
+
+    for (const auto& [matrix, mesh, color] : frameData.widgetState.wireframeData)
     {
-        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, objectInstance + frameData.objectState.toonMeshStartingIndex); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
-        ++objectInstance;
+        vertexPushConstants.model = matrix;
+        fragmentPushConstants.color = color;
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(WireframeVertexPushConstants), &vertexPushConstants);
+        cmd->pushConstants(m_pipelineLayout.get(), vk::ShaderStageFlagBits::eFragment, sizeof(WireframeVertexPushConstants), sizeof(WireframeFragmentPushConstants), &fragmentPushConstants.color);
+        cmd->drawIndexed(mesh.indexCount, 1, mesh.firstIndex, mesh.firstVertex, 0); // indexCount, instanceCount, firstIndex, vertexOffset, firstInstance
     }
 }
-
-void ToonTechnique::Clear() noexcept
-{
-}
 } // namespace nc::graphics::vulkan
+
+#endif

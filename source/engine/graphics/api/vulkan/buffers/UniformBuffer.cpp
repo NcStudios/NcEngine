@@ -5,7 +5,7 @@ namespace nc::graphics::vulkan
 UniformBuffer::UniformBuffer(GpuAllocator* allocator, const void*, uint32_t size)
     : m_allocator{allocator},
       m_alignedSize{m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eUniformBuffer)},
-      m_buffer{m_allocator->CreateBuffer(m_alignedSize, vk::BufferUsageFlagBits::eUniformBuffer, vma::MemoryUsage::eCpuToGpu)},
+      m_buffer{m_allocator->CreateBuffer(m_alignedSize, vk::BufferUsageFlagBits::eUniformBuffer, VMA_MEMORY_USAGE_CPU_TO_GPU)},
       m_info{vk::DescriptorBufferInfo{m_buffer, 0, m_alignedSize}}
 {}
 

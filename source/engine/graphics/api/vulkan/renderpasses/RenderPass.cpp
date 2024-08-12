@@ -1,5 +1,4 @@
 #include "RenderPass.h"
-#include "graphics/api/vulkan/techniques/ShadowMappingTechnique.h"
 
 #include "optick.h"
 
@@ -76,30 +75,50 @@ auto CreateVkRenderPass(std::span<const nc::graphics::vulkan::AttachmentSlot> at
 namespace nc::graphics::vulkan
 {
 RenderPass::RenderPass(vk::Device device,
-                       std::string uid,
                        std::span<const AttachmentSlot> attachmentSlots,
                        std::span<const Subpass> subpasses,
                        std::vector<Attachment> attachments,
                        const AttachmentSize &size,
                        ClearValueFlags_t clearFlags)
     : m_device{device},
-      m_uid{std::move(uid)},
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
-      m_attachments{std::move(attachments)}
+      m_pipelines{},
+      m_attachments{std::move(attachments)},
+      m_sinkViewsType{RenderPassSinkType::None},
+      m_sinkViews{},
+      m_sourceSinkPartition{0u}
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional)
+RenderPass::RenderPass(vk::Device device,
+                       std::span<const AttachmentSlot> attachmentSlots,
+                       std::span<const Subpass> subpasses,
+                       std::vector<Attachment> attachments,
+                       const AttachmentSize &size,
+                       ClearValueFlags_t clearFlags,
+                       RenderPassSinkType renderTargetsType,
+                       std::vector<vk::ImageView> renderTargets,
+                       uint32_t sourceSinkPartition)
+    : m_device{device},
+      m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
+      m_attachmentSize{size},
+      m_clearFlags{clearFlags},
+      m_pipelines{},
+      m_attachments{std::move(attachments)},
+      m_sinkViewsType{renderTargetsType},
+      m_sinkViews{std::move(renderTargets)},
+      m_sourceSinkPartition{sourceSinkPartition}
 {
-    m_shadowMappingTechniques.push_back(std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex, isOmniDirectional));
 }
 
-void RenderPass::UnregisterShadowMappingTechnique()
+void RenderPass::UnregisterPipelines()
 {
-    if (!m_shadowMappingTechniques.empty())
-        m_shadowMappingTechniques.pop_back();
+    for (auto& pipeline : m_pipelines)
+    {
+        pipeline.isActive = false;
+    }
 }
 
 void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
@@ -108,7 +127,7 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     const auto renderPassInfo = vk::RenderPassBeginInfo
     {
         m_renderPass.get(),
-        GetFrameBuffer(attachmentIndex),
+        m_frameBuffers.at(attachmentIndex).get(),
         vk::Rect2D{vk::Offset2D{0, 0}, m_attachmentSize.extent},
         static_cast<uint32_t>(clearValues.size()),
         clearValues.data()
@@ -116,26 +135,17 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, const PerFrameInstanceData& instanceData, uint32_t frameIndex) const
 {
     OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
 
-    for (const auto &technique : m_shadowMappingTechniques)
+    for (const auto& pipeline : m_pipelines)
     {
-        if (!technique->CanBind(frameData)) continue;
-        technique->Bind(frameIndex, cmd);
-
-        if (!technique->CanRecord(frameData)) continue;
-        technique->Record(cmd, frameData);
-    }
-
-    for (const auto &technique : m_litTechniques)
-    {
-        if (!technique->CanBind(frameData)) continue;
-        technique->Bind(frameIndex, cmd);
-
-        if (!technique->CanRecord(frameData)) continue;
-        technique->Record(cmd, frameData);
+        if (pipeline.isActive)
+        {
+            pipeline.pipeline->Bind(frameIndex, cmd);
+            pipeline.pipeline->Record(cmd, frameData, instanceData);
+        }
     }
 }
 
@@ -144,22 +154,12 @@ void RenderPass::End(vk::CommandBuffer *cmd)
     cmd->endRenderPass();
 }
 
-auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
-{
-    return m_attachments.at(index).view.get();
-}
-
-auto RenderPass::GetUid() const -> std::string
-{
-    return m_uid;
-}
-
 auto RenderPass::GetVkPass() const ->vk::RenderPass
 {
     return m_renderPass.get();
 }
 
-void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions, uint32_t index)
+void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2 dimensions)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
@@ -172,20 +172,17 @@ void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector
         1                                       // Layers
     };
 
-    m_frameBuffers.emplace_back(index, m_device.createFramebufferUnique(framebufferInfo));
+    m_frameBuffers.emplace_back(m_device.createFramebufferUnique(framebufferInfo));
 }
 
-auto RenderPass::GetFrameBuffer(uint32_t index) -> vk::Framebuffer
+auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
 {
-    const auto frameBufferPos = std::ranges::find_if(m_frameBuffers, [index](const auto &frameBuffer)
+    if (m_sourceSinkPartition >= m_sinkViews.size())
     {
-        return (frameBuffer.index == index);
-    });
-
-    if (frameBufferPos == m_frameBuffers.end())
-    {
-        return m_frameBuffers.at(0).frameBuffer.get();
+        return {};
     }
-    return frameBufferPos->frameBuffer.get();
+
+    return std::span<const vk::ImageView>{m_sinkViews.data() + m_sourceSinkPartition, m_sinkViews.size() - m_sourceSinkPartition};
 }
+
 } // namespace nc::graphics::vulkan

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/IGraphics.h"
+#include "graphics/shader_resource/ShaderResourceBus.h"
 
 #include "ncmath/Vector.h"
 
@@ -22,7 +23,7 @@ class NcAsset;
 namespace graphics
 {
 struct PerFrameRenderState;
-struct ShaderResourceBus;
+struct PerFrameRenderStateData;
 
 namespace vulkan
 {
@@ -41,15 +42,12 @@ class VulkanGraphics : public IGraphics
     public:
         VulkanGraphics(const config::ProjectSettings& projectSettings,
                        const config::GraphicsSettings& graphicsSettings,
-                       const config::MemorySettings& memorySettings,
                        asset::NcAsset* assetModule,
-                       ShaderResourceBus& shaderResourceBus,
-                       uint32_t apiVersion, Registry* registry, 
-                       GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);
+                       uint32_t apiVersion, GLFWwindow* window, Vector2 dimensions, Vector2 screenExtent);
 
         ~VulkanGraphics() noexcept;
 
-        void CommitResourceLayout() override;
+        void BuildRenderGraph(const PerFrameRenderStateData& stateData) override;
         auto BeginFrame() -> bool override;
         auto PrepareFrame() -> bool override;
         auto CurrentFrameIndex() -> uint32_t override;
@@ -57,6 +55,7 @@ class VulkanGraphics : public IGraphics
         void FrameEnd() override;
         void OnResize(const Vector2& dimensions, bool isMinimized) override;
         void Clear() noexcept override;
+        auto ResourceBus() noexcept -> ShaderResourceBus* override { return &m_shaderResourceBus; }
 
     private:
         void Resize(const Vector2& dimensions);
@@ -67,9 +66,10 @@ class VulkanGraphics : public IGraphics
         std::unique_ptr<Swapchain> m_swapchain;
         std::unique_ptr<GpuAllocator> m_allocator;
         std::unique_ptr<FrameManager> m_frameManager;
+        ShaderResourceBus m_shaderResourceBus;
         std::unique_ptr<ShaderBindingManager> m_shaderBindingManager;
-        std::unique_ptr<RenderGraph> m_renderGraph;
         std::unique_ptr<ShaderStorage> m_shaderStorage;
+        std::unique_ptr<RenderGraph> m_renderGraph;
         std::unique_ptr<Imgui> m_imgui;
 
         std::mutex m_resizingMutex;

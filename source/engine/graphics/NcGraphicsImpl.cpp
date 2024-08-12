@@ -79,11 +79,10 @@ namespace nc::graphics
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             NC_LOG_TRACE("Selecting Graphics API");
-            auto resourceBus = ShaderResourceBus{};
-            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, memorySettings, ncAsset, resourceBus, registry, *ncWindow);
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, *ncWindow);
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), std::move(resourceBus), *ncWindow);
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -96,14 +95,11 @@ namespace nc::graphics
                                    ModuleProvider modules,
                                    SystemEvents& events,
                                    std::unique_ptr<IGraphics> graphics,
-                                   ShaderResourceBus shaderResourceBus,
                                    window::NcWindow& window)
         : m_registry{registry},
           m_graphics{std::move(graphics)},
-          m_shaderResourceBus{std::move(shaderResourceBus)},
-          m_assetResources{AssetResourcesConfig{memorySettings}, &m_shaderResourceBus, modules.Get<asset::NcAsset>()},
-          m_postProcessResources{memorySettings.maxPointLights + memorySettings.maxSpotLights, &m_shaderResourceBus},
-          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, &m_shaderResourceBus, modules, events, std::bind_front(&NcGraphics::GetCamera, this)},
+          m_assetResources{AssetResourcesConfig{memorySettings}, m_graphics->ResourceBus(), modules.Get<asset::NcAsset>()},
+          m_systemResources{SystemResourcesConfig{graphicsSettings, memorySettings}, m_registry, m_graphics->ResourceBus(), modules, events, std::bind_front(&NcGraphics::GetCamera, this)},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl::OnResize)}
     {
 #if NC_DEBUG_RENDERING_ENABLED
@@ -150,7 +146,6 @@ namespace nc::graphics
         /** @todo graphics::clear not marked noexcept */
         m_systemResources.particleEmitters.Clear();
         m_graphics->Clear();
-        m_postProcessResources.shadowMaps.Clear();
         m_systemResources.cameras.Clear();
         m_systemResources.environment.Clear();
         m_systemResources.lights.Clear();
@@ -215,23 +210,6 @@ namespace nc::graphics
         auto lightState = m_systemResources.lights.Execute(currentFrameIndex, MultiView<PointLight, Transform>{m_registry}, MultiView<SpotLight, Transform>{m_registry});
         auto particleState = m_systemResources.particleEmitters.Execute(currentFrameIndex);
 
-        // If any changes were made to resource layouts (lights added or removed, textures added, etc) that require an update of that resource layout, do so now.
-        m_graphics->CommitResourceLayout();
-
-        if (lightState.updateShadows)
-        {
-            m_postProcessResources.shadowMaps.Update(static_cast<uint32_t>(lightState.viewProjections.size()), currentFrameIndex);
-        }
-
-        // Allow the frame to begin accepting draw commands.
-        if (!m_graphics->BeginFrame())
-        {
-            return;
-        }
-
-        // Bind mesh buffer to the current frame.
-        m_assetResources.meshes.Bind(currentFrameIndex);
-
         // Collect all the resource data for this frame.
         auto state = PerFrameRenderState
         {
@@ -242,6 +220,29 @@ namespace nc::graphics
             std::move(widgetState),
             std::move(particleState)
         };
+
+        auto stateData = PerFrameRenderStateData
+        {
+            state.environmentState.useSkybox,
+            state.lightState.omniDirectionalLightCount,
+            state.lightState.uniDirectionalLightCount,
+            static_cast<uint32_t>(state.objectState.pbrMeshes.size()),
+            static_cast<uint32_t>(state.objectState.toonMeshes.size()),
+            static_cast<uint32_t>(state.widgetState.wireframeData.size()),
+            state.particleState.count
+        };
+
+        // Build the pipelines and renderpasses depending on which render state was generated.
+        m_graphics->BuildRenderGraph(stateData);
+
+        // Allow the frame to begin accepting draw commands.
+        if (!m_graphics->BeginFrame())
+        {
+            return;
+        }
+
+        // Bind mesh buffer to the current frame.
+        m_assetResources.meshes.Bind(currentFrameIndex);
 
         // Draw all the resource data
         m_graphics->DrawFrame(state);
