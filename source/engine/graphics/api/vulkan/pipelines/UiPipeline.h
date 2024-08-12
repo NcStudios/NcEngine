@@ -1,8 +1,7 @@
 #pragma once
 
 #include "IPipeline.h"
-
-#include "vulkan/vk_mem_alloc.hpp"
+#include "graphics/api/vulkan/NcVulkan.h"
 
 namespace nc::graphics::vulkan
 {

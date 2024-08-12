@@ -73,6 +73,7 @@ target_include_directories(${NC_ENGINE_LIB}
     SYSTEM PUBLIC
         $<INSTALL_INTERFACE:external/>
         $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
+        $<BUILD_INTERFACE:${VMA_INCLUDE_DIR}>
 )
 
 # Install

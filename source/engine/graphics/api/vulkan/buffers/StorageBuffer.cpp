@@ -7,7 +7,7 @@ namespace nc::graphics::vulkan
 StorageBuffer::StorageBuffer(GpuAllocator* allocator, uint32_t size)
     : m_allocator{allocator},
       m_alignedSize{m_allocator->PadBufferOffsetAlignment(size, vk::DescriptorType::eStorageBuffer)},
-      m_buffer{m_allocator->CreateBuffer(m_alignedSize, vk::BufferUsageFlagBits::eStorageBuffer, vma::MemoryUsage::eCpuToGpu)},
+      m_buffer{m_allocator->CreateBuffer(m_alignedSize, vk::BufferUsageFlagBits::eStorageBuffer, VMA_MEMORY_USAGE_CPU_TO_GPU)},
       m_info{vk::DescriptorBufferInfo{m_buffer, 0, m_alignedSize}},
       m_previousDataSize{0u}
 {}
