@@ -256,7 +256,14 @@ TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
     const auto entity = g_ecs.Emplace<nc::Entity>(nc::EntityInfo{});
     g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
 
-    const auto expectedProperties = nc::physics::PhysicsProperties{};
+    const auto expectedProperties = nc::physics::PhysicsProperties{
+        .mass = 2.0f,
+        .drag = 0.5f,
+        .angularDrag = 0.5f,
+        .useGravity = false,
+        .isKinematic = true
+    };
+
     const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
         entity,
         g_ecs.Get<nc::Transform>(entity),
