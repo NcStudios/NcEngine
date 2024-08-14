@@ -27,6 +27,9 @@ class Executor
         // Assign a new graph context.
         void SetContext(ExecutorContext ctx);
 
+        // Check if graph contexts are valid.
+        auto IsContextInitialized() const noexcept { return m_ctx.update && m_ctx.render; }
+
         // Blocking call to run the update graph. Throws any exceptions caught during execution.
         void RunUpdateTasks();
 

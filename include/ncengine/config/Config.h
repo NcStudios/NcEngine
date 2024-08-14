@@ -20,9 +20,10 @@ struct ProjectSettings
 /** @brief Settings for configuring the engine run loop and executor. */
 struct EngineSettings
 {
-    float timeStep = 0.01667f; // Set to 0 for variable time step
-    float maxTimeStep = 0.1f;  // Clamp delta time below this value
-    unsigned threadCount = 8u; // Set to 0 to use std::hardware_concurrency
+    float timeStep = 0.01667f;    // Set to 0 for variable time step
+    float maxTimeStep = 0.1f;     // Clamp delta time below this value
+    unsigned threadCount = 8u;    // Set to 0 to use std::hardware_concurrency
+    bool buildTasksOnInit = true; // Build tasks automatically on engine initialization or require explicit building
 };
 
 /**

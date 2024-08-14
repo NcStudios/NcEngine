@@ -110,6 +110,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_FLOAT_EQ(expected.engineSettings.timeStep, actual.engineSettings.timeStep);
     EXPECT_FLOAT_EQ(expected.engineSettings.maxTimeStep, actual.engineSettings.maxTimeStep);
     EXPECT_EQ(expected.engineSettings.threadCount, actual.engineSettings.threadCount);
+    EXPECT_EQ(expected.engineSettings.buildTasksOnInit, actual.engineSettings.buildTasksOnInit);
 
     EXPECT_EQ(expected.assetSettings.audioClipsPath, actual.assetSettings.audioClipsPath);
     EXPECT_EQ(expected.assetSettings.concaveCollidersPath, actual.assetSettings.concaveCollidersPath);
