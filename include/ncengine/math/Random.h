@@ -106,7 +106,12 @@ class Random : public Module
          * @param max The maximum range value.
          * @return size_t
          */
-        auto Between(size_t min, size_t max) noexcept -> size_t { return m_generator() * (max - min) + min; }
+        auto Between(size_t min, size_t max) noexcept -> size_t
+        {
+            const auto minFloat = static_cast<float>(min);
+            const auto maxFloat = static_cast<float>(max);
+            return static_cast<size_t>(Get() * (maxFloat - minFloat) + minFloat);
+        }
 
         /**
          * @brief Generate a random Vector2 with components in the range [min, max].
