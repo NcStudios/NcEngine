@@ -25,6 +25,11 @@ target_compile_options(${NC_ENGINE_LIB}
         ${NC_COMPILER_FLAGS}
 )
 
+if(NC_PHYSICS_CONFIG)
+    message("Using user-provided physics config: ${NC_PHYSICS_CONFIG}")
+    add_definitions(-DNC_PHYSICS_CONFIG="${NC_PHYSICS_CONFIG}")
+endif()
+
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE
