@@ -2,6 +2,7 @@
 
 #include "ncutility/platform/SourceLocation.h"
 
+#include <exception>
 #include <string_view>
 
 namespace nc

@@ -98,7 +98,7 @@ void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
     NC_ASSERT(
         m_executor.IsContextInitialized(),
         "Task graph is not built. Make sure to call RebuildTaskGraph() "
-        "if EngineSettings::buildTasksOnInit == true."
+        "if EngineSettings::buildTasksOnInit == false."
     );
 
     m_isRunning = true;
