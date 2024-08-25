@@ -222,11 +222,14 @@ void RenderGraph::RecordDrawCallsOnBuffer(const PerFrameRenderState &frameData, 
 
     SetViewportAndScissorFullWindow(cmd, dimensions);
 
-    for (auto& shadowMappingPass : renderGraph.shadowPasses)
+    if (frameData.lightState.omniDirectionalLightCount || frameData.lightState.uniDirectionalLightCount)
     {
-        shadowMappingPass.Begin(cmd);
-        shadowMappingPass.Execute(cmd, frameData, frameIndex);
-        shadowMappingPass.End(cmd);
+        for (auto& shadowMappingPass : renderGraph.shadowPasses)
+        {
+            shadowMappingPass.Begin(cmd);
+            shadowMappingPass.Execute(cmd, frameData, frameIndex);
+            shadowMappingPass.End(cmd);
+        }
     }
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
