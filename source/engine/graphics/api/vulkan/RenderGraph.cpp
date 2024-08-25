@@ -287,20 +287,21 @@ void RenderGraph::Execute(const PerFrameRenderState &frameData, const Vector2& d
     auto frameIndex = frame->Index();
     auto& renderGraph = GetCurrentFrameGraph();
 
-    SetViewportAndScissorFullWindow(cmd, dimensions);
-
     auto instanceData = PerFrameInstanceData{};
-
-    for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.shadowPasses))
+    if (frameData.lightState.omniDirectionalLightCount || frameData.lightState.uniDirectionalLightCount)
     {
-        instanceData.isOmniDirectional = index < renderGraph.stateData.omniDirLightsCount;
-        instanceData.shadowCasterIndex = static_cast<uint32_t>(index);
-        shadowMappingPass.Begin(cmd);
-        shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
-        shadowMappingPass.End(cmd);
-        Sink(shadowMappingPass);
+        SetViewportAndScissorFullWindow(cmd, dimensions);
+        for (auto [index, shadowMappingPass] : std::views::enumerate(renderGraph.shadowPasses))
+        {
+            instanceData.isOmniDirectional = index < renderGraph.stateData.omniDirLightsCount;
+            instanceData.shadowCasterIndex = static_cast<uint32_t>(index);
+            shadowMappingPass.Begin(cmd);
+            shadowMappingPass.Execute(cmd, frameData, instanceData, frameIndex);
+            shadowMappingPass.End(cmd);
+            Sink(shadowMappingPass);
+        }
+        renderGraph.isSinkDirty.at(RenderPassSinkType::ShadowMap) = false;
     }
-    renderGraph.isSinkDirty.at(RenderPassSinkType::ShadowMap) = false;
 
     SetViewportAndScissorAspectRatio(cmd, dimensions, screenExtent);
 
