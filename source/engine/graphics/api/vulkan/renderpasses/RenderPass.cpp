@@ -84,24 +84,38 @@ RenderPass::RenderPass(vk::Device device,
       m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
       m_attachmentSize{size},
       m_clearFlags{clearFlags},
-      m_litPipelines{},
-      m_attachments{std::move(attachments)}
+      m_pipelines{},
+      m_attachments{std::move(attachments)},
+      m_sinkViewsType{RenderPassSinkType::None},
+      m_sinkViews{},
+      m_sourceSinkPartition{0u}
 {
 }
 
-void RenderPass::RegisterShadowMappingTechnique(vk::Device device, ShaderBindingManager* shaderBindingManager, uint32_t shadowCasterIndex, bool isOmniDirectional)
+RenderPass::RenderPass(vk::Device device,
+                       std::span<const AttachmentSlot> attachmentSlots,
+                       std::span<const Subpass> subpasses,
+                       std::vector<Attachment> attachments,
+                       const AttachmentSize &size,
+                       ClearValueFlags_t clearFlags,
+                       RenderPassSinkType renderTargetsType,
+                       std::vector<vk::ImageView> renderTargets,
+                       uint32_t sourceSinkPartition)
+    : m_device{device},
+      m_renderPass{CreateVkRenderPass(attachmentSlots, subpasses, device)},
+      m_attachmentSize{size},
+      m_clearFlags{clearFlags},
+      m_pipelines{},
+      m_attachments{std::move(attachments)},
+      m_sinkViewsType{renderTargetsType},
+      m_sinkViews{std::move(renderTargets)},
+      m_sourceSinkPartition{sourceSinkPartition}
 {
-    m_shadowMappingTechnique = std::make_unique<ShadowMappingTechnique>(device, shaderBindingManager, m_renderPass.get(), shadowCasterIndex, isOmniDirectional);
-}
-
-void RenderPass::UnregisterShadowMappingTechnique()
-{
-    m_shadowMappingTechnique.reset();
 }
 
 void RenderPass::UnregisterPipelines()
 {
-    for (auto& pipeline : m_litPipelines)
+    for (auto& pipeline : m_pipelines)
     {
         pipeline.isActive = false;
     }
@@ -121,29 +135,16 @@ void RenderPass::Begin(vk::CommandBuffer *cmd, uint32_t attachmentIndex)
     cmd->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 }
 
-void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, uint32_t frameIndex) const
+void RenderPass::Execute(vk::CommandBuffer *cmd, const PerFrameRenderState &frameData, const PerFrameInstanceData& instanceData, uint32_t frameIndex) const
 {
     OPTICK_CATEGORY("RenderPass::Execute", Optick::Category::Rendering);
 
-    if (m_shadowMappingTechnique)
-    {
-        if (m_shadowMappingTechnique->CanBind(frameData))
-        {
-            m_shadowMappingTechnique->Bind(frameIndex, cmd);
-
-            if (m_shadowMappingTechnique->CanRecord(frameData))
-            {
-                m_shadowMappingTechnique->Record(cmd, frameData);
-            }
-        }
-    }
-
-    for (const auto& pipeline : m_litPipelines)
+    for (const auto& pipeline : m_pipelines)
     {
         if (pipeline.isActive)
         {
             pipeline.pipeline->Bind(frameIndex, cmd);
-            pipeline.pipeline->Record(cmd, frameData);
+            pipeline.pipeline->Record(cmd, frameData, instanceData);
         }
     }
 }
@@ -153,17 +154,12 @@ void RenderPass::End(vk::CommandBuffer *cmd)
     cmd->endRenderPass();
 }
 
-auto RenderPass::GetAttachmentView(uint32_t index) const -> vk::ImageView
-{
-    return m_attachments.at(index).view.get();
-}
-
 auto RenderPass::GetVkPass() const ->vk::RenderPass
 {
     return m_renderPass.get();
 }
 
-void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector2 dimensions)
+void RenderPass::CreateFrameBuffer(std::span<const vk::ImageView> views, Vector2 dimensions)
 {
     const auto framebufferInfo = vk::FramebufferCreateInfo
     {
@@ -178,4 +174,15 @@ void RenderPass::CreateFrameBuffers(std::span<const vk::ImageView> views, Vector
 
     m_frameBuffers.emplace_back(m_device.createFramebufferUnique(framebufferInfo));
 }
+
+auto RenderPass::GetSinkViews() const -> std::span<const vk::ImageView>
+{
+    if (m_sourceSinkPartition >= m_sinkViews.size())
+    {
+        return {};
+    }
+
+    return std::span<const vk::ImageView>{m_sinkViews.data() + m_sourceSinkPartition, m_sinkViews.size() - m_sourceSinkPartition};
+}
+
 } // namespace nc::graphics::vulkan

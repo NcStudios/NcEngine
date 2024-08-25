@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vulkan/vk_mem_alloc.hpp"
+#include "graphics/api/vulkan/NcVulkan.h"
 
 #include <optional>
 #include <set>

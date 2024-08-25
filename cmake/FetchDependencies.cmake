@@ -2,10 +2,19 @@
 ### Required Dependencies ###
 #############################
 
+include(FetchContent)
+
 # Vulkan
 find_package(Vulkan REQUIRED)
 
-include(FetchContent)
+# Vulkan Memory Allocator
+if(EXISTS "${Vulkan_INCLUDE_DIR}/vma/vk_mem_alloc.h")
+    message(STATUS "Using VMA from Vulkan SDK: ${Vulkan_INCLUDE_DIR}")
+    set(VMA_INCLUDE_DIR ${Vulkan_INCLUDE_DIR})
+else()
+    message(STATUS "Using vendored fallback VMA header")
+    set(VMA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/source/external/vma_fallback")
+endif()
 
 # NcCommon
 FetchContent_Declare(NcCommon

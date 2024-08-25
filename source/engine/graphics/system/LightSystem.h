@@ -4,7 +4,7 @@
 #include "ecs/View.h"
 #include "graphics/GraphicsConstants.h"
 #include "graphics/shader_resource/ShaderResourceBus.h"
-#include "graphics/shader_resource/PPImageArrayBufferHandle.h"
+#include "graphics/shader_resource/RenderPassSinkBufferHandle.h"
 #include "graphics/shader_resource/StorageBufferHandle.h"
 #include "graphics/PointLight.h"
 #include "graphics/SpotLight.h"

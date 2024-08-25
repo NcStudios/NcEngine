@@ -1,13 +1,13 @@
 #pragma once
-#include "graphics/shader_resource/ShaderTypes.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
+#include "graphics/api/vulkan/NcVulkan.h"
+#include "graphics/shader_resource/ShaderTypes.h"
 
 namespace nc::graphics::vulkan
 {
-struct PPImageArrayBuffer
+struct RenderPassSinkBuffer
 {
-    PPImageArrayBuffer(vk::Device device);
+    RenderPassSinkBuffer(vk::Device device);
 
     void Clear() noexcept;
 

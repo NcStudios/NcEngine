@@ -1,13 +1,12 @@
 #pragma once
 
+#include "graphics/api/vulkan/NcVulkan.h"
 #include "graphics/api/vulkan/VulkanConstants.h"
 #include "graphics/GraphicsConstants.h"
 #include "utility/Signal.h"
 
 #include "ncengine/type/StableAddress.h"
 #include "ncengine/utility/SparseMap.h"
-
-#include "vulkan/vk_mem_alloc.hpp"
 
 #include <span>
 #include <unordered_map>

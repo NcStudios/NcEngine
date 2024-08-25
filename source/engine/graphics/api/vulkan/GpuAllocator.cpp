@@ -6,17 +6,23 @@
 
 namespace
 {
-    auto CreateAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance) -> vma::Allocator
+    auto CreateAllocator(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice, vk::Instance instance) -> VmaAllocator
     {
-        vma::AllocatorCreateInfo allocatorInfo{};
-        vma::VulkanFunctions vulkanFunctions{};
-        vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
-        vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
-        allocatorInfo.pVulkanFunctions = &vulkanFunctions;
-        allocatorInfo.physicalDevice = physicalDevice;
-        allocatorInfo.device = logicalDevice;
-        allocatorInfo.instance = instance;
-        return vma::createAllocator(allocatorInfo);
+        auto vulkanFunctions = VmaVulkanFunctions{};
+        vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+        vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+
+        auto createInfo = VmaAllocatorCreateInfo{};
+        createInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+        createInfo.physicalDevice = static_cast<VkPhysicalDevice>(physicalDevice);
+        createInfo.device = static_cast<VkDevice>(logicalDevice);
+        createInfo.pVulkanFunctions = &vulkanFunctions;
+        createInfo.instance = static_cast<VkInstance>(instance);
+        createInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+
+        auto allocator = VmaAllocator{};
+        vmaCreateAllocator(&createInfo, &allocator);
+        return allocator;
     }
 } // anonymous namespace
 
@@ -31,7 +37,7 @@ namespace nc::graphics::vulkan
 
     GpuAllocator::~GpuAllocator() noexcept
     {
-        m_allocator.destroy();
+        vmaDestroyAllocator(m_allocator);
     }
 
     auto GpuAllocator::PadBufferOffsetAlignment(uint32_t originalSize, vk::DescriptorType bufferType) -> uint32_t
@@ -76,19 +82,20 @@ namespace nc::graphics::vulkan
         });
     }
 
-    auto GpuAllocator::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>
+    auto GpuAllocator::CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, VmaMemoryUsage usageType) -> GpuAllocation<vk::Buffer>
     {
-        vk::BufferCreateInfo bufferInfo{};
+        auto bufferInfo = VkBufferCreateInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = size;
-        bufferInfo.usage = usageFlags;
+        bufferInfo.usage = static_cast<VkBufferUsageFlags>(usageFlags);
 
-        vma::AllocationCreateInfo allocationInfo{};
+        auto allocationInfo = VmaAllocationCreateInfo{};
         allocationInfo.usage = usageType;
 
-        vk::Buffer buffer;
-        vma::Allocation allocation;
-        auto result = m_allocator.createBuffer(&bufferInfo, &allocationInfo, &buffer, &allocation, nullptr);
-        if (result != vk::Result::eSuccess)
+        auto buffer = VkBuffer{};
+        auto allocation = VmaAllocation{};
+        auto result = vmaCreateBuffer(m_allocator, &bufferInfo, &allocationInfo, &buffer, &allocation, nullptr);
+        if (result != VK_SUCCESS)
         {
             throw NcError("Error creating buffer.");
         }
@@ -108,13 +115,16 @@ namespace nc::graphics::vulkan
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
         imageInfo.setUsage(usageFlags);
         imageInfo.setFlags(imageFlags);
+        imageInfo.setInitialLayout(vk::ImageLayout::eUndefined);
 
-        vma::AllocationCreateInfo allocationInfo{};
-        allocationInfo.usage = vma::MemoryUsage::eGpuOnly;
+        const auto& nativeImageInfo = static_cast<const VkImageCreateInfo&>(imageInfo);
+        auto allocationInfo = VmaAllocationCreateInfo{};
+        allocationInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
-        vk::Image image;
-        vma::Allocation allocation;
-        if (m_allocator.createImage(&imageInfo, &allocationInfo, &image, &allocation, nullptr) != vk::Result::eSuccess)
+        auto image = VkImage{};
+        auto allocation = VmaAllocation{};
+        const auto result = vmaCreateImage(m_allocator, &nativeImageInfo, &allocationInfo, &image, &allocation, nullptr);
+        if (result != VK_SUCCESS)
         {
             throw NcError("Error creating image.");
         }
@@ -135,7 +145,7 @@ namespace nc::graphics::vulkan
         }
 
         const auto imageSize = width * height * 4u;
-        auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+        auto stagingBuffer = CreateBuffer(imageSize, vk::BufferUsageFlagBits::eTransferSrc, VMA_MEMORY_USAGE_CPU_ONLY);
         void* mappedData = Map(stagingBuffer.Allocation());
         std::memcpy(mappedData, pixels, imageSize);
         Unmap(stagingBuffer.Allocation());
@@ -162,7 +172,7 @@ namespace nc::graphics::vulkan
 
     auto GpuAllocator::CreateCubeMapTexture(const unsigned char* pixels, uint32_t cubeMapSize, uint32_t sideLength) -> GpuAllocation<vk::Image>
     {
-        auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, vma::MemoryUsage::eCpuOnly);
+        auto stagingBuffer = CreateBuffer(cubeMapSize, vk::BufferUsageFlagBits::eTransferSrc, VMA_MEMORY_USAGE_CPU_ONLY);
         auto* mappedData = Map(stagingBuffer.Allocation());
         std::memcpy(mappedData, pixels, cubeMapSize);
 
@@ -180,28 +190,27 @@ namespace nc::graphics::vulkan
 
     void GpuAllocator::Destroy(const GpuAllocation<vk::Buffer>& buffer) const
     {
-        m_allocator.destroyBuffer(buffer.Data(), buffer.Allocation());
+        vmaDestroyBuffer(m_allocator, buffer.Data(), buffer.Allocation());
     }
 
     void GpuAllocator::Destroy(const GpuAllocation<vk::Image>& image) const
     {
-        m_allocator.destroyImage(image.Data(), image.Allocation());
+        vmaDestroyImage(m_allocator, image.Data(), image.Allocation());
     }
 
-    auto GpuAllocator::Map(vma::Allocation allocation) const -> void*
+    auto GpuAllocator::Map(VmaAllocation allocation) const -> void*
     {
         void* out;
-        auto result = m_allocator.mapMemory(allocation, &out);
-        if (result != vk::Result::eSuccess)
+        if (vmaMapMemory(m_allocator, allocation, &out) != VK_SUCCESS)
         {
             throw NcError("Error mapping memory.");
         }
         return out;
     }
 
-    void GpuAllocator::Unmap(vma::Allocation allocation) const
+    void GpuAllocator::Unmap(VmaAllocation allocation) const
     {
-        m_allocator.unmapMemory(allocation);
+        vmaUnmapMemory(m_allocator, allocation);
     }
 
     void GpuAllocator::GenerateMipMaps(vk::Image image, uint32_t width, uint32_t height, uint32_t mipLevels)

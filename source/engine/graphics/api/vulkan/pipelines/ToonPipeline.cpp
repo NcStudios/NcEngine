@@ -1,4 +1,4 @@
-#include "OutlineTechnique.h"
+#include "ToonPipeline.h"
 #include "asset/Assets.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
@@ -12,7 +12,7 @@
 
 namespace nc::graphics::vulkan
 {
-OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass* renderPass)
+ToonPipeline::ToonPipeline(const Device& device, ShaderBindingManager* shaderBindingManager, vk::RenderPass renderPass)
     : m_shaderBindingManager{shaderBindingManager},
       m_pipeline{nullptr},
       m_pipelineLayout{nullptr}
@@ -21,8 +21,8 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* s
 
     // Shaders
     auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "OutlineVertex.spv");
-    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "OutlineFragment.spv");
+    auto vertexShaderByteCode = ReadShader(defaultShaderPath + "ToonVertex.spv");
+    auto fragmentShaderByteCode = ReadShader(defaultShaderPath + "ToonFragment.spv");
 
     auto vertexShaderModule = CreateShaderModule(vkDevice, vertexShaderByteCode);
     auto fragmentShaderModule = CreateShaderModule(vkDevice, fragmentShaderByteCode);
@@ -33,9 +33,11 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* s
         CreatePipelineShaderStageCreateInfo(ShaderStage::Fragment, fragmentShaderModule)
     };
 
-    std::array<vk::DescriptorSetLayout, 1u> descriptorLayouts
+    std::array<vk::DescriptorSetLayout, 3u> descriptorLayouts
     {
-        *(m_shaderBindingManager->GetSetLayout(0))
+        *(m_shaderBindingManager->GetSetLayout(0)),
+        *(m_shaderBindingManager->GetSetLayout(1)),
+        *(m_shaderBindingManager->GetSetLayout(2))
     };
 
     auto pipelineLayoutInfo = CreatePipelineLayoutCreateInfo(descriptorLayouts);
@@ -61,17 +63,18 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* s
     auto viewportState = CreateViewportCreateInfo();
     pipelineCreateInfo.setPViewportState(&viewportState);
     auto rasterizer = CreateRasterizationCreateInfo(vk::PolygonMode::eFill);
-    rasterizer.cullMode = vk::CullModeFlagBits::eFront;
+    rasterizer.cullMode = vk::CullModeFlagBits::eNone;
     pipelineCreateInfo.setPRasterizationState(&rasterizer);
     auto multisampling = CreateMultisampleCreateInfo(device.GetGpuOptions().GetMaxSamplesCount());
     pipelineCreateInfo.setPMultisampleState(&multisampling);
+    
     pipelineCreateInfo.setPDepthStencilState(&depthStencil);
     auto colorBlendAttachment = CreateColorBlendAttachmentCreateInfo(false);
     auto colorBlending = CreateColorBlendStateCreateInfo(colorBlendAttachment, false);
     pipelineCreateInfo.setPColorBlendState(&colorBlending);
     pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
     pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-    pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+    pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
     pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
     pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
     pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
@@ -82,35 +85,25 @@ OutlineTechnique::OutlineTechnique(const Device& device, ShaderBindingManager* s
     vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
 }
 
-OutlineTechnique::~OutlineTechnique() noexcept
+ToonPipeline::~ToonPipeline() noexcept
 {
     m_pipeline.reset();
     m_pipelineLayout.reset();
 }
 
-bool OutlineTechnique::CanBind(const PerFrameRenderState& frameData)
+void ToonPipeline::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
 {
-    (void)frameData;
-    return true;
-}
-
-void OutlineTechnique::Bind(uint32_t frameIndex, vk::CommandBuffer* cmd)
-{
-    OPTICK_CATEGORY("OutlineTechnique::Bind", Optick::Category::Rendering);
+    OPTICK_CATEGORY("ToonPipeline::Bind", Optick::Category::Rendering);
 
     cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     m_shaderBindingManager->BindSet(0, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
+    m_shaderBindingManager->BindSet(1, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0);
+    m_shaderBindingManager->BindSet(2, cmd, vk::PipelineBindPoint::eGraphics, m_pipelineLayout.get(), 0, frameIndex);
 }
 
-bool OutlineTechnique::CanRecord(const PerFrameRenderState& frameData)
+void ToonPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData, const PerFrameInstanceData&)
 {
-    (void)frameData;
-    return true;
-}
-
-void OutlineTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState& frameData)
-{
-    OPTICK_CATEGORY("OutlineTechnique::Record", Optick::Category::Rendering);
+    OPTICK_CATEGORY("ToonPipeline::Record", Optick::Category::Rendering);
     uint32_t objectInstance = 0;
     for (const auto& mesh : frameData.objectState.toonMeshes)
     {
@@ -119,7 +112,7 @@ void OutlineTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&
     }
 }
 
-void OutlineTechnique::Clear() noexcept
+void ToonPipeline::Clear() noexcept
 {
 }
 } // namespace nc::graphics::vulkan

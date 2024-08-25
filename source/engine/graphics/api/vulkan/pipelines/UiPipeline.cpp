@@ -1,4 +1,4 @@
-#include "UiTechnique.h"
+#include "UiPipeline.h"
 #include "config/Config.h"
 #include "graphics/api/vulkan/core/Device.h"
 #include "graphics/api/vulkan/Initializers.h"
@@ -11,7 +11,7 @@
 
 namespace nc::graphics::vulkan
 {
-    UiTechnique::UiTechnique(const Device& device, ShaderBindingManager*, vk::RenderPass* renderPass)
+    UiPipeline::UiPipeline(const Device& device, ShaderBindingManager*, vk::RenderPass renderPass)
         : m_pipeline{nullptr},
           m_pipelineLayout{nullptr}
     {
@@ -62,7 +62,7 @@ namespace nc::graphics::vulkan
         pipelineCreateInfo.setPColorBlendState(&colorBlending);
         pipelineCreateInfo.setPDynamicState(&dynamicStateInfo);
         pipelineCreateInfo.setLayout(m_pipelineLayout.get());
-        pipelineCreateInfo.setRenderPass(*renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
+        pipelineCreateInfo.setRenderPass(renderPass); // Can eventually swap out and combine render passes but they have to be compatible. see: https://www.khronos.org/registry/specs/1.0/html/vkspec.html#renderpass-compatibility
         pipelineCreateInfo.setSubpass(0); // The index of the subpass where this graphics pipeline where be used.
         pipelineCreateInfo.setBasePipelineHandle(nullptr); // Graphics pipelines can be created by deriving from existing, similar pipelines. 
         pipelineCreateInfo.setBasePipelineIndex(-1); // Similarly, switching between pipelines from the same parent can be done.
@@ -72,28 +72,18 @@ namespace nc::graphics::vulkan
         vkDevice.destroyShaderModule(fragmentShaderModule, nullptr);
     }
 
-    UiTechnique::~UiTechnique() noexcept
+    UiPipeline::~UiPipeline() noexcept
     {
         m_pipeline.reset();
         m_pipelineLayout.reset();
     }
 
-    bool UiTechnique::CanBind(const PerFrameRenderState&)
-    {
-        return true;
-    }
-
-    void UiTechnique::Bind(uint32_t, vk::CommandBuffer* cmd)
+    void UiPipeline::Bind(uint32_t, vk::CommandBuffer* cmd)
     {
         cmd->bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline.get());
     }
 
-    bool UiTechnique::CanRecord(const PerFrameRenderState&)
-    {
-        return true;
-    }
-
-    void UiTechnique::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&)
+    void UiPipeline::Record(vk::CommandBuffer* cmd, const PerFrameRenderState&, const PerFrameInstanceData&)
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
     }

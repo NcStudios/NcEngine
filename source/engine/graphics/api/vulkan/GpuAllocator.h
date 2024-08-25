@@ -1,10 +1,10 @@
 #pragma once
 
+#include "NcVulkan.h"
+
 #include "ncmath/Vector.h"
 
-#include "vulkan/vk_mem_alloc.hpp"
 #include "utility/Memory.h"
-
 #include <utility>
 
 namespace nc::graphics::vulkan
@@ -18,7 +18,8 @@ namespace nc::graphics::vulkan
     {
         public:
             GpuAllocation() noexcept;
-            GpuAllocation(T data, vma::Allocation allocation, GpuAllocator* allocator) noexcept;
+            GpuAllocation(T data, VmaAllocation allocation, GpuAllocator* allocator) noexcept;
+
             GpuAllocation(const GpuAllocation<T>&) = delete;
             GpuAllocation(GpuAllocation<T>&&) noexcept;
             GpuAllocation& operator=(const GpuAllocation<T>&) = delete;
@@ -27,13 +28,13 @@ namespace nc::graphics::vulkan
 
             operator T() const noexcept { return m_data; }
             auto Data() const noexcept -> T { return m_data; }
-            auto Allocation() const noexcept -> vma::Allocation { return m_allocation; }
-            auto GetInfo() const -> vma::AllocationInfo;
+            auto Allocation() const noexcept -> VmaAllocation { return m_allocation; }
+            auto GetInfo() const -> VmaAllocationInfo;
             void Release() noexcept;
 
         private:
             T m_data;
-            vma::Allocation m_allocation;
+            VmaAllocation m_allocation;
             GpuAllocator* m_allocator;
     };
 
@@ -49,11 +50,11 @@ namespace nc::graphics::vulkan
 
             auto PadBufferOffsetAlignment(uint32_t originalSize, vk::DescriptorType bufferType) -> uint32_t;
 
-            auto Map(vma::Allocation allocation) const -> void*;
-            void Unmap(vma::Allocation allocation) const;
+            auto Map(VmaAllocation allocation) const -> void*;
+            void Unmap(VmaAllocation allocation) const;
 
             void CopyBuffer(const vk::Buffer& sourceBuffer, const vk::Buffer& destinationBuffer, const vk::DeviceSize size);
-            auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, vma::MemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
+            auto CreateBuffer(uint32_t size, vk::BufferUsageFlags usageFlags, VmaMemoryUsage usageType) -> GpuAllocation<vk::Buffer>;
             auto CreateImage(vk::Format format, Vector2 dimensions, vk::ImageUsageFlags usageFlags, vk::ImageCreateFlags imageFlags, uint32_t arrayLayers, uint32_t mipLevels, vk::SampleCountFlagBits numSamples) -> GpuAllocation<vk::Image>;
             auto CreateTexture(const unsigned char* pixels, uint32_t width, uint32_t height, uint32_t mipLevels, bool isNormal) -> GpuAllocation<vk::Image>;
             auto CreateTextureView(vk::Image image, uint32_t mipLevels, bool isNormal) -> vk::UniqueImageView;
@@ -62,21 +63,13 @@ namespace nc::graphics::vulkan
             void Destroy(const GpuAllocation<vk::Buffer>& buffer) const;
             void Destroy(const GpuAllocation<vk::Image>& image) const;
 
-            template<class T>
-            auto GetAllocationInfo(const GpuAllocation<T>& allocation) const -> vma::AllocationInfo
-            {
-                auto info = vma::AllocationInfo{};
-                m_allocator.getAllocationInfo(allocation.Allocation(), &info);
-                return info;
-            }
-
         private:
             void GenerateMipMaps(vk::Image, uint32_t width, uint32_t height, uint32_t mipLevels);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
             void CopyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height, uint32_t layerCount);
             void TransitionImageLayout(vk::Image image, vk::ImageLayout oldLayout, uint32_t layerCount, uint32_t mipLevels, vk::ImageLayout newLayout);
             const Device* m_device;
-            vma::Allocator m_allocator;
+            VmaAllocator m_allocator;
             vk::PhysicalDeviceProperties m_deviceProperties;
     };
 
@@ -89,7 +82,7 @@ namespace nc::graphics::vulkan
     }
 
     template<class T>
-    GpuAllocation<T>::GpuAllocation(T data, vma::Allocation allocation, GpuAllocator* allocator) noexcept
+    GpuAllocation<T>::GpuAllocation(T data, VmaAllocation allocation, GpuAllocator* allocator) noexcept
         : m_data{data},
           m_allocation{allocation},
           m_allocator{allocator}
@@ -99,7 +92,7 @@ namespace nc::graphics::vulkan
     template<class T>
     GpuAllocation<T>::GpuAllocation(GpuAllocation<T>&& other) noexcept
         : m_data{std::exchange(other.m_data, T{})},
-          m_allocation{std::exchange(other.m_allocation, vma::Allocation{})},
+          m_allocation{std::exchange(other.m_allocation, VmaAllocation{})},
           m_allocator{std::exchange(other.m_allocator, nullptr)}
     {
     }
@@ -113,7 +106,7 @@ namespace nc::graphics::vulkan
         }
 
         m_data = std::exchange(other.m_data, T{});
-        m_allocation = std::exchange(other.m_allocation, vma::Allocation{});
+        m_allocation = std::exchange(other.m_allocation, VmaAllocation{});
         m_allocator = std::exchange(other.m_allocator, nullptr);
         return *this;
     }
@@ -136,13 +129,7 @@ namespace nc::graphics::vulkan
         }
 
         m_data = T{};
-        m_allocation = vma::Allocation{};
+        m_allocation = VmaAllocation{};
         m_allocator = nullptr;
-    }
-
-    template<class T>
-    auto GpuAllocation<T>::GetInfo() const -> vma::AllocationInfo
-    {
-        return m_allocator->GetAllocationInfo(*this);
     }
 } // namespace nc::graphics::vulkan
