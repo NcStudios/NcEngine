@@ -25,6 +25,7 @@ constexpr auto LogMaxFileSizeKey = "log_max_file_size"sv;
 constexpr auto TimeStepKey = "time_step"sv;
 constexpr auto MaxTimeStepKey = "max_time_step"sv;
 constexpr auto ThreadCountKey = "thread_count"sv;
+constexpr auto BuildTasksOnInitKey = "build_tasks_on_init"sv;
 
 // asset
 constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
@@ -180,6 +181,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.timeStep, TimeStepKey, kvPairs);
         ParseValueIfExists(out.maxTimeStep, MaxTimeStepKey, kvPairs);
         ParseValueIfExists(out.threadCount, ThreadCountKey, kvPairs);
+        ParseValueIfExists(out.buildTasksOnInit, BuildTasksOnInitKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::AssetSettings>)
     {
@@ -329,6 +331,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, TimeStepKey, config.engineSettings.timeStep);
     ::WriteKVPair(stream, MaxTimeStepKey, config.engineSettings.maxTimeStep);
     ::WriteKVPair(stream, ThreadCountKey, config.engineSettings.threadCount);
+    ::WriteKVPair(stream, BuildTasksOnInitKey, config.engineSettings.buildTasksOnInit);
 
     if (writeSections) stream << "[asset_settings]\n";
     ::WriteKVPair(stream, AudioClipsPathKey, config.assetSettings.audioClipsPath);

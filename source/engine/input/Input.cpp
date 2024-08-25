@@ -9,22 +9,14 @@
 
 namespace
 {
-enum class KeyState
-{
-    None,
-    Pressed,
-    Held,
-    Released
-};
-
 auto ToKeyState(int action)
 {
     switch(action)
     {
-        case GLFW_PRESS: return KeyState::Pressed;
-        case GLFW_RELEASE: return KeyState::Released;
-        case GLFW_REPEAT: return KeyState::Held; // Note: 'Repeat' is not strictly the same as 'held', and we handle checking for and setting the 'held' state in Input::Flush. However, we know that if 'repeat' is true, 'held' is also true.
-        default: return KeyState::None;
+        case GLFW_PRESS: return nc::input::KeyState::Pressed;
+        case GLFW_RELEASE: return nc::input::KeyState::Released;
+        case GLFW_REPEAT: return nc::input::KeyState::Held; // Note: 'Repeat' is not strictly the same as 'held', and we handle checking for and setting the 'held' state in Input::Flush. However, we know that if 'repeat' is true, 'held' is also true.
+        default: return nc::input::KeyState::None;
     }
 }
 }
@@ -65,6 +57,11 @@ namespace nc::input
     Vector2 GetAxis()
     {
         return Vector2(GetXAxis(), GetYAxis());
+    }
+
+    auto Key(KeyCode keyCode) -> KeyState
+    {
+        return g_state.keyStates.contains(keyCode) ? g_state.keyStates[keyCode] : KeyState::None;
     }
 
     bool KeyDown(KeyCode keyCode)

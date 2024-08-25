@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef NC_PHYSICS_CONFIG
+#include NC_PHYSICS_CONFIG
+#else
+
 #include <cstdint>
 
 namespace nc::physics
@@ -37,3 +41,4 @@ constexpr bool EnableSleeping = false;   // Allow disabling simulation of inacti
 constexpr float SleepEpsilon = 0.01f;    // Velocity threshold for physics sleeping
 constexpr uint8_t FramesUntilSleep = 5u; // How many frames below epsilon until an object sleeps
 } // namespace nc::physics
+#endif

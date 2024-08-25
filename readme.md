@@ -114,6 +114,12 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
     Default: OFF
     Enabled profiling with Optick. This also requires the Optick application (https://www.optickprofiler.com) and the Optick shared library (installed to install-prefix/bin/OptickCore.dll).
 
+#### NC_PHYSICS_CONFIG
+Default Config: [DefaultPhysicsConstants](source/engine/physics/DefaultPhysicsConstants.h)
+
+    Default: undefined
+    Provide a custom header for compile-time physics configuration. If this is not defined, the default config is used. Custom headers must include all options from the default.
+
 ## More Information
 -------------------
 To learn more:

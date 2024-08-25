@@ -51,8 +51,9 @@ auto BuildTimer(const nc::config::EngineSettings& settings) -> nc::time::StepTim
 auto BuildExecutor(const nc::config::EngineSettings& settings, const nc::ModuleRegistry& modules) -> nc::task::Executor
 {
     const auto threadCount = settings.threadCount > 0 ? settings.threadCount : std::thread::hardware_concurrency();
+    auto ctx = settings.buildTasksOnInit ? nc::task::BuildContext(modules.GetAllModules()) : nc::task::ExecutorContext{};
     NC_LOG_INFO("Building Executor with {} threads", threadCount);
-    return nc::task::Executor{threadCount, nc::task::BuildContext(modules.GetAllModules())};
+    return nc::task::Executor{threadCount, std::move(ctx)};
 }
 } // anonymous namespace
 
@@ -94,6 +95,12 @@ NcEngineImpl::~NcEngineImpl() noexcept
 void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)
 {
     NC_LOG_INFO("Starting engine");
+    NC_ASSERT(
+        m_executor.IsContextInitialized(),
+        "Task graph is not built. Make sure to call RebuildTaskGraph() "
+        "if EngineSettings::buildTasksOnInit == false."
+    );
+
     m_isRunning = true;
     auto ncScene = m_modules->Get<NcScene>();
     ncScene->Queue(std::move(initialScene));
