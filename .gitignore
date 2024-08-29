@@ -19,6 +19,7 @@
 build/
 install/
 scratch/
+DiligentCore/
 
 #gprof analysis
 analysis.txt
