@@ -1,0 +1,39 @@
+#include "GraphicsCommon.h"
+
+cbuffer Colors
+{
+    ReloadTestData g_Data;
+};
+
+Texture2D g_Tex2D_Static0;
+Texture2D g_Tex2D_Static1;
+#ifdef WEBGPU
+    Texture2D g_Tex2D_Mut_0;
+    Texture2D g_Tex2D_Mut_1;    
+#else
+    Texture2D g_Tex2D_Mut[2];
+#endif
+Texture2D g_Tex2D_Dyn;
+
+SamplerState g_Tex2D_Static0_sampler;
+SamplerState g_Tex2D_Static1_sampler;
+SamplerState g_Tex2D_Mut_sampler;
+SamplerState g_Tex2D_Dyn_sampler;
+ 
+float4 main(in PSInput PSIn) : SV_Target
+{
+    float2 UV = float2(0.5, 0.5);
+    float4 Color = float4(0.0, 0.0, 0.0, PSIn.Color.r);
+    Color *= g_Tex2D_Static0.Sample(g_Tex2D_Static0_sampler, UV.xy);
+    Color *= g_Tex2D_Static1.Sample(g_Tex2D_Static1_sampler, UV.xy);
+#ifdef WEBGPU 
+    Color *= g_Tex2D_Mut_0.Sample(g_Tex2D_Mut_sampler, UV.xy);
+    Color *= g_Tex2D_Mut_1.Sample(g_Tex2D_Mut_sampler, UV.xy);
+#else
+    Color *= g_Tex2D_Mut[0].Sample(g_Tex2D_Mut_sampler, UV.xy);
+    Color *= g_Tex2D_Mut[1].Sample(g_Tex2D_Mut_sampler, UV.xy);
+#endif
+    Color *= g_Tex2D_Dyn.Sample(g_Tex2D_Dyn_sampler, UV.xy); 
+    Color *= g_Data.RefTexColors[0];
+    return Color;
+}

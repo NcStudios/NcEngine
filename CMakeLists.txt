@@ -53,6 +53,8 @@ include(cmake/FetchDependencies.cmake)
 # Add source
 add_subdirectory(source)
 
+add_subdirectory(DiligentCore)
+
 if(NOT NC_PROD_BUILD)
     add_subdirectory(sample)
 endif()

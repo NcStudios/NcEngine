@@ -1,0 +1,71 @@
+struct BufferData0
+{
+    float4 data;
+};
+
+struct BufferData1
+{
+    float4 data;
+};
+
+struct BufferData2
+{
+    int data;
+};
+
+struct BufferData3
+{
+    int data0;
+    int data1;
+    int data2;
+    int data3;
+};
+
+RWStructuredBuffer<BufferData0> g_RWBuff0;
+RWStructuredBuffer<BufferData0> g_RWBuff1;
+RWStructuredBuffer<BufferData1> g_RWBuff2;
+RWStructuredBuffer<BufferData1> g_RWBuff3;
+
+RWStructuredBuffer<int> g_RWBuffAtomic0;
+RWStructuredBuffer<int> g_RWBuffAtomic1;
+
+RWStructuredBuffer<int> g_RWBuff0_atomic;
+RWStructuredBuffer<int> g_RWBuff1_atomic;
+
+RWStructuredBuffer<int> g_RWBuff0Atomic_atomic;
+RWStructuredBuffer<int> g_RWBuff1Atomic_atomic;
+
+RWStructuredBuffer<BufferData2> g_RWBuff2Atomic;
+RWStructuredBuffer<BufferData3> g_RWBuff3Atomic;
+RWStructuredBuffer<BufferData2> g_RWBuff4Atomic_atomic;
+RWStructuredBuffer<BufferData3> g_RWBuff5Atomic_atomic;
+
+float4 main() : SV_Target
+{
+    BufferData0 Data0;
+    Data0.data = float4(1.0, 2.0, 3.0, 4.0);
+    g_RWBuff0[0] = Data0;
+    g_RWBuff1[0] = Data0;
+
+    BufferData1 Data1;
+    Data1.data = float4(1.0, 2.0, 3.0, 4.0);
+    g_RWBuff2[0] = Data1;
+    g_RWBuff3[0] = Data1;
+
+    int OriginalListIdx = 0;
+    InterlockedAdd(g_RWBuffAtomic0[0], 1, OriginalListIdx);
+    InterlockedAdd(g_RWBuffAtomic1[0], 1, OriginalListIdx);
+    
+    g_RWBuff0_atomic[0] = 1;
+    g_RWBuff1_atomic[0] = 1;
+    
+    InterlockedAdd(g_RWBuff0Atomic_atomic[0], 1, OriginalListIdx);
+    InterlockedAdd(g_RWBuff1Atomic_atomic[0], 1, OriginalListIdx);
+
+    InterlockedAdd(g_RWBuff2Atomic[0].data, 1, OriginalListIdx);
+    InterlockedAdd(g_RWBuff3Atomic[0].data1, 1, OriginalListIdx);
+    InterlockedAdd(g_RWBuff4Atomic_atomic[0].data, 1, OriginalListIdx);
+    InterlockedAdd(g_RWBuff5Atomic_atomic[0].data3, 1, OriginalListIdx);
+    
+    return float4(1.0, 0.0, 0.0, 1.0);
+}
