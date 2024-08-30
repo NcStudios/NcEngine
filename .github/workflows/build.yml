@@ -24,7 +24,6 @@ jobs:
         os: [windows-2022, ubuntu-24.04]
         config: [Debug, Release]
         variant: [Dev, Prod]
-        physics: [Legacy, Jolt]
         include:
           - os: windows-2022
             generator: "Visual Studio 17 2022"
@@ -36,8 +35,6 @@ jobs:
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
             cmakeArgs: "-DNC_PROD_BUILD=ON"
-          - physics: Jolt
-            cmakeArgs: "-DNC_USE_JOLT=ON"
 
     name: ${{ matrix.shortName }}-${{ matrix.variant }}-${{ matrix.config }}
     runs-on: ${{ matrix.os }}

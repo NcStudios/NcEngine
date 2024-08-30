@@ -145,6 +145,8 @@ bool Gjk(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
         if(XMVector3Less(XMVector3Dot(supports.worldCSO, direction_v), g_XMZero))
             break;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" // some versions trigger false potitive
         Vector3 supportCSO;
         Vector3 worldSupportA;
         Vector3 worldSupportB;
@@ -155,8 +157,8 @@ bool Gjk(const BVA& a, const BVB& b, DirectX::FXMMATRIX aMatrix, DirectX::FXMMAT
         XMStoreVector3(&worldSupportB, supports.worldB);
         XMStoreVector3(&localSupportA, supports.localA);
         XMStoreVector3(&localSupportB, supports.localB);
-
         stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, localSupportB);
+#pragma GCC diagnostic pop
 
         if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
         {
@@ -210,6 +212,8 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" // some versions trigger false potitive
         Vector3 supportCSO;
         Vector3 worldSupportA;
         Vector3 worldSupportB;
@@ -218,8 +222,8 @@ bool GjkVsTriangle(const BVA& a, const Triangle& b, DirectX::FXMMATRIX aMatrix, 
         XMStoreVector3(&worldSupportA, aSupportWorld_v);
         XMStoreVector3(&worldSupportB, bSupportWorld_v);
         XMStoreVector3(&localSupportA, aSupportLocal_v);
-
         stateOut->simplex.PushFront(supportCSO, worldSupportA, worldSupportB, localSupportA, worldSupportB);
+#pragma GCC diagnostic pop
 
         if(RefineSimplex[stateOut->simplex.Size() - 1](stateOut->simplex, direction))
         {
@@ -252,14 +256,16 @@ bool Gjk(const BVA& a, const BVB& b)
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" // some versions trigger false potitive
         Vector3 supportCSO;
         Vector3 supportA;
         Vector3 supportB;
         XMStoreVector3(&supportCSO, supportCSO_v);
         XMStoreVector3(&supportA, supportA_v);
         XMStoreVector3(&supportB, supportB_v);
-
         simplex.PushFront(supportCSO, supportA, supportB, supportA, supportB);
+#pragma GCC diagnostic pop
 
         if(RefineSimplex[simplex.Size() - 1](simplex, direction))
         {

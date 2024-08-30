@@ -27,7 +27,7 @@ TEST_F(ShapeTest, MakeShape_box_returnsBoxShape)
     ASSERT_EQ(JPH::EShapeSubType::Box, shape->GetSubType());
 
     const auto box = static_cast<const JPH::BoxShape*>(shape.GetPtr());
-    const auto actualScale = box->GetLocalBounds().GetExtent() * 2.0f;
+    const auto actualScale = box->GetHalfExtent() * 2.0f;
 
     EXPECT_EQ(expectedScale, actualScale);
 }

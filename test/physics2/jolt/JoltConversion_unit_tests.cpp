@@ -28,10 +28,10 @@ TEST(JoltConversionTest, Quaternion_roundTrip_preservesValue)
     const auto expectedQuat = DirectX::XMQuaternionRotationRollPitchYaw(3.14f, 0.0f, 1.07f);
     const auto joltQuat = nc::physics::ToJoltQuaternion(expectedQuat);
     const auto actualQuat = nc::physics::ToXMQuaternion(joltQuat);
-    EXPECT_FLOAT_EQ(DirectX::XMVectorGetX(actualQuat), DirectX::XMVectorGetX(actualQuat));
-    EXPECT_FLOAT_EQ(DirectX::XMVectorGetY(actualQuat), DirectX::XMVectorGetY(actualQuat));
-    EXPECT_FLOAT_EQ(DirectX::XMVectorGetZ(actualQuat), DirectX::XMVectorGetZ(actualQuat));
-    EXPECT_FLOAT_EQ(DirectX::XMVectorGetW(actualQuat), DirectX::XMVectorGetW(actualQuat));
+    EXPECT_FLOAT_EQ(DirectX::XMVectorGetX(expectedQuat), DirectX::XMVectorGetX(actualQuat));
+    EXPECT_FLOAT_EQ(DirectX::XMVectorGetY(expectedQuat), DirectX::XMVectorGetY(actualQuat));
+    EXPECT_FLOAT_EQ(DirectX::XMVectorGetZ(expectedQuat), DirectX::XMVectorGetZ(actualQuat));
+    EXPECT_FLOAT_EQ(DirectX::XMVectorGetW(expectedQuat), DirectX::XMVectorGetW(actualQuat));
 }
 
 TEST(JoltConversionTest, ToMotionType_convertsBodyType)
