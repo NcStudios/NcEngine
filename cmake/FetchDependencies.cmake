@@ -53,6 +53,12 @@ elseif(APPLE)
     # TODO: #349 Artifact not yet published
 endif()
 
+# DiligentCore
+FetchContent_Declare(DiligentCore
+                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
+                     SOURCE_DIR external/DiligentCore
+)
+
 # Taskflow
 set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -88,7 +94,7 @@ FetchContent_Declare(optick
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert DiligentCore taskflow glfw optick)
 
 # Set Taskflow includes as system to prevent some warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)

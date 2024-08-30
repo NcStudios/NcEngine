@@ -27,6 +27,7 @@ target_link_libraries(${NC_SAMPLE_EXE}
     PRIVATE
         ${NC_ENGINE_LIB}
         Diligent-GraphicsEngineD3D12-shared
+        Diligent-GraphicsEngineOpenGL-shared
 )
 copy_required_dlls(${NC_SAMPLE_EXE})
 
