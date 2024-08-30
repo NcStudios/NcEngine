@@ -119,6 +119,7 @@ target_compile_options(ShapeFactory_unit_tests
 
 target_link_libraries(ShapeFactory_unit_tests
     PRIVATE
+        NcMath
         NcUtility
         Jolt
         gtest_main
