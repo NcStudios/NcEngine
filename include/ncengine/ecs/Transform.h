@@ -127,6 +127,16 @@ class Transform final : public ComponentBase
         /** @brief Set local scale */
         void SetScale(const Vector3& scale);
 
+        /** @brief Set local position and rotation from XMVECTORs */
+        void SetPositionAndRotationXM(DirectX::FXMVECTOR position, DirectX::FXMVECTOR orientation)
+        {
+            const auto scale = DecomposeScale(m_localMatrix);
+            m_localMatrix = DirectX::XMMatrixScalingFromVector(scale) *
+                            DirectX::XMMatrixRotationQuaternion(orientation);
+            m_localMatrix.r[3] = DirectX::XMVectorSetW(position, 1.0f);
+            m_dirty = true;
+        }
+
         /** @brief Add to local position */
         void Translate(const Vector3& vec);
 

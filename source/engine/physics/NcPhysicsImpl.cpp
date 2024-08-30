@@ -51,6 +51,7 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 
 namespace nc::physics
 {
+#ifndef NC_USE_JOLT
 auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(settings.enabled)
@@ -62,6 +63,7 @@ auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* regis
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
     return std::make_unique<NcPhysicsStub>(registry);
 }
+#endif
 
 NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events)
     : m_pipeline{registry, settings.fixedUpdateInterval, events.rebuildStatics},
