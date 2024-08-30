@@ -1,6 +1,6 @@
 #include "NcPhysicsImpl2.h"
 #include "jolt/Conversion.h"
-#include "jolt/Shape.h"
+#include "jolt/ShapeFactory.h"
 
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/config/Config.h"

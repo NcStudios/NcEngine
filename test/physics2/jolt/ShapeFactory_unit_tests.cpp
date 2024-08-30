@@ -1,24 +1,20 @@
 #include "gtest/gtest.h"
-#include "physics2/jolt/Shape.h"
+#include "physics2/jolt/ShapeFactory.h"
 #include "physics2/jolt/JoltApi.h"
 
-class ShapeTest : public ::testing::Test
+class ShapeFactoryTest : public ::testing::Test
 {
     private:
         nc::physics::JoltApi m_jolt;
 
     protected:
-        ShapeTest()
+        ShapeFactoryTest()
             : m_jolt{nc::physics::JoltApi::Initialize()}
-        {
-        }
-
-        ~ShapeTest() noexcept
         {
         }
 };
 
-TEST_F(ShapeTest, MakeShape_box_returnsBoxShape)
+TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)
 {
     const auto expectedScale = JPH::Vec3{1.0f, 2.0f, 3.0f};
     const auto shape = nc::physics::MakeShape(nc::physics::Shape::Box, expectedScale);
@@ -32,7 +28,7 @@ TEST_F(ShapeTest, MakeShape_box_returnsBoxShape)
     EXPECT_EQ(expectedScale, actualScale);
 }
 
-TEST_F(ShapeTest, MakeShape_sphere_returnsBoxShape)
+TEST_F(ShapeFactoryTest, MakeShape_sphere_returnsBoxShape)
 {
     const auto expectedRadius = 0.75f;
     const auto shape = nc::physics::MakeShape(nc::physics::Shape::Sphere, JPH::Vec3::sReplicate(expectedRadius * 2.0f));

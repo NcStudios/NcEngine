@@ -100,28 +100,28 @@ target_link_libraries(PhysicsAllocator_unit_tests
 
 add_test(PhysicsAllocator_unit_tests PhysicsAllocator_unit_tests)
 
-### Shape Tests ###
-add_executable(Shape_unit_tests
-    Shape_unit_tests.cpp
+### ShapeFactor Tests ###
+add_executable(ShapeFactory_unit_tests
+    ShapeFactory_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
 )
 
-target_include_directories(Shape_unit_tests
+target_include_directories(ShapeFactory_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(Shape_unit_tests
+target_compile_options(ShapeFactory_unit_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(Shape_unit_tests
+target_link_libraries(ShapeFactory_unit_tests
     PRIVATE
         NcUtility
         Jolt
         gtest_main
 )
 
-add_test(Shape_unit_tests Shape_unit_tests)
+add_test(ShapeFactory_unit_tests ShapeFactory_unit_tests)
