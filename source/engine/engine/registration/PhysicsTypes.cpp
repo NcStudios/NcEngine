@@ -4,6 +4,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/RigidBody.h"
 
 namespace nc
 {
@@ -16,5 +17,6 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
     Register<physics::VelocityRestriction>(registry, maxEntities, VelocityRestrictionId, "VelocityRestriction", editor::VelocityRestrictionUIWidget, CreateVelocityRestriction, SerializeVelocityRestriction, DeserializeVelocityRestriction);
     Register<physics::PositionClamp>(registry, maxEntities, PositionClampId, "PositionClamp", editor::PositionClampUIWidget, CreatePositionClamp, SerializePositionClamp, DeserializePositionClamp);
     Register<physics::OrientationClamp>(registry, maxEntities, OrientationClampId, "OrientationClamp", editor::OrientationClampUIWidget, CreateOrientationClamp, SerializeOrientationClamp, DeserializeOrientationClamp);
+    Register<physics::RigidBody>(registry, maxEntities, RigidBodyId, "RigidBody");
 }
 } // namespace nc

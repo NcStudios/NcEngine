@@ -43,6 +43,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         glfw
         OptickCore
         RtAudio
+        Jolt
 )
 
 if(WIN32)
@@ -109,6 +110,7 @@ add_subdirectory(input)
 add_subdirectory(network)
 add_subdirectory(particle)
 add_subdirectory(physics)
+add_subdirectory(physics2)
 add_subdirectory(serialize)
 add_subdirectory(scene)
 add_subdirectory(task)

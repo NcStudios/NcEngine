@@ -39,6 +39,7 @@ constexpr size_t VelocityRestrictionId = 20ull;
 constexpr size_t PositionClampId = 21ull;
 constexpr size_t SpotLightId = 22ull;
 constexpr size_t OrientationClampId = 23ull;
+constexpr size_t RigidBodyId = 24ull;
 /** @} */
 
 /** @{ */
