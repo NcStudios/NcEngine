@@ -4,7 +4,7 @@
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" // some versions trigger false potitive
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" // some versions trigger false positive
 #endif
 
 namespace nc::physics
@@ -256,7 +256,6 @@ bool Gjk(const BVA& a, const BVB& b)
 
         if(XMVector3Less(XMVector3Dot(supportCSO_v, direction_v), g_XMZero))
             break;
-
 
         Vector3 supportCSO;
         Vector3 supportA;
