@@ -54,13 +54,13 @@ void Inspector::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
             ImGui::TreePop();
         }
 
-        std::ranges::for_each(ctx.world.GetComponentPools(), [entity](auto&& pool)
+        std::ranges::for_each(ctx.world.GetComponentPools(), [entity, &ctx](auto&& pool)
         {
             if (pool->HasDrawUI() && pool->Contains(entity))
             {
                 auto any = pool->GetAsAnyComponent(entity);
                 ElementHeader(any.Name());
-                any.DrawUI();
+                any.DrawUI(entity, ctx);
             }
         });
     });

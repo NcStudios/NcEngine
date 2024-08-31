@@ -94,6 +94,11 @@ struct StoragePolicy : DefaultStoragePolicy {};
 struct SerializationContext;
 struct DeserializationContext;
 
+namespace ui::editor
+{
+struct EditorContext;
+} // namespace ui::editor
+
 /** @brief Optional data and callbacks for generic component operations. */
 template<PooledComponent T>
 struct ComponentHandler
@@ -113,7 +118,10 @@ struct ComponentHandler
                                           const std::any& userData)>;
 
     /** @brief Function type for the DrawUI handler. */
-    using DrawUI_t = std::function<void(T& component)>;
+    using DrawUI_t = std::function<void(T& component,
+                                        Entity self,
+                                        ui::editor::EditorContext& ctx,
+                                        const std::any& userData)>;
 
     /**
      * @brief A unique identifier for the component.

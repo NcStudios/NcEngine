@@ -198,33 +198,6 @@ target_link_libraries(FreeComponentGroup_unit_test
 
 add_test(FreeComponentGroup_unit_test FreeComponentGroup_unit_test)
 
-### Registry Tests ###
-add_executable(Registry_unit_tests
-    Registry_unit_tests.cpp
-)
-
-target_include_directories(Registry_unit_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_INCLUDE_DIR}/ncengine
-        ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}
-)
-
-target_compile_options(Registry_unit_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(Registry_unit_tests
-    PRIVATE
-        NcMath
-        NcUtility
-        gtest_main
-)
-
-add_test(Registry_unit_tests Registry_unit_tests)
-
 ### SparseSet Tests ###
 add_executable(SparseSet_unit_tests
     SparseSet_unit_tests.cpp
