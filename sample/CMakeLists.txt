@@ -1,5 +1,3 @@
-include(../cmake/BuildUtils.cmake)
-
 # Sample CMake Root
 add_executable(${NC_SAMPLE_EXE})
 
@@ -21,15 +19,6 @@ target_include_directories(${NC_SAMPLE_EXE}
         ${NC_INCLUDE_DIR}
         ${NC_EXTERNAL_DIR}
 )
-
-# Link Options
-target_link_libraries(${NC_SAMPLE_EXE}
-    PRIVATE
-        ${NC_ENGINE_LIB}
-        Diligent-GraphicsEngineD3D12-shared
-        Diligent-GraphicsEngineOpenGL-shared
-)
-copy_required_dlls(${NC_SAMPLE_EXE})
 
 add_subdirectory(source)
 

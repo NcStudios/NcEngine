@@ -1,6 +1,9 @@
 # NcEngine CMake Root
 add_library(${NC_ENGINE_LIB} STATIC)
 
+include(../../cmake/BuildUtils.cmake)
+
+
 # Propagate version
 configure_file(${PROJECT_SOURCE_DIR}/cmake/Version.h.in
                ${NC_INCLUDE_DIR}/ncengine/config/Version.h
@@ -43,7 +46,11 @@ target_link_libraries(${NC_ENGINE_LIB}
         glfw
         OptickCore
         RtAudio
+        Diligent-GraphicsEngineD3D12-shared
+        Diligent-GraphicsEngineOpenGL-shared
 )
+
+copy_required_dlls(${NC_ENGINE_LIB})
 
 if(WIN32)
     target_link_libraries(${NC_ENGINE_LIB}
@@ -79,10 +86,19 @@ target_include_directories(${NC_ENGINE_LIB}
         $<INSTALL_INTERFACE:external/>
         $<BUILD_INTERFACE:${NC_EXTERNAL_DIR}>
         $<BUILD_INTERFACE:${VMA_INCLUDE_DIR}>
+        $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:DiligentCore>
 )
 
 # Install
-install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio
+install(TARGETS     ${NC_ENGINE_LIB} 
+        imgui NcMath NcUtility NcAsset RtAudio
+        Diligent-GraphicsEngineD3D12-shared
+        Diligent-GraphicsEngineOpenGL-shared
+        Diligent-GraphicsEngineD3D12Interface
+        Diligent-GraphicsEngineOpenGLInterface
+        Diligent-GraphicsEngineD3DBaseInterface
+        Diligent-GraphicsEngineInterface
         EXPORT      NcEngine-export
         DESTINATION lib
 )

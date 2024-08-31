@@ -56,7 +56,7 @@ endif()
 # DiligentCore
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
-                     SOURCE_DIR external/DiligentCore
+                     SOURCE_DIR _deps/DiligentCore
 )
 
 # Taskflow

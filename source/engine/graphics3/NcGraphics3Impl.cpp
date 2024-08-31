@@ -12,8 +12,6 @@
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 
-#include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
-
 #include "imgui/imgui.h"
 #include "optick.h"
 
@@ -103,8 +101,19 @@ namespace nc::graphics
         (void)modules;
         (void)events;
 
+        Diligent::SwapChainDesc scDesc;
+        auto engineFactoryD3D12 = Diligent::LoadGraphicsEngineD3D12();
+        Diligent::EngineD3D12CreateInfo engineCI;
+        auto* pFactoryD3D12 = Diligent::GetEngineFactoryD3D12();
+        pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
+        Win32NativeWindow win32Window{window.GetWindowHandle()};
+        pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, scDesc, Diligent::FullScreenModeDesc{}, win32Window, &m_pSwapChain);
 
+    }
 
+    NcGraphics3Impl::~NcGraphics3Impl()
+    {
+        m_pImmediateContext->Flush();
     }
 
     void NcGraphics3Impl::SetCamera(Camera* camera) noexcept

@@ -2,6 +2,14 @@
 
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
+
+#include "EngineFactoryD3D12.h"
+#include "EngineFactoryOpenGL.h"
+#include "RenderDevice.h"
+#include "DeviceContext.h"
+#include "SwapChain.h"
+#include "RefCntAutoPtr.hpp"
+
 #include <memory>
 
 namespace nc
@@ -25,6 +33,8 @@ class NcGraphics3Impl : public NcGraphics
                        SystemEvents& events,
                        window::NcWindow& window);
 
+        ~NcGraphics3Impl() noexcept;
+
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
         void SetUi(ui::IUI* ui) noexcept override;
@@ -39,7 +49,10 @@ class NcGraphics3Impl : public NcGraphics
     private:
         Registry* m_registry;
         Connection<const Vector2&, bool> m_onResizeConnection;
-        // RefCntAutoPtr<IPipelineState> m_pPSO;
+        Diligent::RefCntAutoPtr<IRenderDevice> m_pDevice;
+        Diligent::RefCntAutoPtr<IDeviceContext> m_pImmediateContext;
+        Diligent::RefCntAutoPtr<ISwapChain> m_pPSO;
+        Diligent::RENDER_DEVICE_TYPE m_DeviceType = RENDER_DEVICE_TYPE_D3D12;
     };
 } // namespace graphics
 } // namespace nc
