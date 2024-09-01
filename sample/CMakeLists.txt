@@ -20,6 +20,12 @@ target_include_directories(${NC_SAMPLE_EXE}
         ${NC_EXTERNAL_DIR}
 )
 
+# Link Options
+target_link_libraries(${NC_SAMPLE_EXE}
+    PRIVATE
+        ${NC_ENGINE_LIB}
+)
+
 add_subdirectory(source)
 
 # Install

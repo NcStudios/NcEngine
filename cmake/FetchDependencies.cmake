@@ -53,12 +53,6 @@ elseif(APPLE)
     # TODO: #349 Artifact not yet published
 endif()
 
-# DiligentCore
-FetchContent_Declare(DiligentCore
-                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
-                     SOURCE_DIR _deps/DiligentCore
-)
-
 # Taskflow
 set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -93,12 +87,24 @@ FetchContent_Declare(optick
                      GIT_SHALLOW    TRUE
 )
 
+# Jolt
+FetchContent_Declare(JoltPhysics
+                     GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
+                     GIT_TAG        v5.1.0
+                     GIT_SHALLOW    TRUE
+                     SOURCE_SUBDIR  "Build"
+)
+
 # Fetch all required sources
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert DiligentCore taskflow glfw optick)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics)
 
 # Set Taskflow includes as system to prevent some warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
+
+# Set Jolt includes as system to prevent warnings
+get_target_property(_Jolt_Include_Prop Jolt INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(Jolt SYSTEM INTERFACE ${_Jolt_Include_Prop})
 
 #############################
 ### Optional Dependencies ###
