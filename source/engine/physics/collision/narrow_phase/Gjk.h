@@ -2,6 +2,11 @@
 
 #include "Epa.h"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized" // some versions trigger false positive
+#endif
+
 namespace nc::physics
 {
 constexpr size_t GjkMaxIterations = 10u;
@@ -258,7 +263,6 @@ bool Gjk(const BVA& a, const BVB& b)
         XMStoreVector3(&supportCSO, supportCSO_v);
         XMStoreVector3(&supportA, supportA_v);
         XMStoreVector3(&supportB, supportB_v);
-
         simplex.PushFront(supportCSO, supportA, supportB, supportA, supportB);
 
         if(RefineSimplex[simplex.Size() - 1](simplex, direction))
@@ -270,3 +274,7 @@ bool Gjk(const BVA& a, const BVB& b)
     return false;
 }
 } // namespace nc::physics
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop // -Wmaybe-uninitialized
+#endif

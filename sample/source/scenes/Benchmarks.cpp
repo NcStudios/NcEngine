@@ -10,6 +10,7 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 #include <functional>
@@ -357,6 +358,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
     world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::Box, physics::BodyType::Static);
 
     const auto spawnBehavior = SpawnBehavior{
         .minPosition = Vector3{g_mapExtent * -0.4f, 1.0f, g_mapExtent * -0.4f},
@@ -431,6 +433,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
                 world.Emplace<graphics::ToonRenderer>(entity, ::physics_body::Mesh, ::RandomToonMaterial());
                 auto& collider = ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
                 world.Emplace<physics::PhysicsBody>(entity, world.Get<Transform>(entity), collider, physics::PhysicsProperties{.mass = 5.0f});
+                world.Emplace<physics::RigidBody>(entity, physics::Shape::Box, physics::BodyType::Dynamic);
             }
         );
 
