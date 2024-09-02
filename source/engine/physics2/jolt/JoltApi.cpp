@@ -39,5 +39,7 @@ JoltApi::JoltApi()
         objectVsBroadphaseFilter,
         objectLayerPairFilter
     );
+
+    ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterface(), shapeFactory);
 }
 } // namespace nc::physics

@@ -74,12 +74,12 @@ class AnyComponent
         }
 
         /** @brief Invoke ComponentHandler::drawUI with the component instance, if it is set. */
-        void DrawUI()
+        void DrawUI(ui::editor::EditorContext& ctx)
         {
             EnsureIsEngaged();
             if (HasDrawUI())
             {
-                m_storage.AsImpl()->DrawUI();
+                m_storage.AsImpl()->DrawUI(ctx);
             }
         }
 
