@@ -60,7 +60,7 @@ void Inspector::Draw(EditorContext& ctx, CreateEntityDialog& createEntity)
             {
                 auto any = pool->GetAsAnyComponent(entity);
                 ElementHeader(any.Name());
-                any.DrawUI(entity, ctx);
+                any.DrawUI(ctx);
             }
         });
     });

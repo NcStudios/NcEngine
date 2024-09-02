@@ -163,7 +163,6 @@ TEST(AnyComponentTest, HasDrawUI_funcSet_returnsTrue)
     auto component = TestComponent{};
     auto handler = nc::ComponentHandler<TestComponent>{
         .drawUI = [](TestComponent&,
-                     nc::Entity,
                      nc::ui::editor::EditorContext&,
                      const std::any&)
                      {
@@ -188,7 +187,6 @@ TEST(AnyComponentTest, DrawUI_validCall_dispatchesToHandler)
     auto component = TestComponent{};
     auto handler = nc::ComponentHandler<TestComponent>{
         .drawUI = [&numCalls](TestComponent&,
-                              nc::Entity,
                               nc::ui::editor::EditorContext&,
                               const std::any&)
                               {
@@ -197,8 +195,8 @@ TEST(AnyComponentTest, DrawUI_validCall_dispatchesToHandler)
     };
 
     auto uut = nc::AnyComponent{&component, &handler};
-    uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx);
-    uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx);
+    uut.DrawUI(g_mockEditorCtx);
+    uut.DrawUI(g_mockEditorCtx);
     EXPECT_EQ(2, numCalls);
 }
 
@@ -208,11 +206,11 @@ TEST(AnyComponentTest, DrawUI_nullFunc_succeeds)
     auto handler = nc::ComponentHandler<TestComponent>{ .drawUI = nullptr };
     auto uut = nc::AnyComponent{&component, &handler};
     EXPECT_FALSE(uut.HasDrawUI());
-    EXPECT_NO_THROW(uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx));
+    EXPECT_NO_THROW(uut.DrawUI(g_mockEditorCtx));
 }
 
 TEST(AnyComponentTest, DrawUI_nullObject_throws)
 {
     auto uut = nc::AnyComponent{};
-    EXPECT_THROW(uut.DrawUI(nc::Entity::Null(), g_mockEditorCtx), nc::NcError);
+    EXPECT_THROW(uut.DrawUI(g_mockEditorCtx), nc::NcError);
 }

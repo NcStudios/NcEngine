@@ -119,7 +119,6 @@ struct ComponentHandler
 
     /** @brief Function type for the DrawUI handler. */
     using DrawUI_t = std::function<void(T& component,
-                                        Entity self,
                                         ui::editor::EditorContext& ctx,
                                         const std::any& userData)>;
 
