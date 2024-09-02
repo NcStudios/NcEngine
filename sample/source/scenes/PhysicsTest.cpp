@@ -21,12 +21,14 @@ std::function<void(unsigned)> DestroyFunc = nullptr;
 
 int SpawnCount = 1000;
 int DestroyCount = 1000;
+float forceMultiplier = 1.0f;
 
 void Widget()
 {
     ImGui::Text("Physics Test");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
+        ui::DragFloat(forceMultiplier, "forceMultiplier");
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         const auto halfCellWidth = (ImGui::GetColumnWidth() * 0.5f) - 10.0f;
 
@@ -119,9 +121,9 @@ struct FollowCamera : public graphics::Camera
 #ifdef NC_USE_JOLT
 class VehicleController : public FreeComponent
 {
-    static constexpr auto force = 300.7f;
-    static constexpr auto torqueForce = 700.6f;
-    static constexpr auto jumpForce = 3700.0f;
+    static constexpr auto force = 50.0f;
+    static constexpr auto torqueForce = 50.0f;
+    static constexpr auto jumpForce = 400.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
     public:
@@ -158,24 +160,24 @@ class VehicleController : public FreeComponent
         {
             auto& rBody = world.Get<physics::RigidBody>(ParentEntity());
 
-            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force);
-            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force);
-            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force);
-            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force);
-            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce);
-            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce);
+            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * forceMultiplier);
+            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * forceMultiplier);
 
             if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * forceMultiplier;
                 rBody.AddImpulse(dir);
             }
 
             if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Vector3::Up() * jumpForce;
+                const auto dir = Vector3::Up() * jumpForce * forceMultiplier;
                 rBody.AddImpulse(dir);
             }
         }
@@ -363,7 +365,7 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
     auto wormMaterial = GreenToonMaterial;
-    wormMaterial.outlineWidth = 6;
+    wormMaterial.outlineWidth = 1;
     world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, wormMaterial);

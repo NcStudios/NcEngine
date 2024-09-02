@@ -96,11 +96,25 @@ void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTas
 
 void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
 {
-    const auto& transform = m_ecs.Get<Transform>(body.GetEntity());
+    auto& transform = m_ecs.Get<Transform>(body.GetEntity());
     const auto [scale, rotation, position] = DecomposeMatrix(transform.TransformationMatrix());
+    const auto shape = body.GetShape();
     const auto bodyType = body.GetBodyType();
+    auto shapeScale = ToJoltVec3(scale);
+    if (body.ScalesWithTransform())
+    {
+        if (NormalizeScaleForShape(shape, shapeScale))
+        {
+            transform.SetScale(ToVector3(shapeScale)); // update Transform to prevent invalid scales
+        }
+    }
+    else
+    {
+        shapeScale = JPH::Vec3::sReplicate(1.0f);
+    }
+
     const auto bodySettings = JPH::BodyCreationSettings{
-        MakeShape(body.GetShape(), ToJoltVec3(scale)),
+        m_jolt.shapeFactory.MakeShape(shape, shapeScale),
         ToJoltVec3(position),
         ToJoltQuaternion(rotation),
         ToMotionType(bodyType),
@@ -110,7 +124,7 @@ void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
     auto& iBody = m_jolt.physicsSystem.GetBodyInterface(); // @todo: 697 try non-locking interface
     auto apiBody = iBody.CreateBody(bodySettings);
     iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
-    body.Init(apiBody, &iBody);
+    body.SetContext(apiBody, m_jolt.ctx.get());
 }
 
 void NcPhysicsImpl2::Clear() noexcept

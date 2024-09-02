@@ -1,5 +1,6 @@
 #include "ui/editor/ComponentWidgets.h"
 #include "assets/AssetWrapper.h"
+#include "ncengine/Events.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -14,7 +15,9 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
+#include "ncengine/ui/editor/EditorContext.h"
 
 #include <array>
 #include <ranges>
@@ -248,32 +251,70 @@ void TagUIWidget(Tag& tag, Entity, EditorContext&, const std::any&)
     ui::InputText(tag.value, "tag");
 }
 
-void TransformUIWidget(Transform& transform, Entity, EditorContext&, const std::any&)
+void TransformUIWidget(Transform& transform, Entity self, EditorContext& ctx, const std::any&)
 {
-    auto scl_v = DirectX::XMVECTOR{};
-    auto rot_v = DirectX::XMVECTOR{};
-    auto pos_v = DirectX::XMVECTOR{};
-    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.LocalTransformationMatrix());
+    const auto decomposedMatrix = DecomposeMatrix(transform.LocalTransformationMatrix());
+    auto scl = ToVector3(decomposedMatrix.scale);
+    auto pos = ToVector3(decomposedMatrix.position);
+    auto curRot = ToQuaternion(decomposedMatrix.rotation).ToEulerAngles();
+    const auto prevRot = curRot;
+    auto wasUpdated = false;
 
-    auto scl = Vector3{};
-    auto pos = Vector3{};
-    auto quat = nc::Quaternion::Identity();
-    DirectX::XMStoreVector3(&scl, scl_v);
-    DirectX::XMStoreQuaternion(&quat, rot_v);
-    DirectX::XMStoreVector3(&pos, pos_v);
-    const auto prevRot = quat.ToEulerAngles();
-    auto curRot = prevRot;
-
-    if (ui::InputPosition(pos, "position")) transform.SetPosition(pos);
+    if (ui::InputPosition(pos, "position"))
+    {
+        wasUpdated = true;
+        if (ctx.world.Contains<physics::RigidBody>(self))
+        {
+            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            physics::SetSimulatedBodyPosition(transform, body, pos, true);
+        }
+        else
+        {
+            transform.SetPosition(pos);
+        }
+    }
 
     if (ui::InputAngles(curRot, "rotation"))
     {
-        if      (!FloatEqual(curRot.x, prevRot.x)) transform.Rotate(Vector3::Right(), curRot.x - prevRot.x);
-        else if (!FloatEqual(curRot.y, prevRot.y)) transform.Rotate(Vector3::Up(), curRot.y - prevRot.y);
-        else if (!FloatEqual(curRot.z, prevRot.z)) transform.Rotate(Vector3::Front(), curRot.z - prevRot.z);
+        wasUpdated = true;
+        const auto rotationNeeded = [&]()
+        {
+            if      (!FloatEqual(curRot.x, prevRot.x)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR0, curRot.x - prevRot.x);
+            else if (!FloatEqual(curRot.y, prevRot.y)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR1, curRot.y - prevRot.y);
+            else if (!FloatEqual(curRot.z, prevRot.z)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR2, curRot.z - prevRot.z);
+            return DirectX::XMQuaternionIdentity();
+        }();
+
+        const auto newRotation = ToQuaternion(DirectX::XMQuaternionMultiply(decomposedMatrix.rotation, rotationNeeded));
+        if (ctx.world.Contains<physics::RigidBody>(self))
+        {
+            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            physics::SetSimulatedBodyRotation(transform, body, newRotation, true);
+        }
+        else
+        {
+            transform.SetRotation(newRotation);
+        }
     }
 
-    if (ui::InputScale(scl, "scale")) transform.SetScale(scl);
+    if (ui::InputScale(scl, "scale"))
+    {
+        wasUpdated = true;
+        if (ctx.world.Contains<physics::RigidBody>(self))
+        {
+            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            physics::SetSimulatedBodyScale(transform, body, scl, true);
+        }
+        else
+        {
+            transform.SetScale(scl);
+        }
+    }
+
+    if (wasUpdated && self.IsStatic() && ctx.rebuildStaticsOnTransformWrite)
+    {
+        ctx.events->rebuildStatics();
+    }
 }
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource, Entity, EditorContext&, const std::any&)
