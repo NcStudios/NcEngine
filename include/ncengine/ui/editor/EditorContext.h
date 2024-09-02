@@ -46,6 +46,7 @@ struct EditorContext
     Entity selectedEntity = Entity::Null();
     OpenState openState = OpenState::Closed;
     ImVec2 dimensions = ImVec2{};
+    bool rebuildStaticsOnTransformWrite = true;
 
     // Immutable state
     const Entity objectBucket = Entity::Null();

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "physics2/jolt/Conversion.h"
 
-TEST(JoltConversionTest, Vector3_roundTrip_preservesValue)
+TEST(JoltConversionTest, XMVector3_roundTrip_preservesValue)
 {
     const auto expectedVector = DirectX::XMVectorSet(1.0f, 2.0f, 3.0f, 0.0f);
     const auto joltVector = nc::physics::ToJoltVec3(expectedVector);
@@ -12,7 +12,7 @@ TEST(JoltConversionTest, Vector3_roundTrip_preservesValue)
     EXPECT_FLOAT_EQ(DirectX::XMVectorGetW(expectedVector), DirectX::XMVectorGetW(actualVector));
 }
 
-TEST(JoltConversionTest, Vector3Homogeneous_roundTrip_preservesValue)
+TEST(JoltConversionTest, XMVector3Homogeneous_roundTrip_preservesValue)
 {
     const auto expectedVector = DirectX::XMVectorSet(1.0f, 2.0f, 3.0f, 1.0f);
     const auto joltVector = nc::physics::ToJoltVec3(expectedVector);
@@ -23,7 +23,15 @@ TEST(JoltConversionTest, Vector3Homogeneous_roundTrip_preservesValue)
     EXPECT_FLOAT_EQ(DirectX::XMVectorGetW(expectedVector), DirectX::XMVectorGetW(actualVector));
 }
 
-TEST(JoltConversionTest, Quaternion_roundTrip_preservesValue)
+TEST(JoltConversionTest, Vector3_roundTrip_preservesValue)
+{
+    const auto expectedVector = nc::Vector3{1.0f, 2.0f, 3.0f};
+    const auto joltVector = nc::physics::ToJoltVec3(expectedVector);
+    const auto actualVector = nc::physics::ToVector3(joltVector);
+    EXPECT_EQ(expectedVector, actualVector);
+}
+
+TEST(JoltConversionTest, XMQuaternion_roundTrip_preservesValue)
 {
     const auto expectedQuat = DirectX::XMQuaternionRotationRollPitchYaw(3.14f, 0.0f, 1.07f);
     const auto joltQuat = nc::physics::ToJoltQuaternion(expectedQuat);
@@ -32,6 +40,14 @@ TEST(JoltConversionTest, Quaternion_roundTrip_preservesValue)
     EXPECT_FLOAT_EQ(DirectX::XMVectorGetY(expectedQuat), DirectX::XMVectorGetY(actualQuat));
     EXPECT_FLOAT_EQ(DirectX::XMVectorGetZ(expectedQuat), DirectX::XMVectorGetZ(actualQuat));
     EXPECT_FLOAT_EQ(DirectX::XMVectorGetW(expectedQuat), DirectX::XMVectorGetW(actualQuat));
+}
+
+TEST(JoltConversionTest, Quaternion_roundTrip_preservesValue)
+{
+    const auto expectedQuat = nc::Quaternion::FromEulerAngles(3.14f, 0.0f, 1.07f);
+    const auto joltQuat = nc::physics::ToJoltQuaternion(expectedQuat);
+    const auto actualQuat = nc::physics::ToQuaternion(joltQuat);
+    EXPECT_EQ(expectedQuat, actualQuat);
 }
 
 TEST(JoltConversionTest, ToMotionType_convertsBodyType)

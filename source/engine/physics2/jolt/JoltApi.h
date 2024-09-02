@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Allocator.h"
+#include "ComponentContext.h"
 #include "Layers.h"
+#include "ShapeFactory.h"
 #include "ncengine/type/StableAddress.h"
 #include "ncutility/NcError.h"
 
@@ -43,6 +45,8 @@ struct JoltApi : public StableAddress
     ObjectVsBroadPhaseLayerFilter objectVsBroadphaseFilter;
     ObjectLayerPairFilter objectLayerPairFilter;
     JPH::PhysicsSystem physicsSystem;
+    ShapeFactory shapeFactory;
+    std::unique_ptr<ComponentContext> ctx;
 
     private:
         JoltApi();

@@ -1,42 +1,101 @@
 #include "ncengine/physics/RigidBody.h"
-#include "ncutility/NcError.h"
+#include "jolt/ComponentContext.h"
 #include "jolt/Conversion.h"
+#include "jolt/ShapeFactory.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSystem.h"
+#include "ncutility/NcError.h"
+
+namespace
+{
+auto ToBody(void* handle) -> JPH::Body*
+{
+    return reinterpret_cast<JPH::Body*>(handle);
+}
+
+auto ToActivationMode(bool wake) -> JPH::EActivation
+{
+    return wake ? JPH::EActivation::Activate : JPH::EActivation::DontActivate;
+}
+} // anonymous namespace
 
 namespace nc::physics
 {
-RigidBody::~RigidBody() noexcept
+void SetSimulatedBodyPosition(Transform& transform,
+                              RigidBody& rigidBody,
+                              const Vector3& position,
+                              bool wake)
 {
-    if (m_handle)
-    {
-        auto iBody = reinterpret_cast<JPH::BodyInterface*>(m_interface);
-        auto apiBody = reinterpret_cast<JPH::Body*>(m_handle);
-        const auto& id = apiBody->GetID();
-        iBody->RemoveBody(id);
-        iBody->DestroyBody(id);
-    }
+    transform.SetPosition(position);
+    rigidBody.SetPosition(position, wake);
 }
 
-void RigidBody::Init(BodyHandle handle, BodyInterface interface)
+void SetSimulatedBodyRotation(Transform& transform,
+                              RigidBody& rigidBody,
+                              const Quaternion& rotation,
+                              bool wake)
 {
-    NC_ASSERT(!(m_self.IsStatic() && m_bodyType != BodyType::Static), "Static entities only support BodyType::Static");
-    m_handle = handle;
-    m_interface = interface;
+    transform.SetRotation(rotation);
+    rigidBody.SetRotation(rotation, wake);
+}
+
+auto SetSimulatedBodyScale(Transform& transform,
+                           RigidBody& rigidBody,
+                           const Vector3& scale,
+                           bool wake) -> Vector3
+{
+    const auto appliedScale = rigidBody.ScalesWithTransform()
+        ? rigidBody.SetScale(scale, wake)
+        : scale;
+
+    transform.SetScale(appliedScale);
+    return appliedScale;
+}
+
+RigidBody::~RigidBody() noexcept
+{
+    if (IsInitialized())
+    {
+        const auto& id = ToBody(m_handle)->GetID();
+        m_ctx->interface.RemoveBody(id);
+        m_ctx->interface.DestroyBody(id);
+    }
 }
 
 void RigidBody::AddImpulse(const Vector3& impulse)
 {
-    auto iBody = reinterpret_cast<JPH::BodyInterface*>(m_interface);
-    auto apiBody = reinterpret_cast<JPH::Body*>(m_handle);
-    iBody->AddImpulse(apiBody->GetID(), JPH::Vec3{impulse.x, impulse.y, impulse.z});
+    m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
 }
 
 void RigidBody::AddTorque(const Vector3& torque)
 {
-    auto iBody = reinterpret_cast<JPH::BodyInterface*>(m_interface);
-    auto apiBody = reinterpret_cast<JPH::Body*>(m_handle);
-    iBody->AddTorque(apiBody->GetID(), JPH::Vec3{torque.x, torque.y, torque.z});
+    m_ctx->interface.AddTorque(ToBody(m_handle)->GetID(), ToJoltVec3(torque));
+}
+
+void RigidBody::SetPosition(const Vector3& position, bool wake)
+{
+    m_ctx->interface.SetPosition(ToBody(m_handle)->GetID(), ToJoltVec3(position), ToActivationMode(wake));
+}
+
+void RigidBody::SetRotation(const Quaternion& rotation, bool wake)
+{
+    m_ctx->interface.SetRotation(ToBody(m_handle)->GetID(), ToJoltQuaternion(rotation), ToActivationMode(wake));
+}
+
+auto RigidBody::SetScale(const Vector3& scale, bool wake) -> Vector3
+{
+    auto shapeScale = ToJoltVec3(scale);
+    NormalizeScaleForShape(m_shape, shapeScale);
+    auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, shapeScale);
+    m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
+    return ToVector3(shapeScale);
+}
+
+void RigidBody::SetContext(BodyHandle handle, ComponentContext* ctx)
+{
+    NC_ASSERT(!(m_self.IsStatic() && m_bodyType != BodyType::Static), "Static entities only support BodyType::Static");
+    m_handle = handle;
+    m_ctx = ctx;
 }
 } // namespace nc::physics

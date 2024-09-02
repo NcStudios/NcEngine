@@ -17,6 +17,7 @@ target_compile_options(JoltApi_unit_tests
 
 target_link_libraries(JoltApi_unit_tests
     PRIVATE
+        NcMath
         NcUtility
         Jolt
         gtest_main
@@ -75,6 +76,34 @@ target_link_libraries(Layers_unit_tests
 
 add_test(Layers_unit_tests Layers_unit_tests)
 
+### RigidBody Tests ###
+add_executable(RigidBody_unit_tests
+    RigidBody_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+)
+
+target_include_directories(RigidBody_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(RigidBody_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(RigidBody_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        Jolt
+        gtest_main
+)
+
+add_test(RigidBody_unit_tests RigidBody_unit_tests)
+
 ### PhysicsAllocator Tests ###
 add_executable(PhysicsAllocator_unit_tests
     PhysicsAllocator_unit_tests.cpp
@@ -93,6 +122,7 @@ target_compile_options(PhysicsAllocator_unit_tests
 
 target_link_libraries(PhysicsAllocator_unit_tests
     PRIVATE
+        NcMath
         NcUtility
         Jolt
         gtest_main

@@ -142,10 +142,25 @@ void EditorUI::DrawMenu(EditorContext& ctx)
 
         if (ImGui::BeginMenu("Debug"))
         {
+            ImGui::Text("Display Options");
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Spacing();
+
             if (ImGui::MenuItem("FPS Overlay"))
                 m_fpsOverlay.ToggleOpen();
-            if (ImGui::MenuItem("Rebuild Static Entity Data"))
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Text("Static Entity Options");
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Spacing();
+
+            if (ImGui::MenuItem("Rebuild"))
                 ctx.events->rebuildStatics.Emit();
+
+            ui::Checkbox(ctx.rebuildStaticsOnTransformWrite, "Rebuild On Transform Update");
 
             ImGui::EndMenu();
         }
