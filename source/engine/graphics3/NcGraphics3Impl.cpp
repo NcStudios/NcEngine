@@ -12,8 +12,13 @@
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 
+#define GLFW_EXPOSE_NATIVE_WIN32
+
+#include "GLFW/glfw3.h"
+#include "GLFW/glfw3native.h"
 #include "imgui/imgui.h"
 #include "optick.h"
+
 
 namespace
 {
@@ -101,14 +106,41 @@ namespace nc::graphics
         (void)modules;
         (void)events;
 
-        Diligent::SwapChainDesc scDesc;
-        auto engineFactoryD3D12 = Diligent::LoadGraphicsEngineD3D12();
-        Diligent::EngineD3D12CreateInfo engineCI;
-        auto* pFactoryD3D12 = Diligent::GetEngineFactoryD3D12();
-        pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
-        Win32NativeWindow win32Window{window.GetWindowHandle()};
-        pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, scDesc, Diligent::FullScreenModeDesc{}, win32Window, &m_pSwapChain);
+        using namespace Diligent;
 
+        /* Initialize Diligent Engine */
+        SwapChainDesc SCDesc;
+        auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
+        EngineD3D12CreateInfo engineCI;
+        auto* pFactoryD3D12 = GetEngineFactoryD3D12();
+        pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
+        auto win32Handle = glfwGetWin32Window(window.GetWindowHandle());
+        Win32NativeWindow win32Window{win32Handle};
+        pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, win32Window, &m_pSwapChain);
+
+        /* Create resources */
+        GraphicsPipelineStateCreateInfo psoCI;
+        psoCI.PSODesc.Name = "Triangle PSO";
+        psoCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+
+        psoCI.GraphicsPipeline.NumRenderTargets             = 1;
+        psoCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
+        psoCI.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
+        psoCI.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        psoCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_NONE;
+        psoCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
+
+        ShaderCreateInfo shaderCI;
+        shaderCI.SourceLanguage                  = SHADER_SOURCE_LANGUAGE_GLSL;
+        shaderCI.Desc.UseCombinedTextureSamplers = true;
+
+        // RefCntAutoPtr<IShader> pPS;
+        // {
+        //     shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+        //     shaderCI.EntryPoint      = "main";
+        //     shaderCI.Desc.Name       = ""
+        // }
+        
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()

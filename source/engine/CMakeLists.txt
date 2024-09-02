@@ -65,6 +65,21 @@ elseif(APPLE)
     )
 endif()
 
+if(D3D11_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
+endif()
+if(D3D12_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D12-shared)
+endif()
+if(GL_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineOpenGL-shared)
+endif()
+if(VULKAN_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineVk-shared)
+endif()
+
+copy_required_dlls(${NC_ENGINE_LIB})
+
 # Include Dirs
 target_include_directories(${NC_ENGINE_LIB}
     PUBLIC
@@ -82,22 +97,28 @@ target_include_directories(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:${VMA_INCLUDE_DIR}>
 )
 
-# Install
-install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio
-        EXPORT      NcEngine-export
-        DESTINATION lib
+# Diligent Include Dirs
+target_include_directories(${NC_ENGINE_LIB}
+    PRIVATE
+        $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
 )
-install(EXPORT      NcEngine-export
-        FILE        NcEngineTargets.cmake
-        NAMESPACE   Nc::
-        DESTINATION lib/cmake/NcEngine
-)
-install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
-        DESTINATION lib/cmake/NcEngine
-)
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
-        DESTINATION include
-)
+
+# # Install
+# install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio Diligent-GraphicsEngineD3D11-shared # Diligent-GraphicsEngineD3D12-shared Diligent-GraphicsEngineOpenGL-shared Diligent-GraphicsEngineVk-shared
+#         EXPORT      NcEngine-export
+#         DESTINATION lib
+# )
+# install(EXPORT      NcEngine-export
+#         FILE        NcEngineTargets.cmake
+#         NAMESPACE   Nc::
+#         DESTINATION lib/cmake/NcEngine
+# )
+# install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
+#         DESTINATION lib/cmake/NcEngine
+# )
+# install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
+#         DESTINATION include
+# )
 
 add_subdirectory(audio)
 add_subdirectory(asset)
@@ -106,6 +127,7 @@ add_subdirectory(debug)
 add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
+add_subdirectory(graphics3)
 add_subdirectory(input)
 add_subdirectory(network)
 add_subdirectory(particle)

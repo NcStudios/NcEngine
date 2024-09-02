@@ -3,12 +3,16 @@
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
 
-#include "EngineFactoryD3D12.h"
-#include "EngineFactoryOpenGL.h"
-#include "RenderDevice.h"
-#include "DeviceContext.h"
-#include "SwapChain.h"
-#include "RefCntAutoPtr.hpp"
+#include "Graphics/GraphicsEngineD3D11/interface/EngineFactoryD3D11.h"
+#include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
+#include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
+#include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
+
+#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
+#include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/SwapChain.h"
+
+#include "Common/interface/RefCntAutoPtr.hpp"
 
 #include <memory>
 
@@ -49,10 +53,11 @@ class NcGraphics3Impl : public NcGraphics
     private:
         Registry* m_registry;
         Connection<const Vector2&, bool> m_onResizeConnection;
-        Diligent::RefCntAutoPtr<IRenderDevice> m_pDevice;
-        Diligent::RefCntAutoPtr<IDeviceContext> m_pImmediateContext;
-        Diligent::RefCntAutoPtr<ISwapChain> m_pPSO;
-        Diligent::RENDER_DEVICE_TYPE m_DeviceType = RENDER_DEVICE_TYPE_D3D12;
+        Diligent::RefCntAutoPtr<Diligent::IRenderDevice>  m_pDevice;
+        Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
+        Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
+        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
+        Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12; /* @todo: Decision based on config and device capabilities */
     };
 } // namespace graphics
 } // namespace nc
