@@ -67,7 +67,7 @@ class Transform final : public ComponentBase
         /** @brief Get local space position */
         auto LocalPosition() const noexcept -> Vector3 { return ToVector3(LocalPositionXM()); }
 
-        /** @brief Get loca space position as an XMVECTOR */
+        /** @brief Get local space position as an XMVECTOR */
         auto LocalPositionXM() const noexcept -> DirectX::FXMVECTOR { return m_localMatrix.r[3]; }
 
         /** @brief Get world space rotation */
