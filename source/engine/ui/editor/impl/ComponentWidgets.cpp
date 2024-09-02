@@ -234,25 +234,26 @@ constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHa
 
 namespace nc::ui::editor
 {
-void CollisionLogicUIWidget(CollisionLogic&, Entity, EditorContext&, const std::any&)
+void CollisionLogicUIWidget(CollisionLogic&, EditorContext&, const std::any&)
 {
 }
 
-void FixedLogicUIWidget(FixedLogic&, Entity, EditorContext&, const std::any&)
+void FixedLogicUIWidget(FixedLogic&, EditorContext&, const std::any&)
 {
 }
 
-void FrameLogicUIWidget(FrameLogic&, Entity, EditorContext&, const std::any&)
+void FrameLogicUIWidget(FrameLogic&, EditorContext&, const std::any&)
 {
 }
 
-void TagUIWidget(Tag& tag, Entity, EditorContext&, const std::any&)
+void TagUIWidget(Tag& tag, EditorContext&, const std::any&)
 {
     ui::InputText(tag.value, "tag");
 }
 
-void TransformUIWidget(Transform& transform, Entity self, EditorContext& ctx, const std::any&)
+void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&)
 {
+    const auto self = ctx.selectedEntity;
     const auto decomposedMatrix = DecomposeMatrix(transform.LocalTransformationMatrix());
     auto scl = ToVector3(decomposedMatrix.scale);
     auto pos = ToVector3(decomposedMatrix.position);
@@ -317,7 +318,7 @@ void TransformUIWidget(Transform& transform, Entity self, EditorContext& ctx, co
     }
 }
 
-void AudioSourceUIWidget(audio::AudioSource& audioSource, Entity, EditorContext&, const std::any&)
+void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&)
 {
     ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
@@ -348,7 +349,7 @@ void AudioSourceUIWidget(audio::AudioSource& audioSource, Entity, EditorContext&
         audioSource.AddClip(asset::DefaultAudioClip);
 }
 
-void MeshRendererUIWidget(graphics::MeshRenderer& renderer, Entity, EditorContext&, const std::any&)
+void MeshRendererUIWidget(graphics::MeshRenderer& renderer, EditorContext&, const std::any&)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
@@ -359,7 +360,7 @@ void MeshRendererUIWidget(graphics::MeshRenderer& renderer, Entity, EditorContex
     ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
 }
 
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, Entity, EditorContext&, const std::any&)
+void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
@@ -398,7 +399,7 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, Entity, EditorC
     ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
 }
 
-void PointLightUIWidget(graphics::PointLight& light, Entity, EditorContext&, const std::any&)
+void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
@@ -408,7 +409,7 @@ void PointLightUIWidget(graphics::PointLight& light, Entity, EditorContext&, con
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
-void SpotLightUIWidget(graphics::SpotLight& light, Entity, EditorContext&, const std::any&)
+void SpotLightUIWidget(graphics::SpotLight& light, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
@@ -419,11 +420,11 @@ void SpotLightUIWidget(graphics::SpotLight& light, Entity, EditorContext&, const
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);
 }
 
-void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, Entity, EditorContext&, const std::any&)
+void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, EditorContext&, const std::any&)
 {
 }
 
-void ToonRendererUIWidget(graphics::ToonRenderer& renderer, Entity, EditorContext&, const std::any&)
+void ToonRendererUIWidget(graphics::ToonRenderer& renderer, EditorContext&, const std::any&)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
@@ -434,11 +435,11 @@ void ToonRendererUIWidget(graphics::ToonRenderer& renderer, Entity, EditorContex
     ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
 }
 
-void NetworkDispatcherUIWidget(net::NetworkDispatcher&, Entity, EditorContext&, const std::any&)
+void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const std::any&)
 {
 }
 
-void ColliderUIWidget(physics::Collider& collider, Entity, EditorContext&, const std::any&)
+void ColliderUIWidget(physics::Collider& collider, EditorContext&, const std::any&)
 {
     using namespace std::string_view_literals;
     constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
@@ -455,13 +456,13 @@ void ColliderUIWidget(physics::Collider& collider, Entity, EditorContext&, const
     ui::PropertyWidget(collider_ext::triggerProp, collider, &ui::Checkbox);
 }
 
-void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, Entity, EditorContext&, const std::any&)
+void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, EditorContext&, const std::any&)
 {
     /** @todo #454 Allow updating asset. */
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 
-void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, Entity, EditorContext&, const std::any&)
+void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "OrientationClamp");
     ui::InputVector3(orientationClamp.targetOrientation, "targetOrientation", 0.1f, -1.0f, 1.0f);
@@ -469,7 +470,7 @@ void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, Entit
     ui::DragFloat(orientationClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
 }
 
-void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, Entity, EditorContext&, const std::any&)
+void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, EditorContext&, const std::any&)
 {
     constexpr auto largeStep = 0.1f;
     constexpr auto smallStep = 0.01f;
@@ -484,13 +485,13 @@ void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, Entity, EditorContex
     ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
 }
 
-void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, Entity, EditorContext&, const std::any&)
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, EditorContext&, const std::any&)
 {
     ui::DragFloat(physicsMaterial.friction, "friction", 0.01f, 0.0f, 1.0f);
     ui::DragFloat(physicsMaterial.restitution, "restitution", 0.01f, 0.0f, 1.0f);
 }
 
-void PositionClampUIWidget(physics::PositionClamp& positionClamp, Entity, EditorContext&, const std::any&)
+void PositionClampUIWidget(physics::PositionClamp& positionClamp, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "PositionClamp");
     ui::InputVector3(positionClamp.targetPosition, "targetPosition", 0.1f, -1000.0f, 1000.0f);
@@ -498,7 +499,7 @@ void PositionClampUIWidget(physics::PositionClamp& positionClamp, Entity, Editor
     ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
 }
 
-void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, Entity, EditorContext&, const std::any&)
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "VelocityRestriction");
     ui::InputVector3(velocityRestriction.linearFreedom, "linearFreedom", 0.1f, 0.0f, 1.0f);

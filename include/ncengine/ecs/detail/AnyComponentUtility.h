@@ -23,7 +23,7 @@ struct AnyImplBase
     virtual auto Id() const noexcept -> size_t = 0;
     virtual auto Name() const noexcept -> std::string_view = 0;
     virtual auto HasDrawUI() const noexcept -> bool = 0;
-    virtual void DrawUI(Entity self, ui::editor::EditorContext& ctx) = 0;
+    virtual void DrawUI(ui::editor::EditorContext& ctx) = 0;
 
 };
 
@@ -39,7 +39,7 @@ class AnyImplConcrete : public AnyImplBase
         auto Id() const noexcept -> size_t override;
         auto Name() const noexcept -> std::string_view override;
         auto HasDrawUI() const noexcept -> bool override;
-        void DrawUI(Entity self, ui::editor::EditorContext& ctx) override;
+        void DrawUI(ui::editor::EditorContext& ctx) override;
 
     private:
         T* m_instance;
@@ -128,9 +128,9 @@ auto AnyImplConcrete<T>::HasDrawUI() const noexcept -> bool
 }
 
 template<PooledComponent T>
-void AnyImplConcrete<T>::DrawUI(Entity self, ui::editor::EditorContext& ctx)
+void AnyImplConcrete<T>::DrawUI(ui::editor::EditorContext& ctx)
 {
-    m_handler->drawUI(*m_instance, self, ctx, m_handler->userData);
+    m_handler->drawUI(*m_instance, ctx, m_handler->userData);
 }
 
 template<PooledComponent T>
