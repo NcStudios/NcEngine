@@ -76,6 +76,7 @@ auto AssetCombo(std::string& selection) -> bool
     return nc::ui::Combobox(selection, "##assetcombo", g_assets);
 }
 
+[[maybe_unused]]
 auto AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::Collider&
 {
     if (mesh == nc::asset::CubeMesh)
@@ -90,6 +91,7 @@ auto AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view 
     throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
 }
 
+[[maybe_unused]]
 auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::RigidBody&
 {
     if (mesh == nc::asset::CubeMesh)
