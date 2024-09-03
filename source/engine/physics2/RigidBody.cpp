@@ -63,6 +63,11 @@ RigidBody::~RigidBody() noexcept
     }
 }
 
+auto RigidBody::IsAwake() const -> bool
+{
+    return ToBody(m_handle)->IsActive();
+}
+
 void RigidBody::AddImpulse(const Vector3& impulse)
 {
     m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
@@ -85,11 +90,11 @@ void RigidBody::SetRotation(const Quaternion& rotation, bool wake)
 
 auto RigidBody::SetScale(const Vector3& scale, bool wake) -> Vector3
 {
-    auto shapeScale = ToJoltVec3(scale);
-    NormalizeScaleForShape(m_shape, shapeScale);
-    auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, shapeScale);
+    auto allowedScaling = ToJoltVec3(scale);
+    NormalizeScaleForShape(m_shape.GetType(), allowedScaling);
+    auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
     m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
-    return ToVector3(shapeScale);
+    return ToVector3(allowedScaling);
 }
 
 void RigidBody::SetContext(BodyHandle handle, ComponentContext* ctx)

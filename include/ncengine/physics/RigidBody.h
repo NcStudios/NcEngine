@@ -4,10 +4,10 @@
  */
 #pragma once
 
+#include "Shape.h"
 #include "ncengine/ecs/Component.h"
 #include "ncengine/ecs/Transform.h"
-
-#include "DirectXMath.h"
+#include "ncengine/utility/MatrixUtilities.h"
 
 namespace nc::physics
 {
@@ -36,13 +36,6 @@ struct RigidBodyFlags
 
     /** @brief Default flag values. */
     static constexpr Type Default = ScaleWithTransform;
-};
-
-/** @brief RigidBody shape options. */
-enum class Shape : uint8_t
-{
-    Box,
-    Sphere
 };
 
 /** @brief Determines movement and collision behavior of a RigidBody. */
@@ -93,7 +86,10 @@ auto SetSimulatedBodyScale(Transform& transform,
 class RigidBody
 {
     public:
-        RigidBody(Entity self, Shape shape, BodyType bodyType, RigidBodyFlags::Type flags = RigidBodyFlags::Default)
+        RigidBody(Entity self,
+                  const Shape& shape = Shape::MakeBox(),
+                  BodyType bodyType = BodyType::Dynamic,
+                  RigidBodyFlags::Type flags = RigidBodyFlags::Default)
             : m_self{self},
               m_shape{shape},
               m_bodyType{bodyType},
@@ -128,10 +124,11 @@ class RigidBody
         RigidBody& operator=(RigidBody&) = delete;
 
         auto GetEntity() const -> Entity { return m_self; }
-        auto GetShape() const -> Shape { return m_shape; }
+        auto GetShape() const -> const Shape& { return m_shape; }
         auto ScalesWithTransform() const -> bool { return m_flags & RigidBodyFlags::ScaleWithTransform; }
         auto GetBodyType() const -> BodyType { return m_bodyType; }
         auto GetHandle() const -> BodyHandle { return m_handle; }
+        auto IsAwake() const -> bool;
 
         void AddImpulse(const Vector3& impulse);
         void AddTorque(const Vector3& torque);

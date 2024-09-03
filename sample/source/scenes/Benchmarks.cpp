@@ -90,6 +90,16 @@ auto AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view 
     throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
 }
 
+auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::RigidBody&
+{
+    if (mesh == nc::asset::CubeMesh)
+        return world.Emplace<nc::physics::RigidBody>(entity, nc::physics::Shape::MakeBox());
+    else if (mesh == nc::asset::SphereMesh)
+        return world.Emplace<nc::physics::RigidBody>(entity, nc::physics::Shape::MakeSphere());
+
+    throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
+}
+
 struct mesh_renderer
 {
     static constexpr auto name = "Mesh Renderer";
@@ -358,7 +368,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
     world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::Box, physics::BodyType::Static);
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox(), physics::BodyType::Static);
 
     const auto spawnBehavior = SpawnBehavior{
         .minPosition = Vector3{g_mapExtent * -0.4f, 1.0f, g_mapExtent * -0.4f},
@@ -431,9 +441,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             spawnBehavior,
             [world](Entity entity) mutable {
                 world.Emplace<graphics::ToonRenderer>(entity, ::physics_body::Mesh, ::RandomToonMaterial());
+#ifdef NC_USE_JOLT
+                ::AddRigidBodyForMesh(world, entity, ::physics_body::Mesh);
+#else
                 auto& collider = ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
                 world.Emplace<physics::PhysicsBody>(entity, world.Get<Transform>(entity), collider, physics::PhysicsProperties{.mass = 5.0f});
-                world.Emplace<physics::RigidBody>(entity, physics::Shape::Box, physics::BodyType::Dynamic);
+#endif
             }
         );
 

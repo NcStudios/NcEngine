@@ -121,8 +121,8 @@ struct FollowCamera : public graphics::Camera
 #ifdef NC_USE_JOLT
 class VehicleController : public FreeComponent
 {
-    static constexpr auto force = 50.0f;
-    static constexpr auto torqueForce = 50.0f;
+    static constexpr auto force = 150.0f;
+    static constexpr auto torqueForce = 150.0f;
     static constexpr auto jumpForce = 400.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
@@ -340,6 +340,7 @@ class VehicleController : public FreeComponent
 auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
 {
     const auto head = world.Emplace<Entity>({
+        .scale = Vector3::Splat(2.0f),
         .tag = "Worm Head"
     });
 
@@ -386,10 +387,10 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
     world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
 
-    world.Emplace<physics::RigidBody>(head, physics::Shape::Box, physics::BodyType::Dynamic);
-    world.Emplace<physics::RigidBody>(segment1, physics::Shape::Box, physics::BodyType::Dynamic);
-    world.Emplace<physics::RigidBody>(segment2, physics::Shape::Box, physics::BodyType::Dynamic);
-    world.Emplace<physics::RigidBody>(segment3, physics::Shape::Box, physics::BodyType::Dynamic);
+    world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
 
     world.Emplace<physics::VelocityRestriction>(head);
     world.Emplace<physics::VelocityRestriction>(segment1);
@@ -458,7 +459,7 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<physics::Collider>(leftWall, physics::BoxProperties{});
     world.Emplace<physics::Collider>(rightWall, physics::BoxProperties{});
 
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::Box, physics::BodyType::Static);
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox(), physics::BodyType::Static);
 }
 
 void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -769,7 +770,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
             auto& collider = world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
             world.Emplace<physics::PhysicsBody>(handle, world.Get<Transform>(handle), collider, physics::PhysicsProperties{.mass = 5.0f});
-            world.Emplace<physics::RigidBody>(handle, physics::Shape::Box, physics::BodyType::Dynamic);
+            world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox(), physics::BodyType::Dynamic);
         }
     );
 

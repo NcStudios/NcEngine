@@ -6,6 +6,8 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/Collider.h"
+#include "ncengine/physics/RigidBody.h"
+#include "ncengine/utility/MatrixUtilities.h"
 #include "asset/AssetService.h"
 
 #include "optick.h"
@@ -60,11 +62,47 @@ auto GetMeshView(nc::physics::ColliderType type) -> nc::asset::MeshView
 }
 
 [[maybe_unused]]
+auto GetMeshView(nc::physics::ShapeType shape) -> nc::asset::MeshView
+{
+    using namespace nc::asset;
+    switch(shape)
+    {
+        case nc::physics::ShapeType::Box:
+        {
+            static const auto view = AssetService<MeshView>::Get()->Acquire(CubeMesh);
+            return view;
+        }
+        case nc::physics::ShapeType::Sphere:
+        {
+            static const auto view = AssetService<MeshView>::Get()->Acquire(SphereMesh);
+            return view;
+        }
+        default:
+        {
+            throw nc::NcError("Unknown Shape");
+        }
+    }
+}
+
+[[maybe_unused]]
 auto CalculateWireframeMatrix(DirectX::FXMMATRIX worldSpace, const nc::physics::VolumeInfo& info) -> DirectX::XMMATRIX
 {
     const auto scale = DirectX::XMLoadVector3(&info.scale);
     const auto offset = DirectX::XMLoadVector3(&info.offset);
     return DirectX::XMMatrixScalingFromVector(scale) * worldSpace * DirectX::XMMatrixTranslationFromVector(offset);
+}
+
+[[maybe_unused]]
+auto CalculateWireframeMatrix(DirectX::FXMMATRIX worldSpace, const nc::physics::Shape& shape, bool scalesWithTransform) -> DirectX::XMMATRIX
+{
+    const auto localSpace = nc::ToScaleMatrix(shape.GetLocalScale()) * nc::ToTransMatrix(shape.GetLocalPosition());
+    if (scalesWithTransform)
+    {
+        return localSpace * worldSpace;
+    }
+
+    const auto [_, worldRotation, worldPosition] = nc::DecomposeMatrix(worldSpace);
+    return localSpace * DirectX::XMMatrixRotationQuaternion(worldRotation) * DirectX::XMMatrixTranslationFromVector(worldPosition);
 }
 } // anonymous namespace
 
@@ -74,7 +112,8 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                                             MeshRenderer,
                                             ToonRenderer,
                                             WireframeRenderer,
-                                            physics::Collider> worldView) -> WidgetState
+                                            physics::Collider,
+                                            physics::RigidBody> worldView) -> WidgetState
 {
     OPTICK_CATEGORY("WidgetSystem::Execute", Optick::Category::Rendering);
     auto state = WidgetState{};
@@ -111,6 +150,17 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
             }
             case WireframeSource::Collider:
             {
+#ifdef NC_USE_JOLT
+                if (!worldView.Contains<physics::RigidBody>(renderer.target))
+                {
+                    renderer.target = Entity::Null();
+                    continue;
+                }
+
+                const auto& body = worldView.Get<physics::RigidBody>(renderer.target);
+                const auto& shape = body.GetShape();
+                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, shape, body.ScalesWithTransform()), GetMeshView(shape.GetType()), renderer.color);
+#else
                 if (!worldView.Contains<physics::Collider>(renderer.target))
                 {
                     renderer.target = Entity::Null();
@@ -119,6 +169,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
 
                 const auto& info = worldView.Get<physics::Collider>(renderer.target).GetInfo();
                 state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, info), GetMeshView(info.type), renderer.color);
+#endif
                 break;
             }
             case WireframeSource::Internal: std::unreachable();

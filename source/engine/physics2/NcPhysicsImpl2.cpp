@@ -97,26 +97,23 @@ void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTas
 void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
 {
     auto& transform = m_ecs.Get<Transform>(body.GetEntity());
-    const auto [scale, rotation, position] = DecomposeMatrix(transform.TransformationMatrix());
-    const auto shape = body.GetShape();
+    const auto [transformScale, transformRotation, transformPosition] = DecomposeMatrix(transform.TransformationMatrix());
+    const auto& shape = body.GetShape();
     const auto bodyType = body.GetBodyType();
-    auto shapeScale = ToJoltVec3(scale);
+    auto allowedScaling = JPH::Vec3::sReplicate(1.0f);
     if (body.ScalesWithTransform())
     {
-        if (NormalizeScaleForShape(shape, shapeScale))
+        allowedScaling = ToJoltVec3(transformScale);
+        if (NormalizeScaleForShape(shape.GetType(), allowedScaling))
         {
-            transform.SetScale(ToVector3(shapeScale)); // update Transform to prevent invalid scales
+            transform.SetScale(ToVector3(allowedScaling)); // update Transform to prevent invalid scales
         }
-    }
-    else
-    {
-        shapeScale = JPH::Vec3::sReplicate(1.0f);
     }
 
     const auto bodySettings = JPH::BodyCreationSettings{
-        m_jolt.shapeFactory.MakeShape(shape, shapeScale),
-        ToJoltVec3(position),
-        ToJoltQuaternion(rotation),
+        m_jolt.shapeFactory.MakeShape(shape, allowedScaling),
+        ToJoltVec3(transformPosition),
+        ToJoltQuaternion(transformRotation),
         ToMotionType(bodyType),
         ToObjectLayer(bodyType)
     };
