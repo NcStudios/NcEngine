@@ -65,6 +65,8 @@ elseif(APPLE)
     )
 endif()
 
+set(CMAKE_DEBUG_POSTFIX "")
+
 if(D3D11_SUPPORTED)
     target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
 endif()
@@ -102,6 +104,8 @@ target_include_directories(${NC_ENGINE_LIB}
     PRIVATE
         $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
 )
+
+message(FileOutput="${CMAKE_BINARY_DIR}/sample/${CMAKE_BUILD_TYPE}")
 
 # # Install
 # install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio Diligent-GraphicsEngineD3D11-shared # Diligent-GraphicsEngineD3D12-shared Diligent-GraphicsEngineOpenGL-shared Diligent-GraphicsEngineVk-shared

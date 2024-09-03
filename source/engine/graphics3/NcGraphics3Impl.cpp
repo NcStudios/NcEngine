@@ -11,6 +11,8 @@
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
+#include "config/Config.h"
+#include "graphics/api/vulkan/ShaderUtilities.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 
@@ -86,6 +88,10 @@ namespace nc::graphics
             NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
+
+            
+            NC_LOG_TRACE("Building NcGraphics module");
+            return std::make_unique<NcGraphics3Impl>(graphicsSettings, memorySettings, registry, modules, events, *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -108,6 +114,8 @@ namespace nc::graphics
 
         using namespace Diligent;
 
+        ImGui::CreateContext();
+
         /* Initialize Diligent Engine */
         SwapChainDesc SCDesc;
         auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
@@ -118,7 +126,7 @@ namespace nc::graphics
         Win32NativeWindow win32Window{win32Handle};
         pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, win32Window, &m_pSwapChain);
 
-        /* Create resources */
+        /* Create Pipeline */
         GraphicsPipelineStateCreateInfo psoCI;
         psoCI.PSODesc.Name = "Triangle PSO";
         psoCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
@@ -130,22 +138,49 @@ namespace nc::graphics
         psoCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_NONE;
         psoCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
 
+        /* Shaders */
+        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
+
         ShaderCreateInfo shaderCI;
-        shaderCI.SourceLanguage                  = SHADER_SOURCE_LANGUAGE_GLSL;
+        shaderCI.SourceLanguage                  = SHADER_SOURCE_LANGUAGE_HLSL;
         shaderCI.Desc.UseCombinedTextureSamplers = true;
 
-        // RefCntAutoPtr<IShader> pPS;
-        // {
-        //     shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
-        //     shaderCI.EntryPoint      = "main";
-        //     shaderCI.Desc.Name       = ""
-        // }
-        
+        RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
+        pFactoryD3D12->CreateDefaultShaderSourceStreamFactory(nullptr, &pShaderSourceFactory);
+        shaderCI.pShaderSourceStreamFactory = pShaderSourceFactory;
+
+        auto vertPath = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Triangle.vsh")).string();
+        auto fragPath = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Triangle.psh")).string();
+
+        RefCntAutoPtr<IShader> pVS;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Triangle Vertex";
+            shaderCI.FilePath        = vertPath.data();
+            shaderCI.SourceLength    = vertPath.size();
+            m_pDevice->CreateShader(shaderCI, &pVS);
+        }
+
+        RefCntAutoPtr<IShader> pPS;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Triangle Fragment";
+            shaderCI.FilePath        = fragPath.data();
+            shaderCI.SourceLength    = fragPath.size();
+            m_pDevice->CreateShader(shaderCI, &pPS);
+        }
+
+        psoCI.pVS = pVS;
+        psoCI.pPS = pPS;
+        m_pDevice->CreateGraphicsPipelineState(psoCI, &m_pPSO);
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()
     {
         m_pImmediateContext->Flush();
+        Clear();
     }
 
     void NcGraphics3Impl::SetCamera(Camera* camera) noexcept
@@ -183,9 +218,13 @@ namespace nc::graphics
 
     void NcGraphics3Impl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
     {
-        (void)update;
-
         NC_LOG_TRACE("Building NcGraphics Tasks");
+        update.Add(
+            update_task_id::ParticleEmitterUpdate,
+            "Dummy",
+            [this]{ ClearEnvironment(); }
+        );
+
         render.Add(
             render_task_id::Render,
             "Render",
@@ -196,11 +235,32 @@ namespace nc::graphics
     void NcGraphics3Impl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
+
+        using namespace Diligent;
+        auto* pRTV = m_pSwapChain->GetCurrentBackBufferRTV();
+        auto* pDSV = m_pSwapChain->GetDepthBufferDSV();
+        m_pImmediateContext->SetRenderTargets(1, &pRTV, pDSV, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        const float clearColor[] = {0.350f, 0.350f, 0.350f, 1.0f};
+        m_pImmediateContext->ClearRenderTarget(pRTV, clearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        m_pImmediateContext->SetPipelineState(m_pPSO);
+
+        /** COMMIT SHADER RESOURCES GOES HERE ONCE WE HAVE RESOURCES TO COMMIT */
+
+        DrawAttribs drawAttribs;
+        drawAttribs.NumVertices = 3;
+        m_pImmediateContext->Draw(drawAttribs);
+
+        m_pSwapChain->Present();
     }
 
     void NcGraphics3Impl::OnResize(const Vector2& dimensions, bool isMinimized)
     {
-        (void)dimensions;
         (void)isMinimized;
+
+        if (m_pSwapChain)
+            m_pSwapChain->Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
     }
 } // namespace nc::graphics
