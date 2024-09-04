@@ -2,6 +2,8 @@
 
 #include "ncutility/NcError.h"
 
+#include <utility>
+
 namespace
 {
 void EnsureGreaterThanZeroScale(nc::Vector3& out)
