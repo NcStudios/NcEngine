@@ -80,6 +80,7 @@ add_test(Layers_unit_tests Layers_unit_tests)
 add_executable(RigidBody_unit_tests
     RigidBody_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
+    ${NC_SOURCE_DIR}/physics2/Shape.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
 )
 

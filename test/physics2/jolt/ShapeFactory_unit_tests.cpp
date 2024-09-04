@@ -17,38 +17,6 @@ class ShapeFactoryTest : public ::testing::Test
         nc::physics::ShapeFactory uut;
 };
 
-TEST(ShapeFactoryUtilityTest, NormalizeScaleForShape_box_doesNotModify)
-{
-    constexpr auto shape = nc::physics::ShapeType::Box;
-    const auto expectedScale1 = JPH::Vec3{1.0f, 1.0f, 1.0f};
-    const auto expectedScale2 = JPH::Vec3{1.0f, 2.0f, 3.0f};
-    auto actualScale1 = expectedScale1;
-    auto actualScale2 = expectedScale2;
-    EXPECT_FALSE(nc::physics::NormalizeScaleForShape(shape, actualScale1));
-    EXPECT_FALSE(nc::physics::NormalizeScaleForShape(shape, actualScale2));
-    EXPECT_EQ(expectedScale1, actualScale1);
-    EXPECT_EQ(expectedScale2, actualScale2);
-}
-
-TEST(ShapeFactoryUtilityTest, NormalizeScaleForShape_sphere_uniformScaling_doesNotModify)
-{
-    constexpr auto shape = nc::physics::ShapeType::Sphere;
-    const auto expectedScale = JPH::Vec3{3.0f, 3.0f, 3.0f};
-    auto actualScale = expectedScale;
-    EXPECT_FALSE(nc::physics::NormalizeScaleForShape(shape, actualScale));
-    EXPECT_EQ(expectedScale, actualScale);
-}
-
-TEST(ShapeFactoryUtilityTest, NormalizeScaleForShape_sphere_nonUniformScaling_fixesScale)
-{
-    constexpr auto shape = nc::physics::ShapeType::Sphere;
-    auto actualScale = JPH::Vec3{1.0f, 2.0f, 3.0f};
-    const auto averageScale = (actualScale.GetX() + actualScale.GetY() + actualScale.GetZ()) / 3.0f;
-    const auto expectedScale = JPH::Vec3::sReplicate(averageScale);
-    EXPECT_TRUE(nc::physics::NormalizeScaleForShape(shape, actualScale));
-    EXPECT_EQ(expectedScale, actualScale);
-}
-
 TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)
 {
     const auto inShape = nc::physics::Shape::MakeBox(nc::Vector3{1.0f, 2.0f, 3.0f}, nc::Vector3::Zero());
@@ -140,11 +108,4 @@ TEST_F(ShapeFactoryTest, MakeShape_sphere_withTransformScaling_returnsBoxShape)
     const auto expectedRadius = inShape.GetLocalScale().x * transformScale.x * 0.5f;
     const auto actualRadius = sphere->GetRadius();
     EXPECT_FLOAT_EQ(expectedRadius, actualRadius);
-}
-
-TEST_F(ShapeFactoryTest, MakeShape_sphere_nonUniformTransformScaling_throws)
-{
-    const auto transformScale = nc::Vector3{1.0f, 2.0f, 3.0f};
-    const auto inShape = nc::physics::Shape::MakeSphere(0.5, nc::Vector3{1.0f, 1.0f, 1.0f});
-    EXPECT_THROW(uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale)), nc::NcError);
 }

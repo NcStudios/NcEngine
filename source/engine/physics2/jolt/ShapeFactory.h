@@ -3,45 +3,20 @@
 #include "Conversion.h"
 
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
+#include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/ScaledShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 
 namespace nc::physics
 {
-inline auto NormalizeScaleForShape(nc::physics::ShapeType shape, JPH::Vec3& scaleOut) -> bool
-{
-    switch (shape)
-    {
-        case nc::physics::ShapeType::Box:
-        {
-            return false;
-        }
-        case nc::physics::ShapeType::Sphere:
-        {
-            if (JPH::ScaleHelpers::IsUniformScale(scaleOut))
-            {
-                return false;
-            }
-
-            scaleOut = JPH::ScaleHelpers::MakeUniformScale(scaleOut);
-            return true;
-        }
-        default:
-        {
-            NC_ASSERT(false, fmt::format("Unhandled Shape: '{}'", std::to_underlying(shape)));
-            std::unreachable();
-        }
-    }
-}
-
 class ShapeFactory
 {
     static constexpr auto boxConvexRadius = 0.05f;
 
     public:
         auto MakeShape(const Shape& shape,
-                        const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>
+                       const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>
         {
             const auto type = shape.GetType();
             const auto localPosition = ToJoltVec3(shape.GetLocalPosition());
@@ -54,8 +29,9 @@ class ShapeFactory
                 case ShapeType::Box:
                     return MakeBox(worldScale * 0.5f, localPosition * additionalScaling);
                 case ShapeType::Sphere:
-                    NC_ASSERT(JPH::ScaleHelpers::IsUniformScale(worldScale), "Sphere requires uniform scale");
                     return MakeSphere(worldScale.GetX() * 0.5f, localPosition * additionalScaling);
+                case ShapeType::Capsule:
+                    return MakeCapsule(worldScale.GetY() * 0.5f, worldScale.GetX() * 0.5f, localPosition * additionalScaling);
                 default:
                     NC_ASSERT(false, fmt::format("Unhandled ShapeType '{}'", std::to_underlying(type)));
                     std::unreachable();
@@ -70,6 +46,11 @@ class ShapeFactory
         auto MakeSphere(float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
         {
             return ApplyLocalOffsets(MakeRef<JPH::SphereShape>(radius), localPosition);
+        }
+
+        auto MakeCapsule(float halfHeight, float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
+        {
+            return ApplyLocalOffsets(MakeRef<JPH::CapsuleShape>(halfHeight, radius), localPosition);
         }
 
     private:

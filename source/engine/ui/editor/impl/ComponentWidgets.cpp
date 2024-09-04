@@ -253,9 +253,11 @@ void TagUIWidget(Tag& tag, EditorContext&, const std::any&)
 
 void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "Transform");
     const auto self = ctx.selectedEntity;
     const auto decomposedMatrix = DecomposeMatrix(transform.LocalTransformationMatrix());
     auto scl = ToVector3(decomposedMatrix.scale);
+    const auto prevScl = scl;
     auto pos = ToVector3(decomposedMatrix.position);
     auto curRot = ToQuaternion(decomposedMatrix.rotation).ToEulerAngles();
     const auto prevRot = curRot;
@@ -304,6 +306,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
         if (ctx.world.Contains<physics::RigidBody>(self))
         {
             auto& body = ctx.world.Get<physics::RigidBody>(self);
+            scl = physics::NormalizeScaleForShape(body.GetShape().GetType(), prevScl, scl);
             physics::SetSimulatedBodyScale(transform, body, scl, true);
         }
         else

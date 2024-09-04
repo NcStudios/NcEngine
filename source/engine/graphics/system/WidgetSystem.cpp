@@ -77,6 +77,11 @@ auto GetMeshView(nc::physics::ShapeType shape) -> nc::asset::MeshView
             static const auto view = AssetService<MeshView>::Get()->Acquire(SphereMesh);
             return view;
         }
+        case nc::physics::ShapeType::Capsule:
+        {
+            static const auto view = AssetService<MeshView>::Get()->Acquire(CapsuleMesh);
+            return view;
+        }
         default:
         {
             throw nc::NcError("Unknown Shape");

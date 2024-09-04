@@ -134,9 +134,9 @@ class RigidBody
         void AddTorque(const Vector3& torque);
 
         auto IsInitialized() const noexcept -> bool { return m_handle; }
-        void SetPosition(const Vector3& position, bool wake = true);
-        void SetRotation(const Quaternion& rotation, bool wake = true);
-        auto SetScale(const Vector3& scale, bool wake = true) -> Vector3;
+        void SetBodyPosition(const Vector3& position, bool wake = true);
+        void SetBodyRotation(const Quaternion& rotation, bool wake = true);
+        auto SetBodyScale(const Vector3& previousScale, const Vector3& newScale, bool wake = true) -> Vector3;
 
     private:
         friend class NcPhysicsImpl2;

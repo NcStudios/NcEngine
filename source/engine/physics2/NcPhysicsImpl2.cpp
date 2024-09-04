@@ -100,18 +100,19 @@ void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
     const auto [transformScale, transformRotation, transformPosition] = DecomposeMatrix(transform.TransformationMatrix());
     const auto& shape = body.GetShape();
     const auto bodyType = body.GetBodyType();
-    auto allowedScaling = JPH::Vec3::sReplicate(1.0f);
+    auto allowedScaling = Vector3::One();
     if (body.ScalesWithTransform())
     {
-        allowedScaling = ToJoltVec3(transformScale);
-        if (NormalizeScaleForShape(shape.GetType(), allowedScaling))
+        const auto currentScale = nc::ToVector3(transformScale);
+        allowedScaling = NormalizeScaleForShape(shape.GetType(), currentScale, currentScale);
+        if (allowedScaling != currentScale)
         {
-            transform.SetScale(ToVector3(allowedScaling)); // update Transform to prevent invalid scales
+            transform.SetScale(allowedScaling); // update Transform to prevent invalid scales
         }
     }
 
     const auto bodySettings = JPH::BodyCreationSettings{
-        m_jolt.shapeFactory.MakeShape(shape, allowedScaling),
+        m_jolt.shapeFactory.MakeShape(shape, ToJoltVec3(allowedScaling)),
         ToJoltVec3(transformPosition),
         ToJoltQuaternion(transformRotation),
         ToMotionType(bodyType),
