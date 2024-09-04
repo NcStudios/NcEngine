@@ -23,7 +23,7 @@ class ShapeFactory
             const auto localScale = ToJoltVec3(shape.GetLocalScale());
             const auto worldScale = localScale * additionalScaling;
 
-            /** @todo: 692, 693, 694 support additional shape types */
+            /** @todo: 693, 694 support additional shape types */
             switch (type)
             {
                 case ShapeType::Box:
