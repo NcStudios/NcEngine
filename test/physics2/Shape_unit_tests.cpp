@@ -61,7 +61,7 @@ TEST(ShapeTest, NormalizeScaleForShape_capsule_uniformXZScaling_doesNotModify)
     constexpr auto shape = nc::physics::ShapeType::Capsule;
     const auto initialScale = nc::Vector3{0.5f, 2.0f, 0.5f};
     const auto expectedScale = nc::Vector3{1.0f, 2.0f, 1.0f};
-    auto actualScale = nc::physics::NormalizeScaleForShape(shape, nc::Vector3::One(), expectedScale);
+    auto actualScale = nc::physics::NormalizeScaleForShape(shape, initialScale, expectedScale);
     EXPECT_EQ(expectedScale, actualScale);
 }
 
