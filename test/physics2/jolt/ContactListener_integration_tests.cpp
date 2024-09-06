@@ -42,7 +42,7 @@ class ContactListenerTest : public ::testing::Test
                 nc::physics::ToObjectLayer(type)
             };
 
-            settings.mUserData = nc::physics::ToUserData(entity);
+            settings.mUserData = nc::Entity::Hash{}(entity);
             auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
             auto body = interface.CreateBody(settings);
             interface.AddBody(body->GetID(), JPH::EActivation::Activate);

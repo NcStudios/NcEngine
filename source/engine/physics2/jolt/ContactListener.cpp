@@ -48,8 +48,8 @@ void ContactListener::OnContactAdded(const JPH::Body& body1,
 
     const auto pair = OverlappingPair{
         hash,
-        ToEntity(body1.GetUserData()),
-        ToEntity(body2.GetUserData())
+        Entity::FromHash(body1.GetUserData()),
+        Entity::FromHash(body2.GetUserData())
     };
 
     const auto firstReceivesEvents = pair.first.ReceivesCollisionEvents() && !pair.first.IsStatic();

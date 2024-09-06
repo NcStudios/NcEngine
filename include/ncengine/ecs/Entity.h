@@ -40,6 +40,14 @@ class Entity
         {
         }
 
+        static constexpr auto FromHash(uint64_t hash) noexcept -> Entity
+        {
+            const auto index = static_cast<Entity::index_type>((hash >> 16) & 0xFFFFFFFF);
+            const auto layer = static_cast<Entity::layer_type>((hash >> 8) & 0xFF);
+            const auto flags = static_cast<Entity::flags_type>(hash & 0xFF);
+            return Entity{index, layer, flags};
+        }
+
         static constexpr auto Null() noexcept { return Entity{}; }
         constexpr auto Valid() const noexcept { return m_index != NullIndex; }
         constexpr auto Index() const noexcept { return m_index; }
@@ -58,9 +66,9 @@ class Entity
         {
             constexpr auto operator()(const Entity& entity) const noexcept
             {
-                return static_cast<size_t>(entity.Index()) << 16
-                     | static_cast<size_t>(entity.Layer()) << 8
-                     | static_cast<size_t>(entity.Flags());
+                return static_cast<uint64_t>(entity.Index()) << 16
+                     | static_cast<uint64_t>(entity.Layer()) << 8
+                     | static_cast<uint64_t>(entity.Flags());
             }
         };
 

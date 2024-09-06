@@ -5,6 +5,9 @@
 
 #include "DirectXMath.h"
 
+
+#include <type_traits>
+
 namespace nc::physics
 {
 inline auto ToJoltVec3(const nc::Vector3& in) -> JPH::Vec3
@@ -76,19 +79,5 @@ inline auto ToObjectLayer(BodyType bodyType) -> JPH::ObjectLayer
         case BodyType::Static:    return ObjectLayer::Static;
         default: std::unreachable();
     }
-}
-
-inline auto ToUserData(Entity entity) -> uint64_t
-{
-    auto out = uint64_t{};
-    std::memcpy(&out, &entity, sizeof(Entity));
-    return out;
-}
-
-inline auto ToEntity(uint64_t bodyUserData) -> Entity
-{
-    auto out = Entity{};
-    std::memcpy(&out, &bodyUserData, sizeof(Entity));
-    return out;
 }
 } // namespace nc::physics
