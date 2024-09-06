@@ -4,9 +4,9 @@
  */
 #pragma once
 
-#include "Shape.h"
 #include "ncengine/ecs/Component.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/physics/Shape.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
 namespace nc::physics
@@ -45,42 +45,6 @@ enum class BodyType : uint8_t
     Static,   // non-movable; does not collide with other static bodies
     Kinematic // movable only with velocities; collides with all other bodies
 };
-
-/**
- * @defgroup SimulatedBodyFunctions Simulated Body Functions
- * @note Prefer using simulated body functions over the Transform equivalents for \ref Entity "entities" with a RigidBody.
- * 
- * Simulated body functions synchronize updating of properties shared between a Transform and RigidBody. They should only
- * be used when strictly necessary, as directly modifying these properties can cause undesirable behavior in the simulation
- * (e.g. when repositioning one body inside of another).
- *
- * @{
- */
-
-/** @brief Set the position of an object's Transform and RigidBody. */
-void SetSimulatedBodyPosition(Transform& transform,
-                              RigidBody& rigidBody,
-                              const Vector3& position,
-                              bool wake = true);
-
-/** @brief Set the rotation of an object's Transform and RigidBody. */
-void SetSimulatedBodyRotation(Transform& transform,
-                              RigidBody& rigidBody,
-                              const Quaternion& rotation,
-                              bool wake = true);
-
-/**
- * @brief Set the scale of an object's Transform and RigidBody.
- * 
- * The actual applied scale is returned and may differ from the requested value, depending on scaling requirements of the
- * RigidBody Shape. If the body does not have ScaleWithTransform set, only the Transform will be modified - in this case,
- * RigidBody::SetScale() may be used to update the body independently.
- */
-auto SetSimulatedBodyScale(Transform& transform,
-                           RigidBody& rigidBody,
-                           const Vector3& scale,
-                           bool wake = true) -> Vector3;
-/** @} */ // End SimulatedBodyFunctions
 
 /** @brief Component managing physics simulation properties. */
 class RigidBody
@@ -134,9 +98,38 @@ class RigidBody
         void AddTorque(const Vector3& torque);
 
         auto IsInitialized() const noexcept -> bool { return m_handle; }
-        void SetBodyPosition(const Vector3& position, bool wake = true);
-        void SetBodyRotation(const Quaternion& rotation, bool wake = true);
-        auto SetBodyScale(const Vector3& previousScale, const Vector3& newScale, bool wake = true) -> Vector3;
+
+        /**
+         * @defgroup SimulatedBodyFunctions Simulated Body Functions
+         * @note Prefer using simulated body functions over the Transform equivalents for \ref Entity "entities" with a RigidBody.
+         * 
+         * Simulated body functions synchronize updating of properties shared between a Transform and RigidBody. They should only
+         * be used when strictly necessary, as directly modifying these properties can cause undesirable behavior in the simulation
+         * (e.g. when repositioning one body inside of another).
+         *
+         * @{
+         */
+
+        /** @brief Set the position of an object's Transform and RigidBody. */
+        void SetSimulatedBodyPosition(Transform& transform,
+                                      const Vector3& position,
+                                      bool wake = true);
+
+        /** @brief Set the rotation of an object's Transform and RigidBody. */
+        void SetSimulatedBodyRotation(Transform& transform,
+                                      const Quaternion& rotation,
+                                      bool wake = true);
+
+        /**
+         * @brief Set the scale of an object's Transform and RigidBody.
+         * 
+         * The actual applied scale is returned and may differ from the requested value, depending on scaling requirements of the
+         * RigidBody Shape. If the body does not have ScaleWithTransform set, only the Transform will be modified.
+         */
+        auto SetSimulatedBodyScale(Transform& transform,
+                                   const Vector3& scale,
+                                   bool wake = true) -> Vector3;
+        /** @} */ // End SimulatedBodyFunctions
 
     private:
         friend class NcPhysicsImpl2;

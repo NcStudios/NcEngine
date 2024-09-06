@@ -269,7 +269,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
         if (ctx.world.Contains<physics::RigidBody>(self))
         {
             auto& body = ctx.world.Get<physics::RigidBody>(self);
-            physics::SetSimulatedBodyPosition(transform, body, pos, true);
+            body.SetSimulatedBodyPosition(transform, pos, true);
         }
         else
         {
@@ -292,7 +292,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
         if (ctx.world.Contains<physics::RigidBody>(self))
         {
             auto& body = ctx.world.Get<physics::RigidBody>(self);
-            physics::SetSimulatedBodyRotation(transform, body, newRotation, true);
+            body.SetSimulatedBodyRotation(transform, newRotation, true);
         }
         else
         {
@@ -307,7 +307,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
         {
             auto& body = ctx.world.Get<physics::RigidBody>(self);
             scl = physics::NormalizeScaleForShape(body.GetShape().GetType(), prevScl, scl);
-            physics::SetSimulatedBodyScale(transform, body, scl, true);
+            body.SetSimulatedBodyScale(transform, scl, true);
         }
         else
         {
