@@ -63,3 +63,11 @@ TEST(JoltConversionTest, ToObjectLayer_convertsBodyType)
     EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Kinematic));
     EXPECT_EQ(nc::physics::ObjectLayer::Static, ToObjectLayer(nc::physics::BodyType::Static));
 }
+
+TEST(JoltConversionTest, EntityToUserData_roundTrip_preservesValue)
+{
+    const auto expectedEntity = nc::Entity{42, 1, 0};
+    const auto userData = nc::physics::ToUserData(expectedEntity);
+    const auto actualEntity = nc::physics::ToEntity(userData);
+    EXPECT_EQ(expectedEntity, actualEntity);
+}

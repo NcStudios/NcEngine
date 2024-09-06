@@ -77,4 +77,18 @@ inline auto ToObjectLayer(BodyType bodyType) -> JPH::ObjectLayer
         default: std::unreachable();
     }
 }
+
+inline auto ToUserData(Entity entity) -> uint64_t
+{
+    auto out = uint64_t{};
+    std::memcpy(&out, &entity, sizeof(Entity));
+    return out;
+}
+
+inline auto ToEntity(uint64_t bodyUserData) -> Entity
+{
+    auto out = Entity{};
+    std::memcpy(&out, &bodyUserData, sizeof(Entity));
+    return out;
+}
 } // namespace nc::physics

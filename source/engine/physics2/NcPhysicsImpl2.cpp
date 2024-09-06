@@ -1,4 +1,5 @@
 #include "NcPhysicsImpl2.h"
+#include "EventDispatch.h"
 #include "jolt/Conversion.h"
 #include "jolt/ShapeFactory.h"
 
@@ -59,28 +60,9 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::PhysicsSettings&, Registry* registr
 
 void NcPhysicsImpl2::Run()
 {
-    // @todo: 689 need to update api bodies for all dirty non-static objects
     m_jolt.Update(time::DeltaTime());
-
-    for (auto& body : m_ecs.GetAll<RigidBody>())
-    {
-        // @todo: 691 not sure how kinematic behave yet, assuming they won't get updated
-        if (body.GetBodyType() != BodyType::Dynamic)
-        {
-            continue;
-        }
-
-        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
-        if (!apiBody->IsActive())
-        {
-            continue;
-        }
-
-        const auto position = ToXMVectorHomogeneous(apiBody->GetPosition());
-        const auto orientation = ToXMQuaternion(apiBody->GetRotation());
-        auto& transform = m_ecs.Get<Transform>(body.GetEntity());
-        transform.SetPositionAndRotationXM(position, orientation);
-    }
+    SyncTransforms();
+    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
 }
 
 void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
@@ -111,7 +93,7 @@ void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
         }
     }
 
-    const auto bodySettings = JPH::BodyCreationSettings{
+    auto bodySettings = JPH::BodyCreationSettings{
         m_jolt.shapeFactory.MakeShape(shape, ToJoltVec3(allowedScaling)),
         ToJoltVec3(transformPosition),
         ToJoltQuaternion(transformRotation),
@@ -119,10 +101,35 @@ void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
         ToObjectLayer(bodyType)
     };
 
+    bodySettings.mUserData = ToUserData(body.GetEntity());
+
     auto& iBody = m_jolt.physicsSystem.GetBodyInterface(); // @todo: 697 try non-locking interface
     auto apiBody = iBody.CreateBody(bodySettings);
     iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
     body.SetContext(apiBody, m_jolt.ctx.get());
+}
+
+void NcPhysicsImpl2::SyncTransforms()
+{
+    for (auto& body : m_ecs.GetAll<RigidBody>())
+    {
+        // @todo: 691 not sure how kinematic behave yet, assuming they won't get updated
+        if (body.GetBodyType() != BodyType::Dynamic)
+        {
+            continue;
+        }
+
+        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
+        if (!apiBody->IsActive())
+        {
+            continue;
+        }
+
+        const auto position = ToXMVectorHomogeneous(apiBody->GetPosition());
+        const auto orientation = ToXMQuaternion(apiBody->GetRotation());
+        auto& transform = m_ecs.Get<Transform>(body.GetEntity());
+        transform.SetPositionAndRotationXM(position, orientation);
+    }
 }
 
 void NcPhysicsImpl2::Clear() noexcept

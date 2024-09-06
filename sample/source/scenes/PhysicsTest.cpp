@@ -1,4 +1,5 @@
 #include "PhysicsTest.h"
+#include "shared/GameLog.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 #include "shared/spawner/Spawner.h"
@@ -9,6 +10,7 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/Constraints.h"
+#include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
@@ -340,7 +342,7 @@ class VehicleController : public FreeComponent
 auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
 {
     const auto head = world.Emplace<Entity>({
-        .scale = Vector3::Splat(2.0f),
+        .scale = Vector3::Splat(1.0f),
         .tag = "Worm Head"
     });
 
@@ -391,6 +393,15 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
     world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
     world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
+    world.Emplace<physics::CollisionListener>(
+        head,
+        [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs){
+            GameLog::Log(fmt::format("Player collision enter with {}", other.Index()));
+        },
+        [](Entity, Entity other, ecs::Ecs){
+            GameLog::Log(fmt::format("Player collsion exit with {}", other.Index()));
+        }
+    );
 
     world.Emplace<physics::VelocityRestriction>(head);
     world.Emplace<physics::VelocityRestriction>(segment1);

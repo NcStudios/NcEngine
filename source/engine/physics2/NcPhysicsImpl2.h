@@ -19,8 +19,6 @@ struct PhysicsSettings;
 
 namespace physics
 {
-using PhysicsEcsFilter = ecs::ExplicitEcs<Transform, RigidBody>;
-
 class NcPhysicsImpl2 final : public NcPhysics
 {
     public:
@@ -38,11 +36,12 @@ class NcPhysicsImpl2 final : public NcPhysics
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr; }
 
     private:
-        PhysicsEcsFilter m_ecs;
+        ecs::Ecs m_ecs;
         JoltApi m_jolt;
         Connection<RigidBody&> m_onAddRigidBodyConnection;
 
         void OnAddRigidBody(RigidBody& body);
+        void SyncTransforms();
 };
 } // namespace physics
 } // namespace nc

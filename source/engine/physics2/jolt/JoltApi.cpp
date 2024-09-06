@@ -29,6 +29,7 @@ JoltApi::~JoltApi() noexcept
 }
 
 JoltApi::JoltApi()
+    : contactListener{physicsSystem}
 {
     physicsSystem.Init(
         maxBodies,
@@ -40,6 +41,7 @@ JoltApi::JoltApi()
         objectLayerPairFilter
     );
 
+    physicsSystem.SetContactListener(&contactListener);
     ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterface(), shapeFactory);
 }
 } // namespace nc::physics
