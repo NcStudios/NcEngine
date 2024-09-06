@@ -4,8 +4,8 @@
  */
 #pragma once
 
-#include "HitInfo.h"
 #include "ncengine/ecs/EcsFwd.h"
+#include "ncengine/physics/HitInfo.h"
 
 #include <functional>
 
