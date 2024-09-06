@@ -59,6 +59,11 @@ inline auto ToQuaternion(const JPH::Quat& in) -> Quaternion
     return Quaternion{in.GetX(), in.GetY(), in.GetZ(), in.GetW()};
 }
 
+inline auto ToMotionQuality(bool useLinearCastValue) -> JPH::EMotionQuality
+{
+    return useLinearCastValue ? JPH::EMotionQuality::LinearCast : JPH::EMotionQuality::Discrete;
+}
+
 inline auto ToMotionType(BodyType bodyType) -> JPH::EMotionType
 {
     switch (bodyType)

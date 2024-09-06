@@ -102,6 +102,8 @@ void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
     };
 
     bodySettings.mUserData = Entity::Hash{}(body.GetEntity());
+    bodySettings.mMotionQuality = ToMotionQuality(body.UseContinuousDetection());
+
     auto& iBody = m_jolt.physicsSystem.GetBodyInterfaceNoLock();
     auto apiBody = iBody.CreateBody(bodySettings);
     iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);

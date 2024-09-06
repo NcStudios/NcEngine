@@ -13,8 +13,10 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
+#include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/PhysicsUtility.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/ui/editor/EditorContext.h"
@@ -141,6 +143,78 @@ constexpr auto angularDragProp = nc::ui::Property{ &T::GetAngularDrag, &T::SetAn
 constexpr auto useGravityProp  = nc::ui::Property{ &T::UseGravity,     &T::SetUseGravity,  "useGravity"  };
 constexpr auto isKinematicProp = nc::ui::Property{ &T::IsKinematic,    &T::SetIsKinematic, "isKinematic" };
 } // namespace physics_body_ext
+
+namespace rigid_body_ext
+{
+using T = nc::physics::RigidBody;
+
+constexpr bool (T::*getScalesWithTransform)() const = &T::ScalesWithTransform;
+constexpr void (T::*setScalesWithTransform)(bool)   = &T::ScalesWithTransform;
+constexpr bool (T::*getUseContinuousDetection)() const       = &T::UseContinuousDetection;
+constexpr void (T::*setUseContinuousDetection)(bool)         = &T::UseContinuousDetection;
+
+constexpr auto getBodyType = [](auto& body)
+{
+    return std::string{nc::physics::ToString(body.GetBodyType())};
+};
+
+constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
+{
+    body.SetBodyType(nc::physics::ToBodyType(bodyTypeStr));
+};
+
+constexpr auto awakeProp                  = nc::ui::Property{ &T::GetAwakeState,         &T::SetAwakeState,         "awake"               };
+constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"            };
+constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"            };
+constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"         };
+constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"       };
+constexpr auto angularDampingProp         = nc::ui::Property{ &T::GetAngularDamping,     &T::SetAngularDamping,     "angularDamping"      };
+constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMultiplier,  &T::SetGravityMultiplier,  "gravityMultiplier"   };
+constexpr auto scalesWithTransformProp    = nc::ui::Property{ getScalesWithTransform,    setScalesWithTransform,    "scalesWithTransform" };
+constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"  };
+
+void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+{
+    const auto& shape = body.GetShape();
+    auto extents = shape.GetLocalScale();
+    auto position = shape.GetLocalPosition();
+    const auto extentsModified = nc::ui::InputScale(extents, "extents");
+    const auto positionModified = nc::ui::InputPosition(position, "localPosition");
+    if (positionModified || extentsModified)
+    {
+        body.SetShape(nc::physics::Shape::MakeBox(extents, position), transformScale);
+    }
+}
+
+void SphereProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+{
+    const auto& shape = body.GetShape();
+    auto radius = shape.GetLocalScale().x * 0.5f;
+    auto position = shape.GetLocalPosition();
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto positionModified = nc::ui::InputPosition(position, "localPosition");
+    if (radiusModified | positionModified)
+    {
+        body.SetShape(nc::physics::Shape::MakeSphere(radius, position), transformScale);
+    }
+}
+
+void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+{
+    const auto& shape = body.GetShape();
+    const auto& scale = shape.GetLocalScale();
+    auto height = scale.y * 2.0f;
+    auto radius = scale.x * 0.5f;
+    auto position = shape.GetLocalPosition();
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto positionModified = nc::ui::InputPosition(position, "localPosition");
+    if (heightModified | radiusModified | positionModified)
+    {
+        body.SetShape(nc::physics::Shape::MakeCapsule(height, radius, position), transformScale);
+    }
+}
+} // namespace rigid_body_ext
 
 namespace particle_emitter_ext
 {
@@ -440,6 +514,52 @@ void ToonRendererUIWidget(graphics::ToonRenderer& renderer, EditorContext&, cons
 
 void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const std::any&)
 {
+}
+
+void CollisionListenerUIWidget(physics::CollisionListener&, EditorContext&, const std::any&)
+{
+}
+
+void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "RigidBody");
+    ui::PropertyWidget(rigid_body_ext::awakeProp, body, &ui::Checkbox);
+
+    ImGui::Separator();
+    ImGui::Text("Shape");
+    const auto transformScale = ctx.world.Get<Transform>(body.GetEntity()).Scale();
+    auto selectedShapeName = std::string{ToString(body.GetShape().GetType())};
+    if (ui::Combobox(selectedShapeName, "shapeType", physics::GetShapeTypeNames()))
+    {
+        const auto newShape = physics::ToShapeType(selectedShapeName);
+        switch (newShape)
+        {
+            case physics::ShapeType::Box:     { body.SetShape(physics::Shape::MakeBox(),     transformScale); break; }
+            case physics::ShapeType::Sphere:  { body.SetShape(physics::Shape::MakeSphere(),  transformScale); break; }
+            case physics::ShapeType::Capsule: { body.SetShape(physics::Shape::MakeCapsule(), transformScale); break; }
+        }
+    }
+
+    switch (body.GetShape().GetType())
+    {
+        case physics::ShapeType::Box:     { rigid_body_ext::BoxProperties(body,     transformScale); break; }
+        case physics::ShapeType::Sphere:  { rigid_body_ext::SphereProperties(body,  transformScale); break; }
+        case physics::ShapeType::Capsule: { rigid_body_ext::CapsuleProperties(body, transformScale); break;}
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Properties");
+    ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
+    ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f, 0.0f, 100.0f);
+    ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+
+    ImGui::Separator();
+    ImGui::Text("Flags");
+    ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp,    body, &ui::Checkbox);
+    ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
 }
 
 void ColliderUIWidget(physics::Collider& collider, EditorContext&, const std::any&)

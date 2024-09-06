@@ -370,7 +370,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
     world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox(), physics::BodyType::Static);
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
         .minPosition = Vector3{g_mapExtent * -0.4f, 1.0f, g_mapExtent * -0.4f},

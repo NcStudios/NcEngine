@@ -63,9 +63,92 @@ RigidBody::~RigidBody() noexcept
     }
 }
 
-auto RigidBody::IsAwake() const -> bool
+void RigidBody::SetBodyType(BodyType type)
+{
+    if (m_self.IsStatic())
+    {
+        return;
+    }
+
+    m_info.type = type;
+    m_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), JPH::EActivation::Activate);
+}
+
+auto RigidBody::GetAwakeState() const -> bool
 {
     return ToBody(m_handle)->IsActive();
+}
+
+void RigidBody::SetAwakeState(bool wake)
+{
+    const auto id = ToBody(m_handle)->GetID();
+    if (wake)
+    {
+        m_ctx->interface.ActivateBody(id);
+    }
+    else
+    {
+        m_ctx->interface.DeactivateBody(id);
+    }
+}
+
+void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale)
+{
+    m_shape = shape;
+    const auto allowedScaling = ScalesWithTransform()
+        ? ToJoltVec3(NormalizeScaleForShape(m_shape.GetType(), transformScale, transformScale))
+        : JPH::Vec3::sReplicate(1.0f);
+
+    const auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
+    m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, JPH::EActivation::DontActivate);
+}
+
+void RigidBody::SetFriction(float friction)
+{
+    m_info.friction = Clamp(friction, 0.0f, 1.0f);
+    ToBody(m_handle)->SetFriction(m_info.friction);
+}
+
+void RigidBody::SetRestitution(float restitution)
+{
+    m_info.restitution = Clamp(restitution, 0.0f, 1.0f);
+    ToBody(m_handle)->SetRestitution(m_info.restitution);
+}
+
+void RigidBody::SetLinearDamping(float damping)
+{
+    m_info.linearDamping = Clamp(damping, 0.0f, 1.0f);
+    ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetLinearDamping(m_info.linearDamping);
+}
+
+void RigidBody::SetAngularDamping(float damping)
+{
+    m_info.angularDamping = Clamp(damping, 0.0f, 1.0f);
+    ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetAngularDamping(m_info.linearDamping);
+}
+
+void RigidBody::SetGravityMultiplier(float factor)
+{
+    m_info.gravityMultiplier = Clamp(factor, 0.0f, 100.0f); // max??
+    m_ctx->interface.SetGravityFactor(ToBody(m_handle)->GetID(), m_info.gravityMultiplier);
+}
+
+void RigidBody::ScalesWithTransform(bool value)
+{
+    (void)value;
+    // how do we do this?
+
+    m_info.flags = value
+        ? m_info.flags | RigidBodyFlags::ScaleWithTransform
+        : m_info.flags & ~RigidBodyFlags::ScaleWithTransform;
+}
+
+void RigidBody::UseContinuousDetection(bool value)
+{
+    m_ctx->interface.SetMotionQuality(ToBody(m_handle)->GetID(), ToMotionQuality(value));
+    m_info.flags = value
+        ? m_info.flags | RigidBodyFlags::ContinuousDetection
+        : m_info.flags & ~RigidBodyFlags::ContinuousDetection;
 }
 
 void RigidBody::AddImpulse(const Vector3& impulse)
@@ -98,7 +181,6 @@ auto RigidBody::SetBodyScale(const Vector3& previousScale, const Vector3& scale,
 
 void RigidBody::SetContext(BodyHandle handle, ComponentContext* ctx)
 {
-    NC_ASSERT(!(m_self.IsStatic() && m_bodyType != BodyType::Static), "Static entities only support BodyType::Static");
     m_handle = handle;
     m_ctx = ctx;
 }

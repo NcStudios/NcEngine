@@ -23,13 +23,18 @@ class NcPhysicsImpl2
 constexpr auto g_entity = nc::Entity{0, 0, nc::Entity::Flags::None};
 constexpr auto g_staticEntity = nc::Entity{0, 0, nc::Entity::Flags::Static};
 constexpr auto g_shape = nc::physics::Shape::MakeBox();
-constexpr auto g_dynamicBodyType = nc::physics::BodyType::Dynamic;
-constexpr auto g_staticBodyType = nc::physics::BodyType::Static;
-constexpr auto g_flags = nc::physics::RigidBodyFlags::ScaleWithTransform;
+
+constexpr auto g_dynamicInfo = nc::physics::RigidBodyInfo{
+    .type = nc::physics::BodyType::Dynamic
+};
+
+constexpr auto g_staticInfo = nc::physics::RigidBodyInfo{
+    .type = nc::physics::BodyType::Static
+};
 
 TEST(RigidBodyTests, IsInitialized_returnsCorrectState)
 {
-    auto uut = nc::physics::RigidBody{g_entity, g_shape, g_dynamicBodyType, g_flags};
+    auto uut = nc::physics::RigidBody{g_entity, g_shape, g_dynamicInfo};
     EXPECT_FALSE(uut.IsInitialized());
     auto mockModule = nc::physics::NcPhysicsImpl2{};
     mockModule.MockRegisterBody(uut);
@@ -39,7 +44,7 @@ TEST(RigidBodyTests, IsInitialized_returnsCorrectState)
 
 TEST(RigidBodyTests, SetContext_staticEntityWithStaticBody_succeeds)
 {
-    auto uut = nc::physics::RigidBody{g_staticEntity, g_shape, g_staticBodyType};
+    auto uut = nc::physics::RigidBody{g_staticEntity, g_shape, g_staticInfo};
     auto mockModule = nc::physics::NcPhysicsImpl2{};
     EXPECT_NO_THROW(mockModule.MockRegisterBody(uut));
     mockModule.MockUnregisterBody(uut);
@@ -47,14 +52,14 @@ TEST(RigidBodyTests, SetContext_staticEntityWithStaticBody_succeeds)
 
 TEST(RigidBodyTests, SetContext_staticEntityWithDynamicBody_throws)
 {
-    auto uut = nc::physics::RigidBody{g_staticEntity, g_shape, g_dynamicBodyType};
+    auto uut = nc::physics::RigidBody{g_staticEntity, g_shape, g_dynamicInfo};
     auto mockModule = nc::physics::NcPhysicsImpl2{};
     EXPECT_THROW(mockModule.MockRegisterBody(uut), nc::NcError);
 }
 
 TEST(RigidBodyTests, MoveOperations_transferRegistrationData)
 {
-    auto first = nc::physics::RigidBody{g_entity, g_shape, g_dynamicBodyType};
+    auto first = nc::physics::RigidBody{g_entity, g_shape, g_dynamicInfo};
     auto mockModule = nc::physics::NcPhysicsImpl2{};
     mockModule.MockRegisterBody(first);
     auto second = nc::physics::RigidBody{std::move(first)};
@@ -72,9 +77,9 @@ TEST(RigidBodyTests, MoveOperations_transferRegistrationData)
 
 TEST(RigidBodyTests, TrivialGetters_returnExpectedValues)
 {
-    const auto uut = nc::physics::RigidBody{g_entity, g_shape, g_dynamicBodyType, g_flags};
+    const auto uut = nc::physics::RigidBody{g_entity, g_shape, g_dynamicInfo};
     EXPECT_EQ(g_entity, uut.GetEntity());
     EXPECT_EQ(g_shape.GetType(), uut.GetShape().GetType());
-    EXPECT_EQ(g_dynamicBodyType, uut.GetBodyType());
+    EXPECT_EQ(g_dynamicInfo.type, uut.GetBodyType());
     EXPECT_TRUE(uut.ScalesWithTransform());
 }

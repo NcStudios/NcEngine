@@ -18,34 +18,6 @@ class RigidBody;
 /** @brief Handle to internal RigidBody state. */
 using BodyHandle = void*;
 
-/** @brief Flags for configuring RigidBody behavior. */
-struct RigidBodyFlags
-{
-    using Type = uint8_t;
-
-    /** @brief Disable all flags. */
-    static constexpr Type None = 0x0;
-
-    /** @brief Scale the body's shape using the associated Transform's scale.
-     * 
-     * For shapes with scaling restrictions, this may force updates to the Transform to prevent invalid shape scaling.
-     * E.g. placing a sphere on an object with non-uniform Transform scaling will update the Transform to have uniform
-     * scaling.
-     */
-    static constexpr Type ScaleWithTransform = 0x1;
-
-    /** @brief Default flag values. */
-    static constexpr Type Default = ScaleWithTransform;
-};
-
-/** @brief Determines movement and collision behavior of a RigidBody. */
-enum class BodyType : uint8_t
-{
-    Dynamic,  // movable with velocities and forces; collides with all other bodies
-    Static,   // non-movable; does not collide with other static bodies
-    Kinematic // movable only with velocities; collides with all other bodies
-};
-
 /**
  * @defgroup SimulatedBodyFunctions Simulated Body Functions
  * @note Prefer using simulated body functions over the Transform equivalents for \ref Entity "entities" with a RigidBody.
@@ -82,19 +54,66 @@ auto SetSimulatedBodyScale(Transform& transform,
                            bool wake = true) -> Vector3;
 /** @} */ // End SimulatedBodyFunctions
 
+/** @brief Flags for configuring RigidBody behavior. */
+struct RigidBodyFlags
+{
+    using Type = uint8_t;
+
+    /** @brief Disable all flags. */
+    static constexpr Type None = 0x0;
+
+    /** @brief Scale the body's shape using the associated Transform's scale.
+     * 
+     * For shapes with scaling restrictions, this may force updates to the Transform to prevent invalid shape scaling.
+     * E.g. placing a sphere on an object with non-uniform Transform scaling will update the Transform to have uniform
+     * scaling.
+     */
+    static constexpr Type ScaleWithTransform = 0x1;
+
+    /** @brief Enable continuous collision detection on the body using a linear shape cast. */
+    static constexpr Type ContinuousDetection = 0x2;
+
+    /** @brief Default flag values. */
+    static constexpr Type Default = ScaleWithTransform;
+};
+
+/** @brief Determines movement and collision behavior of a RigidBody. */
+enum class BodyType : uint8_t
+{
+    Dynamic,   // movable with velocities and forces; collides with all other bodies
+    Kinematic, // movable only with velocities; collides with all other bodies
+    Static     // non-movable; does not collide with other static bodies
+};
+
+/** @brief Properties for initializing a RigidBody. */
+struct RigidBodyInfo
+{
+    float friction = 0.2f;          // [0, 1]
+    float restitution = 0.0f;       // [0, 1]
+    float linearDamping = 0.0f;     // [0, 1]
+    float angularDamping = 0.0f;    // [0, 1]
+    float gravityMultiplier = 1.0f; // [0, 1]
+    BodyType type = BodyType::Dynamic;
+    RigidBodyFlags::Type flags = RigidBodyFlags::Default;
+};
+
 /** @brief Component managing physics simulation properties. */
 class RigidBody
 {
     public:
+        /** @name Special member functions */
+        /** @{ */
         RigidBody(Entity self,
                   const Shape& shape = Shape::MakeBox(),
-                  BodyType bodyType = BodyType::Dynamic,
-                  RigidBodyFlags::Type flags = RigidBodyFlags::Default)
+                  const RigidBodyInfo& info = RigidBodyInfo{})
             : m_self{self},
               m_shape{shape},
-              m_bodyType{bodyType},
-              m_flags{flags}
+              m_info{info}
         {
+            if (self.IsStatic())
+            {
+                m_info.type = BodyType::Static;
+            }
         }
 
         RigidBody(RigidBody&& other) noexcept
@@ -102,8 +121,7 @@ class RigidBody
               m_handle{std::exchange(other.m_handle, nullptr)},
               m_ctx{std::exchange(other.m_ctx, nullptr)},
               m_shape{other.m_shape},
-              m_bodyType{other.m_bodyType},
-              m_flags{other.m_flags}
+              m_info{other.m_info}
         {
         }
 
@@ -113,8 +131,7 @@ class RigidBody
             m_handle = std::exchange(other.m_handle, nullptr);
             m_ctx = std::exchange(other.m_ctx, nullptr);
             m_shape = other.m_shape;
-            m_bodyType = other.m_bodyType;
-            m_flags = other.m_flags;
+            m_info = other.m_info;
             return *this;
         }
 
@@ -122,21 +139,55 @@ class RigidBody
 
         RigidBody(RigidBody&) = delete;
         RigidBody& operator=(RigidBody&) = delete;
+        /** @} */
 
+        /** @name Handle functions */
         auto GetEntity() const -> Entity { return m_self; }
-        auto GetShape() const -> const Shape& { return m_shape; }
-        auto ScalesWithTransform() const -> bool { return m_flags & RigidBodyFlags::ScaleWithTransform; }
-        auto GetBodyType() const -> BodyType { return m_bodyType; }
         auto GetHandle() const -> BodyHandle { return m_handle; }
-        auto IsAwake() const -> bool;
 
+        /** 
+         * @name BodyType functions
+         * @note BodyType::Static is forced if attached to a static Entity.
+         */
+        auto GetBodyType() const -> BodyType { return m_info.type; }
+        void SetBodyType(BodyType type);
+
+        /** @name Shape functions */
+        auto GetShape() const -> const Shape& { return m_shape; }
+        void SetShape(const Shape& shape, const Vector3& transformScale);
+
+        /** @name General physics property functions */
+        auto GetAwakeState() const -> bool;
+        void SetAwakeState(bool wake);
+        auto GetFriction() const -> float { return m_info.friction; }
+        void SetFriction(float friction);
+        auto GetRestitution() const -> float { return m_info.restitution; }
+        void SetRestitution(float restitution);
+        auto GetLinearDamping() const -> float { return m_info.linearDamping; }
+        void SetLinearDamping(float damping); // can set?
+        auto GetAngularDamping() const -> float { return m_info.angularDamping; }
+        void SetAngularDamping(float damping); // can set?
+        auto GetGravityMultiplier() const -> float { return m_info.gravityMultiplier; }
+        void SetGravityMultiplier(float factor);
+
+        /** @name RigidBodyFlags functions */
+        auto ScalesWithTransform() const -> bool { return m_info.flags & RigidBodyFlags::ScaleWithTransform; }
+        void ScalesWithTransform(bool value);
+        auto UseContinuousDetection() const -> bool { return m_info.flags & RigidBodyFlags::ContinuousDetection; }
+        void UseContinuousDetection(bool value);
+
+        /** @name Force/Impulse functions - requires a dynamic body */
         void AddImpulse(const Vector3& impulse);
         void AddTorque(const Vector3& torque);
 
-        auto IsInitialized() const noexcept -> bool { return m_handle; }
+        /** @name Spatial body property functions */
         void SetBodyPosition(const Vector3& position, bool wake = true);
         void SetBodyRotation(const Quaternion& rotation, bool wake = true);
         auto SetBodyScale(const Vector3& previousScale, const Vector3& newScale, bool wake = true) -> Vector3;
+
+        /** @cond internal */
+        auto IsInitialized() const noexcept -> bool { return m_handle; }
+        /** @endcond */
 
     private:
         friend class NcPhysicsImpl2;
@@ -145,8 +196,7 @@ class RigidBody
         BodyHandle m_handle = nullptr;
         ComponentContext* m_ctx = nullptr;
         Shape m_shape;
-        BodyType m_bodyType;
-        RigidBodyFlags::Type m_flags;
+        RigidBodyInfo m_info;
 
         void SetContext(BodyHandle handle, ComponentContext* ctx);
 };
