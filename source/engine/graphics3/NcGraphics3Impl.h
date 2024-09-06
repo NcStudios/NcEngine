@@ -27,6 +27,12 @@ class NcWindow;
 
 namespace graphics
 {
+
+struct DiligentVertex
+{
+    float3 pos;
+    float4 color;
+};
 class NcGraphics3Impl : public NcGraphics
 {
     public:
@@ -57,6 +63,10 @@ class NcGraphics3Impl : public NcGraphics
         Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
         Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
+        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSOCube;
+        Diligent::RefCntAutoPtr<IBuffer> m_CubeVertexBuffer;
+        Diligent::RefCntAutoPtr<IBuffer> m_CubeIndexBuffer;
+        Diligent::RefCntAutoPtr<IBuffer> m_VSConstants;
         Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12; /* @todo: Decision based on config and device capabilities */
     };
 } // namespace graphics

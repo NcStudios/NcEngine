@@ -115,7 +115,7 @@ namespace nc::graphics
         using namespace Diligent;
 
         ImGui::CreateContext();
-
+        /* TUTORIAL 01*/
         /* Initialize Diligent Engine */
         SwapChainDesc SCDesc;
         auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
@@ -175,6 +175,99 @@ namespace nc::graphics
         psoCI.pVS = pVS;
         psoCI.pPS = pPS;
         m_pDevice->CreateGraphicsPipelineState(psoCI, &m_pPSO);
+
+        /* TUTORIAL 02*/
+        /* Create Pipeline */
+        GraphicsPipelineStateCreateInfo psoCubeCI;
+        psoCubeCI.PSODesc.Name = "Cube PSO";
+        psoCubeCI.PipelineType = PIPELINE_TYPE_GRAPHICS;
+
+        psoCubeCI.GraphicsPipeline.NumRenderTargets             = 1;
+        psoCubeCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
+        psoCubeCI.GraphicsPipeline.DTVFormats[0]                = m_pSwapChain->GetDesc().DepthBufferFormat;
+        psoCubeCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
+        psoCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+
+        /* Shaders */
+        auto vertPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.vsh")).string();
+        auto fragPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.psh")).string();
+
+        RefCntAutoPtr<IShader> pVSCube;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Cube Vertex";
+            shaderCI.FilePath        = vertPathCube.data();
+            shaderCI.SourceLength    = vertPathCube.size();
+            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+            m_pDevice->CreateShader(shaderCI, &pVS);
+        }
+
+        RefCntAutoPtr<IShader> pPSCube;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Cube Fragment";
+            shaderCI.FilePath        = fragPathCube.data();
+            shaderCI.SourceLength    = fragPathCube.size();
+            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+            m_pDevice->CreateShader(shaderCI, &pPS);
+        }
+
+        psoCubeCI.pVS = pVSCube;
+        psoCubeCI.pPS = pPSCube;
+
+        psoCubeCI.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+
+        /* Input layout for vertices */
+        LayoutElement layoutElems[] =
+        {
+            LayoutElement{0, 0, 3, VT_FLOAT32, false}, // Position, Attribute 0
+            LayoutElement{1, 0, 4, VT_FLOAT32, false}  // Color, Attribute 1
+        };
+
+        psoCubeCI.GraphicsPipeline.InputLayout.LayoutElements = layoutElems;
+        psoCubeCI.GraphicsPipeline.InputLayout.NumElements    = _countof(layoutElems);
+
+        m_pDevice->CreateGraphicsPipelineState(psoCubeCI, &m_pPSOCube);
+
+        /* Resources */
+        /* Constant buffer holding MVP matrix */
+        BufferDesc cbDesc;
+        cbDesc.Name = "VS Constants CB";
+        cbDesc.Size = sizeof(float4x4);
+        cbDesc.Usage = USAGE_DYNAMIC;
+        cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
+        cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
+        m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
+
+      
+        m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
+
+        /** Create vertex buffer */
+        DiligentVertex cubeVerts[8] = 
+        {
+            {float3(-1,-1,-1), float4(1,0,0,1)},
+            {float3(-1,+1,-1), float4(0,1,0,1)},
+            {float3(+1,+1,-1), float4(0,0,1,1)},
+            {float3(+1,-1,-1), float4(1,1,1,1)},
+
+            {float3(-1,-1,+1), float4(1,1,0,1)},
+            {float3(-1,+1,+1), float4(0,1,1,1)},
+            {float3(+1,+1,+1), float4(1,0,1,1)},
+            {float3(+1,-1,+1), float4(0.2f,0.2f,0.2f,1)},
+        };
+
+        BufferDesc vertexBufferDesc;
+        vertexBufferDesc.Name = "Cube Vertex Buffer";
+        vertexBufferDesc.Usage = "USAGE_IMMUTABLE";
+        vertexBufferDesc.BindFlags = BIND_VERTEX_BUFFER;
+        vertexBufferDesc.Size = sizeof(cubeVerts);
+        BufferData vertexBufferData;
+        vertexBufferData.pData = cubeVerts;
+        vertexBufferData.DataSize = sizeof(CubeVerts);
+        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, m_CubeVertexBuffer);
+
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()
