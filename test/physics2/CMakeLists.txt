@@ -1,4 +1,28 @@
 ### Shape Tests ###
+add_executable(Contacts_unit_tests
+    Contacts_unit_tests.cpp
+)
+
+target_include_directories(Contacts_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+)
+
+target_compile_options(Contacts_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(Contacts_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        gtest_main
+)
+
+add_test(Contacts_unit_tests Contacts_unit_tests)
+
+### Shape Tests ###
 add_executable(Shape_unit_tests
     Shape_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics2/Shape.cpp
