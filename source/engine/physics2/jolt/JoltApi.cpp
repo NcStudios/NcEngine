@@ -42,6 +42,6 @@ JoltApi::JoltApi()
     );
 
     physicsSystem.SetContactListener(&contactListener);
-    ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterface(), shapeFactory);
+    ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterfaceNoLock(), shapeFactory);
 }
 } // namespace nc::physics

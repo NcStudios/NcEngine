@@ -8,7 +8,17 @@
 
 namespace
 {
+auto FillPoints(std::array<nc::Vector3, 4>& points, const JPH::ContactPoints& source) -> size_t
+{
+    const auto count = source.size();
+    NC_ASSERT(count <= 4u, "Unexpected contact count");
+    for (auto i = 0u; i < count; ++i)
+    {
+        points[i] = nc::physics::ToVector3(source[i]);
+    }
 
+    return count;
+}
 } // anonymous namespace
 
 namespace nc::physics
@@ -50,20 +60,9 @@ void ContactListener::OnContactAdded(const JPH::Body& body1,
     }
 
     auto pointsOnFirst = std::array<Vector3, 4>{};
-    const auto numPointsOnFirst = manifold.mRelativeContactPointsOn1.size();
-    NC_ASSERT(numPointsOnFirst <= 4u, "Unexpected contact count");
-    for (auto i = 0u; i < numPointsOnFirst; ++i)
-    {
-        pointsOnFirst[i] = ToVector3(manifold.mRelativeContactPointsOn1[i]);
-    }
-
     auto pointsOnSecond = std::array<Vector3, 4>{};
-    const auto numPointsOnSecond = manifold.mRelativeContactPointsOn2.size();
-    NC_ASSERT(numPointsOnFirst <= 4u, "Unexpected contact count");
-    for (auto i = 0u; i < numPointsOnFirst; ++i)
-    {
-        pointsOnSecond[i] = ToVector3(manifold.mRelativeContactPointsOn2[i]);
-    }
+    const auto numPointsOnFirst = FillPoints(pointsOnFirst, manifold.mRelativeContactPointsOn1);
+    const auto numPointsOnSecond = FillPoints(pointsOnSecond, manifold.mRelativeContactPointsOn2);
 
     {
         auto lock = std::lock_guard{m_addedMutex};
