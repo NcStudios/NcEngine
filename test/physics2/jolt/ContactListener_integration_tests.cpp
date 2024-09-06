@@ -24,8 +24,10 @@ class ContactListenerTest : public ::testing::Test
         void Step()
         {
             joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, &joltApi.jobSystem);
-            lastOnEnter = std::ranges::to<std::vector>(uut.GetAdded());
-            lastOnExit = std::ranges::to<std::vector>(uut.GetRemoved());
+            lastOnEnter.clear();
+            lastOnExit.clear();
+            std::ranges::copy(uut.GetAdded(), std::back_inserter(lastOnEnter));
+            std::ranges::copy(uut.GetRemoved(), std::back_inserter(lastOnExit));
             uut.CommitPendingChanges();
         }
 
