@@ -18,7 +18,6 @@ endif()
 # Variables
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(NC_COMPILER_FLAGS -Werror
                           -Wfatal-errors

@@ -30,6 +30,10 @@ if(NC_PHYSICS_CONFIG)
     add_definitions(-DNC_PHYSICS_CONFIG="${NC_PHYSICS_CONFIG}")
 endif()
 
+set_target_properties(${NC_ENGINE_LIB}
+    PROPERTIES CMAKE_DEBUG_POSTFIX d
+)
+
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE
@@ -78,8 +82,6 @@ endif()
 if(VULKAN_SUPPORTED)
     target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineVk-shared)
 endif()
-
-copy_required_dlls(${NC_ENGINE_LIB})
 
 # Include Dirs
 target_include_directories(${NC_ENGINE_LIB}

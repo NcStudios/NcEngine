@@ -245,120 +245,120 @@ namespace nc::graphics
         psoCI.pPS = pPS;
         m_pDevice->CreateGraphicsPipelineState(psoCI, &m_pPSO);
 
-        /* TUTORIAL 02*/
-        /* Create Pipeline */
-        GraphicsPipelineStateCreateInfo psoCubeCI;
-        psoCubeCI.PSODesc.Name = "Cube PSO";
-        psoCubeCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+        // /* TUTORIAL 02*/
+        // /* Create Pipeline */
+        // GraphicsPipelineStateCreateInfo psoCubeCI;
+        // psoCubeCI.PSODesc.Name = "Cube PSO";
+        // psoCubeCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
 
-        psoCubeCI.GraphicsPipeline.NumRenderTargets             = 1;
-        psoCubeCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
-        psoCubeCI.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
-        psoCubeCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
-        psoCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+        // psoCubeCI.GraphicsPipeline.NumRenderTargets             = 1;
+        // psoCubeCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
+        // psoCubeCI.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
+        // psoCubeCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
+        // psoCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
 
-        /* Shaders */
-        auto vertPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.vsh")).string();
-        auto fragPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.psh")).string();
+        // /* Shaders */
+        // auto vertPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.vsh")).string();
+        // auto fragPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.psh")).string();
 
-        RefCntAutoPtr<IShader> pVSCube;
-        {
-            shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
-            shaderCI.EntryPoint      = "main";
-            shaderCI.Desc.Name       = "Cube Vertex";
-            shaderCI.FilePath        = vertPathCube.data();
-            shaderCI.SourceLength    = vertPathCube.size();
-            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
-            m_pDevice->CreateShader(shaderCI, &pVS);
-        }
+        // RefCntAutoPtr<IShader> pVSCube;
+        // {
+        //     shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+        //     shaderCI.EntryPoint      = "main";
+        //     shaderCI.Desc.Name       = "Cube Vertex";
+        //     shaderCI.FilePath        = vertPathCube.data();
+        //     shaderCI.SourceLength    = vertPathCube.size();
+        //     shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+        //     m_pDevice->CreateShader(shaderCI, &pVS);
+        // }
 
-        RefCntAutoPtr<IShader> pPSCube;
-        {
-            shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
-            shaderCI.EntryPoint      = "main";
-            shaderCI.Desc.Name       = "Cube Fragment";
-            shaderCI.FilePath        = fragPathCube.data();
-            shaderCI.SourceLength    = fragPathCube.size();
-            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
-            m_pDevice->CreateShader(shaderCI, &pPS);
-        }
+        // RefCntAutoPtr<IShader> pPSCube;
+        // {
+        //     shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+        //     shaderCI.EntryPoint      = "main";
+        //     shaderCI.Desc.Name       = "Cube Fragment";
+        //     shaderCI.FilePath        = fragPathCube.data();
+        //     shaderCI.SourceLength    = fragPathCube.size();
+        //     shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+        //     m_pDevice->CreateShader(shaderCI, &pPS);
+        // }
 
-        psoCubeCI.pVS = pVSCube;
-        psoCubeCI.pPS = pPSCube;
+        // psoCubeCI.pVS = pVSCube;
+        // psoCubeCI.pPS = pPSCube;
 
-        psoCubeCI.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+        // psoCubeCI.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-        /* Input layout for vertices */
-        std::array<LayoutElement, 2> layoutElems =
-        {
-            LayoutElement{0, 0, 3, VT_FLOAT32, false}, // Position, Attribute 0
-            LayoutElement{1, 0, 4, VT_FLOAT32, false}  // Color, Attribute 1
-        };
+        // /* Input layout for vertices */
+        // std::array<LayoutElement, 2> layoutElems =
+        // {
+        //     LayoutElement{0, 0, 3, VT_FLOAT32, false}, // Position, Attribute 0
+        //     LayoutElement{1, 0, 4, VT_FLOAT32, false}  // Color, Attribute 1
+        // };
 
-        psoCubeCI.GraphicsPipeline.InputLayout.LayoutElements = layoutElems.data();
-        psoCubeCI.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(layoutElems.size());
+        // psoCubeCI.GraphicsPipeline.InputLayout.LayoutElements = layoutElems.data();
+        // psoCubeCI.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(layoutElems.size());
 
-        m_pDevice->CreateGraphicsPipelineState(psoCubeCI, &m_pPSOCube);
+        // m_pDevice->CreateGraphicsPipelineState(psoCubeCI, &m_pPSOCube);
 
-        /* Resources */
-        /* Constant buffer holding MVP matrix */
-        BufferDesc cbDesc;
-        cbDesc.Name = "VS Constants CB";
-        cbDesc.Size = sizeof(DirectX::XMMATRIX);
-        cbDesc.Usage = USAGE_DYNAMIC;
-        cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
-        cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
-        m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
+        // /* Resources */
+        // /* Constant buffer holding MVP matrix */
+        // BufferDesc cbDesc;
+        // cbDesc.Name = "VS Constants CB";
+        // cbDesc.Size = sizeof(DirectX::XMMATRIX);
+        // cbDesc.Usage = USAGE_DYNAMIC;
+        // cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
+        // cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
+        // m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
 
-        m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
+        // m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
 
-        // Create a shader resource binding object and bind all static resources in it
-        m_pPSOCube->CreateShaderResourceBinding(&m_pSRB, true);
+        // // Create a shader resource binding object and bind all static resources in it
+        // m_pPSOCube->CreateShaderResourceBinding(&m_pSRB, true);
 
-        /** Create vertex buffer */
-        std::array<DiligentVertexType, 8> cubeVerts = 
-        {{
-            {DirectX::XMFLOAT3(-1,-1,-1), DirectX::XMFLOAT4(1,0,0,1)},
-            {DirectX::XMFLOAT3(-1,+1,-1), DirectX::XMFLOAT4(0,1,0,1)},
-            {DirectX::XMFLOAT3(+1,+1,-1), DirectX::XMFLOAT4(0,0,1,1)},
-            {DirectX::XMFLOAT3(+1,-1,-1), DirectX::XMFLOAT4(1,1,1,1)},
+        // /** Create vertex buffer */
+        // std::array<DiligentVertexType, 8> cubeVerts = 
+        // {{
+        //     {DirectX::XMFLOAT3(-1,-1,-1), DirectX::XMFLOAT4(1,0,0,1)},
+        //     {DirectX::XMFLOAT3(-1,+1,-1), DirectX::XMFLOAT4(0,1,0,1)},
+        //     {DirectX::XMFLOAT3(+1,+1,-1), DirectX::XMFLOAT4(0,0,1,1)},
+        //     {DirectX::XMFLOAT3(+1,-1,-1), DirectX::XMFLOAT4(1,1,1,1)},
 
-            {DirectX::XMFLOAT3(-1,-1,+1), DirectX::XMFLOAT4(1,1,0,1)},
-            {DirectX::XMFLOAT3(-1,+1,+1), DirectX::XMFLOAT4(0,1,1,1)},
-            {DirectX::XMFLOAT3(+1,+1,+1), DirectX::XMFLOAT4(1,0,1,1)},
-            {DirectX::XMFLOAT3(+1,-1,+1), DirectX::XMFLOAT4(0.2f,0.2f,0.2f,1)}
-        }};
+        //     {DirectX::XMFLOAT3(-1,-1,+1), DirectX::XMFLOAT4(1,1,0,1)},
+        //     {DirectX::XMFLOAT3(-1,+1,+1), DirectX::XMFLOAT4(0,1,1,1)},
+        //     {DirectX::XMFLOAT3(+1,+1,+1), DirectX::XMFLOAT4(1,0,1,1)},
+        //     {DirectX::XMFLOAT3(+1,-1,+1), DirectX::XMFLOAT4(0.2f,0.2f,0.2f,1)}
+        // }};
 
-        BufferDesc vertexBufferDesc;
-        vertexBufferDesc.Name = "Cube Vertex Buffer";
-        vertexBufferDesc.Usage = USAGE_IMMUTABLE;
-        vertexBufferDesc.BindFlags = BIND_VERTEX_BUFFER;
-        vertexBufferDesc.Size = sizeof(cubeVerts);
-        BufferData vertexBufferData;
-        vertexBufferData.pData = cubeVerts.data();
-        vertexBufferData.DataSize = sizeof(cubeVerts);
-        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_CubeVertexBuffer);
+        // BufferDesc vertexBufferDesc;
+        // vertexBufferDesc.Name = "Cube Vertex Buffer";
+        // vertexBufferDesc.Usage = USAGE_IMMUTABLE;
+        // vertexBufferDesc.BindFlags = BIND_VERTEX_BUFFER;
+        // vertexBufferDesc.Size = sizeof(cubeVerts);
+        // BufferData vertexBufferData;
+        // vertexBufferData.pData = cubeVerts.data();
+        // vertexBufferData.DataSize = sizeof(cubeVerts);
+        // m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_CubeVertexBuffer);
 
-        /** Create index buffer */
-        constexpr std::array<uint32_t, 36> cubeIndices =
-        {
-            2,0,1, 2,3,0,
-            4,6,5, 4,7,6,
-            0,7,4, 0,3,7,
-            1,0,4, 1,4,5,
-            1,5,2, 5,6,2,
-            3,6,7, 3,2,6
-        };
+        // /** Create index buffer */
+        // constexpr std::array<uint32_t, 36> cubeIndices =
+        // {
+        //     2,0,1, 2,3,0,
+        //     4,6,5, 4,7,6,
+        //     0,7,4, 0,3,7,
+        //     1,0,4, 1,4,5,
+        //     1,5,2, 5,6,2,
+        //     3,6,7, 3,2,6
+        // };
 
-        BufferDesc indexBufferDesc;
-        vertexBufferDesc.Name = "Cube Index Buffer";
-        vertexBufferDesc.Usage = USAGE_IMMUTABLE;
-        vertexBufferDesc.BindFlags = BIND_INDEX_BUFFER;
-        vertexBufferDesc.Size = sizeof(cubeIndices);
-        BufferData indexBufferData;
-        indexBufferData.pData = cubeVerts.data();
-        indexBufferData.DataSize = sizeof(cubeVerts);
-        m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_CubeIndexBuffer);
+        // BufferDesc indexBufferDesc;
+        // vertexBufferDesc.Name = "Cube Index Buffer";
+        // vertexBufferDesc.Usage = USAGE_IMMUTABLE;
+        // vertexBufferDesc.BindFlags = BIND_INDEX_BUFFER;
+        // vertexBufferDesc.Size = sizeof(cubeIndices);
+        // BufferData indexBufferData;
+        // indexBufferData.pData = cubeVerts.data();
+        // indexBufferData.DataSize = sizeof(cubeVerts);
+        // m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_CubeIndexBuffer);
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()
@@ -403,6 +403,20 @@ namespace nc::graphics
     void NcGraphics3Impl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
     {
         NC_LOG_TRACE("Building NcGraphics Tasks");
+
+            update.Add(
+                nc::update_task_id::ParticleEmitterUpdate,
+                "ParticleEmitterUpdate(stub)",
+                []{}
+            );
+
+            update.Add(
+                nc::update_task_id::ParticleEmitterSync,
+                "ParticleEmitterSync(stub)",
+                []{},
+                {nc::update_task_id::CommitStagedChanges}
+            );
+
         update.Add(
             update_task_id::UpdateRenderData,
             "Update",
@@ -452,24 +466,24 @@ namespace nc::graphics
         // MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
         // *cbConstants = m_worldViewProj;
 
-        /* Bind vertex and index buffers */
-        const uint64_t offset = 0;
-        std::array<IBuffer*, 1> pBuffs = {m_CubeVertexBuffer};
-        m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
-        m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        // /* Bind vertex and index buffers */
+        // const uint64_t offset = 0;
+        // std::array<IBuffer*, 1> pBuffs = {m_CubeVertexBuffer};
+        // m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
+        // m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        /* Set the pipeline state. */ 
-        m_pImmediateContext->SetPipelineState(m_pPSOCube);
+        // /* Set the pipeline state. */ 
+        // m_pImmediateContext->SetPipelineState(m_pPSOCube);
 
-        /* Commit shader resources. RESOURCE_STATE_TRANSITION_MODE_TRANSITION mode makes sure that resources are transitioned to required states. */
-        m_pImmediateContext->CommitShaderResources(m_pSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        // /* Commit shader resources. RESOURCE_STATE_TRANSITION_MODE_TRANSITION mode makes sure that resources are transitioned to required states. */
+        // m_pImmediateContext->CommitShaderResources(m_pSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        DrawIndexedAttribs drawIndexedAttribs;
-        drawIndexedAttribs.IndexType = VT_UINT32;
-        drawIndexedAttribs.NumIndices = 36;
-        drawIndexedAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
+        // DrawIndexedAttribs drawIndexedAttribs;
+        // drawIndexedAttribs.IndexType = VT_UINT32;
+        // drawIndexedAttribs.NumIndices = 36;
+        // drawIndexedAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
         
-        m_pImmediateContext->DrawIndexed(drawIndexedAttribs);
+        // m_pImmediateContext->DrawIndexed(drawIndexedAttribs);
 
         m_pSwapChain->Present();
     }

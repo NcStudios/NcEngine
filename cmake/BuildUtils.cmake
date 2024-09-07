@@ -1,4 +1,4 @@
-#if(PLATFORM_WIN32 OR PLATFORM_UNIVERSAL_WINDOWS)
+if(PLATFORM_WIN32 OR PLATFORM_UNIVERSAL_WINDOWS)
 
     function(copy_required_dlls TARGET_NAME)
         if(D3D11_SUPPORTED)
@@ -117,7 +117,7 @@
         endforeach()
     endfunction()
 
-#endif(PLATFORM_WIN32 OR PLATFORM_UNIVERSAL_WINDOWS)
+endif(PLATFORM_WIN32 OR PLATFORM_UNIVERSAL_WINDOWS)
 
 
 function(set_common_target_properties TARGET)
