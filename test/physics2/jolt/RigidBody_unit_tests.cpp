@@ -78,5 +78,11 @@ TEST(RigidBodyTests, TrivialGetters_returnExpectedValues)
     EXPECT_EQ(g_entity, uut.GetEntity());
     EXPECT_EQ(g_shape.GetType(), uut.GetShape().GetType());
     EXPECT_EQ(g_dynamicInfo.type, uut.GetBodyType());
+    EXPECT_FLOAT_EQ(g_dynamicInfo.friction, uut.GetFriction());
+    EXPECT_FLOAT_EQ(g_dynamicInfo.restitution, uut.GetRestitution());
+    EXPECT_FLOAT_EQ(g_dynamicInfo.linearDamping, uut.GetLinearDamping());
+    EXPECT_FLOAT_EQ(g_dynamicInfo.angularDamping, uut.GetAngularDamping());
+    EXPECT_FLOAT_EQ(g_dynamicInfo.gravityMultiplier, uut.GetGravityMultiplier());
     EXPECT_TRUE(uut.ScalesWithTransform());
+    EXPECT_FALSE(uut.UseContinuousDetection());
 }
