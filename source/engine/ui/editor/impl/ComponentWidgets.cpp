@@ -148,14 +148,15 @@ namespace rigid_body_ext
 {
 using T = nc::physics::RigidBody;
 
-constexpr bool (T::*getScalesWithTransform)() const = &T::ScalesWithTransform;
-constexpr void (T::*setScalesWithTransform)(bool)   = &T::ScalesWithTransform;
+constexpr bool (T::*getScalesWithTransform)() const          = &T::ScalesWithTransform;
+constexpr void (T::*setScalesWithTransform)(bool)            = &T::ScalesWithTransform;
 constexpr bool (T::*getUseContinuousDetection)() const       = &T::UseContinuousDetection;
 constexpr void (T::*setUseContinuousDetection)(bool)         = &T::UseContinuousDetection;
 
 constexpr auto getBodyType = [](auto& body)
 {
-    return std::string{nc::physics::ToString(body.GetBodyType())};
+    const auto strView = nc::physics::ToString(body.GetBodyType());
+    return std::string{strView};
 };
 
 constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
@@ -163,7 +164,7 @@ constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
     body.SetBodyType(nc::physics::ToBodyType(bodyTypeStr));
 };
 
-constexpr auto awakeProp                  = nc::ui::Property{ &T::GetAwakeState,         &T::SetAwakeState,         "awake"               };
+constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"               };
 constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"            };
 constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"            };
 constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"         };
@@ -179,7 +180,7 @@ void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformSca
     auto extents = shape.GetLocalScale();
     auto position = shape.GetLocalPosition();
     const auto extentsModified = nc::ui::InputScale(extents, "extents");
-    const auto positionModified = nc::ui::InputPosition(position, "localPosition");
+    const auto positionModified = nc::ui::InputPosition(position, "position");
     if (positionModified || extentsModified)
     {
         body.SetShape(nc::physics::Shape::MakeBox(extents, position), transformScale);
@@ -192,7 +193,7 @@ void SphereProperties(nc::physics::RigidBody& body, const nc::Vector3& transform
     auto radius = shape.GetLocalScale().x * 0.5f;
     auto position = shape.GetLocalPosition();
     const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    const auto positionModified = nc::ui::InputPosition(position, "localPosition");
+    const auto positionModified = nc::ui::InputPosition(position, "position");
     if (radiusModified | positionModified)
     {
         body.SetShape(nc::physics::Shape::MakeSphere(radius, position), transformScale);
@@ -208,7 +209,7 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     auto position = shape.GetLocalPosition();
     const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
     const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    const auto positionModified = nc::ui::InputPosition(position, "localPosition");
+    const auto positionModified = nc::ui::InputPosition(position, "position");
     if (heightModified | radiusModified | positionModified)
     {
         body.SetShape(nc::physics::Shape::MakeCapsule(height, radius, position), transformScale);

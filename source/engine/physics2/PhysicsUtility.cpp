@@ -23,11 +23,6 @@ constexpr auto g_shapeTypeNames = std::array{
 
 namespace nc::physics
 {
-auto GetBodyTypeNames() -> std::span<const std::string_view>
-{
-    return g_bodyTypeNames;
-}
-
 auto ToString(BodyType type) -> std::string_view
 {
     return g_bodyTypeNames.at(static_cast<size_t>(type));
@@ -45,9 +40,9 @@ auto ToBodyType(std::string_view bodyType) -> BodyType
     throw NcError{fmt::format("Unknown BodyType '{}'", bodyType)};
 }
 
-auto GetShapeTypeNames() -> std::span<const std::string_view>
+auto GetBodyTypeNames() -> std::span<const std::string_view>
 {
-    return g_shapeTypeNames;
+    return g_bodyTypeNames;
 }
 
 auto ToString(ShapeType type) -> std::string_view
@@ -65,5 +60,10 @@ auto ToShapeType(std::string_view shapeType) -> ShapeType
     }
 
     throw NcError{fmt::format("Unknown ShapeType '{}'", shapeType)};
+}
+
+auto GetShapeTypeNames() -> std::span<const std::string_view>
+{
+    return g_shapeTypeNames;
 }
 } // namespace nc::physics

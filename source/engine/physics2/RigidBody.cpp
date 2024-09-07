@@ -43,7 +43,7 @@ void RigidBody::SetBodyType(BodyType type)
     m_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), JPH::EActivation::Activate);
 }
 
-auto RigidBody::GetAwakeState() const -> bool
+auto RigidBody::IsAwake() const -> bool
 {
     return ToBody(m_handle)->IsActive();
 }
@@ -98,15 +98,12 @@ void RigidBody::SetAngularDamping(float damping)
 
 void RigidBody::SetGravityMultiplier(float factor)
 {
-    m_info.gravityMultiplier = Clamp(factor, 0.0f, 100.0f); // max??
+    m_info.gravityMultiplier = Clamp(factor, 0.0f, RigidBodyInfo::maxGravityMultiplier);
     m_ctx->interface.SetGravityFactor(ToBody(m_handle)->GetID(), m_info.gravityMultiplier);
 }
 
 void RigidBody::ScalesWithTransform(bool value)
 {
-    (void)value;
-    // how do we do this?
-
     m_info.flags = value
         ? m_info.flags | RigidBodyFlags::ScaleWithTransform
         : m_info.flags & ~RigidBodyFlags::ScaleWithTransform;

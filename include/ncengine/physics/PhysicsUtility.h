@@ -4,8 +4,8 @@
  */
 #pragma once
 
-#include "RigidBody.h"
-#include "Shape.h"
+#include "ncengine/physics/RigidBody.h"
+#include "ncengine/physics/Shape.h"
 
 #include <span>
 #include <string_view>
