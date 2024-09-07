@@ -11,6 +11,9 @@ namespace nc::physics
 /** @brief Minimum allowed scale for physics shapes. */
 constexpr auto g_minimumShapeScale = 0.0001f;
 
+/** @brief Maximum allowed scale for physics shapes. */
+constexpr auto g_maximumShapeScale = 1000.0f;
+
 /** @brief Options for Shape geometry. */
 enum class ShapeType : uint8_t
 {

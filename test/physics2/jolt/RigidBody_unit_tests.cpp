@@ -42,19 +42,16 @@ TEST(RigidBodyTests, IsInitialized_returnsCorrectState)
     mockModule.MockUnregisterBody(uut);
 }
 
-TEST(RigidBodyTests, SetContext_staticEntityWithStaticBody_succeeds)
+TEST(RigidBodyTests, Constructor_staticEntityWithStaticBody_setsToCorrectBodyType)
 {
     auto uut = nc::physics::RigidBody{g_staticEntity, g_shape, g_staticInfo};
-    auto mockModule = nc::physics::NcPhysicsImpl2{};
-    EXPECT_NO_THROW(mockModule.MockRegisterBody(uut));
-    mockModule.MockUnregisterBody(uut);
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
 }
 
-TEST(RigidBodyTests, SetContext_staticEntityWithDynamicBody_throws)
+TEST(RigidBodyTests, Constructor_staticEntityWithDynamicBody_overwritesBodyType)
 {
     auto uut = nc::physics::RigidBody{g_staticEntity, g_shape, g_dynamicInfo};
-    auto mockModule = nc::physics::NcPhysicsImpl2{};
-    EXPECT_THROW(mockModule.MockRegisterBody(uut), nc::NcError);
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
 }
 
 TEST(RigidBodyTests, MoveOperations_transferRegistrationData)

@@ -93,7 +93,7 @@ void RigidBody::SetLinearDamping(float damping)
 void RigidBody::SetAngularDamping(float damping)
 {
     m_info.angularDamping = Clamp(damping, 0.0f, 1.0f);
-    ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetAngularDamping(m_info.linearDamping);
+    ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetAngularDamping(m_info.angularDamping);
 }
 
 void RigidBody::SetGravityMultiplier(float factor)

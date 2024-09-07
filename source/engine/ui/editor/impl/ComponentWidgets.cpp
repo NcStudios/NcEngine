@@ -148,10 +148,10 @@ namespace rigid_body_ext
 {
 using T = nc::physics::RigidBody;
 
-constexpr bool (T::*getScalesWithTransform)() const          = &T::ScalesWithTransform;
-constexpr void (T::*setScalesWithTransform)(bool)            = &T::ScalesWithTransform;
-constexpr bool (T::*getUseContinuousDetection)() const       = &T::UseContinuousDetection;
-constexpr void (T::*setUseContinuousDetection)(bool)         = &T::UseContinuousDetection;
+constexpr bool (T::*getScalesWithTransform)() const    = &T::ScalesWithTransform;
+constexpr void (T::*setScalesWithTransform)(bool)      = &T::ScalesWithTransform;
+constexpr bool (T::*getUseContinuousDetection)() const = &T::UseContinuousDetection;
+constexpr void (T::*setUseContinuousDetection)(bool)   = &T::UseContinuousDetection;
 
 constexpr auto getBodyType = [](auto& body)
 {
@@ -179,7 +179,7 @@ void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformSca
     const auto& shape = body.GetShape();
     auto extents = shape.GetLocalScale();
     auto position = shape.GetLocalPosition();
-    const auto extentsModified = nc::ui::InputScale(extents, "extents");
+    const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (positionModified || extentsModified)
     {
@@ -192,7 +192,7 @@ void SphereProperties(nc::physics::RigidBody& body, const nc::Vector3& transform
     const auto& shape = body.GetShape();
     auto radius = shape.GetLocalScale().x * 0.5f;
     auto position = shape.GetLocalPosition();
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (radiusModified | positionModified)
     {
@@ -207,8 +207,8 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     auto height = scale.y * 2.0f;
     auto radius = scale.x * 0.5f;
     auto position = shape.GetLocalPosition();
-    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (heightModified | radiusModified | positionModified)
     {
@@ -553,7 +553,7 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
     ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
     ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
     ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-    ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f, 0.0f, 100.0f);
+    ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
     ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
     ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
 
