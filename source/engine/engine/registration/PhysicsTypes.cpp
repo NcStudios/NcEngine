@@ -103,5 +103,12 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         CollisionListenerId,
         "CollisionListener"
     );
+
+    Register<physics::CollisionListener>(
+        registry,
+        maxEntities,
+        CollisionListenerId,
+        "CollisionListener"
+    );
 }
 } // namespace nc

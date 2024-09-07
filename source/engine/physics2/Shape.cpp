@@ -19,7 +19,7 @@ void EnsureGreaterThanZeroScale(nc::Vector3& out)
 void FixSphereScale(const nc::Vector3& current, nc::Vector3& desired)
 {
     if (!nc::FloatEqual(current.x, desired.x))
-        desired =  nc::Vector3::Splat(desired.x);
+        desired = nc::Vector3::Splat(desired.x);
     else if (!nc::FloatEqual(current.y, desired.y))
         desired = nc::Vector3::Splat(desired.y);
     else

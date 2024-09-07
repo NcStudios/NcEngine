@@ -22,37 +22,6 @@ auto ToActivationMode(bool wake) -> JPH::EActivation
 
 namespace nc::physics
 {
-void SetSimulatedBodyPosition(Transform& transform,
-                              RigidBody& rigidBody,
-                              const Vector3& position,
-                              bool wake)
-{
-    transform.SetPosition(position);
-    rigidBody.SetBodyPosition(position, wake);
-}
-
-void SetSimulatedBodyRotation(Transform& transform,
-                              RigidBody& rigidBody,
-                              const Quaternion& rotation,
-                              bool wake)
-{
-    transform.SetRotation(rotation);
-    rigidBody.SetBodyRotation(rotation, wake);
-}
-
-auto SetSimulatedBodyScale(Transform& transform,
-                           RigidBody& rigidBody,
-                           const Vector3& scale,
-                           bool wake) -> Vector3
-{
-    const auto appliedScale = rigidBody.ScalesWithTransform()
-        ? rigidBody.SetBodyScale(transform.Scale(), scale, wake)
-        : scale;
-
-    transform.SetScale(appliedScale);
-    return appliedScale;
-}
-
 RigidBody::~RigidBody() noexcept
 {
     if (IsInitialized())
@@ -161,22 +130,36 @@ void RigidBody::AddTorque(const Vector3& torque)
     m_ctx->interface.AddTorque(ToBody(m_handle)->GetID(), ToJoltVec3(torque));
 }
 
-void RigidBody::SetBodyPosition(const Vector3& position, bool wake)
+void RigidBody::SetSimulatedBodyPosition(Transform& transform,
+                                         const Vector3& position,
+                                         bool wake)
 {
+    transform.SetPosition(position);
     m_ctx->interface.SetPosition(ToBody(m_handle)->GetID(), ToJoltVec3(position), ToActivationMode(wake));
 }
 
-void RigidBody::SetBodyRotation(const Quaternion& rotation, bool wake)
+void RigidBody::SetSimulatedBodyRotation(Transform& transform,
+                                         const Quaternion& rotation,
+                                         bool wake)
 {
+    transform.SetRotation(rotation);
     m_ctx->interface.SetRotation(ToBody(m_handle)->GetID(), ToJoltQuaternion(rotation), ToActivationMode(wake));
 }
 
-auto RigidBody::SetBodyScale(const Vector3& previousScale, const Vector3& scale, bool wake) -> Vector3
+auto RigidBody::SetSimulatedBodyScale(Transform& transform,
+                                      const Vector3& scale,
+                                      bool wake) -> Vector3
 {
-    const auto allowedScaling = NormalizeScaleForShape(m_shape.GetType(), previousScale, scale);
-    const auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, ToJoltVec3(allowedScaling));
-    m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
-    return allowedScaling;
+    auto appliedScale = scale;
+    if (ScalesWithTransform())
+    {
+        appliedScale = NormalizeScaleForShape(m_shape.GetType(), transform.Scale(), scale);
+        const auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, ToJoltVec3(appliedScale));
+        m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
+    }
+
+    transform.SetScale(appliedScale);
+    return appliedScale;
 }
 
 void RigidBody::SetContext(BodyHandle handle, ComponentContext* ctx)
