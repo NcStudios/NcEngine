@@ -22,7 +22,7 @@ class NcPhysicsImpl2
 
 constexpr auto g_entity = nc::Entity{0, 0, nc::Entity::Flags::None};
 constexpr auto g_staticEntity = nc::Entity{0, 0, nc::Entity::Flags::Static};
-constexpr auto g_shape = nc::physics::Shape::Box;
+constexpr auto g_shape = nc::physics::Shape::MakeBox();
 constexpr auto g_dynamicBodyType = nc::physics::BodyType::Dynamic;
 constexpr auto g_staticBodyType = nc::physics::BodyType::Static;
 constexpr auto g_flags = nc::physics::RigidBodyFlags::ScaleWithTransform;
@@ -74,7 +74,7 @@ TEST(RigidBodyTests, TrivialGetters_returnExpectedValues)
 {
     const auto uut = nc::physics::RigidBody{g_entity, g_shape, g_dynamicBodyType, g_flags};
     EXPECT_EQ(g_entity, uut.GetEntity());
-    EXPECT_EQ(g_shape, uut.GetShape());
+    EXPECT_EQ(g_shape.GetType(), uut.GetShape().GetType());
     EXPECT_EQ(g_dynamicBodyType, uut.GetBodyType());
     EXPECT_TRUE(uut.ScalesWithTransform());
 }

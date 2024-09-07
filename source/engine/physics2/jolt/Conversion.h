@@ -5,6 +5,9 @@
 
 #include "DirectXMath.h"
 
+
+#include <type_traits>
+
 namespace nc::physics
 {
 inline auto ToJoltVec3(const nc::Vector3& in) -> JPH::Vec3

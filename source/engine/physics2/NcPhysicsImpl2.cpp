@@ -1,4 +1,5 @@
 #include "NcPhysicsImpl2.h"
+#include "EventDispatch.h"
 #include "jolt/Conversion.h"
 #include "jolt/ShapeFactory.h"
 
@@ -59,9 +60,56 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::PhysicsSettings&, Registry* registr
 
 void NcPhysicsImpl2::Run()
 {
-    // @todo: 689 need to update api bodies for all dirty non-static objects
     m_jolt.Update(time::DeltaTime());
+    SyncTransforms();
+    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
+}
 
+void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
+{
+    NC_LOG_TRACE("Building NcPhysics Tasks");
+    update.Add(
+        update_task_id::PhysicsPipeline,
+        "PhysicsPipeline",
+        [this](){ this->Run(); },
+        {update_task_id::FrameLogicUpdate}
+    );
+}
+
+void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
+{
+    auto& transform = m_ecs.Get<Transform>(body.GetEntity());
+    const auto [transformScale, transformRotation, transformPosition] = DecomposeMatrix(transform.TransformationMatrix());
+    const auto& shape = body.GetShape();
+    const auto bodyType = body.GetBodyType();
+    auto allowedScaling = Vector3::One();
+    if (body.ScalesWithTransform())
+    {
+        const auto currentScale = nc::ToVector3(transformScale);
+        allowedScaling = NormalizeScaleForShape(shape.GetType(), currentScale, currentScale);
+        if (allowedScaling != currentScale)
+        {
+            transform.SetScale(allowedScaling); // update Transform to prevent invalid scales
+        }
+    }
+
+    auto bodySettings = JPH::BodyCreationSettings{
+        m_jolt.shapeFactory.MakeShape(shape, ToJoltVec3(allowedScaling)),
+        ToJoltVec3(transformPosition),
+        ToJoltQuaternion(transformRotation),
+        ToMotionType(bodyType),
+        ToObjectLayer(bodyType)
+    };
+
+    bodySettings.mUserData = Entity::Hash{}(body.GetEntity());
+    auto& iBody = m_jolt.physicsSystem.GetBodyInterfaceNoLock();
+    auto apiBody = iBody.CreateBody(bodySettings);
+    iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
+    body.SetContext(apiBody, m_jolt.ctx.get());
+}
+
+void NcPhysicsImpl2::SyncTransforms()
+{
     for (auto& body : m_ecs.GetAll<RigidBody>())
     {
         // @todo: 691 not sure how kinematic behave yet, assuming they won't get updated
@@ -81,50 +129,6 @@ void NcPhysicsImpl2::Run()
         auto& transform = m_ecs.Get<Transform>(body.GetEntity());
         transform.SetPositionAndRotationXM(position, orientation);
     }
-}
-
-void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
-{
-    NC_LOG_TRACE("Building NcPhysics Tasks");
-    update.Add(
-        update_task_id::PhysicsPipeline,
-        "PhysicsPipeline",
-        [this](){ this->Run(); },
-        {update_task_id::FrameLogicUpdate}
-    );
-}
-
-void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
-{
-    auto& transform = m_ecs.Get<Transform>(body.GetEntity());
-    const auto [scale, rotation, position] = DecomposeMatrix(transform.TransformationMatrix());
-    const auto shape = body.GetShape();
-    const auto bodyType = body.GetBodyType();
-    auto shapeScale = ToJoltVec3(scale);
-    if (body.ScalesWithTransform())
-    {
-        if (NormalizeScaleForShape(shape, shapeScale))
-        {
-            transform.SetScale(ToVector3(shapeScale)); // update Transform to prevent invalid scales
-        }
-    }
-    else
-    {
-        shapeScale = JPH::Vec3::sReplicate(1.0f);
-    }
-
-    const auto bodySettings = JPH::BodyCreationSettings{
-        m_jolt.shapeFactory.MakeShape(shape, shapeScale),
-        ToJoltVec3(position),
-        ToJoltQuaternion(rotation),
-        ToMotionType(bodyType),
-        ToObjectLayer(bodyType)
-    };
-
-    auto& iBody = m_jolt.physicsSystem.GetBodyInterface(); // @todo: 697 try non-locking interface
-    auto apiBody = iBody.CreateBody(bodySettings);
-    iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
-    body.SetContext(apiBody, m_jolt.ctx.get());
 }
 
 void NcPhysicsImpl2::Clear() noexcept

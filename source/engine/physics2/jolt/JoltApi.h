@@ -2,6 +2,7 @@
 
 #include "Allocator.h"
 #include "ComponentContext.h"
+#include "ContactListener.h"
 #include "Layers.h"
 #include "ShapeFactory.h"
 #include "ncengine/type/StableAddress.h"
@@ -46,6 +47,7 @@ struct JoltApi : public StableAddress
     ObjectLayerPairFilter objectLayerPairFilter;
     JPH::PhysicsSystem physicsSystem;
     ShapeFactory shapeFactory;
+    ContactListener contactListener;
     std::unique_ptr<ComponentContext> ctx;
 
     private:
