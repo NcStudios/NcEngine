@@ -1,4 +1,4 @@
-### Shape Tests ###
+### Contacts Tests ###
 add_executable(Contacts_unit_tests
     Contacts_unit_tests.cpp
 )
@@ -46,6 +46,35 @@ target_link_libraries(PhysicsUtility_unit_tests
 )
 
 add_test(PhysicsUtility_unit_tests PhysicsUtility_unit_tests)
+
+### RigidBody Tests ###
+add_executable(RigidBody_unit_tests
+    RigidBody_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
+    ${NC_SOURCE_DIR}/physics2/Shape.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+)
+
+target_include_directories(RigidBody_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(RigidBody_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(RigidBody_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        Jolt
+        gtest_main
+)
+
+add_test(RigidBody_unit_tests RigidBody_unit_tests)
 
 ### Shape Tests ###
 add_executable(Shape_unit_tests
