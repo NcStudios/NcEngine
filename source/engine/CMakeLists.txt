@@ -65,7 +65,6 @@ elseif(APPLE)
     )
 endif()
 
-set(CMAKE_DEBUG_POSTFIX "")
 
 if(D3D11_SUPPORTED)
     target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)

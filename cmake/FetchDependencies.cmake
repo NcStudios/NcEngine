@@ -95,14 +95,12 @@ FetchContent_Declare(JoltPhysics
                      SOURCE_SUBDIR  "Build"
 )
 
-set(CMAKE_DEBUG_POSTFIX "")
 # DiligentCore
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
                      SOURCE_DIR _deps/DiligentCore
 )
 FetchContent_MakeAvailable(DiligentCore)
-set(CMAKE_DEBUG_POSTFIX d)
 
 # Fetch all required sources
 FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics)

@@ -23,7 +23,7 @@
 #include "optick.h"
 #include "DirectXMath.h"
 
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
+// #include "Graphics/GraphicsTools/interface/MapHelper.hpp"
 
 namespace
 {
@@ -70,70 +70,70 @@ namespace
         void ClearEnvironment() override {}
     };
 
-    DirectX::XMMATRIX GetSurfacePretransformMatrixInternal(const DirectX::XMVECTOR& f3CameraViewAxis,
-                                                           const Diligent::RefCntAutoPtr<Diligent::ISwapChain>& swapchain)
-    {
-        const auto& SCDesc = swapchain->GetDesc();
-        switch (SCDesc.PreTransform)
-        {
-            case Diligent::SURFACE_TRANSFORM_ROTATE_90:
-                // The image content is rotated 90 degrees clockwise.
-                return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI / 2.f);
+    // DirectX::XMMATRIX GetSurfacePretransformMatrixInternal(const DirectX::XMVECTOR& f3CameraViewAxis,
+    //                                                        const Diligent::RefCntAutoPtr<Diligent::ISwapChain>& swapchain)
+    // {
+    //     const auto& SCDesc = swapchain->GetDesc();
+    //     switch (SCDesc.PreTransform)
+    //     {
+    //         case Diligent::SURFACE_TRANSFORM_ROTATE_90:
+    //             // The image content is rotated 90 degrees clockwise.
+    //             return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI / 2.f);
 
-            case Diligent::SURFACE_TRANSFORM_ROTATE_180:
-                // The image content is rotated 180 degrees clockwise.
-                return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI);
+    //         case Diligent::SURFACE_TRANSFORM_ROTATE_180:
+    //             // The image content is rotated 180 degrees clockwise.
+    //             return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI);
 
-            case Diligent::SURFACE_TRANSFORM_ROTATE_270:
-                // The image content is rotated 270 degrees clockwise.
-                return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI * 3.f / 2.f);
+    //         case Diligent::SURFACE_TRANSFORM_ROTATE_270:
+    //             // The image content is rotated 270 degrees clockwise.
+    //             return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI * 3.f / 2.f);
 
-            case Diligent::SURFACE_TRANSFORM_OPTIMAL:
-                UNEXPECTED("SURFACE_TRANSFORM_OPTIMAL is only valid as parameter during swap chain initialization.");
-                return DirectX::XMMatrixIdentity();
+    //         case Diligent::SURFACE_TRANSFORM_OPTIMAL:
+    //             UNEXPECTED("SURFACE_TRANSFORM_OPTIMAL is only valid as parameter during swap chain initialization.");
+    //             return DirectX::XMMatrixIdentity();
 
-            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR:
-            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90:
-            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180:
-            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270:
-                UNEXPECTED("Mirror transforms are not supported");
-                return DirectX::XMMatrixIdentity();
+    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR:
+    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90:
+    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180:
+    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270:
+    //             UNEXPECTED("Mirror transforms are not supported");
+    //             return DirectX::XMMatrixIdentity();
 
-            default:
-                return DirectX::XMMatrixIdentity();
-        }
-    }
+    //         default:
+    //             return DirectX::XMMatrixIdentity();
+    //     }
+    // }
 
-    DirectX::XMMATRIX GetAdjustedProjectionMatrix(float FOV,
-                                                  float NearPlane,
-                                                  float FarPlane,
-                                                  const Diligent::RefCntAutoPtr<Diligent::ISwapChain>& swapchain)
-    {
-        const auto& SCDesc = swapchain->GetDesc();
+    // DirectX::XMMATRIX GetAdjustedProjectionMatrix(float FOV,
+    //                                               float NearPlane,
+    //                                               float FarPlane,
+    //                                               const Diligent::RefCntAutoPtr<Diligent::ISwapChain>& swapchain)
+    // {
+    //     const auto& SCDesc = swapchain->GetDesc();
 
-        float AspectRatio = static_cast<float>(SCDesc.Width) / static_cast<float>(SCDesc.Height);
-        float XScale, YScale;
-        if (SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_90 ||
-            SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_270 ||
-            SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90 ||
-            SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270)
-        {
-            // When the screen is rotated, vertical FOV becomes horizontal FOV
-            XScale = 1.f / std::tan(FOV / 2.f);
-            // Aspect ratio is inversed
-            YScale = XScale * AspectRatio;
-        }
-        else
-        {
-            YScale = 1.f / std::tan(FOV / 2.f);
-            XScale = YScale / AspectRatio;
-        }
+    //     float AspectRatio = static_cast<float>(SCDesc.Width) / static_cast<float>(SCDesc.Height);
+    //     float XScale, YScale;
+    //     if (SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_90 ||
+    //         SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_270 ||
+    //         SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90 ||
+    //         SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270)
+    //     {
+    //         // When the screen is rotated, vertical FOV becomes horizontal FOV
+    //         XScale = 1.f / std::tan(FOV / 2.f);
+    //         // Aspect ratio is inversed
+    //         YScale = XScale * AspectRatio;
+    //     }
+    //     else
+    //     {
+    //         YScale = 1.f / std::tan(FOV / 2.f);
+    //         XScale = YScale / AspectRatio;
+    //     }
 
-        auto perspective = DirectX::XMMatrixPerspectiveFovRH(FOV, AspectRatio, NearPlane, FarPlane);
-        perspective.r[0].m128_f32[0] = XScale;
-        perspective.r[1].m128_f32[1] = YScale;
-        return perspective;
-    }
+    //     auto perspective = DirectX::XMMatrixPerspectiveFovRH(FOV, AspectRatio, NearPlane, FarPlane);
+    //     perspective.r[0].m128_f32[0] = XScale;
+    //     perspective.r[1].m128_f32[1] = YScale;
+    //     return perspective;
+    // }
 
 } // anonymous namespace
 
@@ -418,12 +418,12 @@ namespace nc::graphics
 
     void NcGraphics3Impl::Update()
     {
-        auto dt = time::DeltaTime();
-        auto modelTransform = DirectX::XMMatrixRotationY(dt) * DirectX::XMMatrixRotationX(-DirectX::XM_PI * 0.1f);
-        auto view = DirectX::XMMatrixTranslation(0.0f, 0.0f, 5.0f);
-        auto srfPreTransform = GetSurfacePretransformMatrixInternal(DirectX::XMVectorSet(0, 0, 1, 0), m_pSwapChain);
-        auto proj = GetAdjustedProjectionMatrix(DirectX::XM_PI / 4.0f, 0.1f, 100.0f, m_pSwapChain);
-        m_worldViewProj = modelTransform * view * srfPreTransform * proj;
+        // auto dt = time::DeltaTime();
+        // auto modelTransform = DirectX::XMMatrixRotationY(dt) * DirectX::XMMatrixRotationX(-DirectX::XM_PI * 0.1f);
+        // auto view = DirectX::XMMatrixTranslation(0.0f, 0.0f, 5.0f);
+        // auto srfPreTransform = GetSurfacePretransformMatrixInternal(DirectX::XMVectorSet(0, 0, 1, 0), m_pSwapChain);
+        // auto proj = GetAdjustedProjectionMatrix(DirectX::XM_PI / 4.0f, 0.1f, 100.0f, m_pSwapChain);
+        // m_worldViewProj = modelTransform * view * srfPreTransform * proj;
     }
 
     void NcGraphics3Impl::Run()
@@ -449,8 +449,8 @@ namespace nc::graphics
         /** Tutorial 2 */
 
         /* Map the buffer and write current world-view-projection matrix */
-        MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
-        *cbConstants = m_worldViewProj;
+        // MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
+        // *cbConstants = m_worldViewProj;
 
         /* Bind vertex and index buffers */
         const uint64_t offset = 0;
