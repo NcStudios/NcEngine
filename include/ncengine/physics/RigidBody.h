@@ -113,11 +113,11 @@ class RigidBody
          * @note BodyType::Static is forced if attached to a static Entity.
          */
         auto GetBodyType() const -> BodyType { return m_info.type; }
-        void SetBodyType(BodyType type);
+        void SetBodyType(BodyType type, bool wake = true);
 
         /** @name Shape Functions */
         auto GetShape() const -> const Shape& { return m_shape; }
-        void SetShape(const Shape& shape, const Vector3& transformScale); // todo: how to update transform?
+        void SetShape(const Shape& shape, const Vector3& transformScale, bool wake = true); // todo: how to update transform?
 
         /** @name Simulation Properties */
         auto IsAwake() const -> bool;

@@ -32,7 +32,7 @@ RigidBody::~RigidBody() noexcept
     }
 }
 
-void RigidBody::SetBodyType(BodyType type)
+void RigidBody::SetBodyType(BodyType type, bool wake)
 {
     if (m_self.IsStatic())
     {
@@ -40,7 +40,7 @@ void RigidBody::SetBodyType(BodyType type)
     }
 
     m_info.type = type;
-    m_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), JPH::EActivation::Activate);
+    m_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), ToActivationMode(wake));
 }
 
 auto RigidBody::IsAwake() const -> bool
@@ -61,7 +61,7 @@ void RigidBody::SetAwakeState(bool wake)
     }
 }
 
-void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale)
+void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale, bool wake)
 {
     m_shape = shape;
     const auto allowedScaling = ScalesWithTransform()
@@ -69,7 +69,7 @@ void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale)
         : JPH::Vec3::sReplicate(1.0f);
 
     const auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
-    m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, JPH::EActivation::DontActivate);
+    m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
 }
 
 void RigidBody::SetFriction(float friction)
