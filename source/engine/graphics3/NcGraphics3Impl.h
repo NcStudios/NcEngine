@@ -28,11 +28,12 @@ class NcWindow;
 namespace graphics
 {
 
-struct DiligentVertex
+struct DiligentVertexType
 {
-    float3 pos;
-    float4 color;
+    DirectX::XMFLOAT3 pos;
+    DirectX::XMFLOAT4 color;
 };
+
 class NcGraphics3Impl : public NcGraphics
 {
     public:
@@ -54,6 +55,7 @@ class NcGraphics3Impl : public NcGraphics
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void Clear() noexcept override;
         void Run();
+        void Update();
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
     private:
@@ -64,10 +66,12 @@ class NcGraphics3Impl : public NcGraphics
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
         Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
         Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSOCube;
-        Diligent::RefCntAutoPtr<IBuffer> m_CubeVertexBuffer;
-        Diligent::RefCntAutoPtr<IBuffer> m_CubeIndexBuffer;
-        Diligent::RefCntAutoPtr<IBuffer> m_VSConstants;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_CubeVertexBuffer;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_CubeIndexBuffer;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_VSConstants;
         Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12; /* @todo: Decision based on config and device capabilities */
+        Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pSRB;
+        DirectX::XMMATRIX m_worldViewProj;
     };
 } // namespace graphics
 } // namespace nc
