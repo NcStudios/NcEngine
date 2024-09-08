@@ -12,6 +12,7 @@
 #include "graphics/system/UISystem.h"
 #include "graphics/system/WidgetSystem.h"
 
+#include "ncengine/asset/AssetData.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/graphics/NcGraphics.h"

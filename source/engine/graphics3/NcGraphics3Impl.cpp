@@ -24,6 +24,7 @@
 #include "DirectXMath.h"
 
 #include "Graphics/GraphicsTools/interface/MapHelper.hpp"
+#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
 
 namespace
 {
@@ -173,7 +174,9 @@ namespace nc::graphics
                                    SystemEvents& events,
                                    window::NcWindow& window)
         : m_registry{registry},
-          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphics3Impl::OnResize)}
+          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphics3Impl::OnResize)},
+          m_onTextureArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnTextureUpdate().Connect(this, &NcGraphics3Impl::AddTextures)},
+          m_textures{}
     {
         (void)graphicsSettings;
         (void)memorySettings;
@@ -193,8 +196,35 @@ namespace nc::graphics
         auto win32Handle = glfwGetWin32Window(window.GetWindowHandle());
         Win32NativeWindow win32Window{win32Handle};
         pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, win32Window, &m_pSwapChain);
+        
+        /* Reusable shaders setup */
+        auto defaultShadersPath = nc::config::GetAssetSettings().shadersPath;
+
+        ShaderCreateInfo shaderCI;
+        shaderCI.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
+        shaderCI.Desc.UseCombinedTextureSamplers = true;
+
+        RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
+        pFactoryD3D12->CreateDefaultShaderSourceStreamFactory(nullptr, &pShaderSourceFactory);
+        shaderCI.pShaderSourceStreamFactory = pShaderSourceFactory;
 
         /* TUTORIAL 01 - Triangle */
+        SetupTriangle01(defaultShadersPath, shaderCI);
+
+        /* Constant buffer holding MVP matrix */
+        CreateUniformBuffer(m_pDevice, sizeof(DirectX::XMMATRIX), "VS Constants CB", &m_VSConstants);
+
+        /* TUTORIAL 02 - Cube */
+        SetupCube02(defaultShadersPath, shaderCI);
+        
+        /* TUTORIAL 03 - Texture */
+        SetupTexturedCube03(defaultShadersPath, shaderCI);
+    }
+
+    void NcGraphics3Impl::SetupTriangle01(std::string_view defaultShadersPath, Diligent::ShaderCreateInfo shaderCI)
+    {
+        using namespace Diligent;
+
         /* Create Pipeline */
         GraphicsPipelineStateCreateInfo psoCI;
         psoCI.PSODesc.Name = "Triangle PSO";
@@ -207,19 +237,8 @@ namespace nc::graphics
         psoCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_NONE;
         psoCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
 
-        /* Shaders */
-        auto defaultShaderPath = nc::config::GetAssetSettings().shadersPath;
-
-        ShaderCreateInfo shaderCI;
-        shaderCI.SourceLanguage                  = SHADER_SOURCE_LANGUAGE_HLSL;
-        shaderCI.Desc.UseCombinedTextureSamplers = true;
-
-        RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
-        pFactoryD3D12->CreateDefaultShaderSourceStreamFactory(nullptr, &pShaderSourceFactory);
-        shaderCI.pShaderSourceStreamFactory = pShaderSourceFactory;
-
-        auto vertPath = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Triangle.vsh")).string();
-        auto fragPath = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Triangle.psh")).string();
+        auto vertPath = (std::filesystem::path(defaultShadersPath) / std::filesystem::path("Triangle.vsh")).string();
+        auto fragPath = (std::filesystem::path(defaultShadersPath) / std::filesystem::path("Triangle.psh")).string();
 
         RefCntAutoPtr<IShader> pVS;
         {
@@ -244,8 +263,12 @@ namespace nc::graphics
         psoCI.pVS = pVS;
         psoCI.pPS = pPS;
         m_pDevice->CreateGraphicsPipelineState(psoCI, &m_pPSO);
+    }
 
-        /* TUTORIAL 02 - Cube */
+    void NcGraphics3Impl::SetupCube02(std::string_view defaultShadersPath, Diligent::ShaderCreateInfo shaderCI)
+    {
+        using namespace Diligent;
+
         /* Create Pipeline */
         GraphicsPipelineStateCreateInfo psoCubeCI;
         psoCubeCI.PSODesc.Name = "Cube PSO";
@@ -258,8 +281,8 @@ namespace nc::graphics
         psoCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
 
         /* Shaders */
-        auto vertPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.vsh")).string();
-        auto fragPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.psh")).string();
+        auto vertPathCube = (std::filesystem::path(defaultShadersPath) / std::filesystem::path("Cube.vsh")).string();
+        auto fragPathCube = (std::filesystem::path(defaultShadersPath) / std::filesystem::path("Cube.psh")).string();
 
         RefCntAutoPtr<IShader> pVSCube;
         {
@@ -270,16 +293,6 @@ namespace nc::graphics
             shaderCI.SourceLength    = vertPathCube.size();
             shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
             m_pDevice->CreateShader(shaderCI, &pVSCube);
-
-            /* Constant buffer holding MVP matrix */
-            BufferDesc cbDesc;
-            cbDesc.Name = "VS Constants CB";
-            cbDesc.Size = sizeof(DirectX::XMMATRIX);
-            cbDesc.Usage = USAGE_DYNAMIC;
-            cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
-            cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
-            m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
-
         }
 
         RefCntAutoPtr<IShader> pPSCube;
@@ -314,7 +327,13 @@ namespace nc::graphics
         m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
 
         /* Create a shader resource binding object and bind all static resources in it */
-        m_pPSOCube->CreateShaderResourceBinding(&m_pSRB, true);
+        m_pPSOCube->CreateShaderResourceBinding(&m_pCubeSRB, true);
+
+        struct DiligentVertexType
+        {
+            DirectX::XMFLOAT3 pos;
+            DirectX::XMFLOAT4 color;
+        };
 
         /* Create vertex buffer */
         std::array<DiligentVertexType, 8> cubeVerts = 
@@ -338,7 +357,7 @@ namespace nc::graphics
         BufferData vertexBufferData;
         vertexBufferData.pData = cubeVerts.data();
         vertexBufferData.DataSize = sizeof(cubeVerts);
-        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_CubeVertexBuffer);
+        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_cubeVertexBuffer);
 
         /* Create index buffer */
         constexpr std::array<uint32_t, 36> cubeIndices =
@@ -359,9 +378,13 @@ namespace nc::graphics
         BufferData indexBufferData;
         indexBufferData.pData = cubeIndices.data();
         indexBufferData.DataSize = sizeof(cubeIndices);
-        m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_CubeIndexBuffer);
-        
-        /* TUTORIAL 03 - Texture */
+        m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_cubeIndexBuffer);
+    }
+
+    void NcGraphics3Impl::SetupTexturedCube03(std::string_view defaultShadersPath, Diligent::ShaderCreateInfo shaderCI)
+    {
+        using namespace Diligent;
+
         /* Create Pipeline */
         GraphicsPipelineStateCreateInfo psoTextCubeCI;
         psoTextCubeCI.PSODesc.Name = "Texture Cube PSO";
@@ -374,8 +397,8 @@ namespace nc::graphics
         psoTextCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
 
         /* Shaders */
-        auto vertPathTextCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("TexturedCube.vsh")).string();
-        auto fragPathTextCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("TexturedCube.psh")).string();
+        auto vertPathTextCube = (std::filesystem::path(defaultShadersPath) / std::filesystem::path("TexturedCube.vsh")).string();
+        auto fragPathTextCube = (std::filesystem::path(defaultShadersPath) / std::filesystem::path("TexturedCube.psh")).string();
 
         RefCntAutoPtr<IShader> pVSTextCube;
         {
@@ -386,15 +409,6 @@ namespace nc::graphics
             shaderCI.SourceLength    = vertPathTextCube.size();
             shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
             m_pDevice->CreateShader(shaderCI, &pVSTextCube);
-
-            /* Constant buffer holding MVP matrix */
-            BufferDesc cbDesc;
-            cbDesc.Name = "VS Constants CB";
-            cbDesc.Size = sizeof(DirectX::XMMATRIX);
-            cbDesc.Usage = USAGE_DYNAMIC;
-            cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
-            cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
-            m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
         }
 
         RefCntAutoPtr<IShader> pPSTextCube;
@@ -402,10 +416,201 @@ namespace nc::graphics
             shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
             shaderCI.EntryPoint      = "main";
             shaderCI.Desc.Name       = "Cube Fragment";
-            shaderCI.FilePath        = fragPathCube.data();
-            shaderCI.SourceLength    = fragPathCube.size();
+            shaderCI.FilePath        = fragPathTextCube.data();
+            shaderCI.SourceLength    = fragPathTextCube.size();
             shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
-            m_pDevice->CreateShader(shaderCI, &pPSCube);
+            m_pDevice->CreateShader(shaderCI, &pPSTextCube);
+        }
+
+        psoTextCubeCI.pVS = pVSTextCube;
+        psoTextCubeCI.pPS = pPSTextCube;
+
+        std::array<LayoutElement, 2> layoutElems 
+        {
+            LayoutElement{0, 0, 3, VT_FLOAT32, false}, // ATTR 0, Vertex Pos
+            LayoutElement{1, 0, 2, VT_FLOAT32, false}  // ATTR 1, UV
+        };
+
+        psoTextCubeCI.GraphicsPipeline.InputLayout.LayoutElements = layoutElems.data();
+        psoTextCubeCI.GraphicsPipeline.InputLayout.NumElements = static_cast<uint32_t>(layoutElems.size());
+        psoTextCubeCI.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+
+        /* Create mutable texture SRV. Mutable textures are expected to be changed per-instance. */
+        std::array<ShaderResourceVariableDesc, 1> shaderVariables
+        {
+            {{SHADER_TYPE_PIXEL, "g_Texture", SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE}}
+        };
+
+        psoTextCubeCI.PSODesc.ResourceLayout.Variables = shaderVariables.data();
+        psoTextCubeCI.PSODesc.ResourceLayout.NumVariables = static_cast<uint32_t>(shaderVariables.size());
+
+        /* Create immutable sampler. */
+        SamplerDesc linearClampedSampler
+        {
+            FILTER_TYPE_LINEAR,    FILTER_TYPE_LINEAR,    FILTER_TYPE_LINEAR,
+            TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP
+        };
+
+        std::array<ImmutableSamplerDesc, 1> immutableSamplers
+        {
+            {{SHADER_TYPE_PIXEL, "g_Texture", linearClampedSampler}}
+        };
+
+        psoTextCubeCI.PSODesc.ResourceLayout.ImmutableSamplers = immutableSamplers.data();
+        psoTextCubeCI.PSODesc.ResourceLayout.NumImmutableSamplers = immutableSamplers.size();
+
+        m_pDevice->CreateGraphicsPipelineState(psoTextCubeCI, &m_pPSOTextCube);
+
+        /* Since we did not explicitly specify the type for 'Constants' variable, default
+        type (SHADER_RESOURCE_VARIABLE_TYPE_STATIC) will be used. Static variables
+        never change and are bound directly through the pipeline state object. */
+        m_pPSOTextCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
+
+        /* Since we are using a mutable variable, we must create a shader resource binding object
+        http://diligentgraphics.com/2016/03/23/resource-binding-model-in-diligent-engine-2-0/ */
+        m_pPSOTextCube->CreateShaderResourceBinding(&m_pTextCubeSRB, true);
+
+        struct DiligentVertexType
+        {
+            DirectX::XMFLOAT3 pos;
+            DirectX::XMFLOAT2 uv;
+        };
+
+        /* Vertex Buffer */
+        /* This time we have to duplicate vertices because texture coordinates cannot be shared */
+        std::array<DiligentVertexType, 24> cubeVerts =
+        {{
+            {DirectX::XMFLOAT3{-1, -1, -1}, DirectX::XMFLOAT2{0, 1}},
+            {DirectX::XMFLOAT3{-1, +1, -1}, DirectX::XMFLOAT2{0, 0}},
+            {DirectX::XMFLOAT3{+1, +1, -1}, DirectX::XMFLOAT2{1, 0}},
+            {DirectX::XMFLOAT3{+1, -1, -1}, DirectX::XMFLOAT2{1, 1}},
+
+            {DirectX::XMFLOAT3{-1, -1, -1}, DirectX::XMFLOAT2{0, 1}},
+            {DirectX::XMFLOAT3{-1, -1, +1}, DirectX::XMFLOAT2{0, 0}},
+            {DirectX::XMFLOAT3{+1, -1, +1}, DirectX::XMFLOAT2{1, 0}},
+            {DirectX::XMFLOAT3{+1, -1, -1}, DirectX::XMFLOAT2{1, 1}},
+
+            {DirectX::XMFLOAT3{+1, -1, -1}, DirectX::XMFLOAT2{0, 1}},
+            {DirectX::XMFLOAT3{+1, -1, +1}, DirectX::XMFLOAT2{1, 1}},
+            {DirectX::XMFLOAT3{+1, +1, +1}, DirectX::XMFLOAT2{1, 0}},
+            {DirectX::XMFLOAT3{+1, +1, -1}, DirectX::XMFLOAT2{0, 0}},
+
+            {DirectX::XMFLOAT3{+1, +1, -1}, DirectX::XMFLOAT2{0, 1}},
+            {DirectX::XMFLOAT3{+1, +1, +1}, DirectX::XMFLOAT2{0, 0}},
+            {DirectX::XMFLOAT3{-1, +1, +1}, DirectX::XMFLOAT2{1, 0}},
+            {DirectX::XMFLOAT3{-1, +1, -1}, DirectX::XMFLOAT2{1, 1}},
+
+            {DirectX::XMFLOAT3{-1, +1, -1}, DirectX::XMFLOAT2{1, 0}},
+            {DirectX::XMFLOAT3{-1, +1, +1}, DirectX::XMFLOAT2{0, 0}},
+            {DirectX::XMFLOAT3{-1, -1, +1}, DirectX::XMFLOAT2{0, 1}},
+            {DirectX::XMFLOAT3{-1, -1, -1}, DirectX::XMFLOAT2{1, 1}},
+
+            {DirectX::XMFLOAT3{-1, -1, +1}, DirectX::XMFLOAT2{1, 1}},
+            {DirectX::XMFLOAT3{+1, -1, +1}, DirectX::XMFLOAT2{0, 1}},
+            {DirectX::XMFLOAT3{+1, +1, +1}, DirectX::XMFLOAT2{0, 0}},
+            {DirectX::XMFLOAT3{-1, +1, +1}, DirectX::XMFLOAT2{1, 0}},
+        }};
+
+        BufferDesc vertexBufferDesc;
+        vertexBufferDesc.Name = "Cube vertex buffer";
+        vertexBufferDesc.Usage = USAGE_IMMUTABLE;
+        vertexBufferDesc.BindFlags = BIND_VERTEX_BUFFER;
+        vertexBufferDesc.Size = sizeof(cubeVerts);
+        BufferData vbData;
+        vbData.pData = cubeVerts.data();
+        vbData.DataSize = sizeof(cubeVerts);
+        m_pDevice->CreateBuffer(vertexBufferDesc, &vbData, &m_cubeVertexBuffer);
+
+        /* Index Buffer */
+        std::array<uint32_t, 36> cubeIndices
+        {{        
+            2,0,1,    2,3,0,
+            4,6,5,    4,7,6,
+            8,10,9,   8,11,10,
+            12,14,13, 12,15,14,
+            16,18,17, 16,19,18,
+            20,21,22, 20,22,23
+        }};
+
+        BufferDesc indexBufferDesc;
+        indexBufferDesc.Name = "Cube index buffer";
+        indexBufferDesc.Usage = USAGE_IMMUTABLE;
+        indexBufferDesc.BindFlags = BIND_INDEX_BUFFER;
+        indexBufferDesc.Size = sizeof(cubeIndices);
+        BufferData ibData;
+        ibData.pData = cubeIndices.data();
+        ibData.DataSize = sizeof(cubeIndices);
+        m_pDevice->CreateBuffer(indexBufferDesc, &ibData, &m_cubeIndexBuffer);
+    }
+
+    void NcGraphics3Impl::UpdateCube02()
+    {
+        using namespace Diligent;
+    }
+
+    void NcGraphics3Impl::UpdateTexturedCube03()
+    {
+        using namespace Diligent;
+    }
+
+    void NcGraphics3Impl::RenderTriangle01()
+    {
+        using namespace Diligent;
+        m_pImmediateContext->SetPipelineState(m_pPSO);
+
+        DrawAttribs drawAttribs;
+        drawAttribs.NumVertices = 3;
+        m_pImmediateContext->Draw(drawAttribs);
+    }
+
+    void NcGraphics3Impl::RenderCube02()
+    {
+        using namespace Diligent;
+
+        /* Bind vertex and index buffers */
+        const uint64_t offset = 0;
+        std::array<IBuffer*, 1> pBuffs = {m_cubeVertexBuffer};
+        m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
+        m_pImmediateContext->SetIndexBuffer(m_cubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        /* Set the pipeline state. */ 
+        m_pImmediateContext->SetPipelineState(m_pPSOCube);
+
+        /* Commit shader resources. RESOURCE_STATE_TRANSITION_MODE_TRANSITION mode makes sure that resources are transitioned to required states. */
+        m_pImmediateContext->CommitShaderResources(m_pCubeSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        DrawIndexedAttribs drawIndexedAttribs;
+        drawIndexedAttribs.IndexType = VT_UINT32;
+        drawIndexedAttribs.NumIndices = 36;
+        drawIndexedAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
+        
+        m_pImmediateContext->DrawIndexed(drawIndexedAttribs);
+    }
+
+    void NcGraphics3Impl::RenderTexturedCube03()
+    {
+        using namespace Diligent;
+    }
+
+    void NcGraphics3Impl::AddTextures(const asset::TextureUpdateEventData& assetData)
+    {
+        switch (assetData.updateAction)
+        {
+            case asset::UpdateAction::Load:
+            {
+                m_textures.assign(assetData.data.begin(), assetData.data.end());
+                break;
+            }
+            case asset::UpdateAction::Unload:
+            {
+                /** @todo: m_textures.Remove(assetData.data); */
+                break;
+            }
+            case asset::UpdateAction::UnloadAll:
+            {
+                m_textures.clear();
+                break;
+            }
         }
     }
 
@@ -481,6 +686,7 @@ namespace nc::graphics
     void NcGraphics3Impl::Update()
     {
         const float dt = time::DeltaTime();
+
         auto modelTransform = DirectX::XMMatrixRotationY(dt * 10.0f) * DirectX::XMMatrixRotationX(-DirectX::XM_PI);
         auto view = DirectX::XMMatrixTranslation(0.0f, 0.0f, -10.0f);
         auto srfPreTransform = GetSurfacePretransformMatrixInternal(DirectX::XMVectorSet(0, 0, 1, 1), m_pSwapChain.ConstPtr());
@@ -504,37 +710,16 @@ namespace nc::graphics
         m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
          /* Tutorial 1 */
-         m_pImmediateContext->SetPipelineState(m_pPSO);
+         RenderTriangle01();
 
-         DrawAttribs drawAttribs;
-         drawAttribs.NumVertices = 3;
-         m_pImmediateContext->Draw(drawAttribs);
-
-        /* Tutorial 2 */
+        /* Map the buffer and write current world-view-projection matrix */
         {
-            /* Map the buffer and write current world-view-projection matrix */
             MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
             *cbConstants = m_worldViewProj;
         }
 
-        /* Bind vertex and index buffers */
-        const uint64_t offset = 0;
-        std::array<IBuffer*, 1> pBuffs = {m_CubeVertexBuffer};
-        m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
-        m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-        /* Set the pipeline state. */ 
-        m_pImmediateContext->SetPipelineState(m_pPSOCube);
-
-        /* Commit shader resources. RESOURCE_STATE_TRANSITION_MODE_TRANSITION mode makes sure that resources are transitioned to required states. */
-        m_pImmediateContext->CommitShaderResources(m_pSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-        DrawIndexedAttribs drawIndexedAttribs;
-        drawIndexedAttribs.IndexType = VT_UINT32;
-        drawIndexedAttribs.NumIndices = 36;
-        drawIndexedAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
-        
-        m_pImmediateContext->DrawIndexed(drawIndexedAttribs);
+        /* Tutorial 2 */
+        RenderCube02();
 
         m_pSwapChain->Present();
     }
