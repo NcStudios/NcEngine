@@ -15,6 +15,11 @@ namespace nc
 struct SystemEvents;
 class Registry;
 
+namespace asset
+{
+class PhysicsAssetLoader;
+} // namespace asset
+
 namespace config
 {
 struct PhysicsSettings;
@@ -68,6 +73,8 @@ struct NcPhysics : public Module
     virtual void RegisterClickable(IClickable* clickable) = 0;
     virtual void UnregisterClickable(IClickable* clickable) noexcept = 0;
     virtual auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* = 0;
+
+    virtual auto GetAssetLoader() const -> const asset::PhysicsAssetLoader& = 0;
 };
 
 /** @brief Build an NcPhysics module instance. */

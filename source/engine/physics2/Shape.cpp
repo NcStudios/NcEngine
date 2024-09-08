@@ -43,11 +43,11 @@ auto NormalizeScaleForShape(nc::physics::ShapeType shape,
     auto allowedScale = ClampScale(newScale);
     switch (shape)
     {
-        case nc::physics::ShapeType::Box:
+        case ShapeType::Box:
         {
             break;
         }
-        case nc::physics::ShapeType::Sphere:
+        case ShapeType::Sphere:
         {
             if (!HasUniformElements(allowedScale))
             {
@@ -56,13 +56,18 @@ auto NormalizeScaleForShape(nc::physics::ShapeType shape,
 
             break;
         }
-        case nc::physics::ShapeType::Capsule:
+        case ShapeType::Capsule:
         {
             if (!FloatEqual(allowedScale.x, allowedScale.z))
             {
                 FixCapsuleScale(currentScale, allowedScale);
             }
 
+            break;
+        }
+        case ShapeType::ConvexHull:
+        {
+            // todo: not sure what's needed
             break;
         }
         default:

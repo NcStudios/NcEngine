@@ -33,6 +33,7 @@ class NcPhysicsStub : public nc::physics::NcPhysics
         void RegisterClickable(IClickable*) override {}
         void UnregisterClickable(IClickable*) noexcept override {}
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr;}
+        auto GetAssetLoader() const -> const nc::asset::PhysicsAssetLoader& override { throw nc::NcError{"Not Implemented"}; }
 
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
@@ -101,6 +102,11 @@ void NcPhysicsImpl::UnregisterClickable(IClickable* clickable) noexcept
 auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
 {
     return m_clickableSystem.RaycastToClickables(mask);
+}
+
+auto NcPhysicsImpl::GetAssetLoader() const -> const asset::PhysicsAssetLoader&
+{
+    throw nc::NcError{"Not Implemented"};
 }
 
 void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)

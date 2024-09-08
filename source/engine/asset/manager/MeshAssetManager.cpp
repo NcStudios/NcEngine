@@ -174,4 +174,20 @@ auto MeshAssetManager::OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData
 {
     return m_onBoneUpdate;
 }
+
+auto MeshAssetManager::GetMeshData(std::string_view path) const -> NamedMesh
+{
+    const auto& view = m_accessors.at(path);
+    return NamedMesh{
+        std::span<const asset::MeshVertex>{
+            m_vertexData.begin() + view.firstVertex,
+            view.vertexCount
+        },
+        std::span<const uint32_t>{
+            m_indexData.begin() + view.firstIndex,
+            view.indexCount
+        },
+        std::string{path}
+    };
+}
 } // namespace nc::asset

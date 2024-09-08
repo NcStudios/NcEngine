@@ -7,6 +7,7 @@
 #include "Assets.h"
 #include "ncasset/Assets.h"
 
+#include <any>
 #include <span>
 #include <string>
 #include <vector>
@@ -51,6 +52,19 @@ struct MeshUpdateEventData
 {
     std::span<const asset::MeshVertex> vertices;
     std::span<const uint32_t> indices;
+};
+
+struct NamedMesh
+{
+    std::span<const asset::MeshVertex> vertices;
+    std::span<const uint32_t> indices;
+    std::string name;
+};
+
+/** @todo #712 this belongs with other assets (ncasset/Assets.h)*/
+struct ConvexHull
+{
+    std::any shape;
 };
 
 /** @brief Event data for skeletal animation load and unload operations. */

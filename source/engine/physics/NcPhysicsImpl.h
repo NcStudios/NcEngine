@@ -42,6 +42,7 @@ class NcPhysicsImpl final : public NcPhysics
         void RegisterClickable(IClickable* clickable) override;
         void UnregisterClickable(IClickable* clickable) noexcept override;
         auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
+        auto GetAssetLoader() const -> const asset::PhysicsAssetLoader& override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void Clear() noexcept override;
 

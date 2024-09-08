@@ -10,6 +10,7 @@ namespace nc::asset
 {
 struct MeshUpdateEventData;
 struct BoneUpdateEventData;
+struct NamedMesh;
 
 class MeshAssetManager : public IAssetService<MeshView, std::string>
 {
@@ -27,6 +28,7 @@ class MeshAssetManager : public IAssetService<MeshView, std::string>
         auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::Mesh; }
         auto OnBoneUpdate() -> Signal<const asset::BoneUpdateEventData&>&;
         auto OnMeshUpdate() -> Signal<const asset::MeshUpdateEventData&>&;
+        auto GetMeshData(std::string_view path) const -> NamedMesh;
 
     private:
         std::vector<asset::MeshVertex> m_vertexData;

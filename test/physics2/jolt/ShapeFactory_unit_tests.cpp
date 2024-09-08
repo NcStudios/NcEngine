@@ -1,6 +1,11 @@
 #include "gtest/gtest.h"
 #include "physics2/jolt/ShapeFactory.h"
+#include "physics2/jolt/Conversion.h"
 #include "physics2/jolt/JoltApi.h"
+
+#include "Jolt/Physics/Collision/Shape/BoxShape.h"
+#include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
+#include "Jolt/Physics/Collision/Shape/SphereShape.h"
 
 class ShapeFactoryTest : public ::testing::Test
 {
@@ -9,12 +14,13 @@ class ShapeFactoryTest : public ::testing::Test
 
     protected:
         ShapeFactoryTest()
-            : m_jolt{nc::physics::JoltApi::Initialize()}
+            : m_jolt{nc::physics::JoltApi::Initialize()},
+              uut{m_jolt.shapeFactory}
         {
         }
 
     public:
-        nc::physics::ShapeFactory uut;
+        nc::physics::ShapeFactory& uut;
 };
 
 TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)

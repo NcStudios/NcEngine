@@ -34,6 +34,7 @@ class NcPhysicsImpl2 final : public NcPhysics
         void RegisterClickable(IClickable*) override {}
         void UnregisterClickable(IClickable*) noexcept override {}
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr; }
+        auto GetAssetLoader() const -> const asset::PhysicsAssetLoader& override { return m_jolt.assetLoader; }
 
     private:
         ecs::Ecs m_ecs;

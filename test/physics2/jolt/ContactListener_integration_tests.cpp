@@ -1,8 +1,10 @@
 #include "gtest/gtest.h"
 #include "physics2/jolt/ContactListener.h"
+#include "physics2/jolt/Conversion.h"
 #include "physics2/jolt/JoltApi.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "Jolt/Physics/Collision/Shape/BoxShape.h"
 
 #include <ranges>
 
@@ -23,7 +25,7 @@ class ContactListenerTest : public ::testing::Test
 
         void Step()
         {
-            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, &joltApi.jobSystem);
+            joltApi.Update(1.0f / 60.0f, 1);
             lastOnEnter.clear();
             lastOnExit.clear();
             std::ranges::copy(uut.GetAdded(), std::back_inserter(lastOnEnter));

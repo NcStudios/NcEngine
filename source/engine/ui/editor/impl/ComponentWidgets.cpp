@@ -517,8 +517,14 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const st
 {
 }
 
-void CollisionListenerUIWidget(physics::CollisionListener&, EditorContext&, const std::any&)
+void CollisionListenerUIWidget(physics::CollisionListener& listener, EditorContext&, const std::any&)
 {
+    ImGui::BeginDisabled(true);
+    auto hasOnEnter = listener.onEnter != nullptr;
+    auto hasOnExit = listener.onExit != nullptr;
+    ui::Checkbox(hasOnEnter, "onEnter registered");
+    ui::Checkbox(hasOnExit, "onExit registered");
+    ImGui::EndDisabled();
 }
 
 void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::any&)

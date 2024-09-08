@@ -2,7 +2,9 @@
 add_executable(ContactListener_integration_tests
     ContactListener_integration_tests.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/JoltAssetLoader.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ShapeFactory.cpp
 )
 
 target_include_directories(ContactListener_integration_tests
@@ -18,6 +20,7 @@ target_compile_options(ContactListener_integration_tests
 
 target_link_libraries(ContactListener_integration_tests
     PRIVATE
+        NcAsset
         NcMath
         NcUtility
         Jolt
@@ -30,7 +33,9 @@ add_test(ContactListener_integration_tests ContactListener_integration_tests)
 add_executable(JoltApi_unit_tests
     JoltApi_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/JoltAssetLoader.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ShapeFactory.cpp
 )
 
 target_include_directories(JoltApi_unit_tests
@@ -46,6 +51,7 @@ target_compile_options(JoltApi_unit_tests
 
 target_link_libraries(JoltApi_unit_tests
     PRIVATE
+        NcAsset
         NcMath
         NcUtility
         Jolt
@@ -136,6 +142,8 @@ add_executable(ShapeFactory_unit_tests
     ShapeFactory_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/JoltAssetLoader.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ShapeFactory.cpp
 )
 
 target_include_directories(ShapeFactory_unit_tests
@@ -151,6 +159,7 @@ target_compile_options(ShapeFactory_unit_tests
 
 target_link_libraries(ShapeFactory_unit_tests
     PRIVATE
+        NcAsset # don't want this ??
         NcMath
         NcUtility
         Jolt

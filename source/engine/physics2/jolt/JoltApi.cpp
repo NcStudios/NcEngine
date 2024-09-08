@@ -29,7 +29,8 @@ JoltApi::~JoltApi() noexcept
 }
 
 JoltApi::JoltApi()
-    : contactListener{physicsSystem}
+    : contactListener{physicsSystem},
+      assetLoader{shapeFactory}
 {
     physicsSystem.Init(
         maxBodies,

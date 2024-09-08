@@ -1,6 +1,7 @@
 #include "NcAssetImpl.h"
-#include "asset/AssetData.h"
-#include "config/Config.h"
+#include "ncengine/asset/AssetData.h"
+#include "ncengine/asset/AssetLoader.h"
+#include "ncengine/config/Config.h"
 #include "manager/AudioClipAssetManager.h"
 #include "manager/ConcaveColliderAssetManager.h"
 #include "manager/CubeMapAssetManager.h"
@@ -115,5 +116,23 @@ auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
     });
 
     return out;
+}
+
+void NcAssetImpl::SetLoader(const PhysicsAssetLoader& loader)
+{
+    m_physicsAssetLoader = &loader;
+}
+
+void NcAssetImpl::ConvertToConvexHull(std::string_view mesh)
+{
+    if (!m_physicsAssetLoader)
+    {
+        throw NcError("A physics asset loader is not registered");
+    }
+
+    const auto in = m_meshManager->GetMeshData(mesh);
+    const auto out = m_physicsAssetLoader->ConvertToConvexHull(in);
+    (void)out;
+    /** @todo #712 send out to hull manager */
 }
 } // namespace nc::asset

@@ -17,7 +17,8 @@ constexpr auto g_bodyTypeNames = std::array{
 constexpr auto g_shapeTypeNames = std::array{
     "Box"sv,
     "Sphere"sv,
-    "Capsule"sv
+    "Capsule"sv,
+    "ConvexHull"sv
 };
 } // anonymous namespace
 

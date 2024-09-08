@@ -53,10 +53,16 @@ auto BuildModuleRegistry(Registry* registry,
                                                                ModuleProvider{moduleRegistry.get()},
                                                                registry,
                                                                events));
-    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
+    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings,
+                                                             registry,
+                                                             events));
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));
     moduleRegistry->Register(std::make_unique<nc::Random>());
+
+    auto ncAsset = moduleRegistry->Get<asset::NcAsset>();
+    auto ncPhysics = moduleRegistry->Get<physics::NcPhysics>();
+    ncAsset->SetLoader(ncPhysics->GetAssetLoader());
     return moduleRegistry;
 }
 } // namespace nc

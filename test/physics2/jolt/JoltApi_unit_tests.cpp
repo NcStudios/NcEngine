@@ -1,5 +1,5 @@
-#include "physics2/jolt/JoltApi.h"
 #include "gtest/gtest.h"
+#include "physics2/jolt/JoltApi.h"
 
 TEST(JoltApiIntegrationTest, Initialize_succeeds)
 {

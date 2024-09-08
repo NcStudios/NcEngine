@@ -8,6 +8,10 @@
 
 #include <iostream>
 
+
+
+#include "ncengine/asset/NcAsset.h"
+
 struct Args
 {
     bool runSmokeTest = false;
@@ -48,6 +52,13 @@ int main(int argc, char** argv)
         const auto config = nc::config::Load(args.configPath);
         engine = nc::InitializeNcEngine(config);
         nc::sample::InitializeResources();
+
+
+        engine->GetModuleRegistry()->Get<nc::asset::NcAsset>()->ConvertToConvexHull("tree.nca");
+
+
+
+
 
         if (args.runSmokeTest)
         {

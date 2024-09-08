@@ -62,10 +62,10 @@ auto GetMeshView(nc::physics::ColliderType type) -> nc::asset::MeshView
 }
 
 [[maybe_unused]]
-auto GetMeshView(nc::physics::ShapeType shape) -> nc::asset::MeshView
+auto GetMeshView(const nc::physics::Shape& shape) -> nc::asset::MeshView
 {
     using namespace nc::asset;
-    switch(shape)
+    switch(shape.GetType())
     {
         case nc::physics::ShapeType::Box:
         {
@@ -81,6 +81,10 @@ auto GetMeshView(nc::physics::ShapeType shape) -> nc::asset::MeshView
         {
             static const auto view = AssetService<MeshView>::Get()->Acquire(CapsuleMesh);
             return view;
+        }
+        case nc::physics::ShapeType::ConvexHull:
+        {
+            return AssetService<MeshView>::Get()->Acquire(std::string{shape.GetAssetPath()});
         }
         default:
         {
@@ -164,7 +168,7 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
 
                 const auto& body = worldView.Get<physics::RigidBody>(renderer.target);
                 const auto& shape = body.GetShape();
-                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, shape, body.ScalesWithTransform()), GetMeshView(shape.GetType()), renderer.color);
+                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, shape, body.ScalesWithTransform()), GetMeshView(shape), renderer.color);
 #else
                 if (!worldView.Contains<physics::Collider>(renderer.target))
                 {

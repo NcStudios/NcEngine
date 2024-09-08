@@ -41,6 +41,8 @@ class NcAssetImpl : public NcAsset
         auto OnFontUpdate() noexcept -> Signal<>& override;
         void LoadAssets(const AssetMap& assets) override;
         auto GetLoadedAssets() const noexcept -> AssetMap override;
+        void SetLoader(const PhysicsAssetLoader& loader) override;
+        void ConvertToConvexHull(std::string_view mesh) override;
 
     private:
         std::unique_ptr<AudioClipAssetManager> m_audioClipManager;
@@ -52,6 +54,7 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<TextureAssetManager> m_textureManager;
         std::unique_ptr<FontAssetManager> m_fontManager;
         AssetMap m_defaults;
+        const PhysicsAssetLoader* m_physicsAssetLoader = nullptr;
 };
 } // namespace asset
 } // namespace nc

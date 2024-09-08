@@ -369,7 +369,8 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
 
     auto wormMaterial = GreenToonMaterial;
     wormMaterial.outlineWidth = 1;
-    world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, wormMaterial);
+    // world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, wormMaterial);
+    world.Emplace<graphics::ToonRenderer>(head, "tree.nca", wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment3, asset::CubeMesh, wormMaterial);
@@ -389,7 +390,8 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
     world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
 
-    world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox());
+    // world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(head, physics::Shape::MakeConvexHull("tree.nca"));
     world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
     world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
     world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());

@@ -22,6 +22,7 @@ class NcPhysicsStub2 : public nc::physics::NcPhysics
         void RegisterClickable(nc::physics::IClickable*) override {}
         void UnregisterClickable(nc::physics::IClickable*) noexcept override {}
         auto RaycastToClickables(nc::physics::LayerMask) -> nc::physics::IClickable* override { return nullptr;}
+        auto GetAssetLoader() const -> const nc::asset::PhysicsAssetLoader& override { throw nc::NcError{"Not Implemented"}; }
 
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {

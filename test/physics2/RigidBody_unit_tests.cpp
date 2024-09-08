@@ -22,7 +22,7 @@ class NcPhysicsImpl2
 
 constexpr auto g_entity = nc::Entity{0, 0, nc::Entity::Flags::None};
 constexpr auto g_staticEntity = nc::Entity{0, 0, nc::Entity::Flags::Static};
-constexpr auto g_shape = nc::physics::Shape::MakeBox();
+const auto g_shape = nc::physics::Shape::MakeBox();
 
 constexpr auto g_dynamicInfo = nc::physics::RigidBodyInfo{
     .type = nc::physics::BodyType::Dynamic

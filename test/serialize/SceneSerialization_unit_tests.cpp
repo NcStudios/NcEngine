@@ -21,6 +21,8 @@ class NcAssetMock : public NcAsset
         auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
         auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override { return m_textureSignal; }
         auto OnFontUpdate() noexcept -> Signal<>& override { return m_fontSignal; }
+        void SetLoader(const PhysicsAssetLoader&) override {}
+        void ConvertToConvexHull(std::string_view) override {}
 
         // Mocks
         void LoadAssets(const AssetMap& assets) override

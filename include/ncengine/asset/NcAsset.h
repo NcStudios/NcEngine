@@ -24,6 +24,7 @@ struct CubeMapUpdateEventData;
 struct MeshUpdateEventData;
 struct SkeletalAnimationUpdateEventData;
 struct TextureUpdateEventData;
+class PhysicsAssetLoader;
 
 /** @brief A map of AssetType to a list of asset paths of that type. */
 using AssetMap = std::unordered_map<asset::AssetType, std::vector<std::string>>;
@@ -55,6 +56,10 @@ class NcAsset : public Module
 
         /** @brief Get the names of all loaded assets as an AssetMap. */
         virtual auto GetLoadedAssets() const noexcept -> AssetMap = 0;
+
+
+        virtual void SetLoader(const PhysicsAssetLoader& loader) = 0;
+        virtual void ConvertToConvexHull(std::string_view mesh) = 0;
 };
 
 /**
