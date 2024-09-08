@@ -69,6 +69,11 @@ elseif(APPLE)
     )
 endif()
 
+target_link_libraries(${NC_ENGINE_LIB}
+    PUBLIC
+        Diligent-GraphicsTools
+        Diligent-TargetPlatform
+)
 
 if(D3D11_SUPPORTED)
     target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)

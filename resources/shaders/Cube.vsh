@@ -9,7 +9,7 @@ struct VSInput
     float4 Color : ATTRIB1;
 };
 
-struct PSINPUT
+struct PSInput
 {
     float4 Pos   : SV_POSITION;
     float4 Color : COLOR0;

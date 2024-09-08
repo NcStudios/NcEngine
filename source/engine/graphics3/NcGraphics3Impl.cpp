@@ -23,7 +23,7 @@
 #include "optick.h"
 #include "DirectXMath.h"
 
-// #include "Graphics/GraphicsTools/interface/MapHelper.hpp"
+#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
 
 namespace
 {
@@ -70,70 +70,70 @@ namespace
         void ClearEnvironment() override {}
     };
 
-    // DirectX::XMMATRIX GetSurfacePretransformMatrixInternal(const DirectX::XMVECTOR& f3CameraViewAxis,
-    //                                                        const Diligent::RefCntAutoPtr<Diligent::ISwapChain>& swapchain)
-    // {
-    //     const auto& SCDesc = swapchain->GetDesc();
-    //     switch (SCDesc.PreTransform)
-    //     {
-    //         case Diligent::SURFACE_TRANSFORM_ROTATE_90:
-    //             // The image content is rotated 90 degrees clockwise.
-    //             return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI / 2.f);
+    DirectX::XMMATRIX GetSurfacePretransformMatrixInternal(const DirectX::XMVECTOR& f3CameraViewAxis,
+                                                           const Diligent::ISwapChain* swapchain)
+    {
+        const auto& SCDesc = swapchain->GetDesc();
+        switch (SCDesc.PreTransform)
+        {
+            case Diligent::SURFACE_TRANSFORM_ROTATE_90:
+                // The image content is rotated 90 degrees clockwise.
+                return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI / 2.f);
 
-    //         case Diligent::SURFACE_TRANSFORM_ROTATE_180:
-    //             // The image content is rotated 180 degrees clockwise.
-    //             return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI);
+            case Diligent::SURFACE_TRANSFORM_ROTATE_180:
+                // The image content is rotated 180 degrees clockwise.
+                return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI);
 
-    //         case Diligent::SURFACE_TRANSFORM_ROTATE_270:
-    //             // The image content is rotated 270 degrees clockwise.
-    //             return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI * 3.f / 2.f);
+            case Diligent::SURFACE_TRANSFORM_ROTATE_270:
+                // The image content is rotated 270 degrees clockwise.
+                return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI * 3.f / 2.f);
 
-    //         case Diligent::SURFACE_TRANSFORM_OPTIMAL:
-    //             UNEXPECTED("SURFACE_TRANSFORM_OPTIMAL is only valid as parameter during swap chain initialization.");
-    //             return DirectX::XMMatrixIdentity();
+            case Diligent::SURFACE_TRANSFORM_OPTIMAL:
+                UNEXPECTED("SURFACE_TRANSFORM_OPTIMAL is only valid as parameter during swap chain initialization.");
+                return DirectX::XMMatrixIdentity();
 
-    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR:
-    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90:
-    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180:
-    //         case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270:
-    //             UNEXPECTED("Mirror transforms are not supported");
-    //             return DirectX::XMMatrixIdentity();
+            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR:
+            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90:
+            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180:
+            case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270:
+                UNEXPECTED("Mirror transforms are not supported");
+                return DirectX::XMMatrixIdentity();
 
-    //         default:
-    //             return DirectX::XMMatrixIdentity();
-    //     }
-    // }
+            default:
+                return DirectX::XMMatrixIdentity();
+        }
+    }
 
-    // DirectX::XMMATRIX GetAdjustedProjectionMatrix(float FOV,
-    //                                               float NearPlane,
-    //                                               float FarPlane,
-    //                                               const Diligent::RefCntAutoPtr<Diligent::ISwapChain>& swapchain)
-    // {
-    //     const auto& SCDesc = swapchain->GetDesc();
+    DirectX::XMMATRIX GetAdjustedProjectionMatrix(float FOV,
+                                                  float NearPlane,
+                                                  float FarPlane,
+                                                  const Diligent::ISwapChain* swapchain)
+    {
+        const auto& SCDesc = swapchain->GetDesc();
 
-    //     float AspectRatio = static_cast<float>(SCDesc.Width) / static_cast<float>(SCDesc.Height);
-    //     float XScale, YScale;
-    //     if (SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_90 ||
-    //         SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_270 ||
-    //         SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90 ||
-    //         SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270)
-    //     {
-    //         // When the screen is rotated, vertical FOV becomes horizontal FOV
-    //         XScale = 1.f / std::tan(FOV / 2.f);
-    //         // Aspect ratio is inversed
-    //         YScale = XScale * AspectRatio;
-    //     }
-    //     else
-    //     {
-    //         YScale = 1.f / std::tan(FOV / 2.f);
-    //         XScale = YScale / AspectRatio;
-    //     }
+        float AspectRatio = static_cast<float>(SCDesc.Width) / static_cast<float>(SCDesc.Height);
+        float XScale, YScale;
+        if (SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_90 ||
+            SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_270 ||
+            SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90 ||
+            SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270)
+        {
+            // When the screen is rotated, vertical FOV becomes horizontal FOV
+            XScale = 1.f / std::tan(FOV / 2.f);
+            // Aspect ratio is inversed
+            YScale = XScale * AspectRatio;
+        }
+        else
+        {
+            YScale = 1.f / std::tan(FOV / 2.f);
+            XScale = YScale / AspectRatio;
+        }
 
-    //     auto perspective = DirectX::XMMatrixPerspectiveFovRH(FOV, AspectRatio, NearPlane, FarPlane);
-    //     perspective.r[0].m128_f32[0] = XScale;
-    //     perspective.r[1].m128_f32[1] = YScale;
-    //     return perspective;
-    // }
+        auto perspective =
+            DirectX::XMMatrixPerspectiveFovRH(FOV, 1.0, NearPlane, FarPlane) *
+            DirectX::XMMatrixScaling(XScale, YScale, 1.0f);
+        return perspective;
+    }
 
 } // anonymous namespace
 
@@ -184,6 +184,7 @@ namespace nc::graphics
         using namespace Diligent;
 
         ImGui::CreateContext();
+
         /* TUTORIAL 01*/
         /* Initialize Diligent Engine */
         SwapChainDesc SCDesc;
@@ -246,119 +247,121 @@ namespace nc::graphics
         m_pDevice->CreateGraphicsPipelineState(psoCI, &m_pPSO);
 
         // /* TUTORIAL 02*/
-        // /* Create Pipeline */
-        // GraphicsPipelineStateCreateInfo psoCubeCI;
-        // psoCubeCI.PSODesc.Name = "Cube PSO";
-        // psoCubeCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+        /* Create Pipeline */
+        GraphicsPipelineStateCreateInfo psoCubeCI;
+        psoCubeCI.PSODesc.Name = "Cube PSO";
+        psoCubeCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
 
-        // psoCubeCI.GraphicsPipeline.NumRenderTargets             = 1;
-        // psoCubeCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
-        // psoCubeCI.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
-        // psoCubeCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
-        // psoCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+        psoCubeCI.GraphicsPipeline.NumRenderTargets             = 1;
+        psoCubeCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
+        psoCubeCI.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
+        psoCubeCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
+        psoCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
 
-        // /* Shaders */
-        // auto vertPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.vsh")).string();
-        // auto fragPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.psh")).string();
+        /* Shaders */
+        auto vertPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.vsh")).string();
+        auto fragPathCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("Cube.psh")).string();
 
-        // RefCntAutoPtr<IShader> pVSCube;
-        // {
-        //     shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
-        //     shaderCI.EntryPoint      = "main";
-        //     shaderCI.Desc.Name       = "Cube Vertex";
-        //     shaderCI.FilePath        = vertPathCube.data();
-        //     shaderCI.SourceLength    = vertPathCube.size();
-        //     shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
-        //     m_pDevice->CreateShader(shaderCI, &pVS);
-        // }
+        RefCntAutoPtr<IShader> pVSCube;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Cube Vertex";
+            shaderCI.FilePath        = vertPathCube.data();
+            shaderCI.SourceLength    = vertPathCube.size();
+            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+            m_pDevice->CreateShader(shaderCI, &pVSCube);
 
-        // RefCntAutoPtr<IShader> pPSCube;
-        // {
-        //     shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
-        //     shaderCI.EntryPoint      = "main";
-        //     shaderCI.Desc.Name       = "Cube Fragment";
-        //     shaderCI.FilePath        = fragPathCube.data();
-        //     shaderCI.SourceLength    = fragPathCube.size();
-        //     shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
-        //     m_pDevice->CreateShader(shaderCI, &pPS);
-        // }
+            /* Constant buffer holding MVP matrix */
+            BufferDesc cbDesc;
+            cbDesc.Name = "VS Constants CB";
+            cbDesc.Size = sizeof(DirectX::XMMATRIX);
+            cbDesc.Usage = USAGE_DYNAMIC;
+            cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
+            cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
+            m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
+        }
 
-        // psoCubeCI.pVS = pVSCube;
-        // psoCubeCI.pPS = pPSCube;
+        RefCntAutoPtr<IShader> pPSCube;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Cube Fragment";
+            shaderCI.FilePath        = fragPathCube.data();
+            shaderCI.SourceLength    = fragPathCube.size();
+            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+            m_pDevice->CreateShader(shaderCI, &pPSCube);
+        }
 
-        // psoCubeCI.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+        psoCubeCI.pVS = pVSCube;
+        psoCubeCI.pPS = pPSCube;
 
-        // /* Input layout for vertices */
-        // std::array<LayoutElement, 2> layoutElems =
-        // {
-        //     LayoutElement{0, 0, 3, VT_FLOAT32, false}, // Position, Attribute 0
-        //     LayoutElement{1, 0, 4, VT_FLOAT32, false}  // Color, Attribute 1
-        // };
+        psoCubeCI.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-        // psoCubeCI.GraphicsPipeline.InputLayout.LayoutElements = layoutElems.data();
-        // psoCubeCI.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(layoutElems.size());
+        /* Input layout for vertices */
+        std::array<LayoutElement, 2> layoutElems =
+        {
+            LayoutElement{0, 0, 3, VT_FLOAT32, false}, // Position, Attribute 0
+            LayoutElement{1, 0, 4, VT_FLOAT32, false}  // Color, Attribute 1
+        };
 
-        // m_pDevice->CreateGraphicsPipelineState(psoCubeCI, &m_pPSOCube);
+        psoCubeCI.GraphicsPipeline.InputLayout.LayoutElements = layoutElems.data();
+        psoCubeCI.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(layoutElems.size());
 
-        // /* Resources */
-        // /* Constant buffer holding MVP matrix */
-        // BufferDesc cbDesc;
-        // cbDesc.Name = "VS Constants CB";
-        // cbDesc.Size = sizeof(DirectX::XMMATRIX);
-        // cbDesc.Usage = USAGE_DYNAMIC;
-        // cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
-        // cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
-        // m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
+        m_pDevice->CreateGraphicsPipelineState(psoCubeCI, &m_pPSOCube);
 
-        // m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
+        /* Resources */
 
-        // // Create a shader resource binding object and bind all static resources in it
-        // m_pPSOCube->CreateShaderResourceBinding(&m_pSRB, true);
 
-        // /** Create vertex buffer */
-        // std::array<DiligentVertexType, 8> cubeVerts = 
-        // {{
-        //     {DirectX::XMFLOAT3(-1,-1,-1), DirectX::XMFLOAT4(1,0,0,1)},
-        //     {DirectX::XMFLOAT3(-1,+1,-1), DirectX::XMFLOAT4(0,1,0,1)},
-        //     {DirectX::XMFLOAT3(+1,+1,-1), DirectX::XMFLOAT4(0,0,1,1)},
-        //     {DirectX::XMFLOAT3(+1,-1,-1), DirectX::XMFLOAT4(1,1,1,1)},
+        m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
 
-        //     {DirectX::XMFLOAT3(-1,-1,+1), DirectX::XMFLOAT4(1,1,0,1)},
-        //     {DirectX::XMFLOAT3(-1,+1,+1), DirectX::XMFLOAT4(0,1,1,1)},
-        //     {DirectX::XMFLOAT3(+1,+1,+1), DirectX::XMFLOAT4(1,0,1,1)},
-        //     {DirectX::XMFLOAT3(+1,-1,+1), DirectX::XMFLOAT4(0.2f,0.2f,0.2f,1)}
-        // }};
+        // Create a shader resource binding object and bind all static resources in it
+        m_pPSOCube->CreateShaderResourceBinding(&m_pSRB, true);
 
-        // BufferDesc vertexBufferDesc;
-        // vertexBufferDesc.Name = "Cube Vertex Buffer";
-        // vertexBufferDesc.Usage = USAGE_IMMUTABLE;
-        // vertexBufferDesc.BindFlags = BIND_VERTEX_BUFFER;
-        // vertexBufferDesc.Size = sizeof(cubeVerts);
-        // BufferData vertexBufferData;
-        // vertexBufferData.pData = cubeVerts.data();
-        // vertexBufferData.DataSize = sizeof(cubeVerts);
-        // m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_CubeVertexBuffer);
+        /** Create vertex buffer */
+        std::array<DiligentVertexType, 8> cubeVerts = 
+        {{
+            {DirectX::XMFLOAT3(-1,-1,-1), DirectX::XMFLOAT4(1,0,0,1)},
+            {DirectX::XMFLOAT3(-1,+1,-1), DirectX::XMFLOAT4(0,1,0,1)},
+            {DirectX::XMFLOAT3(+1,+1,-1), DirectX::XMFLOAT4(0,0,1,1)},
+            {DirectX::XMFLOAT3(+1,-1,-1), DirectX::XMFLOAT4(1,1,1,1)},
 
-        // /** Create index buffer */
-        // constexpr std::array<uint32_t, 36> cubeIndices =
-        // {
-        //     2,0,1, 2,3,0,
-        //     4,6,5, 4,7,6,
-        //     0,7,4, 0,3,7,
-        //     1,0,4, 1,4,5,
-        //     1,5,2, 5,6,2,
-        //     3,6,7, 3,2,6
-        // };
+            {DirectX::XMFLOAT3(-1,-1,+1), DirectX::XMFLOAT4(1,1,0,1)},
+            {DirectX::XMFLOAT3(-1,+1,+1), DirectX::XMFLOAT4(0,1,1,1)},
+            {DirectX::XMFLOAT3(+1,+1,+1), DirectX::XMFLOAT4(1,0,1,1)},
+            {DirectX::XMFLOAT3(+1,-1,+1), DirectX::XMFLOAT4(0.2f,0.2f,0.2f,1)}
+        }};
 
-        // BufferDesc indexBufferDesc;
-        // vertexBufferDesc.Name = "Cube Index Buffer";
-        // vertexBufferDesc.Usage = USAGE_IMMUTABLE;
-        // vertexBufferDesc.BindFlags = BIND_INDEX_BUFFER;
-        // vertexBufferDesc.Size = sizeof(cubeIndices);
-        // BufferData indexBufferData;
-        // indexBufferData.pData = cubeVerts.data();
-        // indexBufferData.DataSize = sizeof(cubeVerts);
-        // m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_CubeIndexBuffer);
+        BufferDesc vertexBufferDesc;
+        vertexBufferDesc.Name = "Cube Vertex Buffer";
+        vertexBufferDesc.Usage = USAGE_IMMUTABLE;
+        vertexBufferDesc.BindFlags = BIND_VERTEX_BUFFER;
+        vertexBufferDesc.Size = sizeof(cubeVerts);
+        BufferData vertexBufferData;
+        vertexBufferData.pData = cubeVerts.data();
+        vertexBufferData.DataSize = sizeof(cubeVerts);
+        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_CubeVertexBuffer);
+
+        /** Create index buffer */
+        constexpr std::array<uint32_t, 36> cubeIndices =
+        {
+            2,0,1, 2,3,0,
+            4,6,5, 4,7,6,
+            0,7,4, 0,3,7,
+            1,0,4, 1,4,5,
+            1,5,2, 5,6,2,
+            3,6,7, 3,2,6
+        };
+
+        BufferDesc indexBufferDesc;
+        indexBufferDesc.Name = "Cube Index Buffer";
+        indexBufferDesc.Usage = USAGE_IMMUTABLE;
+        indexBufferDesc.BindFlags = BIND_INDEX_BUFFER;
+        indexBufferDesc.Size = sizeof(cubeIndices);
+        BufferData indexBufferData;
+        indexBufferData.pData = cubeIndices.data();
+        indexBufferData.DataSize = sizeof(cubeIndices);
+        m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_CubeIndexBuffer);
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()
@@ -432,18 +435,20 @@ namespace nc::graphics
 
     void NcGraphics3Impl::Update()
     {
-        // auto dt = time::DeltaTime();
-        // auto modelTransform = DirectX::XMMatrixRotationY(dt) * DirectX::XMMatrixRotationX(-DirectX::XM_PI * 0.1f);
-        // auto view = DirectX::XMMatrixTranslation(0.0f, 0.0f, 5.0f);
-        // auto srfPreTransform = GetSurfacePretransformMatrixInternal(DirectX::XMVectorSet(0, 0, 1, 0), m_pSwapChain);
-        // auto proj = GetAdjustedProjectionMatrix(DirectX::XM_PI / 4.0f, 0.1f, 100.0f, m_pSwapChain);
-        // m_worldViewProj = modelTransform * view * srfPreTransform * proj;
+        const float dt = time::DeltaTime();
+        auto modelTransform = DirectX::XMMatrixRotationY(dt * 10.0f) * DirectX::XMMatrixRotationX(-DirectX::XM_PI);
+        auto view = DirectX::XMMatrixTranslation(0.0f, 0.0f, -10.0f);
+        auto srfPreTransform = GetSurfacePretransformMatrixInternal(DirectX::XMVectorSet(0, 0, 1, 1), m_pSwapChain.ConstPtr());
+        auto proj = GetAdjustedProjectionMatrix(DirectX::XM_PI / 4.0f,
+                                                0.1f,
+                                                100.0f,
+                                                m_pSwapChain.ConstPtr());
+        m_worldViewProj = modelTransform * view * srfPreTransform * proj;
     }
 
     void NcGraphics3Impl::Run()
     {
         OPTICK_CATEGORY("Render", Optick::Category::Rendering);
-
         using namespace Diligent;
         auto* pRTV = m_pSwapChain->GetCurrentBackBufferRTV();
         auto* pDSV = m_pSwapChain->GetDepthBufferDSV();
@@ -453,37 +458,38 @@ namespace nc::graphics
         m_pImmediateContext->ClearRenderTarget(pRTV, clearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        /** Tutorial 1 */
-        m_pImmediateContext->SetPipelineState(m_pPSO);
+         /** Tutorial 1 */
+         m_pImmediateContext->SetPipelineState(m_pPSO);
 
-        DrawAttribs drawAttribs;
-        drawAttribs.NumVertices = 3;
-        m_pImmediateContext->Draw(drawAttribs);
+         DrawAttribs drawAttribs;
+         drawAttribs.NumVertices = 3;
+         m_pImmediateContext->Draw(drawAttribs);
 
         /** Tutorial 2 */
+        {
+            /* Map the buffer and write current world-view-projection matrix */
+            MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
+            *cbConstants = m_worldViewProj;
+        }
 
-        /* Map the buffer and write current world-view-projection matrix */
-        // MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
-        // *cbConstants = m_worldViewProj;
+        /* Bind vertex and index buffers */
+        const uint64_t offset = 0;
+        std::array<IBuffer*, 1> pBuffs = {m_CubeVertexBuffer};
+        m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
+        m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        // /* Bind vertex and index buffers */
-        // const uint64_t offset = 0;
-        // std::array<IBuffer*, 1> pBuffs = {m_CubeVertexBuffer};
-        // m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
-        // m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        /* Set the pipeline state. */ 
+        m_pImmediateContext->SetPipelineState(m_pPSOCube);
 
-        // /* Set the pipeline state. */ 
-        // m_pImmediateContext->SetPipelineState(m_pPSOCube);
+        /* Commit shader resources. RESOURCE_STATE_TRANSITION_MODE_TRANSITION mode makes sure that resources are transitioned to required states. */
+        m_pImmediateContext->CommitShaderResources(m_pSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        // /* Commit shader resources. RESOURCE_STATE_TRANSITION_MODE_TRANSITION mode makes sure that resources are transitioned to required states. */
-        // m_pImmediateContext->CommitShaderResources(m_pSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-        // DrawIndexedAttribs drawIndexedAttribs;
-        // drawIndexedAttribs.IndexType = VT_UINT32;
-        // drawIndexedAttribs.NumIndices = 36;
-        // drawIndexedAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
+        DrawIndexedAttribs drawIndexedAttribs;
+        drawIndexedAttribs.IndexType = VT_UINT32;
+        drawIndexedAttribs.NumIndices = 36;
+        drawIndexedAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
         
-        // m_pImmediateContext->DrawIndexed(drawIndexedAttribs);
+        m_pImmediateContext->DrawIndexed(drawIndexedAttribs);
 
         m_pSwapChain->Present();
     }
