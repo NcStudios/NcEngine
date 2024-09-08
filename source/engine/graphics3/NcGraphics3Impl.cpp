@@ -157,7 +157,6 @@ namespace nc::graphics
             NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
-
             
             NC_LOG_TRACE("Building NcGraphics module");
             return std::make_unique<NcGraphics3Impl>(graphicsSettings, memorySettings, registry, modules, events, *ncWindow);
@@ -185,7 +184,6 @@ namespace nc::graphics
 
         ImGui::CreateContext();
 
-        /* TUTORIAL 01*/
         /* Initialize Diligent Engine */
         SwapChainDesc SCDesc;
         auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
@@ -196,6 +194,7 @@ namespace nc::graphics
         Win32NativeWindow win32Window{win32Handle};
         pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, win32Window, &m_pSwapChain);
 
+        /* TUTORIAL 01 - Triangle */
         /* Create Pipeline */
         GraphicsPipelineStateCreateInfo psoCI;
         psoCI.PSODesc.Name = "Triangle PSO";
@@ -246,7 +245,7 @@ namespace nc::graphics
         psoCI.pPS = pPS;
         m_pDevice->CreateGraphicsPipelineState(psoCI, &m_pPSO);
 
-        // /* TUTORIAL 02*/
+        /* TUTORIAL 02 - Cube */
         /* Create Pipeline */
         GraphicsPipelineStateCreateInfo psoCubeCI;
         psoCubeCI.PSODesc.Name = "Cube PSO";
@@ -280,6 +279,7 @@ namespace nc::graphics
             cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
             cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
             m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
+
         }
 
         RefCntAutoPtr<IShader> pPSCube;
@@ -311,14 +311,12 @@ namespace nc::graphics
         m_pDevice->CreateGraphicsPipelineState(psoCubeCI, &m_pPSOCube);
 
         /* Resources */
-
-
         m_pPSOCube->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
 
-        // Create a shader resource binding object and bind all static resources in it
+        /* Create a shader resource binding object and bind all static resources in it */
         m_pPSOCube->CreateShaderResourceBinding(&m_pSRB, true);
 
-        /** Create vertex buffer */
+        /* Create vertex buffer */
         std::array<DiligentVertexType, 8> cubeVerts = 
         {{
             {DirectX::XMFLOAT3(-1,-1,-1), DirectX::XMFLOAT4(1,0,0,1)},
@@ -342,7 +340,7 @@ namespace nc::graphics
         vertexBufferData.DataSize = sizeof(cubeVerts);
         m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_CubeVertexBuffer);
 
-        /** Create index buffer */
+        /* Create index buffer */
         constexpr std::array<uint32_t, 36> cubeIndices =
         {
             2,0,1, 2,3,0,
@@ -362,6 +360,53 @@ namespace nc::graphics
         indexBufferData.pData = cubeIndices.data();
         indexBufferData.DataSize = sizeof(cubeIndices);
         m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_CubeIndexBuffer);
+        
+        /* TUTORIAL 03 - Texture */
+        /* Create Pipeline */
+        GraphicsPipelineStateCreateInfo psoTextCubeCI;
+        psoTextCubeCI.PSODesc.Name = "Texture Cube PSO";
+        psoTextCubeCI.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+
+        psoTextCubeCI.GraphicsPipeline.NumRenderTargets             = 1;
+        psoTextCubeCI.GraphicsPipeline.RTVFormats[0]                = m_pSwapChain->GetDesc().ColorBufferFormat;
+        psoTextCubeCI.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
+        psoTextCubeCI.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
+        psoTextCubeCI.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+
+        /* Shaders */
+        auto vertPathTextCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("TexturedCube.vsh")).string();
+        auto fragPathTextCube = (std::filesystem::path(defaultShaderPath) / std::filesystem::path("TexturedCube.psh")).string();
+
+        RefCntAutoPtr<IShader> pVSTextCube;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Textured Cube Vertex";
+            shaderCI.FilePath        = vertPathTextCube.data();
+            shaderCI.SourceLength    = vertPathTextCube.size();
+            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+            m_pDevice->CreateShader(shaderCI, &pVSTextCube);
+
+            /* Constant buffer holding MVP matrix */
+            BufferDesc cbDesc;
+            cbDesc.Name = "VS Constants CB";
+            cbDesc.Size = sizeof(DirectX::XMMATRIX);
+            cbDesc.Usage = USAGE_DYNAMIC;
+            cbDesc.BindFlags = BIND_UNIFORM_BUFFER;
+            cbDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
+            m_pDevice->CreateBuffer(cbDesc, nullptr, &m_VSConstants);
+        }
+
+        RefCntAutoPtr<IShader> pPSTextCube;
+        {
+            shaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+            shaderCI.EntryPoint      = "main";
+            shaderCI.Desc.Name       = "Cube Fragment";
+            shaderCI.FilePath        = fragPathCube.data();
+            shaderCI.SourceLength    = fragPathCube.size();
+            shaderCI.CompileFlags    = SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR;
+            m_pDevice->CreateShader(shaderCI, &pPSCube);
+        }
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()
@@ -458,14 +503,14 @@ namespace nc::graphics
         m_pImmediateContext->ClearRenderTarget(pRTV, clearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-         /** Tutorial 1 */
+         /* Tutorial 1 */
          m_pImmediateContext->SetPipelineState(m_pPSO);
 
          DrawAttribs drawAttribs;
          drawAttribs.NumVertices = 3;
          m_pImmediateContext->Draw(drawAttribs);
 
-        /** Tutorial 2 */
+        /* Tutorial 2 */
         {
             /* Map the buffer and write current world-view-projection matrix */
             MapHelper<DirectX::XMMATRIX> cbConstants(m_pImmediateContext, m_VSConstants, MAP_WRITE, MAP_FLAG_DISCARD);
