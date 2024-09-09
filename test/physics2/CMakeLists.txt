@@ -50,9 +50,11 @@ add_test(PhysicsUtility_unit_tests PhysicsUtility_unit_tests)
 ### RigidBody Tests ###
 add_executable(RigidBody_unit_tests
     RigidBody_unit_tests.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
     ${NC_SOURCE_DIR}/physics2/Shape.cpp
-    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
 )
 
 target_include_directories(RigidBody_unit_tests
