@@ -15,8 +15,8 @@ class ContactListenerTest : public ::testing::Test
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = 1024 * 1024 * 4,
-                    .maxBodyPairs = 8,
-                    .maxContacts = 32
+                    .maxBodyPairs = 16,
+                    .maxContacts = 8
                   }
               )},
               uut{joltApi.contactListener}

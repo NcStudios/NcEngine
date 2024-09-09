@@ -14,7 +14,7 @@ class ShapeFactoryTest : public ::testing::Test
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = 1024 * 1024 * 4,
-                    .maxBodyPairs = 2,
+                    .maxBodyPairs = 8,
                     .maxContacts = 4
                   }
               )}

@@ -28,7 +28,7 @@ class RigidBodyTest : public ::testing::Test
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = 1024 * 1024 * 4,
                     .maxBodyPairs = 8,
-                    .maxContacts = 32
+                    .maxContacts = 4
                   }
               )}
         {

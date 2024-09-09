@@ -5,7 +5,7 @@
 constexpr auto g_memorySettings = nc::config::MemorySettings{};
 constexpr auto g_physicsSettings = nc::config::PhysicsSettings{
     .tempAllocatorSize = 1024 * 1024 * 4,
-    .maxBodyPairs = 2,
+    .maxBodyPairs = 8,
     .maxContacts = 4
 };
 
