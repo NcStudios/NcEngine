@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "physics2/jolt/ShapeFactory.h"
 #include "physics2/jolt/JoltApi.h"
+#include "ncengine/config/Config.h"
 
 class ShapeFactoryTest : public ::testing::Test
 {
@@ -9,7 +10,14 @@ class ShapeFactoryTest : public ::testing::Test
 
     protected:
         ShapeFactoryTest()
-            : m_jolt{nc::physics::JoltApi::Initialize()}
+            : m_jolt{nc::physics::JoltApi::Initialize(
+                  nc::config::MemorySettings{},
+                  nc::config::PhysicsSettings{
+                    .tempAllocatorSize = 1024 * 1024 * 4,
+                    .maxBodyPairs = 2,
+                    .maxContacts = 4
+                  }
+              )}
         {
         }
 
