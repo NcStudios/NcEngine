@@ -457,7 +457,7 @@ namespace nc::graphics
         };
 
         psoTextCubeCI.PSODesc.ResourceLayout.ImmutableSamplers = immutableSamplers.data();
-        psoTextCubeCI.PSODesc.ResourceLayout.NumImmutableSamplers = immutableSamplers.size();
+        psoTextCubeCI.PSODesc.ResourceLayout.NumImmutableSamplers = static_cast<uint32_t>(immutableSamplers.size());
 
         m_pDevice->CreateGraphicsPipelineState(psoTextCubeCI, &m_pPSOTextCube);
 
@@ -541,6 +541,19 @@ namespace nc::graphics
         ibData.pData = cubeIndices.data();
         ibData.DataSize = sizeof(cubeIndices);
         m_pDevice->CreateBuffer(indexBufferDesc, &ibData, &m_cubeIndexBuffer);
+
+        // https://github.com/DiligentGraphics/DiligentTools/blob/036ea8d67882d853dee6b4975dcaea14da9d8a0a/AssetLoader/src/GLTFLoader.cpp#L849
+
+        // ImageData Image;
+        // Image.Width         = gltf_image.width;
+        // Image.Height        = gltf_image.height;
+        // Image.NumComponents = gltf_image.component;
+        // Image.ComponentSize = gltf_image.bits / 8;
+        // Image.FileFormat    = (gltf_image.width < 0 && gltf_image.height < 0) ? static_cast<IMAGE_FILE_FORMAT>(gltf_image.pixel_type) : IMAGE_FILE_FORMAT_UNKNOWN;
+        // Image.pData         = gltf_image.image.data();
+        // Image.DataSize      = gltf_image.image.size();
+
+        // AddTexture(pDevice, pTextureCache, pResourceMgr, Image, gltf_tex.sampler, CacheId);
     }
 
     void NcGraphics3Impl::UpdateCube02()

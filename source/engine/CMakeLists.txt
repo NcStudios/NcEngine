@@ -73,6 +73,7 @@ target_link_libraries(${NC_ENGINE_LIB}
     PUBLIC
         Diligent-GraphicsTools
         Diligent-TargetPlatform
+        Diligent-TextureLoader
 )
 
 if(D3D11_SUPPORTED)
