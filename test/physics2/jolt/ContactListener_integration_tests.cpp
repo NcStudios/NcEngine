@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "physics2/jolt/ContactListener.h"
 #include "physics2/jolt/JoltApi.h"
+#include "ncengine/config/Config.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
@@ -10,7 +11,14 @@ class ContactListenerTest : public ::testing::Test
 {
     protected:
         ContactListenerTest()
-            : joltApi{nc::physics::JoltApi::Initialize()},
+            : joltApi{nc::physics::JoltApi::Initialize(
+                  nc::config::MemorySettings{},
+                  nc::config::PhysicsSettings{
+                    .tempAllocatorSize = 1024 * 1024 * 4,
+                    .maxBodyPairs = 16,
+                    .maxContacts = 8
+                  }
+              )},
               uut{joltApi.contactListener}
         {
         }

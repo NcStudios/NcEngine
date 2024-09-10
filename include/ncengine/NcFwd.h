@@ -62,6 +62,8 @@ class NetworkDispatcher;
 namespace physics
 {
 struct NcPhysics;
+struct CollisionListener;
+class RigidBody;
 class Collider;
 class ConcaveCollider;
 struct OrientationClamp;

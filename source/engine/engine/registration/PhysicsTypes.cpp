@@ -93,14 +93,16 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         registry,
         maxEntities,
         RigidBodyId,
-        "RigidBody"
+        "RigidBody",
+        ui::editor::RigidBodyUIWidget
     );
 
     Register<physics::CollisionListener>(
         registry,
         maxEntities,
         CollisionListenerId,
-        "CollisionListener"
+        "CollisionListener",
+        ui::editor::CollisionListenerUIWidget
     );
 }
 } // namespace nc
