@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/physics/RigidBody.h"
 #include "physics2/jolt/JoltApi.h"
 
@@ -22,7 +23,14 @@ class RigidBodyTest : public ::testing::Test
 {
     protected:
         RigidBodyTest()
-            : joltApi{nc::physics::JoltApi::Initialize()}
+            : joltApi{nc::physics::JoltApi::Initialize(
+                  nc::config::MemorySettings{},
+                  nc::config::PhysicsSettings{
+                    .tempAllocatorSize = 1024 * 1024 * 4,
+                    .maxBodyPairs = 8,
+                    .maxContacts = 4
+                  }
+              )}
         {
         }
 

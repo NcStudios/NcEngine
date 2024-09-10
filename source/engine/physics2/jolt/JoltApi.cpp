@@ -1,24 +1,53 @@
 #include "JoltApi.h"
+#include "ncengine/config/Config.h"
+#include "ncutility/NcError.h"
 
 #include "Jolt/Core/Factory.h"
 #include "Jolt/RegisterTypes.h"
 
-#include <memory>
-
 namespace
 {
 auto g_factory = std::unique_ptr<JPH::Factory>{};
+
+auto ToJoltSettings(const nc::config::PhysicsSettings& in) -> JPH::PhysicsSettings
+{
+    auto out = JPH::PhysicsSettings{};
+    out.mBaumgarte = in.baumgarteStabilization;
+    out.mSpeculativeContactDistance = in.speculativeContactDistance;
+    out.mPenetrationSlop = in.penetrationSlop;
+    out.mNumVelocitySteps = in.velocitySteps;
+    out.mNumPositionSteps = in.positionSteps;
+    out.mTimeBeforeSleep = in.timeBeforeSleep;
+    out.mPointVelocitySleepThreshold = in.sleepThreshold;
+    return out;
+}
 } // anonymous namespace
 
 namespace nc::physics
 {
-auto JoltApi::Initialize() -> JoltApi
+void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
+{
+    auto messages = std::string{};
+    if ((bool)(error & JPH::EPhysicsUpdateError::ManifoldCacheFull))
+        messages.append("\n\tManifoldCacheFull");
+    if ((bool)(error & JPH::EPhysicsUpdateError::BodyPairCacheFull))
+        messages.append("\n\tBodyPairCacheFull");
+    if ((bool)(error & JPH::EPhysicsUpdateError::ContactConstraintsFull))
+        messages.append("\n\tContactConstraintsFull");
+
+    throw NcError{fmt::format(
+        "Physics update failed with '{}'. Errors: {}", std::to_underlying(error), messages
+    )};
+}
+
+auto JoltApi::Initialize(const config::MemorySettings& memorySettings,
+                         const config::PhysicsSettings& physicsSettings) -> JoltApi
 {
     RegisterAllocator();
     g_factory = std::make_unique<JPH::Factory>();
     JPH::Factory::sInstance = g_factory.get();
     JPH::RegisterTypes();
-    return JoltApi{};
+    return JoltApi{memorySettings, physicsSettings};
 }
 
 JoltApi::~JoltApi() noexcept
@@ -28,19 +57,23 @@ JoltApi::~JoltApi() noexcept
     JPH::Factory::sInstance = nullptr;
 }
 
-JoltApi::JoltApi()
-    : contactListener{physicsSystem}
+JoltApi::JoltApi(const config::MemorySettings& memorySettings,
+                 const config::PhysicsSettings& physicsSettings)
+    : tempAllocator{physicsSettings.tempAllocatorSize},
+      jobSystem{JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, 4},
+      contactListener{physicsSystem}
 {
     physicsSystem.Init(
-        maxBodies,
-        numBodyMutexes,
-        maxBodyPairs,
-        maxContactConstraints,
+        memorySettings.maxRigidBodies,
+        0,
+        physicsSettings.maxBodyPairs,
+        physicsSettings.maxContacts,
         layerMap,
         objectVsBroadphaseFilter,
         objectLayerPairFilter
     );
 
+    physicsSystem.SetPhysicsSettings(ToJoltSettings(physicsSettings));
     physicsSystem.SetContactListener(&contactListener);
     ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterfaceNoLock(), shapeFactory);
 }

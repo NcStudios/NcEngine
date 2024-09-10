@@ -38,12 +38,15 @@ class NcPhysicsStub2 : public nc::physics::NcPhysics
 namespace nc::physics
 {
 #ifdef NC_USE_JOLT
-auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
+                        const config::PhysicsSettings& physicsSettings,
+                        Registry* registry,
+                        SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
-    if(settings.enabled)
+    if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl2>(settings, registry, events);
+        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, events);
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
@@ -51,9 +54,12 @@ auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* regis
 }
 #endif
 
-NcPhysicsImpl2::NcPhysicsImpl2(const config::PhysicsSettings&, Registry* registry, SystemEvents&)
+NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
+                               const config::PhysicsSettings& physicsSettings,
+                               Registry* registry,
+                               SystemEvents&)
     : m_ecs{registry->GetEcs()},
-      m_jolt{JoltApi::Initialize()},
+      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings)},
       m_onAddRigidBodyConnection{registry->OnAdd<physics::RigidBody>().Connect(this, &NcPhysicsImpl2::OnAddRigidBody)}
 {
 }

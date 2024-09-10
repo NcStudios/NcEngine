@@ -53,8 +53,7 @@ struct AssetSettings
  */
 struct MemorySettings
 {
-    unsigned maxDynamicColliders = 25000;
-    unsigned maxStaticColliders = 25000;
+    unsigned maxRigidBodies = 15000;
     unsigned maxNetworkDispatchers = 0;
     unsigned maxParticleEmitters = 1000;
     unsigned maxRenderers = 100000;
@@ -86,9 +85,17 @@ struct GraphicsSettings
 /** @brief Options for configuring NcPhysics. */
 struct PhysicsSettings
 {
-    bool enabled = true;
-    float fixedUpdateInterval = 0.01667f;
-    float worldspaceExtent = 1000.0f;
+    bool enabled = true;                            ///< enable the NcPhysics module
+    unsigned tempAllocatorSize = 64 * 1024 * 1024;  ///< size of per-frame allocaor; needs to be large enough to account for maximums below (bytes)
+    unsigned maxBodyPairs = 50000;                  ///< max number of simultaneous body interactions
+    unsigned maxContacts = 30000;                   ///< max number of simultaneous contacts
+    unsigned velocitySteps = 10;                    ///< number of velocity solver iterations to use (>=2)
+    unsigned positionSteps = 2;                     ///< number of position solver iterations to use
+    float baumgarteStabilization = 0.2f;            ///< factor for position error correction ([0, 1])
+    float speculativeContactDistance = 0.02f;       ///< object radius for contact detection (meters)
+    float penetrationSlop = 0.02f;                  ///< distance objects are allowed to overlap (meters)
+    float timeBeforeSleep = 0.5f;                   ///< time until objects are allowed to sleep (seconds)
+    float sleepThreshold = 0.03f;                   ///< velocity below which objects are put to sleep (m/s)
 };
 
 /** @brief Options for configuring NcAudio. */

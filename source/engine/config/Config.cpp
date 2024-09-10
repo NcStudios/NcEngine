@@ -39,8 +39,7 @@ constexpr auto TexturesPathKey = "textures_path"sv;
 constexpr auto FontsPathKey = "fonts_path"sv;
 
 // memory
-constexpr auto MaxDynamicCollidersKey = "max_dynamic_colliders"sv;
-constexpr auto MaxStaticCollidersKey = "max_static_colliders"sv;
+constexpr auto MaxRigidBodiesKey = "max_rigid_bodies"sv;
 constexpr auto MaxNetworkDispatchersKey = "max_network_dispatchers"sv;
 constexpr auto MaxParticleEmittersKey = "max_particle_emitters"sv;
 constexpr auto MaxRenderersKey = "max_renderers"sv;
@@ -54,8 +53,16 @@ constexpr auto MaxParticlesKey = "max_particles"sv;
 
 // physics
 constexpr auto PhysicsEnabledKey = "physics_enabled"sv;
-constexpr auto FixedUpdateIntervalKey = "fixed_update_interval"sv;
-constexpr auto WorldspaceExtentKey = "worldspace_extent"sv;
+constexpr auto TempAllocatorSizeKey = "temp_allocator_size"sv;
+constexpr auto MaxBodyPairsKey = "max_body_pairs"sv;
+constexpr auto MaxContactsKey = "max_contacts"sv;
+constexpr auto VelocityStepsKey = "velocity_steps"sv;
+constexpr auto PositionStepsKey = "position_steps"sv;
+constexpr auto BaumgarteStabilizationKey = "baumgarte_stabilization"sv;
+constexpr auto SpeculativeContactDistanceKey = "speculative_contact_distance"sv;
+constexpr auto PenetrationSlopKey = "penetration_slop"sv;
+constexpr auto TimeBeforeSleepKey = "time_before_sleep"sv;
+constexpr auto SleepThresholdKey = "sleep_threshold"sv;
 
 // graphics
 constexpr auto GraphicsEnabledKey = "graphics_enabled"sv;
@@ -87,6 +94,13 @@ auto ValidateBufferFrames(unsigned frames)
         case 2048: return true;
         default:   return false;
     }
+}
+
+auto ValidatePhysicsSettings(const nc::config::PhysicsSettings& settings) -> bool
+{
+    return settings.velocitySteps >= 2u &&
+           settings.baumgarteStabilization >= 0.0f &&
+           settings.baumgarteStabilization <= 1.0f;
 }
 
 auto TrimWhiteSpace(const std::string& str) -> std::string
@@ -197,8 +211,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     }
     else if constexpr (std::same_as<Struct_t, nc::config::MemorySettings>)
     {
-        ParseValueIfExists(out.maxDynamicColliders, MaxDynamicCollidersKey, kvPairs);
-        ParseValueIfExists(out.maxStaticColliders, MaxStaticCollidersKey, kvPairs);
+        ParseValueIfExists(out.maxRigidBodies, MaxRigidBodiesKey, kvPairs);
         ParseValueIfExists(out.maxNetworkDispatchers, MaxNetworkDispatchersKey, kvPairs);
         ParseValueIfExists(out.maxParticleEmitters, MaxParticleEmittersKey, kvPairs);
         ParseValueIfExists(out.maxRenderers, MaxRenderersKey, kvPairs);
@@ -227,8 +240,16 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     else if constexpr (std::same_as<Struct_t, nc::config::PhysicsSettings>)
     {
         ParseValueIfExists(out.enabled, PhysicsEnabledKey, kvPairs);
-        ParseValueIfExists(out.fixedUpdateInterval, FixedUpdateIntervalKey, kvPairs);
-        ParseValueIfExists(out.worldspaceExtent, WorldspaceExtentKey, kvPairs);
+        ParseValueIfExists(out.tempAllocatorSize, TempAllocatorSizeKey, kvPairs);
+        ParseValueIfExists(out.maxBodyPairs, MaxBodyPairsKey, kvPairs);
+        ParseValueIfExists(out.maxContacts, MaxContactsKey, kvPairs);
+        ParseValueIfExists(out.velocitySteps, VelocityStepsKey, kvPairs);
+        ParseValueIfExists(out.positionSteps, PositionStepsKey, kvPairs);
+        ParseValueIfExists(out.baumgarteStabilization, BaumgarteStabilizationKey, kvPairs);
+        ParseValueIfExists(out.speculativeContactDistance, SpeculativeContactDistanceKey, kvPairs);
+        ParseValueIfExists(out.penetrationSlop, PenetrationSlopKey, kvPairs);
+        ParseValueIfExists(out.timeBeforeSleep, TimeBeforeSleepKey, kvPairs);
+        ParseValueIfExists(out.sleepThreshold, SleepThresholdKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::AudioSettings>)
     {
@@ -345,8 +366,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, FontsPathKey, config.assetSettings.fontsPath);
 
     if (writeSections) stream << "[memory_settings]\n";
-    ::WriteKVPair(stream, MaxDynamicCollidersKey, config.memorySettings.maxDynamicColliders);
-    ::WriteKVPair(stream, MaxStaticCollidersKey, config.memorySettings.maxStaticColliders);
+    ::WriteKVPair(stream, MaxRigidBodiesKey, config.memorySettings.maxRigidBodies);
     ::WriteKVPair(stream, MaxNetworkDispatchersKey, config.memorySettings.maxNetworkDispatchers);
     ::WriteKVPair(stream, MaxParticleEmittersKey, config.memorySettings.maxParticleEmitters);
     ::WriteKVPair(stream, MaxPointLightsKey, config.memorySettings.maxPointLights);
@@ -360,8 +380,16 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[physics_settings]\n";
     ::WriteKVPair(stream, PhysicsEnabledKey, config.physicsSettings.enabled);
-    ::WriteKVPair(stream, FixedUpdateIntervalKey, config.physicsSettings.fixedUpdateInterval);
-    ::WriteKVPair(stream, WorldspaceExtentKey, config.physicsSettings.worldspaceExtent);
+    ::WriteKVPair(stream, TempAllocatorSizeKey, config.physicsSettings.tempAllocatorSize);
+    ::WriteKVPair(stream, MaxBodyPairsKey, config.physicsSettings.maxBodyPairs);
+    ::WriteKVPair(stream, MaxContactsKey, config.physicsSettings.maxContacts);
+    ::WriteKVPair(stream, VelocityStepsKey, config.physicsSettings.velocitySteps);
+    ::WriteKVPair(stream, PositionStepsKey, config.physicsSettings.positionSteps);
+    ::WriteKVPair(stream, BaumgarteStabilizationKey, config.physicsSettings.baumgarteStabilization);
+    ::WriteKVPair(stream, SpeculativeContactDistanceKey, config.physicsSettings.speculativeContactDistance);
+    ::WriteKVPair(stream, PenetrationSlopKey, config.physicsSettings.penetrationSlop);
+    ::WriteKVPair(stream, TimeBeforeSleepKey, config.physicsSettings.timeBeforeSleep);
+    ::WriteKVPair(stream, SleepThresholdKey, config.physicsSettings.sleepThreshold);
 
     if (writeSections) stream << "[graphics_settings]\n";
     ::WriteKVPair(stream, GraphicsEnabledKey, config.graphicsSettings.enabled);
@@ -396,14 +424,13 @@ bool Validate(const Config& config)
            (config.assetSettings.texturesPath != "") &&
            (config.assetSettings.cubeMapsPath != "") &&
            (config.assetSettings.fontsPath != "") &&
-           (config.physicsSettings.fixedUpdateInterval > 0.0f) &&
-           (config.physicsSettings.worldspaceExtent > 0.0f) &&
            (config.graphicsSettings.screenWidth != 0) &&
            (config.graphicsSettings.screenHeight != 0) &&
            (config.graphicsSettings.targetFPS != 0) &&
            (config.graphicsSettings.nearClip > 0.0f) &&
            (config.graphicsSettings.farClip > 0.0f) &&
            (config.graphicsSettings.antialiasing > 0) &&
+           ValidatePhysicsSettings(config.physicsSettings) &&
            ValidateBufferFrames(config.audioSettings.bufferFrames);
 }
 
