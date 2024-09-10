@@ -47,7 +47,7 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
     if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, dispatchher, events);
+        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, dispatcher, events);
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");

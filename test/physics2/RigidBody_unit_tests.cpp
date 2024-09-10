@@ -7,7 +7,9 @@
 
 #include <vector>
 
-namespace nc::physics
+namespace nc
+{
+namespace physics
 {
 class NcPhysicsImpl2
 {
@@ -17,7 +19,13 @@ class NcPhysicsImpl2
             body.SetContext(static_cast<BodyHandle>(apiBody), &ctx);
         }
 };
-} // namespace nc::physics
+} // namespace physics
+
+namespace task
+{
+class AsyncDispatcher{};
+} // namespace task
+} // namespace nc
 
 class RigidBodyTest : public ::testing::Test
 {
@@ -29,7 +37,8 @@ class RigidBodyTest : public ::testing::Test
                     .tempAllocatorSize = 1024 * 1024 * 4,
                     .maxBodyPairs = 8,
                     .maxContacts = 4
-                  }
+                  },
+                  nc::task::AsyncDispatcher{}
               )}
         {
         }
