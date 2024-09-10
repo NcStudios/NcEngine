@@ -117,14 +117,69 @@ void RigidBody::UseContinuousDetection(bool value)
         : m_info.flags & ~RigidBodyFlags::ContinuousDetection;
 }
 
-void RigidBody::AddImpulse(const Vector3& impulse)
+auto RigidBody::GetLinearVelocity() const -> Vector3
 {
-    m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
+    return ToVector3(ToBody(m_handle)->GetLinearVelocity());
+}
+
+void RigidBody::SetLinearVelocity(const Vector3& velocity)
+{
+    m_ctx->interface.SetLinearVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
+}
+
+void RigidBody::AddLinearVelocity(const Vector3& velocity)
+{
+    m_ctx->interface.AddLinearVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
+}
+
+auto RigidBody::GetAngularVelocity() const -> Vector3
+{
+    return ToVector3(ToBody(m_handle)->GetAngularVelocity());
+}
+
+void RigidBody::SetAngularVelocity(const Vector3& velocity)
+{
+    m_ctx->interface.SetAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
+}
+
+void RigidBody::SetVelocities(const Vector3& linearVelocity, const Vector3& angularVelocity)
+{
+    m_ctx->interface.SetLinearAndAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(linearVelocity), ToJoltVec3(angularVelocity));
+}
+
+void RigidBody::AddVelocities(const Vector3& linearVelocity, const Vector3& angularVelocity)
+{
+    m_ctx->interface.AddLinearAndAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(linearVelocity), ToJoltVec3(angularVelocity));
+}
+
+void RigidBody::AddForce(const Vector3& force)
+{
+    m_ctx->interface.AddForce(ToBody(m_handle)->GetID(), ToJoltVec3(force));
+}
+
+void RigidBody::AddForceAt(const Vector3& force, const Vector3& point)
+{
+    m_ctx->interface.AddForce(ToBody(m_handle)->GetID(), ToJoltVec3(force), ToJoltVec3(point));
 }
 
 void RigidBody::AddTorque(const Vector3& torque)
 {
     m_ctx->interface.AddTorque(ToBody(m_handle)->GetID(), ToJoltVec3(torque));
+}
+
+void RigidBody::AddImpulse(const Vector3& impulse)
+{
+    m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
+}
+
+void RigidBody::AddImpulseAt(const Vector3& impulse, const Vector3& point)
+{
+    m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse), ToJoltVec3(point));
+}
+
+void RigidBody::AddAngularImpulse(const Vector3& impulse)
+{
+    m_ctx->interface.AddAngularImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
 }
 
 void RigidBody::SetSimulatedBodyPosition(Transform& transform,

@@ -140,11 +140,27 @@ class RigidBody
         void UseContinuousDetection(bool value);
 
         /**
+         * @name Velocity Functions
+         * @note Requires BodyType::Dynamic or BodyType::Kinematic
+         */
+        auto GetLinearVelocity() const -> Vector3;
+        void SetLinearVelocity(const Vector3& velocity);
+        void AddLinearVelocity(const Vector3& velocity);
+        auto GetAngularVelocity() const -> Vector3;
+        void SetAngularVelocity(const Vector3& velocity);
+        void SetVelocities(const Vector3& linearVelocity, const Vector3& angularVelocity);
+        void AddVelocities(const Vector3& linearVelocity, const Vector3& angularVelocity);
+
+        /**
          * @name Force/Impulse Functions
          * @note Requires BodyType::Dynamic
          */
-        void AddImpulse(const Vector3& impulse);
+        void AddForce(const Vector3& force);
+        void AddForceAt(const Vector3& force, const Vector3& point);
         void AddTorque(const Vector3& torque);
+        void AddImpulse(const Vector3& impulse);
+        void AddImpulseAt(const Vector3& impulse, const Vector3& point);
+        void AddAngularImpulse(const Vector3& impulse);
 
         /**
          * @name Simulated Body Functions
