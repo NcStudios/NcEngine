@@ -87,7 +87,7 @@ auto InputPosition(Vector3& value, const char* label) -> bool;
 auto InputAngles(Vector3& value, const char* label) -> bool;
 
 /** @brief Vector3 UI widget constrained for scale inputs. */
-auto InputScale(Vector3& value, const char* label) -> bool;
+auto InputScale(Vector3& value, const char* label, float min = g_minScale, float max = g_maxScale) -> bool;
 
 /** @brief RGB color picker UI widget. */
 auto InputColor3(Vector3& value, const char* label) -> bool;
@@ -292,9 +292,9 @@ inline auto InputAngles(Vector3& value, const char* label) -> bool
     return ImGui::DragFloat3(label, &value.x, 0.1f, g_minAngle, g_maxAngle);
 }
 
-inline auto InputScale(Vector3& value, const char* label) -> bool
+inline auto InputScale(Vector3& value, const char* label, float min, float max) -> bool
 {
-    return ImGui::DragFloat3(label, &value.x, 0.5f, g_minScale, g_maxScale);
+    return ImGui::DragFloat3(label, &value.x, 0.5f, min, max);
 }
 
 inline auto InputColor(Vector3& value, const char* label) -> bool

@@ -38,12 +38,16 @@ class NcPhysicsStub2 : public nc::physics::NcPhysics
 namespace nc::physics
 {
 #ifdef NC_USE_JOLT
-auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, const task::AsyncDispatcher& dispatcher, SystemEvents& events) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
+                        const config::PhysicsSettings& physicsSettings,
+                        Registry* registry,
+                        const task::AsyncDispatcher& dispatcher,
+                        SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
-    if(settings.enabled)
+    if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl2>(settings, registry, dispatcher, events);
+        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, dispatchher, events);
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
@@ -51,9 +55,13 @@ auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* regis
 }
 #endif
 
-NcPhysicsImpl2::NcPhysicsImpl2(const config::PhysicsSettings&, Registry* registry, const task::AsyncDispatcher& dispatcher, SystemEvents&)
+NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
+                               const config::PhysicsSettings& physicsSettings,
+                               Registry* registry,
+                               const task::AsyncDispatcher& dispatcher,
+                               SystemEvents&)
     : m_ecs{registry->GetEcs()},
-      m_jolt{JoltApi::Initialize(dispatcher)},
+      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
       m_onAddRigidBodyConnection{registry->OnAdd<physics::RigidBody>().Connect(this, &NcPhysicsImpl2::OnAddRigidBody)}
 {
 }
@@ -102,6 +110,8 @@ void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
     };
 
     bodySettings.mUserData = Entity::Hash{}(body.GetEntity());
+    bodySettings.mMotionQuality = ToMotionQuality(body.UseContinuousDetection());
+
     auto& iBody = m_jolt.physicsSystem.GetBodyInterfaceNoLock();
     auto apiBody = iBody.CreateBody(bodySettings);
     iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);

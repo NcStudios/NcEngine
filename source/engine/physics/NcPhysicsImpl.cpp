@@ -52,7 +52,11 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 namespace nc::physics
 {
 #ifndef NC_USE_JOLT
-auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, const task::AsyncDispatcher&, SystemEvents& events) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(const config::MemorySettings&,
+                        const config::PhysicsSettings& settings,
+                        Registry* registry,
+                        const task::AsyncDispatcher&,
+                        SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(settings.enabled)
     {
@@ -65,8 +69,8 @@ auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* regis
 }
 #endif
 
-NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events)
-    : m_pipeline{registry, settings.fixedUpdateInterval, events.rebuildStatics},
+NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings&, Registry* registry, SystemEvents& events)
+    : m_pipeline{registry, 1.0f / 60.0f, events.rebuildStatics},
       m_clickableSystem{},
       m_accumulatedTime{0.0},
       m_currentIterations{0u}

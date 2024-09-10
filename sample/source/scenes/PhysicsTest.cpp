@@ -470,7 +470,11 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<physics::Collider>(leftWall, physics::BoxProperties{});
     world.Emplace<physics::Collider>(rightWall, physics::BoxProperties{});
 
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox(), physics::BodyType::Static);
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(backWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(frontWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(leftWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(rightWall, physics::Shape::MakeBox());
 }
 
 void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -781,7 +785,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
             auto& collider = world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
             world.Emplace<physics::PhysicsBody>(handle, world.Get<Transform>(handle), collider, physics::PhysicsProperties{.mass = 5.0f});
-            world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox(), physics::BodyType::Dynamic);
+            world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox());
         }
     );
 

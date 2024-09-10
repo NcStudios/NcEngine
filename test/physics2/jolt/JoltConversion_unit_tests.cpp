@@ -50,6 +50,12 @@ TEST(JoltConversionTest, Quaternion_roundTrip_preservesValue)
     EXPECT_EQ(expectedQuat, actualQuat);
 }
 
+TEST(JoltConversionTest, ToMotionQuality_convertsValue)
+{
+    EXPECT_EQ(JPH::EMotionQuality::Discrete, nc::physics::ToMotionQuality(false));
+    EXPECT_EQ(JPH::EMotionQuality::LinearCast, nc::physics::ToMotionQuality(true));
+}
+
 TEST(JoltConversionTest, ToMotionType_convertsBodyType)
 {
     EXPECT_EQ(JPH::EMotionType::Dynamic, ToMotionType(nc::physics::BodyType::Dynamic));

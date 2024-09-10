@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "physics2/jolt/ShapeFactory.h"
 #include "physics2/jolt/JoltApi.h"
+#include "ncengine/config/Config.h"
 
 namespace nc::task
 {
@@ -14,7 +15,15 @@ class ShapeFactoryTest : public ::testing::Test
 
     protected:
         ShapeFactoryTest()
-            : m_jolt{nc::physics::JoltApi::Initialize(nc::task::AsyncDispatcher{})}
+            : m_jolt{nc::physics::JoltApi::Initialize(
+                  nc::config::MemorySettings{},
+                  nc::config::PhysicsSettings{
+                    .tempAllocatorSize = 1024 * 1024 * 4,
+                    .maxBodyPairs = 8,
+                    .maxContacts = 4
+                  },
+                  nc::task::AsyncDispatcher{}
+              )}
         {
         }
 

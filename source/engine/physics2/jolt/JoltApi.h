@@ -7,40 +7,43 @@
 #include "Layers.h"
 #include "ShapeFactory.h"
 #include "ncengine/type/StableAddress.h"
-#include "ncutility/NcError.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSettings.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 
-namespace nc::physics
+#include <memory>
+
+namespace nc
 {
+namespace config
+{
+struct MemorySettings;
+struct PhysicsSettings;
+} // namespace config
+
+namespace physics
+{
+[[noreturn]] void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error);
+
 struct JoltApi : public StableAddress
 {
-    /** @todo: 690 some of this should move to config */
-    static constexpr uint32_t maxBodies = 1024 * 10;
-    static constexpr uint32_t numBodyMutexes = 0;
-    static constexpr uint32_t maxBodyPairs = 1024 * 10;
-    static constexpr uint32_t maxContactConstraints = 1024 * 10 * 4;
-    static constexpr uint32_t tempAllocatorSize = 40 * 1024 * 1024;
-    static constexpr int maxJobs = JPH::cMaxPhysicsJobs;
-    static constexpr int maxBarriers = JPH::cMaxPhysicsBarriers;
-    static constexpr int threads = 4;
-
     ~JoltApi() noexcept;
 
-    static auto Initialize(const task::AsyncDispatcher& dispatcher) -> JoltApi;
+    static auto Initialize(const config::MemorySettings& memorySettings,
+                           const config::PhysicsSettings& physicsSettings,
+                           const task::AsyncDispatcher& dispatcher) -> JoltApi;
 
     void Update(float dt, int steps = 1)
     {
         const auto error = physicsSystem.Update(dt, steps, &tempAllocator, jobSystem.get());
         if (error != JPH::EPhysicsUpdateError::None)
         {
-            throw NcError{fmt::format("Physics update failed with '{}'", std::to_underlying(error))};
+            ThrowJoltUpdateError(error);
         }
     }
 
-    TempAllocator tempAllocator{tempAllocatorSize};
+    TempAllocator tempAllocator;
     LayerMap layerMap;
     ObjectVsBroadPhaseLayerFilter objectVsBroadphaseFilter;
     ObjectLayerPairFilter objectLayerPairFilter;
@@ -51,6 +54,9 @@ struct JoltApi : public StableAddress
     std::unique_ptr<ComponentContext> ctx;
 
     private:
-        JoltApi(const task::AsyncDispatcher& dispatcher);
+        JoltApi(const config::MemorySettings& memorySettings,
+                const config::PhysicsSettings& physicsSettings,
+                const task::AsyncDispatcher& dispatcher);
 };
-} // namespace nc::physics
+} // namespace physics
+} // namespace nc

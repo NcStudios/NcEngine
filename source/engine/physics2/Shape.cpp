@@ -6,14 +6,13 @@
 
 namespace
 {
-void EnsureGreaterThanZeroScale(nc::Vector3& out)
+auto ClampScale(const nc::Vector3& out) -> nc::Vector3
 {
-    if (out.x <= 0.0f)
-        out.x = nc::physics::g_minimumShapeScale;
-    if (out.y <= 0.0f)
-        out.y = nc::physics::g_minimumShapeScale;
-    if (out.z <= 0.0f)
-        out.z = nc::physics::g_minimumShapeScale;
+    return nc::Vector3{
+        nc::Clamp(out.x, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale),
+        nc::Clamp(out.y, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale),
+        nc::Clamp(out.z, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale)
+    };
 }
 
 void FixSphereScale(const nc::Vector3& current, nc::Vector3& desired)
@@ -41,9 +40,7 @@ auto NormalizeScaleForShape(nc::physics::ShapeType shape,
                             const Vector3& currentScale,
                             const Vector3& newScale) -> Vector3
 {
-    auto allowedScale = newScale;
-    EnsureGreaterThanZeroScale(allowedScale);
-
+    auto allowedScale = ClampScale(newScale);
     switch (shape)
     {
         case nc::physics::ShapeType::Box:

@@ -17,6 +17,7 @@ class Registry;
 
 namespace config
 {
+struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
@@ -71,7 +72,8 @@ struct NcPhysics : public Module
 };
 
 /** @brief Build an NcPhysics module instance. */
-auto BuildPhysicsModule(const config::PhysicsSettings& settings,
+auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
+                        const config::PhysicsSettings& physicsSettings,
                         Registry* registry,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>;
