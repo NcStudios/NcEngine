@@ -48,12 +48,11 @@ auto BuildTimer(const nc::config::EngineSettings& settings) -> nc::time::StepTim
     return nc::time::StepTimer{settings.timeStep, settings.maxTimeStep};
 }
 
-auto BuildExecutor(const nc::config::EngineSettings& settings, const nc::ModuleRegistry& modules) -> nc::task::Executor
+auto BuildExecutor(const nc::config::EngineSettings& settings) -> nc::task::Executor
 {
     const auto threadCount = settings.threadCount > 0 ? settings.threadCount : std::thread::hardware_concurrency();
-    auto ctx = settings.buildTasksOnInit ? nc::task::BuildContext(modules.GetAllModules()) : nc::task::ExecutorContext{};
     NC_LOG_INFO("Building Executor with {} threads", threadCount);
-    return nc::task::Executor{threadCount, std::move(ctx)};
+    return nc::task::Executor{threadCount};
 }
 } // anonymous namespace
 
@@ -79,11 +78,15 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_timer{::BuildTimer(config.engineSettings)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
       m_legacyRegistry{*m_registry},
-      m_modules{BuildModuleRegistry(&m_legacyRegistry, m_events, config)},
-      m_executor{::BuildExecutor(config.engineSettings, *m_modules)},
+      m_executor{::BuildExecutor(config.engineSettings)},
+      m_modules{BuildModuleRegistry(&m_legacyRegistry, GetAsyncDispatcher(), m_events, config)},
       m_onQuitConnection{m_events.quit.Connect(this, &NcEngineImpl::Stop, SignalPriority::Lowest)},
       m_isRunning{false}
 {
+    if (config.engineSettings.buildTasksOnInit)
+    {
+        m_executor.SetContext(task::BuildContext(m_modules->GetAllModules()));
+    }
 }
 
 NcEngineImpl::~NcEngineImpl() noexcept
@@ -139,6 +142,11 @@ auto NcEngineImpl::GetModuleRegistry() noexcept -> ModuleRegistry*
     return m_modules.get();
 }
 
+auto NcEngineImpl::GetAsyncDispatcher() noexcept -> task::AsyncDispatcher
+{
+    return m_executor.GetAsyncDispatcher();
+}
+
 auto NcEngineImpl::GetSystemEvents() noexcept -> SystemEvents&
 {
     return m_events;
@@ -167,6 +175,7 @@ void NcEngineImpl::Run()
     auto* ncScene = m_modules->Get<NcScene>();
     auto update = [this, ncWindow = m_modules->Get<window::NcWindow>()](float dt)
     {
+        OPTICK_FRAME("Main Thread");
         time::SetDeltaTime(dt);
         input::Flush();
         ncWindow->ProcessSystemMessages();
@@ -175,7 +184,6 @@ void NcEngineImpl::Run()
 
     while(m_isRunning)
     {
-        OPTICK_FRAME("Main Thread");
         if (m_timer.Tick(update))
         {
             m_executor.RunRenderTasks();

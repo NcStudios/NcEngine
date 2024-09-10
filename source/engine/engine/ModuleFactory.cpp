@@ -35,6 +35,7 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
 namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
+                         const task::AsyncDispatcher& dispatcher,
                          SystemEvents& events,
                          const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
@@ -53,7 +54,7 @@ auto BuildModuleRegistry(Registry* registry,
                                                                ModuleProvider{moduleRegistry.get()},
                                                                registry,
                                                                events));
-    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, events));
+    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.physicsSettings, registry, dispatcher, events));
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));
     moduleRegistry->Register(std::make_unique<nc::Random>());

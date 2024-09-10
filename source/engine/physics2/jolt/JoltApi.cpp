@@ -12,13 +12,13 @@ auto g_factory = std::unique_ptr<JPH::Factory>{};
 
 namespace nc::physics
 {
-auto JoltApi::Initialize() -> JoltApi
+auto JoltApi::Initialize(const task::AsyncDispatcher& dispatcher) -> JoltApi
 {
     RegisterAllocator();
     g_factory = std::make_unique<JPH::Factory>();
     JPH::Factory::sInstance = g_factory.get();
     JPH::RegisterTypes();
-    return JoltApi{};
+    return JoltApi{dispatcher};
 }
 
 JoltApi::~JoltApi() noexcept
@@ -28,8 +28,9 @@ JoltApi::~JoltApi() noexcept
     JPH::Factory::sInstance = nullptr;
 }
 
-JoltApi::JoltApi()
-    : contactListener{physicsSystem}
+JoltApi::JoltApi(const task::AsyncDispatcher& dispatcher)
+    : contactListener{physicsSystem},
+      jobSystem{BuildJobSystem(dispatcher)}
 {
     physicsSystem.Init(
         maxBodies,

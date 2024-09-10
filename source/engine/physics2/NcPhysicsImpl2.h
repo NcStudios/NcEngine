@@ -22,7 +22,7 @@ namespace physics
 class NcPhysicsImpl2 final : public NcPhysics
 {
     public:
-        NcPhysicsImpl2(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events);
+        NcPhysicsImpl2(const config::PhysicsSettings& settings, Registry* registry, const task::AsyncDispatcher& dispatcher, SystemEvents& events);
 
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;

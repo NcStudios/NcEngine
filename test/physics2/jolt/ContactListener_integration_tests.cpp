@@ -6,11 +6,16 @@
 
 #include <ranges>
 
+namespace nc::task
+{
+class AsyncDispatcher{};
+}
+
 class ContactListenerTest : public ::testing::Test
 {
     protected:
         ContactListenerTest()
-            : joltApi{nc::physics::JoltApi::Initialize()},
+            : joltApi{nc::physics::JoltApi::Initialize(nc::task::AsyncDispatcher{})},
               uut{joltApi.contactListener}
         {
         }
@@ -23,7 +28,7 @@ class ContactListenerTest : public ::testing::Test
 
         void Step()
         {
-            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, &joltApi.jobSystem);
+            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, joltApi.jobSystem.get());
             lastOnEnter.clear();
             lastOnExit.clear();
             std::ranges::copy(uut.GetAdded(), std::back_inserter(lastOnEnter));

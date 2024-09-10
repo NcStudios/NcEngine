@@ -1,6 +1,7 @@
 ### ContactListener Tests ###
 add_executable(ContactListener_integration_tests
     ContactListener_integration_tests.cpp
+    JobSystem_stub.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
 )
@@ -29,6 +30,7 @@ add_test(ContactListener_integration_tests ContactListener_integration_tests)
 ### JoltApi Tests ###
 add_executable(JoltApi_unit_tests
     JoltApi_unit_tests.cpp
+    JobSystem_stub.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
 )
@@ -163,6 +165,7 @@ add_test(PhysicsAllocator_unit_tests PhysicsAllocator_unit_tests)
 ### ShapeFactory Tests ###
 add_executable(ShapeFactory_unit_tests
     ShapeFactory_unit_tests.cpp
+    JobSystem_stub.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
 )

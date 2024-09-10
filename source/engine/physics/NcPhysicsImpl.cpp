@@ -52,7 +52,7 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 namespace nc::physics
 {
 #ifndef NC_USE_JOLT
-auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events) -> std::unique_ptr<NcPhysics>
+auto BuildPhysicsModule(const config::PhysicsSettings& settings, Registry* registry, const task::AsyncDispatcher&, SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(settings.enabled)
     {

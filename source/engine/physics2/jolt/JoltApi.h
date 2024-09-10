@@ -3,13 +3,13 @@
 #include "Allocator.h"
 #include "ComponentContext.h"
 #include "ContactListener.h"
+#include "JobSystem.h"
 #include "Layers.h"
 #include "ShapeFactory.h"
 #include "ncengine/type/StableAddress.h"
 #include "ncutility/NcError.h"
 
 #include "Jolt/Jolt.h"
-#include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Physics/PhysicsSettings.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 
@@ -29,11 +29,11 @@ struct JoltApi : public StableAddress
 
     ~JoltApi() noexcept;
 
-    static auto Initialize() -> JoltApi;
+    static auto Initialize(const task::AsyncDispatcher& dispatcher) -> JoltApi;
 
     void Update(float dt, int steps = 1)
     {
-        const auto error = physicsSystem.Update(dt, steps, &tempAllocator, &jobSystem);
+        const auto error = physicsSystem.Update(dt, steps, &tempAllocator, jobSystem.get());
         if (error != JPH::EPhysicsUpdateError::None)
         {
             throw NcError{fmt::format("Physics update failed with '{}'", std::to_underlying(error))};
@@ -41,16 +41,16 @@ struct JoltApi : public StableAddress
     }
 
     TempAllocator tempAllocator{tempAllocatorSize};
-    JPH::JobSystemThreadPool jobSystem{maxJobs, maxBarriers, threads};
     LayerMap layerMap;
     ObjectVsBroadPhaseLayerFilter objectVsBroadphaseFilter;
     ObjectLayerPairFilter objectLayerPairFilter;
     JPH::PhysicsSystem physicsSystem;
     ShapeFactory shapeFactory;
     ContactListener contactListener;
+    std::unique_ptr<JPH::JobSystem> jobSystem;
     std::unique_ptr<ComponentContext> ctx;
 
     private:
-        JoltApi();
+        JoltApi(const task::AsyncDispatcher& dispatcher);
 };
 } // namespace nc::physics

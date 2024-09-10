@@ -73,6 +73,7 @@ struct NcPhysics : public Module
 /** @brief Build an NcPhysics module instance. */
 auto BuildPhysicsModule(const config::PhysicsSettings& settings,
                         Registry* registry,
+                        const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>;
 } // namespace physics
 } // namespace nc

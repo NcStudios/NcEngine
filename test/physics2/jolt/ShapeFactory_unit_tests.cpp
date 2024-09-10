@@ -2,6 +2,11 @@
 #include "physics2/jolt/ShapeFactory.h"
 #include "physics2/jolt/JoltApi.h"
 
+namespace nc::task
+{
+class AsyncDispatcher{};
+}
+
 class ShapeFactoryTest : public ::testing::Test
 {
     private:
@@ -9,7 +14,7 @@ class ShapeFactoryTest : public ::testing::Test
 
     protected:
         ShapeFactoryTest()
-            : m_jolt{nc::physics::JoltApi::Initialize()}
+            : m_jolt{nc::physics::JoltApi::Initialize(nc::task::AsyncDispatcher{})}
         {
         }
 
