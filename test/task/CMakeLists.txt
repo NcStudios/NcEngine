@@ -26,6 +26,7 @@ add_test(ExceptionContext_unit_tests ExceptionContext_unit_tests)
 ### Executor Tests ###
 add_executable(Executor_unit_tests
     Executor_unit_tests.cpp
+    ${NC_SOURCE_DIR}/task/AsyncDispatcher.cpp
     ${NC_SOURCE_DIR}/task/Executor.cpp
 )
 

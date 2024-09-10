@@ -50,7 +50,6 @@ add_test(PhysicsUtility_unit_tests PhysicsUtility_unit_tests)
 ### RigidBody Tests ###
 add_executable(RigidBody_unit_tests
     RigidBody_unit_tests.cpp
-    jolt/JobSystem_stub.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
     ${NC_SOURCE_DIR}/physics2/Shape.cpp

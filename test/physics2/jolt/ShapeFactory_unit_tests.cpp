@@ -1,12 +1,8 @@
 #include "gtest/gtest.h"
+#include "JobSystem_stub.inl"
 #include "physics2/jolt/ShapeFactory.h"
 #include "physics2/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
-
-namespace nc::task
-{
-class AsyncDispatcher{};
-}
 
 class ShapeFactoryTest : public ::testing::Test
 {

@@ -313,9 +313,67 @@ TEST_F(ExecutorTests, SetContext_graphRunning_throws)
 TEST_F(ExecutorTests, WriteGraph_writesToStream)
 {
     auto modules = BuildModules<SingleTaskModule>();
-const auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
+    const auto uut = nc::task::Executor{4, nc::task::BuildContext(modules)};
     auto stream = std::ostringstream{};
     uut.WriteGraph(stream);
     // Just checking that it succeeded and wrote something
     EXPECT_NE(std::streampos{0}, stream.tellp());
+}
+
+TEST(AsyncDispatcherTests, MaxConcurrency_returnsNumWorkers)
+{
+    constexpr auto workers = 4u;
+    auto executor = nc::task::Executor{4, nc::task::ExecutorContext{}};
+    const auto uut = executor.GetAsyncDispatcher();
+    EXPECT_EQ(workers, uut.MaxConcurrency());
+}
+
+TEST(AsyncDispatcherTests, Async_runsTask)
+{
+    auto executor = nc::task::Executor{1, nc::task::ExecutorContext{}};
+    auto uut = executor.GetAsyncDispatcher();
+    constexpr auto expectedReturn = 42;
+    auto result = uut.Async([]() -> int
+    {
+        return expectedReturn;
+    });
+
+    const auto actualReturn = result.get();
+    EXPECT_EQ(expectedReturn, actualReturn);
+}
+
+TEST(AsyncDispatcherTests, SilentAsync_runsTask)
+{
+    constexpr auto concurrency = 3u;
+    auto executor = nc::task::Executor{concurrency, nc::task::ExecutorContext{}};
+    auto uut = executor.GetAsyncDispatcher();
+    auto mutex = std::mutex{};
+    auto cv = std::condition_variable{};
+    auto numFinished = 0u;
+    auto func = [&]()
+    {
+        {
+            auto lock = std::unique_lock{mutex};
+            numFinished += 1;
+        }
+
+        cv.notify_one();
+    };
+
+    for (auto i = 0u; i < concurrency; ++i)
+    {
+        uut.SilentAsync(func);
+    }
+
+    auto lock = std::unique_lock{mutex};
+    cv.wait_for(
+        lock,
+        std::chrono::milliseconds(500),
+        [&]()
+        {
+            return numFinished == concurrency;
+        }
+    );
+
+    EXPECT_EQ(concurrency, numFinished);
 }

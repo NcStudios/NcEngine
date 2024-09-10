@@ -12,10 +12,7 @@ namespace nc::task
 class AsyncDispatcher
 {
     public:
-        explicit AsyncDispatcher(tf::Executor* executor)
-            : m_executor{executor}
-        {
-        }
+        explicit AsyncDispatcher(tf::Executor* executor);
 
         /** @brief Run a function asynchronously, returning the eventual result in a std::future. */
         template<class F>

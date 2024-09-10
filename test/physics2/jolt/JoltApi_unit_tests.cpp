@@ -1,5 +1,6 @@
-#include "physics2/jolt/JoltApi.h"
 #include "gtest/gtest.h"
+#include "JobSystem_stub.inl"
+#include "physics2/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
 
 constexpr auto g_memorySettings = nc::config::MemorySettings{};
@@ -8,11 +9,6 @@ constexpr auto g_physicsSettings = nc::config::PhysicsSettings{
     .maxBodyPairs = 8,
     .maxContacts = 4
 };
-
-namespace nc::task
-{
-class AsyncDispatcher{};
-}
 
 TEST(JoltApiIntegrationTest, Initialize_succeeds)
 {

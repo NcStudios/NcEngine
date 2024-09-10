@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "JobSystem_stub.inl"
 #include "physics2/jolt/ContactListener.h"
 #include "physics2/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
@@ -6,11 +7,6 @@
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
 #include <ranges>
-
-namespace nc::task
-{
-class AsyncDispatcher{};
-}
 
 class ContactListenerTest : public ::testing::Test
 {
