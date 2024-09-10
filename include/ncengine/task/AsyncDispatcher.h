@@ -31,6 +31,11 @@ class AsyncDispatcher
             m_executor->silent_async(std::forward<F>(f));
         }
 
+        auto MaxConcurrency() const -> size_t
+        {
+            return m_executor->num_workers();
+        }
+
     private:
         tf::Executor* m_executor;
 };

@@ -1,17 +1,12 @@
 #include "JobSystem.h"
 #include "Allocator.h"
 
-#include "ncengine/task/Executor.h"
+#include "ncengine/task/AsyncDispatcher.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Core/FixedSizeFreeList.h"
 #include "Jolt/Core/JobSystemWithBarrier.h"
-
 #include "Jolt/Physics/PhysicsSettings.h"
-
-#include "Jolt/Core/JobSystemSingleThreaded.h"
-
-#include "optick.h"
 
 namespace
 {
@@ -86,19 +81,15 @@ class TaskRouterFreeList : public JPH::JobSystemWithBarrier
 {
     public:
         TaskRouterFreeList(const nc::task::AsyncDispatcher& dispatcher)
-            : m_dispatcher{dispatcher}
+            : JPH::JobSystemWithBarrier{JPH::cMaxPhysicsBarriers},
+              m_dispatcher{dispatcher}
         {
-            // todo: take in ctor
-            JPH::JobSystemWithBarrier::Init(8);
             m_freeList.Init(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsJobs);
-
         }
 
         auto GetMaxConcurrency() const -> int override
         {
-            // todo: can't access value b/c of init timing
-            return 8;
-            // return static_cast<int>(m_executor->num_workers());
+            return static_cast<int>(m_dispatcher.MaxConcurrency());
         }
 
         auto CreateJob(const char* name,
@@ -119,6 +110,7 @@ class TaskRouterFreeList : public JPH::JobSystemWithBarrier
             auto* job = &m_freeList.Get(index);
 
             // Construct handle to keep a reference, the job is queued below and may immediately complete
+            // can just return, right?
             JPH::JobHandle handle(job);
 
             // // If there are no dependencies, queue the job now
@@ -134,7 +126,6 @@ class TaskRouterFreeList : public JPH::JobSystemWithBarrier
         {
             m_dispatcher.SilentAsync([job]()
             {
-                OPTICK_CATEGORY("Job - Jolt", Optick::Category::Physics);
                 job->Execute();
                 job->Release();
             });
@@ -147,7 +138,6 @@ class TaskRouterFreeList : public JPH::JobSystemWithBarrier
                 auto job = jobs[i];
                 m_dispatcher.SilentAsync([job]()
                 {
-                    OPTICK_CATEGORY("Job - Jolt", Optick::Category::Physics);
                     job->Execute();
                     job->Release();
                 });
@@ -170,6 +160,5 @@ namespace nc::physics
 auto BuildJobSystem(const task::AsyncDispatcher& dispatcher) -> std::unique_ptr<JPH::JobSystem>
 {
     return std::make_unique<TaskRouterFreeList>(dispatcher);
-    // return std::make_unique<JPH::JobSystemSingleThreaded>(JPH::cMaxPhysicsJobs);
 }
 } // namespace nc::physics
