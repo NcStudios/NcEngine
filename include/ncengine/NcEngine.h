@@ -36,7 +36,7 @@ class NcEngine
         /** @brief Get a reference to the collection of system events. */
         virtual auto GetSystemEvents() noexcept -> SystemEvents& = 0;
 
-        /** @brief Get an interface for running async tasks on the task graph. */
+        /** @brief Get an interface for running async tasks on the thread pool. */
         virtual auto GetAsyncDispatcher() noexcept -> task::AsyncDispatcher = 0;
 
         /**

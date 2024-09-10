@@ -8,7 +8,7 @@
 
 namespace nc::task
 {
-/** @brief */
+/** @brief Dispatcher for running tasks on the thread pool outside of a TaskGraph. */
 class AsyncDispatcher
 {
     public:
@@ -17,20 +17,21 @@ class AsyncDispatcher
         {
         }
 
-        /** @brief */
+        /** @brief Run a function asynchronously, returning the eventual result in a std::future. */
         template<class F>
-        auto Async(F&& f)
+        auto Async(F&& f) -> std::future<std::invoke_result_t<std::decay_t<F>>>
         {
             return m_executor->async(std::forward<F>(f));
         }
 
-        /** @brief */
+        /** @brief Run a function asynchronously without returning the result. */
         template<class F>
         void SilentAsync(F&& f)
         {
             m_executor->silent_async(std::forward<F>(f));
         }
 
+        /** @brief Get the number of workers in the thread pool. */
         auto MaxConcurrency() const -> size_t
         {
             return m_executor->num_workers();
