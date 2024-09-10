@@ -25,6 +25,7 @@
 
 #include "Graphics/GraphicsTools/interface/MapHelper.hpp"
 #include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
+#include "Graphics/GraphicsAccessories/interface/GraphicsAccessories.hpp"
 
 namespace
 {
@@ -134,6 +135,19 @@ namespace
             DirectX::XMMatrixPerspectiveFovRH(FOV, 1.0, NearPlane, FarPlane) *
             DirectX::XMMatrixScaling(XScale, YScale, 1.0f);
         return perspective;
+    }
+
+    auto GetTextureFormatFromChannelsCount(uint32_t channelsCount) -> Diligent::TEXTURE_FORMAT
+    {
+        switch (channelsCount)
+        {
+            case 1: return Diligent::TEX_FORMAT_R8_UNORM;
+            case 2: return Diligent::TEX_FORMAT_RG8_UNORM;
+            case 3:
+            case 4: return Diligent::TEX_FORMAT_RGBA8_UNORM;
+            default:
+                throw nc::NcError(std::format("Unsupported number of channels in the texture: {0}", channelsCount));
+        }
     }
 
 } // anonymous namespace
@@ -542,6 +556,35 @@ namespace nc::graphics
         ibData.DataSize = sizeof(cubeIndices);
         m_pDevice->CreateBuffer(indexBufferDesc, &ibData, &m_cubeIndexBuffer);
 
+        auto textureWithID = m_textures.at(0);
+
+        TextureDesc textureDesc;
+        textureDesc.Name = "Texture";
+        textureDesc.Type = RESOURCE_DIM_TEX_2D;
+        textureDesc.Usage = USAGE_DEFAULT;
+        textureDesc.BindFlags = BIND_SHADER_RESOURCE;
+        textureDesc.Width = textureWithID.texture.width;
+        textureDesc.Height = textureWithID.texture.height;
+        textureDesc.Format = GetTextureFormatFromChannelsCount(textureWithID.texture.numChannels);
+        textureDesc.MipLevels = 0;
+        textureDesc.MiscFlags = MISC_TEXTURE_FLAG_GENERATE_MIPS;
+        textureDesc.
+
+        m_pDevice->CreateTexture(textureDesc, nullptr, &m_texture);
+        m_pTextureSRV = m_texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
+        m_pTextCubeSRB->GetVariableByName(SHADER_TYPE_PIXEL, "g_Texture")->Set(m_pTextureSRV);
+
+        /**
+        struct Texture
+        {
+            static constexpr uint32_t numChannels = 4u;
+
+            uint32_t width;
+            uint32_t height;
+            std::vector<unsigned char> pixelData;
+        };
+         */
+
         // https://github.com/DiligentGraphics/DiligentTools/blob/036ea8d67882d853dee6b4975dcaea14da9d8a0a/AssetLoader/src/GLTFLoader.cpp#L849
 
         // ImageData Image;
@@ -603,6 +646,9 @@ namespace nc::graphics
     void NcGraphics3Impl::RenderTexturedCube03()
     {
         using namespace Diligent;
+        const uint64_t offset = 0;
+
+
     }
 
     void NcGraphics3Impl::AddTextures(const asset::TextureUpdateEventData& assetData)
@@ -723,7 +769,7 @@ namespace nc::graphics
         m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
          /* Tutorial 1 */
-         RenderTriangle01();
+         /* RenderTriangle01(); */
 
         /* Map the buffer and write current world-view-projection matrix */
         {
@@ -732,7 +778,10 @@ namespace nc::graphics
         }
 
         /* Tutorial 2 */
-        RenderCube02();
+        /* RenderCube02(); */
+
+        /* Tutorial 3 */
+        RenderTexturedCube03();
 
         m_pSwapChain->Present();
     }

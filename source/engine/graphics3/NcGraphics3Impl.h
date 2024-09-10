@@ -84,6 +84,8 @@ class NcGraphics3Impl : public NcGraphics
         Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12; /* @todo: Decision based on config and device capabilities */
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pCubeSRB;
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pTextCubeSRB;
+        Diligent::RefCntAutoPtr<Diligent::ITexture> m_texture;
+        Diligent::RefCntAutoPtr<Diligent::ITextureView> m_pTextureSRV;
         DirectX::XMMATRIX m_worldViewProj;
 
         nc::Connection<const asset::TextureUpdateEventData&> m_onTextureArrayBufferUpdate;
