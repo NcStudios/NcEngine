@@ -32,7 +32,7 @@ TEST(ConfigTests, Validate_badValues_returnsFalse)
 
     {
         auto actual = nc::config::Config{};
-        actual.physicsSettings.fixedUpdateInterval = -1.0f;
+        actual.physicsSettings.velocitySteps = 1u;
         EXPECT_FALSE(nc::config::Validate(actual));
     }
 }
@@ -122,8 +122,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.assetSettings.cubeMapsPath, actual.assetSettings.cubeMapsPath);
     EXPECT_EQ(expected.assetSettings.fontsPath, actual.assetSettings.fontsPath);
 
-    EXPECT_EQ(expected.memorySettings.maxDynamicColliders, actual.memorySettings.maxDynamicColliders);
-    EXPECT_EQ(expected.memorySettings.maxStaticColliders, actual.memorySettings.maxStaticColliders);
+    EXPECT_EQ(expected.memorySettings.maxRigidBodies, actual.memorySettings.maxRigidBodies);
     EXPECT_EQ(expected.memorySettings.maxNetworkDispatchers, actual.memorySettings.maxNetworkDispatchers);
     EXPECT_EQ(expected.memorySettings.maxParticleEmitters, actual.memorySettings.maxParticleEmitters);
     EXPECT_EQ(expected.memorySettings.maxRenderers, actual.memorySettings.maxRenderers);
@@ -148,8 +147,16 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.graphicsSettings.useValidationLayers, actual.graphicsSettings.useValidationLayers);
 
     EXPECT_EQ(expected.physicsSettings.enabled, actual.physicsSettings.enabled);
-    EXPECT_FLOAT_EQ(expected.physicsSettings.fixedUpdateInterval, actual.physicsSettings.fixedUpdateInterval);
-    EXPECT_FLOAT_EQ(expected.physicsSettings.worldspaceExtent, actual.physicsSettings.worldspaceExtent);
+    EXPECT_EQ(expected.physicsSettings.tempAllocatorSize, actual.physicsSettings.tempAllocatorSize);
+    EXPECT_EQ(expected.physicsSettings.maxBodyPairs, actual.physicsSettings.maxBodyPairs);
+    EXPECT_EQ(expected.physicsSettings.maxContacts, actual.physicsSettings.maxContacts);
+    EXPECT_EQ(expected.physicsSettings.velocitySteps, actual.physicsSettings.velocitySteps);
+    EXPECT_EQ(expected.physicsSettings.positionSteps, actual.physicsSettings.positionSteps);
+    EXPECT_FLOAT_EQ(expected.physicsSettings.baumgarteStabilization, actual.physicsSettings.baumgarteStabilization);
+    EXPECT_FLOAT_EQ(expected.physicsSettings.speculativeContactDistance, actual.physicsSettings.speculativeContactDistance);
+    EXPECT_FLOAT_EQ(expected.physicsSettings.penetrationSlop, actual.physicsSettings.penetrationSlop);
+    EXPECT_FLOAT_EQ(expected.physicsSettings.timeBeforeSleep, actual.physicsSettings.timeBeforeSleep);
+    EXPECT_FLOAT_EQ(expected.physicsSettings.sleepThreshold, actual.physicsSettings.sleepThreshold);
 
     EXPECT_EQ(expected.audioSettings.enabled, actual.audioSettings.enabled);
     EXPECT_EQ(expected.audioSettings.bufferFrames, actual.audioSettings.bufferFrames);

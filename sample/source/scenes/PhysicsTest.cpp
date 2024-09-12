@@ -1,4 +1,5 @@
 #include "PhysicsTest.h"
+#include "shared/GameLog.h"
 #include "shared/GameLogic.h"
 #include "shared/Prefabs.h"
 #include "shared/spawner/Spawner.h"
@@ -9,6 +10,7 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/Constraints.h"
+#include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
@@ -21,12 +23,14 @@ std::function<void(unsigned)> DestroyFunc = nullptr;
 
 int SpawnCount = 1000;
 int DestroyCount = 1000;
+float forceMultiplier = 1.0f;
 
 void Widget()
 {
     ImGui::Text("Physics Test");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
+        ui::DragFloat(forceMultiplier, "forceMultiplier");
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         const auto halfCellWidth = (ImGui::GetColumnWidth() * 0.5f) - 10.0f;
 
@@ -119,9 +123,9 @@ struct FollowCamera : public graphics::Camera
 #ifdef NC_USE_JOLT
 class VehicleController : public FreeComponent
 {
-    static constexpr auto force = 300.7f;
-    static constexpr auto torqueForce = 700.6f;
-    static constexpr auto jumpForce = 3700.0f;
+    static constexpr auto force = 150.0f;
+    static constexpr auto torqueForce = 150.0f;
+    static constexpr auto jumpForce = 400.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
     public:
@@ -158,24 +162,24 @@ class VehicleController : public FreeComponent
         {
             auto& rBody = world.Get<physics::RigidBody>(ParentEntity());
 
-            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force);
-            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force);
-            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force);
-            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force);
-            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce);
-            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce);
+            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * forceMultiplier);
+            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * forceMultiplier);
+            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * forceMultiplier);
 
             if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * forceMultiplier;
                 rBody.AddImpulse(dir);
             }
 
             if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Vector3::Up() * jumpForce;
+                const auto dir = Vector3::Up() * jumpForce * forceMultiplier;
                 rBody.AddImpulse(dir);
             }
         }
@@ -338,6 +342,7 @@ class VehicleController : public FreeComponent
 auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
 {
     const auto head = world.Emplace<Entity>({
+        .scale = Vector3::Splat(1.0f),
         .tag = "Worm Head"
     });
 
@@ -363,7 +368,7 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
     auto wormMaterial = GreenToonMaterial;
-    wormMaterial.outlineWidth = 6;
+    wormMaterial.outlineWidth = 1;
     world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, wormMaterial);
@@ -384,10 +389,19 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
     world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
 
-    world.Emplace<physics::RigidBody>(head, physics::Shape::Box, physics::BodyType::Dynamic);
-    world.Emplace<physics::RigidBody>(segment1, physics::Shape::Box, physics::BodyType::Dynamic);
-    world.Emplace<physics::RigidBody>(segment2, physics::Shape::Box, physics::BodyType::Dynamic);
-    world.Emplace<physics::RigidBody>(segment3, physics::Shape::Box, physics::BodyType::Dynamic);
+    world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
+    world.Emplace<physics::CollisionListener>(
+        head,
+        [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs){
+            GameLog::Log(fmt::format("Player collision enter with {}", other.Index()));
+        },
+        [](Entity, Entity other, ecs::Ecs){
+            GameLog::Log(fmt::format("Player collsion exit with {}", other.Index()));
+        }
+    );
 
     world.Emplace<physics::VelocityRestriction>(head);
     world.Emplace<physics::VelocityRestriction>(segment1);
@@ -456,7 +470,11 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<physics::Collider>(leftWall, physics::BoxProperties{});
     world.Emplace<physics::Collider>(rightWall, physics::BoxProperties{});
 
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::Box, physics::BodyType::Static);
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(backWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(frontWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(leftWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(rightWall, physics::Shape::MakeBox());
 }
 
 void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -767,7 +785,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
             auto& collider = world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
             world.Emplace<physics::PhysicsBody>(handle, world.Get<Transform>(handle), collider, physics::PhysicsProperties{.mass = 5.0f});
-            world.Emplace<physics::RigidBody>(handle, physics::Shape::Box, physics::BodyType::Dynamic);
+            world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox());
         }
     );
 

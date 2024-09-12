@@ -127,3 +127,19 @@ TEST(Entity_unit_tests, Hash_AllValues_ReturnsExpectedHash)
     constexpr auto expected = size_t{0x00000123456789AB}; // top 4 bytes empty | index | layer | flags
     EXPECT_EQ(expected, actual);
 }
+
+TEST(Entity_unit_tests, FromHash_NoFlags_ReconstructsEntity)
+{
+    constexpr auto expectedEntity = Entity{42u, 0u, 0u};
+    constexpr auto hash = Entity::Hash{}(expectedEntity);
+    constexpr auto actualEntity = Entity::FromHash(hash);
+    EXPECT_EQ(expectedEntity, actualEntity);
+}
+
+TEST(Entity_unit_tests, FromHash_AllValues_ReconstructsEntity)
+{
+    constexpr auto expectedEntity = Entity{128u, 7u, nc::Entity::Flags::Static | nc::Entity::Flags::NoSerialize};
+    constexpr auto hash = Entity::Hash{}(expectedEntity);
+    constexpr auto actualEntity = Entity::FromHash(hash);
+    EXPECT_EQ(expectedEntity, actualEntity);
+}

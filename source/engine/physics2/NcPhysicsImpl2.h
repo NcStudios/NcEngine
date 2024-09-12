@@ -14,17 +14,19 @@ struct SystemEvents;
 
 namespace config
 {
+struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
 namespace physics
 {
-using PhysicsEcsFilter = ecs::ExplicitEcs<Transform, RigidBody>;
-
 class NcPhysicsImpl2 final : public NcPhysics
 {
     public:
-        NcPhysicsImpl2(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events);
+        NcPhysicsImpl2(const config::MemorySettings& memorySettings,
+                       const config::PhysicsSettings& physicsSettings,
+                       Registry* registry,
+                       SystemEvents& events);
 
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
@@ -38,11 +40,12 @@ class NcPhysicsImpl2 final : public NcPhysics
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr; }
 
     private:
-        PhysicsEcsFilter m_ecs;
+        ecs::Ecs m_ecs;
         JoltApi m_jolt;
         Connection<RigidBody&> m_onAddRigidBodyConnection;
 
         void OnAddRigidBody(RigidBody& body);
+        void SyncTransforms();
 };
 } // namespace physics
 } // namespace nc

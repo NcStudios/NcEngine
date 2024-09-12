@@ -59,28 +59,40 @@ class Transform final : public ComponentBase
         Transform& operator=(const Transform&) = delete;
 
         /** @brief Get world space position */
-        auto Position() const noexcept -> Vector3 { return ToVector3(m_worldMatrix.r[3]); }
+        auto Position() const noexcept -> Vector3 { return ToVector3(PositionXM()); }
 
-        /** @brief Get world space position as XMVECTOR */
+        /** @brief Get world space position as an XMVECTOR */
         auto PositionXM() const noexcept -> DirectX::FXMVECTOR { return m_worldMatrix.r[3]; }
 
         /** @brief Get local space position */
-        auto LocalPosition() const noexcept -> Vector3 { return ToVector3(m_localMatrix.r[3]); }
+        auto LocalPosition() const noexcept -> Vector3 { return ToVector3(LocalPositionXM()); }
+
+        /** @brief Get local space position as an XMVECTOR */
+        auto LocalPositionXM() const noexcept -> DirectX::FXMVECTOR { return m_localMatrix.r[3]; }
 
         /** @brief Get world space rotation */
         auto Rotation() const noexcept -> Quaternion { return ToQuaternion(RotationXM()); }
 
-        /** @brief Get world space rotation as XMVECTOR */
+        /** @brief Get world space rotation as an XMVECTOR */
         auto RotationXM() const noexcept -> DirectX::XMVECTOR { return DecomposeRotation(m_worldMatrix); }
 
         /** @brief Get local space rotation */
-        auto LocalRotation() const noexcept -> Quaternion { return ToQuaternion(DecomposeRotation(m_localMatrix)); }
+        auto LocalRotation() const noexcept -> Quaternion { return ToQuaternion(LocalRotationXM()); }
+
+        /** @brief Get local space rotation as an XMVECTOR */
+        auto LocalRotationXM() const noexcept -> DirectX::XMVECTOR { return DecomposeRotation(m_localMatrix); }
 
         /** @brief Get world space scale */
-        auto Scale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_worldMatrix)); }
+        auto Scale() const noexcept -> Vector3 { return ToVector3(ScaleXM()); }
+
+        /** @brief Get world space scale as an XMVECTOR */
+        auto ScaleXM() const noexcept -> DirectX::XMVECTOR { return DecomposeScale(m_worldMatrix); }
 
         /** @brief Get local space scale */
-        auto LocalScale() const noexcept -> Vector3 { return ToVector3(DecomposeScale(m_localMatrix)); }
+        auto LocalScale() const noexcept -> Vector3 { return ToVector3(LocalScaleXM()); }
+
+        /** @brief Get local space scale as an XMVECTOR */
+        auto LocalScaleXM() const noexcept -> DirectX::XMVECTOR { return DecomposeScale(m_localMatrix); }
 
         /** @brief Get world space matrix */
         auto TransformationMatrix() const noexcept -> DirectX::FXMMATRIX { return m_worldMatrix; }

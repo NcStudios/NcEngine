@@ -2,26 +2,32 @@
 
 #include "ncengine/NcFwd.h"
 
-namespace nc::editor
+#include <any>
+
+namespace nc::ui::editor
 {
-void CollisionLogicUIWidget(CollisionLogic& logic);
-void FixedLogicUIWidget(FixedLogic& logic);
-void FrameLogicUIWidget(FrameLogic& logic);
-void TagUIWidget(Tag& tag);
-void TransformUIWidget(Transform& transform);
-void AudioSourceUIWidget(audio::AudioSource& audioSource);
-void MeshRendererUIWidget(graphics::MeshRenderer& meshRenderer);
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& particleEmitter);
-void PointLightUIWidget(graphics::PointLight& pointLight);
-void SpotLightUIWidget(graphics::SpotLight& spotLight);
-void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator& skeletalAnimator);
-void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer);
-void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher);
-void ColliderUIWidget(physics::Collider& collider);
-void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider);
-void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp);
-void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody);
-void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial);
-void PositionClampUIWidget(physics::PositionClamp& positionClamp);
-void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction);
-} // namespace nc::editor
+struct EditorContext;
+
+void CollisionLogicUIWidget(CollisionLogic& logic, EditorContext&, const std::any&);
+void FixedLogicUIWidget(FixedLogic& logic, EditorContext&, const std::any&);
+void FrameLogicUIWidget(FrameLogic& logic, EditorContext&, const std::any&);
+void TagUIWidget(Tag& tag, EditorContext&, const std::any&);
+void TransformUIWidget(Transform& transform, EditorContext&, const std::any&);
+void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&);
+void MeshRendererUIWidget(graphics::MeshRenderer& meshRenderer, EditorContext&, const std::any&);
+void ParticleEmitterUIWidget(graphics::ParticleEmitter& particleEmitter, EditorContext&, const std::any&);
+void PointLightUIWidget(graphics::PointLight& pointLight, EditorContext&, const std::any&);
+void SpotLightUIWidget(graphics::SpotLight& spotLight, EditorContext&, const std::any&);
+void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator& skeletalAnimator, EditorContext&, const std::any&);
+void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer, EditorContext&, const std::any&);
+void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher, EditorContext&, const std::any&);
+void ColliderUIWidget(physics::Collider& collider, EditorContext&, const std::any&);
+void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, EditorContext&, const std::any&);
+void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, EditorContext&, const std::any&);
+void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, EditorContext&, const std::any&);
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, EditorContext&, const std::any&);
+void PositionClampUIWidget(physics::PositionClamp& positionClamp, EditorContext&, const std::any&);
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, EditorContext&, const std::any&);
+void CollisionListenerUIWidget(physics::CollisionListener& listener, EditorContext&, const std::any&);
+void RigidBodyUIWidget(physics::RigidBody& body, EditorContext&, const std::any&);
+} // namespace nc::ui::editor

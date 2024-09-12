@@ -5,8 +5,16 @@
 
 #include "DirectXMath.h"
 
+
+#include <type_traits>
+
 namespace nc::physics
 {
+inline auto ToJoltVec3(const nc::Vector3& in) -> JPH::Vec3
+{
+    return JPH::Vec3{reinterpret_cast<const JPH::Float3&>(in)};
+}
+
 inline auto ToJoltVec3(DirectX::FXMVECTOR in) -> JPH::Vec3
 {
 #ifdef JPH_FLOATING_POINT_EXCEPTIONS_ENABLED
@@ -14,6 +22,11 @@ inline auto ToJoltVec3(DirectX::FXMVECTOR in) -> JPH::Vec3
 #else
     return JPH::Vec3{in};
 #endif
+}
+
+inline auto ToJoltQuaternion(const nc::Quaternion& in) -> JPH::Quat
+{
+    return JPH::Quat{in.x, in.y, in.z, in.w};
 }
 
 inline auto ToJoltQuaternion(DirectX::FXMVECTOR in) -> JPH::Quat
@@ -34,6 +47,21 @@ inline auto ToXMVectorHomogeneous(const JPH::Vec3& in) -> DirectX::XMVECTOR
 inline auto ToXMQuaternion(const JPH::Quat& in) -> DirectX::XMVECTOR
 {
     return in.mValue.mValue;
+}
+
+inline auto ToVector3(const JPH::Vec3& in) -> Vector3
+{
+    return Vector3{in.GetX(), in.GetY(), in.GetZ()};
+}
+
+inline auto ToQuaternion(const JPH::Quat& in) -> Quaternion
+{
+    return Quaternion{in.GetX(), in.GetY(), in.GetZ(), in.GetW()};
+}
+
+inline auto ToMotionQuality(bool useLinearCastValue) -> JPH::EMotionQuality
+{
+    return useLinearCastValue ? JPH::EMotionQuality::LinearCast : JPH::EMotionQuality::Discrete;
 }
 
 inline auto ToMotionType(BodyType bodyType) -> JPH::EMotionType

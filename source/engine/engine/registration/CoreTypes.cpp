@@ -8,9 +8,34 @@ namespace nc
 {
 void RegisterCoreTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
-    Register<ecs::detail::FreeComponentGroup>(registry, maxEntities, FreeComponentGroupId, "");
-    Register<Tag>(registry, maxEntities, TagId, "Tag", editor::TagUIWidget);
-    Register<Transform>(registry, maxEntities, TransformId, "Transform", editor::TransformUIWidget);
-    Register<Hierarchy>(registry, maxEntities, HierarchyId, "Hierarchy");
+    Register<ecs::detail::FreeComponentGroup>(
+        registry,
+        maxEntities,
+        FreeComponentGroupId,
+        ""
+    );
+
+    Register<Tag>(
+        registry,
+        maxEntities,
+        TagId,
+        "Tag",
+        ui::editor::TagUIWidget
+    );
+
+    Register<Transform>(
+        registry,
+        maxEntities,
+        TransformId,
+        "Transform",
+        ui::editor::TransformUIWidget
+    );
+
+    Register<Hierarchy>(
+        registry,
+        maxEntities,
+        HierarchyId,
+        "Hierarchy"
+    );
 }
 } // namespace nc

@@ -14,6 +14,7 @@ class Transform;
 namespace physics
 {
 class Collider;
+class RigidBody;
 } // namespace physics
 
 namespace graphics
@@ -41,7 +42,8 @@ class WidgetSystem
                                       MeshRenderer,
                                       ToonRenderer,
                                       WireframeRenderer,
-                                      physics::Collider> worldView) -> WidgetState;
+                                      physics::Collider,
+                                      physics::RigidBody> worldView) -> WidgetState;
 };
 } // namespace graphics
 } // namespace nc

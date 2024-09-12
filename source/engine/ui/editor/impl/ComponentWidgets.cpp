@@ -1,5 +1,6 @@
 #include "ui/editor/ComponentWidgets.h"
 #include "assets/AssetWrapper.h"
+#include "ncengine/Events.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -12,9 +13,13 @@
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
+#include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/PhysicsUtility.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
+#include "ncengine/ui/editor/EditorContext.h"
 
 #include <array>
 #include <ranges>
@@ -139,6 +144,79 @@ constexpr auto useGravityProp  = nc::ui::Property{ &T::UseGravity,     &T::SetUs
 constexpr auto isKinematicProp = nc::ui::Property{ &T::IsKinematic,    &T::SetIsKinematic, "isKinematic" };
 } // namespace physics_body_ext
 
+namespace rigid_body_ext
+{
+using T = nc::physics::RigidBody;
+
+constexpr bool (T::*getScalesWithTransform)() const    = &T::ScalesWithTransform;
+constexpr void (T::*setScalesWithTransform)(bool)      = &T::ScalesWithTransform;
+constexpr bool (T::*getUseContinuousDetection)() const = &T::UseContinuousDetection;
+constexpr void (T::*setUseContinuousDetection)(bool)   = &T::UseContinuousDetection;
+
+constexpr auto getBodyType = [](auto& body)
+{
+    const auto strView = nc::physics::ToString(body.GetBodyType());
+    return std::string{strView};
+};
+
+constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
+{
+    body.SetBodyType(nc::physics::ToBodyType(bodyTypeStr));
+};
+
+constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"               };
+constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"            };
+constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"            };
+constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"         };
+constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"       };
+constexpr auto angularDampingProp         = nc::ui::Property{ &T::GetAngularDamping,     &T::SetAngularDamping,     "angularDamping"      };
+constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMultiplier,  &T::SetGravityMultiplier,  "gravityMultiplier"   };
+constexpr auto scalesWithTransformProp    = nc::ui::Property{ getScalesWithTransform,    setScalesWithTransform,    "scalesWithTransform" };
+constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"  };
+
+void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+{
+    const auto& shape = body.GetShape();
+    auto extents = shape.GetLocalScale();
+    auto position = shape.GetLocalPosition();
+    const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto positionModified = nc::ui::InputPosition(position, "position");
+    if (positionModified || extentsModified)
+    {
+        body.SetShape(nc::physics::Shape::MakeBox(extents, position), transformScale);
+    }
+}
+
+void SphereProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+{
+    const auto& shape = body.GetShape();
+    auto radius = shape.GetLocalScale().x * 0.5f;
+    auto position = shape.GetLocalPosition();
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto positionModified = nc::ui::InputPosition(position, "position");
+    if (radiusModified | positionModified)
+    {
+        body.SetShape(nc::physics::Shape::MakeSphere(radius, position), transformScale);
+    }
+}
+
+void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+{
+    const auto& shape = body.GetShape();
+    const auto& scale = shape.GetLocalScale();
+    auto height = scale.y * 2.0f;
+    auto radius = scale.x * 0.5f;
+    auto position = shape.GetLocalPosition();
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto positionModified = nc::ui::InputPosition(position, "position");
+    if (heightModified | radiusModified | positionModified)
+    {
+        body.SetShape(nc::physics::Shape::MakeCapsule(height, radius, position), transformScale);
+    }
+}
+} // namespace rigid_body_ext
+
 namespace particle_emitter_ext
 {
 using T = nc::graphics::ParticleEmitter;
@@ -229,54 +307,96 @@ constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHa
 } // namespace toon_renderer_ext
 } // anonymous namespace
 
-namespace nc::editor
+namespace nc::ui::editor
 {
-void CollisionLogicUIWidget(CollisionLogic&)
-{
-}
-
-void FixedLogicUIWidget(FixedLogic&)
+void CollisionLogicUIWidget(CollisionLogic&, EditorContext&, const std::any&)
 {
 }
 
-void FrameLogicUIWidget(FrameLogic&)
+void FixedLogicUIWidget(FixedLogic&, EditorContext&, const std::any&)
 {
 }
 
-void TagUIWidget(Tag& tag)
+void FrameLogicUIWidget(FrameLogic&, EditorContext&, const std::any&)
+{
+}
+
+void TagUIWidget(Tag& tag, EditorContext&, const std::any&)
 {
     ui::InputText(tag.value, "tag");
 }
 
-void TransformUIWidget(Transform& transform)
+void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&)
 {
-    auto scl_v = DirectX::XMVECTOR{};
-    auto rot_v = DirectX::XMVECTOR{};
-    auto pos_v = DirectX::XMVECTOR{};
-    DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, transform.LocalTransformationMatrix());
+    IMGUI_SCOPE(ui::ImGuiId, "Transform");
+    const auto self = ctx.selectedEntity;
+    const auto decomposedMatrix = DecomposeMatrix(transform.LocalTransformationMatrix());
+    auto scl = ToVector3(decomposedMatrix.scale);
+    const auto prevScl = scl;
+    auto pos = ToVector3(decomposedMatrix.position);
+    auto curRot = ToQuaternion(decomposedMatrix.rotation).ToEulerAngles();
+    const auto prevRot = curRot;
+    auto wasUpdated = false;
 
-    auto scl = Vector3{};
-    auto pos = Vector3{};
-    auto quat = nc::Quaternion::Identity();
-    DirectX::XMStoreVector3(&scl, scl_v);
-    DirectX::XMStoreQuaternion(&quat, rot_v);
-    DirectX::XMStoreVector3(&pos, pos_v);
-    const auto prevRot = quat.ToEulerAngles();
-    auto curRot = prevRot;
-
-    if (ui::InputPosition(pos, "position")) transform.SetPosition(pos);
+    if (ui::InputPosition(pos, "position"))
+    {
+        wasUpdated = true;
+        if (ctx.world.Contains<physics::RigidBody>(self))
+        {
+            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            body.SetSimulatedBodyPosition(transform, pos, true);
+        }
+        else
+        {
+            transform.SetPosition(pos);
+        }
+    }
 
     if (ui::InputAngles(curRot, "rotation"))
     {
-        if      (!FloatEqual(curRot.x, prevRot.x)) transform.Rotate(Vector3::Right(), curRot.x - prevRot.x);
-        else if (!FloatEqual(curRot.y, prevRot.y)) transform.Rotate(Vector3::Up(), curRot.y - prevRot.y);
-        else if (!FloatEqual(curRot.z, prevRot.z)) transform.Rotate(Vector3::Front(), curRot.z - prevRot.z);
+        wasUpdated = true;
+        const auto rotationNeeded = [&]()
+        {
+            if      (!FloatEqual(curRot.x, prevRot.x)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR0, curRot.x - prevRot.x);
+            else if (!FloatEqual(curRot.y, prevRot.y)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR1, curRot.y - prevRot.y);
+            else if (!FloatEqual(curRot.z, prevRot.z)) return DirectX::XMQuaternionRotationAxis(DirectX::g_XMIdentityR2, curRot.z - prevRot.z);
+            return DirectX::XMQuaternionIdentity();
+        }();
+
+        const auto newRotation = ToQuaternion(DirectX::XMQuaternionMultiply(decomposedMatrix.rotation, rotationNeeded));
+        if (ctx.world.Contains<physics::RigidBody>(self))
+        {
+            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            body.SetSimulatedBodyRotation(transform, newRotation, true);
+        }
+        else
+        {
+            transform.SetRotation(newRotation);
+        }
     }
 
-    if (ui::InputScale(scl, "scale")) transform.SetScale(scl);
+    if (ui::InputScale(scl, "scale"))
+    {
+        wasUpdated = true;
+        if (ctx.world.Contains<physics::RigidBody>(self))
+        {
+            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            scl = physics::NormalizeScaleForShape(body.GetShape().GetType(), prevScl, scl);
+            body.SetSimulatedBodyScale(transform, scl, true);
+        }
+        else
+        {
+            transform.SetScale(scl);
+        }
+    }
+
+    if (wasUpdated && self.IsStatic() && ctx.rebuildStaticsOnTransformWrite)
+    {
+        ctx.events->rebuildStatics();
+    }
 }
 
-void AudioSourceUIWidget(audio::AudioSource& audioSource)
+void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&)
 {
     ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
@@ -307,7 +427,7 @@ void AudioSourceUIWidget(audio::AudioSource& audioSource)
         audioSource.AddClip(asset::DefaultAudioClip);
 }
 
-void MeshRendererUIWidget(graphics::MeshRenderer& renderer)
+void MeshRendererUIWidget(graphics::MeshRenderer& renderer, EditorContext&, const std::any&)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
@@ -318,7 +438,7 @@ void MeshRendererUIWidget(graphics::MeshRenderer& renderer)
     ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
 }
 
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
+void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
@@ -357,7 +477,7 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter)
     ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
 }
 
-void PointLightUIWidget(graphics::PointLight& light)
+void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
@@ -367,7 +487,7 @@ void PointLightUIWidget(graphics::PointLight& light)
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
-void SpotLightUIWidget(graphics::SpotLight& light)
+void SpotLightUIWidget(graphics::SpotLight& light, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
@@ -378,11 +498,11 @@ void SpotLightUIWidget(graphics::SpotLight& light)
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);
 }
 
-void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&)
+void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, EditorContext&, const std::any&)
 {
 }
 
-void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
+void ToonRendererUIWidget(graphics::ToonRenderer& renderer, EditorContext&, const std::any&)
 {
     auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
     auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
@@ -393,11 +513,57 @@ void ToonRendererUIWidget(graphics::ToonRenderer& renderer)
     ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
 }
 
-void NetworkDispatcherUIWidget(net::NetworkDispatcher&)
+void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const std::any&)
 {
 }
 
-void ColliderUIWidget(physics::Collider& collider)
+void CollisionListenerUIWidget(physics::CollisionListener&, EditorContext&, const std::any&)
+{
+}
+
+void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "RigidBody");
+    ui::PropertyWidget(rigid_body_ext::awakeProp, body, &ui::Checkbox);
+
+    ImGui::Separator();
+    ImGui::Text("Shape");
+    const auto transformScale = ctx.world.Get<Transform>(body.GetEntity()).Scale();
+    auto selectedShapeName = std::string{ToString(body.GetShape().GetType())};
+    if (ui::Combobox(selectedShapeName, "shapeType", physics::GetShapeTypeNames()))
+    {
+        const auto newShape = physics::ToShapeType(selectedShapeName);
+        switch (newShape)
+        {
+            case physics::ShapeType::Box:     { body.SetShape(physics::Shape::MakeBox(),     transformScale); break; }
+            case physics::ShapeType::Sphere:  { body.SetShape(physics::Shape::MakeSphere(),  transformScale); break; }
+            case physics::ShapeType::Capsule: { body.SetShape(physics::Shape::MakeCapsule(), transformScale); break; }
+        }
+    }
+
+    switch (body.GetShape().GetType())
+    {
+        case physics::ShapeType::Box:     { rigid_body_ext::BoxProperties(body,     transformScale); break; }
+        case physics::ShapeType::Sphere:  { rigid_body_ext::SphereProperties(body,  transformScale); break; }
+        case physics::ShapeType::Capsule: { rigid_body_ext::CapsuleProperties(body, transformScale); break;}
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Properties");
+    ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
+    ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
+    ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+    ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+
+    ImGui::Separator();
+    ImGui::Text("Flags");
+    ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp,    body, &ui::Checkbox);
+    ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
+}
+
+void ColliderUIWidget(physics::Collider& collider, EditorContext&, const std::any&)
 {
     using namespace std::string_view_literals;
     constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
@@ -414,13 +580,13 @@ void ColliderUIWidget(physics::Collider& collider)
     ui::PropertyWidget(collider_ext::triggerProp, collider, &ui::Checkbox);
 }
 
-void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider)
+void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, EditorContext&, const std::any&)
 {
     /** @todo #454 Allow updating asset. */
     ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
 }
 
-void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp)
+void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "OrientationClamp");
     ui::InputVector3(orientationClamp.targetOrientation, "targetOrientation", 0.1f, -1.0f, 1.0f);
@@ -428,7 +594,7 @@ void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp)
     ui::DragFloat(orientationClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
 }
 
-void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
+void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, EditorContext&, const std::any&)
 {
     constexpr auto largeStep = 0.1f;
     constexpr auto smallStep = 0.01f;
@@ -443,13 +609,13 @@ void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody)
     ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
 }
 
-void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial)
+void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, EditorContext&, const std::any&)
 {
     ui::DragFloat(physicsMaterial.friction, "friction", 0.01f, 0.0f, 1.0f);
     ui::DragFloat(physicsMaterial.restitution, "restitution", 0.01f, 0.0f, 1.0f);
 }
 
-void PositionClampUIWidget(physics::PositionClamp& positionClamp)
+void PositionClampUIWidget(physics::PositionClamp& positionClamp, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "PositionClamp");
     ui::InputVector3(positionClamp.targetPosition, "targetPosition", 0.1f, -1000.0f, 1000.0f);
@@ -457,11 +623,11 @@ void PositionClampUIWidget(physics::PositionClamp& positionClamp)
     ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
 }
 
-void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction)
+void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "VelocityRestriction");
     ui::InputVector3(velocityRestriction.linearFreedom, "linearFreedom", 0.1f, 0.0f, 1.0f);
     ui::InputVector3(velocityRestriction.angularFreedom, "angularFreedom", 0.1f, 0.0f, 1.0f);
     ui::Checkbox(velocityRestriction.worldSpace, "worldSpace");
 }
-} // namespace nc::editor
+} // namespace nc::ui::editor
