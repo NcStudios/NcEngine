@@ -15,6 +15,12 @@ if(NC_USE_JOLT)
     add_definitions(-DNC_USE_JOLT)
 endif()
 
+# diligent feature flag
+option(NC_USE_DILIGENT "Enable DiligentGraphics" OFF)
+if(NC_USE_DILIGENT)
+    add_definitions(-DNC_USE_DILIGENT)
+endif()
+
 # Variables
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

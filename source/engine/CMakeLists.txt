@@ -69,24 +69,26 @@ elseif(APPLE)
     )
 endif()
 
-target_link_libraries(${NC_ENGINE_LIB}
-    PUBLIC
-        Diligent-GraphicsTools
-        Diligent-TargetPlatform
-        Diligent-TextureLoader
-)
+if(NC_USE_DILIGENT)
+    target_link_libraries(${NC_ENGINE_LIB}
+        PUBLIC
+            Diligent-GraphicsTools
+            Diligent-TargetPlatform
+            Diligent-TextureLoader
+    )
 
-if(D3D11_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
-endif()
-if(D3D12_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D12-shared)
-endif()
-if(GL_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineOpenGL-shared)
-endif()
-if(VULKAN_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineVk-shared)
+    if(D3D11_SUPPORTED)
+        target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
+    endif()
+    if(D3D12_SUPPORTED)
+        target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D12-shared)
+    endif()
+    if(GL_SUPPORTED)
+        target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineOpenGL-shared)
+    endif()
+    if(VULKAN_SUPPORTED)
+        target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineVk-shared)
+    endif()
 endif()
 
 # Include Dirs
@@ -107,30 +109,13 @@ target_include_directories(${NC_ENGINE_LIB}
 )
 
 # Diligent Include Dirs
-target_include_directories(${NC_ENGINE_LIB}
-    PRIVATE
-        $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${diligenttools_SOURCE_DIR}>
-)
-
-message(FileOutput="${CMAKE_BINARY_DIR}/sample/${CMAKE_BUILD_TYPE}")
-
-# # Install
-# install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio Diligent-GraphicsEngineD3D11-shared # Diligent-GraphicsEngineD3D12-shared Diligent-GraphicsEngineOpenGL-shared Diligent-GraphicsEngineVk-shared
-#         EXPORT      NcEngine-export
-#         DESTINATION lib
-# )
-# install(EXPORT      NcEngine-export
-#         FILE        NcEngineTargets.cmake
-#         NAMESPACE   Nc::
-#         DESTINATION lib/cmake/NcEngine
-# )
-# install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
-#         DESTINATION lib/cmake/NcEngine
-# )
-# install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
-#         DESTINATION include
-# )
+if(NC_USE_DILIGENT)
+    target_include_directories(${NC_ENGINE_LIB}
+        PRIVATE
+            $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
+            $<BUILD_INTERFACE:${diligenttools_SOURCE_DIR}>
+    )
+endif()
 
 add_subdirectory(audio)
 add_subdirectory(asset)
@@ -139,7 +124,9 @@ add_subdirectory(debug)
 add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
-add_subdirectory(graphics3)
+if(NC_USE_DILIGENT)
+    add_subdirectory(graphics3)
+endif()
 add_subdirectory(input)
 add_subdirectory(network)
 add_subdirectory(particle)

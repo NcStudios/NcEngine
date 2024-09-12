@@ -63,31 +63,34 @@ namespace
 
 namespace nc::graphics
 {
-    // auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
-    //                          const config::GraphicsSettings& graphicsSettings,
-    //                          const config::MemorySettings& memorySettings,
-    //                          ModuleProvider modules,
-    //                          Registry* registry,
-    //                          SystemEvents& events) -> std::unique_ptr<NcGraphics>
-    // {
-    //     if (graphicsSettings.enabled)
-    //     {
-    //         auto ncAsset = modules.Get<asset::NcAsset>();
-    //         auto ncWindow = modules.Get<window::NcWindow>();
-    //         NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
-    //         NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
-    //         NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
-    //         NC_LOG_TRACE("Selecting Graphics API");
-    //         auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, *ncWindow);
+#ifndef NC_USE_DILIGENT
+    auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                             const config::GraphicsSettings& graphicsSettings,
+                             const config::MemorySettings& memorySettings,
+                             ModuleProvider modules,
+                             Registry* registry,
+                             SystemEvents& events) -> std::unique_ptr<NcGraphics>
+    {
+        if (graphicsSettings.enabled)
+        {
+            auto ncAsset = modules.Get<asset::NcAsset>();
+            auto ncWindow = modules.Get<window::NcWindow>();
+            NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
+            NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
+            NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
-    //         NC_LOG_TRACE("Building NcGraphics module");
-    //         return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), *ncWindow);
-    //     }
+            NC_LOG_TRACE("Selecting Graphics API");
+            auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, *ncWindow);
 
-    //     NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
-    //     return std::make_unique<NcGraphicsStub>(registry);
-    // }
+            NC_LOG_TRACE("Building NcGraphics module");
+            return std::make_unique<NcGraphicsImpl>(graphicsSettings, memorySettings, registry, modules, events, std::move(graphicsApi), *ncWindow);
+        }
+
+        NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
+        return std::make_unique<NcGraphicsStub>(registry);
+    }
+#endif
 
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                                    const config::MemorySettings& memorySettings,

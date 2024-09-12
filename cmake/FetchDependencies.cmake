@@ -97,16 +97,18 @@ FetchContent_Declare(JoltPhysics
 )
 
 # Diligent
-FetchContent_Declare(DiligentCore
-                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
-                     SOURCE_DIR _deps/DiligentCore
-)
+if(${NC_USE_DILIGENT})
+    FetchContent_Declare(DiligentCore
+                        GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
+                        SOURCE_DIR _deps/DiligentCore
+    )
 
-FetchContent_Declare(DiligentTools
-                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
-                     SOURCE_DIR _deps/DiligentTools
-)
-FetchContent_MakeAvailable(DiligentCore DiligentTools)
+    FetchContent_Declare(DiligentTools
+                        GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
+                        SOURCE_DIR _deps/DiligentTools
+    )
+    FetchContent_MakeAvailable(DiligentCore DiligentTools)
+endif()
 
 # Fetch all required sources
 FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics)

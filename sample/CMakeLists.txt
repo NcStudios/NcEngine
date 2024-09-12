@@ -28,14 +28,16 @@ target_link_libraries(${NC_SAMPLE_EXE}
 
 add_subdirectory(source)
 
-copy_required_dlls(${NC_SAMPLE_EXE})
+if(${NC_USE_DILIGENT})
+    copy_required_dlls(${NC_SAMPLE_EXE})
+
+    install(DIRECTORY           ${CMAKE_BINARY_DIR}/sample/${CMAKE_BUILD_TYPE}/
+            DESTINATION         sample
+            FILES_MATCHING REGEX ".*\.(dll)"
+    )
+endif()
 
 # Install
-install(DIRECTORY           ${CMAKE_BINARY_DIR}/sample/${CMAKE_BUILD_TYPE}/
-        DESTINATION         sample
-        FILES_MATCHING REGEX ".*\.(dll)"
-)
-
 install(TARGETS     ${NC_SAMPLE_EXE}
         DESTINATION sample
 )
@@ -53,6 +55,9 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sample/assets/raw/image/ # TODO: Remov
         DESTINATION sample/raw/image
 )
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/
+        DESTINATION    sample/nca/shaders
+)
+install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
         DESTINATION    sample/nca/shaders
 )
 install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
