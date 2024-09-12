@@ -13,7 +13,7 @@
 #include "RenderDevice.h"
 #include "DeviceContext.h"
 #include "SwapChain.h"
-#include "RefCntAutoPtr.hpp"
+#include "Common/interface/RefCntAutoPtr.hpp"
 
 #include <memory>
 
