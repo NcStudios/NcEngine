@@ -1,19 +1,13 @@
 #include "NcGraphics3Impl.h"
-#include "graphics/PerFrameRenderState.h"
-#include "graphics/shader_resource/ShaderResourceBus.h"
-#include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
-#include "ncengine/debug/DebugRendering.h"
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/View.h"
-#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 #include "config/Config.h"
-#include "graphics/api/vulkan/ShaderUtilities.h"
 #include "time/Time.h"
+#include "input/Input.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 
@@ -23,9 +17,10 @@
 #include "optick.h"
 #include "DirectXMath.h"
 
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
-#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
-#include "Graphics/GraphicsAccessories/interface/GraphicsAccessories.hpp"
+// Diligent
+#include "MapHelper.hpp"
+#include "GraphicsUtilities.h"
+#include "TextureUtilities.h"
 
 namespace
 {
@@ -136,20 +131,6 @@ namespace
             DirectX::XMMatrixScaling(XScale, YScale, 1.0f);
         return perspective;
     }
-
-    auto GetTextureFormatFromChannelsCount(uint32_t channelsCount) -> Diligent::TEXTURE_FORMAT
-    {
-        switch (channelsCount)
-        {
-            case 1: return Diligent::TEX_FORMAT_R8_UNORM;
-            case 2: return Diligent::TEX_FORMAT_RG8_UNORM;
-            case 3:
-            case 4: return Diligent::TEX_FORMAT_RGBA8_UNORM;
-            default:
-                throw nc::NcError(std::format("Unsupported number of channels in the texture: {0}", channelsCount));
-        }
-    }
-
 } // anonymous namespace
 
 namespace nc::graphics
@@ -189,8 +170,7 @@ namespace nc::graphics
                                    window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphics3Impl::OnResize)},
-          m_onTextureArrayBufferUpdate{modules.Get<asset::NcAsset>()->OnTextureUpdate().Connect(this, &NcGraphics3Impl::AddTextures)},
-          m_textures{}
+          m_elapsedTime{0.0f}
     {
         (void)graphicsSettings;
         (void)memorySettings;
@@ -371,7 +351,7 @@ namespace nc::graphics
         BufferData vertexBufferData;
         vertexBufferData.pData = cubeVerts.data();
         vertexBufferData.DataSize = sizeof(cubeVerts);
-        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_cubeVertexBuffer);
+        m_pDevice->CreateBuffer(vertexBufferDesc, &vertexBufferData, &m_pCubeVertexBuffer);
 
         /* Create index buffer */
         constexpr std::array<uint32_t, 36> cubeIndices =
@@ -392,7 +372,7 @@ namespace nc::graphics
         BufferData indexBufferData;
         indexBufferData.pData = cubeIndices.data();
         indexBufferData.DataSize = sizeof(cubeIndices);
-        m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_cubeIndexBuffer);
+        m_pDevice->CreateBuffer(indexBufferDesc, &indexBufferData, &m_pCubeIndexBuffer);
     }
 
     void NcGraphics3Impl::SetupTexturedCube03(std::string_view defaultShadersPath, Diligent::ShaderCreateInfo shaderCI)
@@ -533,7 +513,7 @@ namespace nc::graphics
         BufferData vbData;
         vbData.pData = cubeVerts.data();
         vbData.DataSize = sizeof(cubeVerts);
-        m_pDevice->CreateBuffer(vertexBufferDesc, &vbData, &m_cubeVertexBuffer);
+        m_pDevice->CreateBuffer(vertexBufferDesc, &vbData, &m_pTextCubeVertexBuffer);
 
         /* Index Buffer */
         std::array<uint32_t, 36> cubeIndices
@@ -554,49 +534,15 @@ namespace nc::graphics
         BufferData ibData;
         ibData.pData = cubeIndices.data();
         ibData.DataSize = sizeof(cubeIndices);
-        m_pDevice->CreateBuffer(indexBufferDesc, &ibData, &m_cubeIndexBuffer);
+        m_pDevice->CreateBuffer(indexBufferDesc, &ibData, &m_pTextCubeIndexBuffer);
 
-        auto textureWithID = m_textures.at(0);
+        TextureLoadInfo textureLI;
+        textureLI.IsSRGB = true;
+        CreateTextureFromFile("raw/image/sphere/marble/BaseColor.png", textureLI, m_pDevice, &m_pTexture);
 
-        TextureDesc textureDesc;
-        textureDesc.Name = "Texture";
-        textureDesc.Type = RESOURCE_DIM_TEX_2D;
-        textureDesc.Usage = USAGE_DEFAULT;
-        textureDesc.BindFlags = BIND_SHADER_RESOURCE;
-        textureDesc.Width = textureWithID.texture.width;
-        textureDesc.Height = textureWithID.texture.height;
-        textureDesc.Format = GetTextureFormatFromChannelsCount(textureWithID.texture.numChannels);
-        textureDesc.MipLevels = 0;
-        textureDesc.MiscFlags = MISC_TEXTURE_FLAG_GENERATE_MIPS;
-        textureDesc.
-
-        m_pDevice->CreateTexture(textureDesc, nullptr, &m_texture);
-        m_pTextureSRV = m_texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
+        m_pTextureSRV = m_pTexture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
         m_pTextCubeSRB->GetVariableByName(SHADER_TYPE_PIXEL, "g_Texture")->Set(m_pTextureSRV);
 
-        /**
-        struct Texture
-        {
-            static constexpr uint32_t numChannels = 4u;
-
-            uint32_t width;
-            uint32_t height;
-            std::vector<unsigned char> pixelData;
-        };
-         */
-
-        // https://github.com/DiligentGraphics/DiligentTools/blob/036ea8d67882d853dee6b4975dcaea14da9d8a0a/AssetLoader/src/GLTFLoader.cpp#L849
-
-        // ImageData Image;
-        // Image.Width         = gltf_image.width;
-        // Image.Height        = gltf_image.height;
-        // Image.NumComponents = gltf_image.component;
-        // Image.ComponentSize = gltf_image.bits / 8;
-        // Image.FileFormat    = (gltf_image.width < 0 && gltf_image.height < 0) ? static_cast<IMAGE_FILE_FORMAT>(gltf_image.pixel_type) : IMAGE_FILE_FORMAT_UNKNOWN;
-        // Image.pData         = gltf_image.image.data();
-        // Image.DataSize      = gltf_image.image.size();
-
-        // AddTexture(pDevice, pTextureCache, pResourceMgr, Image, gltf_tex.sampler, CacheId);
     }
 
     void NcGraphics3Impl::UpdateCube02()
@@ -625,9 +571,9 @@ namespace nc::graphics
 
         /* Bind vertex and index buffers */
         const uint64_t offset = 0;
-        std::array<IBuffer*, 1> pBuffs = {m_cubeVertexBuffer};
+        std::array<IBuffer*, 1> pBuffs = {m_pCubeVertexBuffer};
         m_pImmediateContext->SetVertexBuffers(0, 1, pBuffs.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
-        m_pImmediateContext->SetIndexBuffer(m_cubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        m_pImmediateContext->SetIndexBuffer(m_pCubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
         /* Set the pipeline state. */ 
         m_pImmediateContext->SetPipelineState(m_pPSOCube);
@@ -647,30 +593,22 @@ namespace nc::graphics
     {
         using namespace Diligent;
         const uint64_t offset = 0;
-
-
-    }
-
-    void NcGraphics3Impl::AddTextures(const asset::TextureUpdateEventData& assetData)
-    {
-        switch (assetData.updateAction)
+        std::array<IBuffer*, 1> pBuffers
         {
-            case asset::UpdateAction::Load:
-            {
-                m_textures.assign(assetData.data.begin(), assetData.data.end());
-                break;
-            }
-            case asset::UpdateAction::Unload:
-            {
-                /** @todo: m_textures.Remove(assetData.data); */
-                break;
-            }
-            case asset::UpdateAction::UnloadAll:
-            {
-                m_textures.clear();
-                break;
-            }
-        }
+            {m_pTextCubeVertexBuffer}
+        };
+
+        m_pImmediateContext->SetVertexBuffers(0, 1, pBuffers.data(), &offset, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
+        m_pImmediateContext->SetIndexBuffer(m_pTextCubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        m_pImmediateContext->SetPipelineState(m_pPSOTextCube);
+        m_pImmediateContext->CommitShaderResources(m_pTextCubeSRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        DrawIndexedAttribs drawAttribs;
+        drawAttribs.IndexType = VT_UINT32;
+        drawAttribs.NumIndices = 36;
+        drawAttribs.Flags = DRAW_FLAG_VERIFY_ALL;
+        m_pImmediateContext->DrawIndexed(drawAttribs);
     }
 
     NcGraphics3Impl::~NcGraphics3Impl()
@@ -745,8 +683,14 @@ namespace nc::graphics
     void NcGraphics3Impl::Update()
     {
         const float dt = time::DeltaTime();
+        m_elapsedTime += dt;
+        if (m_elapsedTime > std::numeric_limits<float>::max() - 0.05f)
+        {
+            m_elapsedTime = 0.0f;
+        }
 
-        auto modelTransform = DirectX::XMMatrixRotationY(dt * 10.0f) * DirectX::XMMatrixRotationX(-DirectX::XM_PI);
+        auto modelTransform = DirectX::XMMatrixIdentity();
+        modelTransform *= DirectX::XMMatrixRotationY(m_elapsedTime * 1.0f) * DirectX::XMMatrixRotationX(-DirectX::XM_PI);
         auto view = DirectX::XMMatrixTranslation(0.0f, 0.0f, -10.0f);
         auto srfPreTransform = GetSurfacePretransformMatrixInternal(DirectX::XMVectorSet(0, 0, 1, 1), m_pSwapChain.ConstPtr());
         auto proj = GetAdjustedProjectionMatrix(DirectX::XM_PI / 4.0f,
@@ -768,8 +712,9 @@ namespace nc::graphics
         m_pImmediateContext->ClearRenderTarget(pRTV, clearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-         /* Tutorial 1 */
-         /* RenderTriangle01(); */
+        /* Tutorial 1 */
+        if (input::KeyHeld(input::KeyCode::One))
+            RenderTriangle01();
 
         /* Map the buffer and write current world-view-projection matrix */
         {
@@ -778,10 +723,12 @@ namespace nc::graphics
         }
 
         /* Tutorial 2 */
-        /* RenderCube02(); */
+        if (input::KeyHeld(input::KeyCode::Two))
+            RenderCube02();
 
         /* Tutorial 3 */
-        RenderTexturedCube03();
+        if (input::KeyHeld(input::KeyCode::Three))
+            RenderTexturedCube03();
 
         m_pSwapChain->Present();
     }

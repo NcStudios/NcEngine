@@ -49,6 +49,9 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/sample/assets/font
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/resources/nca
         DESTINATION sample
 )
+install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sample/assets/raw/image/ # TODO: Remove. Just for experimenting
+        DESTINATION sample/raw/image
+)
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/
         DESTINATION    sample/nca/shaders
 )

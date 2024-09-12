@@ -5,16 +5,15 @@
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
 
-#include "Graphics/GraphicsEngineD3D11/interface/EngineFactoryD3D11.h"
-#include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
-#include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
-#include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
-
-#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
-#include "Graphics/GraphicsEngine/interface/DeviceContext.h"
-#include "Graphics/GraphicsEngine/interface/SwapChain.h"
-
-#include "Common/interface/RefCntAutoPtr.hpp"
+// Diligent
+#include "EngineFactoryD3D11.h"
+#include "EngineFactoryD3D12.h"
+#include "EngineFactoryOpenGL.h"
+#include "EngineFactoryVk.h"
+#include "RenderDevice.h"
+#include "DeviceContext.h"
+#include "SwapChain.h"
+#include "RefCntAutoPtr.hpp"
 
 #include <memory>
 
@@ -66,30 +65,33 @@ class NcGraphics3Impl : public NcGraphics
         void RenderCube02();
         void RenderTexturedCube03();
 
-        void AddTextures(const asset::TextureUpdateEventData& assetData);
-
         Registry* m_registry;
         Connection<const Vector2&, bool> m_onResizeConnection;
         Diligent::RefCntAutoPtr<Diligent::IRenderDevice>  m_pDevice;
         Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
-        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
-        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSOCube;
-        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSOTextCube;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_cubeVertexBuffer;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_cubeIndexBuffer;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_textCubeVertexBuffer;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_textCubeIndexBuffer;
         Diligent::RefCntAutoPtr<Diligent::IBuffer> m_VSConstants;
         Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12; /* @todo: Decision based on config and device capabilities */
-        Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pCubeSRB;
-        Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pTextCubeSRB;
-        Diligent::RefCntAutoPtr<Diligent::ITexture> m_texture;
-        Diligent::RefCntAutoPtr<Diligent::ITextureView> m_pTextureSRV;
-        DirectX::XMMATRIX m_worldViewProj;
 
-        nc::Connection<const asset::TextureUpdateEventData&> m_onTextureArrayBufferUpdate;
-        std::vector<asset::TextureWithId> m_textures;
+        /** Tutorial 1 - Triangle */
+        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
+
+        /** Tutorial 2 - Cube */
+        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSOCube;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_pCubeIndexBuffer;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_pCubeVertexBuffer;
+        Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pCubeSRB;
+
+        /** Tutorial 2 - Texture Cube */
+        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSOTextCube;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_pTextCubeIndexBuffer;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_pTextCubeVertexBuffer;
+        Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_pTextCubeSRB;
+        Diligent::RefCntAutoPtr<Diligent::ITexture> m_pTexture;
+        Diligent::RefCntAutoPtr<Diligent::ITextureView> m_pTextureSRV;
+
+        float m_elapsedTime;
+        DirectX::XMMATRIX m_worldViewProj;
     };
 } // namespace graphics
 } // namespace nc

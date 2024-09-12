@@ -110,6 +110,7 @@ target_include_directories(${NC_ENGINE_LIB}
 target_include_directories(${NC_ENGINE_LIB}
     PRIVATE
         $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${diligenttools_SOURCE_DIR}>
 )
 
 message(FileOutput="${CMAKE_BINARY_DIR}/sample/${CMAKE_BUILD_TYPE}")
