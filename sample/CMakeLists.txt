@@ -28,6 +28,9 @@ target_link_libraries(${NC_SAMPLE_EXE}
 
 add_subdirectory(source)
 
+# Diligent helper method
+#copy_required_dlls(${NC_SAMPLE_EXE})
+
 # Install
 install(TARGETS     ${NC_SAMPLE_EXE}
         DESTINATION sample

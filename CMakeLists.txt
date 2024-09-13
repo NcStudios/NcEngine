@@ -9,16 +9,21 @@ option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
-# jolt feature flag
+# Jolt feature flag
 option(NC_USE_JOLT "Enable JoltPhysics" OFF)
 if(NC_USE_JOLT)
     add_definitions(-DNC_USE_JOLT)
 endif()
 
+# Diligent feature flag
+option(NC_USE_DILIGENT "Enable DiligentGraphics" OFF)
+if(NC_USE_DILIGENT)
+    add_definitions(-DNC_USE_DILIGENT)
+endif()
+
 # Variables
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(NC_COMPILER_FLAGS -Werror
                           -Wfatal-errors

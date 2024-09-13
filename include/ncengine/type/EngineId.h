@@ -66,6 +66,7 @@ constexpr size_t FrameLogicUpdate = 4ull; // Depends on DebugRendererNewFrame
 constexpr size_t PhysicsPipeline = 5ull; // Depends on FrameLogicUpdate
 constexpr size_t CommitStagedChanges = 6ull; // Depends on all other update tasks
 constexpr size_t ParticleEmitterSync = 7ull; // Depends on CommitStagedChanges
+constexpr size_t UpdateRenderData = 8ull;
 /** @} */
 } // namespace update_task_id
 

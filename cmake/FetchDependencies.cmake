@@ -95,8 +95,19 @@ FetchContent_Declare(JoltPhysics
                      SOURCE_SUBDIR  "Build"
 )
 
+# Diligent
+FetchContent_Declare(DiligentCore
+GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
+SOURCE_DIR _deps/DiligentCore
+)
+
+FetchContent_Declare(DiligentTools
+GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
+SOURCE_DIR _deps/DiligentTools
+)
+
 # Fetch all required sources
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics DiligentCore DiligentTools)
 
 # Set Taskflow includes as system to prevent some warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)

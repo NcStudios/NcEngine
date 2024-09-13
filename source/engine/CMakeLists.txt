@@ -30,6 +30,10 @@ if(NC_PHYSICS_CONFIG)
     add_definitions(-DNC_PHYSICS_CONFIG="${NC_PHYSICS_CONFIG}")
 endif()
 
+set_target_properties(${NC_ENGINE_LIB}
+    PROPERTIES CMAKE_DEBUG_POSTFIX d
+)
+
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE
@@ -45,6 +49,27 @@ target_link_libraries(${NC_ENGINE_LIB}
         RtAudio
         Jolt
 )
+
+# Diligent
+target_link_libraries(${NC_ENGINE_LIB}
+    PUBLIC
+        Diligent-GraphicsTools
+        Diligent-TargetPlatform
+        Diligent-TextureLoader
+)
+
+if(D3D11_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
+endif()
+if(D3D12_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D12-shared)
+endif()
+if(GL_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineOpenGL-shared)
+endif()
+if(VULKAN_SUPPORTED)
+    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineVk-shared)
+endif()
 
 if(WIN32)
     target_link_libraries(${NC_ENGINE_LIB}
@@ -73,6 +98,8 @@ target_include_directories(${NC_ENGINE_LIB}
     PRIVATE
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}/ncengine>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${diligenttools_SOURCE_DIR}>
 )
 
 target_include_directories(${NC_ENGINE_LIB}
@@ -82,23 +109,6 @@ target_include_directories(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:${VMA_INCLUDE_DIR}>
 )
 
-# Install
-install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio
-        EXPORT      NcEngine-export
-        DESTINATION lib
-)
-install(EXPORT      NcEngine-export
-        FILE        NcEngineTargets.cmake
-        NAMESPACE   Nc::
-        DESTINATION lib/cmake/NcEngine
-)
-install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
-        DESTINATION lib/cmake/NcEngine
-)
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
-        DESTINATION include
-)
-
 add_subdirectory(audio)
 add_subdirectory(asset)
 add_subdirectory(config)
@@ -106,6 +116,7 @@ add_subdirectory(debug)
 add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
+add_subdirectory(graphics2)
 add_subdirectory(input)
 add_subdirectory(network)
 add_subdirectory(particle)
