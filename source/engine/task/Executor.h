@@ -1,7 +1,9 @@
 #pragma once
 
-#include "module/Module.h"
-#include "task/TaskGraph.h"
+#include "ncengine/module/Module.h"
+#include "ncengine/task/AsyncDispatcher.h"
+#include "ncengine/task/TaskGraph.h"
+#include "ncengine/type/StableAddress.h"
 
 #include <iosfwd>
 
@@ -18,11 +20,11 @@ struct ExecutorContext
 auto BuildContext(const std::vector<std::unique_ptr<Module>>& modules) -> ExecutorContext;
 
 // Manages the engine's primary task graph.
-class Executor
+class Executor : public StableAddress
 {
     public:
         // Initialize with a context object
-        explicit Executor(uint32_t threadCount, ExecutorContext ctx);
+        explicit Executor(uint32_t threadCount, ExecutorContext ctx = ExecutorContext{});
 
         // Assign a new graph context.
         void SetContext(ExecutorContext ctx);
@@ -35,6 +37,12 @@ class Executor
 
         // Blocking call to run the render graph. Throws any exceptions caught during execution.
         void RunRenderTasks();
+
+        // Get an interface for running async tasks on the executor.
+        auto GetAsyncDispatcher() -> AsyncDispatcher
+        {
+            return AsyncDispatcher{&m_executor};
+        }
 
         // Write task graph structure to a stream in Graphviz DOT language.
         void WriteGraph(std::ostream& stream) const;

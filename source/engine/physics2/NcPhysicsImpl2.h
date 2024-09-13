@@ -26,6 +26,7 @@ class NcPhysicsImpl2 final : public NcPhysics
         NcPhysicsImpl2(const config::MemorySettings& memorySettings,
                        const config::PhysicsSettings& physicsSettings,
                        Registry* registry,
+                       const task::AsyncDispatcher& dispatcher,
                        SystemEvents& events);
 
         void Run();

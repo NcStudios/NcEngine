@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "JobSystem_stub.inl"
 #include "physics2/jolt/ContactListener.h"
 #include "physics2/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
@@ -17,7 +18,8 @@ class ContactListenerTest : public ::testing::Test
                     .tempAllocatorSize = 1024 * 1024 * 4,
                     .maxBodyPairs = 16,
                     .maxContacts = 8
-                  }
+                  },
+                  nc::task::AsyncDispatcher{}
               )},
               uut{joltApi.contactListener}
         {
@@ -31,7 +33,7 @@ class ContactListenerTest : public ::testing::Test
 
         void Step()
         {
-            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, &joltApi.jobSystem);
+            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, joltApi.jobSystem.get());
             lastOnEnter.clear();
             lastOnExit.clear();
             std::ranges::copy(uut.GetAdded(), std::back_inserter(lastOnEnter));

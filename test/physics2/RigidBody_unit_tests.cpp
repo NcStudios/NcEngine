@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "jolt/JobSystem_stub.inl"
 #include "ncengine/config/Config.h"
 #include "ncengine/physics/RigidBody.h"
 #include "physics2/jolt/JoltApi.h"
@@ -29,7 +30,8 @@ class RigidBodyTest : public ::testing::Test
                     .tempAllocatorSize = 1024 * 1024 * 4,
                     .maxBodyPairs = 8,
                     .maxContacts = 4
-                  }
+                  },
+                  nc::task::AsyncDispatcher{}
               )}
         {
         }

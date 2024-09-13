@@ -41,12 +41,13 @@ namespace nc::physics
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         Registry* registry,
+                        const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, events);
+        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, dispatcher, events);
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
@@ -57,9 +58,10 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
 NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
                                const config::PhysicsSettings& physicsSettings,
                                Registry* registry,
+                               const task::AsyncDispatcher& dispatcher,
                                SystemEvents&)
     : m_ecs{registry->GetEcs()},
-      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings)},
+      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
       m_onAddRigidBodyConnection{registry->OnAdd<physics::RigidBody>().Connect(this, &NcPhysicsImpl2::OnAddRigidBody)}
 {
 }

@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "JobSystem_stub.inl"
 #include "physics2/jolt/ShapeFactory.h"
 #include "physics2/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
@@ -16,7 +17,8 @@ class ShapeFactoryTest : public ::testing::Test
                     .tempAllocatorSize = 1024 * 1024 * 4,
                     .maxBodyPairs = 8,
                     .maxContacts = 4
-                  }
+                  },
+                  nc::task::AsyncDispatcher{}
               )}
         {
         }

@@ -75,6 +75,7 @@ struct NcPhysics : public Module
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         Registry* registry,
+                        const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>;
 } // namespace physics
 } // namespace nc
