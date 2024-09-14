@@ -561,15 +561,6 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
     ImGui::Text("Flags");
     ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp,    body, &ui::Checkbox);
     ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
-
-    ImGui::Separator();
-    ImGui::Text("Constraints");
-    const auto constraints = body.GetConstraints();
-    ImGui::Text("count: %zu", constraints.size());
-    for (const auto& info : constraints)
-    {
-        ImGui::Text("Constraint (id: %u, referenced: %u)", info.id, info.referencedEntity.Index());
-    }
 }
 
 void ColliderUIWidget(physics::Collider& collider, EditorContext&, const std::any&)

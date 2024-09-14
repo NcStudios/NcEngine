@@ -75,7 +75,7 @@ void BodyManager::RemoveBody(Entity toRemove)
 
 void BodyManager::Clear()
 {
-    auto ids = m_bodies.values();
+    const auto ids = m_bodies.values();
     const auto size = static_cast<int>(ids.size());
     if (size == 0)
     {
