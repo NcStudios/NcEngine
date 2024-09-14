@@ -56,7 +56,7 @@ class RigidBodyTest : public JoltApiFixture
     protected:
         RigidBodyTest()
             : registry{10},
-              constraintManager{joltApi.physicsSystem},
+              constraintManager{joltApi.physicsSystem, 10},
               bodyManager{
                   nc::ecs::Ecs{registry},
                   10,

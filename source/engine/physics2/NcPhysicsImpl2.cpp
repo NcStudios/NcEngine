@@ -60,7 +60,7 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
                                SystemEvents&)
     : m_ecs{registry->GetEcs()},
       m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
-      m_constraintManager{m_jolt.physicsSystem},
+      m_constraintManager{m_jolt.physicsSystem, memorySettings.maxTransforms},
       m_bodyManager{
         registry->GetEcs(),
         memorySettings.maxTransforms,

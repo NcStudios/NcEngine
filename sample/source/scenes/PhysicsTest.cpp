@@ -425,8 +425,8 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
             .point1 = Vector3{0.0f, -0.1f, -0.6f},
             .point2 = Vector3{0.0f, 0.0f, 0.5f},
             .space = physics::ConstraintSpace::Local
-        }//,
-        // &bodyNode1
+        },
+        bodyNode1
     );
 
     bodyNode1.AddConstraint(
