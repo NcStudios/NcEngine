@@ -55,7 +55,7 @@ struct OrientationClamp
     float dampingFrequency = 10.0f;
 };
 
-/** @brief The space a Constraint is applied in. */
+/** @brief The relative space of a constraint. */
 enum class ConstraintSpace : uint8_t
 {
     World,
@@ -65,22 +65,22 @@ enum class ConstraintSpace : uint8_t
 /** @brief Initialization information for a constraint that attaches two bodies with no degrees of freedom. */
 struct FixedConstraintInfo
 {
-    Vector3 point1 = Vector3::Zero();
-    Vector3 axisX1 = Vector3::Right();
-    Vector3 axisY1 = Vector3::Up();
-    Vector3 point2 = Vector3::Zero();
-    Vector3 axisX2 = Vector3::Right();
-    Vector3 axisY2 = Vector3::Up();
-    bool autoDetect = false;
-    ConstraintSpace space = ConstraintSpace::World;
+    Vector3 point1 = Vector3::Zero();               /// first body reference position
+    Vector3 axisX1 = Vector3::Right();              /// first body reference right axis
+    Vector3 axisY1 = Vector3::Up();                 /// first body reference up axis
+    Vector3 point2 = Vector3::Zero();               /// second body reference frame
+    Vector3 axisX2 = Vector3::Right();              /// second body reference right axis
+    Vector3 axisY2 = Vector3::Up();                 /// second body reference up axis
+    bool detectFromPositions = false;               /// auto calculate settings from body positions (requires ConstraintSpace::World)
+    ConstraintSpace space = ConstraintSpace::World; /// space other settings are relative to
 };
 
 /** @brief Initialization information for a constraint that attaches two bodies at a point. */
 struct PointConstraintInfo
 {
-    Vector3 point1 = Vector3::Zero();
-    Vector3 point2 = Vector3::Zero();
-    ConstraintSpace space = ConstraintSpace::World;
+    Vector3 point1 = Vector3::Zero();               /// first body constraint position
+    Vector3 point2 = Vector3::Zero();               /// second body constraint position
+    ConstraintSpace space = ConstraintSpace::World; /// space other settings are relative to
 };
 
 /** @brief Generalized constraint initialization information. */

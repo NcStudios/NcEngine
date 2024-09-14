@@ -16,8 +16,9 @@ auto MakeConstraint(const FixedConstraintInfo& info,
 {
     auto settings = JPH::FixedConstraintSettings{};
     settings.mSpace = ToConstraintSpace(info.space);
-    if (info.autoDetect)
+    if (info.detectFromPositions)
     {
+        NC_ASSERT(info.space == ConstraintSpace::World, "FixedConstraintInfo::detectFromPositions requires ConstraintSpace::World");
         settings.mAutoDetectPoint = true;
     }
     else
