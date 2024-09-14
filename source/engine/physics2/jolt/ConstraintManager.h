@@ -33,10 +33,12 @@ struct EntityConstraints
 class ConstraintManager
 {
     public:
-        explicit ConstraintManager(JPH::PhysicsSystem& physicsSystem)
+        static constexpr auto ConstraintMapSizeHint = 1000u;
+
+        explicit ConstraintManager(JPH::PhysicsSystem& physicsSystem, uint32_t maxEntities)
             : m_physicsSystem{&physicsSystem},
               m_factory{physicsSystem},
-              m_entityState{1000u, 1000u} // todo: figure out
+              m_entityState{ConstraintMapSizeHint, maxEntities}
         {
         }
 
