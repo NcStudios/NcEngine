@@ -7,7 +7,7 @@ class ConstraintManagerTest : public JoltApiFixture
         nc::physics::ConstraintManager uut;
 
         ConstraintManagerTest()
-            : uut{joltApi.physicsSystem}
+            : uut{joltApi.physicsSystem, 100u}
         {
         }
 };
