@@ -85,4 +85,14 @@ inline auto ToObjectLayer(BodyType bodyType) -> JPH::ObjectLayer
         default: std::unreachable();
     }
 }
+
+inline auto ToConstraintSpace(ConstraintSpace space) -> JPH::EConstraintSpace
+{
+    switch (space)
+    {
+        case ConstraintSpace::World: return JPH::EConstraintSpace::WorldSpace;
+        case ConstraintSpace::Local: return JPH::EConstraintSpace::LocalToBodyCOM;
+        default: std::unreachable();
+    }
+}
 } // namespace nc::physics

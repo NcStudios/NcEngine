@@ -6,6 +6,7 @@
 
 #include "ncengine/ecs/Component.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/Shape.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
