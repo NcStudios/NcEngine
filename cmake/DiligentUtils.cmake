@@ -1,0 +1,60 @@
+function(install_required_dlls TARGET_NAME OUTPUT_DIR)
+    if(D3D11_SUPPORTED)
+        list(APPEND ENGINE_DLLS Diligent-GraphicsEngineD3D11-shared)
+    endif()
+    if(D3D12_SUPPORTED)
+        list(APPEND ENGINE_DLLS Diligent-GraphicsEngineD3D12-shared)
+    endif()
+    if(GL_SUPPORTED)
+        list(APPEND ENGINE_DLLS Diligent-GraphicsEngineOpenGL-shared)
+    endif()
+    if(VULKAN_SUPPORTED)
+        list(APPEND ENGINE_DLLS Diligent-GraphicsEngineVk-shared)
+    endif()
+    if(METAL_SUPPORTED)
+        list(APPEND ENGINE_DLLS Diligent-GraphicsEngineMetal-shared)
+    endif()
+    if(WEBGPU_SUPPORTED)
+        list(APPEND ENGINE_DLLS Diligent-GraphicsEngineWebGPU-shared)
+    endif()
+    if(TARGET Diligent-Archiver-shared)
+        list(APPEND ENGINE_DLLS Diligent-Archiver-shared)
+    endif()
+
+    foreach(DLL ${ENGINE_DLLS})
+        install(FILES "$<TARGET_FILE:${DLL}>"
+                DESTINATION ${OUTPUT_DIR})
+    endforeach(DLL)
+
+    # Install D3Dcompiler_47.dll, dxcompiler.dll, and dxil.dll
+    if(MSVC)
+        if ((D3D11_SUPPORTED OR D3D12_SUPPORTED) AND VS_D3D_COMPILER_PATH)
+            list(APPEND SHADER_COMPILER_DLLS ${VS_D3D_COMPILER_PATH})
+        endif()
+
+        if(D3D12_SUPPORTED AND VS_DXC_COMPILER_PATH AND VS_DXIL_SIGNER_PATH)
+            list(APPEND SHADER_COMPILER_DLLS ${VS_DXC_COMPILER_PATH})
+            list(APPEND SHADER_COMPILER_DLLS ${VS_DXIL_SIGNER_PATH})
+        endif()
+
+        foreach(DLL ${SHADER_COMPILER_DLLS})
+            install(FILES ${DLL}
+                    DESTINATION ${OUTPUT_DIR})
+        endforeach(DLL)
+
+        if(D3D12_SUPPORTED AND EXISTS ${DILIGENT_PIX_EVENT_RUNTIME_DLL_PATH})
+            install(FILES ${DILIGENT_PIX_EVENT_RUNTIME_DLL_PATH}
+                    DESTINATION ${OUTPUT_DIR})
+        endif()
+
+        if(VULKAN_SUPPORTED)
+            if(NOT DEFINED DILIGENT_DXCOMPILER_FOR_SPIRV_PATH)
+                message(FATAL_ERROR "DILIGENT_DXCOMPILER_FOR_SPIRV_PATH is undefined, check order of cmake includes")
+            endif()
+            if(EXISTS ${DILIGENT_DXCOMPILER_FOR_SPIRV_PATH})
+                install(FILES ${DILIGENT_DXCOMPILER_FOR_SPIRV_PATH}
+                        DESTINATION ${OUTPUT_DIR}/spv_dxcompiler.dll)
+            endif()
+        endif()
+    endif()
+endfunction()

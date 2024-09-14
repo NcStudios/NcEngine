@@ -63,6 +63,7 @@ namespace
 
 namespace nc::graphics
 {
+#ifndef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
                              const config::MemorySettings& memorySettings,
@@ -88,7 +89,7 @@ namespace nc::graphics
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
         return std::make_unique<NcGraphicsStub>(registry);
     }
-
+#endif
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                                    const config::MemorySettings& memorySettings,
                                    Registry* registry,

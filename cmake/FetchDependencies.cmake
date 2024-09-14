@@ -96,6 +96,11 @@ FetchContent_Declare(JoltPhysics
 )
 
 # Diligent
+set(DILIGENT_INSTALL_CORE OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_TOOLS  OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_SAMPLES  OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_FX  OFF CACHE BOOL "" FORCE)
+
 FetchContent_Declare(DiligentCore
 GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
 SOURCE_DIR _deps/DiligentCore

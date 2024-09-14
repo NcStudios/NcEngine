@@ -30,6 +30,7 @@ if(NC_PHYSICS_CONFIG)
     add_definitions(-DNC_PHYSICS_CONFIG="${NC_PHYSICS_CONFIG}")
 endif()
 
+# Add debug post fix of 'd' to NC_ENGINE_LIB targets
 set_target_properties(${NC_ENGINE_LIB}
     PROPERTIES CMAKE_DEBUG_POSTFIX d
 )
@@ -50,7 +51,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         Jolt
 )
 
-# Diligent
+# Link Diligent Library Dependencies
 target_link_libraries(${NC_ENGINE_LIB}
     PUBLIC
         Diligent-GraphicsTools
@@ -58,6 +59,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         Diligent-TextureLoader
 )
 
+# Link Diligent Primary Libraries
 if(D3D11_SUPPORTED)
     target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
 endif()
