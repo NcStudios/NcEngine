@@ -39,17 +39,17 @@ auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
     {
         if (m_freeIndices.empty())
         {
-            const auto index = static_cast<uint32_t>(m_handles.size());
+            const auto i = static_cast<uint32_t>(m_handles.size());
             m_handles.push_back(handle);
             m_pairs.emplace_back(ownerId, referencedId);
-            return index;
+            return i;
         }
 
-        const auto index = m_freeIndices.back();
+        const auto i = m_freeIndices.back();
         m_freeIndices.pop_back();
-        m_handles[index] = handle;
-        m_pairs[index] = ConstraintPair{ownerId, referencedId};
-        return index;
+        m_handles[i] = handle;
+        m_pairs[i] = ConstraintPair{ownerId, referencedId};
+        return i;
     }();
 
     auto& ownerState = m_entityState.contains(ownerId)
