@@ -2,6 +2,8 @@
 
 #include "BodyFactory.h"
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/Transform.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/utility/SparseMap.h"
 
 #include "Jolt/Jolt.h"
@@ -17,7 +19,6 @@ class PhysicsSystem;
 
 namespace nc::physics
 {
-class RigidBody;
 struct ComponentContext;
 class ConstraintManager;
 class ShapeFactory;
@@ -27,7 +28,8 @@ class BodyManager : public StableAddress
     public:
         static constexpr auto BodyMapSizeHint = 1000u;
 
-        BodyManager(ecs::Ecs world,
+        BodyManager(ecs::ComponentPool<Transform>& transformPool,
+                    ecs::ComponentPool<RigidBody>& rigidBodyPool,
                     uint32_t maxEntities,
                     JPH::PhysicsSystem& physicsSystem,
                     ShapeFactory& shapeFactory,
@@ -44,10 +46,9 @@ class BodyManager : public StableAddress
         }
 
     private:
-        using set_t = ecs::detail::SparseSet<JPH::BodyID>;
         struct Connections;
 
-        ecs::Ecs m_world;
+        ecs::ComponentPool<Transform>* m_transformPool;
         sparse_map<JPH::BodyID> m_bodies;
         BodyFactory m_bodyFactory;
         ConstraintManager* m_constraintManager;

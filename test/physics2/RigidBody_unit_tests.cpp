@@ -14,12 +14,13 @@ namespace nc::physics
 {
 struct BodyManager::Connections {};
 
-BodyManager::BodyManager(ecs::Ecs world,
+BodyManager::BodyManager(ecs::ComponentPool<Transform>& transformPool,
+                         ecs::ComponentPool<RigidBody>&,
                          uint32_t maxEntities,
                          JPH::PhysicsSystem& physicsSystem,
                          ShapeFactory& shapeFactory,
                          ConstraintManager& constraintManager)
-    : m_world{world},
+    : m_transformPool{&transformPool},
       m_bodies{maxEntities, maxEntities},
       m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
       m_ctx{std::make_unique<ComponentContext>(
@@ -55,10 +56,12 @@ class RigidBodyTest : public JoltApiFixture
 {
     protected:
         RigidBodyTest()
-            : registry{10},
+            : transformPool{10, nc::ComponentHandler<nc::Transform>{}},
+              rigidBodyPool{10ull, nc::ComponentHandler<nc::physics::RigidBody>{}},
               constraintManager{joltApi.physicsSystem, 10},
               bodyManager{
-                  nc::ecs::Ecs{registry},
+                  transformPool,
+                  rigidBodyPool,
                   10,
                   joltApi.physicsSystem,
                   shapeFactory,
@@ -68,7 +71,8 @@ class RigidBodyTest : public JoltApiFixture
         }
 
     public:
-        nc::ecs::ComponentRegistry registry;
+        nc::ecs::ComponentPool<nc::Transform> transformPool;
+        nc::ecs::ComponentPool<nc::physics::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;
         nc::physics::ConstraintManager constraintManager;
         nc::physics::BodyManager bodyManager;

@@ -23,12 +23,13 @@ struct BodyManager::Connections
     Connection<Entity> removeRigidBodyConnection;
 };
 
-BodyManager::BodyManager(ecs::Ecs world,
+BodyManager::BodyManager(ecs::ComponentPool<Transform>& transformPool,
+                         ecs::ComponentPool<RigidBody>& rigidBodyPool,
                          uint32_t maxEntities,
                          JPH::PhysicsSystem& physicsSystem,
                          ShapeFactory& shapeFactory,
                          ConstraintManager& constraintManager)
-    : m_world{world},
+    : m_transformPool{&transformPool},
       m_bodies{std::min(BodyMapSizeHint, maxEntities), maxEntities},
       m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
       m_constraintManager{&constraintManager},
@@ -37,7 +38,7 @@ BodyManager::BodyManager(ecs::Ecs world,
           shapeFactory,
           constraintManager
       )},
-      m_connections{Connections::Connect(this, world.GetPool<RigidBody>())}
+      m_connections{Connections::Connect(this, rigidBodyPool)}
 {
     RigidBody::SetContext(m_ctx.get());
 }
@@ -46,7 +47,7 @@ BodyManager::~BodyManager() noexcept = default;
 
 void BodyManager::AddBody(RigidBody& added)
 {
-    auto& transform = m_world.Get<Transform>(added.GetEntity());
+    auto& transform = m_transformPool->Get(added.GetEntity());
     auto [handle, adjustedScale, wasScaleAdjusted] = m_bodyFactory.MakeBody(added, transform.TransformationMatrix());
     if (wasScaleAdjusted)
     {
