@@ -27,6 +27,38 @@ target_link_libraries(BodyFactory_unit_tests
 
 add_test(BodyFactory_unit_tests BodyFactory_unit_tests)
 
+### BodyManager Tests ###
+add_executable(BodyManager_unit_tests
+    BodyManager_unit_tests.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/BodyFactory.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/BodyManager.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
+    ${NC_SOURCE_DIR}/physics2/Shape.cpp
+)
+
+target_include_directories(BodyManager_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(BodyManager_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(BodyManager_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        Jolt
+        gtest_main
+)
+
+add_test(BodyManager_unit_tests BodyManager_unit_tests)
+
 ### ContactListener Tests ###
 add_executable(ContactListener_integration_tests
     ContactListener_integration_tests.cpp

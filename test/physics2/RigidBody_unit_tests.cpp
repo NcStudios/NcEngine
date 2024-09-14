@@ -25,10 +25,10 @@ BodyManager::BodyManager(ecs::Ecs world,
       m_ctx{std::make_unique<ComponentContext>(
         physicsSystem.GetBodyInterfaceNoLock(),
         shapeFactory,
-        constraintManager,
-        *this
+        constraintManager
       )}
 {
+    nc::physics::RigidBody::SetContext(m_ctx.get());
 }
 
 void BodyManager::AddBody(RigidBody& added)
@@ -36,7 +36,7 @@ void BodyManager::AddBody(RigidBody& added)
     const auto matrix = DirectX::XMMatrixIdentity();
     auto [handle, _1, _2] = m_bodyFactory.MakeBody(added, matrix);
     m_ctx->interface.AddBody(handle->GetID(), JPH::EActivation::Activate);
-    added.SetContext(handle, m_ctx.get());
+    added.SetHandle(handle);
     m_bodies.emplace(added.GetEntity().Index(), handle->GetID());
 }
 
@@ -127,6 +127,9 @@ TEST_F(RigidBodyTest, MoveOperations_transferRegistrationData)
     EXPECT_TRUE(first.IsInitialized());
     EXPECT_FALSE(second.GetEntity().Valid());
     EXPECT_FALSE(second.IsInitialized());
+    first = std::move(first);
+    EXPECT_TRUE(first.GetEntity().Valid());
+    EXPECT_TRUE(first.IsInitialized());
 }
 
 TEST_F(RigidBodyTest, SimulationPropertyFunctions_updateInternalState)

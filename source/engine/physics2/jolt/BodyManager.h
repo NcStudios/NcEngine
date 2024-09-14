@@ -25,6 +25,8 @@ class ShapeFactory;
 class BodyManager : public StableAddress
 {
     public:
+        static constexpr auto BodyMapSizeHint = 1000u;
+
         BodyManager(ecs::Ecs world,
                     uint32_t maxEntities,
                     JPH::PhysicsSystem& physicsSystem,

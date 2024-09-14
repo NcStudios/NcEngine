@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BodyManager.h"
 #include "ConstraintManager.h"
 #include "ShapeFactory.h"
 
@@ -14,6 +13,5 @@ struct ComponentContext
     JPH::BodyInterface& interface;
     ShapeFactory& shapeFactory;
     ConstraintManager& constraintManager;
-    BodyManager& bodyManager;
 };
 } // namespace nc::physics

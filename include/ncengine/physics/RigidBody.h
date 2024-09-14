@@ -83,7 +83,6 @@ class RigidBody
         RigidBody(RigidBody&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
               m_handle{std::exchange(other.m_handle, nullptr)},
-              m_ctx{std::exchange(other.m_ctx, nullptr)},
               m_shape{other.m_shape},
               m_info{other.m_info}
         {
@@ -91,22 +90,19 @@ class RigidBody
 
         RigidBody& operator=(RigidBody&& other) noexcept
         {
-            ReleaseBody();
-            m_self = std::exchange(other.m_self, Entity::Null());
-            m_handle = std::exchange(other.m_handle, nullptr);
-            m_ctx = std::exchange(other.m_ctx, nullptr);
-            m_shape = other.m_shape;
-            m_info = other.m_info;
+            if (this != &other)
+            {
+                m_self = std::exchange(other.m_self, Entity::Null());
+                m_handle = std::exchange(other.m_handle, nullptr);
+                m_shape = other.m_shape;
+                m_info = other.m_info;
+            }
+
             return *this;
         }
 
         RigidBody(RigidBody&) = delete;
         RigidBody& operator=(RigidBody&) = delete;
-
-        ~RigidBody() noexcept
-        {
-            ReleaseBody();
-        }
 
         /** @name General Functions */
         auto GetEntity() const -> Entity { return m_self; }
@@ -205,17 +201,17 @@ class RigidBody
         /** @cond internal */
         auto IsInitialized() const noexcept -> bool { return m_handle; }
         auto GetHandle() const -> BodyHandle { return m_handle; }
-        void SetContext(BodyHandle handle, ComponentContext* ctx);
+        void SetHandle(BodyHandle handle) { m_handle = handle; }
+        static void SetContext(ComponentContext* ctx) { s_ctx = ctx; }
         /** @endcond */
 
     private:
+        inline static ComponentContext* s_ctx = nullptr;
+
         Entity m_self;
         BodyHandle m_handle = nullptr;
-        ComponentContext* m_ctx = nullptr;
         Shape m_shape;
         RigidBodyInfo m_info;
-
-        void ReleaseBody() noexcept;
 };
 } // namespace nc::physics
 
@@ -226,6 +222,6 @@ struct StoragePolicy<physics::RigidBody> : DefaultStoragePolicy
 {
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnCommitCallbacks = false;
-    static constexpr bool EnableOnRemoveCallbacks = false;
+    static constexpr bool EnableOnRemoveCallbacks = true;
 };
 } // namespace nc

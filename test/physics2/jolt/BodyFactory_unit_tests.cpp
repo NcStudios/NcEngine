@@ -3,12 +3,6 @@
 #include "physics2/jolt/ShapeFactory.h"
 #include "ncengine/physics/RigidBody.h"
 
-namespace nc::physics
-{
-// Let the memory temporarily leak here because its much simpler to clean it up at end of tests.
-void RigidBody::ReleaseBody() noexcept {}
-} // namespace nc::physics
-
 class BodyFactoryTest : public JoltApiFixture
 {
     protected:

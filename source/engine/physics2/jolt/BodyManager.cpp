@@ -14,13 +14,13 @@ struct BodyManager::Connections
     static auto Connect(BodyManager* manager, ecs::ComponentPool<RigidBody>& pool)
     {
         return std::make_unique<Connections>(
-            pool.OnAdd().Connect(manager, &BodyManager::AddBody)
-            // pool.OnRemove().Connect(manager, &BodyManager::RemoveBody)
+            pool.OnAdd().Connect(manager, &BodyManager::AddBody),
+            pool.OnRemove().Connect(manager, &BodyManager::RemoveBody)
         );
     }
 
     Connection<RigidBody&> addRigidBodyConnection;
-    // Connection<Entity> removeRigidBodyConnection;
+    Connection<Entity> removeRigidBodyConnection;
 };
 
 BodyManager::BodyManager(ecs::Ecs world,
@@ -29,17 +29,17 @@ BodyManager::BodyManager(ecs::Ecs world,
                          ShapeFactory& shapeFactory,
                          ConstraintManager& constraintManager)
     : m_world{world},
-      m_bodies{1000, maxEntities}, // todo figure this out
+      m_bodies{std::min(BodyMapSizeHint, maxEntities), maxEntities},
       m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
       m_constraintManager{&constraintManager},
       m_ctx{std::make_unique<ComponentContext>(
           physicsSystem.GetBodyInterfaceNoLock(),
           shapeFactory,
-          constraintManager,
-          *this
+          constraintManager
       )},
       m_connections{Connections::Connect(this, world.GetPool<RigidBody>())}
 {
+    RigidBody::SetContext(m_ctx.get());
 }
 
 BodyManager::~BodyManager() noexcept = default;
@@ -54,7 +54,7 @@ void BodyManager::AddBody(RigidBody& added)
     }
 
     m_ctx->interface.AddBody(handle->GetID(), JPH::EActivation::Activate);
-    added.SetContext(handle, m_ctx.get());
+    added.SetHandle(handle);
     m_bodies.emplace(added.GetEntity().Index(), handle->GetID());
 }
 
