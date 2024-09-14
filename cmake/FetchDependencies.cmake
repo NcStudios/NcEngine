@@ -88,6 +88,7 @@ FetchContent_Declare(optick
 )
 
 # Jolt
+set(CPP_EXCEPTIONS_ENABLED ON CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
                      GIT_TAG        v5.1.0

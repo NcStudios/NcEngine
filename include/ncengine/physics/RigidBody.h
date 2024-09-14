@@ -6,14 +6,13 @@
 
 #include "ncengine/ecs/Component.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/Shape.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
 namespace nc::physics
 {
 struct ComponentContext;
-class NcPhysicsImpl2;
-class RigidBody;
 
 /** @brief Handle to internal RigidBody state. */
 using BodyHandle = void*;
@@ -92,6 +91,7 @@ class RigidBody
 
         RigidBody& operator=(RigidBody&& other) noexcept
         {
+            ReleaseBody();
             m_self = std::exchange(other.m_self, Entity::Null());
             m_handle = std::exchange(other.m_handle, nullptr);
             m_ctx = std::exchange(other.m_ctx, nullptr);
@@ -100,10 +100,13 @@ class RigidBody
             return *this;
         }
 
-        ~RigidBody() noexcept;
-
         RigidBody(RigidBody&) = delete;
         RigidBody& operator=(RigidBody&) = delete;
+
+        ~RigidBody() noexcept
+        {
+            ReleaseBody();
+        }
 
         /** @name General Functions */
         auto GetEntity() const -> Entity { return m_self; }
@@ -162,6 +165,19 @@ class RigidBody
         void AddImpulseAt(const Vector3& impulse, const Vector3& point);
         void AddAngularImpulse(const Vector3& impulse);
 
+        /** @name Constraint Functions */
+        /** @brief Add a Constraint between the RigidBody and another. */
+        auto AddConstraint(const ConstraintInfo& createInfo, const RigidBody& otherBody) -> ConstraintId;
+
+        /** @brief Add a Constraint between the RigidBody and the world. */
+        auto AddConstraint(const ConstraintInfo& createInfo) -> ConstraintId;
+
+        /** @brief Remove a constraint from the RigidBody. */
+        void RemoveConstraint(ConstraintId constraintId);
+
+        /** @brief View all of the constraints attached to the RigidBody. */
+        auto GetConstraints() const -> std::span<const ConstraintView>;
+
         /**
          * @name Simulated Body Functions
          * @note Prefer using simulated body functions over the Transform equivalents for \ref Entity "entities" with a RigidBody.
@@ -189,18 +205,17 @@ class RigidBody
         /** @cond internal */
         auto IsInitialized() const noexcept -> bool { return m_handle; }
         auto GetHandle() const -> BodyHandle { return m_handle; }
+        void SetContext(BodyHandle handle, ComponentContext* ctx);
         /** @endcond */
 
     private:
-        friend class NcPhysicsImpl2;
-
         Entity m_self;
         BodyHandle m_handle = nullptr;
         ComponentContext* m_ctx = nullptr;
         Shape m_shape;
         RigidBodyInfo m_info;
 
-        void SetContext(BodyHandle handle, ComponentContext* ctx);
+        void ReleaseBody() noexcept;
 };
 } // namespace nc::physics
 

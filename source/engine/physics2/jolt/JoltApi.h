@@ -1,11 +1,9 @@
 #pragma once
 
 #include "Allocator.h"
-#include "ComponentContext.h"
 #include "ContactListener.h"
 #include "JobSystem.h"
 #include "Layers.h"
-#include "ShapeFactory.h"
 #include "ncengine/type/StableAddress.h"
 
 #include "Jolt/Jolt.h"
@@ -48,10 +46,8 @@ struct JoltApi : public StableAddress
     ObjectVsBroadPhaseLayerFilter objectVsBroadphaseFilter;
     ObjectLayerPairFilter objectLayerPairFilter;
     JPH::PhysicsSystem physicsSystem;
-    ShapeFactory shapeFactory;
     ContactListener contactListener;
     std::unique_ptr<JPH::JobSystem> jobSystem;
-    std::unique_ptr<ComponentContext> ctx;
 
     private:
         JoltApi(const config::MemorySettings& memorySettings,

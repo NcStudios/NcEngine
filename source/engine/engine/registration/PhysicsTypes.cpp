@@ -94,7 +94,8 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         maxEntities,
         RigidBodyId,
         "RigidBody",
-        ui::editor::RigidBodyUIWidget
+        ui::editor::RigidBodyUIWidget,
+        CreateRigidBody
     );
 
     Register<physics::CollisionListener>(

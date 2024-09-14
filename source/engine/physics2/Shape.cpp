@@ -21,16 +21,23 @@ void FixSphereScale(const nc::Vector3& current, nc::Vector3& desired)
         desired = nc::Vector3::Splat(desired.x);
     else if (!nc::FloatEqual(current.y, desired.y))
         desired = nc::Vector3::Splat(desired.y);
-    else
+    else if (!nc::FloatEqual(current.z, desired.z))
         desired = nc::Vector3::Splat(desired.z);
+
+    const auto avg = (desired.x + desired.y + desired.z) / 3.0f;
+    desired = nc::Vector3::Splat(avg);
 }
 
 void FixCapsuleScale(const nc::Vector3& current, nc::Vector3& desired)
 {
     if (!nc::FloatEqual(current.x, desired.x))
         desired.z = desired.x;
-    else
+    else if (!nc::FloatEqual(current.z, desired.z))
         desired.x = desired.z;
+
+    const auto avg = (desired.x + desired.z) / 2.0f;
+    desired.x = avg;
+    desired.z = avg;
 }
 } // anonymous namespace
 

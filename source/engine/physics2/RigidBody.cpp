@@ -22,13 +22,12 @@ auto ToActivationMode(bool wake) -> JPH::EActivation
 
 namespace nc::physics
 {
-RigidBody::~RigidBody() noexcept
+void RigidBody::ReleaseBody() noexcept
 {
+    // todo: this isn't actually noexcept
     if (IsInitialized())
     {
-        const auto& id = ToBody(m_handle)->GetID();
-        m_ctx->interface.RemoveBody(id);
-        m_ctx->interface.DestroyBody(id);
+        m_ctx->bodyManager.RemoveBody(m_self);
     }
 }
 
@@ -180,6 +179,26 @@ void RigidBody::AddImpulseAt(const Vector3& impulse, const Vector3& point)
 void RigidBody::AddAngularImpulse(const Vector3& impulse)
 {
     m_ctx->interface.AddAngularImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
+}
+
+auto RigidBody::AddConstraint(const ConstraintInfo& createInfo, const RigidBody& other) -> ConstraintId
+{
+    return m_ctx->constraintManager.AddConstraint(createInfo, m_self, ToBody(m_handle), other.m_self, ToBody(other.m_handle));
+}
+
+auto RigidBody::AddConstraint(const ConstraintInfo& createInfo) -> ConstraintId
+{
+    return m_ctx->constraintManager.AddConstraint(createInfo, m_self, ToBody(m_handle), Entity::Null(), &JPH::Body::sFixedToWorld);
+}
+
+void RigidBody::RemoveConstraint(ConstraintId constraintId)
+{
+    m_ctx->constraintManager.RemoveConstraint(constraintId);
+}
+
+auto RigidBody::GetConstraints() const -> std::span<const ConstraintView>
+{
+    return m_ctx->constraintManager.GetConstraints(m_self);
 }
 
 void RigidBody::SetSimulatedBodyPosition(Transform& transform,

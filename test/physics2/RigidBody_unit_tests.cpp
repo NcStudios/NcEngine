@@ -1,8 +1,10 @@
-#include "gtest/gtest.h"
-#include "jolt/JobSystem_stub.inl"
-#include "ncengine/config/Config.h"
+#include "jolt/JoltApiFixture.inl"
 #include "ncengine/physics/RigidBody.h"
-#include "physics2/jolt/JoltApi.h"
+
+#include "physics2/jolt/BodyManager.h"
+#include "physics2/jolt/ComponentContext.h"
+#include "physics2/jolt/ConstraintManager.h"
+#include "physics2/jolt/ShapeFactory.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
@@ -10,59 +12,75 @@
 
 namespace nc::physics
 {
-class NcPhysicsImpl2
+struct BodyManager::Connections {};
+
+BodyManager::BodyManager(ecs::Ecs world,
+                         uint32_t maxEntities,
+                         JPH::PhysicsSystem& physicsSystem,
+                         ShapeFactory& shapeFactory,
+                         ConstraintManager& constraintManager)
+    : m_world{world},
+      m_bodies{maxEntities, maxEntities},
+      m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
+      m_ctx{std::make_unique<ComponentContext>(
+        physicsSystem.GetBodyInterfaceNoLock(),
+        shapeFactory,
+        constraintManager,
+        *this
+      )}
 {
-    public:
-        void MockRegisterBody(RigidBody& body, JPH::Body* apiBody, ComponentContext& ctx)
-        {
-            body.SetContext(static_cast<BodyHandle>(apiBody), &ctx);
-        }
-};
+}
+
+void BodyManager::AddBody(RigidBody& added)
+{
+    const auto matrix = DirectX::XMMatrixIdentity();
+    auto [handle, _1, _2] = m_bodyFactory.MakeBody(added, matrix);
+    m_ctx->interface.AddBody(handle->GetID(), JPH::EActivation::Activate);
+    added.SetContext(handle, m_ctx.get());
+    m_bodies.emplace(added.GetEntity().Index(), handle->GetID());
+}
+
+void BodyManager::RemoveBody(Entity toRemove)
+{
+    const auto bodyId = m_bodies.at(toRemove.Index());
+    m_bodies.erase(toRemove.Index());
+    m_ctx->interface.RemoveBody(bodyId);
+    m_ctx->interface.DestroyBody(bodyId);
+}
+
+BodyManager::~BodyManager() noexcept = default;
 } // namespace nc::physics
 
-class RigidBodyTest : public ::testing::Test
+class RigidBodyTest : public JoltApiFixture
 {
     protected:
         RigidBodyTest()
-            : joltApi{nc::physics::JoltApi::Initialize(
-                  nc::config::MemorySettings{},
-                  nc::config::PhysicsSettings{
-                    .tempAllocatorSize = 1024 * 1024 * 4,
-                    .maxBodyPairs = 8,
-                    .maxContacts = 4
-                  },
-                  nc::task::AsyncDispatcher{}
-              )}
+            : registry{10},
+              constraintManager{joltApi.physicsSystem},
+              bodyManager{
+                  nc::ecs::Ecs{registry},
+                  10,
+                  joltApi.physicsSystem,
+                  shapeFactory,
+                  constraintManager
+              }
         {
         }
 
     public:
-        nc::physics::JoltApi joltApi;
-        nc::physics::NcPhysicsImpl2 ncPhysics;
+        nc::ecs::ComponentRegistry registry;
+        nc::physics::ShapeFactory shapeFactory;
+        nc::physics::ConstraintManager constraintManager;
+        nc::physics::BodyManager bodyManager;
         std::vector<JPH::Body*> bodies;
 
         auto CreateRigidBody(nc::Entity entity,
                              const nc::physics::Shape& shape,
-                             const nc::physics::RigidBodyInfo& info,
-                             const JPH::Vec3& position = JPH::Vec3::sZero(),
-                             const JPH::Vec3& scale = JPH::Vec3::sReplicate(1.0f))
+                             const nc::physics::RigidBodyInfo& info)
         {
             auto body = nc::physics::RigidBody{entity, shape, info};
-            auto settings = JPH::BodyCreationSettings{
-                joltApi.shapeFactory.MakeShape(shape, scale),
-                position,
-                JPH::Quat::sIdentity(),
-                nc::physics::ToMotionType(info.type),
-                nc::physics::ToObjectLayer(info.type)
-            };
-
-            settings.mUserData = nc::Entity::Hash{}(entity);
-            settings.mMotionQuality = nc::physics::ToMotionQuality(body.UseContinuousDetection());
-            auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
-            auto apiBody = interface.CreateBody(settings);
-            interface.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
-            ncPhysics.MockRegisterBody(body, apiBody, *joltApi.ctx);
-            bodies.push_back(apiBody);
+            bodyManager.AddBody(body);
+            bodies.push_back(reinterpret_cast<JPH::Body*>(body.GetHandle()));
             return body;
         }
 };

@@ -56,6 +56,15 @@ TEST(ShapeTest, NormalizeScaleForShape_sphere_nonUniformScaling_fixesScale)
     EXPECT_EQ(expectedUniformFromZ, actualUniformFromZ);
 }
 
+TEST(ShapeTest, NormalizeScaleForShape_sphere_nonUniformScaling_sameCurrentAndDesiredScale_averagesScale)
+{
+    constexpr auto shape = nc::physics::ShapeType::Sphere;
+    const auto nonUniformScale = nc::Vector3{1.0, 2.0f, 3.0f};
+    const auto actualScale = nc::physics::NormalizeScaleForShape(shape, nonUniformScale, nonUniformScale);
+    const auto expectedScale = nc::Vector3::Splat(2.0f);
+    EXPECT_EQ(expectedScale, actualScale);
+}
+
 TEST(ShapeTest, NormalizeScaleForShape_sphere_zeroScale_fixesScale)
 {
     constexpr auto shape = nc::physics::ShapeType::Sphere;
@@ -83,7 +92,7 @@ TEST(ShapeTest, NormalizeScaleForShape_capsule_uniformXZScaling_doesNotModify)
     EXPECT_EQ(expectedScale, actualScale);
 }
 
-TEST(ShapeTest, NormalizeScaleForShape_sphere_nonUniformXZScaling_fixesScale)
+TEST(ShapeTest, NormalizeScaleForShape_capsule_nonUniformXZScaling_fixesScale)
 {
     constexpr auto shape = nc::physics::ShapeType::Capsule;
     const auto initialScale = nc::Vector3{1.0f, 2.0f, 1.0f};
@@ -95,6 +104,15 @@ TEST(ShapeTest, NormalizeScaleForShape_sphere_nonUniformXZScaling_fixesScale)
     const auto actualUniformFromZ = nc::physics::NormalizeScaleForShape(shape, initialScale, attemptScaleZ);
     EXPECT_EQ(expectedUniformFromX, actualUniformFromX);
     EXPECT_EQ(expectedUniformFromZ, actualUniformFromZ);
+}
+
+TEST(ShapeTest, NormalizeScaleForShape_capsule_nonUniformScaling_sameCurrentAndDesiredScale_averagesScale)
+{
+    constexpr auto shape = nc::physics::ShapeType::Capsule;
+    const auto nonUniformScale = nc::Vector3{2.0, 2.0f, 3.0f};
+    const auto actualScale = nc::physics::NormalizeScaleForShape(shape, nonUniformScale, nonUniformScale);
+    const auto expectedScale = nc::Vector3{2.5f, 2.0f, 2.5f};
+    EXPECT_EQ(expectedScale, actualScale);
 }
 
 TEST(ShapeTest, NormalizeScaleForShape_capsule_zeroScale_fixesScale)

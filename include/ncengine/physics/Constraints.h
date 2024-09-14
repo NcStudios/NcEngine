@@ -4,7 +4,9 @@
  */
 #pragma once
 
-#include "ncmath/Vector.h"
+#include "ncengine/ecs/Entity.h"
+
+#include <variant>
 
 namespace nc::physics
 {
@@ -51,5 +53,47 @@ struct OrientationClamp
     Vector3 targetOrientation = Vector3::Up();
     float dampingRatio = 0.1f;
     float dampingFrequency = 10.0f;
+};
+
+/** @brief The space a Constraint is applied in. */
+enum class ConstraintSpace : uint8_t
+{
+    World,
+    Local
+};
+
+/** @brief  */
+struct FixedConstraintInfo
+{
+    Vector3 point1 = Vector3::Zero();
+    Vector3 axisX1 = Vector3::Right();
+    Vector3 axisY1 = Vector3::Up();
+    Vector3 point2 = Vector3::Zero();
+    Vector3 axisX2 = Vector3::Right();
+    Vector3 axisY2 = Vector3::Up();
+    bool autoDetect = false;
+    ConstraintSpace space = ConstraintSpace::World;
+};
+
+/** @brief  */
+struct PointConstraintInfo
+{
+    Vector3 point1 = Vector3::Zero();
+    Vector3 point2 = Vector3::Zero();
+    ConstraintSpace space = ConstraintSpace::World;
+};
+
+/** @brief Generalized constraint initialization information. */
+using ConstraintInfo = std::variant<FixedConstraintInfo, PointConstraintInfo>;
+
+/** @brief Unique value identifying internal Constraint state. */
+using ConstraintId = uint32_t;
+
+/** @brief Information regarding an existing Constraint. */
+struct ConstraintView
+{
+    ConstraintInfo info;
+    Entity referencedEntity = Entity::Null();
+    ConstraintId id = UINT32_MAX;
 };
 } // namespace nc::physics
