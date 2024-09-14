@@ -131,11 +131,11 @@ auto ConstraintManager::GetConstraints(Entity owner) const -> std::span<const Co
 
 void ConstraintManager::Clear()
 {
+    const auto constraintsBeg = m_handles.begin();
+    const auto constraintsEnd = std::remove(constraintsBeg, m_handles.end(), nullptr);
+    const auto constraintCount = std::distance(constraintsBeg, constraintsEnd);
+    m_physicsSystem->RemoveConstraints(m_handles.data(), static_cast<int>(constraintCount));
 
-    // todo: do better?
-    std::erase(m_handles, nullptr);
-
-    m_physicsSystem->RemoveConstraints(m_handles.data(), static_cast<int>(m_handles.size()));
     m_handles.clear();
     m_handles.shrink_to_fit();
     m_pairs.clear();
