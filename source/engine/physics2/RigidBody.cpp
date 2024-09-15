@@ -172,12 +172,12 @@ void RigidBody::AddAngularImpulse(const Vector3& impulse)
     s_ctx->interface.AddAngularImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
 }
 
-auto RigidBody::AddConstraint(const ConstraintInfo& createInfo, const RigidBody& other) -> ConstraintId
+auto RigidBody::AddConstraint(const ConstraintInfo& createInfo, const RigidBody& other) -> Constraint&
 {
     return s_ctx->constraintManager.AddConstraint(createInfo, m_self, ToBody(m_handle), other.m_self, ToBody(other.m_handle));
 }
 
-auto RigidBody::AddConstraint(const ConstraintInfo& createInfo) -> ConstraintId
+auto RigidBody::AddConstraint(const ConstraintInfo& createInfo) -> Constraint&
 {
     return s_ctx->constraintManager.AddConstraint(createInfo, m_self, ToBody(m_handle), Entity::Null(), &JPH::Body::sFixedToWorld);
 }
@@ -187,7 +187,7 @@ void RigidBody::RemoveConstraint(ConstraintId constraintId)
     s_ctx->constraintManager.RemoveConstraint(constraintId);
 }
 
-auto RigidBody::GetConstraints() const -> std::span<const ConstraintView>
+auto RigidBody::GetConstraints() -> std::span<Constraint>
 {
     return s_ctx->constraintManager.GetConstraints(m_self);
 }

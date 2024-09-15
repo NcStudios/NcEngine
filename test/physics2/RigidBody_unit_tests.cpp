@@ -131,7 +131,15 @@ TEST_F(RigidBodyTest, MoveOperations_transferRegistrationData)
     EXPECT_TRUE(first.IsInitialized());
     EXPECT_FALSE(second.GetEntity().Valid());
     EXPECT_FALSE(second.IsInitialized());
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     first = std::move(first);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
     EXPECT_TRUE(first.GetEntity().Valid());
     EXPECT_TRUE(first.IsInitialized());
 }

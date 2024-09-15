@@ -163,16 +163,16 @@ class RigidBody
 
         /** @name Constraint Functions */
         /** @brief Add a Constraint between the RigidBody and another. */
-        auto AddConstraint(const ConstraintInfo& createInfo, const RigidBody& otherBody) -> ConstraintId;
+        auto AddConstraint(const ConstraintInfo& createInfo, const RigidBody& otherBody) -> Constraint&;
 
         /** @brief Add a Constraint between the RigidBody and the world. */
-        auto AddConstraint(const ConstraintInfo& createInfo) -> ConstraintId;
+        auto AddConstraint(const ConstraintInfo& createInfo) -> Constraint&;
 
         /** @brief Remove a constraint from the RigidBody. */
         void RemoveConstraint(ConstraintId constraintId);
 
         /** @brief View all of the constraints attached to the RigidBody. */
-        auto GetConstraints() const -> std::span<const ConstraintView>;
+        auto GetConstraints() -> std::span<Constraint>;
 
         /**
          * @name Simulated Body Functions
