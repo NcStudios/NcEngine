@@ -1,4 +1,5 @@
 #include "NcGraphicsImpl2.h"
+#include "GraphicsTypes.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/scene/NcScene.h"
@@ -71,17 +72,77 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     void ClearEnvironment() override {}
 };
 
-auto GetSupportedRenderDeviceType(std::string_view targetApi) -> Diligent::RENDER_DEVICE_TYPE
+auto GetSupportedRenderDeviceType(std::string_view targetApi, nc::graphics::Platform platform) -> Diligent::RENDER_DEVICE_TYPE
 {
-    auto deviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
+    bool vulkanSupported = false;
+    bool d3d12Supported = false;
+    bool d3d11Supported = false;
+    bool openGLSupported = false;
 
-    // vulkan, dx12, dx11, opengl
+    #if VULKAN_SUPPORTED
+        vulkanSupported = true;
+    #endif
+    #if D3D12_SUPPORTED
+        d3d12Supported = true;
+    #endif
+    #if D3D11_SUPPORTED
+        d3d11Supported = true;
+    #endif
+    #if GL_SUPPORTED
+        openGLSupported = true;
+    #endif
+
+    // vulkan, d3d12, d3d11, opengl
     if (targetApi == "vulkan")
     {
-        #if VULKAN_SUPPORTED
-            deviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
-        #endif
+        switch (platform)
+        {
+            case nc::graphics::Platform::Win32:
+            {
+                if (vulkanSupported)
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
+                if (d3d12Supported)
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D12;
+                if (d3d11Supported)
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D11;
+                if  (openGLSupported)
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
+                throw nc::NcError("No supported render device found from [Vulkan, D3D12, D3D11, OpenGL]. Platform: Win32");
+            }
+            case nc::graphics::Platform::Linux:
+                if (vulkanSupported)
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
+                if  (openGLSupported)
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
+                throw nc::NcError("No supported render device found from [Vulkan, OpenGL]. Platform: Linux.");
+        }
+        std::unreachable();
+        throw nc::NcError()
+    }
+    if (targetApi == "vulkan")
+    {
+        if (vulkanSupported)
+            return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
 
+        if (platform == nc::graphics::Platform::Win32)
+        {
+            if (d3d12Supported)
+                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D12;
+
+            if (d3d11Supported)
+                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D11;
+
+            if  (openGLSupported)
+                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
+
+            throw nc::NcError("No supported render device found from [Vulkan, D3D12, D3D11, OpenGL]. Platform: Win32");
+        }
+        if (platform == nc::graphics::Platform::Linux)
+        {
+            if  (openGLSupported)
+                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
+            throw nc::NcError("No supported render device found from [Vulkan, OpenGL]. Platform: Linux.");
+        }
     }
 }
 } // anonymous namespace

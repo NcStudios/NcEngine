@@ -70,7 +70,7 @@ struct MemorySettings
 struct GraphicsSettings
 {
     bool enabled = true;
-    std::string targetApi = "vulkan"; ///< possible values: vulkan, dx12, dx11, opengl
+    std::string targetApi = "vulkan"; ///< possible values: vulkan, d3d12, d3d11, opengl
     bool useNativeResolution = false;
     bool launchInFullscreen = false;
     unsigned screenWidth = 1000;
