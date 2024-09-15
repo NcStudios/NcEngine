@@ -2,73 +2,84 @@
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSystem.h"
-
-namespace
-{
-void UntrackConstraint(nc::physics::EntityConstraints& state, nc::physics::ConstraintId constraintId, bool isOwner)
-{
-    auto idPos = std::ranges::find(state.ids, constraintId);
-    NC_ASSERT(idPos != state.ids.cend(), "ConstraintId not found");
-    *idPos = state.ids.back();
-    state.ids.pop_back();
-    if (!isOwner)
-    {
-        return;
-    }
-
-    auto infoPos = std::ranges::find(state.views, constraintId, &nc::physics::ConstraintView::id);
-    NC_ASSERT(infoPos != state.views.cend(), "ConstraintView not found");
-    state.views.erase(infoPos);
-}
-} // anonymous namespace
+#include "Jolt/Physics/Constraints/TwoBodyConstraint.h"
 
 namespace nc::physics
 {
 auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
                                       Entity owner,
                                       JPH::Body* ownerBody,
-                                      Entity referenced,
-                                      JPH::Body* referencedBody) -> ConstraintId
+                                      Entity target,
+                                      JPH::Body* targetBody) -> Constraint&
 {
-    auto handle = m_factory.MakeConstraint(createInfo, *ownerBody, *referencedBody);
+    auto handle = m_factory.MakeConstraint(createInfo, *ownerBody, *targetBody);
     m_physicsSystem->AddConstraint(handle);
 
     const auto ownerId = owner.Index();
-    const auto referencedId = referenced.Index();
+    const auto targetId = target.Index();
     const auto index = [&]()
     {
         if (m_freeIndices.empty())
         {
             const auto i = static_cast<uint32_t>(m_handles.size());
             m_handles.push_back(handle);
-            m_pairs.emplace_back(ownerId, referencedId);
+            m_pairs.emplace_back(ownerId, targetId);
             return i;
         }
 
         const auto i = m_freeIndices.back();
         m_freeIndices.pop_back();
         m_handles[i] = handle;
-        m_pairs[i] = ConstraintPair{ownerId, referencedId};
+        m_pairs[i] = ConstraintPair{ownerId, targetId};
         return i;
     }();
 
-    auto& ownerState = m_entityState.contains(ownerId)
-        ? m_entityState.at(ownerId)
-        : m_entityState.emplace(ownerId, EntityConstraints{});
-
-    ownerState.ids.emplace_back(index);
-    ownerState.views.emplace_back(createInfo, referenced, index);
-
-    if (referenced.Valid())
+    auto& ownerState = TrackConstraint(ownerId, index);
+    auto& constraint = ownerState.constraints.emplace_back(createInfo, target, index);
+    if (target.Valid())
     {
-        auto& referencedState = m_entityState.contains(referencedId)
-            ? m_entityState.at(referencedId)
-            : m_entityState.emplace(referencedId, EntityConstraints{});
-
-        referencedState.ids.emplace_back(index);
+        TrackConstraint(targetId, index);
     }
 
-    return index;
+    return constraint;
+}
+
+void ConstraintManager::EnableConstraint(Constraint& constraint, bool enabled)
+{
+    constraint.m_enabled = enabled;
+    GetConstraintHandle(constraint.GetId())->SetEnabled(enabled);
+}
+
+void ConstraintManager::UpdateConstraint(Constraint& constraint)
+{
+    auto oldHandle = GetConstraintHandle(constraint.GetId());
+    auto [ownerBody, targetBody] = GetConstraintBodies(oldHandle);
+    ReplaceInternalConstraint(constraint, oldHandle, ownerBody, targetBody);
+}
+
+void ConstraintManager::UpdateConstraintTarget(Constraint& constraint,
+                                               Entity referenced,
+                                               JPH::Body* referencedBody)
+{
+    constraint.m_otherBody = referenced;
+
+    const auto id = constraint.GetId();
+    auto oldHandle = GetConstraintHandle(id);
+    auto [ownerBody, _] = GetConstraintBodies(oldHandle);
+    ReplaceInternalConstraint(constraint, oldHandle, ownerBody, referencedBody);
+
+    auto& [trackedOwner, trackedReference] = m_pairs.at(id);
+    NC_ASSERT(trackedOwner != referenced.Index(), "Attempt to self assign constraint attachment");
+    if (trackedReference != Entity::NullIndex)
+    {
+        UntrackConstraint(trackedReference, id, false);
+    }
+
+    trackedReference = referenced.Index();
+    if (referenced.Valid())
+    {
+        TrackConstraint(trackedReference, id);
+    }
 }
 
 void ConstraintManager::RemoveConstraint(ConstraintId constraintId)
@@ -78,10 +89,10 @@ void ConstraintManager::RemoveConstraint(ConstraintId constraintId)
     m_physicsSystem->RemoveConstraint(handle);
     const auto [owner, referenced] = std::exchange(m_pairs.at(constraintId), ConstraintPair{});
     m_freeIndices.push_back(constraintId);
-    UntrackConstraint(m_entityState.at(owner), constraintId, true);
+    UntrackConstraint(owner, constraintId, true);
     if (referenced != Entity::NullIndex)
     {
-        UntrackConstraint(m_entityState.at(referenced), constraintId, false);
+        UntrackConstraint(referenced, constraintId, false);
     }
 }
 
@@ -107,26 +118,39 @@ void ConstraintManager::RemoveConstraints(Entity toRemove)
                 : std::pair{ownerId, true};
         }();
 
-
         if (otherId != Entity::NullIndex)
         {
-            auto& otherInfo = m_entityState.at(otherId);
-            UntrackConstraint(otherInfo, constraintId, otherIsOwner);
+            UntrackConstraint(otherId, constraintId, otherIsOwner);
         }
     }
 
     m_entityState.erase(toRemoveId);
 }
 
-auto ConstraintManager::GetConstraints(Entity owner) const -> std::span<const ConstraintView>
+auto ConstraintManager::GetConstraintHandle(ConstraintId constraintId) -> JPH::Constraint*
 {
-    auto id = owner.Index();
+    auto handle = m_handles.at(constraintId);
+    NC_ASSERT(handle, "Bad ConstraintId");
+    return handle;
+}
+
+auto ConstraintManager::GetConstraint(Entity owner, ConstraintId constraintId) -> Constraint&
+{
+    auto& owned = m_entityState.at(owner.Index()).constraints;
+    auto pos = std::ranges::find(owned, constraintId, &Constraint::GetId);
+    NC_ASSERT(pos != owned.cend(), "Invalid ConstraintId");
+    return *pos;
+}
+
+auto ConstraintManager::GetConstraints(Entity owner) -> std::span<Constraint>
+{
+    const auto id = owner.Index();
     if (m_entityState.contains(id))
     {
-        return m_entityState.at(id).views;
+        return m_entityState.at(id).constraints;
     }
 
-    return std::span<const ConstraintView>{};
+    return std::span<Constraint>{};
 }
 
 void ConstraintManager::Clear()
@@ -143,5 +167,53 @@ void ConstraintManager::Clear()
     m_freeIndices.clear();
     m_freeIndices.shrink_to_fit();
     m_entityState.clear();
+}
+
+auto ConstraintManager::TrackConstraint(uint32_t entityId,
+                                        ConstraintId constraintId) -> EntityConstraints&
+{
+    auto& state = m_entityState.contains(entityId)
+        ? m_entityState.at(entityId)
+        : m_entityState.emplace(entityId, EntityConstraints{});
+
+    state.ids.push_back(constraintId);
+    return state;
+}
+
+void ConstraintManager::UntrackConstraint(uint32_t entityId,
+                                          ConstraintId constraintId,
+                                          bool isOwner)
+{
+    auto& state = m_entityState.at(entityId);
+    auto idPos = std::ranges::find(state.ids, constraintId);
+    NC_ASSERT(idPos != state.ids.cend(), "ConstraintId not found");
+    *idPos = state.ids.back();
+    state.ids.pop_back();
+    if (!isOwner)
+    {
+        return;
+    }
+
+    auto constraintPos = std::ranges::find(state.constraints, constraintId, &nc::physics::Constraint::GetId);
+    NC_ASSERT(constraintPos != state.constraints.cend(), "Constraint not found");
+    state.constraints.erase(constraintPos);
+}
+
+auto ConstraintManager::GetConstraintBodies(JPH::Constraint* handle) -> ConstraintBodies
+{
+    const auto upcast = static_cast<JPH::TwoBodyConstraint*>(handle);
+    return ConstraintBodies{upcast->GetBody1(), upcast->GetBody2()};
+}
+
+void ConstraintManager::ReplaceInternalConstraint(const Constraint& replaceWith,
+                                                  JPH::Constraint* toReplace,
+                                                  JPH::Body* owner,
+                                                  JPH::Body* referenced)
+{
+    m_physicsSystem->RemoveConstraint(toReplace);
+    auto newHandle = m_factory.MakeConstraint(replaceWith.GetInfo(), *owner, *referenced);
+    newHandle->SetEnabled(replaceWith.IsEnabled());
+    m_physicsSystem->AddConstraint(newHandle);
+    m_handles.at(replaceWith.GetId()) = newHandle;
 }
 } // namespace nc::physics
