@@ -10,6 +10,9 @@
 
 namespace nc::physics
 {
+class ConstraintManager;
+class RigidBody;
+
 /**
  * @brief Constrain an object's linear and angular velocities.
  * 
@@ -89,11 +92,48 @@ using ConstraintInfo = std::variant<FixedConstraintInfo, PointConstraintInfo>;
 /** @brief Unique value identifying internal Constraint state. */
 using ConstraintId = uint32_t;
 
-/** @brief Information regarding an existing Constraint. */
-struct ConstraintView
+/**
+ * @brief A physics constraint attaching the owning RigidBody to another. */
+class Constraint
 {
-    ConstraintInfo info;
-    Entity referencedEntity = Entity::Null();
-    ConstraintId id = UINT32_MAX;
+    public:
+        explicit Constraint(const ConstraintInfo& info,
+                            Entity otherBody,
+                            ConstraintId id)
+            : m_info{info},
+              m_otherBody{otherBody},
+              m_id{id}
+        {
+        }
+
+        /**
+         * @brief Get the ConstraintInfo.
+         * @note Settings may be modified but changes won't take effect until NotifyUpdateInfo() is called.
+         */
+        auto GetInfo() -> ConstraintInfo& { return m_info; }
+        auto GetInfo() const -> const ConstraintInfo& { return m_info; }
+
+        /** @brief Update internal state based on the current ConstraintInfo values. */
+        void NotifyUpdateInfo();
+
+        /** @brief Update the body that the Constraint owner is attached to (use nullptr to attach to the world). */
+        void SetConstraintTarget(RigidBody* otherBody = nullptr);
+        auto GetConstraintTarget() const -> Entity { return m_otherBody; }
+
+        /** @brief Toggle the Constraint on or off. */
+        void Enable(bool enabled);
+        auto IsEnabled() const -> bool { return m_enabled; }
+
+        /** @brief Get the Constraint's unique identifier. */
+        auto GetId() const -> ConstraintId { return m_id; }
+
+    private:
+        friend class ConstraintManager;
+        inline static ConstraintManager* s_manager = nullptr;
+
+        ConstraintInfo m_info;
+        Entity m_otherBody;
+        ConstraintId m_id;
+        bool m_enabled = true;
 };
 } // namespace nc::physics

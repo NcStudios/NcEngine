@@ -19,15 +19,22 @@ namespace nc::physics
 // Pair of entity indices associated with a constraint
 struct ConstraintPair
 {
-    uint32_t owningId = UINT32_MAX; // Index of the Entity the constraint was added to
-    uint32_t referencedId = UINT32_MAX; // Index of the other Entity referenced by the constraint (may be Null if fixed to world)
+    uint32_t ownerId = UINT32_MAX; // Index of the Entity the constraint was added to
+    uint32_t targetId = UINT32_MAX; // Index of the other Entity targeted by the constraint (may be NullIndex if fixed to world)
 };
 
 // Per-Entity constraint information
 struct EntityConstraints
 {
-    std::vector<uint32_t> ids; // ids of all constraints involving this entity (owned and referenced-by)
-    std::vector<ConstraintView> views; // original ConstraintInfos for owned constraints
+    std::vector<uint32_t> ids; // ids of all constraints involving this entity (owned and targeted-by)
+    std::vector<Constraint> constraints; // owned constraints
+};
+
+// Internal bodies referenced by a constraint
+struct ConstraintBodies
+{
+    JPH::Body* body1 = nullptr;
+    JPH::Body* body2 = nullptr;
 };
 
 class ConstraintManager
@@ -40,17 +47,26 @@ class ConstraintManager
               m_factory{physicsSystem},
               m_entityState{ConstraintMapSizeHint, maxEntities}
         {
+            Constraint::s_manager = this;
         }
 
         auto AddConstraint(const ConstraintInfo& createInfo,
                            Entity owner,
                            JPH::Body* ownerBody,
-                           Entity referenced,
-                           JPH::Body* referencedBody) -> ConstraintId;
+                           Entity target,
+                           JPH::Body* targetBody) -> Constraint&;
+
+        void EnableConstraint(Constraint& constraint, bool enabled);
+        void UpdateConstraint(Constraint& constraint);
+        void UpdateConstraintTarget(Constraint& constraint,
+                                    Entity target,
+                                    JPH::Body* targetBody);
 
         void RemoveConstraint(ConstraintId id);
         void RemoveConstraints(Entity toRemove);
-        auto GetConstraints(Entity owner) const -> std::span<const ConstraintView>;
+        auto GetConstraintHandle(ConstraintId constraintId) -> JPH::Constraint*;
+        auto GetConstraint(Entity owner, ConstraintId constraintId) -> Constraint&;
+        auto GetConstraints(Entity owner) -> std::span<Constraint>;
         void Clear();
 
     private:
@@ -60,5 +76,13 @@ class ConstraintManager
         std::vector<ConstraintPair> m_pairs;
         std::vector<uint32_t> m_freeIndices;
         sparse_map<EntityConstraints> m_entityState;
+
+        auto TrackConstraint(uint32_t entityId, ConstraintId constraintId) -> EntityConstraints&;
+        void UntrackConstraint(uint32_t entityId, ConstraintId constraintId, bool isOwner);
+        auto GetConstraintBodies(JPH::Constraint* handle) -> ConstraintBodies;
+        void ReplaceInternalConstraint(const Constraint& replaceWith,
+                                       JPH::Constraint* toReplace,
+                                       JPH::Body* owner,
+                                       JPH::Body* target);
 };
 } // namespace nc::physics
