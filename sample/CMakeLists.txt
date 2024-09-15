@@ -28,14 +28,18 @@ target_link_libraries(${NC_SAMPLE_EXE}
 
 add_subdirectory(source)
 
-# Diligent helper method to get required DLLs and EXEs into the project's executable dir.
-copy_required_dlls(${NC_SAMPLE_EXE})
 
 # Install
-install(DIRECTORY      $<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/
+if(PLATFORM_WIN32)
+        # Diligent helper method to get required DLLs and EXEs into the project's executable dir.
+        copy_required_dlls(${NC_SAMPLE_EXE})
+
+        install(DIRECTORY      $<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/
         DESTINATION    sample
         FILES_MATCHING REGEX ".*\.(dll)" # Diligent DLLs and EXEs
 )
+endif()
+
 install(TARGETS     ${NC_SAMPLE_EXE}
         DESTINATION sample
 )

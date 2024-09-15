@@ -6,17 +6,18 @@
 #include "ncengine/module/ModuleProvider.h"
 
 // Diligent
-#include "EngineFactoryD3D11.h"
-#include "EngineFactoryD3D12.h"
-#include "EngineFactoryOpenGL.h"
-#include "EngineFactoryVk.h"
-#include "RenderDevice.h"
-#include "DeviceContext.h"
-#include "SwapChain.h"
+#include "GraphicsTypes.h"
 #include "Common/interface/RefCntAutoPtr.hpp"
 
 #include <memory>
 
+namespace Diligent
+{
+struct IRenderDevice;
+struct IDeviceContext;
+struct ISwapChain;
+struct IBuffer;
+}
 namespace nc
 {
 class Scene;
@@ -60,7 +61,7 @@ class NcGraphicsImpl2 : public NcGraphics
         Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
         Diligent::RefCntAutoPtr<Diligent::IBuffer> m_VSConstants;
-        Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12; /* @todo: Decision based on config and device capabilities */
+        Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
 };
 } // namespace graphics
 } // namespace nc

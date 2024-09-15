@@ -66,6 +66,7 @@ constexpr auto SleepThresholdKey = "sleep_threshold"sv;
 
 // graphics
 constexpr auto GraphicsEnabledKey = "graphics_enabled"sv;
+constexpr auto TargetApiKey = "target_api"sv;
 constexpr auto UseNativeResolutionKey = "use_native_resolution"sv;
 constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
 constexpr auto ScreenWidthKey = "screen_width"sv;
@@ -226,6 +227,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     else if constexpr (std::same_as<Struct_t, nc::config::GraphicsSettings>)
     {
         ParseValueIfExists(out.enabled, GraphicsEnabledKey, kvPairs);
+        ParseValueIfExists(out.targetApi, TargetApiKey, kvPairs);
         ParseValueIfExists(out.useNativeResolution, UseNativeResolutionKey, kvPairs);
         ParseValueIfExists(out.launchInFullscreen, LaunchInFullscreenKey, kvPairs);
         ParseValueIfExists(out.screenWidth, ScreenWidthKey, kvPairs);
@@ -393,6 +395,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[graphics_settings]\n";
     ::WriteKVPair(stream, GraphicsEnabledKey, config.graphicsSettings.enabled);
+    ::WriteKVPair(stream, TargetApiKey, config.graphicsSettings.targetApi);
     ::WriteKVPair(stream, UseNativeResolutionKey, config.graphicsSettings.useNativeResolution);
     ::WriteKVPair(stream, LaunchInFullscreenKey, config.graphicsSettings.launchInFullscreen);
     ::WriteKVPair(stream, ScreenWidthKey, config.graphicsSettings.screenWidth);
@@ -424,6 +427,7 @@ bool Validate(const Config& config)
            (config.assetSettings.texturesPath != "") &&
            (config.assetSettings.cubeMapsPath != "") &&
            (config.assetSettings.fontsPath != "") &&
+           (config.graphicsSettings.targetApi != "") &&
            (config.graphicsSettings.screenWidth != 0) &&
            (config.graphicsSettings.screenHeight != 0) &&
            (config.graphicsSettings.targetFPS != 0) &&

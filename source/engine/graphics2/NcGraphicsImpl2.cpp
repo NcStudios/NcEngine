@@ -16,6 +16,12 @@
 #include "DirectXMath.h"
 
 // Diligent
+#include "EngineFactoryD3D11.h"
+#include "EngineFactoryD3D12.h"
+#include "EngineFactoryOpenGL.h"
+#include "EngineFactoryVk.h"
+#include "DeviceContext.h"
+#include "SwapChain.h"
 #include "MapHelper.hpp"
 #include "GraphicsUtilities.h"
 #include "TextureUtilities.h"
@@ -65,74 +71,24 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     void ClearEnvironment() override {}
 };
 
-DirectX::XMMATRIX GetSurfacePretransformMatrixInternal(const DirectX::XMVECTOR& f3CameraViewAxis,
-                                                        const Diligent::ISwapChain* swapchain)
+auto GetSupportedRenderDeviceType(std::string_view targetApi) -> Diligent::RENDER_DEVICE_TYPE
 {
-    const auto& SCDesc = swapchain->GetDesc();
-    switch (SCDesc.PreTransform)
+    auto deviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
+
+    // vulkan, dx12, dx11, opengl
+    if (targetApi == "vulkan")
     {
-        case Diligent::SURFACE_TRANSFORM_ROTATE_90:
-            // The image content is rotated 90 degrees clockwise.
-            return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI / 2.f);
+        #if VULKAN_SUPPORTED
+            deviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
+        #endif
 
-        case Diligent::SURFACE_TRANSFORM_ROTATE_180:
-            // The image content is rotated 180 degrees clockwise.
-            return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI);
-
-        case Diligent::SURFACE_TRANSFORM_ROTATE_270:
-            // The image content is rotated 270 degrees clockwise.
-            return DirectX::XMMatrixRotationAxis(f3CameraViewAxis, -DirectX::XM_PI * 3.f / 2.f);
-
-        case Diligent::SURFACE_TRANSFORM_OPTIMAL:
-            UNEXPECTED("SURFACE_TRANSFORM_OPTIMAL is only valid as parameter during swap chain initialization.");
-            return DirectX::XMMatrixIdentity();
-
-        case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR:
-        case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90:
-        case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180:
-        case Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270:
-            UNEXPECTED("Mirror transforms are not supported");
-            return DirectX::XMMatrixIdentity();
-
-        default:
-            return DirectX::XMMatrixIdentity();
     }
-}
-
-DirectX::XMMATRIX GetAdjustedProjectionMatrix(float FOV,
-                                                float NearPlane,
-                                                float FarPlane,
-                                                const Diligent::ISwapChain* swapchain)
-{
-    const auto& SCDesc = swapchain->GetDesc();
-
-    float AspectRatio = static_cast<float>(SCDesc.Width) / static_cast<float>(SCDesc.Height);
-    float XScale, YScale;
-    if (SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_90 ||
-        SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_ROTATE_270 ||
-        SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90 ||
-        SCDesc.PreTransform == Diligent::SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270)
-    {
-        // When the screen is rotated, vertical FOV becomes horizontal FOV
-        XScale = 1.f / std::tan(FOV / 2.f);
-        // Aspect ratio is inversed
-        YScale = XScale * AspectRatio;
-    }
-    else
-    {
-        YScale = 1.f / std::tan(FOV / 2.f);
-        XScale = YScale / AspectRatio;
-    }
-
-    auto perspective =
-        DirectX::XMMatrixPerspectiveFovRH(FOV, 1.0, NearPlane, FarPlane) *
-        DirectX::XMMatrixScaling(XScale, YScale, 1.0f);
-    return perspective;
 }
 } // anonymous namespace
 
 namespace nc::graphics
 {
+#define NC_USE_DILIGENT 1 // TODO: REMOVE
 #ifdef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
