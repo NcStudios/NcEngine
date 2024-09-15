@@ -134,7 +134,7 @@ TEST_F(RigidBodyTest, MoveOperations_transferRegistrationData)
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wself-move"
 #endif
     first = std::move(first);
 #ifdef __GNUC__
