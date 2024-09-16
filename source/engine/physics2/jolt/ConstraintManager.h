@@ -19,8 +19,8 @@ namespace nc::physics
 // Pair of entity indices associated with a constraint
 struct ConstraintPair
 {
-    uint32_t ownerId = UINT32_MAX; // Index of the Entity the constraint was added to
-    uint32_t targetId = UINT32_MAX; // Index of the other Entity targeted by the constraint (may be NullIndex if fixed to world)
+    uint32_t ownerId = Entity::NullIndex; // Index of the Entity the constraint was added to
+    uint32_t targetId = Entity::NullIndex; // Index of the other Entity targeted by the constraint (may be NullIndex if fixed to world)
 };
 
 // Per-Entity constraint information
@@ -52,9 +52,13 @@ class ConstraintManager
 
         auto AddConstraint(const ConstraintInfo& createInfo,
                            Entity owner,
-                           JPH::Body* ownerBody,
+                           JPH::Body& ownerBody,
                            Entity target,
-                           JPH::Body* targetBody) -> Constraint&;
+                           JPH::Body& targetBody) -> Constraint&;
+
+        auto AddConstraint(const ConstraintInfo& createInfo,
+                           Entity owner,
+                           JPH::Body& ownerBody) -> Constraint&;
 
         void EnableConstraint(Constraint& constraint, bool enabled);
         void UpdateConstraint(Constraint& constraint);

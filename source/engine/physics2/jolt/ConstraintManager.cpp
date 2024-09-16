@@ -8,11 +8,11 @@ namespace nc::physics
 {
 auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
                                       Entity owner,
-                                      JPH::Body* ownerBody,
+                                      JPH::Body& ownerBody,
                                       Entity target,
-                                      JPH::Body* targetBody) -> Constraint&
+                                      JPH::Body& targetBody) -> Constraint&
 {
-    auto handle = m_factory.MakeConstraint(createInfo, *ownerBody, *targetBody);
+    auto handle = m_factory.MakeConstraint(createInfo, ownerBody, targetBody);
     m_physicsSystem->AddConstraint(handle);
 
     const auto ownerId = owner.Index();
@@ -44,6 +44,13 @@ auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
     return constraint;
 }
 
+auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
+                                      Entity owner,
+                                      JPH::Body& ownerBody) -> Constraint&
+{
+    return AddConstraint(createInfo, owner, ownerBody, Entity::Null(), JPH::Body::sFixedToWorld);
+}
+
 void ConstraintManager::EnableConstraint(Constraint& constraint, bool enabled)
 {
     constraint.m_enabled = enabled;
@@ -61,12 +68,11 @@ void ConstraintManager::UpdateConstraintTarget(Constraint& constraint,
                                                Entity referenced,
                                                JPH::Body* referencedBody)
 {
-    constraint.m_otherBody = referenced;
-
     const auto id = constraint.GetId();
     auto oldHandle = GetConstraintHandle(id);
     auto [ownerBody, _] = GetConstraintBodies(oldHandle);
     ReplaceInternalConstraint(constraint, oldHandle, ownerBody, referencedBody);
+    constraint.m_otherBody = referenced;
 
     auto& [trackedOwner, trackedReference] = m_pairs.at(id);
     NC_ASSERT(trackedOwner != referenced.Index(), "Attempt to self assign constraint attachment");
@@ -84,9 +90,10 @@ void ConstraintManager::UpdateConstraintTarget(Constraint& constraint,
 
 void ConstraintManager::RemoveConstraint(ConstraintId constraintId)
 {
-    const auto handle = std::exchange(m_handles.at(constraintId), nullptr);
+    auto& handle = m_handles.at(constraintId);
     NC_ASSERT(handle, "Bad ConstraintId");
     m_physicsSystem->RemoveConstraint(handle);
+    handle = nullptr;
     const auto [owner, referenced] = std::exchange(m_pairs.at(constraintId), ConstraintPair{});
     m_freeIndices.push_back(constraintId);
     UntrackConstraint(owner, constraintId, true);

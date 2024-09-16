@@ -174,12 +174,12 @@ void RigidBody::AddAngularImpulse(const Vector3& impulse)
 
 auto RigidBody::AddConstraint(const ConstraintInfo& createInfo, const RigidBody& other) -> Constraint&
 {
-    return s_ctx->constraintManager.AddConstraint(createInfo, m_self, ToBody(m_handle), other.m_self, ToBody(other.m_handle));
+    return s_ctx->constraintManager.AddConstraint(createInfo, m_self, *ToBody(m_handle), other.m_self, *ToBody(other.m_handle));
 }
 
 auto RigidBody::AddConstraint(const ConstraintInfo& createInfo) -> Constraint&
 {
-    return s_ctx->constraintManager.AddConstraint(createInfo, m_self, ToBody(m_handle), Entity::Null(), &JPH::Body::sFixedToWorld);
+    return s_ctx->constraintManager.AddConstraint(createInfo, m_self, *ToBody(m_handle));
 }
 
 void RigidBody::RemoveConstraint(ConstraintId constraintId)
