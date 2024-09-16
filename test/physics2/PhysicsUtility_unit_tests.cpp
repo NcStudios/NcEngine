@@ -56,3 +56,53 @@ TEST(PhysicsUtilityTest, GetShapeTypeNames_returnsValidNames)
         EXPECT_NO_THROW(nc::physics::ToShapeType(name));
     }
 }
+
+TEST(PhysicsUtilityTest, ConstraintTypeConversion_roundTrip_preservesValues)
+{
+    constexpr auto fixedConstraint = nc::physics::ConstraintType::FixedConstraint;
+    constexpr auto pointConstraint = nc::physics::ConstraintType::PointConstraint;
+    const auto fixedConstraintName = nc::physics::ToString(fixedConstraint);
+    const auto pointConstraintName = nc::physics::ToString(pointConstraint);
+    EXPECT_EQ(fixedConstraint, nc::physics::ToConstraintType(fixedConstraintName));
+    EXPECT_EQ(pointConstraint, nc::physics::ToConstraintType(pointConstraintName));
+}
+
+TEST(PhysicsUtilityTest, ConstraintTypeConversion_badValue_throws)
+{
+    constexpr auto badType = static_cast<nc::physics::ConstraintType>(255);
+    EXPECT_THROW(nc::physics::ToString(badType), std::exception);
+    EXPECT_THROW(nc::physics::ToConstraintType("invalid"), std::exception);
+}
+
+TEST(PhysicsUtilityTest, GetConstraintTypeNames_returnsValidNames)
+{
+    for (const auto& name : nc::physics::GetConstraintTypeNames())
+    {
+        EXPECT_NO_THROW(nc::physics::ToConstraintType(name));
+    }
+}
+
+TEST(PhysicsUtilityTest, ConstraintSpaceConversion_roundTrip_preservesValues)
+{
+    constexpr auto world = nc::physics::ConstraintSpace::World;
+    constexpr auto local = nc::physics::ConstraintSpace::Local;
+    const auto worldName = nc::physics::ToString(world);
+    const auto localName = nc::physics::ToString(local);
+    EXPECT_EQ(world, nc::physics::ToConstraintSpace(worldName));
+    EXPECT_EQ(local, nc::physics::ToConstraintSpace(localName));
+}
+
+TEST(PhysicsUtilityTest, ConstraintSpaceConversion_badValue_throws)
+{
+    constexpr auto badType = static_cast<nc::physics::ConstraintSpace>(255);
+    EXPECT_THROW(nc::physics::ToString(badType), std::exception);
+    EXPECT_THROW(nc::physics::ToConstraintSpace("invalid"), std::exception);
+}
+
+TEST(PhysicsUtilityTest, GetConstraintSpaceNames_returnsValidNames)
+{
+    for (const auto& name : nc::physics::GetConstraintSpaceNames())
+    {
+        EXPECT_NO_THROW(nc::physics::ToConstraintSpace(name));
+    }
+}

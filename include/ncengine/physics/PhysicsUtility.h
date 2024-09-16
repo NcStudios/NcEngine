@@ -19,4 +19,12 @@ auto GetBodyTypeNames() -> std::span<const std::string_view>;
 auto ToString(ShapeType type) -> std::string_view;
 auto ToShapeType(std::string_view shapeType) -> ShapeType;
 auto GetShapeTypeNames() -> std::span<const std::string_view>;
+
+auto ToString(ConstraintType type) -> std::string_view;
+auto ToConstraintType(std::string_view constraintType) -> ConstraintType;
+auto GetConstraintTypeNames() -> std::span<const std::string_view>;
+
+auto ToString(ConstraintSpace space) -> std::string_view;
+auto ToConstraintSpace(std::string_view constraintSpace) -> ConstraintSpace;
+auto GetConstraintSpaceNames() -> std::span<const std::string_view>;
 } // namespace nc::physics

@@ -58,6 +58,16 @@ struct OrientationClamp
     float dampingFrequency = 10.0f;
 };
 
+/**
+ * @brief Type of a Constraint.
+ * @internal Keep ordered with ConstraintInfo types.
+*/
+enum class ConstraintType : uint8_t
+{
+    FixedConstraint,
+    PointConstraint
+};
+
 /** @brief The relative space of a constraint. */
 enum class ConstraintSpace : uint8_t
 {
@@ -86,7 +96,10 @@ struct PointConstraintInfo
     ConstraintSpace space = ConstraintSpace::World; /// space other settings are relative to
 };
 
-/** @brief Generalized constraint initialization information. */
+/**
+ * @brief Generalized constraint initialization information.
+ * @internal Keep ordered with ConstraintType.
+ */
 using ConstraintInfo = std::variant<FixedConstraintInfo, PointConstraintInfo>;
 
 /** @brief Unique value identifying internal Constraint state. */
@@ -112,6 +125,9 @@ class Constraint
          */
         auto GetInfo() -> ConstraintInfo& { return m_info; }
         auto GetInfo() const -> const ConstraintInfo& { return m_info; }
+
+        /** @brief Get the type of constraint. */
+        auto GetType() const -> ConstraintType;
 
         /** @brief Update internal state based on the current ConstraintInfo values. */
         void NotifyUpdateInfo();

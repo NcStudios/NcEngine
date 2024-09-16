@@ -7,6 +7,11 @@
 
 namespace nc::physics
 {
+auto Constraint::GetType() const -> ConstraintType
+{
+    return static_cast<ConstraintType>(m_info.index());
+}
+
 void Constraint::Enable(bool enabled)
 {
     s_manager->EnableConstraint(*this, enabled);

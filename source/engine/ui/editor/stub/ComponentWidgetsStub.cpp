@@ -27,4 +27,6 @@ void PhysicsBodyUIWidget(physics::PhysicsBody&, EditorContext&, const std::any&)
 void PhysicsMaterialUIWidget(physics::PhysicsMaterial&, EditorContext&, const std::any&) {}
 void PositionClampUIWidget(physics::PositionClamp&, EditorContext&, const std::any&) {}
 void VelocityRestrictionUIWidget(physics::VelocityRestriction&, EditorContext&, const std::any&) {}
+void CollisionListenerUIWidget(physics::CollisionListener&, EditorContext&, const std::any&) {}
+void RigidBodyUIWidget(physics::RigidBody&, EditorContext&, const std::any&) {}
 } // namespace nc::ui::editor
