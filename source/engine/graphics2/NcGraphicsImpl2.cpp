@@ -72,84 +72,115 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     void ClearEnvironment() override {}
 };
 
-auto GetSupportedRenderDeviceType(std::string_view targetApi, nc::graphics::Platform platform) -> Diligent::RENDER_DEVICE_TYPE
+template<typename T>
+void RotateElementToBeginning(std::vector<T>& vectorToRotate, const T& elem)
 {
-    bool vulkanSupported = false;
-    bool d3d12Supported = false;
-    bool d3d11Supported = false;
-    bool openGLSupported = false;
+    auto elemPos = std::ranges::find(vectorToRotate, elem);
+    NC_ASSERT(elemPos != vectorToRotate.end(), fmt::format("{0} was not present in the vector.", elem));
+    // Store the element before modifying the vector
+    T element = *elemPos;
 
-    #if VULKAN_SUPPORTED
-        vulkanSupported = true;
-    #endif
-    #if D3D12_SUPPORTED
-        d3d12Supported = true;
-    #endif
-    #if D3D11_SUPPORTED
-        d3d11Supported = true;
-    #endif
-    #if GL_SUPPORTED
-        openGLSupported = true;
-    #endif
+    // Erase the element from its current position
+    vectorToRotate.erase(elemPos);
 
-    // vulkan, d3d12, d3d11, opengl
-    if (targetApi == "vulkan")
+    // Insert the element at the beginning
+    vectorToRotate.insert(vectorToRotate.begin(), element);
+}
+
+auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Diligent::RENDER_DEVICE_TYPE
+{
+    constexpr std::string_view D3D12 = std::string_view("d3d12");
+    constexpr std::string_view Vulkan = std::string_view("vulkan");
+    constexpr std::string_view D3D11 = std::string_view("d3d11");
+    constexpr std::string_view OpenGL = std::string_view("openGL");
+
+    auto preferredWin32ApiOrder = std::vector<std::string_view> 
     {
-        switch (platform)
+        D3D12,
+        Vulkan,
+        D3D11,
+        OpenGL
+    };
+
+    auto preferredLinuxApiOrder = std::vector<std::string_view> 
+    {
+        Vulkan,
+        OpenGL
+    };
+
+    #if PLATFORM_WIN32
+        // D3D12 already in front if targetApi is D3D12
+        if (targetApi == Vulkan)
+            RotateElementToBeginning(preferredWin32ApiOrder, Vulkan);
+        else if (targetApi == D3D11)
+            RotateElementToBeginning(preferredWin32ApiOrder, D3D11);
+        else if (targetApi == OpenGL)
+            RotateElementToBeginning(preferredWin32ApiOrder, OpenGL);
+        else
+            throw nc::NcError(fmt::format("Target API of {0} is not in the list of potential APIs. Potential APIs: d3d12, vulkan, d3d11, openGL", targetApi));
+
+        for (const auto& api : preferredWin32ApiOrder)
         {
-            case nc::graphics::Platform::Win32:
+            if (api == D3D12)
             {
-                if (vulkanSupported)
-                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
-                if (d3d12Supported)
+                #if D3D12_SUPPORTED
                     return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D12;
-                if (d3d11Supported)
-                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D11;
-                if  (openGLSupported)
-                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
-                throw nc::NcError("No supported render device found from [Vulkan, D3D12, D3D11, OpenGL]. Platform: Win32");
+                #endif
             }
-            case nc::graphics::Platform::Linux:
-                if (vulkanSupported)
+            else if (api == Vulkan)
+            {
+                #if VULKAN_SUPPORTED
                     return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
-                if  (openGLSupported)
+                #endif
+            }
+            else if (api == D3D11)
+            {
+                #if D3D11_SUPPORTED
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D11;
+                #endif
+            }
+            else if (api == OpenGL)
+            {
+                #if GL_SUPPORTED
                     return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
-                throw nc::NcError("No supported render device found from [Vulkan, OpenGL]. Platform: Linux.");
+                #endif
+            }
         }
-        std::unreachable();
-        throw nc::NcError()
-    }
-    if (targetApi == "vulkan")
-    {
-        if (vulkanSupported)
-            return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
+        throw nc::NcError("No supported API found from [d3d12, vulkan, d3d11, openGL]. Platform: Win32");
 
-        if (platform == nc::graphics::Platform::Win32)
+    #elif PLATFORM_LINUX
+        // Vulkan already in front if targetApi is Vulkan
+        if (targetApi == D3D12 || targetApi == D3D11)
+            NC_LOG_WARNING(fmt::format("Target API of {0} is not supported on Linux. Defaulting to Linux-supported API.", targetApi));
+        else if (targetApi == OpenGL)
+            RotateElementToBeginning(preferredLinuxApiOrder, OpenGL);
+        else
+            throw nc::NcError(fmt::format("Target API of {0} is not in the list of potential APIs. Potential APIs: vulkan, openGL", targetApi));
+
+        for (const auto& api : preferredLinuxApiOrder)
         {
-            if (d3d12Supported)
-                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D12;
-
-            if (d3d11Supported)
-                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_D3D11;
-
-            if  (openGLSupported)
-                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
-
-            throw nc::NcError("No supported render device found from [Vulkan, D3D12, D3D11, OpenGL]. Platform: Win32");
+            if (api == Vulkan)
+            {
+                #if VULKAN_SUPPORTED
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_VULKAN;
+                #endif
+            }
+            else if (api == OpenGL)
+            {
+                #if GL_SUPPORTED
+                    return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
+                #endif
+            }
         }
-        if (platform == nc::graphics::Platform::Linux)
-        {
-            if  (openGLSupported)
-                return Diligent::RENDER_DEVICE_TYPE::RENDER_DEVICE_TYPE_GL;
-            throw nc::NcError("No supported render device found from [Vulkan, OpenGL]. Platform: Linux.");
-        }
-    }
+        throw nc::NcError("No supported API found from [vulkan, openGL]. Platform: Linux");
+    #else
+        #error "Unsupported platform detected. NcEngine only supports Win32 and Linux."
+    #endif
 }
 } // anonymous namespace
 
 namespace nc::graphics
 {
-#define NC_USE_DILIGENT 1 // TODO: REMOVE
 #ifdef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
@@ -196,6 +227,16 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
     using namespace Diligent;
 
     ImGui::CreateContext();
+
+    auto supportedDeviceTypeByPlatform = GetSupportedRenderDeviceTypeByPlatform(graphicsSettings.targetApi);
+
+    switch (supportedDeviceTypeByPlatform)
+    {
+        case RENDER_DEVICE_TYPE_VULKAN:
+        {
+            
+        }
+    }
 
     /* Initialize Diligent Engine */
     SwapChainDesc SCDesc;
