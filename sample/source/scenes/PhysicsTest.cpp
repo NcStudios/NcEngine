@@ -123,9 +123,9 @@ struct FollowCamera : public graphics::Camera
 #ifdef NC_USE_JOLT
 class VehicleController : public FreeComponent
 {
-    static constexpr auto force = 150.0f;
-    static constexpr auto torqueForce = 150.0f;
-    static constexpr auto jumpForce = 400.0f;
+    static constexpr auto force = 250.0f;
+    static constexpr auto torqueForce = 250.0f;
+    static constexpr auto jumpForce = 5000.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
     public:
@@ -389,10 +389,38 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
     world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
 
-    world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
+    auto& bodyHead = world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox(), physics::RigidBodyInfo{.friction = 0.8f});
+    auto& bodyNode1 = world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
+    auto& bodyNode2 = world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
+    auto& bodyNode3 = world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
+
+    bodyHead.AddConstraint(
+        physics::PointConstraintInfo{
+            .point1 = Vector3{0.0f, -0.1f, -0.6f},
+            .point2 = Vector3{0.0f, 0.0f, 0.5f},
+            .space = physics::ConstraintSpace::Local
+        },
+        bodyNode1
+    );
+
+    bodyNode1.AddConstraint(
+        physics::PointConstraintInfo{
+            .point1 = Vector3{0.0f, -0.1f, -0.5f},
+            .point2 = Vector3{0.0f, 0.0f, 0.4f},
+            .space = physics::ConstraintSpace::Local
+        },
+        bodyNode2
+    );
+
+    bodyNode2.AddConstraint(
+        physics::PointConstraintInfo{
+            .point1 = Vector3{0.0f, -0.1f, -0.4f},
+            .point2 = Vector3{0.0f, 0.0f, 0.3f},
+            .space = physics::ConstraintSpace::Local
+        },
+        bodyNode3
+    );
+
     world.Emplace<physics::CollisionListener>(
         head,
         [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs){
@@ -527,6 +555,30 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<physics::PhysicsBody>(platform1, platform1Transform, platform1Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
     world.Emplace<physics::PhysicsBody>(platform2, platform2Transform, platform2Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
 
+    world.Emplace<physics::RigidBody>(
+        platform1,
+        nc::physics::Shape::MakeBox(),
+        nc::physics::RigidBodyInfo{
+            .type = physics::BodyType::Static
+        }
+    );
+
+    world.Emplace<physics::RigidBody>(
+        platform2,
+        nc::physics::Shape::MakeBox(),
+        nc::physics::RigidBodyInfo{
+            .type = physics::BodyType::Static
+        }
+    );
+
+    world.Emplace<physics::RigidBody>(
+        ramp1,
+        nc::physics::Shape::MakeBox(),
+        nc::physics::RigidBodyInfo{
+            .type = physics::BodyType::Static
+        }
+    );
+
     // Bridge
     const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
     auto makePlank = [&world, bridgeParent](const Vector3& pos, const Vector3& scale)
@@ -601,6 +653,12 @@ void BuildSteps(ecs::Ecs world)
         world.Emplace<physics::PhysicsBody>(step, transform, collider);
         world.Emplace<physics::PositionClamp>(step, position, 0.1f, 2.0f);
         world.Emplace<physics::VelocityRestriction>(step, Vector3::Up(), Vector3::Zero());
+
+        world.Emplace<physics::RigidBody>(step)
+            .AddConstraint(physics::PointConstraintInfo{
+                .point1 = position,
+                .point2 = position
+            });
     };
 
     buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f});
@@ -811,6 +869,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.GetPool<Transform>().Reserve(140);
     world.GetPool<graphics::ToonRenderer>().Reserve(140);
     world.GetPool<physics::PhysicsBody>().Reserve(140);
+    world.GetPool<physics::RigidBody>().Reserve(140);
     world.GetPool<physics::Collider>().Reserve(140);
 
     // Vehicle

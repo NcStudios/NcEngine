@@ -62,3 +62,9 @@ TEST(JoltConversionTest, ToMotionType_convertsBodyType)
     EXPECT_EQ(JPH::EMotionType::Static, ToMotionType(nc::physics::BodyType::Static));
     EXPECT_EQ(JPH::EMotionType::Kinematic, ToMotionType(nc::physics::BodyType::Kinematic));
 }
+
+TEST(JoltConversionTest, ToConstraintSpace_convertsSpace)
+{
+    EXPECT_EQ(JPH::EConstraintSpace::WorldSpace, ToConstraintSpace(nc::physics::ConstraintSpace::World));
+    EXPECT_EQ(JPH::EConstraintSpace::LocalToBodyCOM, ToConstraintSpace(nc::physics::ConstraintSpace::Local));
+}

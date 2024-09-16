@@ -22,16 +22,6 @@ auto ToActivationMode(bool wake) -> JPH::EActivation
 
 namespace nc::physics
 {
-RigidBody::~RigidBody() noexcept
-{
-    if (IsInitialized())
-    {
-        const auto& id = ToBody(m_handle)->GetID();
-        m_ctx->interface.RemoveBody(id);
-        m_ctx->interface.DestroyBody(id);
-    }
-}
-
 void RigidBody::SetBodyType(BodyType type, bool wake)
 {
     if (m_self.IsStatic())
@@ -40,7 +30,7 @@ void RigidBody::SetBodyType(BodyType type, bool wake)
     }
 
     m_info.type = type;
-    m_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), ToActivationMode(wake));
+    s_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), ToActivationMode(wake));
 }
 
 auto RigidBody::IsAwake() const -> bool
@@ -53,11 +43,11 @@ void RigidBody::SetAwakeState(bool wake)
     const auto id = ToBody(m_handle)->GetID();
     if (wake)
     {
-        m_ctx->interface.ActivateBody(id);
+        s_ctx->interface.ActivateBody(id);
     }
     else
     {
-        m_ctx->interface.DeactivateBody(id);
+        s_ctx->interface.DeactivateBody(id);
     }
 }
 
@@ -68,8 +58,8 @@ void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale, bool
         ? ToJoltVec3(NormalizeScaleForShape(m_shape.GetType(), transformScale, transformScale))
         : JPH::Vec3::sReplicate(1.0f);
 
-    const auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
-    m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
+    const auto newShape = s_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
+    s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
 }
 
 void RigidBody::SetFriction(float friction)
@@ -99,7 +89,7 @@ void RigidBody::SetAngularDamping(float damping)
 void RigidBody::SetGravityMultiplier(float factor)
 {
     m_info.gravityMultiplier = Clamp(factor, 0.0f, RigidBodyInfo::maxGravityMultiplier);
-    m_ctx->interface.SetGravityFactor(ToBody(m_handle)->GetID(), m_info.gravityMultiplier);
+    s_ctx->interface.SetGravityFactor(ToBody(m_handle)->GetID(), m_info.gravityMultiplier);
 }
 
 void RigidBody::ScalesWithTransform(bool value)
@@ -111,7 +101,7 @@ void RigidBody::ScalesWithTransform(bool value)
 
 void RigidBody::UseContinuousDetection(bool value)
 {
-    m_ctx->interface.SetMotionQuality(ToBody(m_handle)->GetID(), ToMotionQuality(value));
+    s_ctx->interface.SetMotionQuality(ToBody(m_handle)->GetID(), ToMotionQuality(value));
     m_info.flags = value
         ? m_info.flags | RigidBodyFlags::ContinuousDetection
         : m_info.flags & ~RigidBodyFlags::ContinuousDetection;
@@ -124,12 +114,12 @@ auto RigidBody::GetLinearVelocity() const -> Vector3
 
 void RigidBody::SetLinearVelocity(const Vector3& velocity)
 {
-    m_ctx->interface.SetLinearVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
+    s_ctx->interface.SetLinearVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
 }
 
 void RigidBody::AddLinearVelocity(const Vector3& velocity)
 {
-    m_ctx->interface.AddLinearVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
+    s_ctx->interface.AddLinearVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
 }
 
 auto RigidBody::GetAngularVelocity() const -> Vector3
@@ -139,47 +129,67 @@ auto RigidBody::GetAngularVelocity() const -> Vector3
 
 void RigidBody::SetAngularVelocity(const Vector3& velocity)
 {
-    m_ctx->interface.SetAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
+    s_ctx->interface.SetAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(velocity));
 }
 
 void RigidBody::SetVelocities(const Vector3& linearVelocity, const Vector3& angularVelocity)
 {
-    m_ctx->interface.SetLinearAndAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(linearVelocity), ToJoltVec3(angularVelocity));
+    s_ctx->interface.SetLinearAndAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(linearVelocity), ToJoltVec3(angularVelocity));
 }
 
 void RigidBody::AddVelocities(const Vector3& linearVelocity, const Vector3& angularVelocity)
 {
-    m_ctx->interface.AddLinearAndAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(linearVelocity), ToJoltVec3(angularVelocity));
+    s_ctx->interface.AddLinearAndAngularVelocity(ToBody(m_handle)->GetID(), ToJoltVec3(linearVelocity), ToJoltVec3(angularVelocity));
 }
 
 void RigidBody::AddForce(const Vector3& force)
 {
-    m_ctx->interface.AddForce(ToBody(m_handle)->GetID(), ToJoltVec3(force));
+    s_ctx->interface.AddForce(ToBody(m_handle)->GetID(), ToJoltVec3(force));
 }
 
 void RigidBody::AddForceAt(const Vector3& force, const Vector3& point)
 {
-    m_ctx->interface.AddForce(ToBody(m_handle)->GetID(), ToJoltVec3(force), ToJoltVec3(point));
+    s_ctx->interface.AddForce(ToBody(m_handle)->GetID(), ToJoltVec3(force), ToJoltVec3(point));
 }
 
 void RigidBody::AddTorque(const Vector3& torque)
 {
-    m_ctx->interface.AddTorque(ToBody(m_handle)->GetID(), ToJoltVec3(torque));
+    s_ctx->interface.AddTorque(ToBody(m_handle)->GetID(), ToJoltVec3(torque));
 }
 
 void RigidBody::AddImpulse(const Vector3& impulse)
 {
-    m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
+    s_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
 }
 
 void RigidBody::AddImpulseAt(const Vector3& impulse, const Vector3& point)
 {
-    m_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse), ToJoltVec3(point));
+    s_ctx->interface.AddImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse), ToJoltVec3(point));
 }
 
 void RigidBody::AddAngularImpulse(const Vector3& impulse)
 {
-    m_ctx->interface.AddAngularImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
+    s_ctx->interface.AddAngularImpulse(ToBody(m_handle)->GetID(), ToJoltVec3(impulse));
+}
+
+auto RigidBody::AddConstraint(const ConstraintInfo& createInfo, const RigidBody& other) -> Constraint&
+{
+    return s_ctx->constraintManager.AddConstraint(createInfo, m_self, *ToBody(m_handle), other.m_self, *ToBody(other.m_handle));
+}
+
+auto RigidBody::AddConstraint(const ConstraintInfo& createInfo) -> Constraint&
+{
+    return s_ctx->constraintManager.AddConstraint(createInfo, m_self, *ToBody(m_handle));
+}
+
+void RigidBody::RemoveConstraint(ConstraintId constraintId)
+{
+    s_ctx->constraintManager.RemoveConstraint(constraintId);
+}
+
+auto RigidBody::GetConstraints() -> std::span<Constraint>
+{
+    return s_ctx->constraintManager.GetConstraints(m_self);
 }
 
 void RigidBody::SetSimulatedBodyPosition(Transform& transform,
@@ -187,7 +197,7 @@ void RigidBody::SetSimulatedBodyPosition(Transform& transform,
                                          bool wake)
 {
     transform.SetPosition(position);
-    m_ctx->interface.SetPosition(ToBody(m_handle)->GetID(), ToJoltVec3(position), ToActivationMode(wake));
+    s_ctx->interface.SetPosition(ToBody(m_handle)->GetID(), ToJoltVec3(position), ToActivationMode(wake));
 }
 
 void RigidBody::SetSimulatedBodyRotation(Transform& transform,
@@ -195,7 +205,7 @@ void RigidBody::SetSimulatedBodyRotation(Transform& transform,
                                          bool wake)
 {
     transform.SetRotation(rotation);
-    m_ctx->interface.SetRotation(ToBody(m_handle)->GetID(), ToJoltQuaternion(rotation), ToActivationMode(wake));
+    s_ctx->interface.SetRotation(ToBody(m_handle)->GetID(), ToJoltQuaternion(rotation), ToActivationMode(wake));
 }
 
 auto RigidBody::SetSimulatedBodyScale(Transform& transform,
@@ -206,17 +216,11 @@ auto RigidBody::SetSimulatedBodyScale(Transform& transform,
     if (ScalesWithTransform())
     {
         appliedScale = NormalizeScaleForShape(m_shape.GetType(), transform.Scale(), scale);
-        const auto newShape = m_ctx->shapeFactory.MakeShape(m_shape, ToJoltVec3(appliedScale));
-        m_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
+        const auto newShape = s_ctx->shapeFactory.MakeShape(m_shape, ToJoltVec3(appliedScale));
+        s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
     }
 
     transform.SetScale(appliedScale);
     return appliedScale;
-}
-
-void RigidBody::SetContext(BodyHandle handle, ComponentContext* ctx)
-{
-    m_handle = handle;
-    m_ctx = ctx;
 }
 } // namespace nc::physics

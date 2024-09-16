@@ -6,14 +6,13 @@
 
 #include "ncengine/ecs/Component.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/Shape.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
 namespace nc::physics
 {
 struct ComponentContext;
-class NcPhysicsImpl2;
-class RigidBody;
 
 /** @brief Handle to internal RigidBody state. */
 using BodyHandle = void*;
@@ -84,7 +83,6 @@ class RigidBody
         RigidBody(RigidBody&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
               m_handle{std::exchange(other.m_handle, nullptr)},
-              m_ctx{std::exchange(other.m_ctx, nullptr)},
               m_shape{other.m_shape},
               m_info{other.m_info}
         {
@@ -92,15 +90,16 @@ class RigidBody
 
         RigidBody& operator=(RigidBody&& other) noexcept
         {
-            m_self = std::exchange(other.m_self, Entity::Null());
-            m_handle = std::exchange(other.m_handle, nullptr);
-            m_ctx = std::exchange(other.m_ctx, nullptr);
-            m_shape = other.m_shape;
-            m_info = other.m_info;
+            if (this != &other)
+            {
+                m_self = std::exchange(other.m_self, Entity::Null());
+                m_handle = std::exchange(other.m_handle, nullptr);
+                m_shape = other.m_shape;
+                m_info = other.m_info;
+            }
+
             return *this;
         }
-
-        ~RigidBody() noexcept;
 
         RigidBody(RigidBody&) = delete;
         RigidBody& operator=(RigidBody&) = delete;
@@ -162,6 +161,19 @@ class RigidBody
         void AddImpulseAt(const Vector3& impulse, const Vector3& point);
         void AddAngularImpulse(const Vector3& impulse);
 
+        /** @name Constraint Functions */
+        /** @brief Add a Constraint between the RigidBody and another. */
+        auto AddConstraint(const ConstraintInfo& createInfo, const RigidBody& otherBody) -> Constraint&;
+
+        /** @brief Add a Constraint between the RigidBody and the world. */
+        auto AddConstraint(const ConstraintInfo& createInfo) -> Constraint&;
+
+        /** @brief Remove a constraint from the RigidBody. */
+        void RemoveConstraint(ConstraintId constraintId);
+
+        /** @brief View all of the constraints attached to the RigidBody. */
+        auto GetConstraints() -> std::span<Constraint>;
+
         /**
          * @name Simulated Body Functions
          * @note Prefer using simulated body functions over the Transform equivalents for \ref Entity "entities" with a RigidBody.
@@ -189,18 +201,17 @@ class RigidBody
         /** @cond internal */
         auto IsInitialized() const noexcept -> bool { return m_handle; }
         auto GetHandle() const -> BodyHandle { return m_handle; }
+        void SetHandle(BodyHandle handle) { m_handle = handle; }
+        static void SetContext(ComponentContext* ctx) { s_ctx = ctx; }
         /** @endcond */
 
     private:
-        friend class NcPhysicsImpl2;
+        inline static ComponentContext* s_ctx = nullptr;
 
         Entity m_self;
         BodyHandle m_handle = nullptr;
-        ComponentContext* m_ctx = nullptr;
         Shape m_shape;
         RigidBodyInfo m_info;
-
-        void SetContext(BodyHandle handle, ComponentContext* ctx);
 };
 } // namespace nc::physics
 
@@ -211,6 +222,6 @@ struct StoragePolicy<physics::RigidBody> : DefaultStoragePolicy
 {
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnCommitCallbacks = false;
-    static constexpr bool EnableOnRemoveCallbacks = false;
+    static constexpr bool EnableOnRemoveCallbacks = true;
 };
 } // namespace nc

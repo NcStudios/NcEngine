@@ -80,10 +80,4 @@ struct PositionConstraint
     float depth;
     CollisionEventType eventType;
 };
-
-struct Constraints
-{
-    std::vector<ContactConstraint> contact;
-    std::vector<PositionConstraint> position;
-};
 } // namespace nc::physics
