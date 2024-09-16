@@ -54,8 +54,8 @@ class Connection
 /** @brief Priority values for controlling call order from a Signal. */
 struct SignalPriority
 {
-    static constexpr size_t Highest = 0ull;
-    static constexpr size_t Lowest = std::numeric_limits<size_t>::max();
+    static constexpr size_t Lowest = 0ull;
+    static constexpr size_t Highest = std::numeric_limits<size_t>::max();
 };
 
 /** @brief An event source supporting multiple Connections. */

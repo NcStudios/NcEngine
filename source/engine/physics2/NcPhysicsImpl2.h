@@ -1,6 +1,9 @@
 #pragma once
 
 #include "jolt/JoltApi.h"
+#include "jolt/BodyManager.h"
+#include "jolt/ConstraintManager.h"
+#include "jolt/ShapeFactory.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -31,6 +34,7 @@ class NcPhysicsImpl2 final : public NcPhysics
 
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
+        void OnBeforeSceneLoad() override;
         void Clear() noexcept override;
 
         void AddJoint(Entity , Entity, const Vector3&, const Vector3&, float = 0.2f, float = 0.0f) override {}
@@ -43,7 +47,9 @@ class NcPhysicsImpl2 final : public NcPhysics
     private:
         ecs::Ecs m_ecs;
         JoltApi m_jolt;
-        Connection<RigidBody&> m_onAddRigidBodyConnection;
+        ShapeFactory m_shapeFactory;
+        ConstraintManager m_constraintManager;
+        BodyManager m_bodyManager;
 
         void OnAddRigidBody(RigidBody& body);
         void SyncTransforms();

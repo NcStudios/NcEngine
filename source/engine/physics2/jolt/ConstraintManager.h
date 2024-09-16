@@ -45,7 +45,7 @@ class ConstraintManager
         explicit ConstraintManager(JPH::PhysicsSystem& physicsSystem, uint32_t maxEntities)
             : m_physicsSystem{&physicsSystem},
               m_factory{physicsSystem},
-              m_entityState{ConstraintMapSizeHint, maxEntities}
+              m_entityState{std::min(ConstraintMapSizeHint, maxEntities), maxEntities}
         {
             Constraint::s_manager = this;
         }

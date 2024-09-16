@@ -23,4 +23,5 @@ auto CreatePhysicsBody(Entity entity, const std::any& userData) -> physics::Phys
 auto CreatePhysicsMaterial(Entity entity, const std::any&) -> physics::PhysicsMaterial;
 auto CreatePositionClamp(Entity entity, const std::any&) -> physics::PositionClamp;
 auto CreateVelocityRestriction(Entity entity, const std::any&) -> physics::VelocityRestriction;
+auto CreateRigidBody(Entity entity, const std::any&) -> physics::RigidBody;
 } // namespace nc

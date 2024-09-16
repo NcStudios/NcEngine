@@ -78,6 +78,5 @@ JoltApi::JoltApi(const config::MemorySettings& memorySettings,
 
     physicsSystem.SetPhysicsSettings(ToJoltSettings(physicsSettings));
     physicsSystem.SetContactListener(&contactListener);
-    ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterfaceNoLock(), shapeFactory);
 }
 } // namespace nc::physics

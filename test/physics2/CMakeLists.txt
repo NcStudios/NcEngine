@@ -53,7 +53,9 @@ add_executable(RigidBody_unit_tests
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
     ${NC_SOURCE_DIR}/physics2/Shape.cpp
-    ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/BodyFactory.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ConstraintFactory.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ConstraintManager.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
 )
 

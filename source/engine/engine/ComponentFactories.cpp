@@ -14,6 +14,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/RigidBody.h"
 
 namespace nc
 {
@@ -107,5 +108,10 @@ auto CreatePositionClamp(Entity, const std::any&) -> physics::PositionClamp
 auto CreateVelocityRestriction(Entity, const std::any&) -> physics::VelocityRestriction
 {
     return physics::VelocityRestriction{};
+}
+
+auto CreateRigidBody(Entity entity, const std::any&) -> physics::RigidBody
+{
+    return physics::RigidBody{entity};
 }
 } // namespace nc

@@ -1,5 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        BodyFactory.cpp
+        BodyManager.cpp
         ContactListener.cpp
         ConstraintFactory.cpp
         ConstraintManager.cpp
