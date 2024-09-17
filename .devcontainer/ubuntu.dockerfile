@@ -13,7 +13,8 @@ RUN apt update && apt -y install \
     libglx-dev \
     libglu1-mesa-dev \
     freeglut3-dev \
-    mesa-common-dev
+    mesa-common-dev \
+    gawk
 
 ENV CC=/usr/bin/gcc-14 \
     CXX=/usr/bin/g++-14
