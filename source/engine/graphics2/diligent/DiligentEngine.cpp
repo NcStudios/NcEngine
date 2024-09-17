@@ -1,23 +1,22 @@
 #include "DiligentEngine.h"
+#include "ncengine/window/Window.h"
+#include "ncutility/NcError.h"
+#include "ncengine/utility/Log.h"
 
 #if PLATFORM_WIN32
-    #define GLFW_EXPOSE_NATIVE_WIN32
+    #define GLFW_EXPOSE_NATIVE_WIN32 1
 #elif PLATFORM_LINUX
-    #define GLFW_EXPOSE_NATIVE_X11
-    #include <GL/glx.h>
+    #define GLFW_EXPOSE_NATIVE_X11 1
 #endif
 
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
-#include <GL/gl.h>
 
 // Diligent
 #include "EngineFactoryD3D11.h"
 #include "EngineFactoryD3D12.h"
 #include "EngineFactoryOpenGL.h"
 #include "EngineFactoryVk.h"
-#include "DeviceContext.h"
-#include "SwapChain.h"
 #include "MapHelper.hpp"
 #include "GraphicsUtilities.h"
 #include "TextureUtilities.h"
@@ -126,15 +125,23 @@ auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Dilig
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& window)
+DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& window_)
 {
     using namespace Diligent;
 
-    /* Initialize Diligent Engine */
+    /* Initialize cross-platform window */
+    #if PLATFORM_WIN32
+        auto window = Win32NativeWindow{glfwGetWin32Window(window_.GetWindowHandle())};
+    #elif PLATFORM_LINUX
+        LinuxNativeWindow window;
+        window.WindowId = glfwGetX11Window(window_.GetWindowHandle());
+        window.pDisplay = glfwGetX11Display();
+    #endif
+
     SwapChainDesc SCDesc;
+    auto supportedDeviceTypeByPlatform = GetSupportedRenderDeviceTypeByPlatform(targetApi);
 
-    auto supportedDeviceTypeByPlatform = GetSupportedRenderDeviceTypeByPlatform(graphicsSettings.targetApi);
-
+    /* Initialize cross-api engine */
     switch (supportedDeviceTypeByPlatform)
     {
         case RENDER_DEVICE_TYPE_D3D12:
@@ -143,9 +150,7 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
             EngineD3D12CreateInfo engineCI;
             auto* pFactoryD3D12 = GetEngineFactoryD3D12();
             pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
-            auto win32Handle = glfwGetWin32Window(window.GetWindowHandle());
-            Win32NativeWindow win32Window{win32Handle};
-            pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, win32Window, &m_pSwapChain);
+            pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
             break;
         }
         case RENDER_DEVICE_TYPE_VULKAN:
@@ -154,12 +159,7 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
             EngineVkCreateInfo engineCI;
             auto* pFactoryVk = GetEngineFactoryVk();
             pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
-            auto win32Handle = glfwGetWin32Window(window.GetWindowHandle());
-            if (!m_pSwapChain && win32Handle != nullptr)
-            {
-                Win32NativeWindow win32Window{win32Handle};
-                pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, win32Window, &m_pSwapChain);
-            }
+            pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
             break;
         }
         case RENDER_DEVICE_TYPE_D3D11:
@@ -168,19 +168,16 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
             EngineD3D11CreateInfo engineCI;
             auto* pFactoryD3D11 = GetEngineFactoryD3D11();
             pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
-            auto win32Handle = glfwGetWin32Window(window.GetWindowHandle());
-            Win32NativeWindow win32Window{win32Handle};
-            pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, win32Window, &m_pSwapChain);
+            pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
             break;
         }
         case RENDER_DEVICE_TYPE_GL:
         {
             auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
             auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
+            glfwMakeContextCurrent(window_.GetWindowHandle());
             EngineGLCreateInfo engineCI;
-            auto win32Handle = glfwGetWin32Window(window.GetWindowHandle());
-            Win32NativeWindow win32Window{win32Handle};
-            engineCI.Window.hWnd = win32Handle;
+            engineCI.Window = window;
             pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
             break;
         }
