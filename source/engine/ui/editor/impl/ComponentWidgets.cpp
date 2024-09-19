@@ -217,32 +217,30 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     }
 }
 
-auto ConstraintSpaceCombo(nc::physics::ConstraintSpace& space) -> bool
-{
-    auto spaceStr = std::string{nc::physics::ToString(space)};
-    if (nc::ui::Combobox(spaceStr, "space", nc::physics::GetConstraintSpaceNames()))
-    {
-        space = nc::physics::ToConstraintSpace(spaceStr);
-        return true;
-    }
-
-    return false;
-}
-
 void UpdateConstraintType(nc::physics::Constraint& constraint, nc::physics::ConstraintType type)
 {
+    using namespace nc::physics;
+
     switch (type)
     {
-        case nc::physics::ConstraintType::FixedConstraint:
-        {
-            constraint.GetInfo() = nc::physics::FixedConstraintInfo{};
+        case ConstraintType::FixedConstraint:
+            constraint.GetInfo() = FixedConstraintInfo{};
             break;
-        }
-        case nc::physics::ConstraintType::PointConstraint:
-        {
-            constraint.GetInfo() = nc::physics::PointConstraintInfo{};
+        case ConstraintType::PointConstraint:
+            constraint.GetInfo() = PointConstraintInfo{};
             break;
-        }
+        case ConstraintType::DistanceConstraint:
+            constraint.GetInfo() = DistanceConstraintInfo{};
+            break;
+        case ConstraintType::HingeConstraint:
+            constraint.GetInfo() = HingeConstraintInfo{};
+            break;
+        case ConstraintType::SliderConstraint:
+            constraint.GetInfo() = SliderConstraintInfo{};
+            break;
+        case ConstraintType::SwingTwistConstraint:
+            constraint.GetInfo() = SwingTwistConstraintInfo{};
+            break;
     }
 
     constraint.NotifyUpdateInfo();
@@ -287,35 +285,102 @@ void ConstraintTargetWidget(nc::physics::Constraint& constraint, nc::Entity self
     });
 }
 
+auto SpringSettingsWidget(nc::physics::SpringSettings& settings) -> bool
+{
+    auto dirty = nc::ui::DragFloat(settings.frequency, "springFrequency", 0.1f, 0.0f, 30.0f);
+    dirty = nc::ui::DragFloat(settings.damping, "springDamping", 0.05f, 0.0f, 5.0f) || dirty;
+    return dirty;
+}
+
 struct ConstraintVisitor
 {
+    static constexpr auto Pi = std::numbers::pi_v<float>;
+    static constexpr auto HalfPi = Pi * 0.5f;
+
     auto operator()(nc::physics::FixedConstraintInfo& constraint) -> bool
     {
-        auto dirty = nc::ui::InputPosition(constraint.point1, "point1");
-        dirty = nc::ui::InputAngles(constraint.axisX1, "axisX1") || dirty;
-        dirty = nc::ui::InputAngles(constraint.axisY1, "axisY1") || dirty;
-        dirty = nc::ui::InputPosition(constraint.point2, "point2") || dirty;
-        dirty = nc::ui::InputAngles(constraint.axisX2, "axisX2") || dirty;
-        dirty = nc::ui::InputAngles(constraint.axisY2, "axisY2") || dirty;
-        dirty = ConstraintSpaceCombo(constraint.space) || dirty;
+        auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = nc::ui::InputAxis(constraint.ownerRight, "ownerRight") || dirty;
+        dirty = nc::ui::InputAxis(constraint.ownerUp, "ownerUp") || dirty;
+        dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
+        dirty = nc::ui::InputAxis(constraint.targetRight, "targetRight") || dirty;
+        dirty = nc::ui::InputAxis(constraint.targetUp, "targetUp") || dirty;
         return dirty;
     }
 
     auto operator()(nc::physics::PointConstraintInfo& constraint) -> bool
     {
-        auto dirty = nc::ui::InputPosition(constraint.point1, "point1");
-        dirty = nc::ui::InputPosition(constraint.point2, "point2") || dirty;
-        dirty = ConstraintSpaceCombo(constraint.space) || dirty;
+        auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
+        return dirty;
+    }
+
+    auto operator()(nc::physics::DistanceConstraintInfo& constraint) -> bool
+    {
+        auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
+        dirty = nc::ui::DragFloat(constraint.minLimit, "minLimit", 0.1f, 0.0f, constraint.maxLimit) || dirty;
+        dirty = nc::ui::DragFloat(constraint.maxLimit, "maxLimit", 0.1f, constraint.minLimit, 1000.0f) || dirty;
+        dirty = SpringSettingsWidget(constraint.springSettings) || dirty;
+        return dirty;
+    }
+
+    auto operator()(nc::physics::HingeConstraintInfo& constraint) -> bool
+    {
+        auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
+        dirty = nc::ui::InputAxis(constraint.hingeAxis, "hingeAxis") || dirty;
+
+        constexpr auto minAngle = 0.001f;
+        const auto minLimitUpperBound = constraint.maxLimit == 0.0f ? -minAngle : 0.0f;
+        dirty = nc::ui::DragFloat(constraint.minLimit, "minLimit", 0.05f, -Pi, minLimitUpperBound) || dirty;
+
+        const auto maxLimitLowerBound = constraint.minLimit == 0.0f ? minAngle : 0.0f;
+        dirty = nc::ui::DragFloat(constraint.maxLimit, "maxLimit", 0.05f, maxLimitLowerBound, Pi) || dirty;
+
+        dirty = nc::ui::DragFloat(constraint.maxFrictionTorque, "maxTorqueFriction", 1.0f, 0.0f, 1000.0f) || dirty;
+        dirty = SpringSettingsWidget(constraint.springSettings) || dirty;
+        return dirty;
+    }
+
+    auto operator()(nc::physics::SliderConstraintInfo& constraint) -> bool
+    {
+        auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
+        dirty = nc::ui::InputAxis(constraint.sliderAxis, "sliderAxis") || dirty;
+
+        constexpr auto minLength = 0.001f;
+        const auto minLimitUpperBound = constraint.maxLimit == 0.0f ? -minLength : 0.0f;
+        dirty = nc::ui::DragFloat(constraint.minLimit, "minLimit", 0.1f, -1000.0f, minLimitUpperBound) || dirty;
+
+        const auto maxLimitLowerBound = constraint.minLimit == 0.0f ? minLength : 0.0f;
+        dirty = nc::ui::DragFloat(constraint.maxLimit, "maxLimit", 0.1f, maxLimitLowerBound, 1000.0f) || dirty;
+
+        dirty = nc::ui::DragFloat(constraint.maxFrictionForce, "maxFrictionForce", 1.0f, 0.0f, 1000.0f) || dirty;
+        dirty = SpringSettingsWidget(constraint.springSettings) || dirty;
+        return dirty;
+    }
+
+    auto operator()(nc::physics::SwingTwistConstraintInfo& constraint) -> bool
+    {
+        auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = nc::ui::InputAxis(constraint.ownerTwistAxis, "ownerTwistAxis") || dirty;
+        dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
+        dirty = nc::ui::InputAxis(constraint.targetTwistAxis, "targetTwistAxis") || dirty;
+        dirty = nc::ui::DragFloat(constraint.swingLimit, "swingLimit", 0.05f, 0.0f, Pi) || dirty;
+        dirty = nc::ui::DragFloat(constraint.twistLimit, "twistLimit", 0.05f, 0.0f, Pi) || dirty;
+        dirty = nc::ui::DragFloat(constraint.maxFrictionTorque, "maxTorqueFriction", 0.1f, 0.0f, 1000.0f) || dirty;
         return dirty;
     }
 };
 
 void ConstraintWidget(nc::physics::Constraint& constraint, nc::physics::RigidBody& body, nc::ecs::Ecs world)
 {
-    IMGUI_SCOPE(nc::ui::ImGuiId, static_cast<int>(constraint.GetId()));
+    const auto id = constraint.GetId();
+    IMGUI_SCOPE(nc::ui::ImGuiId, static_cast<int>(id));
     const auto type = constraint.GetType();
     auto constraintTypeStr = std::string{nc::physics::ToString(type)};
-    const auto name = fmt::format("{} ({})", constraintTypeStr, constraint.GetId());
+    const auto name = fmt::format("{} ({})###{}", constraintTypeStr, id, id);
     const auto isConstraintOpen = ImGui::TreeNodeEx(
         name.c_str(),
         ImGuiTreeNodeFlags_FramePadding |

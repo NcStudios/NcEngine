@@ -65,48 +65,117 @@ struct OrientationClamp
 enum class ConstraintType : uint8_t
 {
     FixedConstraint,
-    PointConstraint
+    PointConstraint,
+    DistanceConstraint,
+    HingeConstraint,
+    SliderConstraint,
+    SwingTwistConstraint
 };
 
-/** @brief The relative space of a constraint. */
-enum class ConstraintSpace : uint8_t
+/** @brief Settings for softening constraints with a spring-damper. */
+struct SpringSettings
 {
-    World,
-    Local
+    /** @brief Spring frequency value hints */
+    struct Frequency
+    {
+        static constexpr auto Disabled = 0.0f; /// disable the spring
+        static constexpr auto Soft = 2.0f;     /// typical soft spring
+        static constexpr auto Stiff = 20.0f;   /// typical stiff spring
+        static constexpr auto Max = 30.0f;     /// frequency should not exceed half simulation frequency (assumes 60 fps here)
+    };
+
+    /** @brief Spring damping value hints */
+    struct Damping
+    {
+        static constexpr auto Undamped = 0.0f;    /// minimal energy loss, maximum oscillation (not completely lossless for stability)
+        static constexpr auto Underdamped = 0.5f; /// some energy loss, moderate oscillation (underdamping applies when 0 < d < 1)
+        static constexpr auto Critical = 1.0f;    /// full energy loss, no oscillation
+        static constexpr auto Overdamped = 2.0f;  /// energy loss occurs even outside of oscillation (overdamping applies when d > 1)
+    };
+
+    float frequency = Frequency::Disabled; // oscillation rate in hertz [0, targetFPS / 2]
+    float damping = Damping::Undamped;     // oscillation decay [0, 1] (typical max is 1, but larger values are allowed)
 };
 
-/** @brief Initialization information for a constraint that attaches two bodies with no degrees of freedom. */
+/** @brief Constraint settings to attach two bodies with no degrees of freedom. */
 struct FixedConstraintInfo
 {
-    Vector3 point1 = Vector3::Zero();               /// first body reference position
-    Vector3 axisX1 = Vector3::Right();              /// first body reference right axis
-    Vector3 axisY1 = Vector3::Up();                 /// first body reference up axis
-    Vector3 point2 = Vector3::Zero();               /// second body reference frame
-    Vector3 axisX2 = Vector3::Right();              /// second body reference right axis
-    Vector3 axisY2 = Vector3::Up();                 /// second body reference up axis
-    bool detectFromPositions = false;               /// auto calculate settings from body positions (requires ConstraintSpace::World)
-    ConstraintSpace space = ConstraintSpace::World; /// space other settings are relative to
+    Vector3 ownerPosition = Vector3::Zero();  /// local attach position on owning body
+    Vector3 ownerRight = Vector3::Right();    /// local right axis on owning body
+    Vector3 ownerUp = Vector3::Up();          /// local up axis on owning body
+    Vector3 targetPosition = Vector3::Zero(); /// local attach position on targeted body
+    Vector3 targetRight = Vector3::Right();   /// local right axis on targeted body
+    Vector3 targetUp = Vector3::Up();         /// local up axis on targeted body
 };
 
-/** @brief Initialization information for a constraint that attaches two bodies at a point. */
+/** @brief Constraint settings to attach two bodies at a point. */
 struct PointConstraintInfo
 {
-    Vector3 point1 = Vector3::Zero();               /// first body constraint position
-    Vector3 point2 = Vector3::Zero();               /// second body constraint position
-    ConstraintSpace space = ConstraintSpace::World; /// space other settings are relative to
+    Vector3 ownerPosition = Vector3::Zero();  /// local attach position on owning body
+    Vector3 targetPosition = Vector3::Zero(); /// local attach position on targeted body
+};
+
+/** @brief Constraint settings to keep two bodies within a specified distance range. */
+struct DistanceConstraintInfo
+{
+    Vector3 ownerPosition = Vector3::Zero();          /// local attach position on owning body
+    Vector3 targetPosition = Vector3::Zero();         /// local attach position on targeted body
+    float minLimit = 0.0f;                            /// how close together bodies are allowed to be [0, maxDistance]
+    float maxLimit = 1.0f;                            /// how far apart bodies are allowed to be [minDistance, infinity]
+    SpringSettings springSettings = SpringSettings{}; /// settings to soften the limits
+};
+
+/** @brief Constraint settings to attach two bodies with and limit motion to a single axis of rotation. */
+struct HingeConstraintInfo
+{
+    Vector3 ownerPosition = Vector3::Zero();          /// local attach position on owning body
+    Vector3 targetPosition = Vector3::Zero();         /// local attach position on targeted body
+    Vector3 hingeAxis = Vector3::Up();                /// worldspace axis of rotation
+    float minLimit = -std::numbers::pi_v<float>;      /// min rotation about hinge axis [-pi, 0]
+    float maxLimit = std::numbers::pi_v<float>;       /// max rotation about hinge axis [0, pi]
+    float maxFrictionTorque = 0.0f;                   /// max torque to apply as friction (Nm) [0, inf]
+    SpringSettings springSettings = SpringSettings{}; /// settings to soften the limits
+};
+
+/** @brief Constraint settings to attach two bodies and limit motion to a single axis of translation. */
+struct SliderConstraintInfo
+{
+    Vector3 ownerPosition = Vector3::Zero();          /// local attach position on owning body
+    Vector3 targetPosition = Vector3::Zero();         /// local attach position on targeted body
+    Vector3 sliderAxis = Vector3::Right();            /// worldspace axis of translation
+    float minLimit = -1.0f;                           /// slider length in negative direction [-inf, 0] ( |minLimit| + maxLimit > 0 )
+    float maxLimit = 1.0f;                            /// slider length in positive direction [0, inf]
+    float maxFrictionForce = 0.0f;                    /// max friction force that can be applied (N) [0, inf]
+    SpringSettings springSettings = SpringSettings{}; /// settings to soften the limits
+};
+
+/** @brief Constraint settings to attach two bodies at a point and limit motion to twist around an axis and swing within a cone. */
+struct SwingTwistConstraintInfo
+{
+    Vector3 ownerPosition = Vector3::Zero();      /// local attach position on owning body
+    Vector3 ownerTwistAxis = Vector3::Right();    /// local twist axis of owning body (cone axis)
+    Vector3 targetPosition = Vector3::Zero();     /// local attach position on targeted body
+    Vector3 targetTwistAxis = Vector3::Right();   /// local twist axis of targeted body (cone axis)
+    float swingLimit = std::numbers::pi_v<float>; /// rotation limit from twist axis (cone angle) [0, pi]
+    float twistLimit = std::numbers::pi_v<float>; /// rotation limit about twist axis [0, pi]
+    float maxFrictionTorque = 0.0f;               /// max torque to apply as friction (Nm) [0, inf]
 };
 
 /**
  * @brief Generalized constraint initialization information.
  * @internal Keep ordered with ConstraintType.
  */
-using ConstraintInfo = std::variant<FixedConstraintInfo, PointConstraintInfo>;
+using ConstraintInfo = std::variant<FixedConstraintInfo,
+                                    PointConstraintInfo,
+                                    DistanceConstraintInfo,
+                                    HingeConstraintInfo,
+                                    SliderConstraintInfo,
+                                    SwingTwistConstraintInfo>;
 
 /** @brief Unique value identifying internal Constraint state. */
 using ConstraintId = uint32_t;
 
-/**
- * @brief A physics constraint attaching the owning RigidBody to another. */
+/** @brief A physics constraint attaching the owning RigidBody to another. */
 class Constraint
 {
     public:

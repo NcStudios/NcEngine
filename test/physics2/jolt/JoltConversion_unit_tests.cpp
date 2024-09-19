@@ -63,8 +63,15 @@ TEST(JoltConversionTest, ToMotionType_convertsBodyType)
     EXPECT_EQ(JPH::EMotionType::Kinematic, ToMotionType(nc::physics::BodyType::Kinematic));
 }
 
-TEST(JoltConversionTest, ToConstraintSpace_convertsSpace)
+TEST(JoltConversionTest, ToSpringSettings_convertsSettings)
 {
-    EXPECT_EQ(JPH::EConstraintSpace::WorldSpace, ToConstraintSpace(nc::physics::ConstraintSpace::World));
-    EXPECT_EQ(JPH::EConstraintSpace::LocalToBodyCOM, ToConstraintSpace(nc::physics::ConstraintSpace::Local));
+    const auto expected = nc::physics::SpringSettings{
+        .frequency = 10.0f,
+        .damping = 1.0f
+    };
+
+    const auto actual = ToSpringSettings(expected);
+    EXPECT_EQ(JPH::ESpringMode::FrequencyAndDamping, actual.mMode);
+    EXPECT_FLOAT_EQ(expected.frequency, actual.mFrequency);
+    EXPECT_FLOAT_EQ(expected.damping, actual.mDamping);
 }

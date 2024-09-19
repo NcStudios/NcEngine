@@ -22,12 +22,11 @@ constexpr auto g_shapeTypeNames = std::array{
 
 constexpr auto g_constraintTypeNames = std::array{
     "FixedConstraint"sv,
-    "PointConstraint"sv
-};
-
-constexpr auto g_constraintSpaceNames = std::array{
-    "World"sv,
-    "Local"sv
+    "PointConstraint"sv,
+    "DistanceConstraint"sv,
+    "HingeConstraint"sv,
+    "SliderConstraint"sv,
+    "SwingTwistConstraint"sv
 };
 } // anonymous namespace
 
@@ -97,27 +96,5 @@ auto ToConstraintType(std::string_view constraintType) -> ConstraintType
 auto GetConstraintTypeNames() -> std::span<const std::string_view>
 {
     return g_constraintTypeNames;
-}
-
-auto ToString(ConstraintSpace space) -> std::string_view
-{
-    return g_constraintSpaceNames.at(static_cast<size_t>(space));
-}
-
-auto ToConstraintSpace(std::string_view constraintSpace) -> ConstraintSpace
-{
-    const auto pos = std::ranges::find(g_constraintSpaceNames, constraintSpace);
-    if (pos != g_constraintSpaceNames.cend())
-    {
-        const auto index = std::distance(g_constraintSpaceNames.cbegin(), pos);
-        return static_cast<ConstraintSpace>(index);
-    }
-
-    throw NcError{fmt::format("Unknown ConstraintSpace '{}'", constraintSpace)};
-}
-
-auto GetConstraintSpaceNames() -> std::span<const std::string_view>
-{
-    return g_constraintSpaceNames;
 }
 } // namespace nc::physics

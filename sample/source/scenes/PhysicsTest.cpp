@@ -13,7 +13,6 @@
 #include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/PhysicsMaterial.h"
-#include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace nc::sample
@@ -120,71 +119,6 @@ struct FollowCamera : public graphics::Camera
     }
 };
 
-#ifdef NC_USE_JOLT
-class VehicleController : public FreeComponent
-{
-    static constexpr auto force = 250.0f;
-    static constexpr auto torqueForce = 250.0f;
-    static constexpr auto jumpForce = 5000.0f;
-    static constexpr auto jumpCooldownTime = 0.3f;
-
-    public:
-        VehicleController(Entity self, Entity node1, Entity node2, Entity node3)
-            : FreeComponent{self}, m_node1{node1}, m_node2{node2}, m_node3{node3}
-        {
-        }
-
-        void Run(Entity, Registry* registry, float dt)
-        {
-            auto world = registry->GetEcs();
-
-            if (m_jumpOnCooldown)
-            {
-                m_jumpCooldownRemaining -= dt;
-                if (m_jumpCooldownRemaining < 0.0f)
-                {
-                    m_jumpCooldownRemaining = jumpCooldownTime;
-                    m_jumpOnCooldown = false;
-                }
-            }
-
-            MoveController(world);
-        }
-
-    private:
-        Entity m_node1;
-        Entity m_node2;
-        Entity m_node3;
-        float m_jumpCooldownRemaining = 0.0f;
-        bool m_jumpOnCooldown = false;
-
-        void MoveController(ecs::Ecs world)
-        {
-            auto& rBody = world.Get<physics::RigidBody>(ParentEntity());
-
-            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * forceMultiplier);
-            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * forceMultiplier);
-
-            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
-            {
-                m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * forceMultiplier;
-                rBody.AddImpulse(dir);
-            }
-
-            if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
-            {
-                m_jumpOnCooldown = true;
-                const auto dir = Vector3::Up() * jumpForce * forceMultiplier;
-                rBody.AddImpulse(dir);
-            }
-        }
-};
-#else
 class VehicleController : public FreeComponent
 {
     static constexpr auto force = 1.7f;
@@ -337,7 +271,6 @@ class VehicleController : public FreeComponent
             }
         }
 };
-#endif
 
 auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
 {
@@ -388,48 +321,6 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<physics::PhysicsBody>(segment1, segment1Transform, segment1Collider, physics::PhysicsProperties{.mass = 3.0f});
     world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
     world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
-
-    auto& bodyHead = world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox(), physics::RigidBodyInfo{.friction = 0.8f});
-    auto& bodyNode1 = world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
-    auto& bodyNode2 = world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
-    auto& bodyNode3 = world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
-
-    bodyHead.AddConstraint(
-        physics::PointConstraintInfo{
-            .point1 = Vector3{0.0f, -0.1f, -0.6f},
-            .point2 = Vector3{0.0f, 0.0f, 0.5f},
-            .space = physics::ConstraintSpace::Local
-        },
-        bodyNode1
-    );
-
-    bodyNode1.AddConstraint(
-        physics::PointConstraintInfo{
-            .point1 = Vector3{0.0f, -0.1f, -0.5f},
-            .point2 = Vector3{0.0f, 0.0f, 0.4f},
-            .space = physics::ConstraintSpace::Local
-        },
-        bodyNode2
-    );
-
-    bodyNode2.AddConstraint(
-        physics::PointConstraintInfo{
-            .point1 = Vector3{0.0f, -0.1f, -0.4f},
-            .point2 = Vector3{0.0f, 0.0f, 0.3f},
-            .space = physics::ConstraintSpace::Local
-        },
-        bodyNode3
-    );
-
-    world.Emplace<physics::CollisionListener>(
-        head,
-        [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs){
-            GameLog::Log(fmt::format("Player collision enter with {}", other.Index()));
-        },
-        [](Entity, Entity other, ecs::Ecs){
-            GameLog::Log(fmt::format("Player collsion exit with {}", other.Index()));
-        }
-    );
 
     world.Emplace<physics::VelocityRestriction>(head);
     world.Emplace<physics::VelocityRestriction>(segment1);
@@ -497,12 +388,6 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<physics::Collider>(frontWall, physics::BoxProperties{});
     world.Emplace<physics::Collider>(leftWall, physics::BoxProperties{});
     world.Emplace<physics::Collider>(rightWall, physics::BoxProperties{});
-
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(backWall, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(frontWall, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(leftWall, physics::Shape::MakeBox());
-    world.Emplace<physics::RigidBody>(rightWall, physics::Shape::MakeBox());
 }
 
 void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
@@ -554,30 +439,6 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     auto& platform2Transform = world.Get<Transform>(platform2);
     world.Emplace<physics::PhysicsBody>(platform1, platform1Transform, platform1Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
     world.Emplace<physics::PhysicsBody>(platform2, platform2Transform, platform2Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
-
-    world.Emplace<physics::RigidBody>(
-        platform1,
-        nc::physics::Shape::MakeBox(),
-        nc::physics::RigidBodyInfo{
-            .type = physics::BodyType::Static
-        }
-    );
-
-    world.Emplace<physics::RigidBody>(
-        platform2,
-        nc::physics::Shape::MakeBox(),
-        nc::physics::RigidBodyInfo{
-            .type = physics::BodyType::Static
-        }
-    );
-
-    world.Emplace<physics::RigidBody>(
-        ramp1,
-        nc::physics::Shape::MakeBox(),
-        nc::physics::RigidBodyInfo{
-            .type = physics::BodyType::Static
-        }
-    );
 
     // Bridge
     const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
@@ -653,12 +514,6 @@ void BuildSteps(ecs::Ecs world)
         world.Emplace<physics::PhysicsBody>(step, transform, collider);
         world.Emplace<physics::PositionClamp>(step, position, 0.1f, 2.0f);
         world.Emplace<physics::VelocityRestriction>(step, Vector3::Up(), Vector3::Zero());
-
-        world.Emplace<physics::RigidBody>(step)
-            .AddConstraint(physics::PointConstraintInfo{
-                .point1 = position,
-                .point2 = position
-            });
     };
 
     buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f});
@@ -843,7 +698,6 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
             auto& collider = world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
             world.Emplace<physics::PhysicsBody>(handle, world.Get<Transform>(handle), collider, physics::PhysicsProperties{.mass = 5.0f});
-            world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox());
         }
     );
 
@@ -869,7 +723,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.GetPool<Transform>().Reserve(140);
     world.GetPool<graphics::ToonRenderer>().Reserve(140);
     world.GetPool<physics::PhysicsBody>().Reserve(140);
-    world.GetPool<physics::RigidBody>().Reserve(140);
     world.GetPool<physics::Collider>().Reserve(140);
 
     // Vehicle

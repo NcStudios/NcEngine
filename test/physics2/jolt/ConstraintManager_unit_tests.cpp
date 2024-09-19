@@ -22,9 +22,8 @@ constexpr auto g_entity3 = nc::Entity{21, 0, 0};
 TEST_F(ConstraintManagerTest, AddConstraint_twoBody_succeeds)
 {
     const auto expectedInfo = nc::physics::PointConstraintInfo{
-        .point1 = nc::Vector3{1.0f, 2.0f, 3.0f},
-        .point2 = nc::Vector3{4.0f, 5.0f, 6.0f},
-        .space = nc::physics::ConstraintSpace::World
+        .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
+        .targetPosition = nc::Vector3{4.0f, 5.0f, 6.0f}
     };
 
     auto body1 = CreateBody();
@@ -33,9 +32,8 @@ TEST_F(ConstraintManagerTest, AddConstraint_twoBody_succeeds)
 
     EXPECT_EQ(g_entity2, actualConstraint.GetConstraintTarget());
     auto& actualInfo = std::get<nc::physics::PointConstraintInfo>(actualConstraint.GetInfo());
-    EXPECT_EQ(expectedInfo.point1, actualInfo.point1);
-    EXPECT_EQ(expectedInfo.point2, actualInfo.point2);
-    EXPECT_EQ(expectedInfo.space, actualInfo.space);
+    EXPECT_EQ(expectedInfo.ownerPosition, actualInfo.ownerPosition);
+    EXPECT_EQ(expectedInfo.targetPosition, actualInfo.targetPosition);
 
     DestroyBody(body1);
     DestroyBody(body2);
@@ -44,9 +42,8 @@ TEST_F(ConstraintManagerTest, AddConstraint_twoBody_succeeds)
 TEST_F(ConstraintManagerTest, AddConstraint_oneBody_succeeds)
 {
     const auto expectedInfo = nc::physics::PointConstraintInfo{
-        .point1 = nc::Vector3{1.0f, 2.0f, 3.0f},
-        .point2 = nc::Vector3{4.0f, 5.0f, 6.0f},
-        .space = nc::physics::ConstraintSpace::World
+        .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
+        .targetPosition = nc::Vector3{4.0f, 5.0f, 6.0f}
     };
 
     auto body = CreateBody();
@@ -57,9 +54,8 @@ TEST_F(ConstraintManagerTest, AddConstraint_oneBody_succeeds)
 
     EXPECT_FALSE(actualConstraint.GetConstraintTarget().Valid());
     const auto& actualInfo = std::get<nc::physics::PointConstraintInfo>(actualConstraint.GetInfo());
-    EXPECT_EQ(expectedInfo.point1, actualInfo.point1);
-    EXPECT_EQ(expectedInfo.point2, actualInfo.point2);
-    EXPECT_EQ(expectedInfo.space, actualInfo.space);
+    EXPECT_EQ(expectedInfo.ownerPosition, actualInfo.ownerPosition);
+    EXPECT_EQ(expectedInfo.targetPosition, actualInfo.targetPosition);
 
     DestroyBody(body);
 }
@@ -128,8 +124,8 @@ TEST_F(ConstraintManagerTest, UpdateConstraint_sameType_updateSettings)
 {
     const auto initialInfo = nc::physics::PointConstraintInfo{};
     const auto expectedInfo = nc::physics::PointConstraintInfo{
-        .point1 = nc::Vector3{3.0f, 3.0f, 3.0f},
-        .point2 = nc::Vector3{4.0f, 4.0f, 4.0f}
+        .ownerPosition = nc::Vector3{3.0f, 3.0f, 3.0f},
+        .targetPosition = nc::Vector3{4.0f, 4.0f, 4.0f}
     };
 
     auto body1 = CreateBody();
@@ -142,8 +138,8 @@ TEST_F(ConstraintManagerTest, UpdateConstraint_sameType_updateSettings)
     ASSERT_EQ(JPH::EConstraintSubType::Point, handle->GetSubType());
     auto pointConstraintHandle = static_cast<JPH::PointConstraint*>(handle);
 
-    EXPECT_EQ(expectedInfo.point1, nc::physics::ToVector3(pointConstraintHandle->GetLocalSpacePoint1()));
-    EXPECT_EQ(expectedInfo.point2, nc::physics::ToVector3(pointConstraintHandle->GetLocalSpacePoint2()));
+    EXPECT_EQ(expectedInfo.ownerPosition, nc::physics::ToVector3(pointConstraintHandle->GetLocalSpacePoint1()));
+    EXPECT_EQ(expectedInfo.targetPosition, nc::physics::ToVector3(pointConstraintHandle->GetLocalSpacePoint2()));
 
     DestroyBody(body1);
     DestroyBody(body2);

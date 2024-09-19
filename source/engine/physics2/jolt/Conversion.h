@@ -86,13 +86,12 @@ inline auto ToObjectLayer(BodyType bodyType) -> JPH::ObjectLayer
     }
 }
 
-inline auto ToConstraintSpace(ConstraintSpace space) -> JPH::EConstraintSpace
+inline auto ToSpringSettings(const SpringSettings& settings) -> JPH::SpringSettings
 {
-    switch (space)
-    {
-        case ConstraintSpace::World: return JPH::EConstraintSpace::WorldSpace;
-        case ConstraintSpace::Local: return JPH::EConstraintSpace::LocalToBodyCOM;
-        default: std::unreachable();
-    }
+    return JPH::SpringSettings{
+        JPH::ESpringMode::FrequencyAndDamping,
+        settings.frequency,
+        settings.damping
+    };
 }
 } // namespace nc::physics
