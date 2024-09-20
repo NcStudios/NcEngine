@@ -317,12 +317,14 @@ inline auto InputAxis(Vector3& value, const char* label, float min, float max) -
     {
         // When a component is changed to a maximum, other values are still potentially non-zero. These cases need to
         // be hard reset to the correct axis otherwise normalization prevents ever being able to reach it.
-        if (value.x != previous.x && (value.x == 1.0f || value.x == -1.0f))
+        if (value.x != previous.x && std::fabs(value.x) == 1.0f)
             value = Vector3{value.x, 0.0f, 0.0f};
-        else if (value.y != previous.y && (value.y == 1.0f || value.y == -1.0f))
+        else if (value.y != previous.y && std::fabs(value.y) == 1.0f)
             value = Vector3{0.0f, value.y, 0.0f};
-        else if (value.z != previous.z && (value.z == 1.0f || value.z == -1.0f))
+        else if (value.z != previous.z && std::fabs(value.z) == 1.0f)
             value = Vector3{0.0f, 0.0f, value.z};
+        else if (value == Vector3::Zero()) // prevent problems when 0 is directly enterered
+            value = previous;
         else
             value = Normalize(value);
 

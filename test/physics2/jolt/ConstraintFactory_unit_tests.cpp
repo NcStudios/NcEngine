@@ -225,8 +225,11 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_HingeConstraint_twoBody_setsExpecte
 
     const auto inConstraint = nc::physics::HingeConstraintInfo{
         .ownerPosition = nc::Vector3::Splat(2.0f),
+        .ownerHingeAxis = nc::Vector3::Right(),
+        .ownerNormalAxis = nc::Vector3::Up(),
         .targetPosition = nc::Vector3::Splat(3.0f),
-        .hingeAxis = nc::Normalize(nc::Vector3::One()),
+        .targetHingeAxis = nc::Vector3::Down(),
+        .targetNormalAxis = -nc::Vector3::Right(),
         .minLimit = -std::numbers::pi_v<float>,
         .maxLimit = std::numbers::pi_v<float>,
         .maxFrictionTorque = 100.0f,
@@ -246,11 +249,11 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_HingeConstraint_twoBody_setsExpecte
     const auto actualSettings = static_cast<JPH::HingeConstraintSettings*>(baseSettings.GetPtr());
 
     EXPECT_EQ(inConstraint.ownerPosition, nc::physics::ToVector3(actualSettings->mPoint1));
+    EXPECT_EQ(inConstraint.ownerHingeAxis, nc::physics::ToVector3(actualSettings->mHingeAxis1));
+    EXPECT_EQ(inConstraint.ownerNormalAxis, nc::physics::ToVector3(actualSettings->mNormalAxis1));
     EXPECT_EQ(inConstraint.targetPosition, nc::physics::ToVector3(actualSettings->mPoint2));
-    EXPECT_EQ(inConstraint.hingeAxis, nc::physics::ToVector3(actualSettings->mHingeAxis1));
-    EXPECT_FLOAT_EQ(0.0f, actualSettings->mHingeAxis1.Dot(actualSettings->mNormalAxis1));
-    EXPECT_EQ(inConstraint.hingeAxis, nc::physics::ToVector3(actualSettings->mHingeAxis2));
-    EXPECT_FLOAT_EQ(0.0f, actualSettings->mHingeAxis2.Dot(actualSettings->mNormalAxis2));
+    EXPECT_EQ(inConstraint.targetHingeAxis, nc::physics::ToVector3(actualSettings->mHingeAxis2));
+    EXPECT_EQ(inConstraint.targetNormalAxis, nc::physics::ToVector3(actualSettings->mNormalAxis2));
     EXPECT_EQ(inConstraint.minLimit, actualSettings->mLimitsMin);
     EXPECT_EQ(inConstraint.maxLimit, actualSettings->mLimitsMax);
     EXPECT_EQ(inConstraint.maxFrictionTorque, actualSettings->mMaxFrictionTorque);
@@ -296,8 +299,11 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SliderConstraint_twoBody_setsExpect
 
     const auto inConstraint = nc::physics::SliderConstraintInfo{
         .ownerPosition = nc::Vector3::Splat(2.0f),
+        .ownerSliderAxis = Normalize(nc::Vector3::Splat(1.0f)),
+        .ownerNormalAxis = OrthogonalTo(Normalize(nc::Vector3::Splat(1.0f))),
         .targetPosition = nc::Vector3::Splat(3.0f),
-        .sliderAxis = nc::Normalize(nc::Vector3::One()),
+        .targetSliderAxis = Normalize(nc::Vector3::Splat(-11.0f)),
+        .targetNormalAxis = OrthogonalTo(Normalize(nc::Vector3::Splat(-1.0f))),
         .minLimit = -2.0f,
         .maxLimit = 2.0f,
         .maxFrictionForce = 100.0f,
@@ -317,11 +323,11 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SliderConstraint_twoBody_setsExpect
     const auto actualSettings = static_cast<JPH::SliderConstraintSettings*>(baseSettings.GetPtr());
 
     EXPECT_EQ(inConstraint.ownerPosition, nc::physics::ToVector3(actualSettings->mPoint1));
+    EXPECT_EQ(inConstraint.ownerSliderAxis, nc::physics::ToVector3(actualSettings->mSliderAxis1));
+    EXPECT_EQ(inConstraint.ownerNormalAxis, nc::physics::ToVector3(actualSettings->mNormalAxis1));
     EXPECT_EQ(inConstraint.targetPosition, nc::physics::ToVector3(actualSettings->mPoint2));
-    EXPECT_EQ(inConstraint.sliderAxis, nc::physics::ToVector3(actualSettings->mSliderAxis1));
-    EXPECT_FLOAT_EQ(0.0f, actualSettings->mSliderAxis1.Dot(actualSettings->mNormalAxis1)); // is orthogonal
-    EXPECT_EQ(inConstraint.sliderAxis, nc::physics::ToVector3(actualSettings->mSliderAxis2));
-    EXPECT_FLOAT_EQ(0.0f, actualSettings->mSliderAxis2.Dot(actualSettings->mNormalAxis2)); // is orthogonal
+    EXPECT_EQ(inConstraint.targetSliderAxis, nc::physics::ToVector3(actualSettings->mSliderAxis2));
+    EXPECT_EQ(inConstraint.targetNormalAxis, nc::physics::ToVector3(actualSettings->mNormalAxis2));
     EXPECT_EQ(inConstraint.minLimit, actualSettings->mLimitsMin);
     EXPECT_EQ(inConstraint.maxLimit, actualSettings->mLimitsMax);
     EXPECT_EQ(inConstraint.maxFrictionForce, actualSettings->mMaxFrictionForce);

@@ -69,9 +69,11 @@ auto MakeConstraint(const HingeConstraintInfo& info,
     auto settings = JPH::HingeConstraintSettings{};
     settings.mSpace = JPH::EConstraintSpace::LocalToBodyCOM;
     settings.mPoint1 = ToJoltVec3(info.ownerPosition);
+    settings.mHingeAxis1 = ToJoltVec3(info.ownerHingeAxis);
+    settings.mNormalAxis1 = ToJoltVec3(info.ownerNormalAxis);
     settings.mPoint2 = ToJoltVec3(info.targetPosition);
-    settings.mHingeAxis1 = settings.mHingeAxis2 = ToJoltVec3(info.hingeAxis);
-    settings.mNormalAxis1 = settings.mNormalAxis2 = settings.mHingeAxis1.GetNormalizedPerpendicular();
+    settings.mHingeAxis2 = ToJoltVec3(info.targetHingeAxis);
+    settings.mNormalAxis2 = ToJoltVec3(info.targetNormalAxis);
     settings.mLimitsMin = info.minLimit;
     settings.mLimitsMax = info.maxLimit;
     settings.mMaxFrictionTorque = info.maxFrictionTorque;
@@ -91,10 +93,13 @@ auto MakeConstraint(const SliderConstraintInfo& info,
     );
 
     auto settings = JPH::SliderConstraintSettings{};
-    settings.mSpace = JPH::EConstraintSpace::WorldSpace;
-    settings.mPoint1 = first.GetPosition() + ToJoltVec3(info.ownerPosition);
-    settings.mPoint2 = second.GetPosition() + ToJoltVec3(info.targetPosition);
-    settings.SetSliderAxis(ToJoltVec3(info.sliderAxis));
+    settings.mSpace = JPH::EConstraintSpace::LocalToBodyCOM;
+    settings.mPoint1 = ToJoltVec3(info.ownerPosition);
+    settings.mPoint2 = ToJoltVec3(info.targetPosition);
+    settings.mSliderAxis1 = ToJoltVec3(info.ownerSliderAxis);
+    settings.mNormalAxis1 = ToJoltVec3(info.ownerNormalAxis);
+    settings.mSliderAxis2 = ToJoltVec3(info.targetSliderAxis);
+    settings.mNormalAxis2 = ToJoltVec3(info.targetNormalAxis);
     settings.mLimitsMin = info.minLimit;
     settings.mLimitsMax = info.maxLimit;
     settings.mLimitsSpringSettings = ToSpringSettings(info.springSettings);

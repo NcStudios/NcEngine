@@ -297,14 +297,42 @@ struct ConstraintVisitor
     static constexpr auto Pi = std::numbers::pi_v<float>;
     static constexpr auto HalfPi = Pi * 0.5f;
 
+    auto ClosestOrthogonal(const nc::Vector3& target, const nc::Vector3& reference) -> nc::Vector3
+    {
+        constexpr auto parallelThreshold = 0.999f;
+        const auto projection = Dot(target, reference);
+        if (std::fabs(projection) < parallelThreshold)
+        {
+            return Normalize(target - reference * projection);
+        }
+
+        return OrthogonalTo(reference);
+    }
+
+    auto InputReferenceFrame(nc::Vector3& basis, nc::Vector3& normal, const char* basisLabel, const char* normalLabel) -> bool
+    {
+        auto dirty = false;
+        if (nc::ui::InputAxis(basis, basisLabel))
+        {
+            normal = ClosestOrthogonal(normal, basis);
+            dirty = true;
+        }
+
+        if (nc::ui::InputAxis(normal, normalLabel))
+        {
+            basis = ClosestOrthogonal(basis, normal);
+            dirty = true;
+        }
+
+        return dirty;
+    }
+
     auto operator()(nc::physics::FixedConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
-        dirty = nc::ui::InputAxis(constraint.ownerRight, "ownerRight") || dirty;
-        dirty = nc::ui::InputAxis(constraint.ownerUp, "ownerUp") || dirty;
+        dirty = InputReferenceFrame(constraint.ownerRight, constraint.ownerUp, "ownerRight", "ownerUp") || dirty;
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
-        dirty = nc::ui::InputAxis(constraint.targetRight, "targetRight") || dirty;
-        dirty = nc::ui::InputAxis(constraint.targetUp, "targetUp") || dirty;
+        dirty = InputReferenceFrame(constraint.targetRight, constraint.targetUp, "targetRight", "targetUp") || dirty;
         return dirty;
     }
 
@@ -328,8 +356,9 @@ struct ConstraintVisitor
     auto operator()(nc::physics::HingeConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = InputReferenceFrame(constraint.ownerHingeAxis, constraint.ownerNormalAxis, "ownerHingeAxis", "ownerNormalAxis") || dirty;
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
-        dirty = nc::ui::InputAxis(constraint.hingeAxis, "hingeAxis") || dirty;
+        dirty = InputReferenceFrame(constraint.targetHingeAxis, constraint.targetNormalAxis, "targetHingeAxis", "targetNormalAxis") || dirty;
 
         constexpr auto minAngle = 0.001f;
         const auto minLimitUpperBound = constraint.maxLimit == 0.0f ? -minAngle : 0.0f;
@@ -346,8 +375,10 @@ struct ConstraintVisitor
     auto operator()(nc::physics::SliderConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
+        dirty = InputReferenceFrame(constraint.ownerSliderAxis, constraint.ownerNormalAxis, "ownerSliderAxis", "ownerNormalAxis") || dirty;
+
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
-        dirty = nc::ui::InputAxis(constraint.sliderAxis, "sliderAxis") || dirty;
+        dirty = InputReferenceFrame(constraint.targetSliderAxis, constraint.targetNormalAxis, "targetSliderAxis", "targetNormalAxis") || dirty;
 
         constexpr auto minLength = 0.001f;
         const auto minLimitUpperBound = constraint.maxLimit == 0.0f ? -minLength : 0.0f;

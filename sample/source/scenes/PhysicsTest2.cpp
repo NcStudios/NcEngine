@@ -418,27 +418,48 @@ void BuildBridge(ecs::Ecs world)
 
     platform1Body.AddConstraint(
         nc::physics::HingeConstraintInfo{
-            .ownerPosition = nc::Vector3{0.0f, 0.0f, 5.1f},
-            .targetPosition = nc::Vector3{0.0f, 0.0f, -1.0f},
-            .hingeAxis = nc::Vector3::Right()
+            .ownerPosition = Vector3{0.0f, 0.0f, 5.1f},
+            .targetPosition = Vector3{0.0f, 0.0f, -1.0f},
         },
         plank1
     );
 
     platform2Body.AddConstraint(
         nc::physics::HingeConstraintInfo{
-            .ownerPosition = nc::Vector3{0.0f, 0.0f, -5.1f},
-            .targetPosition = nc::Vector3{0.0f, 0.0f, 1.0f},
-            .hingeAxis = nc::Vector3::Right()
+            .ownerPosition = Vector3{0.0f, 0.0f, -5.1f},
+            .targetPosition = Vector3{0.0f, 0.0f, 1.0f}
         },
         plank5
     );
 
     const auto plankToPlank = nc::physics::HingeConstraintInfo{
-        .ownerPosition = nc::Vector3{0.0f, 0.0f, 1.0f},
-        .targetPosition = nc::Vector3{0.0f, 0.0f, -1.0f},
-        .hingeAxis = nc::Vector3::Right()
+        .ownerPosition = Vector3{0.0f, 0.0f, 1.0f},
+        .targetPosition = Vector3{0.0f, 0.0f, -1.0f}
     };
+
+    // platform1Body.AddConstraint(
+    //     nc::physics::HingeConstraintInfo{
+    //         .ownerPosition = nc::Vector3{0.0f, 0.0f, 5.1f},
+    //         .targetPosition = nc::Vector3{0.0f, 0.0f, -1.0f},
+    //         .hingeAxis = nc::Vector3::Right()
+    //     },
+    //     plank1
+    // );
+
+    // platform2Body.AddConstraint(
+    //     nc::physics::HingeConstraintInfo{
+    //         .ownerPosition = nc::Vector3{0.0f, 0.0f, -5.1f},
+    //         .targetPosition = nc::Vector3{0.0f, 0.0f, 1.0f},
+    //         .hingeAxis = nc::Vector3::Right()
+    //     },
+    //     plank5
+    // );
+
+    // const auto plankToPlank = nc::physics::HingeConstraintInfo{
+    //     .ownerPosition = nc::Vector3{0.0f, 0.0f, 1.0f},
+    //     .targetPosition = nc::Vector3{0.0f, 0.0f, -1.0f},
+    //     .hingeAxis = nc::Vector3::Right()
+    // };
 
     plank1.AddConstraint(plankToPlank, plank2);
     plank2.AddConstraint(plankToPlank, plank3);
@@ -496,7 +517,6 @@ void BuildSteps(ecs::Ecs world)
         .AddConstraint(
             physics::HingeConstraintInfo{
                 .targetPosition = Vector3{-19.1f, 2.0f, 40.0f},
-                .hingeAxis = Vector3::Right(),
                 .minLimit = -0.25f,
                 .maxLimit = 0.25f
             }
@@ -583,7 +603,6 @@ void BuildHinge(ecs::Ecs world)
             physics::HingeConstraintInfo{
                 .ownerPosition = Vector3{0.0f, panelScale.y * 0.5f, 0.0f},
                 .targetPosition = anchorPosition,
-                .hingeAxis = Vector3::Right(),
                 .minLimit = -1.0f,
                 .maxLimit = 1.0f
             }
@@ -727,10 +746,16 @@ void BuildSliders(ecs::Ecs world)
         }
     };
 
-    sliderInfo.sliderAxis = Vector3::Right();
+    // sliderInfo.sliderAxis = Vector3::Right();
+    // slider1Body.AddConstraint(sliderInfo, baseBody);
+
+    // sliderInfo.sliderAxis = Vector3::Front();
+    // slider2Body.AddConstraint(sliderInfo, baseBody);
+
+    sliderInfo.ownerSliderAxis = sliderInfo.targetSliderAxis = Vector3::Right();
     slider1Body.AddConstraint(sliderInfo, baseBody);
 
-    sliderInfo.sliderAxis = Vector3::Front();
+    sliderInfo.ownerSliderAxis = sliderInfo.targetSliderAxis = Vector3::Front();
     slider2Body.AddConstraint(sliderInfo, baseBody);
 }
 
@@ -765,7 +790,13 @@ void BuildSwingingBars(ecs::Ecs world)
     auto& bar1Body = world.Emplace<physics::RigidBody>(bar1);
     auto& bar2Body = world.Emplace<physics::RigidBody>(bar2);
 
-    auto hingeInfo = physics::HingeConstraintInfo{};
+    auto hingeInfo = physics::HingeConstraintInfo{
+        .ownerHingeAxis = Vector3::Up(),
+        .ownerNormalAxis = Vector3::Right(),
+        .targetHingeAxis = Vector3::Up(),
+        .targetNormalAxis = Vector3::Right()
+    };
+
     hingeInfo.targetPosition = Vector3{0.0f, -0.5f, 0.0f};
     bar1Body.AddConstraint(hingeInfo, poleBody);
 
