@@ -97,15 +97,15 @@ struct SpringSettings
     float damping = Damping::Undamped;     // oscillation decay [0, 1] (typical max is 1, but larger values are allowed)
 };
 
-/** @brief Constraint settings to attach two bodies, limiting all relative motion. */
+/** @brief Constraint settings to rigidly fix two bodies together, limiting all relative motion. */
 struct FixedConstraintInfo
 {
-    Vector3 ownerPosition = Vector3::Zero();  /// local attach position on owning body
-    Vector3 ownerRight = Vector3::Right();    /// local right axis on owning body
-    Vector3 ownerUp = Vector3::Up();          /// local up axis on owning body
-    Vector3 targetPosition = Vector3::Zero(); /// local attach position on targeted body
-    Vector3 targetRight = Vector3::Right();   /// local right axis on targeted body
-    Vector3 targetUp = Vector3::Up();         /// local up axis on targeted body
+    Vector3 ownerPosition = Vector3::Zero();  /// local attach position
+    Vector3 ownerRight = Vector3::Right();    /// local right axis
+    Vector3 ownerUp = Vector3::Up();          /// local up axis
+    Vector3 targetPosition = Vector3::Zero(); /// local attach position
+    Vector3 targetRight = Vector3::Right();   /// local right axis
+    Vector3 targetUp = Vector3::Up();         /// local up axis
 };
 
 /** @brief Constraint settings to attach two bodies at a point, limiting relative motion to rotation only. */
@@ -119,7 +119,7 @@ struct PointConstraintInfo
 struct DistanceConstraintInfo
 {
     Vector3 ownerPosition = Vector3::Zero();          /// local attach position
-    Vector3 targetPosition = Vector3::Zero();         /// local attach position (worldpace position if constrained to world)
+    Vector3 targetPosition = Vector3::Zero();         /// local attach position
     float minLimit = 0.0f;                            /// how close together bodies are allowed to be [0, maxDistance]
     float maxLimit = 1.0f;                            /// how far apart bodies are allowed to be [minDistance, infinity]
     SpringSettings springSettings = SpringSettings{}; /// settings to soften the limits

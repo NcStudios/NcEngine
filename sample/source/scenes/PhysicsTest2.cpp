@@ -437,30 +437,6 @@ void BuildBridge(ecs::Ecs world)
         .targetPosition = Vector3{0.0f, 0.0f, -1.0f}
     };
 
-    // platform1Body.AddConstraint(
-    //     nc::physics::HingeConstraintInfo{
-    //         .ownerPosition = nc::Vector3{0.0f, 0.0f, 5.1f},
-    //         .targetPosition = nc::Vector3{0.0f, 0.0f, -1.0f},
-    //         .hingeAxis = nc::Vector3::Right()
-    //     },
-    //     plank1
-    // );
-
-    // platform2Body.AddConstraint(
-    //     nc::physics::HingeConstraintInfo{
-    //         .ownerPosition = nc::Vector3{0.0f, 0.0f, -5.1f},
-    //         .targetPosition = nc::Vector3{0.0f, 0.0f, 1.0f},
-    //         .hingeAxis = nc::Vector3::Right()
-    //     },
-    //     plank5
-    // );
-
-    // const auto plankToPlank = nc::physics::HingeConstraintInfo{
-    //     .ownerPosition = nc::Vector3{0.0f, 0.0f, 1.0f},
-    //     .targetPosition = nc::Vector3{0.0f, 0.0f, -1.0f},
-    //     .hingeAxis = nc::Vector3::Right()
-    // };
-
     plank1.AddConstraint(plankToPlank, plank2);
     plank2.AddConstraint(plankToPlank, plank3);
     plank3.AddConstraint(plankToPlank, plank4);
@@ -745,12 +721,6 @@ void BuildSliders(ecs::Ecs world)
             .damping = 0.1f
         }
     };
-
-    // sliderInfo.sliderAxis = Vector3::Right();
-    // slider1Body.AddConstraint(sliderInfo, baseBody);
-
-    // sliderInfo.sliderAxis = Vector3::Front();
-    // slider2Body.AddConstraint(sliderInfo, baseBody);
 
     sliderInfo.ownerSliderAxis = sliderInfo.targetSliderAxis = Vector3::Right();
     slider1Body.AddConstraint(sliderInfo, baseBody);
