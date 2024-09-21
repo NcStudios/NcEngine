@@ -13,13 +13,24 @@
 #include "GLFW/glfw3native.h"
 
 // Diligent
-#include "EngineFactoryD3D11.h"
-#include "EngineFactoryD3D12.h"
-#include "EngineFactoryOpenGL.h"
-#include "EngineFactoryVk.h"
-#include "MapHelper.hpp"
-#include "GraphicsUtilities.h"
-#include "TextureUtilities.h"
+#if PLATFORM_WIN32
+    #if D3D11_SUPPORTED
+        #include "Graphics/GraphicsEngineD3D11/interface/EngineFactoryD3D11.h"
+    #endif
+    #if D3D12_SUPPORTED
+        #include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
+    #endif
+#endif
+#if GL_SUPPORTED
+    #include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
+#endif
+#if VULKAN_SUPPORTED
+    #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
+#endif
+#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
+#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
+
+#include <string_view>
 
 namespace
 {
@@ -56,14 +67,21 @@ auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Dilig
 
     #if PLATFORM_WIN32
         if (targetApi == Vulkan)
+        {
             RotateElementToBeginning(preferredWin32ApiOrder, Vulkan);
+        }
         else if (targetApi == D3D11)
+        {
             RotateElementToBeginning(preferredWin32ApiOrder, D3D11);
+        }
         else if (targetApi == OpenGL)
+        {
             RotateElementToBeginning(preferredWin32ApiOrder, OpenGL);
+        }
         else if (targetApi != D3D12) // D3D12 already in front if targetApi is D3D12
+        {
             throw nc::NcError(fmt::format("Target API of {0} is not in the list of potential APIs. Potential APIs: d3d12, vulkan, d3d11, opengl", targetApi));
-
+        }
         for (const auto& api : preferredWin32ApiOrder)
         {
             if (api == D3D12)
@@ -95,11 +113,17 @@ auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Dilig
 
     #elif PLATFORM_LINUX
         if (targetApi == D3D12 || targetApi == D3D11)
-            NC_LOG_WARNING(fmt::format("Target API of {0} is not supported on Linux. Defaulting to Linux-supported API.", targetApi));
+        {
+            NC_LOG_WARNING("Target API of D3D(11,12) is not supported on Linux. Defaulting to Linux-supported API.");
+        }
         else if (targetApi == OpenGL)
+        {
             RotateElementToBeginning(preferredLinuxApiOrder, OpenGL);
+        }
         else if (targetApi != Vulkan)  // Vulkan already in front if targetApi is Vulkan
+        {
             throw nc::NcError(fmt::format("Target API of {0} is not in the list of potential APIs. Potential APIs: vulkan, opengl", targetApi));
+        }
 
         for (const auto& api : preferredLinuxApiOrder)
         {
@@ -134,7 +158,7 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
         auto window = Win32NativeWindow{glfwGetWin32Window(window_.GetWindowHandle())};
     #elif PLATFORM_LINUX
         LinuxNativeWindow window;
-        window.WindowId = glfwGetX11Window(window_.GetWindowHandle());
+        window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_.GetWindowHandle()));
         window.pDisplay = glfwGetX11Display();
     #endif
 
@@ -144,36 +168,48 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
     /* Initialize cross-api engine */
     switch (supportedDeviceTypeByPlatform)
     {
-        case RENDER_DEVICE_TYPE_D3D12:
-        {
-            auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
-            EngineD3D12CreateInfo engineCI;
-            auto* pFactoryD3D12 = GetEngineFactoryD3D12();
-            pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
-            pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
-            break;
-        }
+        #if PLATFORM_WIN32
+            case RENDER_DEVICE_TYPE_D3D12:
+            {
+                #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                    auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
+                #endif
+                EngineD3D12CreateInfo engineCI;
+                auto* pFactoryD3D12 = GetEngineFactoryD3D12();
+                pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
+                pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
+                break;
+            }
+        #endif
         case RENDER_DEVICE_TYPE_VULKAN:
         {
-            auto GetEngineFactoryVk = LoadGraphicsEngineVk();
+            #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
+            #endif
             EngineVkCreateInfo engineCI;
             auto* pFactoryVk = GetEngineFactoryVk();
             pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
             pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
             break;
         }
-        case RENDER_DEVICE_TYPE_D3D11:
-        {
-            auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
-            EngineD3D11CreateInfo engineCI;
-            auto* pFactoryD3D11 = GetEngineFactoryD3D11();
-            pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
-            pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
-            break;
-        }
+        #if PLATFORM_WIN32
+            case RENDER_DEVICE_TYPE_D3D11:
+            {
+                #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                    auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
+                #endif
+                EngineD3D11CreateInfo engineCI;
+                auto* pFactoryD3D11 = GetEngineFactoryD3D11();
+                pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
+                pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
+                break;
+            }
+        #endif
         case RENDER_DEVICE_TYPE_GL:
         {
-            auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
+            #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
+            #endif
             auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
             glfwMakeContextCurrent(window_.GetWindowHandle());
             EngineGLCreateInfo engineCI;

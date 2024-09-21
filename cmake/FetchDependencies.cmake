@@ -4,12 +4,11 @@
 
 include(FetchContent)
 
+# OpenGL
+find_package(OpenGL REQUIRED)
 if (UNIX)
     find_package(X11 REQUIRED)
 endif()
-
-# OpenGL
-find_package(OpenGL REQUIRED)
 
 # Vulkan
 find_package(Vulkan REQUIRED)
@@ -113,13 +112,8 @@ GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
 SOURCE_DIR _deps/DiligentCore
 )
 
-FetchContent_Declare(DiligentTools
-GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
-SOURCE_DIR _deps/DiligentTools
-)
-
 # Fetch all required sources
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics DiligentCore DiligentTools)
+FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics DiligentCore)
 
 # Set Taskflow includes as system to prevent some warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)

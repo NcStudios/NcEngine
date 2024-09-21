@@ -54,9 +54,7 @@ target_link_libraries(${NC_ENGINE_LIB}
 # Link Diligent Library Dependencies
 target_link_libraries(${NC_ENGINE_LIB}
     PUBLIC
-        Diligent-GraphicsTools
         Diligent-TargetPlatform
-        Diligent-TextureLoader
 )
 
 # Link Diligent Primary Libraries
@@ -104,7 +102,6 @@ target_include_directories(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}/ncengine>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
         $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${diligenttools_SOURCE_DIR}>
 )
 
 target_include_directories(${NC_ENGINE_LIB}

@@ -2,10 +2,10 @@
 
 // Diligent
 #include "Common/interface/RefCntAutoPtr.hpp"
-#include "DeviceContext.h"
-#include "GraphicsTypes.h"
-#include "RenderDevice.h"
-#include "SwapChain.h"
+#include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
+#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
+#include "Graphics/GraphicsEngine/interface/SwapChain.h"
 
 namespace nc
 {
