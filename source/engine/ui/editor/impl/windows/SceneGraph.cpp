@@ -120,7 +120,7 @@ void SceneGraph::GraphNode(EditorContext& ctx, Entity entity, Tag& tag, Hierarch
 
     const auto isNodeExpanded = ImGui::TreeNodeEx(tag.value.c_str(), flags);
 
-    if (ImGui::IsItemClicked())
+    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
     {
         SetEntitySelection(ctx, entity);
     }

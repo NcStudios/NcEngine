@@ -143,6 +143,9 @@ void DragAndDropTarget(F&& func);
 /** @brief UI layout helper for spacing. */
 void SameLineSpaced();
 
+/** @brief UI layout helper for right aligning an item on the same line as the previous item. */
+void SameLineRightAligned(float itemWidth);
+
 /** @brief UI layout helper for separator. */
 void SeparatorSpaced();
 
@@ -229,6 +232,13 @@ inline void SameLineSpaced()
     ImGui::SameLine();
     ImGui::Spacing();
     ImGui::SameLine();
+}
+
+inline void SameLineRightAligned(float itemWidth)
+{
+    const auto availableWidth = ImGui::GetContentRegionAvail().x;
+    itemWidth += + ImGui::GetStyle().FramePadding.x * 2.0f;
+    ImGui::SameLine(ImGui::GetCursorPosX() + availableWidth - itemWidth);
 }
 
 inline void SeparatorSpaced()
