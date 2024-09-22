@@ -799,32 +799,31 @@ void BuildSwingingBars(ecs::Ecs world)
     bar2Body.AddConstraint(hingeInfo, poleBody);
 }
 
-void BuildTriggers(ecs::Ecs world, const Vector3& rootPosition)
+void BuildTriggers(ecs::Ecs world)
 {
     const auto root = world.Emplace<Entity>({
-        .position = rootPosition,
         .tag = "Triggers"
     });
 
     const auto sphere = world.Emplace<Entity>({
-        .position = Vector3{-5.0f, 1.0f, -5.0f} + rootPosition,
+        .position = Vector3{-30.0f, 1.0f, 15.0f},
         .scale = Vector3::Splat(3.0f),
-        // .parent = root,
+        .parent = root,
         .tag = "Sphere"
     });
 
     const auto box = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 1.0f, .0f} + rootPosition,
+        .position = Vector3{-25.0f, 1.0f, 20.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 1.57f, 0.0f),
         .scale = Vector3::Splat(3.0f),
-        // .parent = root,
+        .parent = root,
         .tag = "Box"
     });
 
     const auto capsule = world.Emplace<Entity>({
-        .position = Vector3{5.0f, 1.0f, 5.0f} + rootPosition,
+        .position = Vector3{-20.0f, 1.0f, 25.0f},
         .scale = Vector3::Splat(2.0f),
-        // .parent = root,
+        .parent = root,
         .tag = "Capsule"
     });
 
@@ -932,7 +931,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     BuildHalfPipes(world);
     BuildPunchingBag(world);
     BuildChain(world);
-    BuildTriggers(world, Vector3{-25.0f, 0.0f, 20.0f});
+    BuildTriggers(world);
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
