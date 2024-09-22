@@ -85,3 +85,25 @@ TEST(JoltConversionTest, ToSpringSettings_convertsSettings)
     EXPECT_FLOAT_EQ(expected.frequency, actual.mFrequency);
     EXPECT_FLOAT_EQ(expected.damping, actual.mDamping);
 }
+
+TEST(JoltConversionTest, ToAllowedDOFs_convertsFlags)
+{
+    using namespace nc::physics;
+    constexpr auto allTranslation = JPH::EAllowedDOFs::TranslationX |
+                                    JPH::EAllowedDOFs::TranslationY |
+                                    JPH::EAllowedDOFs::TranslationZ;
+
+    constexpr auto allRotation = JPH::EAllowedDOFs::RotationX |
+                                 JPH::EAllowedDOFs::RotationY |
+                                 JPH::EAllowedDOFs::RotationZ;
+
+    EXPECT_EQ(JPH::EAllowedDOFs::All, ToAllowedDOFs(DegreeOfFreedom::All));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationX, ToAllowedDOFs(DegreeOfFreedom::TranslationX));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationY, ToAllowedDOFs(DegreeOfFreedom::TranslationY));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationZ, ToAllowedDOFs(DegreeOfFreedom::TranslationZ));
+    EXPECT_EQ(allTranslation, ToAllowedDOFs(DegreeOfFreedom::Translation));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationX, ToAllowedDOFs(DegreeOfFreedom::RotationX));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationY, ToAllowedDOFs(DegreeOfFreedom::RotationY));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationZ, ToAllowedDOFs(DegreeOfFreedom::RotationZ));
+    EXPECT_EQ(allRotation, ToAllowedDOFs(DegreeOfFreedom::Rotation));
+}

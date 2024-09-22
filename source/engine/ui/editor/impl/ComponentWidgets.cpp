@@ -218,6 +218,38 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     }
 }
 
+void DegreesOfFreedomWidget(nc::physics::RigidBody& body)
+{
+    using nc::physics::DegreeOfFreedom;
+    auto dof = body.GetDegreesOfFreedom();
+    auto modified = false;
+    auto flagBox = [&dof, &modified](DegreeOfFreedom::Type flag, const char* label)
+    {
+        auto hasFlag = static_cast<bool>(dof & flag);
+        ImGui::SameLine();
+        if (nc::ui::Checkbox(hasFlag, label))
+        {
+            dof = hasFlag ? dof | flag : dof & ~flag;
+            modified = true;
+        }
+    };
+
+    ImGui::Text("Translation: ");
+    flagBox(DegreeOfFreedom::TranslationX, "X###DOFTransX");
+    flagBox(DegreeOfFreedom::TranslationY, "Y###DOFTransY");
+    flagBox(DegreeOfFreedom::TranslationZ, "Z###DOFTransZ");
+
+    ImGui::Text("Rotation:    ");
+    flagBox(DegreeOfFreedom::RotationX, "X###DOFRotX");
+    flagBox(DegreeOfFreedom::RotationY, "Y###DOFRotY");
+    flagBox(DegreeOfFreedom::RotationZ, "Z###DOFRotZ");
+
+    if (modified)
+    {
+        body.SetDegreesOfFreedom(dof);
+    }
+}
+
 void UpdateConstraintType(nc::physics::Constraint& constraint, nc::physics::ConstraintType type)
 {
     using namespace nc::physics;
@@ -800,6 +832,14 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
         ImGui::TreePop();
     }
 
+    ImGui::Separator();
+    if(ImGui::TreeNodeEx("Degrees of Freedom", 0))
+    {
+        ImGui::BeginDisabled(body.GetBodyType() == physics::BodyType::Static);
+        rigid_body_ext::DegreesOfFreedomWidget(body);
+        ImGui::EndDisabled();
+        ImGui::TreePop();
+    }
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Flags", 0))

@@ -99,4 +99,9 @@ inline auto ToSpringSettings(const SpringSettings& settings) -> JPH::SpringSetti
         settings.damping
     };
 }
+
+inline auto ToAllowedDOFs(DegreeOfFreedom::Type dof) -> JPH::EAllowedDOFs
+{
+    return static_cast<JPH::EAllowedDOFs>(dof);
+}
 } // namespace nc::physics

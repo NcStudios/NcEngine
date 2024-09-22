@@ -17,6 +17,25 @@ struct ComponentContext;
 /** @brief Handle to internal RigidBody state. */
 using BodyHandle = void*;
 
+/**
+ * @brief Flags indicating allowed degrees of freedom of a RigidBody.
+ * @note To restrict all motion, use BodyType::Static instead.
+ */
+struct DegreeOfFreedom
+{
+    using Type = uint8_t;
+
+    static constexpr Type All          = 0b00111111;
+    static constexpr Type TranslationX = 0b00000001;
+    static constexpr Type TranslationY = 0b00000010;
+    static constexpr Type TranslationZ = 0b00000100;
+    static constexpr Type Translation  = 0b00000111;
+    static constexpr Type RotationX    = 0b00001000;
+    static constexpr Type RotationY    = 0b00010000;
+    static constexpr Type RotationZ    = 0b00100000;
+    static constexpr Type Rotation     = 0b00111000;
+};
+
 /** @brief Flags for configuring RigidBody behavior. */
 struct RigidBodyFlags
 {
@@ -59,6 +78,7 @@ struct RigidBodyInfo
     float angularDamping = 0.0f;                          ///< angular motion damping (range: [0, 1])
     float gravityMultiplier = 1.0f;                       ///< amount of gravity applied to the body (range: [0, maxGravityMultiplier])
     BodyType type = BodyType::Dynamic;                    ///< set type of body (on a static Entity, this will be overwritten to BodyType::Static)
+    DegreeOfFreedom::Type freedom = DegreeOfFreedom::All; ///< set degrees of freedom for the body
     RigidBodyFlags::Type flags = RigidBodyFlags::None;    ///< set flags for the body
 };
 
@@ -119,6 +139,10 @@ class RigidBody
          */
         auto GetBodyType() const -> BodyType { return m_info.type; }
         void SetBodyType(BodyType type, bool wake = true);
+
+        /** @name DegreeOfFreedom Functions */
+        auto GetDegreesOfFreedom() const -> DegreeOfFreedom::Type { return m_info.freedom; }
+        void SetDegreesOfFreedom(DegreeOfFreedom::Type dof);
 
         /** @name Shape Functions */
         auto GetShape() const -> const Shape& { return m_shape; }

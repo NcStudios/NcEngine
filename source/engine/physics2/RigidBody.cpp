@@ -35,6 +35,22 @@ void RigidBody::SetBodyType(BodyType type, bool wake)
     s_ctx->interface.SetObjectLayer(id, ToObjectLayer(m_info.type, IsTrigger()));
 }
 
+void RigidBody::SetDegreesOfFreedom(DegreeOfFreedom::Type dof)
+{
+    m_info.freedom = dof;
+    if (m_self.IsStatic())
+    {
+        return; // doesn't have internal MotionProperties
+    }
+
+    auto body = ToBody(m_handle);
+    auto properties = body->GetMotionPropertiesUnchecked();
+    properties->SetMassProperties(
+        ToAllowedDOFs(dof),
+        body->GetShape()->GetMassProperties()
+    );
+}
+
 auto RigidBody::IsAwake() const -> bool
 {
     return ToBody(m_handle)->IsActive();
@@ -79,12 +95,22 @@ void RigidBody::SetRestitution(float restitution)
 void RigidBody::SetLinearDamping(float damping)
 {
     m_info.linearDamping = Clamp(damping, 0.0f, 1.0f);
+    if (m_self.IsStatic())
+    {
+        return; // doesn't have internal MotionProperties
+    }
+
     ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetLinearDamping(m_info.linearDamping);
 }
 
 void RigidBody::SetAngularDamping(float damping)
 {
     m_info.angularDamping = Clamp(damping, 0.0f, 1.0f);
+    if (m_self.IsStatic())
+    {
+        return; // doesn't have internal MotionProperties
+    }
+
     ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetAngularDamping(m_info.angularDamping);
 }
 
