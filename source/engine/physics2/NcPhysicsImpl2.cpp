@@ -74,6 +74,11 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
 
 void NcPhysicsImpl2::Run()
 {
+    if (!m_updateEnabled)
+    {
+        return;
+    }
+
     m_jolt.Update(time::DeltaTime());
     SyncTransforms();
     DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);

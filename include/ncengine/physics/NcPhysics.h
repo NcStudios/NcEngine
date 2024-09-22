@@ -37,6 +37,12 @@ struct NcPhysics : public Module
     explicit NcPhysics() noexcept
         : Module{NcPhysicsId} {}
 
+    /** @brief Check if the physics update step is enabled. */
+    virtual auto IsUpdateEnabled() const -> bool { return true; }
+
+    /** @brief Toggle physics update step on or off. */
+    virtual void EnableUpdate(bool) {}
+
     /**
      * @brief A a joint between two entities.
      * 
