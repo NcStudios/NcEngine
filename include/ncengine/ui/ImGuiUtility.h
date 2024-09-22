@@ -183,6 +183,13 @@ struct ItemWidth
     ~ItemWidth() noexcept               { ImGui::PopItemWidth();           }
 };
 
+/** @brief RAII wrapper for conditionally disabling widgets within a scope. */
+struct DisableIf
+{
+    explicit DisableIf(bool condition) { ImGui::BeginDisabled(condition); }
+    ~DisableIf() noexcept              { ImGui::EndDisabled();            }
+};
+
 /** @brief Check if the UI is currently using keyboard events.
  *  @note May be called at any time. */
 inline auto IsCapturingKeyboard() -> bool

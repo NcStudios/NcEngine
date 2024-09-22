@@ -794,6 +794,7 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
 {
     IMGUI_SCOPE(ui::ImGuiId, "RigidBody");
     ui::PropertyWidget(rigid_body_ext::awakeProp, body, &ui::Checkbox);
+    const auto isStaticBody = body.GetBodyType() == physics::BodyType::Static;
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Shape", 0))
@@ -826,31 +827,36 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
         ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
         ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
         ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
-        ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        {
+            IMGUI_SCOPE(ui::DisableIf, isStaticBody);
+            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
+            ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+            ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        }
+
         ImGui::TreePop();
     }
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Degrees of Freedom", 0))
     {
-        ImGui::BeginDisabled(body.GetBodyType() == physics::BodyType::Static);
+        IMGUI_SCOPE(ui::DisableIf, isStaticBody);
         rigid_body_ext::DegreesOfFreedomWidget(body);
-        ImGui::EndDisabled();
         ImGui::TreePop();
     }
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Flags", 0))
     {
-        ImGui::BeginDisabled(body.UseContinuousDetection());
-        ui::PropertyWidget(rigid_body_ext::triggerProp, body, &ui::Checkbox);
-        ImGui::EndDisabled();
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.UseContinuousDetection());
+            ui::PropertyWidget(rigid_body_ext::triggerProp, body, &ui::Checkbox);
+        }
 
-        ImGui::BeginDisabled(body.IsTrigger());
-        ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
-        ImGui::EndDisabled();
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.IsTrigger());
+            ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
+        }
 
         ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp, body, &ui::Checkbox);
         ImGui::TreePop();
