@@ -25,19 +25,19 @@ struct RigidBodyFlags
     /** @brief Disable all flags. */
     static constexpr Type None = 0x0;
 
+    /** @brief Disables the collision response for the body and raises trigger events instead of collision events. */
+    static constexpr Type Trigger = 0x1;
+
+    /** @brief Enable continuous collision detection on the body using a linear shape cast. (incompatible with Trigger) */
+    static constexpr Type ContinuousDetection = 0x2;
+
     /** @brief Scale the body's shape using the associated Transform's scale.
      * 
      * For shapes with scaling restrictions, this may force updates to the Transform to prevent invalid shape scaling.
      * E.g. placing a sphere on an object with non-uniform Transform scaling will update the Transform to have uniform
      * scaling.
      */
-    static constexpr Type ScaleWithTransform = 0x1;
-
-    /** @brief Enable continuous collision detection on the body using a linear shape cast. */
-    static constexpr Type ContinuousDetection = 0x2;
-
-    /** @brief Default flag values. */
-    static constexpr Type Default = ScaleWithTransform;
+    static constexpr Type IgnoreTransformScaling = 0x4;
 };
 
 /** @brief Determines movement and collision behavior of a RigidBody. */
@@ -45,7 +45,7 @@ enum class BodyType : uint8_t
 {
     Dynamic,   ///< movable with velocities and forces; collides with all other bodies
     Kinematic, ///< movable only with velocities; collides with all other bodies
-    Static     ///< non-movable; does not collide with other static bodies
+    Static     ///< non-movable; does not collide with other static bodies (required if Entity is static)
 };
 
 /** @brief Properties for initializing a RigidBody. */
@@ -59,7 +59,7 @@ struct RigidBodyInfo
     float angularDamping = 0.0f;                          ///< angular motion damping (range: [0, 1])
     float gravityMultiplier = 1.0f;                       ///< amount of gravity applied to the body (range: [0, maxGravityMultiplier])
     BodyType type = BodyType::Dynamic;                    ///< set type of body (on a static Entity, this will be overwritten to BodyType::Static)
-    RigidBodyFlags::Type flags = RigidBodyFlags::Default; ///< set flags for the body
+    RigidBodyFlags::Type flags = RigidBodyFlags::None;    ///< set flags for the body
 };
 
 /** @brief Component managing physics simulation properties. */
@@ -77,6 +77,12 @@ class RigidBody
             if (self.IsStatic())
             {
                 m_info.type = BodyType::Static;
+            }
+
+            constexpr auto exclusiveFlags = RigidBodyFlags::Trigger | RigidBodyFlags::ContinuousDetection;
+            if ((m_info.flags & exclusiveFlags) == exclusiveFlags)
+            {
+                m_info.flags &= ~RigidBodyFlags::ContinuousDetection;
             }
         }
 
@@ -133,11 +139,13 @@ class RigidBody
         void SetGravityMultiplier(float factor);
 
         /** @name RigidBodyFlags Functions */
-        auto ScalesWithTransform() const -> bool { return m_info.flags & RigidBodyFlags::ScaleWithTransform; }
-        void ScalesWithTransform(bool value);
+        auto IsTrigger() const -> bool { return m_info.flags & RigidBodyFlags::Trigger; }
+        void SetTrigger(bool value);
         auto UseContinuousDetection() const -> bool { return m_info.flags & RigidBodyFlags::ContinuousDetection; }
         void UseContinuousDetection(bool value);
-
+        auto ScalesWithTransform() const -> bool { return !IgnoreTransformScaling(); }
+        auto IgnoreTransformScaling() const -> bool { return m_info.flags & RigidBodyFlags::IgnoreTransformScaling; }
+        void IgnoreTransformScaling(bool value);
         /**
          * @name Velocity Functions
          * @note Requires BodyType::Dynamic or BodyType::Kinematic

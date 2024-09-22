@@ -63,6 +63,16 @@ TEST(JoltConversionTest, ToMotionType_convertsBodyType)
     EXPECT_EQ(JPH::EMotionType::Kinematic, ToMotionType(nc::physics::BodyType::Kinematic));
 }
 
+TEST(JoltConversionTest, ToObjectLayer_determinesLayer)
+{
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Dynamic, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Kinematic, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, ToObjectLayer(nc::physics::BodyType::Static, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Dynamic, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Kinematic, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Static, true));
+}
+
 TEST(JoltConversionTest, ToSpringSettings_convertsSettings)
 {
     const auto expected = nc::physics::SpringSettings{

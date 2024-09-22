@@ -30,8 +30,7 @@ constexpr auto g_dynamicProperties = nc::physics::RigidBodyInfo{
     .angularDamping = 0.4f,
     .gravityMultiplier = 0.1f,
     .type = nc::physics::BodyType::Dynamic,
-    .flags = nc::physics::RigidBodyFlags::ScaleWithTransform |
-             nc::physics::RigidBodyFlags::ContinuousDetection
+    .flags = nc::physics::RigidBodyFlags::ContinuousDetection
 };
 
 TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
@@ -52,6 +51,7 @@ TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
 
     EXPECT_EQ(JPH::EMotionType::Dynamic, actualBody->GetMotionType());
     EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, actualBody->GetObjectLayer());
+    EXPECT_FALSE(actualBody->IsSensor());
     EXPECT_EQ(nc::Entity::Hash{}(g_entity), actualBody->GetUserData());
     EXPECT_EQ(expectedProperties.friction, actualBody->GetFriction());
     EXPECT_EQ(expectedProperties.restitution, actualBody->GetRestitution());

@@ -6,6 +6,7 @@
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
@@ -21,16 +22,21 @@ namespace nc::sample
 std::function<void(unsigned)> SpawnFunc = nullptr;
 std::function<void(unsigned)> DestroyFunc = nullptr;
 
-int SpawnCount = 1000;
-int DestroyCount = 1000;
-float forceMultiplier = 1.0f;
+constexpr auto PlayerLayer = Entity::layer_type{10};
+auto SpawnCount = 1000;
+auto DestroyCount = 1000;
+auto ForceMultiplier = 1.0f;
+auto LogCollisionEvents = true;
+auto LogTriggerEvents = true;
 
 void Widget()
 {
     ImGui::Text("Physics Test");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
-        ui::DragFloat(forceMultiplier, "forceMultiplier");
+        ui::Checkbox(LogCollisionEvents, "logCollisions");
+        ui::Checkbox(LogTriggerEvents, "logTriggers");
+        ui::DragFloat(ForceMultiplier, "forceMultiplier");
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         const auto halfCellWidth = (ImGui::GetColumnWidth() * 0.5f) - 10.0f;
 
@@ -161,24 +167,24 @@ class VehicleController : public FreeComponent
         {
             auto& rBody = world.Get<physics::RigidBody>(ParentEntity());
 
-            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * forceMultiplier);
-            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * forceMultiplier);
-            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * forceMultiplier);
+            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * ForceMultiplier);
 
             if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * forceMultiplier;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * ForceMultiplier;
                 rBody.AddImpulse(dir);
             }
 
             if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Vector3::Up() * jumpForce * forceMultiplier;
+                const auto dir = Vector3::Up() * jumpForce * ForceMultiplier;
                 rBody.AddImpulse(dir);
             }
         }
@@ -188,7 +194,8 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
 {
     const auto head = world.Emplace<Entity>({
         .scale = Vector3::Splat(1.0f),
-        .tag = "Worm Head"
+        .tag = "Worm Head",
+        .layer = PlayerLayer
     });
 
     const auto segment1 = world.Emplace<Entity>({
@@ -248,15 +255,33 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
         bodyNode3
     );
 
+    static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs world)
+    {
+        static const auto deletedTag = std::string{"deleted"};
+        const auto& tag = world.Contains<Tag>(other)
+            ? world.Get<Tag>(other).value
+            : deletedTag;
+
+        GameLog::Log(fmt::format("Player {} with {} ({})", eventType, tag, other.Index()));
+    };
+
     world.Emplace<physics::CollisionListener>(
         head,
         [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs world){
-            const auto& tag = world.Get<Tag>(other).value;
-            GameLog::Log(fmt::format("Player collision enter with {} ({})", tag, other.Index()));
+            if (LogCollisionEvents)
+                log("collision enter", other, world);
         },
         [](Entity, Entity other, ecs::Ecs world){
-            const auto& tag = world.Get<Tag>(other).value;
-            GameLog::Log(fmt::format("Player collsion exit with {} ({})", tag, other.Index()));
+            if (LogCollisionEvents)
+                log("collision exit", other, world);
+        },
+        [](Entity, Entity other, ecs::Ecs world){
+            if (LogTriggerEvents)
+                log("trigger enter", other, world);
+        },
+        [](Entity, Entity other, ecs::Ecs world){
+            if (LogTriggerEvents)
+                log("trigger exit", other, world);
         }
     );
 
@@ -774,6 +799,68 @@ void BuildSwingingBars(ecs::Ecs world)
     bar2Body.AddConstraint(hingeInfo, poleBody);
 }
 
+void BuildTriggers(ecs::Ecs world, const Vector3& rootPosition)
+{
+    const auto root = world.Emplace<Entity>({
+        .position = rootPosition,
+        .tag = "Triggers"
+    });
+
+    const auto sphere = world.Emplace<Entity>({
+        .position = Vector3{-5.0f, 1.0f, -5.0f} + rootPosition,
+        .scale = Vector3::Splat(3.0f),
+        // .parent = root,
+        .tag = "Sphere"
+    });
+
+    const auto box = world.Emplace<Entity>({
+        .position = Vector3{0.0f, 1.0f, .0f} + rootPosition,
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.57f, 0.0f),
+        .scale = Vector3::Splat(3.0f),
+        // .parent = root,
+        .tag = "Box"
+    });
+
+    const auto capsule = world.Emplace<Entity>({
+        .position = Vector3{5.0f, 1.0f, 5.0f} + rootPosition,
+        .scale = Vector3::Splat(2.0f),
+        // .parent = root,
+        .tag = "Capsule"
+    });
+
+    constexpr auto white = Vector4::Splat(1.0f);
+    constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
+    constexpr auto source = graphics::WireframeSource::Collider;
+    world.Emplace<graphics::WireframeRenderer>(box, source, box, white);
+    world.Emplace<graphics::WireframeRenderer>(sphere, source, sphere, white);
+    world.Emplace<graphics::WireframeRenderer>(capsule, source, capsule, white);
+
+    const auto info = physics::RigidBodyInfo{
+        .type = physics::BodyType::Static,
+        .flags = physics::RigidBodyFlags::Trigger
+    };
+
+    world.Emplace<physics::RigidBody>(box, physics::Shape::MakeBox(), info);
+    world.Emplace<physics::RigidBody>(sphere, physics::Shape::MakeSphere(), info);
+    world.Emplace<physics::RigidBody>(capsule, physics::Shape::MakeCapsule(), info);
+
+    auto setPink = [](Entity self, Entity other, ecs::Ecs world)
+    {
+        if (other.Layer() == PlayerLayer)
+            world.Get<graphics::WireframeRenderer>(self).color = pink;
+    };
+
+    auto setWhite = [](Entity self, Entity other, ecs::Ecs world)
+    {
+        if (other.Layer() == PlayerLayer)
+            world.Get<graphics::WireframeRenderer>(self).color = white;
+    };
+
+    world.Emplace<physics::CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
+    world.Emplace<physics::CollisionListener>(sphere, nullptr, nullptr, setPink, setWhite);
+    world.Emplace<physics::CollisionListener>(capsule, nullptr, nullptr, setPink, setWhite);
+}
+
 void BuildSpawner(ecs::Ecs world, Random* ncRandom)
 {
     const auto spawnerHandle = world.Emplace<Entity>({
@@ -845,6 +932,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     BuildHalfPipes(world);
     BuildPunchingBag(world);
     BuildChain(world);
+    BuildTriggers(world, Vector3{-25.0f, 0.0f, 20.0f});
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({

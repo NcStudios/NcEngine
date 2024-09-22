@@ -30,7 +30,9 @@ void RigidBody::SetBodyType(BodyType type, bool wake)
     }
 
     m_info.type = type;
-    s_ctx->interface.SetMotionType(ToBody(m_handle)->GetID(), ToMotionType(type), ToActivationMode(wake));
+    const auto id = ToBody(m_handle)->GetID();
+    s_ctx->interface.SetMotionType(id, ToMotionType(type), ToActivationMode(wake));
+    s_ctx->interface.SetObjectLayer(id, ToObjectLayer(m_info.type, IsTrigger()));
 }
 
 auto RigidBody::IsAwake() const -> bool
@@ -92,15 +94,35 @@ void RigidBody::SetGravityMultiplier(float factor)
     s_ctx->interface.SetGravityFactor(ToBody(m_handle)->GetID(), m_info.gravityMultiplier);
 }
 
-void RigidBody::ScalesWithTransform(bool value)
+void RigidBody::SetTrigger(bool value)
+{
+    if (UseContinuousDetection())
+    {
+        return;
+    }
+
+    auto body = ToBody(m_handle);
+    body->SetIsSensor(value);
+    s_ctx->interface.SetObjectLayer(body->GetID(), ToObjectLayer(m_info.type, value));
+    m_info.flags = value
+        ? m_info.flags | RigidBodyFlags::Trigger
+        : m_info.flags & ~RigidBodyFlags::Trigger;
+}
+
+void RigidBody::IgnoreTransformScaling(bool value)
 {
     m_info.flags = value
-        ? m_info.flags | RigidBodyFlags::ScaleWithTransform
-        : m_info.flags & ~RigidBodyFlags::ScaleWithTransform;
+        ? m_info.flags | RigidBodyFlags::IgnoreTransformScaling
+        : m_info.flags & ~RigidBodyFlags::IgnoreTransformScaling;
 }
 
 void RigidBody::UseContinuousDetection(bool value)
 {
+    if (IsTrigger())
+    {
+        return;
+    }
+
     s_ctx->interface.SetMotionQuality(ToBody(m_handle)->GetID(), ToMotionQuality(value));
     m_info.flags = value
         ? m_info.flags | RigidBodyFlags::ContinuousDetection

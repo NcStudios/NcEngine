@@ -22,10 +22,20 @@ using OnCollisionExit_t = std::function<void(Entity self,
                                              Entity other,
                                              ecs::Ecs world)>;
 
+/** @brief Callback type for trigger enter events. */
+using OnTriggerEnter_t = std::function<void(Entity self,
+                                            Entity other,
+                                            ecs::Ecs world)>;
+
+/** @brief Callback type for trigger exit events. */
+using OnTriggerExit_t = OnTriggerEnter_t;
+
 /** @brief Component that receives collision event callbacks. */
 struct CollisionListener
 {
     OnCollisionEnter_t onEnter = nullptr;
     OnCollisionExit_t onExit = nullptr;
+    OnTriggerEnter_t onTriggerEnter = nullptr;
+    OnTriggerExit_t onTriggerExit = nullptr;
 };
 } // namespace nc::physics

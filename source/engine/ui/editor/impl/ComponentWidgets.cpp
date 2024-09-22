@@ -149,8 +149,8 @@ namespace rigid_body_ext
 {
 using T = nc::physics::RigidBody;
 
-constexpr bool (T::*getScalesWithTransform)() const    = &T::ScalesWithTransform;
-constexpr void (T::*setScalesWithTransform)(bool)      = &T::ScalesWithTransform;
+constexpr bool (T::*getIgnoreTransformScaling)() const    = &T::IgnoreTransformScaling;
+constexpr void (T::*setIgnoreTransformScaling)(bool)      = &T::IgnoreTransformScaling;
 constexpr bool (T::*getUseContinuousDetection)() const = &T::UseContinuousDetection;
 constexpr void (T::*setUseContinuousDetection)(bool)   = &T::UseContinuousDetection;
 
@@ -165,15 +165,16 @@ constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
     body.SetBodyType(nc::physics::ToBodyType(bodyTypeStr));
 };
 
-constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"               };
-constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"            };
-constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"            };
-constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"         };
-constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"       };
-constexpr auto angularDampingProp         = nc::ui::Property{ &T::GetAngularDamping,     &T::SetAngularDamping,     "angularDamping"      };
-constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMultiplier,  &T::SetGravityMultiplier,  "gravityMultiplier"   };
-constexpr auto scalesWithTransformProp    = nc::ui::Property{ getScalesWithTransform,    setScalesWithTransform,    "scalesWithTransform" };
-constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"  };
+constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"                  };
+constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"               };
+constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"               };
+constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"            };
+constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"          };
+constexpr auto angularDampingProp         = nc::ui::Property{ &T::GetAngularDamping,     &T::SetAngularDamping,     "angularDamping"         };
+constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMultiplier,  &T::SetGravityMultiplier,  "gravityMultiplier"      };
+constexpr auto triggerProp                = nc::ui::Property{ &T::IsTrigger,             &T::SetTrigger,            "isTrigger"              };
+constexpr auto scalesWithTransformProp    = nc::ui::Property{ getIgnoreTransformScaling, setIgnoreTransformScaling, "ignoreTransformScaling" };
+constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"     };
 
 void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
 {
@@ -799,11 +800,19 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
         ImGui::TreePop();
     }
 
+
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Flags", 0))
     {
-        ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp,    body, &ui::Checkbox);
+        ImGui::BeginDisabled(body.UseContinuousDetection());
+        ui::PropertyWidget(rigid_body_ext::triggerProp, body, &ui::Checkbox);
+        ImGui::EndDisabled();
+
+        ImGui::BeginDisabled(body.IsTrigger());
         ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
+        ImGui::EndDisabled();
+
+        ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp, body, &ui::Checkbox);
         ImGui::TreePop();
     }
 

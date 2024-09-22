@@ -75,13 +75,18 @@ inline auto ToMotionType(BodyType bodyType) -> JPH::EMotionType
     }
 }
 
-inline auto ToObjectLayer(BodyType bodyType) -> JPH::ObjectLayer
+inline auto ToObjectLayer(BodyType bodyType, bool isTrigger) -> JPH::ObjectLayer
 {
+    if (isTrigger)
+    {
+        return ObjectLayer::Trigger;
+    }
+
     switch (bodyType)
     {
-        case BodyType::Dynamic:   [[fallthrough]];
-        case BodyType::Kinematic: return ObjectLayer::Dynamic;
-        case BodyType::Static:    return ObjectLayer::Static;
+        case BodyType::Dynamic:       [[fallthrough]];
+        case BodyType::Kinematic:     return ObjectLayer::Dynamic;
+        case BodyType::Static:        return ObjectLayer::Static;
         default: std::unreachable();
     }
 }

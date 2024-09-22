@@ -38,7 +38,7 @@ constexpr auto g_maxPos = 5000.0f;
 constexpr auto g_minPos = -g_maxPos;
 constexpr auto g_maxAngle = std::numbers::pi_v<float> * 2.0f;
 constexpr auto g_minAngle = -g_maxAngle;
-constexpr auto g_minScale = 0.0001f;
+constexpr auto g_minScale = 0.1f;
 constexpr auto g_maxScale = 1000.0f;
 
 /** @brief Create a top-level window. */
