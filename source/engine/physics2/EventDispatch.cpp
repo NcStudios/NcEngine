@@ -2,7 +2,7 @@
 #include "jolt/ContactListener.h"
 
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/physics/EventListeners.h"
+#include "ncengine/physics/CollisionListener.h"
 
 namespace
 {
