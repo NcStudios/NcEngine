@@ -38,10 +38,14 @@ auto BodyFactory::MakeBody(const RigidBody& rigidBody, DirectX::FXMMATRIX transf
         ToJoltVec3(initPosition),
         ToJoltQuaternion(initRotation),
         ToMotionType(bodyType),
-        ToObjectLayer(bodyType)
+        ToObjectLayer(bodyType, rigidBody.IsTrigger())
     };
 
-    bodySettings.mUserData = Entity::Hash{}(rigidBody.GetEntity());
+    const auto entity = rigidBody.GetEntity();
+    bodySettings.mUserData = Entity::Hash{}(entity);
+    bodySettings.mAllowedDOFs = ToAllowedDOFs(rigidBody.GetDegreesOfFreedom());
+    bodySettings.mAllowDynamicOrKinematic = !entity.IsStatic(); // skip creating MotionProperties for static entities
+    bodySettings.mIsSensor = rigidBody.IsTrigger();
     bodySettings.mMotionQuality = ToMotionQuality(rigidBody.UseContinuousDetection());
     bodySettings.mFriction = rigidBody.GetFriction();
     bodySettings.mRestitution = rigidBody.GetRestitution();
