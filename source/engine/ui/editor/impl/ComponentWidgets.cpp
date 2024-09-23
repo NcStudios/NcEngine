@@ -11,9 +11,9 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Collider.h"
+#include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/PhysicsUtility.h"
@@ -149,8 +149,8 @@ namespace rigid_body_ext
 {
 using T = nc::physics::RigidBody;
 
-constexpr bool (T::*getScalesWithTransform)() const    = &T::ScalesWithTransform;
-constexpr void (T::*setScalesWithTransform)(bool)      = &T::ScalesWithTransform;
+constexpr bool (T::*getIgnoreTransformScaling)() const    = &T::IgnoreTransformScaling;
+constexpr void (T::*setIgnoreTransformScaling)(bool)      = &T::IgnoreTransformScaling;
 constexpr bool (T::*getUseContinuousDetection)() const = &T::UseContinuousDetection;
 constexpr void (T::*setUseContinuousDetection)(bool)   = &T::UseContinuousDetection;
 
@@ -165,15 +165,16 @@ constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
     body.SetBodyType(nc::physics::ToBodyType(bodyTypeStr));
 };
 
-constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"               };
-constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"            };
-constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"            };
-constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"         };
-constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"       };
-constexpr auto angularDampingProp         = nc::ui::Property{ &T::GetAngularDamping,     &T::SetAngularDamping,     "angularDamping"      };
-constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMultiplier,  &T::SetGravityMultiplier,  "gravityMultiplier"   };
-constexpr auto scalesWithTransformProp    = nc::ui::Property{ getScalesWithTransform,    setScalesWithTransform,    "scalesWithTransform" };
-constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"  };
+constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"                  };
+constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"               };
+constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"               };
+constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"            };
+constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"          };
+constexpr auto angularDampingProp         = nc::ui::Property{ &T::GetAngularDamping,     &T::SetAngularDamping,     "angularDamping"         };
+constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMultiplier,  &T::SetGravityMultiplier,  "gravityMultiplier"      };
+constexpr auto triggerProp                = nc::ui::Property{ &T::IsTrigger,             &T::SetTrigger,            "isTrigger"              };
+constexpr auto scalesWithTransformProp    = nc::ui::Property{ getIgnoreTransformScaling, setIgnoreTransformScaling, "ignoreTransformScaling" };
+constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"     };
 
 void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
 {
@@ -214,6 +215,38 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     if (heightModified | radiusModified | positionModified)
     {
         body.SetShape(nc::physics::Shape::MakeCapsule(height, radius, position), transformScale);
+    }
+}
+
+void DegreesOfFreedomWidget(nc::physics::RigidBody& body)
+{
+    using nc::physics::DegreeOfFreedom;
+    auto dof = body.GetDegreesOfFreedom();
+    auto modified = false;
+    auto flagBox = [&dof, &modified](DegreeOfFreedom::Type flag, const char* label)
+    {
+        auto hasFlag = static_cast<bool>(dof & flag);
+        ImGui::SameLine();
+        if (nc::ui::Checkbox(hasFlag, label))
+        {
+            dof = hasFlag ? dof | flag : dof & ~flag;
+            modified = true;
+        }
+    };
+
+    ImGui::Text("Translation: ");
+    flagBox(DegreeOfFreedom::TranslationX, "X###DOFTransX");
+    flagBox(DegreeOfFreedom::TranslationY, "Y###DOFTransY");
+    flagBox(DegreeOfFreedom::TranslationZ, "Z###DOFTransZ");
+
+    ImGui::Text("Rotation:    ");
+    flagBox(DegreeOfFreedom::RotationX, "X###DOFRotX");
+    flagBox(DegreeOfFreedom::RotationY, "Y###DOFRotY");
+    flagBox(DegreeOfFreedom::RotationZ, "Z###DOFRotZ");
+
+    if (modified)
+    {
+        body.SetDegreesOfFreedom(dof);
     }
 }
 
@@ -761,6 +794,7 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
 {
     IMGUI_SCOPE(ui::ImGuiId, "RigidBody");
     ui::PropertyWidget(rigid_body_ext::awakeProp, body, &ui::Checkbox);
+    const auto isStaticBody = body.GetBodyType() == physics::BodyType::Static;
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Shape", 0))
@@ -793,17 +827,38 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
         ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
         ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
         ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
-        ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        {
+            IMGUI_SCOPE(ui::DisableIf, isStaticBody);
+            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
+            ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+            ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+    if(ImGui::TreeNodeEx("Degrees of Freedom", 0))
+    {
+        IMGUI_SCOPE(ui::DisableIf, isStaticBody);
+        rigid_body_ext::DegreesOfFreedomWidget(body);
         ImGui::TreePop();
     }
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Flags", 0))
     {
-        ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp,    body, &ui::Checkbox);
-        ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.UseContinuousDetection());
+            ui::PropertyWidget(rigid_body_ext::triggerProp, body, &ui::Checkbox);
+        }
+
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.IsTrigger());
+            ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
+        }
+
+        ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp, body, &ui::Checkbox);
         ImGui::TreePop();
     }
 
