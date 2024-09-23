@@ -218,6 +218,38 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     }
 }
 
+void DegreesOfFreedomWidget(nc::physics::RigidBody& body)
+{
+    using nc::physics::DegreeOfFreedom;
+    auto dof = body.GetDegreesOfFreedom();
+    auto modified = false;
+    auto flagBox = [&dof, &modified](DegreeOfFreedom::Type flag, const char* label)
+    {
+        auto hasFlag = static_cast<bool>(dof & flag);
+        ImGui::SameLine();
+        if (nc::ui::Checkbox(hasFlag, label))
+        {
+            dof = hasFlag ? dof | flag : dof & ~flag;
+            modified = true;
+        }
+    };
+
+    ImGui::Text("Translation: ");
+    flagBox(DegreeOfFreedom::TranslationX, "X###DOFTransX");
+    flagBox(DegreeOfFreedom::TranslationY, "Y###DOFTransY");
+    flagBox(DegreeOfFreedom::TranslationZ, "Z###DOFTransZ");
+
+    ImGui::Text("Rotation:    ");
+    flagBox(DegreeOfFreedom::RotationX, "X###DOFRotX");
+    flagBox(DegreeOfFreedom::RotationY, "Y###DOFRotY");
+    flagBox(DegreeOfFreedom::RotationZ, "Z###DOFRotZ");
+
+    if (modified)
+    {
+        body.SetDegreesOfFreedom(dof);
+    }
+}
+
 void UpdateConstraintType(nc::physics::Constraint& constraint, nc::physics::ConstraintType type)
 {
     using namespace nc::physics;
@@ -762,6 +794,7 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
 {
     IMGUI_SCOPE(ui::ImGuiId, "RigidBody");
     ui::PropertyWidget(rigid_body_ext::awakeProp, body, &ui::Checkbox);
+    const auto isStaticBody = body.GetBodyType() == physics::BodyType::Static;
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Shape", 0))
@@ -794,23 +827,36 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
         ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
         ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
         ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
-        ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        {
+            IMGUI_SCOPE(ui::DisableIf, isStaticBody);
+            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
+            ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+            ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        }
+
         ImGui::TreePop();
     }
 
+    ImGui::Separator();
+    if(ImGui::TreeNodeEx("Degrees of Freedom", 0))
+    {
+        IMGUI_SCOPE(ui::DisableIf, isStaticBody);
+        rigid_body_ext::DegreesOfFreedomWidget(body);
+        ImGui::TreePop();
+    }
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Flags", 0))
     {
-        ImGui::BeginDisabled(body.UseContinuousDetection());
-        ui::PropertyWidget(rigid_body_ext::triggerProp, body, &ui::Checkbox);
-        ImGui::EndDisabled();
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.UseContinuousDetection());
+            ui::PropertyWidget(rigid_body_ext::triggerProp, body, &ui::Checkbox);
+        }
 
-        ImGui::BeginDisabled(body.IsTrigger());
-        ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
-        ImGui::EndDisabled();
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.IsTrigger());
+            ui::PropertyWidget(rigid_body_ext::useContinuousDetectionProp, body, &ui::Checkbox);
+        }
 
         ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp, body, &ui::Checkbox);
         ImGui::TreePop();

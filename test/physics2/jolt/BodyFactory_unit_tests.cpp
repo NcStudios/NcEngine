@@ -30,6 +30,7 @@ constexpr auto g_dynamicProperties = nc::physics::RigidBodyInfo{
     .angularDamping = 0.4f,
     .gravityMultiplier = 0.1f,
     .type = nc::physics::BodyType::Dynamic,
+    .freedom = nc::physics::DegreeOfFreedom::TranslationY,
     .flags = nc::physics::RigidBodyFlags::ContinuousDetection
 };
 
@@ -57,6 +58,7 @@ TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
     EXPECT_EQ(expectedProperties.restitution, actualBody->GetRestitution());
 
     const auto& actualMotionProperties = actualBody->GetMotionProperties();
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationY, actualMotionProperties->GetAllowedDOFs());
     EXPECT_EQ(JPH::EMotionQuality::LinearCast, actualMotionProperties->GetMotionQuality());
     EXPECT_EQ(expectedProperties.linearDamping, actualMotionProperties->GetLinearDamping());
     EXPECT_EQ(expectedProperties.angularDamping, actualMotionProperties->GetAngularDamping());
