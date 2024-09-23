@@ -59,6 +59,13 @@ void ContactListener::OnContactAdded(const JPH::Body& body1,
         return; // our api doesn't allow this event to be dispatched
     }
 
+    if (body1.IsSensor() || body2.IsSensor())
+    {
+        auto lock = std::lock_guard{m_addedMutex};
+        m_enteredTriggers.emplace_back(pair);
+        return;
+    }
+
     auto pointsOnFirst = std::array<Vector3, 4>{};
     auto pointsOnSecond = std::array<Vector3, 4>{};
     const auto numPointsOnFirst = FillPoints(pointsOnFirst, manifold.mRelativeContactPointsOn1);
@@ -66,7 +73,7 @@ void ContactListener::OnContactAdded(const JPH::Body& body1,
 
     {
         auto lock = std::lock_guard{m_addedMutex};
-        m_added.emplace_back(
+        m_enteredCollisions.emplace_back(
             pair,
             HitInfo{
                 ToVector3(manifold.mBaseOffset),
@@ -104,26 +111,61 @@ void ContactListener::OnContactRemoved(const JPH::SubShapeIDPair& pairID)
         return;
     }
 
+    auto& pair = pos->second.pair;
+    auto& queue = pos->second.isTrigger ? m_exitedTriggers : m_exitedCollisions;
+
     {
         auto lock = std::lock_guard{m_removedMutex};
-        m_removed.push_back(pos->second);
+        queue.push_back(pair);
     }
 }
 
 void ContactListener::CommitPendingChanges()
 {
-    for (const auto& overlappinPair : m_removed)
+    for (const auto& overlapping : m_exitedCollisions)
     {
-        m_pairs.erase(overlappinPair.hash);
+        m_pairs.erase(overlapping.hash);
     }
 
-    m_removed.clear();
+    m_exitedCollisions.clear();
 
-    for (const auto& collisionPair : m_added)
+    for (const auto& overlapping : m_exitedTriggers)
     {
-        m_pairs.emplace(collisionPair.pair.hash, collisionPair.pair);
+        m_pairs.erase(overlapping.hash);
     }
 
-    m_added.clear();
+    m_exitedTriggers.clear();
+
+    for (const auto& collision : m_enteredCollisions)
+    {
+        m_pairs.emplace(
+            collision.pair.hash,
+            DetectEvent{collision.pair, false}
+        );
+    }
+
+    m_enteredCollisions.clear();
+
+    for (const auto& collisionPair : m_enteredTriggers)
+    {
+        m_pairs.emplace(
+            collisionPair.hash,
+            DetectEvent{collisionPair, true}
+        );
+    }
+
+    m_enteredTriggers.clear();
+}
+
+void ContactListener::Clear() noexcept
+{
+    m_enteredCollisions.clear();
+    m_enteredCollisions.shrink_to_fit();
+    m_enteredTriggers.clear();
+    m_enteredTriggers.shrink_to_fit();
+    m_exitedCollisions.clear();
+    m_exitedCollisions.shrink_to_fit();
+    m_exitedTriggers.clear();
+    m_exitedTriggers.shrink_to_fit();
 }
 } // namespace nc::physics

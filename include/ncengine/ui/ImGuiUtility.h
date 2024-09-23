@@ -38,7 +38,7 @@ constexpr auto g_maxPos = 5000.0f;
 constexpr auto g_minPos = -g_maxPos;
 constexpr auto g_maxAngle = std::numbers::pi_v<float> * 2.0f;
 constexpr auto g_minAngle = -g_maxAngle;
-constexpr auto g_minScale = 0.0001f;
+constexpr auto g_minScale = 0.1f;
 constexpr auto g_maxScale = 1000.0f;
 
 /** @brief Create a top-level window. */
@@ -88,6 +88,9 @@ auto InputAngles(Vector3& value, const char* label) -> bool;
 
 /** @brief Vector3 UI widget constrained for scale inputs. */
 auto InputScale(Vector3& value, const char* label, float min = g_minScale, float max = g_maxScale) -> bool;
+
+/** @brief Vector3 UI widget constraint for normalized axis inputs. */
+auto InputAxis(Vector3& value, const char* label, float min = -1.0f, float max = 1.0f) -> bool;
 
 /** @brief RGB color picker UI widget. */
 auto InputColor3(Vector3& value, const char* label) -> bool;
@@ -178,6 +181,13 @@ struct ItemWidth
 {
     explicit ItemWidth(float itemWidth) { ImGui::PushItemWidth(itemWidth); }
     ~ItemWidth() noexcept               { ImGui::PopItemWidth();           }
+};
+
+/** @brief RAII wrapper for conditionally disabling widgets within a scope. */
+struct DisableIf
+{
+    explicit DisableIf(bool condition) { ImGui::BeginDisabled(condition); }
+    ~DisableIf() noexcept              { ImGui::EndDisabled();            }
 };
 
 /** @brief Check if the UI is currently using keyboard events.
@@ -305,6 +315,30 @@ inline auto InputAngles(Vector3& value, const char* label) -> bool
 inline auto InputScale(Vector3& value, const char* label, float min, float max) -> bool
 {
     return ImGui::DragFloat3(label, &value.x, 0.5f, min, max);
+}
+
+inline auto InputAxis(Vector3& value, const char* label, float min, float max) -> bool
+{
+    const auto previous = value;
+    if (ImGui::DragFloat3(label, &value.x, 0.1f, min, max))
+    {
+        // When a component is changed to a maximum, other values are still potentially non-zero. These cases need to
+        // be hard reset to the correct axis otherwise normalization prevents ever being able to reach it.
+        if (value.x != previous.x && std::fabs(value.x) == 1.0f)
+            value = Vector3{value.x, 0.0f, 0.0f};
+        else if (value.y != previous.y && std::fabs(value.y) == 1.0f)
+            value = Vector3{0.0f, value.y, 0.0f};
+        else if (value.z != previous.z && std::fabs(value.z) == 1.0f)
+            value = Vector3{0.0f, 0.0f, value.z};
+        else if (value == Vector3::Zero()) // prevent problems when 0 is directly enterered
+            value = previous;
+        else
+            value = Normalize(value);
+
+        return true;
+    }
+
+    return false;
 }
 
 inline auto InputColor(Vector3& value, const char* label) -> bool

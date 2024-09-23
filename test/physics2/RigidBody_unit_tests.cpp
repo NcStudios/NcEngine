@@ -117,6 +117,21 @@ TEST_F(RigidBodyTest, Constructor_staticEntityWithDynamicBody_overwritesBodyType
     EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
 }
 
+TEST_F(RigidBodyTest, Constructor_triggerWithContinuousDetection_disablesContinuosDetection)
+{
+    auto uut = nc::physics::RigidBody{
+        g_entity,
+        g_shape,
+        nc::physics::RigidBodyInfo{
+            .flags = nc::physics::RigidBodyFlags::Trigger |
+                     nc::physics::RigidBodyFlags::ContinuousDetection
+        }
+    };
+
+    EXPECT_FALSE(uut.UseContinuousDetection());
+    EXPECT_TRUE(uut.IsTrigger());
+}
+
 TEST_F(RigidBodyTest, MoveOperations_transferRegistrationData)
 {
     auto first = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
@@ -182,6 +197,130 @@ TEST_F(RigidBodyTest, SimulationPropertyFunctions_updateInternalState)
     uut.SetGravityMultiplier(2.0f);
     EXPECT_FLOAT_EQ(2.0f, uut.GetGravityMultiplier());
     EXPECT_FLOAT_EQ(2.0f, apiBody->GetMotionProperties()->GetGravityFactor());
+}
+
+TEST_F(RigidBodyTest, RigidBodyFlagFunctions_validFlags_setExpectedState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    auto body = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetTrigger(true);
+    EXPECT_TRUE(uut.IsTrigger());
+    EXPECT_TRUE(body->IsSensor());
+
+    uut.SetTrigger(false);
+    EXPECT_FALSE(uut.IsTrigger());
+    EXPECT_FALSE(body->IsSensor());
+
+    uut.UseContinuousDetection(true);
+    EXPECT_TRUE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::LinearCast, body->GetMotionProperties()->GetMotionQuality());
+
+    uut.UseContinuousDetection(false);
+    EXPECT_FALSE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::Discrete, body->GetMotionProperties()->GetMotionQuality());
+
+    uut.IgnoreTransformScaling(true);
+    EXPECT_TRUE(uut.IgnoreTransformScaling());
+    EXPECT_FALSE(uut.ScalesWithTransform());
+
+    uut.IgnoreTransformScaling(false);
+    EXPECT_FALSE(uut.IgnoreTransformScaling());
+    EXPECT_TRUE(uut.ScalesWithTransform());
+}
+
+TEST_F(RigidBodyTest, RigidBodyFlagFunctions_incompatibleFlags_doesNotModifyState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    auto body = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetTrigger(true);
+    uut.UseContinuousDetection(true);
+    EXPECT_TRUE(uut.IsTrigger());
+    EXPECT_TRUE(body->IsSensor());
+    EXPECT_FALSE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::Discrete, body->GetMotionProperties()->GetMotionQuality());
+
+    uut.SetTrigger(false);
+    uut.UseContinuousDetection(true);
+    uut.SetTrigger(true);
+    EXPECT_FALSE(uut.IsTrigger());
+    EXPECT_FALSE(body->IsSensor());
+    EXPECT_TRUE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::LinearCast, body->GetMotionProperties()->GetMotionQuality());
+}
+
+TEST_F(RigidBodyTest, SetBody_dynamicToStatic_updateInternalState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetBodyType(nc::physics::BodyType::Static);
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetBody_kinematicToStatic_updateInternalState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_kinematicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetBodyType(nc::physics::BodyType::Static);
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetBody_staticToDynamic_updateInternalState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_staticInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetBodyType(nc::physics::BodyType::Dynamic);
+    EXPECT_EQ(nc::physics::BodyType::Dynamic, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Dynamic, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Dynamic, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetBody_staticEntity_doesNotModifyState)
+{
+    auto uut = CreateRigidBody(g_staticEntity, g_shape, g_staticInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    EXPECT_NO_THROW(uut.SetBodyType(nc::physics::BodyType::Dynamic));
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetDegreesOfFreedom_dynamicBody_updatesMotionProperties)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+    const auto motionProperties = apiBody->GetMotionProperties();
+    const auto originalInvMass = motionProperties->GetInverseMass();
+    const auto originalInvInertia = motionProperties->GetInverseInertiaDiagonal();
+
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::RotationX);
+    EXPECT_EQ(nc::physics::DegreeOfFreedom::RotationX, uut.GetDegreesOfFreedom());
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationX, motionProperties->GetAllowedDOFs());
+    EXPECT_EQ(0.0f, motionProperties->GetInverseMass());
+
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::TranslationX);
+    EXPECT_EQ(nc::physics::DegreeOfFreedom::TranslationX, uut.GetDegreesOfFreedom());
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationX, motionProperties->GetAllowedDOFs());
+    EXPECT_EQ(JPH::Vec3::sZero(), motionProperties->GetInverseInertiaDiagonal());
+
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::All);
+    EXPECT_EQ(nc::physics::DegreeOfFreedom::All, uut.GetDegreesOfFreedom());
+    EXPECT_EQ(JPH::EAllowedDOFs::All, motionProperties->GetAllowedDOFs());
+    EXPECT_EQ(originalInvMass, motionProperties->GetInverseMass());
+    EXPECT_EQ(originalInvInertia, motionProperties->GetInverseInertiaDiagonal());
 }
 
 TEST_F(RigidBodyTest, VelocityFunctions_dynamicBody_updateVelocities)

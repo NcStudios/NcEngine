@@ -12,7 +12,8 @@ struct ObjectLayer
 {
     static constexpr auto Static = JPH::ObjectLayer{0};
     static constexpr auto Dynamic = JPH::ObjectLayer{1};
-    static constexpr auto LayerCount = 2u;
+    static constexpr auto Trigger = JPH::ObjectLayer{2};
+    static constexpr auto LayerCount = 3u;
 };
 
 // Layers for broadphase subtrees - using a 1-1 mapping to ObjectLayers
@@ -20,7 +21,8 @@ struct BroadPhaseLayer
 {
     static constexpr auto Static = JPH::BroadPhaseLayer{0};
     static constexpr auto Dynamic = JPH::BroadPhaseLayer{1};
-    static constexpr auto LayerCount = 2u;
+    static constexpr auto Trigger = JPH::BroadPhaseLayer{2};
+    static constexpr auto LayerCount = 3u;
 };
 
 // Defines mapping from ObjectLayer -> BroadPhaseLayer
@@ -31,6 +33,7 @@ public:
     {
         m_map[ObjectLayer::Static] = BroadPhaseLayer::Static;
         m_map[ObjectLayer::Dynamic] = BroadPhaseLayer::Dynamic;
+        m_map[ObjectLayer::Trigger] = BroadPhaseLayer::Trigger;
     }
 
     auto GetNumBroadPhaseLayers() const -> uint32_t override
@@ -50,6 +53,7 @@ public:
         {
             case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayer::Dynamic): return "Dynamic";
             case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayer::Static): return "Static";
+            case static_cast<JPH::BroadPhaseLayer::Type>(BroadPhaseLayer::Trigger): return "Trigger";
             default: return "Unknown";
         }
     }
@@ -69,6 +73,7 @@ class ObjectLayerPairFilter : public JPH::ObjectLayerPairFilter
             {
                 case ObjectLayer::Static: return second == ObjectLayer::Dynamic;
                 case ObjectLayer::Dynamic: return true;
+                case ObjectLayer::Trigger: return second == ObjectLayer::Dynamic;
                 default:
                     NC_ASSERT(false, fmt::format("Unhandled ObjectLayer '{}'", first));
                     std::unreachable();
@@ -86,6 +91,7 @@ class ObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter
             {
                 case ObjectLayer::Static: return second == BroadPhaseLayer::Dynamic;
                 case ObjectLayer::Dynamic: return true;
+                case ObjectLayer::Trigger: return second == BroadPhaseLayer::Dynamic;
                 default:
                     NC_ASSERT(false, fmt::format("Unhandled ObjectLayer '{}'", first));
                     std::unreachable();

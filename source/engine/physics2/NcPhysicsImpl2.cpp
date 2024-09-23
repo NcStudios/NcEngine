@@ -99,8 +99,7 @@ void NcPhysicsImpl2::SyncTransforms()
 {
     for (auto& body : m_ecs.GetAll<RigidBody>())
     {
-        // @todo: 691 not sure how kinematic behave yet, assuming they won't get updated
-        if (body.GetBodyType() != BodyType::Dynamic)
+        if (body.GetBodyType() == BodyType::Static)
         {
             continue;
         }
@@ -125,6 +124,7 @@ void NcPhysicsImpl2::OnBeforeSceneLoad()
 
 void NcPhysicsImpl2::Clear() noexcept
 {
+    m_jolt.contactListener.Clear();
     m_constraintManager.Clear();
     m_bodyManager.Clear();
     m_bodyManager.DeferCleanup(true);
