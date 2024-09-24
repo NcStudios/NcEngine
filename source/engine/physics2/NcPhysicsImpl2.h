@@ -37,6 +37,8 @@ class NcPhysicsImpl2 final : public NcPhysics
         void OnBeforeSceneLoad() override;
         void Clear() noexcept override;
 
+        auto IsUpdateEnabled() const -> bool override { return m_updateEnabled; }
+        void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
         void AddJoint(Entity , Entity, const Vector3&, const Vector3&, float = 0.2f, float = 0.0f) override {}
         void RemoveJoint(Entity, Entity ) override {}
         void RemoveAllJoints(Entity) override {}
@@ -50,6 +52,7 @@ class NcPhysicsImpl2 final : public NcPhysics
         ShapeFactory m_shapeFactory;
         ConstraintManager m_constraintManager;
         BodyManager m_bodyManager;
+        bool m_updateEnabled = true;
 
         void OnAddRigidBody(RigidBody& body);
         void SyncTransforms();
