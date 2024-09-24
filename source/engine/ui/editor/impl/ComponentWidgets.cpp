@@ -486,6 +486,15 @@ void ConstraintWidget(nc::physics::Constraint& constraint, nc::physics::RigidBod
         ImGui::TreePop();
     }
 }
+
+void MakeDefaultConstraint(nc::physics::RigidBody& body, nc::Transform& transform)
+{
+    body.AddConstraint(nc::physics::FixedConstraintInfo{
+        .ownerRight = transform.Right(),
+        .ownerUp = transform.Up(),
+        .targetPosition = transform.Position()
+    });
+}
 } // namespace rigid_body_ext
 
 namespace particle_emitter_ext
@@ -881,7 +890,7 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
 
         if (ImGui::Button("Add Constraint"))
         {
-            body.AddConstraint(physics::FixedConstraintInfo{});
+            rigid_body_ext::MakeDefaultConstraint(body, ctx.world.Get<Transform>(body.GetEntity()));
         }
 
         ImGui::TreePop();
