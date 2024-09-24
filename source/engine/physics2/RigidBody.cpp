@@ -74,7 +74,10 @@ void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale, bool
 
     const auto newShape = s_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
     s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, false, ToActivationMode(wake));
-    SetMass(m_info.mass); // recalculate inertia
+    if (m_info.type != BodyType::Static)
+    {
+        SetMass(m_info.mass); // recalculate inertia
+    }
 }
 
 void RigidBody::SetMass(float mass)
@@ -266,7 +269,10 @@ auto RigidBody::SetSimulatedBodyScale(Transform& transform,
         appliedScale = NormalizeScaleForShape(m_shape.GetType(), transform.Scale(), scale);
         const auto newShape = s_ctx->shapeFactory.MakeShape(m_shape, ToJoltVec3(appliedScale));
         s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, false, ToActivationMode(wake));
-        SetMass(m_info.mass); // recalculate inertia
+        if (m_info.type != BodyType::Static)
+        {
+            SetMass(m_info.mass); // recalculate inertia
+        }
     }
 
     transform.SetScale(appliedScale);
