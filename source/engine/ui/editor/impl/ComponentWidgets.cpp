@@ -15,6 +15,7 @@
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/PhysicsLimits.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/PhysicsUtility.h"
 #include "ncengine/physics/RigidBody.h"
@@ -167,6 +168,7 @@ constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
 
 constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"                  };
 constexpr auto bodyTypeProp               = nc::ui::Property{ getBodyType,               setBodyType,               "bodyType"               };
+constexpr auto massProp                   = nc::ui::Property{ &T::GetMass,               &T::SetMass,               "mass"                   };
 constexpr auto frictionProp               = nc::ui::Property{ &T::GetFriction,           &T::SetFriction,           "friction"               };
 constexpr auto restitutionProp            = nc::ui::Property{ &T::GetRestitution,        &T::SetRestitution,        "restitution"            };
 constexpr auto linearDampingProp          = nc::ui::Property{ &T::GetLinearDamping,      &T::SetLinearDamping,      "linearDamping"          };
@@ -181,7 +183,7 @@ void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformSca
     const auto& shape = body.GetShape();
     auto extents = shape.GetLocalScale();
     auto position = shape.GetLocalPosition();
-    const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (positionModified || extentsModified)
     {
@@ -194,7 +196,7 @@ void SphereProperties(nc::physics::RigidBody& body, const nc::Vector3& transform
     const auto& shape = body.GetShape();
     auto radius = shape.GetLocalScale().x * 0.5f;
     auto position = shape.GetLocalPosition();
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (radiusModified | positionModified)
     {
@@ -209,8 +211,8 @@ void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transfor
     auto height = scale.y * 2.0f;
     auto radius = scale.x * 0.5f;
     auto position = shape.GetLocalPosition();
-    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale);
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (heightModified | radiusModified | positionModified)
     {
@@ -824,14 +826,20 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Simulation Properties", 0))
     {
-        ui::PropertyWidget(rigid_body_ext::bodyTypeProp,            body, &ui::Combobox,  physics::GetBodyTypeNames());
-        ui::PropertyWidget(rigid_body_ext::frictionProp,            body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-        ui::PropertyWidget(rigid_body_ext::restitutionProp,         body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+        ui::PropertyWidget(rigid_body_ext::bodyTypeProp, body, &ui::Combobox,  physics::GetBodyTypeNames());
         {
             IMGUI_SCOPE(ui::DisableIf, isStaticBody);
-            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp,   body, &ui::DragFloat, 0.1f,  0.0f, physics::RigidBodyInfo::maxGravityMultiplier);
-            ui::PropertyWidget(rigid_body_ext::linearDampingProp,       body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
-            ui::PropertyWidget(rigid_body_ext::angularDampingProp,      body, &ui::DragFloat, 0.01f, 0.0f, 1.0f);
+            ui::PropertyWidget(rigid_body_ext::massProp, body, &ui::DragFloat, 5.0f, physics::g_minMass, physics::g_maxMass);
+        }
+
+        ui::PropertyWidget(rigid_body_ext::frictionProp,    body, &ui::DragFloat, 0.01f, physics::g_minFrictionCoefficient, physics::g_maxFrictionCoefficient);
+        ui::PropertyWidget(rigid_body_ext::restitutionProp, body, &ui::DragFloat, 0.01f, physics::g_minRestitutionCoefficient, physics::g_maxRestitutionCoefficient);
+
+        {
+            IMGUI_SCOPE(ui::DisableIf, isStaticBody);
+            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp, body, &ui::DragFloat, 0.1f,  physics::g_minGravityMultiplier, physics::g_maxGravityMultiplier);
+            ui::PropertyWidget(rigid_body_ext::linearDampingProp,     body, &ui::DragFloat, 0.01f, physics::g_minDamping, physics::g_maxDamping);
+            ui::PropertyWidget(rigid_body_ext::angularDampingProp,    body, &ui::DragFloat, 0.01f, physics::g_minDamping, physics::g_maxDamping);
         }
 
         ImGui::TreePop();

@@ -24,6 +24,7 @@ class BodyFactoryTest : public JoltApiFixture
 
 constexpr auto g_entity = nc::Entity{42, 0, 0};
 constexpr auto g_dynamicProperties = nc::physics::RigidBodyInfo{
+    .mass = 500.0f,
     .friction = 1.0f,
     .restitution = 0.9f,
     .linearDamping = 0.5f,
@@ -63,6 +64,8 @@ TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
     EXPECT_EQ(expectedProperties.linearDamping, actualMotionProperties->GetLinearDamping());
     EXPECT_EQ(expectedProperties.angularDamping, actualMotionProperties->GetAngularDamping());
     EXPECT_EQ(expectedProperties.gravityMultiplier, actualMotionProperties->GetGravityFactor());
+    const auto actualMass = 1.0f / actualMotionProperties->GetInverseMass();
+    EXPECT_FLOAT_EQ(expectedProperties.mass, actualMass);
 
     DestroyBody(actualBody);
 }

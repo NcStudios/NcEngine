@@ -70,13 +70,12 @@ enum class BodyType : uint8_t
 /** @brief Properties for initializing a RigidBody. */
 struct RigidBodyInfo
 {
-    static constexpr auto maxGravityMultiplier = 100.0f;
-
-    float friction = 0.2f;                                ///< friction of the body (range: [0, 1])
-    float restitution = 0.0f;                             ///< elasticity of collision response (range: [0, 1])
-    float linearDamping = 0.0f;                           ///< linear motion damping (range: [0, 1])
-    float angularDamping = 0.0f;                          ///< angular motion damping (range: [0, 1])
-    float gravityMultiplier = 1.0f;                       ///< amount of gravity applied to the body (range: [0, maxGravityMultiplier])
+    float mass = 1000.0f;                                 ///< mass of the body in kg [0.1, 100000]
+    float friction = 0.2f;                                ///< friction of the body [0, 1]
+    float restitution = 0.0f;                             ///< elasticity of collision response [0, 1]
+    float linearDamping = 0.0f;                           ///< linear motion damping [0, 1]
+    float angularDamping = 0.0f;                          ///< angular motion damping [0, 1]
+    float gravityMultiplier = 1.0f;                       ///< amount of gravity applied to the body [0, maxGravityMultiplier]
     BodyType type = BodyType::Dynamic;                    ///< set type of body (on a static Entity, this will be overwritten to BodyType::Static)
     DegreeOfFreedom::Type freedom = DegreeOfFreedom::All; ///< set degrees of freedom for the body
     RigidBodyFlags::Type flags = RigidBodyFlags::None;    ///< set flags for the body
@@ -140,7 +139,10 @@ class RigidBody
         auto GetBodyType() const -> BodyType { return m_info.type; }
         void SetBodyType(BodyType type, bool wake = true);
 
-        /** @name DegreeOfFreedom Functions */
+        /**
+         * @name DegreeOfFreedom Functions
+         * @note Not supported on static bodies.
+         */
         auto GetDegreesOfFreedom() const -> DegreeOfFreedom::Type { return m_info.freedom; }
         void SetDegreesOfFreedom(DegreeOfFreedom::Type dof);
 
@@ -155,12 +157,19 @@ class RigidBody
         void SetFriction(float friction);
         auto GetRestitution() const -> float { return m_info.restitution; }
         void SetRestitution(float restitution);
-        auto GetLinearDamping() const -> float { return m_info.linearDamping; }
-        void SetLinearDamping(float damping); // can set?
-        auto GetAngularDamping() const -> float { return m_info.angularDamping; }
-        void SetAngularDamping(float damping); // can set?
         auto GetGravityMultiplier() const -> float { return m_info.gravityMultiplier; }
         void SetGravityMultiplier(float factor);
+
+        /**
+         * @name Simulation Properties (Dynamic Only)
+         * @note Not supported on static bodies.
+         */
+        auto GetMass() const -> float { return m_info.mass; }
+        void SetMass(float mass);
+        auto GetLinearDamping() const -> float { return m_info.linearDamping; }
+        void SetLinearDamping(float damping);
+        auto GetAngularDamping() const -> float { return m_info.angularDamping; }
+        void SetAngularDamping(float damping);
 
         /** @name RigidBodyFlags Functions */
         auto IsTrigger() const -> bool { return m_info.flags & RigidBodyFlags::Trigger; }
@@ -170,6 +179,7 @@ class RigidBody
         auto ScalesWithTransform() const -> bool { return !IgnoreTransformScaling(); }
         auto IgnoreTransformScaling() const -> bool { return m_info.flags & RigidBodyFlags::IgnoreTransformScaling; }
         void IgnoreTransformScaling(bool value);
+
         /**
          * @name Velocity Functions
          * @note Requires BodyType::Dynamic or BodyType::Kinematic
