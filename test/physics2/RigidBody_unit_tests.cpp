@@ -323,6 +323,21 @@ TEST_F(RigidBodyTest, SetMass_goodCall_updatesInternalMassProperties)
     EXPECT_FLOAT_EQ(expectedMass, uut.GetMass());
 }
 
+TEST_F(RigidBodyTest, SetMass_massOutOfRange_clamps)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    constexpr auto expectedMass = nc::physics::g_minMass;
+    uut.SetMass(0.0f);
+    const auto invMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_GT(invMass, 0.0f);
+    const auto actualMass = 1.0f / invMass;
+
+    EXPECT_FLOAT_EQ(expectedMass, actualMass);
+    EXPECT_FLOAT_EQ(expectedMass, uut.GetMass());
+}
+
 TEST_F(RigidBodyTest, SetMass_noTranslationDegreesOfFreedom_maintainsZeroInternalMass)
 {
     auto info = g_dynamicInfo;
