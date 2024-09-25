@@ -52,6 +52,8 @@ auto BodyFactory::MakeBody(const RigidBody& rigidBody, DirectX::FXMMATRIX transf
     bodySettings.mLinearDamping = rigidBody.GetLinearDamping();
     bodySettings.mAngularDamping = rigidBody.GetAngularDamping();
     bodySettings.mGravityFactor = rigidBody.GetGravityMultiplier();
+    bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+    bodySettings.mMassPropertiesOverride.ScaleToMass(rigidBody.GetMass());
 
     return BodyResult{
         m_interface->CreateBody(bodySettings),

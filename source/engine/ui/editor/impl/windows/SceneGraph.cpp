@@ -4,6 +4,7 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/View.h"
 #include "ncengine/graphics/WireframeRenderer.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 namespace
@@ -79,10 +80,17 @@ void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
 {
     ctx.selectedEntity = entity;
     ctx.world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
+#ifdef NC_USE_JOLT
+    ctx.world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
+        (entity.Valid() && ctx.world.Contains<physics::RigidBody>(entity))
+        ? entity
+        : Entity::Null();
+#else
     ctx.world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
         (entity.Valid() && ctx.world.Contains<physics::Collider>(entity))
         ? entity
         : Entity::Null();
+#endif
 }
 
 void SceneGraph::EnsureSelection(EditorContext& ctx)

@@ -199,6 +199,16 @@ TEST_F(RigidBodyTest, SimulationPropertyFunctions_updateInternalState)
     EXPECT_FLOAT_EQ(2.0f, apiBody->GetMotionProperties()->GetGravityFactor());
 }
 
+TEST_F(RigidBodyTest, SimulationPropertyFunctions_dynamicOnlyFunctionsOnStaticBody_throw)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_staticInfo);
+
+    EXPECT_THROW(uut.SetMass(1.0f), std::exception);
+    EXPECT_THROW(uut.SetLinearDamping(1.0f), std::exception);
+    EXPECT_THROW(uut.SetAngularDamping(1.0f), std::exception);
+    EXPECT_THROW(uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::All), std::exception);
+}
+
 TEST_F(RigidBodyTest, RigidBodyFlagFunctions_validFlags_setExpectedState)
 {
     auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
@@ -296,6 +306,90 @@ TEST_F(RigidBodyTest, SetBody_staticEntity_doesNotModifyState)
     EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
     EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
     EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetMass_goodCall_updatesInternalMassProperties)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    constexpr auto expectedMass = 1.0f;
+    uut.SetMass(expectedMass);
+    const auto invMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_GT(invMass, 0.0f);
+    const auto actualMass = 1.0f / invMass;
+
+    EXPECT_FLOAT_EQ(expectedMass, actualMass);
+    EXPECT_FLOAT_EQ(expectedMass, uut.GetMass());
+}
+
+TEST_F(RigidBodyTest, SetMass_massOutOfRange_clamps)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    constexpr auto expectedMass = nc::physics::g_minMass;
+    uut.SetMass(0.0f);
+    const auto invMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_GT(invMass, 0.0f);
+    const auto actualMass = 1.0f / invMass;
+
+    EXPECT_FLOAT_EQ(expectedMass, actualMass);
+    EXPECT_FLOAT_EQ(expectedMass, uut.GetMass());
+}
+
+TEST_F(RigidBodyTest, SetMass_noTranslationDegreesOfFreedom_maintainsZeroInternalMass)
+{
+    auto info = g_dynamicInfo;
+    info.freedom = nc::physics::DegreeOfFreedom::Rotation;
+    auto uut = CreateRigidBody(g_entity, g_shape, info);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    const auto initialInverseMass = apiBody->GetMotionProperties()->GetInverseMass();
+    EXPECT_FLOAT_EQ(0.0f, initialInverseMass);
+
+    // expect we send our flags with the mass, zeroing out the internal mass, but keeping the value in the RigidBody
+    uut.SetMass(1.0f);
+    const auto unaffectedInverseMass = apiBody->GetMotionProperties()->GetInverseMass();
+    EXPECT_FLOAT_EQ(0.0f, unaffectedInverseMass);
+    EXPECT_FLOAT_EQ(1.0f, uut.GetMass());
+
+    // expect we send mass with flags so we end up with the right value after unrestricting translation
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::All);
+    const auto updatedInverseMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_LT(0.0f, updatedInverseMass);
+    EXPECT_FLOAT_EQ(info.mass, 1.0f / updatedInverseMass);
+}
+
+TEST_F(RigidBodyTest, SetShape_changesVolume_preservesMassProperties)
+{
+    const auto smallRadius = 2.0f;
+    const auto smallSphere = nc::physics::Shape::MakeSphere(smallRadius);
+    auto uut = CreateRigidBody(g_entity, smallSphere, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+    const auto motionProperties = apiBody->GetMotionProperties();
+
+    const auto expectedInvMass = motionProperties->GetInverseMass();
+    const auto initialInvInertia = motionProperties->GetInverseInertiaDiagonal();
+
+    const auto largeRadius = 6.0f;
+    const auto largeSphere = nc::physics::Shape::MakeSphere(6.0f);
+    uut.SetShape(largeSphere, nc::Vector3::Splat(1.0f), true);
+
+    const auto actualInvMass = motionProperties->GetInverseMass();
+    EXPECT_FLOAT_EQ(expectedInvMass, actualInvMass);
+
+    // Slight pain, but there's a failure/fallback path for inertia we want to make sure we're avoiding.
+    // It uses a sphere with radius 1, so we'll use different radii.
+    // solid sphere moment of inertia: I = 2/5 m r^2
+    // assert that this formula is correct:
+    const auto assumedMOI = (2.0f / 5.0f) * g_dynamicInfo.mass * smallRadius * smallRadius;
+    ASSERT_EQ(JPH::Vec3::sReplicate(assumedMOI).Reciprocal(), initialInvInertia);
+
+    const auto expectedMOI = (2.0f / 5.0f) * g_dynamicInfo.mass * largeRadius * largeRadius;
+    const auto expectedInvInertia = JPH::Vec3::sReplicate(expectedMOI).Reciprocal();
+    const auto actualInvInertia = motionProperties->GetInverseInertiaDiagonal();
+    EXPECT_EQ(expectedInvInertia, actualInvInertia);
 }
 
 TEST_F(RigidBodyTest, SetDegreesOfFreedom_dynamicBody_updatesMotionProperties)
