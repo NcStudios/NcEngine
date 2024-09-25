@@ -1,10 +1,9 @@
 #include "NcAudioImpl.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/View.h"
 #include "ncengine/utility/Log.h"
-
-#include "optick.h"
 
 #include <cstring>
 
@@ -211,7 +210,7 @@ int NcAudioImpl::WriteToDeviceBuffer(double* output, uint32_t bufferFrames)
 
 void NcAudioImpl::Run()
 {
-    OPTICK_CATEGORY("AudioModule", Optick::Category::Audio);
+    NC_PROFILE_TASK("AudioModule", ProfileCategory::Audio);
     if(!m_listener.Valid())
     {
         return;

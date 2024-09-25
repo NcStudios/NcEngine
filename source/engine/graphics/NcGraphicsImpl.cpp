@@ -4,6 +4,7 @@
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/DebugRendering.h"
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/View.h"
 #include "ncengine/graphics/WireframeRenderer.h"
@@ -13,7 +14,6 @@
 #include "ncengine/window/Window.h"
 
 #include "imgui/imgui.h"
-#include "optick.h"
 
 namespace
 {
@@ -189,7 +189,7 @@ namespace nc::graphics
 
     void NcGraphicsImpl::Run()
     {
-        OPTICK_CATEGORY("Render", Optick::Category::Rendering);
+        NC_PROFILE_TASK("Render", ProfileCategory::Rendering);
 
         // Wait until the frame is ready to be rendered, begin accepting ImGui commands
         if (!m_graphics->PrepareFrame())

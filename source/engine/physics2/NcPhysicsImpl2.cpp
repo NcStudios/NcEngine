@@ -3,6 +3,7 @@
 #include "jolt/Conversion.h"
 #include "jolt/ShapeFactory.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/time/Time.h"
@@ -74,6 +75,7 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
 
 void NcPhysicsImpl2::Run()
 {
+    NC_PROFILE_TASK("NcPhysics::Run", ProfileCategory::Physics);
     if (!m_updateEnabled)
     {
         return;
@@ -97,6 +99,7 @@ void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTas
 
 void NcPhysicsImpl2::SyncTransforms()
 {
+    NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
     for (auto& body : m_ecs.GetAll<RigidBody>())
     {
         if (body.GetBodyType() == BodyType::Static)

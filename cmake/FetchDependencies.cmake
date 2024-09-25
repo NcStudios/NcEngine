@@ -89,6 +89,9 @@ FetchContent_Declare(optick
 
 # Jolt
 set(CPP_EXCEPTIONS_ENABLED ON CACHE BOOL "" FORCE)
+set(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
+set(ENABLE_OBJECT_STREAM OFF CACHE BOOL "" FORCE)
+set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
                      GIT_TAG        v5.1.0
@@ -106,6 +109,14 @@ target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
 # Set Jolt includes as system to prevent warnings
 get_target_property(_Jolt_Include_Prop Jolt INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Jolt SYSTEM INTERFACE ${_Jolt_Include_Prop})
+
+# Add flag to Jolt to enable our profile implementation
+if(NC_PROFILING_ENABLED)
+    target_compile_definitions(Jolt
+        PUBLIC
+            -DJPH_EXTERNAL_PROFILE
+    )
+endif()
 
 #############################
 ### Optional Dependencies ###
