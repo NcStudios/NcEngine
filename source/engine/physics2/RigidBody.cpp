@@ -37,12 +37,8 @@ void RigidBody::SetBodyType(BodyType type, bool wake)
 
 void RigidBody::SetDegreesOfFreedom(DegreeOfFreedom::Type dof)
 {
+    NC_ASSERT(m_info.type != BodyType::Static, "DegreesOfFreedom not supported on static bodies");
     m_info.freedom = dof;
-    if (m_self.IsStatic())
-    {
-        return; // doesn't have internal MotionProperties
-    }
-
     auto body = ToBody(m_handle);
     auto properties = body->GetMotionPropertiesUnchecked();
     properties->SetMassProperties(
@@ -77,46 +73,53 @@ void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale, bool
         : JPH::Vec3::sReplicate(1.0f);
 
     const auto newShape = s_ctx->shapeFactory.MakeShape(m_shape, allowedScaling);
-    s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
+    s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, false, ToActivationMode(wake));
+    if (m_info.type != BodyType::Static)
+    {
+        SetMass(m_info.mass); // recalculate inertia
+    }
+}
+
+void RigidBody::SetMass(float mass)
+{
+    NC_ASSERT(m_info.type != BodyType::Static, "Changing mass not supported on static bodies");
+    m_info.mass = Clamp(mass, g_minMass, g_maxMass);
+    auto body = ToBody(m_handle);
+    auto massProperties = body->GetShape()->GetMassProperties();
+    massProperties.ScaleToMass(m_info.mass);
+    auto motionProperties = body->GetMotionProperties();
+    motionProperties->SetMassProperties(ToAllowedDOFs(m_info.freedom), massProperties);
 }
 
 void RigidBody::SetFriction(float friction)
 {
-    m_info.friction = Clamp(friction, 0.0f, 1.0f);
+    m_info.friction = Clamp(friction, g_minFrictionCoefficient, g_maxFrictionCoefficient);
     ToBody(m_handle)->SetFriction(m_info.friction);
 }
 
 void RigidBody::SetRestitution(float restitution)
 {
-    m_info.restitution = Clamp(restitution, 0.0f, 1.0f);
+    m_info.restitution = Clamp(restitution, g_minRestitutionCoefficient, g_maxRestitutionCoefficient);
     ToBody(m_handle)->SetRestitution(m_info.restitution);
 }
 
 void RigidBody::SetLinearDamping(float damping)
 {
-    m_info.linearDamping = Clamp(damping, 0.0f, 1.0f);
-    if (m_self.IsStatic())
-    {
-        return; // doesn't have internal MotionProperties
-    }
-
+    NC_ASSERT(m_info.type != BodyType::Static, "Changing damping not supported on static bodies");
+    m_info.linearDamping = Clamp(damping, g_minDamping, g_maxDamping);
     ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetLinearDamping(m_info.linearDamping);
 }
 
 void RigidBody::SetAngularDamping(float damping)
 {
-    m_info.angularDamping = Clamp(damping, 0.0f, 1.0f);
-    if (m_self.IsStatic())
-    {
-        return; // doesn't have internal MotionProperties
-    }
-
+    NC_ASSERT(m_info.type != BodyType::Static, "Changing damping not supported on static bodies");
+    m_info.angularDamping = Clamp(damping, g_minDamping, g_maxDamping);
     ToBody(m_handle)->GetMotionPropertiesUnchecked()->SetAngularDamping(m_info.angularDamping);
 }
 
 void RigidBody::SetGravityMultiplier(float factor)
 {
-    m_info.gravityMultiplier = Clamp(factor, 0.0f, RigidBodyInfo::maxGravityMultiplier);
+    m_info.gravityMultiplier = Clamp(factor, g_minGravityMultiplier, g_maxGravityMultiplier);
     s_ctx->interface.SetGravityFactor(ToBody(m_handle)->GetID(), m_info.gravityMultiplier);
 }
 
@@ -265,7 +268,11 @@ auto RigidBody::SetSimulatedBodyScale(Transform& transform,
     {
         appliedScale = NormalizeScaleForShape(m_shape.GetType(), transform.Scale(), scale);
         const auto newShape = s_ctx->shapeFactory.MakeShape(m_shape, ToJoltVec3(appliedScale));
-        s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, true, ToActivationMode(wake));
+        s_ctx->interface.SetShape(ToBody(m_handle)->GetID(), newShape, false, ToActivationMode(wake));
+        if (m_info.type != BodyType::Static)
+        {
+            SetMass(m_info.mass); // recalculate inertia
+        }
     }
 
     transform.SetScale(appliedScale);

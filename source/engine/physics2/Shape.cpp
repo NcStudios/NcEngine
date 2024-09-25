@@ -9,9 +9,9 @@ namespace
 auto ClampScale(const nc::Vector3& out) -> nc::Vector3
 {
     return nc::Vector3{
-        nc::Clamp(out.x, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale),
-        nc::Clamp(out.y, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale),
-        nc::Clamp(out.z, nc::physics::g_minimumShapeScale, nc::physics::g_maximumShapeScale)
+        nc::Clamp(out.x, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale),
+        nc::Clamp(out.y, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale),
+        nc::Clamp(out.z, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale)
     };
 }
 
