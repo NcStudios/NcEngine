@@ -110,8 +110,9 @@ target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
 get_target_property(_Jolt_Include_Prop Jolt INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Jolt SYSTEM INTERFACE ${_Jolt_Include_Prop})
 
-# Add flag to Jolt to enable our profile implementation
-if(NC_PROFILING_ENABLED)
+# Tell Jolt to use our profile implementation. This introduces a circular dependency between Jolt/NcEngine,
+# which GCC struggles with (but it could be coerced), so we just exclude Jolt events from nix profiling.
+if(NC_PROFILING_ENABLED AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_definitions(Jolt
         PUBLIC
             -DJPH_EXTERNAL_PROFILE

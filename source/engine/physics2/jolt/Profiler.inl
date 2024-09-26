@@ -1,4 +1,4 @@
-// ExternalProfileMeasurement Implementation
+// ExternalProfileMeasurement Implementation (currently MSVC-only)
 // see Jolt/Core/Profiler.h
 #ifdef JPH_EXTERNAL_PROFILE
 

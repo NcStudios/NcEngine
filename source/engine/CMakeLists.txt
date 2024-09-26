@@ -15,13 +15,6 @@ target_compile_definitions(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:IMGUI_USER_CONFIG="${PROJECT_SOURCE_DIR}/include/ncengine/ui/ImGuiConversion.h">
 )
 
-if(NC_PROFILING_ENABLED)
-    target_compile_definitions(${NC_ENGINE_LIB}
-        PUBLIC
-            NC_PROFILING_ENABLED
-    )
-endif()
-
 if(NOT NC_PROD_BUILD)
     add_definitions(-DNC_ASSERT_ENABLED)
 endif()
