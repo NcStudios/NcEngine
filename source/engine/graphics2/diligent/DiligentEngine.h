@@ -16,6 +16,8 @@ class NcWindow;
 
 namespace graphics
 {
+auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Diligent::RENDER_DEVICE_TYPE;
+
 class DiligentEngine
 {
     public:

@@ -26,8 +26,7 @@ class NcWindowImpl : public NcWindow
 {
     public:
         NcWindowImpl(const config::ProjectSettings& projectSettings,
-                   const config::GraphicsSettings& graphicsSettings,
-                   Signal<>& quit);
+                     Signal<>& quit);
         ~NcWindowImpl() noexcept;
         NcWindowImpl(const NcWindowImpl& other) = delete;
         NcWindowImpl(NcWindowImpl&& other) = delete;
@@ -37,6 +36,7 @@ class NcWindowImpl : public NcWindow
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
         void ProcessSystemMessages() override;
+        void SetWindow(WindowInfo windowInfo);
 
     private:
         void SetDimensions(int width, int height) noexcept;
@@ -49,6 +49,7 @@ class NcWindowImpl : public NcWindow
         static void ProcessSetContentScaleEvent(GLFWwindow* window, float x, float y);
         static void ProcessWindowCloseEvent(GLFWwindow* window);
 
+        std::string m_windowName;
         std::vector<IOnResizeReceiver*> m_onResizeReceivers;
         Signal<>* m_quit;
 };

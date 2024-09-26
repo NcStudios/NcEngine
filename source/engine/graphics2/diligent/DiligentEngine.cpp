@@ -43,7 +43,10 @@ void RotateElementToBeginning(std::vector<T>& vectorToRotate, const T& elem)
     vectorToRotate.erase(elemPos);
     vectorToRotate.insert(vectorToRotate.begin(), element);
 }
+} // anonymous namespace
 
+namespace nc::graphics
+{
 auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Diligent::RENDER_DEVICE_TYPE
 {
     constexpr std::string_view D3D12  = std::string_view("d3d12");
@@ -145,10 +148,7 @@ auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Dilig
         #error "Unsupported platform detected. NcEngine only supports Win32 and Linux."
     #endif
 }
-} // anonymous namespace
 
-namespace nc::graphics
-{
 DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& window_)
 {
     using namespace Diligent;
@@ -171,7 +171,7 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
         #if PLATFORM_WIN32
             case RENDER_DEVICE_TYPE_D3D12:
             {
-                #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                #if ENGINE_DLL
                     auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
                 #endif
                 EngineD3D12CreateInfo engineCI;
@@ -195,7 +195,7 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
         #if PLATFORM_WIN32
             case RENDER_DEVICE_TYPE_D3D11:
             {
-                #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                #if ENGINE_DLL
                     auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
                 #endif
                 EngineD3D11CreateInfo engineCI;
@@ -207,12 +207,12 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
         #endif
         case RENDER_DEVICE_TYPE_GL:
         {
-            #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+            #if EXPLICITLY_LOAD_ENGINE_GL_DLL
                 auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
             #endif
             auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-            glfwMakeContextCurrent(window_.GetWindowHandle());
             EngineGLCreateInfo engineCI;
+            glfwMakeContextCurrent(window_.GetWindowHandle());
             engineCI.Window = window;
             pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
             break;
@@ -221,6 +221,8 @@ DiligentEngine::DiligentEngine(std::string_view targetApi, window::NcWindow& win
             throw nc::NcError("Failed to initialize the render device. Unsupported device type.");
     }
 }
+
+
 
 DiligentEngine::~DiligentEngine() noexcept
 {

@@ -44,6 +44,31 @@ void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
  */
 void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
 
+/** 
+ * @brief The window's graphics API context.
+ */
+enum class RenderApiContext : uint8_t
+{
+    None,  ///< No context. Used if headless, or for Vulkan, D3D11 and D3D12 rendering engines
+    OpenGL ///< OpenGL. Used for OpenGL rendering engines
+};
+
+/** 
+ * @brief The window's create info.
+ */
+struct WindowInfo
+{
+    Vector2 dimensions          = Vector2{640, 800}; ///< The window's dimensions.
+    RenderApiContext apiContext = RenderApiContext::None;  ///< The window must be created with the target rendering engine in mind.
+    bool isHeadless             = false; ///< True if this is a headless window. Still receives input events.
+    bool useNativeResolution    = false; ///< True if the window should use the monitor's native resolution.
+    bool launchInFullScreen     = false; ///< True if the window should launch in full screen.
+    bool isResizable            = false; ///< True if the window is resizable.
+};
+
+/** @brief Set the window for the module. */
+void SetWindow(WindowInfo windowInfo);
+
 /** @brief Window module interface.
  * 
  */
@@ -68,6 +93,9 @@ class NcWindow : public Module
         /** @brief Get the Signal for window resize events. */
         auto OnResize() noexcept -> Signal<const Vector2&, bool>& { return m_onResize; }
 
+        /** @brief Set the window for the module. */
+        void SetWindow(WindowInfo windowInfo);
+
         /**
          * @brief Process window and input events.
          * @note This is called by NcEngine each frame.
@@ -84,7 +112,6 @@ class NcWindow : public Module
 
 /** @brief Build an NcWindow module instance. */
 auto BuildWindowModule(const config::ProjectSettings& projectSettings,
-                       const config::GraphicsSettings& graphicsSettings,
                        Signal<>& quit) -> std::unique_ptr<NcWindow>;
 } // namespace window
 } // namespace nc

@@ -1,6 +1,12 @@
 # Sample CMake Root
 add_executable(${NC_SAMPLE_EXE})
 
+set_target_properties(${NC_SAMPLE_EXE}
+    PROPERTIES
+        INSTALL_RPATH "/workspaces/NcEngine/build/linux/_deps/diligentcore-build/Graphics/GraphicsEngineOpenGL;/workspaces/NcEngine/build/linux/_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
+
+)
+
 # Compile Options
 target_compile_options(${NC_SAMPLE_EXE}
     PRIVATE
@@ -28,7 +34,6 @@ target_link_libraries(${NC_SAMPLE_EXE}
 
 add_subdirectory(source)
 
-
 # Install
 if(PLATFORM_WIN32)
         # Diligent helper method to get required DLLs and EXEs into the project's executable dir.
@@ -39,6 +44,8 @@ if(PLATFORM_WIN32)
         FILES_MATCHING REGEX ".*\.(dll)" # Diligent DLLs and EXEs
 )
 endif()
+
+
 
 install(TARGETS     ${NC_SAMPLE_EXE}
         DESTINATION sample

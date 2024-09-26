@@ -41,7 +41,6 @@ auto BuildModuleRegistry(Registry* registry,
     NC_LOG_INFO("Building module registry");
     auto moduleRegistry = std::make_unique<nc::ModuleRegistry>();
     moduleRegistry->Register(nc::window::BuildWindowModule(config.projectSettings,
-                                                           config.graphicsSettings,
                                                            events.quit));
 
     moduleRegistry->Register(nc::BuildSceneModule());
