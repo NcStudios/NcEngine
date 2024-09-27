@@ -30,6 +30,12 @@ struct CollisionPair
     HitInfo hit;
 };
 
+struct DetectEvent
+{
+    OverlappingPair pair;
+    bool isTrigger;
+};
+
 class ContactListener final : public JPH::ContactListener
 {
     public:
@@ -45,18 +51,23 @@ class ContactListener final : public JPH::ContactListener
 
         void OnContactRemoved(const JPH::SubShapeIDPair& pair) override;
 
-        auto GetAdded() const -> std::span<const CollisionPair> { return m_added; }
-        auto GetRemoved() const -> std::span<const OverlappingPair> { return m_removed; }
+        auto GetNewCollisions() const -> std::span<const CollisionPair> { return m_enteredCollisions; }
+        auto GetNewTriggers() const -> std::span<const OverlappingPair> { return m_enteredTriggers; }
+        auto GetRemovedCollisions() const -> std::span<const OverlappingPair> { return m_exitedCollisions; }
+        auto GetRemovedTriggers() const -> std::span<const OverlappingPair> { return m_exitedTriggers;}
         void CommitPendingChanges();
+        void Clear() noexcept;
 
     private:
         JPH::PhysicsSystem* m_physicsSystem;
-        std::unordered_map<size_t, OverlappingPair> m_pairs;
+        std::unordered_map<size_t, DetectEvent> m_pairs;
 
-        std::vector<CollisionPair> m_added;
+        std::vector<CollisionPair> m_enteredCollisions;
+        std::vector<OverlappingPair> m_enteredTriggers;
         std::mutex m_addedMutex;
 
-        std::vector<OverlappingPair> m_removed;
+        std::vector<OverlappingPair> m_exitedCollisions;
+        std::vector<OverlappingPair> m_exitedTriggers;
         std::mutex m_removedMutex;
 };
 } // namespace nc::physics

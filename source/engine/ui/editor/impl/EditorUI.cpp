@@ -3,6 +3,7 @@
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/physics/NcPhysics.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/window/Window.h"
@@ -136,6 +137,23 @@ void EditorUI::DrawMenu(EditorContext& ctx)
                 m_saveSceneDialog.Open(ctx.modules.Get<asset::NcAsset>()->GetLoadedAssets());
             if (ImGui::MenuItem("Load"))
                 m_loadSceneDialog.Open(ctx.modules.Get<asset::NcAsset>());
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Modules"))
+        {
+            if (ImGui::BeginMenu("NcPhysics"))
+            {
+                auto ncPhysics = ctx.modules.Get<physics::NcPhysics>();
+                auto enabled = ncPhysics->IsUpdateEnabled();
+                if (ui::Checkbox(enabled, "enableUpdate"))
+                {
+                    ncPhysics->EnableUpdate(enabled);
+                }
+
+                ImGui::EndMenu();
+            }
 
             ImGui::EndMenu();
         }

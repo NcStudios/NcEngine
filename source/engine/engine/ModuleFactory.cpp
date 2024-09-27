@@ -35,6 +35,7 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
 namespace nc
 {
 auto BuildModuleRegistry(Registry* registry,
+                         const task::AsyncDispatcher& dispatcher,
                          SystemEvents& events,
                          const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
@@ -58,6 +59,7 @@ auto BuildModuleRegistry(Registry* registry,
     moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.memorySettings,
                                                              config.physicsSettings,
                                                              registry,
+                                                             dispatcher,
                                                              events));
 
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));

@@ -62,3 +62,48 @@ TEST(JoltConversionTest, ToMotionType_convertsBodyType)
     EXPECT_EQ(JPH::EMotionType::Static, ToMotionType(nc::physics::BodyType::Static));
     EXPECT_EQ(JPH::EMotionType::Kinematic, ToMotionType(nc::physics::BodyType::Kinematic));
 }
+
+TEST(JoltConversionTest, ToObjectLayer_determinesLayer)
+{
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Dynamic, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Kinematic, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, ToObjectLayer(nc::physics::BodyType::Static, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Dynamic, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Kinematic, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Static, true));
+}
+
+TEST(JoltConversionTest, ToSpringSettings_convertsSettings)
+{
+    const auto expected = nc::physics::SpringSettings{
+        .frequency = 10.0f,
+        .damping = 1.0f
+    };
+
+    const auto actual = ToSpringSettings(expected);
+    EXPECT_EQ(JPH::ESpringMode::FrequencyAndDamping, actual.mMode);
+    EXPECT_FLOAT_EQ(expected.frequency, actual.mFrequency);
+    EXPECT_FLOAT_EQ(expected.damping, actual.mDamping);
+}
+
+TEST(JoltConversionTest, ToAllowedDOFs_convertsFlags)
+{
+    using namespace nc::physics;
+    constexpr auto allTranslation = JPH::EAllowedDOFs::TranslationX |
+                                    JPH::EAllowedDOFs::TranslationY |
+                                    JPH::EAllowedDOFs::TranslationZ;
+
+    constexpr auto allRotation = JPH::EAllowedDOFs::RotationX |
+                                 JPH::EAllowedDOFs::RotationY |
+                                 JPH::EAllowedDOFs::RotationZ;
+
+    EXPECT_EQ(JPH::EAllowedDOFs::All, ToAllowedDOFs(DegreeOfFreedom::All));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationX, ToAllowedDOFs(DegreeOfFreedom::TranslationX));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationY, ToAllowedDOFs(DegreeOfFreedom::TranslationY));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationZ, ToAllowedDOFs(DegreeOfFreedom::TranslationZ));
+    EXPECT_EQ(allTranslation, ToAllowedDOFs(DegreeOfFreedom::Translation));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationX, ToAllowedDOFs(DegreeOfFreedom::RotationX));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationY, ToAllowedDOFs(DegreeOfFreedom::RotationY));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationZ, ToAllowedDOFs(DegreeOfFreedom::RotationZ));
+    EXPECT_EQ(allRotation, ToAllowedDOFs(DegreeOfFreedom::Rotation));
+}

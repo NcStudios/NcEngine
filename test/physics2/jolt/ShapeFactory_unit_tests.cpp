@@ -1,26 +1,8 @@
-#include "gtest/gtest.h"
+#include "JoltApiFixture.inl"
 #include "physics2/jolt/ShapeFactory.h"
-#include "physics2/jolt/JoltApi.h"
-#include "ncengine/config/Config.h"
 
-class ShapeFactoryTest : public ::testing::Test
+class ShapeFactoryTest : public JoltApiFixture
 {
-    private:
-        nc::physics::JoltApi m_jolt;
-
-    protected:
-        ShapeFactoryTest()
-            : m_jolt{nc::physics::JoltApi::Initialize(
-                  nc::config::MemorySettings{},
-                  nc::config::PhysicsSettings{
-                    .tempAllocatorSize = 1024 * 1024 * 4,
-                    .maxBodyPairs = 8,
-                    .maxContacts = 4
-                  }
-              )}
-        {
-        }
-
     public:
         nc::physics::ShapeFactory uut;
 };

@@ -8,8 +8,6 @@
 #include "ncengine/time/Time.h"
 #include "ncengine/utility/Log.h"
 
-#include "Jolt/Physics/Body/BodyCreationSettings.h"
-
 namespace
 {
 class NcPhysicsStub2 : public nc::physics::NcPhysics
@@ -41,12 +39,13 @@ namespace nc::physics
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         Registry* registry,
+                        const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, events);
+        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, dispatcher, events);
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
@@ -57,15 +56,29 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
 NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
                                const config::PhysicsSettings& physicsSettings,
                                Registry* registry,
+                               const task::AsyncDispatcher& dispatcher,
                                SystemEvents&)
     : m_ecs{registry->GetEcs()},
-      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings)},
-      m_onAddRigidBodyConnection{registry->OnAdd<physics::RigidBody>().Connect(this, &NcPhysicsImpl2::OnAddRigidBody)}
+      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
+      m_constraintManager{m_jolt.physicsSystem, memorySettings.maxTransforms},
+      m_bodyManager{
+        registry->GetImpl().GetPool<Transform>(),
+        registry->GetImpl().GetPool<RigidBody>(),
+        memorySettings.maxTransforms,
+        m_jolt.physicsSystem,
+        m_shapeFactory,
+        m_constraintManager
+      }
 {
 }
 
 void NcPhysicsImpl2::Run()
 {
+    if (!m_updateEnabled)
+    {
+        return;
+    }
+
     m_jolt.Update(time::DeltaTime());
     SyncTransforms();
     DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
@@ -82,46 +95,11 @@ void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTas
     );
 }
 
-void NcPhysicsImpl2::OnAddRigidBody(RigidBody& body)
-{
-    auto& transform = m_ecs.Get<Transform>(body.GetEntity());
-    const auto [transformScale, transformRotation, transformPosition] = DecomposeMatrix(transform.TransformationMatrix());
-    const auto& shape = body.GetShape();
-    const auto bodyType = body.GetBodyType();
-    auto allowedScaling = Vector3::One();
-    if (body.ScalesWithTransform())
-    {
-        const auto currentScale = nc::ToVector3(transformScale);
-        allowedScaling = NormalizeScaleForShape(shape.GetType(), currentScale, currentScale);
-        if (allowedScaling != currentScale)
-        {
-            transform.SetScale(allowedScaling); // update Transform to prevent invalid scales
-        }
-    }
-
-    auto bodySettings = JPH::BodyCreationSettings{
-        m_jolt.shapeFactory.MakeShape(shape, ToJoltVec3(allowedScaling)),
-        ToJoltVec3(transformPosition),
-        ToJoltQuaternion(transformRotation),
-        ToMotionType(bodyType),
-        ToObjectLayer(bodyType)
-    };
-
-    bodySettings.mUserData = Entity::Hash{}(body.GetEntity());
-    bodySettings.mMotionQuality = ToMotionQuality(body.UseContinuousDetection());
-
-    auto& iBody = m_jolt.physicsSystem.GetBodyInterfaceNoLock();
-    auto apiBody = iBody.CreateBody(bodySettings);
-    iBody.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
-    body.SetContext(apiBody, m_jolt.ctx.get());
-}
-
 void NcPhysicsImpl2::SyncTransforms()
 {
     for (auto& body : m_ecs.GetAll<RigidBody>())
     {
-        // @todo: 691 not sure how kinematic behave yet, assuming they won't get updated
-        if (body.GetBodyType() != BodyType::Dynamic)
+        if (body.GetBodyType() == BodyType::Static)
         {
             continue;
         }
@@ -139,7 +117,16 @@ void NcPhysicsImpl2::SyncTransforms()
     }
 }
 
+void NcPhysicsImpl2::OnBeforeSceneLoad()
+{
+    m_bodyManager.DeferCleanup(false);
+}
+
 void NcPhysicsImpl2::Clear() noexcept
 {
+    m_jolt.contactListener.Clear();
+    m_constraintManager.Clear();
+    m_bodyManager.Clear();
+    m_bodyManager.DeferCleanup(true);
 }
 } // namespace nc::physics

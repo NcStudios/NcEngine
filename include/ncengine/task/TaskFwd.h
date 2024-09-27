@@ -11,6 +11,7 @@ namespace nc::task
 template<class Phase>
 class TaskGraph;
 
+class AsyncDispatcher;
 struct UpdatePhase;
 struct RenderPhase;
 using UpdateTasks = TaskGraph<UpdatePhase>;

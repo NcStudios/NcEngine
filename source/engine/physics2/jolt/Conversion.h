@@ -75,14 +75,33 @@ inline auto ToMotionType(BodyType bodyType) -> JPH::EMotionType
     }
 }
 
-inline auto ToObjectLayer(BodyType bodyType) -> JPH::ObjectLayer
+inline auto ToObjectLayer(BodyType bodyType, bool isTrigger) -> JPH::ObjectLayer
 {
+    if (isTrigger)
+    {
+        return ObjectLayer::Trigger;
+    }
+
     switch (bodyType)
     {
-        case BodyType::Dynamic:   [[fallthrough]];
-        case BodyType::Kinematic: return ObjectLayer::Dynamic;
-        case BodyType::Static:    return ObjectLayer::Static;
+        case BodyType::Dynamic:       [[fallthrough]];
+        case BodyType::Kinematic:     return ObjectLayer::Dynamic;
+        case BodyType::Static:        return ObjectLayer::Static;
         default: std::unreachable();
     }
+}
+
+inline auto ToSpringSettings(const SpringSettings& settings) -> JPH::SpringSettings
+{
+    return JPH::SpringSettings{
+        JPH::ESpringMode::FrequencyAndDamping,
+        settings.frequency,
+        settings.damping
+    };
+}
+
+inline auto ToAllowedDOFs(DegreeOfFreedom::Type dof) -> JPH::EAllowedDOFs
+{
+    return static_cast<JPH::EAllowedDOFs>(dof);
 }
 } // namespace nc::physics

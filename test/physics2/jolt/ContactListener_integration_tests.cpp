@@ -1,9 +1,13 @@
 #include "gtest/gtest.h"
+#include "JobSystem_stub.inl"
 #include "physics2/jolt/ContactListener.h"
+#include "physics2/jolt/Conversion.h"
 #include "physics2/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/physics/RigidBody.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "Jolt/Physics/Collision/Shape/BoxShape.h"
 
 #include <ranges>
 
@@ -17,7 +21,8 @@ class ContactListenerTest : public ::testing::Test
                     .tempAllocatorSize = 1024 * 1024 * 4,
                     .maxBodyPairs = 16,
                     .maxContacts = 8
-                  }
+                  },
+                  nc::task::AsyncDispatcher{}
               )},
               uut{joltApi.contactListener}
         {
@@ -27,32 +32,40 @@ class ContactListenerTest : public ::testing::Test
         nc::physics::JoltApi joltApi;
         nc::physics::ContactListener& uut;
         std::vector<nc::physics::CollisionPair> lastOnEnter;
+        std::vector<nc::physics::OverlappingPair> lastOnTriggerEnter;
         std::vector<nc::physics::OverlappingPair> lastOnExit;
+        std::vector<nc::physics::OverlappingPair> lastOnTriggerExit;
 
         void Step()
         {
-            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, &joltApi.jobSystem);
+            joltApi.physicsSystem.Update(1.0f / 60.0f, 1, &joltApi.tempAllocator, joltApi.jobSystem.get());
             lastOnEnter.clear();
+            lastOnTriggerEnter.clear();
             lastOnExit.clear();
-            std::ranges::copy(uut.GetAdded(), std::back_inserter(lastOnEnter));
-            std::ranges::copy(uut.GetRemoved(), std::back_inserter(lastOnExit));
+            lastOnTriggerExit.clear();
+            std::ranges::copy(uut.GetNewCollisions(), std::back_inserter(lastOnEnter));
+            std::ranges::copy(uut.GetNewTriggers(), std::back_inserter(lastOnTriggerEnter));
+            std::ranges::copy(uut.GetRemovedCollisions(), std::back_inserter(lastOnExit));
+            std::ranges::copy(uut.GetRemovedTriggers(), std::back_inserter(lastOnTriggerExit));
             uut.CommitPendingChanges();
         }
 
         auto CreateBody(nc::Entity entity,
                         nc::physics::BodyType type,
                         const JPH::Vec3& position,
-                        const JPH::Vec3& halfExtents) -> JPH::Body*
+                        const JPH::Vec3& halfExtents,
+                        bool isTrigger = false) -> JPH::Body*
         {
             auto settings = JPH::BodyCreationSettings{
                 new JPH::BoxShape{halfExtents},
                 position,
                 JPH::Quat::sIdentity(),
                 nc::physics::ToMotionType(type),
-                nc::physics::ToObjectLayer(type)
+                nc::physics::ToObjectLayer(type, isTrigger)
             };
 
             settings.mUserData = nc::Entity::Hash{}(entity);
+            settings.mIsSensor = isTrigger;
             auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
             auto body = interface.CreateBody(settings);
             interface.AddBody(body->GetID(), JPH::EActivation::Activate);
@@ -98,6 +111,8 @@ TEST_F(ContactListenerTest, InteractingObjects_generatesExpectedEvents)
     Step();
     EXPECT_EQ(1u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
     const auto& enter = lastOnEnter.at(0);
     EXPECT_TRUE(
         (entity1 == enter.pair.first && entity2 == enter.pair.second) ||
@@ -108,24 +123,32 @@ TEST_F(ContactListenerTest, InteractingObjects_generatesExpectedEvents)
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
 
     // expect no events on sleep
     interface.DeactivateBody(body2->GetID());
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
 
     // expect no events on wake
     interface.ActivateBody(body2->GetID());
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
 
     // expect exit event when moved apart
     interface.SetPosition(body2->GetID(), JPH::Vec3{0.0f, 2.0f, 0.0f}, JPH::EActivation::Activate);
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(1u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
     const auto& exit = lastOnExit.at(0);
     EXPECT_TRUE(
         (entity1 == exit.first && entity2 == exit.second) ||
@@ -147,6 +170,8 @@ TEST_F(ContactListenerTest, InteractingObjects_generatesExpectedEvents)
         if (lastOnEnter.size() > 0)
         {
             EXPECT_EQ(1u, lastOnEnter.size());
+            EXPECT_EQ(0u, lastOnTriggerEnter.size());
+            EXPECT_EQ(0u, lastOnTriggerExit.size());
             const auto& reenter = lastOnEnter.at(0);
             EXPECT_TRUE(
                 (entity1 == reenter.pair.first && entity2 == reenter.pair.second) ||
@@ -159,6 +184,90 @@ TEST_F(ContactListenerTest, InteractingObjects_generatesExpectedEvents)
 
     DestroyBody(body1->GetID());
     DestroyBody(body2->GetID());
+}
+
+TEST_F(ContactListenerTest, Events_triggerVsDynamicAndKinematic_generatesExpectedEvents)
+{
+    const auto entity1 = nc::Entity{1, 0, 0};
+    const auto entity2 = nc::Entity{2, 0, 0};
+    const auto entity3 = nc::Entity{3, 0, 0};
+    const auto entity4 = nc::Entity{4, 0, 0};
+    const auto scale = JPH::Vec3::sReplicate(2.0f);
+    using nc::physics::BodyType;
+
+    auto dynamicTrigger1 = CreateBody(entity1, BodyType::Dynamic, JPH::Vec3{-0.5f, 1.0f, 0.0f}, scale, true);
+    auto dynamicTrigger2 = CreateBody(entity2, BodyType::Dynamic, JPH::Vec3{0.5f, 1.0f, 0.0f}, scale, true);
+    auto kinematicTrigger = CreateBody(entity3, BodyType::Static, JPH::Vec3{-0.5f, 0.0f, 0.0f}, scale, true);
+    auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
+
+
+    // expect all triggers to detect hit against dynamic body
+    auto dynamic = CreateBody(entity4, BodyType::Dynamic, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
+    Step();
+    EXPECT_EQ(0u, lastOnEnter.size());
+    EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(3u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
+
+    // expect all triggers to exit on move
+    interface.SetPosition(dynamic->GetID(), JPH::Vec3{0.0f, 10.0f, 0.0f}, JPH::EActivation::Activate);
+    Step();
+    EXPECT_EQ(0u, lastOnEnter.size());
+    EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(3u, lastOnTriggerExit.size());
+
+    DestroyBody(dynamic->GetID());
+
+    // expect all triggers to detect hit against dynamic body
+    auto kinematic = CreateBody(entity4, BodyType::Kinematic, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
+    Step();
+    EXPECT_EQ(0u, lastOnEnter.size());
+    EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(3u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
+
+    // expect all triggers to exit on move
+    interface.SetPosition(kinematic->GetID(), JPH::Vec3{0.0f, 10.0f, 0.0f}, JPH::EActivation::Activate);
+    Step();
+    EXPECT_EQ(0u, lastOnEnter.size());
+    EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(3u, lastOnTriggerExit.size());
+
+    DestroyBody(kinematic->GetID());
+    DestroyBody(dynamicTrigger1->GetID());
+    DestroyBody(dynamicTrigger2->GetID());
+    DestroyBody(kinematicTrigger->GetID());
+}
+
+TEST_F(ContactListenerTest, Events_triggerVsTriggerAndStatic_generatesNoEvents)
+{
+    const auto entity1 = nc::Entity{1, 0, 0};
+    const auto entity2 = nc::Entity{10, 0, 0};
+    const auto entity3 = nc::Entity{20, 0, 0};
+    const auto staticEntity1 = nc::Entity{30, 0, nc::Entity::Flags::Static};
+    const auto staticEntity2 = nc::Entity{40, 0, nc::Entity::Flags::Static};
+    const auto scale = JPH::Vec3::sReplicate(2.0f);
+    using nc::physics::BodyType;
+
+    auto dynamicTrigger1 = CreateBody(entity1, BodyType::Dynamic, JPH::Vec3{-0.5f, 1.0f, 0.0f}, scale, true);
+    auto dynamicTrigger2 = CreateBody(entity2, BodyType::Dynamic, JPH::Vec3{0.5f, 1.0f, 0.0f}, scale, true);
+    auto kinematicTrigger = CreateBody(entity3, BodyType::Static, JPH::Vec3{-0.5f, 0.0f, 0.0f}, scale, true);
+    auto staticTrigger = CreateBody(staticEntity1, BodyType::Static, JPH::Vec3{0.5f, 0.0f, 0.0f}, scale, true);
+    auto staticNonTrigger = CreateBody(staticEntity2, BodyType::Static, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
+
+    Step();
+    EXPECT_EQ(0u, lastOnEnter.size());
+    EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
+
+    DestroyBody(dynamicTrigger1->GetID());
+    DestroyBody(dynamicTrigger2->GetID());
+    DestroyBody(kinematicTrigger->GetID());
+    DestroyBody(staticTrigger->GetID());
+    DestroyBody(staticNonTrigger->GetID());
 }
 
 TEST_F(ContactListenerTest, Events_staticVsStatic_generatesNoEvents)
@@ -182,6 +291,8 @@ TEST_F(ContactListenerTest, Events_staticVsStatic_generatesNoEvents)
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
 
     DestroyBody(body1->GetID());
     DestroyBody(body2->GetID());
@@ -208,6 +319,8 @@ TEST_F(ContactListenerTest, Events_noCollisionEventsVsNoCollisionEvents_generate
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
 
     DestroyBody(body1->GetID());
     DestroyBody(body2->GetID());
@@ -234,6 +347,8 @@ TEST_F(ContactListenerTest, Events_staticVsNoCollisionEvents_generatesNoEvents)
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
+    EXPECT_EQ(0u, lastOnTriggerEnter.size());
+    EXPECT_EQ(0u, lastOnTriggerExit.size());
 
     DestroyBody(body1->GetID());
     DestroyBody(body2->GetID());

@@ -1,7 +1,10 @@
-#include "gtest/gtest.h"
-#include "ncengine/config/Config.h"
+#include "jolt/JoltApiFixture.inl"
 #include "ncengine/physics/RigidBody.h"
-#include "physics2/jolt/JoltApi.h"
+
+#include "physics2/jolt/BodyManager.h"
+#include "physics2/jolt/ComponentContext.h"
+#include "physics2/jolt/ConstraintManager.h"
+#include "physics2/jolt/ShapeFactory.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
@@ -9,58 +12,79 @@
 
 namespace nc::physics
 {
-class NcPhysicsImpl2
+struct BodyManager::Connections {};
+
+BodyManager::BodyManager(ecs::ComponentPool<Transform>& transformPool,
+                         ecs::ComponentPool<RigidBody>&,
+                         uint32_t maxEntities,
+                         JPH::PhysicsSystem& physicsSystem,
+                         ShapeFactory& shapeFactory,
+                         ConstraintManager& constraintManager)
+    : m_transformPool{&transformPool},
+      m_bodies{maxEntities, maxEntities},
+      m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
+      m_ctx{std::make_unique<ComponentContext>(
+        physicsSystem.GetBodyInterfaceNoLock(),
+        shapeFactory,
+        constraintManager
+      )}
 {
-    public:
-        void MockRegisterBody(RigidBody& body, JPH::Body* apiBody, ComponentContext& ctx)
-        {
-            body.SetContext(static_cast<BodyHandle>(apiBody), &ctx);
-        }
-};
+    nc::physics::RigidBody::SetContext(m_ctx.get());
+}
+
+void BodyManager::AddBody(RigidBody& added)
+{
+    const auto matrix = DirectX::XMMatrixIdentity();
+    auto [handle, _1, _2] = m_bodyFactory.MakeBody(added, matrix);
+    m_ctx->interface.AddBody(handle->GetID(), JPH::EActivation::Activate);
+    added.SetHandle(handle);
+    m_bodies.emplace(added.GetEntity().Index(), handle->GetID());
+}
+
+void BodyManager::RemoveBody(Entity toRemove)
+{
+    const auto bodyId = m_bodies.at(toRemove.Index());
+    m_bodies.erase(toRemove.Index());
+    m_ctx->interface.RemoveBody(bodyId);
+    m_ctx->interface.DestroyBody(bodyId);
+}
+
+BodyManager::~BodyManager() noexcept = default;
 } // namespace nc::physics
 
-class RigidBodyTest : public ::testing::Test
+class RigidBodyTest : public JoltApiFixture
 {
     protected:
         RigidBodyTest()
-            : joltApi{nc::physics::JoltApi::Initialize(
-                  nc::config::MemorySettings{},
-                  nc::config::PhysicsSettings{
-                    .tempAllocatorSize = 1024 * 1024 * 4,
-                    .maxBodyPairs = 8,
-                    .maxContacts = 4
-                  }
-              )}
+            : transformPool{10, nc::ComponentHandler<nc::Transform>{}},
+              rigidBodyPool{10ull, nc::ComponentHandler<nc::physics::RigidBody>{}},
+              constraintManager{joltApi.physicsSystem, 10},
+              bodyManager{
+                  transformPool,
+                  rigidBodyPool,
+                  10,
+                  joltApi.physicsSystem,
+                  shapeFactory,
+                  constraintManager
+              }
         {
         }
 
     public:
-        nc::physics::JoltApi joltApi;
-        nc::physics::NcPhysicsImpl2 ncPhysics;
+        nc::ecs::ComponentPool<nc::Transform> transformPool;
+        nc::ecs::ComponentPool<nc::physics::RigidBody> rigidBodyPool;
+        nc::physics::ShapeFactory shapeFactory;
+        nc::physics::ConstraintManager constraintManager;
+        nc::physics::BodyManager bodyManager;
         std::vector<JPH::Body*> bodies;
 
         auto CreateRigidBody(nc::Entity entity,
                              const nc::physics::Shape& shape,
-                             const nc::physics::RigidBodyInfo& info,
-                             const JPH::Vec3& position = JPH::Vec3::sZero(),
-                             const JPH::Vec3& scale = JPH::Vec3::sReplicate(1.0f))
+                             const nc::physics::RigidBodyInfo& info)
         {
             auto body = nc::physics::RigidBody{entity, shape, info};
-            auto settings = JPH::BodyCreationSettings{
-                joltApi.shapeFactory.MakeShape(shape, scale),
-                position,
-                JPH::Quat::sIdentity(),
-                nc::physics::ToMotionType(info.type),
-                nc::physics::ToObjectLayer(info.type)
-            };
-
-            settings.mUserData = nc::Entity::Hash{}(entity);
-            settings.mMotionQuality = nc::physics::ToMotionQuality(body.UseContinuousDetection());
-            auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
-            auto apiBody = interface.CreateBody(settings);
-            interface.AddBody(apiBody->GetID(), JPH::EActivation::Activate);
-            ncPhysics.MockRegisterBody(body, apiBody, *joltApi.ctx);
-            bodies.push_back(apiBody);
+            bodyManager.AddBody(body);
+            bodies.push_back(reinterpret_cast<JPH::Body*>(body.GetHandle()));
             return body;
         }
 };
@@ -93,6 +117,21 @@ TEST_F(RigidBodyTest, Constructor_staticEntityWithDynamicBody_overwritesBodyType
     EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
 }
 
+TEST_F(RigidBodyTest, Constructor_triggerWithContinuousDetection_disablesContinuosDetection)
+{
+    auto uut = nc::physics::RigidBody{
+        g_entity,
+        g_shape,
+        nc::physics::RigidBodyInfo{
+            .flags = nc::physics::RigidBodyFlags::Trigger |
+                     nc::physics::RigidBodyFlags::ContinuousDetection
+        }
+    };
+
+    EXPECT_FALSE(uut.UseContinuousDetection());
+    EXPECT_TRUE(uut.IsTrigger());
+}
+
 TEST_F(RigidBodyTest, MoveOperations_transferRegistrationData)
 {
     auto first = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
@@ -107,6 +146,17 @@ TEST_F(RigidBodyTest, MoveOperations_transferRegistrationData)
     EXPECT_TRUE(first.IsInitialized());
     EXPECT_FALSE(second.GetEntity().Valid());
     EXPECT_FALSE(second.IsInitialized());
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-move"
+#endif
+    first = std::move(first);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+    EXPECT_TRUE(first.GetEntity().Valid());
+    EXPECT_TRUE(first.IsInitialized());
 }
 
 TEST_F(RigidBodyTest, SimulationPropertyFunctions_updateInternalState)
@@ -147,6 +197,224 @@ TEST_F(RigidBodyTest, SimulationPropertyFunctions_updateInternalState)
     uut.SetGravityMultiplier(2.0f);
     EXPECT_FLOAT_EQ(2.0f, uut.GetGravityMultiplier());
     EXPECT_FLOAT_EQ(2.0f, apiBody->GetMotionProperties()->GetGravityFactor());
+}
+
+TEST_F(RigidBodyTest, SimulationPropertyFunctions_dynamicOnlyFunctionsOnStaticBody_throw)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_staticInfo);
+
+    EXPECT_THROW(uut.SetMass(1.0f), std::exception);
+    EXPECT_THROW(uut.SetLinearDamping(1.0f), std::exception);
+    EXPECT_THROW(uut.SetAngularDamping(1.0f), std::exception);
+    EXPECT_THROW(uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::All), std::exception);
+}
+
+TEST_F(RigidBodyTest, RigidBodyFlagFunctions_validFlags_setExpectedState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    auto body = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetTrigger(true);
+    EXPECT_TRUE(uut.IsTrigger());
+    EXPECT_TRUE(body->IsSensor());
+
+    uut.SetTrigger(false);
+    EXPECT_FALSE(uut.IsTrigger());
+    EXPECT_FALSE(body->IsSensor());
+
+    uut.UseContinuousDetection(true);
+    EXPECT_TRUE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::LinearCast, body->GetMotionProperties()->GetMotionQuality());
+
+    uut.UseContinuousDetection(false);
+    EXPECT_FALSE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::Discrete, body->GetMotionProperties()->GetMotionQuality());
+
+    uut.IgnoreTransformScaling(true);
+    EXPECT_TRUE(uut.IgnoreTransformScaling());
+    EXPECT_FALSE(uut.ScalesWithTransform());
+
+    uut.IgnoreTransformScaling(false);
+    EXPECT_FALSE(uut.IgnoreTransformScaling());
+    EXPECT_TRUE(uut.ScalesWithTransform());
+}
+
+TEST_F(RigidBodyTest, RigidBodyFlagFunctions_incompatibleFlags_doesNotModifyState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    auto body = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetTrigger(true);
+    uut.UseContinuousDetection(true);
+    EXPECT_TRUE(uut.IsTrigger());
+    EXPECT_TRUE(body->IsSensor());
+    EXPECT_FALSE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::Discrete, body->GetMotionProperties()->GetMotionQuality());
+
+    uut.SetTrigger(false);
+    uut.UseContinuousDetection(true);
+    uut.SetTrigger(true);
+    EXPECT_FALSE(uut.IsTrigger());
+    EXPECT_FALSE(body->IsSensor());
+    EXPECT_TRUE(uut.UseContinuousDetection());
+    EXPECT_EQ(JPH::EMotionQuality::LinearCast, body->GetMotionProperties()->GetMotionQuality());
+}
+
+TEST_F(RigidBodyTest, SetBody_dynamicToStatic_updateInternalState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetBodyType(nc::physics::BodyType::Static);
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetBody_kinematicToStatic_updateInternalState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_kinematicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetBodyType(nc::physics::BodyType::Static);
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetBody_staticToDynamic_updateInternalState)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_staticInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    uut.SetBodyType(nc::physics::BodyType::Dynamic);
+    EXPECT_EQ(nc::physics::BodyType::Dynamic, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Dynamic, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Dynamic, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetBody_staticEntity_doesNotModifyState)
+{
+    auto uut = CreateRigidBody(g_staticEntity, g_shape, g_staticInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    EXPECT_NO_THROW(uut.SetBodyType(nc::physics::BodyType::Dynamic));
+    EXPECT_EQ(nc::physics::BodyType::Static, uut.GetBodyType());
+    EXPECT_EQ(JPH::EMotionType::Static, apiBody->GetMotionType());
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, apiBody->GetObjectLayer());
+    EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
+}
+
+TEST_F(RigidBodyTest, SetMass_goodCall_updatesInternalMassProperties)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    constexpr auto expectedMass = 1.0f;
+    uut.SetMass(expectedMass);
+    const auto invMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_GT(invMass, 0.0f);
+    const auto actualMass = 1.0f / invMass;
+
+    EXPECT_FLOAT_EQ(expectedMass, actualMass);
+    EXPECT_FLOAT_EQ(expectedMass, uut.GetMass());
+}
+
+TEST_F(RigidBodyTest, SetMass_massOutOfRange_clamps)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    constexpr auto expectedMass = nc::physics::g_minMass;
+    uut.SetMass(0.0f);
+    const auto invMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_GT(invMass, 0.0f);
+    const auto actualMass = 1.0f / invMass;
+
+    EXPECT_FLOAT_EQ(expectedMass, actualMass);
+    EXPECT_FLOAT_EQ(expectedMass, uut.GetMass());
+}
+
+TEST_F(RigidBodyTest, SetMass_noTranslationDegreesOfFreedom_maintainsZeroInternalMass)
+{
+    auto info = g_dynamicInfo;
+    info.freedom = nc::physics::DegreeOfFreedom::Rotation;
+    auto uut = CreateRigidBody(g_entity, g_shape, info);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+
+    const auto initialInverseMass = apiBody->GetMotionProperties()->GetInverseMass();
+    EXPECT_FLOAT_EQ(0.0f, initialInverseMass);
+
+    // expect we send our flags with the mass, zeroing out the internal mass, but keeping the value in the RigidBody
+    uut.SetMass(1.0f);
+    const auto unaffectedInverseMass = apiBody->GetMotionProperties()->GetInverseMass();
+    EXPECT_FLOAT_EQ(0.0f, unaffectedInverseMass);
+    EXPECT_FLOAT_EQ(1.0f, uut.GetMass());
+
+    // expect we send mass with flags so we end up with the right value after unrestricting translation
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::All);
+    const auto updatedInverseMass = apiBody->GetMotionProperties()->GetInverseMass();
+    ASSERT_LT(0.0f, updatedInverseMass);
+    EXPECT_FLOAT_EQ(info.mass, 1.0f / updatedInverseMass);
+}
+
+TEST_F(RigidBodyTest, SetShape_changesVolume_preservesMassProperties)
+{
+    const auto smallRadius = 2.0f;
+    const auto smallSphere = nc::physics::Shape::MakeSphere(smallRadius);
+    auto uut = CreateRigidBody(g_entity, smallSphere, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+    const auto motionProperties = apiBody->GetMotionProperties();
+
+    const auto expectedInvMass = motionProperties->GetInverseMass();
+    const auto initialInvInertia = motionProperties->GetInverseInertiaDiagonal();
+
+    const auto largeRadius = 6.0f;
+    const auto largeSphere = nc::physics::Shape::MakeSphere(6.0f);
+    uut.SetShape(largeSphere, nc::Vector3::Splat(1.0f), true);
+
+    const auto actualInvMass = motionProperties->GetInverseMass();
+    EXPECT_FLOAT_EQ(expectedInvMass, actualInvMass);
+
+    // Slight pain, but there's a failure/fallback path for inertia we want to make sure we're avoiding.
+    // It uses a sphere with radius 1, so we'll use different radii.
+    // solid sphere moment of inertia: I = 2/5 m r^2
+    // assert that this formula is correct:
+    const auto assumedMOI = (2.0f / 5.0f) * g_dynamicInfo.mass * smallRadius * smallRadius;
+    ASSERT_EQ(JPH::Vec3::sReplicate(assumedMOI).Reciprocal(), initialInvInertia);
+
+    const auto expectedMOI = (2.0f / 5.0f) * g_dynamicInfo.mass * largeRadius * largeRadius;
+    const auto expectedInvInertia = JPH::Vec3::sReplicate(expectedMOI).Reciprocal();
+    const auto actualInvInertia = motionProperties->GetInverseInertiaDiagonal();
+    EXPECT_EQ(expectedInvInertia, actualInvInertia);
+}
+
+TEST_F(RigidBodyTest, SetDegreesOfFreedom_dynamicBody_updatesMotionProperties)
+{
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto apiBody = static_cast<JPH::Body*>(uut.GetHandle());
+    const auto motionProperties = apiBody->GetMotionProperties();
+    const auto originalInvMass = motionProperties->GetInverseMass();
+    const auto originalInvInertia = motionProperties->GetInverseInertiaDiagonal();
+
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::RotationX);
+    EXPECT_EQ(nc::physics::DegreeOfFreedom::RotationX, uut.GetDegreesOfFreedom());
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationX, motionProperties->GetAllowedDOFs());
+    EXPECT_EQ(0.0f, motionProperties->GetInverseMass());
+
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::TranslationX);
+    EXPECT_EQ(nc::physics::DegreeOfFreedom::TranslationX, uut.GetDegreesOfFreedom());
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationX, motionProperties->GetAllowedDOFs());
+    EXPECT_EQ(JPH::Vec3::sZero(), motionProperties->GetInverseInertiaDiagonal());
+
+    uut.SetDegreesOfFreedom(nc::physics::DegreeOfFreedom::All);
+    EXPECT_EQ(nc::physics::DegreeOfFreedom::All, uut.GetDegreesOfFreedom());
+    EXPECT_EQ(JPH::EAllowedDOFs::All, motionProperties->GetAllowedDOFs());
+    EXPECT_EQ(originalInvMass, motionProperties->GetInverseMass());
+    EXPECT_EQ(originalInvInertia, motionProperties->GetInverseInertiaDiagonal());
 }
 
 TEST_F(RigidBodyTest, VelocityFunctions_dynamicBody_updateVelocities)

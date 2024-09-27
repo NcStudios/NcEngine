@@ -1,8 +1,8 @@
 #include "PhysicsTypes.h"
 #include "ncengine/physics/Collider.h"
+#include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/EventListeners.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
@@ -94,7 +94,8 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         maxEntities,
         RigidBodyId,
         "RigidBody",
-        ui::editor::RigidBodyUIWidget
+        ui::editor::RigidBodyUIWidget,
+        CreateRigidBody
     );
 
     Register<physics::CollisionListener>(

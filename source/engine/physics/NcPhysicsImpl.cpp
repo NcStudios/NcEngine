@@ -55,6 +55,7 @@ namespace nc::physics
 auto BuildPhysicsModule(const config::MemorySettings&,
                         const config::PhysicsSettings& settings,
                         Registry* registry,
+                        const task::AsyncDispatcher&,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
     if(settings.enabled)

@@ -19,6 +19,7 @@ namespace nc
             void Shutdown() noexcept override;
             auto GetComponentRegistry() noexcept -> ecs::ComponentRegistry& override;
             auto GetModuleRegistry() noexcept -> ModuleRegistry* override;
+            auto GetAsyncDispatcher() noexcept -> task::AsyncDispatcher override;
             auto GetSystemEvents() noexcept -> SystemEvents& override;
             void RebuildTaskGraph() override;
 
@@ -27,8 +28,8 @@ namespace nc
             SystemEvents m_events;
             std::unique_ptr<ecs::ComponentRegistry> m_registry;
             Registry m_legacyRegistry; // delete once all usage is cutover
-            std::unique_ptr<ModuleRegistry> m_modules;
             task::Executor m_executor;
+            std::unique_ptr<ModuleRegistry> m_modules;
             Connection<> m_onQuitConnection;
             bool m_isRunning;
 

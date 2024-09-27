@@ -12,7 +12,7 @@ namespace nc::physics
 {
 class ShapeFactory
 {
-    static constexpr auto boxConvexRadius = 0.05f;
+    static constexpr auto boxConvexRadius = 0.025f;
 
     public:
         auto MakeShape(const Shape& shape,

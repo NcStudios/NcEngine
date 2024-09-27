@@ -1,4 +1,31 @@
 ### Contacts Tests ###
+add_executable(Constraints_unit_tests
+    Constraints_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics2/Constraints.cpp
+)
+
+target_include_directories(Constraints_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(Constraints_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(Constraints_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        Jolt
+        gtest_main
+)
+
+add_test(Constraints_unit_tests Constraints_unit_tests)
+
+### Contacts Tests ###
 add_executable(Contacts_unit_tests
     Contacts_unit_tests.cpp
 )
@@ -53,7 +80,9 @@ add_executable(RigidBody_unit_tests
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
     ${NC_SOURCE_DIR}/physics2/Shape.cpp
-    ${NC_SOURCE_DIR}/physics2/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/BodyFactory.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ConstraintFactory.cpp
+    ${NC_SOURCE_DIR}/physics2/jolt/ConstraintManager.cpp
     ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
 )
 

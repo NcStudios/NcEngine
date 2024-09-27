@@ -5,6 +5,7 @@
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/Scene.h"
+#include "ncengine/task/TaskFwd.h"
 
 namespace nc
 {
@@ -34,6 +35,9 @@ class NcEngine
 
         /** @brief Get a reference to the collection of system events. */
         virtual auto GetSystemEvents() noexcept -> SystemEvents& = 0;
+
+        /** @brief Get an interface for running async tasks on the thread pool. */
+        virtual auto GetAsyncDispatcher() noexcept -> task::AsyncDispatcher = 0;
 
         /**
          * @brief Compose a new task graph from all registered modules.

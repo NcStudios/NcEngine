@@ -41,13 +41,14 @@ void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
 }
 
 auto JoltApi::Initialize(const config::MemorySettings& memorySettings,
-                         const config::PhysicsSettings& physicsSettings) -> JoltApi
+                         const config::PhysicsSettings& physicsSettings,
+                         const task::AsyncDispatcher& dispatcher) -> JoltApi
 {
     RegisterAllocator();
     g_factory = std::make_unique<JPH::Factory>();
     JPH::Factory::sInstance = g_factory.get();
     JPH::RegisterTypes();
-    return JoltApi{memorySettings, physicsSettings};
+    return JoltApi{memorySettings, physicsSettings, dispatcher};
 }
 
 JoltApi::~JoltApi() noexcept
@@ -58,10 +59,12 @@ JoltApi::~JoltApi() noexcept
 }
 
 JoltApi::JoltApi(const config::MemorySettings& memorySettings,
-                 const config::PhysicsSettings& physicsSettings)
+                 const config::PhysicsSettings& physicsSettings,
+                 const task::AsyncDispatcher& dispatcher)
     : tempAllocator{physicsSettings.tempAllocatorSize},
-      jobSystem{JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, 4},
-      contactListener{physicsSystem}
+      contactListener{physicsSystem},
+      jobSystem{BuildJobSystem(dispatcher)}
+
 {
     physicsSystem.Init(
         memorySettings.maxRigidBodies,
@@ -75,6 +78,5 @@ JoltApi::JoltApi(const config::MemorySettings& memorySettings,
 
     physicsSystem.SetPhysicsSettings(ToJoltSettings(physicsSettings));
     physicsSystem.SetContactListener(&contactListener);
-    ctx = std::make_unique<ComponentContext>(physicsSystem.GetBodyInterfaceNoLock(), shapeFactory);
 }
 } // namespace nc::physics

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "jolt/JoltApi.h"
+#include "jolt/BodyManager.h"
+#include "jolt/ConstraintManager.h"
+#include "jolt/ShapeFactory.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -26,12 +29,16 @@ class NcPhysicsImpl2 final : public NcPhysics
         NcPhysicsImpl2(const config::MemorySettings& memorySettings,
                        const config::PhysicsSettings& physicsSettings,
                        Registry* registry,
+                       const task::AsyncDispatcher& dispatcher,
                        SystemEvents& events);
 
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
+        void OnBeforeSceneLoad() override;
         void Clear() noexcept override;
 
+        auto IsUpdateEnabled() const -> bool override { return m_updateEnabled; }
+        void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
         void AddJoint(Entity , Entity, const Vector3&, const Vector3&, float = 0.2f, float = 0.0f) override {}
         void RemoveJoint(Entity, Entity ) override {}
         void RemoveAllJoints(Entity) override {}
@@ -42,7 +49,10 @@ class NcPhysicsImpl2 final : public NcPhysics
     private:
         ecs::Ecs m_ecs;
         JoltApi m_jolt;
-        Connection<RigidBody&> m_onAddRigidBodyConnection;
+        ShapeFactory m_shapeFactory;
+        ConstraintManager m_constraintManager;
+        BodyManager m_bodyManager;
+        bool m_updateEnabled = true;
 
         void OnAddRigidBody(RigidBody& body);
         void SyncTransforms();
