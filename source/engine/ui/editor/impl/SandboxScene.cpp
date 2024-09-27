@@ -14,7 +14,7 @@ void SandboxScene::Load(ecs::Ecs world, ModuleProvider modules)
     {
         auto file = std::ifstream{m_fragmentPath, std::ios::binary};
         NC_ASSERT(file.is_open(), fmt::format("Failed to open scene fragment file '{}'", m_fragmentPath));
-        LoadSceneFragment(file, world, *modules.Get<asset::NcAsset>());
+        LoadSceneFragment(file, world, modules);
         return;
     }
 }

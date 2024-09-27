@@ -11,8 +11,10 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "physics/ColliderUtility.h"
+#include "physics2/DeferredPhysicsCreateState.h"
 
 #include "ncutility/BinarySerialization.h"
 
@@ -277,5 +279,126 @@ auto DeserializeVelocityRestriction(std::istream& stream, const DeserializationC
     auto out = physics::VelocityRestriction{};
     serialize::Deserialize(stream, out);
     return out;
+}
+
+void SerializeRigidBody(std::ostream& stream, const physics::RigidBody& out, const SerializationContext& ctx, const std::any&)
+{
+    serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
+
+    const auto& shape = out.GetShape();
+    serialize::Serialize(stream, shape.GetType());
+    serialize::Serialize(stream, shape.GetLocalScale());
+    serialize::Serialize(stream, shape.GetLocalPosition());
+    serialize::Serialize(stream, out.GetInfo());
+
+    auto&& constraints = out.GetConstraints();
+    serialize::Serialize(stream, constraints.size());
+    for (const auto& constraint : constraints)
+    {
+        std::visit(
+            [&](const auto& constraintInfo) {
+                serialize::Serialize(stream, constraintInfo.type);
+                serialize::Serialize(stream, constraintInfo);
+            },
+            constraint.GetInfo()
+        );
+
+        const auto target = constraint.GetConstraintTarget();
+        const auto targetId = target.Valid() ? ctx.entityMap.at(target) : Entity::NullIndex;
+        serialize::Serialize(stream, targetId);
+    }
+}
+
+auto DeserializeConstraintInfo(std::istream& stream) -> physics::ConstraintInfo
+{
+    auto type = physics::ConstraintType{};
+    serialize::Deserialize(stream, type);
+    switch (type)
+    {
+        case physics::ConstraintType::FixedConstraint:
+        {
+            auto createInfo = physics::FixedConstraintInfo{};
+            serialize::Deserialize(stream, createInfo);
+            return physics::ConstraintInfo{createInfo};
+        }
+        case physics::ConstraintType::PointConstraint:
+        {
+            auto createInfo = physics::PointConstraintInfo{};
+            serialize::Deserialize(stream, createInfo);
+            return physics::ConstraintInfo{createInfo};
+        }
+        case physics::ConstraintType::DistanceConstraint:
+        {
+            auto createInfo = physics::DistanceConstraintInfo{};
+            serialize::Deserialize(stream, createInfo);
+            return physics::ConstraintInfo{createInfo};
+        }
+        case physics::ConstraintType::HingeConstraint:
+        {
+            auto createInfo = physics::HingeConstraintInfo{};
+            serialize::Deserialize(stream, createInfo);
+            return physics::ConstraintInfo{createInfo};
+        }
+        case physics::ConstraintType::SliderConstraint:
+        {
+            auto createInfo = physics::SliderConstraintInfo{};
+            serialize::Deserialize(stream, createInfo);
+            return physics::ConstraintInfo{createInfo};
+        }
+        case physics::ConstraintType::SwingTwistConstraint:
+        {
+            auto createInfo = physics::SwingTwistConstraintInfo{};
+            serialize::Deserialize(stream, createInfo);
+            return physics::ConstraintInfo{createInfo};
+        }
+        default:
+        {
+            throw NcError{fmt::format("Deserialized Unknown ConstraintType: '{}'", std::to_underlying(type))};
+        }
+    }
+}
+
+auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ctx, const std::any& userData) -> physics::RigidBody
+{
+    auto id = uint32_t{};
+    auto shapeType = physics::ShapeType{};
+    auto shapeScale = Vector3{};
+    auto shapePosition = Vector3{};
+    auto info = physics::RigidBodyInfo{};
+    auto constraintCount = size_t{};
+    serialize::Deserialize(stream, id);
+    serialize::Deserialize(stream, shapeType);
+    serialize::Deserialize(stream, shapeScale);
+    serialize::Deserialize(stream, shapePosition);
+    serialize::Deserialize(stream, info);
+    serialize::Deserialize(stream, constraintCount);
+
+    auto deferredState = std::any_cast<nc::physics::DeferredPhysicsCreateState>(&userData);
+    NC_ASSERT(deferredState, "RigidBody user data did not contain DeferredPhysicsCreateState");
+    const auto entity = ctx.entityMap.at(id);
+
+    for (auto i = 0u; i < constraintCount; ++i)
+    {
+        auto constraintInfo = DeserializeConstraintInfo(stream);
+        auto targetId = uint32_t{};
+        serialize::Deserialize(stream, targetId);
+        const auto target = targetId == Entity::NullIndex ? Entity::Null() : ctx.entityMap.at(targetId);
+        deferredState->constraints.emplace_back(entity, target, constraintInfo);
+    }
+
+    const auto shape = [&]()
+    {
+        using namespace nc::physics;
+        switch (shapeType)
+        {
+            case ShapeType::Box:     return Shape::MakeBox(shapeScale, shapePosition);
+            case ShapeType::Sphere:  return Shape::MakeSphere(shapeScale.x * 0.5f, shapePosition);
+            case ShapeType::Capsule: return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f, shapePosition);
+            default:
+                throw NcError{fmt::format("Deserialized Unknown ShapeType: '{}'", std::to_underlying(shapeType))};
+        }
+    }();
+
+    return physics::RigidBody{entity, shape, info};
 }
 } // namespace nc

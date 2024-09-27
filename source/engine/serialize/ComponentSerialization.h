@@ -36,4 +36,6 @@ void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& o
 auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::ToonRenderer;
 void SerializeVelocityRestriction(std::ostream& stream, const physics::VelocityRestriction& out, const SerializationContext&, const std::any&);
 auto DeserializeVelocityRestriction(std::istream& stream, const DeserializationContext&, const std::any&) -> physics::VelocityRestriction;
+void SerializeRigidBody(std::ostream& stream, const physics::RigidBody& out, const SerializationContext&, const std::any&);
+auto DeserializeRigidBody(std::istream& stream, const DeserializationContext&, const std::any&) -> physics::RigidBody;
 } // namespace nc

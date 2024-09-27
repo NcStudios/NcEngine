@@ -131,6 +131,7 @@ class RigidBody
 
         /** @name General Functions */
         auto GetEntity() const -> Entity { return m_self; }
+        auto GetInfo() const -> const RigidBodyInfo& { return m_info; }
 
         /**
          * @name BodyType Functions
@@ -215,6 +216,7 @@ class RigidBody
 
         /** @brief View all of the constraints attached to the RigidBody. */
         auto GetConstraints() -> std::span<Constraint>;
+        auto GetConstraints() const -> std::span<const Constraint>;
 
         /**
          * @name Simulated Body Functions

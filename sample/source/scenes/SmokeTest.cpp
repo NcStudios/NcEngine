@@ -19,6 +19,7 @@
 #include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
 
@@ -39,7 +40,7 @@ void SaveScene(nc::ecs::Ecs world, const nc::asset::AssetMap& assets)
     nc::SaveSceneFragment(file, world, assets);
 }
 
-void LoadScene(nc::ecs::Ecs world, nc::asset::NcAsset& ncAsset)
+void LoadScene(nc::ecs::Ecs world, nc::ModuleProvider modules)
 {
     auto file = std::ifstream{g_sceneFragment, std::ios::binary};
     if (!file)
@@ -47,7 +48,7 @@ void LoadScene(nc::ecs::Ecs world, nc::asset::NcAsset& ncAsset)
         throw nc::NcError{fmt::format("Failed to open fragment for reading: '{}'", g_sceneFragment)};
     }
 
-    nc::LoadSceneFragment(file, world, ncAsset);
+    nc::LoadSceneFragment(file, world, modules);
 }
 } // anonymous namespace
 
@@ -98,21 +99,28 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllMeshAssets();
         asset::UnloadAllTextureAssets();
         asset::UnloadAllSkeletalAnimationAssets();
-        ::LoadScene(world, *modules.Get<asset::NcAsset>());
+        ::LoadScene(world, modules);
     }
     else
     {
         const auto ground = world.Emplace<Entity>({
             .position = Vector3::Up() * -2.5f,
-            .scale = Vector3{3.0f, 1.0f, 3.0f}
+            .scale = Vector3{3.0f, 1.0f, 3.0f},
+            .flags = Entity::Flags::Static
         });
 
         world.Emplace<graphics::ToonRenderer>(ground);
-        auto& groundCollider = world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-        auto& groundTransform = world.Get<Transform>(ground);
-        world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
-        world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
-        world.Emplace<physics::OrientationClamp>(ground, Vector3::Up(), 1.0f, 5.0f);
+        world.Emplace<physics::RigidBody>(
+            ground,
+            physics::Shape::MakeBox()
+        );
+
+
+        // auto& groundCollider = world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
+        // auto& groundTransform = world.Get<Transform>(ground);
+        // world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
+        // world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
+        // world.Emplace<physics::OrientationClamp>(ground, Vector3::Up(), 1.0f, 5.0f);
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
@@ -148,11 +156,17 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .kinematic = {}
     });
 
-    auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
-    auto& objectTransform = world.Get<Transform>(object);
-    world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
-    world.Emplace<physics::PhysicsMaterial>(object);
-    world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
+    world.Emplace<physics::RigidBody>(
+        object,
+        physics::Shape::MakeBox()
+
+    );
+
+    // auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
+    // auto& objectTransform = world.Get<Transform>(object);
+    // world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
+    // world.Emplace<physics::PhysicsMaterial>(object);
+    // world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
 
     world.Emplace<Entity>({.parent = object});
 }

@@ -73,6 +73,9 @@ class ConstraintManager
         auto GetConstraints(Entity owner) -> std::span<Constraint>;
         void Clear();
 
+        auto BeginBatchAdd() -> size_t;
+        void EndBatchAdd(size_t batchBegin);
+
     private:
         JPH::PhysicsSystem* m_physicsSystem;
         ConstraintFactory m_factory;
@@ -80,6 +83,7 @@ class ConstraintManager
         std::vector<ConstraintPair> m_pairs;
         std::vector<uint32_t> m_freeIndices;
         sparse_map<EntityConstraints> m_entityState;
+        bool m_isBatchInProgress = false;
 
         auto TrackConstraint(uint32_t entityId, ConstraintId constraintId) -> EntityConstraints&;
         void UntrackConstraint(uint32_t entityId, ConstraintId constraintId, bool isOwner);

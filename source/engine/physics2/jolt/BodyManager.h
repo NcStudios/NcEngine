@@ -40,6 +40,9 @@ class BodyManager : public StableAddress
         void AddBody(RigidBody& added);
         void RemoveBody(Entity entity);
         void Clear();
+
+        auto BeginBatchAdd() -> size_t;
+        void EndBatchAdd(size_t batchBegin);
         void DeferCleanup(bool value)
         {
             m_deferCleanup = value;
@@ -54,6 +57,7 @@ class BodyManager : public StableAddress
         ConstraintManager* m_constraintManager;
         std::unique_ptr<ComponentContext> m_ctx;
         std::unique_ptr<Connections> m_connections;
+        bool m_deferInitialization = false;
         bool m_deferCleanup = false;
 };
 } // namespace nc::physics

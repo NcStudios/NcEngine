@@ -102,7 +102,7 @@ auto EditorUI::ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsse
     else if (KeyDown(hotkeys.openSaveSceneDialog))
         m_saveSceneDialog.Open(ncAsset.GetLoadedAssets());
     else if (KeyDown(hotkeys.openLoadSceneDialog))
-        m_loadSceneDialog.Open(&ncAsset);
+        m_loadSceneDialog.Open();
 
     return state;
 }
@@ -136,7 +136,7 @@ void EditorUI::DrawMenu(EditorContext& ctx)
             if (ImGui::MenuItem("Save"))
                 m_saveSceneDialog.Open(ctx.modules.Get<asset::NcAsset>()->GetLoadedAssets());
             if (ImGui::MenuItem("Load"))
-                m_loadSceneDialog.Open(ctx.modules.Get<asset::NcAsset>());
+                m_loadSceneDialog.Open();
 
             ImGui::EndMenu();
         }

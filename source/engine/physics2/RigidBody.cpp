@@ -243,6 +243,11 @@ auto RigidBody::GetConstraints() -> std::span<Constraint>
     return s_ctx->constraintManager.GetConstraints(m_self);
 }
 
+auto RigidBody::GetConstraints() const -> std::span<const Constraint>
+{
+    return s_ctx->constraintManager.GetConstraints(m_self);
+}
+
 void RigidBody::SetSimulatedBodyPosition(Transform& transform,
                                          const Vector3& position,
                                          bool wake)

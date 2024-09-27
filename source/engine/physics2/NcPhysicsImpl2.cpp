@@ -31,6 +31,14 @@ class NcPhysicsStub2 : public nc::physics::NcPhysics
             );
         }
 };
+
+auto GetDeferredCreateState(nc::Registry* registry) -> nc::physics::DeferredPhysicsCreateState*
+{
+    auto& userData = registry->GetEcs().GetPool<nc::physics::RigidBody>().Handler().userData;
+    auto state = std::any_cast<nc::physics::DeferredPhysicsCreateState>(&userData);
+    NC_ASSERT(state, "RigidBody user data did not contain DeferredPhysicsCreateState");
+    return state;
+}
 } // anonymous namespace
 
 namespace nc::physics
@@ -68,7 +76,8 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
         m_jolt.physicsSystem,
         m_shapeFactory,
         m_constraintManager
-      }
+      },
+      m_deferredState{GetDeferredCreateState(registry)}
 {
 }
 
@@ -120,6 +129,33 @@ void NcPhysicsImpl2::SyncTransforms()
 void NcPhysicsImpl2::OnBeforeSceneLoad()
 {
     m_bodyManager.DeferCleanup(false);
+}
+
+void NcPhysicsImpl2::OnBeforeSceneFragmentLoad()
+{
+    m_deferredState->bodyBatchIndex = m_bodyManager.BeginBatchAdd();
+    m_deferredState->constraintBatchIndex = m_constraintManager.BeginBatchAdd();
+}
+
+void NcPhysicsImpl2::OnAfterSceneFragmentLoad()
+{
+    m_bodyManager.EndBatchAdd(std::exchange(m_deferredState->bodyBatchIndex, 0ull));
+
+    for (const auto& [ownerEntity, targetEntity, info] : m_deferredState->constraints)
+    {
+        auto& owner = m_ecs.Get<RigidBody>(ownerEntity);
+        if (targetEntity.Valid())
+        {
+            auto& target = m_ecs.Get<RigidBody>(targetEntity);
+            owner.AddConstraint(info, target);
+        }
+        else
+        {
+            owner.AddConstraint(info);
+        }
+    }
+
+    m_constraintManager.EndBatchAdd(std::exchange(m_deferredState->constraintBatchIndex, 0ull));
 }
 
 void NcPhysicsImpl2::Clear() noexcept

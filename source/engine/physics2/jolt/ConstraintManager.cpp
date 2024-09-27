@@ -13,13 +13,16 @@ auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
                                       JPH::Body& targetBody) -> Constraint&
 {
     auto handle = m_factory.MakeConstraint(createInfo, ownerBody, targetBody);
-    m_physicsSystem->AddConstraint(handle);
+    if (!m_isBatchInProgress)
+    {
+        m_physicsSystem->AddConstraint(handle);
+    }
 
     const auto ownerId = owner.Index();
     const auto targetId = target.Index();
     const auto index = [&]()
     {
-        if (m_freeIndices.empty())
+        if (m_freeIndices.empty() || m_isBatchInProgress) // todo: test for this
         {
             const auto i = static_cast<uint32_t>(m_handles.size());
             m_handles.push_back(handle);
@@ -174,6 +177,27 @@ void ConstraintManager::Clear()
     m_freeIndices.clear();
     m_freeIndices.shrink_to_fit();
     m_entityState.clear();
+}
+
+auto ConstraintManager::BeginBatchAdd() -> size_t
+{
+    m_isBatchInProgress = true;
+    return m_handles.size();
+}
+
+void ConstraintManager::EndBatchAdd(size_t batchBegin)
+{
+    m_isBatchInProgress = false;
+    const auto numConstraints = m_handles.size();
+    if (batchBegin == numConstraints)
+    {
+        return;
+    }
+
+    NC_ASSERT(batchBegin < numConstraints, "Constraint batching out-of-sync");
+    auto beg = m_handles.data() + batchBegin;
+    auto count = static_cast<int>(numConstraints - batchBegin);
+    m_physicsSystem->AddConstraints(beg, count);
 }
 
 auto ConstraintManager::TrackConstraint(uint32_t entityId,

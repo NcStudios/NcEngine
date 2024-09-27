@@ -49,14 +49,19 @@ void BodyManager::AddBody(RigidBody& added)
 {
     auto& transform = m_transformPool->Get(added.GetEntity());
     auto [handle, adjustedScale, wasScaleAdjusted] = m_bodyFactory.MakeBody(added, transform.TransformationMatrix());
+    added.SetHandle(handle);
     if (wasScaleAdjusted)
     {
         transform.SetScale(adjustedScale);
     }
 
-    m_ctx->interface.AddBody(handle->GetID(), JPH::EActivation::Activate);
-    added.SetHandle(handle);
     m_bodies.emplace(added.GetEntity().Index(), handle->GetID());
+    if (m_deferInitialization)
+    {
+        return;
+    }
+
+    m_ctx->interface.AddBody(handle->GetID(), JPH::EActivation::Activate);
 }
 
 void BodyManager::RemoveBody(Entity toRemove)
@@ -71,6 +76,28 @@ void BodyManager::RemoveBody(Entity toRemove)
     m_constraintManager->RemoveConstraints(toRemove);
     m_ctx->interface.RemoveBody(bodyId);
     m_ctx->interface.DestroyBody(bodyId);
+}
+
+auto BodyManager::BeginBatchAdd() -> size_t
+{
+    m_deferInitialization = true;
+    return m_bodies.size();
+}
+
+void BodyManager::EndBatchAdd(size_t batchBegin)
+{
+    m_deferInitialization = false;
+    const auto numBodies = m_bodies.size();
+    if (batchBegin == numBodies)
+    {
+        return;
+    }
+
+    NC_ASSERT(batchBegin < numBodies, "Body batching out-of-sync");
+    auto beg = &*(m_bodies.begin() + batchBegin);
+    auto count = static_cast<int>(numBodies - batchBegin);
+    auto batchCtx = m_ctx->interface.AddBodiesPrepare(beg, count);
+    m_ctx->interface.AddBodiesFinalize(beg, count, batchCtx, JPH::EActivation::Activate);
 }
 
 void BodyManager::Clear()

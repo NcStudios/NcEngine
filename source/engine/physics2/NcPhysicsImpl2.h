@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DeferredPhysicsCreateState.h"
 #include "jolt/JoltApi.h"
 #include "jolt/BodyManager.h"
 #include "jolt/ConstraintManager.h"
@@ -35,6 +36,8 @@ class NcPhysicsImpl2 final : public NcPhysics
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void OnBeforeSceneLoad() override;
+        void OnBeforeSceneFragmentLoad() override;
+        void OnAfterSceneFragmentLoad() override;
         void Clear() noexcept override;
 
         auto IsUpdateEnabled() const -> bool override { return m_updateEnabled; }
@@ -52,6 +55,7 @@ class NcPhysicsImpl2 final : public NcPhysics
         ShapeFactory m_shapeFactory;
         ConstraintManager m_constraintManager;
         BodyManager m_bodyManager;
+        DeferredPhysicsCreateState* m_deferredState;
         bool m_updateEnabled = true;
 
         void OnAddRigidBody(RigidBody& body);

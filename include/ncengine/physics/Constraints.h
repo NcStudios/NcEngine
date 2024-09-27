@@ -100,6 +100,8 @@ struct SpringSettings
 /** @brief Constraint settings to rigidly fix two bodies together, limiting all relative motion. */
 struct FixedConstraintInfo
 {
+    static constexpr auto type = ConstraintType::FixedConstraint;
+
     Vector3 ownerPosition = Vector3::Zero();  ///< local attach position
     Vector3 ownerRight = Vector3::Right();    ///< local right axis
     Vector3 ownerUp = Vector3::Up();          ///< local up axis
@@ -111,6 +113,8 @@ struct FixedConstraintInfo
 /** @brief Constraint settings to attach two bodies at a point, limiting relative motion to rotation only. */
 struct PointConstraintInfo
 {
+    static constexpr auto type = ConstraintType::PointConstraint;
+
     Vector3 ownerPosition = Vector3::Zero();  ///< local attach position
     Vector3 targetPosition = Vector3::Zero(); ///< local attach position
 };
@@ -118,6 +122,8 @@ struct PointConstraintInfo
 /** @brief Constraint settings to keep two bodies within a specified distance range. */
 struct DistanceConstraintInfo
 {
+    static constexpr auto type = ConstraintType::DistanceConstraint;
+
     Vector3 ownerPosition = Vector3::Zero();          ///< local attach position
     Vector3 targetPosition = Vector3::Zero();         ///< local attach position
     float minLimit = 0.0f;                            ///< how close together bodies are allowed to be [0, maxDistance]
@@ -128,6 +134,8 @@ struct DistanceConstraintInfo
 /** @brief Constraint settings to attach two bodies with a hinge, limiting relative motion to rotation about a single axis. */
 struct HingeConstraintInfo
 {
+    static constexpr auto type = ConstraintType::HingeConstraint;
+
     Vector3 ownerPosition = Vector3::Zero();          ///< local attach position
     Vector3 ownerHingeAxis = Vector3::Right();        ///< local axis of rotation
     Vector3 ownerNormalAxis = Vector3::Up();          ///< local reference axis perpendicular to ownerHingeAxis
@@ -143,6 +151,8 @@ struct HingeConstraintInfo
 /** @brief Constraint settings to attach two bodies with a slider, limiting relative motion to a single axis of translation. */
 struct SliderConstraintInfo
 {
+    static constexpr auto type = ConstraintType::SliderConstraint;
+
     Vector3 ownerPosition = Vector3::Zero();          ///< local attach position
     Vector3 ownerSliderAxis = Vector3::Right();       ///< local axis of translation
     Vector3 ownerNormalAxis = Vector3::Up();          ///< local reference axis perpendicular to ownerSliderAxis
@@ -158,6 +168,8 @@ struct SliderConstraintInfo
 /** @brief Constraint settings to attach two bodies with a shoulder-like joint, limiting relative motion to rotation within a cone. */
 struct SwingTwistConstraintInfo
 {
+    static constexpr auto type = ConstraintType::SwingTwistConstraint;
+
     Vector3 ownerPosition = Vector3::Zero();      ///< local attach position
     Vector3 ownerTwistAxis = Vector3::Right();    ///< local twist axis (cone axis)
     Vector3 targetPosition = Vector3::Zero();     ///< local attach position
