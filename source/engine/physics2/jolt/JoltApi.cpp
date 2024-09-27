@@ -1,4 +1,5 @@
 #include "JoltApi.h"
+#include "Profiler.inl"
 #include "ncengine/config/Config.h"
 #include "ncutility/NcError.h"
 
