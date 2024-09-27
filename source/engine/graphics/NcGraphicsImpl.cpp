@@ -82,7 +82,7 @@ namespace nc::graphics
             window::SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .apiContext = RenderApiContext::None, // None for Vulkan
+                .apiContext = window::RenderApiContext::None, // None for Vulkan, D3D11/12, or headless modes.
                 .isHeadless = false,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,

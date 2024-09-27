@@ -1,6 +1,5 @@
 #pragma once
 
-// Diligent
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
@@ -16,12 +15,21 @@ class NcWindow;
 
 namespace graphics
 {
-auto GetSupportedRenderDeviceTypeByPlatform(std::string_view targetApi) -> Diligent::RENDER_DEVICE_TYPE;
+namespace api
+{
+    constexpr std::string_view Headless = std::string_view("headless");
+    constexpr std::string_view OpenGL   = std::string_view("opengl");
+    constexpr std::string_view D3D11    = std::string_view("d3d11");
+    constexpr std::string_view D3D12    = std::string_view("d3d12");
+    constexpr std::string_view Vulkan   = std::string_view("vulkan");
+} // namespace api
+
+auto GetSupportedRenderApiByPlatform(std::string_view targetApi) -> std::string_view;
 
 class DiligentEngine
 {
     public:
-        DiligentEngine(std::string_view targetApi, window::NcWindow& window);
+        DiligentEngine(std::string_view renderApi, window::NcWindow& window);
         ~DiligentEngine() noexcept;
 
         auto Device()    -> Diligent::IRenderDevice*  { return m_pDevice.RawPtr(); }
@@ -32,7 +40,7 @@ class DiligentEngine
         Diligent::RefCntAutoPtr<Diligent::IRenderDevice>  m_pDevice;
         Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
-        Diligent::RENDER_DEVICE_TYPE                      m_deviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
+        std::string_view                                  m_renderApi = api::Headless;
 };
 } // namespace graphics
 } // namespace nc

@@ -27,7 +27,8 @@ class NcGraphicsImpl2 : public NcGraphics
                        Registry* registry,
                        ModuleProvider modules,
                        SystemEvents& events,
-                       window::NcWindow& window);
+                       window::NcWindow& window,
+                       std::string_view renderApi); /** @todo Hack! This param will go away when I address #734 */
 
         ~NcGraphicsImpl2() noexcept;
 
