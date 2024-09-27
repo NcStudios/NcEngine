@@ -11,7 +11,6 @@
 #include "optick.h"
 #include "DirectXMath.h"
 
-
 namespace
 {
 struct NcGraphicsStub2 : nc::graphics::NcGraphics
@@ -162,23 +161,17 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 {
     NC_LOG_TRACE("Building NcGraphics Tasks");
 
-        update.Add(
-            nc::update_task_id::ParticleEmitterUpdate,
-            "ParticleEmitterUpdate(stub)",
-            []{}
-        );
-
-        update.Add(
-            nc::update_task_id::ParticleEmitterSync,
-            "ParticleEmitterSync(stub)",
-            []{},
-            {nc::update_task_id::CommitStagedChanges}
-        );
+    update.Add(
+        nc::update_task_id::ParticleEmitterUpdate,
+        "ParticleEmitterUpdate(stub)",
+        []{}
+    );
 
     update.Add(
-        update_task_id::UpdateRenderData,
-        "Update",
-        [this]{ Update(); }
+        nc::update_task_id::ParticleEmitterSync,
+        "ParticleEmitterSync(stub)",
+        []{},
+        {nc::update_task_id::CommitStagedChanges}
     );
 
     render.Add(
