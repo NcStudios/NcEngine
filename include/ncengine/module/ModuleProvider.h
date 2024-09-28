@@ -6,6 +6,8 @@
 
 #include "ModuleRegistry.h"
 
+#include <functional>
+
 namespace nc
 {
 /** @brief Provides access to registered Modules. */
