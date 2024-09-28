@@ -178,8 +178,8 @@ void NcPhysicsImpl2::BeginRigidBodyBatch(size_t bodyCountHint)
         pool.Reserve(pool.size() + bodyCountHint);
     }
 
-    m_deferredState->bodyBatchIndex = m_bodyManager.BeginBatchAdd(bodyCountHint);
-    m_deferredState->constraintBatchIndex = m_constraintManager.BeginBatchAdd();
+    m_deferredState->bodyBatchIndex = m_bodyManager.BeginBatch(bodyCountHint);
+    m_deferredState->constraintBatchIndex = m_constraintManager.BeginBatch();
 }
 
 void NcPhysicsImpl2::EndRigidBodyBatch()
@@ -190,7 +190,7 @@ void NcPhysicsImpl2::EndRigidBodyBatch()
         "No RigidBody batch is in progress"
     );
 
-    m_bodyManager.EndBatchAdd(std::exchange(m_deferredState->bodyBatchIndex, DeferredPhysicsCreateState::NullBatch));
+    m_bodyManager.EndBatch(std::exchange(m_deferredState->bodyBatchIndex, DeferredPhysicsCreateState::NullBatch));
 
     // Deserialization needs to queue constraints until all bodies exist. If the batch isn't from a scene fragment, this
     // will be empty and any constraints will already be in the ConstraintManager, but not yet added to the simulation.
@@ -208,6 +208,6 @@ void NcPhysicsImpl2::EndRigidBodyBatch()
         }
     }
 
-    m_constraintManager.EndBatchAdd(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
+    m_constraintManager.EndBatch(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
 }
 } // namespace nc::physics

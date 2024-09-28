@@ -398,3 +398,72 @@ TEST_F(ConstraintManagerTest, Clear_withNullptrsInList_succeeds)
     DestroyBody(body1);
     DestroyBody(body2);
 }
+
+TEST_F(ConstraintManagerTest, BeginBatch_doesNotAddToSimulationUntilBatchEnded)
+{
+    const auto batchIndex = uut.BeginBatch();
+    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    auto body1 = CreateBody();
+    auto body2 = CreateBody();
+    const auto& constraint1 = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
+    const auto& constraint2 = uut.AddConstraint(expectedInfo, g_entity2, *body2, g_entity1, *body1);
+
+    EXPECT_TRUE(joltApi.physicsSystem.GetConstraints().empty());
+
+    uut.EndBatch(batchIndex);
+    EXPECT_EQ(2u, joltApi.physicsSystem.GetConstraints().size());
+
+    uut.RemoveConstraint(constraint1.GetId());
+    uut.RemoveConstraint(constraint2.GetId());
+    DestroyBody(body1);
+    DestroyBody(body2);
+}
+
+TEST_F(ConstraintManagerTest, BeginBatch_emptyBatch_succeeds)
+{
+    const auto batchIndex = uut.BeginBatch();
+    EXPECT_NO_THROW(uut.EndBatch(batchIndex));
+}
+
+TEST_F(ConstraintManagerTest, BeginBatch_nonEmptyFreeList_allocatesSequentiallyFromEnd)
+{
+    // b/c batch add requires a contiguous array, we want to verify constraints are allocated sequentially
+    // while a batch is active, even if there are free spaces available in the internal vector
+    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    auto body1 = CreateBody();
+    auto body2 = CreateBody();
+    const auto& toRemoveId1 = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2).GetId();
+    const auto& toRemoveId2 = uut.AddConstraint(expectedInfo, g_entity2, *body2, g_entity1, *body1).GetId();
+    uut.RemoveConstraint(toRemoveId1);
+    uut.RemoveConstraint(toRemoveId2);
+
+    const auto batchIndex = uut.BeginBatch();
+    const auto& batchedId1 = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2).GetId();
+    const auto& batchedId2 = uut.AddConstraint(expectedInfo, g_entity2, *body2, g_entity1, *body1).GetId();
+    EXPECT_TRUE(batchedId1 > toRemoveId1 && batchedId1 > toRemoveId2);
+    EXPECT_TRUE(batchedId2 > toRemoveId1 && batchedId2 > toRemoveId2);
+    EXPECT_EQ(batchedId1 + 1, batchedId2);
+    uut.EndBatch(batchIndex);
+
+    uut.RemoveConstraint(batchedId1);
+    uut.RemoveConstraint(batchedId2);
+    DestroyBody(body1);
+    DestroyBody(body2);
+}
+
+TEST_F(ConstraintManagerTest, BeginBatch_batchInProgress_throws)
+{
+    uut.BeginBatch();
+    EXPECT_THROW(uut.BeginBatch(), std::exception);
+}
+
+TEST_F(ConstraintManagerTest, EndBatchAdd_badIndex_throws)
+{
+    const auto batchIndex = uut.BeginBatch();
+    EXPECT_THROW(uut.EndBatch(batchIndex + 1), std::exception);
+}
+
+TEST_F(ConstraintManagerTest, EndBatchAdd_noBatchInProgress_throws)
+{
+    EXPECT_THROW(uut.EndBatch(1), std::exception);
+}

@@ -22,7 +22,7 @@ auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
     const auto targetId = target.Index();
     const auto index = [&]()
     {
-        if (m_freeIndices.empty() || m_isBatchInProgress) // todo: test for this
+        if (m_freeIndices.empty() || m_isBatchInProgress)
         {
             const auto i = static_cast<uint32_t>(m_handles.size());
             m_handles.push_back(handle);
@@ -179,14 +179,16 @@ void ConstraintManager::Clear()
     m_entityState.clear();
 }
 
-auto ConstraintManager::BeginBatchAdd() -> size_t
+auto ConstraintManager::BeginBatch() -> size_t
 {
+    NC_ASSERT(!m_isBatchInProgress, "Constraint batch already in progress");
     m_isBatchInProgress = true;
     return m_handles.size();
 }
 
-void ConstraintManager::EndBatchAdd(size_t batchBegin)
+void ConstraintManager::EndBatch(size_t batchBegin)
 {
+    NC_ASSERT(m_isBatchInProgress, "Constraint batch is not in progress");
     m_isBatchInProgress = false;
     const auto numConstraints = m_handles.size();
     if (batchBegin == numConstraints)

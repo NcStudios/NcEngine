@@ -78,15 +78,17 @@ void BodyManager::RemoveBody(Entity toRemove)
     m_ctx->interface.DestroyBody(bodyId);
 }
 
-auto BodyManager::BeginBatchAdd(size_t bodyCountHint) -> size_t
+auto BodyManager::BeginBatch(size_t bodyCountHint) -> size_t
 {
+    NC_ASSERT(!m_deferInitialization, "RigidBody batch already in progress");
     m_deferInitialization = true;
     m_bodies.reserve(m_bodies.size() + bodyCountHint);
     return m_bodies.size();
 }
 
-void BodyManager::EndBatchAdd(size_t batchBegin)
+void BodyManager::EndBatch(size_t batchBegin)
 {
+    NC_ASSERT(m_deferInitialization, "RigidBody batch not in progress");
     m_deferInitialization = false;
     const auto numBodies = m_bodies.size();
     if (batchBegin == numBodies)

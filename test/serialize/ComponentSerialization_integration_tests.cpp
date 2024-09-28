@@ -365,7 +365,8 @@ TEST(ComponentSerializationTests, RoundTrip_velocityRestriction_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)
 {
     auto stream = std::stringstream{};
-    auto userData = std::any{nc::physics::DeferredPhysicsCreateState{}};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
     const auto expected = nc::physics::RigidBody{
         g_entity,
         nc::physics::Shape::MakeBox(
@@ -410,7 +411,8 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
 {
     auto stream = std::stringstream{};
-    auto userData = std::any{nc::physics::DeferredPhysicsCreateState{}};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
     const auto expectedShape = nc::physics::Shape::MakeBox(
         nc::Vector3{2.0f, 3.0f, 4.0f},
         nc::Vector3::Splat(5.0f)
@@ -429,7 +431,8 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
 {
     auto stream = std::stringstream{};
-    auto userData = std::any{nc::physics::DeferredPhysicsCreateState{}};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
     const auto expectedShape = nc::physics::Shape::MakeSphere(
         7.0f,
         nc::Vector3::Splat(5.0f)
@@ -448,7 +451,8 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
 {
     auto stream = std::stringstream{};
-    auto userData = std::any{nc::physics::DeferredPhysicsCreateState{}};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
     const auto expectedShape = nc::physics::Shape::MakeCapsule(
         10.0f,
         5.0f,
@@ -497,7 +501,8 @@ TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)
     const auto& expectedConstraint6 = std::as_const(body3).GetConstraints()[1];
 
     auto stream = std::stringstream{};
-    auto userData = std::any{nc::physics::DeferredPhysicsCreateState{}};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
     nc::SerializeRigidBody(stream, entity1, serializationContext, userData);
     nc::SerializeRigidBody(stream, entity2, serializationContext, userData);
     nc::SerializeRigidBody(stream, entity3, serializationContext, userData);
@@ -506,10 +511,7 @@ TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)
     nc::DeserializeRigidBody(stream, deserializationContext, userData);
 
     // deserialized bodies won't have constraints, they'll be in user data
-    const auto deferredState = std::any_cast<nc::physics::DeferredPhysicsCreateState>(&userData);
-    ASSERT_NE(nullptr, deferredState);
-
-    const auto& actualConstraints = deferredState->constraints;
+    const auto& actualConstraints = deferredState.constraints;
     ASSERT_EQ(6u, actualConstraints.size());
 
     const auto& actualConstraint1 = actualConstraints.at(0);

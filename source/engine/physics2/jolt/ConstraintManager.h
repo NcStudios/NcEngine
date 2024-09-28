@@ -73,8 +73,8 @@ class ConstraintManager
         auto GetConstraints(Entity owner) -> std::span<Constraint>;
         void Clear();
 
-        auto BeginBatchAdd() -> size_t;
-        void EndBatchAdd(size_t batchBegin);
+        auto BeginBatch() -> size_t;
+        void EndBatch(size_t batchBegin);
 
     private:
         JPH::PhysicsSystem* m_physicsSystem;

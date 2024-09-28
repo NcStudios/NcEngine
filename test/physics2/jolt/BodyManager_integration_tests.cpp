@@ -180,6 +180,41 @@ TEST_F(BodyManagerTest, Clear_hasBodies_removesBodiesFromSimulation)
     EXPECT_FALSE(bodyInterface.IsAdded(id3));
 }
 
+TEST_F(BodyManagerTest, BeginBatch_doesNotAddToSimulationUntilBatchEnded)
+{
+    const auto batchIndex = uut.BeginBatch(1);
+    auto& body = AddRigidBody(g_entity1);
+    const auto bodyId = GetBodyId(body);
+    auto& bodyInterface = GetBodyInterface();
+    EXPECT_FALSE(bodyInterface.IsAdded(bodyId));
+    uut.EndBatch(batchIndex);
+    EXPECT_TRUE(bodyInterface.IsAdded(bodyId));
+    RemoveRigidBody(g_entity1);
+}
+
+TEST_F(BodyManagerTest, BeginBatch_emptyBatch_succeeds)
+{
+    const auto batchIndex = uut.BeginBatch(10);
+    EXPECT_NO_THROW(uut.EndBatch(batchIndex));
+}
+
+TEST_F(BodyManagerTest, BeginBatch_batchInProgress_throws)
+{
+    uut.BeginBatch(1);
+    EXPECT_THROW(uut.BeginBatch(1), std::exception);
+}
+
+TEST_F(BodyManagerTest, EndBatchAdd_badIndex_throws)
+{
+    const auto batchIndex = uut.BeginBatch(1);
+    EXPECT_THROW(uut.EndBatch(batchIndex + 1), std::exception);
+}
+
+TEST_F(BodyManagerTest, EndBatchAdd_noBatchInProgress_throws)
+{
+    EXPECT_THROW(uut.EndBatch(1), std::exception);
+}
+
 TEST_F(BodyManagerTest, SampleWorkflow)
 {
     auto& physicsSystem = joltApi.physicsSystem;
@@ -187,11 +222,15 @@ TEST_F(BodyManagerTest, SampleWorkflow)
 
     auto id1 = GetBodyId(AddRigidBody(g_entity1));
     auto id2 = GetBodyId(AddRigidBody(g_entity2));
+    auto batchIndex = uut.BeginBatch(1);
     auto id3 = GetBodyId(AddRigidBody(g_entity3));
 
-    EXPECT_EQ(3u, physicsSystem.GetNumBodies());
+    EXPECT_EQ(3u, physicsSystem.GetNumBodies()); // id3 is in the system, but not yet visible to interface/broadphase
     EXPECT_TRUE(bodyInterface.IsAdded(id1));
     EXPECT_TRUE(bodyInterface.IsAdded(id2));
+    EXPECT_FALSE(bodyInterface.IsAdded(id3));
+
+    uut.EndBatch(batchIndex);
     EXPECT_TRUE(bodyInterface.IsAdded(id3));
 
     RemoveRigidBody(g_entity2);
