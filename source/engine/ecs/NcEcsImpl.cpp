@@ -1,4 +1,5 @@
 #include "NcEcsImpl.h"
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
@@ -8,8 +9,6 @@
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/time/Time.h"
 #include "ncengine/utility/Log.h"
-
-#include "optick.h"
 
 namespace nc::ecs
 {
@@ -62,7 +61,7 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 
 void EcsModule::RunFrameLogic()
 {
-    OPTICK_CATEGORY("RunFrameLogic", Optick::Category::GameLogic);
+    NC_PROFILE_TASK("RunFrameLogic", ProfileCategory::GameLogic);
     const float dt = time::DeltaTime();
     auto legacyRegistry = Registry{*m_registry};
     for(auto& logic : m_registry->GetPool<FrameLogic>().GetComponents())
@@ -73,7 +72,7 @@ void EcsModule::RunFrameLogic()
 
 void EcsModule::UpdateWorldSpaceMatrices()
 {
-    OPTICK_CATEGORY("UpdateWorldSpaceMatrices", Optick::Category::GameLogic);
+    NC_PROFILE_TASK("UpdateWorldSpaceMatrices", ProfileCategory::GameLogic);
     auto world = Ecs{*m_registry};
 
 #if 1 // normal update using graph traversal

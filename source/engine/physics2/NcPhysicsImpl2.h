@@ -10,7 +10,6 @@
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/task/TaskGraph.h"
-#include "ncengine/utility/Signal.h"
 
 namespace nc
 {
@@ -58,7 +57,6 @@ class NcPhysicsImpl2 final : public NcPhysics
         DeferredPhysicsCreateState* m_deferredState;
         bool m_updateEnabled = true;
 
-        void OnAddRigidBody(RigidBody& body);
         void SyncTransforms();
 };
 } // namespace physics

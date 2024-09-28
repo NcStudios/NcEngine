@@ -51,6 +51,10 @@ else()
     set(NC_SAMPLE_EXE "Sample")
 endif()
 
+if(NC_PROFILING_ENABLED)
+    list(APPEND NC_COMPILE_DEFINITIONS NC_PROFILING_ENABLED)
+endif()
+
 # TODO: #494 Remove usage of aligned_storage
 add_definitions(-D_SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING)
 
