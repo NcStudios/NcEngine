@@ -78,9 +78,10 @@ void BodyManager::RemoveBody(Entity toRemove)
     m_ctx->interface.DestroyBody(bodyId);
 }
 
-auto BodyManager::BeginBatchAdd() -> size_t
+auto BodyManager::BeginBatchAdd(size_t bodyCountHint) -> size_t
 {
     m_deferInitialization = true;
+    m_bodies.reserve(m_bodies.size() + bodyCountHint);
     return m_bodies.size();
 }
 

@@ -33,6 +33,8 @@ class NcPhysicsStub : public nc::physics::NcPhysics
         void RegisterClickable(IClickable*) override {}
         void UnregisterClickable(IClickable*) noexcept override {}
         auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr;}
+        void BeginRigidBodyBatch(size_t) override {}
+        void EndRigidBodyBatch() override {}
 
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {

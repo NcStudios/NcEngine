@@ -373,7 +373,7 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
     serialize::Deserialize(stream, info);
     serialize::Deserialize(stream, constraintCount);
 
-    auto deferredState = std::any_cast<nc::physics::DeferredPhysicsCreateState>(&userData);
+    auto deferredState = std::any_cast<nc::physics::DeferredPhysicsCreateState*>(userData);
     NC_ASSERT(deferredState, "RigidBody user data did not contain DeferredPhysicsCreateState");
     const auto entity = ctx.entityMap.at(id);
 

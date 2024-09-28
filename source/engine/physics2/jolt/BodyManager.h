@@ -41,7 +41,7 @@ class BodyManager : public StableAddress
         void RemoveBody(Entity entity);
         void Clear();
 
-        auto BeginBatchAdd() -> size_t;
+        auto BeginBatchAdd(size_t bodyCountHint) -> size_t;
         void EndBatchAdd(size_t batchBegin);
         void DeferCleanup(bool value)
         {

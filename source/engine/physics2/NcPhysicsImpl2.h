@@ -30,7 +30,8 @@ class NcPhysicsImpl2 final : public NcPhysics
                        const config::PhysicsSettings& physicsSettings,
                        Registry* registry,
                        const task::AsyncDispatcher& dispatcher,
-                       SystemEvents& events);
+                       SystemEvents& events,
+                       std::unique_ptr<DeferredPhysicsCreateState> deferredState);
 
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
@@ -41,6 +42,9 @@ class NcPhysicsImpl2 final : public NcPhysics
 
         auto IsUpdateEnabled() const -> bool override { return m_updateEnabled; }
         void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
+        void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) override;
+        void EndRigidBodyBatch() override;
+
         void AddJoint(Entity , Entity, const Vector3&, const Vector3&, float = 0.2f, float = 0.0f) override {}
         void RemoveJoint(Entity, Entity ) override {}
         void RemoveAllJoints(Entity) override {}
@@ -54,7 +58,7 @@ class NcPhysicsImpl2 final : public NcPhysics
         ShapeFactory m_shapeFactory;
         ConstraintManager m_constraintManager;
         BodyManager m_bodyManager;
-        DeferredPhysicsCreateState* m_deferredState;
+        std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;
         bool m_updateEnabled = true;
 
         void SyncTransforms();

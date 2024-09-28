@@ -110,17 +110,11 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         });
 
         world.Emplace<graphics::ToonRenderer>(ground);
-        world.Emplace<physics::RigidBody>(
-            ground,
-            physics::Shape::MakeBox()
-        );
-
-
-        // auto& groundCollider = world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-        // auto& groundTransform = world.Get<Transform>(ground);
-        // world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
-        // world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
-        // world.Emplace<physics::OrientationClamp>(ground, Vector3::Up(), 1.0f, 5.0f);
+        auto& groundCollider = world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
+        auto& groundTransform = world.Get<Transform>(ground);
+        world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
+        world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
+        world.Emplace<physics::OrientationClamp>(ground, Vector3::Up(), 1.0f, 5.0f);
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
@@ -156,17 +150,11 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .kinematic = {}
     });
 
-    world.Emplace<physics::RigidBody>(
-        object,
-        physics::Shape::MakeBox()
-
-    );
-
-    // auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
-    // auto& objectTransform = world.Get<Transform>(object);
-    // world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
-    // world.Emplace<physics::PhysicsMaterial>(object);
-    // world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
+    auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
+    auto& objectTransform = world.Get<Transform>(object);
+    world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
+    world.Emplace<physics::PhysicsMaterial>(object);
+    world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
 
     world.Emplace<Entity>({.parent = object});
 }

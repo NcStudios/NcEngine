@@ -44,7 +44,8 @@ class NcPhysicsImpl final : public NcPhysics
         auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
         void Clear() noexcept override;
-
+        void BeginRigidBodyBatch(size_t) override {}
+        void EndRigidBodyBatch() override {}
     private:
         PhysicsPipeline<PipelineDescription> m_pipeline;
         ClickableSystem m_clickableSystem;

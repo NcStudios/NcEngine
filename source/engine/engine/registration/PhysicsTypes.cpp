@@ -1,5 +1,4 @@
 #include "PhysicsTypes.h"
-#include "physics2/DeferredPhysicsCreateState.h"
 #include "ncengine/physics/Collider.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/ConcaveCollider.h"
@@ -98,8 +97,8 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         ui::editor::RigidBodyUIWidget,
         CreateRigidBody,
         SerializeRigidBody,
-        DeserializeRigidBody,
-        physics::DeferredPhysicsCreateState{}
+        DeserializeRigidBody
+        // has user data, but is set during NcPhysics initialization
     );
 
     Register<physics::CollisionListener>(

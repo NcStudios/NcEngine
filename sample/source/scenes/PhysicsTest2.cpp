@@ -16,6 +16,7 @@
 #include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
+#include "ncutility/ScopeExit.h"
 
 namespace nc::sample
 {
@@ -860,7 +861,7 @@ void BuildTriggers(ecs::Ecs world)
     world.Emplace<physics::CollisionListener>(capsule, nullptr, nullptr, setPink, setWhite);
 }
 
-void BuildSpawner(ecs::Ecs world, Random* ncRandom)
+void BuildSpawner(ecs::Ecs world, Random* ncRandom, physics::NcPhysics* ncPhysics)
 {
     const auto spawnerHandle = world.Emplace<Entity>({
         .tag = "Spawner"
@@ -878,6 +879,12 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
         [world](Entity handle) mutable {
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
             world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox());
+        },
+        [ncPhysics](bool isPreSpawn, unsigned count) {
+            if (isPreSpawn)
+                ncPhysics->BeginRigidBodyBatch(count);
+            else
+                ncPhysics->EndRigidBodyBatch();
         }
     );
 
@@ -897,11 +904,14 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
+    auto ncPhysics = modules.Get<physics::NcPhysics>();
 
     // Reserve space for default objects so references don't get invalidated
     world.GetPool<Transform>().Reserve(140);
     world.GetPool<graphics::ToonRenderer>().Reserve(140);
-    world.GetPool<physics::RigidBody>().Reserve(140);
+    // Defer fully initializing physics objects until the whole scene is loaded (also calls reserve on the RigidBody pool).
+    ncPhysics->BeginRigidBodyBatch(140);
+    SCOPE_EXIT(ncPhysics->EndRigidBodyBatch(););
 
     // Vehicle
     const auto vehicle = BuildVehicle(world);
@@ -918,7 +928,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncGraphics->SetCamera(&camera);
 
     // Cube Spawner
-    BuildSpawner(world, ncRandom);
+    BuildSpawner(world, ncRandom, ncPhysics);
 
     // Environment
     BuildGround(world);
