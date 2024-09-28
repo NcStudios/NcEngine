@@ -11,6 +11,7 @@
 
 namespace
 {
+[[maybe_unused]]
 auto RegisterDeferredCreateState(nc::Registry* registry) -> std::unique_ptr<nc::physics::DeferredPhysicsCreateState>
 {
     auto state = std::make_unique<nc::physics::DeferredPhysicsCreateState>();
