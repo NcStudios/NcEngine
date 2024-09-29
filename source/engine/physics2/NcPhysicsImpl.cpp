@@ -1,4 +1,4 @@
-#include "NcPhysicsImpl2.h"
+#include "NcPhysicsImpl.h"
 #include "EventDispatch.h"
 #include "jolt/Conversion.h"
 #include "jolt/ShapeFactory.h"
@@ -21,10 +21,10 @@ auto RegisterDeferredCreateState(nc::Registry* registry) -> std::unique_ptr<nc::
     return state;
 }
 
-class NcPhysicsStub2 : public nc::physics::NcPhysics
+class NcPhysicsStub : public nc::physics::NcPhysics
 {
     public:
-        NcPhysicsStub2(std::unique_ptr<nc::physics::DeferredPhysicsCreateState> deferredState)
+        NcPhysicsStub(std::unique_ptr<nc::physics::DeferredPhysicsCreateState> deferredState)
             : m_deferredState{std::move(deferredState)}
         {
         }
@@ -58,14 +58,14 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
     if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl2>(memorySettings, physicsSettings, registry, dispatcher, events, std::move(deferredState));
+        return std::make_unique<NcPhysicsImpl>(memorySettings, physicsSettings, registry, dispatcher, events, std::move(deferredState));
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
-    return std::make_unique<NcPhysicsStub2>(std::move(deferredState));
+    return std::make_unique<NcPhysicsStub>(std::move(deferredState));
 }
 
-NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
+NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                                const config::PhysicsSettings& physicsSettings,
                                Registry* registry,
                                const task::AsyncDispatcher& dispatcher,
@@ -86,7 +86,7 @@ NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
 {
 }
 
-void NcPhysicsImpl2::Run()
+void NcPhysicsImpl::Run()
 {
     NC_PROFILE_TASK("NcPhysics::Run", ProfileCategory::Physics);
     if (!m_updateEnabled)
@@ -99,7 +99,7 @@ void NcPhysicsImpl2::Run()
     DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
 }
 
-void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
+void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
     NC_LOG_TRACE("Building NcPhysics Tasks");
     update.Add(
@@ -110,7 +110,7 @@ void NcPhysicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTas
     );
 }
 
-void NcPhysicsImpl2::SyncTransforms()
+void NcPhysicsImpl::SyncTransforms()
 {
     NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
     for (auto& body : m_ecs.GetAll<RigidBody>())
@@ -133,22 +133,22 @@ void NcPhysicsImpl2::SyncTransforms()
     }
 }
 
-void NcPhysicsImpl2::OnBeforeSceneLoad()
+void NcPhysicsImpl::OnBeforeSceneLoad()
 {
     m_bodyManager.DeferCleanup(false);
 }
 
-void NcPhysicsImpl2::OnBeforeSceneFragmentLoad()
+void NcPhysicsImpl::OnBeforeSceneFragmentLoad()
 {
     BeginRigidBodyBatch();
 }
 
-void NcPhysicsImpl2::OnAfterSceneFragmentLoad()
+void NcPhysicsImpl::OnAfterSceneFragmentLoad()
 {
     EndRigidBodyBatch();
 }
 
-void NcPhysicsImpl2::Clear() noexcept
+void NcPhysicsImpl::Clear() noexcept
 {
     m_jolt.contactListener.Clear();
     m_constraintManager.Clear();
@@ -156,7 +156,7 @@ void NcPhysicsImpl2::Clear() noexcept
     m_bodyManager.DeferCleanup(true);
 }
 
-void NcPhysicsImpl2::BeginRigidBodyBatch(size_t bodyCountHint)
+void NcPhysicsImpl::BeginRigidBodyBatch(size_t bodyCountHint)
 {
     NC_ASSERT(
         m_deferredState->bodyBatchIndex == DeferredPhysicsCreateState::NullBatch &&
@@ -174,7 +174,7 @@ void NcPhysicsImpl2::BeginRigidBodyBatch(size_t bodyCountHint)
     m_deferredState->constraintBatchIndex = m_constraintManager.BeginBatch();
 }
 
-void NcPhysicsImpl2::EndRigidBodyBatch()
+void NcPhysicsImpl::EndRigidBodyBatch()
 {
     NC_ASSERT(
         m_deferredState->bodyBatchIndex != DeferredPhysicsCreateState::NullBatch &&

@@ -6,29 +6,37 @@
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
-#include "ncengine/physics/PhysicsMaterial.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
+#include "ncutility/ScopeExit.h"
 
 namespace nc::sample
 {
 std::function<void(unsigned)> SpawnFunc = nullptr;
 std::function<void(unsigned)> DestroyFunc = nullptr;
 
-int SpawnCount = 1000;
-int DestroyCount = 1000;
-float forceMultiplier = 1.0f;
+constexpr auto PlayerLayer = Entity::layer_type{10};
+auto SpawnCount = 1000;
+auto DestroyCount = 1000;
+auto ForceMultiplier = 1.0f;
+auto LogCollisionEvents = true;
+auto LogTriggerEvents = true;
 
 void Widget()
 {
     ImGui::Text("Physics Test");
     if(ImGui::BeginChild("Widget", {0,0}, true))
     {
-        ui::DragFloat(forceMultiplier, "forceMultiplier");
+        ui::Checkbox(LogCollisionEvents, "logCollisions");
+        ui::Checkbox(LogTriggerEvents, "logTriggers");
+        ui::DragFloat(ForceMultiplier, "forceMultiplier");
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         const auto halfCellWidth = (ImGui::GetColumnWidth() * 0.5f) - 10.0f;
 
@@ -120,9 +128,9 @@ struct FollowCamera : public graphics::Camera
 
 class VehicleController : public FreeComponent
 {
-    static constexpr auto force = 1.7f;
-    static constexpr auto torqueForce = 0.6f;
-    static constexpr auto jumpForce = 30.0f;
+    static constexpr auto force = 250.0f;
+    static constexpr auto torqueForce = 250.0f;
+    static constexpr auto jumpForce = 5000.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
     public:
@@ -131,7 +139,7 @@ class VehicleController : public FreeComponent
         {
         }
 
-        void Run(Entity self, Registry* registry, float dt)
+        void Run(Entity, Registry* registry, float dt)
         {
             auto world = registry->GetEcs();
 
@@ -145,20 +153,7 @@ class VehicleController : public FreeComponent
                 }
             }
 
-            if(!world.Contains<physics::PhysicsBody>(self))
-                return;
-
-            auto& body = world.Get<physics::PhysicsBody>(self);
-
-            if (KeyDown(input::KeyCode::LeftCtrl))
-                ToggleAimModeOn(world, true);
-            else if (KeyUp(input::KeyCode::LeftCtrl))
-                ToggleAimModeOn(world, false);
-
-            if (m_aimMode)
-                AimController(world, body);
-            else
-                MoveController(world, body);
+            MoveController(world);
         }
 
     private:
@@ -167,115 +162,40 @@ class VehicleController : public FreeComponent
         Entity m_node3;
         float m_jumpCooldownRemaining = 0.0f;
         bool m_jumpOnCooldown = false;
-        bool m_aimMode = false;
 
-        void ToggleAimModeOn(ecs::Ecs world, bool on)
+        void MoveController(ecs::Ecs world)
         {
-            m_aimMode = on;
-            auto getConstraint = [&world](Entity e) { return &world.Get<physics::VelocityRestriction>(e); };
-            auto bodyConstraints = {getConstraint(ParentEntity()), getConstraint(m_node1), getConstraint(m_node2)};
-            auto tailConstraint = getConstraint(m_node3);
-            if (on)
-            {
-                tailConstraint->linearFreedom = Vector3::Zero();
-                tailConstraint->angularFreedom = Vector3::Up();
-                for (auto constraint : bodyConstraints)
-                {
-                    constraint->linearFreedom = Vector3::Splat(0.7f);
-                    constraint->angularFreedom = Vector3{0.9f, 1.0f, 0.9f};
-                }
-            }
-            else
-            {
-                tailConstraint->linearFreedom = Vector3::One();
-                tailConstraint->angularFreedom = Vector3::One();
-                for (auto constraint : bodyConstraints)
-                {
-                    constraint->linearFreedom = Vector3::One();
-                    constraint->angularFreedom = Vector3::One();
-                }
-            }
-        }
+            auto& rBody = world.Get<physics::RigidBody>(ParentEntity());
 
-        void MoveController(ecs::Ecs world, physics::PhysicsBody& body)
-        {
-            if(KeyHeld(input::KeyCode::W)) body.ApplyImpulse(Vector3::Front() * force);
-            if(KeyHeld(input::KeyCode::S)) body.ApplyImpulse(Vector3::Back() * force);
-            if(KeyHeld(input::KeyCode::A)) body.ApplyImpulse(Vector3::Left() * force);
-            if(KeyHeld(input::KeyCode::D)) body.ApplyImpulse(Vector3::Right() * force);
-            if(KeyHeld(input::KeyCode::Q)) body.ApplyTorqueImpulse(Vector3::Down() * torqueForce);
-            if(KeyHeld(input::KeyCode::E)) body.ApplyTorqueImpulse(Vector3::Up() * torqueForce);
+            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * ForceMultiplier);
+            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * ForceMultiplier);
 
             if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
-                body.ApplyImpulse(dir);
-                world.Get<physics::PhysicsBody>(m_node1).ApplyImpulse(dir * 0.5f);
-                world.Get<physics::PhysicsBody>(m_node2).ApplyImpulse(dir * 0.25f);
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * ForceMultiplier;
+                rBody.AddImpulse(dir);
             }
 
             if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Vector3::Up() * jumpForce;
-                body.ApplyImpulse(dir);
-                world.Get<physics::PhysicsBody>(m_node1).ApplyImpulse(dir * 0.5f);
-                world.Get<physics::PhysicsBody>(m_node2).ApplyImpulse(dir * 0.25f);
-            }
-        }
-
-        void AimController(ecs::Ecs world, physics::PhysicsBody& body)
-        {
-            body.SetVelocities(DirectX::g_XMZero, DirectX::g_XMZero);
-            auto& transform = world.Get<Transform>(ParentEntity());
-            auto& targetTransform = world.Get<Transform>(m_node3);
-
-            if(KeyHeld(input::KeyCode::W))
-            {
-                body.ApplyImpulse(Vector3::Up() * force * 20.0f);
-            }
-
-            if(KeyHeld(input::KeyCode::S))
-            {
-                transform.RotateAround(targetTransform.Position(), targetTransform.Right(), 0.02f);
-            }
-
-            if(KeyHeld(input::KeyCode::A))
-            {
-                transform.RotateAround(targetTransform.Position(), Vector3::Up(), -0.02f);
-                body.ApplyTorqueImpulse(transform.Up() * -1.0f);
-            }
-
-            if(KeyHeld(input::KeyCode::D))
-            {
-                transform.RotateAround(targetTransform.Position(), Vector3::Up(), 0.02f);
-                body.ApplyTorqueImpulse(transform.Up() * 1.0f);
-            }
-
-            if(KeyHeld(input::KeyCode::Q))
-                body.ApplyTorqueImpulse(Vector3::Down() * torqueForce);
-
-            if(KeyHeld(input::KeyCode::E))
-                body.ApplyTorqueImpulse(Vector3::Up() * torqueForce);
-
-            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
-            {
-                ToggleAimModeOn(world, false);
-                m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
-                body.ApplyImpulse(dir);
-                world.Get<physics::PhysicsBody>(m_node1).ApplyImpulse(dir * 0.5f);
-                world.Get<physics::PhysicsBody>(m_node2).ApplyImpulse(dir * 0.25f);
+                const auto dir = Vector3::Up() * jumpForce * ForceMultiplier;
+                rBody.AddImpulse(dir);
             }
         }
 };
 
-auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
+auto BuildVehicle(ecs::Ecs world) -> Entity
 {
     const auto head = world.Emplace<Entity>({
         .scale = Vector3::Splat(1.0f),
-        .tag = "Worm Head"
+        .tag = "Worm Head",
+        .layer = PlayerLayer
     });
 
     const auto segment1 = world.Emplace<Entity>({
@@ -306,31 +226,64 @@ auto BuildVehicle(ecs::Ecs world, physics::NcPhysics* ncPhysics) -> Entity
     world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, wormMaterial);
     world.Emplace<graphics::ToonRenderer>(segment3, asset::CubeMesh, wormMaterial);
 
-    auto& headCollider = world.Emplace<physics::Collider>(head, physics::BoxProperties{}, false);
-    auto& segment1Collider = world.Emplace<physics::Collider>(segment1, physics::BoxProperties{}, false);
-    auto& segment2Collider = world.Emplace<physics::Collider>(segment2, physics::BoxProperties{}, false);
-    auto& segment3Collider = world.Emplace<physics::Collider>(segment3, physics::BoxProperties{}, false);
+    auto& bodyHead = world.Emplace<physics::RigidBody>(head, physics::Shape::MakeBox(), physics::RigidBodyInfo{.friction = 0.8f});
+    auto& bodyNode1 = world.Emplace<physics::RigidBody>(segment1, physics::Shape::MakeBox());
+    auto& bodyNode2 = world.Emplace<physics::RigidBody>(segment2, physics::Shape::MakeBox());
+    auto& bodyNode3 = world.Emplace<physics::RigidBody>(segment3, physics::Shape::MakeBox());
 
-    auto& headTransform = world.Get<Transform>(head);
-    auto& segment1Transform = world.Get<Transform>(head);
-    auto& segment2Transform = world.Get<Transform>(head);
-    auto& segment3Transform = world.Get<Transform>(head);
+    bodyHead.AddConstraint(
+        physics::PointConstraintInfo{
+            .ownerPosition = Vector3{0.0f, -0.1f, -0.6f},
+            .targetPosition = Vector3{0.0f, 0.0f, 0.5f}
+        },
+        bodyNode1
+    );
 
-    world.Emplace<physics::PhysicsBody>(head, headTransform, headCollider, physics::PhysicsProperties{.mass = 5.0f});
-    world.Emplace<physics::PhysicsBody>(segment1, segment1Transform, segment1Collider, physics::PhysicsProperties{.mass = 3.0f});
-    world.Emplace<physics::PhysicsBody>(segment2, segment2Transform, segment2Collider, physics::PhysicsProperties{.mass = 1.0f});
-    world.Emplace<physics::PhysicsBody>(segment3, segment3Transform, segment3Collider, physics::PhysicsProperties{.mass = 0.2f});
+    bodyNode1.AddConstraint(
+        physics::PointConstraintInfo{
+            .ownerPosition = Vector3{0.0f, -0.1f, -0.5f},
+            .targetPosition = Vector3{0.0f, 0.0f, 0.4f}
+        },
+        bodyNode2
+    );
 
-    world.Emplace<physics::VelocityRestriction>(head);
-    world.Emplace<physics::VelocityRestriction>(segment1);
-    world.Emplace<physics::VelocityRestriction>(segment2);
-    world.Emplace<physics::VelocityRestriction>(segment3);
+    bodyNode2.AddConstraint(
+        physics::PointConstraintInfo{
+            .ownerPosition = Vector3{0.0f, -0.1f, -0.4f},
+            .targetPosition = Vector3{0.0f, 0.0f, 0.3f}
+        },
+        bodyNode3
+    );
 
-    constexpr auto bias = 0.2f;
-    constexpr auto softness = 0.1f;
-    ncPhysics->AddJoint(head, segment1, Vector3{0.0f, 0.0f, -0.6f}, Vector3{0.0f, 0.0f, 0.5f}, bias, softness);
-    ncPhysics->AddJoint(segment1, segment2, Vector3{0.0f, 0.0f, -0.5f}, Vector3{0.0f, 0.0f, 0.4f}, bias, softness);
-    ncPhysics->AddJoint(segment2, segment3, Vector3{0.0f, 0.0f, -0.4f}, Vector3{0.0f, 0.0f, 0.3f}, bias, softness);
+    static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs world)
+    {
+        static const auto deletedTag = std::string{"deleted"};
+        const auto& tag = world.Contains<Tag>(other)
+            ? world.Get<Tag>(other).value
+            : deletedTag;
+
+        GameLog::Log(fmt::format("Player {} with {} ({})", eventType, tag, other.Index()));
+    };
+
+    world.Emplace<physics::CollisionListener>(
+        head,
+        [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs world){
+            if (LogCollisionEvents)
+                log("collision enter", other, world);
+        },
+        [](Entity, Entity other, ecs::Ecs world){
+            if (LogCollisionEvents)
+                log("collision exit", other, world);
+        },
+        [](Entity, Entity other, ecs::Ecs world){
+            if (LogTriggerEvents)
+                log("trigger enter", other, world);
+        },
+        [](Entity, Entity other, ecs::Ecs world){
+            if (LogTriggerEvents)
+                log("trigger exit", other, world);
+        }
+    );
 
     return head;
 }
@@ -340,9 +293,14 @@ void BuildGround(ecs::Ecs world)
     constexpr auto extent = 150.0f;
     constexpr auto halfExtent = extent * 0.5f;
 
+    auto borders = world.Emplace<Entity>({
+        .tag = "Borders"
+    });
+
     auto ground = world.Emplace<Entity>({
         .position = Vector3{0.0f, -1.0f, 0.0f},
         .scale = Vector3{extent, 1.0f, extent},
+        .parent = borders,
         .tag = "Ground",
         .flags = Entity::Flags::Static
     });
@@ -350,6 +308,7 @@ void BuildGround(ecs::Ecs world)
     auto backWall = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, halfExtent},
         .scale = Vector3{extent, 3.0f, 2.0f},
+        .parent = borders,
         .tag = "Wall",
         .flags = Entity::Flags::Static
     });
@@ -357,6 +316,7 @@ void BuildGround(ecs::Ecs world)
     auto frontWall = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, -halfExtent},
         .scale = Vector3{extent, 3.0f, 2.0f},
+        .parent = borders,
         .tag = "Wall",
         .flags = Entity::Flags::Static
     });
@@ -364,6 +324,7 @@ void BuildGround(ecs::Ecs world)
     auto leftWall = world.Emplace<Entity>({
         .position = Vector3{-halfExtent, 0.0f, 0.0f},
         .scale = Vector3{2.0f, 3.0f, extent},
+        .parent = borders,
         .tag = "Wall",
         .flags = Entity::Flags::Static
     });
@@ -371,6 +332,7 @@ void BuildGround(ecs::Ecs world)
     auto rightWall = world.Emplace<Entity>({
         .position = Vector3{halfExtent, 0.0f, 0.0f},
         .scale = Vector3{2.0f, 3.0f, extent},
+        .parent = borders,
         .tag = "Wall",
         .flags = Entity::Flags::Static
     });
@@ -382,14 +344,14 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<graphics::ToonRenderer>(leftWall, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(rightWall, asset::CubeMesh, DefaultToonMaterial);
 
-    world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(backWall, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(frontWall, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(leftWall, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(rightWall, physics::BoxProperties{});
+    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(backWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(frontWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(leftWall, physics::Shape::MakeBox());
+    world.Emplace<physics::RigidBody>(rightWall, physics::Shape::MakeBox());
 }
 
-void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
+void BuildBridge(ecs::Ecs world)
 {
     // Platforms
     const auto platform1 = world.Emplace<Entity>({
@@ -427,21 +389,33 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
     world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, DefaultToonMaterial);
 
-    world.Emplace<physics::Collider>(ramp1, physics::BoxProperties{});
-    world.Emplace<physics::Collider>(ramp2, physics::HullProperties{.assetPath = RampHullCollider});
-    auto& platform1Collider = world.Emplace<physics::Collider>(platform1, physics::BoxProperties{});
-    auto& platform2Collider = world.Emplace<physics::Collider>(platform2, physics::BoxProperties{});
-    world.Emplace<physics::PhysicsMaterial>(ramp1, 0.1f, 1.0f);
-    world.Emplace<physics::PhysicsMaterial>(ramp2, 0.1f, 1.0f);
+    auto& platform1Body = world.Emplace<physics::RigidBody>(
+        platform1,
+        nc::physics::Shape::MakeBox(),
+        nc::physics::RigidBodyInfo{
+            .type = physics::BodyType::Static
+        }
+    );
 
-    auto& platform1Transform = world.Get<Transform>(platform1);
-    auto& platform2Transform = world.Get<Transform>(platform2);
-    world.Emplace<physics::PhysicsBody>(platform1, platform1Transform, platform1Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(platform2, platform2Transform, platform2Collider, physics::PhysicsProperties{.mass = 0.0f, .isKinematic = true});
+    auto& platform2Body = world.Emplace<physics::RigidBody>(
+        platform2,
+        nc::physics::Shape::MakeBox(),
+        nc::physics::RigidBodyInfo{
+            .type = physics::BodyType::Static
+        }
+    );
+
+    world.Emplace<physics::RigidBody>(
+        ramp1,
+        nc::physics::Shape::MakeBox(),
+        nc::physics::RigidBodyInfo{
+            .type = physics::BodyType::Static
+        }
+    );
 
     // Bridge
     const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
-    auto makePlank = [&world, bridgeParent](const Vector3& pos, const Vector3& scale)
+    auto makePlank = [&world, bridgeParent](const Vector3& pos, const Vector3& scale) -> decltype(auto)
     {
         const auto plank = world.Emplace<Entity>({
             .position = pos,
@@ -450,46 +424,48 @@ void BuildBridge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
             .tag = "Plank"}
         );
 
-        auto& transform = world.Get<Transform>(plank);
         world.Emplace<graphics::ToonRenderer>(plank, asset::CubeMesh, OrangeToonMaterial);
-        auto& collider = world.Emplace<physics::Collider>(plank, physics::BoxProperties{}, false);
-        world.Emplace<physics::PhysicsBody>(plank, transform, collider, physics::PhysicsProperties{});
-        return plank;
+        return world.Emplace<physics::RigidBody>(plank);
     };
 
     auto nextPos = Vector3{0.0f, 5.0f, 46.0f};
     constexpr auto offset = Vector3{0.0f, 0.0f, 2.0f};
     constexpr auto scale = Vector3{8.0f, 0.8f, 1.8f};
-    const auto plank1 = makePlank(nextPos, scale);
+    auto& plank1 = makePlank(nextPos, scale);
     nextPos += offset;
-    const auto plank2 = makePlank(nextPos, scale);
+    auto& plank2 = makePlank(nextPos, scale);
     nextPos += offset;
-    const auto plank3 = makePlank(nextPos, scale);
+    auto& plank3 = makePlank(nextPos, scale);
     nextPos += offset;
-    const auto plank4 = makePlank(nextPos, scale);
+    auto& plank4 = makePlank(nextPos, scale);
     nextPos += offset;
-    const auto plank5 = makePlank(nextPos, scale);
+    auto& plank5 = makePlank(nextPos, scale);
 
-    constexpr auto bias = 0.2f;
-    constexpr auto softness = 0.5f;
+    platform1Body.AddConstraint(
+        nc::physics::HingeConstraintInfo{
+            .ownerPosition = Vector3{0.0f, 0.0f, 5.1f},
+            .targetPosition = Vector3{0.0f, 0.0f, -1.0f},
+        },
+        plank1
+    );
 
-    ncPhysics->AddJoint(platform1, plank1, Vector3{-3.0f, 0.0f, 5.1f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-    ncPhysics->AddJoint(platform1, plank1, Vector3{3.0f, 0.0f, 5.1f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+    platform2Body.AddConstraint(
+        nc::physics::HingeConstraintInfo{
+            .ownerPosition = Vector3{0.0f, 0.0f, -5.1f},
+            .targetPosition = Vector3{0.0f, 0.0f, 1.0f}
+        },
+        plank5
+    );
 
-    ncPhysics->AddJoint(plank1, plank2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-    ncPhysics->AddJoint(plank1, plank2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
+    const auto plankToPlank = nc::physics::HingeConstraintInfo{
+        .ownerPosition = Vector3{0.0f, 0.0f, 1.0f},
+        .targetPosition = Vector3{0.0f, 0.0f, -1.0f}
+    };
 
-    ncPhysics->AddJoint(plank2, plank3, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-    ncPhysics->AddJoint(plank2, plank3, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
-
-    ncPhysics->AddJoint(plank3, plank4, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-    ncPhysics->AddJoint(plank3, plank4, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
-
-    ncPhysics->AddJoint(plank4, plank5, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -1.0f}, bias, softness);
-    ncPhysics->AddJoint(plank4, plank5, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -1.0f}, bias, softness);
-
-    ncPhysics->AddJoint(plank5, platform2, Vector3{-3.0f, 0.0f, 1.0f}, Vector3{-3.0f, 0.0f, -5.1f}, bias, softness);
-    ncPhysics->AddJoint(plank5, platform2, Vector3{3.0f, 0.0f, 1.0f}, Vector3{3.0f, 0.0f, -5.1f}, bias, softness);
+    plank1.AddConstraint(plankToPlank, plank2);
+    plank2.AddConstraint(plankToPlank, plank3);
+    plank3.AddConstraint(plankToPlank, plank4);
+    plank4.AddConstraint(plankToPlank, plank5);
 }
 
 void BuildSteps(ecs::Ecs world)
@@ -508,11 +484,11 @@ void BuildSteps(ecs::Ecs world)
         stepMaterial.outlineWidth = 3;
         auto& renderer = world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, stepMaterial);
         renderer.SetHatchingTiling(hatchTiling);
-        auto& transform = world.Get<Transform>(step);
-        auto& collider = world.Emplace<physics::Collider>(step, physics::BoxProperties{});
-        world.Emplace<physics::PhysicsBody>(step, transform, collider);
-        world.Emplace<physics::PositionClamp>(step, position, 0.1f, 2.0f);
-        world.Emplace<physics::VelocityRestriction>(step, Vector3::Up(), Vector3::Zero());
+        world.Emplace<physics::RigidBody>(step)
+            .AddConstraint(physics::PointConstraintInfo{
+                .ownerPosition = Vector3{},
+                .targetPosition = position
+            });
     };
 
     buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f});
@@ -533,32 +509,46 @@ void BuildSteps(ecs::Ecs world)
     const auto rotatingBridge = world.Emplace<Entity>({
         .position = Vector3{-19.1f, 2.0f, 40.0f},
         .rotation = Quaternion::FromAxisAngle(Vector3::Up(), 1.57f),
-        .scale = Vector3{4.0f, 1.0f, 9.9f},
+        .scale = Vector3{9.9f, 1.0f, 4.0f},
         .tag = "Rotating Bridge"
     });
 
     world.Emplace<graphics::ToonRenderer>(rotatingBridge, asset::CubeMesh, RedToonMaterial);
-    auto& transform = world.Get<Transform>(rotatingBridge);
-    auto& collider = world.Emplace<physics::Collider>(rotatingBridge, physics::BoxProperties{});
-    world.Emplace<physics::PhysicsBody>(rotatingBridge, transform, collider);
-    world.Emplace<physics::VelocityRestriction>(rotatingBridge, Vector3::Zero(), Vector3::Right() * 0.7f);
+    world.Emplace<physics::RigidBody>(rotatingBridge)
+        .AddConstraint(
+            physics::HingeConstraintInfo{
+                .targetPosition = Vector3{-19.1f, 2.0f, 40.0f},
+                .minLimit = -0.25f,
+                .maxLimit = 0.25f
+            }
+        );
 }
 
 void BuildRotatingSteps(ecs::Ecs world)
 {
-    auto build = [world](const Vector3& position) mutable
+    auto root = world.Emplace<Entity>({
+        .tag = "Rotating Steps"
+    });
+
+    auto build = [world, root](const Vector3& position) mutable
     {
-        auto disk = world.Emplace<Entity>({
+        auto step = world.Emplace<Entity>({
             .position = position,
             .scale = Vector3{7.0f, 1.0f, 7.0f},
-            .tag = "Disk"
+            .parent = root,
+            .tag = "Step"
         });
 
-        world.Emplace<graphics::ToonRenderer>(disk, asset::CubeMesh, YellowToonMaterial);
-        auto& diskCollider = world.Emplace<physics::Collider>(disk, physics::BoxProperties{});
-        auto& diskTransform = world.Get<Transform>(disk);
-        world.Emplace<physics::PhysicsBody>(disk, diskTransform, diskCollider);
-        world.Emplace<physics::VelocityRestriction>(disk, Vector3::Zero(), Vector3{0.7f, 0.7f, 0.7f});
+        world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, YellowToonMaterial);
+        world.Emplace<physics::RigidBody>(step)
+            .AddConstraint(
+                physics::SwingTwistConstraintInfo{
+                    .ownerTwistAxis = Vector3::Up(),
+                    .targetPosition = position,
+                    .targetTwistAxis = Vector3::Up(),
+                    .swingLimit = 0.5f
+                }
+        );
     };
 
     build(Vector3{-29.0f, 2.5f, 50.0f});
@@ -579,111 +569,301 @@ void BuildHalfPipes(ecs::Ecs world)
     halfPipeMaterial.outlineWidth = 2;
 
     world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, halfPipeMaterial);
-
-    world.Emplace<physics::ConcaveCollider>(halfPipe2, HalfPipeConcaveCollider);
 }
 
-void BuildHinge(ecs::Ecs world, physics::NcPhysics* ncPhysics)
+void BuildHinge(ecs::Ecs world)
 {
+    constexpr auto anchorPosition = Vector3{-15.0f, 3.25f, 15.0f};
+    constexpr auto anchorScale = Vector3{3.0f, 0.5f, 0.5f};
+    constexpr auto panelPosition = Vector3{-15.0f, 1.5f, 15.0f};
+    constexpr auto panelScale = Vector3{3.0f, 3.0f, 0.1f};
+
+    const auto root = world.Emplace<Entity>({
+        .tag = "Hinge"
+    });
+
     const auto anchor = world.Emplace<Entity>({
-        .position = Vector3{-15.0f, 3.25f, 15.0f},
-        .scale = Vector3{3.0f, 0.5f, 0.5f}
+        .position = anchorPosition,
+        .scale = anchorScale,
+        .parent = root
     });
 
     const auto panel = world.Emplace<Entity>({
-        .position = Vector3{-15.0f, 1.5f, 15.0f},
-        .scale = Vector3{3.0f, 3.0f, 0.1f}
+        .position = panelPosition,
+        .scale = panelScale,
+        .parent = root
     });
 
     world.Emplace<graphics::ToonRenderer>(anchor, asset::CubeMesh, DefaultToonMaterial);
     world.Emplace<graphics::ToonRenderer>(panel, asset::CubeMesh, PurpleToonMaterial);
 
-    auto& anchorCollider = world.Emplace<physics::Collider>(anchor, physics::BoxProperties{}, false);
-    auto& panelCollider = world.Emplace<physics::Collider>(panel, physics::BoxProperties{}, false);
-
-    auto& anchorTransform = world.Get<Transform>(anchor);
-    auto& panelTransform = world.Get<Transform>(panel);
-
-    world.Emplace<physics::PhysicsBody>(anchor, anchorTransform, anchorCollider, physics::PhysicsProperties{.isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(panel, panelTransform, panelCollider, physics::PhysicsProperties{.mass = 4.0f});
-
-    ncPhysics->AddJoint(anchor, panel, Vector3{-2.0f, -0.255f, 0.0f}, Vector3{-2.0f, 1.55f, 0.0f});
-    ncPhysics->AddJoint(anchor, panel, Vector3{2.0f, -0.255f, 0.0f}, Vector3{2.0f, 1.55f, 0.0f});
+    world.Emplace<physics::RigidBody>(panel)
+        .AddConstraint(
+            physics::HingeConstraintInfo{
+                .ownerPosition = Vector3{0.0f, panelScale.y * 0.5f, 0.0f},
+                .targetPosition = anchorPosition,
+                .minLimit = -1.0f,
+                .maxLimit = 1.0f
+            }
+        );
 }
 
-void BuildBalancePlatform(ecs::Ecs world, physics::NcPhysics* ncPhysics)
+void BuildPunchingBag(ecs::Ecs world)
 {
+    const auto root = world.Emplace<Entity>({
+        .tag = "Punching Bag"
+    });
+
+    const auto top = world.Emplace<Entity>({
+        .position = Vector3{15.0f, 3.0f, 15.0f},
+        .scale = Vector3{2.0f, 0.5f, 2.0f},
+        .parent = root,
+        .tag = "Top",
+        .flags = Entity::Flags::Static
+    });
+
+    const auto bag = world.Emplace<Entity>({
+        .position = Vector3{15.0f, 2.0f, 15.0f},
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .parent = root,
+        .tag = "Bag"
+    });
+
+    world.Emplace<graphics::ToonRenderer>(top, asset::CubeMesh, PurpleToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(bag, asset::CapsuleMesh, OrangeToonMaterial);
+
+    auto& topBody = world.Emplace<physics::RigidBody>(top);
+    auto& bagBody = world.Emplace<physics::RigidBody>(bag, physics::Shape::MakeCapsule());
+
+    bagBody.AddConstraint(
+        physics::SwingTwistConstraintInfo{
+            .ownerPosition = Vector3{0.0f, 1.0f, 0.0f},
+            .ownerTwistAxis = Vector3::Up(),
+            .targetPosition = Vector3{0.0f, -1.0f, 0.0f},
+            .targetTwistAxis = Vector3::Up()
+        },
+        topBody
+    );
+}
+
+void BuildChain(ecs::Ecs world)
+{
+    const auto root = world.Emplace<Entity>({
+        .tag = "Chain"
+    });
+
+    auto nodeInfo = EntityInfo{
+        .position = Vector3{0.0f, 1.0f, -20.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 1.57f),
+        .scale = Vector3::Splat(0.5f),
+        .parent = root,
+        .tag = "End"
+    };
+
+    nodeInfo.position.x = -3.0f;
+    const auto node1 = world.Emplace<Entity>(nodeInfo);
+    nodeInfo.position.x = -1.0f;
+    const auto node2 = world.Emplace<Entity>(nodeInfo);
+    nodeInfo.position.x = 1.0f;
+    const auto node3 = world.Emplace<Entity>(nodeInfo);
+    nodeInfo.position.x = 3.0f;
+    const auto node4 = world.Emplace<Entity>(nodeInfo);
+
+    world.Emplace<graphics::ToonRenderer>(node1, asset::CapsuleMesh, TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(node2, asset::CapsuleMesh, TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(node3, asset::CapsuleMesh, TealToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(node4, asset::CapsuleMesh, TealToonMaterial);
+
+    const auto capsule = physics::Shape::MakeCapsule();
+    auto& node1Body = world.Emplace<physics::RigidBody>(node1, capsule);
+    auto& node2Body = world.Emplace<physics::RigidBody>(node2, capsule);
+    auto& node3Body = world.Emplace<physics::RigidBody>(node3, capsule);
+    auto& node4Body = world.Emplace<physics::RigidBody>(node4, capsule);
+
+    auto distanceInfo = physics::DistanceConstraintInfo{
+        .ownerPosition = Vector3::Up() * 0.5f,
+        .targetPosition = Vector3::Down() * 0.5f,
+        .minLimit = 0.1f,
+        .maxLimit = 0.2f
+    };
+
+    node1Body.AddConstraint(distanceInfo, node2Body);
+    node2Body.AddConstraint(distanceInfo, node3Body);
+    node3Body.AddConstraint(distanceInfo, node4Body);
+}
+
+void BuildSliders(ecs::Ecs world)
+{
+    constexpr auto basePos = Vector3{15.0f, -0.35f, -15.0f};
+    constexpr auto baseScale = Vector3{10.0f, 0.25f, 10.0f};
+    constexpr auto slider1Pos = Vector3{10.0f, 0.5f, -14.0f};
+    constexpr auto slider2Pos = Vector3{14.0f, 0.5f, -10.0f};
+    constexpr auto sliderScale = Vector3::One();
+
+    const auto sliderRoot = world.Emplace<Entity>({
+        .tag = "Sliders"
+    });
+
     const auto base = world.Emplace<Entity>({
-        .position = Vector3{15.0f, -0.75f, -15.0f},
-        .scale = Vector3::Splat(2.0f)
+        .position = basePos,
+        .scale = baseScale,
+        .parent = sliderRoot,
+        .tag = "Slider Base",
+        .flags = Entity::Flags::Static
     });
 
-    const auto balancePlatform = world.Emplace<Entity>({
-        .position = Vector3{15.0f, -0.4f, -15.0f},
-        .scale = Vector3{6.0f, 0.1f, 6.0f}
+    const auto slider1 = world.Emplace<Entity>({
+        .position = slider1Pos,
+        .scale = sliderScale,
+        .parent = sliderRoot,
+        .tag = "Slider1"
     });
 
-    world.Emplace<graphics::ToonRenderer>(base, asset::SphereMesh, PurpleToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(balancePlatform, asset::CubeMesh, OrangeToonMaterial);
+    const auto slider2 = world.Emplace<Entity>({
+        .position = slider2Pos,
+        .scale = sliderScale,
+        .parent = sliderRoot,
+        .tag = "Slider2"
+    });
 
-    auto& baseCollider = world.Emplace<physics::Collider>(base, physics::SphereProperties{}, false);
-    auto& platformCollider = world.Emplace<physics::Collider>(balancePlatform, physics::BoxProperties{}, false);
+    world.Emplace<graphics::ToonRenderer>(base, asset::CubeMesh, RedToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(slider1, asset::CapsuleMesh, YellowToonMaterial);
+    world.Emplace<graphics::ToonRenderer>(slider2, asset::CapsuleMesh, YellowToonMaterial);
 
-    auto& baseTransform = world.Get<Transform>(base);
-    auto& platformTransform = world.Get<Transform>(balancePlatform);
+    auto& baseBody = world.Emplace<physics::RigidBody>(base);
+    auto& slider1Body = world.Emplace<physics::RigidBody>(slider1, physics::Shape::MakeCapsule());
+    auto& slider2Body = world.Emplace<physics::RigidBody>(slider2, physics::Shape::MakeCapsule());
 
-    world.Emplace<physics::PhysicsBody>(base, baseTransform, baseCollider);
-    world.Emplace<physics::PhysicsBody>(balancePlatform, platformTransform, platformCollider, physics::PhysicsProperties{.mass = 5.0f});
+    auto sliderInfo = nc::physics::SliderConstraintInfo{
+        .ownerPosition = Vector3::Down() * sliderScale.y,
+        .targetPosition = Vector3::Up() * baseScale.y * 0.5f,
+        .minLimit = -4.5f,
+        .maxLimit = 4.5f,
+        .springSettings = physics::SpringSettings{
+            .frequency = 2.0f,
+            .damping = 0.1f
+        }
+    };
 
-    world.Emplace<physics::VelocityRestriction>(base, Vector3::Zero(), Vector3::Zero());
+    sliderInfo.ownerSliderAxis = sliderInfo.targetSliderAxis = Vector3::Right();
+    slider1Body.AddConstraint(sliderInfo, baseBody);
 
-    ncPhysics->AddJoint(base, balancePlatform, Vector3{0.0f, 1.1f, 0.0f}, Vector3{0.0f, -0.15f, 0.0f}, 0.2f, 0.1f);
+    sliderInfo.ownerSliderAxis = sliderInfo.targetSliderAxis = Vector3::Front();
+    slider2Body.AddConstraint(sliderInfo, baseBody);
 }
 
-void BuildSwingingBars(ecs::Ecs world, physics::NcPhysics* ncPhysics)
+void BuildSwingingBars(ecs::Ecs world)
 {
+    const auto root = world.Emplace<Entity>({.tag = "Swing Bars"});
+
     const auto pole = world.Emplace<Entity>({
         .position = Vector3{-15.0f, 1.0f, -15.0f},
-        .scale = Vector3{0.05f, 4.0f, 0.05f}
+        .scale = Vector3{0.05f, 4.0f, 0.05f},
+        .parent = root,
+        .flags = Entity::Flags::Static
     });
 
     const auto bar1 = world.Emplace<Entity>({
         .position = Vector3{-15.0f, -0.5f, -15.0f},
-        .scale = Vector3{3.0f, 1.0f, 0.1f}
+        .scale = Vector3{3.0f, 1.0f, 0.1f},
+        .parent = root
     });
 
     const auto bar2 = world.Emplace<Entity>({
         .position = Vector3{-15.0f, 1.0f, -15.0f},
-        .scale = Vector3{3.0f, 1.0f, 0.1f}
+        .scale = Vector3{3.0f, 1.0f, 0.1f},
+        .parent = root
     });
 
     world.Emplace<graphics::ToonRenderer>(pole, asset::CubeMesh, PurpleToonMaterial);
     world.Emplace<graphics::ToonRenderer>(bar1, asset::CubeMesh, YellowToonMaterial);
     world.Emplace<graphics::ToonRenderer>(bar2, asset::CubeMesh, YellowToonMaterial);
 
-    auto& poleCollider = world.Emplace<physics::Collider>(pole, physics::BoxProperties{}, true);
-    auto& bar1Collider = world.Emplace<physics::Collider>(bar1, physics::BoxProperties{});
-    auto& bar2Collider = world.Emplace<physics::Collider>(bar2, physics::BoxProperties{});
+    auto& poleBody = world.Emplace<physics::RigidBody>(pole, physics::Shape::MakeCapsule());
+    auto& bar1Body = world.Emplace<physics::RigidBody>(bar1);
+    auto& bar2Body = world.Emplace<physics::RigidBody>(bar2);
 
-    auto& poleTransform = world.Get<Transform>(pole);
-    auto& bar1Transform = world.Get<Transform>(bar1);
-    auto& bar2Transform = world.Get<Transform>(bar2);
+    auto hingeInfo = physics::HingeConstraintInfo{
+        .ownerHingeAxis = Vector3::Up(),
+        .ownerNormalAxis = Vector3::Right(),
+        .targetHingeAxis = Vector3::Up(),
+        .targetNormalAxis = Vector3::Right()
+    };
 
-    world.Emplace<physics::PhysicsBody>(pole, poleTransform, poleCollider, physics::PhysicsProperties{.isKinematic = true});
-    world.Emplace<physics::PhysicsBody>(bar1, bar1Transform, bar1Collider, physics::PhysicsProperties{});
-    world.Emplace<physics::PhysicsBody>(bar2, bar2Transform, bar2Collider, physics::PhysicsProperties{});
+    hingeInfo.targetPosition = Vector3{0.0f, -0.5f, 0.0f};
+    bar1Body.AddConstraint(hingeInfo, poleBody);
 
-    world.Emplace<physics::VelocityRestriction>(bar1, Vector3::One(), Vector3::Up());
-    world.Emplace<physics::VelocityRestriction>(bar2, Vector3::One(), Vector3::Up());
-
-
-    ncPhysics->AddJoint(pole, bar1, Vector3{0.0f, -0.5f, 0.0f}, Vector3{});
-    ncPhysics->AddJoint(pole, bar2, Vector3{0.0f, 1.0f, 0.0f}, Vector3{});
+    hingeInfo.targetPosition = Vector3{0.0f, 1.0f, 0.0f};
+    bar2Body.AddConstraint(hingeInfo, poleBody);
 }
 
-void BuildSpawner(ecs::Ecs world, Random* ncRandom)
+void BuildTriggers(ecs::Ecs world)
 {
-    const auto spawnerHandle = world.Emplace<Entity>({});
+    const auto root = world.Emplace<Entity>({
+        .tag = "Triggers"
+    });
+
+    const auto sphere = world.Emplace<Entity>({
+        .position = Vector3{-30.0f, 1.0f, 15.0f},
+        .scale = Vector3::Splat(3.0f),
+        .parent = root,
+        .tag = "Sphere"
+    });
+
+    const auto box = world.Emplace<Entity>({
+        .position = Vector3{-25.0f, 1.0f, 20.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.57f, 0.0f),
+        .scale = Vector3::Splat(3.0f),
+        .parent = root,
+        .tag = "Box"
+    });
+
+    const auto capsule = world.Emplace<Entity>({
+        .position = Vector3{-20.0f, 1.0f, 25.0f},
+        .scale = Vector3::Splat(2.0f),
+        .parent = root,
+        .tag = "Capsule"
+    });
+
+    constexpr auto white = Vector4::Splat(1.0f);
+    constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
+    constexpr auto source = graphics::WireframeSource::Collider;
+    world.Emplace<graphics::WireframeRenderer>(box, source, box, white);
+    world.Emplace<graphics::WireframeRenderer>(sphere, source, sphere, white);
+    world.Emplace<graphics::WireframeRenderer>(capsule, source, capsule, white);
+
+    const auto info = physics::RigidBodyInfo{
+        .type = physics::BodyType::Static,
+        .flags = physics::RigidBodyFlags::Trigger
+    };
+
+    world.Emplace<physics::RigidBody>(box, physics::Shape::MakeBox(), info);
+    world.Emplace<physics::RigidBody>(sphere, physics::Shape::MakeSphere(), info);
+    world.Emplace<physics::RigidBody>(capsule, physics::Shape::MakeCapsule(), info);
+
+    auto setPink = [](Entity self, Entity other, ecs::Ecs world)
+    {
+        if (other.Layer() == PlayerLayer)
+            world.Get<graphics::WireframeRenderer>(self).color = pink;
+    };
+
+    auto setWhite = [](Entity self, Entity other, ecs::Ecs world)
+    {
+        if (other.Layer() == PlayerLayer)
+            world.Get<graphics::WireframeRenderer>(self).color = white;
+    };
+
+    world.Emplace<physics::CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
+    world.Emplace<physics::CollisionListener>(sphere, nullptr, nullptr, setPink, setWhite);
+    world.Emplace<physics::CollisionListener>(capsule, nullptr, nullptr, setPink, setWhite);
+}
+
+void BuildSpawner(ecs::Ecs world, Random* ncRandom, physics::NcPhysics* ncPhysics)
+{
+    const auto spawnerHandle = world.Emplace<Entity>({
+        .tag = "Spawner"
+    });
+
     auto& spawner = world.Emplace<Spawner>(
         spawnerHandle,
         ncRandom,
@@ -695,8 +875,13 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom)
         },
         [world](Entity handle) mutable {
             world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
-            auto& collider = world.Emplace<physics::Collider>(handle, physics::BoxProperties{}, false);
-            world.Emplace<physics::PhysicsBody>(handle, world.Get<Transform>(handle), collider, physics::PhysicsProperties{.mass = 5.0f});
+            world.Emplace<physics::RigidBody>(handle, physics::Shape::MakeBox());
+        },
+        [ncPhysics](bool isPreSpawn, unsigned count) {
+            if (isPreSpawn)
+                ncPhysics->BeginRigidBodyBatch(count);
+            else
+                ncPhysics->EndRigidBodyBatch();
         }
     );
 
@@ -714,18 +899,19 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(Widget);
 
-    auto ncPhysics = modules.Get<physics::NcPhysics>();
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     auto ncRandom = modules.Get<Random>();
+    auto ncPhysics = modules.Get<physics::NcPhysics>();
 
     // Reserve space for default objects so references don't get invalidated
     world.GetPool<Transform>().Reserve(140);
     world.GetPool<graphics::ToonRenderer>().Reserve(140);
-    world.GetPool<physics::PhysicsBody>().Reserve(140);
-    world.GetPool<physics::Collider>().Reserve(140);
+    // Defer fully initializing physics objects until the whole scene is loaded (also calls reserve on the RigidBody pool).
+    ncPhysics->BeginRigidBodyBatch(140);
+    SCOPE_EXIT(ncPhysics->EndRigidBodyBatch(););
 
     // Vehicle
-    const auto vehicle = BuildVehicle(world, ncPhysics);
+    const auto vehicle = BuildVehicle(world);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
@@ -739,17 +925,20 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncGraphics->SetCamera(&camera);
 
     // Cube Spawner
-    BuildSpawner(world, ncRandom);
+    BuildSpawner(world, ncRandom, ncPhysics);
 
     // Environment
     BuildGround(world);
-    BuildBridge(world, ncPhysics);
+    BuildBridge(world);
     BuildSteps(world);
     BuildRotatingSteps(world);
-    BuildHinge(world, ncPhysics);
-    BuildBalancePlatform(world, ncPhysics);
-    BuildSwingingBars(world, ncPhysics);
+    BuildHinge(world);
+    BuildSliders(world);
+    BuildSwingingBars(world);
     BuildHalfPipes(world);
+    BuildPunchingBag(world);
+    BuildChain(world);
+    BuildTriggers(world);
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({

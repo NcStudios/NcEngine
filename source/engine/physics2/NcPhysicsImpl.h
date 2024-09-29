@@ -23,10 +23,10 @@ struct PhysicsSettings;
 
 namespace physics
 {
-class NcPhysicsImpl2 final : public NcPhysics
+class NcPhysicsImpl final : public NcPhysics
 {
     public:
-        NcPhysicsImpl2(const config::MemorySettings& memorySettings,
+        NcPhysicsImpl(const config::MemorySettings& memorySettings,
                        const config::PhysicsSettings& physicsSettings,
                        Registry* registry,
                        const task::AsyncDispatcher& dispatcher,
