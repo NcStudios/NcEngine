@@ -825,8 +825,8 @@ void BuildTriggers(ecs::Ecs world)
         .tag = "Capsule"
     });
 
-    constexpr auto white = Vector4::Splat(1.0f);
-    constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
+    static constexpr auto white = Vector4::Splat(1.0f);
+    static constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
     constexpr auto source = graphics::WireframeSource::Collider;
     world.Emplace<graphics::WireframeRenderer>(box, source, box, white);
     world.Emplace<graphics::WireframeRenderer>(sphere, source, sphere, white);
