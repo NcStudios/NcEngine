@@ -107,14 +107,12 @@ class SceneSerializationTests : public ::testing::Test
         static constexpr auto maxEntities = 10ull;
         nc::ecs::ComponentRegistry registry;
         nc::ecs::Ecs ecs;
-        std::unique_ptr<nc::asset::NcAsset> assetModule;
+        nc::ModuleRegistry moduleRegistry;
+        nc::ModuleProvider moduleProvider{&moduleRegistry};
 
         SceneSerializationTests()
             : registry{maxEntities},
-              ecs{registry},
-              assetModule{nc::asset::BuildAssetModule(nc::config::AssetSettings{},
-                                                      nc::config::MemorySettings{},
-                                                      nc::asset::AssetMap{})}
+              ecs{registry}
         {
             registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(maxEntities, nc::ComponentHandler<nc::ecs::detail::FreeComponentGroup>{});
             registry.RegisterType<nc::Tag>(maxEntities, nc::ComponentHandler<nc::Tag>{});
@@ -140,6 +138,10 @@ class SceneSerializationTests : public ::testing::Test
                     .deserialize = TestComponent2::Deserialize
                 }
             );
+
+            moduleRegistry.Register(nc::asset::BuildAssetModule(nc::config::AssetSettings{},
+                                                                nc::config::MemorySettings{},
+                                                                nc::asset::AssetMap{}));
         }
 
         ~SceneSerializationTests()
@@ -153,7 +155,7 @@ TEST_F(SceneSerializationTests, LoadSceneFragment_onlyHasHeader_succeeds)
     auto stream = std::stringstream{};
     const auto header = nc::SceneFragmentHeader{nc::g_sceneFragmentMagicNumber, nc::g_currentSceneFragmentVersion};
     stream.write(reinterpret_cast<const char*>(&header), sizeof(header));
-    EXPECT_NO_THROW(nc::LoadSceneFragment(stream, ecs, *assetModule));
+    EXPECT_NO_THROW(nc::LoadSceneFragment(stream, ecs, moduleProvider));
 }
 
 TEST_F(SceneSerializationTests, LoadSceneFragment_badMagicNumber_throws)
@@ -161,7 +163,7 @@ TEST_F(SceneSerializationTests, LoadSceneFragment_badMagicNumber_throws)
     auto stream = std::stringstream{};
     const auto header = nc::SceneFragmentHeader{nc::g_sceneFragmentMagicNumber + 1, nc::g_currentSceneFragmentVersion};
     stream.write(reinterpret_cast<const char*>(&header), sizeof(header));
-    EXPECT_THROW(nc::LoadSceneFragment(stream, ecs, *assetModule), nc::NcError);
+    EXPECT_THROW(nc::LoadSceneFragment(stream, ecs, moduleProvider), nc::NcError);
 }
 
 TEST_F(SceneSerializationTests, LoadSceneFragment_badVersion_throws)
@@ -169,14 +171,15 @@ TEST_F(SceneSerializationTests, LoadSceneFragment_badVersion_throws)
     auto stream = std::stringstream{};
     const auto header = nc::SceneFragmentHeader{nc::g_sceneFragmentMagicNumber, nc::g_currentSceneFragmentVersion + 1};
     stream.write(reinterpret_cast<const char*>(&header), sizeof(header));
-    EXPECT_THROW(nc::LoadSceneFragment(stream, ecs, *assetModule), nc::NcError);
+    EXPECT_THROW(nc::LoadSceneFragment(stream, ecs, moduleProvider), nc::NcError);
 }
 
 TEST_F(SceneSerializationTests, RoundTrip_emptyGameState_succeeds)
 {
     auto stream = std::stringstream{};
+    auto assetModule = moduleProvider.Get<nc::asset::NcAsset>();
     nc::SaveSceneFragment(stream, ecs, assetModule->GetLoadedAssets());
-    nc::LoadSceneFragment(stream, ecs, *assetModule);
+    nc::LoadSceneFragment(stream, ecs, moduleProvider);
     EXPECT_TRUE(assetModule->GetLoadedAssets().empty());
     EXPECT_TRUE(ecs.GetAll<nc::Entity>().empty());
 }
@@ -194,11 +197,12 @@ TEST_F(SceneSerializationTests, RoundTrip_hasLoadedAssets_correctlyRestoresAsset
         {nc::asset::AssetType::Texture,           std::vector<std::string>{"t"}}
     };
 
+    auto assetModule = moduleProvider.Get<nc::asset::NcAsset>();
     assetModule->LoadAssets(expectedAssets);
 
     auto stream = std::stringstream{};
     nc::SaveSceneFragment(stream, ecs, assetModule->GetLoadedAssets());
-    nc::LoadSceneFragment(stream, ecs, *assetModule);
+    nc::LoadSceneFragment(stream, ecs, moduleProvider);
     EXPECT_TRUE(ecs.GetAll<nc::Entity>().empty());
     const auto actualAssets = assetModule->GetLoadedAssets();
     ASSERT_FALSE(actualAssets.empty());
@@ -254,7 +258,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
     registry.CommitPendingChanges();
     registry.Clear();
 
-    nc::LoadSceneFragment(stream, ecs, *assetModule);
+    nc::LoadSceneFragment(stream, ecs, moduleProvider);
 
     const auto entities = ecs.GetAll<nc::Entity>();
     ASSERT_EQ(expectedInfos.size(), entities.size());
@@ -300,7 +304,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntityHierarchy_correctlyRestoresHi
     registry.CommitPendingChanges();
     registry.Clear();
 
-    nc::LoadSceneFragment(stream, ecs, *assetModule);
+    nc::LoadSceneFragment(stream, ecs, moduleProvider);
 
     const auto actualEntities = ecs.GetAll<nc::Entity>();
     ASSERT_EQ(4, actualEntities.size());
@@ -338,7 +342,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasComponents_correctlyLoadsComponents
     registry.CommitPendingChanges();
     registry.Clear();
 
-    nc::LoadSceneFragment(stream, ecs, *assetModule);
+    nc::LoadSceneFragment(stream, ecs, moduleProvider);
 
     const auto actualEntities = ecs.GetAll<nc::Entity>();
     ASSERT_EQ(4, actualEntities.size());

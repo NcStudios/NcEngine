@@ -14,8 +14,6 @@ class Module;
 class AnyComponent;
 class ComponentBase;
 class FreeComponent;
-class CollisionLogic;
-class FixedLogic;
 class FrameLogic;
 struct Tag;
 class Transform;
@@ -23,6 +21,13 @@ struct Quaternion;
 struct Vector2;
 struct Vector3;
 struct Vector4;
+
+// Physics Types
+struct NcPhysics;
+struct CollisionListener;
+class Constraint;
+class RigidBody;
+struct Shape;
 
 namespace audio
 {
@@ -58,18 +63,4 @@ namespace net
 {
 class NetworkDispatcher;
 } // namespace net
-
-namespace physics
-{
-struct NcPhysics;
-struct CollisionListener;
-class RigidBody;
-class Collider;
-class ConcaveCollider;
-struct OrientationClamp;
-class PhysicsBody;
-struct PhysicsMaterial;
-struct PositionClamp;
-struct VelocityRestriction;
-} // namespace physics
 } // namespac nc

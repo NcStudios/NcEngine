@@ -7,7 +7,7 @@
 #include <limits>
 #include <numbers>
 
-namespace nc::physics
+namespace nc
 {
 /** @name Shape Limits */
 constexpr auto g_minShapeScale = 0.1f;                  ///< minimum allowed scale for a Shape
@@ -35,4 +35,4 @@ constexpr auto g_minFrictionForce = 0.0f;                               ///< min
 constexpr auto g_maxFrictionForce = std::numeric_limits<float>::max();  ///< maximum friction force a constraint can apply
 constexpr auto g_minFrictionTorque = 0.0f;                              ///< minimum torque a constraint can apply as friction
 constexpr auto g_maxFrictionTorque = std::numeric_limits<float>::max(); ///< maximum torque a constraint can apply as friction
-} // namespace nc::physics
+} // namespace nc

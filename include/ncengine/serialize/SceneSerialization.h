@@ -6,6 +6,7 @@
 
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/module/ModuleProvider.h"
 
 #include <iosfwd>
 
@@ -15,7 +16,7 @@ namespace nc
 constexpr auto g_sceneFragmentMagicNumber = 0x3ff0e17b;
 
 /** @brief Version number serialized with a scene fragment. */
-constexpr auto g_currentSceneFragmentVersion = 2u;
+constexpr auto g_currentSceneFragmentVersion = 3u;
 
 /** @brief Header for a binary scene fragment blob. */
 struct SceneFragmentHeader
@@ -53,5 +54,5 @@ void SaveSceneFragment(std::ostream& stream,
 /** @brief Load game state from a binary stream. */
 void LoadSceneFragment(std::istream& stream,
                        ecs::Ecs ecs,
-                       asset::NcAsset& assetModule);
+                       ModuleProvider modules);
 } // namespace nc

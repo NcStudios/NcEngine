@@ -73,7 +73,7 @@ class LoadSceneDialog : public ModalDialog
         explicit LoadSceneDialog(ecs::Ecs world, NcScene* ncScene) noexcept
             : ModalDialog{DialogSize}, m_world{world}, m_ncScene{ncScene} {}
 
-        void Open(asset::NcAsset* ncAsset);
+        void Open();
         void Draw(const EditorContext& ctx);
 
     private:
@@ -81,7 +81,6 @@ class LoadSceneDialog : public ModalDialog
         std::string m_errorText;
         ecs::Ecs m_world;
         NcScene* m_ncScene;
-        asset::NcAsset* m_ncAsset = nullptr;
 
         int m_openType = OpenOverlayed;
 };

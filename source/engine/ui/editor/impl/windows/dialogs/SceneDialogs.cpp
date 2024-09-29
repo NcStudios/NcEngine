@@ -191,10 +191,9 @@ auto SaveSceneDialog::SelectFilter() -> std::function<bool(Entity)>
         : BuildLayerFilter(m_includePersistent, m_includedLayers);
 }
 
-void LoadSceneDialog::Open(asset::NcAsset* ncAsset)
+void LoadSceneDialog::Open()
 {
     m_errorText.clear();
-    m_ncAsset = ncAsset;
     OpenPopup();
 }
 
@@ -216,7 +215,7 @@ void LoadSceneDialog::Draw(const EditorContext& ctx)
             }
             else if (auto file = std::ifstream{m_fileName, std::ios::binary})
             {
-                LoadSceneFragment(file, m_world, *m_ncAsset);
+                LoadSceneFragment(file, m_world, ctx.modules);
                 ClosePopup();
             }
             else

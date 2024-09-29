@@ -9,16 +9,20 @@
 namespace nc::sample
 {
 /** A prefab spawner configurable with a SpawnBehavior. If provided, extension
-    will be applied to each handle after creation. */
+    will be applied to each handle after creation, and the prePostSpawn
+    is called before and after spawning all objects.
+*/
 class Spawner : public FreeComponent
 {
     public:
         using SpawnExtension = std::function<void(Entity)>;
+        using PrePostOp = std::function<void(bool isPreSpawn, unsigned count)>;
 
         Spawner(Entity entity,
                 Random* random,
                 SpawnBehavior behavior,
-                SpawnExtension extension = nullptr);
+                SpawnExtension extension = nullptr,
+                PrePostOp prePostSpawn = nullptr);
         void Run(Entity, Registry*, float);
         void StageSpawn(unsigned count = 1u);
         void Spawn(Registry* registry, unsigned count = 1u);
@@ -29,6 +33,7 @@ class Spawner : public FreeComponent
 
     private:
         SpawnExtension m_extension;
+        PrePostOp m_prePostSpawn;
         std::vector<Entity> m_entities;
         SpawnPropertyGenerator m_generator;
         Entity::layer_type m_layer;
@@ -40,9 +45,11 @@ class Spawner : public FreeComponent
 inline Spawner::Spawner(Entity entity,
                         Random* random,
                         SpawnBehavior behavior,
-                        SpawnExtension extension)
+                        SpawnExtension extension,
+                        PrePostOp prePostSpawn)
     : FreeComponent{entity},
       m_extension{std::move(extension)},
+      m_prePostSpawn{std::move(prePostSpawn)},
       m_entities{},
       m_generator{behavior, random},
       m_layer{behavior.layer},
@@ -77,6 +84,9 @@ inline void Spawner::StageSpawn(unsigned count)
 
 inline void Spawner::Spawn(Registry* registry, unsigned count)
 {
+    if (m_prePostSpawn)
+        m_prePostSpawn(true, count);
+
     std::generate_n(std::back_inserter(m_entities), count, [this, registry]()
     {
         const auto handle = registry->Add<Entity>({
@@ -91,6 +101,9 @@ inline void Spawner::Spawn(Registry* registry, unsigned count)
 
         return handle;
     });
+
+    if (m_prePostSpawn)
+        m_prePostSpawn(false, count);
 }
 
 inline void Spawner::StageDestroy(unsigned count)

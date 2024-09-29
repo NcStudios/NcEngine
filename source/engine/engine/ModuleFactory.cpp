@@ -57,11 +57,11 @@ auto BuildModuleRegistry(Registry* registry,
                                                                registry,
                                                                events));
 
-    moduleRegistry->Register(nc::physics::BuildPhysicsModule(config.memorySettings,
-                                                             config.physicsSettings,
-                                                             registry,
-                                                             dispatcher,
-                                                             events));
+    moduleRegistry->Register(nc::BuildPhysicsModule(config.memorySettings,
+                                                    config.physicsSettings,
+                                                    registry->GetEcs(),
+                                                    dispatcher,
+                                                    events));
 
     moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
     moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));

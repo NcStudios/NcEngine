@@ -14,11 +14,11 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
-#include "ncengine/physics/Collider.h"
+#include "ncengine/graphics/WireframeRenderer.h"
+#include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/PhysicsBody.h"
-#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/RigidBody.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
 
@@ -39,7 +39,7 @@ void SaveScene(nc::ecs::Ecs world, const nc::asset::AssetMap& assets)
     nc::SaveSceneFragment(file, world, assets);
 }
 
-void LoadScene(nc::ecs::Ecs world, nc::asset::NcAsset& ncAsset)
+void LoadScene(nc::ecs::Ecs world, nc::ModuleProvider modules)
 {
     auto file = std::ifstream{g_sceneFragment, std::ios::binary};
     if (!file)
@@ -47,7 +47,7 @@ void LoadScene(nc::ecs::Ecs world, nc::asset::NcAsset& ncAsset)
         throw nc::NcError{fmt::format("Failed to open fragment for reading: '{}'", g_sceneFragment)};
     }
 
-    nc::LoadSceneFragment(file, world, ncAsset);
+    nc::LoadSceneFragment(file, world, modules);
 }
 } // anonymous namespace
 
@@ -64,6 +64,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
+    world.GetPool<RigidBody>().Reserve(30ull);
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),
@@ -98,21 +99,59 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         asset::UnloadAllMeshAssets();
         asset::UnloadAllTextureAssets();
         asset::UnloadAllSkeletalAnimationAssets();
-        ::LoadScene(world, *modules.Get<asset::NcAsset>());
+        ::LoadScene(world, modules);
     }
     else
     {
         const auto ground = world.Emplace<Entity>({
-            .position = Vector3::Up() * -2.5f,
-            .scale = Vector3{3.0f, 1.0f, 3.0f}
+            .position = Vector3::Up() * -3.5f,
+            .scale = Vector3{10.0f, 1.0f, 10.0f}
         });
 
         world.Emplace<graphics::ToonRenderer>(ground);
-        auto& groundCollider = world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-        auto& groundTransform = world.Get<Transform>(ground);
-        world.Emplace<physics::PhysicsBody>(ground, groundTransform, groundCollider);
-        world.Emplace<physics::PositionClamp>(ground, groundTransform.Position(), 0.1f, 2.0f);
-        world.Emplace<physics::OrientationClamp>(ground, Vector3::Up(), 1.0f, 5.0f);
+        auto& groundBody = world.Emplace<RigidBody>(
+            ground,
+            Shape::MakeBox(),
+            RigidBodyInfo{
+                .freedom = DegreeOfFreedom::Rotation
+            }
+        );
+
+        groundBody.AddConstraint(
+            SwingTwistConstraintInfo{
+                .ownerTwistAxis = Vector3::Up(),
+                .targetTwistAxis = Vector3::Up(),
+                .swingLimit = 0.1f
+            }
+        );
+
+        const auto trigger = world.Emplace<Entity>({
+            .position = Vector3::Down() * 3.0f,
+            .scale = Vector3{9.0f, 0.5f, 9.0f}
+        });
+
+        world.Emplace<graphics::WireframeRenderer>(
+            trigger,
+            graphics::WireframeSource::Collider,
+            trigger,
+            Vector4{0.9f, 0.1f, 0.7f, 1.0f}
+        );
+
+        auto& triggerBody = world.Emplace<RigidBody>(
+            trigger,
+            Shape::MakeBox(),
+            RigidBodyInfo{
+                .flags = RigidBodyFlags::Trigger
+            }
+        );
+
+        triggerBody.AddConstraint(
+            FixedConstraintInfo{
+                .ownerPosition = Vector3::Down() * 0.25f,
+                .targetPosition = Vector3::Up() * 0.5f
+            },
+            groundBody
+        );
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
@@ -122,9 +161,15 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
     modules.Get<audio::NcAudio>()->RegisterListener(cameraHandle);
 
-    const auto object = world.Emplace<Entity>({});
+    const auto animatedCube = world.Emplace<Entity>({
+        .position = Vector3::Up() * 4.0f
+    });
+
+    world.Emplace<graphics::MeshRenderer>(animatedCube);
+    world.Emplace<graphics::ToonRenderer>(animatedCube);
+    world.Emplace<graphics::SkeletalAnimator>(animatedCube, "DefaultCube.nca", "DefaultCubeAnimation.nca");
     world.Emplace<audio::AudioSource>(
-        object,
+        animatedCube,
         std::vector<std::string>{
             std::string{asset::DefaultAudioClip}
         },
@@ -134,26 +179,75 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         }
     );
 
-    world.Emplace<graphics::MeshRenderer>(object);
-    world.Emplace<graphics::ToonRenderer>(object);
-    world.Emplace<graphics::SkeletalAnimator>(object, "DefaultCube.nca", "DefaultCubeAnimation.nca");
-    world.Emplace<graphics::PointLight>(object);
-    world.Emplace<graphics::ParticleEmitter>(object, graphics::ParticleInfo{
-        .emission = {
-            .initialEmissionCount = 10,
-            .periodicEmissionCount = 10,
-            .periodicEmissionFrequency = 0.1f
-        },
-        .init = {},
-        .kinematic = {}
+    const auto pointLight = world.Emplace<Entity>({
+        .position = Vector3::Down(),
+        .parent = animatedCube
     });
 
-    auto& objectCollider = world.Emplace<physics::Collider>(object, physics::BoxProperties{});
-    auto& objectTransform = world.Get<Transform>(object);
-    world.Emplace<physics::PhysicsBody>(object, objectTransform, objectCollider);
-    world.Emplace<physics::PhysicsMaterial>(object);
-    world.Emplace<physics::VelocityRestriction>(object, Vector3::One(), Vector3::Up());
+    world.Emplace<graphics::PointLight>(pointLight);
 
-    world.Emplace<Entity>({.parent = object});
+    const auto box1 = world.Emplace<Entity>({.position = Vector3{-1.0f, 0.0f, 0.0f}});
+    const auto box2 = world.Emplace<Entity>({.position = Vector3{1.0f, 0.0f, 0.0f}});
+    const auto sphere1 = world.Emplace<Entity>({.position = Vector3{-4.0f, 1.0f, 0.0f}});
+    const auto sphere2 = world.Emplace<Entity>({.position = Vector3{-3.0f, 0.0f, 0.0f}});
+    const auto capsule1 = world.Emplace<Entity>({.position = Vector3{3.5f, 0.0f, 0.0f}});
+    const auto capsule2 = world.Emplace<Entity>({.position = Vector3{3.5f, 3.0f, 0.0f}});
+
+    world.Emplace<graphics::MeshRenderer>(box1, asset::CubeMesh);
+    world.Emplace<graphics::MeshRenderer>(box2, asset::CubeMesh);
+    world.Emplace<graphics::ToonRenderer>(sphere1, asset::SphereMesh);
+    world.Emplace<graphics::ToonRenderer>(sphere2, asset::SphereMesh);
+    world.Emplace<graphics::ToonRenderer>(capsule1, asset::CapsuleMesh);
+    world.Emplace<graphics::ToonRenderer>(capsule2, asset::CapsuleMesh);
+
+    auto& box1Body = world.Emplace<RigidBody>(box1);
+    auto& box2Body = world.Emplace<RigidBody>(box2);
+    auto& sphere1Body = world.Emplace<RigidBody>(sphere1);
+    auto& sphere2Body = world.Emplace<RigidBody>(sphere2);
+    auto& capsule1Body = world.Emplace<RigidBody>(capsule1);
+    auto& capsule2Body = world.Emplace<RigidBody>(capsule2);
+
+    world.Emplace<CollisionListener>(
+        box1,
+        [](Entity, Entity, const HitInfo&, ecs::Ecs) {},
+        [](Entity, Entity, ecs::Ecs) {},
+        [](Entity, Entity, ecs::Ecs) {},
+        [](Entity, Entity, ecs::Ecs) {}
+    );
+
+    box1Body.AddImpulse(Vector3::Up() * 5000.0f);
+    sphere1Body.AddImpulse(Vector3::Up() * 5000.0f);
+    capsule1Body.AddImpulse(Vector3::Up() * 5000.0f);
+
+    box1Body.AddConstraint(
+        PointConstraintInfo{
+            .ownerPosition = Vector3::Right() * 0.6f,
+            .targetPosition = Vector3::Left() * 0.6f
+        },
+        box2Body
+    );
+
+    box2Body.AddConstraint(
+        SliderConstraintInfo{
+            .minLimit = -3.0f,
+            .maxLimit = 3.0f
+        },
+        sphere1Body
+    );
+
+    sphere1Body.AddConstraint(
+        DistanceConstraintInfo{},
+        sphere2Body
+    );
+
+    capsule1Body.AddConstraint(
+        HingeConstraintInfo{
+            .ownerPosition = Vector3::Up(),
+            .targetPosition = Vector3::Down()
+        },
+        capsule2Body
+    );
+
+    world.Emplace<Entity>({.parent = box1});
 }
 } // namespace nc::sample

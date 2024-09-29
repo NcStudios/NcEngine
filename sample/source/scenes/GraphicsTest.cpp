@@ -6,20 +6,18 @@
 #include "ncengine/NcEngine.h"
 #include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/ecs/Logic.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
-#include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/CollisionListener.h"
+#include "ncengine/physics/RigidBody.h"
 
 #include <string>
 #include <iostream>
-
-
-#include "ncengine/physics/Collider.h"
-#include "ncengine/ecs/Logic.h"
 
 namespace nc::sample
 {
@@ -207,14 +205,11 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "ogre"
     });
     world.Emplace<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
-    auto& collider = world.Emplace<physics::Collider>(ogre, physics::SphereProperties{}, false);
-    world.Emplace<physics::PhysicsBody>(
+    world.Emplace<RigidBody>(
         ogre,
-        world.Get<Transform>(ogre),
-        collider,
-        physics::PhysicsProperties{
-            .mass = 0.0f,
-            .isKinematic = true
+        Shape::MakeSphere(),
+        RigidBodyInfo{
+            .type = BodyType::Kinematic
         }
     );
 
@@ -247,18 +242,23 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
 
     world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
-    world.Emplace<FrameLogic>(skeleton, WasdBasedMovement);
-    world.Emplace<physics::Collider>(skeleton, physics::SphereProperties{}, true);
-    world.Emplace<CollisionLogic>(skeleton, nullptr, nullptr,
-    [](Entity, Entity other, Registry* reg)
-    {
-        auto ogreAnim = reg->Get<graphics::SkeletalAnimator>(other);
-        ogreAnim->PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);
-        if(auto* tag = reg->Get<Tag>(other); tag)
-        {
-            GameLog::Log(std::string{"Collision Enter: "} + tag->value.c_str());
+    world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
+    world.Emplace<RigidBody>(
+        skeleton,
+        Shape::MakeSphere(),
+        RigidBodyInfo{
+            .type = BodyType::Kinematic,
+            .flags = RigidBodyFlags::Trigger
         }
-    }, nullptr);
+    );
+
+    world.Emplace<CollisionListener>(skeleton)
+        .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
+            auto& ogreAnim = ecs.Get<graphics::SkeletalAnimator>(other);
+            ogreAnim.PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);
+            auto& tag = ecs.Get<Tag>(other);
+            GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
+        };
 
     // Skeleton Animation
     {
