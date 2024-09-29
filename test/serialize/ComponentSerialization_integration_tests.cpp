@@ -8,11 +8,7 @@
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
-#include "ncengine/physics/Collider.h"
-#include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/PhysicsBody.h"
-#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "graphics/system/ParticleEmitterSystem.h"
@@ -117,75 +113,6 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
     EXPECT_EQ(expectedFlags, actualProperties.flags);
 }
 
-TEST(ComponentSerializationTests, RoundTrip_collider_box_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::Collider{g_entity, nc::physics::BoxProperties{}, false};
-    nc::SerializeCollider(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeCollider(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.IsTrigger(), actual.IsTrigger());
-    EXPECT_EQ(expected.GetAssetPath(), actual.GetAssetPath());
-    const auto& expectedInfo = expected.GetInfo();
-    const auto& actualInfo = actual.GetInfo();
-    EXPECT_EQ(expectedInfo.type, actualInfo.type);
-    EXPECT_EQ(expectedInfo.offset, actualInfo.offset);
-    EXPECT_EQ(expectedInfo.scale, actualInfo.scale);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_collider_capsule_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::Collider{g_entity, nc::physics::CapsuleProperties{}, false};
-    nc::SerializeCollider(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeCollider(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.IsTrigger(), actual.IsTrigger());
-    EXPECT_EQ(expected.GetAssetPath(), actual.GetAssetPath());
-    const auto& expectedInfo = expected.GetInfo();
-    const auto& actualInfo = actual.GetInfo();
-    EXPECT_EQ(expectedInfo.type, actualInfo.type);
-    EXPECT_EQ(expectedInfo.offset, actualInfo.offset);
-    EXPECT_EQ(expectedInfo.scale, actualInfo.scale);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_collider_sphere_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::Collider{g_entity, nc::physics::SphereProperties{}, false};
-    nc::SerializeCollider(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeCollider(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.IsTrigger(), actual.IsTrigger());
-    EXPECT_EQ(expected.GetAssetPath(), actual.GetAssetPath());
-    const auto& expectedInfo = expected.GetInfo();
-    const auto& actualInfo = actual.GetInfo();
-    EXPECT_EQ(expectedInfo.type, actualInfo.type);
-    EXPECT_EQ(expectedInfo.offset, actualInfo.offset);
-    EXPECT_EQ(expectedInfo.scale, actualInfo.scale);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_collider_hull_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::Collider{g_entity, nc::physics::HullProperties{"geometry.nca"}, false};
-    nc::SerializeCollider(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeCollider(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.IsTrigger(), actual.IsTrigger());
-    EXPECT_EQ(expected.GetAssetPath(), actual.GetAssetPath());
-    const auto& expectedInfo = expected.GetInfo();
-    const auto& actualInfo = actual.GetInfo();
-    EXPECT_EQ(expectedInfo.type, actualInfo.type);
-    EXPECT_EQ(expectedInfo.offset, actualInfo.offset);
-    EXPECT_EQ(expectedInfo.scale, actualInfo.scale);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_concaveCollider_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::ConcaveCollider{g_staticEntity, "geometry.nca"};
-    nc::SerializeConcaveCollider(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeConcaveCollider(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.GetPath(), actual.GetPath());
-}
-
 TEST(ComponentSerializationTests, RoundTrip_meshRenderer_preservesValues)
 {
     auto stream = std::stringstream{};
@@ -267,99 +194,6 @@ TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
     EXPECT_EQ(expectedMaterial.outlineWidth, actualMaterial.outlineWidth);
     EXPECT_EQ(expectedMaterial.hatching, actualMaterial.hatching);
     EXPECT_EQ(expectedMaterial.hatchingTiling, actualMaterial.hatchingTiling);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_physicsBody_preservesValues)
-{
-    // We actually need a Collider in the Registry for this test, so we want to clean up for next tests.
-    SCOPE_EXIT
-    (
-        g_registry.CommitPendingChanges();
-        g_registry.Clear()
-    );
-
-    g_registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(1);
-    g_registry.RegisterType<nc::Tag>(1);
-    g_registry.RegisterType<nc::Transform>(1);
-    g_registry.RegisterType<nc::Hierarchy>(1);
-    g_registry.RegisterType<nc::physics::Collider>(1);
-    g_registry.RegisterType<nc::physics::PhysicsBody>(1);
-
-    const auto entity = g_ecs.Emplace<nc::Entity>(nc::EntityInfo{});
-    g_ecs.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
-
-    const auto expectedProperties = nc::physics::PhysicsProperties{
-        .mass = 2.0f,
-        .drag = 0.5f,
-        .angularDrag = 0.5f,
-        .useGravity = false,
-        .isKinematic = true
-    };
-
-    const auto& expected = g_ecs.Emplace<nc::physics::PhysicsBody>(
-        entity,
-        g_ecs.Get<nc::Transform>(entity),
-        g_ecs.Get<nc::physics::Collider>(entity),
-        expectedProperties
-    );
-
-    auto entityToFragmentId = nc::EntityToFragmentIdMap{ {entity, 0u} };
-    auto fragmentIdToEntity = nc::FragmentIdToEntityMap{ {0u, entity} };
-    const auto serializeCtx = nc::SerializationContext{entityToFragmentId, g_ecs};
-    auto deserializeCtx = nc::DeserializationContext{fragmentIdToEntity, g_ecs};
-
-    auto stream = std::stringstream{};
-    nc::SerializePhysicsBody(stream, expected, serializeCtx, &g_registry);
-    const auto actual = nc::DeserializePhysicsBody(stream, deserializeCtx, &g_registry);
-    const auto& actualProperties = actual.GetProperties();
-    EXPECT_EQ(expectedProperties.mass, 1.0f / actualProperties.mass); // is inverse mass once stored in member
-    EXPECT_EQ(expectedProperties.drag, actualProperties.drag);
-    EXPECT_EQ(expectedProperties.angularDrag, actualProperties.angularDrag);
-    EXPECT_EQ(expectedProperties.useGravity, actualProperties.useGravity);
-    EXPECT_EQ(expectedProperties.isKinematic, actualProperties.isKinematic);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_physicsMaterial_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::PhysicsMaterial{0.7f, 0.1234f};
-    nc::SerializePhysicsMaterial(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializePhysicsMaterial(stream, g_deserializationContext, nullptr);
-    EXPECT_FLOAT_EQ(expected.friction, actual.friction);
-    EXPECT_FLOAT_EQ(expected.restitution, actual.restitution);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_orientationClamp_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::OrientationClamp{nc::Vector3{1.0f, 0.0f, 0.0f}, 0.5f, 5.0f};
-    nc::SerializeOrientationClamp(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeOrientationClamp(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(nc::Vector3(1.0f, 0.0f, 0.0f), actual.targetOrientation);
-    EXPECT_FLOAT_EQ(0.5f, actual.dampingRatio);
-    EXPECT_FLOAT_EQ(5.0f, actual.dampingFrequency);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_positionClamp_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::PositionClamp{nc::Vector3{1.0f, 42.0f, 0.0f}, 0.5f, 5.0f};
-    nc::SerializePositionClamp(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializePositionClamp(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(nc::Vector3(1.0f, 42.0f, 0.0f), actual.targetPosition);
-    EXPECT_FLOAT_EQ(0.5f, actual.dampingRatio);
-    EXPECT_FLOAT_EQ(5.0f, actual.dampingFrequency);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_velocityRestriction_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expected = nc::physics::VelocityRestriction{nc::Vector3::Front(), nc::Vector3::Up(), true};
-    nc::SerializeVelocityRestriction(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeVelocityRestriction(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(nc::Vector3::Front(), actual.linearFreedom);
-    EXPECT_EQ(nc::Vector3::Up(), actual.angularFreedom);
-    EXPECT_TRUE(actual.worldSpace);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)

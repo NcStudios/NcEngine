@@ -10,13 +10,9 @@
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
-#include "ncengine/physics/Collider.h"
 #include "ncengine/physics/CollisionListener.h"
-#include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/PhysicsBody.h"
 #include "ncengine/physics/PhysicsLimits.h"
-#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/PhysicsUtility.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiStyle.h"
@@ -39,80 +35,6 @@ constexpr auto spatialProp     = nc::ui::Property{ &T::IsSpatial,      &T::SetSp
 constexpr auto loopProp        = nc::ui::Property{ &T::IsLooping,      &T::SetLooping,     "loop"       };
 } // namespace audio_source_ext
 
-namespace collider_ext
-{
-using T = nc::physics::Collider;
-
-constexpr auto setAssetPath = [](auto& obj, auto& str)
-{
-    obj.SetProperties(nc::physics::HullProperties{str});
-};
-
-constexpr auto getType = [](auto& obj)
-{
-    return std::string{nc::physics::ToString(obj.GetType())};
-};
-
-constexpr auto setType = [](auto& obj, auto& str)
-{
-    using namespace nc::physics;
-    switch(FromString(str))
-    {
-        case ColliderType::Box:     { obj.SetProperties(BoxProperties{});     break; }
-        case ColliderType::Capsule: { obj.SetProperties(CapsuleProperties{}); break; }
-        case ColliderType::Hull:    { obj.SetProperties(HullProperties{});    break; } 
-        case ColliderType::Sphere:  { obj.SetProperties(SphereProperties{});  break; }
-    }
-};
-
-constexpr auto triggerProp   = nc::ui::Property{ &T::IsTrigger,    &T::SetTrigger, "isTrigger" };
-constexpr auto assetPathProp = nc::ui::Property{ &T::GetAssetPath, setAssetPath,   "asset"     };
-constexpr auto typeProp      = nc::ui::Property{ getType,          setType,        "type"      };
-
-void BoxProperties(nc::physics::Collider& obj)
-{
-    auto [_, offset, scale] = obj.GetInfo();
-    const auto centerModified = nc::ui::InputPosition(offset, "center");
-    const auto extentsModified = nc::ui::InputScale(scale, "extents");
-    if (centerModified || extentsModified)
-    {
-        obj.SetProperties(nc::physics::BoxProperties{offset, scale});
-    }
-}
-
-void CapsuleProperties(nc::physics::Collider& obj)
-{
-    auto [_, offset, scale] = obj.GetInfo();
-    auto height = scale.y * 2.0f;
-    auto radius = scale.x * 0.5f;
-    const auto centerModified = nc::ui::InputPosition(offset, "center");
-    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    if (centerModified || heightModified || radiusModified)
-    {
-        obj.SetProperties(nc::physics::CapsuleProperties{offset, height, radius});
-    }
-}
-
-void HullProperties(nc::physics::Collider& obj)
-{
-    auto colliders = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::HullCollider);
-    nc::ui::PropertyWidget(assetPathProp, obj, &nc::ui::Combobox, colliders);
-}
-
-void SphereProperties(nc::physics::Collider& obj)
-{
-    auto [_, offset, scale] = obj.GetInfo();
-    auto radius = scale.x * 0.5f;
-    const auto centerModified = nc::ui::InputPosition(offset, "center");
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::ui::g_minScale, nc::ui::g_maxScale);
-    if (centerModified || radiusModified)
-    {
-        obj.SetProperties(nc::physics::SphereProperties{offset, radius});
-    }
-}
-} // namespace collider_ext
-
 namespace mesh_renderer_ext
 {
 using T = nc::graphics::MeshRenderer;
@@ -128,23 +50,6 @@ constexpr auto normalProp    = nc::ui::Property{ getNormal,       &T::SetNormal,
 constexpr auto roughnessProp = nc::ui::Property{ getRoughness,    &T::SetRoughness, "roughness" };
 constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetallic,  "metallic"  };
 } // namespace mesh_renderer_ext
-
-namespace physics_body_ext
-{
-using T = nc::physics::PhysicsBody;
-
-constexpr auto getMass = [](T& obj)
-{
-    const auto mass = obj.GetInverseMass();
-    return nc::FloatEqual(mass, 0.0f) ? 0.0f : 1.0f / mass;
-};
-
-constexpr auto massProp        = nc::ui::Property{ getMass,            &T::SetMass,        "mass"        };
-constexpr auto dragProp        = nc::ui::Property{ &T::GetDrag,        &T::SetDrag,        "drag"        };
-constexpr auto angularDragProp = nc::ui::Property{ &T::GetAngularDrag, &T::SetAngularDrag, "angularDrag" };
-constexpr auto useGravityProp  = nc::ui::Property{ &T::UseGravity,     &T::SetUseGravity,  "useGravity"  };
-constexpr auto isKinematicProp = nc::ui::Property{ &T::IsKinematic,    &T::SetIsKinematic, "isKinematic" };
-} // namespace physics_body_ext
 
 namespace rigid_body_ext
 {
@@ -895,73 +800,5 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
 
         ImGui::TreePop();
     }
-}
-
-void ColliderUIWidget(physics::Collider& collider, EditorContext&, const std::any&)
-{
-    using namespace std::string_view_literals;
-    constexpr auto colliderTypes = std::array<std::string_view, 4>{ "Box"sv, "Capsule"sv, "Hull"sv, "Sphere"sv };
-    ui::PropertyWidget(collider_ext::typeProp, collider, &ui::Combobox, colliderTypes);
-
-    switch (collider.GetType())
-    {
-        case physics::ColliderType::Box:     { collider_ext::BoxProperties(collider);     break; }
-        case physics::ColliderType::Capsule: { collider_ext::CapsuleProperties(collider); break; }
-        case physics::ColliderType::Hull:    { collider_ext::HullProperties(collider);    break; }
-        case physics::ColliderType::Sphere:  { collider_ext::SphereProperties(collider);  break; }
-    }
-
-    ui::PropertyWidget(collider_ext::triggerProp, collider, &ui::Checkbox);
-}
-
-void ConcaveColliderUIWidget(physics::ConcaveCollider& concaveCollider, EditorContext&, const std::any&)
-{
-    /** @todo #454 Allow updating asset. */
-    ImGui::Text("Path: %s", concaveCollider.GetPath().c_str());
-}
-
-void OrientationClampUIWidget(physics::OrientationClamp& orientationClamp, EditorContext&, const std::any&)
-{
-    IMGUI_SCOPE(ui::ImGuiId, "OrientationClamp");
-    ui::InputVector3(orientationClamp.targetOrientation, "targetOrientation", 0.1f, -1.0f, 1.0f);
-    ui::DragFloat(orientationClamp.dampingRatio, "dampingRatio", 0.01f, 0.01f, 10.0f);
-    ui::DragFloat(orientationClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
-}
-
-void PhysicsBodyUIWidget(physics::PhysicsBody& physicsBody, EditorContext&, const std::any&)
-{
-    constexpr auto largeStep = 0.1f;
-    constexpr auto smallStep = 0.01f;
-    constexpr auto min = 0.0f;
-    constexpr auto max = 1000.0f;
-
-    ImGui::Text("Status: %s", physicsBody.IsAwake() ? "Awake" : "Asleep");
-    ui::PropertyWidget(physics_body_ext::useGravityProp,  physicsBody, &ui::Checkbox);
-    ui::PropertyWidget(physics_body_ext::isKinematicProp, physicsBody, &ui::Checkbox);
-    ui::PropertyWidget(physics_body_ext::massProp,        physicsBody, &ui::DragFloat, largeStep, min, max);
-    ui::PropertyWidget(physics_body_ext::dragProp,        physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
-    ui::PropertyWidget(physics_body_ext::angularDragProp, physicsBody, &ui::DragFloat, smallStep, min, 1.0f);
-}
-
-void PhysicsMaterialUIWidget(physics::PhysicsMaterial& physicsMaterial, EditorContext&, const std::any&)
-{
-    ui::DragFloat(physicsMaterial.friction, "friction", 0.01f, 0.0f, 1.0f);
-    ui::DragFloat(physicsMaterial.restitution, "restitution", 0.01f, 0.0f, 1.0f);
-}
-
-void PositionClampUIWidget(physics::PositionClamp& positionClamp, EditorContext&, const std::any&)
-{
-    IMGUI_SCOPE(ui::ImGuiId, "PositionClamp");
-    ui::InputVector3(positionClamp.targetPosition, "targetPosition", 0.1f, -1000.0f, 1000.0f);
-    ui::DragFloat(positionClamp.dampingRatio, "dampingRatio", 0.01f, 0.01f, 10.0f);
-    ui::DragFloat(positionClamp.dampingFrequency, "dampingFrequency", 1.0f, 1.0f, 120.0f);
-}
-
-void VelocityRestrictionUIWidget(physics::VelocityRestriction& velocityRestriction, EditorContext&, const std::any&)
-{
-    IMGUI_SCOPE(ui::ImGuiId, "VelocityRestriction");
-    ui::InputVector3(velocityRestriction.linearFreedom, "linearFreedom", 0.1f, 0.0f, 1.0f);
-    ui::InputVector3(velocityRestriction.angularFreedom, "angularFreedom", 0.1f, 0.0f, 1.0f);
-    ui::Checkbox(velocityRestriction.worldSpace, "worldSpace");
 }
 } // namespace nc::ui::editor

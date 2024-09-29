@@ -15,9 +15,8 @@
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
-#include "ncengine/physics/Collider.h"
-#include "ncengine/physics/ConcaveCollider.h"
-#include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/CollisionListener.h"
+#include "ncengine/physics/RigidBody.h"
 
 namespace nc::type
 {
@@ -43,7 +42,8 @@ REGISTER_TYPE(graphics::PointLight);
 REGISTER_TYPE(graphics::SkeletalAnimator);
 REGISTER_TYPE(graphics::SpotLight);
 REGISTER_TYPE(net::NetworkDispatcher);
-REGISTER_TYPE(physics::ConcaveCollider);
-REGISTER_TYPE(physics::Collider);
-REGISTER_TYPE(physics::PhysicsBody);
+REGISTER_TYPE(physics::CollisionListener);
+REGISTER_TYPE(physics::Constraint);
+REGISTER_TYPE(physics::RigidBody);
+REGISTER_TYPE(physics::Shape);
 } // namespace nc::type

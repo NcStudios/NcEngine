@@ -5,7 +5,6 @@
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/WireframeRenderer.h"
-#include "ncengine/physics/Collider.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/utility/MatrixUtilities.h"
 #include "asset/AssetService.h"
@@ -25,40 +24,6 @@ auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::graphics::MeshRende
         return worldView.Get<nc::graphics::ToonRenderer>(target).GetMeshView();
     else
         return defaultMeshView;
-}
-
-[[maybe_unused]]
-auto GetMeshView(nc::physics::ColliderType type) -> nc::asset::MeshView
-{
-    using namespace nc::asset;
-    switch(type)
-    {
-        case nc::physics::ColliderType::Box:
-        {
-            static const auto view = AssetService<MeshView>::Get()->Acquire(CubeMesh);
-            return view;
-        }
-        case nc::physics::ColliderType::Sphere:
-        {
-            static const auto view = AssetService<MeshView>::Get()->Acquire(SphereMesh);
-            return view;
-        }
-        case nc::physics::ColliderType::Capsule:
-        {
-            static const auto view = AssetService<MeshView>::Get()->Acquire(CapsuleMesh);
-            return view;
-        }
-        case nc::physics::ColliderType::Hull:
-        {
-            // @todo #567: Eventually not have sphere here.
-            static const auto view = AssetService<MeshView>::Get()->Acquire(SphereMesh);
-            return view;
-        }
-        default:
-        {
-            throw nc::NcError("Unknown ColliderType");
-        }
-    }
 }
 
 [[maybe_unused]]
@@ -87,14 +52,6 @@ auto GetMeshView(nc::physics::ShapeType shape) -> nc::asset::MeshView
             throw nc::NcError("Unknown Shape");
         }
     }
-}
-
-[[maybe_unused]]
-auto CalculateWireframeMatrix(DirectX::FXMMATRIX worldSpace, const nc::physics::VolumeInfo& info) -> DirectX::XMMATRIX
-{
-    const auto scale = DirectX::XMLoadVector3(&info.scale);
-    const auto offset = DirectX::XMLoadVector3(&info.offset);
-    return DirectX::XMMatrixScalingFromVector(scale) * worldSpace * DirectX::XMMatrixTranslationFromVector(offset);
 }
 
 [[maybe_unused]]

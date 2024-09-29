@@ -13,7 +13,6 @@
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
-#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncutility/ScopeExit.h"
@@ -570,8 +569,6 @@ void BuildHalfPipes(ecs::Ecs world)
     halfPipeMaterial.outlineWidth = 2;
 
     world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, halfPipeMaterial);
-
-    world.Emplace<physics::ConcaveCollider>(halfPipe2, HalfPipeConcaveCollider);
 }
 
 void BuildHinge(ecs::Ecs world)
