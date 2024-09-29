@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/type/EngineId.h"
 
@@ -12,7 +13,6 @@
 namespace nc
 {
 struct SystemEvents;
-class Registry;
 
 namespace config
 {
@@ -58,7 +58,7 @@ struct NcPhysics : public Module
 /** @brief Build an NcPhysics module instance. */
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
-                        Registry* registry,
+                        ecs::Ecs world,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>;
 } // namespace nc

@@ -4,7 +4,6 @@
 #include "jolt/ShapeFactory.h"
 
 #include "ncengine/debug/Profile.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/time/Time.h"
 #include "ncengine/utility/Log.h"
@@ -12,10 +11,10 @@
 namespace
 {
 [[maybe_unused]]
-auto RegisterDeferredCreateState(nc::Registry* registry) -> std::unique_ptr<nc::physics::DeferredPhysicsCreateState>
+auto RegisterDeferredCreateState(nc::ecs::Ecs world) -> std::unique_ptr<nc::physics::DeferredPhysicsCreateState>
 {
     auto state = std::make_unique<nc::physics::DeferredPhysicsCreateState>();
-    auto& userData = registry->GetEcs().GetPool<nc::RigidBody>().Handler().userData;
+    auto& userData = world.GetPool<nc::RigidBody>().Handler().userData;
     NC_ASSERT(!userData.has_value(), "Attempting to initialize RigidBody user data, but it already has a value");
     userData = std::any{state.get()};
     return state;
@@ -50,18 +49,18 @@ namespace nc
 {
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
-                        Registry* registry,
+                        ecs::Ecs world,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
-    auto deferredState = RegisterDeferredCreateState(registry);
+    auto deferredState = RegisterDeferredCreateState(world);
     if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
         return std::make_unique<physics::NcPhysicsImpl>(
             memorySettings,
             physicsSettings,
-            registry,
+            world,
             dispatcher,
             events,
             std::move(deferredState)
@@ -75,17 +74,17 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
 namespace physics
 {
 NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
-                               const config::PhysicsSettings& physicsSettings,
-                               Registry* registry,
-                               const task::AsyncDispatcher& dispatcher,
-                               SystemEvents&,
-                               std::unique_ptr<DeferredPhysicsCreateState> deferredState)
-    : m_ecs{registry->GetEcs()},
+                             const config::PhysicsSettings& physicsSettings,
+                             ecs::Ecs world,
+                             const task::AsyncDispatcher& dispatcher,
+                             SystemEvents&,
+                             std::unique_ptr<DeferredPhysicsCreateState> deferredState)
+    : m_ecs{world},
       m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
       m_constraintManager{m_jolt.physicsSystem, memorySettings.maxTransforms},
       m_bodyManager{
-        registry->GetImpl().GetPool<Transform>(),
-        registry->GetImpl().GetPool<RigidBody>(),
+        world.GetPool<Transform>(),
+        world.GetPool<RigidBody>(),
         memorySettings.maxTransforms,
         m_jolt.physicsSystem,
         m_shapeFactory,

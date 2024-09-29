@@ -27,11 +27,11 @@ class NcPhysicsImpl final : public NcPhysics
 {
     public:
         NcPhysicsImpl(const config::MemorySettings& memorySettings,
-                       const config::PhysicsSettings& physicsSettings,
-                       Registry* registry,
-                       const task::AsyncDispatcher& dispatcher,
-                       SystemEvents& events,
-                       std::unique_ptr<DeferredPhysicsCreateState> deferredState);
+                      const config::PhysicsSettings& physicsSettings,
+                      ecs::Ecs world,
+                      const task::AsyncDispatcher& dispatcher,
+                      SystemEvents& events,
+                      std::unique_ptr<DeferredPhysicsCreateState> deferredState);
 
         void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;

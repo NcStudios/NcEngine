@@ -59,7 +59,7 @@ auto BuildModuleRegistry(Registry* registry,
 
     moduleRegistry->Register(nc::BuildPhysicsModule(config.memorySettings,
                                                     config.physicsSettings,
-                                                    registry,
+                                                    registry->GetEcs(),
                                                     dispatcher,
                                                     events));
 
