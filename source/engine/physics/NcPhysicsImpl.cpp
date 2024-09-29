@@ -1,41 +1,35 @@
 #include "NcPhysicsImpl.h"
-#include "ncengine/Events.h"
+#include "EventDispatch.h"
+#include "jolt/Conversion.h"
+#include "jolt/ShapeFactory.h"
+
+#include "ncengine/debug/Profile.h"
 #include "ncengine/config/Config.h"
-#include "ncengine/physics/ConcaveCollider.h"
 #include "ncengine/time/Time.h"
 #include "ncengine/utility/Log.h"
 
 namespace
 {
-using namespace nc::physics;
-
-struct BspTreeStub
+[[maybe_unused]]
+auto RegisterDeferredCreateState(nc::ecs::Ecs world) -> std::unique_ptr<nc::physics::DeferredPhysicsCreateState>
 {
-    BspTreeStub(nc::Registry* registry)
-        : onAddConnection{registry->OnAdd<ConcaveCollider>().Connect(this, &BspTreeStub::OnAdd)},
-          onRemoveConnection{registry->OnRemove<ConcaveCollider>().Connect(this, &BspTreeStub::OnRemove)}
-    {
-    }
+    auto state = std::make_unique<nc::physics::DeferredPhysicsCreateState>();
+    auto& userData = world.GetPool<nc::RigidBody>().Handler().userData;
+    NC_ASSERT(!userData.has_value(), "Attempting to initialize RigidBody user data, but it already has a value");
+    userData = std::any{state.get()};
+    return state;
+}
 
-    void OnAdd(ConcaveCollider&) {}
-    void OnRemove(nc::Entity) {}
-    nc::Connection<ConcaveCollider&> onAddConnection;
-    nc::Connection<nc::Entity> onRemoveConnection;
-};
-
-class NcPhysicsStub : public nc::physics::NcPhysics
+class NcPhysicsStub : public nc::NcPhysics
 {
     public:
-        NcPhysicsStub(nc::Registry* reg) : m_bspStub{reg} {}
-        void AddJoint(nc::Entity, nc::Entity, const nc::Vector3&, const nc::Vector3&, float = 0.2f, float = 0.0f) override {}
-        void RemoveJoint(nc::Entity, nc::Entity) override {}
-        void RemoveAllJoints(nc::Entity) override {}
-        void RegisterClickable(IClickable*) override {}
-        void UnregisterClickable(IClickable*) noexcept override {}
-        auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr;}
+        NcPhysicsStub(std::unique_ptr<nc::physics::DeferredPhysicsCreateState> deferredState)
+            : m_deferredState{std::move(deferredState)}
+        {
+        }
+
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
-
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
             update.Add(
@@ -47,66 +41,70 @@ class NcPhysicsStub : public nc::physics::NcPhysics
         }
 
     private:
-        BspTreeStub m_bspStub;
+        std::unique_ptr<nc::physics::DeferredPhysicsCreateState> m_deferredState;
 };
 } // anonymous namespace
 
-namespace nc::physics
+namespace nc
 {
-#ifndef NC_USE_JOLT
-auto BuildPhysicsModule(const config::MemorySettings&,
-                        const config::PhysicsSettings& settings,
-                        Registry* registry,
-                        const task::AsyncDispatcher&,
+auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
+                        const config::PhysicsSettings& physicsSettings,
+                        ecs::Ecs world,
+                        const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
-    if(settings.enabled)
+    auto deferredState = RegisterDeferredCreateState(world);
+    if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl>(settings, registry, events);
+        return std::make_unique<physics::NcPhysicsImpl>(
+            memorySettings,
+            physicsSettings,
+            world,
+            dispatcher,
+            events,
+            std::move(deferredState)
+        );
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
-    return std::make_unique<NcPhysicsStub>(registry);
+    return std::make_unique<NcPhysicsStub>(std::move(deferredState));
 }
-#endif
 
-NcPhysicsImpl::NcPhysicsImpl(const config::PhysicsSettings&, Registry* registry, SystemEvents& events)
-    : m_pipeline{registry, 1.0f / 60.0f, events.rebuildStatics},
-      m_clickableSystem{},
-      m_accumulatedTime{0.0},
-      m_currentIterations{0u}
+namespace physics
+{
+NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
+                             const config::PhysicsSettings& physicsSettings,
+                             ecs::Ecs world,
+                             const task::AsyncDispatcher& dispatcher,
+                             SystemEvents&,
+                             std::unique_ptr<DeferredPhysicsCreateState> deferredState)
+    : m_ecs{world},
+      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
+      m_constraintManager{m_jolt.physicsSystem, memorySettings.maxTransforms},
+      m_bodyManager{
+        world.GetPool<Transform>(),
+        world.GetPool<RigidBody>(),
+        memorySettings.maxTransforms,
+        m_jolt.physicsSystem,
+        m_shapeFactory,
+        m_constraintManager
+      },
+      m_deferredState{std::move(deferredState)}
 {
 }
 
-void NcPhysicsImpl::AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias, float softness)
+void NcPhysicsImpl::Run()
 {
-    m_pipeline.GetJointSystem()->AddJoint(entityA, entityB, anchorA, anchorB, bias, softness);
-}
+    NC_PROFILE_TASK("NcPhysics::Run", ProfileCategory::Physics);
+    if (!m_updateEnabled)
+    {
+        return;
+    }
 
-void NcPhysicsImpl::RemoveJoint(Entity entityA, Entity entityB)
-{
-    m_pipeline.GetJointSystem()->RemoveJoint(entityA, entityB);
-}
-
-void NcPhysicsImpl::RemoveAllJoints(Entity entity)
-{
-    m_pipeline.GetJointSystem()->RemoveAllJoints(entity);
-}
-
-void NcPhysicsImpl::RegisterClickable(IClickable* clickable)
-{
-    m_clickableSystem.RegisterClickable(clickable);
-}
-
-void NcPhysicsImpl::UnregisterClickable(IClickable* clickable) noexcept
-{
-    m_clickableSystem.UnregisterClickable(clickable);
-}
-
-auto NcPhysicsImpl::RaycastToClickables(LayerMask mask) -> IClickable*
-{
-    return m_clickableSystem.RaycastToClickables(mask);
+    m_jolt.Update(time::DeltaTime());
+    SyncTransforms();
+    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
 }
 
 void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
@@ -115,16 +113,102 @@ void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTask
     update.Add(
         update_task_id::PhysicsPipeline,
         "PhysicsPipeline",
-        m_pipeline.BuildTaskGraph(update.GetExceptionContext()),
+        [this](){ this->Run(); },
         {update_task_id::FrameLogicUpdate}
     );
 }
 
+void NcPhysicsImpl::SyncTransforms()
+{
+    NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
+    for (auto& body : m_ecs.GetAll<RigidBody>())
+    {
+        if (body.GetBodyType() == BodyType::Static)
+        {
+            continue;
+        }
+
+        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
+        if (!apiBody->IsActive())
+        {
+            continue;
+        }
+
+        const auto position = ToXMVectorHomogeneous(apiBody->GetPosition());
+        const auto orientation = ToXMQuaternion(apiBody->GetRotation());
+        auto& transform = m_ecs.Get<Transform>(body.GetEntity());
+        transform.SetPositionAndRotationXM(position, orientation);
+    }
+}
+
+void NcPhysicsImpl::OnBeforeSceneLoad()
+{
+    m_bodyManager.DeferCleanup(false);
+}
+
+void NcPhysicsImpl::OnBeforeSceneFragmentLoad()
+{
+    BeginRigidBodyBatch();
+}
+
+void NcPhysicsImpl::OnAfterSceneFragmentLoad()
+{
+    EndRigidBodyBatch();
+}
+
 void NcPhysicsImpl::Clear() noexcept
 {
-    /** @todo make sure these are noexcept */
-
-    m_pipeline.Clear();
-    m_clickableSystem.Clear();
+    m_jolt.contactListener.Clear();
+    m_constraintManager.Clear();
+    m_bodyManager.Clear();
+    m_bodyManager.DeferCleanup(true);
 }
-} // namespace nc::physics
+
+void NcPhysicsImpl::BeginRigidBodyBatch(size_t bodyCountHint)
+{
+    NC_ASSERT(
+        m_deferredState->bodyBatchIndex == DeferredPhysicsCreateState::NullBatch &&
+        m_deferredState->constraintBatchIndex == DeferredPhysicsCreateState::NullBatch,
+        "RigidBody batch already in progress"
+    );
+
+    if (bodyCountHint != 0ull)
+    {
+        auto& pool = m_ecs.GetPool<RigidBody>();
+        pool.Reserve(pool.size() + bodyCountHint);
+    }
+
+    m_deferredState->bodyBatchIndex = m_bodyManager.BeginBatch(bodyCountHint);
+    m_deferredState->constraintBatchIndex = m_constraintManager.BeginBatch();
+}
+
+void NcPhysicsImpl::EndRigidBodyBatch()
+{
+    NC_ASSERT(
+        m_deferredState->bodyBatchIndex != DeferredPhysicsCreateState::NullBatch &&
+        m_deferredState->constraintBatchIndex != DeferredPhysicsCreateState::NullBatch,
+        "No RigidBody batch is in progress"
+    );
+
+    m_bodyManager.EndBatch(std::exchange(m_deferredState->bodyBatchIndex, DeferredPhysicsCreateState::NullBatch));
+
+    // Deserialization needs to queue constraints until all bodies exist. If the batch isn't from a scene fragment, this
+    // will be empty and any constraints will already be in the ConstraintManager, but not yet added to the simulation.
+    for (const auto& [ownerEntity, targetEntity, info] : m_deferredState->constraints)
+    {
+        auto& owner = m_ecs.Get<RigidBody>(ownerEntity);
+        if (targetEntity.Valid())
+        {
+            auto& target = m_ecs.Get<RigidBody>(targetEntity);
+            owner.AddConstraint(info, target);
+        }
+        else
+        {
+            owner.AddConstraint(info);
+        }
+    }
+
+    m_constraintManager.EndBatch(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
+}
+} // namespace physics
+} // namespace nc

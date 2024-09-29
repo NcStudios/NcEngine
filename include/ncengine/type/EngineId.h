@@ -22,25 +22,16 @@ constexpr size_t TransformId = 3ull;
 constexpr size_t MeshRendererId = 4ull;
 constexpr size_t ToonRendererId = 5ull;
 constexpr size_t PointLightId = 6ull;
-constexpr size_t SkeletalAnimatorId = 7ull;
-constexpr size_t ParticleEmitterId = 8ull;
-constexpr size_t ColliderId = 9ull;
-constexpr size_t ConcaveColliderId = 10ull;
-constexpr size_t PhysicsBodyId = 11ull;
+constexpr size_t SpotLightId = 7ull;
+constexpr size_t SkeletalAnimatorId = 8ull;
+constexpr size_t ParticleEmitterId = 9ull;
+constexpr size_t RigidBodyId = 10ull;
+constexpr size_t AudioSourceId = 11ull;
 constexpr size_t FrameLogicId = 12ull;
-constexpr size_t FixedLogicId = 13ull;
-constexpr size_t CollisionLogicId = 14ull;
-constexpr size_t AudioSourceId = 15ull;
-constexpr size_t NetworkDispatcherId = 16ull;
-constexpr size_t WireframeRendererId = 17ull;
-constexpr size_t HierarchyId = 18ull;
-constexpr size_t PhysicsMaterialId = 19ull;
-constexpr size_t VelocityRestrictionId = 20ull;
-constexpr size_t PositionClampId = 21ull;
-constexpr size_t SpotLightId = 22ull;
-constexpr size_t OrientationClampId = 23ull;
-constexpr size_t RigidBodyId = 24ull;
-constexpr size_t CollisionListenerId = 25ull;
+constexpr size_t CollisionListenerId = 13ull;
+constexpr size_t NetworkDispatcherId = 14ull;
+constexpr size_t WireframeRendererId = 15ull;
+constexpr size_t HierarchyId = 16ull;
 /** @} */
 
 /** @{ */

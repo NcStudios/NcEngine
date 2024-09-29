@@ -6,6 +6,7 @@ namespace nc::sample
 {
 /** Frame Logic */
 void WasdBasedMovement(Entity self, Registry* registry, float dt);
+void WasdBasedSimulatedBodyMovement(Entity self, Registry* registry, float dt);
 
 /** Collision Logic */
 void DestroyOnTriggerExit(Entity self, Entity hit, Registry* registry);

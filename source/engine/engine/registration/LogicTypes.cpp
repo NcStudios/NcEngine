@@ -13,23 +13,5 @@ void RegisterLogicTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         ui::editor::FrameLogicUIWidget,
         CreateFrameLogic
     );
-
-    Register<FixedLogic>(
-        registry,
-        maxEntities,
-        FixedLogicId,
-        "FixedLogic",
-        ui::editor::FixedLogicUIWidget,
-        CreateFixedLogic
-    );
-
-    Register<CollisionLogic>(
-        registry,
-        maxEntities,
-        CollisionLogicId,
-        "CollisionLogic",
-        ui::editor::CollisionLogicUIWidget,
-        CreateCollisionLogic
-    );
 }
 } // namespace nc

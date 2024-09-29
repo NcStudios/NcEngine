@@ -10,10 +10,7 @@
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
-#include "ncengine/physics/Collider.h"
 #include "ncengine/physics/Constraints.h"
-#include "ncengine/physics/PhysicsBody.h"
-#include "ncengine/physics/PhysicsMaterial.h"
 #include "ncengine/physics/RigidBody.h"
 
 namespace nc
@@ -21,16 +18,6 @@ namespace nc
 auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource
 {
     return audio::AudioSource{entity, {asset::DefaultAudioClip}};
-}
-
-auto CreateCollisionLogic(Entity entity, const std::any&) -> CollisionLogic
-{
-    return CollisionLogic{entity, nullptr, nullptr, nullptr, nullptr};
-}
-
-auto CreateFixedLogic(Entity entity, const std::any&) -> FixedLogic
-{
-    return FixedLogic{entity, nullptr};
 }
 
 auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic
@@ -73,45 +60,8 @@ auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDisp
     return net::NetworkDispatcher{entity};
 }
 
-auto CreateCollider(Entity entity, const std::any&) -> physics::Collider
+auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody
 {
-    return physics::Collider{entity, physics::BoxProperties{}};
-}
-
-auto CreateOrientationClamp(Entity, const std::any&) -> physics::OrientationClamp
-{
-    return physics::OrientationClamp{};
-}
-
-auto CreatePhysicsBody(Entity entity, const std::any& userData) -> physics::PhysicsBody
-{
-    auto registry = std::any_cast<ecs::ComponentRegistry*>(userData);
-    auto& transform = registry->GetPool<Transform>().Get(entity);
-    auto& colliderPool = registry->GetPool<physics::Collider>();
-    auto& collider = colliderPool.Contains(entity)
-        ? colliderPool.Get(entity)
-        : colliderPool.Emplace(entity, physics::BoxProperties{});
-
-    return physics::PhysicsBody{transform, collider};
-}
-
-auto CreatePhysicsMaterial(Entity, const std::any&) -> physics::PhysicsMaterial
-{
-    return physics::PhysicsMaterial{};
-}
-
-auto CreatePositionClamp(Entity, const std::any&) -> physics::PositionClamp
-{
-    return physics::PositionClamp{};
-}
-
-auto CreateVelocityRestriction(Entity, const std::any&) -> physics::VelocityRestriction
-{
-    return physics::VelocityRestriction{};
-}
-
-auto CreateRigidBody(Entity entity, const std::any&) -> physics::RigidBody
-{
-    return physics::RigidBody{entity};
+    return RigidBody{entity};
 }
 } // namespace nc

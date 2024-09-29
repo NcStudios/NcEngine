@@ -7,7 +7,7 @@
 #include "ncengine/physics/PhysicsLimits.h"
 #include "ncmath/Vector.h"
 
-namespace nc::physics
+namespace nc
 {
 /** @brief Options for Shape geometry. */
 enum class ShapeType : uint8_t
@@ -18,7 +18,7 @@ enum class ShapeType : uint8_t
 };
 
 /** @brief Get a valid scale for a shape given its current and desired scale values. */
-auto NormalizeScaleForShape(nc::physics::ShapeType shape,
+auto NormalizeScaleForShape(nc::ShapeType shape,
                             const Vector3& currentScale,
                             const Vector3& newScale) -> Vector3;
 
@@ -61,4 +61,4 @@ struct Shape
         Vector3 m_localScale;
         ShapeType m_type;
 };
-} // namespace nc::physics
+} // namespace nc

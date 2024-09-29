@@ -10,9 +10,12 @@
 #include "ncengine/physics/Shape.h"
 #include "ncengine/utility/MatrixUtilities.h"
 
-namespace nc::physics
+namespace nc
+{
+namespace physics
 {
 struct ComponentContext;
+} // namespace physics
 
 /** @brief Handle to internal RigidBody state. */
 using BodyHandle = void*;
@@ -246,23 +249,20 @@ class RigidBody
         auto IsInitialized() const noexcept -> bool { return m_handle; }
         auto GetHandle() const -> BodyHandle { return m_handle; }
         void SetHandle(BodyHandle handle) { m_handle = handle; }
-        static void SetContext(ComponentContext* ctx) { s_ctx = ctx; }
+        static void SetContext(physics::ComponentContext* ctx) { s_ctx = ctx; }
         /** @endcond */
 
     private:
-        inline static ComponentContext* s_ctx = nullptr;
+        inline static physics::ComponentContext* s_ctx = nullptr;
 
         Entity m_self;
         BodyHandle m_handle = nullptr;
         Shape m_shape;
         RigidBodyInfo m_info;
 };
-} // namespace nc::physics
 
-namespace nc
-{
 template<>
-struct StoragePolicy<physics::RigidBody> : DefaultStoragePolicy
+struct StoragePolicy<RigidBody> : DefaultStoragePolicy
 {
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnCommitCallbacks = false;
