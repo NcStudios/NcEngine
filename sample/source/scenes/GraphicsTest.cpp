@@ -253,10 +253,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     );
 
     world.Emplace<physics::CollisionListener>(skeleton)
-        .onTriggerEnter = [](Entity, Entity other, ecs::Ecs world){
-            auto& ogreAnim = world.Get<graphics::SkeletalAnimator>(other);
+        .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
+            auto& ogreAnim = ecs.Get<graphics::SkeletalAnimator>(other);
             ogreAnim.PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);
-            auto& tag = world.Get<Tag>(other);
+            auto& tag = ecs.Get<Tag>(other);
             GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
         };
 
