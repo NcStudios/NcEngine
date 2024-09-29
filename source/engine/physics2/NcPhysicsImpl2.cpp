@@ -55,7 +55,6 @@ class NcPhysicsStub2 : public nc::physics::NcPhysics
 
 namespace nc::physics
 {
-#ifdef NC_USE_JOLT
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         Registry* registry,
@@ -72,7 +71,6 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
     return std::make_unique<NcPhysicsStub2>(std::move(deferredState));
 }
-#endif
 
 NcPhysicsImpl2::NcPhysicsImpl2(const config::MemorySettings& memorySettings,
                                const config::PhysicsSettings& physicsSettings,

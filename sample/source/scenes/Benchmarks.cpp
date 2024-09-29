@@ -443,12 +443,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             spawnBehavior,
             [world](Entity entity) mutable {
                 world.Emplace<graphics::ToonRenderer>(entity, ::physics_body::Mesh, ::RandomToonMaterial());
-#ifdef NC_USE_JOLT
                 ::AddRigidBodyForMesh(world, entity, ::physics_body::Mesh);
-#else
-                auto& collider = ::AddColliderForMesh(world, entity, ::physics_body::Mesh);
-                world.Emplace<physics::PhysicsBody>(entity, world.Get<Transform>(entity), collider, physics::PhysicsProperties{.mass = 5.0f});
-#endif
             }
         );
 

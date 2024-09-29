@@ -9,12 +9,6 @@ option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
-# jolt feature flag
-option(NC_USE_JOLT "Enable JoltPhysics" OFF)
-if(NC_USE_JOLT)
-    add_definitions(-DNC_USE_JOLT)
-endif()
-
 # Variables
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

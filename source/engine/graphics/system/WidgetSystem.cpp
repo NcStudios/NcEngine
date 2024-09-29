@@ -155,7 +155,6 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
             }
             case WireframeSource::Collider:
             {
-#ifdef NC_USE_JOLT
                 if (!worldView.Contains<physics::RigidBody>(renderer.target))
                 {
                     renderer.target = Entity::Null();
@@ -165,16 +164,6 @@ auto WidgetSystem::Execute(ecs::ExplicitEcs<Transform,
                 const auto& body = worldView.Get<physics::RigidBody>(renderer.target);
                 const auto& shape = body.GetShape();
                 state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, shape, body.ScalesWithTransform()), GetMeshView(shape.GetType()), renderer.color);
-#else
-                if (!worldView.Contains<physics::Collider>(renderer.target))
-                {
-                    renderer.target = Entity::Null();
-                    continue;
-                }
-
-                const auto& info = worldView.Get<physics::Collider>(renderer.target).GetInfo();
-                state.wireframeData.emplace_back(CalculateWireframeMatrix(targetMatrix, info), GetMeshView(info.type), renderer.color);
-#endif
                 break;
             }
             case WireframeSource::Internal: std::unreachable();
