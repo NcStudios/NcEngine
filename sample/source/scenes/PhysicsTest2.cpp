@@ -847,7 +847,7 @@ void BuildTriggers(ecs::Ecs world)
     auto setPink = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            ECONNREFUSED.Get<graphics::WireframeRenderer>(self).color = pink;
+            ecs.Get<graphics::WireframeRenderer>(self).color = pink;
     };
 
     auto setWhite = [](Entity self, Entity other, ecs::Ecs ecs)
