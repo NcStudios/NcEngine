@@ -10,7 +10,7 @@ auto s_allocations = std::vector<void*>{};
 #define NC_FREE_HOOK(ptr) std::erase(s_allocations, ptr);
 #define NC_ALIGNED_FREE_HOOK(ptr) NC_FREE_HOOK(ptr);
 
-#include "physics2/jolt/JoltApi.h"
+#include "physics/jolt/JoltApi.h"
 
 TEST(PhysicsAllocatorTests, AllocateFunctions_succeed)
 {

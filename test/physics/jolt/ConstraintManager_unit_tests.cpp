@@ -1,6 +1,6 @@
 #include "JoltApiFixture.inl"
-#include "physics2/jolt/Conversion.h"
-#include "physics2/jolt/ConstraintManager.h"
+#include "physics/jolt/Conversion.h"
+#include "physics/jolt/ConstraintManager.h"
 
 #include "Jolt/Physics/Constraints/PointConstraint.h"
 

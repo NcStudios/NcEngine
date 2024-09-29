@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "JobSystem_stub.inl"
-#include "physics2/jolt/JoltApi.h"
+#include "physics/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
 
 constexpr auto g_memorySettings = nc::config::MemorySettings{};

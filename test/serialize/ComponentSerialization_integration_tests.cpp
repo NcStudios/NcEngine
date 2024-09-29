@@ -12,7 +12,7 @@
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "graphics/system/ParticleEmitterSystem.h"
-#include "physics2/DeferredPhysicsCreateState.h"
+#include "physics/DeferredPhysicsCreateState.h"
 
 #include "ncutility/ScopeExit.h"
 

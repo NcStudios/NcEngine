@@ -1,7 +1,7 @@
 #include "JoltApiFixture.inl"
-#include "physics2/jolt/ConstraintFactory.h"
+#include "physics/jolt/ConstraintFactory.h"
 
-#include "physics2/jolt/Conversion.h"
+#include "physics/jolt/Conversion.h"
 #include "ncutility/ScopeExit.h"
 
 #include "Jolt/Physics/Constraints/DistanceConstraint.h"

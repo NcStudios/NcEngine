@@ -1,7 +1,7 @@
 #include "JoltApiFixture.inl"
-#include "physics2/jolt/BodyManager.h"
-#include "physics2/jolt/ConstraintManager.h"
-#include "physics2/jolt/ShapeFactory.h"
+#include "physics/jolt/BodyManager.h"
+#include "physics/jolt/ConstraintManager.h"
+#include "physics/jolt/ShapeFactory.h"
 
 class BodyManagerTest : public JoltApiFixture
 {

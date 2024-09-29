@@ -9,7 +9,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
-#include "physics2/DeferredPhysicsCreateState.h"
+#include "physics/DeferredPhysicsCreateState.h"
 
 #include "ncutility/BinarySerialization.h"
 

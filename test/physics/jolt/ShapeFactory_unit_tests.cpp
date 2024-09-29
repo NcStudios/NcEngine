@@ -1,5 +1,5 @@
 #include "JoltApiFixture.inl"
-#include "physics2/jolt/ShapeFactory.h"
+#include "physics/jolt/ShapeFactory.h"
 
 class ShapeFactoryTest : public JoltApiFixture
 {

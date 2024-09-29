@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
-#include "physics2/jolt/ConstraintManager.h"
-#include "physics2/jolt/Profiler.inl"
+#include "physics/jolt/ConstraintManager.h"
+#include "physics/jolt/Profiler.inl"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/Body.h"

@@ -1,7 +1,7 @@
 ### Contacts Tests ###
 add_executable(Constraints_unit_tests
     Constraints_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics2/Constraints.cpp
+    ${NC_SOURCE_DIR}/physics/Constraints.cpp
 )
 
 target_include_directories(Constraints_unit_tests
@@ -52,7 +52,7 @@ add_test(Contacts_unit_tests Contacts_unit_tests)
 ### PhysicsUtility Tests ###
 add_executable(PhysicsUtility_unit_tests
     PhysicsUtility_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics2/PhysicsUtility.cpp
+    ${NC_SOURCE_DIR}/physics/PhysicsUtility.cpp
 )
 
 target_include_directories(PhysicsUtility_unit_tests
@@ -78,12 +78,12 @@ add_test(PhysicsUtility_unit_tests PhysicsUtility_unit_tests)
 add_executable(RigidBody_unit_tests
     RigidBody_unit_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/physics2/RigidBody.cpp
-    ${NC_SOURCE_DIR}/physics2/Shape.cpp
-    ${NC_SOURCE_DIR}/physics2/jolt/BodyFactory.cpp
-    ${NC_SOURCE_DIR}/physics2/jolt/ConstraintFactory.cpp
-    ${NC_SOURCE_DIR}/physics2/jolt/ConstraintManager.cpp
-    ${NC_SOURCE_DIR}/physics2/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/RigidBody.cpp
+    ${NC_SOURCE_DIR}/physics/Shape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/BodyFactory.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ConstraintManager.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
 )
 
 target_include_directories(RigidBody_unit_tests
@@ -110,7 +110,7 @@ add_test(RigidBody_unit_tests RigidBody_unit_tests)
 ### Shape Tests ###
 add_executable(Shape_unit_tests
     Shape_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics2/Shape.cpp
+    ${NC_SOURCE_DIR}/physics/Shape.cpp
 )
 
 target_include_directories(Shape_unit_tests

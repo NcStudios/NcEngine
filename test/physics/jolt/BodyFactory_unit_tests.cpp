@@ -1,6 +1,6 @@
 #include "JoltApiFixture.inl"
-#include "physics2/jolt/BodyFactory.h"
-#include "physics2/jolt/ShapeFactory.h"
+#include "physics/jolt/BodyFactory.h"
+#include "physics/jolt/ShapeFactory.h"
 #include "ncengine/physics/RigidBody.h"
 
 class BodyFactoryTest : public JoltApiFixture

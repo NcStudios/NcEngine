@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "physics2/jolt/Layers.h"
+#include "physics/jolt/Layers.h"
 
 constexpr auto g_staticObject = nc::physics::ObjectLayer::Static;
 constexpr auto g_dynamicObject = nc::physics::ObjectLayer::Dynamic;

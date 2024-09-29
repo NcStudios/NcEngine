@@ -2,7 +2,7 @@
 #include "ContactListener_stub.inl"
 #include "JobSystem_stub.inl"
 #include "ncengine/config/Config.h"
-#include "physics2/jolt/JoltApi.h"
+#include "physics/jolt/JoltApi.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"

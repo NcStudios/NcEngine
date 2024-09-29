@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "physics2/jolt/Conversion.h"
+#include "physics/jolt/Conversion.h"
 
 TEST(JoltConversionTest, XMVector3_roundTrip_preservesValue)
 {

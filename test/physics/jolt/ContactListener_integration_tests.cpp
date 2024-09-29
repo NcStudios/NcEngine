@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "JobSystem_stub.inl"
-#include "physics2/jolt/ContactListener.h"
-#include "physics2/jolt/Conversion.h"
-#include "physics2/jolt/JoltApi.h"
+#include "physics/jolt/ContactListener.h"
+#include "physics/jolt/Conversion.h"
+#include "physics/jolt/JoltApi.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/physics/RigidBody.h"
 
