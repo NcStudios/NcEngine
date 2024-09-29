@@ -2,6 +2,7 @@
 #include "SpawnPropertyGenerator.h"
 #include "shared/Prefabs.h"
 
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/math/Random.h"
 
 #include <functional>
@@ -23,11 +24,11 @@ class Spawner : public FreeComponent
                 SpawnBehavior behavior,
                 SpawnExtension extension = nullptr,
                 PrePostOp prePostSpawn = nullptr);
-        void Run(Entity, Registry*, float);
+        void Run(Entity, ecs::Ecs world, float);
         void StageSpawn(unsigned count = 1u);
-        void Spawn(Registry* registry, unsigned count = 1u);
+        void Spawn(ecs::Ecs world, unsigned count = 1u);
         void StageDestroy(unsigned count = 1u);
-        void Destroy(Registry* registry, unsigned count = 1u);
+        void Destroy(ecs::Ecs world, unsigned count = 1u);
         const std::vector<Entity>& GetHandles() const;
         int GetObjectCount() const;
 
@@ -59,20 +60,20 @@ inline Spawner::Spawner(Entity entity,
 {
 }
 
-inline void Spawner::Run(Entity, Registry* registry, float)
+inline void Spawner::Run(Entity, ecs::Ecs world, float)
 {
     // Additions/Deletions are delayed until FrameUpdate because Spawn/Destroy are
     // callbacks from ui events, and modifying state in the middle of rendering can
     // cause problems.
     if(m_stagedAdditions)
     {
-        Spawn(registry, m_stagedAdditions);
+        Spawn(world, m_stagedAdditions);
         m_stagedAdditions = 0u;
     }
 
     if(m_stagedDeletions)
     {
-        Destroy(registry, m_stagedDeletions);
+        Destroy(world, m_stagedDeletions);
         m_stagedDeletions = 0u;
     }
 }
@@ -82,14 +83,14 @@ inline void Spawner::StageSpawn(unsigned count)
     m_stagedAdditions = count;
 }
 
-inline void Spawner::Spawn(Registry* registry, unsigned count)
+inline void Spawner::Spawn(ecs::Ecs world, unsigned count)
 {
     if (m_prePostSpawn)
         m_prePostSpawn(true, count);
 
-    std::generate_n(std::back_inserter(m_entities), count, [this, registry]()
+    std::generate_n(std::back_inserter(m_entities), count, [this, &world]()
     {
-        const auto handle = registry->Add<Entity>({
+        const auto handle = world.Emplace<Entity>({
             .position = m_generator.Position(),
             .rotation = Quaternion::FromEulerAngles(m_generator.Rotation()),
             .layer = m_layer,
@@ -111,11 +112,11 @@ inline void Spawner::StageDestroy(unsigned count)
     m_stagedDeletions = count;
 }
 
-inline void Spawner::Destroy(Registry* registry, unsigned count)
+inline void Spawner::Destroy(ecs::Ecs world, unsigned count)
 {
     while(!m_entities.empty() && count--)
     {
-        registry->Remove<Entity>(m_entities.back());
+        world.Remove<Entity>(m_entities.back());
         m_entities.pop_back();
     }
 }

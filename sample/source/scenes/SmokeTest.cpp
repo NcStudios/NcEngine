@@ -68,7 +68,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),
-        [world, modules, quit = m_quitEngine](Entity, Registry*, float) mutable
+        [world, modules, quit = m_quitEngine](Entity, ecs::Ecs, float) mutable
         {
             static auto framesRun = 0ull;
             constexpr auto framesUntilSceneChange = 60ull;

@@ -4,16 +4,15 @@
  */
 #pragma once
 
-#include "Component.h"
+#include "ncengine/ecs/Component.h"
+#include "ncengine/ecs/Ecs.h"
 
 #include <functional>
 
 namespace nc
 {
-class Registry;
-
 /** @brief FrameLogic callable member type */
-using FrameLogicCallable_t = std::function<void(Entity self, Registry* registry, float dt)>;
+using FrameLogicCallable_t = std::function<void(Entity self, ecs::Ecs world, float dt)>;
 
 /** @brief FrameLogic callable type requirements */
 template<class Func>
@@ -37,9 +36,9 @@ class FrameLogic final : public ComponentBase
             m_func = std::forward<Func>(func);
         }
 
-        void Run(Registry* registry, float dt)
+        void Run(ecs::Ecs world, float dt)
         {
-            if(m_func) m_func(ParentEntity(), registry, dt);
+            if(m_func) m_func(ParentEntity(), world, dt);
         }
 
     private:

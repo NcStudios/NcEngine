@@ -1,5 +1,5 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
-#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/window/Window.h"
 
@@ -33,13 +33,13 @@ SceneNavigationCamera::SceneNavigationCamera(Entity entity,
 {
 }
 
-void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
+void SceneNavigationCamera::Run(Entity self, ecs::Ecs world, float dt)
 {
     if (!m_enabled)
         return;
 
     const auto& [truckPedestalSpeed, panTiltSpeed, dollySpeed] = KeyHeld(Key::Speed) ? m_coarseSpeed : m_fineSpeed;
-    auto* transform = registry->Get<Transform>(self);
+    auto& transform = world.Get<Transform>(self);
     auto translation = Dolly(dt, dollySpeed);
 
     if(HandlePanInput())
@@ -47,11 +47,11 @@ void SceneNavigationCamera::Run(Entity self, Registry* registry, float dt)
         translation += TruckAndPedestal(dt, truckPedestalSpeed);
     }
 
-    transform->TranslateLocalSpace(translation);
+    transform.TranslateLocalSpace(translation);
 
     if(HandleLookInput())
     {
-        transform->Rotate(PanAndTilt(dt, panTiltSpeed, transform->Right()));
+        transform.Rotate(PanAndTilt(dt, panTiltSpeed, transform.Right()));
     }
 }
 

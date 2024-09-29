@@ -63,10 +63,10 @@ void EcsModule::RunFrameLogic()
 {
     NC_PROFILE_TASK("RunFrameLogic", ProfileCategory::GameLogic);
     const float dt = time::DeltaTime();
-    auto legacyRegistry = Registry{*m_registry};
+    auto world = ecs::Ecs{*m_registry};
     for(auto& logic : m_registry->GetPool<FrameLogic>().GetComponents())
     {
-        logic.Run(&legacyRegistry, dt);
+        logic.Run(world, dt);
     }
 }
 
