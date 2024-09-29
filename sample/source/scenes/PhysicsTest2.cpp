@@ -844,16 +844,16 @@ void BuildTriggers(ecs::Ecs world)
     world.Emplace<physics::RigidBody>(sphere, physics::Shape::MakeSphere(), info);
     world.Emplace<physics::RigidBody>(capsule, physics::Shape::MakeCapsule(), info);
 
-    auto setPink = [](Entity self, Entity other, ecs::Ecs world)
+    auto setPink = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            world.Get<graphics::WireframeRenderer>(self).color = pink;
+            ECONNREFUSED.Get<graphics::WireframeRenderer>(self).color = pink;
     };
 
-    auto setWhite = [](Entity self, Entity other, ecs::Ecs world)
+    auto setWhite = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            world.Get<graphics::WireframeRenderer>(self).color = white;
+            ecs.Get<graphics::WireframeRenderer>(self).color = white;
     };
 
     world.Emplace<physics::CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
