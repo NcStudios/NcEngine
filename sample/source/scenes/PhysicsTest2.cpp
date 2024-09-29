@@ -256,11 +256,11 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
         bodyNode3
     );
 
-    static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs world)
+    static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs ecs)
     {
         static const auto deletedTag = std::string{"deleted"};
-        const auto& tag = world.Contains<Tag>(other)
-            ? world.Get<Tag>(other).value
+        const auto& tag = ecs.Contains<Tag>(other)
+            ? ecs.Get<Tag>(other).value
             : deletedTag;
 
         GameLog::Log(fmt::format("Player {} with {} ({})", eventType, tag, other.Index()));
