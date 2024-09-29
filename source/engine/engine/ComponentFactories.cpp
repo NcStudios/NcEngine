@@ -60,8 +60,8 @@ auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDisp
     return net::NetworkDispatcher{entity};
 }
 
-auto CreateRigidBody(Entity entity, const std::any&) -> physics::RigidBody
+auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody
 {
-    return physics::RigidBody{entity};
+    return RigidBody{entity};
 }
 } // namespace nc

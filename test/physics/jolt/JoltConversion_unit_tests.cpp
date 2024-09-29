@@ -58,29 +58,29 @@ TEST(JoltConversionTest, ToMotionQuality_convertsValue)
 
 TEST(JoltConversionTest, ToMotionType_convertsBodyType)
 {
-    EXPECT_EQ(JPH::EMotionType::Dynamic, ToMotionType(nc::physics::BodyType::Dynamic));
-    EXPECT_EQ(JPH::EMotionType::Static, ToMotionType(nc::physics::BodyType::Static));
-    EXPECT_EQ(JPH::EMotionType::Kinematic, ToMotionType(nc::physics::BodyType::Kinematic));
+    EXPECT_EQ(JPH::EMotionType::Dynamic, nc::physics::ToMotionType(nc::BodyType::Dynamic));
+    EXPECT_EQ(JPH::EMotionType::Static, nc::physics::ToMotionType(nc::BodyType::Static));
+    EXPECT_EQ(JPH::EMotionType::Kinematic, nc::physics::ToMotionType(nc::BodyType::Kinematic));
 }
 
 TEST(JoltConversionTest, ToObjectLayer_determinesLayer)
 {
-    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Dynamic, false));
-    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, ToObjectLayer(nc::physics::BodyType::Kinematic, false));
-    EXPECT_EQ(nc::physics::ObjectLayer::Static, ToObjectLayer(nc::physics::BodyType::Static, false));
-    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Dynamic, true));
-    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Kinematic, true));
-    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, ToObjectLayer(nc::physics::BodyType::Static, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, nc::physics::ToObjectLayer(nc::BodyType::Dynamic, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, nc::physics::ToObjectLayer(nc::BodyType::Kinematic, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Static, nc::physics::ToObjectLayer(nc::BodyType::Static, false));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, nc::physics::ToObjectLayer(nc::BodyType::Dynamic, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, nc::physics::ToObjectLayer(nc::BodyType::Kinematic, true));
+    EXPECT_EQ(nc::physics::ObjectLayer::Trigger, nc::physics::ToObjectLayer(nc::BodyType::Static, true));
 }
 
 TEST(JoltConversionTest, ToSpringSettings_convertsSettings)
 {
-    const auto expected = nc::physics::SpringSettings{
+    const auto expected = nc::SpringSettings{
         .frequency = 10.0f,
         .damping = 1.0f
     };
 
-    const auto actual = ToSpringSettings(expected);
+    const auto actual = nc::physics::ToSpringSettings(expected);
     EXPECT_EQ(JPH::ESpringMode::FrequencyAndDamping, actual.mMode);
     EXPECT_FLOAT_EQ(expected.frequency, actual.mFrequency);
     EXPECT_FLOAT_EQ(expected.damping, actual.mDamping);
@@ -97,13 +97,13 @@ TEST(JoltConversionTest, ToAllowedDOFs_convertsFlags)
                                  JPH::EAllowedDOFs::RotationY |
                                  JPH::EAllowedDOFs::RotationZ;
 
-    EXPECT_EQ(JPH::EAllowedDOFs::All, ToAllowedDOFs(DegreeOfFreedom::All));
-    EXPECT_EQ(JPH::EAllowedDOFs::TranslationX, ToAllowedDOFs(DegreeOfFreedom::TranslationX));
-    EXPECT_EQ(JPH::EAllowedDOFs::TranslationY, ToAllowedDOFs(DegreeOfFreedom::TranslationY));
-    EXPECT_EQ(JPH::EAllowedDOFs::TranslationZ, ToAllowedDOFs(DegreeOfFreedom::TranslationZ));
-    EXPECT_EQ(allTranslation, ToAllowedDOFs(DegreeOfFreedom::Translation));
-    EXPECT_EQ(JPH::EAllowedDOFs::RotationX, ToAllowedDOFs(DegreeOfFreedom::RotationX));
-    EXPECT_EQ(JPH::EAllowedDOFs::RotationY, ToAllowedDOFs(DegreeOfFreedom::RotationY));
-    EXPECT_EQ(JPH::EAllowedDOFs::RotationZ, ToAllowedDOFs(DegreeOfFreedom::RotationZ));
-    EXPECT_EQ(allRotation, ToAllowedDOFs(DegreeOfFreedom::Rotation));
+    EXPECT_EQ(JPH::EAllowedDOFs::All, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::All));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationX, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::TranslationX));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationY, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::TranslationY));
+    EXPECT_EQ(JPH::EAllowedDOFs::TranslationZ, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::TranslationZ));
+    EXPECT_EQ(allTranslation, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::Translation));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationX, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::RotationX));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationY, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::RotationY));
+    EXPECT_EQ(JPH::EAllowedDOFs::RotationZ, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::RotationZ));
+    EXPECT_EQ(allRotation, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::Rotation));
 }

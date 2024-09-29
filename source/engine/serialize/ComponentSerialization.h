@@ -22,6 +22,6 @@ void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, co
 auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::SpotLight;
 void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::ToonRenderer;
-void SerializeRigidBody(std::ostream& stream, const physics::RigidBody& out, const SerializationContext&, const std::any&);
-auto DeserializeRigidBody(std::istream& stream, const DeserializationContext&, const std::any&) -> physics::RigidBody;
+void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const SerializationContext&, const std::any&);
+auto DeserializeRigidBody(std::istream& stream, const DeserializationContext&, const std::any&) -> RigidBody;
 } // namespace nc

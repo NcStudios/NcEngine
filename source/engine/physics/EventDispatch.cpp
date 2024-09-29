@@ -9,9 +9,9 @@ namespace
 void Dispatch(auto&& memberCallback,
               nc::Entity target,
               nc::Entity other,
-              const nc::physics::HitInfo& hit,
+              const nc::HitInfo& hit,
               nc::ecs::Ecs& world,
-              nc::ecs::ComponentPool<nc::physics::CollisionListener>& pool)
+              nc::ecs::ComponentPool<nc::CollisionListener>& pool)
 {
     if (target.ReceivesCollisionEvents() && pool.Contains(target))
     {
@@ -27,7 +27,7 @@ void Dispatch(auto&& memberCallback,
               nc::Entity target,
               nc::Entity other,
               nc::ecs::Ecs& world,
-              nc::ecs::ComponentPool<nc::physics::CollisionListener>& pool)
+              nc::ecs::ComponentPool<nc::CollisionListener>& pool)
 {
     if (target.ReceivesCollisionEvents() && pool.Contains(target))
     {
@@ -42,7 +42,7 @@ void Dispatch(auto&& memberCallback,
 void Dispatch(auto&& callback,
               std::span<const nc::physics::CollisionPair> events,
               nc::ecs::Ecs& world,
-              nc::ecs::ComponentPool<nc::physics::CollisionListener>& pool)
+              nc::ecs::ComponentPool<nc::CollisionListener>& pool)
 {
     for (const auto& [overlapping, hit] : events)
     {
@@ -54,7 +54,7 @@ void Dispatch(auto&& callback,
 void Dispatch(auto&& callback,
               std::span<const nc::physics::OverlappingPair> events,
               nc::ecs::Ecs& world,
-              nc::ecs::ComponentPool<nc::physics::CollisionListener>& pool)
+              nc::ecs::ComponentPool<nc::CollisionListener>& pool)
 {
     for (const auto& [_, first, second] : events)
     {

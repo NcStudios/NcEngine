@@ -20,8 +20,10 @@ auto ToActivationMode(bool wake) -> JPH::EActivation
 }
 } // anonymous namespace
 
-namespace nc::physics
+namespace nc
 {
+using namespace nc::physics;
+
 void RigidBody::SetBodyType(BodyType type, bool wake)
 {
     if (m_self.IsStatic())
@@ -283,4 +285,4 @@ auto RigidBody::SetSimulatedBodyScale(Transform& transform,
     transform.SetScale(appliedScale);
     return appliedScale;
 }
-} // namespace nc::physics
+} // namespace nc

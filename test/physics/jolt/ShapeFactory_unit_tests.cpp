@@ -9,7 +9,7 @@ class ShapeFactoryTest : public JoltApiFixture
 
 TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)
 {
-    const auto inShape = nc::physics::Shape::MakeBox(nc::Vector3{1.0f, 2.0f, 3.0f}, nc::Vector3::Zero());
+    const auto inShape = nc::Shape::MakeBox(nc::Vector3{1.0f, 2.0f, 3.0f}, nc::Vector3::Zero());
     const auto wrappedShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
 
     ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
@@ -32,7 +32,7 @@ TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)
 TEST_F(ShapeFactoryTest, MakeShape_box_withTransformScaling_returnsBoxShape)
 {
     const auto transformScale = nc::Vector3{2.0f, 2.0f, 2.0f};
-    const auto inShape = nc::physics::Shape::MakeBox(nc::Vector3{2.0f, 2.0f, 2.0f}, nc::Vector3{0.0f, 1.0f, 0.0f});
+    const auto inShape = nc::Shape::MakeBox(nc::Vector3{2.0f, 2.0f, 2.0f}, nc::Vector3{0.0f, 1.0f, 0.0f});
     const auto wrappedShape = uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale));
 
     ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
@@ -55,7 +55,7 @@ TEST_F(ShapeFactoryTest, MakeShape_box_withTransformScaling_returnsBoxShape)
 
 TEST_F(ShapeFactoryTest, MakeShape_sphere_returnsBoxShape)
 {
-    const auto inShape = nc::physics::Shape::MakeSphere(0.75, nc::Vector3::Zero());
+    const auto inShape = nc::Shape::MakeSphere(0.75, nc::Vector3::Zero());
     const auto wrappedShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
 
     ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
@@ -79,7 +79,7 @@ TEST_F(ShapeFactoryTest, MakeShape_sphere_returnsBoxShape)
 TEST_F(ShapeFactoryTest, MakeShape_sphere_withTransformScaling_returnsBoxShape)
 {
     const auto transformScale = nc::Vector3{2.0f, 2.0f, 2.0f};
-    const auto inShape = nc::physics::Shape::MakeSphere(0.75, nc::Vector3{1.0f, 2.0f, 3.0f});
+    const auto inShape = nc::Shape::MakeSphere(0.75, nc::Vector3{1.0f, 2.0f, 3.0f});
     const auto wrappedShape = uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale));
 
     ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());

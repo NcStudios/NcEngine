@@ -81,7 +81,7 @@ void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
     ctx.selectedEntity = entity;
     ctx.world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
     ctx.world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
-        (entity.Valid() && ctx.world.Contains<physics::RigidBody>(entity))
+        (entity.Valid() && ctx.world.Contains<RigidBody>(entity))
         ? entity
         : Entity::Null();
 }

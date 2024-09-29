@@ -9,9 +9,9 @@ namespace
 auto ClampScale(const nc::Vector3& out) -> nc::Vector3
 {
     return nc::Vector3{
-        nc::Clamp(out.x, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale),
-        nc::Clamp(out.y, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale),
-        nc::Clamp(out.z, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale)
+        nc::Clamp(out.x, nc::g_minShapeScale, nc::g_maxShapeScale),
+        nc::Clamp(out.y, nc::g_minShapeScale, nc::g_maxShapeScale),
+        nc::Clamp(out.z, nc::g_minShapeScale, nc::g_maxShapeScale)
     };
 }
 
@@ -41,20 +41,20 @@ void FixCapsuleScale(const nc::Vector3& current, nc::Vector3& desired)
 }
 } // anonymous namespace
 
-namespace nc::physics
+namespace nc
 {
-auto NormalizeScaleForShape(nc::physics::ShapeType shape,
+auto NormalizeScaleForShape(ShapeType shape,
                             const Vector3& currentScale,
                             const Vector3& newScale) -> Vector3
 {
     auto allowedScale = ClampScale(newScale);
     switch (shape)
     {
-        case nc::physics::ShapeType::Box:
+        case ShapeType::Box:
         {
             break;
         }
-        case nc::physics::ShapeType::Sphere:
+        case ShapeType::Sphere:
         {
             if (!HasUniformElements(allowedScale))
             {
@@ -63,7 +63,7 @@ auto NormalizeScaleForShape(nc::physics::ShapeType shape,
 
             break;
         }
-        case nc::physics::ShapeType::Capsule:
+        case ShapeType::Capsule:
         {
             if (!FloatEqual(allowedScale.x, allowedScale.z))
             {
@@ -81,4 +81,4 @@ auto NormalizeScaleForShape(nc::physics::ShapeType shape,
 
     return allowedScale;
 }
-} // namespace nc::physics
+} // namespace nc

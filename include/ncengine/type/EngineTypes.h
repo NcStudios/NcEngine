@@ -40,8 +40,8 @@ REGISTER_TYPE(graphics::PointLight);
 REGISTER_TYPE(graphics::SkeletalAnimator);
 REGISTER_TYPE(graphics::SpotLight);
 REGISTER_TYPE(net::NetworkDispatcher);
-REGISTER_TYPE(physics::CollisionListener);
-REGISTER_TYPE(physics::Constraint);
-REGISTER_TYPE(physics::RigidBody);
-REGISTER_TYPE(physics::Shape);
+REGISTER_TYPE(CollisionListener);
+REGISTER_TYPE(Constraint);
+REGISTER_TYPE(RigidBody);
+REGISTER_TYPE(Shape);
 } // namespace nc::type

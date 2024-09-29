@@ -25,7 +25,7 @@ void WasdBasedSimulatedBodyMovement(Entity self, Registry* registry, float dt)
     auto e = KeyHeld(input::KeyCode::E);
     auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * speed * dt;
     auto transform = registry->Get<Transform>(self);
-    registry->Get<physics::RigidBody>(self)->SetSimulatedBodyPosition(
+    registry->Get<RigidBody>(self)->SetSimulatedBodyPosition(
         *transform,
         transform->Position() + Vector3{leftRight, upDown, frontBack}
     );

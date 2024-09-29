@@ -18,6 +18,6 @@ void SpotLightUIWidget(graphics::SpotLight&, EditorContext&, const std::any&) {}
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, EditorContext&, const std::any&) {}
 void ToonRendererUIWidget(graphics::ToonRenderer&, EditorContext&, const std::any&) {}
 void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const std::any&) {}
-void CollisionListenerUIWidget(physics::CollisionListener&, EditorContext&, const std::any&) {}
-void RigidBodyUIWidget(physics::RigidBody&, EditorContext&, const std::any&) {}
+void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&) {}
+void RigidBodyUIWidget(RigidBody&, EditorContext&, const std::any&) {}
 } // namespace nc::ui::editor

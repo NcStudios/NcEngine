@@ -53,7 +53,7 @@ constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetalli
 
 namespace rigid_body_ext
 {
-using T = nc::physics::RigidBody;
+using T = nc::RigidBody;
 
 constexpr bool (T::*getIgnoreTransformScaling)() const    = &T::IgnoreTransformScaling;
 constexpr void (T::*setIgnoreTransformScaling)(bool)      = &T::IgnoreTransformScaling;
@@ -62,13 +62,13 @@ constexpr void (T::*setUseContinuousDetection)(bool)   = &T::UseContinuousDetect
 
 constexpr auto getBodyType = [](auto& body)
 {
-    const auto strView = nc::physics::ToString(body.GetBodyType());
+    const auto strView = nc::ToString(body.GetBodyType());
     return std::string{strView};
 };
 
 constexpr auto setBodyType = [](auto& body, auto& bodyTypeStr)
 {
-    body.SetBodyType(nc::physics::ToBodyType(bodyTypeStr));
+    body.SetBodyType(nc::ToBodyType(bodyTypeStr));
 };
 
 constexpr auto awakeProp                  = nc::ui::Property{ &T::IsAwake,               &T::SetAwakeState,         "awake"                  };
@@ -83,51 +83,51 @@ constexpr auto triggerProp                = nc::ui::Property{ &T::IsTrigger,    
 constexpr auto scalesWithTransformProp    = nc::ui::Property{ getIgnoreTransformScaling, setIgnoreTransformScaling, "ignoreTransformScaling" };
 constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"     };
 
-void BoxProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+void BoxProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
 {
     const auto& shape = body.GetShape();
     auto extents = shape.GetLocalScale();
     auto position = shape.GetLocalPosition();
-    const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
+    const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::g_minShapeScale, nc::g_maxShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (positionModified || extentsModified)
     {
-        body.SetShape(nc::physics::Shape::MakeBox(extents, position), transformScale);
+        body.SetShape(nc::Shape::MakeBox(extents, position), transformScale);
     }
 }
 
-void SphereProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+void SphereProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
 {
     const auto& shape = body.GetShape();
     auto radius = shape.GetLocalScale().x * 0.5f;
     auto position = shape.GetLocalPosition();
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::g_minShapeScale, nc::g_maxShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (radiusModified | positionModified)
     {
-        body.SetShape(nc::physics::Shape::MakeSphere(radius, position), transformScale);
+        body.SetShape(nc::Shape::MakeSphere(radius, position), transformScale);
     }
 }
 
-void CapsuleProperties(nc::physics::RigidBody& body, const nc::Vector3& transformScale)
+void CapsuleProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
 {
     const auto& shape = body.GetShape();
     const auto& scale = shape.GetLocalScale();
     auto height = scale.y * 2.0f;
     auto radius = scale.x * 0.5f;
     auto position = shape.GetLocalPosition();
-    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
-    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::physics::g_minShapeScale, nc::physics::g_maxShapeScale);
+    const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::g_minShapeScale, nc::g_maxShapeScale);
+    const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::g_minShapeScale, nc::g_maxShapeScale);
     const auto positionModified = nc::ui::InputPosition(position, "position");
     if (heightModified | radiusModified | positionModified)
     {
-        body.SetShape(nc::physics::Shape::MakeCapsule(height, radius, position), transformScale);
+        body.SetShape(nc::Shape::MakeCapsule(height, radius, position), transformScale);
     }
 }
 
-void DegreesOfFreedomWidget(nc::physics::RigidBody& body)
+void DegreesOfFreedomWidget(nc::RigidBody& body)
 {
-    using nc::physics::DegreeOfFreedom;
+    using nc::DegreeOfFreedom;
     auto dof = body.GetDegreesOfFreedom();
     auto modified = false;
     auto flagBox = [&dof, &modified](DegreeOfFreedom::Type flag, const char* label)
@@ -157,36 +157,34 @@ void DegreesOfFreedomWidget(nc::physics::RigidBody& body)
     }
 }
 
-void UpdateConstraintType(nc::physics::Constraint& constraint, nc::physics::ConstraintType type)
+void UpdateConstraintType(nc::Constraint& constraint, nc::ConstraintType type)
 {
-    using namespace nc::physics;
-
     switch (type)
     {
-        case ConstraintType::FixedConstraint:
-            constraint.GetInfo() = FixedConstraintInfo{};
+        case nc::ConstraintType::FixedConstraint:
+            constraint.GetInfo() = nc::FixedConstraintInfo{};
             break;
-        case ConstraintType::PointConstraint:
-            constraint.GetInfo() = PointConstraintInfo{};
+        case nc::ConstraintType::PointConstraint:
+            constraint.GetInfo() = nc::PointConstraintInfo{};
             break;
-        case ConstraintType::DistanceConstraint:
-            constraint.GetInfo() = DistanceConstraintInfo{};
+        case nc::ConstraintType::DistanceConstraint:
+            constraint.GetInfo() = nc::DistanceConstraintInfo{};
             break;
-        case ConstraintType::HingeConstraint:
-            constraint.GetInfo() = HingeConstraintInfo{};
+        case nc::ConstraintType::HingeConstraint:
+            constraint.GetInfo() = nc::HingeConstraintInfo{};
             break;
-        case ConstraintType::SliderConstraint:
-            constraint.GetInfo() = SliderConstraintInfo{};
+        case nc::ConstraintType::SliderConstraint:
+            constraint.GetInfo() = nc::SliderConstraintInfo{};
             break;
-        case ConstraintType::SwingTwistConstraint:
-            constraint.GetInfo() = SwingTwistConstraintInfo{};
+        case nc::ConstraintType::SwingTwistConstraint:
+            constraint.GetInfo() = nc::SwingTwistConstraintInfo{};
             break;
     }
 
     constraint.NotifyUpdateInfo();
 }
 
-void ConstraintTargetWidget(nc::physics::Constraint& constraint, nc::Entity self, nc::ecs::Ecs world)
+void ConstraintTargetWidget(nc::Constraint& constraint, nc::Entity self, nc::ecs::Ecs world)
 {
     constexpr auto nullTargetName = std::string_view{"Null"};
     const auto target = constraint.GetConstraintTarget();
@@ -208,9 +206,9 @@ void ConstraintTargetWidget(nc::physics::Constraint& constraint, nc::Entity self
             if (tagPos != tags.end())
             {
                 auto newTarget = tagPool.GetParent(&*tagPos);
-                if (world.Contains<nc::physics::RigidBody>(newTarget))
+                if (world.Contains<nc::RigidBody>(newTarget))
                 {
-                    constraint.SetConstraintTarget(&world.Get<nc::physics::RigidBody>(newTarget));
+                    constraint.SetConstraintTarget(&world.Get<nc::RigidBody>(newTarget));
                 }
             }
         }
@@ -218,14 +216,14 @@ void ConstraintTargetWidget(nc::physics::Constraint& constraint, nc::Entity self
 
     nc::ui::DragAndDropTarget<nc::Entity>([&constraint, self, &world](nc::Entity* source)
     {
-        if (*source != self && world.Contains<nc::physics::RigidBody>(*source))
+        if (*source != self && world.Contains<nc::RigidBody>(*source))
         {
-            constraint.SetConstraintTarget(&world.Get<nc::physics::RigidBody>(*source));
+            constraint.SetConstraintTarget(&world.Get<nc::RigidBody>(*source));
         }
     });
 }
 
-auto SpringSettingsWidget(nc::physics::SpringSettings& settings) -> bool
+auto SpringSettingsWidget(nc::SpringSettings& settings) -> bool
 {
     auto dirty = nc::ui::DragFloat(settings.frequency, "springFrequency", 0.1f, 0.0f, 30.0f);
     dirty = nc::ui::DragFloat(settings.damping, "springDamping", 0.05f, 0.0f, 5.0f) || dirty;
@@ -267,7 +265,7 @@ struct ConstraintVisitor
         return dirty;
     }
 
-    auto operator()(nc::physics::FixedConstraintInfo& constraint) -> bool
+    auto operator()(nc::FixedConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
         dirty = InputReferenceFrame(constraint.ownerRight, constraint.ownerUp, "ownerRight", "ownerUp") || dirty;
@@ -276,14 +274,14 @@ struct ConstraintVisitor
         return dirty;
     }
 
-    auto operator()(nc::physics::PointConstraintInfo& constraint) -> bool
+    auto operator()(nc::PointConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
         return dirty;
     }
 
-    auto operator()(nc::physics::DistanceConstraintInfo& constraint) -> bool
+    auto operator()(nc::DistanceConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
@@ -293,7 +291,7 @@ struct ConstraintVisitor
         return dirty;
     }
 
-    auto operator()(nc::physics::HingeConstraintInfo& constraint) -> bool
+    auto operator()(nc::HingeConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
         dirty = InputReferenceFrame(constraint.ownerHingeAxis, constraint.ownerNormalAxis, "ownerHingeAxis", "ownerNormalAxis") || dirty;
@@ -312,7 +310,7 @@ struct ConstraintVisitor
         return dirty;
     }
 
-    auto operator()(nc::physics::SliderConstraintInfo& constraint) -> bool
+    auto operator()(nc::SliderConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
         dirty = InputReferenceFrame(constraint.ownerSliderAxis, constraint.ownerNormalAxis, "ownerSliderAxis", "ownerNormalAxis") || dirty;
@@ -332,7 +330,7 @@ struct ConstraintVisitor
         return dirty;
     }
 
-    auto operator()(nc::physics::SwingTwistConstraintInfo& constraint) -> bool
+    auto operator()(nc::SwingTwistConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
         dirty = nc::ui::InputAxis(constraint.ownerTwistAxis, "ownerTwistAxis") || dirty;
@@ -345,12 +343,12 @@ struct ConstraintVisitor
     }
 };
 
-void ConstraintWidget(nc::physics::Constraint& constraint, nc::physics::RigidBody& body, nc::ecs::Ecs world)
+void ConstraintWidget(nc::Constraint& constraint, nc::RigidBody& body, nc::ecs::Ecs world)
 {
     const auto id = constraint.GetId();
     IMGUI_SCOPE(nc::ui::ImGuiId, static_cast<int>(id));
     const auto type = constraint.GetType();
-    auto constraintTypeStr = std::string{nc::physics::ToString(type)};
+    auto constraintTypeStr = std::string{nc::ToString(type)};
     const auto name = fmt::format("{} ({})###{}", constraintTypeStr, id, id);
     const auto isConstraintOpen = ImGui::TreeNodeEx(
         name.c_str(),
@@ -370,9 +368,9 @@ void ConstraintWidget(nc::physics::Constraint& constraint, nc::physics::RigidBod
 
     if(isConstraintOpen)
     {
-        if (nc::ui::Combobox(constraintTypeStr, "type", nc::physics::GetConstraintTypeNames()))
+        if (nc::ui::Combobox(constraintTypeStr, "type", nc::GetConstraintTypeNames()))
         {
-            UpdateConstraintType(constraint, nc::physics::ToConstraintType(constraintTypeStr));
+            UpdateConstraintType(constraint, nc::ToConstraintType(constraintTypeStr));
         }
 
         if (std::visit(ConstraintVisitor{}, constraint.GetInfo()))
@@ -392,9 +390,9 @@ void ConstraintWidget(nc::physics::Constraint& constraint, nc::physics::RigidBod
     }
 }
 
-void MakeDefaultConstraint(nc::physics::RigidBody& body, nc::Transform& transform)
+void MakeDefaultConstraint(nc::RigidBody& body, nc::Transform& transform)
 {
-    body.AddConstraint(nc::physics::FixedConstraintInfo{
+    body.AddConstraint(nc::FixedConstraintInfo{
         .ownerRight = transform.Right(),
         .ownerUp = transform.Up(),
         .targetPosition = transform.Position()
@@ -518,9 +516,9 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     if (ui::InputPosition(pos, "position"))
     {
         wasUpdated = true;
-        if (ctx.world.Contains<physics::RigidBody>(self))
+        if (ctx.world.Contains<RigidBody>(self))
         {
-            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            auto& body = ctx.world.Get<RigidBody>(self);
             body.SetSimulatedBodyPosition(transform, pos, true);
         }
         else
@@ -541,9 +539,9 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
         }();
 
         const auto newRotation = ToQuaternion(DirectX::XMQuaternionMultiply(decomposedMatrix.rotation, rotationNeeded));
-        if (ctx.world.Contains<physics::RigidBody>(self))
+        if (ctx.world.Contains<RigidBody>(self))
         {
-            auto& body = ctx.world.Get<physics::RigidBody>(self);
+            auto& body = ctx.world.Get<RigidBody>(self);
             body.SetSimulatedBodyRotation(transform, newRotation, true);
         }
         else
@@ -555,10 +553,10 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
     if (ui::InputScale(scl, "scale"))
     {
         wasUpdated = true;
-        if (ctx.world.Contains<physics::RigidBody>(self))
+        if (ctx.world.Contains<RigidBody>(self))
         {
-            auto& body = ctx.world.Get<physics::RigidBody>(self);
-            scl = physics::NormalizeScaleForShape(body.GetShape().GetType(), prevScl, scl);
+            auto& body = ctx.world.Get<RigidBody>(self);
+            scl = NormalizeScaleForShape(body.GetShape().GetType(), prevScl, scl);
             body.SetSimulatedBodyScale(transform, scl, true);
         }
         else
@@ -694,37 +692,37 @@ void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const st
 {
 }
 
-void CollisionListenerUIWidget(physics::CollisionListener&, EditorContext&, const std::any&)
+void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&)
 {
 }
 
-void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::any&)
+void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "RigidBody");
     ui::PropertyWidget(rigid_body_ext::awakeProp, body, &ui::Checkbox);
-    const auto isStaticBody = body.GetBodyType() == physics::BodyType::Static;
+    const auto isStaticBody = body.GetBodyType() == BodyType::Static;
 
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Shape", 0))
     {
         const auto transformScale = ctx.world.Get<Transform>(body.GetEntity()).Scale();
         auto selectedShapeName = std::string{ToString(body.GetShape().GetType())};
-        if (ui::Combobox(selectedShapeName, "shapeType", physics::GetShapeTypeNames()))
+        if (ui::Combobox(selectedShapeName, "shapeType", GetShapeTypeNames()))
         {
-            const auto newShape = physics::ToShapeType(selectedShapeName);
+            const auto newShape = ToShapeType(selectedShapeName);
             switch (newShape)
             {
-                case physics::ShapeType::Box:     { body.SetShape(physics::Shape::MakeBox(),     transformScale); break; }
-                case physics::ShapeType::Sphere:  { body.SetShape(physics::Shape::MakeSphere(),  transformScale); break; }
-                case physics::ShapeType::Capsule: { body.SetShape(physics::Shape::MakeCapsule(), transformScale); break; }
+                case ShapeType::Box:     { body.SetShape(Shape::MakeBox(),     transformScale); break; }
+                case ShapeType::Sphere:  { body.SetShape(Shape::MakeSphere(),  transformScale); break; }
+                case ShapeType::Capsule: { body.SetShape(Shape::MakeCapsule(), transformScale); break; }
             }
         }
 
         switch (body.GetShape().GetType())
         {
-            case physics::ShapeType::Box:     { rigid_body_ext::BoxProperties(body,     transformScale); break; }
-            case physics::ShapeType::Sphere:  { rigid_body_ext::SphereProperties(body,  transformScale); break; }
-            case physics::ShapeType::Capsule: { rigid_body_ext::CapsuleProperties(body, transformScale); break;}
+            case ShapeType::Box:     { rigid_body_ext::BoxProperties(body,     transformScale); break; }
+            case ShapeType::Sphere:  { rigid_body_ext::SphereProperties(body,  transformScale); break; }
+            case ShapeType::Capsule: { rigid_body_ext::CapsuleProperties(body, transformScale); break;}
         }
         ImGui::TreePop();
     }
@@ -732,20 +730,20 @@ void RigidBodyUIWidget(physics::RigidBody& body, EditorContext& ctx, const std::
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Simulation Properties", 0))
     {
-        ui::PropertyWidget(rigid_body_ext::bodyTypeProp, body, &ui::Combobox,  physics::GetBodyTypeNames());
+        ui::PropertyWidget(rigid_body_ext::bodyTypeProp, body, &ui::Combobox,  GetBodyTypeNames());
         {
             IMGUI_SCOPE(ui::DisableIf, isStaticBody);
-            ui::PropertyWidget(rigid_body_ext::massProp, body, &ui::DragFloat, 5.0f, physics::g_minMass, physics::g_maxMass);
+            ui::PropertyWidget(rigid_body_ext::massProp, body, &ui::DragFloat, 5.0f, g_minMass, g_maxMass);
         }
 
-        ui::PropertyWidget(rigid_body_ext::frictionProp,    body, &ui::DragFloat, 0.01f, physics::g_minFrictionCoefficient, physics::g_maxFrictionCoefficient);
-        ui::PropertyWidget(rigid_body_ext::restitutionProp, body, &ui::DragFloat, 0.01f, physics::g_minRestitutionCoefficient, physics::g_maxRestitutionCoefficient);
+        ui::PropertyWidget(rigid_body_ext::frictionProp,    body, &ui::DragFloat, 0.01f, g_minFrictionCoefficient, g_maxFrictionCoefficient);
+        ui::PropertyWidget(rigid_body_ext::restitutionProp, body, &ui::DragFloat, 0.01f, g_minRestitutionCoefficient, g_maxRestitutionCoefficient);
 
         {
             IMGUI_SCOPE(ui::DisableIf, isStaticBody);
-            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp, body, &ui::DragFloat, 0.1f,  physics::g_minGravityMultiplier, physics::g_maxGravityMultiplier);
-            ui::PropertyWidget(rigid_body_ext::linearDampingProp,     body, &ui::DragFloat, 0.01f, physics::g_minDamping, physics::g_maxDamping);
-            ui::PropertyWidget(rigid_body_ext::angularDampingProp,    body, &ui::DragFloat, 0.01f, physics::g_minDamping, physics::g_maxDamping);
+            ui::PropertyWidget(rigid_body_ext::gravityMultiplierProp, body, &ui::DragFloat, 0.1f,  g_minGravityMultiplier, g_maxGravityMultiplier);
+            ui::PropertyWidget(rigid_body_ext::linearDampingProp,     body, &ui::DragFloat, 0.01f, g_minDamping, g_maxDamping);
+            ui::PropertyWidget(rigid_body_ext::angularDampingProp,    body, &ui::DragFloat, 0.01f, g_minDamping, g_maxDamping);
         }
 
         ImGui::TreePop();

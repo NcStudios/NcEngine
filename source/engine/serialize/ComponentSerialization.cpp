@@ -111,7 +111,7 @@ auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext&
     return graphics::ToonRenderer{ctx.entityMap.at(id), std::move(mesh), std::move(material)};
 }
 
-void SerializeRigidBody(std::ostream& stream, const physics::RigidBody& out, const SerializationContext& ctx, const std::any&)
+void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
 
@@ -139,47 +139,47 @@ void SerializeRigidBody(std::ostream& stream, const physics::RigidBody& out, con
     }
 }
 
-auto DeserializeConstraintInfo(std::istream& stream) -> physics::ConstraintInfo
+auto DeserializeConstraintInfo(std::istream& stream) -> ConstraintInfo
 {
-    auto type = physics::ConstraintType{};
+    auto type = ConstraintType{};
     serialize::Deserialize(stream, type);
     switch (type)
     {
-        case physics::ConstraintType::FixedConstraint:
+        case ConstraintType::FixedConstraint:
         {
-            auto createInfo = physics::FixedConstraintInfo{};
+            auto createInfo = FixedConstraintInfo{};
             serialize::Deserialize(stream, createInfo);
-            return physics::ConstraintInfo{createInfo};
+            return ConstraintInfo{createInfo};
         }
-        case physics::ConstraintType::PointConstraint:
+        case ConstraintType::PointConstraint:
         {
-            auto createInfo = physics::PointConstraintInfo{};
+            auto createInfo = PointConstraintInfo{};
             serialize::Deserialize(stream, createInfo);
-            return physics::ConstraintInfo{createInfo};
+            return ConstraintInfo{createInfo};
         }
-        case physics::ConstraintType::DistanceConstraint:
+        case ConstraintType::DistanceConstraint:
         {
-            auto createInfo = physics::DistanceConstraintInfo{};
+            auto createInfo = DistanceConstraintInfo{};
             serialize::Deserialize(stream, createInfo);
-            return physics::ConstraintInfo{createInfo};
+            return ConstraintInfo{createInfo};
         }
-        case physics::ConstraintType::HingeConstraint:
+        case ConstraintType::HingeConstraint:
         {
-            auto createInfo = physics::HingeConstraintInfo{};
+            auto createInfo = HingeConstraintInfo{};
             serialize::Deserialize(stream, createInfo);
-            return physics::ConstraintInfo{createInfo};
+            return ConstraintInfo{createInfo};
         }
-        case physics::ConstraintType::SliderConstraint:
+        case ConstraintType::SliderConstraint:
         {
-            auto createInfo = physics::SliderConstraintInfo{};
+            auto createInfo = SliderConstraintInfo{};
             serialize::Deserialize(stream, createInfo);
-            return physics::ConstraintInfo{createInfo};
+            return ConstraintInfo{createInfo};
         }
-        case physics::ConstraintType::SwingTwistConstraint:
+        case ConstraintType::SwingTwistConstraint:
         {
-            auto createInfo = physics::SwingTwistConstraintInfo{};
+            auto createInfo = SwingTwistConstraintInfo{};
             serialize::Deserialize(stream, createInfo);
-            return physics::ConstraintInfo{createInfo};
+            return ConstraintInfo{createInfo};
         }
         default:
         {
@@ -188,13 +188,13 @@ auto DeserializeConstraintInfo(std::istream& stream) -> physics::ConstraintInfo
     }
 }
 
-auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ctx, const std::any& userData) -> physics::RigidBody
+auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ctx, const std::any& userData) -> RigidBody
 {
     auto id = uint32_t{};
-    auto shapeType = physics::ShapeType{};
+    auto shapeType = ShapeType{};
     auto shapeScale = Vector3{};
     auto shapePosition = Vector3{};
-    auto info = physics::RigidBodyInfo{};
+    auto info = RigidBodyInfo{};
     auto constraintCount = size_t{};
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, shapeType);
@@ -229,6 +229,6 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
         }
     }();
 
-    return physics::RigidBody{entity, shape, info};
+    return RigidBody{entity, shape, info};
 }
 } // namespace nc

@@ -7,7 +7,7 @@ namespace nc
 {
 void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
-    Register<physics::RigidBody>(
+    Register<RigidBody>(
         registry,
         maxEntities,
         RigidBodyId,
@@ -19,7 +19,7 @@ void RegisterPhysicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         // has user data, but is set during NcPhysics initialization
     );
 
-    Register<physics::CollisionListener>(
+    Register<CollisionListener>(
         registry,
         maxEntities,
         CollisionListenerId,

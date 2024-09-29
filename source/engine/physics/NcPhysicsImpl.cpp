@@ -15,13 +15,13 @@ namespace
 auto RegisterDeferredCreateState(nc::Registry* registry) -> std::unique_ptr<nc::physics::DeferredPhysicsCreateState>
 {
     auto state = std::make_unique<nc::physics::DeferredPhysicsCreateState>();
-    auto& userData = registry->GetEcs().GetPool<nc::physics::RigidBody>().Handler().userData;
+    auto& userData = registry->GetEcs().GetPool<nc::RigidBody>().Handler().userData;
     NC_ASSERT(!userData.has_value(), "Attempting to initialize RigidBody user data, but it already has a value");
     userData = std::any{state.get()};
     return state;
 }
 
-class NcPhysicsStub : public nc::physics::NcPhysics
+class NcPhysicsStub : public nc::NcPhysics
 {
     public:
         NcPhysicsStub(std::unique_ptr<nc::physics::DeferredPhysicsCreateState> deferredState)
@@ -46,7 +46,7 @@ class NcPhysicsStub : public nc::physics::NcPhysics
 };
 } // anonymous namespace
 
-namespace nc::physics
+namespace nc
 {
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
@@ -58,13 +58,22 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
     if(physicsSettings.enabled)
     {
         NC_LOG_TRACE("Building NcPhysics module");
-        return std::make_unique<NcPhysicsImpl>(memorySettings, physicsSettings, registry, dispatcher, events, std::move(deferredState));
+        return std::make_unique<physics::NcPhysicsImpl>(
+            memorySettings,
+            physicsSettings,
+            registry,
+            dispatcher,
+            events,
+            std::move(deferredState)
+        );
     }
 
     NC_LOG_TRACE("Physics disabled - building NcPhysics stub");
     return std::make_unique<NcPhysicsStub>(std::move(deferredState));
 }
 
+namespace physics
+{
 NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                                const config::PhysicsSettings& physicsSettings,
                                Registry* registry,
@@ -202,4 +211,5 @@ void NcPhysicsImpl::EndRigidBodyBatch()
 
     m_constraintManager.EndBatch(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
 }
-} // namespace nc::physics
+} // namespace physics
+} // namespace nc

@@ -5,7 +5,7 @@
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/Body.h"
 
-namespace nc::physics
+namespace nc
 {
 auto Constraint::GetType() const -> ConstraintType
 {
@@ -34,4 +34,4 @@ void Constraint::SetConstraintTarget(RigidBody* otherBody)
 
     s_manager->UpdateConstraintTarget(*this, referencedEntity, referencedBody);
 }
-} // namespace nc::physics
+} // namespace nc

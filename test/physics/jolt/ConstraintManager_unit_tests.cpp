@@ -21,7 +21,7 @@ constexpr auto g_entity3 = nc::Entity{21, 0, 0};
 
 TEST_F(ConstraintManagerTest, AddConstraint_twoBody_succeeds)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{
+    const auto expectedInfo = nc::PointConstraintInfo{
         .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
         .targetPosition = nc::Vector3{4.0f, 5.0f, 6.0f}
     };
@@ -31,7 +31,7 @@ TEST_F(ConstraintManagerTest, AddConstraint_twoBody_succeeds)
     const auto& actualConstraint = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
 
     EXPECT_EQ(g_entity2, actualConstraint.GetConstraintTarget());
-    auto& actualInfo = std::get<nc::physics::PointConstraintInfo>(actualConstraint.GetInfo());
+    auto& actualInfo = std::get<nc::PointConstraintInfo>(actualConstraint.GetInfo());
     EXPECT_EQ(expectedInfo.ownerPosition, actualInfo.ownerPosition);
     EXPECT_EQ(expectedInfo.targetPosition, actualInfo.targetPosition);
 
@@ -41,7 +41,7 @@ TEST_F(ConstraintManagerTest, AddConstraint_twoBody_succeeds)
 
 TEST_F(ConstraintManagerTest, AddConstraint_oneBody_succeeds)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{
+    const auto expectedInfo = nc::PointConstraintInfo{
         .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
         .targetPosition = nc::Vector3{4.0f, 5.0f, 6.0f}
     };
@@ -53,7 +53,7 @@ TEST_F(ConstraintManagerTest, AddConstraint_oneBody_succeeds)
     ASSERT_EQ(1ull, constraints.size());
 
     EXPECT_FALSE(actualConstraint.GetConstraintTarget().Valid());
-    const auto& actualInfo = std::get<nc::physics::PointConstraintInfo>(actualConstraint.GetInfo());
+    const auto& actualInfo = std::get<nc::PointConstraintInfo>(actualConstraint.GetInfo());
     EXPECT_EQ(expectedInfo.ownerPosition, actualInfo.ownerPosition);
     EXPECT_EQ(expectedInfo.targetPosition, actualInfo.targetPosition);
 
@@ -62,7 +62,7 @@ TEST_F(ConstraintManagerTest, AddConstraint_oneBody_succeeds)
 
 TEST_F(ConstraintManagerTest, AddConstraint_multipleConstraintsBetweenBodies_succeeds)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
 
@@ -87,7 +87,7 @@ TEST_F(ConstraintManagerTest, AddConstraint_multipleConstraintsBetweenBodies_suc
 
 TEST_F(ConstraintManagerTest, EnableConstraint_updatesState)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto& constraint = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
@@ -109,7 +109,7 @@ TEST_F(ConstraintManagerTest, EnableConstraint_updatesState)
 
 TEST_F(ConstraintManagerTest, EnableConstraint_staleConstraint_throws)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto constraint = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
@@ -122,8 +122,8 @@ TEST_F(ConstraintManagerTest, EnableConstraint_staleConstraint_throws)
 
 TEST_F(ConstraintManagerTest, UpdateConstraint_sameType_updateSettings)
 {
-    const auto initialInfo = nc::physics::PointConstraintInfo{};
-    const auto expectedInfo = nc::physics::PointConstraintInfo{
+    const auto initialInfo = nc::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{
         .ownerPosition = nc::Vector3{3.0f, 3.0f, 3.0f},
         .targetPosition = nc::Vector3{4.0f, 4.0f, 4.0f}
     };
@@ -147,8 +147,8 @@ TEST_F(ConstraintManagerTest, UpdateConstraint_sameType_updateSettings)
 
 TEST_F(ConstraintManagerTest, UpdateConstraint_newType_buildsNewType)
 {
-    const auto initialInfo = nc::physics::PointConstraintInfo{};
-    const auto expectedInfo = nc::physics::FixedConstraintInfo{};
+    const auto initialInfo = nc::PointConstraintInfo{};
+    const auto expectedInfo = nc::FixedConstraintInfo{};
 
     auto body1 = CreateBody();
     auto body2 = CreateBody();
@@ -165,8 +165,8 @@ TEST_F(ConstraintManagerTest, UpdateConstraint_newType_buildsNewType)
 
 TEST_F(ConstraintManagerTest, UpdateConstraint_disabled_preservesDisabledState)
 {
-    const auto initialInfo = nc::physics::FixedConstraintInfo{};
-    const auto updatedInfo = nc::physics::PointConstraintInfo{};
+    const auto initialInfo = nc::FixedConstraintInfo{};
+    const auto updatedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto& constraint = uut.AddConstraint(initialInfo, g_entity1, *body1, g_entity2, *body2);
@@ -185,7 +185,7 @@ TEST_F(ConstraintManagerTest, UpdateConstraint_disabled_preservesDisabledState)
 
 TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToOtherBody_attachToNewBody_updatesMapping)
 {
-    const auto info = nc::physics::FixedConstraintInfo{};
+    const auto info = nc::FixedConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto body3 = CreateBody();
@@ -210,7 +210,7 @@ TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToOtherBody_attachT
 
 TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToOtherBody_attachToWorld_updatesMapping)
 {
-    const auto info = nc::physics::FixedConstraintInfo{};
+    const auto info = nc::FixedConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto& constraint = uut.AddConstraint(info, g_entity1, *body1, g_entity2, *body2);
@@ -231,7 +231,7 @@ TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToOtherBody_attachT
 
 TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToWorld_attachToBody_updatesMapping)
 {
-    const auto info = nc::physics::FixedConstraintInfo{};
+    const auto info = nc::FixedConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto& constraint = uut.AddConstraint(info, g_entity1, *body1);
@@ -251,7 +251,7 @@ TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToWorld_attachToBod
 
 TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachToSelf_throws)
 {
-    const auto info = nc::physics::FixedConstraintInfo{};
+    const auto info = nc::FixedConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto& constraint = uut.AddConstraint(info, g_entity1, *body1, g_entity2, *body2);
@@ -261,7 +261,7 @@ TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachToSelf_throws)
 
 TEST_F(ConstraintManagerTest, RemoveConstraint_twoBody_removesState)
 {
-    const auto info = nc::physics::PointConstraintInfo{};
+    const auto info = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     const auto id = uut.AddConstraint(info, g_entity1, *body1, g_entity2, *body2).GetId();
@@ -275,7 +275,7 @@ TEST_F(ConstraintManagerTest, RemoveConstraint_twoBody_removesState)
 
 TEST_F(ConstraintManagerTest, RemoveConstraint_oneBody_removesState)
 {
-    const auto info = nc::physics::PointConstraintInfo{};
+    const auto info = nc::PointConstraintInfo{};
     auto body = CreateBody();
     const auto id = uut.AddConstraint(info, g_entity1, *body).GetId();
 
@@ -287,7 +287,7 @@ TEST_F(ConstraintManagerTest, RemoveConstraint_oneBody_removesState)
 
 TEST_F(ConstraintManagerTest, RemoveConstraint_multipleConstraintsBetweenBodies_preservesOthers)
 {
-    const auto info = nc::physics::PointConstraintInfo{};
+    const auto info = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     const auto toKeepId1 = uut.AddConstraint(info, g_entity1, *body1, g_entity2, *body2).GetId();
@@ -306,7 +306,7 @@ TEST_F(ConstraintManagerTest, RemoveConstraint_multipleConstraintsBetweenBodies_
 
 TEST_F(ConstraintManagerTest, RemoveConstraint_recyclesId)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     const auto& toBeDeletedId = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2).GetId();
@@ -329,7 +329,7 @@ TEST_F(ConstraintManagerTest, RemoveConstraint_badId_throws)
 
 TEST_F(ConstraintManagerTest, RemoveConstraint_doubleDelete_throws)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     const auto toBeDeleted = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
@@ -345,7 +345,7 @@ TEST_F(ConstraintManagerTest, RemoveConstraints_noConstraints_succeeds)
 
 TEST_F(ConstraintManagerTest, RemoveConstraints_removesFromSelfAndOthers)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto body3 = CreateBody();
@@ -381,7 +381,7 @@ TEST_F(ConstraintManagerTest, Clear_triviallySucceeds)
 
 TEST_F(ConstraintManagerTest, Clear_withNullptrsInList_succeeds)
 {
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
@@ -402,7 +402,7 @@ TEST_F(ConstraintManagerTest, Clear_withNullptrsInList_succeeds)
 TEST_F(ConstraintManagerTest, BeginBatch_doesNotAddToSimulationUntilBatchEnded)
 {
     const auto batchIndex = uut.BeginBatch();
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     const auto& constraint1 = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2);
@@ -429,7 +429,7 @@ TEST_F(ConstraintManagerTest, BeginBatch_nonEmptyFreeList_allocatesSequentiallyF
 {
     // b/c batch add requires a contiguous array, we want to verify constraints are allocated sequentially
     // while a batch is active, even if there are free spaces available in the internal vector
-    const auto expectedInfo = nc::physics::PointConstraintInfo{};
+    const auto expectedInfo = nc::PointConstraintInfo{};
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     const auto& toRemoveId1 = uut.AddConstraint(expectedInfo, g_entity1, *body1, g_entity2, *body2).GetId();

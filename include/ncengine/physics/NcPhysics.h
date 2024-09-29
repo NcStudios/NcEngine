@@ -20,8 +20,6 @@ struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
-namespace physics
-{
 /** @brief Physics module interface
  * 
  * Tasks
@@ -63,5 +61,4 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         Registry* registry,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>;
-} // namespace physics
 } // namespace nc

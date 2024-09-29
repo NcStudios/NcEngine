@@ -39,10 +39,8 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
 } // namespace graphics
 
 
-auto g_mockConstraints = std::unordered_map<nc::Entity::index_type, std::vector<nc::physics::Constraint>>{};
+auto g_mockConstraints = std::unordered_map<nc::Entity::index_type, std::vector<nc::Constraint>>{};
 
-namespace physics
-{
 auto RigidBody::AddConstraint(const ConstraintInfo& createInfo, const RigidBody& otherBody) -> Constraint&
 {
     const auto key = m_self.Index();
@@ -65,7 +63,6 @@ auto RigidBody::GetConstraints() const -> std::span<const Constraint>
         ? g_mockConstraints.at(m_self.Index())
         : std::span<const Constraint>{};
 }
-} // namespace physics
 } // namespace nc
 
 auto g_registry = nc::ecs::ComponentRegistry{10ull};
@@ -201,22 +198,22 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expected = nc::physics::RigidBody{
+    const auto expected = nc::RigidBody{
         g_entity,
-        nc::physics::Shape::MakeBox(
+        nc::Shape::MakeBox(
             nc::Vector3{2.0f, 3.0f, 4.0f},
             nc::Vector3::Splat(5.0f)
         ),
-        nc::physics::RigidBodyInfo{
+        nc::RigidBodyInfo{
             .mass = 50.0f,
             .friction = 1.0f,
             .restitution = 0.1f,
             .linearDamping = 0.8f,
             .angularDamping = 0.4f,
             .gravityMultiplier = 0.5f,
-            .type = nc::physics::BodyType::Dynamic,
-            .freedom = nc::physics::DegreeOfFreedom::Translation,
-            .flags = nc::physics::RigidBodyFlags::Trigger
+            .type = nc::BodyType::Dynamic,
+            .freedom = nc::DegreeOfFreedom::Translation,
+            .flags = nc::RigidBodyFlags::Trigger
         }
     };
 
@@ -247,12 +244,12 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expectedShape = nc::physics::Shape::MakeBox(
+    const auto expectedShape = nc::Shape::MakeBox(
         nc::Vector3{2.0f, 3.0f, 4.0f},
         nc::Vector3::Splat(5.0f)
     );
 
-    const auto expected = nc::physics::RigidBody{g_entity, expectedShape};
+    const auto expected = nc::RigidBody{g_entity, expectedShape};
     nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeRigidBody(stream, g_deserializationContext, userData);
 
@@ -267,12 +264,12 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expectedShape = nc::physics::Shape::MakeSphere(
+    const auto expectedShape = nc::Shape::MakeSphere(
         7.0f,
         nc::Vector3::Splat(5.0f)
     );
 
-    const auto expected = nc::physics::RigidBody{g_entity, expectedShape};
+    const auto expected = nc::RigidBody{g_entity, expectedShape};
     nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeRigidBody(stream, g_deserializationContext, userData);
 
@@ -287,13 +284,13 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expectedShape = nc::physics::Shape::MakeCapsule(
+    const auto expectedShape = nc::Shape::MakeCapsule(
         10.0f,
         5.0f,
         nc::Vector3::Splat(5.0f)
     );
 
-    const auto expected = nc::physics::RigidBody{g_entity, expectedShape};
+    const auto expected = nc::RigidBody{g_entity, expectedShape};
     nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeRigidBody(stream, g_deserializationContext, userData);
 
@@ -312,17 +309,17 @@ TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)
     auto fragmentIdToEntityMap = nc::FragmentIdToEntityMap{ {0u, entity1}, {1u, entity2}, {2u, entity3} };
     const auto serializationContext = nc::SerializationContext{entityToFragmentIdMap, g_ecs};
     const auto deserializationContext = nc::DeserializationContext{fragmentIdToEntityMap, g_ecs};
-    const auto shape = nc::physics::Shape::MakeBox();
-    auto body1 = nc::physics::RigidBody{entity1, shape};
-    auto body2 = nc::physics::RigidBody{entity2, shape};
-    auto body3 = nc::physics::RigidBody{entity3, shape};
+    const auto shape = nc::Shape::MakeBox();
+    auto body1 = nc::RigidBody{entity1, shape};
+    auto body2 = nc::RigidBody{entity2, shape};
+    auto body3 = nc::RigidBody{entity3, shape};
 
-    body1.AddConstraint(nc::physics::FixedConstraintInfo{}, body2);
-    body1.AddConstraint(nc::physics::PointConstraintInfo{}, body3);
-    body2.AddConstraint(nc::physics::DistanceConstraintInfo{}, body1);
-    body2.AddConstraint(nc::physics::HingeConstraintInfo{}, body3);
-    body3.AddConstraint(nc::physics::SliderConstraintInfo{}, body1);
-    body3.AddConstraint(nc::physics::SwingTwistConstraintInfo{}, body2);
+    body1.AddConstraint(nc::FixedConstraintInfo{}, body2);
+    body1.AddConstraint(nc::PointConstraintInfo{}, body3);
+    body2.AddConstraint(nc::DistanceConstraintInfo{}, body1);
+    body2.AddConstraint(nc::HingeConstraintInfo{}, body3);
+    body3.AddConstraint(nc::SliderConstraintInfo{}, body1);
+    body3.AddConstraint(nc::SwingTwistConstraintInfo{}, body2);
 
     ASSERT_EQ(2u, std::as_const(body1).GetConstraints().size());
     ASSERT_EQ(2u, std::as_const(body2).GetConstraints().size());
@@ -368,10 +365,10 @@ TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)
     EXPECT_EQ(expectedConstraint5.GetConstraintTarget(), actualConstraint5.target);
     EXPECT_EQ(expectedConstraint6.GetConstraintTarget(), actualConstraint6.target);
 
-    EXPECT_NO_THROW((void)std::get<nc::physics::FixedConstraintInfo>(actualConstraint1.info));
-    EXPECT_NO_THROW((void)std::get<nc::physics::PointConstraintInfo>(actualConstraint2.info));
-    EXPECT_NO_THROW((void)std::get<nc::physics::DistanceConstraintInfo>(actualConstraint3.info));
-    EXPECT_NO_THROW((void)std::get<nc::physics::HingeConstraintInfo>(actualConstraint4.info));
-    EXPECT_NO_THROW((void)std::get<nc::physics::SliderConstraintInfo>(actualConstraint5.info));
-    EXPECT_NO_THROW((void)std::get<nc::physics::SwingTwistConstraintInfo>(actualConstraint6.info));
+    EXPECT_NO_THROW((void)std::get<nc::FixedConstraintInfo>(actualConstraint1.info));
+    EXPECT_NO_THROW((void)std::get<nc::PointConstraintInfo>(actualConstraint2.info));
+    EXPECT_NO_THROW((void)std::get<nc::DistanceConstraintInfo>(actualConstraint3.info));
+    EXPECT_NO_THROW((void)std::get<nc::HingeConstraintInfo>(actualConstraint4.info));
+    EXPECT_NO_THROW((void)std::get<nc::SliderConstraintInfo>(actualConstraint5.info));
+    EXPECT_NO_THROW((void)std::get<nc::SwingTwistConstraintInfo>(actualConstraint6.info));
 }

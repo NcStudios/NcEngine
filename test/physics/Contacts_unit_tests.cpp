@@ -12,7 +12,7 @@ TEST(ContactsTest, InitializeWithMaxSize_hasExpectedPoints)
         nc::Vector3{10.0f, 11.0f, 12.0f}
     };
 
-    const auto uut = nc::physics::Contacts{expectedPoints, 4};
+    const auto uut = nc::Contacts{expectedPoints, 4};
     const auto actualPoints = uut.GetPoints();
     EXPECT_EQ(4, actualPoints.size());
     EXPECT_EQ(4, uut.GetCount());
@@ -28,7 +28,7 @@ TEST(ContactsTest, InitializeWithPartialSize_hasExpectedPoints)
         nc::Vector3{0.0f, 0.0f, 0.0f}
     };
 
-    const auto uut = nc::physics::Contacts{expectedPoints, 2};
+    const auto uut = nc::Contacts{expectedPoints, 2};
     const auto actualPoints = uut.GetPoints();
     EXPECT_EQ(2, actualPoints.size());
     EXPECT_EQ(2, uut.GetCount());
@@ -44,7 +44,7 @@ TEST(ContactsTest, InitializeWithPartialSize_hasExpectedPoints)
 TEST(ContactsTest, InitializeWithPartialSize_hasNoPoints)
 {
     constexpr auto expectedPoints = std::array<nc::Vector3, 4>{};
-    const auto uut = nc::physics::Contacts{expectedPoints, 0};
+    const auto uut = nc::Contacts{expectedPoints, 0};
     const auto actualPoints = uut.GetPoints();
     EXPECT_EQ(0, actualPoints.size());
     EXPECT_EQ(0, uut.GetCount());

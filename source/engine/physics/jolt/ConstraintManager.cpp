@@ -227,7 +227,7 @@ void ConstraintManager::UntrackConstraint(uint32_t entityId,
         return;
     }
 
-    auto constraintPos = std::ranges::find(state.constraints, constraintId, &nc::physics::Constraint::GetId);
+    auto constraintPos = std::ranges::find(state.constraints, constraintId, &nc::Constraint::GetId);
     NC_ASSERT(constraintPos != state.constraints.cend(), "Constraint not found");
     state.constraints.erase(constraintPos);
 }

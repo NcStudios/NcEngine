@@ -205,11 +205,11 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "ogre"
     });
     world.Emplace<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
-    world.Emplace<physics::RigidBody>(
+    world.Emplace<RigidBody>(
         ogre,
-        physics::Shape::MakeSphere(),
-        physics::RigidBodyInfo{
-            .type = physics::BodyType::Kinematic
+        Shape::MakeSphere(),
+        RigidBodyInfo{
+            .type = BodyType::Kinematic
         }
     );
 
@@ -243,16 +243,16 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
     world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
-    world.Emplace<physics::RigidBody>(
+    world.Emplace<RigidBody>(
         skeleton,
-        physics::Shape::MakeSphere(),
-        physics::RigidBodyInfo{
-            .type = physics::BodyType::Kinematic,
-            .flags = physics::RigidBodyFlags::Trigger
+        Shape::MakeSphere(),
+        RigidBodyInfo{
+            .type = BodyType::Kinematic,
+            .flags = RigidBodyFlags::Trigger
         }
     );
 
-    world.Emplace<physics::CollisionListener>(skeleton)
+    world.Emplace<CollisionListener>(skeleton)
         .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
             auto& ogreAnim = ecs.Get<graphics::SkeletalAnimator>(other);
             ogreAnim.PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);

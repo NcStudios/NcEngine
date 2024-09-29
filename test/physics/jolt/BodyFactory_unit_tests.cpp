@@ -23,23 +23,23 @@ class BodyFactoryTest : public JoltApiFixture
 };
 
 constexpr auto g_entity = nc::Entity{42, 0, 0};
-constexpr auto g_dynamicProperties = nc::physics::RigidBodyInfo{
+constexpr auto g_dynamicProperties = nc::RigidBodyInfo{
     .mass = 500.0f,
     .friction = 1.0f,
     .restitution = 0.9f,
     .linearDamping = 0.5f,
     .angularDamping = 0.4f,
     .gravityMultiplier = 0.1f,
-    .type = nc::physics::BodyType::Dynamic,
-    .freedom = nc::physics::DegreeOfFreedom::TranslationY,
-    .flags = nc::physics::RigidBodyFlags::ContinuousDetection
+    .type = nc::BodyType::Dynamic,
+    .freedom = nc::DegreeOfFreedom::TranslationY,
+    .flags = nc::RigidBodyFlags::ContinuousDetection
 };
 
 TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
 {
-    const auto box = nc::physics::Shape::MakeBox();
+    const auto box = nc::Shape::MakeBox();
     const auto& expectedProperties = g_dynamicProperties;
-    const auto rigidBody = nc::physics::RigidBody{g_entity, box, expectedProperties};
+    const auto rigidBody = nc::RigidBody{g_entity, box, expectedProperties};
     const auto matrix = DirectX::XMMatrixIdentity();
 
     const auto result = uut.MakeBody(rigidBody, matrix);
@@ -72,8 +72,8 @@ TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
 
 TEST_F(BodyFactoryTest, MakeBody_invalidTransformScale_returnsAdjustedValue)
 {
-    const auto sphere = nc::physics::Shape::MakeSphere();
-    const auto rigidBody = nc::physics::RigidBody{g_entity, sphere, g_dynamicProperties};
+    const auto sphere = nc::Shape::MakeSphere();
+    const auto rigidBody = nc::RigidBody{g_entity, sphere, g_dynamicProperties};
     const auto matrix = DirectX::XMMatrixScaling(1.0f, 2.0f, 3.0f);
     const auto result = uut.MakeBody(rigidBody, matrix);
     EXPECT_TRUE(result.wasScaleAdjusted);

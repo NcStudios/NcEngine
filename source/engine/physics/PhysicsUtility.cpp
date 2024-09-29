@@ -30,7 +30,7 @@ constexpr auto g_constraintTypeNames = std::array{
 };
 } // anonymous namespace
 
-namespace nc::physics
+namespace nc
 {
 auto ToString(BodyType type) -> std::string_view
 {
@@ -97,4 +97,4 @@ auto GetConstraintTypeNames() -> std::span<const std::string_view>
 {
     return g_constraintTypeNames;
 }
-} // namespace nc::physics
+} // namespace nc

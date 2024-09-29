@@ -8,10 +8,14 @@
 
 #include <variant>
 
-namespace nc::physics
+namespace nc
+{
+class RigidBody;
+
+namespace physics
 {
 class ConstraintManager;
-class RigidBody;
+} // namespace physics
 
 /**
  * @brief Type of a Constraint.
@@ -186,12 +190,12 @@ class Constraint
         auto GetId() const -> ConstraintId { return m_id; }
 
     private:
-        friend class ConstraintManager;
-        inline static ConstraintManager* s_manager = nullptr;
+        friend class physics::ConstraintManager;
+        inline static physics::ConstraintManager* s_manager = nullptr;
 
         ConstraintInfo m_info;
         Entity m_otherBody;
         ConstraintId m_id;
         bool m_enabled = true;
 };
-} // namespace nc::physics
+} // namespace nc

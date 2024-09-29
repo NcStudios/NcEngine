@@ -51,7 +51,7 @@ class ContactListenerTest : public ::testing::Test
         }
 
         auto CreateBody(nc::Entity entity,
-                        nc::physics::BodyType type,
+                        nc::BodyType type,
                         const JPH::Vec3& position,
                         const JPH::Vec3& halfExtents,
                         bool isTrigger = false) -> JPH::Body*
@@ -95,14 +95,14 @@ TEST_F(ContactListenerTest, InteractingObjects_generatesExpectedEvents)
     const auto entity2 = nc::Entity{100, 0, 0};
     auto body1 = CreateBody(
         entity1,
-        nc::physics::BodyType::Static,
+        nc::BodyType::Static,
         JPH::Vec3::sReplicate(0.0f),
         JPH::Vec3{5.0f, 0.5f, 5.0f}
     );
 
     auto body2 = CreateBody(
         entity2,
-        nc::physics::BodyType::Dynamic,
+        nc::BodyType::Dynamic,
         JPH::Vec3{0.0f, 1.0f, 0.0f},
         JPH::Vec3::sReplicate(0.5f)
     );
@@ -193,16 +193,15 @@ TEST_F(ContactListenerTest, Events_triggerVsDynamicAndKinematic_generatesExpecte
     const auto entity3 = nc::Entity{3, 0, 0};
     const auto entity4 = nc::Entity{4, 0, 0};
     const auto scale = JPH::Vec3::sReplicate(2.0f);
-    using nc::physics::BodyType;
 
-    auto dynamicTrigger1 = CreateBody(entity1, BodyType::Dynamic, JPH::Vec3{-0.5f, 1.0f, 0.0f}, scale, true);
-    auto dynamicTrigger2 = CreateBody(entity2, BodyType::Dynamic, JPH::Vec3{0.5f, 1.0f, 0.0f}, scale, true);
-    auto kinematicTrigger = CreateBody(entity3, BodyType::Static, JPH::Vec3{-0.5f, 0.0f, 0.0f}, scale, true);
+    auto dynamicTrigger1 = CreateBody(entity1, nc::BodyType::Dynamic, JPH::Vec3{-0.5f, 1.0f, 0.0f}, scale, true);
+    auto dynamicTrigger2 = CreateBody(entity2, nc::BodyType::Dynamic, JPH::Vec3{0.5f, 1.0f, 0.0f}, scale, true);
+    auto kinematicTrigger = CreateBody(entity3, nc::BodyType::Static, JPH::Vec3{-0.5f, 0.0f, 0.0f}, scale, true);
     auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
 
 
     // expect all triggers to detect hit against dynamic body
-    auto dynamic = CreateBody(entity4, BodyType::Dynamic, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
+    auto dynamic = CreateBody(entity4, nc::BodyType::Dynamic, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
@@ -220,7 +219,7 @@ TEST_F(ContactListenerTest, Events_triggerVsDynamicAndKinematic_generatesExpecte
     DestroyBody(dynamic->GetID());
 
     // expect all triggers to detect hit against dynamic body
-    auto kinematic = CreateBody(entity4, BodyType::Kinematic, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
+    auto kinematic = CreateBody(entity4, nc::BodyType::Kinematic, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
     EXPECT_EQ(0u, lastOnExit.size());
@@ -249,13 +248,12 @@ TEST_F(ContactListenerTest, Events_triggerVsTriggerAndStatic_generatesNoEvents)
     const auto staticEntity1 = nc::Entity{30, 0, nc::Entity::Flags::Static};
     const auto staticEntity2 = nc::Entity{40, 0, nc::Entity::Flags::Static};
     const auto scale = JPH::Vec3::sReplicate(2.0f);
-    using nc::physics::BodyType;
 
-    auto dynamicTrigger1 = CreateBody(entity1, BodyType::Dynamic, JPH::Vec3{-0.5f, 1.0f, 0.0f}, scale, true);
-    auto dynamicTrigger2 = CreateBody(entity2, BodyType::Dynamic, JPH::Vec3{0.5f, 1.0f, 0.0f}, scale, true);
-    auto kinematicTrigger = CreateBody(entity3, BodyType::Static, JPH::Vec3{-0.5f, 0.0f, 0.0f}, scale, true);
-    auto staticTrigger = CreateBody(staticEntity1, BodyType::Static, JPH::Vec3{0.5f, 0.0f, 0.0f}, scale, true);
-    auto staticNonTrigger = CreateBody(staticEntity2, BodyType::Static, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
+    auto dynamicTrigger1 = CreateBody(entity1, nc::BodyType::Dynamic, JPH::Vec3{-0.5f, 1.0f, 0.0f}, scale, true);
+    auto dynamicTrigger2 = CreateBody(entity2, nc::BodyType::Dynamic, JPH::Vec3{0.5f, 1.0f, 0.0f}, scale, true);
+    auto kinematicTrigger = CreateBody(entity3, nc::BodyType::Static, JPH::Vec3{-0.5f, 0.0f, 0.0f}, scale, true);
+    auto staticTrigger = CreateBody(staticEntity1, nc::BodyType::Static, JPH::Vec3{0.5f, 0.0f, 0.0f}, scale, true);
+    auto staticNonTrigger = CreateBody(staticEntity2, nc::BodyType::Static, JPH::Vec3{0.0f, 0.0f, 0.0f}, scale, false);
 
     Step();
     EXPECT_EQ(0u, lastOnEnter.size());
@@ -276,14 +274,14 @@ TEST_F(ContactListenerTest, Events_staticVsStatic_generatesNoEvents)
     const auto entity2 = nc::Entity{100, 0, nc::Entity::Flags::Static};
     auto body1 = CreateBody(
         entity1,
-        nc::physics::BodyType::Static,
+        nc::BodyType::Static,
         JPH::Vec3{0.0f, 0.0f, 0.0f},
         JPH::Vec3::sReplicate(2.0f)
     );
 
     auto body2 = CreateBody(
         entity2,
-        nc::physics::BodyType::Static,
+        nc::BodyType::Static,
         JPH::Vec3{0.0f, 1.0f, 0.0f},
         JPH::Vec3::sReplicate(2.0f)
     );
@@ -304,14 +302,14 @@ TEST_F(ContactListenerTest, Events_noCollisionEventsVsNoCollisionEvents_generate
     const auto entity2 = nc::Entity{100, 0, nc::Entity::Flags::NoCollisionNotifications};
     auto body1 = CreateBody(
         entity1,
-        nc::physics::BodyType::Dynamic,
+        nc::BodyType::Dynamic,
         JPH::Vec3{0.0f, 0.0f, 0.0f},
         JPH::Vec3::sReplicate(2.0f)
     );
 
     auto body2 = CreateBody(
         entity2,
-        nc::physics::BodyType::Dynamic,
+        nc::BodyType::Dynamic,
         JPH::Vec3{0.0f, 1.0f, 0.0f},
         JPH::Vec3::sReplicate(2.0f)
     );
@@ -332,14 +330,14 @@ TEST_F(ContactListenerTest, Events_staticVsNoCollisionEvents_generatesNoEvents)
     const auto entity2 = nc::Entity{100, 0, nc::Entity::Flags::NoCollisionNotifications};
     auto body1 = CreateBody(
         entity1,
-        nc::physics::BodyType::Static,
+        nc::BodyType::Static,
         JPH::Vec3{0.0f, 0.0f, 0.0f},
         JPH::Vec3::sReplicate(2.0f)
     );
 
     auto body2 = CreateBody(
         entity2,
-        nc::physics::BodyType::Dynamic,
+        nc::BodyType::Dynamic,
         JPH::Vec3{0.0f, 1.0f, 0.0f},
         JPH::Vec3::sReplicate(2.0f)
     );

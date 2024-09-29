@@ -22,6 +22,13 @@ struct Vector2;
 struct Vector3;
 struct Vector4;
 
+// Physics Types
+struct NcPhysics;
+struct CollisionListener;
+class Constraint;
+class RigidBody;
+struct Shape;
+
 namespace audio
 {
 struct NcAudio;
@@ -56,13 +63,4 @@ namespace net
 {
 class NetworkDispatcher;
 } // namespace net
-
-namespace physics
-{
-struct NcPhysics;
-struct CollisionListener;
-class Constraint;
-class RigidBody;
-struct Shape;
-} // namespace physics
 } // namespac nc

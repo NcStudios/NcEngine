@@ -8,14 +8,14 @@ class BodyManagerTest : public JoltApiFixture
     protected:
         static constexpr auto maxEntities = 10u;
         nc::ecs::ComponentPool<nc::Transform> transformPool;
-        nc::ecs::ComponentPool<nc::physics::RigidBody> rigidBodyPool;
+        nc::ecs::ComponentPool<nc::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;
         nc::physics::ConstraintManager constraintManager;
         nc::physics::BodyManager uut;
 
         BodyManagerTest()
             : transformPool{maxEntities, nc::ComponentHandler<nc::Transform>{}},
-              rigidBodyPool{maxEntities, nc::ComponentHandler<nc::physics::RigidBody>{}},
+              rigidBodyPool{maxEntities, nc::ComponentHandler<nc::RigidBody>{}},
               constraintManager{joltApi.physicsSystem, maxEntities},
               uut{
                   transformPool,
@@ -28,7 +28,7 @@ class BodyManagerTest : public JoltApiFixture
         {
         }
 
-        auto AddRigidBody(nc::Entity entity) -> nc::physics::RigidBody&
+        auto AddRigidBody(nc::Entity entity) -> nc::RigidBody&
         {
             transformPool.Emplace(entity, nc::Vector3::Zero(), nc::Quaternion::Identity(), nc::Vector3::One());
             return rigidBodyPool.Emplace(entity);
@@ -45,7 +45,7 @@ class BodyManagerTest : public JoltApiFixture
             return joltApi.physicsSystem.GetBodyInterfaceNoLock();
         }
 
-        auto GetBodyId(const nc::physics::RigidBody& rigidBody) -> JPH::BodyID
+        auto GetBodyId(const nc::RigidBody& rigidBody) -> JPH::BodyID
         {
             if (!rigidBody.IsInitialized())
             {

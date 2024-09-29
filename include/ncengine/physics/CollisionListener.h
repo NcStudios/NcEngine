@@ -9,7 +9,7 @@
 
 #include <functional>
 
-namespace nc::physics
+namespace nc
 {
 /** @brief Callback type for collision enter events. */
 using OnCollisionEnter_t = std::function<void(Entity self,
@@ -38,4 +38,4 @@ struct CollisionListener
     OnTriggerEnter_t onTriggerEnter = nullptr;
     OnTriggerExit_t onTriggerExit = nullptr;
 };
-} // namespace nc::physics
+} // namespace nc

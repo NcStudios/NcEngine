@@ -8,10 +8,13 @@ class Body;
 class BodyInterface;
 } // namespace JPH
 
-namespace nc::physics
+namespace nc
+{
+class RigidBody;
+
+namespace physics
 {
 class ShapeFactory;
-class RigidBody;
 
 struct BodyResult
 {
@@ -33,4 +36,5 @@ class BodyFactory
         JPH::BodyInterface* m_interface;
         ShapeFactory* m_shapeFactory;
 };
-} // namespace nc::physics
+} // namespace physics
+} // namespace nc

@@ -15,5 +15,5 @@ auto CreateToonRenderer(Entity entity, const std::any&) -> graphics::ToonRendere
 auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::SkeletalAnimator;
 auto CreateSpotLight(Entity entity, const std::any&) -> graphics::SpotLight;
 auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher;
-auto CreateRigidBody(Entity entity, const std::any&) -> physics::RigidBody;
+auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody;
 } // namespace nc

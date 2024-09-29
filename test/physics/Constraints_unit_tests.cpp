@@ -28,32 +28,32 @@ void ConstraintManager::UpdateConstraintTarget(Constraint&,
 
 TEST(ConstraintsTest, GetType_succeeds)
 {
-    auto uut = nc::physics::Constraint{
-        nc::physics::ConstraintInfo{}, // default constructs first type (FixedConstraint)
+    auto uut = nc::Constraint{
+        nc::ConstraintInfo{}, // default constructs first type (FixedConstraint)
         nc::Entity{},
         0u
     };
 
-    EXPECT_EQ(nc::physics::ConstraintType::FixedConstraint, uut.GetType());
+    EXPECT_EQ(nc::ConstraintType::FixedConstraint, uut.GetType());
 
-    uut.GetInfo() = nc::physics::FixedConstraintInfo{};
-    EXPECT_EQ(nc::physics::ConstraintType::FixedConstraint, uut.GetType());
+    uut.GetInfo() = nc::FixedConstraintInfo{};
+    EXPECT_EQ(nc::ConstraintType::FixedConstraint, uut.GetType());
 
-    uut.GetInfo() = nc::physics::PointConstraintInfo{};
-    EXPECT_EQ(nc::physics::ConstraintType::PointConstraint, uut.GetType());
+    uut.GetInfo() = nc::PointConstraintInfo{};
+    EXPECT_EQ(nc::ConstraintType::PointConstraint, uut.GetType());
 }
 
 TEST(ConstraintsTest, SetConstraintTarget_validTarget_passesTargetArgs)
 {
-    auto uut = nc::physics::Constraint{
-        nc::physics::FixedConstraintInfo{},
+    auto uut = nc::Constraint{
+        nc::FixedConstraintInfo{},
         nc::Entity{},
         0u
     };
 
     auto expectedEntity = nc::Entity{1, 0, 0};
     auto expectedJoltBody = static_cast<void*>(&expectedEntity); // anything works, stub won't dereference
-    auto newTarget = nc::physics::RigidBody{expectedEntity};
+    auto newTarget = nc::RigidBody{expectedEntity};
     newTarget.SetHandle(expectedJoltBody);
 
     uut.SetConstraintTarget(&newTarget);
@@ -66,8 +66,8 @@ TEST(ConstraintsTest, SetConstraintTarget_validTarget_passesTargetArgs)
 
 TEST(ConstraintsTest, SetConstraintTarget_nullTarget_passesDummyArgs)
 {
-    auto uut = nc::physics::Constraint{
-        nc::physics::FixedConstraintInfo{},
+    auto uut = nc::Constraint{
+        nc::FixedConstraintInfo{},
         nc::Entity{},
         0u
     };

@@ -64,7 +64,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
-    world.GetPool<physics::RigidBody>().Reserve(30ull);
+    world.GetPool<RigidBody>().Reserve(30ull);
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
         world.Emplace<Entity>({}),
@@ -109,16 +109,16 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         });
 
         world.Emplace<graphics::ToonRenderer>(ground);
-        auto& groundBody = world.Emplace<physics::RigidBody>(
+        auto& groundBody = world.Emplace<RigidBody>(
             ground,
-            physics::Shape::MakeBox(),
-            physics::RigidBodyInfo{
-                .freedom = physics::DegreeOfFreedom::Rotation
+            Shape::MakeBox(),
+            RigidBodyInfo{
+                .freedom = DegreeOfFreedom::Rotation
             }
         );
 
         groundBody.AddConstraint(
-            physics::SwingTwistConstraintInfo{
+            SwingTwistConstraintInfo{
                 .ownerTwistAxis = Vector3::Up(),
                 .targetTwistAxis = Vector3::Up(),
                 .swingLimit = 0.1f
@@ -137,16 +137,16 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             Vector4{0.9f, 0.1f, 0.7f, 1.0f}
         );
 
-        auto& triggerBody = world.Emplace<physics::RigidBody>(
+        auto& triggerBody = world.Emplace<RigidBody>(
             trigger,
-            physics::Shape::MakeBox(),
-            physics::RigidBodyInfo{
-                .flags = physics::RigidBodyFlags::Trigger
+            Shape::MakeBox(),
+            RigidBodyInfo{
+                .flags = RigidBodyFlags::Trigger
             }
         );
 
         triggerBody.AddConstraint(
-            physics::FixedConstraintInfo{
+            FixedConstraintInfo{
                 .ownerPosition = Vector3::Down() * 0.25f,
                 .targetPosition = Vector3::Up() * 0.5f
             },
@@ -200,16 +200,16 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<graphics::ToonRenderer>(capsule1, asset::CapsuleMesh);
     world.Emplace<graphics::ToonRenderer>(capsule2, asset::CapsuleMesh);
 
-    auto& box1Body = world.Emplace<physics::RigidBody>(box1);
-    auto& box2Body = world.Emplace<physics::RigidBody>(box2);
-    auto& sphere1Body = world.Emplace<physics::RigidBody>(sphere1);
-    auto& sphere2Body = world.Emplace<physics::RigidBody>(sphere2);
-    auto& capsule1Body = world.Emplace<physics::RigidBody>(capsule1);
-    auto& capsule2Body = world.Emplace<physics::RigidBody>(capsule2);
+    auto& box1Body = world.Emplace<RigidBody>(box1);
+    auto& box2Body = world.Emplace<RigidBody>(box2);
+    auto& sphere1Body = world.Emplace<RigidBody>(sphere1);
+    auto& sphere2Body = world.Emplace<RigidBody>(sphere2);
+    auto& capsule1Body = world.Emplace<RigidBody>(capsule1);
+    auto& capsule2Body = world.Emplace<RigidBody>(capsule2);
 
-    world.Emplace<physics::CollisionListener>(
+    world.Emplace<CollisionListener>(
         box1,
-        [](Entity, Entity, const physics::HitInfo&, ecs::Ecs) {},
+        [](Entity, Entity, const HitInfo&, ecs::Ecs) {},
         [](Entity, Entity, ecs::Ecs) {},
         [](Entity, Entity, ecs::Ecs) {},
         [](Entity, Entity, ecs::Ecs) {}
@@ -220,7 +220,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     capsule1Body.AddImpulse(Vector3::Up() * 5000.0f);
 
     box1Body.AddConstraint(
-        physics::PointConstraintInfo{
+        PointConstraintInfo{
             .ownerPosition = Vector3::Right() * 0.6f,
             .targetPosition = Vector3::Left() * 0.6f
         },
@@ -228,7 +228,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     );
 
     box2Body.AddConstraint(
-        physics::SliderConstraintInfo{
+        SliderConstraintInfo{
             .minLimit = -3.0f,
             .maxLimit = 3.0f
         },
@@ -236,12 +236,12 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     );
 
     sphere1Body.AddConstraint(
-        physics::DistanceConstraintInfo{},
+        DistanceConstraintInfo{},
         sphere2Body
     );
 
     capsule1Body.AddConstraint(
-        physics::HingeConstraintInfo{
+        HingeConstraintInfo{
             .ownerPosition = Vector3::Up(),
             .targetPosition = Vector3::Down()
         },

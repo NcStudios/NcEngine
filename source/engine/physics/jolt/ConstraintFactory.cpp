@@ -14,7 +14,7 @@ namespace
 {
 using namespace nc::physics;
 
-auto MakeConstraint(const FixedConstraintInfo& info,
+auto MakeConstraint(const nc::FixedConstraintInfo& info,
                     JPH::Body& first,
                     JPH::Body& second) -> JPH::Constraint*
 {
@@ -29,7 +29,7 @@ auto MakeConstraint(const FixedConstraintInfo& info,
     return settings.Create(first, second);
 }
 
-auto MakeConstraint(const PointConstraintInfo& info,
+auto MakeConstraint(const nc::PointConstraintInfo& info,
                     JPH::Body& first,
                     JPH::Body& second) -> JPH::Constraint*
 {
@@ -40,7 +40,7 @@ auto MakeConstraint(const PointConstraintInfo& info,
     return settings.Create(first, second);
 }
 
-auto MakeConstraint(const DistanceConstraintInfo& info,
+auto MakeConstraint(const nc::DistanceConstraintInfo& info,
                     JPH::Body& first,
                     JPH::Body& second) -> JPH::Constraint*
 {
@@ -55,7 +55,7 @@ auto MakeConstraint(const DistanceConstraintInfo& info,
     return settings.Create(first, second);
 }
 
-auto MakeConstraint(const HingeConstraintInfo& info,
+auto MakeConstraint(const nc::HingeConstraintInfo& info,
                     JPH::Body& first,
                     JPH::Body& second) -> JPH::Constraint*
 {
@@ -81,7 +81,7 @@ auto MakeConstraint(const HingeConstraintInfo& info,
     return settings.Create(first, second);
 }
 
-auto MakeConstraint(const SliderConstraintInfo& info,
+auto MakeConstraint(const nc::SliderConstraintInfo& info,
                     JPH::Body& first,
                     JPH::Body& second) -> JPH::Constraint*
 {
@@ -107,7 +107,7 @@ auto MakeConstraint(const SliderConstraintInfo& info,
     return settings.Create(first, second);
 }
 
-auto MakeConstraint(const SwingTwistConstraintInfo& info,
+auto MakeConstraint(const nc::SwingTwistConstraintInfo& info,
                     JPH::Body& first,
                     JPH::Body& second) -> JPH::Constraint*
 {

@@ -76,26 +76,26 @@ auto AssetCombo(std::string& selection) -> bool
     return nc::ui::Combobox(selection, "##assetcombo", g_assets);
 }
 
-auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh, nc::physics::BodyType type = nc::physics::BodyType::Dynamic) -> nc::physics::RigidBody&
+auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh, nc::BodyType type = nc::BodyType::Dynamic) -> nc::RigidBody&
 {
     auto shape = [&]()
     {
         if (mesh == nc::asset::CubeMesh)
-            return nc::physics::Shape::MakeBox();
+            return nc::Shape::MakeBox();
         else if (mesh == nc::asset::SphereMesh)
-            return nc::physics::Shape::MakeSphere();
+            return nc::Shape::MakeSphere();
         else if (mesh == nc::asset::CapsuleMesh)
-            return nc::physics::Shape::MakeCapsule();
+            return nc::Shape::MakeCapsule();
         else if (mesh == nc::sample::RampMesh) // todo: #693
-            return nc::physics::Shape::MakeBox();
+            return nc::Shape::MakeBox();
         else
             throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
     }();
 
-    return world.Emplace<nc::physics::RigidBody>(
+    return world.Emplace<nc::RigidBody>(
         entity,
         shape,
-        nc::physics::RigidBodyInfo{
+        nc::RigidBodyInfo{
             .type = type
         }
     );
@@ -368,7 +368,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
     });
 
     world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
+    world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
         .minPosition = Vector3{g_mapExtent * -0.4f, 1.0f, g_mapExtent * -0.4f},
@@ -422,7 +422,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             spawnBehavior,
             [world](Entity entity) mutable{
                 world.Emplace<graphics::MeshRenderer>(entity, ::static_body::Mesh, ::RandomPbrMaterial());
-                ::AddRigidBodyForMesh(world, entity, ::static_body::Mesh, physics::BodyType::Static);
+                ::AddRigidBodyForMesh(world, entity, ::static_body::Mesh, BodyType::Static);
             }
         );
 

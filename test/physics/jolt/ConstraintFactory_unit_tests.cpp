@@ -35,7 +35,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_FixedConstraint_twoBody_setsExpecte
         DestroyBody(body2);
     );
 
-    const auto inConstraint = nc::physics::FixedConstraintInfo{
+    const auto inConstraint = nc::FixedConstraintInfo{
         .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
         .ownerRight = nc::Vector3::Right(),
         .ownerUp = nc::Vector3::Up(),
@@ -71,7 +71,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_FixedConstraint_oneBody_setsExpecte
         DestroyBody(body1);
     );
 
-    const auto inConstraint = nc::physics::FixedConstraintInfo{
+    const auto inConstraint = nc::FixedConstraintInfo{
         .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
         .ownerRight = nc::Vector3::Right(),
         .ownerUp = nc::Vector3::Up(),
@@ -108,7 +108,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_PointConstraint_twoBody_setsExpecte
         DestroyBody(body2);
     );
 
-    const auto inConstraint = nc::physics::PointConstraintInfo{
+    const auto inConstraint = nc::PointConstraintInfo{
         .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
         .targetPosition = nc::Vector3{-1.0f, -2.0f, -3.0f}
     };
@@ -135,7 +135,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_PointConstraint_oneBody_setsExpecte
         DestroyBody(body1);
     );
 
-    const auto inConstraint = nc::physics::PointConstraintInfo{
+    const auto inConstraint = nc::PointConstraintInfo{
         .ownerPosition = nc::Vector3{1.0f, 2.0f, 3.0f},
         .targetPosition = nc::Vector3{-1.0f, -2.0f, -3.0f}
     };
@@ -163,12 +163,12 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_DistanceConstraint_twoBody_setsExpe
         DestroyBody(body2);
     );
 
-    const auto inConstraint = nc::physics::DistanceConstraintInfo{
+    const auto inConstraint = nc::DistanceConstraintInfo{
         .ownerPosition = nc::Vector3::Splat(2.0f),
         .targetPosition = nc::Vector3::Splat(3.0f),
         .minLimit = 2.0f,
         .maxLimit = 2.0f,
-        .springSettings = nc::physics::SpringSettings{
+        .springSettings = nc::SpringSettings{
             .frequency = 5.0f,
             .damping = 0.2f
         }
@@ -203,7 +203,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_DistanceConstraint_badValues_throws
         DestroyBody(body2);
     );
 
-    auto inConstraint = nc::physics::DistanceConstraintInfo{};
+    auto inConstraint = nc::DistanceConstraintInfo{};
 
     inConstraint.minLimit = -1.0f;
     EXPECT_THROW(uut.MakeConstraint(inConstraint, *body1, *body2), std::exception); // minLimit must be >= 0
@@ -223,7 +223,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_HingeConstraint_twoBody_setsExpecte
         DestroyBody(body2);
     );
 
-    const auto inConstraint = nc::physics::HingeConstraintInfo{
+    const auto inConstraint = nc::HingeConstraintInfo{
         .ownerPosition = nc::Vector3::Splat(2.0f),
         .ownerHingeAxis = nc::Vector3::Right(),
         .ownerNormalAxis = nc::Vector3::Up(),
@@ -233,7 +233,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_HingeConstraint_twoBody_setsExpecte
         .minLimit = -std::numbers::pi_v<float>,
         .maxLimit = std::numbers::pi_v<float>,
         .maxFrictionTorque = 100.0f,
-        .springSettings = nc::physics::SpringSettings{
+        .springSettings = nc::SpringSettings{
             .frequency = 20.0f,
             .damping = 2.0f
         }
@@ -273,7 +273,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_HingeConstraint_badValues_throws)
         DestroyBody(body2);
     );
 
-    auto inConstraint = nc::physics::HingeConstraintInfo{};
+    auto inConstraint = nc::HingeConstraintInfo{};
 
     inConstraint.minLimit = 1.0f;
     EXPECT_THROW(uut.MakeConstraint(inConstraint, *body1, *body2), std::exception); // minLimit must be <= 0
@@ -297,7 +297,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SliderConstraint_twoBody_setsExpect
         DestroyBody(body2);
     );
 
-    const auto inConstraint = nc::physics::SliderConstraintInfo{
+    const auto inConstraint = nc::SliderConstraintInfo{
         .ownerPosition = nc::Vector3::Splat(2.0f),
         .ownerSliderAxis = Normalize(nc::Vector3::Splat(1.0f)),
         .ownerNormalAxis = OrthogonalTo(Normalize(nc::Vector3::Splat(1.0f))),
@@ -307,7 +307,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SliderConstraint_twoBody_setsExpect
         .minLimit = -2.0f,
         .maxLimit = 2.0f,
         .maxFrictionForce = 100.0f,
-        .springSettings = nc::physics::SpringSettings{
+        .springSettings = nc::SpringSettings{
             .frequency = 2.0f,
             .damping = 0.1f
         }
@@ -347,7 +347,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SliderConstraint_badValues_throws)
         DestroyBody(body2);
     );
 
-    auto inConstraint = nc::physics::SliderConstraintInfo{};
+    auto inConstraint = nc::SliderConstraintInfo{};
 
     inConstraint.minLimit = 1.0f;
     EXPECT_THROW(uut.MakeConstraint(inConstraint, *body1, *body2), std::exception); // minLimit must be <= 0
@@ -371,7 +371,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SwingTwistConstraint_twoBody_setsEx
         DestroyBody(body2);
     );
 
-    const auto inConstraint = nc::physics::SwingTwistConstraintInfo{
+    const auto inConstraint = nc::SwingTwistConstraintInfo{
         .ownerPosition = nc::Vector3::Splat(2.0f),
         .ownerTwistAxis = nc::Vector3::Up(),
         .targetPosition = nc::Vector3::Splat(3.0f),
@@ -414,7 +414,7 @@ TEST_F(ConstraintFactoryTest, MakeConstraint_SwingTwistConstraint_badValues_thro
         DestroyBody(body2);
     );
 
-    auto inConstraint = nc::physics::SwingTwistConstraintInfo{};
+    auto inConstraint = nc::SwingTwistConstraintInfo{};
 
     // 0 <= limits <= pi
     inConstraint.swingLimit = -1.0f;
