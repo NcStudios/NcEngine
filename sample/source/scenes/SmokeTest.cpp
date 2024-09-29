@@ -4,7 +4,7 @@
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/audio/NcAudio.h"
-#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/NcGraphics.h"

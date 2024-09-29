@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 
 namespace nc
 {

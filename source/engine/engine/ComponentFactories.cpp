@@ -1,7 +1,7 @@
 #include "ComponentFactories.h"
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"

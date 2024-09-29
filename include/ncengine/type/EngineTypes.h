@@ -3,7 +3,7 @@
 #include "Type.h"
 
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
