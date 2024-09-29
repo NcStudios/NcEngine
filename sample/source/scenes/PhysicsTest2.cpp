@@ -268,21 +268,21 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
 
     world.Emplace<physics::CollisionListener>(
         head,
-        [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs world){
+        [](Entity, Entity other, const physics::HitInfo&, ecs::Ecs ecs){
             if (LogCollisionEvents)
-                log("collision enter", other, world);
+                log("collision enter", other, ecs);
         },
-        [](Entity, Entity other, ecs::Ecs world){
+        [](Entity, Entity other, ecs::Ecs ecs){
             if (LogCollisionEvents)
-                log("collision exit", other, world);
+                log("collision exit", other, ecs);
         },
-        [](Entity, Entity other, ecs::Ecs world){
+        [](Entity, Entity other, ecs::Ecs ecs){
             if (LogTriggerEvents)
-                log("trigger enter", other, world);
+                log("trigger enter", other, ecs);
         },
-        [](Entity, Entity other, ecs::Ecs world){
+        [](Entity, Entity other, ecs::Ecs ecs){
             if (LogTriggerEvents)
-                log("trigger exit", other, world);
+                log("trigger exit", other, ecs);
         }
     );
 
