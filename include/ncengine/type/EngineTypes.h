@@ -15,9 +15,8 @@
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
-#include "ncengine/physics/Collider.h"
-#include "ncengine/physics/ConcaveCollider.h"
-#include "ncengine/physics/PhysicsBody.h"
+#include "ncengine/physics/CollisionListener.h"
+#include "ncengine/physics/RigidBody.h"
 
 namespace nc::type
 {
@@ -27,9 +26,7 @@ REGISTER_TYPE(Vector4, PROPERTY(Vector4, x), PROPERTY(Vector4, y), PROPERTY(Vect
 REGISTER_TYPE(Quaternion, PROPERTY(Quaternion, x), PROPERTY(Quaternion, y), PROPERTY(Quaternion, z), PROPERTY(Quaternion, w));
 
 /** @todo Only registering names of these: */
-REGISTER_TYPE(CollisionLogic);
 REGISTER_TYPE(Entity);
-REGISTER_TYPE(FixedLogic);
 REGISTER_TYPE(FrameLogic);
 REGISTER_TYPE(Tag);
 REGISTER_TYPE(Transform);
@@ -43,7 +40,8 @@ REGISTER_TYPE(graphics::PointLight);
 REGISTER_TYPE(graphics::SkeletalAnimator);
 REGISTER_TYPE(graphics::SpotLight);
 REGISTER_TYPE(net::NetworkDispatcher);
-REGISTER_TYPE(physics::ConcaveCollider);
-REGISTER_TYPE(physics::Collider);
-REGISTER_TYPE(physics::PhysicsBody);
+REGISTER_TYPE(CollisionListener);
+REGISTER_TYPE(Constraint);
+REGISTER_TYPE(RigidBody);
+REGISTER_TYPE(Shape);
 } // namespace nc::type

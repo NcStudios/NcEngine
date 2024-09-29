@@ -76,30 +76,29 @@ auto AssetCombo(std::string& selection) -> bool
     return nc::ui::Combobox(selection, "##assetcombo", g_assets);
 }
 
-[[maybe_unused]]
-auto AddColliderForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::Collider&
+auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh, nc::BodyType type = nc::BodyType::Dynamic) -> nc::RigidBody&
 {
-    if (mesh == nc::asset::CubeMesh)
-        return world.Emplace<nc::physics::Collider>(entity, nc::physics::BoxProperties{});
-    else if (mesh == nc::asset::SphereMesh)
-        return world.Emplace<nc::physics::Collider>(entity, nc::physics::SphereProperties{});
-    else if (mesh == nc::asset::CapsuleMesh)
-        return world.Emplace<nc::physics::Collider>(entity, nc::physics::CapsuleProperties{});
-    else if (mesh == nc::sample::RampMesh)
-        return world.Emplace<nc::physics::Collider>(entity, nc::physics::HullProperties{.assetPath = nc::sample::RampHullCollider});
+    auto shape = [&]()
+    {
+        if (mesh == nc::asset::CubeMesh)
+            return nc::Shape::MakeBox();
+        else if (mesh == nc::asset::SphereMesh)
+            return nc::Shape::MakeSphere();
+        else if (mesh == nc::asset::CapsuleMesh)
+            return nc::Shape::MakeCapsule();
+        else if (mesh == nc::sample::RampMesh) // todo: #693
+            return nc::Shape::MakeBox();
+        else
+            throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
+    }();
 
-    throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
-}
-
-[[maybe_unused]]
-auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view mesh) -> nc::physics::RigidBody&
-{
-    if (mesh == nc::asset::CubeMesh)
-        return world.Emplace<nc::physics::RigidBody>(entity, nc::physics::Shape::MakeBox());
-    else if (mesh == nc::asset::SphereMesh)
-        return world.Emplace<nc::physics::RigidBody>(entity, nc::physics::Shape::MakeSphere());
-
-    throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
+    return world.Emplace<nc::RigidBody>(
+        entity,
+        shape,
+        nc::RigidBodyInfo{
+            .type = type
+        }
+    );
 }
 
 struct mesh_renderer
@@ -126,9 +125,9 @@ struct toon_renderer
     static inline std::string Mesh = std::string{nc::asset::CubeMesh};
 };
 
-struct collider
+struct static_body
 {
-    static constexpr auto name = "Collider";
+    static constexpr auto name = "Static Body";
     static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
@@ -138,9 +137,9 @@ struct collider
     static inline std::string Mesh = std::string{nc::asset::CubeMesh};
 };
 
-struct physics_body
+struct rigid_body
 {
-    static constexpr auto name = "Physics Body";
+    static constexpr auto name = "Rigid Body";
     static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
@@ -285,15 +284,15 @@ void Widget()
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<collider>(halfCellWidth, [cellWidth](){
+            InnerWidget<static_body>(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(collider::Mesh);
+                AssetCombo(static_body::Mesh);
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<physics_body>(halfCellWidth, [cellWidth](){
+            InnerWidget<rigid_body>(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(physics_body::Mesh);
+                AssetCombo(static_body::Mesh);
             });
 
             ImGui::TableNextRow();
@@ -369,8 +368,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
     });
 
     world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
-    world.Emplace<physics::Collider>(ground, physics::BoxProperties{});
-    world.Emplace<physics::RigidBody>(ground, physics::Shape::MakeBox());
+    world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
         .minPosition = Vector3{g_mapExtent * -0.4f, 1.0f, g_mapExtent * -0.4f},
@@ -415,7 +413,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::toon_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
-    // Collider
+    // Static Rigid Body
     {
         const auto handle = world.Emplace<Entity>({.tag = "Collider Spawner"});
         auto& spawner = world.Emplace<Spawner>(
@@ -423,18 +421,18 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, ::collider::Mesh, ::RandomPbrMaterial());
-                ::AddColliderForMesh(world, entity, ::collider::Mesh);
+                world.Emplace<graphics::MeshRenderer>(entity, ::static_body::Mesh, ::RandomPbrMaterial());
+                ::AddRigidBodyForMesh(world, entity, ::static_body::Mesh, BodyType::Static);
             }
         );
 
         world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
-        ::collider::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
-        ::collider::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
-        ::collider::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+        ::static_body::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::static_body::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::static_body::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
-    // Physics Body
+    // Rigid Body
     {
         const auto handle = world.Emplace<Entity>({.tag = "PhysicsBody Spawner"});
         auto& spawner = world.Emplace<Spawner>(
@@ -442,15 +440,15 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::ToonRenderer>(entity, ::physics_body::Mesh, ::RandomToonMaterial());
-                ::AddRigidBodyForMesh(world, entity, ::physics_body::Mesh);
+                world.Emplace<graphics::ToonRenderer>(entity, ::rigid_body::Mesh, ::RandomToonMaterial());
+                ::AddRigidBodyForMesh(world, entity, ::rigid_body::Mesh);
             }
         );
 
         world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
-        ::physics_body::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
-        ::physics_body::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
-        ::physics_body::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+        ::rigid_body::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::rigid_body::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::rigid_body::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
     // Point Light

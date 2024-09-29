@@ -1,12 +1,15 @@
 #pragma once
 
-#include "physics/NcPhysics.h"
-#include "ClickableSystem.h"
-#include "PhysicsPipeline.h"
-#include "collision/BspTree.h"
-#include "collision/broad_phase/SingleAxisPrune.h"
-#include "proxy/PerFrameProxyCache.h"
-#include "task/TaskGraph.h"
+#include "DeferredPhysicsCreateState.h"
+#include "jolt/JoltApi.h"
+#include "jolt/BodyManager.h"
+#include "jolt/ConstraintManager.h"
+#include "jolt/ShapeFactory.h"
+
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/physics/NcPhysics.h"
+#include "ncengine/physics/RigidBody.h"
+#include "ncengine/task/TaskGraph.h"
 
 namespace nc
 {
@@ -14,43 +17,44 @@ struct SystemEvents;
 
 namespace config
 {
+struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
 namespace physics
 {
-/** @brief Physics module implementation.
- * 
- * Handles the internal processing of Collider, ConcaveCollider, PhysicsBody, Joint, and IClickable types. */
 class NcPhysicsImpl final : public NcPhysics
 {
-    struct PipelineDescription
-    {
-        using multithreaded = std::true_type;
-        using proxy_cache = PerFrameProxyCache<Registry>;
-        using proxy = proxy_cache::proxy_type;
-        using broad_phase = SingleAxisPrune<proxy_cache>;
-        using concave_phase = BspTree;
-    };
-
     public:
-        NcPhysicsImpl(const config::PhysicsSettings& settings, Registry* registry, SystemEvents& events);
+        NcPhysicsImpl(const config::MemorySettings& memorySettings,
+                      const config::PhysicsSettings& physicsSettings,
+                      ecs::Ecs world,
+                      const task::AsyncDispatcher& dispatcher,
+                      SystemEvents& events,
+                      std::unique_ptr<DeferredPhysicsCreateState> deferredState);
 
-        void AddJoint(Entity entityA, Entity entityB, const Vector3& anchorA, const Vector3& anchorB, float bias = 0.2f, float softness = 0.0f) override;
-        void RemoveJoint(Entity entityA, Entity entityB) override;
-        void RemoveAllJoints(Entity entity) override;
-        void RegisterClickable(IClickable* clickable) override;
-        void UnregisterClickable(IClickable* clickable) noexcept override;
-        auto RaycastToClickables(LayerMask mask = LayerMaskAll) -> IClickable* override;
+        void Run();
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&) override;
+        void OnBeforeSceneLoad() override;
+        void OnBeforeSceneFragmentLoad() override;
+        void OnAfterSceneFragmentLoad() override;
         void Clear() noexcept override;
-        void BeginRigidBodyBatch(size_t) override {}
-        void EndRigidBodyBatch() override {}
+
+        auto IsUpdateEnabled() const -> bool override { return m_updateEnabled; }
+        void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
+        void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) override;
+        void EndRigidBodyBatch() override;
+
     private:
-        PhysicsPipeline<PipelineDescription> m_pipeline;
-        ClickableSystem m_clickableSystem;
-        float m_accumulatedTime;
-        unsigned m_currentIterations;
+        ecs::Ecs m_ecs;
+        JoltApi m_jolt;
+        ShapeFactory m_shapeFactory;
+        ConstraintManager m_constraintManager;
+        BodyManager m_bodyManager;
+        std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;
+        bool m_updateEnabled = true;
+
+        void SyncTransforms();
 };
 } // namespace physics
 } // namespace nc

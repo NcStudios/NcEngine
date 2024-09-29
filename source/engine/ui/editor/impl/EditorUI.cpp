@@ -145,7 +145,7 @@ void EditorUI::DrawMenu(EditorContext& ctx)
         {
             if (ImGui::BeginMenu("NcPhysics"))
             {
-                auto ncPhysics = ctx.modules.Get<physics::NcPhysics>();
+                auto ncPhysics = ctx.modules.Get<NcPhysics>();
                 auto enabled = ncPhysics->IsUpdateEnabled();
                 if (ui::Checkbox(enabled, "enableUpdate"))
                 {

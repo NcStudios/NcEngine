@@ -10,7 +10,7 @@
 #include <span>
 #include <string_view>
 
-namespace nc::physics
+namespace nc
 {
 auto ToString(BodyType type) -> std::string_view;
 auto ToBodyType(std::string_view bodyType) -> BodyType;
@@ -23,4 +23,4 @@ auto GetShapeTypeNames() -> std::span<const std::string_view>;
 auto ToString(ConstraintType type) -> std::string_view;
 auto ToConstraintType(std::string_view constraintType) -> ConstraintType;
 auto GetConstraintTypeNames() -> std::span<const std::string_view>;
-} // namespace nc::physics
+} // namespace nc
