@@ -45,13 +45,6 @@ class NcPhysicsImpl2 final : public NcPhysics
         void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) override;
         void EndRigidBodyBatch() override;
 
-        void AddJoint(Entity , Entity, const Vector3&, const Vector3&, float = 0.2f, float = 0.0f) override {}
-        void RemoveJoint(Entity, Entity ) override {}
-        void RemoveAllJoints(Entity) override {}
-        void RegisterClickable(IClickable*) override {}
-        void UnregisterClickable(IClickable*) noexcept override {}
-        auto RaycastToClickables(LayerMask = LayerMaskAll) -> IClickable* override { return nullptr; }
-
     private:
         ecs::Ecs m_ecs;
         JoltApi m_jolt;

@@ -31,13 +31,6 @@ class NcPhysicsStub2 : public nc::physics::NcPhysics
 
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
-        void AddJoint(nc::Entity, nc::Entity, const nc::Vector3&, const nc::Vector3&, float = 0.2f, float = 0.0f) override {}
-        void RemoveJoint(nc::Entity, nc::Entity) override {}
-        void RemoveAllJoints(nc::Entity) override {}
-        void RegisterClickable(nc::physics::IClickable*) override {}
-        void UnregisterClickable(nc::physics::IClickable*) noexcept override {}
-        auto RaycastToClickables(nc::physics::LayerMask) -> nc::physics::IClickable* override { return nullptr;}
-
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
             update.Add(
