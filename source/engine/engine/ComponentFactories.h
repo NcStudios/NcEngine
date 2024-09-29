@@ -7,8 +7,6 @@
 namespace nc
 {
 auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource;
-auto CreateCollisionLogic(Entity entity, const std::any&) -> CollisionLogic;
-auto CreateFixedLogic(Entity entity, const std::any&) -> FixedLogic;
 auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic;
 auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::ParticleEmitter;
 auto CreatePointLight(Entity entity, const std::any&) -> graphics::PointLight;

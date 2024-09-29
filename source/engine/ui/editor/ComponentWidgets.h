@@ -8,8 +8,6 @@ namespace nc::ui::editor
 {
 struct EditorContext;
 
-void CollisionLogicUIWidget(CollisionLogic& logic, EditorContext&, const std::any&);
-void FixedLogicUIWidget(FixedLogic& logic, EditorContext&, const std::any&);
 void FrameLogicUIWidget(FrameLogic& logic, EditorContext&, const std::any&);
 void TagUIWidget(Tag& tag, EditorContext&, const std::any&);
 void TransformUIWidget(Transform& transform, EditorContext&, const std::any&);

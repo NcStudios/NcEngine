@@ -20,16 +20,6 @@ auto CreateAudioSource(Entity entity, const std::any&) -> audio::AudioSource
     return audio::AudioSource{entity, {asset::DefaultAudioClip}};
 }
 
-auto CreateCollisionLogic(Entity entity, const std::any&) -> CollisionLogic
-{
-    return CollisionLogic{entity, nullptr, nullptr, nullptr, nullptr};
-}
-
-auto CreateFixedLogic(Entity entity, const std::any&) -> FixedLogic
-{
-    return FixedLogic{entity, nullptr};
-}
-
 auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic
 {
     return FrameLogic{entity, nullptr};

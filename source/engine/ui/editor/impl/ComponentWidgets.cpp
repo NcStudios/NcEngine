@@ -494,14 +494,6 @@ constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHa
 
 namespace nc::ui::editor
 {
-void CollisionLogicUIWidget(CollisionLogic&, EditorContext&, const std::any&)
-{
-}
-
-void FixedLogicUIWidget(FixedLogic&, EditorContext&, const std::any&)
-{
-}
-
 void FrameLogicUIWidget(FrameLogic&, EditorContext&, const std::any&)
 {
 }

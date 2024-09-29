@@ -26,9 +26,7 @@ REGISTER_TYPE(Vector4, PROPERTY(Vector4, x), PROPERTY(Vector4, y), PROPERTY(Vect
 REGISTER_TYPE(Quaternion, PROPERTY(Quaternion, x), PROPERTY(Quaternion, y), PROPERTY(Quaternion, z), PROPERTY(Quaternion, w));
 
 /** @todo Only registering names of these: */
-REGISTER_TYPE(CollisionLogic);
 REGISTER_TYPE(Entity);
-REGISTER_TYPE(FixedLogic);
 REGISTER_TYPE(FrameLogic);
 REGISTER_TYPE(Tag);
 REGISTER_TYPE(Transform);

@@ -14,8 +14,6 @@ class Module;
 class AnyComponent;
 class ComponentBase;
 class FreeComponent;
-class CollisionLogic;
-class FixedLogic;
 class FrameLogic;
 struct Tag;
 class Transform;
