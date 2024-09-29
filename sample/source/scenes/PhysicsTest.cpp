@@ -255,11 +255,11 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
         bodyNode3
     );
 
-    static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs world)
+    static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs ecs)
     {
         static const auto deletedTag = std::string{"deleted"};
-        const auto& tag = world.Contains<Tag>(other)
-            ? world.Get<Tag>(other).value
+        const auto& tag = ecs.Contains<Tag>(other)
+            ? ecs.Get<Tag>(other).value
             : deletedTag;
 
         GameLog::Log(fmt::format("Player {} with {} ({})", eventType, tag, other.Index()));
@@ -267,21 +267,21 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
 
     world.Emplace<CollisionListener>(
         head,
-        [](Entity, Entity other, const HitInfo&, ecs::Ecs world){
+        [](Entity, Entity other, const HitInfo&, ecs::Ecs ecs){
             if (LogCollisionEvents)
-                log("collision enter", other, world);
+                log("collision enter", other, ecs);
         },
-        [](Entity, Entity other, ecs::Ecs world){
+        [](Entity, Entity other, ecs::Ecs ecs){
             if (LogCollisionEvents)
-                log("collision exit", other, world);
+                log("collision exit", other, ecs);
         },
-        [](Entity, Entity other, ecs::Ecs world){
+        [](Entity, Entity other, ecs::Ecs ecs){
             if (LogTriggerEvents)
-                log("trigger enter", other, world);
+                log("trigger enter", other, ecs);
         },
-        [](Entity, Entity other, ecs::Ecs world){
+        [](Entity, Entity other, ecs::Ecs ecs){
             if (LogTriggerEvents)
-                log("trigger exit", other, world);
+                log("trigger exit", other, ecs);
         }
     );
 
@@ -841,16 +841,16 @@ void BuildTriggers(ecs::Ecs world)
     world.Emplace<RigidBody>(sphere, Shape::MakeSphere(), info);
     world.Emplace<RigidBody>(capsule, Shape::MakeCapsule(), info);
 
-    auto setPink = [](Entity self, Entity other, ecs::Ecs world)
+    auto setPink = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            world.Get<graphics::WireframeRenderer>(self).color = pink;
+            ecs.Get<graphics::WireframeRenderer>(self).color = pink;
     };
 
-    auto setWhite = [](Entity self, Entity other, ecs::Ecs world)
+    auto setWhite = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            world.Get<graphics::WireframeRenderer>(self).color = white;
+            ecs.Get<graphics::WireframeRenderer>(self).color = white;
     };
 
     world.Emplace<CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
