@@ -56,7 +56,7 @@ namespace nc
         m_dirty = true;
     }
 
-   void Transform::SetRotation(const Quaternion& quat)
+    void Transform::SetRotation(const Quaternion& quat)
     {
         DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
