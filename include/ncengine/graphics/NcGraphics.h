@@ -103,7 +103,7 @@ struct NcGraphics : public Module
  * @brief Get a collection of the graphics APIs that are supported on the platform and device.
  * @return A collection of the names of the supported graphics APIs.
  */
-auto GetSupportedApis() -> std::vector<std::string_view>;
+auto GetSupportedApis() -> std::span<const std::string_view>;
 
 /**
  * @brief Build an NcGraphics instance.

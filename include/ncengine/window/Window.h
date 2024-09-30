@@ -45,25 +45,16 @@ void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
 void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
 
 /** 
- * @brief The window's graphics API context.
- */
-enum class RenderApiContext : uint8_t
-{
-    None,  ///< No context. Used if headless, or for Vulkan, D3D11 and D3D12 rendering engines
-    OpenGL ///< OpenGL. Used for OpenGL rendering engines
-};
-
-/** 
  * @brief The window's create info.
  */
 struct WindowInfo
 {
-    Vector2 dimensions          = Vector2{640, 800};      ///< The window's dimensions.
-    RenderApiContext apiContext = RenderApiContext::None; ///< The window must be created with the target rendering engine in mind. None for Vulkan, D3D11, D3D12.
-    bool isHeadless             = false;                  ///< True if this is a headless window. Still receives input events.
-    bool useNativeResolution    = false;                  ///< True if the window should use the monitor's native resolution.
-    bool launchInFullScreen     = false;                  ///< True if the window should launch in full screen.
-    bool isResizable            = false;                  ///< True if the window is resizable.
+    Vector2 dimensions          = Vector2{640, 800}; ///< The window's dimensions.
+    bool isGL                   = false;             ///< The window must be created with the target rendering API in mind. True if the rendering API will be GL. None for Vulkan, D3D11, D3D12.
+    bool isHeadless             = false;             ///< True if this is a headless window. Still receives input events.
+    bool useNativeResolution    = false;             ///< True if the window should use the monitor's native resolution.
+    bool launchInFullScreen     = false;             ///< True if the window should launch in full screen.
+    bool isResizable            = false;             ///< True if the window is resizable.
 };
 
 /** @brief Window module interface.

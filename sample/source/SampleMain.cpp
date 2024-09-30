@@ -57,10 +57,11 @@ int main(int argc, char** argv)
                 throw std::runtime_error("No supported graphics APIs were found on the system.");
             }
 
-            if (!std::ranges::contains(supportedGraphicsApis, config.graphicsSettings.api))
+            const auto& targetApi = config.graphicsSettings.api;
+            if (!std::ranges::contains(supportedGraphicsApis, targetApi))
             {
-                NC_LOG_WARNING("The graphics API specified in the config was not found on the system.");
-                config.graphicsSettings.api = supportedGraphicsApis.at(0);
+                std::cerr << fmt::format("Warning: The target graphics API ({0}) was not found on the system. Falling back to: {1}.", targetApi, supportedGraphicsApis[0]);
+                config.graphicsSettings.api = supportedGraphicsApis[0];
             }
         }
 

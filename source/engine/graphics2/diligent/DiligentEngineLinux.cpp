@@ -1,15 +1,13 @@
 #include "DiligentEngine.h"
 #include "config/Config.h"
+#include "DiligentUtils.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
-#include "ncutility/NcError.h"
 
 #define GLFW_EXPOSE_NATIVE_X11 1
 
 #include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
-#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
@@ -17,16 +15,6 @@
 
 namespace
 {
-template<typename T>
-void RotateElementToBeginning(std::vector<T>& vectorToRotate, const T& elem)
-{
-    auto elemPos = std::ranges::find(vectorToRotate, elem);
-    NC_ASSERT(elemPos != vectorToRotate.end(), fmt::format("{0} was not present in the vector.", elem));
-    T element = *elemPos;
-    vectorToRotate.erase(elemPos);
-    vectorToRotate.insert(vectorToRotate.begin(), element);
-}
-
 void EnsureContextFlushed(Diligent::IDeviceContext* context)
 {
     if (context)
@@ -36,32 +24,20 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
+    const std::string_view& renderApi = graphicsSettings.api;
+    auto preferredApiOrder = std::vector<std::string_view>{};
+    preferredApiOrder.reserve(2);
+    std::ranges::copy(supportedApis, std::back_inserter(preferredApiOrder));
+    RotateElementToBeginning(preferredApiOrder, renderApi);
+
+    std::string errorMessage;
     LinuxNativeWindow window;
     window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_.GetWindowHandle()));
     window.pDisplay = glfwGetX11Display();
-
-    const auto& renderApi = graphicsSettings.api;
-    std::string errorMessage;
-
-    auto preferredApiOrder = std::vector<std::string_view> 
-    {
-        api::Vulkan,
-        api::OpenGL
-    };
-
-    if (renderApi == api::OpenGL)
-    {
-        RotateElementToBeginning(preferredApiOrder, api::OpenGL);
-    }
-    else if (renderApi != api::Vulkan)  // Vulkan already in front if renderApi is Vulkan
-    {
-        throw nc::NcError(fmt::format("API specified in the config: {0} is not in the list of potential APIs. Potential APIs: vulkan, opengl", renderApi));
-    }
-
     SwapChainDesc SCDesc;
 
     /* Initialize the device and context. First try to init the preferred API. Fall back to others on failure. */

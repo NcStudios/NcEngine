@@ -1,6 +1,6 @@
 #include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/platform/win32/NcWin32.h"
 
-#include <windows.h>
 #include <string_view>
 #include <vector>
 
@@ -19,21 +19,26 @@ auto CheckLibrary(char const* dllName) -> bool
 
 namespace nc::graphics
 {
-auto GetSupportedApis() -> std::vector<std::string_view>
+auto GetSupportedApis() -> std::span<const std::string_view>
 {
-    auto supportedApis = std::vector<std::string_view>{};
-    supportedApis.reserve(4);
-    supportedApis.push_back(api::OpenGL);
+    static const auto cachedApis = []()
+    {
+        auto supportedApis = std::vector<std::string_view>{};
+        supportedApis.reserve(4);
 
-    if (CheckLibrary("d3d12.dll"))
-        supportedApis.push_back(api::D3D12);
+        if (CheckLibrary("d3d12.dll"))
+            supportedApis.push_back(api::D3D12);
 
-    if (CheckLibrary("vulkan-1.dll"))
-        supportedApis.push_back(api::Vulkan);
+        if (CheckLibrary("vulkan-1.dll"))
+            supportedApis.push_back(api::Vulkan);
 
-    if (CheckLibrary("d3d11.dll"))
-        supportedApis.push_back(api::D3D11);
+        if (CheckLibrary("d3d11.dll"))
+            supportedApis.push_back(api::D3D11);
+
+        supportedApis.push_back(api::OpenGL);
+        return supportedApis;
+    }();
     
-    return supportedApis;
+    return cachedApis;
 }
 } // namespace nc::graphics

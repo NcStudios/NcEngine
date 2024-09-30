@@ -83,7 +83,7 @@ namespace nc::graphics
             ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .apiContext = graphicsSettings.api == api::OpenGL ? window::RenderApiContext::OpenGL : window::RenderApiContext::None,
+                .isGL = graphicsSettings.api == api::OpenGL,
                 .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
@@ -107,7 +107,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{graphicsSettings, window}
+          m_engine{graphicsSettings, window, GetSupportedApis()}
 {
     (void)graphicsSettings;
     (void)memorySettings;

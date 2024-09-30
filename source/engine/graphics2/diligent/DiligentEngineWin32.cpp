@@ -1,8 +1,8 @@
 #include "DiligentEngine.h"
 #include "config/Config.h"
+#include "DiligentUtils.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
-#include "ncutility/NcError.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32 1
 #ifdef GetObject
@@ -16,25 +16,14 @@
 #include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
 #include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
-#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
+#include <ranges>
 #include <string_view>
 
 namespace
 {
-template<typename T>
-void RotateElementToBeginning(std::vector<T>& vectorToRotate, const T& elem)
-{
-    auto elemPos = std::ranges::find(vectorToRotate, elem);
-    NC_ASSERT(elemPos != vectorToRotate.end(), fmt::format("{0} was not present in the vector.", elem));
-    T element = *elemPos;
-    vectorToRotate.erase(elemPos);
-    vectorToRotate.insert(vectorToRotate.begin(), element);
-}
-
 void EnsureContextFlushed(Diligent::IDeviceContext* context)
 {
     if (context)
@@ -44,40 +33,18 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
-    auto window = Win32NativeWindow{glfwGetWin32Window(window_.GetWindowHandle())};
+    const std::string_view& renderApi = graphicsSettings.api;
+    auto preferredApiOrder = std::vector<std::string_view>{};
+    preferredApiOrder.reserve(4);
+    std::ranges::copy(supportedApis, std::back_inserter(preferredApiOrder));
+    RotateElementToBeginning(preferredApiOrder, renderApi);
 
-    const auto& renderApi = graphicsSettings.api;
     std::string errorMessage;
-
-    auto preferredApiOrder = std::vector<std::string_view> 
-    {
-        api::D3D12,
-        api::Vulkan,
-        api::D3D11,
-        api::OpenGL
-    };
-
-    if (renderApi == api::Vulkan)
-    {
-        RotateElementToBeginning(preferredApiOrder, api::Vulkan);
-    }
-    else if (renderApi == api::D3D11)
-    {
-        RotateElementToBeginning(preferredApiOrder, api::D3D11);
-    }
-    else if (renderApi == api::OpenGL)
-    {
-        RotateElementToBeginning(preferredApiOrder, api::OpenGL);
-    }
-    else if (renderApi != api::D3D12) // D3D12 already in front if renderApi is D3D12
-    {
-        throw nc::NcError(fmt::format("API specified in the config: {0} is not in the list of potential APIs. Potential APIs: d3d12, vulkan, d3d11, opengl", renderApi));
-    }
-
+    auto window = Win32NativeWindow{glfwGetWin32Window(window_.GetWindowHandle())};
     SwapChainDesc SCDesc;
 
     /* Initialize the device and context. First try to init the preferred API. Fall back to others on failure. */

@@ -18,15 +18,20 @@ auto CheckLibrary(const char* soName) -> bool
 
 namespace nc::graphics
 {
-auto GetSupportedApis() -> std::vector<std::string_view>
+auto GetSupportedApis() -> std::span<const std::string_view>
 {
-    auto supportedApis = std::vector<std::string_view>{};
-    supportedApis.reserve(2);
-    supportedApis.push_back(api::OpenGL);
+    static const auto cachedApis = []()
+    {
+        supportedApis = std::vector<std::string_view>{};
+        supportedApis.reserve(2);
 
-    if (CheckLibrary("libvulkan.so"))
-        supportedApis.push_back(api::Vulkan);
-    
-    return supportedApis;
+        if (CheckLibrary("libvulkan.so"))
+            supportedApis.push_back(api::Vulkan);
+
+        supportedApis.push_back(api::OpenGL);
+        return supportedApis;
+    }();
+
+    return cachedApis;
 }
 } // namespace nc::graphics
