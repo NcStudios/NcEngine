@@ -16,13 +16,6 @@ else()
     set(VMA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/source/external/vma_fallback")
 endif()
 
-# NcCommon
-FetchContent_Declare(NcCommon
-                     GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
-                     GIT_TAG        origin/vnext
-                     GIT_SHALLOW    TRUE
-)
-
 # Taskflow
 set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -70,8 +63,23 @@ FetchContent_Declare(JoltPhysics
                      SOURCE_SUBDIR  "Build"
 )
 
+# DirectXMath
+FetchContent_Declare(DirectXMath
+                     GIT_REPOSITORY https://github.com/NcStudios/DirectXMath.git
+                     GIT_TAG        v3.1.6+nc.1
+                     GIT_SHALLOW    TRUE
+)
+
+# fmt - we only need because GCC hasn't implemented std::format yet. Can be removed eventually.
+set(FMT_INSTALL ON)
+FetchContent_Declare(fmt
+                     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+                     GIT_TAG        10.1.1
+                     GIT_SHALLOW    TRUE
+)
+
 # Fetch all required sources
-FetchContent_MakeAvailable(NcCommon taskflow glfw optick JoltPhysics)
+FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt)
 
 # Set Taskflow includes as system to prevent some warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)

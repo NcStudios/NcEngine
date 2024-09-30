@@ -874,6 +874,8 @@ WARN_LOGFILE           =
 INPUT                  = docs/DocsMainPage.md \
                          docs/EngineComponents.md \
                          docs/nc-convert.md \
+                         include/ncmath \
+                         include/ncutility \
                          include/ncengine \
                          include/ncasset
 
