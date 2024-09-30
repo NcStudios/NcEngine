@@ -81,11 +81,16 @@ FetchContent_Declare(fmt
 # Fetch all required sources
 FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt)
 
-# Set Taskflow includes as system to prevent some warnings
+# Silence warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
 
-# Set Jolt includes as system to prevent warnings
+get_target_property(_DirectXMath_Include_Prop DirectXMath INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(DirectXMath SYSTEM INTERFACE ${_DirectXMath_Include_Prop})
+
+get_target_property(_fmt_Include_Prop fmt INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(fmt SYSTEM INTERFACE ${_fmt_Include_Prop})
+
 get_target_property(_Jolt_Include_Prop Jolt INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Jolt SYSTEM INTERFACE ${_Jolt_Include_Prop})
 
@@ -97,6 +102,8 @@ if(NC_PROFILING_ENABLED AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
             -DJPH_EXTERNAL_PROFILE
     )
 endif()
+
+
 
 #############################
 ### Optional Dependencies ###
