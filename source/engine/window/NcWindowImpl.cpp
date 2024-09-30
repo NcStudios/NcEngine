@@ -8,6 +8,7 @@
 
 #include "ncmath/Math.h"
 #include "ncutility/NcError.h"
+#include "utility/Log.h"
 
 #include <algorithm>
 
@@ -48,19 +49,16 @@ namespace nc::window
         g_instance->UnregisterOnResizeReceiver(receiver);
     }
 
-    void SetWindow(WindowInfo windowInfo)
-    {
-        g_instance->SetWindow(windowInfo);
-    }
-
     auto BuildWindowModule(const config::ProjectSettings& projectSettings,
+                           bool isGraphicsEnabled,
                            Signal<>& quit) -> std::unique_ptr<NcWindow>
     {
-        return std::make_unique<NcWindowImpl>(projectSettings, quit);
+        return std::make_unique<NcWindowImpl>(projectSettings, isGraphicsEnabled, quit);
     }
 
     /* NcWindowImpl */
     NcWindowImpl::NcWindowImpl(const config::ProjectSettings& projectSettings,
+                               bool isGraphicsEnabled,
                                Signal<>& quit)
         : m_windowName{projectSettings.projectName},
           m_onResizeReceivers{},
@@ -76,23 +74,31 @@ namespace nc::window
             throw NcError(fmt::format("Failed to initialize GLFW: {} ({}).", error, code));
         }
 
-        SetWindow(WindowInfo
+        /* We only want a headless window created by default here if graphics is disabled. 
+           If graphics is enabled, the graphics module will set a new window (headless or otherwise)
+           and we don't need to create a window needlessly. */
+        if (!isGraphicsEnabled)
         {
-            .dimensions = Vector2{1, 1},
-            .apiContext = RenderApiContext::None,
-            .isHeadless = true,
-            .useNativeResolution = false,
-            .launchInFullScreen = false,
-            .isResizable = false
-        });
+            SetWindow(WindowInfo
+            {
+                .dimensions = Vector2{1, 1},
+                .apiContext = RenderApiContext::None,
+                .isHeadless = true,
+                .useNativeResolution = false,
+                .launchInFullScreen = false,
+                .isResizable = false
+            });
+        }
     }
 
     NcWindowImpl::~NcWindowImpl() noexcept
     {
-        glfwDestroyWindow(m_window);
+        if (m_window)
+        {
+            glfwDestroyWindow(m_window);
+        }
         glfwTerminate();
     }
-
 
     void NcWindowImpl::SetDimensions(int width, int height) noexcept
     {
@@ -144,9 +150,11 @@ namespace nc::window
 
             if (m_window)
             {
+                NC_LOG_TRACE("Tearing down the headless window.");
                 glfwDestroyWindow(m_window);
             }
             m_window = glfwCreateWindow(1, 1, m_windowName.c_str(), nullptr, nullptr);
+            NC_LOG_TRACE("Created a headless window.");
         }
         else
         {
@@ -176,9 +184,11 @@ namespace nc::window
 
             if (m_window)
             {
+                NC_LOG_TRACE("Tearing down the window.");
                 glfwDestroyWindow(m_window);
             }
             m_window = glfwCreateWindow(width, height, m_windowName.c_str(), monitor, nullptr);
+            NC_LOG_TRACE("Created a window.");
         }
 
         if(!m_window)
@@ -187,7 +197,6 @@ namespace nc::window
         }
 
         glfwGetWindowContentScale(m_window, &m_contentScale.x, &m_contentScale.y);
-
         glfwSetKeyCallback(m_window, &ProcessKeyEvent);
         glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
         glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);

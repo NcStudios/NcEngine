@@ -11,6 +11,7 @@
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
+#include "window/NcWindowImpl.h"
 
 #include "imgui/imgui.h"
 #include "optick.h"
@@ -79,11 +80,11 @@ namespace nc::graphics
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
-            window::SetWindow(window::WindowInfo
+            ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
                 .apiContext = window::RenderApiContext::None, // None for Vulkan, D3D11/12, or headless modes.
-                .isHeadless = false,
+                .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
                 .isResizable = false

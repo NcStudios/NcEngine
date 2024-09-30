@@ -6,6 +6,7 @@
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 #include "config/Config.h"
+#include "window/NcWindowImpl.h"
 
 #include "imgui/imgui.h"
 #include "optick.h"
@@ -79,21 +80,18 @@ namespace nc::graphics
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
-            auto renderApi = GetSupportedRenderApiByPlatform(graphicsSettings.targetApi);
-            /** @todo https://github.com/NcStudios/NcEngine/issues/734. Write the renderApi back to GraphicsSettings. */
-
-            window::SetWindow(window::WindowInfo
+            ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .apiContext = renderApi == api::OpenGL ? window::RenderApiContext::OpenGL : window::RenderApiContext::None,
-                .isHeadless = false,
+                .apiContext = graphicsSettings.api == api::OpenGL ? window::RenderApiContext::OpenGL : window::RenderApiContext::None,
+                .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
                 .isResizable = false
             });
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, registry, modules, events, *ncWindow, renderApi);
+            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, registry, modules, events, *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -106,11 +104,10 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  Registry* registry,
                                  ModuleProvider modules,
                                  SystemEvents& events,
-                                 window::NcWindow& window,
-                                 std::string_view renderApi)
+                                 window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{renderApi, window}
+          m_engine{graphicsSettings, window}
 {
     (void)graphicsSettings;
     (void)memorySettings;

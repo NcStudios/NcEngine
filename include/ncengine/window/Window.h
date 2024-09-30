@@ -58,16 +58,13 @@ enum class RenderApiContext : uint8_t
  */
 struct WindowInfo
 {
-    Vector2 dimensions          = Vector2{640, 800}; ///< The window's dimensions.
-    RenderApiContext apiContext = RenderApiContext::None;  ///< The window must be created with the target rendering engine in mind.
-    bool isHeadless             = false; ///< True if this is a headless window. Still receives input events.
-    bool useNativeResolution    = false; ///< True if the window should use the monitor's native resolution.
-    bool launchInFullScreen     = false; ///< True if the window should launch in full screen.
-    bool isResizable            = false; ///< True if the window is resizable.
+    Vector2 dimensions          = Vector2{640, 800};      ///< The window's dimensions.
+    RenderApiContext apiContext = RenderApiContext::None; ///< The window must be created with the target rendering engine in mind. None for Vulkan, D3D11, D3D12.
+    bool isHeadless             = false;                  ///< True if this is a headless window. Still receives input events.
+    bool useNativeResolution    = false;                  ///< True if the window should use the monitor's native resolution.
+    bool launchInFullScreen     = false;                  ///< True if the window should launch in full screen.
+    bool isResizable            = false;                  ///< True if the window is resizable.
 };
-
-/** @brief Set the window for the module. */
-void SetWindow(WindowInfo windowInfo);
 
 /** @brief Window module interface.
  * 
@@ -94,7 +91,7 @@ class NcWindow : public Module
         auto OnResize() noexcept -> Signal<const Vector2&, bool>& { return m_onResize; }
 
         /** @brief Set the window for the module. */
-        void SetWindow(WindowInfo windowInfo);
+        virtual void SetWindow(WindowInfo windowInfo) = 0;
 
         /**
          * @brief Process window and input events.
@@ -112,6 +109,7 @@ class NcWindow : public Module
 
 /** @brief Build an NcWindow module instance. */
 auto BuildWindowModule(const config::ProjectSettings& projectSettings,
+                       bool isGraphicsEnabled,
                        Signal<>& quit) -> std::unique_ptr<NcWindow>;
 } // namespace window
 } // namespace nc

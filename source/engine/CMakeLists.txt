@@ -35,6 +35,19 @@ set_target_properties(${NC_ENGINE_LIB}
     PROPERTIES CMAKE_DEBUG_POSTFIX d
 )
 
+SET(DILIGENT_LIBRARIES
+    Diligent-TargetPlatform
+    Diligent-GraphicsEngineOpenGL-shared
+    Diligent-GraphicsEngineVk-shared
+)
+
+if(WIN32)
+    list(APPEND DILIGENT_LIBRARIES 
+        Diligent-GraphicsEngineD3D11-shared 
+        Diligent-GraphicsEngineD3D12-shared
+    )
+endif()
+
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE
@@ -49,30 +62,8 @@ target_link_libraries(${NC_ENGINE_LIB}
         OptickCore
         RtAudio
         Jolt
+        ${DILIGENT_LIBRARIES}
 )
-
-# Link Diligent Library Dependencies
-target_link_libraries(${NC_ENGINE_LIB}
-    PUBLIC
-        Diligent-TargetPlatform
-)
-
-# Link Diligent Primary Libraries
-if(D3D11_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D11-shared)
-endif()
-if(D3D12_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineD3D12-shared)
-endif()
-if(GL_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineOpenGL-shared OpenGL::GL)
-    if (PLATFORM_LINUX)
-        target_link_libraries(${NC_ENGINE_LIB} PUBLIC X11::X11 OpenGL::GLX)
-    endif()
-endif()
-if(VULKAN_SUPPORTED)
-    target_link_libraries(${NC_ENGINE_LIB} PUBLIC Diligent-GraphicsEngineVk-shared)
-endif()
 
 if(WIN32)
     target_link_libraries(${NC_ENGINE_LIB}

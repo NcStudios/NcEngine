@@ -4,9 +4,11 @@
 #include "shared/Prefabs.h"
 
 #include "ncengine/NcEngine.h"
+#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/utility/Log.h"
 
 #include <iostream>
+#include <ranges>
 
 struct Args
 {
@@ -45,7 +47,23 @@ int main(int argc, char** argv)
     try
     {
         const auto args = ParseArgs(argc, argv);
-        const auto config = nc::config::Load(args.configPath);
+        auto config = nc::config::Load(args.configPath);
+
+        if (config.graphicsSettings.enabled)
+        {
+            auto supportedGraphicsApis = nc::graphics::GetSupportedApis();
+            if (supportedGraphicsApis.empty())
+            {
+                throw std::runtime_error("No supported graphics APIs were found on the system.");
+            }
+
+            if (!std::ranges::contains(supportedGraphicsApis, config.graphicsSettings.api))
+            {
+                NC_LOG_WARNING("The graphics API specified in the config was not found on the system.");
+                config.graphicsSettings.api = supportedGraphicsApis.at(0);
+            }
+        }
+
         engine = nc::InitializeNcEngine(config);
         nc::sample::InitializeResources();
 

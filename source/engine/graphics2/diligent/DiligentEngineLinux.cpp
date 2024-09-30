@@ -1,10 +1,10 @@
 #include "DiligentEngine.h"
+#include "config/Config.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 #include "ncutility/NcError.h"
 
 #define GLFW_EXPOSE_NATIVE_X11 1
-#include <dlfcn.h>
 
 #include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
@@ -27,52 +27,16 @@ void RotateElementToBeginning(std::vector<T>& vectorToRotate, const T& elem)
     vectorToRotate.insert(vectorToRotate.begin(), element);
 }
 
-auto CheckLibrary(const char* soName) -> bool
+void EnsureContextFlushed(Diligent::IDeviceContext* context)
 {
-    void* handle = dlopen(soName, RTLD_LAZY);
-    if (!handle) {
-        return false;
-    }
-    dlclose(handle);
-    return true;
+    if (context)
+        context->Flush();
 }
 } // anonymous namespace
 
 namespace nc::graphics
 {
-auto GetSupportedRenderApiByPlatform(std::string_view targetApi) -> std::string_view
-{
-    auto preferredLinuxApiOrder = std::vector<std::string_view> 
-    {
-        api::Vulkan,
-        api::OpenGL
-    };
-
-    if (targetApi == api::OpenGL)
-    {
-        RotateElementToBeginning(preferredLinuxApiOrder, api::OpenGL);
-    }
-    else if (targetApi != api::Vulkan)  // Vulkan already in front if targetApi is Vulkan
-    {
-        throw nc::NcError(fmt::format("Target API of {0} is not in the list of potential APIs. Potential APIs: vulkan, opengl", targetApi));
-    }
-
-    for (const auto& api : preferredLinuxApiOrder)
-    {
-        if (api == api::Vulkan)
-        {
-            if (CheckLibrary("libvulkan.so"))
-                return api;
-        }
-        else if (api == api::OpenGL)
-        {
-            return api;
-        }
-    }
-    throw nc::NcError("No supported API found from [vulkan, opengl]. Platform: Linux");
-}
-
-DiligentEngine::DiligentEngine(std::string_view renderApi, window::NcWindow& window_)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_)
 {
     using namespace Diligent;
 
@@ -80,43 +44,93 @@ DiligentEngine::DiligentEngine(std::string_view renderApi, window::NcWindow& win
     window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_.GetWindowHandle()));
     window.pDisplay = glfwGetX11Display();
 
+    const auto& renderApi = graphicsSettings.api;
+    std::string errorMessage;
+
+    auto preferredApiOrder = std::vector<std::string_view> 
+    {
+        api::Vulkan,
+        api::OpenGL
+    };
+
+    if (renderApi == api::OpenGL)
+    {
+        RotateElementToBeginning(preferredApiOrder, api::OpenGL);
+    }
+    else if (renderApi != api::Vulkan)  // Vulkan already in front if renderApi is Vulkan
+    {
+        throw nc::NcError(fmt::format("API specified in the config: {0} is not in the list of potential APIs. Potential APIs: vulkan, opengl", renderApi));
+    }
+
     SwapChainDesc SCDesc;
 
-    /* Initialize cross-api engine */
-    if (renderApi == api::Vulkan)
+    /* Initialize the device and context. First try to init the preferred API. Fall back to others on failure. */
+    for (const auto& api : preferredApiOrder)
     {
-        #if EXPLICITLY_LOAD_ENGINE_VK_DLL
-        auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
-        #endif
-        EngineVkCreateInfo engineCI;
-        auto* pFactoryVk = GetEngineFactoryVk();
-        pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
-        pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
-        m_renderApi = renderApi;
+        if (api == api::Vulkan)
+        {
+            try
+            {
+                #if EXPLICITLY_LOAD_ENGINE_VK_DLL
+                    auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
+                #endif
+
+                EngineVkCreateInfo engineCI;
+                auto* pFactoryVk = GetEngineFactoryVk();
+                pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
+
+                if (!graphicsSettings.isHeadless)
+                    pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
+                    
+                m_renderApi = api;
+                NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
+                break;
+            }
+            catch (const std::runtime_error& e)
+            {
+                EnsureContextFlushed(m_pImmediateContext);
+                NC_LOG_WARNING("Failed to initialize Vulkan.");
+                errorMessage = fmt::format("{0} Failed to initialize Vulkan: {1} \n", errorMessage, e.what());
+            }
+        }
+        else if (api == api::OpenGL)
+        {
+            try
+            {
+                #if EXPLICITLY_LOAD_ENGINE_GL_DLL
+                    auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
+                #endif
+
+                auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
+                EngineGLCreateInfo engineCI;
+                glfwMakeContextCurrent(window_.GetWindowHandle());
+                engineCI.Window = window;
+
+                if (!graphicsSettings.isHeadless)
+                    pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
+                
+                m_renderApi = api;
+                NC_LOG_TRACE("Successfully initialized the OpenGL rendering engine.");
+                break;
+            }
+            catch (const std::runtime_error& e)
+            {
+                EnsureContextFlushed(m_pImmediateContext);
+                NC_LOG_WARNING("Failed to initialize OpenGL.");
+                errorMessage = fmt::format("{0} Failed to initialize OpenGL: {1} \n", errorMessage, e.what());
+            }
+        }
     }
-    else if (renderApi == api::OpenGL)
+
+    if (m_renderApi == "" || errorMessage != "")
     {
-        #if EXPLICITLY_LOAD_ENGINE_GL_DLL
-        auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
-        #endif
-        auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-        EngineGLCreateInfo engineCI;
-        glfwMakeContextCurrent(window_.GetWindowHandle());
-        engineCI.Window = window;
-        pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
-        m_renderApi = renderApi;
-    }
-    else
-    {
-        throw nc::NcError("Failed to initialize the rendering engine. Unsupported rendering API value given.");
+        EnsureContextFlushed(m_pImmediateContext);
+        throw nc::NcError(fmt::format("Failed to initialize the rendering engine. The given API and all fallback APIs failed to initialize. {0}", errorMessage));
     }
 }
 
 DiligentEngine::~DiligentEngine() noexcept
 {
-    if (m_pImmediateContext)
-    {
-        m_pImmediateContext->Flush();
-    }
+    EnsureContextFlushed(m_pImmediateContext);
 }
 } // namespace nc::graphics

@@ -135,7 +135,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.memorySettings.maxParticles, actual.memorySettings.maxParticles);
 
     EXPECT_EQ(expected.graphicsSettings.enabled, actual.graphicsSettings.enabled);
-    EXPECT_EQ(expected.graphicsSettings.targetApi, actual.graphicsSettings.targetApi);
+    EXPECT_EQ(expected.graphicsSettings.api, actual.graphicsSettings.api);
     EXPECT_EQ(expected.graphicsSettings.useNativeResolution, actual.graphicsSettings.useNativeResolution);
     EXPECT_EQ(expected.graphicsSettings.launchInFullscreen, actual.graphicsSettings.launchInFullscreen);
     EXPECT_EQ(expected.graphicsSettings.screenWidth, actual.graphicsSettings.screenWidth);

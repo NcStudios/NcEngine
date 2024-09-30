@@ -24,6 +24,14 @@ struct ProjectSettings;
 
 namespace graphics
 {
+namespace api
+{
+constexpr std::string_view OpenGL   = std::string_view("opengl");
+constexpr std::string_view D3D11    = std::string_view("d3d11");
+constexpr std::string_view D3D12    = std::string_view("d3d12");
+constexpr std::string_view Vulkan   = std::string_view("vulkan");
+} // namespace api
+
 /** @brief Graphics module interface.
  * 
  * Update Tasks
@@ -90,6 +98,12 @@ struct NcGraphics : public Module
      */
     virtual void ClearEnvironment() = 0;
 };
+
+/**
+ * @brief Get a collection of the graphics APIs that are supported on the platform and device.
+ * @return A collection of the names of the supported graphics APIs.
+ */
+auto GetSupportedApis() -> std::vector<std::string_view>;
 
 /**
  * @brief Build an NcGraphics instance.

@@ -26,6 +26,7 @@ class NcWindowImpl : public NcWindow
 {
     public:
         NcWindowImpl(const config::ProjectSettings& projectSettings,
+                     bool isGraphicsEnabled,
                      Signal<>& quit);
         ~NcWindowImpl() noexcept;
         NcWindowImpl(const NcWindowImpl& other) = delete;
@@ -35,8 +36,8 @@ class NcWindowImpl : public NcWindow
 
         void RegisterOnResizeReceiver(IOnResizeReceiver* receiver);
         void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
+        void SetWindow(WindowInfo windowInfo) override;
         void ProcessSystemMessages() override;
-        void SetWindow(WindowInfo windowInfo);
 
     private:
         void SetDimensions(int width, int height) noexcept;
