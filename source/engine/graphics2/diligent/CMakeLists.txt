@@ -1,10 +1,9 @@
-if (PLATFORM_WIN32)
+if (WIN32)
     target_sources(${NC_ENGINE_LIB}
         PRIVATE
             DiligentEngineWin32.cpp
     )
-endif()
-if (PLATFORM_LINUX)
+elseif (UNIX AND NOT APPLE)
     target_sources(${NC_ENGINE_LIB}
         PRIVATE
             DiligentEngineLinux.cpp

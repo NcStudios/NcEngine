@@ -24,7 +24,7 @@ target_link_libraries(DiligentEngine_tests
 )
 
 # Diligent helper method to get required DLLs and EXEs into the project's executable dir.
-if(PLATFORM_WIN32)
+if(WIN32)
     copy_required_dlls(DiligentEngine_tests)
 endif()
 

@@ -3,13 +3,13 @@ target_sources(${NC_ENGINE_LIB}
         NcGraphicsImpl2.cpp
 )
 
-if (PLATFORM_WIN32)
+if (WIN32)
     target_sources(${NC_ENGINE_LIB}
         PRIVATE
             NcGraphicsImpl2Win32.cpp
     )
 endif()
-if (PLATFORM_LINUX)
+if (UNIX AND NOT APPLE)
     target_sources(${NC_ENGINE_LIB}
         PRIVATE
             NcGraphicsImpl2Linux.cpp

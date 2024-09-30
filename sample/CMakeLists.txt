@@ -29,7 +29,7 @@ target_link_libraries(${NC_SAMPLE_EXE}
 add_subdirectory(source)
 
 # Install
-if(PLATFORM_WIN32)
+if(WIN32)
     # Diligent helper method to get required DLLs and EXEs into the project's executable dir.
     copy_required_dlls(${NC_SAMPLE_EXE})
 
@@ -37,7 +37,7 @@ if(PLATFORM_WIN32)
             DESTINATION    sample
             FILES_MATCHING REGEX ".*\.(dll)" # Diligent DLLs and EXEs
 )
-elseif(PLATFORM_LINUX)
+elseif(UNIX AND NOT APPLE)
     set_target_properties(${NC_SAMPLE_EXE}
         PROPERTIES
             INSTALL_RPATH "$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineOpenGL;$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
