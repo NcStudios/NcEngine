@@ -4,12 +4,6 @@
 
 include(FetchContent)
 
-# OpenGL
-find_package(OpenGL REQUIRED)
-if (UNIX)
-    find_package(X11 REQUIRED)
-endif()
-
 # Vulkan
 find_package(Vulkan REQUIRED)
 

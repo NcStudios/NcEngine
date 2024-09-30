@@ -56,11 +56,9 @@ namespace nc
         m_dirty = true;
     }
 
-    void Transform::SetRotation(const Quaternion& quat)
+   void Transform::SetRotation(const Quaternion& quat)
     {
-        DirectX::XMVECTOR pos_v = DirectX::XMVectorZero();
-        DirectX::XMVECTOR rot_v = DirectX::XMQuaternionIdentity();
-        DirectX::XMVECTOR scl_v = DirectX::XMVectorZero();
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
         m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
                         ToRotMatrix(quat) *
@@ -70,9 +68,7 @@ namespace nc
 
     void Transform::SetRotation(const Vector3& angles)
     {
-        DirectX::XMVECTOR pos_v = DirectX::XMVectorZero();
-        DirectX::XMVECTOR rot_v = DirectX::XMQuaternionIdentity();
-        DirectX::XMVECTOR scl_v = DirectX::XMVectorZero();
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
         m_localMatrix = DirectX::XMMatrixScalingFromVector(scl_v) *
                         ToRotMatrix(angles) *
@@ -83,9 +79,7 @@ namespace nc
     void Transform::SetScale(const Vector3& scale)
     {
         NC_ASSERT(!HasAnyZeroElement(scale), "Invalid scale(elements cannot be 0)");
-        DirectX::XMVECTOR pos_v = DirectX::XMVectorZero();
-        DirectX::XMVECTOR rot_v = DirectX::XMQuaternionIdentity();
-        DirectX::XMVECTOR scl_v = DirectX::XMVectorZero();
+        DirectX::XMVECTOR scl_v, rot_v, pos_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_localMatrix);
         m_localMatrix = ToScaleMatrix(scale) *
                         DirectX::XMMatrixRotationQuaternion(rot_v) *
@@ -111,9 +105,7 @@ namespace nc
     void Transform::TranslateLocalSpace(const Vector3& translation)
     {
         auto trans_v = ToXMVector(translation);
-        DirectX::XMVECTOR pos_v = DirectX::XMVectorZero();
-        DirectX::XMVECTOR rot_v = DirectX::XMQuaternionIdentity();
-        DirectX::XMVECTOR scl_v = DirectX::XMVectorZero();
+        DirectX::XMVECTOR pos_v, rot_v, scl_v;
         DirectX::XMMatrixDecompose(&scl_v, &rot_v, &pos_v, m_worldMatrix);
         trans_v = DirectX::XMVector3Transform(trans_v, DirectX::XMMatrixRotationQuaternion(rot_v));
         trans_v = DirectX::XMVectorAndInt(trans_v, DirectX::g_XMMask3); //zero w component
