@@ -3,18 +3,60 @@
 #include "EnvironmentSystem.h"
 #include "SkeletalAnimationSystem.h"
 #include "graphics/Camera.h"
-#include "physics/collision/IntersectionQueries.h"
 
+#include "ncmath/DirectXMathUtility.h"
 #include "optick.h"
 
 namespace
 {
+enum class HalfspaceContainment
+{
+    Intersecting,
+    Positive,
+    Negative
+};
+
+auto TestHalfspace(const nc::Plane& plane, const nc::Sphere& sphere) -> HalfspaceContainment
+{
+    float dist = nc::Dot(plane.normal, sphere.center) - plane.d;
+
+    if(std::abs(dist) <= sphere.radius)
+        return HalfspaceContainment::Intersecting;
+    else if(dist > 0.0f)
+        return HalfspaceContainment::Positive;
+    
+    return HalfspaceContainment::Negative;
+}
+
+bool Intersect(const nc::Frustum& a, const nc::Sphere& b)
+{
+    if(auto space = TestHalfspace(a.front, b); space != HalfspaceContainment::Positive)
+        return space == HalfspaceContainment::Intersecting ? true : false;
+
+    if(auto space = TestHalfspace(a.left, b); space != HalfspaceContainment::Positive)
+        return space == HalfspaceContainment::Intersecting ? true : false;
+
+    if(auto space = TestHalfspace(a.right, b); space != HalfspaceContainment::Positive)
+        return space == HalfspaceContainment::Intersecting ? true : false;
+
+    if(auto space = TestHalfspace(a.top, b); space != HalfspaceContainment::Positive)
+        return space == HalfspaceContainment::Intersecting ? true : false;
+
+    if(auto space = TestHalfspace(a.bottom, b); space != HalfspaceContainment::Positive)
+        return space == HalfspaceContainment::Intersecting ? true : false;
+
+    if(auto space = TestHalfspace(a.back, b); space != HalfspaceContainment::Positive)
+        return space == HalfspaceContainment::Intersecting ? true : false;
+
+    return true;
+}
+
 bool IsViewedByFrustum(const nc::Frustum& frustum, float maxMeshExtent, DirectX::FXMMATRIX transform)
 {
     const auto maxScaleExtent = nc::GetMaxScaleExtent(transform);
     auto sphere = nc::Sphere{ .center = nc::Vector3::Zero(), .radius = maxScaleExtent * maxMeshExtent };
     DirectX::XMStoreVector3(&sphere.center, transform.r[3]);
-    return nc::physics::Intersect(frustum, sphere);
+    return Intersect(frustum, sphere);
 }
 
 template<typename T>

@@ -38,6 +38,12 @@ class Module
         /** @brief Called on registered modules prior to loading a new scene. */
         virtual void OnBeforeSceneLoad() {}
 
+        /** @brief Called on registered modules immediately before loading a SceneFragment file. */
+        virtual void OnBeforeSceneFragmentLoad() {}
+
+        /** @brief Called on registered modules immediately after loading a SceneFragment file. */
+        virtual void OnAfterSceneFragmentLoad() {}
+
         /** @brief Called on registered modules prior to clearing the Registry. This
          *         includes Scene::Unload() and NcEngine::Shutdown(). */
         virtual void Clear() noexcept {}

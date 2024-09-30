@@ -9,12 +9,6 @@ option(NC_BUILD_TESTS "Enable building tests." OFF)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
-# Jolt feature flag
-option(NC_USE_JOLT "Enable JoltPhysics" OFF)
-if(NC_USE_JOLT)
-    add_definitions(-DNC_USE_JOLT)
-endif()
-
 # Diligent feature flag
 option(NC_USE_DILIGENT "Enable DiligentGraphics" OFF)
 if(NC_USE_DILIGENT)
@@ -54,6 +48,10 @@ else()
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_SAMPLE_EXE "Sample")
+endif()
+
+if(NC_PROFILING_ENABLED)
+    list(APPEND NC_COMPILE_DEFINITIONS NC_PROFILING_ENABLED)
 endif()
 
 # TODO: #494 Remove usage of aligned_storage

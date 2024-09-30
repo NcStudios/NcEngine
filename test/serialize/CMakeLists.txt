@@ -7,9 +7,6 @@ add_executable(ComponentSerialization_integration_tests
     ${NC_SOURCE_DIR}/graphics/components/MeshRenderer.cpp
     ${NC_SOURCE_DIR}/graphics/components/ParticleEmitter.cpp
     ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
-    ${NC_SOURCE_DIR}/physics/Collider.cpp
-    ${NC_SOURCE_DIR}/physics/ConcaveCollider.cpp
-    ${NC_SOURCE_DIR}/physics/PhysicsBody.cpp
 )
 
 target_include_directories(ComponentSerialization_integration_tests

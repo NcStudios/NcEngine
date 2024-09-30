@@ -9,7 +9,7 @@
 #include <array>
 #include <span>
 
-namespace nc::physics
+namespace nc
 {
 /** @brief A list of contact points on a RigidBody. */
 class Contacts
@@ -45,4 +45,4 @@ struct HitInfo
     Contacts contactsOnFirst;
     Contacts contactsOnSecond;
 };
-} // namespace nc::physics
+} // namespace nc

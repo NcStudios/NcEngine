@@ -192,13 +192,15 @@ void SaveSceneFragment(std::ostream& stream,
 
 void LoadSceneFragment(std::istream& stream,
                        ecs::Ecs ecs,
-                       asset::NcAsset& assetModule)
+                       ModuleProvider modules)
 {
     NC_LOG_TRACE("Loading SceneFragment");
+    modules.ForEachModule(&Module::OnBeforeSceneFragmentLoad);
     auto ctx = DeserializationContext{.entityMap = {}, .ecs = ecs};
     LoadHeader(stream);
-    LoadAssets(stream, assetModule);
+    LoadAssets(stream, *modules.Get<asset::NcAsset>());
     LoadEntities(stream, ctx);
     LoadComponentPools(stream, ctx);
+    modules.ForEachModule(&Module::OnAfterSceneFragmentLoad);
 }
 } // namespace nc
