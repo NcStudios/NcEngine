@@ -1,5 +1,5 @@
 #include "LogicTypes.h"
-#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 
 namespace nc
 {

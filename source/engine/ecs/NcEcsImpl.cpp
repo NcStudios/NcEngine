@@ -3,8 +3,7 @@
 #include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
-#include "ncengine/ecs/Logic.h"
-#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/Events.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/time/Time.h"
@@ -63,10 +62,10 @@ void EcsModule::RunFrameLogic()
 {
     NC_PROFILE_TASK("RunFrameLogic", ProfileCategory::GameLogic);
     const float dt = time::DeltaTime();
-    auto legacyRegistry = Registry{*m_registry};
+    auto world = ecs::Ecs{*m_registry};
     for(auto& logic : m_registry->GetPool<FrameLogic>().GetComponents())
     {
-        logic.Run(&legacyRegistry, dt);
+        logic.Run(world, dt);
     }
 }
 

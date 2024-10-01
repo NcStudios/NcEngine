@@ -193,10 +193,10 @@ struct entity_hierarchy
     static inline unsigned DestroyCount = 1;
     static inline unsigned HierarchySize = 200;
 
-    static void Rotate(nc::Entity self, nc::Registry* registry, float dt)
+    static void Rotate(nc::Entity self, nc::ecs::Ecs world, float dt)
     {
-        auto transform = registry->Get<nc::Transform>(self);
-        transform->Rotate(nc::Vector3::Up(), 0.3f * dt);
+        auto& transform = world.Get<nc::Transform>(self);
+        transform.Rotate(nc::Vector3::Up(), 0.3f * dt);
     }
 
     static void AttachChildren(nc::ecs::Ecs world, nc::Entity root)
