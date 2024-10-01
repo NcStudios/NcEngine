@@ -20,6 +20,17 @@ struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
+struct Ray
+{
+    Vector3 origin;
+    Vector3 direction;
+};
+
+struct RayCastResult
+{
+    Entity hit = Entity::Null();
+};
+
 /** @brief Physics module interface
  * 
  * Tasks
@@ -53,6 +64,8 @@ struct NcPhysics : public Module
      */
     virtual void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) = 0;
     virtual void EndRigidBodyBatch() = 0;
+
+    virtual auto RayCast(const Ray& ray) -> RayCastResult = 0;
 };
 
 /** @brief Build an NcPhysics module instance. */

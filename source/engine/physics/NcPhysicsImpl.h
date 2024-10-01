@@ -3,6 +3,7 @@
 #include "DeferredPhysicsCreateState.h"
 #include "jolt/JoltApi.h"
 #include "jolt/BodyManager.h"
+#include "jolt/Caster.h"
 #include "jolt/ConstraintManager.h"
 #include "jolt/ShapeFactory.h"
 
@@ -44,6 +45,7 @@ class NcPhysicsImpl final : public NcPhysics
         void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
         void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) override;
         void EndRigidBodyBatch() override;
+        auto RayCast(const Ray& ray) -> RayCastResult override;
 
     private:
         ecs::Ecs m_ecs;
@@ -51,6 +53,7 @@ class NcPhysicsImpl final : public NcPhysics
         ShapeFactory m_shapeFactory;
         ConstraintManager m_constraintManager;
         BodyManager m_bodyManager;
+        Caster m_caster;
         std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;
         bool m_updateEnabled = true;
 
