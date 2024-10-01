@@ -7,69 +7,27 @@
 
 namespace nc::sample
 {
-void WasdBasedMovement(Entity self, Registry* registry, float dt)
+void WasdBasedMovement(Entity self, ecs::Ecs world, float dt)
 {
     static constexpr float speed = 2.0f;
     auto [leftRight, frontBack] = input::GetAxis() * speed * dt;
     auto q = KeyHeld(input::KeyCode::Q);
     auto e = KeyHeld(input::KeyCode::E);
     auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * speed * dt;
-    registry->Get<Transform>(self)->Translate(Vector3{leftRight, upDown, frontBack});
+    world.Get<Transform>(self).Translate(Vector3{leftRight, upDown, frontBack});
 }
 
-void WasdBasedSimulatedBodyMovement(Entity self, Registry* registry, float dt)
+void WasdBasedSimulatedBodyMovement(Entity self, ecs::Ecs world, float dt)
 {
     static constexpr float speed = 2.0f;
     auto [leftRight, frontBack] = input::GetAxis() * speed * dt;
     auto q = KeyHeld(input::KeyCode::Q);
     auto e = KeyHeld(input::KeyCode::E);
     auto upDown = (static_cast<float>(q) - static_cast<float>(e)) * speed * dt;
-    auto transform = registry->Get<Transform>(self);
-    registry->Get<RigidBody>(self)->SetSimulatedBodyPosition(
-        *transform,
-        transform->Position() + Vector3{leftRight, upDown, frontBack}
+    auto& transform = world.Get<Transform>(self);
+    world.Get<RigidBody>(self).SetSimulatedBodyPosition(
+        transform,
+        transform.Position() + Vector3{leftRight, upDown, frontBack}
     );
 }
-
-void DestroyOnTriggerExit(Entity, Entity hit, Registry* registry)
-{
-    if(registry->Contains<Entity>(hit))
-        registry->Remove<Entity>(hit);
-}
-
-void LogOnCollisionEnter(Entity, Entity hit, Registry* registry)
-{
-    if(registry->Contains<Entity>(hit))
-    {
-        auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Collision Enter: "} + tag->value.c_str());
-    }
-}
-
-void LogOnCollisionExit(Entity, Entity hit, Registry* registry)
-{
-    if(registry->Contains<Entity>(hit))
-    {
-        auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Collision Exit: "} + tag->value.c_str());
-    }
-}
-
-void LogOnTriggerEnter(Entity, Entity hit, Registry* registry)
-{
-    if(registry->Contains<Entity>(hit))
-    {
-        auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Trigger Enter: "} + tag->value.c_str());
-    }
-}
-
-void LogOnTriggerExit(Entity, Entity hit, Registry* registry)
-{
-    if(registry->Contains<Entity>(hit))
-    {
-        auto* tag = registry->Get<Tag>(hit);
-        GameLog::Log(std::string{"Trigger Exit: "} + tag->value.c_str());
-    }
-}
-}
+} // namespace nc::sample

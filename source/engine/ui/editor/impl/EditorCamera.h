@@ -1,14 +1,13 @@
 #pragma once
 
 #include "ncengine/ecs/Component.h"
+#include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/module/ModuleProvider.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 
 namespace nc
 {
-class Registry;
-
 namespace ui::editor
 {
 class EditorCamera : public graphics::SceneNavigationCamera
@@ -19,9 +18,9 @@ class EditorCamera : public graphics::SceneNavigationCamera
         {
         }
 
-        void Run(Entity, Registry* registry, float dt);
+        void Run(Entity, ecs::Ecs world, float dt);
         void Enable();
-        void Disable(Registry* registry);
+        void Disable(ecs::Ecs world);
 
     private:
         ModuleProvider m_modules;

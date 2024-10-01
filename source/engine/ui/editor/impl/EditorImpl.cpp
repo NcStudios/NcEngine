@@ -1,7 +1,7 @@
 #include "ui/editor/Editor.h"
 #include "EditorCamera.h"
 #include "EditorUI.h"
-#include "ncengine/ecs/Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/window/Window.h"
