@@ -22,7 +22,7 @@ auto GetSupportedApis() -> std::span<const std::string_view>
 {
     static const auto cachedApis = []()
     {
-        supportedApis = std::vector<std::string_view>{};
+        auto supportedApis = std::vector<std::string_view>{};
         supportedApis.reserve(2);
 
         if (CheckLibrary("libvulkan.so"))
