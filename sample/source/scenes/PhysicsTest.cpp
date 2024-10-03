@@ -115,9 +115,9 @@ struct FollowCamera : public graphics::Camera
     {
     }
 
-    void Run(Entity, Registry* registry, float dt)
+    void Run(Entity, ecs::Ecs world, float dt)
     {
-        if (!target.Valid() || !registry->Contains<Transform>(target))
+        if (!target.Valid() || !world.Contains<Transform>(target))
         {
             return;
         }
@@ -129,21 +129,21 @@ struct FollowCamera : public graphics::Camera
             followDistance = Clamp(followDistance + delta, -MaxDistance, -MinDistance);
         }
 
-        const auto targetPos = registry->Get<Transform>(target)->Position();
+        const auto targetPos = world.Get<Transform>(target).Position();
         const auto offset = Vector3{0.0f, followHeight, followDistance};
         const auto desiredPos = targetPos + offset;
-        auto selfTransform = registry->Get<Transform>(ParentEntity());
-        const auto delta = desiredPos - selfTransform->Position();
-        selfTransform->Translate(delta * (speed * dt * dt));
+        auto& selfTransform = world.Get<Transform>(ParentEntity());
+        const auto delta = desiredPos - selfTransform.Position();
+        selfTransform.Translate(delta * (speed * dt * dt));
 
-        const auto camToTarget = targetPos - selfTransform->Position();
+        const auto camToTarget = targetPos - selfTransform.Position();
         const auto forward = nc::Normalize(camToTarget);
         const auto cosTheta = nc::Dot(nc::Vector3::Front(), forward);
         const auto angle = std::acos(cosTheta);
         const auto axis = nc::Normalize(nc::CrossProduct(nc::Vector3::Front(), forward));
         const auto desiredRot = nc::Quaternion::FromAxisAngle(axis, angle);
-        const auto curRot = selfTransform->Rotation();
-        selfTransform->SetRotation(nc::Slerp(curRot, desiredRot, 0.7f));
+        const auto curRot = selfTransform.Rotation();
+        selfTransform.SetRotation(nc::Slerp(curRot, desiredRot, 0.7f));
     }
 };
 
@@ -160,10 +160,8 @@ class VehicleController : public FreeComponent
         {
         }
 
-        void Run(Entity, Registry* registry, float dt)
+        void Run(Entity, ecs::Ecs world, float dt)
         {
-            auto world = registry->GetEcs();
-
             if (m_jumpOnCooldown)
             {
                 m_jumpCooldownRemaining -= dt;
