@@ -18,6 +18,23 @@ Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     UpdateProjectionMatrix(width, height);
 }
 
+auto Camera::UnprojectToNearFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints
+{
+    using namespace DirectX;
+    const auto viewProj = XMMatrixMultiply(m_view, m_projection);
+    const auto viewProjInv = XMMatrixInverse(nullptr, viewProj);
+    const auto nearNDC = XMVectorSet(normalizedDeviceCoords.x, normalizedDeviceCoords.y, 0.0f, 1.0f);
+    const auto farNDC = XMVectorSet(normalizedDeviceCoords.x, normalizedDeviceCoords.y, 1.0f, 1.0f);
+    auto nearWorld = XMVector4Transform(nearNDC, viewProjInv);
+    auto farWorld = XMVector4Transform(farNDC, viewProjInv);
+    nearWorld = XMVectorDivide(nearWorld, XMVectorSplatW(nearWorld));
+    farWorld = XMVectorDivide(farWorld, XMVectorSplatW(farWorld));
+    return NearFarPoints{
+        ToVector3(nearWorld),
+        ToVector3(farWorld)
+    };
+}
+
 void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix)
 {
     const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformationMatrix);

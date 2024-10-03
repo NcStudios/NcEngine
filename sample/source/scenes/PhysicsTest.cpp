@@ -11,6 +11,7 @@
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
+#include "ncengine/physics/CollisionQuery.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/RigidBody.h"
@@ -19,6 +20,17 @@
 
 namespace nc::sample
 {
+enum class CastMode
+{
+    RayCast = 0,
+    CollideShape = 1
+};
+
+constexpr auto CastModeNames = std::array{
+    std::string_view{"RayCast"},
+    std::string_view{"CollideShape"}
+};
+
 std::function<void(unsigned)> SpawnFunc = nullptr;
 std::function<void(unsigned)> DestroyFunc = nullptr;
 
@@ -28,6 +40,8 @@ auto DestroyCount = 1000;
 auto ForceMultiplier = 1.0f;
 auto LogCollisionEvents = true;
 auto LogTriggerEvents = true;
+auto SelectedCastMode = CastMode::RayCast;
+auto SelectedCastModeName = std::string{CastModeNames[0]};
 
 void Widget()
 {
@@ -37,6 +51,13 @@ void Widget()
         ui::Checkbox(LogCollisionEvents, "logCollisions");
         ui::Checkbox(LogTriggerEvents, "logTriggers");
         ui::DragFloat(ForceMultiplier, "forceMultiplier");
+        if (ui::Combobox(SelectedCastModeName, "castMode", CastModeNames))
+        {
+            const auto pos = std::ranges::find(CastModeNames, SelectedCastModeName);
+            NC_ASSERT(pos != CastModeNames.end(), "Invalid CastMode");
+            SelectedCastMode = static_cast<CastMode>(std::distance(CastModeNames.begin(), pos));
+        }
+
         ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
         const auto halfCellWidth = (ImGui::GetColumnWidth() * 0.5f) - 10.0f;
 
@@ -890,6 +911,108 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
     DestroyFunc = std::bind_front(&Spawner::StageDestroy, &spawner);
 }
 
+class RayCaster : public FreeComponent
+{
+    public:
+        RayCaster(Entity self, graphics::NcGraphics* ncGraphics)
+            : FreeComponent{self},
+              m_ncGraphics{ncGraphics}
+        {
+        }
+
+        void Run(Entity, Registry* registry, float)
+        {
+            auto ecs = registry->GetEcs();
+            if (KeyDown(input::KeyCode::LeftButton))
+            {
+                // RayCast from camera based on mouse position
+                const auto ndc = window::ToNormalizedDeviceCoordinates(input::MousePos());
+                const auto camera = m_ncGraphics->GetCamera();
+                const auto [nearPoint, farPoint] = camera->UnprojectToNearFarPlanes(ndc);
+                const auto ray = Ray{nearPoint, farPoint - nearPoint};
+                const auto rayResult = m_query.CastRay(ray);
+                if (!rayResult.hitBody.Valid())
+                {
+                    return;
+                }
+
+                // Update single hit target for RayCast mode
+                if (SelectedCastMode == CastMode::RayCast)
+                {
+                    UpdateHit(ecs, rayResult.hitBody);
+                    return;
+                }
+
+                // Otherwise perform sphere query centered on the hit point, updating everything within a radius
+                const auto sphere = Shape::MakeSphere(3.0f, rayResult.hitPoint);
+                const auto shapeResult = m_query.TestShape(sphere);
+                MakeShapeIndicator(ecs, sphere);
+                for (const auto& hit : shapeResult.hits)
+                {
+                    UpdateHit(ecs, hit.hitBody);
+                }
+            }
+
+            if (KeyUp(input::KeyCode::LeftButton))
+            {
+                for (auto [entity, material] : std::views::zip(m_hits, m_restoreMaterials))
+                {
+                    // possible the entity was deleted, if so we don't want to check for renderer
+                    if (ecs.Contains<Entity>(entity))
+                    {
+                        ecs.Get<graphics::ToonRenderer>(entity).SetMaterial(material);
+                    }
+                }
+
+                m_hits.clear();
+                m_restoreMaterials.clear();
+                if (SelectedCastMode == CastMode::CollideShape)
+                {
+                    ecs.Remove<Entity>(m_shapeParent);
+                    m_shapeParent = Entity::Null();
+                }
+            }
+        }
+
+    private:
+        graphics::NcGraphics* m_ncGraphics;
+        CollisionQuery m_query = CollisionQuery{};
+        std::vector<Entity> m_hits;
+        std::vector<graphics::ToonMaterial> m_restoreMaterials;
+        Entity m_shapeParent = Entity::Null();
+
+        void UpdateHit(ecs::Ecs world, Entity hit)
+        {
+            if (world.Contains<graphics::ToonRenderer>(hit))
+            {
+                auto& renderer = world.Get<graphics::ToonRenderer>(hit);
+                m_hits.push_back(hit);
+                m_restoreMaterials.push_back(renderer.GetMaterial());
+                renderer.SetMaterial(YellowToonMaterial);
+            }
+        }
+
+        void MakeShapeIndicator(ecs::Ecs world, const Shape& shape)
+        {
+            // make a visual indicator to show the sphere test volume
+            m_shapeParent = world.Emplace<Entity>({});
+            world.Emplace<RigidBody>(
+                m_shapeParent,
+                shape,
+                RigidBodyInfo{
+                    .type = BodyType::Static,
+                    .flags = RigidBodyFlags::Trigger
+                }
+            );
+
+            world.Emplace<graphics::WireframeRenderer>(
+                m_shapeParent,
+                graphics::WireframeSource::Collider,
+                m_shapeParent
+            );
+        }
+};
+
 PhysicsTest::PhysicsTest(SampleUI* ui)
     : m_sampleUI{ui}
 {
@@ -923,6 +1046,11 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& camera = world.Emplace<FollowCamera>(cameraHandle, vehicle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);
+
+    // Ray Caster
+    auto rayCaster = world.Emplace<Entity>({.tag = "RayCaster"});
+    world.Emplace<RayCaster>(rayCaster, ncGraphics);
+    world.Emplace<FrameLogic>(rayCaster, InvokeFreeComponent<RayCaster>{});
 
     // Cube Spawner
     BuildSpawner(world, ncRandom, ncPhysics);

@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Layers.h"
+#include "ncengine/physics/CollisionQuery.h"
 #include "ncengine/physics/RigidBody.h"
 
 #include "DirectXMath.h"
-
+#include "Jolt/Physics/Collision/RayCast.h"
 
 #include <type_traits>
 
@@ -103,5 +104,10 @@ inline auto ToSpringSettings(const SpringSettings& settings) -> JPH::SpringSetti
 inline auto ToAllowedDOFs(DegreeOfFreedom::Type dof) -> JPH::EAllowedDOFs
 {
     return static_cast<JPH::EAllowedDOFs>(dof);
+}
+
+inline auto ToRay(const Ray& ray) -> JPH::RRayCast
+{
+    return JPH::RRayCast{ToJoltVec3(ray.origin), ToJoltVec3(ray.direction)};
 }
 } // namespace nc::physics

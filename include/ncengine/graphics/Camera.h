@@ -21,6 +21,13 @@ struct CameraProperties
     float farClip = 400.0f;
 };
 
+/** @brief Unprojected points lying on a Camera's near and far planes. */
+struct NearFarPoints
+{
+    Vector3 nearPoint = Vector3::Zero();
+    Vector3 farPoint = Vector3::Zero();
+};
+
 /** @brief Basic camera component. */
 class Camera : public FreeComponent
 {
@@ -43,6 +50,9 @@ class Camera : public FreeComponent
          * @return DirectX::FXMMATRIX
          */
         auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
+
+        /** @brief Unproject 2D normalized device coordinates into 3D points on the near and far planes. */
+        auto UnprojectToNearFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints;
 
         /**
          * @brief Calculate the camera's viewport.

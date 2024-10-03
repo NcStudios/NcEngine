@@ -30,7 +30,6 @@ class NcPhysicsStub : public nc::NcPhysics
 
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
-        auto RayCast(const nc::Ray&) -> nc::RayCastResult override { return nc::RayCastResult{}; }
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
         {
             update.Add(
@@ -90,6 +89,11 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
         m_jolt.physicsSystem,
         m_shapeFactory,
         m_constraintManager
+      },
+      m_queryManager{
+        m_jolt.physicsSystem.GetNarrowPhaseQuery(),
+        m_jolt.physicsSystem.GetBodyLockInterfaceNoLock(),
+        m_shapeFactory
       },
       m_deferredState{std::move(deferredState)}
 {
@@ -210,16 +214,6 @@ void NcPhysicsImpl::EndRigidBodyBatch()
     }
 
     m_constraintManager.EndBatch(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
-}
-
-auto NcPhysicsImpl::RayCast(const Ray& ray) -> RayCastResult
-{
-    (void)ray;
-    return m_caster.CastRay(
-        m_jolt.physicsSystem.GetNarrowPhaseQuery(),
-        m_jolt.physicsSystem.GetBodyInterfaceNoLock(),
-        ray
-    );
 }
 } // namespace physics
 } // namespace nc
