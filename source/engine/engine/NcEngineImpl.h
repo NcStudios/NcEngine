@@ -30,7 +30,7 @@ namespace nc
             Registry m_legacyRegistry; // delete once all usage is cutover
             task::Executor m_executor;
             std::unique_ptr<ModuleRegistry> m_modules;
-            Connection<> m_onQuitConnection;
+            Connection m_onQuitConnection;
             bool m_isRunning;
 
             void ClearScene();

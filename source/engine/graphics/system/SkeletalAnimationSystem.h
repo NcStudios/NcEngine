@@ -46,16 +46,16 @@ class SkeletalAnimationSystem : public StableAddress
 
         // Mesh assets
         std::unordered_map<std::string, anim::PackedRig> m_rigs;
-        nc::Connection<const asset::BoneUpdateEventData&> m_onBonesUpdate;
+        nc::Connection m_onBonesUpdate;
 
         // Animation assets
         std::unordered_map<std::string, asset::SkeletalAnimation> m_animationAssets;
-        nc::Connection<const asset::SkeletalAnimationUpdateEventData&> m_onSkeletalAnimationUpdate;
+        nc::Connection m_onSkeletalAnimationUpdate;
 
         // Component registration
-        Connection<graphics::SkeletalAnimator&> m_onAddConnection;
-        Connection<Entity> m_onRemoveConnection;
-        std::vector<Connection<const anim::StateChange&>> m_onStateChangedHandlers;
+        Connection m_onAddConnection;
+        Connection m_onRemoveConnection;
+        std::vector<Connection> m_onStateChangedHandlers;
         std::vector<Entity::index_type> m_handlerIndices;
 
         // Animation data sandbox

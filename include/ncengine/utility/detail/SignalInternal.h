@@ -44,7 +44,6 @@ class ConnectionBacklink
         std::mutex m_mutex;
 };
 
-template<class... Args>
 class SharedConnectionState
 {
     public:
@@ -84,11 +83,9 @@ template<class... Args>
 class Slot
 {
     public:
-        using SharedConnectionState_t = SharedConnectionState<Args...>;
-
         Slot(std::function<void(Args...)> func, ConnectionBacklink* link, size_t priority, int id)
             : m_func{std::move(func)},
-              m_state{std::make_shared<SharedConnectionState_t>(link, id)},
+              m_state{std::make_shared<SharedConnectionState>(link, id)},
               m_priority{priority},
               m_id{id}
         {
@@ -109,14 +106,14 @@ class Slot
             m_func(args...);
         }
 
-        auto GetState() const -> std::weak_ptr<SharedConnectionState_t>
+        auto GetState() const -> std::weak_ptr<SharedConnectionState>
         {
             return m_state;
         }
 
     private:
         std::function<void(Args...)> m_func;
-        std::shared_ptr<SharedConnectionState_t> m_state;
+        std::shared_ptr<SharedConnectionState> m_state;
         size_t m_priority;
         int m_id;
 };

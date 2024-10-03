@@ -76,24 +76,24 @@ struct ShaderStorage : StableAddress
 
     std::array<UniqueCabMap, MaxFramesInFlight> m_perFrameCabStorage;
     UniqueCabMap m_staticCabStorage;
-    nc::Connection<const CabUpdateEventData&> m_onCubeMapArrayBufferUpdate;
+    nc::Connection m_onCubeMapArrayBufferUpdate;
 
     MeshArrayBufferStorage m_staticMabStorage;
-    nc::Connection<const MabUpdateEventData&> m_onMeshArrayBufferUpdate;
+    nc::Connection m_onMeshArrayBufferUpdate;
 
     std::array<UniqueRpsMap, MaxFramesInFlight> m_perFrameRpsStorage;
-    nc::Connection<const RpsUpdateEventData&> m_onRenderPassSinkBufferUpdate;
+    nc::Connection m_onRenderPassSinkBufferUpdate;
 
     std::array<UniqueSsboMap, MaxFramesInFlight> m_perFrameSsboStorage;
     UniqueSsboMap m_staticSsboStorage;
-    nc::Connection<const SsboUpdateEventData&> m_onStorageBufferUpdate;
+    nc::Connection m_onStorageBufferUpdate;
 
     std::array<UniqueUboMap, MaxFramesInFlight> m_perFrameUboStorage;
     UniqueUboMap m_staticUboStorage;
-    nc::Connection<const UboUpdateEventData&> m_onUniformBufferUpdate;
+    nc::Connection m_onUniformBufferUpdate;
 
     UniqueTabMap m_staticTabStorage;
-    nc::Connection<const TabUpdateEventData&> m_onTextureArrayBufferUpdate;
+    nc::Connection m_onTextureArrayBufferUpdate;
 };
 } // namespace vulkan
 } // namespace nc::graphics

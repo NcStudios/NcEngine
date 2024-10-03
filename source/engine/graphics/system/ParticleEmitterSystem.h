@@ -49,8 +49,8 @@ class ParticleEmitterSystem
         Random m_random;
         std::function<graphics::Camera* ()> m_getCamera;
         Registry* m_registry;
-        Connection<graphics::ParticleEmitter&> m_onAddConnection;
-        Connection<Entity> m_onRemoveConnection;
+        Connection m_onAddConnection;
+        Connection m_onRemoveConnection;
         std::vector<ParticleData> m_particleDataHostBuffer;
         StorageBufferHandle m_particleDataDeviceBuffer;
         unsigned m_maxParticles;

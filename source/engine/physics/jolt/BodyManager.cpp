@@ -19,8 +19,8 @@ struct BodyManager::Connections
         );
     }
 
-    Connection<RigidBody&> addRigidBodyConnection;
-    Connection<Entity> removeRigidBodyConnection;
+    Connection addRigidBodyConnection;
+    Connection removeRigidBodyConnection;
 };
 
 BodyManager::BodyManager(ecs::ComponentPool<Transform>& transformPool,

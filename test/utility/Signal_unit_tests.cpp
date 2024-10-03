@@ -17,8 +17,8 @@ TEST(Signal_unit_tests, Connection_IsConnected_ValidConnection_ReturnsTrue)
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
-    auto connection = nc::Connection<int>{state};
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
+    auto connection = nc::Connection{state};
     EXPECT_TRUE(connection.IsConnected());
 }
 
@@ -26,9 +26,9 @@ TEST(Signal_unit_tests, Connection_IsConnected_InvalidConnection_ReturnsFalse)
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
     state->Disconnect();
-    auto connection = nc::Connection<int>{state};
+    auto connection = nc::Connection{state};
     EXPECT_FALSE(connection.IsConnected());
 }
 
@@ -36,8 +36,8 @@ TEST(Signal_unit_tests, Connection_Disconnect_ValidConnection_ReturnsTrue)
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
-    auto connection = nc::Connection<int>{state};
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
+    auto connection = nc::Connection{state};
     EXPECT_TRUE(connection.Disconnect());
 }
 
@@ -45,9 +45,9 @@ TEST(Signal_unit_tests, Connection_Disconnect_InvalidConnection_ReturnsFalse)
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
     state->Disconnect();
-    auto connection = nc::Connection<int>{state};
+    auto connection = nc::Connection{state};
     EXPECT_FALSE(connection.Disconnect());
 }
 
@@ -55,8 +55,8 @@ TEST(Signal_unit_tests, Connection_Disconnect_RemovesConnection)
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
-    auto connection = nc::Connection<int>{state};
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
+    auto connection = nc::Connection{state};
     connection.Disconnect();
     EXPECT_FALSE(state->IsConnected());
     EXPECT_FALSE(connection.IsConnected());
@@ -66,9 +66,9 @@ TEST(Signal_unit_tests, Connection_Destructor_ValidConnection_RemovesConnection)
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
     {
-        auto connection = nc::Connection<int>{state};
+        auto connection = nc::Connection{state};
         EXPECT_TRUE(state->IsConnected());
         EXPECT_TRUE(connection.IsConnected());
     }
@@ -79,9 +79,9 @@ TEST(Signal_unit_tests, Connection_Destructor_InvalidConnection_DoesNotAttemptDi
 {
     auto manager = std::make_shared<nc::detail::ConnectionBacklink>();
     auto id = 1;
-    auto state = std::make_shared<nc::detail::SharedConnectionState<int>>(manager.get(), id);
+    auto state = std::make_shared<nc::detail::SharedConnectionState>(manager.get(), id);
     {
-        auto connection = nc::Connection<int>{state};
+        auto connection = nc::Connection{state};
         EXPECT_TRUE(state->IsConnected());
         EXPECT_TRUE(connection.IsConnected());
         connection.Disconnect();

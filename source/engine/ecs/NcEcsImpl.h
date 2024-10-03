@@ -24,7 +24,7 @@ class EcsModule : public NcEcs
 
     private:
         ComponentRegistry* m_registry;
-        Connection<> m_rebuildStaticConnection;
+        Connection m_rebuildStaticConnection;
 
         void UpdateWorldSpaceMatrices();
         void UpdateStaticWorldSpaceMatrices();

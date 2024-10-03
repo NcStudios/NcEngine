@@ -1,3 +1,7 @@
+/**
+ * @file Signal.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "detail/SignalInternal.h"
@@ -14,13 +18,10 @@ namespace nc
  *  the associated function will be removed from the Signal, if the Signal
  *  still exists. Signals and Connections may be destroyed in any order.
  */
-template<class... Args>
 class Connection
 {
     public:
-        using ConnectionState_t = detail::SharedConnectionState<Args...>;
-
-        explicit Connection(std::weak_ptr<ConnectionState_t> state) noexcept
+        explicit Connection(std::weak_ptr<detail::SharedConnectionState> state) noexcept
             : m_state{std::move(state)}
         {
         }
@@ -48,7 +49,7 @@ class Connection
         }
 
     private:
-        std::weak_ptr<ConnectionState_t> m_state;
+        std::weak_ptr<detail::SharedConnectionState> m_state;
 };
 
 /** @brief Priority values for controlling call order from a Signal. */
@@ -64,7 +65,6 @@ class Signal
 {
     public:
         using Slot_t = detail::Slot<Args...>;
-        using Connection_t = Connection<Args...>;
 
         Signal() = default;
         Signal(Signal&&) = default;
@@ -72,8 +72,8 @@ class Signal
         Signal(const Signal&) = delete;
         Signal& operator=(const Signal&) = delete;
 
-        /** Connect a std::function */
-        [[nodiscard]] auto Connect(std::function<void(Args...)> func, size_t priority = SignalPriority::Highest) -> Connection_t
+        /** @brief Connect a std::function */
+        [[nodiscard]] auto Connect(std::function<void(Args...)> func, size_t priority = SignalPriority::Highest) -> Connection
         {
             const auto pos = std::ranges::find_if(m_slots, [priority](auto&& slot)
             {
@@ -83,28 +83,28 @@ class Signal
             if (pos != m_slots.cend())
             {
                 auto result = m_slots.emplace(pos, std::move(func), m_link.get(), priority, ++m_currentId);
-                return Connection_t{result->GetState()};
+                return Connection{result->GetState()};
             }
 
             auto& result = m_slots.emplace_back(std::move(func), m_link.get(), priority, ++m_currentId);
-            return Connection_t{result.GetState()};
+            return Connection{result.GetState()};
         }
 
-        /** Connect a member function */
+        /** @brief Connect a member function */
         template<class T>
-        [[nodiscard]] auto Connect(T *inst, void (T::*func)(Args...), size_t priority = SignalPriority::Highest) -> Connection_t
+        [[nodiscard]] auto Connect(T *inst, void (T::*func)(Args...), size_t priority = SignalPriority::Highest) -> Connection
         {
             return Connect([=](Args... args){ (inst->*func)(args...); }, priority);
         }
 
-        /** Connect a const member function */
+        /** @brief Connect a const member function */
         template<class T>
-        [[nodiscard]] auto Connect(const T *inst, void (T::*func)(Args...) const, size_t priority = SignalPriority::Highest) -> Connection_t
+        [[nodiscard]] auto Connect(const T *inst, void (T::*func)(Args...) const, size_t priority = SignalPriority::Highest) -> Connection
         {
             return Connect([=](Args... args){ (inst->*func)(args...); }, priority);
         }
 
-        /** Remove all connections */
+        /** @brief Remove all connections */
         void DisconnectAll()
         {
             m_slots.clear();
@@ -112,14 +112,14 @@ class Signal
             m_link->GetPendingDisconnections(); // Don't need Sync() - just discard
         }
 
-        /** Get the number of active connections */
+        /** @brief Get the number of active connections */
         auto ConnectionCount() const noexcept -> size_t
         {
             Sync();
             return m_slots.size();
         }
 
-        /** Invoke all slots */
+        /** @brief Invoke all slots */
         void Emit(Args... args)
         {
             Sync();
@@ -129,7 +129,7 @@ class Signal
             }
         }
 
-        /** Invoke all slots */
+        /** @brief Invoke all slots */
         void operator()(Args... args)
         {
             Emit(args...);
