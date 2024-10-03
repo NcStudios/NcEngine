@@ -918,9 +918,8 @@ class RayCaster : public FreeComponent
         {
         }
 
-        void Run(Entity, Registry* registry, float)
+        void Run(Entity, ecs::Ecs world, float)
         {
-            auto ecs = registry->GetEcs();
             if (KeyDown(input::KeyCode::LeftButton))
             {
                 // RayCast from camera based on mouse position
@@ -937,17 +936,17 @@ class RayCaster : public FreeComponent
                 // Update single hit target for RayCast mode
                 if (SelectedCastMode == CastMode::RayCast)
                 {
-                    UpdateHit(ecs, rayResult.hitBody);
+                    UpdateHit(world, rayResult.hitBody);
                     return;
                 }
 
                 // Otherwise perform sphere query centered on the hit point, updating everything within a radius
                 const auto sphere = Shape::MakeSphere(3.0f, rayResult.hitPoint);
                 const auto shapeResult = m_query.TestShape(sphere);
-                MakeShapeIndicator(ecs, sphere);
+                MakeShapeIndicator(world, sphere);
                 for (const auto& hit : shapeResult.hits)
                 {
-                    UpdateHit(ecs, hit.hitBody);
+                    UpdateHit(world, hit.hitBody);
                 }
             }
 
@@ -956,9 +955,9 @@ class RayCaster : public FreeComponent
                 for (auto [entity, material] : std::views::zip(m_hits, m_restoreMaterials))
                 {
                     // possible the entity was deleted, if so we don't want to check for renderer
-                    if (ecs.Contains<Entity>(entity))
+                    if (world.Contains<Entity>(entity))
                     {
-                        ecs.Get<graphics::ToonRenderer>(entity).SetMaterial(material);
+                        world.Get<graphics::ToonRenderer>(entity).SetMaterial(material);
                     }
                 }
 
@@ -966,7 +965,7 @@ class RayCaster : public FreeComponent
                 m_restoreMaterials.clear();
                 if (SelectedCastMode == CastMode::CollideShape)
                 {
-                    ecs.Remove<Entity>(m_shapeParent);
+                    world.Remove<Entity>(m_shapeParent);
                     m_shapeParent = Entity::Null();
                 }
             }
