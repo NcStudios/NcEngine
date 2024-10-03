@@ -21,7 +21,7 @@ struct CameraProperties
     float farClip = 400.0f;
 };
 
-/** @brief Unprojected points lying on a Camera's near and far planes. */
+/** @brief Two points lying on a Camera's near and far planes. */
 struct NearFarPoints
 {
     Vector3 nearPoint = Vector3::Zero();

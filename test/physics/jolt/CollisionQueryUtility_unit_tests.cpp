@@ -31,8 +31,6 @@ TEST_F(CollisionQueryUtilityTest, QueryFilter_includeStatic_includeCorrectTypes)
     EXPECT_TRUE(uut.ShouldCollide(nc::physics::ObjectLayer::Static));
     EXPECT_FALSE(uut.ShouldCollide(nc::physics::ObjectLayer::Dynamic));
     EXPECT_FALSE(uut.ShouldCollide(nc::physics::ObjectLayer::Trigger));
-
-    EXPECT_TRUE(uut.ShouldCollide(JPH::BodyID{}));
 }
 
 TEST_F(CollisionQueryUtilityTest, QueryFilter_includeDynamic_includeCorrectTypes)
@@ -51,8 +49,6 @@ TEST_F(CollisionQueryUtilityTest, QueryFilter_includeDynamic_includeCorrectTypes
     EXPECT_FALSE(uut.ShouldCollide(nc::physics::ObjectLayer::Static));
     EXPECT_TRUE(uut.ShouldCollide(nc::physics::ObjectLayer::Dynamic));
     EXPECT_FALSE(uut.ShouldCollide(nc::physics::ObjectLayer::Trigger));
-
-    EXPECT_TRUE(uut.ShouldCollide(JPH::BodyID{}));
 }
 
 TEST_F(CollisionQueryUtilityTest, QueryFilter_includeTrigger_includeCorrectTypes)
@@ -71,8 +67,6 @@ TEST_F(CollisionQueryUtilityTest, QueryFilter_includeTrigger_includeCorrectTypes
     EXPECT_FALSE(uut.ShouldCollide(nc::physics::ObjectLayer::Static));
     EXPECT_FALSE(uut.ShouldCollide(nc::physics::ObjectLayer::Dynamic));
     EXPECT_TRUE(uut.ShouldCollide(nc::physics::ObjectLayer::Trigger));
-
-    EXPECT_TRUE(uut.ShouldCollide(JPH::BodyID{}));
 }
 
 TEST_F(CollisionQueryUtilityTest, QueryFilter_entityFilter_includesAllowedBodies)
@@ -104,6 +98,15 @@ TEST_F(CollisionQueryUtilityTest, QueryFilter_entityFilter_includesAllowedBodies
     DestroyBody(excludedBody);
 }
 
+TEST_F(CollisionQueryUtilityTest, QueryFilter_nullEntityFilter_throws)
+{
+    const auto filter = nc::CollisionQueryFilter{
+        .entityFilter = nullptr
+    };
+
+    EXPECT_THROW(MakeQueryFilter(filter), nc::NcError);
+}
+
 TEST_F(CollisionQueryUtilityTest, ShapeCollector_convertsHits)
 {
     const auto entity = nc::Entity{1, 2, 0};
@@ -126,8 +129,8 @@ TEST_F(CollisionQueryUtilityTest, ShapeCollector_convertsHits)
     ASSERT_EQ(1ull, actual.size());
     const auto& hit = actual.at(0);
 
-    EXPECT_EQ(entity, hit.hitBody);
-    EXPECT_EQ(nc::physics::ToVector3(expected.mContactPointOn2), hit.hitPoint);
+    EXPECT_EQ(entity, hit.hit);
+    EXPECT_EQ(nc::physics::ToVector3(expected.mContactPointOn2), hit.point);
     EXPECT_FLOAT_EQ(expected.mPenetrationDepth, hit.depth);
 
     const auto expectedNormal = (expected.mContactPointOn2 - expected.mContactPointOn1).Normalized();

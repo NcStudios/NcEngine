@@ -928,7 +928,7 @@ class RayCaster : public FreeComponent
                 const auto [nearPoint, farPoint] = camera->UnprojectToNearFarPlanes(ndc);
                 const auto ray = Ray{nearPoint, farPoint - nearPoint};
                 const auto rayResult = m_query.CastRay(ray);
-                if (!rayResult.hitBody.Valid())
+                if (!rayResult.hit.Valid())
                 {
                     return;
                 }
@@ -936,17 +936,17 @@ class RayCaster : public FreeComponent
                 // Update single hit target for RayCast mode
                 if (SelectedCastMode == CastMode::RayCast)
                 {
-                    UpdateHit(world, rayResult.hitBody);
+                    UpdateHit(world, rayResult.hit);
                     return;
                 }
 
                 // Otherwise perform sphere query centered on the hit point, updating everything within a radius
-                const auto sphere = Shape::MakeSphere(3.0f, rayResult.hitPoint);
+                const auto sphere = Shape::MakeSphere(3.0f, rayResult.point);
                 const auto shapeResult = m_query.TestShape(sphere);
                 MakeShapeIndicator(world, sphere);
                 for (const auto& hit : shapeResult.hits)
                 {
-                    UpdateHit(world, hit.hitBody);
+                    UpdateHit(world, hit.hit);
                 }
             }
 

@@ -54,8 +54,8 @@ TEST_F(CollisionQueryTest, CastRay_occludedObject_findsFirst)
     const auto ray = nc::Ray{nc::Vector3::Zero(), nc::Vector3::Left() * 15.0f};
     auto uut = nc::CollisionQuery();
     const auto result = uut.CastRay(ray);
-    EXPECT_EQ(g_entity1, result.hitBody);
-    EXPECT_EQ(nc::Vector3(-3.5f, 0.0f, 0.0f), result.hitPoint);
+    EXPECT_EQ(g_entity1, result.hit);
+    EXPECT_EQ(nc::Vector3(-3.5f, 0.0f, 0.0f), result.point);
     EXPECT_EQ(nc::Vector3::Right(), result.surfaceNormal);
 
     DestroyBody(body1);
@@ -69,7 +69,7 @@ TEST_F(CollisionQueryTest, CastRay_missesTarget_findsNone)
     const auto ray = nc::Ray{nc::Vector3{0.0f, 1.0f, 1.0f}, nc::Vector3::Left() * 15.0f};
     auto uut = nc::CollisionQuery();
     const auto result = uut.CastRay(ray);
-    EXPECT_EQ(nc::Entity::Null(), result.hitBody);
+    EXPECT_EQ(nc::Entity::Null(), result.hit);
     DestroyBody(body);
 }
 
@@ -79,7 +79,7 @@ TEST_F(CollisionQueryTest, CastRay_outOfRange_findsNone)
     const auto ray = nc::Ray{nc::Vector3::Zero(), nc::Vector3::Splat(9.0f)};
     auto uut = nc::CollisionQuery();
     const auto result = uut.CastRay(ray);
-    EXPECT_EQ(nc::Entity::Null(), result.hitBody);
+    EXPECT_EQ(nc::Entity::Null(), result.hit);
     DestroyBody(body);
 }
 
@@ -93,17 +93,17 @@ TEST_F(CollisionQueryTest, TestShape_multipleTargets_findsOverlapping)
     const auto result = uut.TestShape(sphere);
     ASSERT_EQ(2ull, result.hits.size());
 
-    auto hit1Pos = std::ranges::find(result.hits, g_entity1, &nc::TestShapeHit::hitBody);
+    auto hit1Pos = std::ranges::find(result.hits, g_entity1, &nc::TestShapeHit::hit);
     ASSERT_NE(hit1Pos, result.hits.end());
     const auto& hit1 = *hit1Pos;
-    EXPECT_EQ(nc::Vector3(2.0f, 3.5f, 0.0f), hit1.hitPoint);
+    EXPECT_EQ(nc::Vector3(2.0f, 3.5f, 0.0f), hit1.point);
     EXPECT_EQ(nc::Vector3::Up(), hit1.collisionNormal);
     EXPECT_FLOAT_EQ(0.5f, hit1.depth);
 
-    auto hit2Pos = std::ranges::find(result.hits, g_entity2, &nc::TestShapeHit::hitBody);
+    auto hit2Pos = std::ranges::find(result.hits, g_entity2, &nc::TestShapeHit::hit);
     ASSERT_NE(hit2Pos, result.hits.end());
     const auto& hit2 = *hit2Pos;
-    EXPECT_EQ(nc::Vector3(2.0f, 0.5f, 0.0f), hit2.hitPoint);
+    EXPECT_EQ(nc::Vector3(2.0f, 0.5f, 0.0f), hit2.point);
     EXPECT_EQ(nc::Vector3::Down(), hit2.collisionNormal);
     EXPECT_FLOAT_EQ(0.5f, hit2.depth);
 

@@ -32,6 +32,7 @@ class QueryFilter final : public JPH::BroadPhaseLayerFilter,
               m_lock{&lock},
               m_included{filter.includeStatic, filter.includeDynamic, filter.includeTrigger}
         {
+            NC_ASSERT(m_filter, "CollisionQuery::entityFilter must be non-null.");
         }
 
         auto ShouldCollide(JPH::BroadPhaseLayer layer) const -> bool override
@@ -46,12 +47,12 @@ class QueryFilter final : public JPH::BroadPhaseLayerFilter,
 
         auto ShouldCollide(const JPH::BodyID& id) const -> bool override
         {
-            return m_filter ? m_filter(GetEntity(*m_lock, id)) : true;
+            return m_filter(GetEntity(*m_lock, id));
         }
 
         auto ShouldCollideLocked(const JPH::Body& body) const -> bool override
         {
-            return m_filter ? m_filter(GetEntity(body)) : true;
+            return m_filter(GetEntity(body));
         }
 
     private:
