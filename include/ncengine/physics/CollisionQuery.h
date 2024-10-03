@@ -60,15 +60,18 @@ struct TestShapeResult
 class CollisionQuery
 {
     public:
-        /** @brief Construct a CollisionQuery capable of testing against bodies which pass the specified filter. */
+        /** @brief Construct a CollisionQuery capable of testing against bodies which pass a filter. */
         explicit CollisionQuery(const CollisionQueryFilter& filter = CollisionQueryFilter{});
         ~CollisionQuery() noexcept;
 
-        /** @brief Test for intersection with a ray returning information on the first hit RigidBody. */
+        /** @brief Query for the first \ref RigidBody "body" that a ray intersects. */
         auto CastRay(const Ray& ray) const -> RayCastResult;
 
-        /** @brief Test for collisions against a shape returning information on all hit \ref RigidBody "rigid bodies". */
+        /** @brief Query for all \ref RigidBody "bodies" that collide with a shape. */
         auto TestShape(const Shape& shape) const -> TestShapeResult;
+
+        /** @brief Query for all \ref RigidBody "bodies" that contain a point. */
+        auto TestPoint(const Vector3& point) const -> std::vector<Entity>;
 
     private:
         std::unique_ptr<class CollisionQueryImpl> m_impl;

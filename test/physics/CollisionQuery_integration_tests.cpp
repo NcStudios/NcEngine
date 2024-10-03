@@ -52,6 +52,7 @@ TEST_F(CollisionQueryTest, CastRay_occludedObject_findsFirst)
     const auto body2 = CreateBody(g_entity2, g_sphere, JPH::Vec3{-8.0f, 0.0f, 0.0f});
     const auto body3 = CreateBody(g_entity2, g_sphere, JPH::Vec3{-12.0f, 0.0f, 0.0f});
     const auto ray = nc::Ray{nc::Vector3::Zero(), nc::Vector3::Left() * 15.0f};
+
     auto uut = nc::CollisionQuery();
     const auto result = uut.CastRay(ray);
     EXPECT_EQ(g_entity1, result.hit);
@@ -67,9 +68,11 @@ TEST_F(CollisionQueryTest, CastRay_missesTarget_findsNone)
 {
     const auto body = CreateBody(g_entity1, g_sphere, JPH::Vec3{1.0f, 1.0f, 1.0f});
     const auto ray = nc::Ray{nc::Vector3{0.0f, 1.0f, 1.0f}, nc::Vector3::Left() * 15.0f};
+
     auto uut = nc::CollisionQuery();
     const auto result = uut.CastRay(ray);
     EXPECT_EQ(nc::Entity::Null(), result.hit);
+
     DestroyBody(body);
 }
 
@@ -77,9 +80,11 @@ TEST_F(CollisionQueryTest, CastRay_outOfRange_findsNone)
 {
     const auto body = CreateBody(g_entity1, g_sphere, JPH::Vec3::sReplicate(10.0f));
     const auto ray = nc::Ray{nc::Vector3::Zero(), nc::Vector3::Splat(9.0f)};
+
     auto uut = nc::CollisionQuery();
     const auto result = uut.CastRay(ray);
     EXPECT_EQ(nc::Entity::Null(), result.hit);
+
     DestroyBody(body);
 }
 
@@ -89,6 +94,7 @@ TEST_F(CollisionQueryTest, TestShape_multipleTargets_findsOverlapping)
     const auto hitBody2 = CreateBody(g_entity2, g_sphere, JPH::Vec3{2.0f, 0.0f, 0.0f});
     const auto missedBody = CreateBody(g_entity2, g_sphere, JPH::Vec3{-2.0f, 2.0f, 0.0f});
     const auto sphere = nc::Shape::MakeSphere(2.0f, nc::Vector3{2.0f, 2.0f, 0.0f});
+
     auto uut = nc::CollisionQuery();
     const auto result = uut.TestShape(sphere);
     ASSERT_EQ(2ull, result.hits.size());
@@ -117,10 +123,46 @@ TEST_F(CollisionQueryTest, TestShape_missesTarget_findsNone)
     const auto missedBody1 = CreateBody(g_entity1, g_sphere, JPH::Vec3::sReplicate(4.0f));
     const auto missedBody2 = CreateBody(g_entity2, g_sphere, JPH::Vec3::sReplicate(-4.0f));
     const auto sphere = nc::Shape::MakeSphere(2.0f, nc::Vector3::Zero());
+
     auto uut = nc::CollisionQuery();
     const auto result = uut.TestShape(sphere);
     ASSERT_TRUE(result.hits.empty());
 
     DestroyBody(missedBody1);
     DestroyBody(missedBody2);
+}
+
+TEST_F(CollisionQueryTest, TestPoint_multipleTargets_findsContainment)
+{
+    const auto hitBody1 = CreateBody(g_entity1, g_sphere, JPH::Vec3::sReplicate(0.5f));
+    const auto hitBody2 = CreateBody(g_entity2, g_sphere, JPH::Vec3::sReplicate(1.0f));
+    const auto missedBody = CreateBody(g_entity2, g_sphere, JPH::Vec3::sReplicate(-1.0f));
+    const auto point = nc::Vector3::Splat(0.75f);
+
+    auto uut = nc::CollisionQuery();
+    const auto hits = uut.TestPoint(point);
+    ASSERT_EQ(2ull, hits.size());
+    EXPECT_TRUE(std::ranges::contains(hits, g_entity1));
+    EXPECT_TRUE(std::ranges::contains(hits, g_entity2));
+    EXPECT_FALSE(std::ranges::contains(hits, g_entity3));
+
+    DestroyBody(hitBody1);
+    DestroyBody(hitBody2);
+    DestroyBody(missedBody);
+}
+
+TEST_F(CollisionQueryTest, TestPoint_outisdieTargets_findsNone)
+{
+    const auto missedBody1 = CreateBody(g_entity1, g_sphere, JPH::Vec3::sReplicate(0.5f));
+    const auto missedBody2 = CreateBody(g_entity2, g_sphere, JPH::Vec3::sReplicate(1.0f));
+    const auto missedBody3 = CreateBody(g_entity2, g_sphere, JPH::Vec3::sReplicate(-1.0f));
+    const auto point = nc::Vector3::Splat(10.0f);
+
+    auto uut = nc::CollisionQuery();
+    const auto hits = uut.TestPoint(point);
+    EXPECT_TRUE(hits.empty());
+
+    DestroyBody(missedBody1);
+    DestroyBody(missedBody2);
+    DestroyBody(missedBody3);
 }

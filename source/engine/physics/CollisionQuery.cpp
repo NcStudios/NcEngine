@@ -51,6 +51,20 @@ auto CollisionQueryImpl::TestShape(const nc::Shape& shape) -> TestShapeResult
     return TestShapeResult{collector.ExtractHits()};
 }
 
+auto CollisionQueryImpl::TestPoint(const nc::Vector3& point) -> std::vector<nc::Entity>
+{
+    auto collector = physics::PointCollector{s_ctx->lock};
+    s_ctx->query.CollidePoint(
+        physics::ToJoltVec3(point),
+        collector,
+        m_filter,
+        m_filter,
+        m_filter
+    );
+
+    return collector.ExtractHits();
+}
+
 CollisionQuery::CollisionQuery(const CollisionQueryFilter& filter)
     : m_impl{std::make_unique<CollisionQueryImpl>(filter)}
 {
@@ -66,5 +80,10 @@ auto CollisionQuery::CastRay(const Ray& ray) const -> RayCastResult
 auto CollisionQuery::TestShape(const Shape& shape) const -> TestShapeResult
 {
     return m_impl->TestShape(shape);
+}
+
+auto CollisionQuery::TestPoint(const Vector3& point) const -> std::vector<Entity>
+{
+    return m_impl->TestPoint(point);
 }
 } // namespace nc

@@ -21,6 +21,7 @@ class CollisionQueryImpl
 
         auto CastRay(const Ray& ray) const -> RayCastResult;
         auto TestShape(const nc::Shape& shape) -> TestShapeResult;
+        auto TestPoint(const Vector3& point) -> std::vector<Entity>;
 
         static void SetContext(physics::CollisionQueryContext* ctx)
         {

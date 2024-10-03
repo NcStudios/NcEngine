@@ -4,6 +4,7 @@
 #include "Layers.h"
 
 #include "Jolt/Physics/Collision/Shape/Shape.h"
+#include "Jolt/Physics/Collision/CollidePointResult.h"
 #include "Jolt/Physics/Collision/CollideShape.h"
 
 #include <vector>
@@ -92,6 +93,30 @@ class ShapeCollector final : public JPH::CollideShapeCollector
 
     private:
         std::vector<nc::TestShapeHit> m_hits;
+        const JPH::BodyLockInterfaceNoLock* m_lock;
+};
+
+// Builds a list of hit results for point-based collision queries.
+class PointCollector final : public JPH::CollidePointCollector
+{
+    public:
+        explicit PointCollector(const JPH::BodyLockInterfaceNoLock& lock)
+            : m_lock{&lock}
+        {
+        }
+
+        void AddHit(const JPH::CollidePointResult& in) override
+        {
+            m_hits.push_back(GetEntity(*m_lock, in.mBodyID));
+        }
+
+        auto ExtractHits() -> std::vector<nc::Entity>&&
+        {
+            return std::move(m_hits);
+        }
+
+    private:
+        std::vector<nc::Entity> m_hits;
         const JPH::BodyLockInterfaceNoLock* m_lock;
 };
 } // namespace nc::physics
