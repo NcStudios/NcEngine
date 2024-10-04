@@ -1,3 +1,7 @@
+/**
+ * @file Events.h
+ * @copyright Jaremie Romer and McCallister Romer 2024
+ */
 #pragma once
 
 #include "ncengine/type/StableAddress.h"
