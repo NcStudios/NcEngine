@@ -38,15 +38,15 @@ struct AssetResources
     AssetResources(AssetResourcesConfig config, ShaderResourceBus* resourceBus, asset::NcAsset* ncAsset);
 
     MeshArrayBufferHandle meshes;
-    nc::Connection<const asset::MeshUpdateEventData&> onMeshArrayBufferUpdate;
+    nc::Connection onMeshArrayBufferUpdate;
     void ForwardMeshAssetData(const asset::MeshUpdateEventData& assetData);
 
     CubeMapArrayBufferHandle cubeMaps;
-    nc::Connection<const asset::CubeMapUpdateEventData&> onCubeMapArrayBufferUpdate;
+    nc::Connection onCubeMapArrayBufferUpdate;
     void ForwardCubeMapAssetData(const asset::CubeMapUpdateEventData& assetData);
 
     TextureArrayBufferHandle textures;
-    nc::Connection<const asset::TextureUpdateEventData&> onTextureArrayBufferUpdate;
+    nc::Connection onTextureArrayBufferUpdate;
     void ForwardTextureAssetData(const asset::TextureUpdateEventData& assetData);
 };
 

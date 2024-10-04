@@ -26,6 +26,6 @@ class Imgui
 
     private:
         vk::UniqueDescriptorPool m_imguiDescriptorPool;
-        Connection<> m_buildFonts;
+        Connection m_buildFonts;
     };
 } // namespace nc::graphics::vulkan
