@@ -6,6 +6,7 @@ project("NcSdk"
 
 # Options
 option(NC_BUILD_TESTS "Enable building tests." OFF)
+option(NC_BUILD_NCCONVERT "Enable building nc-convert asset converter." ON)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
@@ -39,6 +40,9 @@ set(NC_EXTERNAL_DIR "${PROJECT_SOURCE_DIR}/source/external")
 if(NC_PROD_BUILD)
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=1)
     set(NC_ENGINE_LIB "NcEngine")
+    if (NOT DEFINED NC_BUILD_NCCONVERT)
+        set(NC_BUILD_NCCONVERT OFF CACHE BOOL "" FORCE)
+    endif()
 else()
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
@@ -64,18 +68,6 @@ endif()
 
 if(NC_BUILD_TESTS)
     add_subdirectory(test)
-endif()
-
-# Install nc-convert
-if(UNIX AND NOT APPLE)
-    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert
-            DESTINATION bin
-    )
-elseif(WIN32)
-    install(FILES       ${nc-convert_SOURCE_DIR}/nc-convert.exe
-            DESTINATION bin
-    )
-elseif(APPLE)
 endif()
 
 # Install Default Assets

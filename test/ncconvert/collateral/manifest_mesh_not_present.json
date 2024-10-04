@@ -1,0 +1,71 @@
+{
+    "globalOptions" : {
+        "outputDirectory": "./test_temp_dir"
+    },
+    "audio-clip": [
+        {
+            "sourcePath": "sine_c_e.wav",
+            "assetName": "myAudioClip"
+        }
+    ],
+    "concave-collider": [
+        {
+            "sourcePath": "plane.fbx",
+            "assetName": "myConcaveCollider"
+        }
+    ],
+    "cube-map": [
+        {
+            "sourcePath": "cube_map_horizontal_cross.png",
+            "assetName": "myCubeMap"
+        }
+    ],
+    "hull-collider": [
+        {
+            "sourcePath": "cube.fbx",
+            "assetName": "myHullCollider"
+        }
+    ],
+    "mesh": [
+        {
+            "sourcePath": "cube.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Cube.001",
+                    "assetName" : "myMultiOutputMesh"
+                }
+            ]
+        },
+        {
+            "sourcePath": "plane.fbx",
+            "assetName": "myMesh"
+        },
+        {
+            "sourcePath": "multicube.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Cube 1 Mesh",
+                    "assetName" : "cube1"
+                },
+                {
+                    "subResourceName" : "Cube 2 Mesh",
+                    "assetName" : "cube2"
+                },
+                {
+                    "subResourceName" : "Cube 3 Mesh",
+                    "assetName" : "cube3"
+                },
+                {
+                    "subResourceName" : "I don't exist",
+                    "assetName" : "idontexist"
+                }
+            ]
+        }
+    ],
+    "texture": [
+        {
+            "sourcePath": "rgb_corners_4x8.png",
+            "assetName": "myTexture"
+        }
+    ]
+}

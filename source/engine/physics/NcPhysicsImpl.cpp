@@ -90,6 +90,11 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
         m_shapeFactory,
         m_constraintManager
       },
+      m_queryManager{
+        m_jolt.physicsSystem.GetNarrowPhaseQuery(),
+        m_jolt.physicsSystem.GetBodyLockInterfaceNoLock(),
+        m_shapeFactory
+      },
       m_deferredState{std::move(deferredState)}
 {
 }
