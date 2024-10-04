@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Registry.h"
-#include "Logic.h"
+#include "ncengine/ecs/FrameLogic.h"
 
 namespace nc
 {
@@ -14,30 +13,16 @@ struct InvokeFreeComponent
 
     /** The user-defined constructor attaches an instance of the component to be invoked. */
     template<class ... Args>
-    InvokeFreeComponent(Entity self, Registry* registry, Args&&... args)
+    InvokeFreeComponent(Entity self, ecs::Ecs world, Args&&... args)
     {
-        registry->Add<T>(self, std::forward<Args>(args)...);
+        world.Emplace<T>(self, std::forward<Args>(args)...);
     }
 
     /** FrameLogic call operator */
-    void operator()(Entity self, Registry* registry, float dt) const
+    void operator()(Entity self, ecs::Ecs world, float dt) const
     {
-        if(registry->Contains<T>(self))
-            registry->Get<T>(self)->Run(self, registry, dt);
-    }
-
-    /** FixedLogic call operator */
-    void operator()(Entity self, Registry* registry) const
-    {
-        if(registry->Contains<T>(self))
-            registry->Get<T>(self)->Run(self, registry);
-    }
-
-    /** CollisionLogic call operator */
-    void operator()(Entity self, Entity hit, Registry* registry) const
-    {
-        if(registry->Contains<T>(self))
-            registry->Get<T>(self)->Run(self, hit, registry);
+        if(world.Contains<T>(self))
+            world.Get<T>(self).Run(self, world, dt);
     }
 };
 } // namespace nc

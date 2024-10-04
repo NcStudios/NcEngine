@@ -1,19 +1,19 @@
 #include "EditorCamera.h"
-#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/NcGraphics.h"
 
 namespace nc::ui::editor
 {
-void EditorCamera::Run(Entity, Registry* registry, float dt)
+void EditorCamera::Run(Entity, ecs::Ecs world, float dt)
 {
     if (nc::input::KeyDown(m_hotkey))
     {
-        m_enabled ? Disable(registry) : Enable();
+        m_enabled ? Disable(world) : Enable();
     }
 
     if (m_enabled)
     {
-        SceneNavigationCamera::Run(ParentEntity(), registry, dt);
+        SceneNavigationCamera::Run(ParentEntity(), world, dt);
     }
 }
 
@@ -35,22 +35,23 @@ void EditorCamera::Enable()
     gfx->SetCamera(this);
 }
 
-void EditorCamera::Disable(Registry* registry)
+void EditorCamera::Disable(ecs::Ecs world)
 {
     m_enabled = false;
     auto gfx = m_modules.Get<nc::graphics::NcGraphics>();
     const auto currentCamera = gfx->GetCamera();
     if (currentCamera == this)
     {
-        if (m_handleToRestore.Valid() && registry->Contains<Transform>(m_handleToRestore))
-        {
-            auto toRestore = registry->Get<graphics::Camera>(m_handleToRestore);
-            if (toRestore)
-            {
-                toRestore->EnableUpdate();
-            }
+        auto isRestoreCameraValid =
+            m_handleToRestore.Valid() &&
+            world.Contains<Transform>(m_handleToRestore) &&
+            world.Contains<graphics::Camera>(m_handleToRestore);
 
-            gfx->SetCamera(toRestore);
+        if (isRestoreCameraValid)
+        {
+            auto& toRestore = world.Get<graphics::Camera>(m_handleToRestore);
+            toRestore.EnableUpdate();
+            gfx->SetCamera(&toRestore);
         }
         else
         {

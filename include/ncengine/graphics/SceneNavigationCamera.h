@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "ncengine/ecs/EcsFwd.h"
 
 namespace nc
 {
@@ -43,7 +44,7 @@ class SceneNavigationCamera : public Camera
          * @param registry Pointer to the active registry
          * @param dt Seconds since last update
          */
-        void Run(Entity self, Registry* registry, float dt);
+        void Run(Entity self, ecs::Ecs world, float dt);
 
         void EnableUpdate() noexcept override { m_enabled = true; }
         void DisableUpdate() noexcept override { m_enabled = false; }
