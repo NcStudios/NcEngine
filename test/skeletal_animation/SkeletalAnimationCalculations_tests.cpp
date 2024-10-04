@@ -347,26 +347,27 @@ TEST_F(SkeletalAnimationCalculations_tests, GetInterpolatedRotation_twoFrames_in
     auto rotationFrame = nc::asset::RotationFrame
     {
         .timeInTicks = 0.0f,
-        .rotation = nc::Quaternion{0.0f, 0.0f, 0.0f, 0.0f}
+        .rotation = nc::Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f)
     };
 
     auto rotationFrame2 = nc::asset::RotationFrame
     {
         .timeInTicks = 2.0f,
-        .rotation = nc::Quaternion{1.0f, 1.0f, 1.0f, 1.0f}
+        .rotation = nc::Quaternion::FromEulerAngles(3.14f, 0.0f, 0.0f)
     };
 
     auto rotationFrames = std::vector<nc::asset::RotationFrame>
     {
-        rotationFrame, 
+        rotationFrame,
         rotationFrame2
     };
 
     auto result = graphics::GetInterpolatedRotation(1.0f, rotationFrames);
-    EXPECT_FLOAT_EQ(result.x, 0.5f);
-    EXPECT_FLOAT_EQ(result.y, 0.5f);
-    EXPECT_FLOAT_EQ(result.z, 0.5f);
-    EXPECT_FLOAT_EQ(result.w, 0.5f);
+    auto expected = nc::Quaternion::FromEulerAngles(1.57f, 0.0f, 0.0f);
+    EXPECT_FLOAT_EQ(result.x, expected.x);
+    EXPECT_FLOAT_EQ(result.y, expected.y);
+    EXPECT_FLOAT_EQ(result.z, expected.z);
+    EXPECT_FLOAT_EQ(result.w, expected.w);
 }
 
 TEST_F(SkeletalAnimationCalculations_tests, GetInterpolatedScale_emptyVector_throws)

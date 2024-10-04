@@ -16,43 +16,6 @@ else()
     set(VMA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/source/external/vma_fallback")
 endif()
 
-# NcCommon
-FetchContent_Declare(NcCommon
-                     GIT_REPOSITORY https://github.com/NcStudios/NcCommon.git
-                     GIT_TAG        origin/vnext
-                     GIT_SHALLOW    TRUE
-)
-
-# NcTools Libs
-set(NC_TOOLS_BUILD_CONVERTER OFF)
-set(NC_TOOLS_BUILD_TESTS OFF)
-
-FetchContent_Declare(nc-tools
-                     GIT_REPOSITORY      https://github.com/NcStudios/NcTools.git
-                     GIT_TAG             v3.1.0-ncasset
-                     GIT_SHALLOW         TRUE
-)
-
-# NcTools Executable
-# We get a pre-built nc-convert so we don't have to build it and its dependencies
-if(UNIX AND NOT APPLE)
-    FetchContent_Declare(nc-convert
-                         URL                        https://github.com/NcStudios/NcTools/releases/download/v3.0.0/nc-convert-ubuntu22.04-x64.zip
-                         URL_HASH                   SHA256=5B9AAF2597001CC2A4052239F2D50918A274D258506B1BC92DEEDC15D80FC563
-                         DOWNLOAD_NO_EXTRACT        FALSE
-                         DOWNLOAD_EXTRACT_TIMESTAMP FALSE
-    )
-elseif(WIN32)
-    FetchContent_Declare(nc-convert
-                         URL                        https://github.com/NcStudios/NcTools/releases/download/v3.0.0/nc-convert-windows-x64.zip
-                         URL_HASH                   SHA256=B94D0A4C29A7B44085267583D424B04DFA2AAB684AB24CCFADB67C94A4C63846
-                         DOWNLOAD_NO_EXTRACT        FALSE
-                         DOWNLOAD_EXTRACT_TIMESTAMP FALSE
-    )
-elseif(APPLE)
-    # TODO: #349 Artifact not yet published
-endif()
-
 # Taskflow
 set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -100,14 +63,34 @@ FetchContent_Declare(JoltPhysics
                      SOURCE_SUBDIR  "Build"
 )
 
-# Fetch all required sources
-FetchContent_MakeAvailable(NcCommon nc-tools nc-convert taskflow glfw optick JoltPhysics)
+# DirectXMath
+FetchContent_Declare(DirectXMath
+                     GIT_REPOSITORY https://github.com/NcStudios/DirectXMath.git
+                     GIT_TAG        v3.1.6+nc.1
+                     GIT_SHALLOW    TRUE
+)
 
-# Set Taskflow includes as system to prevent some warnings
+# fmt - we only need because GCC hasn't implemented std::format yet. Can be removed eventually.
+set(FMT_INSTALL ON)
+FetchContent_Declare(fmt
+                     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+                     GIT_TAG        10.1.1
+                     GIT_SHALLOW    TRUE
+)
+
+# Fetch all required sources
+FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt)
+
+# Silence warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
 
-# Set Jolt includes as system to prevent warnings
+get_target_property(_DirectXMath_Include_Prop DirectXMath INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(DirectXMath SYSTEM INTERFACE ${_DirectXMath_Include_Prop})
+
+get_target_property(_fmt_Include_Prop fmt INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(fmt SYSTEM INTERFACE ${_fmt_Include_Prop})
+
 get_target_property(_Jolt_Include_Prop Jolt INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Jolt SYSTEM INTERFACE ${_Jolt_Include_Prop})
 
@@ -120,9 +103,34 @@ if(NC_PROFILING_ENABLED AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     )
 endif()
 
+
+
 #############################
 ### Optional Dependencies ###
 #############################
+
+# Assimp
+if(NC_BUILD_NCCONVERT)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+    set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_NO_EXPORT OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
+    set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+    set(ASSIMP_INSTALL_PDB OFF CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(assimp
+                        GIT_REPOSITORY https://github.com/NcStudios/assimp.git
+                        GIT_TAG        v5.3.0+nc.1
+                        GIT_SHALLOW    TRUE
+    )
+
+    FetchContent_MakeAvailable(assimp)
+endif()
 
 # gtest
 if(${NC_BUILD_TESTS})
