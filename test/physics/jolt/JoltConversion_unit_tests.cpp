@@ -107,3 +107,11 @@ TEST(JoltConversionTest, ToAllowedDOFs_convertsFlags)
     EXPECT_EQ(JPH::EAllowedDOFs::RotationZ, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::RotationZ));
     EXPECT_EQ(allRotation, nc::physics::ToAllowedDOFs(nc::DegreeOfFreedom::Rotation));
 }
+
+TEST(JoltConversionTest, ToRay_convertsRay)
+{
+    const auto expected = nc::Ray{nc::Vector3::Splat(2.0f), nc::Vector3::Up()};
+    const auto actual = nc::physics::ToRay(expected);
+    EXPECT_EQ(expected.origin, nc::physics::ToVector3(actual.mOrigin));
+    EXPECT_EQ(expected.direction, nc::physics::ToVector3(actual.mDirection));
+}
