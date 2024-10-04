@@ -52,7 +52,7 @@ class Camera : public FreeComponent
         auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
 
         /** @brief Unproject 2D normalized device coordinates into 3D points on the near and far planes. */
-        auto UnprojectToNearFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints;
+        auto CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints;
 
         /**
          * @brief Calculate the camera's viewport.

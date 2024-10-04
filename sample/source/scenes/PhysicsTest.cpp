@@ -925,7 +925,7 @@ class RayCaster : public FreeComponent
                 // RayCast from camera based on mouse position
                 const auto ndc = window::ToNormalizedDeviceCoordinates(input::MousePos());
                 const auto camera = m_ncGraphics->GetCamera();
-                const auto [nearPoint, farPoint] = camera->UnprojectToNearFarPlanes(ndc);
+                const auto [nearPoint, farPoint] = camera->CastToNearAndFarPlanes(ndc);
                 const auto ray = Ray{nearPoint, farPoint - nearPoint};
                 const auto rayResult = m_query.CastRay(ray);
                 if (!rayResult.hit.Valid())

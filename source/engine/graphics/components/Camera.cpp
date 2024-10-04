@@ -18,7 +18,7 @@ Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     UpdateProjectionMatrix(width, height);
 }
 
-auto Camera::UnprojectToNearFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints
+auto Camera::CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints
 {
     using namespace DirectX;
     const auto viewProj = XMMatrixMultiply(m_view, m_projection);
