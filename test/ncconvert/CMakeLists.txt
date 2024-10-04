@@ -78,7 +78,7 @@ target_link_libraries(AudioConverter_unit_tests
 add_test(AudioConverter_unit_tests AudioConverter_unit_tests)
 
 ## Build and Import Tests ###
-if(NC_TOOLS_BUILD_CONVERTER)
+if(NC_BUILD_NCCONVERT)
     add_executable(BuildAndImport_integration_tests
         BuildAndImport_integration_tests.cpp
     )
@@ -170,7 +170,7 @@ target_link_libraries(EnumExtensions_unit_tests
 add_test(EnumExtensions_unit_tests EnumExtensions_unit_tests)
 
 ## GeometryConverter Tests ###
-if(NC_TOOLS_BUILD_CONVERTER)
+if(NC_BUILD_NCCONVERT)
     add_executable(GeometryConverter_unit_tests
         GeometryConverter_unit_tests.cpp
     )
@@ -311,7 +311,7 @@ target_link_libraries(TextureConverter_unit_tests
 add_test(TextureConverter_unit_tests TextureConverter_unit_tests)
 
 ## NcConvert Integration Tests ##
-if(NC_TOOLS_BUILD_CONVERTER)
+if(NC_BUILD_NCCONVERT)
     add_executable(NcConvert_integration_tests
         NcConvert_integration_tests.cpp
     )
