@@ -38,6 +38,17 @@ namespace nc::window
         return g_instance->GetContentScale();
     }
 
+    Vector2 ToNormalizedDeviceCoordinates(const Vector2& screenCoordinates)
+    {
+        NC_ASSERT(g_instance, "Window instance is not set");
+        const auto& [screenX, screenY] = g_instance->GetScreenExtent();
+        return Vector2{
+            (2.0f * screenCoordinates.x) / screenX - 1.0f,
+            (2.0f * screenCoordinates.y) / screenY - 1.0f
+        };
+    }
+
+
     void RegisterOnResizeReceiver(IOnResizeReceiver* receiver)
     {
         NC_ASSERT(g_instance, "window::RegisterOnResizeReceiver - g_instance is not set");

@@ -25,11 +25,6 @@ target_compile_options(${NC_ENGINE_LIB}
         ${NC_COMPILER_FLAGS}
 )
 
-if(NC_PHYSICS_CONFIG)
-    message("Using user-provided physics config: ${NC_PHYSICS_CONFIG}")
-    add_definitions(-DNC_PHYSICS_CONFIG="${NC_PHYSICS_CONFIG}")
-endif()
-
 # Add debug post fix of 'd' to NC_ENGINE_LIB targets
 set_target_properties(${NC_ENGINE_LIB}
     PROPERTIES CMAKE_DEBUG_POSTFIX d
@@ -39,6 +34,7 @@ SET(DILIGENT_LIBRARIES
     Diligent-TargetPlatform
     Diligent-GraphicsEngineOpenGL-shared
     Diligent-GraphicsEngineVk-shared
+    PARENT_SCOPE
 )
 
 if(WIN32)

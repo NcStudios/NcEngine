@@ -44,7 +44,7 @@ class NcGraphicsImpl2 : public NcGraphics
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
         Registry* m_registry;
-        Connection<const Vector2&, bool> m_onResizeConnection;
+        Connection m_onResizeConnection;
         DiligentEngine m_engine;
 };
 } // namespace graphics

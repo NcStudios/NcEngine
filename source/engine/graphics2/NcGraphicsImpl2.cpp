@@ -1,5 +1,6 @@
 #include "NcGraphicsImpl2.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
@@ -9,7 +10,6 @@
 #include "window/NcWindowImpl.h"
 
 #include "imgui/imgui.h"
-#include "optick.h"
 #include "DirectXMath.h"
 
 namespace
@@ -184,7 +184,7 @@ void NcGraphicsImpl2::Update()
 
 void NcGraphicsImpl2::Run()
 {
-    OPTICK_CATEGORY("Render", Optick::Category::Rendering);
+    NC_PROFILE_TASK("Render", Optick::Category::Rendering);
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)

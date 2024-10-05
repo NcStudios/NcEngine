@@ -32,6 +32,9 @@ auto GetScreenExtent() -> Vector2;
 /** @brief Get the current DPI. */
 auto GetContentScale() -> Vector2;
 
+/** @brief Convert screen space coordinates to normalized device coordinates (in the range [-1, 1]). */
+auto ToNormalizedDeviceCoordinates(const Vector2& screenCoordinates) -> Vector2;
+
 /**
  * @brief Allow an object to receive window resize events. Receivers must be unregistered before they are destroyed.
  * @deprecated Prefer using NcWindow::OnResize().

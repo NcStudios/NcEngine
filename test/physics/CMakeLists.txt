@@ -25,6 +25,34 @@ target_link_libraries(Constraints_unit_tests
 
 add_test(Constraints_unit_tests Constraints_unit_tests)
 
+### CollisionQuery Tests ###
+add_executable(CollisionQuery_integration_tests
+    CollisionQuery_integration_tests.cpp
+    ${NC_SOURCE_DIR}/physics/CollisionQuery.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+)
+
+target_include_directories(CollisionQuery_integration_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(CollisionQuery_integration_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(CollisionQuery_integration_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        Jolt
+        gtest_main
+)
+
+add_test(CollisionQuery_integration_tests CollisionQuery_integration_tests)
+
 ### Contacts Tests ###
 add_executable(Contacts_unit_tests
     Contacts_unit_tests.cpp

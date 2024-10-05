@@ -47,7 +47,7 @@ class NcGraphicsImpl : public NcGraphics
         std::unique_ptr<IGraphics> m_graphics;
         AssetResources m_assetResources;
         SystemResources m_systemResources;
-        Connection<const Vector2&, bool> m_onResizeConnection;
+        Connection m_onResizeConnection;
     };
 } // namespace graphics
 } // namespace nc

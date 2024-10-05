@@ -70,6 +70,12 @@ struct MemorySettings
 struct GraphicsSettings
 {
     bool enabled = true;              ///< enable the NcGraphics module
+    /**
+    api is the target graphics api from a predetermined list (narrowed at build time by platform)
+    of vulkan, d3d12, d3d11, opengl. See nc::graphics::GetSupportedApis().
+    If the target api is not detected as compatible, the next in the list returned by GetSupportedApis()
+    will be chosen as a fallback.
+     */
     std::string api = "vulkan";       ///< possible values: vulkan, d3d12, d3d11, opengl
     bool isHeadless = false;          ///< run the api in headless mode
     bool useNativeResolution = false; ///< use the monitor's native resolution

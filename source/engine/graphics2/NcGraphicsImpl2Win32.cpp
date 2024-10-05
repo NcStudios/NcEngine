@@ -8,7 +8,7 @@ namespace
 {
 auto CheckLibrary(char const* dllName) -> bool
 {
-    auto hModule = LoadLibrary(dllName);
+    auto hModule = LoadLibraryExA(dllName, NULL, LOAD_LIBRARY_AS_DATAFILE);
     if (hModule == NULL) {
         return false;
     }

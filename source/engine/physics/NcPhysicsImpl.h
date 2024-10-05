@@ -3,6 +3,7 @@
 #include "DeferredPhysicsCreateState.h"
 #include "jolt/JoltApi.h"
 #include "jolt/BodyManager.h"
+#include "jolt/CollisionQueryManager.h"
 #include "jolt/ConstraintManager.h"
 #include "jolt/ShapeFactory.h"
 
@@ -51,6 +52,7 @@ class NcPhysicsImpl final : public NcPhysics
         ShapeFactory m_shapeFactory;
         ConstraintManager m_constraintManager;
         BodyManager m_bodyManager;
+        CollisionQueryManager m_queryManager;
         std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;
         bool m_updateEnabled = true;
 

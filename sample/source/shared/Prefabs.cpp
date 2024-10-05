@@ -28,7 +28,7 @@ graphics::ToonMaterial PurpleToonMaterial{"solid_color/Purple.nca", outlineWidth
 graphics::ToonMaterial TealToonMaterial{"solid_color/Teal.nca", outlineWidth, asset::DefaultBaseColor, 8};
 graphics::ToonMaterial YellowToonMaterial{"solid_color/Yellow.nca", outlineWidth, asset::DefaultBaseColor, 8};
 
-constexpr auto toonHatch = "line/Hatch3.nca";
+constexpr auto toonHatch = "line/hatch.nca";
 graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, outlineWidth, toonHatch, 8};
 graphics::ToonMaterial RedHatchedToonMaterial{"solid_color/Red.nca", outlineWidth, toonHatch, 8};
 graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color/Green.nca", outlineWidth, toonHatch, 8};
@@ -87,7 +87,6 @@ void InitializeResources()
     {
         "box/BaseColor.nca",
         "box/Roughness.nca",
-        "line/Hatch3.nca",
         "line/hatch.nca",
         "logo/BaseColor.nca",
         "logo/Metallic.nca",
@@ -98,8 +97,7 @@ void InitializeResources()
         "solid_color/Orange.nca",
         "solid_color/Purple.nca",
         "solid_color/Teal.nca",
-        "solid_color/Yellow.nca",
-        "tree/BaseColor.nca"
+        "solid_color/Yellow.nca"
     };
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
 

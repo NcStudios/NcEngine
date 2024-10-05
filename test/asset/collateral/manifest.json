@@ -60,6 +60,26 @@
             "assetName": "mesh3"
         }
     ],
+    "skeletal-animation": [
+        {
+            "sourcePath": "test_animation.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Attack",
+                    "assetName" : "test_animation"
+                }
+            ]
+        },
+        {
+            "sourcePath": "test_animation_2.fbx",
+            "assetNames": [
+                {
+                    "subResourceName" : "Attack",
+                    "assetName" : "test_animation_2"
+                }
+            ]
+        }
+    ],
     "texture": [
         {
             "sourcePath": "texture_base.png",

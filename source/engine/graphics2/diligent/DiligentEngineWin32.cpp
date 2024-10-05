@@ -156,7 +156,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
         }
     }
     
-    if (m_renderApi == "" || errorMessage != "")
+    if (m_renderApi == "")
     {
         EnsureContextFlushed(m_pImmediateContext);
         throw nc::NcError(fmt::format("Failed to initialize the rendering engine. The given API and all fallback APIs failed to initialize. \n {0}", errorMessage));
