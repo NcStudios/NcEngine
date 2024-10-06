@@ -12,6 +12,7 @@
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
+#include "window/NcWindowImpl.h"
 
 #include "imgui/imgui.h"
 
@@ -63,6 +64,7 @@ namespace
 
 namespace nc::graphics
 {
+#ifndef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                              const config::GraphicsSettings& graphicsSettings,
                              const config::MemorySettings& memorySettings,
@@ -78,6 +80,16 @@ namespace nc::graphics
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
+            ncWindow->SetWindow(window::WindowInfo
+            {
+                .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
+                .isGL = false,
+                .isHeadless = graphicsSettings.isHeadless,
+                .useNativeResolution = graphicsSettings.useNativeResolution,
+                .launchInFullScreen = graphicsSettings.launchInFullscreen,
+                .isResizable = false
+            });
+
             NC_LOG_TRACE("Selecting Graphics API");
             auto graphicsApi = GraphicsFactory(projectSettings, graphicsSettings, ncAsset, *ncWindow);
 
@@ -88,7 +100,7 @@ namespace nc::graphics
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
         return std::make_unique<NcGraphicsStub>(registry);
     }
-
+#endif
     NcGraphicsImpl::NcGraphicsImpl(const config::GraphicsSettings& graphicsSettings,
                                    const config::MemorySettings& memorySettings,
                                    Registry* registry,

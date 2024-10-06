@@ -25,6 +25,26 @@ target_compile_options(${NC_ENGINE_LIB}
         ${NC_COMPILER_FLAGS}
 )
 
+# Add debug post fix of 'd' to NC_ENGINE_LIB targets
+set_target_properties(${NC_ENGINE_LIB}
+    PROPERTIES CMAKE_DEBUG_POSTFIX d
+)
+
+list(APPEND DILIGENT_LIBRARIES
+            Diligent-TargetPlatform
+            Diligent-GraphicsEngineOpenGL-shared
+            Diligent-GraphicsEngineVk-shared
+)
+
+if(WIN32)
+    list(APPEND DILIGENT_LIBRARIES 
+        Diligent-GraphicsEngineD3D11-shared
+        Diligent-GraphicsEngineD3D12-shared
+    )
+endif()
+
+set(DILIGENT_LIBRARIES ${DILIGENT_LIBRARIES} PARENT_SCOPE)
+
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE
@@ -39,6 +59,7 @@ target_link_libraries(${NC_ENGINE_LIB}
         OptickCore
         RtAudio
         Jolt
+        ${DILIGENT_LIBRARIES}
 )
 
 if(WIN32)
@@ -68,6 +89,7 @@ target_include_directories(${NC_ENGINE_LIB}
     PRIVATE
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}/ncengine>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
 )
 
 target_include_directories(${NC_ENGINE_LIB}
@@ -77,23 +99,6 @@ target_include_directories(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:${VMA_INCLUDE_DIR}>
 )
 
-# Install
-install(TARGETS     ${NC_ENGINE_LIB} imgui NcMath NcUtility NcAsset RtAudio
-        EXPORT      NcEngine-export
-        DESTINATION lib
-)
-install(EXPORT      NcEngine-export
-        FILE        NcEngineTargets.cmake
-        NAMESPACE   Nc::
-        DESTINATION lib/cmake/NcEngine
-)
-install(FILES       ${PROJECT_SOURCE_DIR}/cmake/NcEngineConfig.cmake
-        DESTINATION lib/cmake/NcEngine
-)
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncengine
-        DESTINATION include
-)
-
 add_subdirectory(audio)
 add_subdirectory(asset)
 add_subdirectory(config)
@@ -101,6 +106,7 @@ add_subdirectory(debug)
 add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
+add_subdirectory(graphics2)
 add_subdirectory(input)
 add_subdirectory(network)
 add_subdirectory(particle)
