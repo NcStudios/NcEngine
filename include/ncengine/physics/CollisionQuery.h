@@ -62,6 +62,9 @@ class CollisionQuery
     public:
         /** @brief Construct a CollisionQuery capable of testing against bodies which pass a filter. */
         explicit CollisionQuery(const CollisionQueryFilter& filter = CollisionQueryFilter{});
+
+        CollisionQuery(CollisionQuery&&) noexcept;
+        CollisionQuery& operator=(CollisionQuery&&) noexcept;
         ~CollisionQuery() noexcept;
 
         /** @brief Query for the first \ref RigidBody "body" that a ray intersects. */

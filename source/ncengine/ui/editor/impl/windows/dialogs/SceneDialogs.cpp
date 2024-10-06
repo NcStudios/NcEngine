@@ -12,7 +12,7 @@ namespace
 {
 auto BuildSimpleFilter(bool includePersistent)
 {
-    return std::function<bool(nc::Entity)>{[includePersistent](nc::Entity entity)
+    return std::move_only_function<bool(nc::Entity)>{[includePersistent](nc::Entity entity)
     {
         return includePersistent ? true : !entity.IsPersistent();
     }};
@@ -26,7 +26,7 @@ auto BuildLayerFilter(bool includePersistent, const std::vector<uint8_t>& includ
         layerFlags.at(included) = true;
     }
 
-    return std::function<bool(nc::Entity)>{[flags = std::move(layerFlags), includePersistent](nc::Entity entity)
+    return std::move_only_function<bool(nc::Entity)>{[flags = std::move(layerFlags), includePersistent](nc::Entity entity)
     {
         return (!includePersistent && entity.IsPersistent()) ? false : flags.at(entity.Layer());
     }};
@@ -184,7 +184,7 @@ void SaveSceneDialog::OnSave()
     }
 }
 
-auto SaveSceneDialog::SelectFilter() -> std::function<bool(Entity)>
+auto SaveSceneDialog::SelectFilter() -> std::move_only_function<bool(Entity)>
 {
     return m_layerInclusionType == LayerInclusionAll
         ? BuildSimpleFilter(m_includePersistent)

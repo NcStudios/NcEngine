@@ -61,7 +61,7 @@ void LoadAssets(std::istream& stream, nc::asset::NcAsset& assetModule)
 }
 
 void SaveEntities(std::ostream& stream,
-                  std::function<bool(nc::Entity)>& entityFilter,
+                  std::move_only_function<bool(nc::Entity)>& entityFilter,
                   nc::SerializationContext& ctx)
 {
     const auto entities = nc::BuildFragmentEntityList(ctx.ecs.GetAll<nc::Entity>(), entityFilter, ctx.ecs);
@@ -176,7 +176,7 @@ namespace nc
 void SaveSceneFragment(std::ostream& stream,
                        ecs::Ecs ecs,
                        const asset::AssetMap& assets,
-                       std::function<bool(Entity)> entityFilter)
+                       std::move_only_function<bool(Entity)> entityFilter)
 {
     NC_LOG_TRACE("Saving SceneFragment");
     static constexpr auto defaultEntityFilter = [](Entity){ return true; };
