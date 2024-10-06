@@ -115,11 +115,14 @@ class ComponentPool final : public ComponentPoolBase
         /** @brief Insert a component attached to an entity. */
         auto Insert(Entity entity, T obj) -> T&;
 
-        /** @brief Get a pointer to the component attached to an entity, or nullptr if one does not exist. */
+        /** @brief Get the component attached to an entity. */
         auto Get(Entity entity) -> T&;
 
-        /** @brief Get a const pointer to the component attached to an entity, or nullptr if one does not exist. */
+        /** @brief Get the component attached to an entity. */
         auto Get(Entity entity) const -> const T&;
+
+        /** @brief Get a pointer to the component attached to an entity, or a nullptr on failure. */
+        auto TryGetStaged(Entity entity) -> T*;
 
         /** @brief Get the entity a component is attached to, or a null entity on failure. */
         auto GetParent(const T* component) const -> Entity;
@@ -296,6 +299,14 @@ auto ComponentPool<T>::Get(Entity entity) const -> const T&
     auto pos = std::ranges::find(m_staging, entity);
     NC_ASSERT(pos != std::cend(m_staging), "Component does not exist");
     return pos->component;
+}
+
+template<PooledComponent T>
+auto ComponentPool<T>::TryGetStaged(Entity entity) -> T*
+{
+    return m_storage.Contains(entity)
+        ? &m_storage.Get(entity)
+        : nullptr;
 }
 
 template<PooledComponent T>

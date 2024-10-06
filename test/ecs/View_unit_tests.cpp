@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "ecs/View.h"
 
+#include <iterator>
+#include <ranges>
+
 using namespace nc;
 
 namespace nc
@@ -56,6 +59,214 @@ class View_unit_tests : public ::testing::Test
             registry.Clear();
         }
 };
+
+TEST_F(View_unit_tests, TypeAssertions)
+{
+    using view_t = nc::ecs::InnerJoinView<nc::ecs::Ecs, Fake1, Fake2>;
+    using iterator_t = decltype(std::declval<view_t>().begin());
+    using sentinel_t = decltype(std::declval<view_t>().end());
+
+    static_assert(std::forward_iterator<iterator_t>);
+    static_assert(std::sentinel_for<sentinel_t, iterator_t>);
+    static_assert(std::ranges::forward_range<view_t>);
+    static_assert(std::ranges::view<view_t>);
+}
+
+TEST_F(View_unit_tests, InnerJoin_singleEntity_returnsComponentSet)
+{
+    auto ecs = nc::ecs::Ecs{impl};
+    auto e1 = ecs.Emplace<Entity>(EntityInfo{});
+    ecs.Emplace<Fake1>(e1, 0);
+    ecs.Emplace<Fake2>(e1, 1);
+    ecs.Emplace<Fake3>(e1, 2);
+    impl.CommitPendingChanges();
+
+    auto uut = nc::ecs::InnerJoin<Fake1, Fake2, Fake3>(ecs, e1);
+    auto [fake1, fake2, fake3] = uut;
+    ASSERT_NE(nullptr, fake1);
+    ASSERT_NE(nullptr, fake2);
+    ASSERT_NE(nullptr, fake3);
+    EXPECT_EQ(e1, fake1->ParentEntity());
+    EXPECT_EQ(e1, fake2->ParentEntity());
+    EXPECT_EQ(e1, fake3->ParentEntity());
+    EXPECT_EQ(0, fake1->value);
+    EXPECT_EQ(1, fake2->value);
+    EXPECT_EQ(2, fake3->value);
+}
+
+TEST_F(View_unit_tests, InnerJoin_singleType_returnsComponentRange)
+{
+    auto ecs = nc::ecs::Ecs{impl};
+
+    {
+        auto uut = nc::ecs::InnerJoin<Fake1>(ecs);
+        EXPECT_EQ(0ull, uut.size_upper_bound());
+        EXPECT_EQ(uut.begin(), uut.end());
+        EXPECT_NO_THROW(std::ranges::for_each(uut, [](auto&&){}));
+    }
+
+    auto e1 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e2 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e3 = ecs.Emplace<Entity>(EntityInfo{});
+    ecs.Emplace<Fake1>(e1, 0);
+    ecs.Emplace<Fake1>(e2, 1);
+    ecs.Emplace<Fake1>(e3, 2);
+    impl.CommitPendingChanges();
+
+    auto uut = nc::ecs::InnerJoin<Fake1>(ecs);
+    EXPECT_EQ(3ull, uut.size_upper_bound());
+    EXPECT_NE(uut.begin(), uut.end());
+    for (const auto& [fake] : uut)
+    {
+        EXPECT_NE(nullptr, fake);
+    }
+}
+
+TEST_F(View_unit_tests, InnerJoin_multipleTypes_returnsComponentRange)
+{
+    auto ecs = nc::ecs::Ecs{impl};
+
+    {
+        auto uut = nc::ecs::InnerJoin<Fake1, Fake2>(ecs);
+        EXPECT_FALSE(uut);
+        EXPECT_TRUE(uut.empty());
+        EXPECT_EQ(0ull, uut.size_upper_bound());
+        EXPECT_EQ(uut.begin(), uut.end());
+        EXPECT_EQ(uut.cbegin(), uut.cend());
+        EXPECT_NO_THROW(std::ranges::for_each(uut, [](auto&&){}));
+    }
+
+    auto e1 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e2 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e3 = ecs.Emplace<Entity>(EntityInfo{});
+    ecs.Emplace<Fake1>(e1, 0);
+    ecs.Emplace<Fake1>(e2, 1);
+    ecs.Emplace<Fake1>(e3, 2);
+    ecs.Emplace<Fake2>(e1, 3);
+    ecs.Emplace<Fake2>(e2, 4);
+    impl.CommitPendingChanges();
+
+    auto uut = nc::ecs::InnerJoin<Fake1, Fake2>(ecs);
+    EXPECT_TRUE(uut);
+    EXPECT_FALSE(uut.empty());
+    EXPECT_EQ(2ull, uut.size_upper_bound());
+    EXPECT_NE(uut.begin(), uut.end());
+    EXPECT_NE(uut.cbegin(), uut.cend());
+    for (const auto& [fake1, fake2] : uut)
+    {
+        ASSERT_NE(nullptr, fake1);
+        ASSERT_NE(nullptr, fake2);
+    }
+
+    {
+        const auto& [frontFake1, frontFake2] = uut.front();
+        EXPECT_EQ(0, frontFake1->value);
+        EXPECT_EQ(3, frontFake2->value);
+    }
+
+    {
+    auto beg = uut.begin();
+    const auto& [firstActualFake1, firstActualFake2] = *beg;
+    EXPECT_EQ(0, firstActualFake1->value);
+    EXPECT_EQ(3, firstActualFake2->value);
+    }
+
+    {
+    auto beg = uut.begin();
+    const auto& [firstActualFake1, firstActualFake2] = *beg;
+    EXPECT_EQ(0, firstActualFake1->value);
+    EXPECT_EQ(3, firstActualFake2->value);
+    }
+
+        {
+    auto beg = uut.begin();
+    const auto& [firstActualFake1, firstActualFake2] = *beg;
+    EXPECT_EQ(0, firstActualFake1->value);
+    EXPECT_EQ(3, firstActualFake2->value);
+    }
+
+    auto beg = uut.begin();
+    ++beg;
+    const auto& [secondActualFake1, secondActualFake2] = *beg;
+    EXPECT_EQ(1, secondActualFake1->value);
+    EXPECT_EQ(4, secondActualFake2->value);
+}
+
+TEST_F(View_unit_tests, InnerJoin_multipleTypes_stlCompatible)
+{
+    auto ecs = nc::ecs::Ecs{impl};
+    auto e1 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e2 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e3 = ecs.Emplace<Entity>(EntityInfo{});
+    ecs.Emplace<Fake1>(e1, 0);
+    ecs.Emplace<Fake1>(e2, 1);
+    ecs.Emplace<Fake1>(e3, 2);
+    ecs.Emplace<Fake2>(e1, 3);
+    ecs.Emplace<Fake2>(e2, 4);
+    ecs.Emplace<Fake2>(e3, 5);
+    ecs.Emplace<Fake3>(e1, 6);
+    ecs.Emplace<Fake3>(e2, 7);
+    ecs.Emplace<Fake3>(e3, 8);
+    impl.CommitPendingChanges();
+
+    std::ranges::for_each(
+        nc::ecs::InnerJoin<Fake1, Fake2, Fake3>(ecs),
+        [](auto&& tuple){
+            const auto& [fake1, fake2, fake3] = tuple;
+            EXPECT_EQ(fake1->ParentEntity(), fake2->ParentEntity());
+            EXPECT_EQ(fake2->ParentEntity(), fake3->ParentEntity());
+        }
+    );
+
+    auto toParent = [](auto&& set){
+        const auto& [fake1, _1, _2] = set;
+        return fake1->ParentEntity();
+    };
+
+    auto composedRange =
+        nc::ecs::InnerJoin<Fake1, Fake2, Fake3>(ecs) |
+        std::views::transform(toParent) |
+        std::views::enumerate;
+
+    for (auto [i, entity] : composedRange)
+    {
+        EXPECT_EQ(i, entity.Index());
+    }
+}
+
+TEST_F(View_unit_tests, InnerJoinView_sizeUpperBound_returnsSizeOfSmallestPool)
+{
+    auto ecs = nc::ecs::Ecs{impl};
+    auto e1 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e2 = ecs.Emplace<Entity>(EntityInfo{});
+    auto e3 = ecs.Emplace<Entity>(EntityInfo{});
+    ecs.Emplace<Fake1>(e1, 0);
+    ecs.Emplace<Fake2>(e1, 3);
+    impl.CommitPendingChanges();
+    auto actualSize = nc::ecs::InnerJoin<Fake1, Fake2, Fake3>(ecs).size_upper_bound();
+    EXPECT_EQ(0, actualSize);
+
+    ecs.Emplace<Fake1>(e2, 1);
+    ecs.Emplace<Fake2>(e2, 4);
+    ecs.Emplace<Fake3>(e2, 7);
+    impl.CommitPendingChanges();
+    actualSize = nc::ecs::InnerJoin<Fake1, Fake2, Fake3>(ecs).size_upper_bound();
+    EXPECT_EQ(1, actualSize);
+
+    ecs.Emplace<Fake1>(e3, 2);
+    ecs.Emplace<Fake2>(e3, 5);
+    ecs.Emplace<Fake3>(e3, 8);
+    impl.CommitPendingChanges();
+    actualSize = nc::ecs::InnerJoin<Fake1, Fake2, Fake3>(ecs).size_upper_bound();
+    EXPECT_EQ(2, actualSize);
+}
+
+
+// todo:
+// test join_for...
+// test view_interface
+// test with diff ecs types
+
 
 TEST_F(View_unit_tests, Single_ForwardIteration_VisitsEach)
 {

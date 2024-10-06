@@ -17,6 +17,10 @@
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncutility/ScopeExit.h"
 
+
+#include "ncengine/ecs/View.h"
+#include <iostream>
+
 namespace nc::sample
 {
 std::function<void(unsigned)> SpawnFunc = nullptr;
@@ -937,6 +941,22 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     BuildPunchingBag(world);
     BuildChain(world);
     BuildTriggers(world);
+
+
+    world.Emplace<FrameLogic>(
+        world.Emplace<Entity>({}),
+        [](Entity, ecs::Ecs world, float)
+        {
+            auto bodyCount = 0u;
+
+            for (auto [body, transform] : ecs::InnerJoin<RigidBody, Transform>(world))
+            {
+                ++bodyCount;
+            }
+
+            std::cout << "bodyCount: " << bodyCount << '\n';
+        }
+    );
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
