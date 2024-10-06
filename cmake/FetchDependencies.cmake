@@ -78,6 +78,21 @@ FetchContent_Declare(JoltPhysics
                      SOURCE_SUBDIR  "Build"
 )
 
+# Diligent
+set(DILIGENT_INSTALL_CORE OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_SAMPLES OFF CACHE BOOL "" FORCE)
+set(DILIGENT_INSTALL_FX OFF CACHE BOOL "" FORCE)
+set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(DILIGENT_NO_GLSLANG OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(DiligentCore
+                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
+                     GIT_TAG        v2.5.6
+                     GIT_SHALLOW    TRUE
+                     SOURCE_DIR     _deps/DiligentCore
+)
+
 # DirectXMath
 FetchContent_Declare(DirectXMath
                      GIT_REPOSITORY https://github.com/NcStudios/DirectXMath.git
@@ -94,7 +109,7 @@ FetchContent_Declare(fmt
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt)
+FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore)
 
 # Silence warnings
 disable_warnings_for_headers(Taskflow)

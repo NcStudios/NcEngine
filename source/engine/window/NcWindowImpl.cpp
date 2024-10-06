@@ -8,6 +8,7 @@
 
 #include "ncmath/Math.h"
 #include "ncutility/NcError.h"
+#include "utility/Log.h"
 
 #include <algorithm>
 
@@ -60,20 +61,22 @@ namespace nc::window
     }
 
     auto BuildWindowModule(const config::ProjectSettings& projectSettings,
-                           const config::GraphicsSettings& graphicsSettings,
+                           bool isGraphicsEnabled,
                            Signal<>& quit) -> std::unique_ptr<NcWindow>
     {
-        return std::make_unique<NcWindowImpl>(projectSettings, graphicsSettings, quit);
+        return std::make_unique<NcWindowImpl>(projectSettings, isGraphicsEnabled, quit);
     }
 
     /* NcWindowImpl */
     NcWindowImpl::NcWindowImpl(const config::ProjectSettings& projectSettings,
-                           const config::GraphicsSettings& graphicsSettings,
-                           Signal<>& quit)
-        : m_onResizeReceivers{},
+                               bool isGraphicsEnabled,
+                               Signal<>& quit)
+        : m_windowName{projectSettings.projectName},
+          m_onResizeReceivers{},
           m_quit{&quit}
     {
         g_instance = this;
+        m_window = nullptr;
 
         if (!glfwInit())
         {
@@ -82,55 +85,31 @@ namespace nc::window
             throw NcError(fmt::format("Failed to initialize GLFW: {} ({}).", error, code));
         }
 
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-        const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        if (!videoMode)
+        /* We only want a headless window created by default here if graphics is disabled. 
+           If graphics is enabled, the graphics module will set a new window (headless or otherwise)
+           and we don't need to create a window needlessly. */
+        if (!isGraphicsEnabled)
         {
-            throw NcError("Error getting the monitor's video mode information.");
+            SetWindow(WindowInfo
+            {
+                .dimensions = Vector2{1, 1},
+                .isGL = false,
+                .isHeadless = true,
+                .useNativeResolution = false,
+                .launchInFullScreen = false,
+                .isResizable = false
+            });
         }
-
-        auto nativeWidth = videoMode->width;
-        auto nativeHeight = videoMode->height;
-
-        if(graphicsSettings.useNativeResolution || graphicsSettings.launchInFullscreen)
-        {
-            m_dimensions = Vector2{ static_cast<float>(nativeWidth), static_cast<float>(nativeHeight) };
-        }
-        else
-        {
-            m_dimensions = Vector2{ static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight) };
-        }
-
-        m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
-        auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
-        auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
-        auto monitor = graphicsSettings.launchInFullscreen ? glfwGetPrimaryMonitor() : nullptr;
-        m_window = glfwCreateWindow(width, height, projectSettings.projectName.c_str(), monitor, nullptr);
-
-        if(!m_window)
-        {
-            throw NcError("CreateWindow failed");
-        }
-
-        glfwGetWindowContentScale(m_window, &m_contentScale.x, &m_contentScale.y);
-
-        glfwSetKeyCallback(m_window, &ProcessKeyEvent);
-        glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
-        glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
-        glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
-        glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
-        glfwSetWindowContentScaleCallback(m_window, &ProcessSetContentScaleEvent);
-        glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
     }
 
     NcWindowImpl::~NcWindowImpl() noexcept
     {
-        glfwDestroyWindow(m_window);
+        if (m_window)
+        {
+            glfwDestroyWindow(m_window);
+        }
         glfwTerminate();
     }
-
 
     void NcWindowImpl::SetDimensions(int width, int height) noexcept
     {
@@ -169,6 +148,73 @@ namespace nc::window
     void NcWindowImpl::ProcessSetContentScaleEvent(GLFWwindow*, float x, float y)
     {
         g_instance->m_contentScale = Vector2{x, y};
+    }
+
+    void NcWindowImpl::SetWindow(WindowInfo windowInfo)
+    {
+        glfwWindowHint(GLFW_CLIENT_API, windowInfo.isGL ? GLFW_OPENGL_API : GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable);
+
+        if (windowInfo.isHeadless)
+        {
+            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
+            if (m_window)
+            {
+                NC_LOG_TRACE("Tearing down the headless window.");
+                glfwDestroyWindow(m_window);
+            }
+            m_window = glfwCreateWindow(1, 1, m_windowName.c_str(), nullptr, nullptr);
+            NC_LOG_TRACE("Created a headless window.");
+        }
+        else
+        {
+            glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+            const auto* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            if (!videoMode)
+            {
+                throw NcError("Error getting the monitor's video mode information.");
+            }
+
+            auto nativeWidth = videoMode->width;
+            auto nativeHeight = videoMode->height;
+
+            if(windowInfo.useNativeResolution || windowInfo.launchInFullScreen)
+            {
+                m_dimensions = Vector2{ static_cast<float>(nativeWidth), static_cast<float>(nativeHeight) };
+            }
+            else
+            {
+                m_dimensions = windowInfo.dimensions;
+            }
+
+            m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+            auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
+            auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
+            auto monitor = windowInfo.launchInFullScreen ? glfwGetPrimaryMonitor() : nullptr;
+
+            if (m_window)
+            {
+                NC_LOG_TRACE("Tearing down the window.");
+                glfwDestroyWindow(m_window);
+            }
+            m_window = glfwCreateWindow(width, height, m_windowName.c_str(), monitor, nullptr);
+            NC_LOG_TRACE("Created a window.");
+        }
+
+        if(!m_window)
+        {
+            throw NcError("SetWindow failed");
+        }
+
+        glfwGetWindowContentScale(m_window, &m_contentScale.x, &m_contentScale.y);
+        glfwSetKeyCallback(m_window, &ProcessKeyEvent);
+        glfwSetCursorPosCallback(m_window, &ProcessMouseCursorPosEvent);
+        glfwSetMouseButtonCallback(m_window, &ProcessMouseButtonEvent);
+        glfwSetScrollCallback(m_window, &ProcessMouseScrollEvent);
+        glfwSetWindowSizeCallback(m_window, &ProcessResizeEvent);
+        glfwSetWindowContentScaleCallback(m_window, &ProcessSetContentScaleEvent);
+        glfwSetWindowCloseCallback(m_window, &ProcessWindowCloseEvent);
     }
 
     void NcWindowImpl::ProcessSystemMessages()

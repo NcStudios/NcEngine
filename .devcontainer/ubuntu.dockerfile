@@ -7,7 +7,13 @@ RUN apt update && apt -y install \
     g++-14 \
     libvulkan-dev \
     xorg-dev \
-    xvfb
+    xvfb \
+    python3 \
+    python3-pip \
+    libglx-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    mesa-common-dev
 
 ENV CC=/usr/bin/gcc-14 \
     CXX=/usr/bin/g++-14

@@ -51,7 +51,13 @@ jobs:
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y xorg-dev xvfb
+          sudo apt-get install -y xorg-dev xvfb \
+          python3 \
+          python3-pip \
+          libglx-dev \
+          libglu1-mesa-dev \
+          freeglut3-dev \
+          mesa-common-dev
 
       - name: Setup Display
         if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
