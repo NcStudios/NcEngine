@@ -12,7 +12,7 @@
 namespace nc
 {
 /** @brief FrameLogic callable member type */
-using FrameLogicCallable_t = std::function<void(Entity self, ecs::Ecs world, float dt)>;
+using FrameLogicCallable_t = std::move_only_function<void(Entity self, ecs::Ecs world, float dt)>;
 
 /** @brief FrameLogic callable type requirements */
 template<class Func>
