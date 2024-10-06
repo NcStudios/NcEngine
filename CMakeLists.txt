@@ -10,10 +10,15 @@ option(NC_BUILD_NCCONVERT "Enable building nc-convert asset converter." ON)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
+# Diligent feature flag
+option(NC_USE_DILIGENT "Enable DiligentGraphics" OFF)
+if(NC_USE_DILIGENT)
+    add_definitions(-DNC_USE_DILIGENT)
+endif()
+
 # Variables
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_DEBUG_POSTFIX d)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(NC_COMPILER_FLAGS -Werror
                           -Wfatal-errors
