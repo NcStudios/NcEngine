@@ -42,7 +42,8 @@ elseif(UNIX AND NOT APPLE)
             DESTINATION lib)
     set_target_properties(${NC_SAMPLE_EXE}
         PROPERTIES
-            INSTALL_RPATH "$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/lib/GraphicsEngineOpenGL;$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/lib/GraphicsEngineVulkan"
+            BUILD_RPATH "$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineOpenGL;$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
+            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
     )
 endif()
 
