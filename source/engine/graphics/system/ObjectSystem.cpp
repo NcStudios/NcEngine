@@ -4,7 +4,7 @@
 #include "SkeletalAnimationSystem.h"
 #include "graphics/Camera.h"
 
-#include "ncmath/DirectXMathUtility.h"
+#include "ncmath/MatrixUtilities.h"
 #include "optick.h"
 
 namespace

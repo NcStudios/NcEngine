@@ -1,6 +1,6 @@
 #include "SkeletalAnimationCalculations.h"
-#include "ncengine/utility/MatrixUtilities.h"
 
+#include "ncmath/MatrixUtilities.h"
 #include "ncutility/NcError.h"
 
 #include <ranges>
