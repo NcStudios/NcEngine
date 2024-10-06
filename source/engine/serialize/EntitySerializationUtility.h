@@ -19,7 +19,7 @@ struct FragmentEntityInfo
 
 // Build a list of all entities to include in a scene fragment. All parents are guaranteed to precede their children.
 auto BuildFragmentEntityList(std::span<const Entity> in,
-                             std::function<bool(Entity)>& filter,
+                             std::move_only_function<bool(Entity)>& filter,
                              ecs::ExplicitEcs<Hierarchy> ecs) -> std::vector<Entity>;
 
 // Build a map of Entity to fragment id.

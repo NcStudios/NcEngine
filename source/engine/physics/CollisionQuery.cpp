@@ -70,6 +70,8 @@ CollisionQuery::CollisionQuery(const CollisionQueryFilter& filter)
 {
 }
 
+CollisionQuery::CollisionQuery(CollisionQuery&&) noexcept = default;
+CollisionQuery& CollisionQuery::operator=(CollisionQuery&&) noexcept = default;
 CollisionQuery::~CollisionQuery() noexcept = default;
 
 auto CollisionQuery::CastRay(const Ray& ray) const -> RayCastResult
