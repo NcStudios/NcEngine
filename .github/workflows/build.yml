@@ -50,6 +50,7 @@ jobs:
       - name: Install dependencies
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
+          echo 'Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: lunar\nComponents: universe\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg' >> /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get update
           sudo apt-get install -y \
           xorg-dev \
@@ -60,7 +61,7 @@ jobs:
           libxinerama-dev \
           libxcursor-dev \
           libxi-dev \
-          libtinfo6
+          libtinfo5
 
       - name: Setup Display
         if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
