@@ -6,9 +6,9 @@
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/RigidBody.h"
-#include "ncengine/utility/MatrixUtilities.h"
 #include "asset/AssetService.h"
 
+#include "ncmath/MatrixUtilities.h"
 #include "optick.h"
 
 namespace

@@ -49,7 +49,7 @@ struct DeserializationContext
 void SaveSceneFragment(std::ostream& stream,
                        ecs::Ecs ecs,
                        const asset::AssetMap& assets,
-                       std::function<bool(Entity)> entityFilter = nullptr);
+                       std::move_only_function<bool(Entity)> entityFilter = nullptr);
 
 /** @brief Load game state from a binary stream. */
 void LoadSceneFragment(std::istream& stream,

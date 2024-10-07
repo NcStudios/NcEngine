@@ -1,8 +1,23 @@
+function(disable_warnings_for_target target)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(${target} PRIVATE -w)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        target_compile_options(${target} PRIVATE /W0)
+    endif()
+endfunction()
+
+function(disable_warnings_for_headers target)
+    get_target_property(target_include_dirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
+    if (target_include_dirs)
+        target_include_directories(${target} SYSTEM INTERFACE ${target_include_dirs})
+    endif()
+endfunction()
+
+include(FetchContent)
+
 #############################
 ### Required Dependencies ###
 #############################
-
-include(FetchContent)
 
 # Vulkan
 find_package(Vulkan REQUIRED)
@@ -105,17 +120,10 @@ FetchContent_Declare(fmt
 FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
 
 # Silence warnings
-get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(Taskflow SYSTEM INTERFACE ${_Taskflow_Include_Prop})
-
-get_target_property(_DirectXMath_Include_Prop DirectXMath INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(DirectXMath SYSTEM INTERFACE ${_DirectXMath_Include_Prop})
-
-get_target_property(_fmt_Include_Prop fmt INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(fmt SYSTEM INTERFACE ${_fmt_Include_Prop})
-
-get_target_property(_Jolt_Include_Prop Jolt INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(Jolt SYSTEM INTERFACE ${_Jolt_Include_Prop})
+disable_warnings_for_headers(Taskflow)
+disable_warnings_for_headers(DirectXMath)
+disable_warnings_for_headers(fmt)
+disable_warnings_for_headers(Jolt)
 
 # Tell Jolt to use our profile implementation. This introduces a circular dependency between Jolt/NcEngine,
 # which GCC struggles with (but it could be coerced), so we just exclude Jolt events from nix profiling.
@@ -151,6 +159,9 @@ if(NC_BUILD_NCCONVERT)
     )
 
     FetchContent_MakeAvailable(assimp)
+
+    disable_warnings_for_headers(assimp)
+    disable_warnings_for_target(assimp)
 endif()
 
 # gtest

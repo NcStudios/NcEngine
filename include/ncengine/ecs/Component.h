@@ -104,23 +104,24 @@ template<PooledComponent T>
 struct ComponentHandler
 {
     /** @brief Function type for the Factory handler. */
-    using Factory_t = std::function<T(Entity entity, const std::any& userData)>;
+    using Factory_t = std::move_only_function<T(Entity entity,
+                                                const std::any& userData)>;
 
     /** @brief Function type for the serialize handler. */
-    using Serialize_t = std::function<void(std::ostream& binaryStream,
-                                           const T& component,
-                                           const SerializationContext& ctx,
-                                           const std::any& userData)>;
+    using Serialize_t = std::move_only_function<void(std::ostream& binaryStream,
+                                                     const T& component,
+                                                     const SerializationContext& ctx,
+                                                     const std::any& userData)>;
 
     /** @brief Function type for the deserialize handler. */
-    using Deserialize_t = std::function<T(std::istream& binaryStream,
-                                          const DeserializationContext& ctx,
-                                          const std::any& userData)>;
+    using Deserialize_t = std::move_only_function<T(std::istream& binaryStream,
+                                                    const DeserializationContext& ctx,
+                                                    const std::any& userData)>;
 
     /** @brief Function type for the DrawUI handler. */
-    using DrawUI_t = std::function<void(T& component,
-                                        ui::editor::EditorContext& ctx,
-                                        const std::any& userData)>;
+    using DrawUI_t = std::move_only_function<void(T& component,
+                                                  ui::editor::EditorContext& ctx,
+                                                  const std::any& userData)>;
 
     /**
      * @brief A unique identifier for the component.
