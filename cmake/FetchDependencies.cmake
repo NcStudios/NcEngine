@@ -15,9 +15,7 @@ endfunction()
 
 include(FetchContent)
 
-#############################
-### Required Dependencies ###
-#############################
+# Required Dependencies
 
 # Vulkan
 find_package(Vulkan REQUIRED)
@@ -126,9 +124,7 @@ if(NC_PROFILING_ENABLED AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     )
 endif()
 
-#############################
-### Optional Dependencies ###
-#############################
+# Optional Dependencies
 
 # Assimp
 if(NC_BUILD_NCCONVERT)
