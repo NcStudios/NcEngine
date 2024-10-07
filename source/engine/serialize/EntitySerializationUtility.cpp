@@ -4,7 +4,7 @@ namespace
 {
 void AddChildren(nc::Entity parent,
                  nc::ecs::ExplicitEcs<nc::Hierarchy> ecs,
-                 std::function<bool(nc::Entity)>& filter,
+                 std::move_only_function<bool(nc::Entity)>& filter,
                  std::vector<nc::Entity>& out)
 {
     auto included = ecs.Get<nc::Hierarchy>(parent).children |
@@ -45,7 +45,7 @@ auto ReconstructEntityInfo(nc::Entity entity,
 namespace nc
 {
 auto BuildFragmentEntityList(std::span<const Entity> in,
-                             std::function<bool(Entity)>& filter,
+                             std::move_only_function<bool(Entity)>& filter,
                              ecs::ExplicitEcs<Hierarchy> ecs) -> std::vector<Entity>
 {
     // All parents must precede their children, so we want a list of all root nodes that pass the filter.

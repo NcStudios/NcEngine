@@ -60,7 +60,7 @@ class SaveSceneDialog : public ModalDialog
         void EnableAllLayers();
         void DisableAllLayers();
         void OnSave();
-        auto SelectFilter() -> std::function<bool(Entity)>;
+        auto SelectFilter() -> std::move_only_function<bool(Entity)>;
 };
 
 class LoadSceneDialog : public ModalDialog
