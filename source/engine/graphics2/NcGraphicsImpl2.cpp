@@ -122,13 +122,13 @@ NcGraphicsImpl2::~NcGraphicsImpl2()
 }
 
 void NcGraphicsImpl2::SetCamera(Camera* camera) noexcept
-    {
-        (void)camera;
-    }
+{
+    m_mainCamera = camera;
+}
 
 auto NcGraphicsImpl2::GetCamera() noexcept -> Camera*
 {
-    return nullptr;
+    return m_mainCamera;
 }
 
 void NcGraphicsImpl2::SetUi(ui::IUI* ui) noexcept
@@ -152,6 +152,7 @@ void NcGraphicsImpl2::ClearEnvironment()
 
 void NcGraphicsImpl2::Clear() noexcept
 {
+    m_mainCamera = nullptr;
 }
 
 void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)

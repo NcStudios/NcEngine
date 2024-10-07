@@ -52,32 +52,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-          build-essential \
-          libx11-dev \
-          xvfb \
-          libgl1-mesa-dev \
-          
-          libxrandr-dev \
-          libxinerama-dev \
-          libxcursor-dev \
-          libxi-dev
-
-
           xorg-dev \
           xvfb \
-          python3 \
-          python3-pip \
-          libglx-dev \
-          libglu1-mesa-dev \
-          freeglut3-dev \
-          mesa-common-dev
-
-          build-essential \
           libx11-dev \
-          libgl-mesa-dev \
-          mesa-vulkan-drivers
-
-          ibxrandr-dev \
+          libgl1-mesa-dev \
+          libxrandr-dev \
           libxinerama-dev \
           libxcursor-dev \
           libxi-dev
