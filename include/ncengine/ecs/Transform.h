@@ -6,7 +6,7 @@
 
 #include "Component.h"
 
-#include "ncengine/utility/MatrixUtilities.h"
+#include "ncmath/MatrixUtilities.h"
 
 #include <span>
 #include <vector>

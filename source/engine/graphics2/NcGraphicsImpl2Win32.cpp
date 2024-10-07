@@ -1,5 +1,5 @@
 #include "ncengine/graphics/NcGraphics.h"
-#include "ncengine/platform/win32/NcWin32.h"
+#include "ncutility/platform/win32/NcWin32.h"
 
 #include <string_view>
 #include <vector>

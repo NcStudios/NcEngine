@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ncengine/utility/MatrixUtilities.h"
+#include "ncmath/MatrixUtilities.h"
 
 namespace JPH
 {
