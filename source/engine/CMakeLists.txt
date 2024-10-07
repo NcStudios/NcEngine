@@ -34,6 +34,7 @@ list(APPEND DILIGENT_LIBRARIES
             Diligent-TargetPlatform
             Diligent-GraphicsEngineOpenGL-shared
             Diligent-GraphicsEngineVk-shared
+            Diligent-TextureLoader
 )
 
 if(WIN32)

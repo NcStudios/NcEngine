@@ -69,13 +69,21 @@ set(DILIGENT_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_SAMPLES OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_FX OFF CACHE BOOL "" FORCE)
 set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-set(DILIGENT_NO_GLSLANG OFF CACHE BOOL "" FORCE)
+set(DILIGENT_NO_GLSLANG ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_RENDER_STATE_PACKAGER ON CACHE BOOL "" FORCE)
 
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
                      GIT_TAG        v2.5.6
                      GIT_SHALLOW    TRUE
                      SOURCE_DIR     _deps/DiligentCore
+)
+
+FetchContent_Declare(DiligentTools
+                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
+                     GIT_TAG        v2.5.6
+                     GIT_SHALLOW    TRUE
+                     SOURCE_DIR     _deps/DiligentTools
 )
 
 # DirectXMath
@@ -94,7 +102,7 @@ FetchContent_Declare(fmt
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore)
+FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
 
 # Silence warnings
 get_target_property(_Taskflow_Include_Prop Taskflow INTERFACE_INCLUDE_DIRECTORIES)
