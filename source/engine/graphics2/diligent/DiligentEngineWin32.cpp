@@ -33,7 +33,7 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
@@ -44,7 +44,9 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
     RotateElementToBeginning(preferredApiOrder, renderApi);
 
     std::string errorMessage;
-    auto window = Win32NativeWindow{glfwGetWin32Window(window_.GetWindowHandle())};
+    auto glfwWindowHandle = glfwGetWin32Window(window_);
+    NC_ASSERT(glfwWindowHandle, "Error getting the Win32 window handle from the GLFW window.");
+    auto window = Win32NativeWindow{glfwWindowHandle};
     SwapChainDesc SCDesc;
 
     /* Initialize the device and context. First try to init the preferred API. Fall back to others on failure. */
@@ -137,7 +139,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
                 auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
                 EngineGLCreateInfo engineCI;
-                glfwMakeContextCurrent(window_.GetWindowHandle());
+                glfwMakeContextCurrent(window_);
                 engineCI.Window = window;
 
                 if (!graphicsSettings.isHeadless)
@@ -152,6 +154,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 EnsureContextFlushed(m_pImmediateContext);
                 NC_LOG_WARNING("Failed to initialize OpenGL.");
                 errorMessage = fmt::format("{0} Failed to initialize OpenGL: {1} \n", errorMessage, e.what());
+                throw e;
             }
         }
     }

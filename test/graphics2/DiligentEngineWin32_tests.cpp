@@ -15,7 +15,9 @@ namespace nc::window
             NcWindowImpl(WindowInfo info)
             : m_window{nullptr}
             {
-                glfwInit();
+                if (!glfwInit())
+                    throw std::runtime_error("Could not init GLFW.");
+
                 SetWindow(info);
             };
 
@@ -44,6 +46,10 @@ namespace nc::window
 
                 glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
                 m_window = glfwCreateWindow(100, 100, "DiligentEngineWin32_tests", nullptr, nullptr);
+                if (!m_window)
+                {
+                    throw std::runtime_error("Could not create window.");
+                }
             };
 
             void ProcessSystemMessages() override
@@ -64,7 +70,7 @@ namespace nc::window
 
 using namespace nc::graphics;
 
-TEST(DiligentEngineWin32_tests, CreateDiligentEngine_Succeeds)
+TEST(DiligentEngineWin32_tests, CreateDiligentEngine_VulkanNotHeadless_Succeeds)
 {
     /* Create config */
     auto graphicsSettings = nc::config::GraphicsSettings();
@@ -74,16 +80,82 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_Succeeds)
     projectSettings.projectName = "DiligentEngineWin32_tests";
 
     /* Create window */
-    auto info = nc::window::WindowInfo
-    {
-        .isGL = false,
-        .isHeadless = graphicsSettings.isHeadless,
-    };
-
-    auto ncWindow = std::make_unique<nc::window::NcWindowImpl>(info);
+    auto info = nc::window::WindowInfo{ .isGL = false, .isHeadless = graphicsSettings.isHeadless};
+    auto ncWindow = nc::window::NcWindowImpl{info};
 
     /* Create DiligentEngine */
     auto supportedApis = GetSupportedApis();
-    EXPECT_NO_THROW(DiligentEngine(graphicsSettings, *ncWindow, supportedApis));
+    EXPECT_NO_THROW(DiligentEngine(graphicsSettings, ncWindow.GetWindowHandle(), supportedApis));
+}
 
+TEST(DiligentEngineWin32_tests, CreateDiligentEngine_VulkanHeadless_Succeeds)
+{
+    /* Create config */
+    auto graphicsSettings = nc::config::GraphicsSettings();
+    graphicsSettings.isHeadless = true;
+    graphicsSettings.api = "vulkan";
+    auto projectSettings = nc::config::ProjectSettings();
+    projectSettings.projectName = "DiligentEngineWin32_tests";
+
+    /* Create window */
+    auto info = nc::window::WindowInfo{ .isGL = false, .isHeadless = graphicsSettings.isHeadless};
+    auto ncWindow = nc::window::NcWindowImpl{info};
+
+    /* Create DiligentEngine */
+    auto supportedApis = GetSupportedApis();
+    EXPECT_NO_THROW(DiligentEngine(graphicsSettings, ncWindow.GetWindowHandle(), supportedApis));
+}
+
+TEST(DiligentEngineWin32_tests, CreateDiligentEngine_OpenGLNotHeadless_Succeeds)
+{
+    /* Create config */
+    auto graphicsSettings = nc::config::GraphicsSettings();
+    graphicsSettings.isHeadless = false;
+    graphicsSettings.api = "opengl";
+    auto projectSettings = nc::config::ProjectSettings();
+    projectSettings.projectName = "DiligentEngineWin32_tests";
+
+    /* Create window */
+    auto info = nc::window::WindowInfo{ .isGL = false, .isHeadless = graphicsSettings.isHeadless};
+    auto ncWindow = nc::window::NcWindowImpl{info};
+
+    /* Create DiligentEngine */
+    auto supportedApis = GetSupportedApis();
+    EXPECT_NO_THROW(DiligentEngine(graphicsSettings, ncWindow.GetWindowHandle(), supportedApis));
+}
+
+TEST(DiligentEngineWin32_tests, CreateDiligentEngine_OpenGLNotHeadless_BadWindow_Fails)
+{
+    /* Create config */
+    auto graphicsSettings = nc::config::GraphicsSettings();
+    graphicsSettings.isHeadless = false;
+    graphicsSettings.api = "opengl";
+    auto projectSettings = nc::config::ProjectSettings();
+    projectSettings.projectName = "DiligentEngineWin32_tests";
+
+    /* Create window. Set .isGL to false which will set GLFW_NO_API - this will cause creation of the GL context to fail. */
+    auto info = nc::window::WindowInfo{ .isGL = false, .isHeadless = graphicsSettings.isHeadless};
+    auto ncWindow = nc::window::NcWindowImpl{info};
+
+    /* Create DiligentEngine */
+    auto supportedApis = GetSupportedApis();
+    EXPECT_THROW(DiligentEngine(graphicsSettings, ncWindow.GetWindowHandle(), supportedApis), std::runtime_error);
+}
+
+TEST(DiligentEngineWin32_tests, CreateDiligentEngine_OpenGLHeadless_Succeeds)
+{
+    /* Create config */
+    auto graphicsSettings = nc::config::GraphicsSettings();
+    graphicsSettings.isHeadless = true;
+    graphicsSettings.api = "opengl";
+    auto projectSettings = nc::config::ProjectSettings();
+    projectSettings.projectName = "DiligentEngineWin32_tests";
+
+    /* Create window */
+    auto info = nc::window::WindowInfo{ .isGL = false, .isHeadless = graphicsSettings.isHeadless};
+    auto ncWindow = nc::window::NcWindowImpl{info};
+
+    /* Create DiligentEngine */
+    auto supportedApis = GetSupportedApis();
+    EXPECT_NO_THROW(DiligentEngine(graphicsSettings, ncWindow.GetWindowHandle(), supportedApis));
 }

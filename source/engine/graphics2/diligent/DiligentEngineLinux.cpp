@@ -24,7 +24,7 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
@@ -36,7 +36,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
     std::string errorMessage;
     LinuxNativeWindow window;
-    window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_.GetWindowHandle()));
+    window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_));
     window.pDisplay = glfwGetX11Display();
     SwapChainDesc SCDesc;
 
@@ -79,7 +79,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
                 auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
                 EngineGLCreateInfo engineCI;
-                glfwMakeContextCurrent(window_.GetWindowHandle());
+                glfwMakeContextCurrent(window_);
                 engineCI.Window = window;
 
                 if (!graphicsSettings.isHeadless)

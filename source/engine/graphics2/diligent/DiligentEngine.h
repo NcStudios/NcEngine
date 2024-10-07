@@ -19,7 +19,7 @@ namespace graphics
 class DiligentEngine
 {
     public:
-        DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window, std::span<const std::string_view> supportedApis);
+        DiligentEngine(const config::GraphicsSettings& graphicsSettings, GLFWwindow* window, std::span<const std::string_view> supportedApis);
         ~DiligentEngine() noexcept;
 
         auto Device()    -> Diligent::IRenderDevice*  { return m_pDevice.RawPtr(); }
