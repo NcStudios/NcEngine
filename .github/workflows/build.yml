@@ -50,6 +50,7 @@ jobs:
       - name: Install dependencies
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
+          sudo add-apt-repository universe
           sudo apt-get update
           sudo apt-get install -y \
           xorg-dev \
@@ -59,7 +60,8 @@ jobs:
           libxrandr-dev \
           libxinerama-dev \
           libxcursor-dev \
-          libxi-dev
+          libxi-dev \
+          libtinfo5
 
       - name: Setup Display
         if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
