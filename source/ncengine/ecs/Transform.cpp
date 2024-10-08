@@ -1,5 +1,10 @@
 #include "ncengine/ecs/Transform.h"
 
+#include "ncutility/platform/Platform.h"
+
+NC_DISABLE_WARNING_PUSH
+NC_DISABLE_WARNING_GCC("-Wmaybe-uninitialized")
+
 namespace nc
 {
     using namespace DirectX;
@@ -164,3 +169,5 @@ namespace nc
         SetRotation(Quaternion::FromAxisAngle(axis, angle));
     }
 }
+
+NC_DISABLE_WARNING_POP
