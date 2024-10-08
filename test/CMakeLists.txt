@@ -2,6 +2,7 @@ enable_testing()
 include(GoogleTest)
 
 add_definitions(-DNC_ASSERT_ENABLED)
+add_definitions(-DNC_ENABLE_GRAPHICS_TEST_FUNCS)
 
 add_subdirectory(alloc)
 add_subdirectory(asset)

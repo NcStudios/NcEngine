@@ -16,6 +16,9 @@ class NcWindow;
 
 namespace graphics
 {
+#ifdef NC_ENABLE_GRAPHICS_TEST_FUNCS
+static std::function<void()> ConditionalThrow;
+#endif
 class DiligentEngine
 {
     public:

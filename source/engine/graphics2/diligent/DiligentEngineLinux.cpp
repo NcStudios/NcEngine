@@ -57,7 +57,12 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
                 if (!graphicsSettings.isHeadless)
                     pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
-                    
+
+                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
+                {
+                    throw nc::NcError("Failed to create the Vulkan device, context or swapchain.");
+                }
+
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
                 break;
@@ -85,6 +90,11 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 if (!graphicsSettings.isHeadless)
                     pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
                 
+                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
+                {
+                    throw nc::NcError("Failed to create the OpenGL device, context or swapchain.");
+                }
+
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the OpenGL rendering engine.");
                 break;
