@@ -24,7 +24,7 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, Diligent::EngineCreateInfo engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
@@ -51,16 +51,21 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
 
-                EngineVkCreateInfo engineCI;
+                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 auto* pFactoryVk = GetEngineFactoryVk();
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
+
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the Vulkan device or context.");
+                }
 
                 if (!graphicsSettings.isHeadless)
                     pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
 
-                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
                 {
-                    throw nc::NcError("Failed to create the Vulkan device, context or swapchain.");
+                    throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }
 
                 m_renderApi = api;
@@ -83,7 +88,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 #endif
 
                 auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-                EngineGLCreateInfo engineCI;
+                auto engineCI = EngineGLCreateInfo{engineCreateInfo};
                 glfwMakeContextCurrent(window_);
                 engineCI.Window = window;
 

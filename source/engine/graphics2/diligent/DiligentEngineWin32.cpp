@@ -33,7 +33,7 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, Diligent::EngineCreateInfo engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
@@ -60,20 +60,21 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
                 #endif
 
-                #ifdef NC_ENABLE_GRAPHICS_TEST_FUNCS
-                ConditionalThrow();
-                #endif
-
-                EngineD3D12CreateInfo engineCI;
+                auto engineCI = EngineD3D12CreateInfo{engineCreateInfo};
                 auto* pFactoryD3D12 = GetEngineFactoryD3D12();
                 pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
+
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the D3D12 device or context.");
+                }
 
                 if (!graphicsSettings.isHeadless)
                     pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
 
-                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
                 {
-                    throw nc::NcError("Failed to create the D3D12 device, context or swapchain.");
+                    throw nc::NcError("Failed to create the D3D12 swapchain.");
                 }
 
                 m_renderApi = api;
@@ -95,20 +96,21 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
 
-                #ifdef NC_ENABLE_GRAPHICS_TEST_FUNCS
-                ConditionalThrow();
-                #endif
-
-                EngineVkCreateInfo engineCI;
+                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 auto* pFactoryVk = GetEngineFactoryVk();
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
+
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the Vulkan device or context.");
+                }
 
                 if (!graphicsSettings.isHeadless)
                     pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
 
-                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
                 {
-                    throw nc::NcError("Failed to create the Vulkan device, context or swapchain.");
+                    throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }
 
                 m_renderApi = api;
@@ -130,20 +132,21 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
                 #endif
 
-                #ifdef NC_ENABLE_GRAPHICS_TEST_FUNCS
-                ConditionalThrow();
-                #endif
-
-                EngineD3D11CreateInfo engineCI;
+                auto engineCI = EngineD3D11CreateInfo{engineCreateInfo};
                 auto* pFactoryD3D11 = GetEngineFactoryD3D11();
                 pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
+
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the D3D11 device or context.");
+                }
 
                 if (!graphicsSettings.isHeadless)
                     pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
 
-                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
                 {
-                    throw nc::NcError("Failed to create the D3D11 device, context or swapchain.");
+                    throw nc::NcError("Failed to create the D3D11 swapchain.");
                 }
 
                 m_renderApi = api;
@@ -165,12 +168,9 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
                 #endif
 
-                #ifdef NC_ENABLE_GRAPHICS_TEST_FUNCS
-                ConditionalThrow();
-                #endif
-                
                 auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-                EngineGLCreateInfo engineCI;
+
+                auto engineCI = EngineGLCreateInfo{engineCreateInfo};
                 glfwMakeContextCurrent(window_);
                 engineCI.Window = window;
 

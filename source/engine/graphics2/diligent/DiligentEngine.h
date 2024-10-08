@@ -16,13 +16,10 @@ class NcWindow;
 
 namespace graphics
 {
-#ifdef NC_ENABLE_GRAPHICS_TEST_FUNCS
-static std::function<void()> ConditionalThrow;
-#endif
 class DiligentEngine
 {
     public:
-        DiligentEngine(const config::GraphicsSettings& graphicsSettings, GLFWwindow* window, std::span<const std::string_view> supportedApis);
+        DiligentEngine(const config::GraphicsSettings& graphicsSettings, Diligent::EngineCreateInfo engineCreateInfo, GLFWwindow* window, std::span<const std::string_view> supportedApis);
         ~DiligentEngine() noexcept;
 
         auto Device()    -> Diligent::IRenderDevice*  { return m_pDevice.RawPtr(); }
