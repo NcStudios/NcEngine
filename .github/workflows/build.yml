@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
-          sudo echo 'Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: lunar\nComponents: universe\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg' >> /etc/apt/sources.list.d/ubuntu.sources
+          sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu/ lunar universe'
           sudo apt-get update
           sudo apt-get install -y \
           xorg-dev \

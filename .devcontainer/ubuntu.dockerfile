@@ -8,7 +8,7 @@
 
 FROM ubuntu:24.04
 
-# Need universe repo for libtinfo5
+# Add repo with libtinfo5
 RUN echo 'Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: lunar\nComponents: universe\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg' >> /etc/apt/sources.list.d/ubuntu.sources
 
 # Core Packages
