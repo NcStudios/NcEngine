@@ -15,6 +15,7 @@ RUN echo 'Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: lunar\nCo
 RUN apt update && apt install -y \
     git \
     make \
+    ninja-build \
     cmake \
     g++-14 \
     gdb \

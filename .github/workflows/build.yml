@@ -30,7 +30,7 @@ jobs:
             shortName: Windows
           - os: ubuntu-24.04
             shortName: Linux
-            generator: "Unix Makefiles"
+            generator: "Ninja"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod
@@ -53,6 +53,7 @@ jobs:
           sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu/ lunar universe'
           sudo apt-get update
           sudo apt-get install -y \
+          ninja-build \
           xorg-dev \
           xvfb \
           libx11-dev \
@@ -78,7 +79,7 @@ jobs:
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
       - name: Build and Install
-        run: cmake --build build --target install --config ${{ matrix.config }}
+        run: cmake --build build --target install --config ${{ matrix.config }} --parallel 4
 
       - name: Run Tests
         working-directory: ${{github.workspace}}/build/test
