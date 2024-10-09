@@ -85,12 +85,12 @@ void InitializeResources()
 
     std::vector<std::string> textures
     {
-        "box/BaseColor.nca",
-        "box/Roughness.nca",
+        // "box/BaseColor.nca",
+        // "box/Roughness.nca",
         "line/hatch.nca",
-        "logo/BaseColor.nca",
-        "logo/Metallic.nca",
-        "logo/Roughness.nca",
+        // "logo/BaseColor.nca",
+        // "logo/Metallic.nca",
+        // "logo/Roughness.nca",
         "solid_color/Blue.nca",
         "solid_color/Green.nca",
         "solid_color/Red.nca",
@@ -101,11 +101,11 @@ void InitializeResources()
     };
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
 
-    std::vector<std::string> normalMaps 
-    {
-        "box/Normal.nca",
-        "logo/Normal.nca"
-    };
-    asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
+    // std::vector<std::string> normalMaps 
+    // {
+    //     "box/Normal.nca",
+    //     "logo/Normal.nca"
+    // };
+    // asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 }
 } // namespace sample

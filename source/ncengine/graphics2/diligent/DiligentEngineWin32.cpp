@@ -84,6 +84,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
                 EngineVkCreateInfo engineCI;
+                engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
                 auto* pFactoryVk = GetEngineFactoryVk();
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
 

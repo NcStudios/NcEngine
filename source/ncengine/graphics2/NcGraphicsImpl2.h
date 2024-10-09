@@ -8,6 +8,10 @@
 
 #include <memory>
 
+
+#include "diligent/TextureArray.h"
+#include "diligent/TestSetup.h"
+
 namespace nc
 {
 class Scene;
@@ -47,6 +51,8 @@ class NcGraphicsImpl2 : public NcGraphics
         Registry* m_registry;
         Connection m_onResizeConnection;
         DiligentEngine m_engine;
+        TestSetup m_testSetup;
+        StubTextureResourceManager m_stubResourceManager;
         Camera* m_mainCamera = nullptr;
 };
 } // namespace graphics

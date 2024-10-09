@@ -91,6 +91,7 @@ target_include_directories(${NC_ENGINE_LIB}
         $<BUILD_INTERFACE:${NC_INCLUDE_DIR}/ncengine>
         $<BUILD_INTERFACE:${NC_SOURCE_DIR}>
         $<BUILD_INTERFACE:${diligentcore_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${diligenttools_SOURCE_DIR}>
 )
 
 target_include_directories(${NC_ENGINE_LIB}

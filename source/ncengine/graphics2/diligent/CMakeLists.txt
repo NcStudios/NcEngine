@@ -9,3 +9,9 @@ elseif (UNIX AND NOT APPLE)
             DiligentEngineLinux.cpp
     )
 endif()
+
+target_sources(${NC_ENGINE_LIB}
+    PRIVATE
+        TestSetup.cpp
+        TextureArray.cpp
+)

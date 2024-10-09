@@ -12,6 +12,9 @@
 #include "imgui/imgui.h"
 #include "DirectXMath.h"
 
+
+#include "ncengine/ecs/Registry.h"
+
 namespace
 {
 struct NcGraphicsStub2 : nc::graphics::NcGraphics
@@ -74,7 +77,7 @@ namespace nc::graphics
 
         if (graphicsSettings.enabled)
         {
-            auto ncAsset = modules.Get<asset::NcAsset>();
+            [[maybe_unused]] auto ncAsset = modules.Get<asset::NcAsset>();
             auto ncWindow = modules.Get<window::NcWindow>();
             NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
@@ -107,7 +110,18 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{graphicsSettings, window, GetSupportedApis()}
+          m_engine{graphicsSettings, window, GetSupportedApis()},
+          m_testSetup{
+            m_engine.Context(),
+            m_engine.Device(),
+            m_engine.SwapChain()
+          },
+          m_stubResourceManager{
+            *m_engine.Context(),
+            *m_engine.Device(),
+            m_testSetup.GetBindlessSRB(),
+            modules.Get<nc::asset::NcAsset>()->OnTextureUpdate()
+          }
 {
     (void)graphicsSettings;
     (void)memorySettings;
@@ -186,6 +200,17 @@ void NcGraphicsImpl2::Update()
 void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
+
+    using namespace Diligent;
+
+    auto* swapChain = m_engine.SwapChain();
+    auto* device = m_engine.Device();
+    auto* context = m_engine.Context();
+
+    m_mainCamera->UpdateViewMatrix(m_registry->Get<Transform>(m_mainCamera->ParentEntity())->TransformationMatrix());
+
+    m_testSetup.Render(context, device, swapChain, m_mainCamera);
+
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
