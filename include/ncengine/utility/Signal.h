@@ -72,8 +72,8 @@ class Signal
         Signal(const Signal&) = delete;
         Signal& operator=(const Signal&) = delete;
 
-        /** @brief Connect a std::function */
-        [[nodiscard]] auto Connect(std::function<void(Args...)> func, size_t priority = SignalPriority::Highest) -> Connection
+        /** @brief Connect a std::move_only_function */
+        [[nodiscard]] auto Connect(std::move_only_function<void(Args...)> func, size_t priority = SignalPriority::Highest) -> Connection
         {
             const auto pos = std::ranges::find_if(m_slots, [priority](auto&& slot)
             {
@@ -123,7 +123,7 @@ class Signal
         void Emit(Args... args)
         {
             Sync();
-            for (const auto& slot : m_slots)
+            for (auto& slot : m_slots)
             {
                 slot(args...);
             }
