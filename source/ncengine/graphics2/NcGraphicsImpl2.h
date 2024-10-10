@@ -6,8 +6,6 @@
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
 
-#include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
-
 #include <memory>
 
 namespace nc
@@ -47,7 +45,6 @@ class NcGraphicsImpl2 : public NcGraphics
 
         Registry* m_registry;
         Connection m_onResizeConnection;
-        Diligent::EngineCreateInfo m_engineCreateInfo;
         DiligentEngine m_engine;
 };
 } // namespace graphics

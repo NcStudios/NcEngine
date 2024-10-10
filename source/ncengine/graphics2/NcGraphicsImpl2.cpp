@@ -107,8 +107,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engineCreateInfo{},
-          m_engine{graphicsSettings, m_engineCreateInfo, window.GetWindowHandle(), GetSupportedApis()}
+          m_engine{graphicsSettings, Diligent::EngineCreateInfo{}, window.GetWindowHandle(), GetSupportedApis()}
 {
     (void)graphicsSettings;
     (void)memorySettings;

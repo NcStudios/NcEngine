@@ -12,7 +12,6 @@ option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
 # Diligent feature flag
 option(NC_USE_DILIGENT "Enable DiligentGraphics" OFF)
-
 if(NC_USE_DILIGENT)
     add_definitions(-DNC_USE_DILIGENT)
 endif()
