@@ -71,7 +71,7 @@ class NcWindowImpl : public NcWindow
 };
 } // namespace nc::window
 
-auto CreateDiligentEngine(bool isHeadless, std::string targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowImpl* window = nullptr) -> nc::graphics::DiligentEngine
+auto CreateDiligentEngine(bool isHeadless, std::string_view targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowImpl* window = nullptr) -> nc::graphics::DiligentEngine
 {
     /* Create config */
     auto graphicsSettings = nc::config::GraphicsSettings();
@@ -112,7 +112,7 @@ auto GetFullApiName(const std::string_view api) -> std::string_view
     throw std::runtime_error("API not in list.");
 }
 
-std::vector<std::string_view> ExcludeStringView(std::span<const std::string_view> inputSpan, const std::string_view& elementToExclude)
+std::vector<std::string_view> ExcludeElementFromContainer(std::span<const std::string_view> inputSpan, const std::string_view& elementToExclude)
 {
     std::vector<std::string_view> result;
     result.reserve(inputSpan.size());

@@ -48,16 +48,16 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_TargetAPIFails_FallbackIsAt
     {
         try
         {
-            CreateDiligentEngine(true, std::string(api), supportedApis, engineCI);
+            CreateDiligentEngine(true, api, supportedApis, engineCI);
         }
         catch (const std::runtime_error& error)
         {
             auto errorStr = std::string_view(error.what());
-            auto otherApis = ExcludeStringView(supportedApis, api);
+            auto otherApis = ExcludeElementFromContainer(supportedApis, api);
 
             for (const auto& otherApi : otherApis)
             {
-                ASSERT_EQ(errorStr.contains(fmt::format("Failed to create the {0}} device or context"), GetFullApiName(otherApi), true));
+                ASSERT_EQ(errorStr.contains(fmt::format("Failed to create the {0} device or context", GetFullApiName(otherApi))), true);
             }
             ASSERT_EQ(errorStr.contains("Failed to initialize the rendering engine. The given API and all fallback APIs failed to initialize."), true);
         }
