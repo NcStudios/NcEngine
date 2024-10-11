@@ -72,7 +72,7 @@ jobs:
 
       - name: Configure Dev
         if: ${{matrix.variant == 'Dev'}}
-        run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON -DNC_BUILD_INTEGRATION_TESTS=ON -DNC_USE_DILIGENT=ON
+        run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON -DNC_BUILD_WIN32_INTEGRATION_TESTS=ON -DNC_USE_DILIGENT=ON
 
       - name: Configure Prod
         if: ${{matrix.variant == 'Prod'}}

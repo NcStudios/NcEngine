@@ -106,9 +106,13 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
     Default: OFF
     Include tests when building.
 
-#### NC_BUILD_INTEGRATION_TESTS
+#### NC_BUILD_WIN32_INTEGRATION_TESTS
     Default: OFF
-    Include integration tests, which require a graphics driver, when building.
+    Include Win32 integration tests, which require a graphics driver, when building.
+
+#### NC_BUILD_LINUX_INTEGRATION_TESTS
+    Default: OFF
+    Include Linux integration tests, which require a graphics driver, when building.
 
 #### NC_PROD_BUILD
     Default: OFF

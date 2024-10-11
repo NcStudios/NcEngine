@@ -8,7 +8,7 @@ add_subdirectory(ncengine)
 add_subdirectory(ncmath)
 add_subdirectory(ncutility)
 
-if(NC_BUILD_INTEGRATION_TESTS)
+if(NC_BUILD_WIN32_INTEGRATION_TESTS OR NC_BUILD_LINUX_INTEGRATION_TESTS)
     add_subdirectory(integration_test)
 endif()
 

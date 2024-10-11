@@ -6,7 +6,8 @@ project("NcSdk"
 
 # Options
 option(NC_BUILD_TESTS "Enable building tests." OFF)
-option(NC_BUILD_INTEGRATION_TESTS "Enable building integration tests." OFF)
+option(NC_BUILD_WIN32_INTEGRATION_TESTS "Enable building WIN32 integration tests." OFF) # @todo: Only forked on platform until we can get SS running on our CI env.
+option(NC_BUILD_LINUX_INTEGRATION_TESTS "Enable building Linux integration tests." OFF)
 option(NC_BUILD_NCCONVERT "Enable building nc-convert asset converter." ON)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
