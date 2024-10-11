@@ -40,7 +40,7 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_TargetAPIFails_NoFallback_F
 
     for (const auto& api : supportedApis)
     {
-        EXPECT_THROW(CreateDiligentEngine(true, api, supportedApis, engineCI));
+        EXPECT_THROW(CreateDiligentEngine(true, api, supportedApis, engineCI), nc::NcError);
     }
 }
 } // namespace nc::graphics

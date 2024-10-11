@@ -24,7 +24,7 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanRenderTriangle_Succee
     auto engineCI = Diligent::EngineCreateInfo{};
 
     /* Create window */
-    auto info = nc::window::WindowInfo{.isHeadless = graphicsSettings.isHeadless};
+    auto info = nc::window::WindowInfo{.isHeadless = false};
     auto ncWindow = nc::window::NcWindowImpl{info};
     auto engine = CreateDiligentEngine(false, "vulkan", supportedApis, engineCI, &ncWindow);
 

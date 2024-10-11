@@ -23,7 +23,7 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, Diligent::EngineCreateInfo engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, const Diligent::EngineCreateInfo& engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
