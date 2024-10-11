@@ -74,9 +74,7 @@ namespace nc::graphics
 
         if (graphicsSettings.enabled)
         {
-            auto ncAsset = modules.Get<asset::NcAsset>();
             auto ncWindow = modules.Get<window::NcWindow>();
-            NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
