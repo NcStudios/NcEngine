@@ -14,7 +14,3 @@ add_subdirectory(skeletal_animation)
 add_subdirectory(task)
 add_subdirectory(time)
 add_subdirectory(utility)
-
-if(NC_USE_DILIGENT)
-    add_subdirectory(graphics2)
-endif() 

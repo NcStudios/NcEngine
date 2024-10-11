@@ -1,1 +1,3 @@
-add_subdirectory(graphics2)
+if(NC_USE_DILIGENT)
+    add_subdirectory(graphics2)
+endif()

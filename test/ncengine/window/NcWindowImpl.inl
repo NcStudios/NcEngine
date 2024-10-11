@@ -42,7 +42,7 @@ class NcWindowImpl : public NcWindow
 
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
             
-            m_window = glfwCreateWindow(static_cast<uint32_t>(info.dimensions.x), static_cast<uint32_t>(info.dimensions.y), "DiligentEngineLinux_tests", nullptr, nullptr);
+            m_window = glfwCreateWindow(static_cast<uint32_t>(info.dimensions.x), static_cast<uint32_t>(info.dimensions.y), "Test Window", nullptr, nullptr);
             if (!m_window)
             {
                 throw std::runtime_error("Could not create window.");
