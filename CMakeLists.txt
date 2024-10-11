@@ -6,6 +6,7 @@ project("NcSdk"
 
 # Options
 option(NC_BUILD_TESTS "Enable building tests." OFF)
+option(NC_BUILD_INTEGRATION_TESTS "Enable building integration tests." OFF)
 option(NC_BUILD_NCCONVERT "Enable building nc-convert asset converter." ON)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)

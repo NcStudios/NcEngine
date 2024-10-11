@@ -106,6 +106,10 @@ While the default `Nc::Engine-dev` target can be built with a Release configurat
     Default: OFF
     Include tests when building.
 
+#### NC_BUILD_INTEGRATION_TESTS
+    Default: OFF
+    Include integration tests, which require a graphics driver, when building.
+
 #### NC_PROD_BUILD
     Default: OFF
     Build engine binaries for use in production releases. This excludes the editor layer, sample app, removes some runtime checks, and limits logging. The engine target name is changed to 'Nc::NcEngine' (dropping the '-dev' suffix).

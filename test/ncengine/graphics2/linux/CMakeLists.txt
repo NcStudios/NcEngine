@@ -30,7 +30,7 @@ target_link_libraries(DiligentEngineLinux_tests
 
 set_target_properties(DiligentEngineLinux_tests
                       PROPERTIES
-                      BUILD_RPATH "$<TARGET_FILE_DIR:DiligentEngineLinux_tests>/../_deps/diligentcore-build/Graphics/GraphicsEngineOpenGL;$<TARGET_FILE_DIR:DiligentEngineLinux_tests/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
+                      BUILD_RPATH "$<TARGET_FILE_DIR:DiligentEngineLinux_tests/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
 )
 
 add_test(DiligentEngineLinux_tests DiligentEngineLinux_tests)

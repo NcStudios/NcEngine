@@ -14,7 +14,6 @@
 
 #include "Graphics/GraphicsEngineD3D11/interface/EngineFactoryD3D11.h"
 #include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
-#include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
@@ -39,7 +38,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
     const std::string_view& renderApi = graphicsSettings.api;
     auto preferredApiOrder = std::vector<std::string_view>{};
-    preferredApiOrder.reserve(4);
+    preferredApiOrder.reserve(3);
     std::ranges::copy(supportedApis, std::back_inserter(preferredApiOrder));
     RotateElementToBeginning(preferredApiOrder, renderApi);
 
@@ -158,39 +157,6 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 EnsureContextFlushed(m_pImmediateContext);
                 NC_LOG_WARNING("Failed to initialize D3D11.");
                 errorMessage = fmt::format("{0} Failed to initialize D3D11: {1} \n", errorMessage, e.what());
-            }
-        }
-        else if (api == api::OpenGL)
-        {
-            try
-            {
-                #if EXPLICITLY_LOAD_ENGINE_GL_DLL
-                    auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
-                #endif
-
-                auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-
-                auto engineCI = EngineGLCreateInfo{engineCreateInfo};
-                glfwMakeContextCurrent(window_);
-                engineCI.Window = window;
-
-                pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
-
-                if (!m_pDevice || !m_pImmediateContext || (!graphicsSettings.isHeadless && !m_pSwapChain))
-                {
-                    throw nc::NcError("Failed to create the OpenGL device, context or swapchain.");
-                }
-
-                m_renderApi = api;
-                NC_LOG_TRACE("Successfully initialized the OpenGL rendering engine.");
-                break;
-            }
-            catch (const std::runtime_error& e)
-            {
-                EnsureContextFlushed(m_pImmediateContext);
-                NC_LOG_WARNING("Failed to initialize OpenGL.");
-                errorMessage = fmt::format("{0} Failed to initialize OpenGL: {1} \n", errorMessage, e.what());
-                throw e;
             }
         }
     }
