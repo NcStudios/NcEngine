@@ -5,7 +5,6 @@
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
-#include "ncengine/window/Window.h"
 #include "config/Config.h"
 #include "window/NcWindowImpl.h"
 
@@ -75,6 +74,7 @@ namespace nc::graphics
         if (graphicsSettings.enabled)
         {
             auto ncWindow = modules.Get<window::NcWindow>();
+            NC_ASSERT(modules.Get<asset::NcAsset>(), "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 

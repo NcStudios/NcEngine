@@ -2,7 +2,7 @@
 #include "graphics2/diligent/DiligentEngine.h"
 #include "graphics/NcGraphics.h"
 #include "window/Window.h"
-#include "../../../ncengine/window/NcWindowImpl.inl"
+#include "../../../ncengine/window/NcWindowStub.inl"
 
 static const char* VSSource = R"(
 struct PSInput 
@@ -105,7 +105,7 @@ void RenderSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState
     engine->Context()->Draw(drawAttrs);
 }
 
-auto CreateDiligentEngine(bool isHeadless, std::string_view targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowImpl* window = nullptr) -> nc::graphics::DiligentEngine
+auto CreateDiligentEngine(bool isHeadless, std::string_view targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowStub* window = nullptr) -> nc::graphics::DiligentEngine
 {
     /* Create config */
     auto graphicsSettings = nc::config::GraphicsSettings();
@@ -118,7 +118,7 @@ auto CreateDiligentEngine(bool isHeadless, std::string_view targetApi, std::span
     {
         /* Create window */
         auto info = nc::window::WindowInfo{.isHeadless = graphicsSettings.isHeadless};
-        auto ncWindow = nc::window::NcWindowImpl{info};
+        auto ncWindow = nc::window::NcWindowStub{info};
 
         /* Create DiligentEngine */
         return nc::graphics::DiligentEngine(graphicsSettings, engineCI, ncWindow.GetWindowHandle(), supportedApis);

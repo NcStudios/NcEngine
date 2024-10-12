@@ -24,7 +24,7 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanRenderTriangle_Succee
 
     /* Create window */
     auto info = nc::window::WindowInfo{.isHeadless = false};
-    auto ncWindow = nc::window::NcWindowImpl{info};
+    auto ncWindow = nc::window::NcWindowStub{info};
     auto engine = CreateDiligentEngine(false, "vulkan", supportedApis, engineCI, &ncWindow);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;

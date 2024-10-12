@@ -5,10 +5,10 @@
 
 namespace nc::window
 {
-class NcWindowImpl : public NcWindow
+class NcWindowStub : public NcWindow
 {
     public:
-        NcWindowImpl(WindowInfo info)
+        NcWindowStub(WindowInfo info)
         : m_window{nullptr}
         {
             if (!glfwInit())
@@ -17,7 +17,7 @@ class NcWindowImpl : public NcWindow
             SetWindow(info);
         };
 
-        ~NcWindowImpl()
+        ~NcWindowStub()
         {
             if (m_window)
             {

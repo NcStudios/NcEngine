@@ -38,7 +38,7 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_D3D12RenderTriangle_Succeed
 
     /* Create window */
     auto info = nc::window::WindowInfo{.isHeadless = false};
-    auto ncWindow = nc::window::NcWindowImpl{info};
+    auto ncWindow = nc::window::NcWindowStub{info};
     auto engine = CreateDiligentEngine(false, "d3d12", supportedApis, engineCI, &ncWindow);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
@@ -63,7 +63,7 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_D3D11RenderTriangle_Succeed
 
     /* Create window */
     auto info = nc::window::WindowInfo{.isHeadless = false};
-    auto ncWindow = nc::window::NcWindowImpl{info};
+    auto ncWindow = nc::window::NcWindowStub{info};
     auto engine = CreateDiligentEngine(false, "d3d11", supportedApis, engineCI, &ncWindow);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
@@ -87,7 +87,7 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_VulkanRenderTriangle_Succee
 
     /* Create window */
     auto info = nc::window::WindowInfo{.isHeadless = false};
-    auto ncWindow = nc::window::NcWindowImpl{info};
+    auto ncWindow = nc::window::NcWindowStub{info};
     auto engine = CreateDiligentEngine(false, "vulkan", supportedApis, engineCI, &ncWindow);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
