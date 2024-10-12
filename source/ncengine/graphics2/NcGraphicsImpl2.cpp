@@ -5,7 +5,6 @@
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
-#include "ncengine/window/Window.h"
 #include "config/Config.h"
 #include "window/NcWindowImpl.h"
 
@@ -74,16 +73,14 @@ namespace nc::graphics
 
         if (graphicsSettings.enabled)
         {
-            auto ncAsset = modules.Get<asset::NcAsset>();
             auto ncWindow = modules.Get<window::NcWindow>();
-            NC_ASSERT(ncAsset, "NcGraphics requires NcAsset to be registered before it.");
+            NC_ASSERT(modules.Get<asset::NcAsset>(), "NcGraphics requires NcAsset to be registered before it.");
             NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
             NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
             ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .isGL = graphicsSettings.api == api::OpenGL,
                 .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
@@ -107,7 +104,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{graphicsSettings, window, GetSupportedApis()}
+          m_engine{graphicsSettings, Diligent::EngineCreateInfo{}, window.GetWindowHandle(), GetSupportedApis()}
 {
     (void)graphicsSettings;
     (void)memorySettings;
@@ -122,13 +119,13 @@ NcGraphicsImpl2::~NcGraphicsImpl2()
 }
 
 void NcGraphicsImpl2::SetCamera(Camera* camera) noexcept
-    {
-        (void)camera;
-    }
+{
+    m_mainCamera = camera;
+}
 
 auto NcGraphicsImpl2::GetCamera() noexcept -> Camera*
 {
-    return nullptr;
+    return m_mainCamera;
 }
 
 void NcGraphicsImpl2::SetUi(ui::IUI* ui) noexcept
@@ -152,6 +149,7 @@ void NcGraphicsImpl2::ClearEnvironment()
 
 void NcGraphicsImpl2::Clear() noexcept
 {
+    m_mainCamera = nullptr;
 }
 
 void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)

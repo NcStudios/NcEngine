@@ -6,7 +6,6 @@
 
 #define GLFW_EXPOSE_NATIVE_X11 1
 
-#include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
@@ -24,7 +23,7 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, const Diligent::EngineCreateInfo& engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
@@ -36,7 +35,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
     std::string errorMessage;
     LinuxNativeWindow window;
-    window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_.GetWindowHandle()));
+    window.WindowId = static_cast<Diligent::Uint32>(glfwGetX11Window(window_));
     window.pDisplay = glfwGetX11Display();
     SwapChainDesc SCDesc;
 
@@ -51,13 +50,23 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
 
-                EngineVkCreateInfo engineCI;
+                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 auto* pFactoryVk = GetEngineFactoryVk();
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
 
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the Vulkan device or context.");
+                }
+
                 if (!graphicsSettings.isHeadless)
                     pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
-                    
+
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
+                {
+                    throw nc::NcError("Failed to create the Vulkan swapchain.");
+                }
+
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
                 break;
@@ -67,33 +76,6 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 EnsureContextFlushed(m_pImmediateContext);
                 NC_LOG_WARNING("Failed to initialize Vulkan.");
                 errorMessage = fmt::format("{0} Failed to initialize Vulkan: {1} \n", errorMessage, e.what());
-            }
-        }
-        else if (api == api::OpenGL)
-        {
-            try
-            {
-                #if EXPLICITLY_LOAD_ENGINE_GL_DLL
-                    auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
-                #endif
-
-                auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-                EngineGLCreateInfo engineCI;
-                glfwMakeContextCurrent(window_.GetWindowHandle());
-                engineCI.Window = window;
-
-                if (!graphicsSettings.isHeadless)
-                    pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
-                
-                m_renderApi = api;
-                NC_LOG_TRACE("Successfully initialized the OpenGL rendering engine.");
-                break;
-            }
-            catch (const std::runtime_error& e)
-            {
-                EnsureContextFlushed(m_pImmediateContext);
-                NC_LOG_WARNING("Failed to initialize OpenGL.");
-                errorMessage = fmt::format("{0} Failed to initialize OpenGL: {1} \n", errorMessage, e.what());
             }
         }
     }

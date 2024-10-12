@@ -93,7 +93,6 @@ namespace nc::window
             SetWindow(WindowInfo
             {
                 .dimensions = Vector2{1, 1},
-                .isGL = false,
                 .isHeadless = true,
                 .useNativeResolution = false,
                 .launchInFullScreen = false,
@@ -152,7 +151,7 @@ namespace nc::window
 
     void NcWindowImpl::SetWindow(WindowInfo windowInfo)
     {
-        glfwWindowHint(GLFW_CLIENT_API, windowInfo.isGL ? GLFW_OPENGL_API : GLFW_NO_API);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, windowInfo.isResizable);
 
         if (windowInfo.isHeadless)

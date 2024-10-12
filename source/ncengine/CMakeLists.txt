@@ -30,21 +30,6 @@ set_target_properties(${NC_ENGINE_LIB}
     PROPERTIES CMAKE_DEBUG_POSTFIX d
 )
 
-list(APPEND DILIGENT_LIBRARIES
-            Diligent-TargetPlatform
-            Diligent-GraphicsEngineOpenGL-shared
-            Diligent-GraphicsEngineVk-shared
-)
-
-if(WIN32)
-    list(APPEND DILIGENT_LIBRARIES 
-        Diligent-GraphicsEngineD3D11-shared
-        Diligent-GraphicsEngineD3D12-shared
-    )
-endif()
-
-set(DILIGENT_LIBRARIES ${DILIGENT_LIBRARIES} PARENT_SCOPE)
-
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
     INTERFACE

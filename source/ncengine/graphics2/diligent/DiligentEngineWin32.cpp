@@ -14,7 +14,6 @@
 
 #include "Graphics/GraphicsEngineD3D11/interface/EngineFactoryD3D11.h"
 #include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
-#include "Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
@@ -33,18 +32,20 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, window::NcWindow& window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, const Diligent::EngineCreateInfo& engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
 {
     using namespace Diligent;
 
     const std::string_view& renderApi = graphicsSettings.api;
     auto preferredApiOrder = std::vector<std::string_view>{};
-    preferredApiOrder.reserve(4);
+    preferredApiOrder.reserve(3);
     std::ranges::copy(supportedApis, std::back_inserter(preferredApiOrder));
     RotateElementToBeginning(preferredApiOrder, renderApi);
 
     std::string errorMessage;
-    auto window = Win32NativeWindow{glfwGetWin32Window(window_.GetWindowHandle())};
+    auto glfwWindowHandle = glfwGetWin32Window(window_);
+    NC_ASSERT(glfwWindowHandle, "Error getting the Win32 window handle from the GLFW window.");
+    auto window = Win32NativeWindow{glfwWindowHandle};
     SwapChainDesc SCDesc;
 
     /* Initialize the device and context. First try to init the preferred API. Fall back to others on failure. */
@@ -58,12 +59,22 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
                 #endif
 
-                EngineD3D12CreateInfo engineCI;
+                auto engineCI = EngineD3D12CreateInfo{engineCreateInfo};
                 auto* pFactoryD3D12 = GetEngineFactoryD3D12();
                 pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
 
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the D3D12 device or context.");
+                }
+
                 if (!graphicsSettings.isHeadless)
                     pFactoryD3D12->CreateSwapChainD3D12(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
+
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
+                {
+                    throw nc::NcError("Failed to create the D3D12 swapchain.");
+                }
 
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the D3D12 rendering engine.");
@@ -83,12 +94,23 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 #if EXPLICITLY_LOAD_ENGINE_VK_DLL
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
-                EngineVkCreateInfo engineCI;
+
+                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 auto* pFactoryVk = GetEngineFactoryVk();
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
 
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the Vulkan device or context.");
+                }
+
                 if (!graphicsSettings.isHeadless)
                     pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
+
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
+                {
+                    throw nc::NcError("Failed to create the Vulkan swapchain.");
+                }
 
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
@@ -109,12 +131,22 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
                 #endif
 
-                EngineD3D11CreateInfo engineCI;
+                auto engineCI = EngineD3D11CreateInfo{engineCreateInfo};
                 auto* pFactoryD3D11 = GetEngineFactoryD3D11();
                 pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
 
+                if (!m_pDevice || !m_pImmediateContext)
+                {
+                    throw nc::NcError("Failed to create the D3D11 device or context.");
+                }
+
                 if (!graphicsSettings.isHeadless)
                     pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
+
+                if (!graphicsSettings.isHeadless && !m_pSwapChain)
+                {
+                    throw nc::NcError("Failed to create the D3D11 swapchain.");
+                }
 
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the D3D11 rendering engine.");
@@ -125,33 +157,6 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 EnsureContextFlushed(m_pImmediateContext);
                 NC_LOG_WARNING("Failed to initialize D3D11.");
                 errorMessage = fmt::format("{0} Failed to initialize D3D11: {1} \n", errorMessage, e.what());
-            }
-        }
-        else if (api == api::OpenGL)
-        {
-            try
-            {
-                #if EXPLICITLY_LOAD_ENGINE_GL_DLL
-                    auto GetEngineFactoryOpenGL = LoadGraphicsEngineOpenGL();
-                #endif
-
-                auto* pFactoryOpenGL = GetEngineFactoryOpenGL();
-                EngineGLCreateInfo engineCI;
-                glfwMakeContextCurrent(window_.GetWindowHandle());
-                engineCI.Window = window;
-
-                if (!graphicsSettings.isHeadless)
-                    pFactoryOpenGL->CreateDeviceAndSwapChainGL(engineCI, &m_pDevice, &m_pImmediateContext, SCDesc, &m_pSwapChain);
-
-                m_renderApi = api;
-                NC_LOG_TRACE("Successfully initialized the OpenGL rendering engine.");
-                break;
-            }
-            catch (const std::runtime_error& e)
-            {
-                EnsureContextFlushed(m_pImmediateContext);
-                NC_LOG_WARNING("Failed to initialize OpenGL.");
-                errorMessage = fmt::format("{0} Failed to initialize OpenGL: {1} \n", errorMessage, e.what());
             }
         }
     }
