@@ -38,11 +38,11 @@ if(WIN32)
             FILES_MATCHING REGEX ".*\.(dll)" # Diligent DLLs and EXEs
 )
 elseif(UNIX AND NOT APPLE)
-    install(TARGETS     Diligent-GraphicsEngineOpenGL-shared Diligent-GraphicsEngineVk-shared
+    install(TARGETS     Diligent-GraphicsEngineVk-shared
             DESTINATION lib)
     set_target_properties(${NC_SAMPLE_EXE}
         PROPERTIES
-            BUILD_RPATH "$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineOpenGL;$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
+            BUILD_RPATH "$<TARGET_FILE_DIR:${NC_SAMPLE_EXE}>/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
             INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
     )
 endif()

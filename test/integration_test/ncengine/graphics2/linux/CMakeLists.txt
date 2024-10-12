@@ -1,0 +1,36 @@
+### DiligentEngineLinuxInt_tests Tests ###
+add_executable(DiligentEngineLinuxInt_tests
+    DiligentEngineLinuxInt_tests.cpp
+        ${NC_SOURCE_DIR}/config/Config.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
+        ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
+)
+
+target_include_directories(DiligentEngineLinuxInt_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+        ${diligentcore_SOURCE_DIR}
+)
+
+target_compile_options(DiligentEngineLinuxInt_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(DiligentEngineLinuxInt_tests
+    PRIVATE
+        gtest_main
+        glfw
+        NcMath
+        ${DILIGENT_LIBRARIES}
+)
+
+set_target_properties(DiligentEngineLinuxInt_tests
+                      PROPERTIES
+                      BUILD_RPATH "$<TARGET_FILE_DIR:DiligentEngineLinuxInt_tests/../_deps/diligentcore-build/Graphics/GraphicsEngineVulkan"
+)
+
+add_test(DiligentEngineLinuxInt_tests DiligentEngineLinuxInt_tests)

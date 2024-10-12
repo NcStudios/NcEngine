@@ -53,7 +53,6 @@ void UnregisterOnResizeReceiver(IOnResizeReceiver* receiver) noexcept;
 struct WindowInfo
 {
     Vector2 dimensions          = Vector2{640, 800}; ///< The window's dimensions.
-    bool isGL                   = false;             ///< The window must be created with the target rendering API in mind. True if the rendering API will be GL. None for Vulkan, D3D11, D3D12.
     bool isHeadless             = false;             ///< True if this is a headless window. Still receives input events.
     bool useNativeResolution    = false;             ///< True if the window should use the monitor's native resolution.
     bool launchInFullScreen     = false;             ///< True if the window should launch in full screen.

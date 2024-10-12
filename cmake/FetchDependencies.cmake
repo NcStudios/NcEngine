@@ -82,8 +82,23 @@ set(DILIGENT_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_SAMPLES OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_FX OFF CACHE BOOL "" FORCE)
 set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-set(DILIGENT_NO_GLSLANG ON CACHE BOOL "" FORCE)
-set(DILIGENT_NO_RENDER_STATE_PACKAGER ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_RENDER_STATE_PACKAGER OFF CACHE BOOL "" FORCE)
+set(DILIGENT_NO_GLSLANG OFF CACHE BOOL "" FORCE)
+set(DILIGENT_NO_OPENGL ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_METAL ON CACHE BOOL "" FORCE)
+
+list(APPEND DILIGENT_LIBRARIES
+            Diligent-TargetPlatform
+            Diligent-GraphicsEngineVk-shared
+            Diligent-TextureLoader
+)
+
+if(WIN32)
+    list(APPEND DILIGENT_LIBRARIES 
+                Diligent-GraphicsEngineD3D11-shared
+                Diligent-GraphicsEngineD3D12-shared
+    )
+endif()
 
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
@@ -161,7 +176,7 @@ if(NC_BUILD_NCCONVERT)
 endif()
 
 # gtest
-if(${NC_BUILD_TESTS})
+if(${NC_BUILD_TESTS} OR ${NC_BUILD_LINUX_INTEGRATION_TESTS} OR ${NC_BUILD_WIN32_INTEGRATION_TESTS})
     set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 
