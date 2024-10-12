@@ -34,13 +34,8 @@ RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --upgrade setuptools
 # Gfx Packages (split out for faster rebuilds, as this list is more in flux)
 RUN apt install -y \
     libx11-dev \
-    libgl-dev \
-    libglx-dev \
-    freeglut3-dev \
     mesa-common-dev \
     mesa-utils \
-    libgl1-mesa-dev \
-    libglu1-mesa-dev \
     libxrandr-dev \
     libxinerama-dev \
     libxcursor-dev \

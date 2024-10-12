@@ -57,7 +57,6 @@ jobs:
           xorg-dev \
           xvfb \
           libx11-dev \
-          libgl1-mesa-dev \
           libxrandr-dev \
           libxinerama-dev \
           libxcursor-dev \
