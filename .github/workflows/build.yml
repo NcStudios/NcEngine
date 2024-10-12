@@ -30,7 +30,7 @@ jobs:
             shortName: Windows
           - os: ubuntu-24.04
             shortName: Linux
-            generator: "Unix Makefiles"
+            generator: "Ninja"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON -DNC_BUILD_WIN32_INTEGRATION_TESTS=ON"
           - variant: Prod
@@ -50,14 +50,18 @@ jobs:
       - name: Install dependencies
         if: ${{ matrix.shortName == 'Linux' }}
         run: |
+          sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu/ lunar universe'
           sudo apt-get update
-          sudo apt-get install -y xorg-dev xvfb \
-          python3 \
-          python3-pip \
-          libglx-dev \
-          libglu1-mesa-dev \
-          freeglut3-dev \
-          mesa-common-dev
+          sudo apt-get install -y \
+          ninja-build \
+          xorg-dev \
+          xvfb \
+          libx11-dev \
+          libxrandr-dev \
+          libxinerama-dev \
+          libxcursor-dev \
+          libxi-dev \
+          libtinfo5
 
       - name: Setup Display
         if: ${{ matrix.shortName == 'Linux' && matrix.variant == 'Dev'}}
@@ -74,7 +78,7 @@ jobs:
         run: ${{ matrix.cmakeEnv }} cmake -G "${{ matrix.generator }}" -S . -B build ${{ matrix.cmakeArgs }} -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DCMAKE_INSTALL_PREFIX=install -DNC_BUILD_TESTS=ON
 
       - name: Build and Install
-        run: cmake --build build --target install --config ${{ matrix.config }}
+        run: cmake --build build --target install --config ${{ matrix.config }} --parallel 4
 
       - name: Run Tests
         working-directory: ${{github.workspace}}/build/test

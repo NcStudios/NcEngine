@@ -24,15 +24,23 @@ RUN apt update && apt install -y \
     python3 \
     python3-pip \
     python3.12-venv \
-    libvulkan-dev 
+    libvulkan-dev \
+    xorg-dev \
+    xvfb
 
 # setup python virtual environment & get setuptools
 RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --upgrade setuptools
 
 # Gfx Packages (split out for faster rebuilds, as this list is more in flux)
 RUN apt install -y \
-    xorg-dev \
-    xvfb 
+    libx11-dev \
+    mesa-common-dev \
+    mesa-utils \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxi-dev \
+    libtinfo5
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 

@@ -82,6 +82,7 @@ set(DILIGENT_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_SAMPLES OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_FX OFF CACHE BOOL "" FORCE)
 set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(DILIGENT_NO_RENDER_STATE_PACKAGER OFF CACHE BOOL "" FORCE)
 set(DILIGENT_NO_GLSLANG OFF CACHE BOOL "" FORCE)
 set(DILIGENT_NO_OPENGL ON CACHE BOOL "" FORCE)
 set(DILIGENT_NO_METAL ON CACHE BOOL "" FORCE)
@@ -89,6 +90,7 @@ set(DILIGENT_NO_METAL ON CACHE BOOL "" FORCE)
 list(APPEND DILIGENT_LIBRARIES
             Diligent-TargetPlatform
             Diligent-GraphicsEngineVk-shared
+            Diligent-TextureLoader
 )
 
 if(WIN32)
@@ -103,6 +105,13 @@ FetchContent_Declare(DiligentCore
                      GIT_TAG        v2.5.6
                      GIT_SHALLOW    TRUE
                      SOURCE_DIR     _deps/DiligentCore
+)
+
+FetchContent_Declare(DiligentTools
+                     GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentTools.git
+                     GIT_TAG        v2.5.6
+                     GIT_SHALLOW    TRUE
+                     SOURCE_DIR     _deps/DiligentTools
 )
 
 # DirectXMath
@@ -121,7 +130,7 @@ FetchContent_Declare(fmt
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore)
+FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
 
 # Silence warnings
 disable_warnings_for_headers(Taskflow)

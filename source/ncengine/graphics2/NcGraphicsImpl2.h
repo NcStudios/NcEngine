@@ -43,9 +43,11 @@ class NcGraphicsImpl2 : public NcGraphics
         void Update();
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
+    private:
         Registry* m_registry;
         Connection m_onResizeConnection;
         DiligentEngine m_engine;
+        Camera* m_mainCamera = nullptr;
 };
 } // namespace graphics
 } // namespace nc
