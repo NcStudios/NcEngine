@@ -23,6 +23,18 @@ constexpr auto assetTypes = std::array<nc::asset::AssetType, 7>{
     nc::asset::AssetType::SkeletalAnimation,
     nc::asset::AssetType::Texture
 };
+
+auto GetOptionText(nc::asset::AssetType type, const nc::convert::Target& target) -> std::string_view
+{
+    if (type == nc::asset::AssetType::Mesh)
+    {
+        return target.options.optimizeMesh
+            ? std::string_view{"[optimizeMesh: true]"}
+            : std::string_view{"[optimizeMesh: false]"};
+    }
+
+    return std::string_view{};
+}
 }
 
 namespace nc::convert
@@ -58,7 +70,7 @@ void BuildOrchestrator::RunBuild()
     {
         for (const auto& target : instructions.GetTargetsForType(type))
         {
-            LOG("Building {}: {}", ToString(type), target.destinationPath.string());
+            LOG("Building {}: {} ({})", ToString(type), target.destinationPath.string(), GetOptionText(type, target));
             if (!m_builder->Build(type, target))
             {
                 LOG("Failed building: {}", target.destinationPath.string());

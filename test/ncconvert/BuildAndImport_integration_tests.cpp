@@ -107,7 +107,7 @@ TEST_F(BuildAndImportTest, Mesh_from_fbx)
     namespace test_data = collateral::cube_fbx;
     const auto inFile = test_data::filePath;
     const auto outFile = ncaTestOutDirectory / "cube_mesh.nca";
-    const auto target = nc::convert::Target{inFile, outFile};
+    const auto target = nc::convert::Target{inFile, outFile, std::nullopt, nc::convert::TargetOptions{.optimizeMesh = true}};
     auto builder = nc::convert::Builder{};
     ASSERT_TRUE(builder.Build(nc::asset::AssetType::Mesh, target));
 
