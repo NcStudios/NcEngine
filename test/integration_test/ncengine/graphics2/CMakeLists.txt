@@ -1,0 +1,5 @@
+if(WIN32 AND NC_BUILD_WIN32_INTEGRATION_TESTS)
+    add_subdirectory(win32)
+elseif(UNIX AND NOT APPLE AND NC_BUILD_LINUX_INTEGRATION_TESTS)
+    add_subdirectory(linux)
+endif()

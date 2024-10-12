@@ -32,7 +32,7 @@ jobs:
             shortName: Linux
             generator: "Unix Makefiles"
           - variant: Dev
-            cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
+            cmakeArgs: "-DNC_PROFILING_ENABLED=ON -DNC_BUILD_WIN32_INTEGRATION_TESTS=ON"
           - variant: Prod
             cmakeArgs: "-DNC_PROD_BUILD=ON"
 
