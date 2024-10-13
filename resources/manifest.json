@@ -29,23 +29,38 @@
     "mesh": [
         {
             "sourcePath": "raw/model/DefaultCapsule.fbx",
-            "assetName": "mesh/DefaultCapsule"
+            "assetName": "mesh/DefaultCapsule",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/DefaultCube.fbx",
-            "assetName": "mesh/DefaultCube"
+            "assetName": "mesh/DefaultCube",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/DefaultPlane.fbx",
-            "assetName": "mesh/DefaultPlane"
+            "assetName": "mesh/DefaultPlane",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/DefaultSphere.fbx",
-            "assetName": "mesh/DefaultSphere"
+            "assetName": "mesh/DefaultSphere",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/DefaultSkybox.fbx",
-            "assetName": "mesh/DefaultSkyboxMesh"
+            "assetName": "mesh/DefaultSkyboxMesh",
+            "options": {
+                "optimizeMesh": true
+            }
         }
     ],
     "texture": [

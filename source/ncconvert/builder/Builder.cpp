@@ -81,7 +81,7 @@ auto Builder::Build(asset::AssetType type, const Target& target) -> bool
         }
         case asset::AssetType::Mesh:
         {
-            const auto asset = m_geometryConverter->ImportMesh(target.sourcePath, target.subResourceName);
+            const auto asset = m_geometryConverter->ImportMesh(target.sourcePath, target.subResourceName, target.options.optimizeMesh);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }

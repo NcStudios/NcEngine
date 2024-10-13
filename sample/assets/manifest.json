@@ -33,31 +33,52 @@
     "mesh": [
         {
             "sourcePath": "raw/model/ogre.fbx",
-            "assetName": "mesh/ogre"
+            "assetName": "mesh/ogre",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/halfpipe.fbx",
-            "assetName": "mesh/halfpipe"
+            "assetName": "mesh/halfpipe",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/worm.fbx",
-            "assetName": "mesh/worm"
+            "assetName": "mesh/worm",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/skeleton.fbx",
-            "assetName": "mesh/skeleton"
+            "assetName": "mesh/skeleton",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/cave.fbx",
-            "assetName": "mesh/cave"
+            "assetName": "mesh/cave",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/cave_ceiling.fbx",
-            "assetName": "mesh/cave_ceiling"
+            "assetName": "mesh/cave_ceiling",
+            "options": {
+                "optimizeMesh": true
+            }
         },
         {
             "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "mesh/ramp"
+            "assetName": "mesh/ramp",
+            "options": {
+                "optimizeMesh": true
+            }
         }
     ],
     "skeletal-animation": [
