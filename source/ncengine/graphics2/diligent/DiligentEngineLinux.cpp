@@ -1,6 +1,7 @@
 #include "DiligentEngine.h"
-#include "config/Config.h"
 #include "DiligentUtils.h"
+#include "ShaderFactory.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 
@@ -23,7 +24,11 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, const Diligent::EngineCreateInfo& engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
+                               const Diligent::EngineCreateInfo& engineCreateInfo,
+                               GLFWwindow* window_,
+                               std::span<const std::string_view> supportedApis,
+                               Diligent::DebugMessageCallbackType logCallback)
 {
     using namespace Diligent;
 
@@ -50,8 +55,13 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
 
-                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 auto* pFactoryVk = GetEngineFactoryVk();
+                if (logCallback)
+                {
+                    pFactoryVk->SetMessageCallback(logCallback);
+                }
+
+                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
 
                 if (!m_pDevice || !m_pImmediateContext)
@@ -67,6 +77,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }
 
+                m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
                 break;

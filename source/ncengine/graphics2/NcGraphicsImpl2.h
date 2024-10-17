@@ -1,6 +1,9 @@
 #pragma once
 
+#include "AssetDispatch.h"
 #include "diligent/DiligentEngine.h"
+#include "diligent/TestPipeline.h"
+#include "diligent/resource/ShaderBindings.h"
 #include "ncengine/asset/AssetData.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -47,6 +50,9 @@ class NcGraphicsImpl2 : public NcGraphics
         Registry* m_registry;
         Connection m_onResizeConnection;
         DiligentEngine m_engine;
+        ShaderBindings m_shaderBindings;
+        AssetDispatch m_assetDispatch;
+        TestPipeline m_testPipeline;
         Camera* m_mainCamera = nullptr;
 };
 } // namespace graphics

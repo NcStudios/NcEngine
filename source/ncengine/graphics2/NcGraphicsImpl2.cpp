@@ -55,6 +55,14 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     void SetSkybox(const std::string&) override {}
     void ClearEnvironment() override {}
 };
+
+auto MakeEngineCreateInfo() -> Diligent::EngineCreateInfo
+{
+    auto engineCI = Diligent::EngineCreateInfo{};
+    engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
+    engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
+    return engineCI;
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -104,7 +112,21 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{graphicsSettings, Diligent::EngineCreateInfo{}, window.GetWindowHandle(), GetSupportedApis()}
+          m_engine{graphicsSettings, MakeEngineCreateInfo(), window.GetWindowHandle(), GetSupportedApis()},
+          m_shaderBindings{m_engine.GetDevice(), memorySettings.maxTextures},
+          m_assetDispatch{
+            m_engine.GetContext(),
+            m_engine.GetDevice(),
+            m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
+            modules.Get<asset::NcAsset>()->OnTextureUpdate()
+          },
+          m_testPipeline{
+            m_engine.GetContext(),
+            m_engine.GetDevice(),
+            m_engine.GetSwapChain(),
+            m_engine.GetShaderFactory(),
+            m_shaderBindings.GetGlobalSignature().GetResourceSignature()
+          }
 {
     (void)graphicsSettings;
     (void)memorySettings;
@@ -183,11 +205,26 @@ void NcGraphicsImpl2::Update()
 void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
+
+    auto& context = m_engine.GetContext();
+    auto& swapChain = m_engine.GetSwapChain();
+
+    auto* pRTV = swapChain.GetCurrentBackBufferRTV();
+    auto* pDSV = swapChain.GetDepthBufferDSV();
+    context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+    constexpr auto ClearColor = Vector4{0.050f, 0.050f, 0.050f, 1.0f};
+    context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+    m_shaderBindings.GetGlobalSignature().Commit(context);
+    m_testPipeline.Render(context);
+    swapChain.Present();
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 {
     (void)isMinimized;
-    m_engine.SwapChain()->Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
+    m_engine.GetSwapChain().Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
 }
 } // namespace nc::graphics
