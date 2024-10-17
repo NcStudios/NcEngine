@@ -54,9 +54,9 @@ function(add_graphics_test target)
 endfunction()
 
 ### GlobalTextureBufferResource Tests ###
-add_graphics_test(GlobalTextureBufferResource_test)
+add_graphics_test(GlobalTextureBufferResource_tests)
 
-target_sources(GlobalTextureBufferResource_test
+target_sources(GlobalTextureBufferResource_tests
     PRIVATE
         GlobalTextureBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
