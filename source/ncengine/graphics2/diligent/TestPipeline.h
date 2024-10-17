@@ -50,7 +50,7 @@ class TestPipeline
 
         struct InstanceData
         {
-            DirectX::XMMATRIX Matrix;
+            DirectX::XMFLOAT4X4 Matrix;
             uint32_t TextureInd = 0;
         };
 

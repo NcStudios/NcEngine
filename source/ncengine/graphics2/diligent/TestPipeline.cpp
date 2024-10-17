@@ -17,7 +17,86 @@ struct Vertex
     nc::Vector3 pos;
     nc::Vector2 uv;
 };
+
+constexpr auto g_pixelShader = std::string_view{
+R"(#ifdef VULKAN
+// NonUniformResourceIndex is not supported by GLSLang
+#   define NonUniformResourceIndex(x) x
+#endif
+
+Texture2D     g_textures[];
+SamplerState  g_textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+struct PSInput 
+{ 
+    float4 Pos      : SV_POSITION; 
+    float2 UV       : TEX_COORD; 
+    uint   TexIndex : TEX_ARRAY_INDEX;
+};
+
+struct PSOutput
+{
+    float4 Color : SV_TARGET;
+};
+
+void main(in  PSInput  PSIn,
+          out PSOutput PSOut)
+{
+    float4 Color;
+    Color = g_textures[NonUniformResourceIndex(PSIn.TexIndex)].Sample(g_textures_sampler, PSIn.UV);
+    PSOut.Color = Color;
+})"};
+
+constexpr auto g_vertexShader = std::string_view{
+R"(struct VSInput
+{
+    // Vertex attributes
+    float3 Pos      : ATTRIB0;
+    float2 UV       : ATTRIB1;
+
+    // Instance attributes
+    float4 MtrxRow0  : ATTRIB2;
+    float4 MtrxRow1  : ATTRIB3;
+    float4 MtrxRow2  : ATTRIB4;
+    float4 MtrxRow3  : ATTRIB5;
+    uint   TexArrInd : ATTRIB6;
+};
+
+struct PSInput 
+{
+    float4 Pos      : SV_POSITION;
+    float2 UV       : TEX_COORD;
+    uint   TexIndex : TEX_ARRAY_INDEX;
+};
+
+static const float4x4 projectionMatrix = float4x4
+(
+    1.0f / (1.777f * tan(1.0472f / 2.0f)),  0.0f,                        0.0f,                               0.0f,
+    0.0f,                                   1.0f / tan(1.0472f / 2.0f),  0.0f,                               0.0f,
+    0.0f,                                   0.0f,                        1000.0f / (1000.0f - 0.1f),         1.0f,
+    0.0f,                                   0.0f,                        -0.1f * 1000.0f / (1000.0f - 0.1f), 0.0f
+);
+
+static const float4x4 viewMatrix = float4x4
+(
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f
+);
+
+static const float4x4 g_ViewProj = mul(projectionMatrix, viewMatrix);
+
+void main(in  VSInput VSIn, out PSInput PSIn)
+{
+    float4x4 InstanceMatr = MatrixFromRows(VSIn.MtrxRow0, VSIn.MtrxRow1, VSIn.MtrxRow2, VSIn.MtrxRow3);
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), InstanceMatr);
+    PSIn.Pos = mul(TransformedPos, g_ViewProj);
+    PSIn.UV  = VSIn.UV;
+    PSIn.TexIndex = VSIn.TexArrInd;
 }
+)"};
+} // anonymous namespace
 
 namespace nc::graphics
 {
@@ -107,17 +186,29 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     createInfo.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
     createInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
 
-    auto vertexShader = [&shaderFactory]()
-    {
-        const auto source = ReadShaderFile("cube.vsh");
-        return shaderFactory.MakeShaderFromSource(source, "Cube VS", Diligent::SHADER_TYPE_VERTEX);
-    }();
+    auto vertexShader = shaderFactory.MakeShaderFromSource(
+        std::span{g_vertexShader},
+        "Cube VS",
+        Diligent::SHADER_TYPE_VERTEX
+    );
 
-    auto pixelShader = [&shaderFactory]()
-    {
-        const auto source = ReadShaderFile("cube.psh");
-        return shaderFactory.MakeShaderFromSource(source, "Cube PS", Diligent::SHADER_TYPE_PIXEL);
-    }();
+    auto pixelShader = shaderFactory.MakeShaderFromSource(
+        std::span{g_pixelShader},
+        "Cube PS",
+        Diligent::SHADER_TYPE_PIXEL
+    );
+
+    // auto vertexShader = [&shaderFactory]()
+    // {
+    //     const auto source = ReadShaderFile("cube.vsh");
+    //     return shaderFactory.MakeShaderFromSource(source, "Cube VS", Diligent::SHADER_TYPE_VERTEX);
+    // }();
+
+    // auto pixelShader = [&shaderFactory]()
+    // {
+    //     const auto source = ReadShaderFile("cube.psh");
+    //     return shaderFactory.MakeShaderFromSource(source, "Cube PS", Diligent::SHADER_TYPE_PIXEL);
+    // }();
 
     createInfo.pVS = vertexShader;
     createInfo.pPS = pixelShader;
@@ -152,7 +243,6 @@ void TestPipeline::CreateGeometryBuffers(Diligent::IDeviceContext& context, Dili
     m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1.f)));
     m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1.f)));
     m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1)));
-
 
     {
         BufferDesc VertBuffDesc;
@@ -225,7 +315,7 @@ void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
             {
                 float xOffset = 2.f * ((float)x + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
                 float yOffset = 2.f * ((float)y + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
-                float zOffset = 2.f * ((float)z + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
+                float zOffset = 3.0f + 2.f * ((float)z + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
                 float scale = BaseScale * scale_distr(gen);
                 auto matrix = DirectX::XMMatrixMultiply(
                     DirectX::XMMatrixMultiply(
@@ -236,7 +326,7 @@ void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
                 );
 
                 auto& CurrInst = m_InstanceData[instId];
-                CurrInst.Matrix   = matrix;
+                DirectX::XMStoreFloat4x4(&CurrInst.Matrix, matrix);
                 CurrInst.TextureInd = tex_distr(gen);
                 m_GeometryType[instId++] = geom_type_distr(gen);
             }
