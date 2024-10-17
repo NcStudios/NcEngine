@@ -91,8 +91,8 @@ target_compile_definitions(ShaderFactory_runtimeCompilation_tests
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
-if(WIN32 AND NC_BUILD_WIN32_INTEGRATION_TESTS)
+if(WIN32)
     add_subdirectory(win32)
-elseif(UNIX AND NOT APPLE AND NC_BUILD_LINUX_INTEGRATION_TESTS)
+elseif(UNIX AND NOT APPLE)
     add_subdirectory(linux)
 endif()

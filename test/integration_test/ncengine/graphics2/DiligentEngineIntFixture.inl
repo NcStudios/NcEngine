@@ -1,9 +1,9 @@
+#include "NcWindowStub.inl"
+#include "graphics2/diligent/DiligentEngine.h"
+
 #include "ncengine/config/Config.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/window/Window.h"
-
-#include "graphics2/diligent/DiligentEngine.h"
-#include "../../../ncengine/window/NcWindowStub.inl"
 
 static const char* VSSource = R"(
 struct PSInput 

@@ -1,6 +1,6 @@
-#include "gtest/gtest.h"
+#include "NcWindowStub.inl"
 #include "graphics2/diligent/DiligentEngine.h"
-#include "../../../ncengine/window/NcWindowStub.inl"
+#include "gtest/gtest.h"
 
 #include "ncengine/config/Config.h"
 #include "ncengine/graphics/NcGraphics.h"
