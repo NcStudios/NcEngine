@@ -198,18 +198,6 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
         Diligent::SHADER_TYPE_PIXEL
     );
 
-    // auto vertexShader = [&shaderFactory]()
-    // {
-    //     const auto source = ReadShaderFile("cube.vsh");
-    //     return shaderFactory.MakeShaderFromSource(source, "Cube VS", Diligent::SHADER_TYPE_VERTEX);
-    // }();
-
-    // auto pixelShader = [&shaderFactory]()
-    // {
-    //     const auto source = ReadShaderFile("cube.psh");
-    //     return shaderFactory.MakeShaderFromSource(source, "Cube PS", Diligent::SHADER_TYPE_PIXEL);
-    // }();
-
     createInfo.pVS = vertexShader;
     createInfo.pPS = pixelShader;
 
