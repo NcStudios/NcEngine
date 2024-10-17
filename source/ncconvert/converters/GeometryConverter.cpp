@@ -1,6 +1,7 @@
 #include "GeometryConverter.h"
 #include "analysis/GeometryAnalysis.h"
 #include "analysis/Sanitize.h"
+#include "optimizer/MeshOptimization.h"
 #include "utility/Path.h"
 #include "utility/Log.h"
 
@@ -436,7 +437,7 @@ class GeometryConverter::impl
             };
         }
 
-        auto ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::Mesh
+        auto ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName, bool optimize) -> asset::Mesh
         {
             const auto scene = ::ReadFbx(path, &m_importer, meshFlags);
             auto mesh = GetMeshFromScene(scene, subResourceName);
@@ -452,11 +453,16 @@ class GeometryConverter::impl
                 LOG("Warning: Bad values detected in mesh. {} values have been set to 0.", count);
             }
 
+            auto convertedIndices = ::ConvertToIndices(::ViewFaces(mesh));
+            auto [processedVertices, processedIndices] = optimize
+                ? OptimizeMesh(convertedVertices, convertedIndices)
+                : OptimizedMesh{std::move(convertedVertices), std::move(convertedIndices)};
+
             return asset::Mesh{
-                GetMeshVertexExtents(convertedVertices),
-                FindFurthestDistanceFromOrigin(convertedVertices),
-                std::move(convertedVertices),
-                ::ConvertToIndices(::ViewFaces(mesh)),
+                GetMeshVertexExtents(processedVertices),
+                FindFurthestDistanceFromOrigin(processedVertices),
+                std::move(processedVertices),
+                std::move(processedIndices),
                 GetBonesData(mesh, scene->mRootNode)
             };
         }
@@ -489,9 +495,9 @@ auto GeometryConverter::ImportHullCollider(const std::filesystem::path& path) ->
     return m_impl->ImportHullCollider(path);
 }
 
-auto GeometryConverter::ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::Mesh
+auto GeometryConverter::ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName, bool optimize) -> asset::Mesh
 {
-    return m_impl->ImportMesh(path, subResourceName);
+    return m_impl->ImportMesh(path, subResourceName, optimize);
 }
 
 auto GeometryConverter::ImportSkeletalAnimation(const std::filesystem::path& path, const std::optional<std::string>& subResourceName) -> asset::SkeletalAnimation

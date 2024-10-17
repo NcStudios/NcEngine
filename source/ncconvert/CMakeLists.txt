@@ -31,6 +31,7 @@ target_link_libraries(nc-convert
         NcMath
         NcUtility
         assimp::assimp
+        meshoptimizer
 )
 
 install(
@@ -43,4 +44,5 @@ install(
 add_subdirectory(analysis)
 add_subdirectory(builder)
 add_subdirectory(converters)
+add_subdirectory(optimizer)
 add_subdirectory(utility)

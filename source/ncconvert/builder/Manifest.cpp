@@ -56,13 +56,18 @@ void ProcessOptions(GlobalManifestOptions& options, const std::filesystem::path&
     }
 }
 
-auto BuildTarget(const std::string& assetName, const std::string& sourcePath, const std::filesystem::path& outputDirectory, const std::optional<std::string>& subResourceName = std::nullopt) -> nc::convert::Target
+auto BuildTarget(const std::string& assetName,
+                 const std::string& sourcePath,
+                 const std::filesystem::path& outputDirectory,
+                 const std::optional<std::string>& subResourceName = std::nullopt,
+                 const nc::convert::TargetOptions& options = nc::convert::TargetOptions{}) -> nc::convert::Target
 {
     auto target = nc::convert::Target
     {
         sourcePath,
         nc::convert::AssetNameToNcaPath(assetName, outputDirectory),
-        subResourceName
+        subResourceName,
+        options
     };
 
     if (!std::filesystem::is_regular_file(target.sourcePath))
@@ -86,6 +91,11 @@ auto IsUpToDate(const nc::convert::Target& target) -> bool
 
 namespace nc::convert
 {
+void from_json(const nlohmann::json& json, nc::convert::TargetOptions& options)
+{
+    options.optimizeMesh = json.value("optimizeMesh", false);
+}
+
 void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<asset::AssetType, std::vector<Target>>& instructions)
 {
     auto file = std::ifstream{manifestPath};
@@ -95,8 +105,8 @@ void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<
     }
 
     auto json = nlohmann::json::parse(file);
-    auto options = json.value("globalOptions", ::GlobalManifestOptions{});
-    ::ProcessOptions(options, manifestPath);
+    auto globalOptions = json.value("globalOptions", ::GlobalManifestOptions{});
+    ::ProcessOptions(globalOptions, manifestPath);
 
     for (const auto& typeTag : ::jsonAssetArrayTags)
     {
@@ -108,6 +118,7 @@ void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<
         const auto type = ToAssetType(typeTag);
         for (const auto& asset : json.at(typeTag))
         {
+            const auto targetOptions = asset.value("options", TargetOptions{});
             // Types that CanOutputMany support both single target (legacy) mode and multiple output mode.
             if (CanOutputMany(type))
             {
@@ -116,7 +127,14 @@ void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<
                 {
                     for (const auto& subResource : asset.at("assetNames"))
                     {
-                        auto target = BuildTarget(subResource.at("assetName"), asset.at("sourcePath"), options.outputDirectory, subResource.at("subResourceName"));
+                        auto target = BuildTarget(
+                            subResource.at("assetName"),
+                            asset.at("sourcePath"),
+                            globalOptions.outputDirectory,
+                            subResource.at("subResourceName"),
+                            targetOptions
+                        );
+
                         if (::IsUpToDate(target))
                         {
                             LOG("Up-to-date: {}", target.destinationPath.string());
@@ -129,7 +147,14 @@ void ReadManifest(const std::filesystem::path& manifestPath, std::unordered_map<
             }
 
             // Single target mode
-            auto target = BuildTarget(asset.at("assetName"), asset.at("sourcePath"), options.outputDirectory);
+            auto target = BuildTarget(
+                asset.at("assetName"),
+                asset.at("sourcePath"),
+                globalOptions.outputDirectory,
+                std::nullopt,
+                targetOptions
+            );
+
             if (::IsUpToDate(target))
             {
                 LOG("Up-to-date: {}", target.destinationPath.string());

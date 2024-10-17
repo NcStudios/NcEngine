@@ -125,6 +125,7 @@ if(NC_BUILD_NCCONVERT)
             ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/AudioConverter.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/GeometryConverter.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/TextureConverter.cpp
+            ${PROJECT_SOURCE_DIR}/source/ncconvert/optimizer/MeshOptimization.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/BlobSize.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/EnumExtensions.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Path.cpp
@@ -135,6 +136,7 @@ if(NC_BUILD_NCCONVERT)
             gtest_main
             NcMath
             assimp::assimp
+            meshoptimizer
     )
 
     add_test(BuildAndImport_integration_tests BuildAndImport_integration_tests)
@@ -197,6 +199,7 @@ if(NC_BUILD_NCCONVERT)
             ${PROJECT_SOURCE_DIR}/source/ncconvert/analysis/GeometryAnalysis.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/analysis/Sanitize.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/converters/GeometryConverter.cpp
+            ${PROJECT_SOURCE_DIR}/source/ncconvert/optimizer/MeshOptimization.cpp
             ${PROJECT_SOURCE_DIR}/source/ncconvert/utility/Path.cpp
     )
 
@@ -205,6 +208,7 @@ if(NC_BUILD_NCCONVERT)
             gtest_main
             NcMath
             assimp::assimp
+            meshoptimizer
     )
 
     add_test(GeometryConverter_unit_tests GeometryConverter_unit_tests)

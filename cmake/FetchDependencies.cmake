@@ -153,8 +153,8 @@ endif()
 
 # Optional Dependencies
 
-# Assimp
 if(NC_BUILD_NCCONVERT)
+    # Assimp
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
     set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
     set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
@@ -173,7 +173,14 @@ if(NC_BUILD_NCCONVERT)
                         GIT_SHALLOW    TRUE
     )
 
-    FetchContent_MakeAvailable(assimp)
+    # meshoptimizer
+    FetchContent_Declare(meshoptimizer
+                        GIT_REPOSITORY https://github.com/zeux/meshoptimizer
+                        GIT_TAG        v0.21
+                        GIT_SHALLOW    TRUE
+    )
+
+    FetchContent_MakeAvailable(assimp meshoptimizer)
 
     disable_warnings_for_headers(assimp)
     disable_warnings_for_target(assimp)
