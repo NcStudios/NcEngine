@@ -36,7 +36,7 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanRenderTriangle_Succee
     {
         ncWindow.ProcessSystemMessages();
         RenderSquare(&engine, m_pPSO.RawPtr());
-        engine.SwapChain()->Present();
+        engine.GetSwapChain().Present();
         currentFrameIndex++;
     }
 }

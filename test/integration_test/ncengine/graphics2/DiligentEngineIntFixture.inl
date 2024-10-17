@@ -1,8 +1,9 @@
-#include "config/Config.h"
+#include "NcWindowStub.inl"
 #include "graphics2/diligent/DiligentEngine.h"
-#include "graphics/NcGraphics.h"
-#include "window/Window.h"
-#include "../../../ncengine/window/NcWindowStub.inl"
+
+#include "ncengine/config/Config.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/window/Window.h"
 
 static const char* VSSource = R"(
 struct PSInput 
@@ -55,8 +56,8 @@ void SetupSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState*
     PSOCreateInfo.PSODesc.Name = "Simple square PSO";
     PSOCreateInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     PSOCreateInfo.GraphicsPipeline.NumRenderTargets             = 1;
-    PSOCreateInfo.GraphicsPipeline.RTVFormats[0]                = engine->SwapChain()->GetDesc().ColorBufferFormat;
-    PSOCreateInfo.GraphicsPipeline.DSVFormat                    = engine->SwapChain()->GetDesc().DepthBufferFormat;
+    PSOCreateInfo.GraphicsPipeline.RTVFormats[0]                = engine->GetSwapChain().GetDesc().ColorBufferFormat;
+    PSOCreateInfo.GraphicsPipeline.DSVFormat                    = engine->GetSwapChain().GetDesc().DepthBufferFormat;
     PSOCreateInfo.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     PSOCreateInfo.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_NONE;
     PSOCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
@@ -71,7 +72,7 @@ void SetupSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState*
         ShaderCI.EntryPoint      = "main";
         ShaderCI.Desc.Name       = "Square vertex shader";
         ShaderCI.Source          = VSSource;
-        engine->Device()->CreateShader(ShaderCI, &pVS);
+        engine->GetDevice().CreateShader(ShaderCI, &pVS);
     }
 
     RefCntAutoPtr<IShader> pPS;
@@ -80,12 +81,12 @@ void SetupSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState*
         ShaderCI.EntryPoint      = "main";
         ShaderCI.Desc.Name       = "Square pixel shader";
         ShaderCI.Source          = PSSource;
-        engine->Device()->CreateShader(ShaderCI, &pPS);
+        engine->GetDevice().CreateShader(ShaderCI, &pPS);
     }
 
     PSOCreateInfo.pVS = pVS;
     PSOCreateInfo.pPS = pPS;
-    engine->Device()->CreateGraphicsPipelineState(PSOCreateInfo, ppPso);
+    engine->GetDevice().CreateGraphicsPipelineState(PSOCreateInfo, ppPso);
 }
 
 void RenderSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState* pPso)
@@ -93,16 +94,16 @@ void RenderSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState
     using namespace Diligent;
 
     const float ClearColor[] = {0.350f, 0.350f, 0.350f, 1.0f};
-    auto* pRTV = engine->SwapChain()->GetCurrentBackBufferRTV();
-    auto* pDSV = engine->SwapChain()->GetDepthBufferDSV();
-    engine->Context()->SetRenderTargets(1, &pRTV, pDSV, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    engine->Context()->ClearRenderTarget(pRTV, ClearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    engine->Context()->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    engine->Context()->SetPipelineState(pPso);
+    auto* pRTV = engine->GetSwapChain().GetCurrentBackBufferRTV();
+    auto* pDSV = engine->GetSwapChain().GetDepthBufferDSV();
+    engine->GetContext().SetRenderTargets(1, &pRTV, pDSV, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    engine->GetContext().ClearRenderTarget(pRTV, ClearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    engine->GetContext().ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    engine->GetContext().SetPipelineState(pPso);
 
     DrawAttribs drawAttrs;
     drawAttrs.NumVertices = 4;
-    engine->Context()->Draw(drawAttrs);
+    engine->GetContext().Draw(drawAttrs);
 }
 
 auto CreateDiligentEngine(bool isHeadless, std::string_view targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowStub* window = nullptr) -> nc::graphics::DiligentEngine
