@@ -80,7 +80,6 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
             auto engineCI = Diligent::EngineCreateInfo{};
             engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
             engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
-            engineCI.EnableValidation = false; /** @todo 749 enable once validation layers are in container */
 
             auto graphicsSettings = nc::config::GraphicsSettings();
             graphicsSettings.isHeadless = true;
