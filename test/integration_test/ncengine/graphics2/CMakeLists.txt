@@ -41,6 +41,23 @@ function(add_graphics_test target)
     nc_setup_runtime_paths(${target})
 endfunction()
 
+### DiligentEngineInit_tests Tests ###
+add_graphics_test(DiligentEngineInit_tests)
+
+if(WIN32)
+    target_sources(DiligentEngineInit_tests
+        PRIVATE
+            DiligentEngineWin32Int_tests.cpp
+            ${NC_SOURCE_DIR}/config/Config.cpp
+    )
+elseif(UNIX AND NOT APPLE)
+    target_sources(DiligentEngineInit_tests
+        PRIVATE
+            DiligentEngineLinuxInt_tests.cpp
+            ${NC_SOURCE_DIR}/config/Config.cpp
+    )
+endif()
+
 ### GlobalTextureBufferResource Tests ###
 add_graphics_test(GlobalTextureBufferResource_tests)
 
@@ -73,9 +90,3 @@ target_compile_definitions(ShaderFactory_runtimeCompilation_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
 )
-
-if(WIN32)
-    add_subdirectory(win32)
-elseif(UNIX AND NOT APPLE)
-    add_subdirectory(linux)
-endif()
