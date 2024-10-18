@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ShaderFactory.h"
-#include "ncengine/config/Config.h"
 #include "ncengine/graphics/NcGraphics.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"

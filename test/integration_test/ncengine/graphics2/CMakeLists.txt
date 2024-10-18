@@ -3,7 +3,6 @@ if(WIN32)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Win32.cpp
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineWin32.cpp
     )
-
 elseif(UNIX AND NOT APPLE)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
