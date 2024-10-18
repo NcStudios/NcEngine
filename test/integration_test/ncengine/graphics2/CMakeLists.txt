@@ -4,8 +4,6 @@ if(WIN32)
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineWin32.cpp
     )
 
-    # Copy dlls to test output dir
-    nc_install_runtime_dependencies(${CMAKE_CURRENT_BINARY_DIR})
 elseif(UNIX AND NOT APPLE)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
@@ -37,8 +35,6 @@ function(add_graphics_test target)
             NcMath
             ${DILIGENT_LIBRARIES}
     )
-
-    nc_setup_runtime_paths(${target})
 endfunction()
 
 ### DiligentEngineInit_tests Tests ###

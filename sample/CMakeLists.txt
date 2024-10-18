@@ -33,15 +33,6 @@ install(TARGETS     ${NC_SAMPLE_EXE}
         DESTINATION sample
 )
 
-if(WIN32)
-    set(SHARED_LIB_INSTALL_DIR "sample")
-elseif(UNIX AND NOT APPLE)
-    set(SHARED_LIB_INSTALL_DIR "sample/lib")
-endif()
-
-nc_install_runtime_dependencies("${SHARED_LIB_INSTALL_DIR}")
-nc_setup_runtime_paths(${NC_SAMPLE_EXE})
-
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/sample/assets/nca
         DESTINATION sample
 )
@@ -63,3 +54,9 @@ install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
 install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
         DESTINATION sample
 )
+
+if(${NC_PROFILING_ENABLED})
+    install(FILES       $<TARGET_FILE:OptickCore>
+            DESTINATION ${SHARED_LIB_DESTINATION}
+    )
+endif()
