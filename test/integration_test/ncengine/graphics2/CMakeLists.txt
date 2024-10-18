@@ -3,20 +3,13 @@ if(WIN32)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Win32.cpp
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineWin32.cpp
     )
+
+    # Copy dlls to test output dir
+    nc_install_runtime_dependencies(${CMAKE_CURRENT_BINARY_DIR})
 elseif(UNIX AND NOT APPLE)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
     )
-
-    set(DILIGENT_RPATH_DIRS "")
-    foreach(target ${DILIGENT_LIBRARIES})
-        get_target_property(TARGET_DIR ${target} BINARY_DIR)
-        if(TARGET_DIR)
-            list(APPEND DILIGENT_RPATH_DIRS "${TARGET_DIR}")
-        endif()
-    endforeach()
-
-    list(JOIN DILIGENT_RPATH_DIRS ";" RPATH_STRING)
 endif()
 
 # Common setup for graphics integration tests
@@ -45,12 +38,7 @@ function(add_graphics_test target)
             ${DILIGENT_LIBRARIES}
     )
 
-    if(UNIX AND NOT APPLE)
-        set_target_properties(${target}
-            PROPERTIES
-                BUILD_RPATH "${DILIGENT_RPATH_DIRS}"
-        )
-    endif()
+    nc_setup_runtime_paths(${target})
 endfunction()
 
 ### GlobalTextureBufferResource Tests ###
@@ -62,11 +50,6 @@ target_sources(GlobalTextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalResourceSignature.cpp
 )
-
-# Just need this for one test to get them in the directory
-if(WIN32)
-    copy_required_dlls(GlobalTextureBufferResource_tests)
-endif()
 
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)

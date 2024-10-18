@@ -73,6 +73,9 @@ add_definitions(-D_SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING)
 # Get dependencies
 include(cmake/FetchDependencies.cmake)
 
+# Include runtime dependency helpers.
+include(cmake/InstallDependencies.cmake)
+
 # Add source
 add_subdirectory(source)
 

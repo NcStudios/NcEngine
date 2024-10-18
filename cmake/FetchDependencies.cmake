@@ -91,18 +91,21 @@ else()
     set(DILIGENT_NO_GLSLANG ON CACHE BOOL "" FORCE)
 endif()
 
-list(APPEND DILIGENT_LIBRARIES
-            Diligent-TargetPlatform
+list(APPEND DILIGENT_RUNTIME_LIBRARIES
             Diligent-GraphicsEngineVk-shared
-            Diligent-TextureLoader
 )
 
 if(WIN32)
-    list(APPEND DILIGENT_LIBRARIES 
+    list(APPEND DILIGENT_RUNTIME_LIBRARIES
                 Diligent-GraphicsEngineD3D11-shared
                 Diligent-GraphicsEngineD3D12-shared
     )
 endif()
+
+set(DILIGENT_LIBRARIES ${DILIGENT_RUNTIME_LIBRARIES}
+                       Diligent-TargetPlatform
+                       Diligent-TextureLoader
+)
 
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git

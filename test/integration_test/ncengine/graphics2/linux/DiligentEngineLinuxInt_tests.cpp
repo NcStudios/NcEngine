@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
-#include "config/Config.h"
-#include "graphics2/diligent/DiligentEngine.h"
-#include "graphics/NcGraphics.h"
 #include "../DiligentEngineIntFixture.inl"
-#include "window/Window.h"
+#include "graphics2/diligent/DiligentEngine.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/window/Window.h"
 
 #define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
