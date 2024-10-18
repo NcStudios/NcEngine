@@ -7,16 +7,6 @@ elseif(UNIX AND NOT APPLE)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
                                   ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
     )
-
-    set(DILIGENT_RPATH_DIRS "")
-    foreach(target ${DILIGENT_LIBRARIES})
-        get_target_property(TARGET_DIR ${target} BINARY_DIR)
-        if(TARGET_DIR)
-            list(APPEND DILIGENT_RPATH_DIRS "${TARGET_DIR}")
-        endif()
-    endforeach()
-
-    list(JOIN DILIGENT_RPATH_DIRS ";" RPATH_STRING)
 endif()
 
 # Common setup for graphics integration tests
@@ -44,14 +34,22 @@ function(add_graphics_test target)
             NcMath
             ${DILIGENT_LIBRARIES}
     )
-
-    if(UNIX AND NOT APPLE)
-        set_target_properties(${target}
-            PROPERTIES
-                BUILD_RPATH "${DILIGENT_RPATH_DIRS}"
-        )
-    endif()
 endfunction()
+
+### DiligentEngineInit_tests Tests ###
+add_graphics_test(DiligentEngineInit_tests)
+
+if(WIN32)
+    target_sources(DiligentEngineInit_tests
+        PRIVATE
+            DiligentEngineWin32Int_tests.cpp
+    )
+elseif(UNIX AND NOT APPLE)
+    target_sources(DiligentEngineInit_tests
+        PRIVATE
+            DiligentEngineLinuxInt_tests.cpp
+    )
+endif()
 
 ### GlobalTextureBufferResource Tests ###
 add_graphics_test(GlobalTextureBufferResource_tests)
@@ -62,11 +60,6 @@ target_sources(GlobalTextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalResourceSignature.cpp
 )
-
-# Just need this for one test to get them in the directory
-if(WIN32)
-    copy_required_dlls(GlobalTextureBufferResource_tests)
-endif()
 
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
@@ -90,9 +83,3 @@ target_compile_definitions(ShaderFactory_runtimeCompilation_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
 )
-
-if(WIN32)
-    add_subdirectory(win32)
-elseif(UNIX AND NOT APPLE)
-    add_subdirectory(linux)
-endif()

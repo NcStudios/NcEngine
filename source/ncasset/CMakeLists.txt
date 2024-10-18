@@ -31,10 +31,3 @@ target_link_libraries(NcAsset
         NcMath
         NcUtility
 )
-
-install(
-    DIRECTORY
-        ${PROJECT_SOURCE_DIR}/include/ncasset
-    DESTINATION
-        include
-)
