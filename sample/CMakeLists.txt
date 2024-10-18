@@ -57,6 +57,6 @@ install(FILES       ${PROJECT_SOURCE_DIR}/sample/config.ini
 
 if(${NC_PROFILING_ENABLED})
     install(FILES       $<TARGET_FILE:OptickCore>
-            DESTINATION ${SHARED_LIB_DESTINATION}
+            DESTINATION sample
     )
 endif()
