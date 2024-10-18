@@ -43,6 +43,7 @@ FetchContent_Declare(taskflow
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(glfw
                      GIT_REPOSITORY https://github.com/glfw/glfw.git
@@ -51,6 +52,7 @@ FetchContent_Declare(glfw
 )
 
 # Optick
+set(OPTICK_INSTALL_TARGETS OFF CACHE BOOL "" FORCE)
 if(${NC_PROFILING_ENABLED})
     set(OPTICK_ENABLED ON CACHE BOOL "" FORCE)
 else()
@@ -69,6 +71,7 @@ set(CPP_RTTI_ENABLED ON CACHE BOOL "" FORCE)
 set(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 set(ENABLE_OBJECT_STREAM OFF CACHE BOOL "" FORCE)
 set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
+set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
                      GIT_TAG        v5.1.0
@@ -125,7 +128,7 @@ FetchContent_Declare(DirectXMath
 )
 
 # fmt - we only need because GCC hasn't implemented std::format yet. Can be removed eventually.
-set(FMT_INSTALL ON)
+set(FMT_INSTALL OFF)
 FetchContent_Declare(fmt
                      GIT_REPOSITORY https://github.com/fmtlib/fmt.git
                      GIT_TAG        10.1.1
