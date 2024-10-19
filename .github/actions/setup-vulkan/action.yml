@@ -15,7 +15,8 @@ runs:
         sdkVersion: ${{ inputs.sdkVersion }}
 
     - name: Download VulkanSDK and Drivers (Linux)
-      if: ${{ runner.os == 'ubuntu-latest' }}
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
       run: |
         sudo apt-get install -y mesa-vulkan-drivers
         wget "https://sdk.lunarg.com/sdk/download/${{ inputs.sdkVersion }}/linux/vulkan-sdk-linux-x86_64-${{ inputs.sdkVersion }}.tar.gz?Human=true" -O vulkan-sdk.tar.gz
