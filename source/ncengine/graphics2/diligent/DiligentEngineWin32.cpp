@@ -12,7 +12,6 @@
     #undef CreateWindow
 #endif
 
-#include "Graphics/GraphicsEngineD3D11/interface/EngineFactoryD3D11.h"
 #include "Graphics/GraphicsEngineD3D12/interface/EngineFactoryD3D12.h"
 #include "Graphics/GraphicsEngineVulkan/interface/EngineFactoryVk.h"
 #include "GLFW/glfw3.h"
@@ -137,48 +136,6 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 EnsureContextFlushed(m_pImmediateContext);
                 NC_LOG_WARNING("Failed to initialize Vulkan.");
                 errorMessage = fmt::format("{0} Failed to initialize Vulkan: {1} \n", errorMessage, e.what());
-            }
-        }
-        else if (api == api::D3D11)
-        {
-            try
-            {
-                #if ENGINE_DLL
-                    auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
-                #endif
-
-                auto* pFactoryD3D11 = GetEngineFactoryD3D11();
-                if (logCallback)
-                {
-                    pFactoryD3D11->SetMessageCallback(logCallback);
-                }
-
-                auto engineCI = EngineD3D11CreateInfo{engineCreateInfo};
-                pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
-
-                if (!m_pDevice || !m_pImmediateContext)
-                {
-                    throw nc::NcError("Failed to create the D3D11 device or context.");
-                }
-
-                if (!graphicsSettings.isHeadless)
-                    pFactoryD3D11->CreateSwapChainD3D11(m_pDevice, m_pImmediateContext, SCDesc, FullScreenModeDesc{}, window, &m_pSwapChain);
-
-                if (!graphicsSettings.isHeadless && !m_pSwapChain)
-                {
-                    throw nc::NcError("Failed to create the D3D11 swapchain.");
-                }
-
-                m_shaderFactory = MakeShaderFactory(*pFactoryD3D11, *m_pDevice);
-                m_renderApi = api;
-                NC_LOG_TRACE("Successfully initialized the D3D11 rendering engine.");
-                break;
-            }
-            catch (const std::runtime_error& e)
-            {
-                EnsureContextFlushed(m_pImmediateContext);
-                NC_LOG_WARNING("Failed to initialize D3D11.");
-                errorMessage = fmt::format("{0} Failed to initialize D3D11: {1} \n", errorMessage, e.what());
             }
         }
     }
