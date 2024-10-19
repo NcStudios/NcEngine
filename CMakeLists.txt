@@ -6,9 +6,9 @@ project("NcSdk"
 
 # Options
 option(NC_BUILD_TESTS "Enable building tests." OFF)
-option(NC_BUILD_WIN32_INTEGRATION_TESTS "Enable building WIN32 integration tests." OFF) # @todo: Only forked on platform until we can get SS running on our CI env.
-option(NC_BUILD_LINUX_INTEGRATION_TESTS "Enable building Linux integration tests." OFF)
+option(NC_BUILD_INTEGRATION_TESTS "Enable building integration tests." OFF)
 option(NC_BUILD_NCCONVERT "Enable building nc-convert asset converter." ON)
+option(NC_RUNTIME_SHADER_COMPILATION "Enable compiling shaders at runtime" ON)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
@@ -50,10 +50,17 @@ if(NC_PROD_BUILD)
     if (NOT DEFINED NC_BUILD_NCCONVERT)
         set(NC_BUILD_NCCONVERT OFF CACHE BOOL "" FORCE)
     endif()
+    if(NOT DEFINED NC_RUNTIME_SHADER_COMPILATION)
+        set(NC_RUNTIME_SHADER_COMPILATION OFF CACHE BOOL "" FORCE)
+    endif()
 else()
     set(NC_COMPILE_DEFINITIONS NC_LOG_LEVEL=2 NC_EDITOR_ENABLED NC_DEBUG_RENDERING_ENABLED NC_ASSERT_ENABLED)
     set(NC_ENGINE_LIB "NcEngine-dev")
     set(NC_SAMPLE_EXE "Sample")
+endif()
+
+if(NC_RUNTIME_SHADER_COMPILATION)
+    list(APPEND NC_COMPILE_DEFINITIONS NC_RUNTIME_SHADER_COMPILATION)
 endif()
 
 if(NC_PROFILING_ENABLED)

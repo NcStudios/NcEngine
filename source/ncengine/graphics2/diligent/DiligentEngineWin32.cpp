@@ -1,6 +1,6 @@
 #include "DiligentEngine.h"
-#include "config/Config.h"
 #include "DiligentUtils.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/utility/Log.h"
 #include "ncengine/window/Window.h"
 
@@ -32,7 +32,11 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
 
 namespace nc::graphics
 {
-DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings, const Diligent::EngineCreateInfo& engineCreateInfo, GLFWwindow* window_, std::span<const std::string_view> supportedApis)
+DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
+                               const Diligent::EngineCreateInfo& engineCreateInfo,
+                               GLFWwindow* window_,
+                               std::span<const std::string_view> supportedApis,
+                               Diligent::DebugMessageCallbackType logCallback)
 {
     using namespace Diligent;
 
@@ -59,8 +63,13 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto GetEngineFactoryD3D12 = LoadGraphicsEngineD3D12();
                 #endif
 
-                auto engineCI = EngineD3D12CreateInfo{engineCreateInfo};
                 auto* pFactoryD3D12 = GetEngineFactoryD3D12();
+                if (logCallback)
+                {
+                    pFactoryD3D12->SetMessageCallback(logCallback);
+                }
+
+                auto engineCI = EngineD3D12CreateInfo{engineCreateInfo};
                 pFactoryD3D12->CreateDeviceAndContextsD3D12(engineCI, &m_pDevice, &m_pImmediateContext);
 
                 if (!m_pDevice || !m_pImmediateContext)
@@ -76,6 +85,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the D3D12 swapchain.");
                 }
 
+                m_shaderFactory = MakeShaderFactory(*pFactoryD3D12, *m_pDevice);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the D3D12 rendering engine.");
                 break;
@@ -95,8 +105,13 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryVk = LoadGraphicsEngineVk();
                 #endif
 
-                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 auto* pFactoryVk = GetEngineFactoryVk();
+                if (logCallback)
+                {
+                    pFactoryVk->SetMessageCallback(logCallback);
+                }
+
+                auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
 
                 if (!m_pDevice || !m_pImmediateContext)
@@ -112,6 +127,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }
 
+                m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
                 break;
@@ -131,8 +147,13 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     auto* GetEngineFactoryD3D11 = LoadGraphicsEngineD3D11();
                 #endif
 
-                auto engineCI = EngineD3D11CreateInfo{engineCreateInfo};
                 auto* pFactoryD3D11 = GetEngineFactoryD3D11();
+                if (logCallback)
+                {
+                    pFactoryD3D11->SetMessageCallback(logCallback);
+                }
+
+                auto engineCI = EngineD3D11CreateInfo{engineCreateInfo};
                 pFactoryD3D11->CreateDeviceAndContextsD3D11(engineCI, &m_pDevice, &m_pImmediateContext);
 
                 if (!m_pDevice || !m_pImmediateContext)
@@ -148,6 +169,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the D3D11 swapchain.");
                 }
 
+                m_shaderFactory = MakeShaderFactory(*pFactoryD3D11, *m_pDevice);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the D3D11 rendering engine.");
                 break;
