@@ -26,11 +26,3 @@ target_sources(NcMath
     PRIVATE
         Quaternion.cpp
 )
-
-install(TARGETS     NcMath
-        DESTINATION lib
-)
-
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncmath
-        DESTINATION include
-)
