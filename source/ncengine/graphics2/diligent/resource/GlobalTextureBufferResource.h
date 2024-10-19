@@ -46,7 +46,7 @@ class GlobalTextureBufferResource
 
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_textures;
-        std::vector<Diligent::IDeviceObject*> m_objects;
+        std::vector<Diligent::IDeviceObject*> m_views;
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
 
