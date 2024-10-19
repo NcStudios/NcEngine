@@ -83,15 +83,3 @@ endif()
 if(NC_BUILD_TESTS)
     add_subdirectory(test)
 endif()
-
-# Install Default Assets
-install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/
-        DESTINATION    resources/assets
-        FILES_MATCHING REGEX ".*\.(nca)|(spv)"
-)
-
-# Install External Files
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/imgui
-        DESTINATION include
-        PATTERN     "src" EXCLUDE
-)
