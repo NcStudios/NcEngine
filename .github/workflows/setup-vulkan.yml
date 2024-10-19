@@ -1,0 +1,31 @@
+name: Setup Vulkan SDK
+
+on:
+  workflow_call:
+    inputs:
+      sdkVersion:
+        description: 'The Vulkan SDK version to install'
+        required: true
+        type: string
+
+jobs:
+  setup_vulkan:
+    steps:
+      - name: Setup VulkanCI
+        if: ${{ runner.os == 'Windows' }}
+        uses: NcStudios/VulkanCI@v1.1
+        with:
+          sdkVersion: ${{ inputs.sdkVersion }}
+
+      - name: Download VulkanSDK and Drivers (Linux)
+        if: ${{ runner.os == 'ubuntu-latest' }}
+        run: |
+          sudo apt-get install -y mesa-vulkan-drivers
+          wget "https://sdk.lunarg.com/sdk/download/${{ inputs.sdkVersion }}/linux/vulkan-sdk-linux-x86_64-${{ inputs.sdkVersion }}.tar.gz?Human=true" -O vulkan-sdk.tar.gz
+          tar xf vulkan-sdk.tar.gz
+          mv ${{ inputs.sdkVersion }} ${{ github.workspace }}/VulkanSDK
+
+          echo "VULKAN_SDK=${{ github.workspace }}/VulkanSDK/x86_64" >> $GITHUB_ENV
+          echo "PATH=${{ github.workspace }}/VulkanSDK/x86_64/bin:$PATH" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${{ github.workspace }}/VulkanSDK/x86_64/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "VK_LAYER_PATH=${{ github.workspace }}/VulkanSDK/x86_64/etc/vulkan/explicit_layer.d" >> $GITHUB_ENV
