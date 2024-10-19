@@ -15,7 +15,7 @@ class GlobalResourceSignature
 {
     public:
         static constexpr auto BindingIndex = 0u;
-        static constexpr auto SignatureName = "GlobalTextureBuffer";
+        static constexpr auto SignatureName = "GlobalResourceSignature";
         static constexpr auto GlobalTextureBufferShaderVariableName = "g_textures";
 
         explicit GlobalResourceSignature(Diligent::IRenderDevice& device, uint32_t maxTextures);
