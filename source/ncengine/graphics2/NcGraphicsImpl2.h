@@ -45,6 +45,8 @@ class NcGraphicsImpl2 : public NcGraphics
         void Run();
         void Update();
         void OnResize(const Vector2& dimensions, bool isMinimized);
+        void OnAddRemoveLight();
+        void GenerateLightCullingMap();
 
     private:
         Registry* m_registry;
@@ -54,6 +56,8 @@ class NcGraphicsImpl2 : public NcGraphics
         AssetDispatch m_assetDispatch;
         TestPipeline m_testPipeline;
         Camera* m_mainCamera = nullptr;
+        const config::GraphicsSettings& m_graphicsSettings;
+        bool m_generateLightCullingMap;
 };
 } // namespace graphics
 } // namespace nc

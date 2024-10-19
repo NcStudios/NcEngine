@@ -88,6 +88,7 @@ struct GraphicsSettings
     bool useShadows = true;           ///< enable shadow mapping and shadow rendering
     unsigned antialiasing = 8u;       ///< the number of samples for MSAA
     bool useValidationLayers = false; ///< turn on validation layers in debug builds
+    bool cullLights = false;           ///< enable clustered shading for light culling
 };
 
 /** @brief Options for configuring NcPhysics. */

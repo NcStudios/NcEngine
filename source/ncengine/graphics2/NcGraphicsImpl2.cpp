@@ -126,9 +126,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings.GetGlobalSignature().GetResourceSignature()
-          }
+          },
+          m_graphicsSettings{graphicsSettings}
 {
-    (void)graphicsSettings;
     (void)memorySettings;
     (void)modules;
     (void)events;
@@ -217,9 +217,63 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-    m_shaderBindings.GetGlobalSignature().Commit(context);
+    if (m_generateLightCullingMap)
+    {
+        GenerateLightCullingMap();
+    }
+
+    /** Useful discussion on committing resources https://github.com/DiligentGraphics/DiligentEngine/discussions/231  */
+    /** Commits the global descriptor set. 
+     *  Only needed once per frame unless binding a PSO whose signature is incompatible with this one,
+     *  or the bindings in the global signature change. (Set or SetArray is called). Changing the data within a mapped buffer does not require recommit, so long as the buffer signature hasn't changed. **/
+    m_shaderBindings.GetGlobalSignature().Commit(context); 
+
+    /*
+    RENDER "GRAPH" EXECUTION:
+
+    Example of terminology:
+    Material: ToonWithOutlineShadow
+    MaterialPass: Shadow, Toon, Alpha, Outline  (These map to PSO). Order Matters.
+
+    for (auto renderOrderIndex : MaxMaterialPassCount) // 0...1...2...3
+    {
+        // The first material pass would be shadow mapping
+        for (const auto& materialPass : renderGraph.MaterialPassRegistry.at(renderOrderIndex))
+        {
+            // Bind the MaterialPass array signature to the context. (each object has it's own "material instance" data in this array)
+            materialPass.GetMaterialSignature().Commit(context); // Still to figure out impl details here.
+            context.SetPipelineState(materialPass.PSO);
+            
+            for (const auto& meshRenderer : materialPass)
+            {
+                DrawIndexedAttribs drawAttrs{};
+                context.DrawIndexed(DrawAttrs);
+            }
+        }
+    }
+    */
+
     m_testPipeline.Render(context);
     swapChain.Present();
+}
+
+void NcGraphicsImpl2::OnAddRemoveLight()
+{
+    if (m_graphicsSettings.cullLights)
+        m_generateLightCullingMap = true;
+}
+
+void NcGraphicsImpl2::GenerateLightCullingMap()
+{
+    /* Inputs:   The geometry buffers (vertex and index), all light buffers, the camera, cell dimension properties. 
+     * Outputs:  A buffer that maps screen-space cell index to one or more light indices (light buffer index, light index). 
+     *           A debug buffer that can be used to render the dimensions of the cells 
+     * Function: Binds the inputs to a compute shader and populates the cell/light mapping buffer via execution of the compute shader.
+     *           This map buffer must be bound to the graphics pipelines below when this feature is enabled.
+     * Remarks:  This doesn't do any culling yet, it just generates a map of influences so only the lights influencing a pixel region will be calculated.
+     *           While this doesn't have to happen every frame, just when our light list changes, we have to be careful about when we execute this pipeline in relation to 
+     *           other running pipelines. */
+    m_generateLightCullingMap = false;
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
