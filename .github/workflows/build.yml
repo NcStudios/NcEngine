@@ -82,7 +82,11 @@ jobs:
           sudo apt-get install -y mesa-vulkan-drivers
 
           wget "https://sdk.lunarg.com/sdk/download/1.3.261.1/linux/vulkan-sdk-linux-x86_64-1.3.261.1.tar.gz?Human=true" -O vulkan-sdk.tar.gz
-          tar -xzf vulkan-sdk.tar.gz
+          file vulkan-sdk.tar.gz
+
+          tar xf vulkan-sdk.tar.gz
+          
+          # tar -xzf vulkan-sdk.tar.gz
           mv 1.3.261.1 $HOME/vulkan-sdk
 
           echo "VULKAN_SDK=$HOME/vulkan-sdk/x86_64" >> $GITHUB_ENV
