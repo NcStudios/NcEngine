@@ -7,6 +7,7 @@
 #include "ncengine/utility/Log.h"
 #include "config/Config.h"
 #include "window/NcWindowImpl.h"
+#include "graphics2/diligent/RendererSystem.h"
 
 #include "imgui/imgui.h"
 #include "DirectXMath.h"
