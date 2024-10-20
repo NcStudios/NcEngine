@@ -139,10 +139,6 @@ auto GetFullApiName(const std::string_view api) -> std::string_view
     {
         return "D3D12";
     }
-    if (api == "d3d11")
-    {
-        return "D3D11";
-    }
 
     throw std::runtime_error("API not in list.");
 }

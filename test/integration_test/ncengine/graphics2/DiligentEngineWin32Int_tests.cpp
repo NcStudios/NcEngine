@@ -1,9 +1,6 @@
 #include "gtest/gtest.h"
-#include "config/Config.h"
+#include "DiligentEngineIntFixture.inl"
 #include "graphics2/diligent/DiligentEngine.h"
-#include "graphics/NcGraphics.h"
-#include "../DiligentEngineIntFixture.inl"
-#include "window/Window.h"
 
 #define GLFW_INCLUDE_NONE
 #include "GLFW/glfw3.h"
@@ -17,12 +14,6 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_VulkanNotHeadless_Succeeds)
     EXPECT_NO_THROW(CreateDiligentEngine(false, "vulkan", supportedApis, engineCI));
 }
 
-TEST(DiligentEngineWin32_tests, CreateDiligentEngine_D3D11LNotHeadless_Succeeds)
-{
-    auto supportedApis = std::vector<std::string_view>{"d3d11"};
-    auto engineCI = Diligent::EngineCreateInfo{};
-    EXPECT_NO_THROW(CreateDiligentEngine(false, "d3d11", supportedApis, engineCI));
-}
 
 TEST(DiligentEngineWin32_tests, CreateDiligentEngine_D3D12LNotHeadless_Succeeds)
 {
@@ -47,30 +38,6 @@ TEST(DiligentEngineWin32_tests, CreateDiligentEngine_D3D12RenderTriangle_Succeed
     auto frameCountMax = 60u;
     auto currentFrameIndex = 0u;
 
-    while (currentFrameIndex < frameCountMax)
-    {
-        ncWindow.ProcessSystemMessages();
-        RenderSquare(&engine, m_pPSO.RawPtr());
-        engine.GetSwapChain().Present();
-        currentFrameIndex++;
-    }
-}
-
-TEST(DiligentEngineWin32_tests, CreateDiligentEngine_D3D11RenderTriangle_Succeeds)
-{
-    auto supportedApis = std::vector<std::string_view>{"d3d11"};
-    auto engineCI = Diligent::EngineCreateInfo{};
-
-    /* Create window */
-    auto info = nc::window::WindowInfo{.isHeadless = false};
-    auto ncWindow = nc::window::NcWindowStub{info};
-    auto engine = CreateDiligentEngine(false, "d3d11", supportedApis, engineCI, &ncWindow);
-
-    Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
-    SetupSquare(&engine, m_pPSO.RawDblPtr());
-
-    auto frameCountMax = 60u;
-    auto currentFrameIndex = 0u;
     while (currentFrameIndex < frameCountMax)
     {
         ncWindow.ProcessSystemMessages();

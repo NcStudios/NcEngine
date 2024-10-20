@@ -27,15 +27,3 @@ target_include_directories(NcUtility
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source/external>
 )
-
-install(TARGETS     NcUtility
-        DESTINATION lib
-)
-
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/include/ncutility
-        DESTINATION include
-)
-
-install(DIRECTORY   ${PROJECT_SOURCE_DIR}/source/external/nlohmann
-        DESTINATION include
-)

@@ -26,7 +26,6 @@ namespace graphics
 {
 namespace api
 {
-constexpr std::string_view D3D11    = std::string_view("d3d11");
 constexpr std::string_view D3D12    = std::string_view("d3d12");
 constexpr std::string_view Vulkan   = std::string_view("vulkan");
 } // namespace api

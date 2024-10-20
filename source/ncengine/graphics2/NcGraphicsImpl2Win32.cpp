@@ -24,7 +24,7 @@ auto GetSupportedApis() -> std::span<const std::string_view>
     static const auto cachedApis = []()
     {
         auto supportedApis = std::vector<std::string_view>{};
-        supportedApis.reserve(3);
+        supportedApis.reserve(2);
 
         if (CheckLibrary("d3d12.dll"))
             supportedApis.push_back(api::D3D12);
@@ -32,8 +32,6 @@ auto GetSupportedApis() -> std::span<const std::string_view>
         if (CheckLibrary("vulkan-1.dll"))
             supportedApis.push_back(api::Vulkan);
 
-        if (CheckLibrary("d3d11.dll"))
-            supportedApis.push_back(api::D3D11);
         return supportedApis;
     }();
     
