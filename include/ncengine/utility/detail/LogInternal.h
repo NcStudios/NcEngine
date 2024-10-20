@@ -5,6 +5,7 @@
 #include "fmt/format.h"
 
 #include <exception>
+#include <utility>
 
 namespace nc::detail
 {
