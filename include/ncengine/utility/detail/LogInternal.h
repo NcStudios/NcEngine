@@ -2,23 +2,13 @@
 
 #include "ncutility/platform/SourceLocation.h"
 
+#include "fmt/format.h"
+
 #include <exception>
-#include <string_view>
 
-namespace nc
+namespace nc::detail
 {
-namespace config
-{
-struct ProjectSettings;
-} // namespace config
-
-namespace utility::detail
-{
-void InitializeLog(const config::ProjectSettings& settings);
-void CloseLog() noexcept;
-void Log(char prefix, std::string_view item) noexcept;
-void Log(char prefix, std::string_view file, int line, std::string_view item) noexcept;
-void Log(const std::exception& e) noexcept;
+void LogException(const std::exception& e) noexcept;
 
 constexpr auto TrimToFilename(const char* path) noexcept -> const char*
 {
@@ -38,14 +28,16 @@ constexpr auto TrimToFilename(const char* path) noexcept -> const char*
 
     return file;
 }
-} // namespace utility::detail
-} // namespace nc
+} // namespace nc::detail
 
-#define NC_LOG_IMPL(prefix, ...)                                              \
-nc::utility::detail::Log(prefix,                                              \
-                         nc::utility::detail::TrimToFilename(NC_SOURCE_FILE), \
-                         NC_SOURCE_LINE,                                      \
-                         fmt::format(__VA_ARGS__));
+#define NC_LOG_CAPTURE_DEFAULT_ARGS(...) \
+"NcEngine", nc::detail::TrimToFilename(NC_SOURCE_FILE), NC_SOURCE_LINE, fmt::format(__VA_ARGS__)
+
+#define NC_LOG_FMT_MSG(category, subsystem, file, line, msg)                                       \
+(file.empty()                                                                                      \
+    ? fmt::format("{} [{}] {}\n", std::to_underlying(category), subsystem, msg)                    \
+    : fmt::format("{} [{}] {}:{}: {}\n", std::to_underlying(category), subsystem, file, line, msg) \
+)
 
 #define NC_VA_OPT_SUPPORTED_SELECT(a,b,c,...) c
 #define NC_VA_OPT_SUPPORTED_IMPL(...) NC_VA_OPT_SUPPORTED_SELECT(__VA_OPT__(,),true,false,)
