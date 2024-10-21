@@ -12,12 +12,13 @@ echo "ENGINE_INSTALL_DIR: $ENGINE_INSTALL_DIR"
 echo "SMOKE_TEST_DIR: $SMOKE_TEST_DIR"
 
 cd "$ENGINE_INSTALL_DIR/sample"
+cp "$SMOKE_TEST_DIR/vk_layer_settings.txt" "./"
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ENGINE_INSTALL_DIR/sample"
 fi
 
-./Sample --run-test --config-path "$SMOKE_TEST_DIR/smoke_test_config.ini" --log-path "$ENGINE_INSTALL_DIR/SmokeTest.log"
+./Sample --run-test --config-path "$SMOKE_TEST_DIR/smoke_test_config.ini" --log-path "SmokeTest.log"
 EXIT_CODE=$?
 echo "smoke test exit code: $EXIT_CODE"
 

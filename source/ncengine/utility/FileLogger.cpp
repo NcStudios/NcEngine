@@ -29,6 +29,11 @@ FileLogger::FileLogger(std::string_view logFilePath,
       m_maxSize{logMaxFileSize},
       m_messageFlushCount{messageFlushCount}
 {
+    if (!std::filesystem::exists(m_logPath))
+    {
+        std::ofstream{m_logPath};
+    }
+
     s_instance = this;
     SetLogCallback(FileLogger::Log);
     NC_LOG_INFO("Log started: {}", ::GetDateTime());
