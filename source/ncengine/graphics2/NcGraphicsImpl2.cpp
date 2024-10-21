@@ -56,10 +56,9 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     void ClearEnvironment() override {}
 };
 
-auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
+auto MakeEngineCreateInfo() -> Diligent::EngineCreateInfo
 {
     auto engineCI = Diligent::EngineCreateInfo{};
-    engineCI.EnableValidation = enableValidation;
     engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     return engineCI;
@@ -136,13 +135,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{
-            graphicsSettings,
-            MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
-            window.GetWindowHandle(),
-            GetSupportedApis(),
-            ::LogCallback
-          },
+          m_engine{graphicsSettings, MakeEngineCreateInfo(), window.GetWindowHandle(), GetSupportedApis(), ::LogCallback},
           m_shaderBindings{m_engine.GetDevice(), memorySettings.maxTextures},
           m_assetDispatch{
             m_engine.GetContext(),

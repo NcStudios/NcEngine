@@ -29,19 +29,29 @@ using LogCallback_t = void(*)(LogCategory category,
 /** @brief Set a callback to reroute logging messages (defaults to stdout). */
 void SetLogCallback(LogCallback_t callback);
 
-/** @brief Log callback instance. */
+/** @cond internal */
+namespace detail
+{
 extern LogCallback_t LogCallback;
+
+void DefaultLogCallback(LogCategory category,
+                        std::string_view subsystem,
+                        std::string_view function,
+                        int line,
+                        std::string_view message);
+} // namespace detail
+/** @endcond internal */
 } // namespace nc
 
 #if NC_LOG_LEVEL >= 1
-    #define NC_LOG_INFO(str, ...)         nc::LogCallback(nc::LogCategory::Info,    NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
-    #define NC_LOG_WARNING(str, ...)      nc::LogCallback(nc::LogCategory::Warning, NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
-    #define NC_LOG_ERROR(str, ...)        nc::LogCallback(nc::LogCategory::Error,   NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
+    #define NC_LOG_INFO(str, ...)         nc::detail::LogCallback(nc::LogCategory::Info,    NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
+    #define NC_LOG_WARNING(str, ...)      nc::detail::LogCallback(nc::LogCategory::Warning, NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
+    #define NC_LOG_ERROR(str, ...)        nc::detail::LogCallback(nc::LogCategory::Error,   NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
     #define NC_LOG_EXCEPTION(exception)   nc::detail::LogException(exception);
 
-    #define NC_LOG_INFO_EXT(subsystem, file, line, str)    nc::LogCallback(nc::LogCategory::Info, subsystem, file, line, str);
-    #define NC_LOG_WARNING_EXT(subsystem, file, line, str) nc::LogCallback(nc::LogCategory::Warning, subsystem, file, line, str);
-    #define NC_LOG_ERROR_EXT(subsystem, file, line, str)   nc::LogCallback(nc::LogCategory::Error, subsystem, file, line, str);
+    #define NC_LOG_INFO_EXT(subsystem, file, line, str)    nc::detail::LogCallback(nc::LogCategory::Info, subsystem, file, line, str);
+    #define NC_LOG_WARNING_EXT(subsystem, file, line, str) nc::detail::LogCallback(nc::LogCategory::Warning, subsystem, file, line, str);
+    #define NC_LOG_ERROR_EXT(subsystem, file, line, str)   nc::detail::LogCallback(nc::LogCategory::Error, subsystem, file, line, str);
 #else
     #define NC_LOG_INFO(str, ...);
     #define NC_LOG_WARNING(str, ...);
@@ -54,8 +64,8 @@ extern LogCallback_t LogCallback;
 #endif
 
 #if NC_LOG_LEVEL >= 2
-    #define NC_LOG_TRACE(str, ...)                         nc::LogCallback(nc::LogCategory::Verbose, NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
-    #define NC_LOG_TRACE_EXT(subsystem, file, line, str)   nc::LogCallback(nc::LogCategory::Verbose, subsystem, file, line, str);
+    #define NC_LOG_TRACE(str, ...)                         nc::detail::LogCallback(nc::LogCategory::Verbose, NC_LOG_CAPTURE_DEFAULT_ARGS(str NC_OPT_EXPAND(__VA_ARGS__)));
+    #define NC_LOG_TRACE_EXT(subsystem, file, line, str)   nc::detail::LogCallback(nc::LogCategory::Verbose, subsystem, file, line, str);
 #else
     #define NC_LOG_TRACE(str, ...);
     #define NC_LOG_TRACE_EXT(subsystem, file, line, str);

@@ -1,6 +1,5 @@
 #include "ncengine/utility/FileLogger.h"
 
-#include "ncutility/NcError.h"
 #include "ncutility/platform/Platform.h"
 
 #include <chrono>
@@ -40,6 +39,12 @@ FileLogger::~FileLogger() noexcept
     NC_LOG_INFO("Log ended: {}", ::GetDateTime());
     Flush();
     s_instance = nullptr;
+
+    // Don't leave a dangling ptr behind, but verify cb hasn't already been changed.
+    if (detail::LogCallback == FileLogger::Log)
+    {
+        SetLogCallback(detail::DefaultLogCallback);
+    }
 }
 
 void FileLogger::Log(LogCategory category,
@@ -48,7 +53,6 @@ void FileLogger::Log(LogCategory category,
                      int line,
                      std::string_view message)
 {
-    NC_ASSERT(s_instance, "No FileLogger constructed");
     s_instance->BufferMessage(NC_LOG_FMT_MSG(category, subsystem, file, line, message));
 }
 
