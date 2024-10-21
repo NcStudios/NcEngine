@@ -18,8 +18,6 @@ using namespace std::literals;
 
 // project
 constexpr auto ProjectNameKey = "project_name"sv;
-constexpr auto LogFilePathKey = "log_file_path"sv;
-constexpr auto LogMaxFileSizeKey = "log_max_file_size"sv;
 
 // engine
 constexpr auto TimeStepKey = "time_step"sv;
@@ -189,8 +187,6 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     if constexpr (std::same_as<Struct_t, nc::config::ProjectSettings>)
     {
         ParseValueIfExists(out.projectName, ProjectNameKey, kvPairs);
-        ParseValueIfExists(out.logFilePath, LogFilePathKey, kvPairs);
-        ParseValueIfExists(out.logMaxFileSize, LogMaxFileSizeKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::EngineSettings>)
     {
@@ -349,8 +345,6 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 {
     if (writeSections) stream << "[project_settings]\n";
     ::WriteKVPair(stream, ProjectNameKey, config.projectSettings.projectName);
-    ::WriteKVPair(stream, LogFilePathKey, config.projectSettings.logFilePath);
-    ::WriteKVPair(stream, LogMaxFileSizeKey, config.projectSettings.logMaxFileSize);
 
     if (writeSections) stream << "[engine_settings]\n";
     ::WriteKVPair(stream, TimeStepKey, config.engineSettings.timeStep);
@@ -418,8 +412,6 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 bool Validate(const Config& config)
 {
     return (config.projectSettings.projectName != "") &&
-           (config.projectSettings.logFilePath != "") &&
-           (config.projectSettings.logMaxFileSize > 0) &&
            (config.engineSettings.timeStep >= 0.0f) &&
            (config.engineSettings.maxTimeStep > 0.0f) &&
            (config.assetSettings.audioClipsPath != "") &&
