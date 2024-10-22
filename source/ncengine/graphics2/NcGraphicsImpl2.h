@@ -4,17 +4,12 @@
 #include "diligent/TestPipeline.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
-#include "ncengine/asset/AssetData.h"
-#include "ncengine/asset/NcAsset.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
 
-#include <memory>
-
 namespace nc
 {
-class Scene;
-
 namespace window
 {
 class NcWindow;
@@ -43,11 +38,10 @@ class NcGraphicsImpl2 : public NcGraphics
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void Clear() noexcept override;
         void Run();
-        void Update();
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
     private:
-        Registry* m_registry;
+        ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
         TestPipeline m_testPipeline;

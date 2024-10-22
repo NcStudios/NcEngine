@@ -1,13 +1,13 @@
 #include "NcGraphicsImpl2.h"
 #include "frontend/FrontendRenderState.h"
 
+#include "ncengine/asset/NcAsset.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
-#include "window/NcWindowImpl.h"
 
 #include "imgui/imgui.h"
 #include "DirectXMath.h"
@@ -115,7 +115,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  ModuleProvider modules,
                                  SystemEvents& events,
                                  window::NcWindow& window)
-        : m_registry{registry},
+        : m_world{registry->GetEcs()},
           m_engine{graphicsSettings, MakeEngineCreateInfo(), window.GetWindowHandle(), GetSupportedApis()},
           m_shaderBindings{
             m_engine.GetDevice(),
@@ -207,15 +207,11 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     );
 }
 
-void NcGraphicsImpl2::Update()
-{
-}
-
 void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
 
-    auto renderState = m_frontend.BuildRenderState(m_registry->GetEcs());
+    auto renderState = m_frontend.BuildRenderState(m_world);
 
     auto& context = m_engine.GetContext();
     auto& swapChain = m_engine.GetSwapChain();
