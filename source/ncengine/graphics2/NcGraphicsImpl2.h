@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AssetDispatch.h"
 #include "diligent/DiligentEngine.h"
 #include "diligent/TestPipeline.h"
 #include "diligent/resource/ShaderBindings.h"
@@ -51,7 +50,6 @@ class NcGraphicsImpl2 : public NcGraphics
         Registry* m_registry;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
-        AssetDispatch m_assetDispatch;
         TestPipeline m_testPipeline;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;

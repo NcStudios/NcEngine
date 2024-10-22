@@ -122,12 +122,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             memorySettings.maxTextures
           },
-          m_assetDispatch{
-            m_engine.GetContext(),
-            m_engine.GetDevice(),
-            m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
-            modules.Get<asset::NcAsset>()->OnTextureUpdate()
-          },
           m_testPipeline{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -135,7 +129,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetShaderFactory(),
             m_shaderBindings.GetGlobalSignature().GetResourceSignature()
           },
-          m_frontend{},
+          m_frontend{
+            m_engine.GetContext(),
+            m_engine.GetDevice(),
+            m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
+            modules.Get<asset::NcAsset>()->OnTextureUpdate()
+          },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
     (void)graphicsSettings;
@@ -152,12 +151,12 @@ NcGraphicsImpl2::~NcGraphicsImpl2()
 
 void NcGraphicsImpl2::SetCamera(Camera* camera) noexcept
 {
-    m_frontend.camera.Set(camera);
+    m_frontend.GetCameraSubsystem().Set(camera);
 }
 
 auto NcGraphicsImpl2::GetCamera() noexcept -> Camera*
 {
-    return m_frontend.camera.Get();
+    return m_frontend.GetCameraSubsystem().Get();
 }
 
 void NcGraphicsImpl2::SetUi(ui::IUI* ui) noexcept

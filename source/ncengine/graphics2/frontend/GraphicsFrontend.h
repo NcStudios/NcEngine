@@ -1,24 +1,40 @@
 #pragma once
 
+#include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 
 namespace nc::graphics
 {
-// todo: move AssetDispatch here...
-
 struct FrontendRenderState;
 
-struct GraphicsFrontend
+class GraphicsFrontend
 {
-    CameraSubsystem camera;
+    public:
+        GraphicsFrontend(Diligent::IDeviceContext& context,
+                         Diligent::IRenderDevice& device,
+                         GlobalTextureBufferResource& textureBuffer,
+                         Signal<const asset::TextureUpdateEventData&>& onTextureEvent)
+            : m_assetDispatch{context, device, textureBuffer, onTextureEvent},
+              m_cameraSystem{}
+        {
+        }
 
-    auto BuildRenderState(ecs::Ecs world) -> FrontendRenderState;
+        auto BuildRenderState(ecs::Ecs world) -> FrontendRenderState;
 
-    void Clear() noexcept
-    {
-        camera.Clear();
-    }
+        void Clear() noexcept
+        {
+            m_cameraSystem.Clear();
+        }
+
+        auto GetCameraSubsystem() -> CameraSubsystem&
+        {
+            return m_cameraSystem;
+        }
+
+    private:
+        AssetDispatch m_assetDispatch;
+        CameraSubsystem m_cameraSystem;
 };
 } // namespace nc::graphics
