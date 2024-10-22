@@ -4,6 +4,7 @@
 #include "diligent/DiligentEngine.h"
 #include "diligent/TestPipeline.h"
 #include "diligent/resource/ShaderBindings.h"
+#include "frontend/GraphicsFrontend.h"
 #include "ncengine/asset/AssetData.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -48,12 +49,12 @@ class NcGraphicsImpl2 : public NcGraphics
 
     private:
         Registry* m_registry;
-        Connection m_onResizeConnection;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
         AssetDispatch m_assetDispatch;
         TestPipeline m_testPipeline;
-        Camera* m_mainCamera = nullptr;
+        GraphicsFrontend m_frontend;
+        Connection m_onResizeConnection;
 };
 } // namespace graphics
 } // namespace nc

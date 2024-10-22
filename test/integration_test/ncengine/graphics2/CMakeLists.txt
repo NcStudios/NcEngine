@@ -58,7 +58,6 @@ target_sources(GlobalTextureBufferResource_tests
     PRIVATE
         GlobalTextureBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalResourceSignature.cpp
 )
 
 ### ShaderFactory Tests ###

@@ -1,15 +1,20 @@
 #include "NcGraphicsImpl2.h"
+#include "frontend/FrontendRenderState.h"
+
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
-#include "config/Config.h"
 #include "window/NcWindowImpl.h"
 
 #include "imgui/imgui.h"
 #include "DirectXMath.h"
+
+
+#include "diligent/resource/GlobalEnvironmentResource.h"
+#include "ncengine/ecs/Registry.h"
 
 namespace
 {
@@ -111,9 +116,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  SystemEvents& events,
                                  window::NcWindow& window)
         : m_registry{registry},
-          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
           m_engine{graphicsSettings, MakeEngineCreateInfo(), window.GetWindowHandle(), GetSupportedApis()},
-          m_shaderBindings{m_engine.GetDevice(), memorySettings.maxTextures},
+          m_shaderBindings{
+            m_engine.GetDevice(),
+            m_engine.GetContext(),
+            memorySettings.maxTextures
+          },
           m_assetDispatch{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -126,7 +134,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings.GetGlobalSignature().GetResourceSignature()
-          }
+          },
+          m_frontend{},
+          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
     (void)graphicsSettings;
     (void)memorySettings;
@@ -142,12 +152,12 @@ NcGraphicsImpl2::~NcGraphicsImpl2()
 
 void NcGraphicsImpl2::SetCamera(Camera* camera) noexcept
 {
-    m_mainCamera = camera;
+    m_frontend.camera.Set(camera);
 }
 
 auto NcGraphicsImpl2::GetCamera() noexcept -> Camera*
 {
-    return m_mainCamera;
+    return m_frontend.camera.Get();
 }
 
 void NcGraphicsImpl2::SetUi(ui::IUI* ui) noexcept
@@ -171,7 +181,7 @@ void NcGraphicsImpl2::ClearEnvironment()
 
 void NcGraphicsImpl2::Clear() noexcept
 {
-    m_mainCamera = nullptr;
+    m_frontend.Clear();
 }
 
 void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render)
@@ -206,6 +216,8 @@ void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
 
+    auto renderState = m_frontend.BuildRenderState(m_registry->GetEcs());
+
     auto& context = m_engine.GetContext();
     auto& swapChain = m_engine.GetSwapChain();
 
@@ -217,7 +229,9 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
+    m_shaderBindings.Update(renderState, context);
     m_shaderBindings.GetGlobalSignature().Commit(context);
+
     m_testPipeline.Render(context);
     swapChain.Present();
 }
