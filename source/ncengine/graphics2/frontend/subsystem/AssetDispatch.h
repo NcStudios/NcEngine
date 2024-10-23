@@ -1,6 +1,6 @@
 #pragma once
 
-#include "diligent/resource/GlobalTextureBufferResource.h"
+#include "graphics2/diligent/resource/GlobalTextureBufferResource.h"
 
 #include "ncengine/asset/AssetData.h"
 #include "ncengine/utility/Signal.h"

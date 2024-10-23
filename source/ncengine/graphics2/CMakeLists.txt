@@ -17,3 +17,4 @@ if (UNIX AND NOT APPLE)
 endif()
 
 add_subdirectory(diligent)
+add_subdirectory(frontend)

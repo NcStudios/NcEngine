@@ -1,6 +1,6 @@
-#include "graphics/Camera.h"
-#include "ecs/Registry.h"
-#include "window/Window.h"
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/window/Window.h"
+#include "ncmath/MatrixUtilities.h"
 
 #ifdef NC_EDITOR_ENABLED
 #include "imgui/imgui.h"
