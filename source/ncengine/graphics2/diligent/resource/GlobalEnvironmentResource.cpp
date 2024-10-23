@@ -3,8 +3,8 @@
 
 #include "ncutility/NcError.h"
 
-#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
+#include "GraphicsUtilities.h"
+#include "MapHelper.hpp"
 
 namespace nc::graphics
 {

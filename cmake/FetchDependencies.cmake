@@ -97,6 +97,7 @@ endif()
 
 set(DILIGENT_LIBRARIES Diligent-GraphicsEngineVk-static
                        Diligent-TargetPlatform
+                       Diligent-GraphicsTools
                        Diligent-TextureLoader
 )
 
@@ -141,6 +142,7 @@ disable_warnings_for_headers(Taskflow)
 disable_warnings_for_headers(DirectXMath)
 disable_warnings_for_headers(fmt)
 disable_warnings_for_headers(Jolt)
+disable_warnings_for_headers(Diligent-GraphicsTools)
 
 # Tell Jolt to use our profile implementation. This introduces a circular dependency between Jolt/NcEngine,
 # which GCC struggles with (but it could be coerced), so we just exclude Jolt events from nix profiling.

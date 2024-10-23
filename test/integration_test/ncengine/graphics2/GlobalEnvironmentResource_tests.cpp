@@ -2,8 +2,6 @@
 #include "graphics2/diligent/resource/GlobalEnvironmentResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
-
 class GlobalEnvironmentResourceTest : public DiligentEngineParameterizedFixture
 {
     protected:
