@@ -64,6 +64,29 @@ auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
     engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     return engineCI;
 }
+
+void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
+                 const char* msg,
+                 const char*,
+                 const char* file,
+                 int line)
+{
+    constexpr auto subsystem = "Diligent";
+    if (!file) file = "";
+    switch (severity)
+    {
+        case Diligent::DEBUG_MESSAGE_SEVERITY_INFO:
+            NC_LOG_TRACE_EXT(subsystem, file, line, msg);
+            break;
+        case Diligent::DEBUG_MESSAGE_SEVERITY_WARNING:
+            NC_LOG_WARNING_EXT(subsystem, file, line, msg);
+            break;
+        case Diligent::DEBUG_MESSAGE_SEVERITY_ERROR:
+        case Diligent::DEBUG_MESSAGE_SEVERITY_FATAL_ERROR:
+            NC_LOG_ERROR_EXT(subsystem, file, line, msg);
+            break;
+    }
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -117,7 +140,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             graphicsSettings,
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
             window.GetWindowHandle(),
-            GetSupportedApis()
+            GetSupportedApis(),
+            ::LogCallback()
           },
           m_shaderBindings{m_engine.GetDevice(), memorySettings.maxTextures},
           m_assetDispatch{
