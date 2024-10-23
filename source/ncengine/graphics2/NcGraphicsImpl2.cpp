@@ -5,16 +5,13 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/ecs/Registry.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 
 #include "imgui/imgui.h"
 #include "DirectXMath.h"
-
-
-#include "diligent/resource/GlobalEnvironmentResource.h"
-#include "ncengine/ecs/Registry.h"
 
 namespace
 {
