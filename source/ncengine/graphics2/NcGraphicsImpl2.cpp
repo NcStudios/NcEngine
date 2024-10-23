@@ -63,6 +63,29 @@ auto MakeEngineCreateInfo() -> Diligent::EngineCreateInfo
     engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     return engineCI;
 }
+
+void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
+                 const char* msg,
+                 const char*,
+                 const char* file,
+                 int line)
+{
+    constexpr auto subsystem = "Diligent";
+    if (!file) file = "";
+    switch (severity)
+    {
+        case Diligent::DEBUG_MESSAGE_SEVERITY_INFO:
+            NC_LOG_TRACE_EXT(subsystem, file, line, msg);
+            break;
+        case Diligent::DEBUG_MESSAGE_SEVERITY_WARNING:
+            NC_LOG_WARNING_EXT(subsystem, file, line, msg);
+            break;
+        case Diligent::DEBUG_MESSAGE_SEVERITY_ERROR:
+        case Diligent::DEBUG_MESSAGE_SEVERITY_FATAL_ERROR:
+            NC_LOG_ERROR_EXT(subsystem, file, line, msg);
+            break;
+    }
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -112,7 +135,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_registry{registry},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_engine{graphicsSettings, MakeEngineCreateInfo(), window.GetWindowHandle(), GetSupportedApis()},
+          m_engine{graphicsSettings, MakeEngineCreateInfo(), window.GetWindowHandle(), GetSupportedApis(), ::LogCallback},
           m_shaderBindings{m_engine.GetDevice(), memorySettings.maxTextures},
           m_assetDispatch{
             m_engine.GetContext(),
