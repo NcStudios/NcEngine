@@ -26,12 +26,12 @@ class GlobalTextureBufferResourceTest : public DiligentEngineParameterizedFixtur
             const auto resource = nc::graphics::GlobalTextureBufferResource::MakeResourceDesc(variableName, maxTextures);
             const auto sampler = nc::graphics::GlobalTextureBufferResource::MakeSamplerDesc(variableName);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
-            desc.Resources = &resource,
-            desc.NumResources = 1,
-            desc.ImmutableSamplers = &sampler,
-            desc.NumImmutableSamplers = 1,
-            desc.BindingIndex = 0,
-            desc.UseCombinedTextureSamplers = true,
+            desc.Resources = &resource;
+            desc.NumResources = 1;
+            desc.ImmutableSamplers = &sampler;
+            desc.NumImmutableSamplers = 1;
+            desc.BindingIndex = 0;
+            desc.UseCombinedTextureSamplers = true;
             engine->GetDevice().CreatePipelineResourceSignature(desc, &signature);
             signature->CreateShaderResourceBinding(&srb);
             uut = std::make_unique<nc::graphics::GlobalTextureBufferResource>(

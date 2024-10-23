@@ -15,8 +15,8 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVa
 {
     Diligent::CreateUniformBuffer(
         &device,
-        sizeof(EnvironmentData),
-        "EnvironmentDataUniformBuffer",
+        sizeof(GlobalEnvironmentData),
+        UniformBufferName,
         &m_uniformBuffer
     );
 
@@ -49,7 +49,7 @@ auto GlobalEnvironmentResource::MakeResourceDesc(std::string_view variableName) 
 void GlobalEnvironmentResource::Update(const CameraRenderState cameraState,
                                        Diligent::IDeviceContext& context)
 {
-    auto cbConstants = Diligent::MapHelper<EnvironmentData>{
+    auto cbConstants = Diligent::MapHelper<GlobalEnvironmentData>{
         &context,
         m_uniformBuffer,
         Diligent::MAP_WRITE,

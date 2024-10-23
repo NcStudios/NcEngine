@@ -10,14 +10,16 @@ namespace nc::graphics
 {
 struct CameraRenderState;
 
+struct GlobalEnvironmentData
+{
+    DirectX::XMMATRIX cameraViewProjection;
+};
+
 class GlobalEnvironmentResource
 {
-    struct EnvironmentData
-    {
-        DirectX::XMMATRIX cameraViewProjection;
-    };
-
     public:
+        static constexpr auto UniformBufferName = "EnvironmentDataUniformBuffer";
+
         explicit GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
                                            Diligent::IRenderDevice& device,
                                            Diligent::IDeviceContext& context);
