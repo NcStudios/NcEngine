@@ -141,7 +141,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
             window.GetWindowHandle(),
             GetSupportedApis(),
-            ::LogCallback()
+            ::LogCallback
           },
           m_shaderBindings{m_engine.GetDevice(), memorySettings.maxTextures},
           m_assetDispatch{
