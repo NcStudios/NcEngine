@@ -13,8 +13,6 @@ namespace nc::config
 struct ProjectSettings
 {
     std::string projectName = "Project Name";
-    std::string logFilePath = "NcEngine.log";
-    size_t logMaxFileSize = 1000000ull;
 };
 
 /** @brief Settings for configuring the engine run loop and executor. */

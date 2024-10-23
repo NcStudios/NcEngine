@@ -52,14 +52,12 @@ TEST(ConfigTests, Read_partialConfig_succeeds)
     auto stream = std::istringstream
     {
         "project_name=PartialCollateral\n"
-        "log_file_path=Partial.log\n"
         "max_transforms=100\n"
         "use_validation_layers=1\n"
     };
 
     const auto actual = nc::config::Read(stream);
     EXPECT_STREQ("PartialCollateral", actual.projectSettings.projectName.c_str());
-    EXPECT_STREQ("Partial.log", actual.projectSettings.logFilePath.c_str());
     EXPECT_EQ(100, actual.memorySettings.maxTransforms);
     EXPECT_TRUE(actual.graphicsSettings.useValidationLayers);
 }
@@ -104,8 +102,6 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     const auto actual = nc::config::Load(filepath);
 
     EXPECT_EQ(expected.projectSettings.projectName, actual.projectSettings.projectName);
-    EXPECT_EQ(expected.projectSettings.logFilePath, actual.projectSettings.logFilePath);
-    EXPECT_EQ(expected.projectSettings.logMaxFileSize, actual.projectSettings.logMaxFileSize);
 
     EXPECT_FLOAT_EQ(expected.engineSettings.timeStep, actual.engineSettings.timeStep);
     EXPECT_FLOAT_EQ(expected.engineSettings.maxTimeStep, actual.engineSettings.maxTimeStep);
