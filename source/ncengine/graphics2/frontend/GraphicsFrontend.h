@@ -15,8 +15,10 @@ class GraphicsFrontend
         GraphicsFrontend(Diligent::IDeviceContext& context,
                          Diligent::IRenderDevice& device,
                          GlobalTextureBufferResource& textureBuffer,
-                         Signal<const asset::TextureUpdateEventData&>& onTextureEvent)
-            : m_assetDispatch{context, device, textureBuffer, onTextureEvent},
+                         MeshBuffer& meshBuffer,
+                         Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
+                         Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
+            : m_assetDispatch{context, device, textureBuffer, meshBuffer, onTextureEvent, onMeshEvent},
               m_cameraSystem{}
         {
         }

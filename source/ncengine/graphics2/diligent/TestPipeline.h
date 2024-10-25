@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ShaderFactory.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/graphics/ToonRenderer.h"
 
 #include "DirectXMath.h"
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -22,30 +24,19 @@ class TestPipeline
                      ShaderFactory& shaderFactory,
                      Diligent::IPipelineResourceSignature& textureResourceSignature);
 
-        void Render(Diligent::IDeviceContext& context);
+        void Render(Diligent::IDeviceContext& context,
+                    ecs::ExplicitEcs<ToonRenderer> ecs);
 
         void CreatePipelineState(Diligent::IRenderDevice& device,
                                  Diligent::ISwapChain& swapChain,
                                  ShaderFactory& shaderFactory,
                                  Diligent::IPipelineResourceSignature& textureResourceSignature);
 
-        void CreateGeometryBuffers(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device);
         void CreateInstanceBuffer(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device);
         void PopulateInstanceBuffer(Diligent::IDeviceContext& context);
 
-        struct ObjectGeometry
-        {
-            uint32_t FirstIndex = 0;
-            uint32_t NumIndices = 0;
-            uint32_t BaseVertex = 0;
-        };
-
     private:
-        std::vector<ObjectGeometry> m_Geometries;
-
         Diligent::RefCntAutoPtr<Diligent::IPipelineState>         m_pBindlessPSO;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer>                m_VertexBuffer;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer>                m_IndexBuffer;
         Diligent::RefCntAutoPtr<Diligent::IBuffer>                m_InstanceBuffer;
 
         struct InstanceData

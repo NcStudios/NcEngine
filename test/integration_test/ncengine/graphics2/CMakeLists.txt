@@ -69,6 +69,16 @@ target_sources(GlobalTextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
 )
 
+### MeshBuffer Tests ###
+add_graphics_test(MeshBuffer_tests)
+
+target_sources(MeshBuffer_tests
+    PRIVATE
+        MeshBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MeshBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 

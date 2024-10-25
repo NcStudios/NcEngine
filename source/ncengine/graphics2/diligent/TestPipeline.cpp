@@ -1,4 +1,5 @@
 #include "TestPipeline.h"
+#include "ncasset/Assets.h"
 
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
 #include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
@@ -11,12 +12,6 @@ using namespace Diligent;
 
 namespace
 {
-struct Vertex
-{
-    nc::Vector3 pos;
-    nc::Vector2 uv;
-};
-
 constexpr auto g_pixelShader = std::string_view{
 R"(#ifdef VULKAN
 // NonUniformResourceIndex is not supported by GLSLang
@@ -50,15 +45,20 @@ constexpr auto g_vertexShader = std::string_view{
 R"(struct VSInput
 {
     // Vertex attributes
-    float3 Pos      : ATTRIB0;
-    float2 UV       : ATTRIB1;
+    float3 Pos         : ATTRIB0;
+    float3 Normal      : ATTRIB1;
+    float2 UV          : ATTRIB2;
+    float3 Tangent     : ATTRIB3;
+    float3 Bitangent   : ATTRIB4;
+    float4 BoneWeights : ATTRIB5;
+    uint4  BoneIds     : ATTRIB6;
 
     // Instance attributes
-    float4 MtrxRow0  : ATTRIB2;
-    float4 MtrxRow1  : ATTRIB3;
-    float4 MtrxRow2  : ATTRIB4;
-    float4 MtrxRow3  : ATTRIB5;
-    uint   TexArrInd : ATTRIB6;
+    float4 MtrxRow0  : ATTRIB7;
+    float4 MtrxRow1  : ATTRIB8;
+    float4 MtrxRow2  : ATTRIB9;
+    float4 MtrxRow3  : ATTRIB10;
+    uint   TexArrInd : ATTRIB11;
 };
 
 struct PSInput 
@@ -86,61 +86,6 @@ void main(in  VSInput VSIn, out PSInput PSIn)
 
 namespace nc::graphics
 {
-TestPipeline::ObjectGeometry AddCube(std::vector<Vertex>& Vertices,
-                                                     std::vector<uint32_t>& Indices,
-                                                     const Vector3&        f3TopScale,
-                                                     const Vector3&        f3BottomScale)
-{
-    auto BaseVertex = static_cast<uint32_t>(Vertices.size());
-
-    Vertices.insert(Vertices.end(),
-        {
-            {HadamardProduct(Vector3(-1,-1,-1), f3BottomScale), Vector2(0,1)},
-            {HadamardProduct(Vector3(-1,+1,-1), f3BottomScale), Vector2(0,0)},
-            {HadamardProduct(Vector3(+1,+1,-1), f3BottomScale), Vector2(1,0)},
-            {HadamardProduct(Vector3(+1,-1,-1), f3BottomScale), Vector2(1,1)},
-            {HadamardProduct(Vector3(-1,-1,-1), f3BottomScale), Vector2(0,1)},
-            {HadamardProduct(Vector3(-1,-1,+1), f3TopScale),    Vector2(0,0)},
-            {HadamardProduct(Vector3(+1,-1,+1), f3TopScale),    Vector2(1,0)},
-            {HadamardProduct(Vector3(+1,-1,-1), f3BottomScale), Vector2(1,1)},
-            {HadamardProduct(Vector3(+1,-1,-1), f3BottomScale), Vector2(0,1)},
-            {HadamardProduct(Vector3(+1,-1,+1), f3TopScale),    Vector2(1,1)},
-            {HadamardProduct(Vector3(+1,+1,+1), f3TopScale),    Vector2(1,0)},
-            {HadamardProduct(Vector3(+1,+1,-1), f3BottomScale), Vector2(0,0)},
-            {HadamardProduct(Vector3(+1,+1,-1), f3BottomScale), Vector2(0,1)},
-            {HadamardProduct(Vector3(+1,+1,+1), f3TopScale),    Vector2(0,0)},
-            {HadamardProduct(Vector3(-1,+1,+1), f3TopScale),    Vector2(1,0)},
-            {HadamardProduct(Vector3(-1,+1,-1), f3BottomScale), Vector2(1,1)},
-            {HadamardProduct(Vector3(-1,+1,-1), f3BottomScale), Vector2(1,0)},
-            {HadamardProduct(Vector3(-1,+1,+1), f3TopScale),    Vector2(0,0)},
-            {HadamardProduct(Vector3(-1,-1,+1), f3TopScale),    Vector2(0,1)},
-            {HadamardProduct(Vector3(-1,-1,-1), f3BottomScale), Vector2(1,1)},
-            {HadamardProduct(Vector3(-1,-1,+1), f3TopScale),    Vector2(1,1)},
-            {HadamardProduct(Vector3(+1,-1,+1), f3TopScale),    Vector2(0,1)},
-            {HadamardProduct(Vector3(+1,+1,+1), f3TopScale),    Vector2(0,0)},
-            {HadamardProduct(Vector3(-1,+1,+1), f3TopScale),    Vector2(1,0)}
-        }
-    );
-
-    TestPipeline::ObjectGeometry Geometry;
-    Geometry.FirstIndex = static_cast<uint32_t>(Indices.size());
-    Indices.insert(Indices.end(),
-        {
-            2,0,1,    2,3,0,
-            4,6,5,    4,7,6,
-            8,10,9,   8,11,10,
-            12,14,13, 12,15,14,
-            16,18,17, 16,19,18,
-            20,21,22, 20,22,23
-        }
-    );
-
-    Geometry.NumIndices = static_cast<uint32_t>(Indices.size()) - Geometry.FirstIndex;
-    for (uint32_t i = Geometry.FirstIndex; i < Geometry.FirstIndex + Geometry.NumIndices; ++i)
-        Indices[i] += BaseVertex;
-    return Geometry;
-}
-
 TestPipeline::TestPipeline(IDeviceContext& context,
                            IRenderDevice& device,
                            ISwapChain& swapChain,
@@ -148,7 +93,6 @@ TestPipeline::TestPipeline(IDeviceContext& context,
                            Diligent::IPipelineResourceSignature& textureResourceSignature)
 {
     CreatePipelineState(device, swapChain, shaderFactory, textureResourceSignature);
-    CreateGeometryBuffers(context, device);
     CreateInstanceBuffer(context, device);
 }
 
@@ -190,15 +134,20 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     auto LayoutElems = std::array{
         // Per-vertex data - first buffer slot
         LayoutElement{0, 0, 3, VT_FLOAT32, False},
-        LayoutElement{1, 0, 2, VT_FLOAT32, False},
+        LayoutElement{1, 0, 3, VT_FLOAT32, False},
+        LayoutElement{2, 0, 2, VT_FLOAT32, False},
+        LayoutElement{3, 0, 3, VT_FLOAT32, False},
+        LayoutElement{4, 0, 3, VT_FLOAT32, False},
+        LayoutElement{5, 0, 4, VT_FLOAT32, False},
+        LayoutElement{6, 0, 4, VT_UINT32,  False},
 
         // Per-instance data - second buffer slot
         // We will use four attributes to encode instance-specific 4x4 transformation matrix
-        LayoutElement{2, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{3, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{4, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{5, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{6, 1, 1, VT_UINT32,  False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
+        LayoutElement{7, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
+        LayoutElement{8, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
+        LayoutElement{9, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
+        LayoutElement{10, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
+        LayoutElement{11, 1, 1, VT_UINT32,  False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
     };
 
     createInfo.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems.data();
@@ -206,48 +155,6 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
 
     device.CreateGraphicsPipelineState(createInfo, &m_pBindlessPSO);
     NC_ASSERT(m_pBindlessPSO, "Failed to create pipeline state object");
-}
-
-void TestPipeline::CreateGeometryBuffers(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device)
-{
-    std::vector<Vertex> Vertices;
-    std::vector<uint32_t> Indices;
-
-    m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1)));
-    m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1.f)));
-    m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1.f)));
-    m_Geometries.emplace_back(AddCube(Vertices, Indices, Vector3(1, 1, 1), Vector3(1, 1, 1)));
-
-    {
-        BufferDesc VertBuffDesc;
-        VertBuffDesc.Name      = "Geometry vertex buffer";
-        VertBuffDesc.Usage     = USAGE_IMMUTABLE;
-        VertBuffDesc.BindFlags = BIND_VERTEX_BUFFER;
-        VertBuffDesc.Size      = static_cast<Uint32>(sizeof(Vertex) * Vertices.size());
-        BufferData VBData;
-        VBData.pData    = Vertices.data();
-        VBData.DataSize = VertBuffDesc.Size;
-        device.CreateBuffer(VertBuffDesc, &VBData, &m_VertexBuffer);
-    }
-
-    {
-        BufferDesc IndBuffDesc;
-        IndBuffDesc.Name      = "Geometry index buffer";
-        IndBuffDesc.Usage     = USAGE_IMMUTABLE;
-        IndBuffDesc.BindFlags = BIND_INDEX_BUFFER;
-        IndBuffDesc.Size      = static_cast<Uint32>(sizeof(Indices[0]) * Indices.size());
-        BufferData IBData;
-        IBData.pData    = Indices.data();
-        IBData.DataSize = IndBuffDesc.Size;
-        device.CreateBuffer(IndBuffDesc, &IBData, &m_IndexBuffer);
-    }
-
-    auto Barriers = std::array{
-        StateTransitionDesc(m_VertexBuffer.RawPtr(), RESOURCE_STATE_UNKNOWN, RESOURCE_STATE_VERTEX_BUFFER, STATE_TRANSITION_FLAG_UPDATE_STATE),
-        StateTransitionDesc(m_IndexBuffer.RawPtr(),  RESOURCE_STATE_UNKNOWN, RESOURCE_STATE_INDEX_BUFFER,  STATE_TRANSITION_FLAG_UPDATE_STATE)
-    };
-
-    context.TransitionResourceStates(static_cast<uint32_t>(Barriers.size()), Barriers.data());
 }
 
 void TestPipeline::CreateInstanceBuffer(IDeviceContext& context, IRenderDevice& device)
@@ -277,7 +184,7 @@ void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
     std::uniform_real_distribution<float> offset_distr(-0.15f, +0.15f);
     std::uniform_real_distribution<float> rot_distr(-3.14f, 3.14f);
     std::uniform_int_distribution<uint32_t> tex_distr(0, 19 - 1); // todo: not great, max is def larger than available
-    std::uniform_int_distribution<uint32_t> geom_type_distr(0, static_cast<uint32_t>(m_Geometries.size()) - 1);
+    std::uniform_int_distribution<uint32_t> geom_type_distr(0, static_cast<uint32_t>(10)); // todo: just guessing
 
     float BaseScale = 0.6f / fGridSize;
     int   instId    = 0;
@@ -313,29 +220,37 @@ void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
     context.TransitionResourceStates(1, &Barrier);
 }
 
-void TestPipeline::Render(Diligent::IDeviceContext& context)
+void TestPipeline::Render(Diligent::IDeviceContext& context,
+                          ecs::ExplicitEcs<ToonRenderer> ecs)
 {
-    auto pBuffs = std::array{m_VertexBuffer.RawPtr(), m_InstanceBuffer.RawPtr()};
-    context.SetVertexBuffers(0, static_cast<uint32_t>(pBuffs.size()), pBuffs.data(), nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, SET_VERTEX_BUFFERS_FLAG_RESET);
-    context.SetIndexBuffer(m_IndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    auto instanceBuffer = m_InstanceBuffer.RawPtr();
+    context.SetVertexBuffers(
+        1,
+        1,
+        &instanceBuffer,
+        nullptr,
+        RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+        SET_VERTEX_BUFFERS_FLAG_NONE
+    );
 
     context.SetPipelineState(m_pBindlessPSO);
 
-    auto NumObjects = m_GridSize * m_GridSize * m_GridSize;
-    for (int i = 0; i < NumObjects; ++i)
+    const auto renderers = ecs.GetAll<ToonRenderer>();
+    const auto numObjects = std::min(renderers.size(), (size_t)(m_GridSize * m_GridSize * m_GridSize));
+    for (auto i = 0ul; i < numObjects; ++i)
     {
-        const auto& Geometry = m_Geometries[m_GeometryType[i]];
+        const auto& meshView = renderers[i].GetMeshView();
+        const auto attributes = DrawIndexedAttribs{
+            meshView.indexCount,
+            VT_UINT32,
+            DRAW_FLAG_VERIFY_ALL | DRAW_FLAG_DYNAMIC_RESOURCE_BUFFERS_INTACT,
+            1,
+            meshView.firstIndex,
+            meshView.firstVertex,
+            i
+        };
 
-        DrawIndexedAttribs DrawAttrs;
-        DrawAttrs.IndexType             = VT_UINT32;
-        DrawAttrs.NumIndices            = Geometry.NumIndices;
-        DrawAttrs.FirstIndexLocation    = Geometry.FirstIndex;
-        DrawAttrs.FirstInstanceLocation = static_cast<uint32_t>(i);
-        // Verify the state of vertex and index buffers
-        // Also use DRAW_FLAG_DYNAMIC_RESOURCE_BUFFERS_INTACT flag to inform the engine that
-        // none of the dynamic buffers have changed since the last draw command.
-        DrawAttrs.Flags = DRAW_FLAG_VERIFY_ALL | DRAW_FLAG_DYNAMIC_RESOURCE_BUFFERS_INTACT;
-        context.DrawIndexed(DrawAttrs);
+        context.DrawIndexed(attributes);
     }
 }
 } // namespace nc::graphics

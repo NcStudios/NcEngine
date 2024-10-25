@@ -3,5 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         GlobalEnvironmentResource.cpp
         GlobalResourceSignature.cpp
         GlobalTextureBufferResource.cpp
+        MeshBuffer.cpp
         ShaderBindings.cpp
 )
