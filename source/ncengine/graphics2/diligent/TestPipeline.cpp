@@ -3,7 +3,6 @@
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
 #include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
 #include "Graphics/GraphicsTools/interface/ShaderMacroHelper.hpp"
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
 
 #include <array>
 #include <random>
@@ -24,8 +23,8 @@ R"(#ifdef VULKAN
 #   define NonUniformResourceIndex(x) x
 #endif
 
-Texture2D     g_textures[];
-SamplerState  g_textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     Textures[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 struct PSInput 
 { 
@@ -43,7 +42,7 @@ void main(in  PSInput  PSIn,
           out PSOutput PSOut)
 {
     float4 Color;
-    Color = g_textures[NonUniformResourceIndex(PSIn.TexIndex)].Sample(g_textures_sampler, PSIn.UV);
+    Color = Textures[NonUniformResourceIndex(PSIn.TexIndex)].Sample(Textures_sampler, PSIn.UV);
     PSOut.Color = Color;
 })"};
 
@@ -69,29 +68,16 @@ struct PSInput
     uint   TexIndex : TEX_ARRAY_INDEX;
 };
 
-static const float4x4 projectionMatrix = float4x4
-(
-    1.0f / (1.777f * tan(1.0472f / 2.0f)),  0.0f,                        0.0f,                               0.0f,
-    0.0f,                                   1.0f / tan(1.0472f / 2.0f),  0.0f,                               0.0f,
-    0.0f,                                   0.0f,                        1000.0f / (1000.0f - 0.1f),         1.0f,
-    0.0f,                                   0.0f,                        -0.1f * 1000.0f / (1000.0f - 0.1f), 0.0f
-);
-
-static const float4x4 viewMatrix = float4x4
-(
-    1.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 1.0f
-);
-
-static const float4x4 g_ViewProj = mul(projectionMatrix, viewMatrix);
+cbuffer EnvironmentData
+{
+    float4x4 cameraViewProjection;
+};
 
 void main(in  VSInput VSIn, out PSInput PSIn)
 {
     float4x4 InstanceMatr = MatrixFromRows(VSIn.MtrxRow0, VSIn.MtrxRow1, VSIn.MtrxRow2, VSIn.MtrxRow3);
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), InstanceMatr);
-    PSIn.Pos = mul(TransformedPos, g_ViewProj);
+    PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
     PSIn.TexIndex = VSIn.TexArrInd;
 }

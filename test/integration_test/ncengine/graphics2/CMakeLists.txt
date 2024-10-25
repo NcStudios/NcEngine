@@ -52,13 +52,21 @@ elseif(UNIX AND NOT APPLE)
 endif()
 
 ### GlobalTextureBufferResource Tests ###
+add_graphics_test(GlobalEnvironmentResource_tests)
+
+target_sources(GlobalEnvironmentResource_tests
+    PRIVATE
+        GlobalEnvironmentResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalEnvironmentResource.cpp
+)
+
+### GlobalTextureBufferResource Tests ###
 add_graphics_test(GlobalTextureBufferResource_tests)
 
 target_sources(GlobalTextureBufferResource_tests
     PRIVATE
         GlobalTextureBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalResourceSignature.cpp
 )
 
 ### ShaderFactory Tests ###
