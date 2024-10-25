@@ -23,8 +23,8 @@ R"(#ifdef VULKAN
 #   define NonUniformResourceIndex(x) x
 #endif
 
-Texture2D     g_textures[];
-SamplerState  g_textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     Textures[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 struct PSInput 
 { 
@@ -42,7 +42,7 @@ void main(in  PSInput  PSIn,
           out PSOutput PSOut)
 {
     float4 Color;
-    Color = g_textures[NonUniformResourceIndex(PSIn.TexIndex)].Sample(g_textures_sampler, PSIn.UV);
+    Color = Textures[NonUniformResourceIndex(PSIn.TexIndex)].Sample(Textures_sampler, PSIn.UV);
     PSOut.Color = Color;
 })"};
 
