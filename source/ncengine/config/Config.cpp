@@ -71,8 +71,6 @@ constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
 constexpr auto ScreenWidthKey = "screen_width"sv;
 constexpr auto ScreenHeightKey = "screen_height"sv;
 constexpr auto TargetFpsKey = "target_fps"sv;
-constexpr auto NearClipKey = "near_clip"sv;
-constexpr auto FarClipKey = "far_clip"sv;
 constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
 constexpr auto AntialiasingKey = "antialiasing"sv;
 constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
@@ -231,8 +229,6 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.screenWidth, ScreenWidthKey, kvPairs);
         ParseValueIfExists(out.screenHeight, ScreenHeightKey, kvPairs);
         ParseValueIfExists(out.targetFPS, TargetFpsKey, kvPairs);
-        ParseValueIfExists(out.nearClip, NearClipKey, kvPairs);
-        ParseValueIfExists(out.farClip, FarClipKey, kvPairs);
         ParseValueIfExists(out.useShadows, UseShadowsKey, kvPairs);
         ParseValueIfExists(out.antialiasing, AntialiasingKey, kvPairs);
         ParseValueIfExists(out.useValidationLayers, UseValidationLayersKey, kvPairs);
@@ -398,8 +394,6 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, ScreenWidthKey, config.graphicsSettings.screenWidth);
     ::WriteKVPair(stream, ScreenHeightKey, config.graphicsSettings.screenHeight);
     ::WriteKVPair(stream, TargetFpsKey, config.graphicsSettings.targetFPS);
-    ::WriteKVPair(stream, NearClipKey, config.graphicsSettings.nearClip);
-    ::WriteKVPair(stream, FarClipKey, config.graphicsSettings.farClip);
     ::WriteKVPair(stream, UseShadowsKey, config.graphicsSettings.useShadows);
     ::WriteKVPair(stream, AntialiasingKey, config.graphicsSettings.antialiasing);
     ::WriteKVPair(stream, UseValidationLayersKey, config.graphicsSettings.useValidationLayers);
@@ -426,8 +420,6 @@ bool Validate(const Config& config)
            (config.graphicsSettings.screenWidth != 0) &&
            (config.graphicsSettings.screenHeight != 0) &&
            (config.graphicsSettings.targetFPS != 0) &&
-           (config.graphicsSettings.nearClip > 0.0f) &&
-           (config.graphicsSettings.farClip > 0.0f) &&
            (config.graphicsSettings.antialiasing > 0) &&
            ValidatePhysicsSettings(config.physicsSettings) &&
            ValidateBufferFrames(config.audioSettings.bufferFrames);
