@@ -79,6 +79,11 @@ target_sources(MeshBuffer_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
+target_compile_definitions(MeshBuffer_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
+)
+
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 

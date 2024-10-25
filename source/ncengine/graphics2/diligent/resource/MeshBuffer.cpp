@@ -53,6 +53,19 @@ namespace nc::graphics
 //     );
 // }
 
+auto GetMeshVertexLayoutElements(uint32_t slot, uint32_t indexOffset) -> std::array<Diligent::LayoutElement, 7>
+{
+    return std::array{
+        Diligent::LayoutElement{indexOffset,     slot, 3, Diligent::VT_FLOAT32, false},
+        Diligent::LayoutElement{indexOffset + 1, slot, 3, Diligent::VT_FLOAT32, false},
+        Diligent::LayoutElement{indexOffset + 2, slot, 2, Diligent::VT_FLOAT32, false},
+        Diligent::LayoutElement{indexOffset + 3, slot, 3, Diligent::VT_FLOAT32, false},
+        Diligent::LayoutElement{indexOffset + 4, slot, 3, Diligent::VT_FLOAT32, false},
+        Diligent::LayoutElement{indexOffset + 5, slot, 4, Diligent::VT_FLOAT32, false},
+        Diligent::LayoutElement{indexOffset + 6, slot, 4, Diligent::VT_UINT32,  false},
+    };
+}
+
 void MeshBuffer::Load(std::span<const asset::MeshVertex> vertices,
                       std::span<const uint32_t> indices,
                       Diligent::IDeviceContext& context,

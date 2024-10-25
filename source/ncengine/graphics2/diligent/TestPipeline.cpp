@@ -1,4 +1,5 @@
 #include "TestPipeline.h"
+#include "resource/MeshBuffer.h"
 #include "ncasset/Assets.h"
 
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
@@ -131,15 +132,16 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     createInfo.pVS = vertexShader;
     createInfo.pPS = pixelShader;
 
+    const auto vertexElements = GetMeshVertexLayoutElements(0);
     auto LayoutElems = std::array{
         // Per-vertex data - first buffer slot
-        LayoutElement{0, 0, 3, VT_FLOAT32, False},
-        LayoutElement{1, 0, 3, VT_FLOAT32, False},
-        LayoutElement{2, 0, 2, VT_FLOAT32, False},
-        LayoutElement{3, 0, 3, VT_FLOAT32, False},
-        LayoutElement{4, 0, 3, VT_FLOAT32, False},
-        LayoutElement{5, 0, 4, VT_FLOAT32, False},
-        LayoutElement{6, 0, 4, VT_UINT32,  False},
+        vertexElements.at(0),
+        vertexElements.at(1),
+        vertexElements.at(2),
+        vertexElements.at(3),
+        vertexElements.at(4),
+        vertexElements.at(5),
+        vertexElements.at(6),
 
         // Per-instance data - second buffer slot
         // We will use four attributes to encode instance-specific 4x4 transformation matrix

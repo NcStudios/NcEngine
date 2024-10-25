@@ -6,10 +6,17 @@
 #include "Graphics/GraphicsEngine/interface/SwapChain.h"
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 
+#include <ranges>
+
 class MeshBufferTest : public DiligentEngineParameterizedFixture
 {
     protected:
         std::unique_ptr<nc::graphics::MeshBuffer> uut;
+
+        MeshBufferTest()
+            : DiligentEngineParameterizedFixture{false}
+        {
+        }
 
         void SetUp() override
         {
@@ -28,7 +35,7 @@ INSTANTIATE_TEST_SUITE_P(AllApis, MeshBufferTest, g_apiParams);
 constexpr auto g_pixelShader = std::string_view{
 R"(struct PSInput
 {
-    float4 Pos      : SV_POSITION;
+    float4 Pos : SV_POSITION;
 };
 
 struct PSOutput
@@ -36,10 +43,9 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-void main(in  PSInput  PSIn,
-          out PSOutput PSOut)
+void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    PSOut.Color = float4(PSIn, 1);
+    PSOut.Color = PSIn.Pos;
 }
 )"};
 
@@ -47,12 +53,12 @@ constexpr auto g_vertexShader = std::string_view{
 R"(struct VSInput
 {
     float3 Pos         : ATTRIB0;
-    float3 Normal      : ATTRIB1;
-    float2 UV          : ATTRIB2;
-    float3 Tangent     : ATTRIB3;
-    float3 Bitangent   : ATTRIB4;
-    float4 BoneWeights : ATTRIB5;
-    uint4  BoneIds     : ATTRIB6;
+    // float3 Normal      : ATTRIB1;
+    // float2 UV          : ATTRIB2;
+    // float3 Tangent     : ATTRIB3;
+    // float3 Bitangent   : ATTRIB4;
+    // float4 BoneWeights : ATTRIB5;
+    // uint4  BoneIds     : ATTRIB6;
 };
 
 struct PSInput
@@ -62,7 +68,7 @@ struct PSInput
 
 void main(in VSInput VSIn, out PSInput PSIn)
 {
-    PSIn.Pos = VSIn.Pos;
+    PSIn.Pos = float4(VSIn.Pos, 1);
 }
 )"};
 
@@ -97,18 +103,12 @@ auto CreateTestPipelineState(Diligent::IRenderDevice& device,
     createInfo.pVS = vertexShader;
     createInfo.pPS = pixelShader;
 
-    auto LayoutElems = std::array{
-        LayoutElement{0, 0, 3, VT_FLOAT32, False},
-        LayoutElement{1, 0, 3, VT_FLOAT32, False},
-        LayoutElement{2, 0, 2, VT_FLOAT32, False},
-        LayoutElement{3, 0, 3, VT_FLOAT32, False},
-        LayoutElement{4, 0, 3, VT_FLOAT32, False},
-        LayoutElement{5, 0, 4, VT_FLOAT32, False},
-        LayoutElement{6, 0, 4, VT_UINT32,  False},
-    };
+    auto layoutElements = nc::graphics::GetMeshVertexLayoutElements(0);
+    createInfo.GraphicsPipeline.InputLayout.LayoutElements = layoutElements.data();
 
-    createInfo.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems.data();
-    createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(LayoutElems.size());
+    // todo: not sure which way to test
+    createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(1);
+    // createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(layoutElements.size());
 
     auto pso = Diligent::RefCntAutoPtr<Diligent::IPipelineState>{};
     device.CreateGraphicsPipelineState(createInfo, &pso);
@@ -130,6 +130,20 @@ constexpr auto g_vertex3 = nc::asset::MeshVertex{
     .position = nc::Vector3::Right()
 };
 
+TEST(MeshBufferTest, GetMeshVertexLayoutElements_elementsPositionedCorrectly)
+{
+    const auto expectedSlot = 1u;
+    const auto expectedOffset = 3u;
+    const auto actual = nc::graphics::GetMeshVertexLayoutElements(expectedSlot, expectedOffset);
+
+    for (const auto& [i, actualElement] : std::views::enumerate(actual))
+    {
+        EXPECT_EQ(expectedSlot, actualElement.BufferSlot);
+        EXPECT_EQ(i + expectedOffset, actualElement.InputIndex);
+    }
+}
+
+
 TEST_P(MeshBufferTest, SetBuffers_empty_succeeds)
 {
     
@@ -147,6 +161,11 @@ TEST_P(MeshBufferTest, SetBuffers_setsData)
     const auto indices = std::array{0u, 1u, 2u};
 
     uut->Load(vertices, indices, engine->GetContext(), engine->GetDevice());
+
+
+    auto* pRTV = engine->GetSwapChain().GetCurrentBackBufferRTV();
+    auto* pDSV = engine->GetSwapChain().GetDepthBufferDSV();
+    engine->GetContext().SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
     engine->GetContext().SetPipelineState(pso);
 
