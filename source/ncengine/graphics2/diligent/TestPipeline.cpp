@@ -185,8 +185,8 @@ void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
     std::uniform_real_distribution<float> scale_distr(0.3f, 1.0f);
     std::uniform_real_distribution<float> offset_distr(-0.15f, +0.15f);
     std::uniform_real_distribution<float> rot_distr(-3.14f, 3.14f);
-    std::uniform_int_distribution<uint32_t> tex_distr(0, 19 - 1); // todo: not great, max is def larger than available
-    std::uniform_int_distribution<uint32_t> geom_type_distr(0, static_cast<uint32_t>(10)); // todo: just guessing
+    std::uniform_int_distribution<uint32_t> tex_distr(0, 19 - 1); // note: just based on sample assets
+    std::uniform_int_distribution<uint32_t> geom_type_distr(0, static_cast<uint32_t>(10)); // note: lower bound on sample asset; probably more available
 
     float BaseScale = 0.6f / fGridSize;
     int   instId    = 0;
@@ -239,7 +239,7 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
 
     const auto renderers = ecs.GetAll<ToonRenderer>();
     const auto numObjects = std::min(renderers.size(), (size_t)(m_GridSize * m_GridSize * m_GridSize));
-    for (auto i = 0ul; i < numObjects; ++i)
+    for (auto i = 0ull; i < numObjects; ++i)
     {
         const auto& meshView = renderers[i].GetMeshView();
         const auto attributes = DrawIndexedAttribs{
@@ -249,7 +249,7 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
             1,
             meshView.firstIndex,
             meshView.firstVertex,
-            i
+            static_cast<uint32_t>(i)
         };
 
         context.DrawIndexed(attributes);

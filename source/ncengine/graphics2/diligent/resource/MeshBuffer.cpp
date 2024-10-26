@@ -1,6 +1,8 @@
 #include "MeshBuffer.h"
 #include "ncengine/asset/AssetData.h"
 
+#include "ncutility/NcError.h"
+
 #include <array>
 
 namespace
@@ -24,6 +26,72 @@ auto MakeIndexBufferDesc(std::span<const uint32_t> indices) -> Diligent::BufferD
         Diligent::USAGE_IMMUTABLE
     };
 }
+
+template<class T>
+auto MakeBufferData(std::span<const T> data) -> Diligent::BufferData
+{
+    return Diligent::BufferData{
+        data.data(),
+        static_cast<uint32_t>(sizeof(T) * data.size())
+    };
+}
+
+void CreateBuffer(Diligent::IRenderDevice& device,
+                  const Diligent::BufferDesc& desc,
+                  const Diligent::BufferData& data,
+                  Diligent::RefCntAutoPtr<Diligent::IBuffer>& buffer)
+{
+    buffer.Release();
+    device.CreateBuffer(desc, &data, &buffer);
+    if (!buffer)
+    {
+        throw nc::NcError{fmt::format("Failed to create buffer '{}'", desc.Name)};
+    }
+}
+
+void TransitionBufferStates(Diligent::IDeviceContext& context,
+                            Diligent::IBuffer* vertexBuffer,
+                            Diligent::IBuffer* indexBuffer)
+{
+    const auto barriers = std::array{
+        Diligent::StateTransitionDesc(
+            vertexBuffer,
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_VERTEX_BUFFER,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        ),
+        Diligent::StateTransitionDesc(
+            indexBuffer,
+            Diligent::RESOURCE_STATE_UNKNOWN,
+            Diligent::RESOURCE_STATE_INDEX_BUFFER,
+            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        )
+    };
+
+    context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
+}
+
+void SetBuffers(Diligent::IDeviceContext& context,
+                Diligent::IBuffer* vertexBuffer,
+                Diligent::IBuffer* indexBuffer)
+{
+    // note: References to buffers are also held by the context. SET_VERTEX_BUFFER_FLAG_RESET is
+    //       needed here to release potentially stale buffers.
+    context.SetVertexBuffers(
+        0,
+        1,
+        &vertexBuffer,
+        nullptr,
+        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+        Diligent::SET_VERTEX_BUFFERS_FLAG_RESET
+    );
+
+    context.SetIndexBuffer(
+        indexBuffer,
+        0,
+        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+    );
+}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -46,49 +114,9 @@ void MeshBuffer::Load(std::span<const asset::MeshVertex> vertices,
                       Diligent::IDeviceContext& context,
                       Diligent::IRenderDevice& device)
 {
-    m_vertexBuffer.Release();
-    const auto vertexDesc = MakeVertexBufferDesc(vertices);
-    const auto vertexData = Diligent::BufferData{vertices.data(), vertexDesc.Size};
-    device.CreateBuffer(vertexDesc, &vertexData, &m_vertexBuffer);
-
-    m_indexBuffer.Release();
-    const auto indexDesc = MakeIndexBufferDesc(indices);
-    const auto indexData = Diligent::BufferData{indices.data(), indexDesc.Size};
-    device.CreateBuffer(indexDesc, &indexData, &m_indexBuffer);
-
-    const auto barriers = std::array{
-        Diligent::StateTransitionDesc(
-            m_vertexBuffer.RawPtr(),
-            Diligent::RESOURCE_STATE_UNKNOWN,
-            Diligent::RESOURCE_STATE_VERTEX_BUFFER,
-            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-        ),
-        Diligent::StateTransitionDesc(
-            m_indexBuffer.RawPtr(),
-            Diligent::RESOURCE_STATE_UNKNOWN,
-            Diligent::RESOURCE_STATE_INDEX_BUFFER,
-            Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-        )
-    };
-
-    context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
-
-    // note: References to buffers are also held by the context. SET_VERTEX_BUFFER_FLAG_RESET is
-    //       needed here to release potentially stale buffers.
-    auto vBuff = m_vertexBuffer.RawPtr();
-    context.SetVertexBuffers(
-        0,
-        1,
-        &vBuff,
-        nullptr,
-        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-        Diligent::SET_VERTEX_BUFFERS_FLAG_RESET
-    );
-
-    context.SetIndexBuffer(
-        m_indexBuffer,
-        0,
-        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
-    );
+    CreateBuffer(device, MakeVertexBufferDesc(vertices), MakeBufferData(vertices), m_vertexBuffer);
+    CreateBuffer(device, MakeIndexBufferDesc(indices), MakeBufferData(indices), m_indexBuffer);
+    TransitionBufferStates(context, m_vertexBuffer.RawPtr(), m_indexBuffer.RawPtr());
+    SetBuffers(context, m_vertexBuffer.RawPtr(), m_indexBuffer.RawPtr());
 }
 } // namespace nc::graphics
