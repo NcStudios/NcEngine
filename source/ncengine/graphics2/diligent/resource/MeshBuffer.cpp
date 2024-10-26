@@ -28,31 +28,6 @@ auto MakeIndexBufferDesc(std::span<const uint32_t> indices) -> Diligent::BufferD
 
 namespace nc::graphics
 {
-// todo: can we just call once
-// void MeshBuffer::SetBuffers(Diligent::IDeviceContext& context)
-// {
-//     // note: References to buffers are held by the context. SET_VERTEX_BUFFER_FLAG_RESET is needed here to release
-//     //       potentially stale buffers.
-
-//     // todo: What if null/nothing loaded?
-
-//     auto vBuff = m_vertexBuffer.RawPtr();
-//     context.SetVertexBuffers(
-//         0,
-//         1,
-//         &vBuff,
-//         nullptr,
-//         Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-//         Diligent::SET_VERTEX_BUFFERS_FLAG_RESET
-//     );
-
-//     context.SetIndexBuffer(
-//         m_indexBuffer,
-//         0,
-//         Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
-//     );
-// }
-
 auto GetMeshVertexLayoutElements(uint32_t slot, uint32_t indexOffset) -> std::array<Diligent::LayoutElement, 7>
 {
     return std::array{
