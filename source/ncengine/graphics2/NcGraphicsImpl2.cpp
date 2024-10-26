@@ -255,7 +255,6 @@ void NcGraphicsImpl2::Run()
 
     m_shaderBindings.Update(renderState, context);
     m_shaderBindings.GetGlobalSignature().Commit(context);
-    // m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_testPipeline.Render(context, m_world);
     swapChain.Present();

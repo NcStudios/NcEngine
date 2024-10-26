@@ -137,8 +137,6 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.graphicsSettings.screenWidth, actual.graphicsSettings.screenWidth);
     EXPECT_EQ(expected.graphicsSettings.screenHeight, actual.graphicsSettings.screenHeight);
     EXPECT_EQ(expected.graphicsSettings.targetFPS, actual.graphicsSettings.targetFPS);
-    EXPECT_FLOAT_EQ(expected.graphicsSettings.nearClip, actual.graphicsSettings.nearClip);
-    EXPECT_FLOAT_EQ(expected.graphicsSettings.farClip, actual.graphicsSettings.farClip);
     EXPECT_EQ(expected.graphicsSettings.useShadows, actual.graphicsSettings.useShadows);
     EXPECT_EQ(expected.graphicsSettings.antialiasing, actual.graphicsSettings.antialiasing);
     EXPECT_EQ(expected.graphicsSettings.useValidationLayers, actual.graphicsSettings.useValidationLayers);

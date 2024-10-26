@@ -81,8 +81,6 @@ struct GraphicsSettings
     unsigned screenWidth = 1000;      ///< width of the screen
     unsigned screenHeight = 1000;     ///< height of the screen
     unsigned targetFPS = 60;          ///< target frame rate
-    float nearClip = 0.5f;            ///< the near z clip of the camera frustum
-    float farClip = 400.0f;           ///< the far z clip of the camera frustum
     bool useShadows = true;           ///< enable shadow mapping and shadow rendering
     unsigned antialiasing = 8u;       ///< the number of samples for MSAA
     bool useValidationLayers = false; ///< turn on validation layers in debug builds
