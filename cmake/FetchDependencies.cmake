@@ -29,16 +29,6 @@ else()
     set(VMA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/source/external/vma_fallback")
 endif()
 
-# Taskflow
-set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-FetchContent_Declare(taskflow
-                     GIT_REPOSITORY https://github.com/taskflow/taskflow.git
-                     GIT_TAG        v3.6.0
-                     GIT_SHALLOW    TRUE
-)
-
 # GLFW
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -48,6 +38,27 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(glfw
                      GIT_REPOSITORY https://github.com/glfw/glfw.git
                      GIT_TAG        3.3.9
+                     GIT_SHALLOW    TRUE
+)
+
+# Dear ImGui
+FetchContent_Declare(imgui
+                     GIT_REPOSITORY https://github.com/NcStudios/imgui.git
+                     GIT_TAG        v1.91.5+nc
+                     GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(glfw imgui)
+
+include(cmake/BuildImgui.cmake)
+
+# Taskflow
+set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(taskflow
+                     GIT_REPOSITORY https://github.com/taskflow/taskflow.git
+                     GIT_TAG        v3.6.0
                      GIT_SHALLOW    TRUE
 )
 
@@ -99,6 +110,7 @@ set(DILIGENT_LIBRARIES Diligent-GraphicsEngineVk-static
                        Diligent-TargetPlatform
                        Diligent-GraphicsTools
                        Diligent-TextureLoader
+                       Diligent-Imgui
 )
 
 if(WIN32)
@@ -135,7 +147,7 @@ FetchContent_Declare(fmt
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
+FetchContent_MakeAvailable(taskflow optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
 
 # Silence warnings
 disable_warnings_for_headers(Taskflow)
