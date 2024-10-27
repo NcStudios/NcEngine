@@ -1,5 +1,6 @@
 #pragma once
 
+#include "diligent/ImGuiImplGLFW.h"
 #include "diligent/DiligentEngine.h"
 #include "diligent/TestPipeline.h"
 #include "diligent/resource/ShaderBindings.h"
@@ -10,6 +11,11 @@
 
 namespace nc
 {
+namespace ui::editor
+{
+class Editor;
+} // namespace ui::editor
+
 namespace window
 {
 class NcWindow;
@@ -44,8 +50,10 @@ class NcGraphicsImpl2 : public NcGraphics
         ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
+        ImGuiImplGLFW m_imguiBackend;
         TestPipeline m_testPipeline;
         GraphicsFrontend m_frontend;
+        std::unique_ptr<ui::editor::Editor> m_editor;
         Connection m_onResizeConnection;
 };
 } // namespace graphics

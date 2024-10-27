@@ -8,6 +8,7 @@
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
+#include "ncengine/ui/editor/Editor.h"
 #include "ncengine/utility/Log.h"
 
 #include "imgui.h"
@@ -149,6 +150,11 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             memorySettings.maxTextures
           },
+          m_imguiBackend{
+            m_engine.GetDevice(),
+            m_engine.GetSwapChain().GetDesc(),
+            window.GetWindowHandle()
+          },
           m_testPipeline{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -162,6 +168,11 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
             modules.Get<asset::NcAsset>()->OnTextureUpdate()
           },
+          m_editor{ui::editor::BuildEditor(
+            m_world,
+            modules,
+            events
+          )},
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
     (void)graphicsSettings;
@@ -255,6 +266,15 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetGlobalSignature().Commit(context);
 
     m_testPipeline.Render(context);
+
+    // todo: cleanup
+    m_imguiBackend.UpdateFontsTexture();
+    const auto& scDesc = swapChain.GetDesc();
+    m_imguiBackend.NewFrame(scDesc.Width, scDesc.Height, scDesc.PreTransform);
+    m_editor->Draw(m_world);
+    m_imguiBackend.Render(&context);
+
+
     swapChain.Present();
 }
 
