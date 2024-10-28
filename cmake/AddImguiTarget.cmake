@@ -4,13 +4,18 @@ add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
 )
+
+if(WIN32)
+    target_sources(imgui
+        PRIVATE
+            ${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
+    )
+endif()
 
 target_compile_definitions(imgui
     PUBLIC
         WIN32_LEAN_AND_MEAN
-        ImTextureID=void*
 )
 
 target_include_directories(imgui
