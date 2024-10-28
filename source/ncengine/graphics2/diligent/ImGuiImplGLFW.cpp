@@ -1,19 +1,35 @@
 #include "ImGuiImplGLFW.h"
 
+#include "ncengine/graphics/NcGraphics.h"
+#include "ncutility/NcError.h"
+
 #include "backends/imgui_impl_glfw.h"
 
 namespace nc::graphics
 {
 ImGuiImplGLFW::ImGuiImplGLFW(Diligent::IRenderDevice& device,
                              const Diligent::SwapChainDesc& swapChainDesc,
-                             GLFWwindow* window)
-    : Diligent::ImGuiImplDiligent{Diligent::ImGuiDiligentCreateInfo{
-        &device,
-        swapChainDesc
-      }}
+                             GLFWwindow* window,
+                             std::string_view api)
+    : Diligent::ImGuiImplDiligent{
+        Diligent::ImGuiDiligentCreateInfo{
+          &device,
+          swapChainDesc
+        }
+      }
 {
-    // todo: what about dx12?
-    ImGui_ImplGlfw_InitForVulkan(window, true);
+    if (api == api::Vulkan)
+    {
+        ImGui_ImplGlfw_InitForVulkan(window, true);
+    }
+    else if (api == api::D3D12)
+    {
+        ImGui_ImplGlfw_InitForOther(window, true);
+    }
+    else
+    {
+        throw NcError(fmt::format("Unknown API '{}'", api));
+    }
 }
 
 ImGuiImplGLFW::~ImGuiImplGLFW() noexcept

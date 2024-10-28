@@ -1,10 +1,8 @@
 #pragma once
 
 #include "ImGuiImplDiligent.hpp"
-#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
-#include "Graphics/GraphicsEngine/interface/SwapChain.h"
 
-#include <memory>
+#include <string_view>
 
 struct GLFWwindow;
 
@@ -13,10 +11,10 @@ namespace nc::graphics
 class ImGuiImplGLFW final : public Diligent::ImGuiImplDiligent
 {
     public:
-        // todo: just take dev/sc here instead of ci
         ImGuiImplGLFW(Diligent::IRenderDevice& device,
                       const Diligent::SwapChainDesc& swapChainDesc,
-                      GLFWwindow* window);
+                      GLFWwindow* window,
+                      std::string_view api);
 
         ~ImGuiImplGLFW() noexcept;
 
