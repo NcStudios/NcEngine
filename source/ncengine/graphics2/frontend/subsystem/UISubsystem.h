@@ -1,10 +1,12 @@
 #pragma once
 
-#include "ncengine/ui/IUI.h"
-#include "ncengine/ui/editor/Editor.h"
+#include "ncengine/ecs/Ecs.h"
+#include "ncengine/module/ModuleProvider.h"
 
 namespace nc
 {
+struct SystemEvents;
+
 namespace ui
 {
 class IUI;
