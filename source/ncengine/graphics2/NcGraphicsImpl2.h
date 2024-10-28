@@ -1,8 +1,8 @@
 #pragma once
 
 #include "diligent/DiligentEngine.h"
-#include "diligent/DiligentImgui.h"
 #include "diligent/TestPipeline.h"
+#include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
 #include "ncengine/ecs/Ecs.h"

@@ -15,6 +15,7 @@ target_sources(${NC_ENGINE_LIB}
         ImGuiImplGLFW.cpp
         ShaderFactory.cpp
         TestPipeline.cpp
+        UIBackend.cpp
 )
 
 add_subdirectory(resource)

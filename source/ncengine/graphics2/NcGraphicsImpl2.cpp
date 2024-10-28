@@ -249,7 +249,6 @@ void NcGraphicsImpl2::Run()
 
     m_ui.FrameBegin(swapChain);
     m_frontend.GetUISubsystem().UpdateUI(m_world);
-    // m_ui.UpdateUI(m_world);
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
     auto* pDSV = swapChain.GetDepthBufferDSV();
