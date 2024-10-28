@@ -6,8 +6,8 @@
 namespace nc::graphics
 {
 UISubsystem::UISubsystem(ecs::Ecs world,
-            ModuleProvider modules,
-            SystemEvents& events)
+                         ModuleProvider modules,
+                         SystemEvents& events)
     : m_editor{ui::editor::BuildEditor(world, modules, events)}
 {
 }
