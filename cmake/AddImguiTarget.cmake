@@ -16,7 +16,6 @@ endif()
 target_compile_definitions(imgui
     PUBLIC
         WIN32_LEAN_AND_MEAN
-        ImTextureID=void*
 )
 
 target_include_directories(imgui

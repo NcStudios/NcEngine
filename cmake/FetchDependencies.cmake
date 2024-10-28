@@ -44,13 +44,15 @@ FetchContent_Declare(glfw
 # Dear ImGui
 FetchContent_Declare(imgui
                      GIT_REPOSITORY https://github.com/NcStudios/imgui.git
-                     GIT_TAG        v1.91.5+nc
+                     GIT_TAG        v1.91.5+nc.1
                      GIT_SHALLOW    TRUE
 )
 
 FetchContent_MakeAvailable(glfw imgui)
 
-include(cmake/BuildImgui.cmake)
+# Dear ImGui target needs to be available before diligent. Also, it doesn't have a cmake lists, so we add it via script.
+include(cmake/AddImguiTarget.cmake)
+disable_warnings_for_headers(imgui)
 
 # Taskflow
 set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -155,6 +157,8 @@ disable_warnings_for_headers(DirectXMath)
 disable_warnings_for_headers(fmt)
 disable_warnings_for_headers(Jolt)
 disable_warnings_for_headers(Diligent-GraphicsTools)
+
+disable_warnings_for_target(Diligent-Imgui)
 
 # Tell Jolt to use our profile implementation. This introduces a circular dependency between Jolt/NcEngine,
 # which GCC struggles with (but it could be coerced), so we just exclude Jolt events from nix profiling.
