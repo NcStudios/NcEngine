@@ -154,9 +154,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetSwapChain().GetDesc(),
             window.GetWindowHandle(),
             m_engine.GetApi(),
-            m_world,
-            modules,
-            events,
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
           m_testPipeline{
@@ -170,7 +167,10 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             m_engine.GetDevice(),
             m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
-            modules.Get<asset::NcAsset>()->OnTextureUpdate()
+            modules.Get<asset::NcAsset>()->OnTextureUpdate(),
+            m_world,
+            modules,
+            events,
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
@@ -192,12 +192,12 @@ auto NcGraphicsImpl2::GetCamera() noexcept -> Camera*
 
 void NcGraphicsImpl2::SetUi(ui::IUI* ui) noexcept
 {
-    m_ui.SetClientUI(ui);
+    m_frontend.GetUISubsystem().SetClientUI(ui);
 }
 
 bool NcGraphicsImpl2::IsUiHovered() const noexcept
 {
-    return m_ui.IsHovered();
+    return m_frontend.GetUISubsystem().IsHovered();
 }
 
 void NcGraphicsImpl2::SetSkybox(const std::string& path)
@@ -248,7 +248,8 @@ void NcGraphicsImpl2::Run()
     auto& swapChain = m_engine.GetSwapChain();
 
     m_ui.FrameBegin(swapChain);
-    m_ui.UpdateUI(m_world);
+    m_frontend.GetUISubsystem().UpdateUI(m_world);
+    // m_ui.UpdateUI(m_world);
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
     auto* pDSV = swapChain.GetDepthBufferDSV();

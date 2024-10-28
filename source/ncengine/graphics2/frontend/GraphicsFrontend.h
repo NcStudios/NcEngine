@@ -2,6 +2,7 @@
 
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
+#include "subsystem/UISubsystem.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 
@@ -15,8 +16,12 @@ class GraphicsFrontend
         GraphicsFrontend(Diligent::IDeviceContext& context,
                          Diligent::IRenderDevice& device,
                          GlobalTextureBufferResource& textureBuffer,
-                         Signal<const asset::TextureUpdateEventData&>& onTextureEvent)
+                         Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
+                         ecs::Ecs world,
+                         ModuleProvider modules,
+                         SystemEvents& events)
             : m_assetDispatch{context, device, textureBuffer, onTextureEvent},
+              m_uiSystem{world, modules, events},
               m_cameraSystem{}
         {
         }
@@ -28,13 +33,13 @@ class GraphicsFrontend
             m_cameraSystem.Clear();
         }
 
-        auto GetCameraSubsystem() -> CameraSubsystem&
-        {
-            return m_cameraSystem;
-        }
+        auto GetCameraSubsystem()   ->       CameraSubsystem& { return m_cameraSystem; }
+        auto GetUISubsystem()       ->       UISubsystem&     { return m_uiSystem;     }
+        auto GetUISubsystem() const -> const UISubsystem&     { return m_uiSystem;     }
 
     private:
         AssetDispatch m_assetDispatch;
+        UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
 };
 } // namespace nc::graphics

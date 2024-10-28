@@ -45,7 +45,7 @@ class NcGraphicsImpl2 : public NcGraphics
         ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
-        UISubsystem m_ui;
+        UIBackend m_ui;
         TestPipeline m_testPipeline;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
