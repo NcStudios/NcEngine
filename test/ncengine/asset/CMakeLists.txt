@@ -214,6 +214,7 @@ target_link_libraries(FontAssetManager_tests
     PRIVATE
         NcAsset
         NcUtility
+        imgui
         gtest_main
 )
 
@@ -395,6 +396,7 @@ target_link_libraries(NcAsset_tests
     PRIVATE
         NcAsset
         NcUtility
+        imgui
         gtest_main
 )
 

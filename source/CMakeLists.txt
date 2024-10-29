@@ -1,4 +1,3 @@
-add_subdirectory(external/imgui/src)
 add_subdirectory(external/lz4)
 add_subdirectory(external/rtaudio)
 add_subdirectory(ncutility)

@@ -32,15 +32,14 @@ set_target_properties(${NC_ENGINE_LIB}
 
 # Link libraries
 target_link_libraries(${NC_ENGINE_LIB}
-    INTERFACE
-        imgui
     PUBLIC
         NcAsset
         NcMath
         NcUtility
         Vulkan::Vulkan
-        Taskflow
         glfw
+        imgui
+        Taskflow
         OptickCore
         RtAudio
         Jolt

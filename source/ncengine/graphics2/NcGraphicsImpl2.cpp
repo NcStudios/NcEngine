@@ -10,7 +10,7 @@
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 #include "DirectXMath.h"
 
 namespace
@@ -149,6 +149,13 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             memorySettings.maxTextures
           },
+          m_ui{
+            m_engine.GetDevice(),
+            m_engine.GetSwapChain().GetDesc(),
+            window.GetWindowHandle(),
+            m_engine.GetApi(),
+            modules.Get<asset::NcAsset>()->OnFontUpdate()
+          },
           m_testPipeline{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -161,17 +168,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetDevice(),
             m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
             m_shaderBindings.GetMeshBuffer(),
+            m_world,
+            modules,
+            events,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
-    (void)graphicsSettings;
-    (void)memorySettings;
-    (void)modules;
-    (void)events;
-
-    ImGui::CreateContext();
 }
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
@@ -190,12 +194,12 @@ auto NcGraphicsImpl2::GetCamera() noexcept -> Camera*
 
 void NcGraphicsImpl2::SetUi(ui::IUI* ui) noexcept
 {
-    (void)ui;
+    m_frontend.GetUISubsystem().SetClientUI(ui);
 }
 
 bool NcGraphicsImpl2::IsUiHovered() const noexcept
 {
-    return false;
+    return m_frontend.GetUISubsystem().IsHovered();
 }
 
 void NcGraphicsImpl2::SetSkybox(const std::string& path)
@@ -245,6 +249,9 @@ void NcGraphicsImpl2::Run()
     auto& context = m_engine.GetContext();
     auto& swapChain = m_engine.GetSwapChain();
 
+    m_ui.FrameBegin(swapChain);
+    m_frontend.GetUISubsystem().UpdateUI(m_world);
+
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
     auto* pDSV = swapChain.GetDepthBufferDSV();
     context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
@@ -257,6 +264,8 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetGlobalSignature().Commit(context);
 
     m_testPipeline.Render(context, m_world);
+    m_ui.Render(context);
+
     swapChain.Present();
 }
 

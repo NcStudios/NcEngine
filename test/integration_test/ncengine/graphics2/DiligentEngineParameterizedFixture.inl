@@ -24,6 +24,7 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
 {
     protected:
         static inline auto s_diligentErrorOut = std::stringstream{};
+        bool isHeadless;
         std::unique_ptr<nc::window::NcWindowStub> window;
         std::unique_ptr<nc::graphics::DiligentEngine> engine;
         bool isHeadless;

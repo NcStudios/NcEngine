@@ -2,6 +2,7 @@
 
 #include "diligent/DiligentEngine.h"
 #include "diligent/TestPipeline.h"
+#include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
 #include "ncengine/ecs/Ecs.h"
@@ -44,6 +45,7 @@ class NcGraphicsImpl2 : public NcGraphics
         ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
+        UIBackend m_ui;
         TestPipeline m_testPipeline;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;

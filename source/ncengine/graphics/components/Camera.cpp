@@ -3,7 +3,7 @@
 #include "ncmath/MatrixUtilities.h"
 
 #ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
+#include "imgui.h"
 #endif
 
 namespace nc::graphics

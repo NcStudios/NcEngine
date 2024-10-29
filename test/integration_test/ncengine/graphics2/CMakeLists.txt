@@ -106,3 +106,20 @@ target_compile_definitions(ShaderFactory_runtimeCompilation_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
 )
+
+### UIBackend Tests ###
+add_graphics_test(UIBackend_tests)
+
+target_sources(UIBackend_tests
+    PRIVATE
+    UIBackend_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/UIBackend.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ImGuiImplGLFW.cpp
+        ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/UISubsystem.cpp
+        ${NC_SOURCE_DIR}/ui/editor/stub/EditorStub.cpp
+)
+
+target_link_libraries(UIBackend_tests
+    PRIVATE
+        imgui
+)
