@@ -27,7 +27,6 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
         bool isHeadless;
         std::unique_ptr<nc::window::NcWindowStub> window;
         std::unique_ptr<nc::graphics::DiligentEngine> engine;
-        bool isHeadless;
 
         DiligentEngineParameterizedFixture(bool headless = true)
             : isHeadless{headless}

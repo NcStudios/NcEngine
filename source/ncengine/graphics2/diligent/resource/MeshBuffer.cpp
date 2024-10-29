@@ -70,28 +70,6 @@ void TransitionBufferStates(Diligent::IDeviceContext& context,
 
     context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
 }
-
-void SetBuffers(Diligent::IDeviceContext& context,
-                Diligent::IBuffer* vertexBuffer,
-                Diligent::IBuffer* indexBuffer)
-{
-    // note: References to buffers are also held by the context. SET_VERTEX_BUFFER_FLAG_RESET is
-    //       needed here to release potentially stale buffers.
-    context.SetVertexBuffers(
-        0,
-        1,
-        &vertexBuffer,
-        nullptr,
-        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-        Diligent::SET_VERTEX_BUFFERS_FLAG_RESET
-    );
-
-    context.SetIndexBuffer(
-        indexBuffer,
-        0,
-        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
-    );
-}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -117,6 +95,27 @@ void MeshBuffer::Load(std::span<const asset::MeshVertex> vertices,
     CreateBuffer(device, MakeVertexBufferDesc(vertices), MakeBufferData(vertices), m_vertexBuffer);
     CreateBuffer(device, MakeIndexBufferDesc(indices), MakeBufferData(indices), m_indexBuffer);
     TransitionBufferStates(context, m_vertexBuffer.RawPtr(), m_indexBuffer.RawPtr());
-    SetBuffers(context, m_vertexBuffer.RawPtr(), m_indexBuffer.RawPtr());
+}
+
+void MeshBuffer::SetBuffers(Diligent::IDeviceContext& context)
+{
+    NC_ASSERT(m_vertexBuffer && m_indexBuffer, "Mesh buffers are not populated");
+
+    // note: References to buffers are also held by the context. SET_VERTEX_BUFFER_FLAG_RESET is
+    //       needed here to release potentially stale buffers.
+    context.SetVertexBuffers(
+        0,
+        1,
+        m_vertexBuffer.RawDblPtr(),
+        nullptr,
+        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
+        Diligent::SET_VERTEX_BUFFERS_FLAG_RESET
+    );
+
+    context.SetIndexBuffer(
+        m_indexBuffer.RawPtr(),
+        0,
+        Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
+    );
 }
 } // namespace nc::graphics

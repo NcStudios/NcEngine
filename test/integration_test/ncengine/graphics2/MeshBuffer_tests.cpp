@@ -120,58 +120,91 @@ TEST(MeshBufferTest, GetMeshVertexLayoutElements_elementsPositionedCorrectly)
     }
 }
 
-TEST_P(MeshBufferTest, Load_subsequentDrawCallSucceeds)
+TEST_P(MeshBufferTest, Load_initialCall_succeeds)
 {
-    auto pso = CreateTestGraphicsPipelineState(
-        std::span{g_vertexShader},
-        std::span{g_pixelShader},
-        nc::graphics::GetMeshVertexLayoutElements(0)
-    );
-
     const auto vertices = std::array{g_vertex1, g_vertex2, g_vertex3};
     const auto indices = std::array{0u, 1u, 2u};
-    uut->Load(vertices, indices, engine->GetContext(), engine->GetDevice());
-
-    auto* pRTV = engine->GetSwapChain().GetCurrentBackBufferRTV();
-    auto* pDSV = engine->GetSwapChain().GetDepthBufferDSV();
-    engine->GetContext().SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    engine->GetContext().SetPipelineState(pso);
-
-    const auto attrs = Diligent::DrawIndexedAttribs{
-        static_cast<uint32_t>(indices.size()),
-        Diligent::VT_UINT32,
-        Diligent::DRAW_FLAG_VERIFY_ALL
-    };
-
-    engine->GetContext().DrawIndexed(attrs);
+    EXPECT_NO_THROW(uut->Load(vertices, indices, engine->GetContext(), engine->GetDevice()));
 }
 
-TEST_P(MeshBufferTest, Load_bufferAlreadyPopulated_subsequentDrawCallSucceeds)
+TEST_P(MeshBufferTest, Load_overwriteBuffer_succeeds)
 {
-    auto pso = CreateTestGraphicsPipelineState(
-        std::span{g_vertexShader},
-        std::span{g_pixelShader},
-        nc::graphics::GetMeshVertexLayoutElements(0)
-    );
+    auto& context = engine->GetContext();
+    auto& device = engine->GetDevice();
 
-    const auto initialVertices = std::array{g_vertex1, g_vertex2, g_vertex3};
-    const auto initialIndices = std::array{0u, 1u, 2u};
-    uut->Load(initialVertices, initialIndices, engine->GetContext(), engine->GetDevice());
+    const auto initialVertices = std::array{g_vertex1};
+    const auto initialIndices = std::array{0u};
+    uut->Load(initialVertices, initialIndices, context, device);
 
     const auto overwriteVertices = std::array{g_vertex1, g_vertex2, g_vertex3, g_vertex3, g_vertex2, g_vertex1};
     const auto overwriteIndices = std::array{0u, 1u, 2u, 3u, 4u, 5u};
-    uut->Load(overwriteVertices, overwriteIndices, engine->GetContext(), engine->GetDevice());
+    EXPECT_NO_THROW(uut->Load(overwriteVertices, overwriteIndices, context, device));
+}
 
-    auto* pRTV = engine->GetSwapChain().GetCurrentBackBufferRTV();
-    auto* pDSV = engine->GetSwapChain().GetDepthBufferDSV();
-    engine->GetContext().SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    engine->GetContext().SetPipelineState(pso);
+TEST_P(MeshBufferTest, Load_empty_throws)
+{
+    const auto vertices = std::span<const nc::asset::MeshVertex>{};
+    const auto indices = std::span<const uint32_t>{};
+    EXPECT_THROW(uut->Load(vertices, indices, engine->GetContext(), engine->GetDevice()), nc::NcError);
+    ClearErrorOutput();
+}
 
-    const auto attrs = Diligent::DrawIndexedAttribs{
-        static_cast<uint32_t>(overwriteIndices.size()),
+TEST_P(MeshBufferTest, SetBuffers_multipleCalls_succeed)
+{
+    auto& context = engine->GetContext();
+    const auto vertices = std::array{g_vertex1, g_vertex2, g_vertex3};
+    const auto indices = std::array{0u, 1u, 2u};
+    uut->Load(vertices, indices, context, engine->GetDevice());
+    EXPECT_NO_THROW(uut->SetBuffers(context));
+    EXPECT_NO_THROW(uut->SetBuffers(context));
+    EXPECT_NO_THROW(uut->SetBuffers(context));
+}
+
+TEST_P(MeshBufferTest, SetBuffers_noDataLoaded_throws)
+{
+    auto& context = engine->GetContext();
+    EXPECT_THROW(uut->SetBuffers(context), nc::NcError);
+    ClearErrorOutput();
+}
+
+TEST_P(MeshBufferTest, Load_and_SetBuffers_subsequentDrawCallsSucceed)
+{
+    auto& context = engine->GetContext();
+    auto& device = engine->GetDevice();
+    auto& swapChain = engine->GetSwapChain();
+
+    auto pso = CreateTestGraphicsPipelineState(
+        std::span{g_vertexShader},
+        std::span{g_pixelShader},
+        nc::graphics::GetMeshVertexLayoutElements(0)
+    );
+
+    auto* pRTV = swapChain.GetCurrentBackBufferRTV();
+    auto* pDSV = swapChain.GetDepthBufferDSV();
+    context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    context.SetPipelineState(pso);
+
+    auto attrs = Diligent::DrawIndexedAttribs{
+        0u,
         Diligent::VT_UINT32,
         Diligent::DRAW_FLAG_VERIFY_ALL
     };
 
-    engine->GetContext().DrawIndexed(attrs);
+    {
+        const auto vertices = std::array{g_vertex1, g_vertex2, g_vertex3};
+        const auto indices = std::array{0u, 1u, 2u};
+        uut->Load(vertices, indices, context, engine->GetDevice());
+        uut->SetBuffers(context);
+        attrs.NumIndices = static_cast<uint32_t>(indices.size());
+        context.DrawIndexed(attrs);
+    }
+
+    {
+        const auto vertices = std::array{g_vertex1, g_vertex2, g_vertex3, g_vertex1, g_vertex2, g_vertex3};
+        const auto indices = std::array{0u, 1u, 2u, 3u, 4u, 5u};
+        uut->Load(vertices, indices, context, device);
+        uut->SetBuffers(context);
+        attrs.NumIndices = static_cast<uint32_t>(indices.size());
+        context.DrawIndexed(attrs);
+    }
 }
