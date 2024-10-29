@@ -5,7 +5,7 @@
 #include "graphics/PerFrameRenderState.h"
 #include "graphics/api/vulkan/FrameManager.h"
 #include "graphics/api/vulkan/GpuAllocator.h"
-#include "graphics/api/vulkan/Imgui.h"
+#include "graphics/api/vulkan/ImguiVulkan.h"
 #include "graphics/api/vulkan/RenderGraph.h"
 #include "graphics/api/vulkan/ShaderBindingManager.h"
 #include "graphics/api/vulkan/ShaderStorage.h"

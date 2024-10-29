@@ -10,7 +10,7 @@
 #include "ncengine/input/Input.h"
 #include "ncengine/ui/ImGuiStyle.h"
 #include "ncengine/window/Window.h"
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 namespace
 {

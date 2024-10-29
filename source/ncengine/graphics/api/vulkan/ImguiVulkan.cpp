@@ -1,9 +1,9 @@
-#include "Imgui.h"
+#include "ImguiVulkan.h"
 #include "core/Device.h"
 #include "core/Instance.h"
 
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
 
 namespace
 {

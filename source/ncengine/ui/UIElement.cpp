@@ -1,6 +1,6 @@
 #include "ui/UIElement.h"
 #include "window/Window.h"
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 namespace nc::ui
 {

@@ -14,7 +14,7 @@
 #include "ncengine/window/Window.h"
 #include "window/NcWindowImpl.h"
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 namespace
 {
