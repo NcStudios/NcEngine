@@ -24,10 +24,12 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
 {
     protected:
         static inline auto s_diligentErrorOut = std::stringstream{};
+        bool isHeadless;
         std::unique_ptr<nc::window::NcWindowStub> window;
         std::unique_ptr<nc::graphics::DiligentEngine> engine;
 
-        DiligentEngineParameterizedFixture()
+        DiligentEngineParameterizedFixture(bool headless = true)
+            : isHeadless{headless}
         {
             ClearErrorOutput();
         }
@@ -73,7 +75,7 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
         {
             window = std::make_unique<nc::window::NcWindowStub>(
                 nc::window::WindowInfo{
-                    .isHeadless = true
+                    .isHeadless = isHeadless
                 }
             );
 
@@ -82,7 +84,7 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
             engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
 
             auto graphicsSettings = nc::config::GraphicsSettings();
-            graphicsSettings.isHeadless = true;
+            graphicsSettings.isHeadless = isHeadless;
             graphicsSettings.api = GetTestApi();
 
             engine = std::make_unique<nc::graphics::DiligentEngine>(

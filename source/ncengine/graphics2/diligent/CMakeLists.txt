@@ -12,8 +12,10 @@ endif()
 
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        ImGuiImplGLFW.cpp
         ShaderFactory.cpp
         TestPipeline.cpp
+        UIBackend.cpp
 )
 
 add_subdirectory(resource)

@@ -1,4 +1,4 @@
-#include "ui/editor/Editor.h"
+#include "ncengine/ui/editor/Editor.h"
 
 namespace nc::ui::editor
 {
