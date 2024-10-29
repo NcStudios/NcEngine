@@ -167,10 +167,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             m_engine.GetDevice(),
             m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
-            modules.Get<asset::NcAsset>()->OnTextureUpdate(),
+            m_shaderBindings.GetMeshBuffer(),
             m_world,
             modules,
             events,
+            modules.Get<asset::NcAsset>()->OnTextureUpdate(),
+            modules.Get<asset::NcAsset>()->OnMeshUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
@@ -260,8 +262,9 @@ void NcGraphicsImpl2::Run()
 
     m_shaderBindings.Update(renderState, context);
     m_shaderBindings.GetGlobalSignature().Commit(context);
+    m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_testPipeline.Render(context);
+    m_testPipeline.Render(context, m_world);
     m_ui.Render(context);
 
     swapChain.Present();

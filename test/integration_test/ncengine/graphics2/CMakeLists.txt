@@ -51,6 +51,21 @@ elseif(UNIX AND NOT APPLE)
     )
 endif()
 
+### GlobalMeshBuffer Tests ###
+add_graphics_test(GlobalMeshBuffer_tests)
+
+target_sources(GlobalMeshBuffer_tests
+    PRIVATE
+        GlobalMeshBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalMeshBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(GlobalMeshBuffer_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
+)
+
 ### GlobalTextureBufferResource Tests ###
 add_graphics_test(GlobalEnvironmentResource_tests)
 

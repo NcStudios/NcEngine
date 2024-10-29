@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GlobalMeshBuffer.h"
 #include "GlobalResourceSignature.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -26,7 +27,13 @@ class ShaderBindings
             return m_globalSignature;
         }
 
+        auto GetMeshBuffer() -> GlobalMeshBuffer&
+        {
+            return m_meshBuffer;
+        }
+
     private:
         GlobalResourceSignature m_globalSignature;
+        GlobalMeshBuffer m_meshBuffer;
 };
 } // namespace nc::graphics
