@@ -1,7 +1,7 @@
 #pragma once
 
+#include "GlobalMeshBuffer.h"
 #include "GlobalResourceSignature.h"
-#include "MeshBuffer.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -27,13 +27,13 @@ class ShaderBindings
             return m_globalSignature;
         }
 
-        auto GetMeshBuffer() -> MeshBuffer&
+        auto GetMeshBuffer() -> GlobalMeshBuffer&
         {
             return m_meshBuffer;
         }
 
     private:
         GlobalResourceSignature m_globalSignature;
-        MeshBuffer m_meshBuffer;
+        GlobalMeshBuffer m_meshBuffer;
 };
 } // namespace nc::graphics

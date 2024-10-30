@@ -16,7 +16,7 @@ class GraphicsFrontend
         GraphicsFrontend(Diligent::IDeviceContext& context,
                          Diligent::IRenderDevice& device,
                          GlobalTextureBufferResource& textureBuffer,
-                         MeshBuffer& meshBuffer,
+                         GlobalMeshBuffer& meshBuffer,
                          ecs::Ecs world,
                          ModuleProvider modules,
                          SystemEvents& events,

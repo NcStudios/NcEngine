@@ -1,4 +1,4 @@
-#include "MeshBuffer.h"
+#include "GlobalMeshBuffer.h"
 #include "ncengine/asset/AssetData.h"
 
 #include "ncutility/NcError.h"
@@ -87,17 +87,17 @@ auto GetMeshVertexLayoutElements(uint32_t slot, uint32_t indexOffset) -> std::ar
     };
 }
 
-void MeshBuffer::Load(std::span<const asset::MeshVertex> vertices,
-                      std::span<const uint32_t> indices,
-                      Diligent::IDeviceContext& context,
-                      Diligent::IRenderDevice& device)
+void GlobalMeshBuffer::Load(std::span<const asset::MeshVertex> vertices,
+                            std::span<const uint32_t> indices,
+                            Diligent::IDeviceContext& context,
+                            Diligent::IRenderDevice& device)
 {
     CreateBuffer(device, MakeVertexBufferDesc(vertices), MakeBufferData(vertices), m_vertexBuffer);
     CreateBuffer(device, MakeIndexBufferDesc(indices), MakeBufferData(indices), m_indexBuffer);
     TransitionBufferStates(context, m_vertexBuffer.RawPtr(), m_indexBuffer.RawPtr());
 }
 
-void MeshBuffer::SetBuffers(Diligent::IDeviceContext& context)
+void GlobalMeshBuffer::SetBuffers(Diligent::IDeviceContext& context)
 {
     NC_ASSERT(m_vertexBuffer && m_indexBuffer, "Mesh buffers are not populated");
 

@@ -1,5 +1,5 @@
 #include "TestPipeline.h"
-#include "resource/MeshBuffer.h"
+#include "resource/GlobalMeshBuffer.h"
 #include "ncasset/Assets.h"
 
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
