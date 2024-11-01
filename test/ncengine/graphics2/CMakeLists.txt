@@ -25,3 +25,34 @@ target_link_libraries(CameraSubsystem_tests
 )
 
 add_test(CameraSubsystem_tests CameraSubsystem_tests)
+
+### ObjectSubsystem Tests ###
+add_executable(ObjectSubsystem_tests
+    ObjectSubsystem_tests.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+    ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/ObjectSubsystem.cpp
+)
+
+target_include_directories(ObjectSubsystem_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+)
+
+target_compile_options(ObjectSubsystem_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(ObjectSubsystem_tests
+    PRIVATE
+        gtest_main
+        NcAsset
+        NcMath
+)
+
+add_test(ObjectSubsystem_tests ObjectSubsystem_tests)
+

@@ -75,3 +75,14 @@ class ToonRenderer : public ComponentBase
         std::unique_ptr<ToonRendererColdData> m_coldData;
 };
 } // namespace nc::graphics
+
+namespace nc
+{
+template<>
+struct StoragePolicy<graphics::ToonRenderer> : DefaultStoragePolicy
+{
+    static constexpr bool EnableOnAddCallbacks = true;
+    static constexpr bool EnableOnCommitCallbacks = true;
+    static constexpr bool EnableOnRemoveCallbacks = true;
+};
+} // namespace nc
