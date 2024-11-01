@@ -56,6 +56,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 #endif
 
                 auto* pFactoryVk = GetEngineFactoryVk();
+                m_engineFactory = pFactoryVk;
                 if (logCallback)
                 {
                     pFactoryVk->SetMessageCallback(logCallback);

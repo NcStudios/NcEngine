@@ -1,0 +1,89 @@
+{
+    "ResourceSignatures": [
+        {
+            "Name": "TestSignature",
+            "Resources": [
+                {
+                    "Name": "Constants",
+                    "ShaderStages": [
+                        "VERTEX",
+                        "PIXEL"
+                    ],
+                    "VarType": "DYNAMIC",
+                    "ResourceType": "CONSTANT_BUFFER",
+                    "Flags": ["NO_DYNAMIC_BUFFERS"]
+                }
+            ],
+            "ImmutableSamplers": [
+                {
+                    "ShaderStages": ["PIXEL"],
+                    "SamplerOrTextureName": "LinearSampler",
+                    "Desc": {
+                        "BorderColor" : [1.0, 1.0, 1.0, 1.0]
+                    }
+                }
+            ]
+        }
+    ],
+    "Shaders": [
+        {
+            "Desc": {
+                "Name": "TestVertexShader",
+                "ShaderType": "VERTEX",
+                "UseCombinedTextureSamplers": true
+            },
+            "SourceLanguage": "HLSL",
+            "FilePath": "TestVertexShader.vsh",
+            "EntryPoint": "main"
+        },
+        {
+            "Desc": {
+                "Name": "TestPixelShader",
+                "ShaderType": "PIXEL"
+            },
+            "SourceLanguage": "HLSL",
+            "FilePath": "TestPixelShader.psh",
+            "EntryPoint": "main"
+        }
+    ],
+    "Pipelines": [
+        {
+            "PSODesc": {
+                "Name": "TestPSO",
+                "PipelineType": "GRAPHICS"
+            },
+            "GraphicsPipeline": {
+                "DepthStencilDesc": {
+                    "DepthEnable": false
+                },
+                "InputLayout": {
+                    "LayoutElements": [
+                        {
+                            "InputIndex": 0,
+                            "NumComponents": 3
+                        }
+                    ]
+                },
+                "NumRenderTargets": 1,
+                "RTVFormats": {
+                    "0": "RGBA8_UNORM_SRGB"
+                },
+                "RasterizerDesc": {
+                    "CullMode": "FRONT"
+                },
+                "BlendDesc": {
+                    "RenderTargets": {
+                        "0": {
+                            "BlendEnable": true
+                        }
+                    }
+                }
+            },
+            "ppResourceSignatures": [
+                "TestSignature"
+            ],
+            "pVS": "TestVertexShader",
+            "pPS": "TestPixelShader"
+        }
+    ]
+}

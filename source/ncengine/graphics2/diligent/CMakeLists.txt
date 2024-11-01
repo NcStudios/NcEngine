@@ -12,6 +12,7 @@ endif()
 
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        Dearchiver.cpp
         ImGuiImplGLFW.cpp
         ShaderFactory.cpp
         TestPipeline.cpp

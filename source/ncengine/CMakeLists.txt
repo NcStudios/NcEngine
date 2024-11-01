@@ -102,3 +102,10 @@ add_subdirectory(time)
 add_subdirectory(ui)
 add_subdirectory(utility)
 add_subdirectory(window)
+
+install(
+    TARGETS
+        Diligent-RenderStatePackager
+    DESTINATION
+        bin
+)

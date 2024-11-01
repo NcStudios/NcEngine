@@ -36,6 +36,21 @@ function(add_graphics_test target)
     )
 endfunction()
 
+### Dearchiver Tests ###
+add_graphics_test(Dearchiver_tests)
+
+target_sources(Dearchiver_tests
+    PRIVATE
+        Dearchiver_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/Dearchiver.cpp
+)
+
+target_compile_definitions(
+    Dearchiver_tests
+        PRIVATE
+            -DNC_DEARCHIVER_TEST_COLLATERAL_DIR="${CMAKE_CURRENT_LIST_DIR}/collateral/dearchiver"
+)
+
 ### DiligentEngineInit_tests Tests ###
 add_graphics_test(DiligentEngineInit_tests)
 

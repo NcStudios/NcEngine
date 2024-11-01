@@ -63,6 +63,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 #endif
 
                 auto* pFactoryD3D12 = GetEngineFactoryD3D12();
+                m_engineFactory = pFactoryD3D12;
                 if (logCallback)
                 {
                     pFactoryD3D12->SetMessageCallback(logCallback);
@@ -105,6 +106,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                 #endif
 
                 auto* pFactoryVk = GetEngineFactoryVk();
+                m_engineFactory = pFactoryVk;
                 if (logCallback)
                 {
                     pFactoryVk->SetMessageCallback(logCallback);

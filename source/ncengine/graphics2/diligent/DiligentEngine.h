@@ -5,6 +5,7 @@
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/EngineFactory.h"
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/SwapChain.h"
@@ -34,6 +35,7 @@ class DiligentEngine
         auto GetContext()       -> Diligent::IDeviceContext& { return *m_pImmediateContext; }
         auto GetSwapChain()     -> Diligent::ISwapChain&     { return *m_pSwapChain; }
         auto GetShaderFactory() -> ShaderFactory&            { return *m_shaderFactory; }
+        auto GetEngineFactory() -> Diligent::IEngineFactory& { return *m_engineFactory; }
         auto GetApi()           -> std::string_view          { return m_renderApi; }
 
     private:
@@ -41,6 +43,7 @@ class DiligentEngine
         Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
         std::unique_ptr<ShaderFactory>                    m_shaderFactory;
+        Diligent::IEngineFactory*                         m_engineFactory = nullptr;
         std::string_view                                  m_renderApi;
 };
 } // namespace graphics
