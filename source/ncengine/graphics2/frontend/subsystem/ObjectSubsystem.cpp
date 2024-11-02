@@ -1,4 +1,5 @@
 #include "ObjectSubsystem.h"
+#include "ncengine/Events.h"
 
 #include <ranges>
 
@@ -10,9 +11,11 @@ ObjectSubsystem::ObjectSubsystem()
 }
 
 ObjectSubsystem::ObjectSubsystem(nc::Signal<nc::graphics::ToonRenderer&>& onAddRenderer,
-                                 nc::Signal<nc::Entity>& onRemoveRenderer)
+                                 nc::Signal<nc::Entity>& onRemoveRenderer,
+                                 SystemEvents& events)
     : m_onAddRenderer{std::make_unique<Connection>(onAddRenderer.Connect(this, &ObjectSubsystem::OnAddRenderer))},
       m_onRemoveRenderer{std::make_unique<Connection>(onRemoveRenderer.Connect(this, &ObjectSubsystem::OnRemoveRenderer))},
+      m_onStaticEntitiesRebuilt{std::make_unique<Connection>(events.rebuildStatics.Connect(this, &ObjectSubsystem::OnStaticEntitiesRebuilt))},
       m_staticRendererStateCache{},
       m_staticEntityCache{},
       m_dynamicRendererStateCache{},
