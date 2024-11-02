@@ -11,9 +11,8 @@
 
 namespace nc::graphics
 {
-/** Alias over synchronized vector of XMMATRIX and vector of entities. 
- * Can't use a span here because we construct a temporary sorted vector of entities in the case of the static sort. */
-using ModelMatricesAndEntities = std::pair<ObjectRenderState, std::vector<Entity>>; 
+/** Alias over synchronized vector of XMMATRIX and vector of entities. */
+using ModelMatricesAndEntities = std::pair<ObjectRenderState, std::span<const Entity>>; 
 
 /*
 Produces a vector of transform matrices for dynamic (movable) MeshRenderers and static MeshRenderers.
@@ -26,6 +25,7 @@ class ObjectSubsystem
         /** This overload does not sort static mesh renderers to the beginning of the vector. */
         explicit ObjectSubsystem();
 
+        /** @todo: Wire up signal for when static entities are rebuilt in the editor, as that will require a rebuild. */
          /** This overload sorts static mesh renderers to the beginning of the vector. */
         explicit ObjectSubsystem(nc::Signal<nc::graphics::ToonRenderer&>& onAddToonRenderer,
                                  nc::Signal<nc::Entity>& onRemoveToonRenderer);
@@ -35,14 +35,18 @@ class ObjectSubsystem
 
     private:
         /** @todo 776 Replace with new MeshRenderer type once we implement 776 */
-        void OnAddStaticRenderer(ToonRenderer& renderer) { m_isStaticRenderersDirty = renderer.ParentEntity().IsStatic(); }
-        void OnRemoveStaticRenderer(Entity entity) { m_isStaticRenderersDirty = entity.IsStatic(); }
+        void OnAddRenderer(ToonRenderer& renderer) { m_isStaticRenderersDirty = renderer.ParentEntity().IsStatic(); }
+        void OnRemoveRenderer(Entity entity) { m_isStaticRenderersDirty = entity.IsStatic(); }
 
-        std::unique_ptr<Connection> m_onAddStaticRenderer;
-        std::unique_ptr<Connection> m_onRemoveStaticRenderer;
+        std::unique_ptr<Connection> m_onAddRenderer;
+        std::unique_ptr<Connection> m_onRemoveRenderer;
+
         ObjectRenderState m_staticRendererStateCache;
         std::vector<Entity> m_staticEntityCache;
-        uint32_t m_dynamicRenderersStartIndex;
+
+        ObjectRenderState m_dynamicRendererStateCache;
+        std::vector<Entity> m_dynamicEntityCache;
+
         bool m_isStaticRenderersDirty;
         bool m_sortByStatic;
 };

@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "../AssetServiceStub.h"
 #include "../EcsFixture.inl"
+#include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/ToonRenderer.h"
@@ -37,7 +38,6 @@ class ObjectSubsystemTest : public testing::Test,
         }
 };
 
-
 TEST_F(ObjectSubsystemTest, BuildState_NoStaticSorting_Succeeds)
 {
     using namespace nc::graphics;
@@ -51,27 +51,208 @@ TEST_F(ObjectSubsystemTest, BuildState_NoStaticSorting_Succeeds)
         world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
     }
 
-    const auto actualState = uutNoStaticSort.BuildState(world);
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
 
+    // Curious why this deduces to a && ref?
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntities.size(), 5);
+}
 
-    // const auto& actualViewProjection = actualState.viewProjection;
+TEST_F(ObjectSubsystemTest, BuildState_StaticSorting_AllStaticEntities_Succeeds)
+{
+    using namespace nc::graphics;
 
-    // // Should give back something other than an identity matrix
-    // EXPECT_FALSE(
-    //     DirectX::XMVector4Equal(DirectX::g_XMIdentityR0, actualViewProjection.r[0]) &&
-    //     DirectX::XMVector4Equal(DirectX::g_XMIdentityR1, actualViewProjection.r[1]) &&
-    //     DirectX::XMVector4Equal(DirectX::g_XMIdentityR2, actualViewProjection.r[2]) &&
-    //     DirectX::XMVector4Equal(DirectX::g_XMIdentityR3, actualViewProjection.r[3])
-    // );
+    auto world = GetTestWorld();
 
-    // // Don't care about exact values, but matrix should project in a reasonable way
-    // const auto nearPoint = DirectX::XMVectorSet(0.0f, 0.0f, 5.0f, 1.0f);
-    // const auto farPoint = DirectX::XMVectorSet(0.0f, 0.0f, 50.0f, 1.0f);
-    // const auto projectedNearPoint = DirectX::XMVector4Transform(nearPoint, actualViewProjection);
-    // const auto projectedFarPoint = DirectX::XMVector4Transform(farPoint, actualViewProjection);
-    // EXPECT_FLOAT_EQ(0.0f, DirectX::XMVectorGetX(projectedNearPoint));
-    // EXPECT_FLOAT_EQ(0.0f, DirectX::XMVectorGetX(projectedFarPoint));
-    // EXPECT_FLOAT_EQ(0.0f, DirectX::XMVectorGetY(projectedNearPoint));
-    // EXPECT_FLOAT_EQ(0.0f, DirectX::XMVectorGetY(projectedFarPoint));
-    // EXPECT_LT(DirectX::XMVectorGetZ(projectedNearPoint), DirectX::XMVectorGetZ(projectedFarPoint));
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+        const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
+
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntities.size(), 5);
+}
+
+TEST_F(ObjectSubsystemTest, BuildState_StaticSorting_HalfStaticHalfDynamic_Succeeds)
+{
+    using namespace nc::graphics;
+
+    auto world = GetTestWorld();
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+        const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        const auto entity = world.Emplace<nc::Entity>({});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
+
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 10);
+    EXPECT_EQ(actualEntities.size(), 10);
+}
+
+TEST_F(ObjectSubsystemTest, BuildState_NoStaticSorting_BuildStateAgain_Succeeds)
+{
+    using namespace nc::graphics;
+
+    auto world = GetTestWorld();
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        const auto entity = world.Emplace<nc::Entity>({});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
+
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntities.size(), 5);
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        const auto entity = world.Emplace<nc::Entity>({});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    registry.CommitPendingChanges();
+
+    auto [actualRenderStateRebuild, actualEntitiesRebuild] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderStateRebuild.modelMatrices.size(), 10);
+    EXPECT_EQ(actualEntitiesRebuild.size(), 10);
+}
+
+TEST_F(ObjectSubsystemTest, BuildState_StaticSorting_BuildStateAgain_Succeeds)
+{
+    using namespace nc::graphics;
+
+    auto world = GetTestWorld();
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+        const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
+
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntities.size(), 5);
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+        const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+        world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        world.Get<nc::Transform>(entity).Translate(nc::Vector3{i * 5.0f, 0.0f, 0});
+    }
+
+    registry.CommitPendingChanges();
+
+    auto [actualRenderStateRebuild, actualEntitiesRebuild] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderStateRebuild.modelMatrices.size(), 10);
+    EXPECT_EQ(actualEntitiesRebuild.size(), 10);
+}
+
+TEST_F(ObjectSubsystemTest, BuildState_HalfStaticHalfDynamic_BuildStateAgain_Succeeds)
+{
+    using namespace nc::graphics;
+
+    auto world = GetTestWorld();
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+        if (i % 2 == 1)
+        {
+          const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+          world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        }
+        else
+        {
+            const auto entity = world.Emplace<nc::Entity>({});
+            world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        }
+    }
+
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
+
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntities.size(), 5);
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+        if (i % 2 == 0)
+        {
+          const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+          world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        }
+        else
+        {
+            const auto entity = world.Emplace<nc::Entity>({});
+            world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+        }
+    }
+
+    registry.CommitPendingChanges();
+
+    auto [actualRenderStateRebuild, actualEntitiesRebuild] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderStateRebuild.modelMatrices.size(), 10);
+    EXPECT_EQ(actualEntitiesRebuild.size(), 10);
+}
+
+TEST_F(ObjectSubsystemTest, BuildState_StaticSorting_StateNotDirty_Succeeds)
+{
+    using namespace nc::graphics;
+
+    auto world = GetTestWorld();
+
+    for (auto i = 0u; i < 5; i++)
+    {
+        auto flags = nc::Entity::Flags::Static;
+          const auto entity = world.Emplace<nc::Entity>({.flags = flags});
+          world.Emplace<ToonRenderer>(entity, "mesh.nca", dummyMaterial);
+    }
+
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
+
+    auto [actualRenderState, actualEntities] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntities.size(), 5);
+
+    //  Build again, simulating the next frame, with no dirty static entities.
+    auto [actualRenderStateRebuild, actualEntitiesRebuild] = uutNoStaticSort.BuildState(world);
+    EXPECT_EQ(actualRenderStateRebuild.modelMatrices.size(), 5);
+    EXPECT_EQ(actualEntitiesRebuild.size(), 5);
 }
