@@ -21,8 +21,7 @@ class GlobalEnvironmentResource
         static constexpr auto UniformBufferName = "EnvironmentDataUniformBuffer";
 
         explicit GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
-                                           Diligent::IRenderDevice& device,
-                                           Diligent::IDeviceContext& context);
+                                           Diligent::IRenderDevice& device;
 
         static auto MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc;
 

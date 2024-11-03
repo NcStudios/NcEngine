@@ -26,15 +26,15 @@ target_link_libraries(CameraSubsystem_tests
 
 add_test(CameraSubsystem_tests CameraSubsystem_tests)
 
-### ObjectSubsystem Tests ###
-add_executable(ObjectSubsystem_tests
-    ObjectSubsystem_tests.cpp
+### MeshRendererSubsystem Tests ###
+add_executable(MeshRendererSubsystem_tests
+    MeshRendererSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/ObjectSubsystem.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
 )
 
-target_include_directories(ObjectSubsystem_tests
+target_include_directories(MeshRendererSubsystem_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_INCLUDE_DIR}/ncengine
@@ -42,17 +42,17 @@ target_include_directories(ObjectSubsystem_tests
         ${NC_EXTERNAL_DIR}
 )
 
-target_compile_options(ObjectSubsystem_tests
+target_compile_options(MeshRendererSubsystem_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(ObjectSubsystem_tests
+target_link_libraries(MeshRendererSubsystem_tests
     PRIVATE
         gtest_main
         NcAsset
         NcMath
 )
 
-add_test(ObjectSubsystem_tests ObjectSubsystem_tests)
+add_test(MeshRendererSubsystem_tests MeshRendererSubsystem_tests)
 

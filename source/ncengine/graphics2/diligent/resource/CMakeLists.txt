@@ -6,3 +6,5 @@ target_sources(${NC_ENGINE_LIB}
         GlobalTextureBufferResource.cpp
         ShaderBindings.cpp
 )
+
+add_subdirectory(component)

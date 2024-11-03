@@ -1,6 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         CameraSubsystem.cpp
-        ObjectSubsystem.cpp
+        MeshRendererSubsystem.cpp
         UISubsystem.cpp
 )
