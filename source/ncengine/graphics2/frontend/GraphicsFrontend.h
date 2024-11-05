@@ -2,6 +2,7 @@
 
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
+#include "subsystem/MeshRendererSubsystem.h"
 #include "subsystem/UISubsystem.h"
 
 #include "ncengine/ecs/EcsFwd.h"
@@ -24,7 +25,8 @@ class GraphicsFrontend
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
             : m_assetDispatch{context, device, textureBuffer, meshBuffer, onTextureEvent, onMeshEvent},
               m_uiSystem{world, modules, events},
-              m_cameraSystem{}
+              m_cameraSystem{},
+              m_meshRendererSystem{} // No static sorting
         {
         }
 
@@ -35,13 +37,15 @@ class GraphicsFrontend
             m_cameraSystem.Clear();
         }
 
-        auto GetCameraSubsystem()   ->       CameraSubsystem& { return m_cameraSystem; }
-        auto GetUISubsystem()       ->       UISubsystem&     { return m_uiSystem;     }
-        auto GetUISubsystem() const -> const UISubsystem&     { return m_uiSystem;     }
+        auto GetCameraSubsystem()       ->       CameraSubsystem&       { return m_cameraSystem;       }
+        auto GetMeshRendererSubsystem() ->       MeshRendererSubsystem& { return m_meshRendererSystem; }
+        auto GetUISubsystem()           ->       UISubsystem&           { return m_uiSystem;           }
+        auto GetUISubsystem() const     -> const UISubsystem&           { return m_uiSystem;           }
 
     private:
         AssetDispatch m_assetDispatch;
         UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
+        MeshRendererSubsystem m_meshRendererSystem;
 };
 } // namespace nc::graphics

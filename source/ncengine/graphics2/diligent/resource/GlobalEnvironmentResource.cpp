@@ -9,6 +9,7 @@
 namespace nc::graphics
 {
 GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
+                                                     Diligent::IDeviceContext& context,
                                                      Diligent::IRenderDevice& device)
     : m_variable{&variable}
 {
@@ -16,8 +17,7 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVa
         &device,
         sizeof(GlobalEnvironmentData),
         UniformBufferName,
-        &m_uniformBuffer,
-        Diligent::USAGE_DYNAMIC
+        &m_uniformBuffer
     );
 
     if (!m_uniformBuffer)
@@ -25,6 +25,14 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVa
         throw NcError("Failed to create uniform buffer");
     }
 
+    const auto barrier = Diligent::StateTransitionDesc{
+        m_uniformBuffer,
+        Diligent::RESOURCE_STATE_UNKNOWN,
+        Diligent::RESOURCE_STATE_CONSTANT_BUFFER,
+        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+    };
+
+    context.TransitionResourceStates(1, &barrier);
     m_variable->Set(m_uniformBuffer);
 }
 

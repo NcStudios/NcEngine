@@ -9,55 +9,64 @@
 namespace nc::graphics
 {
 MeshRendererBufferResource::MeshRendererBufferResource(Diligent::IShaderResourceVariable& variable,
+                                                       Diligent::IDeviceContext& context,
                                                        Diligent::IRenderDevice& device,
                                                        uint32_t maxMeshRenderers)
     : m_variable{&variable},
       m_maxMeshRenderers{maxMeshRenderers}
 {
-    auto structuredBufferDesc = Diligent::BufferDesc
-    {
-        StructuredBufferName,                          // Name
-        sizeof(MeshRendererData) * m_maxMeshRenderers, // Size,
-        Diligent::BIND_SHADER_RESOURCE,                // BindFlags
-        Diligent::USAGE_DYNAMIC,                       // Usage
-        Diligent::CPU_ACCESS_WRITE,                    // CPU_ACCESS_FLAGS
-        Diligent::BUFFER_MODE_STRUCTURED,              // Mode
-        sizeof(MeshRendererData),                      // ElementByteStride
-    };
-
+    Diligent::BufferDesc structuredBufferDesc;
+    structuredBufferDesc.Name = StructuredBufferName;
+    structuredBufferDesc.Mode = Diligent::BUFFER_MODE_STRUCTURED;
+    structuredBufferDesc.Usage = Diligent::USAGE_DEFAULT;
+    structuredBufferDesc.BindFlags = Diligent::BIND_SHADER_RESOURCE;
+    structuredBufferDesc.Size = sizeof(DirectX::XMMATRIX) * m_maxMeshRenderers;
+    structuredBufferDesc.ElementByteStride = sizeof(DirectX::XMMATRIX);
     device.CreateBuffer(structuredBufferDesc, nullptr, &m_structuredBuffer);
 
     if (!m_structuredBuffer)
     {
         throw NcError("Failed to create structured buffer");
     }
-    
-    m_variable->Set(m_structuredBuffer);
+
+    const auto barrier = Diligent::StateTransitionDesc{
+        m_structuredBuffer,
+        Diligent::RESOURCE_STATE_UNKNOWN,
+        Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+    };
+
+    context.TransitionResourceStates(1, &barrier);
+
+    m_variable->Set(m_structuredBuffer->GetDefaultView(Diligent::BUFFER_VIEW_SHADER_RESOURCE));
 }
 
-auto MeshRendererBufferResource::MakeResourceDesc(std::string_view variableName, uint32_t maxMeshRenderers) -> Diligent::PipelineResourceDesc
+auto MeshRendererBufferResource::MakeResourceDesc(std::string_view variableName, uint32_t ) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc{
         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,
         variableName.data(),
-        maxMeshRenderers,
+        1,
         Diligent::SHADER_RESOURCE_TYPE_BUFFER_SRV,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC
+        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
     };
 }
 
-void MeshRendererBufferResource::Update(const MeshRendererRenderState renderState, Diligent::IDeviceContext& context)
+void MeshRendererBufferResource::Update(const MeshRendererRenderState& renderState, Diligent::IDeviceContext& context)
 {
-    auto modelMatrices = Diligent::MapHelper<DirectX::XMFLOAT4X4>{
-        &context,
+    context.UpdateBuffer(m_structuredBuffer,
+                         0u,
+                         sizeof(DirectX::XMMATRIX) * renderState.modelMatrices.size(),
+                         renderState.modelMatrices.data(),
+                         Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+    const auto barrier = Diligent::StateTransitionDesc{
         m_structuredBuffer,
-        Diligent::MAP_WRITE,
-        Diligent::MAP_FLAG_DISCARD
+        Diligent::RESOURCE_STATE_UNKNOWN,
+        Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
     };
 
-    for (size_t index = 0u; auto& modelMatrix : renderState.modelMatrices)
-    {
-        DirectX::XMStoreFloat4x4(&modelMatrices[index], modelMatrix);
-    }
+    context.TransitionResourceStates(1, &barrier);
 }
 } // namespace nc::graphics

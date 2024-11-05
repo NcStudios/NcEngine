@@ -34,6 +34,7 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IRenderDevice& 
     m_meshRendererResource = std::make_unique<MeshRendererBufferResource>
     (
         GetVariable(Diligent::SHADER_TYPE_PIXEL, MeshRendererShaderVariableName),
+        context,
         device,
         maxMeshRenderers
     );

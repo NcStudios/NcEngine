@@ -28,8 +28,8 @@ class MeshRendererSubsystem
 
          /** This overload sorts static mesh renderers to the beginning of the vector. */
         explicit MeshRendererSubsystem(Signal<ToonRenderer&>& onAddToonRenderer,
-                                 Signal<Entity>& onRemoveToonRenderer,
-                                 SystemEvents& events);
+                                       Signal<Entity>& onRemoveToonRenderer,
+                                       SystemEvents& events);
 
         /** @todo: 776 Add MeshRenderer components in place of old ToonRenderer component. */
         auto BuildState(ecs::ExplicitEcs<ToonRenderer, Transform> ecs) -> MeshRendererRenderState;

@@ -91,24 +91,31 @@ TestPipeline::TestPipeline(IDeviceContext& context,
                            IRenderDevice& device,
                            ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
-                           Diligent::IPipelineResourceSignature& textureResourceSignature)
+                           Diligent::IPipelineResourceSignature& globalResourceSignature,
+                           Diligent::IPipelineResourceSignature& componentResourceSignature)
 {
-    CreatePipelineState(device, swapChain, shaderFactory, textureResourceSignature);
+    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, componentResourceSignature);
     CreateInstanceBuffer(context, device);
 }
 
 void TestPipeline::CreatePipelineState(IRenderDevice& device,
                                        ISwapChain& swapChain,
                                        ShaderFactory& shaderFactory,
-                                       Diligent::IPipelineResourceSignature& textureResourceSignature)
+                                       Diligent::IPipelineResourceSignature& globalResourceSignature,
+                                       Diligent::IPipelineResourceSignature& componentResourceSignature)
 {
     auto createInfo = GraphicsPipelineStateCreateInfo{};
     createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     createInfo.PSODesc.Name = "Test PSO";
 
-    auto signatures = &textureResourceSignature;
-    createInfo.ppResourceSignatures = &signatures;
-    createInfo.ResourceSignaturesCount = 1;
+    auto signatures = std::array<Diligent::IPipelineResourceSignature*, 2>
+    {
+        &globalResourceSignature,
+        &componentResourceSignature
+    };
+
+    createInfo.ppResourceSignatures = signatures.data();
+    createInfo.ResourceSignaturesCount = 2;
 
     createInfo.GraphicsPipeline.NumRenderTargets             = 1;
     createInfo.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
