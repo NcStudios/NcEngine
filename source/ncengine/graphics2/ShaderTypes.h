@@ -27,17 +27,17 @@ struct MaterialData
     float outlineWidth = 1.0f;
 };
 
-// Indicates a modified subrange within the MaterialData buffer.
-struct UpdateRange
+// Specifies a subrange within a buffer.
+struct BufferSlice
 {
-    size_t begin = 0;
-    size_t end = 0;
+    size_t offset = 0;
+    size_t count = 0;
 };
 
 // Event data notifying changes to MaterialInstance buffer.
 struct MaterialDataUpdateInfo
 {
     std::span<const MaterialData> instances; // view over all instances
-    std::vector<UpdateRange> dirtyRanges;    // modified subranges
+    std::vector<BufferSlice> dirtyRanges;    // modified subranges
 };
 } // namespace nc::graphics

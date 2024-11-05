@@ -47,14 +47,11 @@ auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInsta
     return index;
 }
 
-void MaterialRegistry::DestroyInstance(MaterialInstanceHandle index) noexcept
+void MaterialRegistry::DestroyInstance(MaterialInstanceHandle index)
 {
-    // Ignore out-of-bounds so ~MaterialInstance can be noexcept
-    if (index < m_descriptions.size())
-    {
-        m_descriptions[index] = MaterialDesc{};
-        m_freeList.push_back(index);
-    }
+    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+    m_descriptions[index] = MaterialDesc{};
+    m_freeList.push_back(index);
 }
 
 auto MaterialRegistry::GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&
@@ -90,9 +87,9 @@ void MaterialRegistry::CommitPendingChanges(std::function<void(const MaterialDat
     });
 }
 
-auto MaterialRegistry::CollectDirtyRanges() -> std::vector<UpdateRange>
+auto MaterialRegistry::CollectDirtyRanges() -> std::vector<BufferSlice>
 {
-    auto out = std::vector<UpdateRange>{};
+    auto out = std::vector<BufferSlice>{};
     if (m_dirty.empty())
     {
         return out;
@@ -111,13 +108,13 @@ auto MaterialRegistry::CollectDirtyRanges() -> std::vector<UpdateRange>
         }
         else
         {
-            out.emplace_back(start, end);
+            out.emplace_back(start, end - start);
             start = nextEnd;
             end = start + 1;
         }
     }
 
-    out.emplace_back(start, end);
+    out.emplace_back(start, end - start);
     m_dirty.clear();
     return out;
 }

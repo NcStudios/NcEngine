@@ -103,9 +103,9 @@ TEST(MaterialRegistryTest, CommitPendingChanges_multipleWritesToSameInstance_rep
     uut.SetInstanceDesc(instance, nc::MaterialDesc{});
     uut.CommitPendingChanges(listener.MakeCallback());
     ASSERT_EQ(1, listener.receivedInfo.dirtyRanges.size());
-    const auto& [begin, end] = listener.receivedInfo.dirtyRanges[0];
-    EXPECT_EQ(0, begin);
-    EXPECT_EQ(1, end);
+    const auto& [offset, count] = listener.receivedInfo.dirtyRanges[0];
+    EXPECT_EQ(0, offset);
+    EXPECT_EQ(1, count);
 }
 
 TEST(MaterialRegistryTest, CommitPendingChanges_multipleInstances_reportsAsRanges)
@@ -116,9 +116,9 @@ TEST(MaterialRegistryTest, CommitPendingChanges_multipleInstances_reportsAsRange
     uut.CreateInstance();
     uut.CommitPendingChanges(listener.MakeCallback());
     ASSERT_EQ(1, listener.receivedInfo.dirtyRanges.size());
-    const auto& [begin, end] = listener.receivedInfo.dirtyRanges[0];
-    EXPECT_EQ(0, begin);
-    EXPECT_EQ(2, end);
+    const auto& [offset, count] = listener.receivedInfo.dirtyRanges[0];
+    EXPECT_EQ(0, offset);
+    EXPECT_EQ(2, count);
 }
 
 TEST(MaterialRegistryTest, CommitPendingChanges_nonContiguousInstanceUpdates_reportsCorrectly)
@@ -134,18 +134,19 @@ TEST(MaterialRegistryTest, CommitPendingChanges_nonContiguousInstanceUpdates_rep
     uut.SetInstanceDesc(third, nc::MaterialDesc{});
     uut.CommitPendingChanges(listener.MakeCallback());
     ASSERT_EQ(2, listener.receivedInfo.dirtyRanges.size());
-    const auto& [firstBegin, firstEnd] = listener.receivedInfo.dirtyRanges[0];
-    EXPECT_EQ(0, firstBegin);
-    EXPECT_EQ(1, firstEnd);
-    const auto& [secondBegin, secondEnd] = listener.receivedInfo.dirtyRanges[1];
-    EXPECT_EQ(2, secondBegin);
-    EXPECT_EQ(3, secondEnd);
+    const auto& [firstOffset, firstCount] = listener.receivedInfo.dirtyRanges[0];
+    EXPECT_EQ(0, firstOffset);
+    EXPECT_EQ(1, firstCount);
+    const auto& [secondOffset, secondCount] = listener.receivedInfo.dirtyRanges[1];
+    EXPECT_EQ(2, secondOffset);
+    EXPECT_EQ(1, secondCount);
 }
 
 TEST(MaterialRegistryTest, AllMethods_indexOutOfBounds_throws)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
     const auto badIndex = nc::MaterialInstanceHandle{0};
+    EXPECT_THROW(uut.DestroyInstance(badIndex), nc::NcError);
     EXPECT_THROW(uut.GetInstanceDesc(badIndex), nc::NcError);
     EXPECT_THROW(uut.SetInstanceDesc(badIndex, nc::MaterialDesc()), nc::NcError);
     EXPECT_THROW(uut.GetInstanceData(badIndex), nc::NcError);

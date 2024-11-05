@@ -15,7 +15,7 @@ class MaterialRegistry : public StableAddress
         explicit MaterialRegistry(uint32_t maxInstances);
 
         auto CreateInstance(const MaterialDesc& desc = MaterialDesc{}) -> MaterialInstanceHandle;
-        void DestroyInstance(MaterialInstanceHandle index) noexcept;
+        void DestroyInstance(MaterialInstanceHandle index);
         auto GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&;
         void SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc);
         auto GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&;
@@ -30,6 +30,6 @@ class MaterialRegistry : public StableAddress
         MaterialInstanceHandle m_nextIndex = 0;
         MaterialInstanceHandle m_maxIndex;
 
-        auto CollectDirtyRanges() -> std::vector<UpdateRange>;
+        auto CollectDirtyRanges() -> std::vector<BufferSlice>;
 };
 } // namespace nc::graphics

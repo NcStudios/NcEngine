@@ -71,15 +71,14 @@ void MaterialDataBufferResource::Update(const MaterialDataUpdateInfo& updateInfo
         return;
     }
 
-    for (const auto& [begin, end] : updateInfo.dirtyRanges)
+    constexpr auto elementSize = sizeof(MaterialData);
+    for (const auto& [offset, count] : updateInfo.dirtyRanges)
     {
-        const auto byteOffset = begin * sizeof(MaterialData);
-        const auto numBytes = (end - begin) * sizeof(MaterialData);
-        const auto source = &updateInfo.instances[begin];
+        const auto source = &updateInfo.instances[offset];
         context.UpdateBuffer(
             m_buffer,
-            byteOffset,
-            numBytes,
+            offset * elementSize,
+            count * elementSize,
             source,
             Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
         );
