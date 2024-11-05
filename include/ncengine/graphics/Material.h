@@ -50,8 +50,8 @@ struct MaterialDesc
 {
     std::string name = "DefaultMaterial";
     MaterialPasses passes = ShadowedToonMaterial;
-    asset::TextureView diffuseTexture;
-    asset::TextureView normalTexture;
+    asset::TextureView diffuseTexture = asset::TextureView{};
+    asset::TextureView normalTexture = asset::TextureView{};
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
     Vector3 outlineColor = Vector3::One();
