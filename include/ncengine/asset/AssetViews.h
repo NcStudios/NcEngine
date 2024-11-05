@@ -9,6 +9,7 @@
 #include "ncmath/Geometry.h"
 
 #include <concepts>
+#include <limits>
 #include <span>
 #include <string>
 
@@ -16,27 +17,30 @@ struct ImFont;
 
 namespace nc::asset
 {
+constexpr auto NullAssetId = std::numeric_limits<size_t>::max();
+constexpr auto NullAssetIndex = std::numeric_limits<uint32_t>::max();
+
 struct AudioClipView
 {
-    size_t id;
+    size_t id = NullAssetId;
     std::span<const double> leftChannel;
     std::span<const double> rightChannel;
-    size_t samplesPerChannel;
+    size_t samplesPerChannel = 0ull;
 };
 
 struct ConcaveColliderView
 {
-    size_t id;
+    size_t id = NullAssetId;
     std::span<const Triangle> triangles;
-    float maxExtent;
+    float maxExtent = 0.0f;
 };
 
 struct ConvexHullView
 {
-    size_t id;
+    size_t id = NullAssetId;
     std::span<const Vector3> vertices;
     Vector3 extents;
-    float maxExtent;
+    float maxExtent = 0.0f;
 };
 
 enum class CubeMapUsage
@@ -47,25 +51,25 @@ enum class CubeMapUsage
 
 struct CubeMapView
 {
-    size_t id;
-    CubeMapUsage usage;
-    uint32_t index;
+    size_t id = NullAssetId;
+    CubeMapUsage usage = CubeMapUsage::Skybox;
+    uint32_t index = NullAssetIndex;
 };
 
 struct MeshView
 {
-    size_t id;
-    uint32_t firstVertex;
-    uint32_t vertexCount;
-    uint32_t firstIndex;
-    uint32_t indexCount;
-    float maxExtent;
+    size_t id = NullAssetId;
+    uint32_t firstVertex = NullAssetIndex;
+    uint32_t vertexCount = NullAssetIndex;
+    uint32_t firstIndex = NullAssetIndex;
+    uint32_t indexCount = NullAssetIndex;
+    float maxExtent = 0.0f;
 };
 
 struct TextureView
 {
-    size_t id;
-    uint32_t index;
+    size_t id = NullAssetId;
+    uint32_t index = NullAssetIndex;
 };
 
 enum class DescriptorType : uint8_t
@@ -85,10 +89,10 @@ enum class ShaderStages : uint8_t
 
 struct DescriptorManifest
 {
-    uint32_t setIndex;
-    uint32_t slotIndex;
-    DescriptorType descriptorType;
-    ShaderStages shaderStages;
+    uint32_t setIndex = NullAssetIndex;
+    uint32_t slotIndex = NullAssetIndex;
+    DescriptorType descriptorType = DescriptorType::None;
+    ShaderStages shaderStages = ShaderStages::None;
 };
 
 struct ShaderView
@@ -101,8 +105,8 @@ struct ShaderView
 
 struct SkeletalAnimationView
 {
-    size_t id;
-    uint32_t index;
+    size_t id = NullAssetId;
+    uint32_t index = NullAssetIndex;
 };
 
 struct FontInfo
@@ -113,8 +117,8 @@ struct FontInfo
 
 struct FontView
 {
-    ImFont* font;
-    float size;
+    ImFont* font = nullptr;
+    float size = 10.0f;
 };
 
 /** Restrict instantiations to supported asset types to minimize

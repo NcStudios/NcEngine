@@ -8,7 +8,7 @@
 
 namespace nc::graphics
 {
-// MaterialInstance representation for use in a SturctureBuffer.
+// MaterialInstance representation for use in a SturcturedBuffer.
 struct MaterialProperties
 {
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();

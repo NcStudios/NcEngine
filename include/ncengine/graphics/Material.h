@@ -8,6 +8,7 @@
 #include "ncmath/Vector.h"
 
 #include <limits>
+#include <utility>
 
 namespace nc
 {
@@ -49,8 +50,8 @@ struct MaterialDesc
 {
     std::string name = "DefaultMaterial";
     MaterialPasses passes = ShadowedToonMaterial;
-    asset::TextureView diffuseTexture = {}; // defaults?
-    asset::TextureView normalTexture = {};
+    asset::TextureView diffuseTexture;
+    asset::TextureView normalTexture;
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
     Vector3 outlineColor = Vector3::One();

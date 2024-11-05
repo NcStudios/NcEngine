@@ -98,13 +98,13 @@ auto MaterialRegistry::CollectDirtyRanges() -> std::vector<UpdateRange>
         return out;
     }
 
-    std::sort(m_dirty.begin(), m_dirty.end());
-    m_dirty.erase(std::unique(m_dirty.begin(), m_dirty.end()), m_dirty.end());
+    std::ranges::sort(m_dirty);
+    auto removed = std::ranges::unique(m_dirty);
+    m_dirty.erase(removed.begin(), removed.end());
     auto start = m_dirty[0];
     auto end = start + 1;
-    for (auto i = 1ull; i < m_dirty.size(); ++i)
+    for (const auto nextEnd : std::views::drop(m_dirty, 1))
     {
-        const auto nextEnd = m_dirty[i];
         if (nextEnd == end)
         {
             end += 1;
