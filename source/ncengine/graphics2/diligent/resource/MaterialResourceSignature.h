@@ -6,6 +6,8 @@
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
+#include <memory>
+
 namespace nc::graphics
 {
 class MaterialResourceSignature
