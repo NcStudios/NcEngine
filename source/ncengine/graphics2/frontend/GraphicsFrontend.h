@@ -2,6 +2,7 @@
 
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
+#include "subsystem/MaterialRegistry.h"
 #include "subsystem/UISubsystem.h"
 
 #include "ncengine/ecs/EcsFwd.h"
@@ -20,9 +21,11 @@ class GraphicsFrontend
                          ecs::Ecs world,
                          ModuleProvider modules,
                          SystemEvents& events,
+                         uint32_t maxRenderers,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
             : m_assetDispatch{context, device, textureBuffer, meshBuffer, onTextureEvent, onMeshEvent},
+              m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{}
         {
@@ -35,12 +38,14 @@ class GraphicsFrontend
             m_cameraSystem.Clear();
         }
 
-        auto GetCameraSubsystem()   ->       CameraSubsystem& { return m_cameraSystem; }
-        auto GetUISubsystem()       ->       UISubsystem&     { return m_uiSystem;     }
-        auto GetUISubsystem() const -> const UISubsystem&     { return m_uiSystem;     }
+        auto GetMaterialRegistry()  ->       MaterialRegistry& { return m_materialRegistry; }
+        auto GetCameraSubsystem()   ->       CameraSubsystem&  { return m_cameraSystem;     }
+        auto GetUISubsystem()       ->       UISubsystem&      { return m_uiSystem;         }
+        auto GetUISubsystem() const -> const UISubsystem&      { return m_uiSystem;         }
 
     private:
         AssetDispatch m_assetDispatch;
+        MaterialRegistry m_materialRegistry;
         UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
 };

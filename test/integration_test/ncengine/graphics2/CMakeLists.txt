@@ -84,6 +84,22 @@ target_sources(GlobalTextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
 )
 
+### MaterialPropertiesBufferResource Tests ###
+add_graphics_test(MaterialPropertiesBufferResource_tests)
+
+target_sources(MaterialPropertiesBufferResource_tests
+    PRIVATE
+        MaterialPropertiesBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialPropertiesBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialResourceSignature.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(MaterialPropertiesBufferResource_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
+)
+
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 

@@ -99,11 +99,14 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
         // Create a simple graphics pipeline
         auto CreateTestGraphicsPipelineState(std::span<const char> vertexShaderSource,
                                              std::span<const char> pixelShaderSource,
-                                             std::span<const Diligent::LayoutElement> inputLayout) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
+                                             std::span<const Diligent::LayoutElement> inputLayout,
+                                             std::span<Diligent::IPipelineResourceSignature*> signatures = {}) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
         {
             auto createInfo = Diligent::GraphicsPipelineStateCreateInfo{};
             createInfo.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
             createInfo.PSODesc.Name = "Test PSO";
+            createInfo.ppResourceSignatures = signatures.data();
+            createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
             auto& shaderFactory = engine->GetShaderFactory();
             auto vertexShader = shaderFactory.MakeShaderFromSource(vertexShaderSource, "Test VS", Diligent::SHADER_TYPE_VERTEX);
