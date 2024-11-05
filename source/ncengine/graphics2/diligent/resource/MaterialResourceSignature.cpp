@@ -7,11 +7,11 @@ namespace nc::graphics
 MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& context,
                                                      Diligent::IRenderDevice& device,
                                                      std::string_view signatureName,
-                                                     std::string_view materialPropertiesVariableName,
+                                                     std::string_view materialBufferVariableName,
                                                      uint8_t bindingIndex,
                                                      uint32_t maxInstances)
 {
-    const auto resource = MaterialPropertiesBufferResource::MakeResourceDesc(materialPropertiesVariableName);
+    const auto resource = MaterialDataBufferResource::MakeResourceDesc(materialBufferVariableName);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = &resource;
@@ -29,13 +29,13 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, materialPropertiesVariableName.data());
+    auto variable = m_srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, materialBufferVariableName.data());
     if (!variable)
     {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialPropertiesVariableName)};
+        throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialBufferVariableName)};
     }
 
-    m_materialPropertiesResource = std::make_unique<MaterialPropertiesBufferResource>(
+    m_materialDataResource = std::make_unique<MaterialDataBufferResource>(
         context,
         device,
         *variable,

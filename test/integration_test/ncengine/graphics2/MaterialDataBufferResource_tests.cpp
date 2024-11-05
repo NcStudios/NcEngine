@@ -1,12 +1,12 @@
 #include "DiligentEngineParameterizedFixture.inl"
-#include "graphics2/diligent/resource/MaterialPropertiesBufferResource.h"
+#include "graphics2/diligent/resource/MaterialDataBufferResource.h"
 #include "graphics2/diligent/resource/MaterialResourceSignature.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
 #include "ncengine/graphics/Material.h"
 
 #include <array>
 
-class MaterialPropertiesBufferResourceTest : public DiligentEngineParameterizedFixture
+class MaterialDataBufferResourceTest : public DiligentEngineParameterizedFixture
 {
     protected:
         static constexpr auto signatureName = "testSignature";
@@ -14,10 +14,11 @@ class MaterialPropertiesBufferResourceTest : public DiligentEngineParameterizedF
         static constexpr auto bindingIndex = uint8_t{1};
         static constexpr auto initialInstanceHint = 3u;
 
-        std::unique_ptr<nc::graphics::MaterialResourceSignature> uut;
-        std::array<nc::graphics::MaterialProperties, initialInstanceHint> properties;
+        std::unique_ptr<nc::graphics::MaterialResourceSignature> signature;
+        nc::graphics::MaterialDataBufferResource* uut = nullptr;
+        std::array<nc::graphics::MaterialData, initialInstanceHint> properties;
 
-        MaterialPropertiesBufferResourceTest()
+        MaterialDataBufferResourceTest()
             : DiligentEngineParameterizedFixture{false}
         {
         }
@@ -25,7 +26,7 @@ class MaterialPropertiesBufferResourceTest : public DiligentEngineParameterizedF
         void SetUp() override
         {
             INITIALIZE_DILIGENT_FIXTURE;
-            uut = std::make_unique<nc::graphics::MaterialResourceSignature>(
+            signature = std::make_unique<nc::graphics::MaterialResourceSignature>(
                 engine->GetContext(),
                 engine->GetDevice(),
                 signatureName,
@@ -33,45 +34,45 @@ class MaterialPropertiesBufferResourceTest : public DiligentEngineParameterizedF
                 bindingIndex,
                 initialInstanceHint
             );
+
+            uut = &signature->GetMaterialDataResource();
         }
 
         void TearDown() override
         {
             FailIfHasErrorOutput();
         }
-
 };
 
-INSTANTIATE_TEST_SUITE_P(AllApis, MaterialPropertiesBufferResourceTest, g_apiParams);
+INSTANTIATE_TEST_SUITE_P(AllApis, MaterialDataBufferResourceTest, g_apiParams);
 
-TEST_P(MaterialPropertiesBufferResourceTest, Foo)
+TEST_P(MaterialDataBufferResourceTest, UpdateCases_succeed)
 {
     auto& context = engine->GetContext();
     auto& device = engine->GetDevice();
-    auto& resource = uut->GetMaterialPropertiesResource();
 
     // commit succeeds with initial/empty buffer
-    uut->Commit(context);
+    signature->Commit(context);
 
     // update with no dirty elements succeeds
-    auto updateInfo = nc::graphics::MaterialPropertyUpdateInfo{ .instances = properties, .dirtyRanges = {} };
-    resource.Update(updateInfo, context, device);
-    uut->Commit(context);
+    auto updateInfo = nc::graphics::MaterialDataUpdateInfo{ .instances = properties, .dirtyRanges = {} };
+    uut->Update(updateInfo, context, device);
+    signature->Commit(context);
 
     // update entire range succeeds
     updateInfo.dirtyRanges = { {0, initialInstanceHint} };
-    resource.Update(updateInfo, context, device);
-    uut->Commit(context);
+    uut->Update(updateInfo, context, device);
+    signature->Commit(context);
 
     // update individual materials succeeds
     updateInfo.dirtyRanges = { {0, 1}, {1, 2} };
-    resource.Update(updateInfo, context, device);
-    uut->Commit(context);
+    uut->Update(updateInfo, context, device);
+    signature->Commit(context);
 
     // update requires buffer recreation succeeds
-    std::array<nc::graphics::MaterialProperties, initialInstanceHint * 2> largerProperties;
+    std::array<nc::graphics::MaterialData, initialInstanceHint * 2> largerProperties;
     updateInfo.instances = largerProperties;
     updateInfo.dirtyRanges = { {initialInstanceHint, initialInstanceHint * 2} };
-    resource.Update(updateInfo, context, device);
-    uut->Commit(context);
+    uut->Update(updateInfo, context, device);
+    signature->Commit(context);
 }

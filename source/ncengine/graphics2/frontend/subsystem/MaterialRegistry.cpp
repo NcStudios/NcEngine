@@ -7,9 +7,9 @@
 
 namespace
 {
-auto ToMaterialProperties(const nc::MaterialDesc& desc) -> nc::graphics::MaterialProperties
+auto ToMaterialData(const nc::MaterialDesc& desc) -> nc::graphics::MaterialData
 {
-    return nc::graphics::MaterialProperties{
+    return nc::graphics::MaterialData{
         desc.diffuseTexture.index,
         desc.normalTexture.index,
         desc.gradientStart,
@@ -33,7 +33,7 @@ auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInsta
     if (m_freeList.empty())
     {
         NC_ASSERT(m_nextIndex < m_maxIndex, "Max material instances exceeded");
-        m_properties.push_back(ToMaterialProperties(desc));
+        m_data.push_back(ToMaterialData(desc));
         m_descriptions.push_back(desc);
         m_dirty.push_back(m_nextIndex);
         return m_nextIndex++;
@@ -41,7 +41,7 @@ auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInsta
 
     const auto index = m_freeList.back();
     m_freeList.pop_back();
-    m_properties[index] = ToMaterialProperties(desc);
+    m_data[index] = ToMaterialData(desc);
     m_descriptions[index] = desc;
     m_dirty.push_back(index);
     return index;
@@ -65,16 +65,16 @@ auto MaterialRegistry::GetInstanceDesc(MaterialInstanceHandle index) const -> co
 
 void MaterialRegistry::SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc)
 {
-    NC_ASSERT(index < m_properties.size(), "Invalid MaterialInstanceHandle");
-    m_properties[index] = ToMaterialProperties(desc);
+    NC_ASSERT(index < m_data.size(), "Invalid MaterialInstanceHandle");
+    m_data[index] = ToMaterialData(desc);
     m_descriptions[index] = desc;
     m_dirty.push_back(index);
 }
 
-auto MaterialRegistry::GetInstanceProperties(MaterialInstanceHandle index) const -> const MaterialProperties&
+auto MaterialRegistry::GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&
 {
-    NC_ASSERT(index < m_properties.size(), "Invalid MaterialInstanceHandle");
-    return m_properties[index];
+    NC_ASSERT(index < m_data.size(), "Invalid MaterialInstanceHandle");
+    return m_data[index];
 }
 
 auto MaterialRegistry::HasPendingChanges() const -> bool
@@ -82,10 +82,10 @@ auto MaterialRegistry::HasPendingChanges() const -> bool
     return !m_dirty.empty();
 }
 
-void MaterialRegistry::CommitPendingChanges(std::function<void(const MaterialPropertyUpdateInfo&)> notifyUpdate)
+void MaterialRegistry::CommitPendingChanges(std::function<void(const MaterialDataUpdateInfo&)> notifyUpdate)
 {
-    notifyUpdate(MaterialPropertyUpdateInfo{
-        .instances = m_properties,
+    notifyUpdate(MaterialDataUpdateInfo{
+        .instances = m_data,
         .dirtyRanges = CollectDirtyRanges()
     });
 }

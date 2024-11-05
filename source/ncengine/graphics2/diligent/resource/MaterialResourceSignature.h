@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MaterialPropertiesBufferResource.h"
+#include "MaterialDataBufferResource.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -16,7 +16,7 @@ class MaterialResourceSignature
         explicit MaterialResourceSignature(Diligent::IDeviceContext& context,
                                            Diligent::IRenderDevice& device,
                                            std::string_view signatureName,
-                                           std::string_view materialPropertiesVariableName,
+                                           std::string_view materialBufferVariableName,
                                            uint8_t bindingIndex,
                                            uint32_t maxInstances);
 
@@ -30,14 +30,14 @@ class MaterialResourceSignature
             return *m_signature;
         }
 
-        auto GetMaterialPropertiesResource() -> MaterialPropertiesBufferResource&
+        auto GetMaterialDataResource() -> MaterialDataBufferResource&
         {
-            return *m_materialPropertiesResource;
+            return *m_materialDataResource;
         }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        std::unique_ptr<MaterialPropertiesBufferResource> m_materialPropertiesResource;
+        std::unique_ptr<MaterialDataBufferResource> m_materialDataResource;
 };
 } // namespace nc::graphics

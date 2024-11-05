@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics2/MaterialProperties.h"
+#include "graphics2/ShaderTypes.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/type/StableAddress.h"
 
@@ -18,12 +18,12 @@ class MaterialRegistry : public StableAddress
         void DestroyInstance(MaterialInstanceHandle index) noexcept;
         auto GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&;
         void SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc);
-        auto GetInstanceProperties(MaterialInstanceHandle index) const -> const MaterialProperties&;
+        auto GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&;
         auto HasPendingChanges() const -> bool;
-        void CommitPendingChanges(std::function<void(const MaterialPropertyUpdateInfo&)> notifyUpdate);
+        void CommitPendingChanges(std::function<void(const MaterialDataUpdateInfo&)> notifyUpdate);
 
     private:
-        std::vector<MaterialProperties> m_properties;
+        std::vector<MaterialData> m_data;
         std::vector<MaterialDesc> m_descriptions;
         std::vector<MaterialInstanceHandle> m_dirty;
         std::vector<MaterialInstanceHandle> m_freeList;

@@ -24,7 +24,7 @@ class ShaderBindings
                 context,
                 device,
                 "MaterialInstanceSignature",
-                "MaterialPropertiesBuffer",
+                "MaterialDataBuffer",
                 1,
                 initialMaterialSizeHint
               }

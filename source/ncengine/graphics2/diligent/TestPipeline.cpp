@@ -22,7 +22,7 @@ R"(#ifdef VULKAN
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-struct MaterialProperties
+struct MaterialData
 {
     uint diffuseTexture;
     uint normalIndex;
@@ -32,7 +32,7 @@ struct MaterialProperties
     float outlineWidth;
 };
 
-StructuredBuffer<MaterialProperties> MaterialPropertiesBuffer : register(t1);
+StructuredBuffer<MaterialData> MaterialDataBuffer : register(t1);
 
 struct PSInput 
 { 

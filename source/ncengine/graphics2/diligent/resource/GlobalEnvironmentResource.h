@@ -1,19 +1,14 @@
 #pragma once
 
+#include "graphics2/ShaderTypes.h"
+
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
-#include "DirectXMath.h"
-
 namespace nc::graphics
 {
 struct CameraRenderState;
-
-struct GlobalEnvironmentData
-{
-    DirectX::XMMATRIX cameraViewProjection;
-};
 
 class GlobalEnvironmentResource
 {

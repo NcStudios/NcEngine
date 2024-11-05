@@ -1,21 +1,21 @@
-#include "MaterialPropertiesBufferResource.h"
-#include "graphics2/MaterialProperties.h"
+#include "MaterialDataBufferResource.h"
+#include "graphics2/ShaderTypes.h"
 
 #include "ncutility/NcError.h"
 
 namespace nc::graphics
 {
-MaterialPropertiesBufferResource::MaterialPropertiesBufferResource(Diligent::IDeviceContext& context,
-                                                                   Diligent::IRenderDevice& device,
-                                                                   Diligent::IShaderResourceVariable& variable,
-                                                                   uint32_t initialInstanceCountHint)
+MaterialDataBufferResource::MaterialDataBufferResource(Diligent::IDeviceContext& context,
+                                                       Diligent::IRenderDevice& device,
+                                                       Diligent::IShaderResourceVariable& variable,
+                                                       uint32_t initialInstanceCountHint)
     : m_variable{&variable}
 {
-    const auto dummy = std::vector<MaterialProperties>(initialInstanceCountHint);
+    const auto dummy = std::vector<MaterialData>(initialInstanceCountHint);
     CreateBuffer(context, device, dummy);
 }
 
-auto MaterialPropertiesBufferResource::MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc
+auto MaterialDataBufferResource::MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc{
         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,
@@ -26,15 +26,15 @@ auto MaterialPropertiesBufferResource::MakeResourceDesc(std::string_view variabl
     };
 }
 
-void MaterialPropertiesBufferResource::CreateBuffer(Diligent::IDeviceContext& context,
-                                                    Diligent::IRenderDevice& device,
-                                                    std::span<const MaterialProperties> data)
+void MaterialDataBufferResource::CreateBuffer(Diligent::IDeviceContext& context,
+                                              Diligent::IRenderDevice& device,
+                                              std::span<const MaterialData> data)
 {
-    constexpr auto elementSize = static_cast<uint32_t>(sizeof(MaterialProperties));
+    constexpr auto elementSize = static_cast<uint32_t>(sizeof(MaterialData));
     m_bufferElementCount = static_cast<uint32_t>(data.size());
     const auto bufferSize = elementSize * m_bufferElementCount;
     const auto bufferDesc = Diligent::BufferDesc{
-        "MaterialPropertiesBuffer",
+        "MaterialDataBuffer",
         bufferSize,
         Diligent::BIND_SHADER_RESOURCE,
         Diligent::USAGE_DEFAULT,
@@ -61,9 +61,9 @@ void MaterialPropertiesBufferResource::CreateBuffer(Diligent::IDeviceContext& co
     context.TransitionResourceStates(1, &barrier);
 }
 
-void MaterialPropertiesBufferResource::Update(const MaterialPropertyUpdateInfo& updateInfo,
-                                              Diligent::IDeviceContext& context,
-                                              Diligent::IRenderDevice& device)
+void MaterialDataBufferResource::Update(const MaterialDataUpdateInfo& updateInfo,
+                                        Diligent::IDeviceContext& context,
+                                        Diligent::IRenderDevice& device)
 {
     if (updateInfo.instances.size() > m_bufferElementCount)
     {
@@ -73,8 +73,8 @@ void MaterialPropertiesBufferResource::Update(const MaterialPropertyUpdateInfo& 
 
     for (const auto& [begin, end] : updateInfo.dirtyRanges)
     {
-        const auto byteOffset = begin * sizeof(MaterialProperties);
-        const auto numBytes = (end - begin) * sizeof(MaterialProperties);
+        const auto byteOffset = begin * sizeof(MaterialData);
+        const auto numBytes = (end - begin) * sizeof(MaterialData);
         const auto source = &updateInfo.instances[begin];
         context.UpdateBuffer(
             m_buffer,

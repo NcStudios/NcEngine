@@ -8,20 +8,20 @@
 
 namespace nc::graphics
 {
-struct MaterialProperties;
-struct MaterialPropertyUpdateInfo;
+struct MaterialData;
+struct MaterialDataUpdateInfo;
 
-class MaterialPropertiesBufferResource
+class MaterialDataBufferResource
 {
     public:
-        explicit MaterialPropertiesBufferResource(Diligent::IDeviceContext& context,
-                                                  Diligent::IRenderDevice& device,
-                                                  Diligent::IShaderResourceVariable& variable,
-                                                  uint32_t initialInstanceCountHint);
+        explicit MaterialDataBufferResource(Diligent::IDeviceContext& context,
+                                            Diligent::IRenderDevice& device,
+                                            Diligent::IShaderResourceVariable& variable,
+                                            uint32_t initialInstanceCountHint);
 
         static auto MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc;
 
-        void Update(const MaterialPropertyUpdateInfo& updateInfo,
+        void Update(const MaterialDataUpdateInfo& updateInfo,
                     Diligent::IDeviceContext& context,
                     Diligent::IRenderDevice& device);
 
@@ -38,6 +38,6 @@ class MaterialPropertiesBufferResource
 
         void CreateBuffer(Diligent::IDeviceContext& context,
                           Diligent::IRenderDevice& device,
-                          std::span<const MaterialProperties> data);
+                          std::span<const MaterialData> data);
 };
 } // namespace nc::graphics

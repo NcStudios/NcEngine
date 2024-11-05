@@ -5,11 +5,11 @@
 
 struct UpdateListener
 {
-    nc::graphics::MaterialPropertyUpdateInfo receivedInfo;
+    nc::graphics::MaterialDataUpdateInfo receivedInfo;
 
     auto MakeCallback()
     {
-        return [this](const nc::graphics::MaterialPropertyUpdateInfo& info)
+        return [this](const nc::graphics::MaterialDataUpdateInfo& info)
         {
             this->receivedInfo = info;
         };
@@ -17,7 +17,7 @@ struct UpdateListener
 
     void Clear()
     {
-        receivedInfo = nc::graphics::MaterialPropertyUpdateInfo{};
+        receivedInfo = nc::graphics::MaterialDataUpdateInfo{};
     }
 };
 
@@ -42,7 +42,7 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
 
     auto uut = nc::graphics::MaterialRegistry{5u};
     const auto actualIndex = uut.CreateInstance(expectedDesc);
-    const auto actualProperties = uut.GetInstanceProperties(actualIndex);
+    const auto actualProperties = uut.GetInstanceData(actualIndex);
     EXPECT_EQ(0u, actualIndex);
     EXPECT_EQ(expectedDesc.diffuseTexture.index, actualProperties.diffuseTexIndex);
     EXPECT_EQ(expectedDesc.normalTexture.index, actualProperties.normalTexIndex);
@@ -148,7 +148,7 @@ TEST(MaterialRegistryTest, AllMethods_indexOutOfBounds_throws)
     const auto badIndex = nc::MaterialInstanceHandle{0};
     EXPECT_THROW(uut.GetInstanceDesc(badIndex), nc::NcError);
     EXPECT_THROW(uut.SetInstanceDesc(badIndex, nc::MaterialDesc()), nc::NcError);
-    EXPECT_THROW(uut.GetInstanceProperties(badIndex), nc::NcError);
+    EXPECT_THROW(uut.GetInstanceData(badIndex), nc::NcError);
 }
 
 TEST(MaterialRegistryTest, MaterialInstance_wrapsFunctions)
