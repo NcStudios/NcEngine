@@ -21,7 +21,7 @@ class ComponentResourceSignature
     public:
         static constexpr auto BindingIndex = 1u;
         static constexpr auto SignatureName = "ComponentResourceSignature";
-        static constexpr auto MeshRendererShaderVariableName = "MeshRendererData";
+        static constexpr auto MeshRendererShaderVariableName = "MeshRendererBufferData";
 
         explicit ComponentResourceSignature(Diligent::IRenderDevice& device, Diligent::IDeviceContext& context, uint32_t maxMeshRenderers);
         ~ComponentResourceSignature() noexcept;

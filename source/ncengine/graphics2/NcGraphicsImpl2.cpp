@@ -268,7 +268,7 @@ void NcGraphicsImpl2::Run()
 
     m_shaderBindings.GetComponentSignature().Commit(context);
 
-    m_testPipeline.Render(context, m_world);
+    m_testPipeline.Render(context, m_world, renderState);
     m_ui.Render(context);
 
     swapChain.Present();

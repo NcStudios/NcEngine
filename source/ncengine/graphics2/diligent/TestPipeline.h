@@ -15,6 +15,8 @@
 
 namespace nc::graphics
 {
+struct FrontendRenderState;
+
 class TestPipeline
 {
     public:
@@ -26,7 +28,8 @@ class TestPipeline
                      Diligent::IPipelineResourceSignature& componentResourceSignature);
 
         void Render(Diligent::IDeviceContext& context,
-                    ecs::ExplicitEcs<ToonRenderer> ecs);
+                    ecs::ExplicitEcs<ToonRenderer> ecs,
+                    const nc::graphics::FrontendRenderState& renderState);
 
         void CreatePipelineState(Diligent::IRenderDevice& device,
                                  Diligent::ISwapChain& swapChain,
@@ -43,16 +46,9 @@ class TestPipeline
 
         struct InstanceData
         {
-            DirectX::XMFLOAT4X4 Matrix;
             uint32_t TextureInd = 0;
         };
 
         std::vector<InstanceData> m_InstanceData;
-        std::vector<uint32_t>     m_GeometryType;
-
-        int m_GridSize = 5;
-
-        static constexpr int MaxGridSize  = 32;
-        static constexpr int MaxInstances = MaxGridSize * MaxGridSize * MaxGridSize;
 };
 } // namespace nc::graphics
