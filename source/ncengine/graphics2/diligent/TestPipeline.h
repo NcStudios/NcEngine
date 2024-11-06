@@ -22,7 +22,8 @@ class TestPipeline
                      Diligent::IRenderDevice& device,
                      Diligent::ISwapChain& swapChain,
                      ShaderFactory& shaderFactory,
-                     Diligent::IPipelineResourceSignature& textureResourceSignature);
+                     Diligent::IPipelineResourceSignature& globalResourceSignature,
+                     Diligent::IPipelineResourceSignature& materialResourceSignature);
 
         void Render(Diligent::IDeviceContext& context,
                     ecs::ExplicitEcs<ToonRenderer> ecs);
@@ -30,7 +31,8 @@ class TestPipeline
         void CreatePipelineState(Diligent::IRenderDevice& device,
                                  Diligent::ISwapChain& swapChain,
                                  ShaderFactory& shaderFactory,
-                                 Diligent::IPipelineResourceSignature& textureResourceSignature);
+                                 Diligent::IPipelineResourceSignature& globalResourceSignature,
+                                 Diligent::IPipelineResourceSignature& materialResourceSignature);
 
         void CreateInstanceBuffer(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device);
         void PopulateInstanceBuffer(Diligent::IDeviceContext& context);

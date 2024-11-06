@@ -2,6 +2,7 @@
 
 #include "GlobalMeshBuffer.h"
 #include "GlobalResourceSignature.h"
+#include "MaterialResourceSignature.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -13,10 +14,20 @@ struct FrontendRenderState;
 class ShaderBindings
 {
     public:
+        /** @todo: 782 Fully parameterize names, indices, and size hints */
         explicit ShaderBindings(Diligent::IRenderDevice& device,
                                 Diligent::IDeviceContext& context,
-                                uint32_t maxTextures)
-            : m_globalSignature{device, context, maxTextures}
+                                uint32_t maxTextures,
+                                uint32_t initialMaterialSizeHint)
+            : m_globalSignature{device, context, maxTextures},
+              m_materialSignature{
+                context,
+                device,
+                "MaterialInstanceSignature",
+                "MaterialDataBuffer",
+                2,
+                initialMaterialSizeHint
+              }
         {
         }
 
@@ -27,6 +38,11 @@ class ShaderBindings
             return m_globalSignature;
         }
 
+        auto GetMaterialSignature() -> MaterialResourceSignature&
+        {
+            return m_materialSignature;
+        }
+
         auto GetMeshBuffer() -> GlobalMeshBuffer&
         {
             return m_meshBuffer;
@@ -34,6 +50,7 @@ class ShaderBindings
 
     private:
         GlobalResourceSignature m_globalSignature;
+        MaterialResourceSignature m_materialSignature;
         GlobalMeshBuffer m_meshBuffer;
 };
 } // namespace nc::graphics

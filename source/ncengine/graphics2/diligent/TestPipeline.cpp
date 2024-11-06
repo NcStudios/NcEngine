@@ -22,6 +22,18 @@ R"(#ifdef VULKAN
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
+struct MaterialData
+{
+    uint diffuseTexture;
+    uint normalIndex;
+    float3 gradientStart;
+    float3 gradientEnd;
+    float3 outlineColor;
+    float outlineWidth;
+};
+
+StructuredBuffer<MaterialData> MaterialDataBuffer : register(t1);
+
 struct PSInput 
 { 
     float4 Pos      : SV_POSITION; 
@@ -91,24 +103,26 @@ TestPipeline::TestPipeline(IDeviceContext& context,
                            IRenderDevice& device,
                            ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
-                           Diligent::IPipelineResourceSignature& textureResourceSignature)
+                           Diligent::IPipelineResourceSignature& globalResourceSignature,
+                           Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
-    CreatePipelineState(device, swapChain, shaderFactory, textureResourceSignature);
+    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, materialResourceSignature);
     CreateInstanceBuffer(context, device);
 }
 
 void TestPipeline::CreatePipelineState(IRenderDevice& device,
                                        ISwapChain& swapChain,
                                        ShaderFactory& shaderFactory,
-                                       Diligent::IPipelineResourceSignature& textureResourceSignature)
+                                       Diligent::IPipelineResourceSignature& globalResourceSignature,
+                                       Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
     auto createInfo = GraphicsPipelineStateCreateInfo{};
     createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     createInfo.PSODesc.Name = "Test PSO";
 
-    auto signatures = &textureResourceSignature;
-    createInfo.ppResourceSignatures = &signatures;
-    createInfo.ResourceSignaturesCount = 1;
+    auto signatures = std::array{&globalResourceSignature, &materialResourceSignature};
+    createInfo.ppResourceSignatures = signatures.data();
+    createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
     createInfo.GraphicsPipeline.NumRenderTargets             = 1;
     createInfo.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
