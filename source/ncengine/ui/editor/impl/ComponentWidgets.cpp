@@ -751,7 +751,7 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
 
         if (descModified)
         {
-            meshRenderer.GetMaterial().SetDesc(materialDesc);
+            materialInstance.SetDesc(materialDesc);
         }
 
         ImGui::TreePop();

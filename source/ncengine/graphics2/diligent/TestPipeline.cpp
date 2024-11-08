@@ -83,14 +83,12 @@ struct PSInput
 
 cbuffer EnvironmentData
 {
-    row_major float4x4 cameraViewProjection;
+    float4x4 cameraViewProjection;
 };
 
 void main(in  VSInput VSIn, out PSInput PSIn)
 {
-
-    row_major float4x4 InstanceMatr = float4x4(VSIn.MtrxRow0, VSIn.MtrxRow1, VSIn.MtrxRow2, VSIn.MtrxRow3);
-
+    float4x4 InstanceMatr = MatrixFromRows(VSIn.MtrxRow0, VSIn.MtrxRow1, VSIn.MtrxRow2, VSIn.MtrxRow3);
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), InstanceMatr);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
@@ -218,8 +216,8 @@ void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
                 float scale = BaseScale * scale_distr(gen);
                 auto matrix = DirectX::XMMatrixMultiply(
                     DirectX::XMMatrixMultiply(
-                        DirectX::XMMatrixScaling(scale, scale, scale),
-                        DirectX::XMMatrixRotationRollPitchYaw(rot_distr(gen), rot_distr(gen), rot_distr(gen))
+                        DirectX::XMMatrixRotationRollPitchYaw(rot_distr(gen), rot_distr(gen), rot_distr(gen)),
+                        DirectX::XMMatrixScaling(scale, scale, scale)
                     ),
                     DirectX::XMMatrixTranslation(xOffset, yOffset, zOffset)
                 );
