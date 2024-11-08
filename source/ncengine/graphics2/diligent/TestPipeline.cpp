@@ -23,6 +23,18 @@ R"(#ifdef VULKAN
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
+struct MaterialData
+{
+    uint diffuseTexture;
+    uint normalIndex;
+    float3 gradientStart;
+    float3 gradientEnd;
+    float3 outlineColor;
+    float outlineWidth;
+};
+
+StructuredBuffer<MaterialData> MaterialDataBuffer : register(t1);
+
 struct PSInput 
 { 
     float4 Pos      : SV_POSITION; 
@@ -90,35 +102,30 @@ void main(in  VSInput VSIn, in uint InstanceId : SV_InstanceID, out PSInput PSIn
 
 namespace nc::graphics
 {
-TestPipeline::TestPipeline(IDeviceContext& context,
-                           IRenderDevice& device,
+TestPipeline::TestPipeline(IRenderDevice& device,
                            ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
                            Diligent::IPipelineResourceSignature& globalResourceSignature,
-                           Diligent::IPipelineResourceSignature& componentResourceSignature)
+                           Diligent::IPipelineResourceSignature& componentResourceSignature,
+                           Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
-    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, componentResourceSignature);
-    CreateInstanceBuffer(context, device);
+    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, componentResourceSignature, materialResourceSignature);
 }
 
 void TestPipeline::CreatePipelineState(IRenderDevice& device,
                                        ISwapChain& swapChain,
                                        ShaderFactory& shaderFactory,
                                        Diligent::IPipelineResourceSignature& globalResourceSignature,
-                                       Diligent::IPipelineResourceSignature& componentResourceSignature)
+                                       Diligent::IPipelineResourceSignature& componentResourceSignature,
+                                       Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
     auto createInfo = GraphicsPipelineStateCreateInfo{};
     createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     createInfo.PSODesc.Name = "Test PSO";
 
-    auto signatures = std::array<Diligent::IPipelineResourceSignature*, 2>
-    {
-        &globalResourceSignature,
-        &componentResourceSignature
-    };
-
+    auto signatures = std::array{&globalResourceSignature, &componentResourceSignature, &materialResourceSignature};
     createInfo.ppResourceSignatures = signatures.data();
-    createInfo.ResourceSignaturesCount = 2;
+    createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
     createInfo.GraphicsPipeline.NumRenderTargets             = 1;
     createInfo.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
@@ -165,27 +172,6 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     NC_ASSERT(m_pBindlessPSO, "Failed to create pipeline state object");
 }
 
-void TestPipeline::CreateInstanceBuffer(IDeviceContext&, IRenderDevice& device)
-{
-    // Create instance data buffer that will store transformation matrices
-    BufferDesc InstBuffDesc;
-    InstBuffDesc.Name = "Instance data buffer";
-    // Use default usage as this buffer will only be updated when grid size changes
-    InstBuffDesc.Usage     = USAGE_DEFAULT;
-    InstBuffDesc.BindFlags = BIND_VERTEX_BUFFER;
-    InstBuffDesc.Size      = sizeof(InstanceData) * 100000;
-    device.CreateBuffer(InstBuffDesc, nullptr, &m_InstanceBuffer);
-}
-
-void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
-{
-    // Populate instance data buffer
-    auto DataSize = static_cast<uint32_t>(sizeof(InstanceData) * m_InstanceData.size());
-    context.UpdateBuffer(m_InstanceBuffer, 0, DataSize, m_InstanceData.data(), RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    StateTransitionDesc Barrier(m_InstanceBuffer, RESOURCE_STATE_UNKNOWN, RESOURCE_STATE_VERTEX_BUFFER, STATE_TRANSITION_FLAG_UPDATE_STATE);
-    context.TransitionResourceStates(1, &Barrier);
-}
-
 void TestPipeline::Render(Diligent::IDeviceContext& context,
                           ecs::ExplicitEcs<ToonRenderer> ecs,
                           const nc::graphics::FrontendRenderState& renderState)
@@ -198,7 +184,6 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
         const auto& renderer = ecs.Get<ToonRenderer>(entity);
         m_InstanceData.emplace_back(renderer.GetMaterialView().baseColor.index);
     }
-    PopulateInstanceBuffer(context);
 
     auto instanceBuffer = m_InstanceBuffer.RawPtr();
     context.SetVertexBuffers(
