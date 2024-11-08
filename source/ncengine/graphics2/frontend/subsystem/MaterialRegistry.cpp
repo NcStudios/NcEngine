@@ -74,6 +74,12 @@ auto MaterialRegistry::GetInstanceData(MaterialInstanceHandle index) const -> co
     return m_data[index];
 }
 
+void MaterialRegistry::SetInstanceName(MaterialInstanceHandle index, std::string_view name)
+{
+    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+    m_descriptions[index].name = std::string{name};
+}
+
 auto MaterialRegistry::HasPendingChanges() const -> bool
 {
     return !m_dirty.empty();

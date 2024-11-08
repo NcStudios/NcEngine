@@ -116,4 +116,28 @@ auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
 
     return out;
 }
+
+auto NcAssetImpl::GetAssetPath(AssetType type, size_t id) const -> std::string_view
+{
+    return GetService(type).GetPath(id);
+}
+
+auto NcAssetImpl::GetService(AssetType type) const -> const IAssetServiceBase&
+{
+    switch (type)
+    {
+        case AssetType::AudioClip:         return *m_audioClipManager;
+        case AssetType::CubeMap:           return *m_cubeMapManager;
+        case AssetType::ConcaveCollider:   return *m_concaveColliderManager;
+        case AssetType::HullCollider:      return *m_hullColliderManager;
+        case AssetType::Mesh:              return *m_meshManager;
+        case AssetType::Shader:            throw NcError{"Not Implemented"};
+        case AssetType::SkeletalAnimation: return *m_skeletalAnimationManager;
+        case AssetType::Texture:           return *m_textureManager;
+        case AssetType::Font:              return *m_fontManager;
+    }
+
+    NC_ASSERT(false, "Unexpected code path");
+    std::unreachable();
+}
 } // namespace nc::asset
