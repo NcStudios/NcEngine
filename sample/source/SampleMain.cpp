@@ -64,11 +64,11 @@ int main(int argc, char** argv)
                 throw std::runtime_error("No supported graphics APIs were found on the system.");
             }
 
-            const auto& targetApi = config.graphicsSettings.api;
-            if (!std::ranges::contains(supportedGraphicsApis, targetApi))
+            auto& preferredApi = config.graphicsSettings.preferredApi;
+            if (!std::ranges::contains(supportedGraphicsApis, preferredApi))
             {
-                std::cerr << fmt::format("Warning: The target graphics API ({0}) was not found on the system. Falling back to: {1}.", targetApi, supportedGraphicsApis[0]);
-                config.graphicsSettings.api = supportedGraphicsApis[0];
+                std::cerr << fmt::format("Warning: The target graphics API ({0}) was not found on the system. Falling back to: {1}.", preferredApi, supportedGraphicsApis[0]);
+                preferredApi = supportedGraphicsApis[0];
             }
         }
 

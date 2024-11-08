@@ -31,6 +31,7 @@ class NcGraphicsImpl : public NcGraphics
                        std::unique_ptr<IGraphics> graphics,
                        window::NcWindow& window);
 
+        auto GetApi() const noexcept -> std::string_view override { return "vulkan"; }
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
         void SetUi(ui::IUI* ui) noexcept override;

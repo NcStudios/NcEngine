@@ -95,6 +95,13 @@ struct NcGraphics : public Module
      * is not cleared as it can be set on a persistent Entity.
      */
     virtual void ClearEnvironment() = 0;
+
+    /**
+     * @brief Get the graphics api being used.
+     * @note Typically, this will be equal to GraphicsSettings::preferredApi, but insufficient device support or
+     *       initialization failure may result in a fallback api being selected.
+     */
+    virtual auto GetApi() const noexcept -> std::string_view = 0;
 };
 
 /**
@@ -105,8 +112,10 @@ auto GetSupportedApis() -> std::span<const std::string_view>;
 
 /**
  * @brief Build an NcGraphics instance.
- * 
- * The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
+ * @note GraphicsSettings::preferredApi must be one of the values returned from GetSupportedApis(). If initialization
+ *       fails with the preferred option, another attempt will be made with a fallback, if available. The api in use
+ *       can be checked with NcGraphics::GetApi().
+ * @note The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
  */
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,

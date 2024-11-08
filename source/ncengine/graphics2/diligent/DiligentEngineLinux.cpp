@@ -32,11 +32,10 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 {
     using namespace Diligent;
 
-    const std::string_view& renderApi = graphicsSettings.api;
     auto preferredApiOrder = std::vector<std::string_view>{};
     preferredApiOrder.reserve(2);
     std::ranges::copy(supportedApis, std::back_inserter(preferredApiOrder));
-    RotateElementToBeginning(preferredApiOrder, renderApi);
+    RotateElementToBeginning(preferredApiOrder, std::string_view{graphicsSettings.preferredApi});
 
     std::string errorMessage;
     LinuxNativeWindow window;
@@ -63,16 +62,13 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
 
                 auto engineCI = EngineVkCreateInfo{engineCreateInfo};
                 pFactoryVk->CreateDeviceAndContextsVk(engineCI, &m_pDevice, &m_pImmediateContext);
-
                 if (!m_pDevice || !m_pImmediateContext)
                 {
                     throw nc::NcError("Failed to create the Vulkan device or context.");
                 }
 
-                if (!graphicsSettings.isHeadless)
-                    pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
-
-                if (!graphicsSettings.isHeadless && !m_pSwapChain)
+                pFactoryVk->CreateSwapChainVk(m_pDevice, m_pImmediateContext, SCDesc, window, &m_pSwapChain);
+                if (!m_pSwapChain)
                 {
                     throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }

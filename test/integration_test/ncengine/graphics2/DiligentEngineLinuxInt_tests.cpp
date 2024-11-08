@@ -7,11 +7,11 @@
 
 namespace nc::graphics
 {
-TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanNotHeadless_Succeeds)
+TEST(DiligentEngineLinux_tests, CreateDiligentEngine_Vulkan_Succeeds)
 {
     auto supportedApis = std::vector<std::string_view>{"vulkan"};
     auto engineCI = Diligent::EngineCreateInfo{};
-    EXPECT_NO_THROW(CreateDiligentEngine(false, "vulkan", supportedApis, engineCI));
+    EXPECT_NO_THROW(CreateDiligentEngine("vulkan", supportedApis, engineCI));
 }
 
 TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanRenderTriangle_Succeeds)
@@ -20,9 +20,9 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanRenderTriangle_Succee
     auto engineCI = Diligent::EngineCreateInfo{};
 
     /* Create window */
-    auto info = nc::window::WindowInfo{.isHeadless = false};
+    auto info = nc::window::WindowInfo{};
     auto ncWindow = nc::window::NcWindowStub{info};
-    auto engine = CreateDiligentEngine(false, "vulkan", supportedApis, engineCI, &ncWindow);
+    auto engine = CreateDiligentEngine("vulkan", supportedApis, engineCI, &ncWindow);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
     SetupSquare(&engine, m_pPSO.RawDblPtr());
@@ -38,17 +38,6 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_VulkanRenderTriangle_Succee
     }
 }
 
-TEST(DiligentEngineLinux_tests, CreateDiligentEngine_Headless_Succeeds)
-{
-    auto supportedApis = nc::graphics::GetSupportedApis();
-    auto engineCI = Diligent::EngineCreateInfo{};
-
-    for (const auto& api : supportedApis)
-    {
-        EXPECT_NO_THROW(CreateDiligentEngine(true, api, supportedApis, engineCI));
-    }
-}
-
 TEST(DiligentEngineLinux_tests, CreateDiligentEngine_APINotInSupportedApisList_Fails)
 {
     auto supportedApis = nc::graphics::GetSupportedApis();
@@ -56,7 +45,7 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_APINotInSupportedApisList_F
     if (!supportedApis.empty())
     {
         auto engineCI = Diligent::EngineCreateInfo{};
-        EXPECT_THROW(CreateDiligentEngine(true, "notInList", supportedApis, engineCI), nc::NcError);
+        EXPECT_THROW(CreateDiligentEngine("notInList", supportedApis, engineCI), nc::NcError);
     }
 }
 
@@ -68,7 +57,7 @@ TEST(DiligentEngineLinux_tests, CreateDiligentEngine_TargetAPIFails_NoFallback_F
 
     for (const auto& api : supportedApis)
     {
-        EXPECT_THROW(CreateDiligentEngine(true, api, supportedApis, engineCI), nc::NcError);
+        EXPECT_THROW(CreateDiligentEngine(api, supportedApis, engineCI), nc::NcError);
     }
 }
 } // namespace nc::graphics
