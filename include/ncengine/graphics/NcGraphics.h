@@ -97,9 +97,9 @@ struct NcGraphics : public Module
     virtual void ClearEnvironment() = 0;
 
     /**
-     * @brief Get the graphics api being used.
+     * @brief Get the graphics API being used.
      * @note Typically, this will be equal to GraphicsSettings::preferredApi, but insufficient device support or
-     *       initialization failure may result in a fallback api being selected.
+     *       initialization failure may result in a fallback API being selected.
      */
     virtual auto GetApi() const noexcept -> std::string_view = 0;
 };
@@ -113,7 +113,7 @@ auto GetSupportedApis() -> std::span<const std::string_view>;
 /**
  * @brief Build an NcGraphics instance.
  * @note GraphicsSettings::preferredApi must be one of the values returned from GetSupportedApis(). If initialization
- *       fails with the preferred option, another attempt will be made with a fallback, if available. The api in use
+ *       fails with the preferred option, another attempt will be made with a fallback, if available. The API in use
  *       can be checked with NcGraphics::GetApi().
  * @note The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
  */
