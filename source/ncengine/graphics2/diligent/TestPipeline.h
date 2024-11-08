@@ -38,8 +38,7 @@ class TestPipeline
                                  Diligent::IPipelineResourceSignature& componentResourceSignature,
                                  Diligent::IPipelineResourceSignature& materialResourceSignature);
 
-        void CreateInstanceBuffer(Diligent::IDeviceContext& context, Diligent::IRenderDevice& device);
-        void PopulateInstanceBuffer(Diligent::IDeviceContext& context);
+        void CreateInstanceBuffer(Diligent::IRenderDevice& device);
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IPipelineState>         m_pBindlessPSO;

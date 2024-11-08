@@ -110,6 +110,7 @@ TestPipeline::TestPipeline(IRenderDevice& device,
                            Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
     CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, componentResourceSignature, materialResourceSignature);
+    CreateInstanceBuffer(device);
 }
 
 void TestPipeline::CreatePipelineState(IRenderDevice& device,
@@ -172,6 +173,18 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     NC_ASSERT(m_pBindlessPSO, "Failed to create pipeline state object");
 }
 
+void TestPipeline::CreateInstanceBuffer(IRenderDevice& device)
+{
+    // Create instance data buffer that will store transformation matrices
+    BufferDesc InstBuffDesc;
+    InstBuffDesc.Name = "Instance data buffer";
+    // Use default usage as this buffer will only be updated when grid size changes
+    InstBuffDesc.Usage     = USAGE_DEFAULT;
+    InstBuffDesc.BindFlags = BIND_VERTEX_BUFFER;
+    InstBuffDesc.Size      = sizeof(InstanceData) * 100000;
+    device.CreateBuffer(InstBuffDesc, nullptr, &m_InstanceBuffer);
+}
+
 void TestPipeline::Render(Diligent::IDeviceContext& context,
                           ecs::ExplicitEcs<ToonRenderer> ecs,
                           const nc::graphics::FrontendRenderState& renderState)
@@ -185,6 +198,11 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
         m_InstanceData.emplace_back(renderer.GetMaterialView().baseColor.index);
     }
 
+    auto DataSize = static_cast<uint32_t>(sizeof(InstanceData) * m_InstanceData.size());
+    context.UpdateBuffer(m_InstanceBuffer, 0, DataSize, m_InstanceData.data(), RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    StateTransitionDesc Barrier(m_InstanceBuffer, RESOURCE_STATE_UNKNOWN, RESOURCE_STATE_VERTEX_BUFFER, STATE_TRANSITION_FLAG_UPDATE_STATE);
+    context.TransitionResourceStates(1, &Barrier);
+
     auto instanceBuffer = m_InstanceBuffer.RawPtr();
     context.SetVertexBuffers(
         1,
@@ -194,7 +212,6 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
         RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
         SET_VERTEX_BUFFERS_FLAG_NONE
     );
-
     context.SetPipelineState(m_pBindlessPSO);
 
     auto i = 0u;
