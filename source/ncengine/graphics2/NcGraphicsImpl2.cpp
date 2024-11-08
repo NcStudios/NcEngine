@@ -174,7 +174,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules,
             events,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
-            modules.Get<asset::NcAsset>()->OnMeshUpdate()
+            modules.Get<asset::NcAsset>()->OnMeshUpdate(),
+            graphicsSettings
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {

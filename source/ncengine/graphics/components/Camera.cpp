@@ -15,7 +15,7 @@ Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
       m_properties{properties}
 {
     auto [width, height] = window::GetScreenExtent();
-    UpdateProjectionMatrix(width, height);
+    UpdateProjectionMatrix(width, height, true);
 }
 
 auto Camera::CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints
@@ -35,15 +35,15 @@ auto Camera::CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const
     };
 }
 
-void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix)
+void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix, bool isRightHanded)
 {
     const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformationMatrix);
-    m_view = DirectX::XMMatrixLookAtRH(transformationMatrix.r[3], look, DirectX::g_XMNegIdentityR1);
+    m_view = isRightHanded ? DirectX::XMMatrixLookAtRH(transformationMatrix.r[3], look, DirectX::g_XMNegIdentityR1) : DirectX::XMMatrixLookAtLH(transformationMatrix.r[3], look, DirectX::g_XMNegIdentityR1);
 }
 
-void Camera::UpdateProjectionMatrix(float width, float height)
+void Camera::UpdateProjectionMatrix(float width, float height, bool isRightHanded)
 {
-    m_projection = DirectX::XMMatrixPerspectiveFovRH(m_properties.fov, width / height, m_properties.nearClip, m_properties.farClip);
+    m_projection = isRightHanded ? DirectX::XMMatrixPerspectiveFovRH(m_properties.fov, width / height, m_properties.nearClip, m_properties.farClip) : DirectX::XMMatrixPerspectiveFovLH(m_properties.fov, width / height, m_properties.nearClip, m_properties.farClip);
 }
 
 auto Camera::CalculateFrustum() const noexcept -> Frustum

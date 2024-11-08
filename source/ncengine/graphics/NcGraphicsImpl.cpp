@@ -264,7 +264,8 @@ namespace nc::graphics
 
     void NcGraphicsImpl::OnResize(const Vector2& dimensions, bool isMinimized)
     {
-        m_systemResources.cameras.Get()->UpdateProjectionMatrix(dimensions.x, dimensions.y);
+        m_systemResources.cameras.Get()->UpdateProjectionMatrix(dimensions.x, dimensions.y, true);
         m_graphics->OnResize(dimensions, isMinimized);
     }
 } // namespace nc::graphics
+

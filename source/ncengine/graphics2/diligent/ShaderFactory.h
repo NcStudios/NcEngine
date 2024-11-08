@@ -18,9 +18,11 @@ class ShaderFactory
 {
     public:
         explicit ShaderFactory(Diligent::IRenderDevice& device,
-                               Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory> streamFactory)
+                               Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory> streamFactory,
+                               bool isRowMajor)
             : m_device{&device},
-              m_streamFactory{std::move(streamFactory)}
+              m_streamFactory{std::move(streamFactory)},
+              m_isRowMajor{isRowMajor}
         {
         }
 
@@ -38,11 +40,13 @@ class ShaderFactory
     private:
         Diligent::IRenderDevice* m_device;
         Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory> m_streamFactory;
+        bool m_isRowMajor;
 };
 
 template<class EngineFactoryT>
 static auto MakeShaderFactory([[maybe_unused]] EngineFactoryT& engineFactory,
-                              Diligent::IRenderDevice& device) -> std::unique_ptr<ShaderFactory>
+                              Diligent::IRenderDevice& device,
+                              bool isRowMajor) -> std::unique_ptr<ShaderFactory>
 {
     auto shaderSourceFactory = Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory>{};
 #if NC_RUNTIME_SHADER_COMPILATION
@@ -52,6 +56,6 @@ static auto MakeShaderFactory([[maybe_unused]] EngineFactoryT& engineFactory,
         throw NcError{"Failed to create ShaderSourceInputStreamFactory"};
     }
 #endif
-    return std::make_unique<ShaderFactory>(device, std::move(shaderSourceFactory));
+    return std::make_unique<ShaderFactory>(device, std::move(shaderSourceFactory), isRowMajor);
 }
 } // namespace nc::graphics

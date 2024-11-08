@@ -1,6 +1,7 @@
 ### CameraSubsystem Tests ###
 add_executable(CameraSubsystem_tests
     CameraSubsystem_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/GraphicsUtilities.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/CameraSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics/components/Camera.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
@@ -31,6 +32,7 @@ add_executable(MeshRendererSubsystem_tests
     MeshRendererSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/GraphicsUtilities.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
 )
 

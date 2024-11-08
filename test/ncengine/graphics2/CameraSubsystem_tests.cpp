@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../EcsFixture.inl"
+#include "ncengine/config/Config.h"
 #include "graphics2/frontend/subsystem/CameraSubsystem.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "ncengine/graphics/Camera.h"
@@ -19,11 +20,13 @@ class CameraSubsystemTest : public testing::Test,
 {
     protected:
         static constexpr auto MaxEntities = 1ull;
+        nc::config::GraphicsSettings graphicsSettings;
         nc::graphics::CameraSubsystem uut;
 
         CameraSubsystemTest()
             : EcsFixture{MaxEntities},
-              uut{}
+              graphicsSettings{},
+              uut{graphicsSettings}
         {
         }
 };

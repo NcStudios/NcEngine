@@ -6,6 +6,11 @@ namespace nc
 {
 class Transform;
 
+namespace config
+{
+struct GraphicsSettings;
+}
+
 namespace graphics
 {
 class Camera;
@@ -14,6 +19,8 @@ struct CameraRenderState;
 class CameraSubsystem final
 {
     public:
+        explicit CameraSubsystem(const config::GraphicsSettings& graphicsSettings);
+
         void Set(Camera* camera) noexcept
         {
             m_mainCamera = camera;
@@ -33,6 +40,7 @@ class CameraSubsystem final
 
     private:
         Camera* m_mainCamera = nullptr;
+        bool m_isRightHanded;
 };
 } // namespace graphics
 } // namespace nc

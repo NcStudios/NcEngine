@@ -77,7 +77,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }
 
-                m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice);
+                m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice, false);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
                 break;

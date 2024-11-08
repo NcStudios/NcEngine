@@ -2,6 +2,7 @@
 #include "../AssetServiceStub.h"
 #include "../EcsFixture.inl"
 #include "ncengine/Events.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
@@ -26,8 +27,11 @@ class MeshRendererSubsystemTest : public testing::Test,
 
         nc::graphics::ToonMaterial dummyMaterial;
 
+        nc::config::GraphicsSettings graphicsSettings;
+
         nc::graphics::MeshRendererSubsystem uutNoStaticSort; /* No Static Sorting Unit Under Test */
         nc::graphics::MeshRendererSubsystem uutStaticSort;   /* Static Sorting Unit Under Test */
+
 
         void AddStaticEntity(nc::ecs::Ecs& world) 
         {
@@ -49,8 +53,9 @@ class MeshRendererSubsystemTest : public testing::Test,
               onAddToonRenderer{},
               onRemoveToonRenderer{},
               dummyMaterial{"base", 2, "hatch", 2},
-              uutNoStaticSort{},
-              uutStaticSort{onAddToonRenderer, onRemoveToonRenderer, events}
+              graphicsSettings{},
+              uutNoStaticSort{graphicsSettings},
+              uutStaticSort{onAddToonRenderer, onRemoveToonRenderer, events, graphicsSettings}
         {
         }
 };
