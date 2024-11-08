@@ -23,19 +23,21 @@ using MaterialInstanceHandle = uint16_t;
 /** @brief Null identifier for a MaterialInstance. */
 constexpr auto NullMaterialInstanceHandle = std::numeric_limits<MaterialInstanceHandle>::max();
 
-/** @brief Set of flags indicating a MaterialInstance's enabled passes. */
-using MaterialPasses = uint64_t;
-
 /** @brief Material pass flags. */
 struct MaterialPass
 {
-    static constexpr auto Shadow  = MaterialPasses{1 << 0};
-    static constexpr auto Toon    = MaterialPasses{1 << 1};
-    static constexpr auto Alpha   = MaterialPasses{1 << 2};
-    static constexpr auto Depth   = MaterialPasses{1 << 3};
-    static constexpr auto Normals = MaterialPasses{1 << 4};
-    static constexpr auto Outline = MaterialPasses{1 << 5};
+    using type = uint64_t;
+
+    static constexpr auto Shadow  = type{1 << 0};
+    static constexpr auto Toon    = type{1 << 1};
+    static constexpr auto Alpha   = type{1 << 2};
+    static constexpr auto Depth   = type{1 << 3};
+    static constexpr auto Normals = type{1 << 4};
+    static constexpr auto Outline = type{1 << 5};
 };
+
+/** @brief Set of flags indicating a MaterialInstance's enabled passes. */
+using MaterialPasses = MaterialPass::type;
 
 /** @brief Default passes for a toon material. */
 constexpr auto ShadowedToonMaterial = MaterialPass::Shadow |

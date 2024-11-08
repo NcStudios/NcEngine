@@ -100,6 +100,15 @@ target_compile_definitions(MaterialDataBufferResource_tests
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
+### MaterialPassSystem Tests ###
+add_graphics_test(MaterialPassSystem_tests)
+
+target_sources(MaterialPassSystem_tests
+    PRIVATE
+        MaterialPassSystem_tests.cpp
+        # ${NC_SOURCE_DIR}/graphics2/diligent/MaterialPassSystem.cpp
+)
+
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 
