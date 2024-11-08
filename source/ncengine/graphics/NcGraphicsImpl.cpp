@@ -53,6 +53,7 @@ namespace
             );
         }
 
+        auto GetApi() const noexcept -> std::string_view override { return ""; }
         void SetCamera(nc::graphics::Camera*) noexcept override {}
         auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
         void SetUi(nc::ui::IUI*) noexcept override {}
