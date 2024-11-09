@@ -27,3 +27,13 @@ class MaterialPassSystemTests : public testing::Test
 };
 
 // INSTANTIATE_TEST_SUITE_P(AllApis, MaterialPassSystemTests, g_apiParams);
+
+TEST_F(MaterialPassSystemTests, AddDynamicTarget_addsToEnabledPasses)
+{
+    
+}
+
+TEST_F(MaterialPassSystemTests, ClearDynamicTarget_clearsAllPasses)
+{
+    
+}

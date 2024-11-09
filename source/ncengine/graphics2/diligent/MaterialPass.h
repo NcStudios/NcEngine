@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/graphics/Material.h"
 
@@ -16,11 +17,43 @@ namespace nc::graphics
 {
 struct PassTarget
 {
+    explicit PassTarget(uint32_t instanceIndex, const asset::MeshView& mesh)
+        : instance{instanceIndex},
+          indexCount{mesh.indexCount},
+          firstIndex{mesh.firstIndex},
+          firstVertex{mesh.firstVertex}
+    {
+    }
+
+    void UpdateMesh(const asset::MeshView& mesh)
+    {
+        indexCount = mesh.indexCount;
+        firstIndex = mesh.firstIndex;
+        firstVertex = mesh.firstVertex;
+    }
+
     uint32_t instance = UINT32_MAX;
     uint32_t indexCount = UINT32_MAX;
     uint32_t firstIndex = UINT32_MAX;
     uint32_t firstVertex = UINT32_MAX;
 };
+
+inline auto ToDrawAttribs(const PassTarget& target) -> Diligent::DrawIndexedAttribs
+{
+    constexpr auto drawFlags = Diligent::DRAW_FLAG_VERIFY_ALL |
+                               Diligent::DRAW_FLAG_DYNAMIC_RESOURCE_BUFFERS_INTACT;
+
+    return Diligent::DrawIndexedAttribs{
+        target.indexCount,
+        Diligent::VT_UINT32,
+        drawFlags,
+        1,
+        target.firstIndex,
+        target.firstVertex,
+        target.instance
+    };
+}
+
 
 struct Pass
 {
@@ -42,6 +75,8 @@ struct Pass
 // - registers MeshRenderer OnAdd/OnRemove and dispatches to ObjectSystem and MaterialPassSystem (if static)
 // - MeshRenderer has ctx pointer to dispatch here on change of mesh/material for static renderers
 
+// todo: I think we have to 'stage' changes or dynamically produce state or something for parallel reasons
+
 class MaterialPassSystem
 {
     public:
@@ -60,10 +95,10 @@ class MaterialPassSystem
             }
         }
 
-        void AddDynamicTarget(MaterialPasses passes, const PassTarget& target)
+        void AddDynamicTarget(MaterialPasses passes, uint32_t instanceIndex, const asset::MeshView& mesh)
         {
-            ForEnabledPass(passes, [&target](auto& pass){
-                pass.dynamicTargets.push_back(target);
+            ForEnabledPass(passes, [instanceIndex, &mesh](auto& pass){
+                pass.dynamicTargets.emplace_back(instanceIndex, mesh);
             });
         }
 
@@ -75,21 +110,39 @@ class MaterialPassSystem
             }
         }
 
-        void AddStaticTarget(MaterialPasses passes, uint32_t entityId, const PassTarget& target)
+        void AddStaticTarget(MaterialPasses passes, uint32_t entityId, uint32_t instanceIndex, const asset::MeshView& mesh)
         {
-            ForEnabledPass(passes, [entityId, &target] (auto& pass) {
-                pass.staticTargets.push_back(target);
+            ForEnabledPass(passes, [entityId, instanceIndex, &mesh] (auto& pass) {
                 pass.staticTargetEntities.push_back(entityId);
+                pass.staticTargets.emplace_back(instanceIndex, mesh);
             });
         }
 
-        // todo: how to dispatch change of MaterialPasses??? might have to track somehow
-        void UpdateStaticTarget(MaterialPasses passes, uint32_t entityId, const PassTarget& target)
+        void UpdateStaticTargetInstance(MaterialPasses passes, uint32_t entityId, uint32_t instanceIndex)
         {
-            ForEnabledPass(passes, [entityId, &target](auto& pass){
+            ForEnabledPass(passes, [entityId, instanceIndex](auto& pass){
                 const auto index = FindItemIndex(pass.staticTargetEntities, entityId);
-                pass.staticTargets[index] = target;
+                pass.staticTargets[index].instance = instanceIndex;
             });
+        }
+
+        void UpdateStaticTargetMesh(MaterialPasses passes, uint32_t entityId, const asset::MeshView& mesh)
+        {
+            ForEnabledPass(passes, [entityId, &mesh](auto& pass){
+                const auto index = FindItemIndex(pass.staticTargetEntities, entityId);
+                pass.staticTargets[index].UpdateMesh(mesh);
+            });
+        }
+
+        void UpdateStaticTargetPasses(MaterialPasses oldPasses,
+                                      MaterialPasses newPasses,
+                                      uint32_t entityId,
+                                      uint32_t instanceIndex,
+                                      const asset::MeshView& mesh)
+        {
+            // todo: can prob do better, not even sure about params here
+            RemoveStaticTarget(oldPasses, entityId);
+            AddStaticTarget(newPasses, entityId, instanceIndex, mesh);
         }
 
         void RemoveStaticTarget(MaterialPasses passes, uint32_t entityId)
@@ -141,22 +194,9 @@ class MaterialPassSystem
         static void DrawIndexed(Diligent::IDeviceContext& context,
                                 const std::vector<PassTarget>& targets)
         {
-            constexpr auto drawFlags = Diligent::DRAW_FLAG_VERIFY_ALL |
-                                       Diligent::DRAW_FLAG_DYNAMIC_RESOURCE_BUFFERS_INTACT;
-
             for (const auto& target : targets)
             {
-                const auto attributes = Diligent::DrawIndexedAttribs{
-                    target.indexCount,
-                    Diligent::VT_UINT32,
-                    drawFlags,
-                    1,
-                    target.firstIndex,
-                    target.firstVertex,
-                    target.instance
-                };
-
-                context.DrawIndexed(attributes);
+                context.DrawIndexed(ToDrawAttribs(target));
             }
         }
 
