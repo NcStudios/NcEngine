@@ -27,13 +27,12 @@ class MeshRendererSubsystem
 {
     public:
         /** This overload does not sort static mesh renderers to the beginning of the vector. */
-        explicit MeshRendererSubsystem(const config::GraphicsSettings& graphicsSettings);
+        explicit MeshRendererSubsystem();
 
          /** This overload sorts static mesh renderers to the beginning of the vector. */
         explicit MeshRendererSubsystem(Signal<ToonRenderer&>& onAddToonRenderer,
                                        Signal<Entity>& onRemoveToonRenderer,
-                                       SystemEvents& events,
-                                       const config::GraphicsSettings& graphicsSettings);
+                                       SystemEvents& events);
 
         /** @todo: 776 Add MeshRenderer components in place of old ToonRenderer component. */
         auto BuildState(ecs::ExplicitEcs<ToonRenderer, Transform> ecs) -> MeshRendererRenderState;
@@ -56,7 +55,6 @@ class MeshRendererSubsystem
 
         bool m_isStaticRenderersDirty;
         bool m_sortByStatic;
-        bool m_isRowMajor;
 };
 } // namespace graphics
 } // namespace nc

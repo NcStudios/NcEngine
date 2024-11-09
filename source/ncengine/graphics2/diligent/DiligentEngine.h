@@ -30,11 +30,11 @@ class DiligentEngine
                        Diligent::DebugMessageCallbackType logCallback = nullptr);
         ~DiligentEngine() noexcept;
 
-        auto GetDevice()        -> Diligent::IRenderDevice&  { return *m_pDevice; }
-        auto GetContext()       -> Diligent::IDeviceContext& { return *m_pImmediateContext; }
-        auto GetSwapChain()     -> Diligent::ISwapChain&     { return *m_pSwapChain; }
-        auto GetShaderFactory() -> ShaderFactory&            { return *m_shaderFactory; }
-        auto GetApi()           -> std::string_view          { return m_renderApi; }
+        auto GetDevice()              -> Diligent::IRenderDevice&  { return *m_pDevice; }
+        auto GetContext()             -> Diligent::IDeviceContext& { return *m_pImmediateContext; }
+        auto GetSwapChain()           -> Diligent::ISwapChain&     { return *m_pSwapChain; }
+        auto GetShaderFactory()       -> ShaderFactory&            { return *m_shaderFactory; }
+        auto GetApi()                 -> std::string_view          { return m_renderApi; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IRenderDevice>  m_pDevice;

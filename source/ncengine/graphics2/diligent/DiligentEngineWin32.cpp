@@ -84,7 +84,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the D3D12 swapchain.");
                 }
 
-                m_shaderFactory = MakeShaderFactory(*pFactoryD3D12, *m_pDevice, true);
+                m_shaderFactory = MakeShaderFactory(*pFactoryD3D12, *m_pDevice);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the D3D12 rendering engine.");
                 break;
@@ -126,7 +126,7 @@ DiligentEngine::DiligentEngine(const config::GraphicsSettings& graphicsSettings,
                     throw nc::NcError("Failed to create the Vulkan swapchain.");
                 }
 
-                m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice, false);
+                m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice);
                 m_renderApi = api;
                 NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
                 break;

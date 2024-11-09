@@ -18,7 +18,7 @@ auto CameraSystem::Execute(Registry* registry) -> CameraState
     }
 
     const auto transform = registry->Get<Transform>(m_mainCamera->ParentEntity());
-    m_mainCamera->UpdateViewMatrix(transform->TransformationMatrix(), true);
+    m_mainCamera->UpdateViewMatrix(transform->TransformationMatrix());
 
     return CameraState
     {

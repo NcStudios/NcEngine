@@ -1,6 +1,5 @@
 #include "CameraSubsystem.h"
 #include "CameraRenderState.h"
-#include "graphics2/frontend/GraphicsUtilities.h"
 
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/Ecs.h"
@@ -11,38 +10,18 @@
 namespace
 {
 constexpr auto g_defaultProperties = nc::graphics::CameraProperties{};
-const auto g_defaultViewRH = DirectX::XMMatrixLookAtRH(
+const auto g_defaultView = DirectX::XMMatrixLookAtRH(
     DirectX::g_XMIdentityR3,
     DirectX::g_XMIdentityR2,
     DirectX::g_XMNegIdentityR1
 );
 
-const auto g_defaultViewLH = DirectX::XMMatrixLookAtLH(
-    DirectX::g_XMIdentityR3,
-    DirectX::g_XMIdentityR2,
-    DirectX::g_XMNegIdentityR1
-);
-
-auto MakeDefaultViewProjectionRH() -> DirectX::XMMATRIX
+auto MakeDefaultViewProjection() -> DirectX::XMMATRIX
 {
     const auto [width, height] = nc::window::GetScreenExtent();
     return DirectX::XMMatrixMultiply(
-        g_defaultViewRH,
+        g_defaultView,
         DirectX::XMMatrixPerspectiveFovRH(
-            g_defaultProperties.fov,
-            width / height,
-            g_defaultProperties.nearClip,
-            g_defaultProperties.farClip
-        )
-    );
-}
-
-auto MakeDefaultViewProjectionLH() -> DirectX::XMMATRIX
-{
-    const auto [width, height] = nc::window::GetScreenExtent();
-    return DirectX::XMMatrixMultiply(
-        g_defaultViewLH,
-        DirectX::XMMatrixPerspectiveFovLH(
             g_defaultProperties.fov,
             width / height,
             g_defaultProperties.nearClip,
@@ -54,13 +33,12 @@ auto MakeDefaultViewProjectionLH() -> DirectX::XMMATRIX
 
 namespace nc::graphics
 {
-CameraSubsystem::CameraSubsystem(const config::GraphicsSettings& graphicsSettings)
-    : m_isRightHanded{graphicsSettings.api == api::Vulkan}
+CameraSubsystem::CameraSubsystem()
 {
     if (m_mainCamera)
     {
         auto [width, height] = window::GetScreenExtent();
-        m_mainCamera->UpdateProjectionMatrix(width, height, m_isRightHanded);
+        m_mainCamera->UpdateProjectionMatrix(width, height);
     }
 }
 
@@ -69,7 +47,7 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
     if (m_mainCamera)
     {
         const auto& transform = ecs.Get<Transform>(m_mainCamera->ParentEntity());
-        m_mainCamera->UpdateViewMatrix(transform.TransformationMatrix(), m_isRightHanded);
+        m_mainCamera->UpdateViewMatrix(transform.TransformationMatrix());
 
         return CameraRenderState{
             .viewProjection = DirectX::XMMatrixMultiply(
@@ -80,7 +58,7 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
     }
 
     return CameraRenderState{
-        .viewProjection = m_isRightHanded ? MakeDefaultViewProjectionRH() : MakeDefaultViewProjectionLH()
+        .viewProjection = MakeDefaultViewProjection()
     };
 }
 } // namespace nc::graphics

@@ -1,5 +1,4 @@
 #include "MeshRendererSubsystem.h"
-#include "graphics2/frontend/GraphicsUtilities.h"
 
 #include "ncengine/Events.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -22,17 +21,14 @@ void ClearAndReserve(std::vector<DirectX::XMMATRIX>& modelMatrices, std::vector<
 
 namespace nc::graphics
 {
-MeshRendererSubsystem::MeshRendererSubsystem(const config::GraphicsSettings& graphicsSettings)
-    : m_sortByStatic{false},
-      m_isRowMajor{graphicsSettings.api == api::D3D12}
-
+MeshRendererSubsystem::MeshRendererSubsystem()
+    : m_sortByStatic{false}
 {
 }
 
 MeshRendererSubsystem::MeshRendererSubsystem(nc::Signal<nc::graphics::ToonRenderer&>& onAddRenderer,
                                              nc::Signal<nc::Entity>& onRemoveRenderer,
-                                             SystemEvents& events,
-                                             const config::GraphicsSettings& graphicsSettings)
+                                             SystemEvents& events)
     : m_onAddRenderer{std::make_unique<Connection>(onAddRenderer.Connect(this, &MeshRendererSubsystem::OnAddRenderer))},
       m_onRemoveRenderer{std::make_unique<Connection>(onRemoveRenderer.Connect(this, &MeshRendererSubsystem::OnRemoveRenderer))},
       m_onStaticEntitiesRebuilt{std::make_unique<Connection>(events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnStaticEntitiesRebuilt))},
@@ -41,8 +37,7 @@ MeshRendererSubsystem::MeshRendererSubsystem(nc::Signal<nc::graphics::ToonRender
       m_dynamicMatricesCache{},
       m_dynamicEntityCache{},
       m_isStaticRenderersDirty{false},
-      m_sortByStatic{true},
-      m_isRowMajor{graphicsSettings.api == api::D3D12}
+      m_sortByStatic{true}
 {}
 
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<ToonRenderer, Transform> ecs) -> MeshRendererRenderState
@@ -56,10 +51,9 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<ToonRenderer, Transform>
     {
         ClearAndReserve(m_dynamicMatricesCache, m_dynamicEntityCache, objectCount);
 
-        auto requiresTranspose = m_isRowMajor;
-        std::ranges::transform(entities, std::back_inserter(m_dynamicMatricesCache), [&ecs, requiresTranspose](Entity entity) 
+        std::ranges::transform(entities, std::back_inserter(m_dynamicMatricesCache), [&ecs](Entity entity) 
         {
-            return TransposeIfRequired(ecs.Get<Transform>(entity).TransformationMatrix(), requiresTranspose);
+            return ecs.Get<Transform>(entity).TransformationMatrix();
         });
 
         m_dynamicEntityCache.assign(entities.begin(), entities.end());
@@ -77,12 +71,12 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<ToonRenderer, Transform>
             if (entity.IsStatic())
             {
                 m_staticEntityCache.push_back(entity);
-                m_staticMatricesCache.push_back(TransposeIfRequired(ecs.Get<Transform>(entity).TransformationMatrix(), m_isRowMajor));
+                m_staticMatricesCache.push_back(ecs.Get<Transform>(entity).TransformationMatrix());
                 continue;
             }
 
             m_dynamicEntityCache.push_back(entity);
-            m_dynamicMatricesCache.push_back(TransposeIfRequired(ecs.Get<Transform>(entity).TransformationMatrix(), m_isRowMajor));
+            m_dynamicMatricesCache.push_back(ecs.Get<Transform>(entity).TransformationMatrix());
         }
 
         /** We need to return the combined lists of both static and dynamic here. We can add static to m_dynamicEntityCache/RenderStateCache because we are always going to blow away 
@@ -102,7 +96,7 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<ToonRenderer, Transform>
         if (!entity.IsStatic())
         {
             m_dynamicEntityCache.push_back(entity);
-            m_dynamicMatricesCache.push_back(TransposeIfRequired(ecs.Get<Transform>(entity).TransformationMatrix(), m_isRowMajor));
+            m_dynamicMatricesCache.push_back(ecs.Get<Transform>(entity).TransformationMatrix());
         }
     }
 

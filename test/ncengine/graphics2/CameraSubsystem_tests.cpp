@@ -20,13 +20,11 @@ class CameraSubsystemTest : public testing::Test,
 {
     protected:
         static constexpr auto MaxEntities = 1ull;
-        nc::config::GraphicsSettings graphicsSettings;
         nc::graphics::CameraSubsystem uut;
 
         CameraSubsystemTest()
             : EcsFixture{MaxEntities},
-              graphicsSettings{},
-              uut{graphicsSettings}
+              uut{}
         {
         }
 };

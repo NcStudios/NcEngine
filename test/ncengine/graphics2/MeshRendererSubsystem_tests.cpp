@@ -27,8 +27,6 @@ class MeshRendererSubsystemTest : public testing::Test,
 
         nc::graphics::ToonMaterial dummyMaterial;
 
-        nc::config::GraphicsSettings graphicsSettings;
-
         nc::graphics::MeshRendererSubsystem uutNoStaticSort; /* No Static Sorting Unit Under Test */
         nc::graphics::MeshRendererSubsystem uutStaticSort;   /* Static Sorting Unit Under Test */
 
@@ -53,9 +51,8 @@ class MeshRendererSubsystemTest : public testing::Test,
               onAddToonRenderer{},
               onRemoveToonRenderer{},
               dummyMaterial{"base", 2, "hatch", 2},
-              graphicsSettings{},
-              uutNoStaticSort{graphicsSettings},
-              uutStaticSort{onAddToonRenderer, onRemoveToonRenderer, events, graphicsSettings}
+              uutNoStaticSort{},
+              uutStaticSort{onAddToonRenderer, onRemoveToonRenderer, events}
         {
         }
 };

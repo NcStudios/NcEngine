@@ -24,13 +24,12 @@ class GraphicsFrontend
                          SystemEvents& events,
                          uint32_t maxRenderers,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
-                         Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
-                         const config::GraphicsSettings& graphicsSettings)
+                         Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
             : m_assetDispatch{context, device, textureBuffer, meshBuffer, onTextureEvent, onMeshEvent},
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
-              m_cameraSystem{graphicsSettings},
-              m_meshRendererSystem{graphicsSettings} // No static sorting
+              m_cameraSystem{},
+              m_meshRendererSystem{} // No static sorting
         {
         }
 
