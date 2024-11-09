@@ -18,11 +18,6 @@ class MaterialDataBufferResourceTest : public DiligentEngineParameterizedFixture
         nc::graphics::MaterialDataBufferResource* uut = nullptr;
         std::array<nc::graphics::MaterialData, initialInstanceHint> properties;
 
-        MaterialDataBufferResourceTest()
-            : DiligentEngineParameterizedFixture{false}
-        {
-        }
-
         void SetUp() override
         {
             INITIALIZE_DILIGENT_FIXTURE;

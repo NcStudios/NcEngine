@@ -106,19 +106,18 @@ void RenderSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState
     engine->GetContext().Draw(drawAttrs);
 }
 
-auto CreateDiligentEngine(bool isHeadless, std::string_view targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowStub* window = nullptr) -> nc::graphics::DiligentEngine
+auto CreateDiligentEngine(std::string_view targetApi, std::span<const std::string_view> supportedApis, Diligent::EngineCreateInfo engineCI, nc::window::NcWindowStub* window = nullptr) -> nc::graphics::DiligentEngine
 {
     /* Create config */
     auto graphicsSettings = nc::config::GraphicsSettings();
-    graphicsSettings.isHeadless = isHeadless;
-    graphicsSettings.api = targetApi;
+    graphicsSettings.preferredApi = targetApi;
     auto projectSettings = nc::config::ProjectSettings();
     projectSettings.projectName = "DiligentEngineLinux_tests";
 
     if (!window)
     {
         /* Create window */
-        auto info = nc::window::WindowInfo{.isHeadless = graphicsSettings.isHeadless};
+        auto info = nc::window::WindowInfo{};
         auto ncWindow = nc::window::NcWindowStub{info};
 
         /* Create DiligentEngine */

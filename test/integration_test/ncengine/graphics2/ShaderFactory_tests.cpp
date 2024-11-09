@@ -69,42 +69,28 @@ INSTANTIATE_TEST_SUITE_P(AllApis, ShaderFactoryTest, g_apiParams);
 
 #ifdef NC_RUNTIME_SHADER_COMPILATION
 
-TEST_P(ShaderFactoryTest, HasRuntimeCompilationSupport_hasRuntimeSupport_returnsTrue)
+TEST_P(ShaderFactoryTest, RuntimeSupport_happyPaths_succeed)
 {
     EXPECT_TRUE(uut->HasRuntimeCompilationSupport());
-}
 
-TEST_P(ShaderFactoryTest, MakeShaderFromSource_goodSource_succeeds)
-{
     EXPECT_NO_THROW(uut->MakeShaderFromSource(g_goodSource, "", g_shaderType));
-}
 
-TEST_P(ShaderFactoryTest, MakeShaderFromSource_invalidSyntax_throws)
-{
-    EXPECT_THROW(uut->MakeShaderFromSource(g_badSource, "", g_shaderType), nc::NcError);
-    ClearErrorOutput();
-}
-
-TEST_P(ShaderFactoryTest, ReadShaderFile_validFile_producesValidSource)
-{
     const auto source = nc::graphics::ReadShaderFile(testShaderPath.string());
     EXPECT_NO_THROW(uut->MakeShaderFromSource(source, "", g_shaderType));
 }
 
-TEST_P(ShaderFactoryTest, ReadShaderFile_badFile_throws)
+TEST_P(ShaderFactoryTest, RuntimeSupport_failurePaths_throw)
 {
+    EXPECT_THROW(uut->MakeShaderFromSource(g_badSource, "", g_shaderType), nc::NcError);
     EXPECT_THROW(nc::graphics::ReadShaderFile("not_a_shader.psh"), nc::NcError);
+    ClearErrorOutput();
 }
 
 #else
 
-TEST_P(ShaderFactoryTest, HasRuntimeCompilationSupport_noRuntimeSupport_returnsFalse)
+TEST_P(ShaderFactoryTest, NoRuntimeSupport_failurePaths_throw)
 {
     EXPECT_FALSE(uut->HasRuntimeCompilationSupport());
-}
-
-TEST_P(ShaderFactoryTest, MakeShaderFromSource_noRuntimeSupport_throws)
-{
     EXPECT_THROW(uut->MakeShaderFromSource(g_goodSource, "", g_shaderType), nc::NcError);
 }
 

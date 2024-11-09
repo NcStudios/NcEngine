@@ -30,6 +30,7 @@ class NcGraphicsImpl2 : public NcGraphics
 
         ~NcGraphicsImpl2() noexcept;
 
+        auto GetApi() const noexcept -> std::string_view override;
         void SetCamera(Camera* camera) noexcept override;
         auto GetCamera() noexcept -> Camera* override;
         void SetUi(ui::IUI* ui) noexcept override;

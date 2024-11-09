@@ -50,6 +50,7 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
         );
     }
 
+    auto GetApi() const noexcept -> std::string_view override { return ""; }
     void SetCamera(nc::graphics::Camera*) noexcept override {}
     auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
     void SetUi(nc::ui::IUI*) noexcept override {}
@@ -115,7 +116,6 @@ namespace nc::graphics
             ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
                 .isResizable = false
@@ -183,6 +183,11 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
 {
+}
+
+auto NcGraphicsImpl2::GetApi() const noexcept -> std::string_view
+{
+    return m_engine.GetApi();
 }
 
 void NcGraphicsImpl2::SetCamera(Camera* camera) noexcept

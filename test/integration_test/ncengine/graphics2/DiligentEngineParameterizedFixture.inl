@@ -24,12 +24,10 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
 {
     protected:
         static inline auto s_diligentErrorOut = std::stringstream{};
-        bool isHeadless;
         std::unique_ptr<nc::window::NcWindowStub> window;
         std::unique_ptr<nc::graphics::DiligentEngine> engine;
 
-        DiligentEngineParameterizedFixture(bool headless = true)
-            : isHeadless{headless}
+        DiligentEngineParameterizedFixture()
         {
             ClearErrorOutput();
         }
@@ -73,19 +71,14 @@ class DiligentEngineParameterizedFixture : public testing::TestWithParam<std::st
         //       INITIALIZE_DILIGENT_FIXTURE to conditionally initialize/skip the current test based on API support.
         void SetUp() override
         {
-            window = std::make_unique<nc::window::NcWindowStub>(
-                nc::window::WindowInfo{
-                    .isHeadless = isHeadless
-                }
-            );
+            window = std::make_unique<nc::window::NcWindowStub>(nc::window::WindowInfo{});
 
             auto engineCI = Diligent::EngineCreateInfo{};
             engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
             engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
 
             auto graphicsSettings = nc::config::GraphicsSettings();
-            graphicsSettings.isHeadless = isHeadless;
-            graphicsSettings.api = GetTestApi();
+            graphicsSettings.preferredApi = GetTestApi();
 
             engine = std::make_unique<nc::graphics::DiligentEngine>(
                 graphicsSettings,
