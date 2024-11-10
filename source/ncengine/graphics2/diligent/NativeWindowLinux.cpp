@@ -16,7 +16,7 @@ auto GetNativeWindow(GLFWwindow* window) -> Diligent::NativeWindow
     NC_ASSERT(x11Handle, "Error getting the X11 window handle.");
     NC_ASSERT(x11Display, "Error getting the X11 display from the GLFW window.");
     return Diligent::LinuxNativeWindow{
-        static_cast<uint32_t>(x11Window),
+        static_cast<uint32_t>(x11Handle),
         x11Display,
         nullptr
     };
