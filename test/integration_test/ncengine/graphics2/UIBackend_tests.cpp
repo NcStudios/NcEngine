@@ -11,11 +11,6 @@ class UIBackendTest : public DiligentEngineParameterizedFixture
         std::unique_ptr<nc::graphics::UIBackend> uiBackend;
         std::unique_ptr<nc::graphics::UISubsystem> uiSubsystem;
 
-        UIBackendTest()
-            : DiligentEngineParameterizedFixture{false}
-        {
-        }
-
         void SetUp() override
         {
             INITIALIZE_DILIGENT_FIXTURE;

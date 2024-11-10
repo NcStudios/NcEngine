@@ -9,11 +9,6 @@ class GlobalMeshBufferTest : public DiligentEngineParameterizedFixture
     protected:
         std::unique_ptr<nc::graphics::GlobalMeshBuffer> uut;
 
-        GlobalMeshBufferTest()
-            : DiligentEngineParameterizedFixture{false}
-        {
-        }
-
         void SetUp() override
         {
             INITIALIZE_DILIGENT_FIXTURE;
