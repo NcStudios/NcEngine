@@ -63,8 +63,8 @@ class ShaderBindings
         }
 
     private:
-        ComponentResourceSignature m_componentSignature;
         GlobalResourceSignature m_globalSignature;
+        ComponentResourceSignature m_componentSignature;
         MaterialResourceSignature m_materialSignature;
         GlobalMeshBuffer m_meshBuffer;
 };
