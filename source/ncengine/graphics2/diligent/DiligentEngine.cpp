@@ -36,7 +36,7 @@ DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInf
     if (!m_pDevice || !m_pImmediateContext)
     {
         EnsureContextFlushed(m_pImmediateContext);
-        throw nc::NcError("Failed to create the Vulkan device or context.");
+        throw nc::NcError("Failed to create device or context.");
     }
 
     auto window = GetNativeWindow(windowHandle);
@@ -45,11 +45,11 @@ DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInf
     if (!m_pSwapChain)
     {
         EnsureContextFlushed(m_pImmediateContext);
-        throw nc::NcError("Failed to create the Vulkan swapchain.");
+        throw nc::NcError("Failed to create swapchain.");
     }
 
     m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice);
-    NC_LOG_TRACE("Successfully initialized the Vulkan rendering engine.");
+    NC_LOG_TRACE("Successfully initialized rendering engine.");
 }
 
 DiligentEngine::~DiligentEngine() noexcept
