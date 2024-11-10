@@ -1,4 +1,4 @@
-#include "DiligentEngineParameterizedFixture.inl"
+#include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/MaterialDataBufferResource.h"
 #include "graphics2/diligent/resource/MaterialResourceSignature.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
@@ -6,7 +6,7 @@
 
 #include <array>
 
-class MaterialDataBufferResourceTest : public DiligentEngineParameterizedFixture
+class MaterialDataBufferResourceTest : public DiligentEngineFixture
 {
     protected:
         static constexpr auto signatureName = "testSignature";
@@ -18,9 +18,8 @@ class MaterialDataBufferResourceTest : public DiligentEngineParameterizedFixture
         nc::graphics::MaterialDataBufferResource* uut = nullptr;
         std::array<nc::graphics::MaterialData, initialInstanceHint> properties;
 
-        void SetUp() override
+        MaterialDataBufferResourceTest()
         {
-            INITIALIZE_DILIGENT_FIXTURE;
             signature = std::make_unique<nc::graphics::MaterialResourceSignature>(
                 engine->GetContext(),
                 engine->GetDevice(),
@@ -33,15 +32,13 @@ class MaterialDataBufferResourceTest : public DiligentEngineParameterizedFixture
             uut = &signature->GetMaterialDataResource();
         }
 
-        void TearDown() override
+        ~MaterialDataBufferResourceTest()
         {
             FailIfHasErrorOutput();
         }
 };
 
-INSTANTIATE_TEST_SUITE_P(AllApis, MaterialDataBufferResourceTest, g_apiParams);
-
-TEST_P(MaterialDataBufferResourceTest, UpdateCases_succeed)
+TEST_F(MaterialDataBufferResourceTest, UpdateCases_succeed)
 {
     auto& context = engine->GetContext();
     auto& device = engine->GetDevice();

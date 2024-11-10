@@ -68,7 +68,6 @@ struct MemorySettings
 struct GraphicsSettings
 {
     bool enabled = true;                 ///< enable the NcGraphics module
-    std::string preferredApi = "vulkan"; ///< desired graphics api, see NcGraphics for more info (possible values: vulkan, d3d12)
     bool useNativeResolution = false;    ///< use the monitor's native resolution
     bool launchInFullscreen = false;     ///< launch a fullscreen window
     unsigned screenWidth = 1000;         ///< width of the screen
