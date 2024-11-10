@@ -8,9 +8,9 @@
 
 namespace nc::graphics
 {
-GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
-                                                     Diligent::IDeviceContext& context,
-                                                     Diligent::IRenderDevice& device)
+GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& context,
+                                                     Diligent::IRenderDevice& device,
+                                                     Diligent::IShaderResourceVariable& variable)
     : m_variable{&variable}
 {
     Diligent::CreateUniformBuffer(

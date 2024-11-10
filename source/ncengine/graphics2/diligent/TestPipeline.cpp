@@ -6,10 +6,8 @@
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
 #include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
 #include "Graphics/GraphicsTools/interface/ShaderMacroHelper.hpp"
-#include "Graphics/GraphicsTools/interface/MapHelper.hpp"
 
 #include <array>
-#include <random>
 
 using namespace Diligent;
 

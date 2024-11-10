@@ -29,7 +29,7 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
-              m_meshRendererSystem{} // No static sorting
+              m_meshRendererSystem{}
         {
         }
 

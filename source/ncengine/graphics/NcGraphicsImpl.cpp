@@ -268,4 +268,3 @@ namespace nc::graphics
         m_graphics->OnResize(dimensions, isMinimized);
     }
 } // namespace nc::graphics
-

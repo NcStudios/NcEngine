@@ -21,9 +21,9 @@ class GlobalEnvironmentResourceTest : public DiligentEngineParameterizedFixture
             engine->GetDevice().CreatePipelineResourceSignature(desc, &signature);
             signature->CreateShaderResourceBinding(&srb);
             uut = std::make_unique<nc::graphics::GlobalEnvironmentResource>(
-                *srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, variableName),
                 engine->GetContext(),
-                engine->GetDevice()
+                engine->GetDevice(),
+                *srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, variableName)
             );
         }
 

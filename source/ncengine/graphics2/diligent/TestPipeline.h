@@ -40,7 +40,5 @@ class TestPipeline
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IPipelineState>         m_pBindlessPSO;
-        Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
 };
 } // namespace nc::graphics

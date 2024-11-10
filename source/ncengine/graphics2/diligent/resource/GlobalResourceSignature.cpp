@@ -45,9 +45,9 @@ GlobalResourceSignature::GlobalResourceSignature(Diligent::IRenderDevice& device
     );
 
     m_environmentResource = std::make_unique<GlobalEnvironmentResource>(
-        GetVariable(Diligent::SHADER_TYPE_PIXEL, GlobalEnvironmentShaderVariableName),
         context,
-        device
+        device,
+        GetVariable(Diligent::SHADER_TYPE_PIXEL, GlobalEnvironmentShaderVariableName)
     );
 }
 

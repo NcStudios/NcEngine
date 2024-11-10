@@ -18,11 +18,6 @@ class MeshRendererBufferResource : public DiligentEngineParameterizedFixture
         nc::graphics::MeshRendererBufferResource* uut = nullptr;
         nc::graphics::MeshRendererRenderState properties;
 
-        MeshRendererBufferResource()
-            : DiligentEngineParameterizedFixture{false}
-        {
-        }
-
         void SetUp() override
         {
             INITIALIZE_DILIGENT_FIXTURE;

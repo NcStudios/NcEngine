@@ -44,8 +44,8 @@ auto ShaderFactory::MakeShaderFromSource(std::span<const char> source,
     createInfo.Desc.ShaderType = type;
     createInfo.Desc.UseCombinedTextureSamplers = true;
     createInfo.SourceLanguage = language;
-    createInfo.HLSLVersion = Diligent::Version(6, 6);
-    createInfo.CompileFlags = Diligent::SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR | Diligent::SHADER_COMPILE_FLAG_ENABLE_UNBOUNDED_ARRAYS;
+    createInfo.CompileFlags = Diligent::SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR |
+                              Diligent::SHADER_COMPILE_FLAG_ENABLE_UNBOUNDED_ARRAYS;
 
     auto shader = Diligent::RefCntAutoPtr<Diligent::IShader>{};
     m_device->CreateShader(createInfo, &shader);

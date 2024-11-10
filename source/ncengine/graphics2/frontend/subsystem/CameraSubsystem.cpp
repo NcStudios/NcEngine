@@ -1,9 +1,7 @@
 #include "CameraSubsystem.h"
 #include "CameraRenderState.h"
 
-#include "ncengine/config/Config.h"
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/window/Window.h"
 
@@ -33,15 +31,6 @@ auto MakeDefaultViewProjection() -> DirectX::XMMATRIX
 
 namespace nc::graphics
 {
-CameraSubsystem::CameraSubsystem()
-{
-    if (m_mainCamera)
-    {
-        auto [width, height] = window::GetScreenExtent();
-        m_mainCamera->UpdateProjectionMatrix(width, height);
-    }
-}
-
 auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRenderState
 {
     if (m_mainCamera)
