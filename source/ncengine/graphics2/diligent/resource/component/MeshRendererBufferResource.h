@@ -20,9 +20,9 @@ class MeshRendererBufferResource
     public:
         static constexpr auto StructuredBufferName = "MeshRendererStructuredBuffer";
 
-        explicit MeshRendererBufferResource(Diligent::IShaderResourceVariable& variable,
-                                            Diligent::IDeviceContext& context,
+        explicit MeshRendererBufferResource(Diligent::IDeviceContext& context,
                                             Diligent::IRenderDevice& device,
+                                            Diligent::IShaderResourceVariable& variable,
                                             uint32_t maxMeshRenderers);
 
         static auto MakeResourceDesc(std::string_view variableName, uint32_t maxMeshRenderers) -> Diligent::PipelineResourceDesc;

@@ -19,12 +19,12 @@ Expand to hold ParticleEmitter, SkinnedRenderer, etc.
 class ComponentResourceSignature
 {
     public:
-        static constexpr auto BindingIndex = 1u;
-        static constexpr auto SignatureName = "ComponentResourceSignature";
-        static constexpr auto MeshRendererShaderVariableName = "MeshRendererBufferData";
-
-        explicit ComponentResourceSignature(Diligent::IRenderDevice& device, Diligent::IDeviceContext& context, uint32_t maxMeshRenderers);
-        ~ComponentResourceSignature() noexcept;
+        explicit ComponentResourceSignature(Diligent::IDeviceContext& context,
+                                            Diligent::IRenderDevice& device,
+                                            std::string_view signatureName,
+                                            std::string_view meshRendererBufferVariableName,
+                                            uint8_t bindingIndex,
+                                            uint32_t maxInstances);
 
         void Commit(Diligent::IDeviceContext& context)
         {
@@ -45,7 +45,5 @@ class ComponentResourceSignature
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<MeshRendererBufferResource> m_meshRendererResource;
-
-        auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name) -> Diligent::IShaderResourceVariable&;
 };
 } // namespace nc::graphics

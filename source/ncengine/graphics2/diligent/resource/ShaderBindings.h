@@ -22,7 +22,13 @@ class ShaderBindings
                                 uint32_t maxMeshRenderers,
                                 uint32_t initialMaterialSizeHint)
             : m_globalSignature{device, context, maxTextures},
-              m_componentSignature{device, context, maxMeshRenderers}, 
+              m_componentSignature{context,
+                device,
+                "ComponentResourceSignature",
+                "MeshRendererBufferData",
+                1,
+                maxMeshRenderers
+              },
               m_materialSignature{
                 context,
                 device,

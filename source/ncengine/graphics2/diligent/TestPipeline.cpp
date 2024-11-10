@@ -88,19 +88,12 @@ cbuffer EnvironmentData
     float4x4 cameraViewProjection;
 };
 
-cbuffer InstanceData
+void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    uint textureIndex;
-    uint meshRendererIndex;
-};
-
-
-void main(in  VSInput VSIn,  out PSInput PSIn)
-{
-    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[meshRendererIndex].model);
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.TexIndex = textureIndex;
+    PSIn.TexIndex = 0;
 }
 )"};
 } // anonymous namespace
@@ -128,35 +121,7 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     createInfo.PSODesc.Name = "Test PSO";
 
-    /** Make Dynamic CB Resource and Signature */
-    BufferDesc CBDesc;
-    CBDesc.Name           = "InstanceData";
-    CBDesc.Size           = sizeof(InstanceData);
-    CBDesc.Usage          = USAGE_DYNAMIC;
-    CBDesc.BindFlags      = BIND_UNIFORM_BUFFER;
-    CBDesc.CPUAccessFlags = CPU_ACCESS_WRITE;
-    device.CreateBuffer(CBDesc, nullptr, &m_InstanceBuffer);
-
-    auto cbResource = Diligent::PipelineResourceDesc{
-        Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX,
-        "InstanceData",
-        1,
-        Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC,
-        Diligent::PIPELINE_RESOURCE_FLAG_NONE
-    };
-
-    auto resources = std::array{cbResource};
-
-    auto desc = Diligent::PipelineResourceSignatureDesc{};
-    desc.Name = "PipelineData";
-    desc.Resources = resources.data(),
-    desc.NumResources = static_cast<uint32_t>(resources.size()),
-    desc.BindingIndex = 3,
-    device.CreatePipelineResourceSignature(desc, &m_signature);
-    m_signature->CreateShaderResourceBinding(&m_srb);
-
-    auto signatures = std::array{&globalResourceSignature, &componentResourceSignature, &materialResourceSignature, m_signature.RawPtr()};
+    auto signatures = std::array{&globalResourceSignature, &componentResourceSignature, &materialResourceSignature};
     createInfo.ppResourceSignatures = signatures.data();
     createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
@@ -164,7 +129,7 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     createInfo.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
     createInfo.GraphicsPipeline.DSVFormat                    = swapChain.GetDesc().DepthBufferFormat;
     createInfo.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    createInfo.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_FRONT;
+    createInfo.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
     createInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
 
     auto vertexShader = shaderFactory.MakeShaderFromSource(
@@ -194,14 +159,11 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
         vertexElements.at(6),
     };
 
-
     createInfo.PSODesc.ResourceLayout.DefaultVariableType =  SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
     createInfo.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems.data();
     createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(LayoutElems.size());
 
     device.CreateGraphicsPipelineState(createInfo, &m_pBindlessPSO);
-
-    m_srb->GetVariableByName(SHADER_TYPE_VERTEX, "InstanceData")->Set(m_InstanceBuffer);
 
     NC_ASSERT(m_pBindlessPSO, "Failed to create pipeline state object");
 }
@@ -213,20 +175,10 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
     context.SetPipelineState(m_pBindlessPSO);
 
     auto i = 0u;
-    for (auto [entity, transform] : std::views::zip(renderState.meshRendererState.entities, renderState.meshRendererState.modelMatrices))
+    for (auto entity : renderState.meshRendererState.entities)
     {
         const auto& renderer = ecs.Get<ToonRenderer>(entity);
         const auto& meshView = renderer.GetMeshView();
-
-        m_InstanceData.MeshRendererIndex = i;
-        m_InstanceData.TextureInd = renderer.GetMaterialView().baseColor.index;
-
-        {
-            Diligent::MapHelper<InstanceData> cbInstanceData(&context, m_InstanceBuffer, MAP_WRITE, MAP_FLAG_DISCARD);
-            *cbInstanceData = m_InstanceData;
-        }
-
-        context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
         const auto attributes = DrawIndexedAttribs{
             meshView.indexCount,

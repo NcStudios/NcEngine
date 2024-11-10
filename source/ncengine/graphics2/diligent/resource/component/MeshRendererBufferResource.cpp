@@ -8,9 +8,9 @@
 
 namespace nc::graphics
 {
-MeshRendererBufferResource::MeshRendererBufferResource(Diligent::IShaderResourceVariable& variable,
-                                                       Diligent::IDeviceContext& context,
+MeshRendererBufferResource::MeshRendererBufferResource(Diligent::IDeviceContext& context,
                                                        Diligent::IRenderDevice& device,
+                                                       Diligent::IShaderResourceVariable& variable,
                                                        uint32_t maxMeshRenderers)
     : m_variable{&variable},
       m_maxMeshRenderers{maxMeshRenderers}

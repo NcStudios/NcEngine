@@ -40,16 +40,7 @@ class TestPipeline
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IPipelineState>         m_pBindlessPSO;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer>                m_InstanceBuffer;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
-
-        struct InstanceData
-        {
-            uint32_t TextureInd = 0u;
-            uint32_t MeshRendererIndex = 0u;
-        };
-
-        InstanceData m_InstanceData;
 };
 } // namespace nc::graphics
