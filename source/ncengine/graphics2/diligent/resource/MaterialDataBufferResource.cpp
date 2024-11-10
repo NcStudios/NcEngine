@@ -51,14 +51,11 @@ void MaterialDataBufferResource::CreateBuffer(Diligent::IDeviceContext& context,
         throw nc::NcError{fmt::format("Failed to create buffer '{}'", bufferDesc.Name)};
     }
 
-    const auto barrier = Diligent::StateTransitionDesc(
-        m_buffer,
-        Diligent::RESOURCE_STATE_UNKNOWN,
-        Diligent::RESOURCE_STATE_SHADER_RESOURCE,
-        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+    Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
+    m_variable->Set(
+        m_buffer->GetDefaultView(Diligent::BUFFER_VIEW_SHADER_RESOURCE),
+        Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE
     );
-
-    context.TransitionResourceStates(1, &barrier);
 }
 
 void MaterialDataBufferResource::Update(const MaterialDataUpdateInfo& updateInfo,
@@ -68,23 +65,37 @@ void MaterialDataBufferResource::Update(const MaterialDataUpdateInfo& updateInfo
     if (updateInfo.instances.size() > m_bufferElementCount)
     {
         CreateBuffer(context, device, updateInfo.instances);
-        return;
     }
-
-    constexpr auto elementSize = sizeof(MaterialData);
-    for (const auto& [offset, count] : updateInfo.dirtyRanges)
+    else
     {
-        const auto source = &updateInfo.instances[offset];
-        context.UpdateBuffer(
-            m_buffer,
-            offset * elementSize,
-            count * elementSize,
-            source,
-            Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION
-        );
-    }
+        Transition(context, Diligent::RESOURCE_STATE_COPY_DEST);
+        constexpr auto elementSize = sizeof(MaterialData);
+        for (const auto& [offset, count] : updateInfo.dirtyRanges)
+        {
+            const auto source = &updateInfo.instances[offset];
+            context.UpdateBuffer(
+                m_buffer,
+                offset * elementSize,
+                count * elementSize,
+                source,
+                Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
+            );
+        }
 
-    m_view = m_buffer->GetDefaultView(Diligent::BUFFER_VIEW_SHADER_RESOURCE);
-    m_variable->Set(m_view, Diligent::SET_SHADER_RESOURCE_FLAG_NONE);
+        Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
+    }
+}
+
+void MaterialDataBufferResource::Transition(Diligent::IDeviceContext& context,
+                                            Diligent::RESOURCE_STATE state)
+{
+    const auto barrier = Diligent::StateTransitionDesc(
+        m_buffer,
+        Diligent::RESOURCE_STATE_UNKNOWN,
+        state,
+        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+    );
+
+    context.TransitionResourceStates(1, &barrier);
 }
 } // namespace nc::graphics

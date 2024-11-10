@@ -35,7 +35,7 @@ class GlobalEnvironmentResourceTest : public DiligentEngineFixture
 TEST_F(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
 {
     const auto& var = uut->GetShaderVariable();
-    EXPECT_EQ(Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC, var.GetType());
+    EXPECT_EQ(Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE, var.GetType());
     auto actualResourceDesc = Diligent::ShaderResourceDesc{};
     var.GetResourceDesc(actualResourceDesc);
     EXPECT_EQ(Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER, actualResourceDesc.Type);
