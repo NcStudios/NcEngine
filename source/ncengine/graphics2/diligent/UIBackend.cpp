@@ -5,9 +5,8 @@ namespace nc::graphics
 UIBackend::UIBackend(Diligent::IRenderDevice& device,
                      const Diligent::SwapChainDesc& swapChainDesc,
                      GLFWwindow* window,
-                     std::string_view api,
                      Signal<>& onFontUpdate)
-    : m_imguiBackend{device, swapChainDesc, window, api},
+    : m_imguiBackend{device, swapChainDesc, window},
       m_fontConnetion{onFontUpdate.Connect(this, &UIBackend::OnFontUpdate)}
 {
 }
