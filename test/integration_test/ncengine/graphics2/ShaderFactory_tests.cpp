@@ -6,20 +6,19 @@
 
 constexpr auto g_goodSourceText = std::string_view{
 R"(
-struct PSOutput
-{
-    float4 Color : SV_TARGET;
-};
+layout(location = 0) out vec4 Color;
 
-void main(out PSOutput PSOut)
+void main()
 {
-    PSOut.Color = float4(0, 0, 0, 0);
+    Color = vec4(0.0, 0.0, 0.0, 0.0);
 }
 )"};
 
 constexpr auto g_badSourceText = std::string_view{
-R"(void main(in PSInput PSIn, out PSOutput PSOut)
+R"(
+void main()
 {
+    Color = v;
 }
 )"};
 
