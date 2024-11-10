@@ -11,13 +11,13 @@ namespace nc::graphics
 {
 auto GetNativeWindow(GLFWwindow* window) -> Diligent::NativeWindow
 {
-    auto glfwWindowHandle = glfwGetX11Window(window);
-    auto glfwDisplay = glfwGetX11Display();
-    NC_ASSERT(glfwWindowHandle, "Error getting the X11 window handle.");
-    NC_ASSERT(glfwDisplay, "Error getting the X11 display from the GLFW window.");
-    return Diligent::NativeWindow{
-        static_cast<Diligent::Uint32>(glfwWindowHandle);
-        glfwDisplay,
+    auto x11Handle = glfwGetX11Window(window);
+    auto x11Display = glfwGetX11Display();
+    NC_ASSERT(x11Handle, "Error getting the X11 window handle.");
+    NC_ASSERT(x11Display, "Error getting the X11 display from the GLFW window.");
+    return Diligent::LinuxNativeWindow{
+        static_cast<uint32_t>(x11Window),
+        x11Display,
         nullptr
     };
 }
