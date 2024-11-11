@@ -8,3 +8,5 @@ target_sources(${NC_ENGINE_LIB}
         MaterialResourceSignature.cpp
         ShaderBindings.cpp
 )
+
+add_subdirectory(component)

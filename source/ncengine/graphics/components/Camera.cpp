@@ -44,7 +44,7 @@ void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix)
 void Camera::UpdateProjectionMatrix(float width, float height)
 {
     m_projection = DirectX::XMMatrixPerspectiveFovRH(m_properties.fov, width / height, m_properties.nearClip, m_properties.farClip);
-    m_projection.r[1] = DirectX::XMVectorScale(m_projection.r[1], -1.0f);
+    m_projection.r[1] = DirectX::XMVectorScale(m_projection.r[1], -1);
 }
 
 auto Camera::CalculateFrustum() const noexcept -> Frustum

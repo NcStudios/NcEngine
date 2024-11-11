@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ShaderFactory.h"
-#include "ncengine/graphics/NcGraphics.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -11,22 +10,15 @@
 
 #include <memory>
 
-namespace nc
-{
-namespace window
-{
-class NcWindow;
-} // namespace window
+struct GLFWwindow;
 
-namespace graphics
+namespace nc::graphics
 {
 class DiligentEngine
 {
     public:
-        DiligentEngine(const config::GraphicsSettings& graphicsSettings,
-                       const Diligent::EngineCreateInfo& engineCreateInfo,
-                       GLFWwindow* window,
-                       std::span<const std::string_view> supportedApis,
+        DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInfo,
+                       GLFWwindow* windowHandle,
                        Diligent::DebugMessageCallbackType logCallback = nullptr);
         ~DiligentEngine() noexcept;
 
@@ -34,14 +26,11 @@ class DiligentEngine
         auto GetContext()       -> Diligent::IDeviceContext& { return *m_pImmediateContext; }
         auto GetSwapChain()     -> Diligent::ISwapChain&     { return *m_pSwapChain; }
         auto GetShaderFactory() -> ShaderFactory&            { return *m_shaderFactory; }
-        auto GetApi()           -> std::string_view          { return m_renderApi; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IRenderDevice>  m_pDevice;
         Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
         Diligent::RefCntAutoPtr<Diligent::ISwapChain>     m_pSwapChain;
         std::unique_ptr<ShaderFactory>                    m_shaderFactory;
-        std::string_view                                  m_renderApi;
 };
-} // namespace graphics
-} // namespace nc
+} // namespace nc::graphics

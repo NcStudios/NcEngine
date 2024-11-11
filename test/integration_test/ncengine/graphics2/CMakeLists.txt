@@ -1,17 +1,17 @@
 # Platform-specific values for graphics integration tests
 if(WIN32)
-    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Win32.cpp
-                                  ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineWin32.cpp
-    )
+    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/diligent/NativeWindowWin32.cpp)
 elseif(UNIX AND NOT APPLE)
-    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
-                                  ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
-    )
+    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/diligent/NativeWindowLinux.cpp)
 endif()
 
 # Common setup for graphics integration tests
 function(add_graphics_test target)
-    add_executable(${target} ${GraphicsTestCommonSources})
+    add_executable(${target}
+        ${GraphicsTestCommonSources}
+        ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngine.cpp
+    )
+
     add_test(${target} ${target})
 
     target_include_directories(${target}
@@ -36,20 +36,13 @@ function(add_graphics_test target)
     )
 endfunction()
 
-### DiligentEngineInit_tests Tests ###
-add_graphics_test(DiligentEngineInit_tests)
+### DiligentEngine Tests ###
+add_graphics_test(DiligentEngine_tests)
 
-if(WIN32)
-    target_sources(DiligentEngineInit_tests
-        PRIVATE
-            DiligentEngineWin32Int_tests.cpp
-    )
-elseif(UNIX AND NOT APPLE)
-    target_sources(DiligentEngineInit_tests
-        PRIVATE
-            DiligentEngineLinuxInt_tests.cpp
-    )
-endif()
+target_sources(DiligentEngine_tests
+    PRIVATE
+        DiligentEngine_tests.cpp
+)
 
 ### GlobalMeshBuffer Tests ###
 add_graphics_test(GlobalMeshBuffer_tests)
@@ -92,6 +85,22 @@ target_sources(MaterialDataBufferResource_tests
         MaterialDataBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialDataBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialResourceSignature.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(MaterialDataBufferResource_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
+)
+
+### MeshRendererBufferResource Tests ###
+add_graphics_test(MeshRendererBufferResource_tests)
+
+target_sources(MeshRendererBufferResource_tests
+    PRIVATE
+    MeshRendererBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/component/MeshRendererBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/component/ComponentResourceSignature.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 

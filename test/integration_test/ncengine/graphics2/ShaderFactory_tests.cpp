@@ -1,4 +1,4 @@
-#include "DiligentEngineParameterizedFixture.inl"
+#include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/ShaderFactory.h"
 
 #include <filesystem>
@@ -27,7 +27,7 @@ constexpr auto g_shaderType = Diligent::SHADER_TYPE_PIXEL;
 constexpr auto g_goodSource = std::span<const char>{g_goodSourceText.data(), g_goodSourceText.size()};
 constexpr auto g_badSource = std::span<const char>{g_badSourceText};
 
-class ShaderFactoryTest : public DiligentEngineParameterizedFixture
+class ShaderFactoryTest : public DiligentEngineFixture
 {
     protected:
         static inline std::filesystem::path testShaderPath = "";
@@ -53,58 +53,41 @@ class ShaderFactoryTest : public DiligentEngineParameterizedFixture
             }
         }
 
-        void SetUp() override
+        ShaderFactoryTest()
         {
-            INITIALIZE_DILIGENT_FIXTURE;
             uut = &engine->GetShaderFactory();
         }
 
-        void TearDown() override
+        ~ShaderFactoryTest()
         {
             FailIfHasErrorOutput();
         }
 };
 
-INSTANTIATE_TEST_SUITE_P(AllApis, ShaderFactoryTest, g_apiParams);
-
 #ifdef NC_RUNTIME_SHADER_COMPILATION
 
-TEST_P(ShaderFactoryTest, HasRuntimeCompilationSupport_hasRuntimeSupport_returnsTrue)
+TEST_F(ShaderFactoryTest, RuntimeSupport_happyPaths_succeed)
 {
     EXPECT_TRUE(uut->HasRuntimeCompilationSupport());
-}
 
-TEST_P(ShaderFactoryTest, MakeShaderFromSource_goodSource_succeeds)
-{
     EXPECT_NO_THROW(uut->MakeShaderFromSource(g_goodSource, "", g_shaderType));
-}
 
-TEST_P(ShaderFactoryTest, MakeShaderFromSource_invalidSyntax_throws)
-{
-    EXPECT_THROW(uut->MakeShaderFromSource(g_badSource, "", g_shaderType), nc::NcError);
-    ClearErrorOutput();
-}
-
-TEST_P(ShaderFactoryTest, ReadShaderFile_validFile_producesValidSource)
-{
     const auto source = nc::graphics::ReadShaderFile(testShaderPath.string());
     EXPECT_NO_THROW(uut->MakeShaderFromSource(source, "", g_shaderType));
 }
 
-TEST_P(ShaderFactoryTest, ReadShaderFile_badFile_throws)
+TEST_F(ShaderFactoryTest, RuntimeSupport_failurePaths_throw)
 {
+    EXPECT_THROW(uut->MakeShaderFromSource(g_badSource, "", g_shaderType), nc::NcError);
     EXPECT_THROW(nc::graphics::ReadShaderFile("not_a_shader.psh"), nc::NcError);
+    ClearErrorOutput();
 }
 
 #else
 
-TEST_P(ShaderFactoryTest, HasRuntimeCompilationSupport_noRuntimeSupport_returnsFalse)
+TEST_F(ShaderFactoryTest, NoRuntimeSupport_failurePaths_throw)
 {
     EXPECT_FALSE(uut->HasRuntimeCompilationSupport());
-}
-
-TEST_P(ShaderFactoryTest, MakeShaderFromSource_noRuntimeSupport_throws)
-{
     EXPECT_THROW(uut->MakeShaderFromSource(g_goodSource, "", g_shaderType), nc::NcError);
 }
 

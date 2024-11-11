@@ -8,9 +8,9 @@
 
 namespace nc::graphics
 {
-GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
+GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& context,
                                                      Diligent::IRenderDevice& device,
-                                                     Diligent::IDeviceContext& context)
+                                                     Diligent::IShaderResourceVariable& variable)
     : m_variable{&variable}
 {
     Diligent::CreateUniformBuffer(
@@ -42,7 +42,7 @@ auto GlobalEnvironmentResource::MakeResourceDesc(std::string_view variableName) 
         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,
         variableName.data(),
         Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC
+        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
     };
 }
 

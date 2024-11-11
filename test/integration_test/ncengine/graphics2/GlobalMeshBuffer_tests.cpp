@@ -1,32 +1,24 @@
-#include "DiligentEngineParameterizedFixture.inl"
+#include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/GlobalMeshBuffer.h"
 #include "ncasset/Assets.h"
 
 #include <ranges>
 
-class GlobalMeshBufferTest : public DiligentEngineParameterizedFixture
+class GlobalMeshBufferTest : public DiligentEngineFixture
 {
     protected:
         std::unique_ptr<nc::graphics::GlobalMeshBuffer> uut;
 
         GlobalMeshBufferTest()
-            : DiligentEngineParameterizedFixture{false}
         {
-        }
-
-        void SetUp() override
-        {
-            INITIALIZE_DILIGENT_FIXTURE;
             uut = std::make_unique<nc::graphics::GlobalMeshBuffer>();
         }
 
-        void TearDown() override
+        ~GlobalMeshBufferTest()
         {
             FailIfHasErrorOutput();
         }
 };
-
-INSTANTIATE_TEST_SUITE_P(AllApis, GlobalMeshBufferTest, g_apiParams);
 
 constexpr auto g_pixelShader = std::string_view{
 R"(struct PSInput
@@ -107,7 +99,7 @@ constexpr auto g_vertex3 = nc::asset::MeshVertex{
     .position = nc::Vector3::Right()
 };
 
-TEST(GlobalMeshBufferTest, GetMeshVertexLayoutElements_elementsPositionedCorrectly)
+TEST(GlobalMeshBufferUtilityTest, GetMeshVertexLayoutElements_elementsPositionedCorrectly)
 {
     const auto expectedSlot = 1u;
     const auto expectedOffset = 3u;
@@ -120,14 +112,14 @@ TEST(GlobalMeshBufferTest, GetMeshVertexLayoutElements_elementsPositionedCorrect
     }
 }
 
-TEST_P(GlobalMeshBufferTest, Load_initialCall_succeeds)
+TEST_F(GlobalMeshBufferTest, Load_initialCall_succeeds)
 {
     const auto vertices = std::array{g_vertex1, g_vertex2, g_vertex3};
     const auto indices = std::array{0u, 1u, 2u};
     EXPECT_NO_THROW(uut->Load(vertices, indices, engine->GetContext(), engine->GetDevice()));
 }
 
-TEST_P(GlobalMeshBufferTest, Load_overwriteBuffer_succeeds)
+TEST_F(GlobalMeshBufferTest, Load_overwriteBuffer_succeeds)
 {
     auto& context = engine->GetContext();
     auto& device = engine->GetDevice();
@@ -141,7 +133,7 @@ TEST_P(GlobalMeshBufferTest, Load_overwriteBuffer_succeeds)
     EXPECT_NO_THROW(uut->Load(overwriteVertices, overwriteIndices, context, device));
 }
 
-TEST_P(GlobalMeshBufferTest, Load_empty_throws)
+TEST_F(GlobalMeshBufferTest, Load_empty_throws)
 {
     const auto vertices = std::span<const nc::asset::MeshVertex>{};
     const auto indices = std::span<const uint32_t>{};
@@ -149,7 +141,7 @@ TEST_P(GlobalMeshBufferTest, Load_empty_throws)
     ClearErrorOutput();
 }
 
-TEST_P(GlobalMeshBufferTest, SetBuffers_multipleCalls_succeed)
+TEST_F(GlobalMeshBufferTest, SetBuffers_multipleCalls_succeed)
 {
     auto& context = engine->GetContext();
     const auto vertices = std::array{g_vertex1, g_vertex2, g_vertex3};
@@ -160,14 +152,14 @@ TEST_P(GlobalMeshBufferTest, SetBuffers_multipleCalls_succeed)
     EXPECT_NO_THROW(uut->SetBuffers(context));
 }
 
-TEST_P(GlobalMeshBufferTest, SetBuffers_noDataLoaded_throws)
+TEST_F(GlobalMeshBufferTest, SetBuffers_noDataLoaded_throws)
 {
     auto& context = engine->GetContext();
     EXPECT_THROW(uut->SetBuffers(context), nc::NcError);
     ClearErrorOutput();
 }
 
-TEST_P(GlobalMeshBufferTest, Load_and_SetBuffers_subsequentDrawCallsSucceed)
+TEST_F(GlobalMeshBufferTest, Load_and_SetBuffers_subsequentDrawCallsSucceed)
 {
     auto& context = engine->GetContext();
     auto& device = engine->GetDevice();

@@ -1,17 +1,16 @@
-#include "DiligentEngineParameterizedFixture.inl"
+#include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/GlobalEnvironmentResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 
-class GlobalEnvironmentResourceTest : public DiligentEngineParameterizedFixture
+class GlobalEnvironmentResourceTest : public DiligentEngineFixture
 {
     protected:
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> signature;
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> srb;
         std::unique_ptr<nc::graphics::GlobalEnvironmentResource> uut;
 
-        void SetUp() override
+        GlobalEnvironmentResourceTest()
         {
-            INITIALIZE_DILIGENT_FIXTURE;
             constexpr auto variableName = "testTexture";
             const auto resource = nc::graphics::GlobalEnvironmentResource::MakeResourceDesc(variableName);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -21,24 +20,22 @@ class GlobalEnvironmentResourceTest : public DiligentEngineParameterizedFixture
             engine->GetDevice().CreatePipelineResourceSignature(desc, &signature);
             signature->CreateShaderResourceBinding(&srb);
             uut = std::make_unique<nc::graphics::GlobalEnvironmentResource>(
-                *srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, variableName),
+                engine->GetContext(),
                 engine->GetDevice(),
-                engine->GetContext()
+                *srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, variableName)
             );
         }
 
-        void TearDown() override
+        ~GlobalEnvironmentResourceTest()
         {
             FailIfHasErrorOutput();
         }
 };
 
-INSTANTIATE_TEST_SUITE_P(AllApis, GlobalEnvironmentResourceTest, g_apiParams);
-
-TEST_P(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
+TEST_F(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
 {
     const auto& var = uut->GetShaderVariable();
-    EXPECT_EQ(Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC, var.GetType());
+    EXPECT_EQ(Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE, var.GetType());
     auto actualResourceDesc = Diligent::ShaderResourceDesc{};
     var.GetResourceDesc(actualResourceDesc);
     EXPECT_EQ(Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER, actualResourceDesc.Type);
@@ -51,7 +48,7 @@ TEST_P(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
     EXPECT_NE(0, Diligent::RESOURCE_STATE_CONSTANT_BUFFER & actualBuffer->GetState());
 }
 
-TEST_P(GlobalEnvironmentResourceTest, Update_succeeds)
+TEST_F(GlobalEnvironmentResourceTest, Update_succeeds)
 {
     auto cameraState = nc::graphics::CameraRenderState{
         .viewProjection = DirectX::XMMatrixPerspectiveFovRH(90.0f, 16.0f / 9.0f, 0.1f, 100.0f)

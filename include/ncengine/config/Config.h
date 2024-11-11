@@ -67,23 +67,15 @@ struct MemorySettings
 /** @brief Options for configuring NcGraphics. */
 struct GraphicsSettings
 {
-    bool enabled = true;              ///< enable the NcGraphics module
-    /**
-    api is the target graphics api from a predetermined list (narrowed at build time by platform)
-    of vulkan or d3d12. See nc::graphics::GetSupportedApis().
-    If the target api is not detected as compatible, the next in the list returned by GetSupportedApis()
-    will be chosen as a fallback.
-     */
-    std::string api = "vulkan";       ///< possible values: vulkan, d3d12
-    bool isHeadless = false;          ///< run the api in headless mode
-    bool useNativeResolution = false; ///< use the monitor's native resolution
-    bool launchInFullscreen = false;  ///< launch a fullscreen window
-    unsigned screenWidth = 1000;      ///< width of the screen
-    unsigned screenHeight = 1000;     ///< height of the screen
-    unsigned targetFPS = 60;          ///< target frame rate
-    bool useShadows = true;           ///< enable shadow mapping and shadow rendering
-    unsigned antialiasing = 8u;       ///< the number of samples for MSAA
-    bool useValidationLayers = false; ///< turn on validation layers in debug builds
+    bool enabled = true;                 ///< enable the NcGraphics module
+    bool useNativeResolution = false;    ///< use the monitor's native resolution
+    bool launchInFullscreen = false;     ///< launch a fullscreen window
+    unsigned screenWidth = 1000;         ///< width of the screen
+    unsigned screenHeight = 1000;        ///< height of the screen
+    unsigned targetFPS = 60;             ///< target frame rate
+    bool useShadows = true;              ///< enable shadow mapping and shadow rendering
+    unsigned antialiasing = 8u;          ///< the number of samples for MSAA
+    bool useValidationLayers = false;    ///< turn on validation layers in debug builds
 };
 
 /** @brief Options for configuring NcPhysics. */
