@@ -7,12 +7,14 @@ namespace nc::graphics
 MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& context,
                                                      Diligent::IRenderDevice& device,
                                                      std::string_view signatureName,
-                                                     std::string_view materialBufferVariableName,
                                                      uint8_t bindingIndex,
-                                                     uint32_t maxInstanceCount,
-                                                     uint32_t initialInstanceCount)
+                                                     StructuredBufferResourceDesc materialResourceDesc)
 {
-    const auto resource = StructuredBuffer<MaterialData>::MakeResourceDesc(materialBufferVariableName, Diligent::SHADER_TYPE_PIXEL);
+    const auto resource = StructuredBuffer<MaterialData>::MakeResourceDesc(
+        materialResourceDesc.resourceKey,
+        materialResourceDesc.shaderType
+    );
+
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = &resource;
@@ -30,19 +32,19 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(Diligent::SHADER_TYPE_PIXEL, materialBufferVariableName.data());
+    auto variable = m_srb->GetVariableByName(materialResourceDesc.shaderType, materialResourceDesc.resourceKey.data());
     if (!variable)
     {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialBufferVariableName)};
+        throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialResourceDesc.resourceKey)};
     }
 
     m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(
         context,
         device,
-        materialBufferVariableName,
+        materialResourceDesc.resourceKey,
         *variable,
-        maxInstanceCount,
-        initialInstanceCount
+        materialResourceDesc.maxElementCount,
+        materialResourceDesc.initialElementCount
     );
 }
 } // namespace nc::graphics

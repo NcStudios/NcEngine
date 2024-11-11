@@ -11,7 +11,7 @@ class GlobalEnvironmentResourceTest : public DiligentEngineFixture
 
         GlobalEnvironmentResourceTest()
         {
-            constexpr auto variableName = "testTexture";
+            constexpr auto variableName = "EnvironmentDataUniformBuffer";
             const auto resource = nc::graphics::GlobalEnvironmentResource::MakeResourceDesc(variableName);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
             desc.Resources = &resource;
@@ -42,7 +42,7 @@ TEST_F(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
 
     const auto object = var.Get();
     ASSERT_NE(nullptr, object);
-    ASSERT_STREQ(nc::graphics::GlobalEnvironmentResource::UniformBufferName, object->GetDesc().Name);
+    ASSERT_STREQ("EnvironmentDataUniformBuffer", object->GetDesc().Name);
 
     const auto actualBuffer = static_cast<Diligent::IBuffer*>(object);
     EXPECT_NE(0, Diligent::RESOURCE_STATE_CONSTANT_BUFFER & actualBuffer->GetState());

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ResourceTypes.h"
+
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -15,12 +17,12 @@ class GlobalEnvironmentResource;
 class GlobalResourceSignature
 {
     public:
-        static constexpr auto BindingIndex = 0u;
-        static constexpr auto SignatureName = "GlobalResourceSignature";
-        static constexpr auto GlobalTextureBufferShaderVariableName = "Textures";
-        static constexpr auto GlobalEnvironmentShaderVariableName = "EnvironmentData";
-
-        explicit GlobalResourceSignature(Diligent::IRenderDevice& device, Diligent::IDeviceContext& context, uint32_t maxTextures);
+        explicit GlobalResourceSignature(Diligent::IDeviceContext& context,
+                                         Diligent::IRenderDevice& device,
+                                         std::string_view signatureName,
+                                         uint8_t bindingIndex,
+                                         TextureBufferResourceDesc textureResourceDesc,
+                                         UniformBufferResourceDesc environmentResourceDesc);
         ~GlobalResourceSignature() noexcept;
 
         void Commit(Diligent::IDeviceContext& context)
