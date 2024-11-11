@@ -249,14 +249,15 @@ void NcGraphicsImpl2::Run()
     m_frontend.GetMaterialRegistry().CommitPendingChanges(
         [this](const auto& info){
             m_shaderBindings.GetMaterialSignature().GetMaterialDataResource().Update(
-                info,
                 m_engine.GetContext(),
-                m_engine.GetDevice()
+                m_engine.GetDevice(),
+                info
             );
         }
     );
 
     auto& context = m_engine.GetContext();
+    auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
     m_ui.FrameBegin(swapChain);
@@ -270,7 +271,7 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-    m_shaderBindings.Update(renderState, context);
+    m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetGlobalSignature().Commit(context);
     m_shaderBindings.GetComponentSignature().Commit(context);
     m_shaderBindings.GetMaterialSignature().Commit(context);

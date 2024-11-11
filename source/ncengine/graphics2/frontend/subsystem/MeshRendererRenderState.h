@@ -2,6 +2,9 @@
 
 #include "ncengine/ecs/Entity.h"
 #include "graphics2/ShaderTypes.h"
+#include "DirectXMath.h"
+
+#include <span>
 
 namespace nc::graphics
 {

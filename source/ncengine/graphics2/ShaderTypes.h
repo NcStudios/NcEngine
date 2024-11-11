@@ -24,7 +24,7 @@ struct MeshRendererData
     uint32_t materialIndex = NullMaterialInstanceHandle;
 };
 
-// Object model for MaterialInstance (type: StructureBuffer element type).
+// Object model for MaterialInstance (type: StructuredBuffer element type).
 struct MaterialData
 {
     Vector3 gradientStart = Vector3::Splat(10.0f);
@@ -42,10 +42,14 @@ struct BufferSlice
     size_t count = 0;
 };
 
-// Event data notifying changes to MaterialInstance buffer.
-struct MaterialDataUpdateInfo
+template<typename T>
+concept TriviallyCopyable = requires { requires std::is_trivially_copyable_v<T>; };
+
+// Event data notifying changes to StructuredBuffer.
+template<TriviallyCopyable T>
+struct BufferUpdateInfo
 {
-    std::span<const MaterialData> instances; // view over all instances
-    std::vector<BufferSlice> dirtyRanges;    // modified subranges
+    std::span<const T> instances;         // View over all instances
+    std::vector<BufferSlice> dirtyRanges; // Modified subranges
 };
 } // namespace nc::graphics

@@ -1,15 +1,16 @@
 #include "gtest/gtest.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
+#include "graphics2/ShaderTypes.h"
 
 #include "ncutility/NcError.h"
 
 struct UpdateListener
 {
-    nc::graphics::MaterialDataUpdateInfo receivedInfo;
+    nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData> receivedInfo;
 
     auto MakeCallback()
     {
-        return [this](const nc::graphics::MaterialDataUpdateInfo& info)
+        return [this](const nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>& info)
         {
             this->receivedInfo = info;
         };
@@ -17,7 +18,7 @@ struct UpdateListener
 
     void Clear()
     {
-        receivedInfo = nc::graphics::MaterialDataUpdateInfo{};
+        receivedInfo = nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>{};
     }
 };
 
