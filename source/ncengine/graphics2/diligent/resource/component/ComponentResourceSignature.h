@@ -1,7 +1,6 @@
 #pragma once
 
-#include "MeshRendererBufferResource.h"
-
+#include "graphics2/diligent/resource/base/StructuredBuffer.h"
 #include "ncutility/NcError.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -36,7 +35,7 @@ class ComponentResourceSignature
             return *m_signature;
         }
 
-        auto GetMeshRendererBuffer() -> MeshRendererBufferResource&
+        auto GetMeshRendererBuffer() -> StructuredBuffer<MeshRendererData>&
         {
             return *m_meshRendererResource;
         }
@@ -44,6 +43,6 @@ class ComponentResourceSignature
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        std::unique_ptr<MeshRendererBufferResource> m_meshRendererResource;
+        std::unique_ptr<StructuredBuffer<MeshRendererData>> m_meshRendererResource;
 };
 } // namespace nc::graphics

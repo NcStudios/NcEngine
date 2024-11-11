@@ -18,7 +18,8 @@ class MaterialResourceSignature
                                            std::string_view signatureName,
                                            std::string_view materialBufferVariableName,
                                            uint8_t bindingIndex,
-                                           uint32_t maxInstances);
+                                           uint32_t maxInstanceCount,
+                                           uint32_t initialInstanceCount);
 
         void Commit(Diligent::IDeviceContext& context)
         {

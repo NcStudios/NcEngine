@@ -9,7 +9,8 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
                                                      std::string_view signatureName,
                                                      std::string_view materialBufferVariableName,
                                                      uint8_t bindingIndex,
-                                                     uint32_t maxInstances)
+                                                     uint32_t maxInstanceCount,
+                                                     uint32_t initialInstanceCount)
 {
     const auto resource = StructuredBuffer<MaterialData>::MakeResourceDesc(materialBufferVariableName, Diligent::SHADER_TYPE_PIXEL);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -40,7 +41,8 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
         device,
         "MaterialDataBuffer",
         *variable,
-        maxInstances
+        maxInstanceCount,
+        initialInstanceCount
     );
 }
 } // namespace nc::graphics

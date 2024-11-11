@@ -16,7 +16,13 @@ struct GlobalEnvironmentData
     DirectX::XMMATRIX cameraViewProjection;
 };
 
-// Object model for MaterialInstance (type: StructureBuffer element type).
+// Object model for MeshRenderers (type: StructuredBuffer element type).
+struct MeshRendererData
+{
+    DirectX::XMMATRIX modelMatrix;
+};
+
+// Object model for MaterialInstance (type: StructuredBuffer element type).
 struct MaterialData
 {
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();

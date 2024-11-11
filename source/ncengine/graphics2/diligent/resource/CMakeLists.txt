@@ -8,4 +8,5 @@ target_sources(${NC_ENGINE_LIB}
         ShaderBindings.cpp
 )
 
+add_subdirectory(base)
 add_subdirectory(component)

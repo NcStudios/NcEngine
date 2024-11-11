@@ -13,7 +13,7 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<ToonRenderer, Transform>
 
     std::ranges::transform(entities, std::back_inserter(m_modelMatricesCache), [&ecs](Entity entity) 
     {
-        return ecs.Get<Transform>(entity).TransformationMatrix();
+        return MeshRendererData{ecs.Get<Transform>(entity).TransformationMatrix()};
     });
 
     return MeshRendererRenderState{.modelMatrices = m_modelMatricesCache, .entities = entities};

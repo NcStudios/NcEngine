@@ -8,138 +8,117 @@
 
 #include <concepts>
 #include <span>
-#include <vector>
 
 namespace nc::graphics
 {
-template<TriviallyCopyable T>
-class StructuredBuffer
+class StructuredBufferBase
 {
     public:
+        explicit StructuredBufferBase(std::string_view name,
+                                      Diligent::IShaderResourceVariable& variable,
+                                      uint32_t maxSize,
+                                      uint32_t initialSize);
+
+        static auto MakeResourceDesc(std::string_view variableName, Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc;
+        void Transition(Diligent::IDeviceContext& context, Diligent::RESOURCE_STATE state);
+
+        auto GetShaderVariable()       -> Diligent::IShaderResourceVariable& { return *m_variable; }
+        auto Size()              const -> uint32_t                           { return m_size;      }
+        auto MaxSize()           const -> uint32_t                           { return m_maxSize;   }
+
+    protected:
+        Diligent::IShaderResourceVariable* m_variable;
+        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_buffer;
+        std::string m_name;
+        uint32_t m_maxSize = 0;
+        uint32_t m_size = 0;
+
+        void Reallocate(Diligent::IRenderDevice& device,
+                        uint32_t elementCount,
+                        uint32_t elementStride,
+                        Diligent::BufferData* bufferData = nullptr);
+
+        void SetVariable();
+};
+
+template<TriviallyCopyable T>
+class StructuredBuffer : public StructuredBufferBase
+{
+    public:
+        static constexpr auto ElementStride = static_cast<uint32_t>(sizeof(T));
+
         explicit StructuredBuffer(Diligent::IDeviceContext& context,
                                   Diligent::IRenderDevice& device,
                                   std::string_view name,
                                   Diligent::IShaderResourceVariable& variable,
-                                  uint32_t initialSize);
+                                  uint32_t maxElements,
+                                  uint32_t initialElementCount = maxElements)
+            : StructuredBufferBase{name, variable, maxElements, initialElementCount}
+        {
+            CreateBuffer(context, device, initialElementCount);
+        }
 
-        static auto MakeResourceDesc(std::string_view variableName, Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc;
-        auto GetShaderVariable() -> Diligent::IShaderResourceVariable& { return *m_variable; }
-        void Update(Diligent::IDeviceContext& context,
-                    Diligent::IRenderDevice& device,
-                    const BufferUpdateInfo<T>& udpateInfo);
+        // Get the current buffer size in bytes.
+        auto SizeBytes() const -> uint32_t { return ElementStride * m_size; }
 
-    private:
+        // Allocate a new uninitialized buffer.
         void CreateBuffer(Diligent::IDeviceContext& context,
                           Diligent::IRenderDevice& device,
-                          std::span<const T> data);
-
-        void Transition(Diligent::IDeviceContext& context,
-                        Diligent::RESOURCE_STATE state);
-
-        Diligent::IShaderResourceVariable* m_variable;
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_buffer;
-        std::string_view m_name;
-        uint32_t m_bufferElementCount = 0;
-};
-
-template<TriviallyCopyable T>
-StructuredBuffer<T>::StructuredBuffer(Diligent::IDeviceContext& context,
-                                      Diligent::IRenderDevice& device,
-                                      std::string_view name,
-                                      Diligent::IShaderResourceVariable& variable,
-                                      uint32_t initialSize)
-: m_variable{&variable},
-  m_name{name}
-{
-    const auto dummy = std::vector<T>(initialSize);
-    CreateBuffer(context, device, dummy);
-}
-
-template<TriviallyCopyable T>
-auto StructuredBuffer<T>::MakeResourceDesc(std::string_view variableName,
-                                           Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc{
-        shaderType,
-        variableName.data(),
-        1,
-        Diligent::SHADER_RESOURCE_TYPE_BUFFER_SRV,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
-    };
-}
-
-template<TriviallyCopyable T>
-void StructuredBuffer<T>::Transition(Diligent::IDeviceContext& context,
-                                     Diligent::RESOURCE_STATE state)
-{
-    const auto barrier = Diligent::StateTransitionDesc(
-        m_buffer,
-        Diligent::RESOURCE_STATE_UNKNOWN,
-        state,
-        Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-    );
-
-    context.TransitionResourceStates(1, &barrier);
-}
-
-template<TriviallyCopyable T>
-void StructuredBuffer<T>::CreateBuffer(Diligent::IDeviceContext& context,
-                                       Diligent::IRenderDevice& device,
-                                       std::span<const T> data)
-{
-    constexpr auto elementSize = static_cast<uint32_t>(sizeof(T));
-    m_bufferElementCount = static_cast<uint32_t>(data.size());
-    const auto bufferSize = elementSize * m_bufferElementCount;
-    const auto bufferDesc = Diligent::BufferDesc{
-        m_name.data(),
-        bufferSize,
-        Diligent::BIND_SHADER_RESOURCE,
-        Diligent::USAGE_DEFAULT,
-        Diligent::CPU_ACCESS_NONE,
-        Diligent::BUFFER_MODE_STRUCTURED,
-        elementSize
-    };
-
-    auto bufferData = Diligent::BufferData{data.data(), bufferSize};
-    m_buffer.Release();
-    device.CreateBuffer(bufferDesc, &bufferData, &m_buffer);
-    if (!m_buffer)
-    {
-        throw nc::NcError{fmt::format("Failed to create buffer '{}'", bufferDesc.Name)};
-    }
-
-    Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
-    m_variable->Set(
-        m_buffer->GetDefaultView(Diligent::BUFFER_VIEW_SHADER_RESOURCE),
-        Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE
-    );
-}
-
-template<TriviallyCopyable T>
-void StructuredBuffer<T>::Update(Diligent::IDeviceContext& context,
-                                 Diligent::IRenderDevice& device,
-                                 const BufferUpdateInfo<T>& updateInfo)
-{
-    if (updateInfo.instances.size() > m_bufferElementCount)
-    {
-        CreateBuffer(context, device, updateInfo.instances);
-    }
-    else
-    {
-        Transition(context, Diligent::RESOURCE_STATE_COPY_DEST);
-        constexpr auto elementSize = sizeof(MaterialData);
-        for (const auto& [offset, count] : updateInfo.dirtyRanges)
+                          uint32_t elementCount)
         {
-            const auto source = &updateInfo.instances[offset];
+            Reallocate(device, elementCount, ElementStride, nullptr);
+            Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
+            SetVariable();
+        }
+
+        // Allocate a new buffer with initial data.
+        void CreateBuffer(Diligent::IDeviceContext& context,
+                          Diligent::IRenderDevice& device,
+                          std::span<const T> data)
+        {
+            const auto elementCount = static_cast<uint32_t>(data.size());
+            auto bufferData = Diligent::BufferData{data.data(), elementCount * ElementStride};
+            Reallocate(device, elementCount, ElementStride, &bufferData);
+            Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
+            SetVariable();
+        }
+
+        // Write data to the buffer. It is the caller's responsibility to ensure the buffer has sufficient capacity and
+        // is in RESOURCE_STATE_COPY_DEST.
+        void Write(Diligent::IDeviceContext& context,
+                   std::span<const T> source,
+                   uint64_t destinationOffset = 0u)
+        {
+            NC_ASSERT(source.size() + destinationOffset <= m_size, "Buffer write out of bounds - buffer should be reallocated with a larger size");
             context.UpdateBuffer(
                 m_buffer,
-                offset * elementSize,
-                count * elementSize,
-                source,
+                destinationOffset * ElementStride,
+                source.size() * ElementStride,
+                source.data(),
                 Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY
             );
         }
-        Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
-    }
-}
+
+        // Update buffer regions. Buffer resizing and state transitions are handled automatically.
+        void Update(Diligent::IDeviceContext& context,
+                    Diligent::IRenderDevice& device,
+                    const BufferUpdateInfo<T>& updateInfo)
+        {
+            if (updateInfo.instances.size() > m_size)
+            {
+                CreateBuffer(context, device, updateInfo.instances);
+            }
+            else
+            {
+                Transition(context, Diligent::RESOURCE_STATE_COPY_DEST);
+                for (const auto& [offset, count] : updateInfo.dirtyRanges)
+                {
+                    const auto sourceRegion = std::span{&updateInfo.instances[offset], count};
+                    Write(context, sourceRegion, offset);
+                }
+
+                Transition(context, Diligent::RESOURCE_STATE_SHADER_RESOURCE);
+            }
+        }
+};
 } // namespace nc::graphics
