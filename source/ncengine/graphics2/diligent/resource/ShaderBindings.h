@@ -16,7 +16,6 @@ struct FrontendRenderState;
 class ShaderBindings
 {
     public:
-        /** @todo: 782 Fully parameterize names, indices, and size hints */
         explicit ShaderBindings(Diligent::IRenderDevice& device,
                                 Diligent::IDeviceContext& context,
                                 uint32_t maxTextures,
