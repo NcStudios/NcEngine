@@ -4,13 +4,13 @@ namespace nc::graphics
 {
 StructuredBufferBase::StructuredBufferBase(std::string_view name,
                                            Diligent::IShaderResourceVariable& variable,
-                                           uint32_t maxSize,
-                                           uint32_t initialSize)
+                                           uint32_t maxElementCount,
+                                           uint32_t initialElementCount)
     : m_variable{&variable},
       m_buffer{},
       m_name{name},
-      m_maxSize{maxSize},
-      m_size{initialSize}
+      m_maxElementCount{maxElementCount},
+      m_elementCount{initialElementCount}
 {
 }
 
@@ -44,8 +44,8 @@ void StructuredBufferBase::Reallocate(Diligent::IRenderDevice& device,
                                       uint32_t elementStride,
                                       Diligent::BufferData* bufferData)
 {
-    NC_ASSERT(elementCount > 0 && elementCount <= m_maxSize, "Invalid buffer size.");
-    m_size = elementCount;
+    NC_ASSERT(elementCount > 0 && elementCount <= m_maxElementCount, "Invalid buffer size.");
+    m_elementCount = elementCount;
     const auto bufferSize = elementCount * elementStride;
     const auto bufferDesc = Diligent::BufferDesc{
         m_name.c_str(),

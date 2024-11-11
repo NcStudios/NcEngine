@@ -16,22 +16,22 @@ class StructuredBufferBase
     public:
         explicit StructuredBufferBase(std::string_view name,
                                       Diligent::IShaderResourceVariable& variable,
-                                      uint32_t maxSize,
-                                      uint32_t initialSize);
+                                      uint32_t maxElementCount,
+                                      uint32_t initialElementCount);
 
         static auto MakeResourceDesc(std::string_view variableName, Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc;
         void Transition(Diligent::IDeviceContext& context, Diligent::RESOURCE_STATE state);
 
-        auto GetShaderVariable()       -> Diligent::IShaderResourceVariable& { return *m_variable; }
-        auto Size()              const -> uint32_t                           { return m_size;      }
-        auto MaxSize()           const -> uint32_t                           { return m_maxSize;   }
+        auto GetShaderVariable()        -> Diligent::IShaderResourceVariable& { return *m_variable;       }
+        auto GetElementCount()    const -> uint32_t                           { return m_elementCount;    }
+        auto GetMaxElementCount() const -> uint32_t                           { return m_maxElementCount; }
 
     protected:
         Diligent::IShaderResourceVariable* m_variable;
         Diligent::RefCntAutoPtr<Diligent::IBuffer> m_buffer;
         std::string m_name;
-        uint32_t m_maxSize = 0;
-        uint32_t m_size = 0;
+        uint32_t m_maxElementCount = 0;
+        uint32_t m_elementCount = 0;
 
         ~StructuredBufferBase() = default;
 
@@ -53,15 +53,15 @@ class StructuredBuffer : public StructuredBufferBase
                                   Diligent::IRenderDevice& device,
                                   std::string_view name,
                                   Diligent::IShaderResourceVariable& variable,
-                                  uint32_t maxElements,
-                                  uint32_t initialElementCount = maxElements)
-            : StructuredBufferBase{name, variable, maxElements, initialElementCount}
+                                  uint32_t maxElementCount,
+                                  uint32_t initialElementCount = maxElementCount)
+            : StructuredBufferBase{name, variable, maxElementCount, initialElementCount}
         {
             CreateBuffer(context, device, initialElementCount);
         }
 
         // Get the current buffer size in bytes.
-        auto SizeBytes() const -> uint32_t { return ElementStride * m_size; }
+        auto SizeBytes() const -> uint32_t { return GetElementCount() * ElementStride; }
 
         // Allocate a new uninitialized buffer.
         void CreateBuffer(Diligent::IDeviceContext& context,
@@ -91,7 +91,7 @@ class StructuredBuffer : public StructuredBufferBase
                    std::span<const T> source,
                    uint64_t destinationOffset = 0u)
         {
-            NC_ASSERT(source.size() + destinationOffset <= m_size, "Buffer write out of bounds - buffer should be reallocated with a larger size");
+            NC_ASSERT(source.size() + destinationOffset <= m_elementCount, "Buffer write out of bounds - buffer should be reallocated with a larger size");
             context.UpdateBuffer(
                 m_buffer,
                 destinationOffset * ElementStride,
@@ -106,7 +106,7 @@ class StructuredBuffer : public StructuredBufferBase
                     Diligent::IRenderDevice& device,
                     const BufferUpdateInfo<T>& updateInfo)
         {
-            if (updateInfo.instances.size() > m_size)
+            if (updateInfo.instances.size() > GetElementCount())
             {
                 CreateBuffer(context, device, updateInfo.instances);
             }

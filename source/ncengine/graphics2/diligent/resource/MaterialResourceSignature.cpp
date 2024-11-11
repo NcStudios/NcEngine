@@ -39,7 +39,7 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
     m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(
         context,
         device,
-        "MaterialDataBuffer",
+        materialBufferVariableName,
         *variable,
         maxInstanceCount,
         initialInstanceCount

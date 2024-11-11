@@ -80,12 +80,12 @@ TEST_F(StructuredBufferTest, WriteCases)
     auto partialRange = std::span{data.begin() + 1, data.begin() + 2};
 
     // Verify uut + test data size expectations
-    ASSERT_EQ(maxInstanceCount, uut->MaxSize());
-    ASSERT_EQ(initialInstanceCount, uut->Size());
+    ASSERT_EQ(maxInstanceCount, uut->GetMaxElementCount());
+    ASSERT_EQ(initialInstanceCount, uut->GetElementCount());
     ASSERT_EQ(initialInstanceCount * uut->ElementStride, uut->SizeBytes());
-    ASSERT_GT(wholeRange.size(), uut->Size());
-    ASSERT_EQ(allocatedRange.size(), uut->Size());
-    ASSERT_LT(partialRange.size(), uut->Size());
+    ASSERT_GT(wholeRange.size(), uut->GetElementCount());
+    ASSERT_EQ(allocatedRange.size(), uut->GetElementCount());
+    ASSERT_LT(partialRange.size(), uut->GetElementCount());
 
     // Valid writes succeed
     uut->Transition(context, Diligent::RESOURCE_STATE_COPY_DEST);
@@ -94,7 +94,7 @@ TEST_F(StructuredBufferTest, WriteCases)
     EXPECT_NO_THROW(uut->Write(context, partialRange, 1));
 
     // Expect no changes to size
-    EXPECT_EQ(initialInstanceCount, uut->Size());
+    EXPECT_EQ(initialInstanceCount, uut->GetElementCount());
     EXPECT_EQ(initialInstanceCount * uut->ElementStride, uut->SizeBytes());
 
     // Out of bounds due to large source data fails
@@ -114,7 +114,7 @@ TEST_F(StructuredBufferTest, AllocateBufferCases)
 
     // Reallocate with no initial data succeeds
     EXPECT_NO_THROW(uut->CreateBuffer(context, device, 2));
-    EXPECT_EQ(2, uut->Size());
+    EXPECT_EQ(2, uut->GetElementCount());
     signature->Commit(context);
 
     // Reallocate with initial data succeeds

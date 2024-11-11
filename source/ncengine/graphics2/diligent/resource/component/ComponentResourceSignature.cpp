@@ -46,7 +46,7 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
     (
         context,
         device,
-        "MeshRendererStructuredBuffer",
+        meshRendererBufferVariableName,
         *variable,
         maxInstances,
         maxInstances
