@@ -33,6 +33,8 @@ class StructuredBufferBase
         uint32_t m_maxSize = 0;
         uint32_t m_size = 0;
 
+        ~StructuredBufferBase() = default;
+
         void Reallocate(Diligent::IRenderDevice& device,
                         uint32_t elementCount,
                         uint32_t elementStride,

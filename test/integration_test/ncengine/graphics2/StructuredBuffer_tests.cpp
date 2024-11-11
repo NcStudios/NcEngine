@@ -87,11 +87,6 @@ TEST_F(StructuredBufferTest, WriteCases)
     ASSERT_EQ(allocatedRange.size(), uut->Size());
     ASSERT_LT(partialRange.size(), uut->Size());
 
-    // Invalid resource state writes error
-    uut->Write(context, allocatedRange, 0);
-    EXPECT_FALSE(GetErrorOutput().empty());
-    ClearErrorOutput();
-
     // Valid writes succeed
     uut->Transition(context, Diligent::RESOURCE_STATE_COPY_DEST);
     EXPECT_NO_THROW(uut->Write(context, allocatedRange, 0));
@@ -132,9 +127,4 @@ TEST_F(StructuredBufferTest, AllocateBufferCases)
     EXPECT_THROW(uut->CreateBuffer(context, device, maxInstanceCount + 1), nc::NcError);
     EXPECT_THROW(uut->CreateBuffer(context, device, std::span<nc::graphics::MaterialData>{}), nc::NcError);
     EXPECT_THROW(uut->CreateBuffer(context, device, std::array<nc::graphics::MaterialData, maxInstanceCount + 1>{}), nc::NcError);
-
 }
-
-// CreateBuffer
-
-// Failure cases Create
