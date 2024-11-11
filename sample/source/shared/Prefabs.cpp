@@ -9,9 +9,28 @@
 namespace nc::sample
 {
 auto IsInitialized = false;
-auto g_meshLookup = std::unordered_map<std::string, asset::MeshView>{};
-auto g_textureLookup = std::unordered_map<std::string, asset::TextureView>{};
-auto g_materialLookup = std::unordered_map<std::string, MaterialDesc>{};
+
+namespace mesh
+{
+asset::MeshView Cube{};
+asset::MeshView Sphere{};
+asset::MeshView Capsule{};
+asset::MeshView Plane{};
+asset::MeshView HalfPipe{};
+asset::MeshView Ramp{};
+} // namespace mesh
+
+namespace material
+{
+MaterialDesc Default{"DefaultMaterial"};
+MaterialDesc Red{"RedMaterial"};
+MaterialDesc Green{"GreenMaterial"};
+MaterialDesc Blue{"BlueMaterial"};
+MaterialDesc Orange{"OrangeMaterial"};
+MaterialDesc Purple{"PurpleMaterial"};
+MaterialDesc Teal{"TealMaterial"};
+MaterialDesc Yellow{"YellowMaterial"};
+} // namespace material
 
 graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial RedPbrMaterial{"solid_color/Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
@@ -110,20 +129,35 @@ void InitializeResources()
         "box/Normal.nca",
         "logo/Normal.nca"
     };
+
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 }
 
-void PopulateAssetMaps(const asset::NcAsset& ncAsset)
+void ReloadMaterials()
 {
-    const auto loadedAssets = ncAsset.GetLoadedAssets();
-    g_meshLookup.clear();
-    for (const auto& meshPath : loadedAssets.at(asset::AssetType::Mesh))
-    {
-        g_meshLookup.emplace(meshPath, asset::AcquireMeshAsset(meshPath));
-    }
+    mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
+    mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
+    mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
+    mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
+    mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
+
+    const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
+    material::Default.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
+    material::Default.normalTexture = normal;
+    material::Red.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
+    material::Red.normalTexture = normal;
+    material::Green.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
+    material::Green.normalTexture = normal;
+    material::Blue.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
+    material::Blue.normalTexture = normal;
+    material::Orange.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
+    material::Orange.normalTexture = normal;
+    material::Purple.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
+    material::Purple.normalTexture = normal;
+    material::Teal.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
+    material::Teal.normalTexture = normal;
+    material::Yellow.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
+    material::Yellow.normalTexture = normal;
 }
-
-auto GetMeshView(std::string_view path);
-
-auto GetMaterialDesc(std::string_view name);
 } // namespace sample

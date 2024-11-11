@@ -12,24 +12,43 @@ namespace nc::sample
 void InitializeResources();
 
 // 
-void PopulateAssetMaps(const asset::NcAsset& ncAsset);
-
-auto GetMeshView(std::string_view path);
-
-auto GetTextureView(std::string_view path);
-
-auto GetMaterialDesc(std::string_view name);
+void ReloadMaterials();
 
 
 // Mesh
 constexpr auto HalfPipeMesh = "halfpipe.nca";
 constexpr auto RampMesh = "ramp.nca";
 
+namespace mesh
+{
+constexpr auto HalfPipePath = "halfpipe.nca";
+constexpr auto RampPath = "ramp.nca";
+
+extern asset::MeshView Cube;
+extern asset::MeshView Sphere;
+extern asset::MeshView Capsule;
+extern asset::MeshView Plane;
+extern asset::MeshView HalfPipe;
+extern asset::MeshView Ramp;
+} // namespace mesh
+
 // Colliders
 constexpr auto RampHullCollider = "ramp.nca";
 constexpr auto HalfPipeConcaveCollider = "halfpipe.nca";
 
 // Materials
+namespace material
+{
+extern MaterialDesc Default;
+extern MaterialDesc Red;
+extern MaterialDesc Green;
+extern MaterialDesc Blue;
+extern MaterialDesc Orange;
+extern MaterialDesc Purple;
+extern MaterialDesc Teal;
+extern MaterialDesc Yellow;
+} // namespace material
+
 extern graphics::PbrMaterial DefaultPbrMaterial;
 extern graphics::PbrMaterial RedPbrMaterial;
 extern graphics::PbrMaterial GreenPbrMaterial;

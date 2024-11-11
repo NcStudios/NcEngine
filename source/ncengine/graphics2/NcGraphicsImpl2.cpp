@@ -246,6 +246,7 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
+    // todo: how should this one work/where does it go?
     m_frontend.GetMaterialRegistry().CommitPendingChanges(
         [this](const auto& info){
             m_shaderBindings.GetMaterialSignature().GetMaterialDataResource().Update(

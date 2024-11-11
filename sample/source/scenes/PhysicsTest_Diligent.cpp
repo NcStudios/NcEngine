@@ -93,21 +93,6 @@ void Widget()
     ImGui::EndChild();
 }
 
-namespace mesh
-{
-auto Cube = asset::MeshView{};
-auto Ramp = asset::MeshView{};
-} // namespace mesh
-
-namespace material
-{
-auto Default = MaterialDesc{.name = "Default"};
-auto Worm = MaterialDesc{.name = "Worm"};
-auto Ramp = MaterialDesc{.name = "Ramp"};
-auto Step = MaterialDesc{.name = "Step"};
-} // namespace material
-
-
 struct FollowCamera : public graphics::Camera
 {
     static constexpr auto MinDistance = 2.0f;
@@ -254,10 +239,10 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     world.Emplace<VehicleController>(head, segment1, segment2, segment3);
     world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
-    world.Emplace<MeshRenderer2>(head, mesh::Cube, material::Worm);
-    world.Emplace<MeshRenderer2>(segment1, mesh::Cube, material::Worm);
-    world.Emplace<MeshRenderer2>(segment2, mesh::Cube, material::Worm);
-    world.Emplace<MeshRenderer2>(segment3, mesh::Cube, material::Worm);
+    world.Emplace<MeshRenderer2>(head, mesh::Cube, material::Green);
+    world.Emplace<MeshRenderer2>(segment1, mesh::Cube, material::Green);
+    world.Emplace<MeshRenderer2>(segment2, mesh::Cube, material::Green);
+    world.Emplace<MeshRenderer2>(segment3, mesh::Cube, material::Green);
 
     auto& bodyHead = world.Emplace<RigidBody>(head, Shape::MakeBox(), RigidBodyInfo{.friction = 0.8f});
     auto& bodyNode1 = world.Emplace<RigidBody>(segment1, Shape::MakeBox());
@@ -458,7 +443,7 @@ void BuildBridge(ecs::Ecs world)
             .tag = "Plank"}
         );
 
-        world.Emplace<graphics::ToonRenderer>(plank, asset::CubeMesh, OrangeToonMaterial);
+        world.Emplace<MeshRenderer2>(plank, mesh::Cube, material::Orange);
         return world.Emplace<RigidBody>(plank);
     };
 
@@ -516,7 +501,7 @@ void BuildSteps(ecs::Ecs world)
 
         auto stepMaterial = TealToonMaterial;
         stepMaterial.outlineWidth = 3;
-        world.Emplace<MeshRenderer2>(step, mesh::Cube, material::Step);
+        world.Emplace<MeshRenderer2>(step, mesh::Cube, material::Blue);
         world.Emplace<RigidBody>(step)
             .AddConstraint(PointConstraintInfo{
                 .ownerPosition = Vector3{},
@@ -546,7 +531,7 @@ void BuildSteps(ecs::Ecs world)
         .tag = "Rotating Bridge"
     });
 
-    world.Emplace<graphics::ToonRenderer>(rotatingBridge, asset::CubeMesh, RedToonMaterial);
+    world.Emplace<MeshRenderer2>(rotatingBridge, mesh::Cube, material::Red);
     world.Emplace<RigidBody>(rotatingBridge)
         .AddConstraint(
             HingeConstraintInfo{
@@ -572,7 +557,7 @@ void BuildRotatingSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, YellowToonMaterial);
+        world.Emplace<MeshRenderer2>(step, mesh::Cube, material::Yellow);
         world.Emplace<RigidBody>(step)
             .AddConstraint(
                 SwingTwistConstraintInfo{
@@ -601,7 +586,7 @@ void BuildHalfPipes(ecs::Ecs world)
     auto halfPipeMaterial = BlueHatchedToonMaterial;
     halfPipeMaterial.outlineWidth = 2;
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, halfPipeMaterial);
+    world.Emplace<MeshRenderer2>(halfPipe2, mesh::HalfPipe, material::Blue);
 }
 
 void BuildHinge(ecs::Ecs world)
@@ -627,8 +612,8 @@ void BuildHinge(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<graphics::ToonRenderer>(anchor, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(panel, asset::CubeMesh, PurpleToonMaterial);
+    world.Emplace<MeshRenderer2>(anchor, mesh::Cube, material::Default);
+    world.Emplace<MeshRenderer2>(panel, mesh::Cube, material::Purple);
 
     world.Emplace<RigidBody>(panel)
         .AddConstraint(
@@ -662,8 +647,8 @@ void BuildPunchingBag(ecs::Ecs world)
         .tag = "Bag"
     });
 
-    world.Emplace<graphics::ToonRenderer>(top, asset::CubeMesh, PurpleToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(bag, asset::CapsuleMesh, OrangeToonMaterial);
+    world.Emplace<MeshRenderer2>(top, mesh::Cube, material::Purple);
+    world.Emplace<MeshRenderer2>(bag, mesh::Capsule, material::Orange);
 
     auto& topBody = world.Emplace<RigidBody>(top);
     auto& bagBody = world.Emplace<RigidBody>(bag, Shape::MakeCapsule());
@@ -702,10 +687,10 @@ void BuildChain(ecs::Ecs world)
     nodeInfo.position.x = 3.0f;
     const auto node4 = world.Emplace<Entity>(nodeInfo);
 
-    world.Emplace<graphics::ToonRenderer>(node1, asset::CapsuleMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(node2, asset::CapsuleMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(node3, asset::CapsuleMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(node4, asset::CapsuleMesh, TealToonMaterial);
+    world.Emplace<MeshRenderer2>(node1, mesh::Capsule, material::Teal);
+    world.Emplace<MeshRenderer2>(node2, mesh::Capsule, material::Teal);
+    world.Emplace<MeshRenderer2>(node3, mesh::Capsule, material::Teal);
+    world.Emplace<MeshRenderer2>(node4, mesh::Capsule, material::Teal);
 
     const auto capsule = Shape::MakeCapsule();
     auto& node1Body = world.Emplace<RigidBody>(node1, capsule);
@@ -759,9 +744,9 @@ void BuildSliders(ecs::Ecs world)
         .tag = "Slider2"
     });
 
-    world.Emplace<graphics::ToonRenderer>(base, asset::CubeMesh, RedToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(slider1, asset::CapsuleMesh, YellowToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(slider2, asset::CapsuleMesh, YellowToonMaterial);
+    world.Emplace<MeshRenderer2>(base, mesh::Cube, material::Red);
+    world.Emplace<MeshRenderer2>(slider1, mesh::Capsule, material::Yellow);
+    world.Emplace<MeshRenderer2>(slider2, mesh::Capsule, material::Yellow);
 
     auto& baseBody = world.Emplace<RigidBody>(base);
     auto& slider1Body = world.Emplace<RigidBody>(slider1, Shape::MakeCapsule());
@@ -808,9 +793,9 @@ void BuildSwingingBars(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<graphics::ToonRenderer>(pole, asset::CubeMesh, PurpleToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(bar1, asset::CubeMesh, YellowToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(bar2, asset::CubeMesh, YellowToonMaterial);
+    world.Emplace<MeshRenderer2>(pole, mesh::Cube, material::Purple);
+    world.Emplace<MeshRenderer2>(bar1, mesh::Cube, material::Yellow);
+    world.Emplace<MeshRenderer2>(bar2, mesh::Cube, material::Yellow);
 
     auto& poleBody = world.Emplace<RigidBody>(pole, Shape::MakeCapsule());
     auto& bar1Body = world.Emplace<RigidBody>(bar1);
@@ -907,7 +892,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
             .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         },
         [world](Entity handle) mutable {
-            world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
+            world.Emplace<MeshRenderer2>(handle, mesh::Cube, material::Default);
             world.Emplace<RigidBody>(handle, Shape::MakeBox());
         },
         [ncPhysics](bool isPreSpawn, unsigned count) {
@@ -971,7 +956,7 @@ class RayCaster : public FreeComponent
                     // possible the entity was deleted, if so we don't want to check for renderer
                     if (world.Contains<Entity>(entity))
                     {
-                        world.Get<graphics::ToonRenderer>(entity).SetMaterial(material);
+                        world.Get<MeshRenderer2>(entity).GetMaterial().SetDesc(material);
                     }
                 }
 
@@ -989,17 +974,17 @@ class RayCaster : public FreeComponent
         graphics::NcGraphics* m_ncGraphics;
         CollisionQuery m_query = CollisionQuery{};
         std::vector<Entity> m_hits;
-        std::vector<graphics::ToonMaterial> m_restoreMaterials;
+        std::vector<MaterialDesc> m_restoreMaterials;
         Entity m_shapeParent = Entity::Null();
 
         void UpdateHit(ecs::Ecs world, Entity hit)
         {
-            if (world.Contains<graphics::ToonRenderer>(hit))
+            if (world.Contains<MeshRenderer2>(hit))
             {
-                auto& renderer = world.Get<graphics::ToonRenderer>(hit);
+                auto& renderer = world.Get<MeshRenderer2>(hit);
                 m_hits.push_back(hit);
-                m_restoreMaterials.push_back(renderer.GetMaterial());
-                renderer.SetMaterial(YellowToonMaterial);
+                m_restoreMaterials.push_back(renderer.GetMaterial().GetDesc());
+                renderer.GetMaterial().SetDesc(material::Yellow);
             }
         }
 
@@ -1031,6 +1016,7 @@ PhysicsTest::PhysicsTest(SampleUI* ui)
 
 void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
+    ReloadMaterials();
     m_sampleUI->SetWidgetCallback(Widget);
 
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
@@ -1039,27 +1025,10 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Reserve space for default objects so references don't get invalidated
     world.GetPool<Transform>().Reserve(140);
-    world.GetPool<graphics::ToonRenderer>().Reserve(140);
     world.GetPool<MeshRenderer2>().Reserve(140);
     // Defer fully initializing physics objects until the whole scene is loaded (also calls reserve on the RigidBody pool).
     ncPhysics->BeginRigidBodyBatch(140);
     SCOPE_EXIT(ncPhysics->EndRigidBodyBatch(););
-
-    {
-        mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
-        mesh::Ramp = asset::AcquireMeshAsset(RampMesh);
-
-        auto normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal);
-        material::Default.diffuseTexture = asset::AcquireTextureAsset(DefaultToonMaterial.baseColor);
-        material::Default.normalTexture = normalTexture;
-        material::Worm.diffuseTexture = asset::AcquireTextureAsset(GreenToonMaterial.baseColor);
-        material::Worm.normalTexture = normalTexture;
-        material::Ramp.diffuseTexture = asset::AcquireTextureAsset(RedToonMaterial.baseColor);
-        material::Ramp.normalTexture = normalTexture;
-        material::Step.diffuseTexture = asset::AcquireTextureAsset(BlueToonMaterial.baseColor);
-        material::Step.normalTexture = normalTexture;
-    }
-
 
     // Vehicle
     const auto vehicle = BuildVehicle(world);
