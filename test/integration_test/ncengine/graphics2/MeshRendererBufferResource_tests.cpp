@@ -1,4 +1,4 @@
-#include "DiligentEngineParameterizedFixture.inl"
+#include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/component/MeshRendererBufferResource.h"
 #include "graphics2/diligent/resource/component/ComponentResourceSignature.h"
 #include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
@@ -6,7 +6,7 @@
 
 #include <array>
 
-class MeshRendererBufferResource : public DiligentEngineParameterizedFixture
+class MeshRendererBufferResource : public DiligentEngineFixture
 {
     protected:
         static constexpr auto signatureName = "testSignature";
@@ -20,7 +20,6 @@ class MeshRendererBufferResource : public DiligentEngineParameterizedFixture
 
         void SetUp() override
         {
-            INITIALIZE_DILIGENT_FIXTURE;
             signature = std::make_unique<nc::graphics::ComponentResourceSignature>(
                 engine->GetContext(),
                 engine->GetDevice(),
@@ -39,9 +38,7 @@ class MeshRendererBufferResource : public DiligentEngineParameterizedFixture
         }
 };
 
-INSTANTIATE_TEST_SUITE_P(AllApis, MeshRendererBufferResource, g_apiParams);
-
-TEST_P(MeshRendererBufferResource, UpdateCases_succeed)
+TEST_F(MeshRendererBufferResource, UpdateCases_succeed)
 {
     auto& context = engine->GetContext();
 
