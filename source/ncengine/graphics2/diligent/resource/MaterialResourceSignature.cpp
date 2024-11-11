@@ -9,9 +9,10 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
                                                      std::string_view signatureName,
                                                      std::string_view materialBufferVariableName,
                                                      uint8_t bindingIndex,
-                                                     uint32_t maxInstances)
+                                                     uint32_t maxInstanceCount,
+                                                     uint32_t initialInstanceCount)
 {
-    const auto resource = MaterialDataBufferResource::MakeResourceDesc(materialBufferVariableName);
+    const auto resource = StructuredBuffer<MaterialData>::MakeResourceDesc(materialBufferVariableName, Diligent::SHADER_TYPE_PIXEL);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = &resource;
@@ -35,11 +36,13 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
         throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialBufferVariableName)};
     }
 
-    m_materialDataResource = std::make_unique<MaterialDataBufferResource>(
+    m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(
         context,
         device,
+        materialBufferVariableName,
         *variable,
-        maxInstances
+        maxInstanceCount,
+        initialInstanceCount
     );
 }
 } // namespace nc::graphics

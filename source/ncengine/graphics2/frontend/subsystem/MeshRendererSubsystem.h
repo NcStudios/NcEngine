@@ -20,7 +20,7 @@ class MeshRendererSubsystem
         auto BuildState(ecs::ExplicitEcs<ToonRenderer, Transform> ecs) -> MeshRendererRenderState;
 
     private:
-        std::vector<DirectX::XMMATRIX> m_modelMatricesCache;
+        std::vector<MeshRendererData> m_modelMatricesCache;
 
 };
 } // namespace nc::graphics

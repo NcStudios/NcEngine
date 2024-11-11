@@ -11,9 +11,11 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        uint8_t bindingIndex,
                                                        uint32_t maxInstances)
 {
-    const auto resources = std::array
-    {
-        MeshRendererBufferResource::MakeResourceDesc(meshRendererBufferVariableName, maxInstances)
+    const auto resources = std::array{
+        StructuredBuffer<MeshRendererData>::MakeResourceDesc(
+            meshRendererBufferVariableName,
+            Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS
+        )
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -40,11 +42,13 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererBufferVariableName)};
     }
 
-    m_meshRendererResource = std::make_unique<MeshRendererBufferResource>
+    m_meshRendererResource = std::make_unique<StructuredBuffer<MeshRendererData>>
     (
         context,
         device,
+        meshRendererBufferVariableName,
         *variable,
+        maxInstances,
         maxInstances
     );
 }

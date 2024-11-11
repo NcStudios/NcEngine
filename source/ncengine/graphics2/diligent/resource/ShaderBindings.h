@@ -35,12 +35,15 @@ class ShaderBindings
                 "MaterialInstanceSignature",
                 "MaterialDataBuffer",
                 2,
+                maxMeshRenderers,
                 initialMaterialSizeHint
               }
         {
         }
 
-        void Update(const FrontendRenderState& renderState, Diligent::IDeviceContext& context);
+        void Update(Diligent::IDeviceContext& context,
+                    Diligent::IRenderDevice& device,
+                    const FrontendRenderState& renderState);
 
         auto GetComponentSignature() -> ComponentResourceSignature&
         {
