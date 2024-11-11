@@ -50,7 +50,6 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
         );
     }
 
-    auto GetApi() const noexcept -> std::string_view override { return ""; }
     void SetCamera(nc::graphics::Camera*) noexcept override {}
     auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
     void SetUi(nc::ui::IUI*) noexcept override {}
@@ -138,10 +137,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_world{registry->GetEcs()},
           m_engine{
-            graphicsSettings,
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
             window.GetWindowHandle(),
-            GetSupportedApis(),
             ::LogCallback
           },
           m_shaderBindings{
@@ -155,7 +152,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetDevice(),
             m_engine.GetSwapChain().GetDesc(),
             window.GetWindowHandle(),
-            m_engine.GetApi(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
           m_testPipeline{
@@ -184,11 +180,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
 {
-}
-
-auto NcGraphicsImpl2::GetApi() const noexcept -> std::string_view
-{
-    return m_engine.GetApi();
 }
 
 void NcGraphicsImpl2::SetCamera(Camera* camera) noexcept

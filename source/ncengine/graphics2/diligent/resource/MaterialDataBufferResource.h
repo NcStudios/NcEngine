@@ -33,11 +33,13 @@ class MaterialDataBufferResource
     private:
         Diligent::IShaderResourceVariable* m_variable;
         Diligent::RefCntAutoPtr<Diligent::IBuffer> m_buffer;
-        Diligent::IBufferView* m_view = nullptr;
         uint32_t m_bufferElementCount = 0;
 
         void CreateBuffer(Diligent::IDeviceContext& context,
                           Diligent::IRenderDevice& device,
                           std::span<const MaterialData> data);
+
+        void Transition(Diligent::IDeviceContext& context,
+                        Diligent::RESOURCE_STATE state);
 };
 } // namespace nc::graphics

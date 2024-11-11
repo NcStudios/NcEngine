@@ -42,7 +42,7 @@ auto GlobalEnvironmentResource::MakeResourceDesc(std::string_view variableName) 
         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,
         variableName.data(),
         Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC
+        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
     };
 }
 

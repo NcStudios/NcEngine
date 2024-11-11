@@ -22,7 +22,7 @@ class MaterialResourceSignature
 
         void Commit(Diligent::IDeviceContext& context)
         {
-            context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY);
         }
 
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature&
