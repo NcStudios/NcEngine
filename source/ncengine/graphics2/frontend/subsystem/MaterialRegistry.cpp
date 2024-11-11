@@ -10,12 +10,12 @@ namespace
 auto ToMaterialData(const nc::MaterialDesc& desc) -> nc::graphics::MaterialData
 {
     return nc::graphics::MaterialData{
-        desc.diffuseTexture.index,
-        desc.normalTexture.index,
-        desc.gradientStart,
-        desc.gradientEnd,
-        desc.outlineColor,
-        desc.outlineWidth
+        .gradientStart = desc.gradientStart,
+        .diffuseTexIndex = desc.diffuseTexture.index,
+        .gradientEnd = desc.gradientEnd,
+        .normalTexIndex = desc.normalTexture.index,
+        .outlineColor = desc.outlineColor,
+        .outlineWidth = desc.outlineWidth
     };
 }
 } // anonymous namespace

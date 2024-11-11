@@ -24,11 +24,11 @@ SamplerState  Textures_sampler; // By convention, texture samplers must use the 
 
 struct MaterialData
 {
-    uint diffuseTexture;
-    uint normalIndex;
     float3 gradientStart;
+    uint diffuseTexture;
     float3 gradientEnd;
-    float3 outlineColor;
+    uint normalIndex;
+    float4 outlineColor;
     float outlineWidth;
 };
 
@@ -38,7 +38,7 @@ struct PSInput
 { 
     float4 Pos           : SV_POSITION; 
     float2 UV            : TEX_COORD; 
-    uint   MaterialIndex : TEXCOORD1;
+    uint   MaterialIndex;
 };
 
 struct PSOutput
@@ -72,7 +72,7 @@ struct PSInput
 {
     float4 Pos           : SV_POSITION;
     float2 UV            : TEX_COORD;
-    uint   MaterialIndex : TEXCOORD1;
+    uint   MaterialIndex;
 };
 
 struct MeshRendererData

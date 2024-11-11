@@ -4,10 +4,14 @@
 #include "ncengine/config/Config.h"
 
 #include <filesystem>
+#include <unordered_map>
 
 namespace nc::sample
 {
-bool IsInitialized = false;
+auto IsInitialized = false;
+auto g_meshLookup = std::unordered_map<std::string, asset::MeshView>{};
+auto g_textureLookup = std::unordered_map<std::string, asset::TextureView>{};
+auto g_materialLookup = std::unordered_map<std::string, MaterialDesc>{};
 
 graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial RedPbrMaterial{"solid_color/Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
@@ -108,4 +112,18 @@ void InitializeResources()
     };
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 }
+
+void PopulateAssetMaps(const asset::NcAsset& ncAsset)
+{
+    const auto loadedAssets = ncAsset.GetLoadedAssets();
+    g_meshLookup.clear();
+    for (const auto& meshPath : loadedAssets.at(asset::AssetType::Mesh))
+    {
+        g_meshLookup.emplace(meshPath, asset::AcquireMeshAsset(meshPath));
+    }
+}
+
+auto GetMeshView(std::string_view path);
+
+auto GetMaterialDesc(std::string_view name);
 } // namespace sample

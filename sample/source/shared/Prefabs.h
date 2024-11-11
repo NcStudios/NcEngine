@@ -1,12 +1,25 @@
 #pragma once
 
 #include "ncengine/asset/AssetViews.h"
+#include "ncengine/asset/NcAsset.h"
+#include "ncengine/graphics/Material.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ToonRenderer.h"
 
 namespace nc::sample
 {
+// Load Asset Files
 void InitializeResources();
+
+// 
+void PopulateAssetMaps(const asset::NcAsset& ncAsset);
+
+auto GetMeshView(std::string_view path);
+
+auto GetTextureView(std::string_view path);
+
+auto GetMaterialDesc(std::string_view name);
+
 
 // Mesh
 constexpr auto HalfPipeMesh = "halfpipe.nca";

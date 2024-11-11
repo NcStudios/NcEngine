@@ -22,18 +22,16 @@ struct MeshRendererData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
     uint32_t materialIndex = NullMaterialInstanceHandle;
-    // uint32_t padding[3];
-    // todo: padding ??
 };
 
 // Object model for MaterialInstance (type: StructureBuffer element type).
 struct MaterialData
 {
+    Vector3 gradientStart = Vector3::Splat(10.0f);
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
+    Vector3 gradientEnd = Vector3::Splat(11.0f);
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
-    Vector3 gradientStart = Vector3::One();
-    Vector3 gradientEnd = Vector3::One();
-    Vector3 outlineColor = Vector3::One();
+    Vector3 outlineColor = Vector3::Splat(12.0f);
     float outlineWidth = 1.0f;
 };
 
