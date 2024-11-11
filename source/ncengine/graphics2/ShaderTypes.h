@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ncengine/graphics/Material.h"
 #include "ncmath/Vector.h"
 
 #include "DirectXMath.h"
@@ -13,7 +14,16 @@ namespace nc::graphics
 // Object model for environment data (type: constant buffer)
 struct GlobalEnvironmentData
 {
-    DirectX::XMMATRIX cameraViewProjection;
+    DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
+};
+
+// Object model for MeshRenderers (type: StructuredBuffer element type).
+struct MeshRendererData
+{
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+    uint32_t materialIndex = NullMaterialInstanceHandle;
+    // uint32_t padding[3];
+    // todo: padding ??
 };
 
 // Object model for MaterialInstance (type: StructureBuffer element type).

@@ -46,8 +46,16 @@ TEST_F(MeshRendererBufferResource, UpdateCases_succeed)
     signature->Commit(context);
 
     // update with one element succeeds
-    properties.modelMatrices = std::vector<DirectX::XMMATRIX>{DirectX::XMMatrixIdentity()};
-    properties.entities = std::vector<nc::Entity>{nc::Entity{}};
+    auto entities = std::array{nc::Entity{}};
+    auto rendererData = std::array{
+        nc::graphics::MeshRendererData{
+            DirectX::XMMatrixIdentity(),
+            0
+        }
+    };
+
+    properties.modelMatrices = rendererData;
+    properties.entities = entities;
 
     uut->Update(properties, context);
     signature->Commit(context);

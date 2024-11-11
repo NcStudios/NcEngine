@@ -1,26 +1,29 @@
 #pragma once
 
 #include "MeshRendererRenderState.h"
-#include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/ToonRenderer.h"
+#include "ncengine/ecs/EcsFwd.h"
 
-#include <memory>
 #include <vector>
 
-namespace nc::graphics
+namespace nc
 {
+class MeshRenderer2;
+class Transform;
+
+namespace graphics
+{
+class ToonRenderer;
+
 /*
 Produces a vector of transform matrices for MeshRenderers and their corresponding Entities.
 */
 class MeshRendererSubsystem
 {
     public:
-        /** @todo: 776 Add MeshRenderer component(s) in place of old ToonRenderer component. */
-        auto BuildState(ecs::ExplicitEcs<ToonRenderer, Transform> ecs) -> MeshRendererRenderState;
+        auto BuildState(ecs::ExplicitEcs<MeshRenderer2, ToonRenderer, Transform> ecs) -> MeshRendererRenderState;
 
     private:
-        std::vector<DirectX::XMMATRIX> m_modelMatricesCache;
-
+        std::vector<MeshRendererData> m_rendererDataCache;
 };
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

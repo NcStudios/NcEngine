@@ -54,6 +54,11 @@ auto MeshRendererBufferResource::MakeResourceDesc(std::string_view variableName,
 
 void MeshRendererBufferResource::Update(const MeshRendererRenderState& renderState, Diligent::IDeviceContext& context)
 {
+    if (renderState.modelMatrices.empty())
+    {
+        return;
+    }
+
     context.UpdateBuffer(m_structuredBuffer,
                          0u,
                          sizeof(DirectX::XMMATRIX) * renderState.modelMatrices.size(),

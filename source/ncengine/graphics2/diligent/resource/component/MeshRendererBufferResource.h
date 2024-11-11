@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics2/ShaderTypes.h"
+
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -9,11 +11,6 @@
 namespace nc::graphics
 {
 struct MeshRendererRenderState;
-
-struct MeshRendererData
-{
-    DirectX::XMMATRIX modelMatrix;
-};
 
 class MeshRendererBufferResource
 {

@@ -246,6 +246,16 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
+    m_frontend.GetMaterialRegistry().CommitPendingChanges(
+        [this](const auto& info){
+            m_shaderBindings.GetMaterialSignature().GetMaterialDataResource().Update(
+                info,
+                m_engine.GetContext(),
+                m_engine.GetDevice()
+            );
+        }
+    );
+
     auto& context = m_engine.GetContext();
     auto& swapChain = m_engine.GetSwapChain();
 

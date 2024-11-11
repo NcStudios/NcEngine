@@ -2,6 +2,7 @@
 
 #include "ShaderFactory.h"
 #include "ncengine/ecs/Ecs.h"
+#include "ncengine/graphics/MeshRenderer2.h"
 #include "ncengine/graphics/ToonRenderer.h"
 
 #include "DirectXMath.h"
@@ -28,7 +29,7 @@ class TestPipeline
                      Diligent::IPipelineResourceSignature& materialResourceSignature);
 
         void Render(Diligent::IDeviceContext& context,
-                    ecs::ExplicitEcs<ToonRenderer> ecs,
+                    ecs::ExplicitEcs<MeshRenderer2, ToonRenderer> ecs,
                     const nc::graphics::FrontendRenderState& renderState);
 
         void CreatePipelineState(Diligent::IRenderDevice& device,
