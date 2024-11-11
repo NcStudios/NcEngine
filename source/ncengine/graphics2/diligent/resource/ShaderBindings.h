@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalMeshBuffer.h"
+#include "component/ComponentResourceSignature.h"
 #include "GlobalResourceSignature.h"
 #include "MaterialResourceSignature.h"
 
@@ -18,8 +19,16 @@ class ShaderBindings
         explicit ShaderBindings(Diligent::IRenderDevice& device,
                                 Diligent::IDeviceContext& context,
                                 uint32_t maxTextures,
+                                uint32_t maxMeshRenderers,
                                 uint32_t initialMaterialSizeHint)
             : m_globalSignature{device, context, maxTextures},
+              m_componentSignature{context,
+                device,
+                "ComponentResourceSignature",
+                "MeshRendererBufferData",
+                1,
+                maxMeshRenderers
+              },
               m_materialSignature{
                 context,
                 device,
@@ -32,6 +41,11 @@ class ShaderBindings
         }
 
         void Update(const FrontendRenderState& renderState, Diligent::IDeviceContext& context);
+
+        auto GetComponentSignature() -> ComponentResourceSignature&
+        {
+            return m_componentSignature;
+        }
 
         auto GetGlobalSignature() -> GlobalResourceSignature&
         {
@@ -50,6 +64,7 @@ class ShaderBindings
 
     private:
         GlobalResourceSignature m_globalSignature;
+        ComponentResourceSignature m_componentSignature;
         MaterialResourceSignature m_materialSignature;
         GlobalMeshBuffer m_meshBuffer;
 };

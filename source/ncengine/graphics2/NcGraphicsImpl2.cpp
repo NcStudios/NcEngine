@@ -145,6 +145,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetDevice(),
             m_engine.GetContext(),
             memorySettings.maxTextures,
+            memorySettings.maxRenderers,
             1000u /** @todo: 782 parameterize with ShaderConfig object */
           },
           m_ui{
@@ -154,11 +155,11 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
           m_testPipeline{
-            m_engine.GetContext(),
             m_engine.GetDevice(),
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
+            m_shaderBindings.GetComponentSignature().GetResourceSignature(),
             m_shaderBindings.GetMaterialSignature().GetResourceSignature()
           },
           m_frontend{
@@ -261,13 +262,15 @@ void NcGraphicsImpl2::Run()
 
     m_shaderBindings.Update(renderState, context);
     m_shaderBindings.GetGlobalSignature().Commit(context);
+    m_shaderBindings.GetComponentSignature().Commit(context);
     m_shaderBindings.GetMaterialSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_testPipeline.Render(context, m_world);
+    m_testPipeline.Render(context, m_world, renderState);
     m_ui.Render(context);
 
     swapChain.Present();
+    context.FinishFrame();
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)

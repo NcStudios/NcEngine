@@ -27,6 +27,7 @@ GlobalResourceSignature::GlobalResourceSignature(Diligent::IRenderDevice& device
     desc.BindingIndex = BindingIndex,
     desc.UseCombinedTextureSamplers = true,
     device.CreatePipelineResourceSignature(desc, &m_signature);
+
     if (!m_signature)
     {
         throw NcError{"Failed to create resource signature"};
@@ -44,9 +45,9 @@ GlobalResourceSignature::GlobalResourceSignature(Diligent::IRenderDevice& device
     );
 
     m_environmentResource = std::make_unique<GlobalEnvironmentResource>(
-        GetVariable(Diligent::SHADER_TYPE_PIXEL, GlobalEnvironmentShaderVariableName),
+        context,
         device,
-        context
+        GetVariable(Diligent::SHADER_TYPE_PIXEL, GlobalEnvironmentShaderVariableName)
     );
 }
 

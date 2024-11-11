@@ -93,6 +93,22 @@ target_compile_definitions(MaterialDataBufferResource_tests
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
+### MeshRendererBufferResource Tests ###
+add_graphics_test(MeshRendererBufferResource_tests)
+
+target_sources(MeshRendererBufferResource_tests
+    PRIVATE
+    MeshRendererBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/component/MeshRendererBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/component/ComponentResourceSignature.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(MaterialDataBufferResource_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
+)
+
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 
