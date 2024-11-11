@@ -1016,7 +1016,7 @@ PhysicsTest::PhysicsTest(SampleUI* ui)
 
 void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
-    ReloadMaterials();
+    ReloadPrefabs();
     m_sampleUI->SetWidgetCallback(Widget);
 
     auto ncGraphics = modules.Get<graphics::NcGraphics>();

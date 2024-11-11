@@ -4,11 +4,10 @@
 #include "ncengine/config/Config.h"
 
 #include <filesystem>
-#include <unordered_map>
 
 namespace nc::sample
 {
-auto IsInitialized = false;
+bool IsInitialized = false;
 
 namespace mesh
 {
@@ -133,7 +132,7 @@ void InitializeResources()
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 }
 
-void ReloadMaterials()
+void ReloadPrefabs()
 {
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
     mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);

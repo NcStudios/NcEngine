@@ -79,7 +79,6 @@ struct MeshRendererData
 {
     float4x4 model;
     uint materialIndex;
-    // float3 pad2;
 };
 
 StructuredBuffer<MeshRendererData> MeshRendererBufferData;

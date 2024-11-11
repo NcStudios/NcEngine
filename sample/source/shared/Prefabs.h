@@ -12,7 +12,7 @@ namespace nc::sample
 void InitializeResources();
 
 // 
-void ReloadMaterials();
+void ReloadPrefabs();
 
 
 // Mesh
