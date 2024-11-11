@@ -34,10 +34,14 @@ struct BufferSlice
     size_t count = 0;
 };
 
+template<typename T>
+concept TriviallyCopyable = requires { requires std::is_trivially_copyable_v<T>; };
+
 // Event data notifying changes to MaterialInstance buffer.
-struct MaterialDataUpdateInfo
+template<TriviallyCopyable T>
+struct BufferUpdateInfo
 {
-    std::span<const MaterialData> instances; // view over all instances
-    std::vector<BufferSlice> dirtyRanges;    // modified subranges
+    std::span<const T> instances;         // View over all instances
+    std::vector<BufferSlice> dirtyRanges; // Modified subranges
 };
 } // namespace nc::graphics

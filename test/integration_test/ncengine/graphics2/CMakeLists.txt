@@ -77,18 +77,17 @@ target_sources(GlobalTextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
 )
 
-### MaterialDataBufferResource Tests ###
-add_graphics_test(MaterialDataBufferResource_tests)
+### StructuredBuffer Tests ###
+add_graphics_test(StructuredBuffer_tests)
 
-target_sources(MaterialDataBufferResource_tests
+target_sources(StructuredBuffer_tests
     PRIVATE
-        MaterialDataBufferResource_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialDataBufferResource.cpp
+        StructuredBuffer_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialResourceSignature.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
-target_compile_definitions(MaterialDataBufferResource_tests
+target_compile_definitions(StructuredBuffer_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
 )
@@ -104,7 +103,7 @@ target_sources(MeshRendererBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
-target_compile_definitions(MaterialDataBufferResource_tests
+target_compile_definitions(MeshRendererBufferResource_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
 )

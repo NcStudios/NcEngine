@@ -1,12 +1,12 @@
 #include "DiligentEngineFixture.inl"
-#include "graphics2/diligent/resource/MaterialDataBufferResource.h"
+#include "graphics2/diligent/resource/base/StructuredBuffer.h"
 #include "graphics2/diligent/resource/MaterialResourceSignature.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
 #include "ncengine/graphics/Material.h"
 
 #include <array>
 
-class MaterialDataBufferResourceTest : public DiligentEngineFixture
+class StructuredBufferTest : public DiligentEngineFixture
 {
     protected:
         static constexpr auto signatureName = "testSignature";
@@ -15,10 +15,10 @@ class MaterialDataBufferResourceTest : public DiligentEngineFixture
         static constexpr auto initialInstanceHint = 3u;
 
         std::unique_ptr<nc::graphics::MaterialResourceSignature> signature;
-        nc::graphics::MaterialDataBufferResource* uut = nullptr;
+        nc::graphics::StructuredBuffer<nc::graphics::MaterialData>* uut = nullptr;
         std::array<nc::graphics::MaterialData, initialInstanceHint> properties;
 
-        MaterialDataBufferResourceTest()
+        StructuredBufferTest()
         {
             signature = std::make_unique<nc::graphics::MaterialResourceSignature>(
                 engine->GetContext(),
@@ -32,13 +32,13 @@ class MaterialDataBufferResourceTest : public DiligentEngineFixture
             uut = &signature->GetMaterialDataResource();
         }
 
-        ~MaterialDataBufferResourceTest()
+        ~StructuredBufferTest()
         {
             FailIfHasErrorOutput();
         }
 };
 
-TEST_F(MaterialDataBufferResourceTest, UpdateCases_succeed)
+TEST_F(StructuredBufferTest, UpdateCases_succeed)
 {
     auto& context = engine->GetContext();
     auto& device = engine->GetDevice();
@@ -47,24 +47,24 @@ TEST_F(MaterialDataBufferResourceTest, UpdateCases_succeed)
     signature->Commit(context);
 
     // update with no dirty elements succeeds
-    auto updateInfo = nc::graphics::MaterialDataUpdateInfo{ .instances = properties, .dirtyRanges = {} };
-    uut->Update(updateInfo, context, device);
+    auto updateInfo = nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>{ .instances = properties, .dirtyRanges = {} };
+    uut->Update(context, device, updateInfo);
     signature->Commit(context);
 
     // update entire range succeeds
     updateInfo.dirtyRanges = { {0, initialInstanceHint} };
-    uut->Update(updateInfo, context, device);
+    uut->Update(context, device, updateInfo);
     signature->Commit(context);
 
     // update individual materials succeeds
     updateInfo.dirtyRanges = { {0, 1}, {1, 2} };
-    uut->Update(updateInfo, context, device);
+    uut->Update(context, device, updateInfo);
     signature->Commit(context);
 
     // update requires buffer recreation succeeds
     std::array<nc::graphics::MaterialData, initialInstanceHint * 2> largerProperties;
     updateInfo.instances = largerProperties;
     updateInfo.dirtyRanges = { {initialInstanceHint, initialInstanceHint * 2} };
-    uut->Update(updateInfo, context, device);
+    uut->Update(context, device, updateInfo);
     signature->Commit(context);
 }
