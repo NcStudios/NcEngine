@@ -28,7 +28,7 @@ struct MaterialData
     uint diffuseTexture;
     float3 gradientEnd;
     uint normalIndex;
-    float4 outlineColor;
+    float3 outlineColor;
     float outlineWidth;
 };
 
