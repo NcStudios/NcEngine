@@ -37,7 +37,7 @@ struct BufferSlice
 template<typename T>
 concept TriviallyCopyable = requires { requires std::is_trivially_copyable_v<T>; };
 
-// Event data notifying changes to MaterialInstance buffer.
+// Event data notifying changes to StructuredBuffer.
 template<TriviallyCopyable T>
 struct BufferUpdateInfo
 {
