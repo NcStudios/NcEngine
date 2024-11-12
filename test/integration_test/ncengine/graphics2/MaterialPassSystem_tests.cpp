@@ -1,4 +1,4 @@
-#include "DiligentEngineParameterizedFixture.inl"
+#include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/MaterialPass.h"
 
 // class MaterialPassSystemTests : public DiligentEngineParameterizedFixture
