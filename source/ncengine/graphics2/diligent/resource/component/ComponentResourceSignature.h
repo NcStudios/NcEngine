@@ -23,7 +23,10 @@ class ComponentResourceSignature
                                             Diligent::IRenderDevice& device,
                                             std::string_view signatureName,
                                             uint8_t bindingIndex,
-                                            StructuredBufferResourceDesc meshRendererResourceDesc);
+                                            StructuredBufferResourceDesc meshRendererResourceDesc,
+                                            StructuredBufferResourceDesc spotLightResourceDesc,
+                                            StructuredBufferResourceDesc pointLightResourceDesc,
+                                            StructuredBufferResourceDesc directionalLightResourceDesc);
 
         void Commit(Diligent::IDeviceContext& context)
         {
@@ -44,5 +47,8 @@ class ComponentResourceSignature
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<StructuredBuffer<MeshRendererData>> m_meshRendererResource;
+        std::unique_ptr<StructuredBuffer<SpotLightData>> m_spotLightResource;
+        std::unique_ptr<StructuredBuffer<PointLightData>> m_pointLightResource;
+        std::unique_ptr<StructuredBuffer<DirectionalLightData>> m_directionalLightResource;
 };
 } // namespace nc::graphics

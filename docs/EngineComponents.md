@@ -4,14 +4,16 @@ Engine Components
 * [Transform](#transform)
 * [Tag](#tag)
 * [Collider](#collider)
+* [DirectionalLight](#directionalLight)
 * [ConcaveCollider](#concavecollider)
 * [PhysicsBody](#physicsbody)
 * [MeshRenderer](#meshrenderer)
 * [ToonRenderer](#toonrenderer)
 * [PointLight](#pointlight)
+* [SpotLight](#spotLight)
 * [AudioSource](#audiosource)
 * [Camera](#camera)
-  * [SceneNavigationCamera](#scenenavigationcamera)
+* [SceneNavigationCamera](#scenenavigationcamera)
 * [ParticleEmitter](#particleemitter)
 * [NetworkDispatcher](#networkdispatcher)
 * [FreeComponentGroup](#freecomponentgroup)
@@ -131,7 +133,15 @@ Toon renderers allows a mesh to be rendered using a toon material. They rely on 
 
 ### PointLight
 -------------
-Point lights components specify a light source at a point in space emitting light in all directions. The light's position is the position of the associated transform and will be updated if the transform moves.
+Point light components specify a light source at a point in space emitting light in all directions. The light's position is the position of the associated transform and will be updated if the transform moves.
+
+### SpotLight
+-------------
+Spot light components specify a light source at a point in space emitting light in a single direction. The light's position is the position of the associated transform and will be updated if the transform moves.
+
+### DirectionalLight
+-------------
+Directional light components specify a light source with no position, emitting light in a single direction. Directional lights do not cast shadows at this time.
 
 ### AudioSource
 --------------

@@ -3,9 +3,10 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
@@ -63,5 +64,10 @@ auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDisp
 auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody
 {
     return RigidBody{entity};
+}
+
+auto CreateDirectionalLight(Entity, const std::any&) -> graphics::DirectionalLight
+{
+    return graphics::DirectionalLight{};
 }
 } // namespace nc

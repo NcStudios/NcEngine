@@ -33,6 +33,43 @@ struct MaterialData
     float outlineWidth = 1.0f;
 };
 
+// Object model for SpotLights (type: StructuredBuffer element type).
+// 128 bytes (rounded up due to alignment) with a 16-byte alignment.
+struct SpotLightData
+{
+    DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
+    Vector3 position = Vector3::Zero();
+    int castsShadows = 0;
+    Vector3 color = Vector3::One();
+    int isInitialized = 0;
+    Vector3 direction = Vector3::One();
+    float innerAngle = 1.0f;
+    float outerAngle = 1.0f;
+    float radius = 1.0f;
+};
+
+// Object model for PointLights (type: StructuredBuffer element type).
+// 112 bytes (rounded up due to alignment) with a 16-byte alignment.
+struct PointLightData
+{
+    DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
+    Vector3 position = Vector3::Zero();
+    int castsShadows = 0;
+    Vector3 color = Vector3::One();
+    int isInitialized = 0;
+    float radius = 1.0f;
+};
+
+// Object model for DirectionalLights (type: StructuredBuffer element type).
+// Not targeting shadows for directional lights at the moment.
+// 32 bytes (rounded up due to alignment) with a 16-byte alignment.
+struct DirectionalLightData
+{
+    Vector3 color = Vector3::One();
+    int isInitialized = 0;
+    Vector3 direction = Vector3::One();
+};
+
 // Specifies a subrange within a buffer.
 struct BufferSlice
 {

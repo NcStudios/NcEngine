@@ -146,6 +146,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             memorySettings.maxTextures,
             memorySettings.maxRenderers,
+            memorySettings.maxSpotLights,
+            memorySettings.maxPointLights,
+            memorySettings.maxDirectionalLights,
             1000u /** @todo: 782 parameterize with ShaderConfig object */
           },
           m_ui{

@@ -16,4 +16,5 @@ auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::Skeleta
 auto CreateSpotLight(Entity entity, const std::any&) -> graphics::SpotLight;
 auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher;
 auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody;
+auto CreateDirectionalLight(Entity entity, const std::any&) -> graphics::DirectionalLight;
 } // namespace nc

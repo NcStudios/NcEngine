@@ -3,6 +3,7 @@
 #include "../AssetServiceStub.h"
 
 #include "ncengine/audio/AudioSource.h"
+#include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
@@ -153,6 +154,15 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
     EXPECT_EQ(expectedInfo.kinematic.rotationMax, actualInfo.kinematic.rotationMax);
     EXPECT_EQ(expectedInfo.kinematic.rotationOverTimeFactor, actualInfo.kinematic.rotationOverTimeFactor);
     EXPECT_EQ(expectedInfo.kinematic.scaleOverTimeFactor, actualInfo.kinematic.scaleOverTimeFactor);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
+{
+    auto stream = std::stringstream{};
+    const auto expected = nc::graphics::DirectionalLight{nc::Vector3::Splat(1.0f)};
+    nc::SerializeDirectionalLight(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeDirectionalLight(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(expected.color, actual.color);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)

@@ -50,6 +50,7 @@ namespace graphics
 {
 struct NcGraphics;
 class Camera;
+struct DirectionalLight;
 class MeshRenderer;
 class ParticleEmitter;
 struct PointLight;

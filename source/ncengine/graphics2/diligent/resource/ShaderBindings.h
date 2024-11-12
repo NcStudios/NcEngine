@@ -20,19 +20,25 @@ class ShaderBindings
                                 Diligent::IDeviceContext& context,
                                 uint32_t maxTextures,
                                 uint32_t maxMeshRenderers,
+                                uint32_t maxSpotLights,
+                                uint32_t maxPointLights,
+                                uint32_t maxDirectionalLights,
                                 uint32_t initialMaterialSizeHint)
             : m_globalSignature{
                 context, device,
                 "GlobalResourceSignature",
                 0,
-                TextureBufferResourceDesc{"TextureBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
+                TextureBufferResourceDesc{"TextureBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX}
               },
               m_componentSignature{
                 context, device,
                 "ComponentResourceSignature",
                 1,
-                StructuredBufferResourceDesc{"MeshRendererBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers, maxMeshRenderers}
+                StructuredBufferResourceDesc{"MeshRendererBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers,     maxMeshRenderers},
+                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights},
+                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxPointLights,       maxPointLights},
+                StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxDirectionalLights, maxDirectionalLights},
               },
               m_materialSignature{
                 context, device,

@@ -8,13 +8,16 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        Diligent::IRenderDevice& device,
                                                        std::string_view signatureName,
                                                        uint8_t bindingIndex,
-                                                       StructuredBufferResourceDesc meshRendererResourceDesc)
+                                                       StructuredBufferResourceDesc meshRendererResourceDesc,
+                                                       StructuredBufferResourceDesc spotLightResourceDesc,
+                                                       StructuredBufferResourceDesc pointLightResourceDesc,
+                                                       StructuredBufferResourceDesc directionalLightResourceDesc)
 {
     const auto resources = std::array{
-        StructuredBuffer<MeshRendererData>::MakeResourceDesc(
-            meshRendererResourceDesc.resourceKey,
-            meshRendererResourceDesc.shaderType
-        )
+        StructuredBuffer<MeshRendererData>::MakeResourceDesc(meshRendererResourceDesc.resourceKey, meshRendererResourceDesc.shaderType),
+        StructuredBuffer<SpotLightData>::MakeResourceDesc(meshRendererResourceDesc.resourceKey, meshRendererResourceDesc.shaderType),
+        StructuredBuffer<PointLightData>::MakeResourceDesc(meshRendererResourceDesc.resourceKey, meshRendererResourceDesc.shaderType),
+        StructuredBuffer<DirectionalLightData>::MakeResourceDesc(meshRendererResourceDesc.resourceKey, meshRendererResourceDesc.shaderType),
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
