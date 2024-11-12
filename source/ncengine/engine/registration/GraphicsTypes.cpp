@@ -1,6 +1,7 @@
 #include "GraphicsTypes.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/MeshRenderer2.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
@@ -78,6 +79,17 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         CreateSpotLight,
         SerializeSpotLight,
         DeserializeSpotLight
+    );
+
+    Register<MeshRenderer2>(
+        registry,
+        maxEntities,
+        MeshRenderer2Id,
+        "MeshRenderer2",
+        ui::editor::MeshRenderer2UIWidget,
+        CreateMeshRenderer2,
+        nullptr,
+        nullptr
     );
 
 }

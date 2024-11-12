@@ -1,7 +1,7 @@
 #pragma once
 
+#include "ncengine/ecs/Entity.h"
 #include "graphics2/ShaderTypes.h"
-#include "ncengine/ecs/Ecs.h"
 #include "DirectXMath.h"
 
 #include <span>
