@@ -43,8 +43,14 @@ target_link_libraries(${NC_ENGINE_LIB}
         OptickCore
         RtAudio
         Jolt
-        ${DILIGENT_LIBRARIES}
 )
+
+if(NC_USE_DILIGENT)
+    target_link_libraries(${NC_ENGINE_LIB}
+        PUBLIC
+            ${DILIGENT_LIBRARIES}
+    )
+endif()
 
 if(WIN32)
     target_link_libraries(${NC_ENGINE_LIB}
@@ -90,7 +96,6 @@ add_subdirectory(debug)
 add_subdirectory(ecs)
 add_subdirectory(engine)
 add_subdirectory(graphics)
-add_subdirectory(graphics2)
 add_subdirectory(input)
 add_subdirectory(network)
 add_subdirectory(particle)
@@ -102,3 +107,15 @@ add_subdirectory(time)
 add_subdirectory(ui)
 add_subdirectory(utility)
 add_subdirectory(window)
+
+if(NC_USE_DILIGENT)
+    add_subdirectory(graphics2)
+else()
+    # Still need these for linking becuase the editor knows about MeshRenderer2
+    target_sources(${NC_ENGINE_LIB}
+        PRIVATE
+            graphics2/Material.cpp
+            graphics2/GraphicsUtility.cpp
+            graphics2/frontend/subsystem/MaterialRegistry.cpp
+    )
+endif()

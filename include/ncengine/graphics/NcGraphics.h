@@ -24,12 +24,6 @@ struct ProjectSettings;
 
 namespace graphics
 {
-namespace api
-{
-constexpr std::string_view D3D12    = std::string_view("d3d12");
-constexpr std::string_view Vulkan   = std::string_view("vulkan");
-} // namespace api
-
 /** @brief Graphics module interface.
  * 
  * Update Tasks
@@ -98,15 +92,8 @@ struct NcGraphics : public Module
 };
 
 /**
- * @brief Get a collection of the graphics APIs that are supported on the platform and device.
- * @return A collection of the names of the supported graphics APIs.
- */
-auto GetSupportedApis() -> std::span<const std::string_view>;
-
-/**
  * @brief Build an NcGraphics instance.
- * 
- * The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
+ * @note The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
  */
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,

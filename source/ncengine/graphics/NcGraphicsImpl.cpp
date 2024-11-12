@@ -83,7 +83,6 @@ namespace nc::graphics
             ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
                 .isResizable = false

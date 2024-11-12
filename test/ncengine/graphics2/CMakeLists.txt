@@ -52,3 +52,35 @@ target_link_libraries(MaterialRegistry_tests
 )
 
 add_test(MaterialRegistry_tests MaterialRegistry_tests)
+
+### MeshRendererSubsystem Tests ###
+add_executable(MeshRendererSubsystem_tests
+    MeshRendererSubsystem_tests.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+    ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
+)
+
+target_include_directories(MeshRendererSubsystem_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+)
+
+target_compile_options(MeshRendererSubsystem_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(MeshRendererSubsystem_tests
+    PRIVATE
+        gtest_main
+        NcAsset
+        NcMath
+)
+
+add_test(MeshRendererSubsystem_tests MeshRendererSubsystem_tests)
+
+

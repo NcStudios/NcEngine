@@ -4,7 +4,6 @@
 #include "shared/Prefabs.h"
 
 #include "ncengine/NcEngine.h"
-#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/utility/FileLogger.h"
 
 #include <iostream>
@@ -55,23 +54,6 @@ int main(int argc, char** argv)
     try
     {
         auto config = nc::config::Load(args.configPath);
-
-        if (config.graphicsSettings.enabled)
-        {
-            auto supportedGraphicsApis = nc::graphics::GetSupportedApis();
-            if (supportedGraphicsApis.empty())
-            {
-                throw std::runtime_error("No supported graphics APIs were found on the system.");
-            }
-
-            const auto& targetApi = config.graphicsSettings.api;
-            if (!std::ranges::contains(supportedGraphicsApis, targetApi))
-            {
-                std::cerr << fmt::format("Warning: The target graphics API ({0}) was not found on the system. Falling back to: {1}.", targetApi, supportedGraphicsApis[0]);
-                config.graphicsSettings.api = supportedGraphicsApis[0];
-            }
-        }
-
         auto engine = nc::InitializeNcEngine(config);
         nc::sample::InitializeResources();
 

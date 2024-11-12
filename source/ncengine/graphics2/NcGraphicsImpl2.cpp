@@ -115,7 +115,6 @@ namespace nc::graphics
             ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
                 .isResizable = false
@@ -138,31 +137,29 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                                  window::NcWindow& window)
         : m_world{registry->GetEcs()},
           m_engine{
-            graphicsSettings,
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
             window.GetWindowHandle(),
-            GetSupportedApis(),
             ::LogCallback
           },
           m_shaderBindings{
             m_engine.GetDevice(),
             m_engine.GetContext(),
             memorySettings.maxTextures,
+            memorySettings.maxRenderers,
             1000u /** @todo: 782 parameterize with ShaderConfig object */
           },
           m_ui{
             m_engine.GetDevice(),
             m_engine.GetSwapChain().GetDesc(),
             window.GetWindowHandle(),
-            m_engine.GetApi(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
           m_testPipeline{
-            m_engine.GetContext(),
             m_engine.GetDevice(),
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
+            m_shaderBindings.GetComponentSignature().GetResourceSignature(),
             m_shaderBindings.GetMaterialSignature().GetResourceSignature()
           },
           m_frontend{
@@ -249,7 +246,19 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
+    // todo: how should this one work/where does it go?
+    m_frontend.GetMaterialRegistry().CommitPendingChanges(
+        [this](const auto& info){
+            m_shaderBindings.GetMaterialSignature().GetMaterialDataResource().Update(
+                m_engine.GetContext(),
+                m_engine.GetDevice(),
+                info
+            );
+        }
+    );
+
     auto& context = m_engine.GetContext();
+    auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
     m_ui.FrameBegin(swapChain);
@@ -263,15 +272,17 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-    m_shaderBindings.Update(renderState, context);
+    m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetGlobalSignature().Commit(context);
+    m_shaderBindings.GetComponentSignature().Commit(context);
     m_shaderBindings.GetMaterialSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_testPipeline.Render(context, m_world);
+    m_testPipeline.Render(context, m_world, renderState);
     m_ui.Render(context);
 
     swapChain.Present();
+    context.FinishFrame();
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)

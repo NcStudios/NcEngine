@@ -56,7 +56,7 @@ struct MaterialDesc
     asset::TextureView normalTexture = asset::TextureView{};
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
-    Vector3 outlineColor = Vector3::One();
+    Vector3 outlineColor = Vector3::Zero();
     float outlineWidth = 1.0f;
 };
 
@@ -80,6 +80,12 @@ class MaterialInstance
 
         /** @brief Update the instance's properties. */
         void SetDesc(const MaterialDesc& desc);
+
+        /**
+         * @brief Update the instance's name.
+         * @note Prefer this over SetDesc() when only changing the name to avoid an unnecessary GPU-side update.
+         */
+        void SetName(std::string_view name);
 
         /** @brief Get the instance's handle. */
         auto GetHandle() const -> MaterialInstanceHandle

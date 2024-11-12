@@ -1,15 +1,16 @@
 #include "gtest/gtest.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
+#include "graphics2/ShaderTypes.h"
 
 #include "ncutility/NcError.h"
 
 struct UpdateListener
 {
-    nc::graphics::MaterialDataUpdateInfo receivedInfo;
+    nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData> receivedInfo;
 
     auto MakeCallback()
     {
-        return [this](const nc::graphics::MaterialDataUpdateInfo& info)
+        return [this](const nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>& info)
         {
             this->receivedInfo = info;
         };
@@ -17,7 +18,7 @@ struct UpdateListener
 
     void Clear()
     {
-        receivedInfo = nc::graphics::MaterialDataUpdateInfo{};
+        receivedInfo = nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>{};
     }
 };
 
@@ -80,6 +81,17 @@ TEST(MaterialRegistryTest, DestroyInstance_recyclesIndex)
     uut.DestroyInstance(second);
     auto recycled = uut.CreateInstance();
     EXPECT_EQ(1, recycled);
+}
+
+TEST(MaterialRegistryTest, SetInstanceName_doesNotSetDirty)
+{
+    auto uut = nc::graphics::MaterialRegistry{5u};
+    auto listener = UpdateListener{};
+    auto instance = uut.CreateInstance();
+    uut.CommitPendingChanges(listener.MakeCallback());
+
+    uut.SetInstanceName(instance, "updated");
+    EXPECT_FALSE(uut.HasPendingChanges());
 }
 
 TEST(MaterialRegistryTest, HasPendingChanges_returnsExpectedValue)

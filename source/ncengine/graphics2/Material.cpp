@@ -30,4 +30,9 @@ void MaterialInstance::SetDesc(const MaterialDesc& desc)
 {
     s_registry->SetInstanceDesc(m_handle, desc);
 }
+
+void MaterialInstance::SetName(std::string_view name)
+{
+    s_registry->SetInstanceName(m_handle, name);
+}
 } // namespace nc

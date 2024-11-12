@@ -14,7 +14,6 @@ class UIBackend
         UIBackend(Diligent::IRenderDevice& device,
                   const Diligent::SwapChainDesc& swapChainDesc,
                   GLFWwindow* window,
-                  std::string_view api,
                   Signal<>& onFontUpdate);
 
         void FrameBegin(Diligent::ISwapChain& swapChain);

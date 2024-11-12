@@ -13,8 +13,7 @@ class ImGuiImplGLFW final : public Diligent::ImGuiImplDiligent
     public:
         ImGuiImplGLFW(Diligent::IRenderDevice& device,
                       const Diligent::SwapChainDesc& swapChainDesc,
-                      GLFWwindow* window,
-                      std::string_view api);
+                      GLFWwindow* window);
 
         ~ImGuiImplGLFW() noexcept;
 

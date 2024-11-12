@@ -1,13 +1,13 @@
 #include "TestPipeline.h"
 #include "resource/GlobalMeshBuffer.h"
 #include "ncasset/Assets.h"
+#include "graphics2/frontend/FrontendRenderState.h"
 
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
 #include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
 #include "Graphics/GraphicsTools/interface/ShaderMacroHelper.hpp"
 
 #include <array>
-#include <random>
 
 using namespace Diligent;
 
@@ -24,10 +24,10 @@ SamplerState  Textures_sampler; // By convention, texture samplers must use the 
 
 struct MaterialData
 {
-    uint diffuseTexture;
-    uint normalIndex;
     float3 gradientStart;
+    uint diffuseTexture;
     float3 gradientEnd;
+    uint normalIndex;
     float3 outlineColor;
     float outlineWidth;
 };
@@ -36,9 +36,9 @@ StructuredBuffer<MaterialData> MaterialDataBuffer : register(t1);
 
 struct PSInput 
 { 
-    float4 Pos      : SV_POSITION; 
-    float2 UV       : TEX_COORD; 
-    uint   TexIndex : TEX_ARRAY_INDEX;
+    float4 Pos           : SV_POSITION; 
+    float2 UV            : TEX_COORD; 
+    uint   MaterialIndex;
 };
 
 struct PSOutput
@@ -50,7 +50,8 @@ void main(in  PSInput  PSIn,
           out PSOutput PSOut)
 {
     float4 Color;
-    Color = Textures[NonUniformResourceIndex(PSIn.TexIndex)].Sample(Textures_sampler, PSIn.UV);
+    uint TexIndex = MaterialDataBuffer[PSIn.MaterialIndex].diffuseTexture;
+    Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
     PSOut.Color = Color;
 })"};
 
@@ -65,62 +66,62 @@ R"(struct VSInput
     float3 Bitangent   : ATTRIB4;
     float4 BoneWeights : ATTRIB5;
     uint4  BoneIds     : ATTRIB6;
-
-    // Instance attributes
-    float4 MtrxRow0  : ATTRIB7;
-    float4 MtrxRow1  : ATTRIB8;
-    float4 MtrxRow2  : ATTRIB9;
-    float4 MtrxRow3  : ATTRIB10;
-    uint   TexArrInd : ATTRIB11;
 };
 
 struct PSInput 
 {
-    float4 Pos      : SV_POSITION;
-    float2 UV       : TEX_COORD;
-    uint   TexIndex : TEX_ARRAY_INDEX;
+    float4 Pos           : SV_POSITION;
+    float2 UV            : TEX_COORD;
+    uint   MaterialIndex;
 };
+
+struct MeshRendererData
+{
+    float4x4 model;
+    uint materialIndex;
+};
+
+StructuredBuffer<MeshRendererData> MeshRendererBufferData;
 
 cbuffer EnvironmentData
 {
     float4x4 cameraViewProjection;
 };
 
-void main(in  VSInput VSIn, out PSInput PSIn)
+void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    float4x4 InstanceMatr = MatrixFromRows(VSIn.MtrxRow0, VSIn.MtrxRow1, VSIn.MtrxRow2, VSIn.MtrxRow3);
-    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), InstanceMatr);
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.TexIndex = VSIn.TexArrInd;
+    PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
 }
 )"};
 } // anonymous namespace
 
 namespace nc::graphics
 {
-TestPipeline::TestPipeline(IDeviceContext& context,
-                           IRenderDevice& device,
+TestPipeline::TestPipeline(IRenderDevice& device,
                            ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
                            Diligent::IPipelineResourceSignature& globalResourceSignature,
+                           Diligent::IPipelineResourceSignature& componentResourceSignature,
                            Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
-    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, materialResourceSignature);
-    CreateInstanceBuffer(context, device);
+    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, componentResourceSignature, materialResourceSignature);
 }
 
 void TestPipeline::CreatePipelineState(IRenderDevice& device,
                                        ISwapChain& swapChain,
                                        ShaderFactory& shaderFactory,
                                        Diligent::IPipelineResourceSignature& globalResourceSignature,
+                                       Diligent::IPipelineResourceSignature& componentResourceSignature,
                                        Diligent::IPipelineResourceSignature& materialResourceSignature)
 {
     auto createInfo = GraphicsPipelineStateCreateInfo{};
     createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     createInfo.PSODesc.Name = "Test PSO";
 
-    auto signatures = std::array{&globalResourceSignature, &materialResourceSignature};
+    auto signatures = std::array{&globalResourceSignature, &componentResourceSignature, &materialResourceSignature};
     createInfo.ppResourceSignatures = signatures.data();
     createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
@@ -156,106 +157,29 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
         vertexElements.at(4),
         vertexElements.at(5),
         vertexElements.at(6),
-
-        // Per-instance data - second buffer slot
-        // We will use four attributes to encode instance-specific 4x4 transformation matrix
-        LayoutElement{7, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{8, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{9, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{10, 1, 4, VT_FLOAT32, False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
-        LayoutElement{11, 1, 1, VT_UINT32,  False, INPUT_ELEMENT_FREQUENCY_PER_INSTANCE},
     };
 
+    createInfo.PSODesc.ResourceLayout.DefaultVariableType =  SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
     createInfo.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems.data();
     createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(LayoutElems.size());
 
     device.CreateGraphicsPipelineState(createInfo, &m_pBindlessPSO);
+
     NC_ASSERT(m_pBindlessPSO, "Failed to create pipeline state object");
 }
 
-void TestPipeline::CreateInstanceBuffer(IDeviceContext& context, IRenderDevice& device)
-{
-    // Create instance data buffer that will store transformation matrices
-    BufferDesc InstBuffDesc;
-    InstBuffDesc.Name = "Instance data buffer";
-    // Use default usage as this buffer will only be updated when grid size changes
-    InstBuffDesc.Usage     = USAGE_DEFAULT;
-    InstBuffDesc.BindFlags = BIND_VERTEX_BUFFER;
-    InstBuffDesc.Size      = sizeof(InstanceData) * MaxInstances;
-    device.CreateBuffer(InstBuffDesc, nullptr, &m_InstanceBuffer);
-    PopulateInstanceBuffer(context);
-}
-
-void TestPipeline::PopulateInstanceBuffer(IDeviceContext& context)
-{
-    // Populate instance data buffer
-    const auto zGridSize = static_cast<size_t>(m_GridSize);
-    m_InstanceData.resize(zGridSize * zGridSize * zGridSize);
-    m_GeometryType.resize(zGridSize * zGridSize * zGridSize);
-
-    float fGridSize = static_cast<float>(m_GridSize);
-
-    std::mt19937 gen;
-    std::uniform_real_distribution<float> scale_distr(0.3f, 1.0f);
-    std::uniform_real_distribution<float> offset_distr(-0.15f, +0.15f);
-    std::uniform_real_distribution<float> rot_distr(-3.14f, 3.14f);
-    std::uniform_int_distribution<uint32_t> tex_distr(0, 19 - 1); // note: just based on sample assets
-    std::uniform_int_distribution<uint32_t> geom_type_distr(0, static_cast<uint32_t>(10)); // note: lower bound on sample asset; probably more available
-
-    float BaseScale = 0.6f / fGridSize;
-    int   instId    = 0;
-    for (int x = 0; x < m_GridSize; ++x)
-    {
-        for (int y = 0; y < m_GridSize; ++y)
-        {
-            for (int z = 0; z < m_GridSize; ++z)
-            {
-                float xOffset = 2.f * ((float)x + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
-                float yOffset = 2.f * ((float)y + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
-                float zOffset = 3.0f + 2.f * ((float)z + 0.5f + offset_distr(gen)) / fGridSize - 1.f;
-                float scale = BaseScale * scale_distr(gen);
-                auto matrix = DirectX::XMMatrixMultiply(
-                    DirectX::XMMatrixMultiply(
-                        DirectX::XMMatrixRotationRollPitchYaw(rot_distr(gen), rot_distr(gen), rot_distr(gen)),
-                        DirectX::XMMatrixScaling(scale, scale, scale)
-                    ),
-                    DirectX::XMMatrixTranslation(xOffset, yOffset, zOffset)
-                );
-
-                auto& CurrInst = m_InstanceData[instId];
-                DirectX::XMStoreFloat4x4(&CurrInst.Matrix, matrix);
-                CurrInst.TextureInd = tex_distr(gen);
-                m_GeometryType[instId++] = geom_type_distr(gen);
-            }
-        }
-    }
-
-    auto DataSize = static_cast<uint32_t>(sizeof(InstanceData) * m_InstanceData.size());
-    context.UpdateBuffer(m_InstanceBuffer, 0, DataSize, m_InstanceData.data(), RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    StateTransitionDesc Barrier(m_InstanceBuffer, RESOURCE_STATE_UNKNOWN, RESOURCE_STATE_VERTEX_BUFFER, STATE_TRANSITION_FLAG_UPDATE_STATE);
-    context.TransitionResourceStates(1, &Barrier);
-}
-
 void TestPipeline::Render(Diligent::IDeviceContext& context,
-                          ecs::ExplicitEcs<ToonRenderer> ecs)
+                          ecs::ExplicitEcs<MeshRenderer2, ToonRenderer> ecs,
+                          const nc::graphics::FrontendRenderState& renderState)
 {
-    auto instanceBuffer = m_InstanceBuffer.RawPtr();
-    context.SetVertexBuffers(
-        1,
-        1,
-        &instanceBuffer,
-        nullptr,
-        RESOURCE_STATE_TRANSITION_MODE_TRANSITION,
-        SET_VERTEX_BUFFERS_FLAG_NONE
-    );
-
     context.SetPipelineState(m_pBindlessPSO);
 
-    const auto renderers = ecs.GetAll<ToonRenderer>();
-    const auto numObjects = std::min(renderers.size(), (size_t)(m_GridSize * m_GridSize * m_GridSize));
-    for (auto i = 0ull; i < numObjects; ++i)
+    auto i = 0u;
+    for (auto entity : renderState.meshRendererState.entities)
     {
-        const auto& meshView = renderers[i].GetMeshView();
+        const auto& renderer = ecs.Get<MeshRenderer2>(entity);
+        const auto& meshView = renderer.GetMesh();
+
         const auto attributes = DrawIndexedAttribs{
             meshView.indexCount,
             VT_UINT32,
@@ -263,7 +187,7 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
             1,
             meshView.firstIndex,
             meshView.firstVertex,
-            static_cast<uint32_t>(i)
+            i++
         };
 
         context.DrawIndexed(attributes);
