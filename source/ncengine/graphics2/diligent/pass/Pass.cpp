@@ -1,15 +1,5 @@
-#include "TestPipeline.h"
-#include "resource/GlobalMeshBuffer.h"
-#include "ncasset/Assets.h"
-#include "graphics2/frontend/FrontendRenderState.h"
-
-#include "Graphics/GraphicsEngine/interface/PipelineState.h"
-#include "Graphics/GraphicsTools/interface/GraphicsUtilities.h"
-#include "Graphics/GraphicsTools/interface/ShaderMacroHelper.hpp"
-
-#include <array>
-
-using namespace Diligent;
+#include "Pass.h"
+#include "graphics2/diligent/resource/GlobalMeshBuffer.h"
 
 namespace
 {
@@ -100,28 +90,17 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 
 namespace nc::graphics
 {
-TestPipeline::TestPipeline(IRenderDevice& device,
-                           ISwapChain& swapChain,
-                           ShaderFactory& shaderFactory,
-                           Diligent::IPipelineResourceSignature& globalResourceSignature,
-                           Diligent::IPipelineResourceSignature& componentResourceSignature,
-                           Diligent::IPipelineResourceSignature& materialResourceSignature)
+auto MakeTestPass(Diligent::IRenderDevice& device,
+                  Diligent::ISwapChain& swapChain,
+                  ShaderFactory& shaderFactory,
+                  std::vector<Diligent::IPipelineResourceSignature*> signatures) -> Pass
 {
-    CreatePipelineState(device, swapChain, shaderFactory, globalResourceSignature, componentResourceSignature, materialResourceSignature);
-}
+    using namespace Diligent;
 
-void TestPipeline::CreatePipelineState(IRenderDevice& device,
-                                       ISwapChain& swapChain,
-                                       ShaderFactory& shaderFactory,
-                                       Diligent::IPipelineResourceSignature& globalResourceSignature,
-                                       Diligent::IPipelineResourceSignature& componentResourceSignature,
-                                       Diligent::IPipelineResourceSignature& materialResourceSignature)
-{
     auto createInfo = GraphicsPipelineStateCreateInfo{};
     createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     createInfo.PSODesc.Name = "Test PSO";
 
-    auto signatures = std::array{&globalResourceSignature, &componentResourceSignature, &materialResourceSignature};
     createInfo.ppResourceSignatures = signatures.data();
     createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
@@ -147,50 +126,19 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
     createInfo.pVS = vertexShader;
     createInfo.pPS = pixelShader;
 
-    const auto vertexElements = GetMeshVertexLayoutElements(0);
-    auto LayoutElems = std::array{
-        // Per-vertex data - first buffer slot
-        vertexElements.at(0),
-        vertexElements.at(1),
-        vertexElements.at(2),
-        vertexElements.at(3),
-        vertexElements.at(4),
-        vertexElements.at(5),
-        vertexElements.at(6),
-    };
+    auto LayoutElems = GetMeshVertexLayoutElements(0);
 
     createInfo.PSODesc.ResourceLayout.DefaultVariableType =  SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
     createInfo.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems.data();
     createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(LayoutElems.size());
 
-    device.CreateGraphicsPipelineState(createInfo, &m_pBindlessPSO);
+    auto pso = Diligent::RefCntAutoPtr<Diligent::IPipelineState>{};
+    device.CreateGraphicsPipelineState(createInfo, &pso);
 
-    NC_ASSERT(m_pBindlessPSO, "Failed to create pipeline state object");
-}
-
-void TestPipeline::Render(Diligent::IDeviceContext& context,
-                          ecs::ExplicitEcs<MeshRenderer2, ToonRenderer> ecs,
-                          const nc::graphics::FrontendRenderState& renderState)
-{
-    context.SetPipelineState(m_pBindlessPSO);
-
-    auto i = 0u;
-    for (auto entity : renderState.meshRendererState.entities)
-    {
-        const auto& renderer = ecs.Get<MeshRenderer2>(entity);
-        const auto& meshView = renderer.GetMesh();
-
-        const auto attributes = DrawIndexedAttribs{
-            meshView.indexCount,
-            VT_UINT32,
-            DRAW_FLAG_VERIFY_ALL | DRAW_FLAG_DYNAMIC_RESOURCE_BUFFERS_INTACT,
-            1,
-            meshView.firstIndex,
-            meshView.firstVertex,
-            i++
-        };
-
-        context.DrawIndexed(attributes);
-    }
+    NC_ASSERT(pso, "Failed to create pipeline state object");
+    return Pass{
+        std::move(pso),
+        MaterialPass::Toon
+    };
 }
 } // namespace nc::graphics

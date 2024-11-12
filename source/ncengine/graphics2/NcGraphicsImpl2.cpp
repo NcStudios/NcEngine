@@ -1,4 +1,5 @@
 #include "NcGraphicsImpl2.h"
+#include "diligent/pass/Pass.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -154,14 +155,18 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_testPipeline{
-            m_engine.GetDevice(),
-            m_engine.GetSwapChain(),
-            m_engine.GetShaderFactory(),
-            m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
-            m_shaderBindings.GetComponentSignature().GetResourceSignature(),
-            m_shaderBindings.GetMaterialSignature().GetResourceSignature()
-          },
+          m_materialPassBackend{std::vector<Pass>{
+            MakeTestPass(
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory(),
+                {
+                    &m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
+                    &m_shaderBindings.GetComponentSignature().GetResourceSignature(),
+                    &m_shaderBindings.GetMaterialSignature().GetResourceSignature()
+                }
+            )
+          }},
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -278,10 +283,11 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMaterialSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_testPipeline.Render(context, m_world, renderState);
+    m_materialPassBackend.Render(context, renderState.meshRendererState.passState);
     m_ui.Render(context);
 
     swapChain.Present();
+    context.Flush();
     context.FinishFrame();
 }
 

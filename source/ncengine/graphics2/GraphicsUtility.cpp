@@ -32,7 +32,7 @@ auto GetMaterialPassNames() -> std::span<const std::string_view>
     return g_passNames;
 }
 
-auto GetMaterialPassFlags() -> std::span<const MaterialPasses>
+auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>
 {
     return g_passFlags;
 }

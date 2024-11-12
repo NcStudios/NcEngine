@@ -15,5 +15,5 @@ namespace nc
 auto GetMaterialPassNames() -> std::span<const std::string_view>;
 
 /** @brief Returns a view of all material pass flags, ordered by ascending flag value. */
-auto GetMaterialPassFlags() -> std::span<const MaterialPasses>;
+auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>;
 } // namespace nc

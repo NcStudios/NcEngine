@@ -14,14 +14,28 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
     m_rendererDataCache.clear();
     m_rendererDataCache.reserve(entities.size());
 
-    std::ranges::transform(entities, std::back_inserter(m_rendererDataCache), [&ecs](Entity entity)
-    {
-        return MeshRendererData{
-            ecs.Get<Transform>(entity).TransformationMatrix(),
-            ecs.Get<MeshRenderer2>(entity).GetMaterial().GetHandle()
-        };
-    });
+    m_passCache.ClearDynamicTargets();
 
-    return MeshRendererRenderState{.modelMatrices = m_rendererDataCache, .entities = entities};
+    for (auto [i, entity] : std::views::enumerate(entities))
+    {
+        // todo: filter static
+        auto& renderer = ecs.Get<MeshRenderer2>(entity);
+        const auto& material = renderer.GetMaterial();
+        m_passCache.AddDynamicTarget(
+            material.GetDesc().passes,
+            static_cast<uint32_t>(i),
+            renderer.GetMesh()
+        );
+
+        m_rendererDataCache.emplace_back(
+            ecs.Get<Transform>(entity).TransformationMatrix(),
+            material.GetHandle()
+        );
+    }
+
+    return MeshRendererRenderState{
+        .modelMatrices = m_rendererDataCache,
+        .passState = m_passCache.BuildState()
+    };
 }
 } // namespace nc::graphics

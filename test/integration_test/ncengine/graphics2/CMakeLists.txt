@@ -77,14 +77,6 @@ target_sources(GlobalTextureBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
 )
 
-### MaterialPassSystem Tests ###
-add_graphics_test(MaterialPassSystem_tests)
-
-target_sources(MaterialPassSystem_tests
-    PRIVATE
-        MaterialPassSystem_tests.cpp
-)
-
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 
