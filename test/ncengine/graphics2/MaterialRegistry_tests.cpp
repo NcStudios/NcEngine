@@ -83,6 +83,17 @@ TEST(MaterialRegistryTest, DestroyInstance_recyclesIndex)
     EXPECT_EQ(1, recycled);
 }
 
+TEST(MaterialRegistryTest, SetInstanceName_doesNotSetDirty)
+{
+    auto uut = nc::graphics::MaterialRegistry{5u};
+    auto listener = UpdateListener{};
+    auto instance = uut.CreateInstance();
+    uut.CommitPendingChanges(listener.MakeCallback());
+
+    uut.SetInstanceName(instance, "updated");
+    EXPECT_FALSE(uut.HasPendingChanges());
+}
+
 TEST(MaterialRegistryTest, HasPendingChanges_returnsExpectedValue)
 {
     auto uut = nc::graphics::MaterialRegistry{3};

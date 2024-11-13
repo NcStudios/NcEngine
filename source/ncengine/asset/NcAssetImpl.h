@@ -19,6 +19,7 @@ class ConcaveColliderAssetManager;
 class CubeMapAssetManager;
 class FontAssetManager;
 class HullColliderAssetManager;
+class IAssetServiceBase;
 class MeshAssetManager;
 class SkeletalAnimationAssetManager;
 class TextureAssetManager;
@@ -41,6 +42,7 @@ class NcAssetImpl : public NcAsset
         auto OnFontUpdate() noexcept -> Signal<>& override;
         void LoadAssets(const AssetMap& assets) override;
         auto GetLoadedAssets() const noexcept -> AssetMap override;
+        auto GetAssetPath(AssetType type, size_t id) const -> std::string_view override;
 
     private:
         std::unique_ptr<AudioClipAssetManager> m_audioClipManager;
@@ -52,6 +54,8 @@ class NcAssetImpl : public NcAsset
         std::unique_ptr<TextureAssetManager> m_textureManager;
         std::unique_ptr<FontAssetManager> m_fontManager;
         AssetMap m_defaults;
+
+        auto GetService(AssetType type) const -> const IAssetServiceBase&;
 };
 } // namespace asset
 } // namespace nc

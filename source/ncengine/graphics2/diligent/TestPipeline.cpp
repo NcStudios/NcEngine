@@ -24,10 +24,10 @@ SamplerState  TextureBufferData_sampler; // By convention, texture samplers must
 
 struct MaterialData
 {
-    uint diffuseTexture;
-    uint normalIndex;
     float3 gradientStart;
+    uint diffuseTexture;
     float3 gradientEnd;
+    uint normalIndex;
     float3 outlineColor;
     float outlineWidth;
 };
@@ -36,9 +36,9 @@ StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
 
 struct PSInput 
 { 
-    float4 Pos      : SV_POSITION; 
-    float2 UV       : TEX_COORD; 
-    uint   TexIndex : TEX_ARRAY_INDEX;
+    float4 Pos           : SV_POSITION; 
+    float2 UV            : TEX_COORD; 
+    uint   MaterialIndex;
 };
 
 struct PSOutput
@@ -50,7 +50,8 @@ void main(in  PSInput  PSIn,
           out PSOutput PSOut)
 {
     float4 Color;
-    Color = TextureBufferData[NonUniformResourceIndex(PSIn.TexIndex)].Sample(TextureBufferData_sampler, PSIn.UV);
+    uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
+    Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
     PSOut.Color = Color;
 })"};
 
@@ -69,14 +70,15 @@ R"(struct VSInput
 
 struct PSInput 
 {
-    float4 Pos      : SV_POSITION;
-    float2 UV       : TEX_COORD;
-    uint   TexIndex : TEX_ARRAY_INDEX;
+    float4 Pos           : SV_POSITION;
+    float2 UV            : TEX_COORD;
+    uint   MaterialIndex;
 };
 
 struct MeshRendererData
 {
     float4x4 model;
+    uint materialIndex;
 };
 
 StructuredBuffer<MeshRendererData> MeshRendererBufferData;
@@ -91,7 +93,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.TexIndex = 0;
+    PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
 }
 )"};
 } // anonymous namespace
@@ -167,7 +169,7 @@ void TestPipeline::CreatePipelineState(IRenderDevice& device,
 }
 
 void TestPipeline::Render(Diligent::IDeviceContext& context,
-                          ecs::ExplicitEcs<ToonRenderer> ecs,
+                          ecs::ExplicitEcs<MeshRenderer2, ToonRenderer> ecs,
                           const nc::graphics::FrontendRenderState& renderState)
 {
     context.SetPipelineState(m_pBindlessPSO);
@@ -175,8 +177,8 @@ void TestPipeline::Render(Diligent::IDeviceContext& context,
     auto i = 0u;
     for (auto entity : renderState.meshRendererState.entities)
     {
-        const auto& renderer = ecs.Get<ToonRenderer>(entity);
-        const auto& meshView = renderer.GetMeshView();
+        const auto& renderer = ecs.Get<MeshRenderer2>(entity);
+        const auto& meshView = renderer.GetMesh();
 
         const auto attributes = DrawIndexedAttribs{
             meshView.indexCount,

@@ -110,4 +110,12 @@ add_subdirectory(window)
 
 if(NC_USE_DILIGENT)
     add_subdirectory(graphics2)
+else()
+    # Still need these for linking becuase the editor knows about MeshRenderer2
+    target_sources(${NC_ENGINE_LIB}
+        PRIVATE
+            graphics2/Material.cpp
+            graphics2/GraphicsUtility.cpp
+            graphics2/frontend/subsystem/MaterialRegistry.cpp
+    )
 endif()
