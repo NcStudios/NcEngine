@@ -1,5 +1,6 @@
 #include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/GlobalTextureBufferResource.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 
 #include "ncengine/asset/AssetData.h"
 #include "ncasset/Assets.h"
@@ -22,7 +23,12 @@ class GlobalTextureBufferResourceTest : public DiligentEngineFixture
         GlobalTextureBufferResourceTest()
         {
             constexpr auto variableName = "testTexture";
-            const auto resource = nc::graphics::GlobalTextureBufferResource::MakeResourceDesc(variableName, maxTextures);
+            const auto resourceDesc = nc::graphics::TextureBufferResourceDesc{
+                .resourceKey = variableName,
+                .shaderType = Diligent::SHADER_TYPE_PIXEL,
+                .maxElementCount = maxTextures
+            };
+            const auto resource = nc::graphics::ToPipelineResourceDesc(resourceDesc);
             const auto sampler = nc::graphics::GlobalTextureBufferResource::MakeSamplerDesc(variableName);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
             desc.Resources = &resource;

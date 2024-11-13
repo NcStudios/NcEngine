@@ -23,8 +23,8 @@ auto Camera::CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const
     using namespace DirectX;
     const auto viewProj = XMMatrixMultiply(m_view, m_projection);
     const auto viewProjInv = XMMatrixInverse(nullptr, viewProj);
-    const auto nearNDC = XMVectorSet(normalizedDeviceCoords.x, normalizedDeviceCoords.y, 0.0f, 1.0f);
-    const auto farNDC = XMVectorSet(normalizedDeviceCoords.x, normalizedDeviceCoords.y, 1.0f, 1.0f);
+    const auto nearNDC = XMVectorSet(normalizedDeviceCoords.x, -normalizedDeviceCoords.y, 0.0f, 1.0f);
+    const auto farNDC = XMVectorSet(normalizedDeviceCoords.x, -normalizedDeviceCoords.y, 1.0f, 1.0f);
     auto nearWorld = XMVector4Transform(nearNDC, viewProjInv);
     auto farWorld = XMVector4Transform(farNDC, viewProjInv);
     nearWorld = XMVectorDivide(nearWorld, XMVectorSplatW(nearWorld));

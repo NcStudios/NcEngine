@@ -37,18 +37,6 @@ auto ToTextureSubResData(const nc::asset::Texture& texture) -> Diligent::Texture
 
 namespace nc::graphics
 {
-auto GlobalTextureBufferResource::MakeResourceDesc(std::string_view variableName, uint32_t maxTextures) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc{
-        Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,
-        variableName.data(),
-        maxTextures,
-        Diligent::SHADER_RESOURCE_TYPE_TEXTURE_SRV,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE,
-        Diligent::PIPELINE_RESOURCE_FLAG_RUNTIME_ARRAY
-    };
-}
-
 auto GlobalTextureBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
 {
     return Diligent::ImmutableSamplerDesc{
