@@ -8,23 +8,26 @@
 
 namespace nc::graphics
 {
-GlobalResourceSignature::GlobalResourceSignature(Diligent::IRenderDevice& device,
-                                                 Diligent::IDeviceContext& context,
-                                                 uint32_t maxTextures)
+GlobalResourceSignature::GlobalResourceSignature(Diligent::IDeviceContext& context,
+                                                 Diligent::IRenderDevice& device,
+                                                 std::string_view signatureName,
+                                                 uint8_t bindingIndex,
+                                                 TextureBufferResourceDesc textureResourceDesc,
+                                                 UniformBufferResourceDesc environmentResourceDesc)
 {
     const auto resources = std::array{
-        GlobalTextureBufferResource::MakeResourceDesc(GlobalTextureBufferShaderVariableName, maxTextures),
-        GlobalEnvironmentResource::MakeResourceDesc(GlobalEnvironmentShaderVariableName)
+        ToPipelineResourceDesc(textureResourceDesc),
+        ToPipelineResourceDesc(environmentResourceDesc)
     };
 
-    const auto sampler = GlobalTextureBufferResource::MakeSamplerDesc(GlobalTextureBufferShaderVariableName);
+    const auto sampler = GlobalTextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
-    desc.Name = SignatureName;
+    desc.Name = signatureName.data();
     desc.Resources = resources.data(),
     desc.NumResources = static_cast<uint32_t>(resources.size()),
     desc.ImmutableSamplers = &sampler,
     desc.NumImmutableSamplers = 1,
-    desc.BindingIndex = BindingIndex,
+    desc.BindingIndex = bindingIndex,
     desc.UseCombinedTextureSamplers = true,
     device.CreatePipelineResourceSignature(desc, &m_signature);
 
@@ -40,14 +43,14 @@ GlobalResourceSignature::GlobalResourceSignature(Diligent::IRenderDevice& device
     }
 
     m_textureResource = std::make_unique<GlobalTextureBufferResource>(
-        GetVariable(Diligent::SHADER_TYPE_PIXEL, GlobalTextureBufferShaderVariableName),
-        maxTextures
+        GetVariable(textureResourceDesc.shaderType, textureResourceDesc.resourceKey.data()),
+        textureResourceDesc.maxElementCount
     );
 
     m_environmentResource = std::make_unique<GlobalEnvironmentResource>(
         context,
         device,
-        GetVariable(Diligent::SHADER_TYPE_PIXEL, GlobalEnvironmentShaderVariableName)
+        GetVariable(environmentResourceDesc.shaderType, environmentResourceDesc.resourceKey.data())
     );
 }
 
@@ -55,7 +58,7 @@ GlobalResourceSignature::~GlobalResourceSignature() noexcept = default;
 
 auto GlobalResourceSignature::GetVariable(Diligent::SHADER_TYPE shaderType, const char* name) -> Diligent::IShaderResourceVariable&
 {
-    auto var = m_srb->GetVariableByName(shaderType, name);
+    auto var = m_srb->GetVariableByName(ToCommonShaderType(shaderType), name);
     if (!var)
     {
         throw NcError{fmt::format("Failed retrieving shader variable '{}'", name)};

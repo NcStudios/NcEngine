@@ -1,4 +1,5 @@
 #include "DiligentEngineFixture.inl"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/diligent/resource/base/StructuredBuffer.h"
 #include "graphics2/diligent/resource/MaterialResourceSignature.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
@@ -22,13 +23,10 @@ class StructuredBufferTest : public DiligentEngineFixture
         StructuredBufferTest()
         {
             signature = std::make_unique<nc::graphics::MaterialResourceSignature>(
-                engine->GetContext(),
-                engine->GetDevice(),
+                engine->GetContext(), engine->GetDevice(),
                 signatureName,
-                variableName,
                 bindingIndex,
-                maxInstanceCount,
-                initialInstanceCount
+                nc::graphics::StructuredBufferResourceDesc{variableName, Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxInstanceCount, initialInstanceCount}
             );
 
             uut = &signature->GetMaterialDataResource();

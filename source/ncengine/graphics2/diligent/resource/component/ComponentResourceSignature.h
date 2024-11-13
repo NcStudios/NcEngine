@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics2/diligent/resource/base/StructuredBuffer.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "ncutility/NcError.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -21,9 +22,8 @@ class ComponentResourceSignature
         explicit ComponentResourceSignature(Diligent::IDeviceContext& context,
                                             Diligent::IRenderDevice& device,
                                             std::string_view signatureName,
-                                            std::string_view meshRendererBufferVariableName,
                                             uint8_t bindingIndex,
-                                            uint32_t maxInstances);
+                                            StructuredBufferResourceDesc meshRendererResourceDesc);
 
         void Commit(Diligent::IDeviceContext& context)
         {

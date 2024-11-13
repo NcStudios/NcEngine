@@ -1,5 +1,6 @@
 #include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/GlobalEnvironmentResource.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 
 class GlobalEnvironmentResourceTest : public DiligentEngineFixture
@@ -11,8 +12,12 @@ class GlobalEnvironmentResourceTest : public DiligentEngineFixture
 
         GlobalEnvironmentResourceTest()
         {
-            constexpr auto variableName = "testTexture";
-            const auto resource = nc::graphics::GlobalEnvironmentResource::MakeResourceDesc(variableName);
+            constexpr auto variableName = "EnvironmentDataUniformBuffer";
+            const auto resourceDesc = nc::graphics::UniformBufferResourceDesc{
+                variableName,
+                Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL
+            };
+            const auto resource = nc::graphics::ToPipelineResourceDesc(resourceDesc);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
             desc.Resources = &resource;
             desc.NumResources = 1;
@@ -42,7 +47,7 @@ TEST_F(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
 
     const auto object = var.Get();
     ASSERT_NE(nullptr, object);
-    ASSERT_STREQ(nc::graphics::GlobalEnvironmentResource::UniformBufferName, object->GetDesc().Name);
+    ASSERT_STREQ("EnvironmentDataUniformBuffer", object->GetDesc().Name);
 
     const auto actualBuffer = static_cast<Diligent::IBuffer*>(object);
     EXPECT_NE(0, Diligent::RESOURCE_STATE_CONSTANT_BUFFER & actualBuffer->GetState());
