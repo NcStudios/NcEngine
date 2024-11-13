@@ -1,5 +1,6 @@
 #include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/GlobalEnvironmentResource.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 
 class GlobalEnvironmentResourceTest : public DiligentEngineFixture
@@ -12,7 +13,11 @@ class GlobalEnvironmentResourceTest : public DiligentEngineFixture
         GlobalEnvironmentResourceTest()
         {
             constexpr auto variableName = "EnvironmentDataUniformBuffer";
-            const auto resource = nc::graphics::GlobalEnvironmentResource::MakeResourceDesc(variableName);
+            const auto resourceDesc = nc::graphics::UniformBufferResourceDesc{
+                variableName,
+                Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL
+            };
+            const auto resource = nc::graphics::ToPipelineResourceDesc(resourceDesc);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
             desc.Resources = &resource;
             desc.NumResources = 1;

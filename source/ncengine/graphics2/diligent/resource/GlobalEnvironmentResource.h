@@ -19,8 +19,6 @@ class GlobalEnvironmentResource
                                            Diligent::IRenderDevice& device,
                                            Diligent::IShaderResourceVariable& variable);
 
-        static auto MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc;
-
         void Update(const CameraRenderState cameraState,
                     Diligent::IDeviceContext& context);
 

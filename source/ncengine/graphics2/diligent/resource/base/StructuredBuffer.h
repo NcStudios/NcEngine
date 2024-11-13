@@ -1,4 +1,5 @@
 #pragma once
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/ShaderTypes.h"
 #include "ncutility/NcError.h"
 
@@ -19,7 +20,6 @@ class StructuredBufferBase
                                       uint32_t maxElementCount,
                                       uint32_t initialElementCount);
 
-        static auto MakeResourceDesc(std::string_view variableName, Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc;
         void Transition(Diligent::IDeviceContext& context, Diligent::RESOURCE_STATE state);
 
         auto GetShaderVariable()        -> Diligent::IShaderResourceVariable& { return *m_variable;       }
@@ -51,13 +51,11 @@ class StructuredBuffer : public StructuredBufferBase
 
         explicit StructuredBuffer(Diligent::IDeviceContext& context,
                                   Diligent::IRenderDevice& device,
-                                  std::string_view name,
                                   Diligent::IShaderResourceVariable& variable,
-                                  uint32_t maxElementCount,
-                                  uint32_t initialElementCount = maxElementCount)
-            : StructuredBufferBase{name, variable, maxElementCount, initialElementCount}
+                                  StructuredBufferResourceDesc resourceDesc)
+            : StructuredBufferBase{resourceDesc.resourceKey, variable, resourceDesc.maxElementCount, resourceDesc.initialElementCount}
         {
-            CreateBuffer(context, device, initialElementCount);
+            CreateBuffer(context, device, resourceDesc.initialElementCount);
         }
 
         // Get the current buffer size in bytes.

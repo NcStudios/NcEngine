@@ -28,7 +28,7 @@ class ShaderBindings
                 context, device,
                 "GlobalResourceSignature",
                 0,
-                TextureBufferResourceDesc{"TextureBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
+                TextureBufferResourceDesc{"TextureBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX}
               },
               m_componentSignature{

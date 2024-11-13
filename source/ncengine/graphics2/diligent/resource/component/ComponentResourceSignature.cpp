@@ -14,10 +14,10 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        StructuredBufferResourceDesc directionalLightResourceDesc)
 {
     const auto resources = std::array{
-        StructuredBuffer<MeshRendererData>::MakeResourceDesc(meshRendererResourceDesc.resourceKey, meshRendererResourceDesc.shaderType),
-        StructuredBuffer<SpotLightData>::MakeResourceDesc(spotLightResourceDesc.resourceKey, spotLightResourceDesc.shaderType),
-        StructuredBuffer<PointLightData>::MakeResourceDesc(pointLightResourceDesc.resourceKey, pointLightResourceDesc.shaderType),
-        StructuredBuffer<DirectionalLightData>::MakeResourceDesc(directionalLightResourceDesc.resourceKey, directionalLightResourceDesc.shaderType),
+        ToPipelineResourceDesc(meshRendererResourceDesc),
+        ToPipelineResourceDesc(spotLightResourceDesc),
+        ToPipelineResourceDesc(pointLightResourceDesc),
+        ToPipelineResourceDesc(directionalLightResourceDesc),
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -38,23 +38,36 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    /** While you have to specify both shader types (if using both) in the Resource Desc above, you can only specify pixel or vertex here. It doesn't matter which. 
-     * Leaving this logic in instead of hard-coding because ResourceSignature is really starting to look like a class we may want to create a base for. */
-    auto singleShaderType = meshRendererResourceDesc.shaderType == Diligent::SHADER_TYPE_VS_PS ? Diligent::SHADER_TYPE_VERTEX : meshRendererResourceDesc.shaderType;
-    auto variable = m_srb->GetVariableByName(singleShaderType, meshRendererResourceDesc.resourceKey.data());
-    if (!variable)
-    {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererResourceDesc.resourceKey)};
-    }
-
     m_meshRendererResource = std::make_unique<StructuredBuffer<MeshRendererData>>
     (
         context,
         device,
-        meshRendererResourceDesc.resourceKey,
-        *variable,
-        meshRendererResourceDesc.maxElementCount,
-        meshRendererResourceDesc.maxElementCount
+        GetVariable(meshRendererResourceDesc.shaderType, meshRendererResourceDesc.resourceKey.data(), m_srb),
+        meshRendererResourceDesc
+    );
+
+    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
+    (
+        context,
+        device,
+        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+        spotLightResourceDesc
+    );
+
+    m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
+    (
+        context,
+        device,
+        GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
+        pointLightResourceDesc
+    );
+
+    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    (
+        context,
+        device,
+        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+        directionalLightResourceDesc
     );
 }
 
