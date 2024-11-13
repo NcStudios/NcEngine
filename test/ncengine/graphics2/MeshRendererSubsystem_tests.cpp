@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include "../AssetServiceStub.h"
 #include "../EcsFixture.inl"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
@@ -9,9 +8,6 @@
 #include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
 
 #include <ranges>
-
-// DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
-// DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::asset::TextureView, std::string);
 
 namespace nc
 {

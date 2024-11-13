@@ -17,6 +17,9 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         .dirtyRanges = {{0, renderState.meshRendererState.modelMatrices.size() }}
     };
 
-    m_componentSignature.GetMeshRendererBuffer().Update(context, device, meshBufferUpdateInfo);
+    if (!meshBufferUpdateInfo.instances.empty())
+    {
+        m_componentSignature.GetMeshRendererBuffer().Update(context, device, meshBufferUpdateInfo);
+    }
 }
 } // namespace nc::graphics

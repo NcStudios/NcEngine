@@ -13,12 +13,11 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
     const auto entities = rendererPool.GetEntityPool();
     m_rendererDataCache.clear();
     m_rendererDataCache.reserve(entities.size());
-
     m_passCache.ClearDynamicTargets();
 
     for (auto [i, entity] : std::views::enumerate(entities))
     {
-        // todo: filter static
+        /** @todo 798 filter static */
         auto& renderer = ecs.Get<MeshRenderer2>(entity);
         const auto& material = renderer.GetMaterial();
         m_passCache.AddDynamicTarget(

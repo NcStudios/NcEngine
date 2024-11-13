@@ -155,18 +155,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_materialPassBackend{std::vector<Pass>{
-            MakeTestPass(
-                m_engine.GetDevice(),
-                m_engine.GetSwapChain(),
-                m_engine.GetShaderFactory(),
-                {
-                    &m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
-                    &m_shaderBindings.GetComponentSignature().GetResourceSignature(),
-                    &m_shaderBindings.GetMaterialSignature().GetResourceSignature()
-                }
-            )
-          }},
+          m_materialPassBackend{MakePasses(
+            m_engine.GetDevice(),
+            m_engine.GetSwapChain(),
+            m_engine.GetShaderFactory(),
+            m_shaderBindings
+          )},
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),

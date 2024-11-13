@@ -1,5 +1,7 @@
 #include "Pass.h"
+#include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/resource/GlobalMeshBuffer.h"
+#include "graphics2/diligent/resource/ShaderBindings.h"
 
 namespace
 {
@@ -90,27 +92,55 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 
 namespace nc::graphics
 {
-auto MakeTestPass(Diligent::IRenderDevice& device,
-                  Diligent::ISwapChain& swapChain,
-                  ShaderFactory& shaderFactory,
-                  std::vector<Diligent::IPipelineResourceSignature*> signatures) -> Pass
+Pass::Pass(Diligent::IRenderDevice& device,
+           const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
+           MaterialPass::type passId)
+    : pso{},
+      id{passId}
+{
+    device.CreateGraphicsPipelineState(createInfo, &pso);
+    NC_ASSERT(pso, "Failed to create pipeline state object");
+}
+
+auto MakeDefaultGraphicsPipelineCreateInfo(Diligent::ISwapChain& swapChain,
+                                           Diligent::IShader& vertexShader,
+                                           Diligent::IShader& pixelShader,
+                                           std::span<Diligent::IPipelineResourceSignature*> signatures,
+                                           std::span<const Diligent::LayoutElement> layoutElements,
+                                           std::string_view name) -> Diligent::GraphicsPipelineStateCreateInfo
 {
     using namespace Diligent;
 
-    auto createInfo = GraphicsPipelineStateCreateInfo{};
-    createInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
-    createInfo.PSODesc.Name = "Test PSO";
+    auto ci = GraphicsPipelineStateCreateInfo{};
+    ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+    ci.PSODesc.Name = name.data();
+    ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    createInfo.ppResourceSignatures = signatures.data();
-    createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
+    ci.ppResourceSignatures = signatures.data();
+    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
-    createInfo.GraphicsPipeline.NumRenderTargets             = 1;
-    createInfo.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
-    createInfo.GraphicsPipeline.DSVFormat                    = swapChain.GetDesc().DepthBufferFormat;
-    createInfo.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    createInfo.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
-    createInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
+    ci.pVS = &vertexShader;
+    ci.pPS = &pixelShader;
 
+    ci.GraphicsPipeline.NumRenderTargets             = 1;
+    ci.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
+    ci.GraphicsPipeline.DSVFormat                    = swapChain.GetDesc().DepthBufferFormat;
+    ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
+    ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
+    ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
+
+    return ci;
+}
+
+auto MakeTestPass(Diligent::IRenderDevice& device,
+                  Diligent::ISwapChain& swapChain,
+                  ShaderFactory& shaderFactory,
+                  Diligent::IPipelineResourceSignature& globalSignature,
+                  Diligent::IPipelineResourceSignature& componentSignature,
+                  Diligent::IPipelineResourceSignature& materialSignature) -> Pass
+{
     auto vertexShader = shaderFactory.MakeShaderFromSource(
         std::span{g_vertexShader},
         "Cube VS",
@@ -123,22 +153,34 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
         Diligent::SHADER_TYPE_PIXEL
     );
 
-    createInfo.pVS = vertexShader;
-    createInfo.pPS = pixelShader;
+    auto signatures = std::array{&globalSignature, &componentSignature, &materialSignature};
+    auto layoutElements = GetMeshVertexLayoutElements(0);
+    auto createInfo = MakeDefaultGraphicsPipelineCreateInfo(
+        swapChain,
+        *vertexShader,
+        *pixelShader,
+        signatures,
+        layoutElements,
+        "Test PSO"
+    );
 
-    auto LayoutElems = GetMeshVertexLayoutElements(0);
+    return Pass(device, createInfo, MaterialPass::Toon);
+}
 
-    createInfo.PSODesc.ResourceLayout.DefaultVariableType =  SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
-    createInfo.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems.data();
-    createInfo.GraphicsPipeline.InputLayout.NumElements    = static_cast<uint32_t>(LayoutElems.size());
-
-    auto pso = Diligent::RefCntAutoPtr<Diligent::IPipelineState>{};
-    device.CreateGraphicsPipelineState(createInfo, &pso);
-
-    NC_ASSERT(pso, "Failed to create pipeline state object");
-    return Pass{
-        std::move(pso),
-        MaterialPass::Toon
+auto MakePasses(Diligent::IRenderDevice& device,
+                Diligent::ISwapChain& swapChain,
+                ShaderFactory& shaderFactory,
+                ShaderBindings& shaderBindings) -> std::vector<Pass>
+{
+    return std::vector<Pass>{
+        MakeTestPass(
+            device,
+            swapChain,
+            shaderFactory,
+            shaderBindings.GetGlobalSignature().GetResourceSignature(),
+            shaderBindings.GetComponentSignature().GetResourceSignature(),
+            shaderBindings.GetMaterialSignature().GetResourceSignature()
+        )
     };
 }
 } // namespace nc::graphics
