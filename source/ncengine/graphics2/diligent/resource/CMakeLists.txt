@@ -5,6 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         GlobalResourceSignature.cpp
         GlobalTextureBufferResource.cpp
         MaterialResourceSignature.cpp
+        ResourceTypes.cpp
         ShaderBindings.cpp
 )
 

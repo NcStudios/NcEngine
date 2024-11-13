@@ -36,16 +36,6 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& c
     m_variable->Set(m_uniformBuffer);
 }
 
-auto GlobalEnvironmentResource::MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc{
-        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,
-        variableName.data(),
-        Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
-    };
-}
-
 void GlobalEnvironmentResource::Update(const CameraRenderState cameraState,
                                        Diligent::IDeviceContext& context)
 {

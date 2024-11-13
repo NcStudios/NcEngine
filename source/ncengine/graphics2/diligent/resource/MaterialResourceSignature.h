@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ResourceTypes.h"
 #include "base/StructuredBuffer.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -16,10 +17,8 @@ class MaterialResourceSignature
         explicit MaterialResourceSignature(Diligent::IDeviceContext& context,
                                            Diligent::IRenderDevice& device,
                                            std::string_view signatureName,
-                                           std::string_view materialBufferVariableName,
                                            uint8_t bindingIndex,
-                                           uint32_t maxInstanceCount,
-                                           uint32_t initialInstanceCount);
+                                           StructuredBufferResourceDesc materialResourceDesc);
 
         void Commit(Diligent::IDeviceContext& context)
         {

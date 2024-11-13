@@ -7,15 +7,11 @@ namespace nc::graphics
 ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext& context,
                                                        Diligent::IRenderDevice& device,
                                                        std::string_view signatureName,
-                                                       std::string_view meshRendererBufferVariableName,
                                                        uint8_t bindingIndex,
-                                                       uint32_t maxInstances)
+                                                       StructuredBufferResourceDesc meshRendererResourceDesc)
 {
     const auto resources = std::array{
-        StructuredBuffer<MeshRendererData>::MakeResourceDesc(
-            meshRendererBufferVariableName,
-            Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS
-        )
+        ToPipelineResourceDesc(meshRendererResourceDesc)
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -36,20 +32,20 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(Diligent::SHADER_TYPE_VERTEX, meshRendererBufferVariableName.data());
+    auto variable = m_srb->GetVariableByName(ToCommonShaderType(meshRendererResourceDesc.shaderType), meshRendererResourceDesc.resourceKey.data());
     if (!variable)
     {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererBufferVariableName)};
+        throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererResourceDesc.resourceKey)};
     }
 
     m_meshRendererResource = std::make_unique<StructuredBuffer<MeshRendererData>>
     (
         context,
         device,
-        meshRendererBufferVariableName,
+        meshRendererResourceDesc.resourceKey,
         *variable,
-        maxInstances,
-        maxInstances
+        meshRendererResourceDesc.maxElementCount,
+        meshRendererResourceDesc.maxElementCount
     );
 }
 

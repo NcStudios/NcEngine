@@ -66,6 +66,7 @@ target_sources(GlobalEnvironmentResource_tests
     PRIVATE
         GlobalEnvironmentResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalEnvironmentResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
 ### GlobalTextureBufferResource Tests ###
@@ -75,6 +76,7 @@ target_sources(GlobalTextureBufferResource_tests
     PRIVATE
         GlobalTextureBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
 ### ShaderFactory Tests ###
@@ -106,6 +108,7 @@ add_graphics_test(StructuredBuffer_tests)
 target_sources(StructuredBuffer_tests
     PRIVATE
         StructuredBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialResourceSignature.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp

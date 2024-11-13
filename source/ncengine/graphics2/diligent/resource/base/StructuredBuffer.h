@@ -19,7 +19,6 @@ class StructuredBufferBase
                                       uint32_t maxElementCount,
                                       uint32_t initialElementCount);
 
-        static auto MakeResourceDesc(std::string_view variableName, Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc;
         void Transition(Diligent::IDeviceContext& context, Diligent::RESOURCE_STATE state);
 
         auto GetShaderVariable()        -> Diligent::IShaderResourceVariable& { return *m_variable;       }
