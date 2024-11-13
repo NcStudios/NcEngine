@@ -11,8 +11,8 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
 {
     const auto& rendererPool = ecs.GetPool<MeshRenderer2>();
     const auto entities = rendererPool.GetEntityPool();
-    m_rendererDataCache.clear();
-    m_rendererDataCache.reserve(entities.size());
+    m_instanceData.clear();
+    m_instanceData.reserve(entities.size());
     m_passCache.ClearDynamicTargets();
 
     for (auto [i, entity] : std::views::enumerate(entities))
@@ -26,14 +26,14 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
             renderer.GetMesh()
         );
 
-        m_rendererDataCache.emplace_back(
+        m_instanceData.emplace_back(
             ecs.Get<Transform>(entity).TransformationMatrix(),
             material.GetHandle()
         );
     }
 
     return MeshRendererRenderState{
-        .instanceData = m_rendererDataCache,
+        .instanceData = m_instanceData,
         .passData = m_passCache.BuildState()
     };
 }

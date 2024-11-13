@@ -89,7 +89,6 @@ class MaterialPassCache
                                       uint32_t instanceIndex,
                                       const asset::MeshView& mesh)
         {
-            // todo: can prob do better, not even sure about params here
             RemoveStaticTarget(oldPasses, entityId);
             AddStaticTarget(newPasses, entityId, instanceIndex, mesh);
         }

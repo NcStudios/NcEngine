@@ -27,7 +27,7 @@ class MeshRendererSubsystem
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
 
     private:
-        std::vector<MeshRendererData> m_rendererDataCache;
+        std::vector<MeshRendererData> m_instanceData;
         MaterialPassCache m_passCache;
 };
 } // namespace graphics
