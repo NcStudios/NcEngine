@@ -85,6 +85,13 @@ auto MaterialRegistry::HasPendingChanges() const -> bool
     return !m_dirty.empty();
 }
 
+auto MaterialRegistry::BuildState() -> BufferUpdateInfo<MaterialData>
+{
+    return HasPendingChanges()
+        ? BufferUpdateInfo<MaterialData>{m_data, CollectDirtyRanges()}
+        : BufferUpdateInfo<MaterialData>{};
+}
+
 void MaterialRegistry::CommitPendingChanges(std::function<void(const BufferUpdateInfo<MaterialData>&)> notifyUpdate)
 {
     notifyUpdate(BufferUpdateInfo<MaterialData>{

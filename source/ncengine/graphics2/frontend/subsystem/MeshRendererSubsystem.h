@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MaterialPassCache.h"
 #include "MeshRendererRenderState.h"
 #include "ncengine/ecs/EcsFwd.h"
 
@@ -18,10 +19,16 @@ Produces a vector of transform matrices for MeshRenderers and their correspondin
 class MeshRendererSubsystem
 {
     public:
+        explicit MeshRendererSubsystem(std::span<const MaterialPass::type> passes)
+            : m_passCache{passes}
+        {
+        }
+
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
 
     private:
-        std::vector<MeshRendererData> m_rendererDataCache;
+        std::vector<MeshRendererData> m_instanceData;
+        MaterialPassCache m_passCache;
 };
 } // namespace graphics
 } // namespace nc

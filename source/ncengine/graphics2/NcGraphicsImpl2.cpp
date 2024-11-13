@@ -1,4 +1,5 @@
 #include "NcGraphicsImpl2.h"
+#include "diligent/pass/Pass.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -154,14 +155,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_testPipeline{
+          m_materialPassBackend{MakePasses(
             m_engine.GetDevice(),
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
-            m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
-            m_shaderBindings.GetComponentSignature().GetResourceSignature(),
-            m_shaderBindings.GetMaterialSignature().GetResourceSignature()
-          },
+            m_shaderBindings
+          )},
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -246,17 +245,6 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    // todo: how should this one work/where does it go?
-    m_frontend.GetMaterialRegistry().CommitPendingChanges(
-        [this](const auto& info){
-            m_shaderBindings.GetMaterialSignature().GetMaterialDataResource().Update(
-                m_engine.GetContext(),
-                m_engine.GetDevice(),
-                info
-            );
-        }
-    );
-
     auto& context = m_engine.GetContext();
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
@@ -278,10 +266,11 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMaterialSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_testPipeline.Render(context, m_world, renderState);
+    m_materialPassBackend.Render(context, renderState.meshRendererState.passData);
     m_ui.Render(context);
 
     swapChain.Present();
+    context.Flush();
     context.FinishFrame();
 }
 

@@ -32,8 +32,13 @@ auto GetMaterialPassNames() -> std::span<const std::string_view>
     return g_passNames;
 }
 
-auto GetMaterialPassFlags() -> std::span<const MaterialPasses>
+auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>
 {
     return g_passFlags;
+}
+
+auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPass::type>
+{
+    return std::span<const MaterialPass::type>{g_passFlags.data() + 1, 1};
 }
 } // namespace nc

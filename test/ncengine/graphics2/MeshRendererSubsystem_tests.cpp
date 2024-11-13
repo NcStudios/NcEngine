@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include "../AssetServiceStub.h"
 #include "../EcsFixture.inl"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
@@ -10,13 +9,22 @@
 
 #include <ranges>
 
-// DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
-// DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::asset::TextureView, std::string);
+constexpr auto g_materialPasses = std::array{
+    nc::MaterialPass::Toon
+};
+
+const auto g_materialDesc = nc::MaterialDesc{
+    .passes = nc::MaterialPass::Toon
+};
 
 namespace nc
 {
 MaterialInstance::MaterialInstance(const MaterialDesc&){}
 MaterialInstance::~MaterialInstance() = default;
+auto MaterialInstance::GetDesc() const -> const MaterialDesc&
+{
+    return g_materialDesc;
+}
 } // namespace nc
 
 class MeshRendererSubsystemTest : public testing::Test,
@@ -33,13 +41,13 @@ class MeshRendererSubsystemTest : public testing::Test,
             world.Emplace<nc::MeshRenderer2>(
                 entity,
                 nc::asset::MeshView{},
-                nc::MaterialDesc{}
+                g_materialDesc
             );
         }
 
         MeshRendererSubsystemTest()
             : EcsFixture{MaxEntities},
-              uut{}
+              uut{g_materialPasses}
         {
             GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
         }
@@ -59,8 +67,12 @@ TEST_F(MeshRendererSubsystemTest, BuildState_Succeeds)
     auto& registry = GetTestComponentRegistry();
     registry.CommitPendingChanges();
 
-    // Curious why this deduces to a && ref?
     auto actualRenderState = uut.BuildState(world);
-    EXPECT_EQ(actualRenderState.modelMatrices.size(), 5);
-    EXPECT_EQ(actualRenderState.entities.size(), 5);
+    EXPECT_EQ(actualRenderState.instanceData.size(), 5);
+
+    EXPECT_EQ(1, actualRenderState.passData.size());
+    auto& actualToonState = actualRenderState.passData.at(0);
+    EXPECT_EQ(5, actualToonState.dynamicTargets.size());
+    /** @todo 798 Test for presence of static targets, once implemented. */
+    EXPECT_EQ(0, actualToonState.staticTargets.size());
 }

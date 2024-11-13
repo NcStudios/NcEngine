@@ -11,17 +11,30 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
 {
     const auto& rendererPool = ecs.GetPool<MeshRenderer2>();
     const auto entities = rendererPool.GetEntityPool();
-    m_rendererDataCache.clear();
-    m_rendererDataCache.reserve(entities.size());
+    m_instanceData.clear();
+    m_instanceData.reserve(entities.size());
+    m_passCache.ClearDynamicTargets();
 
-    std::ranges::transform(entities, std::back_inserter(m_rendererDataCache), [&ecs](Entity entity)
+    for (auto [i, entity] : std::views::enumerate(entities))
     {
-        return MeshRendererData{
-            ecs.Get<Transform>(entity).TransformationMatrix(),
-            ecs.Get<MeshRenderer2>(entity).GetMaterial().GetHandle()
-        };
-    });
+        /** @todo 798 filter static */
+        auto& renderer = ecs.Get<MeshRenderer2>(entity);
+        const auto& material = renderer.GetMaterial();
+        m_passCache.AddDynamicTarget(
+            material.GetDesc().passes,
+            static_cast<uint32_t>(i),
+            renderer.GetMesh()
+        );
 
-    return MeshRendererRenderState{.modelMatrices = m_rendererDataCache, .entities = entities};
+        m_instanceData.emplace_back(
+            ecs.Get<Transform>(entity).TransformationMatrix(),
+            material.GetHandle()
+        );
+    }
+
+    return MeshRendererRenderState{
+        .instanceData = m_instanceData,
+        .passData = m_passCache.BuildState()
+    };
 }
 } // namespace nc::graphics
