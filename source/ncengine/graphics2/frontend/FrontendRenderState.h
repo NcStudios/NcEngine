@@ -9,5 +9,6 @@ struct FrontendRenderState
 {
     CameraRenderState cameraState;
     MeshRendererRenderState meshRendererState;
+    BufferUpdateInfo<MaterialData> materialRenderState;
 };
 } // namespace nc::graphics

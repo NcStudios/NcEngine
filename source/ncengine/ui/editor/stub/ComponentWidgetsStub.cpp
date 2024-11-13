@@ -13,6 +13,7 @@ void TransformUIWidget(Transform&, EditorContext&, const std::any&) {}
 void AudioSourceUIWidget(audio::AudioSource&, EditorContext&, const std::any&) {}
 void DirectionalLightUIWidget(graphics::DirectionalLight&, EditorContext&, const std::any&) {}
 void MeshRendererUIWidget(graphics::MeshRenderer&, EditorContext&, const std::any&) {}
+void MeshRenderer2UIWidget(MeshRenderer2&, EditorContext&, const std::any&);
 void ParticleEmitterUIWidget(graphics::ParticleEmitter&, EditorContext&, const std::any&) {}
 void PointLightUIWidget(graphics::PointLight&, EditorContext&, const std::any&) {}
 void SpotLightUIWidget(graphics::SpotLight&, EditorContext&, const std::any&) {}

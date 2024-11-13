@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ncengine/graphics/GraphicsUtility.h"
+
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
@@ -29,7 +31,7 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
-              m_meshRendererSystem{}
+              m_meshRendererSystem{GetImplementedMaterialPassFlags()}
         {
         }
 

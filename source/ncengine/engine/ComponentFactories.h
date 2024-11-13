@@ -11,6 +11,7 @@ auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic;
 auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::ParticleEmitter;
 auto CreatePointLight(Entity entity, const std::any&) -> graphics::PointLight;
 auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRenderer;
+auto CreateMeshRenderer2(Entity entity, const std::any&) -> MeshRenderer2;
 auto CreateToonRenderer(Entity entity, const std::any&) -> graphics::ToonRenderer;
 auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::SkeletalAnimator;
 auto CreateSpotLight(Entity entity, const std::any&) -> graphics::SpotLight;

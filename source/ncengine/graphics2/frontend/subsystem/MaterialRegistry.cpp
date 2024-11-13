@@ -10,12 +10,12 @@ namespace
 auto ToMaterialData(const nc::MaterialDesc& desc) -> nc::graphics::MaterialData
 {
     return nc::graphics::MaterialData{
-        desc.diffuseTexture.index,
-        desc.normalTexture.index,
-        desc.gradientStart,
-        desc.gradientEnd,
-        desc.outlineColor,
-        desc.outlineWidth
+        .gradientStart = desc.gradientStart,
+        .diffuseTexIndex = desc.diffuseTexture.index,
+        .gradientEnd = desc.gradientEnd,
+        .normalTexIndex = desc.normalTexture.index,
+        .outlineColor = desc.outlineColor,
+        .outlineWidth = desc.outlineWidth
     };
 }
 } // anonymous namespace
@@ -74,9 +74,22 @@ auto MaterialRegistry::GetInstanceData(MaterialInstanceHandle index) const -> co
     return m_data[index];
 }
 
+void MaterialRegistry::SetInstanceName(MaterialInstanceHandle index, std::string_view name)
+{
+    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+    m_descriptions[index].name = std::string{name};
+}
+
 auto MaterialRegistry::HasPendingChanges() const -> bool
 {
     return !m_dirty.empty();
+}
+
+auto MaterialRegistry::BuildState() -> BufferUpdateInfo<MaterialData>
+{
+    return HasPendingChanges()
+        ? BufferUpdateInfo<MaterialData>{m_data, CollectDirtyRanges()}
+        : BufferUpdateInfo<MaterialData>{};
 }
 
 void MaterialRegistry::CommitPendingChanges(std::function<void(const BufferUpdateInfo<MaterialData>&)> notifyUpdate)

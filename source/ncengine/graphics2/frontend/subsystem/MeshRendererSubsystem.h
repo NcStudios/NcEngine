@@ -1,14 +1,17 @@
 #pragma once
 
+#include "MaterialPassCache.h"
 #include "MeshRendererRenderState.h"
-#include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/ToonRenderer.h"
+#include "ncengine/ecs/EcsFwd.h"
 
-#include <memory>
 #include <vector>
 
-namespace nc::graphics
+namespace nc
+{
+class MeshRenderer2;
+class Transform;
+
+namespace graphics
 {
 /*
 Produces a vector of transform matrices for MeshRenderers and their corresponding Entities.
@@ -16,11 +19,16 @@ Produces a vector of transform matrices for MeshRenderers and their correspondin
 class MeshRendererSubsystem
 {
     public:
-        /** @todo: 776 Add MeshRenderer component(s) in place of old ToonRenderer component. */
-        auto BuildState(ecs::ExplicitEcs<ToonRenderer, Transform> ecs) -> MeshRendererRenderState;
+        explicit MeshRendererSubsystem(std::span<const MaterialPass::type> passes)
+            : m_passCache{passes}
+        {
+        }
+
+        auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
 
     private:
-        std::vector<MeshRendererData> m_modelMatricesCache;
-
+        std::vector<MeshRendererData> m_instanceData;
+        MaterialPassCache m_passCache;
 };
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

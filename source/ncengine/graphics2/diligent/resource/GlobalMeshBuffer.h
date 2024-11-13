@@ -4,6 +4,7 @@
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
+#include <array>
 #include <span>
 
 namespace nc
