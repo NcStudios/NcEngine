@@ -14,10 +14,10 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        StructuredBufferResourceDesc directionalLightResourceDesc)
 {
     const auto resources = std::array{
-        ToPipelineResourceDesc(meshRendererResourceDesc),
-        ToPipelineResourceDesc(spotLightResourceDesc),
-        ToPipelineResourceDesc(pointLightResourceDesc),
-        ToPipelineResourceDesc(directionalLightResourceDesc),
+        ToPipelineResourceDesc(meshRendererResourceDesc)//,
+        // ToPipelineResourceDesc(spotLightResourceDesc),
+        // ToPipelineResourceDesc(pointLightResourceDesc),
+        // ToPipelineResourceDesc(directionalLightResourceDesc),
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -46,29 +46,29 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         meshRendererResourceDesc
     );
 
-    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
-    (
-        context,
-        device,
-        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
-        spotLightResourceDesc
-    );
+    // m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
+    // (
+    //     context,
+    //     device,
+    //     GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+    //     spotLightResourceDesc
+    // );
 
-    m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
-    (
-        context,
-        device,
-        GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
-        pointLightResourceDesc
-    );
+    // m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
+    // (
+    //     context,
+    //     device,
+    //     GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
+    //     pointLightResourceDesc
+    // );
 
-    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
-    (
-        context,
-        device,
-        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
-        directionalLightResourceDesc
-    );
+    // m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    // (
+    //     context,
+    //     device,
+    //     GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+    //     directionalLightResourceDesc
+    // );
 }
 
 } // namespace nc::graphics
