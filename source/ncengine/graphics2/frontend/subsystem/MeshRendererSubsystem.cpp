@@ -33,8 +33,8 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
     }
 
     return MeshRendererRenderState{
-        .modelMatrices = m_rendererDataCache,
-        .passState = m_passCache.BuildState()
+        .instanceData = m_rendererDataCache,
+        .passData = m_passCache.BuildState()
     };
 }
 } // namespace nc::graphics

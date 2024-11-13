@@ -22,6 +22,7 @@ class MaterialRegistry : public StableAddress
         void SetInstanceName(MaterialInstanceHandle index, std::string_view name);
         auto HasPendingChanges() const -> bool;
         void CommitPendingChanges(std::function<void(const BufferUpdateInfo<MaterialData>&)> notifyUpdate);
+        auto BuildState() -> BufferUpdateInfo<MaterialData>;
 
     private:
         std::vector<MaterialData> m_data;

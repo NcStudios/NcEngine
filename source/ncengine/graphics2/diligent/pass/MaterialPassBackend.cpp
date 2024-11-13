@@ -1,5 +1,7 @@
 #include "MaterialPassBackend.h"
 
+#include "ncutility/NcError.h"
+
 #include <ranges>
 
 namespace
@@ -34,6 +36,7 @@ namespace nc::graphics
 void MaterialPassBackend::Render(Diligent::IDeviceContext& context,
                                  const std::vector<PassRenderState>& passStates)
 {
+    NC_ASSERT(m_passes.size() == passStates.size(), "Frontend/Backend passes out of sync.");
     for (auto [pass, state] : std::views::zip(m_passes, passStates))
     {
         context.SetPipelineState(pass.pso);

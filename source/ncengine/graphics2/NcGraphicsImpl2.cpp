@@ -245,17 +245,6 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    // todo: how should this one work/where does it go?
-    m_frontend.GetMaterialRegistry().CommitPendingChanges(
-        [this](const auto& info){
-            m_shaderBindings.GetMaterialSignature().GetMaterialDataResource().Update(
-                m_engine.GetContext(),
-                m_engine.GetDevice(),
-                info
-            );
-        }
-    );
-
     auto& context = m_engine.GetContext();
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
@@ -277,7 +266,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMaterialSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_materialPassBackend.Render(context, renderState.meshRendererState.passState);
+    m_materialPassBackend.Render(context, renderState.meshRendererState.passData);
     m_ui.Render(context);
 
     swapChain.Present();

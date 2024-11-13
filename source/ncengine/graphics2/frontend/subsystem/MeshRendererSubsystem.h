@@ -19,9 +19,8 @@ Produces a vector of transform matrices for MeshRenderers and their correspondin
 class MeshRendererSubsystem
 {
     public:
-        /** @todo 794 Use more passes as they become available. For now we just have one dummy pass. */
-        explicit MeshRendererSubsystem()
-            : m_passCache{std::vector{MaterialPass::Toon}}
+        explicit MeshRendererSubsystem(std::span<const MaterialPass::type> passes)
+            : m_passCache{passes}
         {
         }
 
