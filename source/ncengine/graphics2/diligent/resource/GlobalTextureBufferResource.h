@@ -25,7 +25,6 @@ class GlobalTextureBufferResource
         {
         }
 
-        static auto MakeResourceDesc(std::string_view variableName, uint32_t maxTextures) -> Diligent::PipelineResourceDesc;
         static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
 
         void Load(std::span<const asset::TextureWithId> textures,

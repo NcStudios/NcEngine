@@ -16,8 +16,8 @@ GlobalResourceSignature::GlobalResourceSignature(Diligent::IDeviceContext& conte
                                                  UniformBufferResourceDesc environmentResourceDesc)
 {
     const auto resources = std::array{
-        GlobalTextureBufferResource::MakeResourceDesc(textureResourceDesc.resourceKey, textureResourceDesc.maxElementCount),
-        GlobalEnvironmentResource::MakeResourceDesc(environmentResourceDesc.resourceKey)
+        ToPipelineResourceDesc(textureResourceDesc),
+        ToPipelineResourceDesc(environmentResourceDesc)
     };
 
     const auto sampler = GlobalTextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
@@ -58,7 +58,7 @@ GlobalResourceSignature::~GlobalResourceSignature() noexcept = default;
 
 auto GlobalResourceSignature::GetVariable(Diligent::SHADER_TYPE shaderType, const char* name) -> Diligent::IShaderResourceVariable&
 {
-    auto var = m_srb->GetVariableByName(shaderType, name);
+    auto var = m_srb->GetVariableByName(ToCommonShaderType(shaderType), name);
     if (!var)
     {
         throw NcError{fmt::format("Failed retrieving shader variable '{}'", name)};

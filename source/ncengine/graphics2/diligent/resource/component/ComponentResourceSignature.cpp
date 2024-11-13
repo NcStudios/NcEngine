@@ -11,10 +11,7 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        StructuredBufferResourceDesc meshRendererResourceDesc)
 {
     const auto resources = std::array{
-        StructuredBuffer<MeshRendererData>::MakeResourceDesc(
-            meshRendererResourceDesc.resourceKey,
-            meshRendererResourceDesc.shaderType
-        )
+        ToPipelineResourceDesc(meshRendererResourceDesc)
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -35,10 +32,7 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    /** While you have to specify both shader types (if using both) in the Resource Desc above, you can only specify pixel or vertex here. It doesn't matter which. 
-     * Leaving this logic in instead of hard-coding because ResourceSignature is really starting to look like a class we may want to create a base for. */
-    auto singleShaderType = meshRendererResourceDesc.shaderType == Diligent::SHADER_TYPE_VS_PS ? Diligent::SHADER_TYPE_VERTEX : meshRendererResourceDesc.shaderType;
-    auto variable = m_srb->GetVariableByName(singleShaderType, meshRendererResourceDesc.resourceKey.data());
+    auto variable = m_srb->GetVariableByName(ToCommonShaderType(meshRendererResourceDesc.shaderType), meshRendererResourceDesc.resourceKey.data());
     if (!variable)
     {
         throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererResourceDesc.resourceKey)};

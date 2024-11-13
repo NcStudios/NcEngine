@@ -10,10 +10,7 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
                                                      uint8_t bindingIndex,
                                                      StructuredBufferResourceDesc materialResourceDesc)
 {
-    const auto resource = StructuredBuffer<MaterialData>::MakeResourceDesc(
-        materialResourceDesc.resourceKey,
-        materialResourceDesc.shaderType
-    );
+    const auto resource = ToPipelineResourceDesc(materialResourceDesc);
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
@@ -32,7 +29,7 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(materialResourceDesc.shaderType, materialResourceDesc.resourceKey.data());
+    auto variable = m_srb->GetVariableByName(ToCommonShaderType(materialResourceDesc.shaderType), materialResourceDesc.resourceKey.data());
     if (!variable)
     {
         throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialResourceDesc.resourceKey)};

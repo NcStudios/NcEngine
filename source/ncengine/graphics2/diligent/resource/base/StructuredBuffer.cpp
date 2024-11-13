@@ -14,18 +14,6 @@ StructuredBufferBase::StructuredBufferBase(std::string_view name,
 {
 }
 
-auto StructuredBufferBase::MakeResourceDesc(std::string_view variableName,
-                                            Diligent::SHADER_TYPE shaderType) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc{
-        shaderType,
-        variableName.data(),
-        1,
-        Diligent::SHADER_RESOURCE_TYPE_BUFFER_SRV,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
-    };
-}
-
 void StructuredBufferBase::Transition(Diligent::IDeviceContext& context,
                                       Diligent::RESOURCE_STATE state)
 {
