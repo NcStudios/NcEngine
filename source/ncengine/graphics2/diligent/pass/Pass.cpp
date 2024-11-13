@@ -11,8 +11,8 @@ R"(#ifdef VULKAN
 #   define NonUniformResourceIndex(x) x
 #endif
 
-Texture2D     Textures[];
-SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     TextureBufferData[];
+SamplerState  TextureBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 struct MaterialData
 {
@@ -24,7 +24,7 @@ struct MaterialData
     float outlineWidth;
 };
 
-StructuredBuffer<MaterialData> MaterialDataBuffer : register(t1);
+StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
 
 struct PSInput 
 { 
@@ -42,8 +42,8 @@ void main(in  PSInput  PSIn,
           out PSOutput PSOut)
 {
     float4 Color;
-    uint TexIndex = MaterialDataBuffer[PSIn.MaterialIndex].diffuseTexture;
-    Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
+    uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
+    Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
     PSOut.Color = Color;
 })"};
 
@@ -75,7 +75,7 @@ struct MeshRendererData
 
 StructuredBuffer<MeshRendererData> MeshRendererBufferData;
 
-cbuffer EnvironmentData
+cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
 };
