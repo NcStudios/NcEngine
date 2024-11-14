@@ -11,12 +11,7 @@ MeshRenderer2::MeshRenderer2(Entity self,
       m_material{MaterialInstance{materialDesc}}
 {
     const auto instance = s_ctx->instanceCache.AddInstance(self, m_material.GetHandle());
-    s_ctx->passCache.AddStaticTarget(
-        materialDesc.passes,
-        self.Index(),
-        instance,
-        mesh
-    );
+    s_ctx->passCache.AddTarget(materialDesc.passes, self.Index(), instance, mesh);
 }
 
 MeshRenderer2::~MeshRenderer2() noexcept
@@ -24,14 +19,14 @@ MeshRenderer2::~MeshRenderer2() noexcept
     if (m_self.Valid())
     {
         s_ctx->instanceCache.RemoveInstance(m_self);
-        s_ctx->passCache.RemoveStaticTarget(m_material.GetPasses(), m_self.Index());
+        s_ctx->passCache.RemoveTarget(m_material.GetPasses(), m_self.Index());
     }
 }
 
 void MeshRenderer2::SetMesh(const asset::MeshView& mesh)
 {
     m_meshId = mesh.id;
-    s_ctx->passCache.UpdateStaticTargetMesh(
+    s_ctx->passCache.UpdateTargetMesh(
         m_material.GetPasses(),
         m_self.Index(),
         mesh

@@ -15,9 +15,8 @@ struct PassTargets
     {
     }
 
-    std::vector<PassTarget> dynamicTargets;
-    std::vector<PassTarget> staticTargets;
-    std::vector<uint32_t> staticTargetEntities;
+    std::vector<PassTarget> targets;
+    std::vector<uint32_t> entities;
     MaterialPass::type id;
 };
 
@@ -33,74 +32,57 @@ class MaterialPassCache
         {
             auto states = std::vector<PassRenderState>{};
             states.reserve(m_passTargets.size());
-            for (const auto& targets : m_passTargets)
+            for (const auto& pass : m_passTargets)
             {
-                states.emplace_back(targets.dynamicTargets, targets.staticTargets);
+                states.emplace_back(pass.targets);
             }
 
             return states;
         }
 
-        void AddDynamicTarget(MaterialPasses passes, uint32_t instanceIndex, const asset::MeshView& mesh)
-        {
-            ForEnabledPass(passes, [instanceIndex, &mesh](auto& pass){
-                pass.dynamicTargets.emplace_back(instanceIndex, mesh);
-            });
-        }
-
-        void AddStaticTarget(MaterialPasses passes, uint32_t entityId, uint32_t instanceIndex, const asset::MeshView& mesh)
+        void AddTarget(MaterialPasses passes, uint32_t entityId, uint32_t instanceIndex, const asset::MeshView& mesh)
         {
             ForEnabledPass(passes, [entityId, instanceIndex, &mesh] (auto& pass) {
-                pass.staticTargetEntities.push_back(entityId);
-                pass.staticTargets.emplace_back(instanceIndex, mesh);
+                pass.entities.push_back(entityId);
+                pass.targets.emplace_back(instanceIndex, mesh);
             });
         }
 
-        void RemoveStaticTarget(MaterialPasses passes, uint32_t entityId)
+        void RemoveTarget(MaterialPasses passes, uint32_t entityId)
         {
             ForEnabledPass(passes, [entityId](auto& pass){
-                const auto index = FindItemIndex(pass.staticTargetEntities, entityId);
-                pass.staticTargetEntities[index] = pass.staticTargetEntities.back();
-                pass.staticTargetEntities.pop_back();
-                pass.staticTargets[index] = pass.staticTargets.back();
-                pass.staticTargets.pop_back();
+                const auto index = FindItemIndex(pass.entities, entityId);
+                pass.entities[index] = pass.entities.back();
+                pass.entities.pop_back();
+                pass.targets[index] = pass.targets.back();
+                pass.targets.pop_back();
             });
         }
 
-        void UpdateStaticTargetInstance(MaterialPasses passes, uint32_t entityId, uint32_t instanceIndex)
+        void UpdateTargetInstance(MaterialPasses passes, uint32_t entityId, uint32_t instanceIndex)
         {
             ForEnabledPass(passes, [entityId, instanceIndex](auto& pass){
-                const auto index = FindItemIndex(pass.staticTargetEntities, entityId);
-                pass.staticTargets[index].instance = instanceIndex;
+                const auto index = FindItemIndex(pass.entities, entityId);
+                pass.targets[index].instance = instanceIndex;
             });
         }
 
-        void UpdateStaticTargetMesh(MaterialPasses passes, uint32_t entityId, const asset::MeshView& mesh)
+        void UpdateTargetMesh(MaterialPasses passes, uint32_t entityId, const asset::MeshView& mesh)
         {
             ForEnabledPass(passes, [entityId, &mesh](auto& pass){
-                const auto index = FindItemIndex(pass.staticTargetEntities, entityId);
-                pass.staticTargets[index].UpdateMesh(mesh);
+                const auto index = FindItemIndex(pass.entities, entityId);
+                pass.targets[index].UpdateMesh(mesh);
             });
-        }
-
-        void ClearDynamicTargets()
-        {
-            for (auto& pass : m_passTargets)
-            {
-                pass.dynamicTargets.clear();
-            }
         }
 
         void Clear() noexcept
         {
             for (auto& pass : m_passTargets)
             {
-                pass.dynamicTargets.clear();
-                pass.dynamicTargets.shrink_to_fit();
-                pass.staticTargets.clear();
-                pass.staticTargets.shrink_to_fit();
-                pass.staticTargetEntities.clear();
-                pass.staticTargetEntities.shrink_to_fit();
+                pass.targets.clear();
+                pass.targets.shrink_to_fit();
+                pass.entities.clear();
+                pass.entities.shrink_to_fit();
             }
         }
 

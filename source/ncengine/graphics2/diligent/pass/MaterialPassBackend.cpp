@@ -40,8 +40,7 @@ void MaterialPassBackend::Render(Diligent::IDeviceContext& context,
     for (auto [pass, state] : std::views::zip(m_passes, passStates))
     {
         context.SetPipelineState(pass.pso);
-        DrawIndexed(context, state.dynamicTargets);
-        DrawIndexed(context, state.staticTargets);
+        DrawIndexed(context, state.targets);
     }
 }
 } // namespace nc::graphics

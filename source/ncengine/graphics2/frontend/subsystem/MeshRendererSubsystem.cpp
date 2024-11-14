@@ -17,8 +17,6 @@ MeshRendererSubsystem::MeshRendererSubsystem(std::span<const MaterialPass::type>
 
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
 {
-    m_passCache.ClearDynamicTargets();
-
     m_instanceCache.PopulateMatrices(ecs);
 
     return MeshRendererRenderState{

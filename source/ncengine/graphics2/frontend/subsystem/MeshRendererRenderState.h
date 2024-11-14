@@ -34,8 +34,7 @@ struct PassTarget
 
 struct PassRenderState
 {
-    std::vector<PassTarget> dynamicTargets;
-    std::vector<PassTarget> staticTargets;
+    std::vector<PassTarget> targets;
 };
 
 struct MeshRendererRenderState
