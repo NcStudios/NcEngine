@@ -40,7 +40,7 @@ struct PassRenderState
 
 struct MeshRendererRenderState
 {
-    std::span<const MeshRendererData> instanceData;
+    BufferUpdateInfo<MeshRendererData> instanceData;
     std::vector<PassRenderState> passData;
 };
 } // namespace nc::graphics

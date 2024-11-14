@@ -7,33 +7,22 @@
 
 namespace nc::graphics
 {
+MeshRendererSubsystem::MeshRendererSubsystem(std::span<const MaterialPass::type> passes)
+    : m_instanceCache{100000}, // todo: pass in
+      m_passCache{passes},
+      m_ctx{m_instanceCache, m_passCache}
+{
+    MeshRenderer2::SetContext(&m_ctx);
+}
+
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
 {
-    const auto& rendererPool = ecs.GetPool<MeshRenderer2>();
-    const auto entities = rendererPool.GetEntityPool();
-    m_instanceData.clear();
-    m_instanceData.reserve(entities.size());
     m_passCache.ClearDynamicTargets();
 
-    for (auto [i, entity] : std::views::enumerate(entities))
-    {
-        /** @todo 798 filter static */
-        auto& renderer = ecs.Get<MeshRenderer2>(entity);
-        const auto& material = renderer.GetMaterial();
-        m_passCache.AddDynamicTarget(
-            material.GetDesc().passes,
-            static_cast<uint32_t>(i),
-            renderer.GetMesh()
-        );
-
-        m_instanceData.emplace_back(
-            ecs.Get<Transform>(entity).TransformationMatrix(),
-            material.GetHandle()
-        );
-    }
+    m_instanceCache.PopulateMatrices(ecs);
 
     return MeshRendererRenderState{
-        .instanceData = m_instanceData,
+        .instanceData = m_instanceCache.BuildState(),
         .passData = m_passCache.BuildState()
     };
 }

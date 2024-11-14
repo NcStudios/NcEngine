@@ -13,14 +13,13 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
     /** @todo #794 Once plumbing is finalized with material pass implementation, make sure this is
      *             only sending dirty items. */
     const auto& instanceData = renderState.meshRendererState.instanceData;
-    if (!instanceData.empty())
+    if (!instanceData.instances.empty())
     {
-        auto meshBufferUpdateInfo = BufferUpdateInfo<MeshRendererData>{
-            .instances = instanceData,
-            .dirtyRanges = {{0, instanceData.size() }}
-        };
-
-        m_componentSignature.GetMeshRendererBuffer().Update(context, device, meshBufferUpdateInfo);
+        m_componentSignature.GetMeshRendererBuffer().Update(
+            context,
+            device,
+            instanceData
+        );
     }
 
     const auto& materialData = renderState.materialRenderState;
