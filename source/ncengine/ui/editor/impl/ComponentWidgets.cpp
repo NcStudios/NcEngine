@@ -90,40 +90,40 @@ auto MaterialPassesWidget(nc::MaterialDesc& desc) -> bool
     return modified;
 }
 
-auto MaterialTexturesWidget(nc::MaterialDesc& desc, nc::asset::NcAsset& ncAsset) -> bool
+auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
 {
     /** @todo 353 Get asset views from ncAsset, once implemented */
     constexpr auto assetType = nc::asset::AssetType::Texture;
     const auto textureAssets = nc::ui::editor::GetLoadedAssets(assetType);
-    auto diffusePath = std::string{ncAsset.GetAssetPath(assetType, desc.diffuseTexture.id)};
-    auto normalPath = std::string{ncAsset.GetAssetPath(assetType, desc.normalTexture.id)};
+    auto diffusePath = std::string{ncAsset.GetAssetPath(assetType, properties.diffuseTexture.id)};
+    auto normalPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTexture.id)};
     auto modified = false;
     if (nc::ui::Combobox(diffusePath, "diffuse", textureAssets))
     {
         modified = true;
-        desc.diffuseTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffusePath);
+        properties.diffuseTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffusePath);
     }
 
     if (nc::ui::Combobox(normalPath, "normal", textureAssets))
     {
         modified = true;
-        desc.normalTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalPath);
+        properties.normalTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalPath);
     }
 
     return modified;
 }
 
-auto MaterialColorWidget(nc::MaterialDesc& desc) -> bool
+auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
 {
-    auto modified = nc::ui::InputColor3(desc.gradientStart, "start");
-    modified = nc::ui::InputColor3(desc.gradientEnd, "end") || modified;
+    auto modified = nc::ui::InputColor3(properties.gradientStart, "start");
+    modified = nc::ui::InputColor3(properties.gradientEnd, "end") || modified;
     return modified;
 }
 
-auto MaterialOutlineWidget(nc::MaterialDesc& desc) -> bool
+auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
 {
-    auto modified = nc::ui::InputColor3(desc.outlineColor, "color");
-    modified = nc::ui::DragFloat(desc.outlineWidth, "width", 0.1f, 0.0f, 10.0f) || modified;
+    auto modified = nc::ui::InputColor3(properties.outlineColor, "color");
+    modified = nc::ui::DragFloat(properties.outlineWidth, "width", 0.1f, 0.0f, 10.0f) || modified;
     return modified;
 }
 } // namespace mesh_renderer2_ext
@@ -706,16 +706,17 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
     if (ImGui::TreeNodeEx("Material"))
     {
         auto& materialInstance = meshRenderer.GetMaterial();
-        auto materialDesc = materialInstance.GetDesc();
+        auto properties = materialInstance.GetProperties();
         auto descModified = false;
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Metadata"))
         {
             ImGui::Text("Handle: %hu", materialInstance.GetHandle());
-            if (ui::InputText(materialDesc.name, "name"))
+            auto materialName = std::string{materialInstance.GetName()};
+            if (ui::InputText(materialName, "name"))
             {
-                materialInstance.SetName(materialDesc.name);
+                materialInstance.SetName(materialName);
             }
 
             ImGui::TreePop();
@@ -724,34 +725,34 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Passes"))
         {
-            descModified = mesh_renderer2_ext::MaterialPassesWidget(materialDesc) || descModified;
+            // descModified = mesh_renderer2_ext::MaterialPassesWidget(materialDesc) || descModified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Textures"))
         {
-            descModified = mesh_renderer2_ext::MaterialTexturesWidget(materialDesc, ncAsset) || descModified;
+            descModified = mesh_renderer2_ext::MaterialTexturesWidget(properties, ncAsset) || descModified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Gradient Color"))
         {
-            descModified = mesh_renderer2_ext::MaterialColorWidget(materialDesc) || descModified;
+            descModified = mesh_renderer2_ext::MaterialColorWidget(properties) || descModified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Outline"))
         {
-            descModified = mesh_renderer2_ext::MaterialOutlineWidget(materialDesc) || descModified;
+            descModified = mesh_renderer2_ext::MaterialOutlineWidget(properties) || descModified;
             ImGui::TreePop();
         }
 
         if (descModified)
         {
-            materialInstance.SetDesc(materialDesc);
+            materialInstance.SetProperties(properties);
         }
 
         ImGui::TreePop();

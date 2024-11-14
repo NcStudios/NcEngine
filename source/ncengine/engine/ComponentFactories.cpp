@@ -54,8 +54,10 @@ auto CreateMeshRenderer2(Entity entity, const std::any&) -> MeshRenderer2
         entity,
         meshService->Acquire(asset::CubeMesh),
         MaterialDesc{
-            .diffuseTexture = textureService->Acquire(asset::DefaultBaseColor),
-            .normalTexture = textureService->Acquire(asset::DefaultNormal)
+            .properties = MaterialProperties{
+                .diffuseTexture = textureService->Acquire(asset::DefaultBaseColor),
+                .normalTexture = textureService->Acquire(asset::DefaultNormal)
+            }
         }
     };
 }

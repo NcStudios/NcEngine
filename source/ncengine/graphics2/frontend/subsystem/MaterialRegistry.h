@@ -17,9 +17,9 @@ class MaterialRegistry : public StableAddress
         auto CreateInstance(const MaterialDesc& desc = MaterialDesc{}) -> MaterialInstanceHandle;
         void DestroyInstance(MaterialInstanceHandle index);
         auto GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&;
-        void SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc);
         auto GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&;
         void SetInstanceName(MaterialInstanceHandle index, std::string_view name);
+        void SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties);
         auto HasPendingChanges() const -> bool;
         void CommitPendingChanges(std::function<void(const BufferUpdateInfo<MaterialData>&)> notifyUpdate);
         auto BuildState() -> BufferUpdateInfo<MaterialData>;

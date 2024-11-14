@@ -186,31 +186,6 @@ TEST_F(MaterialPassCacheTest, UpdateStaticTargetMesh_updatesMeshAcrossPasses)
     EXPECT_EQ(mesh2.indexCount, actualAlphaTarget.indexCount);
 }
 
-TEST_F(MaterialPassCacheTest, UpdateStaticTargetPasses_reassignsPasses)
-{
-    constexpr auto initialPasses = nc::MaterialPass::Toon;
-    constexpr auto updatedPasses = nc::MaterialPass::Shadow |
-                                   nc::MaterialPass::Toon |
-                                   nc::MaterialPass::Alpha;
-    constexpr auto id = 10u;
-    constexpr auto instance = 42u;
-    uut.AddStaticTarget(initialPasses, id, instance, mesh1);
-
-    const auto& actualShadowTargets = uut.GetTargets(nc::MaterialPass::Shadow);
-    const auto& actualToonTargets = uut.GetTargets(nc::MaterialPass::Toon);
-    const auto& actualAlphaTargets = uut.GetTargets(nc::MaterialPass::Alpha);
-
-    uut.UpdateStaticTargetPasses(initialPasses, updatedPasses, id, instance, mesh1);
-    EXPECT_EQ(instance, actualShadowTargets.staticTargets.at(0).instance);
-    EXPECT_EQ(instance, actualToonTargets.staticTargets.at(0).instance);
-    EXPECT_EQ(instance, actualAlphaTargets.staticTargets.at(0).instance);
-
-    uut.UpdateStaticTargetPasses(updatedPasses, nc::MaterialPass::type{0}, id, instance, mesh1);
-    EXPECT_TRUE(actualShadowTargets.staticTargets.empty());
-    EXPECT_TRUE(actualToonTargets.staticTargets.empty());
-    EXPECT_TRUE(actualAlphaTargets.staticTargets.empty());
-}
-
 TEST_F(MaterialPassCacheTest, ClearDynamicTargets_clearsOnlyDynamicData)
 {
     constexpr auto dynamicInstance = 1u;

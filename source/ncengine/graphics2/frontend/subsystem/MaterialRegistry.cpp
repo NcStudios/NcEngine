@@ -7,15 +7,15 @@
 
 namespace
 {
-auto ToMaterialData(const nc::MaterialDesc& desc) -> nc::graphics::MaterialData
+auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::MaterialData
 {
     return nc::graphics::MaterialData{
-        .gradientStart = desc.gradientStart,
-        .diffuseTexIndex = desc.diffuseTexture.index,
-        .gradientEnd = desc.gradientEnd,
-        .normalTexIndex = desc.normalTexture.index,
-        .outlineColor = desc.outlineColor,
-        .outlineWidth = desc.outlineWidth
+        .gradientStart = properties.gradientStart,
+        .diffuseTexIndex = properties.diffuseTexture.index,
+        .gradientEnd = properties.gradientEnd,
+        .normalTexIndex = properties.normalTexture.index,
+        .outlineColor = properties.outlineColor,
+        .outlineWidth = properties.outlineWidth
     };
 }
 } // anonymous namespace
@@ -33,7 +33,7 @@ auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInsta
     if (m_freeList.empty())
     {
         NC_ASSERT(m_nextIndex < m_maxIndex, "Max material instances exceeded");
-        m_data.push_back(ToMaterialData(desc));
+        m_data.push_back(ToMaterialData(desc.properties));
         m_descriptions.push_back(desc);
         m_dirty.push_back(m_nextIndex);
         return m_nextIndex++;
@@ -41,7 +41,7 @@ auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInsta
 
     const auto index = m_freeList.back();
     m_freeList.pop_back();
-    m_data[index] = ToMaterialData(desc);
+    m_data[index] = ToMaterialData(desc.properties);
     m_descriptions[index] = desc;
     m_dirty.push_back(index);
     return index;
@@ -60,11 +60,17 @@ auto MaterialRegistry::GetInstanceDesc(MaterialInstanceHandle index) const -> co
     return m_descriptions[index];
 }
 
-void MaterialRegistry::SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc)
+void MaterialRegistry::SetInstanceName(MaterialInstanceHandle index, std::string_view name)
+{
+    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+    m_descriptions[index].name = std::string{name};
+}
+
+void MaterialRegistry::SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties)
 {
     NC_ASSERT(index < m_data.size(), "Invalid MaterialInstanceHandle");
-    m_data[index] = ToMaterialData(desc);
-    m_descriptions[index] = desc;
+    m_data[index] = ToMaterialData(properties);
+    m_descriptions[index].properties = properties;
     m_dirty.push_back(index);
 }
 
@@ -72,12 +78,6 @@ auto MaterialRegistry::GetInstanceData(MaterialInstanceHandle index) const -> co
 {
     NC_ASSERT(index < m_data.size(), "Invalid MaterialInstanceHandle");
     return m_data[index];
-}
-
-void MaterialRegistry::SetInstanceName(MaterialInstanceHandle index, std::string_view name)
-{
-    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
-    m_descriptions[index].name = std::string{name};
 }
 
 auto MaterialRegistry::HasPendingChanges() const -> bool

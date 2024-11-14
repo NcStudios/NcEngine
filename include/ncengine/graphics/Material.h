@@ -47,17 +47,23 @@ constexpr auto ShadowedToonMaterial = MaterialPass::Shadow |
                                       MaterialPass::Normals |
                                       MaterialPass::Outline;
 
-/** @brief Properties for constructing a MaterialInstance. */
-struct MaterialDesc
+/** @brief Properties of a MaterialInstance passed to shaders. */
+struct MaterialProperties
 {
-    std::string name = "DefaultMaterial";
-    MaterialPasses passes = ShadowedToonMaterial;
     asset::TextureView diffuseTexture = asset::TextureView{};
     asset::TextureView normalTexture = asset::TextureView{};
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
     Vector3 outlineColor = Vector3::Zero();
     float outlineWidth = 1.0f;
+};
+
+/** @brief Properties for constructing a MaterialInstance. */
+struct MaterialDesc
+{
+    std::string name = "DefaultMaterial";
+    MaterialPasses passes = ShadowedToonMaterial;
+    MaterialProperties properties = MaterialProperties{};
 };
 
 /** @brief Owning wrapper around a material in GPU memory. */
@@ -75,17 +81,16 @@ class MaterialInstance
         /** @brief Create a new MaterialInstance from this instance's properties. */
         auto Clone() const -> MaterialInstance;
 
-        /** @brief Get the instance's properties. */
-        auto GetDesc() const -> const MaterialDesc&;
-
-        /** @brief Update the instance's properties. */
-        void SetDesc(const MaterialDesc& desc);
-
-        /**
-         * @brief Update the instance's name.
-         * @note Prefer this over SetDesc() when only changing the name to avoid an unnecessary GPU-side update.
-         */
+        /** @name Name Functions */
+        auto GetName() const -> std::string_view;
         void SetName(std::string_view name);
+
+        /** @name MaterialPass Functions */
+        auto GetPasses() const -> MaterialPasses;
+
+        /** @name MaterialProperties Functions */
+        auto GetProperties() const -> const MaterialProperties&;
+        void SetProperties(const MaterialProperties& properties);
 
         /** @brief Get the instance's handle. */
         auto GetHandle() const -> MaterialInstanceHandle

@@ -83,16 +83,6 @@ class MaterialPassCache
             });
         }
 
-        void UpdateStaticTargetPasses(MaterialPasses oldPasses,
-                                      MaterialPasses newPasses,
-                                      uint32_t entityId,
-                                      uint32_t instanceIndex,
-                                      const asset::MeshView& mesh)
-        {
-            RemoveStaticTarget(oldPasses, entityId);
-            AddStaticTarget(newPasses, entityId, instanceIndex, mesh);
-        }
-
         void ClearDynamicTargets()
         {
             for (auto& pass : m_passTargets)
