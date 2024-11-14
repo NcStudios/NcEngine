@@ -35,42 +35,80 @@ struct MaterialData
     float outlineWidth = 1.0f;
 };
 
+// Object model for DirectionalLights (type: StructuredBuffer element type).
+// Not targeting shadows for directional lights at the moment.
+// 48 bytes (rounded up due to alignment) with a 16-byte alignment.
+struct DirectionalLightData
+{ 
+    DirectionalLightData(Vector3 position_, Vector3 color_, Vector3 direction_)
+        : position{position_},
+          color{color_},
+          direction{direction_}{}
+
+    Vector3 position = Vector3::Zero();
+    float padding0 = 0.0f;
+    Vector3 color = Vector3::One();
+    float padding1 = 0.0f;
+    Vector3 direction = Vector3::One();
+    float padding2 = 0.0f;
+};
+
+// Object model for PointLights (type: StructuredBuffer element type).
+// 96 bytes (rounded up due to alignment) with a 16-byte alignment.
+struct PointLightData
+{
+    PointLightData(DirectX::XMMATRIX viewProjection_,
+                   Vector3 position_,
+                   int32_t castsShadows_,
+                   Vector3 color_,
+                   float radius_)
+        : viewProjection{viewProjection_},
+          position{position_},
+          castsShadows{castsShadows_},
+          color{color_},
+          radius{radius_}{}
+    DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
+    Vector3 position = Vector3::Zero();
+    int castsShadows = 0;
+    Vector3 color = Vector3::One();
+    float radius = 1.0f;
+};
+
+
 // Object model for SpotLights (type: StructuredBuffer element type).
 // 128 bytes (rounded up due to alignment) with a 16-byte alignment.
 struct SpotLightData
 {
+    SpotLightData(DirectX::XMMATRIX viewProjection_,
+                  Vector3 position_,
+                  int32_t castsShadows_,
+                  Vector3 color_,
+                  float innerAngle_,
+                  Vector3 direction_,
+                  float outerAngle_,
+                  float radius_)
+        : viewProjection{viewProjection_},
+          position{position_},
+          castsShadows{castsShadows_},
+          color{color_},
+          innerAngle{innerAngle_},
+          direction{direction_},
+          outerAngle{outerAngle_},
+          radius{radius_}{}
     DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
     Vector3 position = Vector3::Zero();
     int castsShadows = 0;
     Vector3 color = Vector3::One();
-    int isInitialized = 0;
-    Vector3 direction = Vector3::One();
     float innerAngle = 1.0f;
+    Vector3 direction = Vector3::One();
     float outerAngle = 1.0f;
     float radius = 1.0f;
+    Vector3 padding = Vector3::Zero();
 };
 
-// Object model for PointLights (type: StructuredBuffer element type).
-// 112 bytes (rounded up due to alignment) with a 16-byte alignment.
-struct PointLightData
-{
-    DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
-    Vector3 position = Vector3::Zero();
-    int castsShadows = 0;
-    Vector3 color = Vector3::One();
-    int isInitialized = 0;
-    float radius = 1.0f;
-};
+constexpr auto sldSize = sizeof(SpotLightData);
+constexpr auto sldAlign = alignof(SpotLightData);
 
-// Object model for DirectionalLights (type: StructuredBuffer element type).
-// Not targeting shadows for directional lights at the moment.
-// 32 bytes (rounded up due to alignment) with a 16-byte alignment.
-struct DirectionalLightData
-{
-    Vector3 color = Vector3::One();
-    int isInitialized = 0;
-    Vector3 direction = Vector3::One();
-};
 
 // Specifies a subrange within a buffer.
 struct BufferSlice
