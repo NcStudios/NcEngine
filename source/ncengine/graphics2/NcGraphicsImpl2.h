@@ -38,6 +38,7 @@ class NcGraphicsImpl2 : public NcGraphics
         void ClearEnvironment() override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void Clear() noexcept override;
+        void RunEditor();
         void Run();
         void OnResize(const Vector2& dimensions, bool isMinimized);
 

@@ -17,9 +17,8 @@ namespace nc::graphics
 class InstanceCache
 {
     public:
-        InstanceCache(uint32_t maxMeshRenderers)
-            : m_data{},
-              m_maxIndex{maxMeshRenderers}
+        explicit InstanceCache(uint32_t maxMeshRenderers)
+            : m_maxIndex{maxMeshRenderers}
         {
         }
 
@@ -42,13 +41,21 @@ class InstanceCache
             return index;
         }
 
-        void RemoveInstance(Entity entity)
+        // todo: returned index is stable - give to mesh renderer and use here instead of search...
+
+        void RemoveInstance(Entity entity, uint32_t instance)
         {
+            (void)entity;
+            (void)instance;
             const auto pos = std::ranges::find(m_entities, entity);
             NC_ASSERT(pos != m_entities.end(), "Instance not found");
             const auto index = static_cast<uint32_t>(std::distance(m_entities.begin(), pos));
             m_entities[index] = Entity::Null();
             m_freeList.push_back(index);
+
+            // NC_ASSERT(instance < m_entities.size(), "Instance out of bounds");
+            // m_entities[instance] = Entity::Null();
+            // m_freeList.push_back(instance);
         }
 
         void Clear() noexcept
@@ -69,7 +76,7 @@ class InstanceCache
             return !m_dirty.empty();
         }
 
-        void PopulateMatrices(ecs::ExplicitEcs<Transform> ecs)
+        void UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
         {
             NC_PROFILE_SCOPE("InstanceCache::PopulateMatrices()", ProfileCategory::Rendering);
             // For all new static instances, grab matrix once
@@ -94,14 +101,13 @@ class InstanceCache
 
                 const auto& transform = ecs.Get<Transform>(entity);
                 m_data[i].modelMatrix = transform.TransformationMatrix();
-                m_dirty.push_back(i); // ???
+                m_dirty.push_back(i);
             }
         }
 
         auto BuildState() -> BufferUpdateInfo<MeshRendererData>
         {
             NC_PROFILE_SCOPE("InstanceCache::BuildState()", ProfileCategory::Rendering);
-
             return HasPendingChanges()
                 ? BufferUpdateInfo<MeshRendererData>{m_data, CollectDirtyRanges()}
                 : BufferUpdateInfo<MeshRendererData>{};

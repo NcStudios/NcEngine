@@ -31,7 +31,7 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
-              m_meshRendererSystem{GetImplementedMaterialPassFlags()}
+              m_meshRendererSystem{maxRenderers, GetImplementedMaterialPassFlags()}
         {
         }
 

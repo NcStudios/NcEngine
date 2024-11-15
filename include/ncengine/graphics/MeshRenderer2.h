@@ -12,7 +12,7 @@ namespace nc
 {
 namespace graphics
 {
-struct MeshRendererContext;
+class MeshRendererSubsystem;
 } // namespace graphics
 
 /** @brief Component enabling rendering of an Entity with a given mesh and material. */
@@ -22,6 +22,8 @@ class MeshRenderer2
         explicit MeshRenderer2(Entity self,
                                const asset::MeshView& mesh,
                                const MaterialDesc& materialDesc);
+
+        // todo: move instance for move ops
 
         MeshRenderer2(MeshRenderer2&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
@@ -34,6 +36,7 @@ class MeshRenderer2
         {
             if (this != &other)
             {
+                Release();
                 m_self = std::exchange(other.m_self, Entity::Null());
                 m_meshId = other.m_meshId;
                 m_material = std::move(other.m_material);
@@ -45,9 +48,12 @@ class MeshRenderer2
         MeshRenderer2(const MeshRenderer2&) = delete;
         MeshRenderer2& operator=(const MeshRenderer2&) = delete;
 
-        ~MeshRenderer2() noexcept;
+        ~MeshRenderer2() noexcept
+        {
+            Release();
+        }
 
-        /** @name  */
+        /** @name General Functions */
         auto GetEntity() const -> Entity { return m_self; }
 
         /** @name Mesh Functions */
@@ -58,16 +64,16 @@ class MeshRenderer2
         auto GetMaterial() const -> const MaterialInstance& { return m_material; }
         auto GetMaterial() -> MaterialInstance& { return m_material; }
 
-        /** @cond internal */
-        static void SetContext(graphics::MeshRendererContext* ctx) { s_ctx = ctx; }
-        /** @endcond internal */
-
     private:
-        inline static graphics::MeshRendererContext* s_ctx = nullptr;
+        friend class graphics::MeshRendererSubsystem;
+        inline static graphics::MeshRendererSubsystem* s_subsystem = nullptr;
 
         Entity m_self;
         uint64_t m_meshId;
+        uint32_t m_instance;
         MaterialInstance m_material;
+
+        void Release() noexcept;
 };
 
 template<>

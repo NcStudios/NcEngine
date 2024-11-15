@@ -51,9 +51,10 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
             UpdateWorldSpaceMatrices();
         },
         {
-            update_task_id::AudioSourceUpdate,
-            update_task_id::ParticleEmitterUpdate,
-            update_task_id::PhysicsPipeline
+            update_task_id::Editor
+            // update_task_id::AudioSourceUpdate,
+            // update_task_id::ParticleEmitterUpdate,
+            // update_task_id::PhysicsPipeline
         }
     );
 }
