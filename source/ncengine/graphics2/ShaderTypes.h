@@ -37,16 +37,13 @@ struct MaterialData
 
 // Object model for DirectionalLights (type: StructuredBuffer element type).
 // Not targeting shadows for directional lights at the moment.
-// 48 bytes (rounded up due to alignment) with a 16-byte alignment.
+// 32 bytes (rounded up due to alignment) with a 16-byte alignment.
 struct DirectionalLightData
 { 
-    DirectionalLightData(Vector3 position_, Vector3 color_, Vector3 direction_)
-        : position{position_},
-          color{color_},
+    DirectionalLightData(Vector3 color_, Vector3 direction_)
+        : color{color_},
           direction{direction_}{}
 
-    Vector3 position = Vector3::Zero();
-    float padding0 = 0.0f;
     Vector3 color = Vector3::One();
     float padding1 = 0.0f;
     Vector3 direction = Vector3::One();
@@ -102,13 +99,9 @@ struct SpotLightData
     float innerAngle = 1.0f;
     Vector3 direction = Vector3::One();
     float outerAngle = 1.0f;
-    float radius = 1.0f;
     Vector3 padding = Vector3::Zero();
+    float radius = 1.0f;
 };
-
-constexpr auto sldSize = sizeof(SpotLightData);
-constexpr auto sldAlign = alignof(SpotLightData);
-
 
 // Specifies a subrange within a buffer.
 struct BufferSlice

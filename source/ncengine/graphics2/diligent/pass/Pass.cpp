@@ -6,7 +6,8 @@
 namespace
 {
 constexpr auto g_pixelShader = std::string_view{
-R"(#ifdef VULKAN
+R"(
+#ifdef VULKAN
 // NonUniformResourceIndex is not supported by GLSLang
 #   define NonUniformResourceIndex(x) x
 #endif
@@ -26,6 +27,42 @@ struct MaterialData
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
 
+struct DirectionalLightData
+{
+    float3 color;
+    float padding;
+    float3 direction;
+    float padding2;
+};
+
+StructuredBuffer<DirectionalLightData> DirectionalLightBufferData : register(t2);
+
+struct PointLightData
+{
+    float4x4 viewProj;
+    float3 position;
+    int castsShadows;
+    float3 color;
+    float radius;
+};
+
+StructuredBuffer<PointLightData> PointLightBufferData : register(t3);
+
+struct SpotLightData
+{
+    float4x4 viewProj;
+    float3 position;
+    int castsShadows;
+    float3 color;
+    float innerAngle;
+    float3 direction;
+    float outerAngle;
+    float3 padding;
+    float radius;
+};
+
+StructuredBuffer<SpotLightData> SpotLightBufferData : register(t4);
+
 struct PSInput 
 { 
     float4 Pos           : SV_POSITION; 
@@ -38,14 +75,14 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-void main(in  PSInput  PSIn,
-          out PSOutput PSOut)
+void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
     uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
     Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
     PSOut.Color = Color;
-})"};
+}
+)"};
 
 constexpr auto g_vertexShader = std::string_view{
 R"(struct VSInput

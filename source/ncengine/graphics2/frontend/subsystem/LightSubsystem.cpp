@@ -37,7 +37,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, Transform> di
                                 ecs::ExplicitEcs<PointLight, Transform> pointLightEcs,
                                 ecs::ExplicitEcs<SpotLight, Transform> spotLightEcs) -> LightRenderState
 {
-    {
+    { // Directional Lights
         const auto& lightPool = dirLightEcs.GetPool<DirectionalLight>();
         const auto entities = lightPool.GetEntityPool();
         m_directionalLights.clear();
@@ -48,11 +48,11 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, Transform> di
             auto& light = dirLightEcs.Get<DirectionalLight>(entity);
             auto& transform = dirLightEcs.Get<Transform>(entity);
 
-            m_directionalLights.emplace_back(transform.Position(), light.color, transform.Forward());
+            m_directionalLights.emplace_back(light.color, transform.Forward());
         }
     }
 
-    {
+    { // Point Lights
         const auto& lightPool = pointLightEcs.GetPool<PointLight>();
         const auto entities = lightPool.GetEntityPool();
         m_pointLights.clear();
@@ -71,7 +71,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, Transform> di
         }
     }
 
-        {
+    { // Spot Lights
         const auto& lightPool = spotLightEcs.GetPool<SpotLight>();
         const auto entities = lightPool.GetEntityPool();
         m_spotLights.clear();

@@ -36,9 +36,9 @@ class ShaderBindings
                 "ComponentResourceSignature",
                 1,
                 StructuredBufferResourceDesc{"MeshRendererBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers,     maxMeshRenderers},
-                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights},
-                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxPointLights,       maxPointLights},
                 StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxDirectionalLights, maxDirectionalLights},
+                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxPointLights,       maxPointLights},
+                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights}
               },
               m_materialSignature{
                 context, device,

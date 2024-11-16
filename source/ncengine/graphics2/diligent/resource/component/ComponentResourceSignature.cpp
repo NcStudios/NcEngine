@@ -9,15 +9,15 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        std::string_view signatureName,
                                                        uint8_t bindingIndex,
                                                        StructuredBufferResourceDesc meshRendererResourceDesc,
-                                                       StructuredBufferResourceDesc spotLightResourceDesc,
+                                                       StructuredBufferResourceDesc directionalLightResourceDesc,
                                                        StructuredBufferResourceDesc pointLightResourceDesc,
-                                                       StructuredBufferResourceDesc directionalLightResourceDesc)
+                                                       StructuredBufferResourceDesc spotLightResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(meshRendererResourceDesc),
-        ToPipelineResourceDesc(spotLightResourceDesc),
-        ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(directionalLightResourceDesc),
+        ToPipelineResourceDesc(pointLightResourceDesc),
+        ToPipelineResourceDesc(spotLightResourceDesc)
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -46,12 +46,12 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         meshRendererResourceDesc
     );
 
-    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
+    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
     (
         context,
         device,
-        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
-        spotLightResourceDesc
+        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+        directionalLightResourceDesc
     );
 
     m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
@@ -62,12 +62,12 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         pointLightResourceDesc
     );
 
-    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
     (
         context,
         device,
-        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
-        directionalLightResourceDesc
+        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+        spotLightResourceDesc
     );
 }
 
