@@ -142,21 +142,21 @@ void ReloadPrefabs()
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
 
     const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
-    material::Default.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
-    material::Default.normalTexture = normal;
-    material::Red.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
-    material::Red.normalTexture = normal;
-    material::Green.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
-    material::Green.normalTexture = normal;
-    material::Blue.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
-    material::Blue.normalTexture = normal;
-    material::Orange.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
-    material::Orange.normalTexture = normal;
-    material::Purple.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
-    material::Purple.normalTexture = normal;
-    material::Teal.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
-    material::Teal.normalTexture = normal;
-    material::Yellow.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
-    material::Yellow.normalTexture = normal;
+    material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
+    material::Default.properties.normalTexture = normal;
+    material::Red.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
+    material::Red.properties.normalTexture = normal;
+    material::Green.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
+    material::Green.properties.normalTexture = normal;
+    material::Blue.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
+    material::Blue.properties.normalTexture = normal;
+    material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
+    material::Orange.properties.normalTexture = normal;
+    material::Purple.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
+    material::Purple.properties.normalTexture = normal;
+    material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
+    material::Teal.properties.normalTexture = normal;
+    material::Yellow.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
+    material::Yellow.properties.normalTexture = normal;
 }
 } // namespace sample
