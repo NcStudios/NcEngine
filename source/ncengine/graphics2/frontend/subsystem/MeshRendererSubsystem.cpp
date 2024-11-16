@@ -21,7 +21,7 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
         auto& renderer = ecs.Get<MeshRenderer2>(entity);
         const auto& material = renderer.GetMaterial();
         m_passCache.AddDynamicTarget(
-            material.GetDesc().passes,
+            material.GetPasses(),
             static_cast<uint32_t>(i),
             renderer.GetMesh()
         );

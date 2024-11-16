@@ -956,7 +956,7 @@ class RayCaster : public FreeComponent
                     // possible the entity was deleted, if so we don't want to check for renderer
                     if (world.Contains<Entity>(entity))
                     {
-                        world.Get<MeshRenderer2>(entity).GetMaterial().SetDesc(material);
+                        world.Get<MeshRenderer2>(entity).GetMaterial().SetProperties(material);
                     }
                 }
 
@@ -974,7 +974,7 @@ class RayCaster : public FreeComponent
         graphics::NcGraphics* m_ncGraphics;
         CollisionQuery m_query = CollisionQuery{};
         std::vector<Entity> m_hits;
-        std::vector<MaterialDesc> m_restoreMaterials;
+        std::vector<MaterialProperties> m_restoreMaterials;
         Entity m_shapeParent = Entity::Null();
 
         void UpdateHit(ecs::Ecs world, Entity hit)
@@ -983,8 +983,8 @@ class RayCaster : public FreeComponent
             {
                 auto& renderer = world.Get<MeshRenderer2>(hit);
                 m_hits.push_back(hit);
-                m_restoreMaterials.push_back(renderer.GetMaterial().GetDesc());
-                renderer.GetMaterial().SetDesc(material::Yellow);
+                m_restoreMaterials.push_back(renderer.GetMaterial().GetProperties());
+                renderer.GetMaterial().SetProperties(material::Yellow.properties);
             }
         }
 
