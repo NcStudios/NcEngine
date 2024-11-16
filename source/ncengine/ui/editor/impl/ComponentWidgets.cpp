@@ -72,15 +72,21 @@ void MeshAssetDropdown(nc::MeshRenderer2& meshRenderer, nc::asset::NcAsset& ncAs
     }
 }
 
-void MaterialPassesWidget(nc::MaterialPasses passes)
+auto MaterialPassesWidget(nc::MaterialPasses& passes) -> bool
 {
-    IMGUI_SCOPE(nc::ui::DisableIf, true);
+    auto modified = false;
     const auto passInfo = std::views::zip(nc::GetMaterialPassNames(), nc::GetMaterialPassFlags());
     for (const auto& [name, flag] : passInfo)
     {
         auto isEnabled = static_cast<bool>(passes & flag);
-        nc::ui::Checkbox(isEnabled, name.data());
+        if (nc::ui::Checkbox(isEnabled, name.data()))
+        {
+            modified = true;
+            isEnabled ? passes |= flag : passes &= ~flag;
+        }
     }
+
+    return modified;
 }
 
 auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
@@ -699,7 +705,9 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
     if (ImGui::TreeNodeEx("Material"))
     {
         auto& material = meshRenderer.GetMaterial();
+        auto passes = material.GetPasses();
         auto properties = material.GetProperties();
+        auto passesModified = false;
         auto modified = false;
 
         ImGui::Separator();
@@ -718,7 +726,7 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Passes"))
         {
-            mesh_renderer2_ext::MaterialPassesWidget(material.GetPasses());
+            passesModified = mesh_renderer2_ext::MaterialPassesWidget(passes);
             ImGui::TreePop();
         }
 
@@ -743,7 +751,11 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
             ImGui::TreePop();
         }
 
-        if (modified)
+        if (passesModified)
+        {
+            meshRenderer.SetMaterial(MaterialDesc{std::string{material.GetName()}, passes, properties});
+        }
+        else if (modified)
         {
             material.SetProperties(properties);
         }

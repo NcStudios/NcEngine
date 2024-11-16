@@ -20,9 +20,9 @@ const auto g_materialDesc = nc::MaterialDesc{
 namespace nc
 {
 MaterialInstance::MaterialInstance(const MaterialDesc&){}
-MaterialInstance::~MaterialInstance() = default;
 auto MaterialInstance::GetPasses()     const ->       MaterialPasses      { return g_materialDesc.passes;     }
 auto MaterialInstance::GetProperties() const -> const MaterialProperties& { return g_materialDesc.properties; }
+void MaterialInstance::Release() noexcept {}
 } // namespace nc
 
 class MeshRendererSubsystemTest : public testing::Test,
