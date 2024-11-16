@@ -226,17 +226,6 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     );
 
     update.Add(
-        nc::update_task_id::Editor,
-        "RunEditor",
-        [this]{ RunEditor(); },
-        {
-            update_task_id::AudioSourceUpdate,
-            update_task_id::ParticleEmitterUpdate,
-            update_task_id::PhysicsPipeline
-        }
-    );
-
-    update.Add(
         nc::update_task_id::ParticleEmitterSync,
         "ParticleEmitterSync(stub)",
         []{},
@@ -250,13 +239,6 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     );
 }
 
-void NcGraphicsImpl2::RunEditor()
-{
-    auto& swapChain = m_engine.GetSwapChain();
-    m_ui.FrameBegin(swapChain);
-    m_frontend.GetUISubsystem().UpdateUI(m_world);
-}
-
 void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
@@ -265,15 +247,10 @@ void NcGraphicsImpl2::Run()
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
-    // m_ui.FrameBegin(swapChain);
-    // m_frontend.GetUISubsystem().UpdateUI(m_world);
+    m_ui.FrameBegin(swapChain);
+    m_frontend.GetUISubsystem().UpdateUI(m_world);
 
     auto renderState = m_frontend.BuildRenderState(m_world);
-
-
-
-    // m_ui.FrameBegin(swapChain);
-    // m_frontend.GetUISubsystem().UpdateUI(m_world);
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
     auto* pDSV = swapChain.GetDepthBufferDSV();

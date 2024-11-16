@@ -97,10 +97,10 @@ void BodyManager::EndBatch(size_t batchBegin)
     }
 
     NC_ASSERT(batchBegin < numBodies, "Body batching out-of-sync");
-    auto beg = &*(m_bodies.begin() + batchBegin);
-    auto count = static_cast<int>(numBodies - batchBegin);
-    auto batchCtx = m_ctx->interface.AddBodiesPrepare(beg, count);
-    m_ctx->interface.AddBodiesFinalize(beg, count, batchCtx, JPH::EActivation::Activate);
+    auto batch = std::vector<JPH::BodyID>{m_bodies.begin() + batchBegin, m_bodies.end()};
+    const auto count = static_cast<int>(batch.size());
+    auto batchCtx = m_ctx->interface.AddBodiesPrepare(batch.data(), count);
+    m_ctx->interface.AddBodiesFinalize(batch.data(), count, batchCtx, JPH::EActivation::Activate);
 }
 
 void BodyManager::Clear()
