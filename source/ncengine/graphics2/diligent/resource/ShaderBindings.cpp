@@ -8,7 +8,9 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
                             Diligent::IRenderDevice& device,
                             const FrontendRenderState& renderState)
 {
-    m_globalSignature.GetGlobalEnvironment().Update(renderState.cameraState, context);
+    m_globalSignature.GetGlobalEnvironment().Update(context,
+                                                    renderState.cameraState, 
+                                                    renderState.lightRenderState);
 
     /** @todo #794 Once plumbing is finalized with material pass implementation, make sure this is
      *             only sending dirty items. */

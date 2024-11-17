@@ -1,5 +1,6 @@
 #include "GlobalEnvironmentResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
+#include "graphics2/frontend/subsystem/LightRenderState.h"
 
 #include "ncutility/NcError.h"
 
@@ -36,8 +37,9 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& c
     m_variable->Set(m_uniformBuffer);
 }
 
-void GlobalEnvironmentResource::Update(const CameraRenderState cameraState,
-                                       Diligent::IDeviceContext& context)
+void GlobalEnvironmentResource::Update(Diligent::IDeviceContext& context,
+                                       const CameraRenderState cameraState,
+                                       const LightRenderState lightRenderState)
 {
     auto cbConstants = Diligent::MapHelper<GlobalEnvironmentData>{
         &context,
@@ -47,5 +49,8 @@ void GlobalEnvironmentResource::Update(const CameraRenderState cameraState,
     };
 
     cbConstants->cameraViewProjection = cameraState.viewProjection;
+    cbConstants->dirLightsCount = static_cast<uint32_t>(lightRenderState.directionalLights.size());
+    cbConstants->pointLightsCount = static_cast<uint32_t>(lightRenderState.pointLights.size());
+    cbConstants->spotLightsCount = static_cast<uint32_t>(lightRenderState.spotLights.size());
 }
 } // namespace nc::graphics

@@ -15,6 +15,15 @@ R"(
 Texture2D     TextureBufferData[];
 SamplerState  TextureBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
+cbuffer EnvironmentBufferData
+{
+    float4x4 cameraViewProjection;
+    uint dirLightsCount;
+    uint pointLightsCount;
+    uint spotLightsCount;
+    uint padding;
+};
+
 struct MaterialData
 {
     float3 gradientStart;
@@ -65,9 +74,11 @@ StructuredBuffer<SpotLightData> SpotLightBufferData : register(t4);
 
 struct PSInput 
 { 
-    float4 Pos           : SV_POSITION; 
+    float4 Pos           : SV_POSITION;
+    float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD; 
     uint   MaterialIndex;
+    float3 WorldPos;
 };
 
 struct PSOutput
@@ -75,11 +86,23 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
+float3 PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 normal)
+{
+    float distance = length(light.position - fragWorldPos);
+    float attenuation = saturate(1.0f / pow(distance, 4.0f));
+    return light.color * attenuation * pow(light.radius, 3.0f);
+}
+
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
     uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
     Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+
+    for (int i = 0; i < pointLightsCount; i++)
+    {
+        Color.rgb += PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, PSIn.Normal);
+    }
     PSOut.Color = Color;
 }
 )"};
@@ -100,8 +123,10 @@ R"(struct VSInput
 struct PSInput 
 {
     float4 Pos           : SV_POSITION;
+    float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD;
     uint   MaterialIndex;
+    float3 WorldPos;
 };
 
 struct MeshRendererData
@@ -115,6 +140,10 @@ StructuredBuffer<MeshRendererData> MeshRendererBufferData;
 cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
+    uint dirLightsCount;
+    uint pointLightsCount;
+    uint spotLightsCount;
+    uint padding;
 };
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
@@ -122,6 +151,8 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
+    PSIn.Normal = VSIn.Normal;
+    PSIn.WorldPos = TransformedPos.xyz;
     PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
 }
 )"};

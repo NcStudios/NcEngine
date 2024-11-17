@@ -12,9 +12,14 @@
 namespace nc::graphics
 {
 // Object model for environment data (type: constant buffer)
+// 80 bytes (rounded up due to alignment) with a 16-byte alignment.
 struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
+    uint32_t dirLightsCount;
+    uint32_t pointLightsCount;
+    uint32_t spotLightsCount;
+    uint32_t padding;
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
