@@ -4,6 +4,8 @@
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 
+#include "ncmath/Vector.h"
+
 class GlobalEnvironmentResourceTest : public DiligentEngineFixture
 {
     protected:
@@ -58,6 +60,7 @@ TEST_F(GlobalEnvironmentResourceTest, Update_succeeds)
 {
     auto cameraState = nc::graphics::CameraRenderState{
         .viewProjection = DirectX::XMMatrixPerspectiveFovRH(90.0f, 16.0f / 9.0f, 0.1f, 100.0f),
+        .position = nc::Vector3::Zero()
     };
 
     auto lightRenderState = nc::graphics::LightRenderState{};

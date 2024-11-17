@@ -49,6 +49,7 @@ void GlobalEnvironmentResource::Update(Diligent::IDeviceContext& context,
     };
 
     cbConstants->cameraViewProjection = cameraState.viewProjection;
+    cbConstants->cameraPosition = cameraState.position;
     cbConstants->dirLightsCount = static_cast<uint32_t>(lightRenderState.directionalLights.size());
     cbConstants->pointLightsCount = static_cast<uint32_t>(lightRenderState.pointLights.size());
     cbConstants->spotLightsCount = static_cast<uint32_t>(lightRenderState.spotLights.size());

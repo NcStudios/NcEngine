@@ -42,12 +42,14 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
             .viewProjection = DirectX::XMMatrixMultiply(
                 m_mainCamera->ViewMatrix(),
                 m_mainCamera->ProjectionMatrix()
-            )
+            ),
+            .position = transform.Position()
         };
     }
 
     return CameraRenderState{
-        .viewProjection = MakeDefaultViewProjection()
+        .viewProjection = MakeDefaultViewProjection(),
+        .position = Vector3::Zero()
     };
 }
 } // namespace nc::graphics
