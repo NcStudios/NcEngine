@@ -28,7 +28,7 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
                                            uint32_t instance,
                                            MaterialPasses passes)
 {
-    m_instanceCache.RemoveInstance(entity, instance);
+    m_instanceCache.RemoveInstance(instance);
     m_passCache.RemoveTarget(passes, entity.Index());
 }
 
