@@ -66,6 +66,7 @@ void BodyManager::AddBody(RigidBody& added)
 
 void BodyManager::RemoveBody(Entity toRemove)
 {
+    NC_ASSERT(!m_deferInitialization, "Cannot remove bodies while a batch is in progress");
     if (m_deferCleanup)
     {
         return;

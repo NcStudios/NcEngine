@@ -72,11 +72,10 @@ void MeshAssetDropdown(nc::MeshRenderer2& meshRenderer, nc::asset::NcAsset& ncAs
     }
 }
 
-auto MaterialPassesWidget(nc::MaterialDesc& desc) -> bool
+auto MaterialPassesWidget(nc::MaterialPasses& passes) -> bool
 {
-    const auto passInfo = std::views::zip(nc::GetMaterialPassNames(), nc::GetMaterialPassFlags());
-    auto& passes = desc.passes;
     auto modified = false;
+    const auto passInfo = std::views::zip(nc::GetMaterialPassNames(), nc::GetMaterialPassFlags());
     for (const auto& [name, flag] : passInfo)
     {
         auto isEnabled = static_cast<bool>(passes & flag);
@@ -705,18 +704,20 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
     ImGui::Separator();
     if (ImGui::TreeNodeEx("Material"))
     {
-        auto& materialInstance = meshRenderer.GetMaterial();
-        auto properties = materialInstance.GetProperties();
-        auto descModified = false;
+        auto& material = meshRenderer.GetMaterial();
+        auto passes = material.GetPasses();
+        auto properties = material.GetProperties();
+        auto passesModified = false;
+        auto modified = false;
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Metadata"))
         {
-            ImGui::Text("Handle: %hu", materialInstance.GetHandle());
-            auto materialName = std::string{materialInstance.GetName()};
+            ImGui::Text("Handle: %hu", material.GetHandle());
+            auto materialName = std::string{material.GetName()};
             if (ui::InputText(materialName, "name"))
             {
-                materialInstance.SetName(materialName);
+                material.SetName(materialName);
             }
 
             ImGui::TreePop();
@@ -725,34 +726,38 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Passes"))
         {
-            // descModified = mesh_renderer2_ext::MaterialPassesWidget(materialDesc) || descModified;
+            passesModified = mesh_renderer2_ext::MaterialPassesWidget(passes);
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Textures"))
         {
-            descModified = mesh_renderer2_ext::MaterialTexturesWidget(properties, ncAsset) || descModified;
+            modified = mesh_renderer2_ext::MaterialTexturesWidget(properties, ncAsset) || modified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Gradient Color"))
         {
-            descModified = mesh_renderer2_ext::MaterialColorWidget(properties) || descModified;
+            modified = mesh_renderer2_ext::MaterialColorWidget(properties) || modified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Outline"))
         {
-            descModified = mesh_renderer2_ext::MaterialOutlineWidget(properties) || descModified;
+            modified = mesh_renderer2_ext::MaterialOutlineWidget(properties) || modified;
             ImGui::TreePop();
         }
 
-        if (descModified)
+        if (passesModified)
         {
-            materialInstance.SetProperties(properties);
+            meshRenderer.SetMaterial(MaterialDesc{std::string{material.GetName()}, passes, properties});
+        }
+        else if (modified)
+        {
+            material.SetProperties(properties);
         }
 
         ImGui::TreePop();

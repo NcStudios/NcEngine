@@ -103,6 +103,8 @@ class MaterialInstance
         static inline graphics::MaterialRegistry* s_registry = nullptr;
 
         MaterialInstanceHandle m_handle;
+
+        void Release() noexcept;
 };
 
 inline MaterialInstance::MaterialInstance(MaterialInstance&& other) noexcept
@@ -114,9 +116,15 @@ inline MaterialInstance& MaterialInstance::operator=(MaterialInstance&& other) n
 {
     if (this != &other)
     {
+        Release();
         m_handle = std::exchange(other.m_handle, NullMaterialInstanceHandle);
     }
 
     return *this;
+}
+
+inline MaterialInstance::~MaterialInstance() noexcept
+{
+    Release();
 }
 } // namespace nc

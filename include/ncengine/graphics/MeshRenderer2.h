@@ -65,6 +65,7 @@ class MeshRenderer2
         /** @name Material Functions */
         auto GetMaterial() const -> const MaterialInstance& { return m_material; }
         auto GetMaterial() -> MaterialInstance& { return m_material; }
+        void SetMaterial(const MaterialDesc& materialDesc) { m_material = MaterialInstance{materialDesc}; }
 
     private:
         friend class graphics::MeshRendererSubsystem;
