@@ -814,8 +814,12 @@ void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
+#ifndef NC_USE_DILIGENT
     ui::InputColor3(light.ambientColor, "ambientColor");
     ui::InputColor3(light.diffuseColor, "diffuseColor");
+#else
+    ui::InputColor3(light.diffuseColor, "color");
+#endif
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 

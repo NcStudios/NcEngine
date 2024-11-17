@@ -12,7 +12,7 @@
 namespace nc::graphics
 {
 // Object model for environment data (type: constant buffer)
-// 80 bytes (rounded up due to alignment) with a 16-byte alignment.
+// 80 bytes with a 16-byte alignment.
 struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
@@ -23,10 +23,13 @@ struct GlobalEnvironmentData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
+// 144 bytes with a 16-byte alignment.
 struct MeshRendererData
 {
-    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity(); // Transforms the object from object space to world space.
+    DirectX::XMMATRIX normalMatrix = DirectX::XMMatrixIdentity(); // Transforms the normals from object space to world space while maintaining angle when non-uniform scaling is done on the object
     uint32_t materialIndex = NullMaterialInstanceHandle;
+    Vector3 padding = Vector3::Zero();
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).
@@ -42,7 +45,7 @@ struct MaterialData
 
 // Object model for DirectionalLights (type: StructuredBuffer element type).
 // Not targeting shadows for directional lights at the moment.
-// 32 bytes (rounded up due to alignment) with a 16-byte alignment.
+// 32 bytes with a 16-byte alignment.
 struct DirectionalLightData
 { 
     DirectionalLightData(Vector3 color_, Vector3 direction_)
@@ -56,7 +59,7 @@ struct DirectionalLightData
 };
 
 // Object model for PointLights (type: StructuredBuffer element type).
-// 96 bytes (rounded up due to alignment) with a 16-byte alignment.
+// 96 bytes with a 16-byte alignment.
 struct PointLightData
 {
     PointLightData(DirectX::XMMATRIX viewProjection_,
@@ -78,7 +81,7 @@ struct PointLightData
 
 
 // Object model for SpotLights (type: StructuredBuffer element type).
-// 128 bytes (rounded up due to alignment) with a 16-byte alignment.
+// 128 bytes with a 16-byte alignment.
 struct SpotLightData
 {
     SpotLightData(DirectX::XMMATRIX viewProjection_,

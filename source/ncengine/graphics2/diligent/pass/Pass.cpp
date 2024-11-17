@@ -88,9 +88,9 @@ struct PSOutput
 
 float3 PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 normal)
 {
-    float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1.0f / pow(distance, 4.0f));
-    return light.color * attenuation * pow(light.radius, 3.0f);
+    float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
+    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
+    return light.color * normalDotLightVec;
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -98,12 +98,13 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 Color;
     uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
     Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+    float3 lightInfluence = {0.0f, 0.0f, 0.0f};
 
     for (int i = 0; i < pointLightsCount; i++)
     {
-        Color.rgb += PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, PSIn.Normal);
+        lightInfluence += PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, PSIn.Normal);
     }
-    PSOut.Color = Color;
+    PSOut.Color = Color * float4(lightInfluence, Color.a);
 }
 )"};
 
@@ -132,6 +133,7 @@ struct PSInput
 struct MeshRendererData
 {
     float4x4 model;
+    float4x4 normalMatrix;
     uint materialIndex;
 };
 
@@ -151,7 +153,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = VSIn.Normal;
+    PSIn.Normal = normalize(mul(VSIn.Normal, float3x3(MeshRendererBufferData[InstanceID].normalMatrix)));
     PSIn.WorldPos = TransformedPos.xyz;
     PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
 }

@@ -5,6 +5,17 @@
 
 #include <ranges>
 
+namespace nc
+{
+/* The vertex normals have to be translated to world-space, but can't simply be multiplied by the model matrix. */
+auto GetNormalMatrix(DirectX::FXMMATRIX transformationMatrix) -> DirectX::XMMATRIX
+{
+    auto normalMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, transformationMatrix));
+    normalMatrix.r[3] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f); // Strip the translation component
+    return normalMatrix;
+}
+}
+
 namespace nc::graphics
 {
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
@@ -28,6 +39,7 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
 
         m_instanceData.emplace_back(
             ecs.Get<Transform>(entity).TransformationMatrix(),
+            GetNormalMatrix(ecs.Get<Transform>(entity).TransformationMatrix()),
             material.GetHandle()
         );
     }
