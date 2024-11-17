@@ -8,31 +8,41 @@ MaterialInstance::MaterialInstance(const MaterialDesc& desc)
 {
 }
 
-MaterialInstance::~MaterialInstance() noexcept
-{
-    if (m_handle != NullMaterialInstanceHandle)
-    {
-        s_registry->DestroyInstance(m_handle);
-    }
-}
-
 auto MaterialInstance::Clone() const -> MaterialInstance
 {
     return MaterialInstance{s_registry->GetInstanceDesc(m_handle)};
 }
 
-auto MaterialInstance::GetDesc() const -> const MaterialDesc&
+auto MaterialInstance::GetName() const -> std::string_view
 {
-    return s_registry->GetInstanceDesc(m_handle);
-}
-
-void MaterialInstance::SetDesc(const MaterialDesc& desc)
-{
-    s_registry->SetInstanceDesc(m_handle, desc);
+    return s_registry->GetInstanceDesc(m_handle).name;
 }
 
 void MaterialInstance::SetName(std::string_view name)
 {
     s_registry->SetInstanceName(m_handle, name);
+}
+
+auto MaterialInstance::GetPasses() const -> MaterialPasses
+{
+    return s_registry->GetInstanceDesc(m_handle).passes;
+}
+
+auto MaterialInstance::GetProperties() const -> const MaterialProperties&
+{
+    return s_registry->GetInstanceDesc(m_handle).properties;
+}
+
+void MaterialInstance::SetProperties(const MaterialProperties& desc)
+{
+    s_registry->SetInstanceProperties(m_handle, desc);
+}
+
+void MaterialInstance::Release() noexcept
+{
+    if (m_handle != NullMaterialInstanceHandle)
+    {
+        s_registry->DestroyInstance(m_handle);
+    }
 }
 } // namespace nc
