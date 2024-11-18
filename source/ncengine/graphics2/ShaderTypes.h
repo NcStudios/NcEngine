@@ -24,7 +24,6 @@ struct GlobalEnvironmentData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
-// 80 bytes with a 16-byte alignment.
 struct MeshRendererData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity(); // Transforms the object from object space to world space.
