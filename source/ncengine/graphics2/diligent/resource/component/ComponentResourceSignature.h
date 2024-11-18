@@ -24,10 +24,10 @@ class ComponentResourceSignature
                                             Diligent::IRenderDevice& device,
                                             std::string_view signatureName,
                                             uint8_t bindingIndex,
-                                            StructuredBufferResourceDesc meshRendererResourceDesc,
-                                            StructuredBufferResourceDesc directionalLightResourceDesc,
-                                            StructuredBufferResourceDesc pointLightResourceDesc,
-                                            StructuredBufferResourceDesc spotLightResourceDesc);
+                                            const StructuredBufferResourceDesc& meshRendererResourceDesc,
+                                            const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                            const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                            const StructuredBufferResourceDesc& spotLightResourceDesc);
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY); }
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }

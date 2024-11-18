@@ -43,7 +43,7 @@ class ShaderFactory
 template<class EngineFactoryT>
 static auto MakeShaderFactory([[maybe_unused]] EngineFactoryT& engineFactory,
                               Diligent::IRenderDevice& device,
-                              std::string_view shadersPath) -> std::unique_ptr<ShaderFactory>
+                              [[maybe_unused]] std::string_view shadersPath) -> std::unique_ptr<ShaderFactory>
 {
     auto shaderSourceFactory = Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory>{};
 #if NC_RUNTIME_SHADER_COMPILATION

@@ -20,7 +20,7 @@ class GlobalEnvironmentResource
                                            Diligent::IRenderDevice& device,
                                            Diligent::IShaderResourceVariable& variable);
 
-        void Update(Diligent::IDeviceContext& context, const CameraRenderState cameraState, const LightRenderState lightRenderState);
+        void Update(Diligent::IDeviceContext& context, const CameraRenderState& cameraState, const LightRenderState& lightRenderState);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

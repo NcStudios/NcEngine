@@ -10,7 +10,7 @@ auto GraphicsFrontend::BuildRenderState(ecs::Ecs world) -> FrontendRenderState
         .cameraState = m_cameraSystem.BuildState(world),
         .meshRendererState = m_meshRendererSystem.BuildState(world),
         .materialRenderState = m_materialRegistry.BuildState(),
-        .lightRenderState = m_lightSubsystem.BuildState(world, world, world) /** This can't be the right usage of ExplicitEcs */
+        .lightRenderState = m_lightSubsystem.BuildState(world)
     };
 }
 } // namespace nc::graphics

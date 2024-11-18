@@ -1,5 +1,4 @@
 #include "LightSubsystem.h"
-#include "ncengine/ecs/Ecs.h"
 
 #include <ranges>
 
@@ -33,35 +32,33 @@ auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix
 
 namespace nc::graphics
 {
-auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, Transform> dirLightEcs,
-                                ecs::ExplicitEcs<PointLight, Transform> pointLightEcs,
-                                ecs::ExplicitEcs<SpotLight, Transform> spotLightEcs) -> LightRenderState
+auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState
 {
     { // Directional Lights
-        const auto& lightPool = dirLightEcs.GetPool<DirectionalLight>();
+        const auto& lightPool = ecs.GetPool<DirectionalLight>();
         const auto entities = lightPool.GetEntityPool();
         m_directionalLights.clear();
         m_directionalLights.reserve(entities.size());
 
         for (auto [i, entity] : std::views::enumerate(entities))
         {
-            auto& light = dirLightEcs.Get<DirectionalLight>(entity);
-            auto& transform = dirLightEcs.Get<Transform>(entity);
+            auto& light = ecs.Get<DirectionalLight>(entity);
+            auto& transform = ecs.Get<Transform>(entity);
 
             m_directionalLights.emplace_back(light.color, transform.Forward());
         }
     }
 
     { // Point Lights
-        const auto& lightPool = pointLightEcs.GetPool<PointLight>();
+        const auto& lightPool = ecs.GetPool<PointLight>();
         const auto entities = lightPool.GetEntityPool();
         m_pointLights.clear();
         m_pointLights.reserve(entities.size());
 
         for (auto [i, entity] : std::views::enumerate(entities))
         {
-            auto& light = pointLightEcs.Get<PointLight>(entity);
-            auto& transform = pointLightEcs.Get<Transform>(entity);
+            auto& light = ecs.Get<PointLight>(entity);
+            auto& transform = ecs.Get<Transform>(entity);
 
             m_pointLights.emplace_back(pointlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix()),
                                        transform.Position(),
@@ -72,15 +69,15 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, Transform> di
     }
 
     { // Spot Lights
-        const auto& lightPool = spotLightEcs.GetPool<SpotLight>();
+        const auto& lightPool = ecs.GetPool<SpotLight>();
         const auto entities = lightPool.GetEntityPool();
         m_spotLights.clear();
         m_spotLights.reserve(entities.size());
 
         for (auto [i, entity] : std::views::enumerate(entities))
         {
-            auto& light = spotLightEcs.Get<SpotLight>(entity);
-            auto& transform = spotLightEcs.Get<Transform>(entity);
+            auto& light = ecs.Get<SpotLight>(entity);
+            auto& transform = ecs.Get<Transform>(entity);
 
             m_spotLights.emplace_back(spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix()),
                                       transform.Position(),

@@ -8,10 +8,10 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        Diligent::IRenderDevice& device,
                                                        std::string_view signatureName,
                                                        uint8_t bindingIndex,
-                                                       StructuredBufferResourceDesc meshRendererResourceDesc,
-                                                       StructuredBufferResourceDesc directionalLightResourceDesc,
-                                                       StructuredBufferResourceDesc pointLightResourceDesc,
-                                                       StructuredBufferResourceDesc spotLightResourceDesc)
+                                                       const StructuredBufferResourceDesc& meshRendererResourceDesc,
+                                                       const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                                       const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                                       const StructuredBufferResourceDesc& spotLightResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(meshRendererResourceDesc),

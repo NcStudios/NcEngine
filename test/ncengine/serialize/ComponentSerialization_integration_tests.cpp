@@ -159,7 +159,7 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::DirectionalLight{nc::Vector3::Splat(1.0f)};
+    const auto expected = nc::graphics::DirectionalLight{nc::Vector3::Splat(7.0f)};
     nc::SerializeDirectionalLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeDirectionalLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.color, actual.color);

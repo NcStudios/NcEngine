@@ -38,8 +38,8 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& c
 }
 
 void GlobalEnvironmentResource::Update(Diligent::IDeviceContext& context,
-                                       const CameraRenderState cameraState,
-                                       const LightRenderState lightRenderState)
+                                       const CameraRenderState& cameraState,
+                                       const LightRenderState& lightRenderState)
 {
     auto cbConstants = Diligent::MapHelper<GlobalEnvironmentData>{
         &context,
