@@ -1,20 +1,23 @@
 #pragma once
 
 #include "LightRenderState.h"
+
 #include "graphics2/ShaderTypes.h"
 
-#include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
+#include "ncengine/ecs/EcsFwd.h"
+
 
 #include <vector>
 
 namespace nc
 {
+class Transform;
 namespace graphics
 {
+struct DirectionalLight;
+struct PointLight;
+struct SpotLight;
+
 class LightSubsystem
 {
     public:
