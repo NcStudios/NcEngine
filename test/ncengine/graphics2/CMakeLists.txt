@@ -26,6 +26,30 @@ target_link_libraries(CameraSubsystem_tests
 
 add_test(CameraSubsystem_tests CameraSubsystem_tests)
 
+### InstanceCache Tests ###
+add_executable(InstanceCache_tests
+    InstanceCache_tests.cpp
+)
+
+target_include_directories(InstanceCache_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(InstanceCache_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(InstanceCache_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(InstanceCache_tests InstanceCache_tests)
+
 ### MaterialPassCache Tests ###
 add_executable(MaterialPassCache_tests
     MaterialPassCache_tests.cpp

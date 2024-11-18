@@ -23,7 +23,7 @@ auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::M
 namespace nc::graphics
 {
 MaterialRegistry::MaterialRegistry(uint32_t maxInstances)
-    : m_maxIndex{static_cast<MaterialInstanceHandle>(maxInstances)}
+    : m_maxIndex{maxInstances}
 {
     MaterialInstance::s_registry = this;
 }
@@ -32,7 +32,7 @@ auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInsta
 {
     if (m_freeList.empty())
     {
-        NC_ASSERT(m_nextIndex < m_maxIndex, "Max material instances exceeded");
+        NC_ASSERT(m_nextIndex < m_maxIndex, fmt::format("Max material instances exceeded: current {}, max {}", m_nextIndex, m_maxIndex));
         m_data.push_back(ToMaterialData(desc.properties));
         m_descriptions.push_back(desc);
         m_dirty.push_back(m_nextIndex);

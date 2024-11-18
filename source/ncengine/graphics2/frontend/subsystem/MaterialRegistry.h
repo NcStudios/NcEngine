@@ -27,10 +27,10 @@ class MaterialRegistry : public StableAddress
     private:
         std::vector<MaterialData> m_data;
         std::vector<MaterialDesc> m_descriptions;
-        std::vector<MaterialInstanceHandle> m_dirty;
-        std::vector<MaterialInstanceHandle> m_freeList;
-        MaterialInstanceHandle m_nextIndex = 0;
-        MaterialInstanceHandle m_maxIndex;
+        std::vector<uint32_t> m_dirty;
+        std::vector<uint32_t> m_freeList;
+        uint32_t m_nextIndex = 0;
+        uint32_t m_maxIndex;
 
         auto CollectDirtyRanges() -> std::vector<BufferSlice>;
 };

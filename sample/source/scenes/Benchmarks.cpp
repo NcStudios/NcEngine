@@ -7,6 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/MeshRenderer2.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -32,6 +33,13 @@ constexpr auto g_assets = std::array{
     std::string_view{nc::sample::RampMesh}
 };
 
+const auto g_meshViews = std::array{
+    &nc::sample::mesh::Cube,
+    &nc::sample::mesh::Sphere,
+    &nc::sample::mesh::Capsule,
+    &nc::sample::mesh::Ramp
+};
+
 // Need to store ptrs b/c deferred initialization
 const auto g_pbrMaterials = std::array{
     &nc::sample::DefaultPbrMaterial,
@@ -45,15 +53,23 @@ const auto g_pbrMaterials = std::array{
 };
 
 const auto g_toonMaterials = std::array{
-    &nc::sample::DefaultToonMaterial,
-    &nc::sample::RedToonMaterial,
-    &nc::sample::GreenToonMaterial,
-    &nc::sample::BlueToonMaterial,
-    &nc::sample::OrangeToonMaterial,
-    &nc::sample::PurpleToonMaterial,
-    &nc::sample::TealToonMaterial,
-    &nc::sample::YellowToonMaterial
+    &nc::sample::material::Default,
+    &nc::sample::material::Red,
+    &nc::sample::material::Green,
+    &nc::sample::material::Blue,
+    &nc::sample::material::Orange,
+    &nc::sample::material::Purple,
+    &nc::sample::material::Teal,
+    &nc::sample::material::Yellow
 };
+
+auto MeshFromPath(std::string_view path) -> const nc::asset::MeshView&
+{
+    const auto pos = std::ranges::find(g_assets, path);
+    NC_ASSERT(pos != g_assets.end(), "Mesh not found");
+    const auto index = std::distance(g_assets.begin(), pos);
+    return *g_meshViews.at(index);
+}
 
 auto RandomPbrMaterial() -> const nc::graphics::PbrMaterial&
 {
@@ -63,7 +79,7 @@ auto RandomPbrMaterial() -> const nc::graphics::PbrMaterial&
     return *g_pbrMaterials.at(index);
 }
 
-auto RandomToonMaterial() -> const nc::graphics::ToonMaterial&
+auto RandomToonMaterial() -> const nc::MaterialDesc&
 {
     static auto index = 0ull;
     ++index;
@@ -367,7 +383,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
+    world.Emplace<MeshRenderer2>(ground, mesh::Cube, material::Blue);
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
@@ -395,15 +411,19 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::mesh_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
-    // Toon Renderer
+    // Mesh Renderer
     {
-        const auto handle = world.Emplace<Entity>({.tag = "ToonRenderer Spawner"});
+        const auto handle = world.Emplace<Entity>({.tag = "MeshRenderer Spawner"});
         auto& spawner = world.Emplace<Spawner>(
             handle,
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::ToonRenderer>(entity, ::toon_renderer::Mesh, ::RandomToonMaterial());
+                world.Emplace<MeshRenderer2>(
+                    entity,
+                    MeshFromPath(::toon_renderer::Mesh),
+                    ::RandomToonMaterial()
+                );
             }
         );
 
@@ -440,7 +460,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::ToonRenderer>(entity, ::rigid_body::Mesh, ::RandomToonMaterial());
+                world.Emplace<MeshRenderer2>(
+                    entity,
+                    MeshFromPath(::rigid_body::Mesh),
+                    ::RandomToonMaterial()
+                );
+
                 ::AddRigidBodyForMesh(world, entity, ::rigid_body::Mesh);
             }
         );

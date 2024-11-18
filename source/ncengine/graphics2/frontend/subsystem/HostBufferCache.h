@@ -12,18 +12,25 @@ namespace nc::graphics
 // todo: handle SOA semantics somehow
 // todo: handle deferred writes for parallelism
 
+using HostBufferHandle = uint32_t;
+
+// Buffer type for managing the cpu-side of a structured buffer.
+// - returned handles are stable indices
+// - buffer may be 'sparse' - indices to erased elements remain valid and are backfilled on the next emplace
+// - unless otherwise specified, functions track modified elements, which can be querried for later updates as
+//   indices or a BufferUpdateInfo<T>.
 template<class T>
-class HostBufferCache
+class HostBuffer
 {
     public:
-        explicit HostBufferCache(uint32_t maxInstances)
+        explicit HostBuffer(uint32_t maxInstances)
             : m_maxIndex{maxInstances}
         {
         }
 
+        // Add a new element
         template<class... Args>
-        // ctorabl w/
-        auto emplace(Args&&... args) -> uint32_t
+        auto emplace(Args&&... args) -> HostBufferHandle
         {
             if (m_freeList.empty())
             {
@@ -40,65 +47,115 @@ class HostBufferCache
             return index;
         }
 
-        void erase(uint32_t index)
+        // Remove an element (does not modify element data or mark as dirty)
+        void erase(HostBufferHandle handle)
         {
-            NC_ASSERT(index < m_data.size(), "Instance out of bounds");
-            m_freeList.push_back(index);
+            NC_ASSERT(handle < m_data.size(), "Instance out of bounds");
+            m_freeList.push_back(handle);
         }
 
-        void erase(uint32_t index, const T& tombstone)
+        // Remove an element, overwriting the current value (does not mark as dirty)
+        void erase(HostBufferHandle handle, const T& tombstone)
         {
-            NC_ASSERT(index < m_data.size(), "Instance out of bounds");
-            m_data[index] = tombstone;
-            m_freeList.push_back(index);
+            NC_ASSERT(handle < m_data.size(), "Instance out of bounds");
+            m_data[handle] = tombstone;
+            m_freeList.push_back(handle);
         }
 
+        // Mutable element access
+        auto access_for_write(HostBufferHandle handle) -> T&
+        {
+            mark_dirty(handle);
+            return m_data[handle];
+        }
+
+        // Immutable element access
+        auto access_for_read(HostBufferHandle handle) const -> const T&
+        {
+            return m_data[handle];
+        }
+
+        // Explicitly track a modification to an element
+        void mark_dirty(HostBufferHandle handle)
+        {
+            m_dirty.push_back(handle);
+        }
+
+        // Check if any elements have been modified
+        auto has_dirty_indices() const -> bool
+        {
+            return !m_dirty.empty();
+        }
+
+        // View indices of modified elements (indices are unsorted and may contain duplicates)
+        auto get_dirty_indices() const -> std::span<const uint32_t>
+        {
+            return m_dirty;
+        }
+
+        // Sort and dedupe indices of modified elements
+        void sort_dirty_indices()
+        {
+            const auto maxIndex = m_data.size();
+            auto visited = std::vector<uint8_t>(maxIndex, 0);
+            for (const auto i : m_dirty)
+            {
+                visited[i] = true;
+            }
+
+            m_dirty.clear();
+            for(auto i = 0u; i < maxIndex; ++i)
+            {
+                if (visited[i])
+                    m_dirty.push_back(i);
+            }
+        }
+
+        // Mark all modified elements as up-to-date
+        void reset_dirty_indices()
+        {
+            m_dirty.clear();
+        }
+
+        // Build a BufferUpdateInfo<T> for all modified elements (calls sort_dirty_indices() and reset_dirty_indices())
         auto build_update_info() -> BufferUpdateInfo<T>
         {
-            return has_dirty_state()
+            return has_dirty_indices()
                 ? BufferUpdateInfo<T>{m_data, collect_dirty_ranges()}
                 : BufferUpdateInfo<T>{};
         }
 
-        auto has_dirty_state()  const -> bool                      { return !m_dirty.empty(); }
-        auto dirty_indices()    const -> std::span<const uint32_t> { return m_dirty; }
+        // STL Functions
+        // note: Any elements modified via these functions must be explicitly marked dirty!
+        auto size()     const { return m_data.size();                   }
+        auto max_size() const { return static_cast<size_t>(m_maxIndex); }
+        auto capacity() const { return m_data.capacity();               }
+        auto data()           { return m_data.data();                   }
+        auto data()     const { return m_data.data();                   }
+        auto begin()          { return m_data.begin();                  }
+        auto begin()    const { return m_data.begin();                  }
+        auto end()            { return m_data.end();                    }
+        auto end()      const { return m_data.end();                    }
 
-        void mark_dirty(uint32_t index)
+        void reserve(size_t capacity)
         {
-            m_dirty.push_back(index);
-        }
-
-        void reset_dirty_state()
-        {
-            m_dirty.clear();
+            m_data.reserve(capacity);
         }
 
         void clear() noexcept
         {
             m_data.clear();
-            m_data.shrink_to_fit();
             m_dirty.clear();
-            m_dirty.shrink_to_fit();
             m_freeList.clear();
-            m_freeList.shrink_to_fit();
             m_nextIndex = 0;
         }
 
-        auto operator[](uint32_t index)       -> T&       { return m_data[index];     }
-        auto operator[](uint32_t index) const -> const T& { return m_data[index];     }
-        auto at(uint32_t index)               -> T&       { return m_data.at(index);  }
-        auto at(uint32_t index)         const -> const T& { return m_data.at(index);  }
-        auto size()                     const -> size_t   { return m_data.size();     } // correct?
-        auto max_size()                 const -> size_t   { return m_maxIndex;        }
-        auto num_free_slots()           const -> size_t   { return m_freeList.size(); }
-        auto capacity()                 const -> size_t   { return m_data.capacity(); }
-        void reserve(uint32_t capacity)                   { m_data.reserve(capacity); }
-        auto data()                           -> T*       { return m_data.data();     }
-        auto data()                     const -> const T* { return m_data.data();     }
-        auto begin()                                      { return m_data.begin();    }
-        auto begin()                    const             { return m_data.begin();    }
-        auto end()                                        { return m_data.end();      }
-        auto end()                      const             { return m_data.end();      }
+        void shrink_to_fit()
+        {
+            m_data.shrink_to_fit();
+            m_dirty.shrink_to_fit();
+            m_freeList.shrink_to_fit();
+        }
 
     private:
         std::vector<T> m_data;
@@ -109,32 +166,27 @@ class HostBufferCache
 
         auto collect_dirty_ranges() -> std::vector<BufferSlice>
         {
+            sort_dirty_indices();
+            const auto end = static_cast<uint32_t>(m_dirty.size());
+            auto curStart = m_dirty[0];
+            auto curEnd = curStart + 1;
             auto out = std::vector<BufferSlice>{};
-            if (m_dirty.empty())
+            for (auto nextEnd = 1u; nextEnd < end; ++nextEnd)
             {
-                return out;
-            }
-
-            std::ranges::sort(m_dirty);
-            auto removed = std::ranges::unique(m_dirty);
-            m_dirty.erase(removed.begin(), removed.end());
-            auto start = m_dirty[0];
-            auto end = start + 1;
-            for (const auto nextEnd : std::views::drop(m_dirty, 1))
-            {
-                if (nextEnd == end)
+                if (nextEnd == curEnd)
                 {
-                    end += 1;
+                    ++curEnd;
                 }
                 else
                 {
-                    out.emplace_back(start, end - start);
-                    start = nextEnd;
-                    end = start + 1;
+                    out.emplace_back(curStart, curEnd - curStart);
+                    curStart = nextEnd;
+                    curEnd = nextEnd + 1;
                 }
             }
 
-            out.emplace_back(start, end - start);
+            out.emplace_back(curStart, curEnd - curStart);
+            reset_dirty_indices();
             return out;
         }
 };

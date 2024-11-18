@@ -153,6 +153,209 @@ class MaterialPassCache
 
 # InstanceCache
 ```cpp
+// attempt 3
+struct InstanceData
+{
+    uint32_t transformIndex;
+    uint32_t materialIndex;
+};
+
+struct InstanceAddResult
+{
+    uint32_t instanceIndex;
+    bool modifiedIndices;
+}
+
+// instead of batch, should just make attribs...
+struct Batch
+{
+    uint32_t instanceOffset;
+    uint32_t instanceCount;
+    uint32_t indexOffset;
+    uint32_t indexCount;
+    uint32_t vertexOffset;
+};
+
+class InstanceCache
+{
+    using BatchKey = uint64_t;
+    static constexpr auto MakeKey(uint64_t meshId, MaterialPasses passes) -> BatchKey
+    {
+        return meshId + passes; // mock
+    }
+
+    // not really sure best way to manage
+    struct BatchRegion
+    {
+        uint32_t offset;
+        uint32_t count;
+        uint32_t indexOffset;
+        uint32_t indexCount;
+        uint32_t vertexOffset;
+
+        uint32_t capacity;
+        MaterialPasses passes
+    };
+
+    public:
+        auto AddInstance(Entity entity,
+                         uint32_t transformIndex,
+                         MaterialInstanceHandle materialIndex,
+                         MaterialPasses passes,
+                         uint64_t meshId) -> uint32_t
+        {
+            const auto id = m_nextId = 0;
+            const auto key = MakeKey(meshId, passes);
+            // ...assuming always exists
+            auto& batch = m_batches.at(key);
+            const auto instanceIndex = batch.offset + batch.count;
+            ++batch.count;
+            m_indexLookup.at(id) = instanceIndex;
+            if (batch.count > batch.capacity)
+            {
+                m_buffer.insert(m_buffer.begin() + instanceIndex, InstanceData{transformIndex, materialIndex});
+                ++batch.capacity;
+                // increment all batches offsets after the new instance
+                for (auto& b : m_batches)
+                {
+                    if (b.offset > batch.offset)
+                        ++b.offset;
+                }
+
+                // increment all instance indices after the new instance
+                for (auto& i : m_indexLookup.values())
+                {
+                    if (i > instanceIndex)
+                        ++i;
+                }
+
+                return {id, true};
+            }
+            else
+            {
+                m_buffer.at(instanceIndex) = InstanceData{transformIndex, materialIndex};
+                return {id, false};
+            }
+        }
+
+        void RemoveInstance(uint32_t id,
+                            meshId meshId,
+                            MaterialPasses passes)
+        {
+            const auto instanceIndex = m_indexLookup.at(id);
+            m_indexLookup.erase(id);
+            // ...reclaim id
+            const auto key = MakeKey(meshId, passes);
+            auto& batch = m_batches.at(key);
+            ++batch.capacity;
+            if (instanceIndex == batch.offset + batch.count)
+            {
+                return;
+            }
+
+            const auto offsetFromBatchBeg = instanceIndex - batch.offset;
+            const auto offsetFromBatchEnd = (batch.offset + batch.count) - instanceIndex;
+            for (auto i = instanceIndex + 1; i < batch.offset + batch.count; ++i)
+            {
+                --m_indexLookup.at(i);
+                m_buffer.at(i - 1) = m_buffer.at(i);
+            }
+        }
+
+        // todo: we prob want to just make Diligent::XXXAttribs here... but can't be exactly here b/c its in frontend
+        auto BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>
+        {
+            auto out = std::vector<std::vector<Batch>>(passes.size(), {});
+            for (const auto& batch : m_batches)
+            {
+                for (auto [i, pass] : std::views::enumerate(passes))
+                {
+                    if (!(batch.passes & pass))
+                        continue;
+
+                    out.at(i).push_back(Batch{
+                        batch.offset,
+                        batch.count,
+                        batch.indexOffset,
+                        batch.indexCount,
+                        batch.vertexOffset
+                    });
+                }
+            }
+
+            return out;
+        }
+
+    private:
+        std::vector<InstanceData> m_buffer;
+        sparse_map<BatchRegion> m_batches; // maps BatchKey -> BatchRegion
+        sparse_map<uint32_t> m_indexLookup; // maps instanceId -> instanceIndex
+        uint32_t m_nextId = 0;
+};
+
+struct PassBatch
+{
+    std::vector<uint32_t> instances;
+    uint32_t indexCount;
+    uint32_t firstIndex;
+    uint32_t firstVertex;
+
+    void Add(uint32_t instance, bool increment) {
+        auto pos = get_pos(instances, instance);
+        instances.sorted_insert(pos, instance);
+        if (increment) {
+            increment(pos, instances.end());
+        }
+    }
+
+    auto Increment(uint32_t instance) {
+        auto pos = get_pos(instances, instance);
+        if (pos != instances.end()) {
+            increment(pos, instances.end());
+        }
+    }
+};
+
+struct PassTargets
+{
+    sparse_map<PassBatch> batches;
+    MaterialPass::type id;
+};
+
+class MaterialPassCache
+{
+    public:
+
+        void AddTarget(MaterialPasses passes,
+                       const asset::MeshView& mesh,
+                       uint32_t instance,
+                       bool subsequentIndicesModified)
+        {
+            ForEachPass(passes, [&](auto& pass) {
+                if (pass.id & passes) {
+                    if (!pass.batches.contains(mesh.id)) {
+                        pass.batches.emplace(
+                            mesh.id,
+                            {},
+                            mesh.indexCount,
+                            mesh.firstIndex,
+                            mesh.firstVertex
+                        );
+                    }
+
+                    pass.batches.at(mesh.id).Add
+                }
+                else {
+
+                }
+            });
+        }
+
+    private:
+        std::vector<PassTargets> m_passTargets;
+};
+
+
 // class InstanceCache
 // {
 //     public:

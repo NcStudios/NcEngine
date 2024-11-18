@@ -1,4 +1,5 @@
 #include "MaterialPassBackend.h"
+#include "ncengine/debug/Profile.h"
 
 #include "ncutility/NcError.h"
 
@@ -24,6 +25,7 @@ auto ToDrawAttribs(const nc::graphics::PassTarget& target) -> Diligent::DrawInde
 
 void DrawIndexed(Diligent::IDeviceContext& context, const std::vector<nc::graphics::PassTarget>& targets)
 {
+    NC_PROFILE_SCOPE("DrawIndexed()", nc::ProfileCategory::Rendering);
     for (const auto& target : targets)
     {
         context.DrawIndexed(ToDrawAttribs(target));
@@ -36,6 +38,7 @@ namespace nc::graphics
 void MaterialPassBackend::Render(Diligent::IDeviceContext& context,
                                  const std::vector<PassRenderState>& passStates)
 {
+    NC_PROFILE_SCOPE("MaterialPassBackend::Render()", ProfileCategory::Rendering);
     NC_ASSERT(m_passes.size() == passStates.size(), "Frontend/Backend passes out of sync.");
     for (auto [pass, state] : std::views::zip(m_passes, passStates))
     {

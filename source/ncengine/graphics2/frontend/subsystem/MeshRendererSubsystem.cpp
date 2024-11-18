@@ -3,7 +3,8 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer2.h"
 
-#include <ranges>
+
+#include "ncengine/debug/Profile.h"
 
 namespace nc::graphics
 {
@@ -39,6 +40,7 @@ void MeshRendererSubsystem::SetInstanceMesh(Entity entity, MaterialPasses passes
 
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
 {
+    NC_PROFILE_SCOPE("MeshRendererSubsystem::BuildState()", ProfileCategory::Rendering);
     m_instanceCache.UpdateMatrices(ecs);
     return MeshRendererRenderState{
         .instanceData = m_instanceCache.BuildState(),
