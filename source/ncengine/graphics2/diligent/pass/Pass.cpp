@@ -87,56 +87,65 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-float3 DirectionalLightRadiance(DirectionalLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+struct LightInfluence
+{
+    float3 color;
+    float specularAmt;
+    float diffuseAmt;
+};
+
+LightInfluence DirectionalLightRadiance(DirectionalLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(-light.direction); // Vector from light to fragment
     float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float3 diffuseTotal = light.color * normalDotLightVec;
+    float diffuseTotal = normalDotLightVec;
     
     // Specular
     float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
     float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
     float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float3 specularTotal = light.color * specular * 0.5f;
+    float specularTotal = specular * 0.5f;
 
-    return specularTotal + diffuseTotal;
+    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    return lightInfluence;
 }
 
-float3 PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
     float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float3 diffuseTotal = light.color * normalDotLightVec;
-    
+    float diffuseTotal = normalDotLightVec;
+
     // Specular
     float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
     float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
     float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float3 specularTotal = light.color * specular * 0.5f;
+    float specularTotal = specular * 0.5f;
 
     // Attenuation
     float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1/pow(distance, 4.0f)) * pow(light.radius, 3);
+    float attenuation = saturate(1.0 / pow(max(distance, 0.01), 4.0f)) * pow(light.radius, 3);
     diffuseTotal *= attenuation;
     specularTotal *= attenuation;
 
-    return specularTotal + diffuseTotal;
+    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    return lightInfluence;
 }
 
-float3 SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
     float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float3 diffuseTotal = light.color * normalDotLightVec;
+    float diffuseTotal = normalDotLightVec;
 
     // Specular
     float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
     float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
     float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float3 specularTotal = light.color * specular * 0.5f;
+    float specularTotal = specular * 0.5f;
 
     // Spot Light Cutoff
     float theta = dot(lightVec, normalize(-light.direction));
@@ -147,11 +156,13 @@ float3 SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float3 camera
 
     // Attenuation
     float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1/pow(distance, 4.0f)) * pow(light.radius, 3);
+    float attenuation = saturate(1.0 / pow(max(distance, 0.01), 4.0f)) * pow(light.radius, 3);
+
     diffuseTotal *= attenuation;
     specularTotal *= attenuation;
 
-    return specularTotal + diffuseTotal;
+    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    return lightInfluence;
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -159,21 +170,28 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 Color;
     uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
     Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
-    float3 lightInfluence = {0.0f, 0.0f, 0.0f};
+    float alpha = Color.a;
+    float3 finalColor = {0.0f, 0.0f, 0.0f};
 
     for (int i = 0; i < dirLightsCount; i++)
     {
-        lightInfluence += DirectionalLightRadiance(DirectionalLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        LightInfluence influence = DirectionalLightRadiance(DirectionalLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
     for (int i = 0; i < pointLightsCount; i++)
     {
-        lightInfluence += PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        LightInfluence influence = PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
     for (int i = 0; i < spotLightsCount; i++)
     {
-        lightInfluence += SpotLightRadiance(SpotLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        LightInfluence influence = SpotLightRadiance(SpotLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
-    PSOut.Color = Color * float4(lightInfluence, Color.a);
+
+    Color *= float4(finalColor, 1.0);
+    Color.a = alpha;
+    PSOut.Color = Color;
 }
 )"};
 
@@ -184,10 +202,6 @@ R"(struct VSInput
     float3 Pos         : ATTRIB0;
     float3 Normal      : ATTRIB1;
     float2 UV          : ATTRIB2;
-    float3 Tangent     : ATTRIB3;
-    float3 Bitangent   : ATTRIB4;
-    float4 BoneWeights : ATTRIB5;
-    uint4  BoneIds     : ATTRIB6;
 };
 
 struct PSInput 
