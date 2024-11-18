@@ -12,6 +12,8 @@ R"(
 #   define NonUniformResourceIndex(x) x
 #endif
 
+#include "Lighting.fxh"
+
 Texture2D     TextureBufferData[];
 SamplerState  TextureBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
@@ -36,41 +38,8 @@ struct MaterialData
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
-
-struct DirectionalLightData
-{
-    float3 color;
-    float padding;
-    float3 direction;
-    float padding2;
-};
-
 StructuredBuffer<DirectionalLightData> DirectionalLightBufferData : register(t2);
-
-struct PointLightData
-{
-    float4x4 viewProj;
-    float3 position;
-    int castsShadows;
-    float3 color;
-    float radius;
-};
-
 StructuredBuffer<PointLightData> PointLightBufferData : register(t3);
-
-struct SpotLightData
-{
-    float4x4 viewProj;
-    float3 position;
-    int castsShadows;
-    float3 color;
-    float innerAngle;
-    float3 direction;
-    float outerAngle;
-    float3 padding;
-    float radius;
-};
-
 StructuredBuffer<SpotLightData> SpotLightBufferData : register(t4);
 
 struct PSInput 
@@ -87,83 +56,6 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-struct LightInfluence
-{
-    float3 color;
-    float specularAmt;
-    float diffuseAmt;
-};
-
-LightInfluence DirectionalLightRadiance(DirectionalLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
-{
-    // Diffuse
-    float3 lightVec = normalize(-light.direction); // Vector from light to fragment
-    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float diffuseTotal = normalDotLightVec;
-    
-    // Specular
-    float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
-    float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
-    float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float specularTotal = specular * 0.5f;
-
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
-    return lightInfluence;
-}
-
-LightInfluence PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
-{
-    // Diffuse
-    float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
-    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float diffuseTotal = normalDotLightVec;
-
-    // Specular
-    float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
-    float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
-    float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float specularTotal = specular * 0.5f;
-
-    // Attenuation
-    float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1.0 / pow(max(distance, 0.01), 4.0f)) * pow(light.radius, 3);
-    diffuseTotal *= attenuation;
-    specularTotal *= attenuation;
-
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
-    return lightInfluence;
-}
-
-LightInfluence SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
-{
-    // Diffuse
-    float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
-    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float diffuseTotal = normalDotLightVec;
-
-    // Specular
-    float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
-    float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
-    float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float specularTotal = specular * 0.5f;
-
-    // Spot Light Cutoff
-    float theta = dot(lightVec, normalize(-light.direction));
-    float epsilon = light.outerAngle - light.innerAngle;
-    float intensity = saturate((theta - light.innerAngle) / epsilon);
-    diffuseTotal *= intensity;
-    specularTotal *= intensity;
-
-    // Attenuation
-    float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1.0 / pow(max(distance, 0.01), 4.0f)) * pow(light.radius, 3);
-
-    diffuseTotal *= attenuation;
-    specularTotal *= attenuation;
-
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
-    return lightInfluence;
-}
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
@@ -216,7 +108,6 @@ struct PSInput
 struct MeshRendererData
 {
     float4x4 model;
-    float4x4 normalMatrix;
     uint materialIndex;
 };
 
@@ -237,7 +128,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize(mul(VSIn.Normal, float3x3(MeshRendererBufferData[InstanceID].normalMatrix)));
+    PSIn.Normal = normalize(mul(MeshRendererBufferData[InstanceID].model, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
     PSIn.WorldPos = TransformedPos.xyz;
     PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
 }

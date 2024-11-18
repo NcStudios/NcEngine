@@ -24,16 +24,15 @@ struct GlobalEnvironmentData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
-// 144 bytes with a 16-byte alignment.
+// 80 bytes with a 16-byte alignment.
 struct MeshRendererData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity(); // Transforms the object from object space to world space.
-    DirectX::XMMATRIX normalMatrix = DirectX::XMMatrixIdentity(); // Transforms the normals from object space to world space while maintaining angle when non-uniform scaling is done on the object
     uint32_t materialIndex = NullMaterialInstanceHandle;
-    Vector3 padding = Vector3::Zero();
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).
+// 48 bytes with a 16-byte alignment.
 struct MaterialData
 {
     Vector3 gradientStart = Vector3::Splat(10.0f);

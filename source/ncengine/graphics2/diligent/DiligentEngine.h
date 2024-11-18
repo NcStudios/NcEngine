@@ -19,6 +19,7 @@ class DiligentEngine
     public:
         DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInfo,
                        GLFWwindow* windowHandle,
+                       std::string_view shadersPath,
                        Diligent::DebugMessageCallbackType logCallback = nullptr);
         ~DiligentEngine() noexcept;
 

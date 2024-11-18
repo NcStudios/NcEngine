@@ -17,6 +17,7 @@ namespace nc::graphics
 {
 DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInfo,
                                GLFWwindow* windowHandle,
+                               std::string_view shadersPath,
                                Diligent::DebugMessageCallbackType logCallback)
 {
     using namespace Diligent;
@@ -48,7 +49,7 @@ DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInf
         throw nc::NcError("Failed to create swapchain.");
     }
 
-    m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice);
+    m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice, shadersPath);
     NC_LOG_TRACE("Successfully initialized rendering engine.");
 }
 
