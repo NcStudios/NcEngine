@@ -8,10 +8,16 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        Diligent::IRenderDevice& device,
                                                        std::string_view signatureName,
                                                        uint8_t bindingIndex,
-                                                       StructuredBufferResourceDesc meshRendererResourceDesc)
+                                                       const StructuredBufferResourceDesc& meshRendererResourceDesc,
+                                                       const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                                       const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                                       const StructuredBufferResourceDesc& spotLightResourceDesc)
 {
     const auto resources = std::array{
-        ToPipelineResourceDesc(meshRendererResourceDesc)
+        ToPipelineResourceDesc(meshRendererResourceDesc),
+        ToPipelineResourceDesc(directionalLightResourceDesc),
+        ToPipelineResourceDesc(pointLightResourceDesc),
+        ToPipelineResourceDesc(spotLightResourceDesc)
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -32,20 +38,36 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(ToCommonShaderType(meshRendererResourceDesc.shaderType), meshRendererResourceDesc.resourceKey.data());
-    if (!variable)
-    {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererResourceDesc.resourceKey)};
-    }
-
     m_meshRendererResource = std::make_unique<StructuredBuffer<MeshRendererData>>
     (
         context,
         device,
-        meshRendererResourceDesc.resourceKey,
-        *variable,
-        meshRendererResourceDesc.maxElementCount,
-        meshRendererResourceDesc.maxElementCount
+        GetVariable(meshRendererResourceDesc.shaderType, meshRendererResourceDesc.resourceKey.data(), m_srb),
+        meshRendererResourceDesc
+    );
+
+    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    (
+        context,
+        device,
+        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+        directionalLightResourceDesc
+    );
+
+    m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
+    (
+        context,
+        device,
+        GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
+        pointLightResourceDesc
+    );
+
+    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
+    (
+        context,
+        device,
+        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+        spotLightResourceDesc
     );
 }
 

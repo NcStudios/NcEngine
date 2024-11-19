@@ -17,6 +17,7 @@ struct SystemEvents;
 
 namespace config
 {
+struct AssetSettings;
 struct GraphicsSettings;
 struct MemorySettings;
 struct ProjectSettings;
@@ -96,6 +97,7 @@ struct NcGraphics : public Module
  * @note The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
  */
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                         const config::AssetSettings& assetSettings,
                          const config::GraphicsSettings& graphicsSettings,
                          const config::MemorySettings& memorySettings,
                          ModuleProvider modules,

@@ -9,6 +9,7 @@
 namespace nc::graphics
 {
 struct CameraRenderState;
+struct LightRenderState;
 
 class GlobalEnvironmentResource
 {
@@ -19,8 +20,7 @@ class GlobalEnvironmentResource
                                            Diligent::IRenderDevice& device,
                                            Diligent::IShaderResourceVariable& variable);
 
-        void Update(const CameraRenderState cameraState,
-                    Diligent::IDeviceContext& context);
+        void Update(Diligent::IDeviceContext& context, const CameraRenderState& cameraState, const LightRenderState& lightRenderState);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

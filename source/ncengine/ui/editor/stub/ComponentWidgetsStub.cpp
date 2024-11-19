@@ -11,6 +11,7 @@ void FrameLogicUIWidget(FrameLogic&, EditorContext&, const std::any&) {}
 void TagUIWidget(Tag&, EditorContext&, const std::any&) {}
 void TransformUIWidget(Transform&, EditorContext&, const std::any&) {}
 void AudioSourceUIWidget(audio::AudioSource&, EditorContext&, const std::any&) {}
+void DirectionalLightUIWidget(graphics::DirectionalLight&, EditorContext&, const std::any&) {}
 void MeshRendererUIWidget(graphics::MeshRenderer&, EditorContext&, const std::any&) {}
 void MeshRenderer2UIWidget(MeshRenderer2&, EditorContext&, const std::any&);
 void ParticleEmitterUIWidget(graphics::ParticleEmitter&, EditorContext&, const std::any&) {}

@@ -2,6 +2,9 @@
 #include "graphics2/diligent/resource/GlobalEnvironmentResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
+#include "graphics2/frontend/subsystem/LightRenderState.h"
+
+#include "ncmath/Vector.h"
 
 class GlobalEnvironmentResourceTest : public DiligentEngineFixture
 {
@@ -56,12 +59,15 @@ TEST_F(GlobalEnvironmentResourceTest, Constructor_initializedVariable)
 TEST_F(GlobalEnvironmentResourceTest, Update_succeeds)
 {
     auto cameraState = nc::graphics::CameraRenderState{
-        .viewProjection = DirectX::XMMatrixPerspectiveFovRH(90.0f, 16.0f / 9.0f, 0.1f, 100.0f)
+        .viewProjection = DirectX::XMMatrixPerspectiveFovRH(90.0f, 16.0f / 9.0f, 0.1f, 100.0f),
+        .position = nc::Vector3::Zero()
     };
+
+    auto lightRenderState = nc::graphics::LightRenderState{};
 
     // Buffer is dynamic/cpu write only, so we don't have a way of inspecting actual contents.
     // Just expect no error output.
-    EXPECT_NO_THROW(uut->Update(cameraState, engine->GetContext()));
+    EXPECT_NO_THROW(uut->Update(engine->GetContext(), cameraState, lightRenderState));
     cameraState.viewProjection = DirectX::XMMatrixIdentity();
-    EXPECT_NO_THROW(uut->Update(cameraState, engine->GetContext()));
+    EXPECT_NO_THROW(uut->Update(engine->GetContext(), cameraState, lightRenderState));
 }

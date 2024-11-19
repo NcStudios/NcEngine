@@ -15,6 +15,7 @@ void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const 
 void MeshRendererUIWidget(graphics::MeshRenderer& meshRenderer, EditorContext&, const std::any&);
 void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext&, const std::any&);
 void ParticleEmitterUIWidget(graphics::ParticleEmitter& particleEmitter, EditorContext&, const std::any&);
+void DirectionalLightUIWidget(graphics::DirectionalLight& directionalLight, EditorContext&, const std::any&);
 void PointLightUIWidget(graphics::PointLight& pointLight, EditorContext&, const std::any&);
 void SpotLightUIWidget(graphics::SpotLight& spotLight, EditorContext&, const std::any&);
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator& skeletalAnimator, EditorContext&, const std::any&);

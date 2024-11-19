@@ -29,19 +29,11 @@ MaterialResourceSignature::MaterialResourceSignature(Diligent::IDeviceContext& c
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(ToCommonShaderType(materialResourceDesc.shaderType), materialResourceDesc.resourceKey.data());
-    if (!variable)
-    {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", materialResourceDesc.resourceKey)};
-    }
-
     m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(
         context,
         device,
-        materialResourceDesc.resourceKey,
-        *variable,
-        materialResourceDesc.maxElementCount,
-        materialResourceDesc.initialElementCount
+        GetVariable(materialResourceDesc.shaderType, materialResourceDesc.resourceKey.data(), m_srb),
+        materialResourceDesc
     );
 }
 } // namespace nc::graphics
