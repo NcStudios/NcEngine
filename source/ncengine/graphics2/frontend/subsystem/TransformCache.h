@@ -96,7 +96,17 @@ class TransformCache
             return m_buffer.build_update_info();
         }
 
-        // todo: RebuildStatics
+        void MarkStaticsDirty()
+        {
+            for (auto [i, entity] : std::views::enumerate(m_entities))
+            {
+                if (entity.IsStatic() || !entity.Valid())
+                {
+                    const auto handle = static_cast<HostBufferHandle>(i);
+                    m_buffer.mark_dirty(handle);
+                }
+            }
+        }
 
     private:
         HostBuffer<TransformData> m_buffer;

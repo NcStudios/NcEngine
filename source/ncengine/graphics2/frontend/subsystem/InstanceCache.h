@@ -18,6 +18,30 @@ namespace nc::graphics
 
 // instead of batch, should just make attribs...
 
+/**
+struct BatchKey
+{
+    MaterialPasses passes;
+    uint64_t meshId;
+};
+
+struct Batch
+{
+    uint32_t instanceOffset = UINT32_MAX;
+    uint32_t instanceCount = UINT32_MAX;
+    uint32_t indexOffset = UINT32_MAX;
+    uint32_t indexCount = UINT32_MAX;
+    uint32_t vertexOffset = UINT32_MAX;
+};
+
+struct BatchRegion
+{
+    BatchKey key;
+    Batch batch;
+    uint32_t capacity;
+};
+
+*/
 
 // not really sure best way to manage
 struct BatchRegion
@@ -46,6 +70,17 @@ struct StagedBatch
 {
     MaterialPasses passes;
     asset::MeshView mesh;
+};
+
+// todo: would be nice to split out into this, batch list is shared though...
+class InstanceStaging
+{
+    public:
+
+    private:
+        std::vector<StagedBatch> m_pendingBatches;
+        std::vector<StagedInstance> m_pendingAdditions;
+        std::vector<StagedInstance> m_pendingRemovals;
 };
 
 class InstanceCache2

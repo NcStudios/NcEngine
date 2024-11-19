@@ -1,4 +1,5 @@
 #include "MeshRendererSubsystem.h"
+#include "ncengine/Events.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer2.h"
@@ -8,9 +9,10 @@
 
 namespace nc::graphics
 {
-MeshRendererSubsystem::MeshRendererSubsystem(uint32_t maxMeshRenderers, std::span<const MaterialPass::type>)
+MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers)
     : m_transformCache{maxMeshRenderers},
-      m_instanceCache{}
+      m_instanceCache{},
+      m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnRebuildStatics)}
 {
     MeshRenderer2::s_subsystem = this;
 }
@@ -32,7 +34,6 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
 {
     m_transformCache.RemoveInstance(transformIndex);
     m_instanceCache.StageRemove(entity.Index(), meshId, passes);
-    // m_instanceCache.RemoveInstance(entity.Index(), meshId, passes);
 }
 
 void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
@@ -57,7 +58,6 @@ void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
 {
     NC_PROFILE_SCOPE("MeshRendererSubsystem::BuildState()", ProfileCategory::Rendering);
-
     m_transformCache.UpdateMatrices(ecs);
     m_instanceCache.CommitPendingChanges();
     return MeshRendererRenderState{
@@ -65,5 +65,10 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
         .instanceData = m_instanceCache.BuildState(),
         .passBatches = m_instanceCache.BuildBatches(GetImplementedMaterialPassFlags())
     };
+}
+
+void MeshRendererSubsystem::OnRebuildStatics()
+{
+    m_transformCache.MarkStaticsDirty();
 }
 } // namespace nc::graphics

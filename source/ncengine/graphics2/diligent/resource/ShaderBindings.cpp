@@ -15,22 +15,10 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
                                                     renderState.cameraState, 
                                                     renderState.lightRenderState);
 
-    /** @todo #794 Once plumbing is finalized with material pass implementation, make sure this is
-     *             only sending dirty items. */
-    // const auto& instanceData = renderState.meshRendererState.instanceData;
-    // if (!instanceData.instances.empty())
-    // {
-    //     m_componentSignature.GetMeshRendererBuffer().Update(
-    //         context,
-    //         device,
-    //         instanceData
-    //     );
-    // }
-
     const auto& transformData = renderState.meshRendererState.transformData;
     if (!transformData.instances.empty())
     {
-        NC_PROFILE_SCOPE("ShaderBindings::Update() - TransformData", ProfileCategory::Rendering);
+        // NC_PROFILE_SCOPE("ShaderBindings::Update() - TransformData", ProfileCategory::Rendering);
         m_componentSignature.GetTransformBuffer().Update(
             context,
             device,
@@ -41,7 +29,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
     const auto& instanceData = renderState.meshRendererState.instanceData;
     if (!instanceData.instances.empty())
     {
-        NC_PROFILE_SCOPE("ShaderBindings::Update() - InstanceData", ProfileCategory::Rendering);
+        // NC_PROFILE_SCOPE("ShaderBindings::Update() - InstanceData", ProfileCategory::Rendering);
         m_componentSignature.GetInstanceBuffer().Update(
             context,
             device,

@@ -1,29 +1,24 @@
 #pragma once
 
-#include "MaterialPassCache.h"
-#include "MeshRendererCache.h"
 #include "MeshRendererRenderState.h"
 #include "TransformCache.h"
 #include "InstanceCache.h"
 
 #include "ncengine/ecs/EcsFwd.h"
-
-#include <vector>
+#include "ncengine/utility/Signal.h"
 
 namespace nc
 {
 class MeshRenderer2;
+struct SystemEvents;
 class Transform;
 
 namespace graphics
 {
-/*
-Produces a vector of transform matrices for MeshRenderers and their corresponding Entities.
-*/
 class MeshRendererSubsystem
 {
     public:
-        explicit MeshRendererSubsystem(uint32_t maxMeshRenderers, std::span<const MaterialPass::type> passes);
+        explicit MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers);
 
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
@@ -48,6 +43,9 @@ class MeshRendererSubsystem
     private:
         TransformCache m_transformCache;
         InstanceCache2 m_instanceCache;
+        Connection m_rebuildStaticsConnection;
+
+        void OnRebuildStatics();
 };
 } // namespace graphics
 } // namespace nc
