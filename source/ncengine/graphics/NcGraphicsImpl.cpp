@@ -66,6 +66,7 @@ namespace nc::graphics
 {
 #ifndef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                             const config::AssetSettings& ,
                              const config::GraphicsSettings& graphicsSettings,
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,

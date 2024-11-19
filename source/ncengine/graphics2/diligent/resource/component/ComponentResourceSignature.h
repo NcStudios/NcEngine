@@ -2,6 +2,7 @@
 
 #include "graphics2/diligent/resource/base/StructuredBuffer.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
+#include "graphics2/ShaderTypes.h"
 #include "ncutility/NcError.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -23,41 +24,29 @@ class ComponentResourceSignature
                                             Diligent::IRenderDevice& device,
                                             std::string_view signatureName,
                                             uint8_t bindingIndex,
-                                            // StructuredBufferResourceDesc meshRendererResourceDesc
                                             const StructuredBufferResourceDesc& transformResourceDesc,
-                                            const StructuredBufferResourceDesc& instanceResourceDesc);
+                                            const StructuredBufferResourceDesc& instanceResourceDesc,
+                                            const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                            const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                            const StructuredBufferResourceDesc& spotLightResourceDesc);
 
-        void Commit(Diligent::IDeviceContext& context)
-        {
-            context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY);
-        }
+        void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY); }
+        auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
 
-        auto GetResourceSignature() -> Diligent::IPipelineResourceSignature&
-        {
-            return *m_signature;
-        }
-
-        // auto GetMeshRendererBuffer() -> StructuredBuffer<MeshRendererData>&
-        // {
-        //     return *m_meshRendererResource;
-        // }
-
-        auto GetTransformBuffer() -> StructuredBuffer<TransformData>&
-        {
-            return *m_transformBuffer;
-        }
-
-        auto GetInstanceBuffer() -> StructuredBuffer<InstanceData>&
-        {
-            return *m_instanceBuffer;
-        }
+        /* Resource Buffers */
+        auto GetTransformBuffer()       -> StructuredBuffer<TransformData>&        { return *m_transformBuffer; }
+        auto GetInstanceBuffer()        -> StructuredBuffer<InstanceData>&         { return *m_instanceBuffer; }
+        auto GetDirectionaLightBuffer() -> StructuredBuffer<DirectionalLightData>& { return *m_directionalLightResource; }
+        auto GetPointLightBuffer()      -> StructuredBuffer<PointLightData>&       { return *m_pointLightResource; }
+        auto GetSpotLightBuffer()       -> StructuredBuffer<SpotLightData>&        { return *m_spotLightResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        // std::unique_ptr<StructuredBuffer<MeshRendererData>> m_meshRendererResource;
-
         std::unique_ptr<StructuredBuffer<TransformData>> m_transformBuffer;
         std::unique_ptr<StructuredBuffer<InstanceData>> m_instanceBuffer;
+        std::unique_ptr<StructuredBuffer<DirectionalLightData>> m_directionalLightResource;
+        std::unique_ptr<StructuredBuffer<PointLightData>> m_pointLightResource;
+        std::unique_ptr<StructuredBuffer<SpotLightData>> m_spotLightResource;
 };
 } // namespace nc::graphics

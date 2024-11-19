@@ -1067,12 +1067,21 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 40.0f, 0.0f},
+            .position = Vector3{4.0f, 50.0f, 35.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{0.8f, 0.8f, 0.8f},
-        180.0f
+        300.0f
+    );
+
+    world.Emplace<graphics::DirectionalLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{0.0f, 40.0f, 0.0f},
+            .rotation = nc::Quaternion::FromEulerAngles(-1.892f, 0.809f, -2.661f),
+            .tag = "Directional Light"
+        }),
+        Vector3{1.0f, 1.0f, 1.0f}
     );
 }
 

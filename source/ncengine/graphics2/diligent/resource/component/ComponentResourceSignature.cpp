@@ -9,11 +9,17 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        std::string_view signatureName,
                                                        uint8_t bindingIndex,
                                                        const StructuredBufferResourceDesc& transformResourceDesc,
-                                                       const StructuredBufferResourceDesc& instanceResourceDesc)
+                                                       const StructuredBufferResourceDesc& instanceResourceDesc,
+                                                       const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                                       const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                                       const StructuredBufferResourceDesc& spotLightResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
-        ToPipelineResourceDesc(instanceResourceDesc)
+        ToPipelineResourceDesc(instanceResourceDesc),
+        ToPipelineResourceDesc(directionalLightResourceDesc),
+        ToPipelineResourceDesc(pointLightResourceDesc),
+        ToPipelineResourceDesc(spotLightResourceDesc)
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -34,37 +40,44 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto transformVariable = m_srb->GetVariableByName(ToCommonShaderType(transformResourceDesc.shaderType), transformResourceDesc.resourceKey.data());
-    if (!transformVariable)
-    {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", transformResourceDesc.resourceKey)};
-    }
-
     m_transformBuffer = std::make_unique<StructuredBuffer<TransformData>>
     (
         context,
         device,
-        transformResourceDesc.resourceKey,
-        *transformVariable,
-        transformResourceDesc.maxElementCount,
-        transformResourceDesc.maxElementCount
+        GetVariable(transformResourceDesc.shaderType, transformResourceDesc.resourceKey.data(), m_srb),
+        transformResourceDesc
     );
-
-    auto instanceVariable = m_srb->GetVariableByName(ToCommonShaderType(instanceResourceDesc.shaderType), instanceResourceDesc.resourceKey.data());
-    if (!instanceVariable)
-    {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", instanceResourceDesc.resourceKey)};
-    }
 
     m_instanceBuffer = std::make_unique<StructuredBuffer<InstanceData>>
     (
         context,
         device,
-        instanceResourceDesc.resourceKey,
-        *instanceVariable,
-        instanceResourceDesc.maxElementCount,
-        instanceResourceDesc.maxElementCount
+        GetVariable(instanceResourceDesc.shaderType, instanceResourceDesc.resourceKey.data(), m_srb),
+        instanceResourceDesc
+    );
+
+    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    (
+        context,
+        device,
+        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+        directionalLightResourceDesc
+    );
+
+    m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
+    (
+        context,
+        device,
+        GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
+        pointLightResourceDesc
+    );
+
+    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
+    (
+        context,
+        device,
+        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+        spotLightResourceDesc
     );
 }
-
 } // namespace nc::graphics

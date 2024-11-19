@@ -4,6 +4,7 @@
 
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
+#include "subsystem/LightSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
 #include "subsystem/MeshRendererSubsystem.h"
 #include "subsystem/UISubsystem.h"
@@ -54,5 +55,6 @@ class GraphicsFrontend
         UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
         MeshRendererSubsystem m_meshRendererSystem;
+        LightSubsystem m_lightSubsystem;
 };
 } // namespace nc::graphics

@@ -33,6 +33,7 @@ constexpr size_t NetworkDispatcherId = 14ull;
 constexpr size_t WireframeRendererId = 15ull;
 constexpr size_t HierarchyId = 16ull;
 constexpr size_t MeshRenderer2Id = 17ull;
+constexpr size_t DirectionalLightId = 18ull;
 /** @} */
 
 /** @{ */

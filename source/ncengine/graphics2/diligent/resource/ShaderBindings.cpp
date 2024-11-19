@@ -11,7 +11,9 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
                             const FrontendRenderState& renderState)
 {
     NC_PROFILE_SCOPE("ShaderBindings::Update()", ProfileCategory::Rendering);
-    m_globalSignature.GetGlobalEnvironment().Update(renderState.cameraState, context);
+    m_globalSignature.GetGlobalEnvironment().Update(context,
+                                                    renderState.cameraState, 
+                                                    renderState.lightRenderState);
 
     /** @todo #794 Once plumbing is finalized with material pass implementation, make sure this is
      *             only sending dirty items. */
@@ -45,6 +47,36 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             device,
             instanceData
         );
+    }
+
+    const auto& dirLightData = renderState.lightRenderState.directionalLights;
+    if (!dirLightData.empty())
+    {
+        auto lightBufferUpdateInfo = BufferUpdateInfo<DirectionalLightData>{
+            .instances = dirLightData,
+            .dirtyRanges = {{0, dirLightData.size()}}
+        };
+        m_componentSignature.GetDirectionaLightBuffer().Update(context, device, lightBufferUpdateInfo);
+    }
+
+    const auto& pointLightData = renderState.lightRenderState.pointLights;
+    if (!pointLightData.empty())
+    {
+        auto lightBufferUpdateInfo = BufferUpdateInfo<PointLightData>{
+            .instances = pointLightData,
+            .dirtyRanges = {{0, pointLightData.size()}}
+        };
+        m_componentSignature.GetPointLightBuffer().Update(context, device, lightBufferUpdateInfo);
+    }
+
+    const auto& spotLightData = renderState.lightRenderState.spotLights;
+    if (!spotLightData.empty())
+    {
+        auto lightBufferUpdateInfo = BufferUpdateInfo<SpotLightData>{
+            .instances = spotLightData,
+            .dirtyRanges = {{0, spotLightData.size()}}
+        };
+        m_componentSignature.GetSpotLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& materialData = renderState.materialRenderState;

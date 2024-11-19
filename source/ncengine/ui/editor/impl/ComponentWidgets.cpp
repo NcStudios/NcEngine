@@ -5,6 +5,7 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/MeshRenderer2.h"
@@ -803,13 +804,22 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&,
     ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
 }
 
+void DirectionalLightUIWidget(graphics::DirectionalLight& light, EditorContext&, const std::any&)
+{
+    ui::InputColor3(light.color, "color");
+}
+
 void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
+#ifndef NC_USE_DILIGENT
     ui::InputColor3(light.ambientColor, "ambientColor");
     ui::InputColor3(light.diffuseColor, "diffuseColor");
+#else
+    ui::InputColor3(light.diffuseColor, "color");
+#endif
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 

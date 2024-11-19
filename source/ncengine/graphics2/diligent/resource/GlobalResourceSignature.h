@@ -50,7 +50,5 @@ class GlobalResourceSignature
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<GlobalTextureBufferResource> m_textureResource;
         std::unique_ptr<GlobalEnvironmentResource> m_environmentResource;
-
-        auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name) -> Diligent::IShaderResourceVariable&;
 };
 } // namespace nc::graphics

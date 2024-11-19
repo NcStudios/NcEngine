@@ -96,6 +96,7 @@ namespace nc::graphics
 {
 #ifdef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                             const config::AssetSettings& assetSettings,
                              const config::GraphicsSettings& graphicsSettings,
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,
@@ -122,7 +123,7 @@ namespace nc::graphics
             });
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, registry, modules, events, *ncWindow);
+            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, assetSettings.shadersPath, registry, modules, events, *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -132,6 +133,7 @@ namespace nc::graphics
 
 NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                                  const config::MemorySettings& memorySettings,
+                                 std::string_view shadersPath,
                                  Registry* registry,
                                  ModuleProvider modules,
                                  SystemEvents& events,
@@ -140,6 +142,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_engine{
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
             window.GetWindowHandle(),
+            shadersPath,
             ::LogCallback
           },
           m_shaderBindings{
@@ -147,6 +150,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetContext(),
             memorySettings.maxTextures,
             memorySettings.maxRenderers,
+            memorySettings.maxSpotLights,
+            memorySettings.maxPointLights,
+            memorySettings.maxDirectionalLights,
             1000u /** @todo: 782 parameterize with ShaderConfig object */
           },
           m_ui{

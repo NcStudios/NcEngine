@@ -23,6 +23,7 @@ class NcGraphicsImpl2 : public NcGraphics
     public:
         NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                        const config::MemorySettings& memorySettings,
+                       std::string_view shadersPath,
                        Registry* registry,
                        ModuleProvider modules,
                        SystemEvents& events,
