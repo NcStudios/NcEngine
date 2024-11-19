@@ -18,10 +18,23 @@ struct GlobalEnvironmentData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
-struct MeshRendererData
+// struct MeshRendererData
+// {
+//     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+
+//     // todo remove
+//     uint32_t materialIndex = NullMaterialInstanceHandle;
+// };
+
+struct TransformData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
-    uint32_t materialIndex = NullMaterialInstanceHandle;
+};
+
+struct InstanceData
+{
+    uint32_t transformIndex = UINT32_MAX;
+    uint32_t materialIndex = UINT32_MAX;
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).

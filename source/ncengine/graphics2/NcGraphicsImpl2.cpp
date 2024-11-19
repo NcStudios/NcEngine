@@ -266,7 +266,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMaterialSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_materialPassBackend.Render(context, renderState.meshRendererState.passData);
+    m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
     m_ui.Render(context);
 
     swapChain.Present();

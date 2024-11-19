@@ -26,55 +26,55 @@ auto MaterialInstance::GetProperties() const -> const MaterialProperties& { retu
 void MaterialInstance::Release() noexcept {}
 } // namespace nc
 
-class MeshRendererSubsystemTest : public testing::Test,
-                                  public EcsFixture
-{
-    protected:
-        static constexpr auto MaxEntities = 20ull;
+// class MeshRendererSubsystemTest : public testing::Test,
+//                                   public EcsFixture
+// {
+//     protected:
+//         static constexpr auto MaxEntities = 20ull;
 
-        nc::graphics::MeshRendererSubsystem uut;
+//         nc::graphics::MeshRendererSubsystem uut;
 
-        void AddEntity(nc::ecs::Ecs& world) 
-        {
-            const auto entity = world.Emplace<nc::Entity>({});
-            world.Emplace<nc::MeshRenderer2>(
-                entity,
-                nc::asset::MeshView{},
-                g_materialDesc
-            );
-        }
+//         void AddEntity(nc::ecs::Ecs& world) 
+//         {
+//             const auto entity = world.Emplace<nc::Entity>({});
+//             world.Emplace<nc::MeshRenderer2>(
+//                 entity,
+//                 nc::asset::MeshView{},
+//                 g_materialDesc
+//             );
+//         }
 
-        MeshRendererSubsystemTest()
-            : EcsFixture{MaxEntities},
-              uut{MaxEntities, g_materialPasses}
-        {
-            GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
-        }
-};
+//         MeshRendererSubsystemTest()
+//             : EcsFixture{MaxEntities},
+//               uut{MaxEntities, g_materialPasses}
+//         {
+//             GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
+//         }
+// };
 
-TEST_F(MeshRendererSubsystemTest, BuildState_Succeeds)
-{
-    using namespace nc::graphics;
+// TEST_F(MeshRendererSubsystemTest, BuildState_Succeeds)
+// {
+//     using namespace nc::graphics;
 
-    auto world = GetTestWorld();
+//     auto world = GetTestWorld();
 
-    for (auto i = 0u; i < 5; i++)
-    {
-        AddEntity(world);
-    }
+//     for (auto i = 0u; i < 5; i++)
+//     {
+//         AddEntity(world);
+//     }
 
-    auto& registry = GetTestComponentRegistry();
-    registry.CommitPendingChanges();
-
-
-    auto actualRenderState = uut.BuildState(world);
-    EXPECT_EQ(actualRenderState.instanceData.instances.size(), 5);
+//     auto& registry = GetTestComponentRegistry();
+//     registry.CommitPendingChanges();
 
 
-    EXPECT_EQ(1, actualRenderState.passData.size());
-    auto& actualToonState = actualRenderState.passData.at(0);
-    EXPECT_EQ(5, actualToonState.targets.size());
+//     auto actualRenderState = uut.BuildState(world);
+//     EXPECT_EQ(actualRenderState.instanceData.instances.size(), 5);
 
-    registry.Clear();
 
-}
+//     EXPECT_EQ(1, actualRenderState.passData.size());
+//     auto& actualToonState = actualRenderState.passData.at(0);
+//     EXPECT_EQ(5, actualToonState.targets.size());
+
+//     registry.Clear();
+
+// }

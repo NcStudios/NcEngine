@@ -23,7 +23,9 @@ class ComponentResourceSignature
                                             Diligent::IRenderDevice& device,
                                             std::string_view signatureName,
                                             uint8_t bindingIndex,
-                                            StructuredBufferResourceDesc meshRendererResourceDesc);
+                                            // StructuredBufferResourceDesc meshRendererResourceDesc
+                                            const StructuredBufferResourceDesc& transformResourceDesc,
+                                            const StructuredBufferResourceDesc& instanceResourceDesc);
 
         void Commit(Diligent::IDeviceContext& context)
         {
@@ -35,14 +37,27 @@ class ComponentResourceSignature
             return *m_signature;
         }
 
-        auto GetMeshRendererBuffer() -> StructuredBuffer<MeshRendererData>&
+        // auto GetMeshRendererBuffer() -> StructuredBuffer<MeshRendererData>&
+        // {
+        //     return *m_meshRendererResource;
+        // }
+
+        auto GetTransformBuffer() -> StructuredBuffer<TransformData>&
         {
-            return *m_meshRendererResource;
+            return *m_transformBuffer;
+        }
+
+        auto GetInstanceBuffer() -> StructuredBuffer<InstanceData>&
+        {
+            return *m_instanceBuffer;
         }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        std::unique_ptr<StructuredBuffer<MeshRendererData>> m_meshRendererResource;
+        // std::unique_ptr<StructuredBuffer<MeshRendererData>> m_meshRendererResource;
+
+        std::unique_ptr<StructuredBuffer<TransformData>> m_transformBuffer;
+        std::unique_ptr<StructuredBuffer<InstanceData>> m_instanceBuffer;
 };
 } // namespace nc::graphics

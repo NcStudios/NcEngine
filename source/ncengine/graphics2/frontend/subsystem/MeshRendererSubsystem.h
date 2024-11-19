@@ -3,6 +3,8 @@
 #include "MaterialPassCache.h"
 #include "MeshRendererCache.h"
 #include "MeshRendererRenderState.h"
+#include "TransformCache.h"
+#include "InstanceCache.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 
@@ -15,6 +17,13 @@ class Transform;
 
 namespace graphics
 {
+// todo should maybe just have 'handle' type to collect everything
+struct AddInstanceResult
+{
+    uint32_t transformIndex;
+    uint32_t instanceId;
+};
+
 /*
 Produces a vector of transform matrices for MeshRenderers and their corresponding Entities.
 */
@@ -26,11 +35,12 @@ class MeshRendererSubsystem
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
                          const MaterialPasses passes,
-                         const asset::MeshView& mesh) -> uint32_t;
+                         const asset::MeshView& mesh) -> AddInstanceResult;
 
         // todo: shouldn't need entity + instance
-        void RemoveInstance(Entity entity,
+        void RemoveInstance(uint32_t transformIndex,
                             uint32_t instance,
+                            uint64_t meshId,
                             MaterialPasses passes);
 
         void SetInstanceMesh(Entity entity,
@@ -40,8 +50,8 @@ class MeshRendererSubsystem
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
 
     private:
-        InstanceCache m_instanceCache;
-        MaterialPassCache m_passCache;
+        TransformCache m_transformCache;
+        InstanceCache2 m_instanceCache;
 };
 } // namespace graphics
 } // namespace nc

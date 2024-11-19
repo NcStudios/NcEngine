@@ -343,6 +343,8 @@ Benchmarks::Benchmarks(SampleUI* ui)
 
 void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 {
+    ReloadPrefabs();
+
     {
         const auto& config = config::GetMemorySettings();
         ::g_maxEntities = config.maxTransforms;

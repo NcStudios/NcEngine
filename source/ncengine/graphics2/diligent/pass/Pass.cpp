@@ -67,13 +67,20 @@ struct PSInput
     uint   MaterialIndex;
 };
 
-struct MeshRendererData
+struct TransformData
 {
     float4x4 model;
+};
+
+StructuredBuffer<TransformData> TransformBufferData;
+
+struct InstanceData
+{
+    uint transformIndex;
     uint materialIndex;
 };
 
-StructuredBuffer<MeshRendererData> MeshRendererBufferData;
+StructuredBuffer<InstanceData> InstanceBufferData;
 
 cbuffer EnvironmentBufferData
 {
@@ -82,10 +89,12 @@ cbuffer EnvironmentBufferData
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
+    uint transformIndex = InstanceBufferData[InstanceID].transformIndex;
+    uint materialIndex = InstanceBufferData[InstanceID].materialIndex;
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), TransformBufferData[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
+    PSIn.MaterialIndex = materialIndex;
 }
 )"};
 } // anonymous namespace

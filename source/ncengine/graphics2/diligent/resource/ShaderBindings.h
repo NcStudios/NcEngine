@@ -32,7 +32,10 @@ class ShaderBindings
                 context, device,
                 "ComponentResourceSignature",
                 1,
-                StructuredBufferResourceDesc{"MeshRendererBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers, maxMeshRenderers}
+                // StructuredBufferResourceDesc{"MeshRendererBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers, maxMeshRenderers}
+                StructuredBufferResourceDesc{"TransformBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers, maxMeshRenderers}, // don't know about max here...
+                StructuredBufferResourceDesc{"InstanceBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers, maxMeshRenderers}
+
               },
               m_materialSignature{
                 context, device,

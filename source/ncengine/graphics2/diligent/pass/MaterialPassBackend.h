@@ -17,7 +17,7 @@ class MaterialPassBackend
         {
         }
 
-        void Render(Diligent::IDeviceContext& context, const std::vector<PassRenderState>& passStates);
+        void Render(Diligent::IDeviceContext& context, const std::vector<std::vector<Batch>>& passBatches);
 
     private:
         std::vector<Pass> m_passes;

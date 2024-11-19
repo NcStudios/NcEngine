@@ -8,10 +8,12 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
                                                        Diligent::IRenderDevice& device,
                                                        std::string_view signatureName,
                                                        uint8_t bindingIndex,
-                                                       StructuredBufferResourceDesc meshRendererResourceDesc)
+                                                       const StructuredBufferResourceDesc& transformResourceDesc,
+                                                       const StructuredBufferResourceDesc& instanceResourceDesc)
 {
     const auto resources = std::array{
-        ToPipelineResourceDesc(meshRendererResourceDesc)
+        ToPipelineResourceDesc(transformResourceDesc),
+        ToPipelineResourceDesc(instanceResourceDesc)
     };
 
     auto desc = Diligent::PipelineResourceSignatureDesc{};
@@ -32,20 +34,36 @@ ComponentResourceSignature::ComponentResourceSignature(Diligent::IDeviceContext&
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    auto variable = m_srb->GetVariableByName(ToCommonShaderType(meshRendererResourceDesc.shaderType), meshRendererResourceDesc.resourceKey.data());
-    if (!variable)
+    auto transformVariable = m_srb->GetVariableByName(ToCommonShaderType(transformResourceDesc.shaderType), transformResourceDesc.resourceKey.data());
+    if (!transformVariable)
     {
-        throw NcError{fmt::format("Failed retrieving shader variable '{}'", meshRendererResourceDesc.resourceKey)};
+        throw NcError{fmt::format("Failed retrieving shader variable '{}'", transformResourceDesc.resourceKey)};
     }
 
-    m_meshRendererResource = std::make_unique<StructuredBuffer<MeshRendererData>>
+    m_transformBuffer = std::make_unique<StructuredBuffer<TransformData>>
     (
         context,
         device,
-        meshRendererResourceDesc.resourceKey,
-        *variable,
-        meshRendererResourceDesc.maxElementCount,
-        meshRendererResourceDesc.maxElementCount
+        transformResourceDesc.resourceKey,
+        *transformVariable,
+        transformResourceDesc.maxElementCount,
+        transformResourceDesc.maxElementCount
+    );
+
+    auto instanceVariable = m_srb->GetVariableByName(ToCommonShaderType(instanceResourceDesc.shaderType), instanceResourceDesc.resourceKey.data());
+    if (!instanceVariable)
+    {
+        throw NcError{fmt::format("Failed retrieving shader variable '{}'", instanceResourceDesc.resourceKey)};
+    }
+
+    m_instanceBuffer = std::make_unique<StructuredBuffer<InstanceData>>
+    (
+        context,
+        device,
+        instanceResourceDesc.resourceKey,
+        *instanceVariable,
+        instanceResourceDesc.maxElementCount,
+        instanceResourceDesc.maxElementCount
     );
 }
 
