@@ -18,31 +18,40 @@ MeshRendererSubsystem::MeshRendererSubsystem(uint32_t maxMeshRenderers, std::spa
 auto MeshRendererSubsystem::AddInstance(Entity entity,
                                         MaterialInstanceHandle material,
                                         MaterialPasses passes,
-                                        const asset::MeshView& mesh) -> AddInstanceResult
+                                        const asset::MeshView& mesh) -> uint32_t
 {
-    // todo: why give back 'instanceId' - just use entity
     const auto transformIndex = m_transformCache.AddInstance(entity);
-    // const auto instanceId = m_instanceCache.AddInstance(transformIndex, material, passes, mesh);
-    const auto instanceId = m_instanceCache.StageAdd(transformIndex, material, passes, mesh);
-    return AddInstanceResult{transformIndex, instanceId};
+    m_instanceCache.StageAdd(entity.Index(), transformIndex, material, passes, mesh);
+    return transformIndex;
 }
 
-void MeshRendererSubsystem::RemoveInstance(uint32_t transformIndex,
-                                           uint32_t instance,
+void MeshRendererSubsystem::RemoveInstance(Entity entity,
+                                           uint32_t transformIndex,
                                            uint64_t meshId,
                                            MaterialPasses passes)
 {
     m_transformCache.RemoveInstance(transformIndex);
-    // m_instanceCache.RemoveInstance(instance, meshId, passes);
-    m_instanceCache.RemoveInstance(instance, meshId, passes);
+    m_instanceCache.StageRemove(entity.Index(), meshId, passes);
+    // m_instanceCache.RemoveInstance(entity.Index(), meshId, passes);
 }
 
-void MeshRendererSubsystem::SetInstanceMesh(Entity entity, MaterialPasses passes, const asset::MeshView& mesh)
+void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
+                                            uint32_t transformIndex,
+                                            MaterialInstanceHandle materialIndex,
+                                            MaterialPasses oldPasses,
+                                            MaterialPasses newPasses,
+                                            uint64_t oldMeshId,
+                                            const asset::MeshView& newMesh)
 {
-    (void)entity;
-    (void)passes;
-    (void)mesh;
-    // m_passCache.UpdateTargetMesh(passes, entity.Index(), mesh);
+    m_instanceCache.UpdateInstance(
+        entity.Index(),
+        transformIndex,
+        materialIndex,
+        oldPasses,
+        newPasses,
+        oldMeshId,
+        newMesh
+    );
 }
 
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
@@ -56,11 +65,5 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
         .instanceData = m_instanceCache.BuildState(),
         .passBatches = m_instanceCache.BuildBatches(GetImplementedMaterialPassFlags())
     };
-
-    // m_instanceCache.UpdateMatrices(ecs);
-    // return MeshRendererRenderState{
-    //     .instanceData = m_instanceCache.BuildState(),
-    //     .passData = m_passCache.BuildState()
-    // };
 }
 } // namespace nc::graphics

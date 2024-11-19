@@ -9,24 +9,30 @@ MeshRenderer2::MeshRenderer2(Entity self,
     : m_self{self},
       m_meshId{mesh.id},
       m_transformIndex{0},
-      m_instance{0},
       m_material{MaterialInstance{materialDesc}}
 {
-    const auto [transformIndex, instanceId] = s_subsystem->AddInstance(
+    m_transformIndex = s_subsystem->AddInstance(
         self,
         m_material.GetHandle(),
         materialDesc.passes,
         mesh
     );
-
-    m_transformIndex = transformIndex;
-    m_instance = instanceId;
 }
 
 void MeshRenderer2::SetMesh(const asset::MeshView& mesh)
 {
+    const auto passes = m_material.GetPasses();
+    s_subsystem->SetInstanceMesh(
+        m_self,
+        m_transformIndex,
+        m_material.GetHandle(),
+        passes,
+        passes,
+        m_meshId,
+        mesh
+    );
+
     m_meshId = mesh.id;
-    s_subsystem->SetInstanceMesh(m_self, m_material.GetPasses(), mesh);
 }
 
 void MeshRenderer2::Release() noexcept
@@ -34,8 +40,8 @@ void MeshRenderer2::Release() noexcept
     if (m_self.Valid())
     {
         s_subsystem->RemoveInstance(
+            m_self,
             m_transformIndex,
-            m_instance,
             m_meshId,
             m_material.GetPasses()
         );

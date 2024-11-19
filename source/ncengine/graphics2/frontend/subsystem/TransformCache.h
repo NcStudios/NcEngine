@@ -59,6 +59,9 @@ class TransformCache
             return !m_buffer.has_dirty_indices();
         }
 
+        // todo? this could be parallel:
+        //  - update statics on this thread
+        //  - fire async task tot update range of like 32k at a time
         void UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
         {
             NC_PROFILE_SCOPE("TransformCache::PopulateMatrices()", ProfileCategory::Rendering);

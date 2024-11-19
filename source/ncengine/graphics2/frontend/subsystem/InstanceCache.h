@@ -16,10 +16,6 @@
 namespace nc::graphics
 {
 
-using InstanceId = uint32_t;
-
-
-
 // instead of batch, should just make attribs...
 
 
@@ -41,7 +37,7 @@ struct StagedInstance
 {
     uint64_t meshId;
     MaterialPasses passes;
-    InstanceId instanceId;
+    uint32_t id; // currently, is entityId when staged, becomes instanceIndex while commiting
     uint32_t transformIndex;
     MaterialInstanceHandle material;
 };
@@ -62,14 +58,14 @@ class InstanceCache2
         }
 
         //// for testing
-        auto IsValidInstance(InstanceId id) const -> bool
+        auto IsValidInstance(uint32_t entityId) const -> bool
         {
-            return m_indexLookup.contains(id);
+            return m_indexLookup.contains(entityId);
         }
 
-        auto GetInstanceIndex(InstanceId id) const -> uint32_t
+        auto GetInstanceIndex(uint32_t entityId) const -> uint32_t
         {
-            return m_indexLookup.at(id);
+            return m_indexLookup.at(entityId);
         }
 
         auto GetBatch(uint64_t meshId, MaterialPasses passes) -> BatchRegion&
@@ -80,27 +76,38 @@ class InstanceCache2
         }
         ///
 
-        // todo: why give back 'InstanceId' - just use Entity::Index()??
-        auto StageAdd(uint32_t transformIndex,
-                         MaterialInstanceHandle materialIndex,
-                         MaterialPasses passes,
-                         const asset::MeshView& mesh) -> InstanceId
+        void StageAdd(uint32_t entityId,
+                      uint32_t transformIndex,
+                      MaterialInstanceHandle materialIndex,
+                      MaterialPasses passes,
+                      const asset::MeshView& mesh)
         {
             if (!HasBatchFor(mesh.id, passes))
             {
                 m_pendingBatches.emplace_back(passes, mesh);
             }
 
-            const auto id = m_nextId++;
-            m_pendingAdditions.emplace_back(mesh.id, passes, id, transformIndex, materialIndex);
-            return id;
+            m_pendingAdditions.emplace_back(mesh.id, passes, entityId, transformIndex, materialIndex);
         }
 
-        void StageRemove(InstanceId id,
+        void StageRemove(uint32_t entityId,
                          uint64_t meshId,
                          MaterialPasses passes)
         {
-            m_pendingRemovals.emplace_back(meshId, passes, id);
+            m_pendingRemovals.emplace_back(meshId, passes, entityId);
+        }
+
+        // todo: (i think)
+        void UpdateInstance(uint32_t entityId,
+                            uint32_t transformIndex,
+                            MaterialInstanceHandle newMaterialIndex,
+                            MaterialPasses oldPasses,
+                            MaterialPasses newPasses,
+                            uint64_t oldMeshId,
+                            const asset::MeshView& newMesh)
+        {
+            StageRemove(entityId, oldMeshId, oldPasses);
+            StageAdd(entityId, transformIndex, newMaterialIndex, newPasses, newMesh);
         }
 
         void CommitPendingChanges()
@@ -120,23 +127,46 @@ class InstanceCache2
                 );
             }
 
+            m_pendingBatches.clear();
+
+
             for (const auto& toRemove : m_pendingRemovals)
             {
-                const auto instanceIndex = m_indexLookup.at(toRemove.instanceId);
-                m_indexLookup.erase(toRemove.instanceId);
-                // todo: reclaim - prob don't have too if we key off of entity
+                const auto instanceIndex = m_indexLookup.at(toRemove.id);
+                m_indexLookup.erase(toRemove.id);
                 auto& batch = GetBatch(toRemove.meshId, toRemove.passes);
-                if (instanceIndex != batch.offset + batch.count)
+                NC_ASSERT(batch.count != 0, "p bad");
+                const auto batchEndIndex = batch.offset + batch.count - 1;
+                NC_ASSERT(batchEndIndex < m_buffer.size(), "p bad again");
+
+                // if equal, is last item, if greater, we removed others from this batch, either way, don't swap
+                if (instanceIndex < batchEndIndex)
                 {
-                    for (auto i = instanceIndex + 1; i < batch.offset + batch.count; ++i)
+                    // another option: instead of shifting, do pop and swap with back of range...?
+                    m_buffer[instanceIndex] = m_buffer[batchEndIndex];
+                    // this is still dumb
+                    for (auto& i : m_indexLookup.values())
                     {
-                        --m_indexLookup.at(i);
-                        m_buffer.at(i - 1) = m_buffer.at(i);
+                        if (i == batchEndIndex)
+                        {
+                            i = instanceIndex;
+                            break;
+                        }
                     }
+
+                    // for (auto i = instanceIndex + 1; i < batch.offset + batch.count; ++i)
+                    // {
+                    //     // todo: this is wrong, we need to know each entity...
+                    //     --m_indexLookup.at(i);
+                    //     // todo: shift left
+                    //     m_buffer.at(i - 1) = m_buffer.at(i);
+                    // }
                 }
 
                 --batch.count;
             }
+
+            m_pendingRemovals.clear();
 
             if (m_pendingAdditions.empty())
             {
@@ -157,13 +187,21 @@ class InstanceCache2
                     ++batch.capacity;
                 }
 
+                // todo: if else here, able to emplace, can we do this somehow?... maybe:
+                //   - reverse iterate
+                //   - if fits in capacity
+                //     - emplace item
+                //     - move item to back
+                //     - update some 'endOfRange' value
+                //   - remove from 'endOfRange' to 'end()' ?
+
                 // weird
-                toAdd.instanceId = instanceIndex;
+                toAdd.id = instanceIndex;
 
             }
 
             std::ranges::sort(m_pendingAdditions, [](const auto& lhs, const auto& rhs){
-                return lhs.instanceId > rhs.instanceId;
+                return lhs.id > rhs.id;
             });
 
             struct IndexOffsets
@@ -175,13 +213,14 @@ class InstanceCache2
             auto indexOffsets = std::vector<IndexOffsets>{};
             indexOffsets.reserve(m_pendingAdditions.size());
 
+            // todo: atm, this doesn't account for capacity, will grow bigger...
             m_buffer.resize(m_buffer.size() + m_pendingAdditions.size());
 
             auto shiftCount = m_pendingAdditions.size();
             auto rngEnd = m_buffer.end();
             for (auto& toAdd : m_pendingAdditions)
             {
-                const auto i = toAdd.instanceId;
+                const auto i = toAdd.id;
                 indexOffsets.emplace_back(i, (uint32_t)shiftCount);
 
                 auto rngBeg = m_buffer.begin() + i;
@@ -204,16 +243,15 @@ class InstanceCache2
                 }
             }
 
-            m_pendingBatches.clear();
             m_pendingAdditions.clear();
-            m_pendingRemovals.clear();
         }
 
-        // todo: multi add
-        auto AddInstance(uint32_t transformIndex,
+        // todo: remove this
+        void AddInstance(uint32_t entityId,
+                         uint32_t transformIndex,
                          MaterialInstanceHandle materialIndex,
                          MaterialPasses passes,
-                         const asset::MeshView& mesh) -> InstanceId
+                         const asset::MeshView& mesh)
         {
             if (!HasBatchFor(mesh.id, passes))
             {
@@ -233,7 +271,7 @@ class InstanceCache2
 
             auto& batch = GetBatch(mesh.id, passes);
             const auto instanceIndex = batch.offset + batch.count;
-            const auto id = AssignId(instanceIndex);
+            m_indexLookup.emplace(entityId, instanceIndex);
             ++batch.count;
             if (batch.count > batch.capacity)
             {
@@ -258,17 +296,15 @@ class InstanceCache2
             {
                 m_buffer.at(instanceIndex) = InstanceData{transformIndex, materialIndex};
             }
-
-            return id;
         }
 
-        void RemoveInstance(InstanceId id,
+        // remove this
+        void RemoveInstance(uint32_t entityId,
                             uint64_t meshId,
                             MaterialPasses passes)
         {
-            const auto instanceIndex = m_indexLookup.at(id);
-            ReleaseId(id);
-            // todo: ...reclaim id
+            const auto instanceIndex = m_indexLookup.at(entityId);
+            m_indexLookup.erase(entityId);
             auto& batch = GetBatch(meshId, passes);
             if (instanceIndex != batch.offset + batch.count)
             {
@@ -282,8 +318,7 @@ class InstanceCache2
             --batch.count;
         }
 
-        // todo: (i think)
-        // void UpdateInstance(InstanceId id, oldData, newData)
+
 
 
         // todo: don't do whole thing
@@ -323,25 +358,10 @@ class InstanceCache2
     private:
         std::vector<InstanceData> m_buffer;
         std::vector<BatchRegion> m_batches;
-        sparse_map<uint32_t> m_indexLookup; // maps instanceId -> instanceIndex
+        sparse_map<uint32_t> m_indexLookup; // maps entityId -> instanceIndex
         std::vector<StagedBatch> m_pendingBatches;
         std::vector<StagedInstance> m_pendingAdditions;
         std::vector<StagedInstance> m_pendingRemovals;
-        uint32_t m_nextId = 0;
-
-        // todo: reclaim
-        auto AssignId(uint32_t instanceIndex) -> InstanceId
-        {
-            const auto id = m_nextId++;
-            m_indexLookup.emplace(id, instanceIndex);
-            return id;
-        }
-
-        void ReleaseId(InstanceId id)
-        {
-            m_indexLookup.erase(id);
-            // todo: reclaim
-        }
 
         auto GetBatchIt(uint64_t meshId, MaterialPasses passes)
         {

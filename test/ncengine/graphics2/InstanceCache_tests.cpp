@@ -74,9 +74,10 @@ struct Batch3
     };
 };
 
-auto AddTestInstance(nc::graphics::InstanceCache2& uut, const TestObjectInfo& info) -> nc::graphics::InstanceId
+void AddTestInstance(nc::graphics::InstanceCache2& uut, uint32_t entityId, const TestObjectInfo& info)
 {
     return uut.AddInstance(
+        entityId,
         info.transformIndex,
         info.materialIndex,
         info.passes,
@@ -111,9 +112,13 @@ TEST(InstanceCacheTest, Foo)
 {
     auto uut = nc::graphics::InstanceCache2{};
 
-    const auto id1 = AddTestInstance(uut, Batch1::objects.at(0));
-    const auto id2 = AddTestInstance(uut, Batch1::objects.at(1));
-    const auto id3 = AddTestInstance(uut, Batch2::objects.at(0));
+    const auto id1 = 0;
+    const auto id2 = 1;
+    const auto id3 = 2;
+
+    AddTestInstance(uut, id1, Batch1::objects.at(0));
+    AddTestInstance(uut, id2, Batch1::objects.at(1));
+    AddTestInstance(uut, id3, Batch2::objects.at(0));
     EXPECT_TRUE(uut.IsValidInstance(id1));
     EXPECT_TRUE(uut.IsValidInstance(id2));
     EXPECT_TRUE(uut.IsValidInstance(id3));
@@ -145,19 +150,21 @@ TEST(InstanceCacheTest, Foo2)
 {
     auto uut = nc::graphics::InstanceCache2{};
 
+    auto curId = 0;
+
     for (const auto& obj : Batch1::objects)
     {
-        AddTestInstance(uut, obj);
+        AddTestInstance(uut, curId++, obj);
     }
 
     for (const auto& obj : Batch2::objects)
     {
-        AddTestInstance(uut, obj);
+        AddTestInstance(uut, curId++, obj);
     }
 
     for (const auto& obj : Batch3::objects)
     {
-        AddTestInstance(uut, obj);
+        AddTestInstance(uut, curId++, obj);
     }
 
     VerifyBatch<Batch1>(uut, 0, 3, 3);
@@ -181,17 +188,17 @@ TEST(InstanceCacheTest, Foo2)
 
     for (const auto& obj : Batch1::objects)
     {
-        AddTestInstance(uut, obj);
+        AddTestInstance(uut, curId++, obj);
     }
 
     for (const auto& obj : Batch2::objects)
     {
-        AddTestInstance(uut, obj);
+        AddTestInstance(uut, curId++, obj);
     }
 
     for (const auto& obj : Batch3::objects)
     {
-        AddTestInstance(uut, obj);
+        AddTestInstance(uut, curId++, obj);
     }
 
     {

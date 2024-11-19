@@ -17,13 +17,6 @@ class Transform;
 
 namespace graphics
 {
-// todo should maybe just have 'handle' type to collect everything
-struct AddInstanceResult
-{
-    uint32_t transformIndex;
-    uint32_t instanceId;
-};
-
 /*
 Produces a vector of transform matrices for MeshRenderers and their corresponding Entities.
 */
@@ -35,17 +28,20 @@ class MeshRendererSubsystem
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
                          const MaterialPasses passes,
-                         const asset::MeshView& mesh) -> AddInstanceResult;
+                         const asset::MeshView& mesh) -> uint32_t; // return transformIndex I guess ??
 
-        // todo: shouldn't need entity + instance
-        void RemoveInstance(uint32_t transformIndex,
-                            uint32_t instance,
+        void RemoveInstance(Entity entity,
+                            uint32_t transformIndex,
                             uint64_t meshId,
                             MaterialPasses passes);
 
         void SetInstanceMesh(Entity entity,
-                             MaterialPasses passes,
-                             const asset::MeshView& mesh);
+                             uint32_t transformIndex,
+                             MaterialInstanceHandle materialIndex,
+                             MaterialPasses oldPasses,
+                             MaterialPasses newPasses,
+                             uint64_t oldMeshId,
+                             const asset::MeshView& newMesh);
 
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
 
