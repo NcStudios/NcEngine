@@ -11,7 +11,7 @@ namespace nc::graphics
 {
 MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers)
     : m_transformCache{maxMeshRenderers},
-      m_instanceCache{},
+      m_instanceCache{maxMeshRenderers},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnRebuildStatics)}
 {
     MeshRenderer2::s_subsystem = this;
@@ -23,7 +23,13 @@ auto MeshRendererSubsystem::AddInstance(Entity entity,
                                         const asset::MeshView& mesh) -> uint32_t
 {
     const auto transformIndex = m_transformCache.AddInstance(entity);
-    m_instanceCache.StageAdd(entity.Index(), transformIndex, material, passes, mesh);
+    m_instanceCache.GetStagingArea().AddInstance(
+        entity.Index(),
+        passes,
+        mesh,
+        InstanceData{transformIndex, material}
+    );
+
     return transformIndex;
 }
 
@@ -32,8 +38,13 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
                                            uint64_t meshId,
                                            MaterialPasses passes)
 {
+    // if (m_isBatchClearInProgress)
+    // {
+    //     return;
+    // }
+
     m_transformCache.RemoveInstance(transformIndex);
-    m_instanceCache.StageRemove(entity.Index(), meshId, passes);
+    m_instanceCache.GetStagingArea().RemoveInstance(entity.Index(), passes, meshId);
 }
 
 void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
@@ -44,14 +55,16 @@ void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
                                             uint64_t oldMeshId,
                                             const asset::MeshView& newMesh)
 {
-    m_instanceCache.UpdateInstance(
+    m_instanceCache.GetStagingArea().UpdateInstance(
         entity.Index(),
-        transformIndex,
-        materialIndex,
         oldPasses,
         newPasses,
         oldMeshId,
-        newMesh
+        newMesh,
+        InstanceData{
+            transformIndex,
+            materialIndex
+        }
     );
 }
 
@@ -65,6 +78,19 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
         .instanceData = m_instanceCache.BuildState(),
         .passBatches = m_instanceCache.BuildBatches(GetImplementedMaterialPassFlags())
     };
+}
+
+void MeshRendererSubsystem::OnBeforeSceneLoad()
+{
+    m_instanceCache.Purge();
+    // m_isBatchClearInProgress = false;
+}
+
+void MeshRendererSubsystem::Clear() noexcept
+{
+    // m_isBatchClearInProgress = true;
+    // m_transformCache.Clear();
+    // m_instanceCache.Clear();
 }
 
 void MeshRendererSubsystem::OnRebuildStatics()

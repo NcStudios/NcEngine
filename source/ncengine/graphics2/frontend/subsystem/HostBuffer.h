@@ -14,6 +14,93 @@ namespace nc::graphics
 
 using HostBufferHandle = uint32_t;
 
+template<class T>
+struct StagedBufferItem
+{
+    T item;
+    HostBufferHandle index;
+};
+
+template<class T>
+class HostBufferStaging
+{
+    public:
+        explicit HostBufferStaging(uint32_t maxInstances)
+            : m_maxIndex{maxInstances}
+        {
+        }
+
+        // Add a new element
+        template<class... Args>
+        auto emplace(Args&&... args) -> HostBufferHandle
+        {
+            const auto index = GetNextIndex();
+            m_largestStagedIndex = std::max(m_largestStagedIndex, index);
+            m_staged.emplace_back(T(std::forward<Args>(args)...), index);
+            return index;
+        }
+
+        // Remove an element (does not modify element data or mark as dirty)
+        void erase(HostBufferHandle handle)
+        {
+            m_freeList.push_back(handle);
+        }
+
+        auto get_staged() -> std::span<const StagedBufferItem<T>>
+        {
+            return m_staged;
+        }
+
+        void clear_staged()
+        {
+            m_staged.clear();
+            m_largestStagedIndex = 0;
+        }
+
+        auto get_staged_bounds() const -> uint32_t
+        {
+            return m_largestStagedIndex + 1;
+        }
+
+        auto max_size() const -> uint32_t
+        {
+            return m_maxIndex;
+        }
+
+        void clear() noexcept
+        {
+            m_staged.clear();
+            m_freeList.clear();
+            m_nextIndex = 0;
+        }
+
+        void shrink_to_fit()
+        {
+            m_staged.shrink_to_fit();
+            m_freeList.shrink_to_fit();
+        }
+
+    private:
+        std::vector<StagedBufferItem<T>> m_staged;
+        std::vector<uint32_t> m_freeList;
+        uint32_t m_nextIndex = 0;
+        uint32_t m_largestStagedIndex = 0;
+        uint32_t m_maxIndex;
+
+        auto GetNextIndex() -> uint32_t
+        {
+            if (m_freeList.empty())
+            {
+                NC_ASSERT(m_nextIndex < m_maxIndex, "Max instances exceeded");
+                return m_nextIndex++;
+            }
+
+            const auto index = m_freeList.back();
+            m_freeList.pop_back();
+            return index;
+        }
+};
+
 // Buffer type for managing the cpu-side of a structured buffer.
 // - returned handles are stable indices
 // - buffer may be 'sparse' - indices to erased elements remain valid and are backfilled on the next emplace
@@ -24,42 +111,30 @@ class HostBuffer
 {
     public:
         explicit HostBuffer(uint32_t maxInstances)
-            : m_maxIndex{maxInstances}
+            : m_stagingArea{maxInstances}
         {
         }
 
-        // Add a new element
-        template<class... Args>
-        auto emplace(Args&&... args) -> HostBufferHandle
+        // Get an interface for adding/removing elements. Changes are staged to allow concurrent buffer access.
+        auto get_staging_area() -> HostBufferStaging<T>&
         {
-            if (m_freeList.empty())
+            return m_stagingArea;
+        }
+
+        // Merge staged elements into the buffer. The staging area must not be accessed while this is in progress.
+        void commit_staging_area()
+        {
+            if (const auto stagingBounds = m_stagingArea.get_staged_bounds(); stagingBounds > m_data.size())
             {
-                NC_ASSERT(m_nextIndex < m_maxIndex, "Max instances exceeded");
-                m_data.emplace_back(std::forward<Args>(args)...);
-                m_dirty.push_back(m_nextIndex);
-                return m_nextIndex++;
+                m_data.resize(stagingBounds);
             }
 
-            const auto index = m_freeList.back();
-            m_freeList.pop_back();
-            m_data[index] = T(std::forward<Args>(args)...);
-            m_dirty.push_back(index);
-            return index;
-        }
+            for (const auto& [item, index] : m_stagingArea.get_staged())
+            {
+                access_for_write(index) = item;
+            }
 
-        // Remove an element (does not modify element data or mark as dirty)
-        void erase(HostBufferHandle handle)
-        {
-            NC_ASSERT(handle < m_data.size(), "Instance out of bounds");
-            m_freeList.push_back(handle);
-        }
-
-        // Remove an element, overwriting the current value (does not mark as dirty)
-        void erase(HostBufferHandle handle, const T& tombstone)
-        {
-            NC_ASSERT(handle < m_data.size(), "Instance out of bounds");
-            m_data[handle] = tombstone;
-            m_freeList.push_back(handle);
+            m_stagingArea.clear_staged();
         }
 
         // Mutable element access
@@ -120,15 +195,24 @@ class HostBuffer
         // Build a BufferUpdateInfo<T> for all modified elements (calls sort_dirty_indices() and reset_dirty_indices())
         auto build_update_info() -> BufferUpdateInfo<T>
         {
-            return has_dirty_indices()
-                ? BufferUpdateInfo<T>{m_data, collect_dirty_ranges()}
-                : BufferUpdateInfo<T>{};
+            // todo: this was a bug I thought was in InstanceCache. Want the commented out section, but something is
+            //       getting womped!
+
+            if (!has_dirty_indices())
+                return BufferUpdateInfo<T>{};
+
+            reset_dirty_indices();
+            return BufferUpdateInfo<T>{m_data, {{0u, (uint32_t)m_data.size()}    }};
+
+            // return has_dirty_indices()
+            //     ? BufferUpdateInfo<T>{m_data, collect_dirty_ranges()}
+            //     : BufferUpdateInfo<T>{};
         }
 
         // STL Functions
         // note: Any elements modified via these functions must be explicitly marked dirty!
         auto size()     const { return m_data.size();                   }
-        auto max_size() const { return static_cast<size_t>(m_maxIndex); }
+        auto max_size() const { return m_stagingArea.max_size();        }
         auto capacity() const { return m_data.capacity();               }
         auto data()           { return m_data.data();                   }
         auto data()     const { return m_data.data();                   }
@@ -146,23 +230,20 @@ class HostBuffer
         {
             m_data.clear();
             m_dirty.clear();
-            m_freeList.clear();
-            m_nextIndex = 0;
+            m_stagingArea.clear();
         }
 
         void shrink_to_fit()
         {
             m_data.shrink_to_fit();
             m_dirty.shrink_to_fit();
-            m_freeList.shrink_to_fit();
+            m_stagingArea.shrink_to_fit();
         }
 
     private:
         std::vector<T> m_data;
         std::vector<uint32_t> m_dirty;
-        std::vector<uint32_t> m_freeList;
-        uint32_t m_nextIndex = 0;
-        uint32_t m_maxIndex;
+        HostBufferStaging<T> m_stagingArea;
 
         auto collect_dirty_ranges() -> std::vector<BufferSlice>
         {

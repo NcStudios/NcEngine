@@ -39,11 +39,14 @@ class MeshRendererSubsystem
                              const asset::MeshView& newMesh);
 
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
+        void OnBeforeSceneLoad();
+        void Clear() noexcept;
 
     private:
         TransformCache m_transformCache;
-        InstanceCache2 m_instanceCache;
+        InstanceCache m_instanceCache;
         Connection m_rebuildStaticsConnection;
+        bool m_isBatchClearInProgress = false;
 
         void OnRebuildStatics();
 };

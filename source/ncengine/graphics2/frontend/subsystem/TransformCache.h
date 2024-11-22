@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HostBuffer.h"
 #include "graphics2/ShaderTypes.h"
 
 #include <vector>
@@ -12,7 +13,6 @@
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/debug/Profile.h"
 
-#include "HostBufferCache.h"
 
 namespace nc::graphics
 {
@@ -24,9 +24,10 @@ class TransformCache
         {
         }
 
+        // 
         auto AddInstance(Entity entity) -> uint32_t
         {
-            const auto index = m_buffer.emplace(DirectX::XMMATRIX{});
+            const auto index = m_buffer.get_staging_area().emplace(DirectX::XMMATRIX{});
             if (index >= m_entities.size())
             {
                 m_entities.push_back(entity);
@@ -42,7 +43,7 @@ class TransformCache
         void RemoveInstance(uint32_t instance)
         {
             NC_ASSERT(instance < m_entities.size(), "Instance out of bounds");
-            m_buffer.erase(instance);
+            m_buffer.get_staging_area().erase(instance);
             m_entities[instance] = Entity::Null();
         }
 
@@ -64,7 +65,9 @@ class TransformCache
         //  - fire async task tot update range of like 32k at a time
         void UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
         {
-            NC_PROFILE_SCOPE("TransformCache::PopulateMatrices()", ProfileCategory::Rendering);
+            NC_PROFILE_SCOPE("TransformCache::UpdateMatrices()", ProfileCategory::Rendering);
+            m_buffer.commit_staging_area();
+
             // For all new static instances, grab matrix once
             for (const auto index : m_buffer.get_dirty_indices())
             {

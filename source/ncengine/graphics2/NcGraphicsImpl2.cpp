@@ -216,6 +216,11 @@ void NcGraphicsImpl2::ClearEnvironment()
 {
 }
 
+void NcGraphicsImpl2::OnBeforeSceneLoad()
+{
+    m_frontend.OnBeforeSceneLoad();
+}
+
 void NcGraphicsImpl2::Clear() noexcept
 {
     m_frontend.Clear();

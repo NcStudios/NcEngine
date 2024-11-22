@@ -29,6 +29,7 @@ add_test(CameraSubsystem_tests CameraSubsystem_tests)
 ### InstanceCache Tests ###
 add_executable(InstanceCache_tests
     InstanceCache_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/InstanceCache.cpp
 )
 
 target_include_directories(InstanceCache_tests
@@ -108,6 +109,7 @@ add_executable(MeshRendererSubsystem_tests
     ${NC_SOURCE_DIR}/graphics2/MeshRenderer2.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/InstanceCache.cpp
 )
 
 target_include_directories(MeshRendererSubsystem_tests

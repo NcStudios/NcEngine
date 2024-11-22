@@ -36,9 +36,15 @@ class GraphicsFrontend
 
         auto BuildRenderState(ecs::Ecs world) -> FrontendRenderState;
 
+        void OnBeforeSceneLoad()
+        {
+            m_meshRendererSystem.OnBeforeSceneLoad();
+        }
+
         void Clear() noexcept
         {
             m_cameraSystem.Clear();
+            m_meshRendererSystem.Clear();
         }
 
         auto GetCameraSubsystem()       ->       CameraSubsystem&       { return m_cameraSystem;       }
