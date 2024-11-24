@@ -9,6 +9,25 @@
 
 namespace nc::graphics
 {
+// @todo 808 Replace PassTarget with this
+struct Batch
+{
+    explicit Batch(uint32_t instanceIndex, const asset::MeshView& mesh)
+        : instanceOffset{instanceIndex},
+          instanceCount{0},
+          indexOffset{mesh.firstIndex},
+          indexCount{mesh.indexCount},
+          vertexOffset{mesh.firstVertex}
+    {
+    }
+
+    uint32_t instanceOffset;
+    uint32_t instanceCount;
+    uint32_t indexOffset;
+    uint32_t indexCount;
+    uint32_t vertexOffset;
+};
+
 struct PassTarget
 {
     explicit PassTarget(uint32_t instanceIndex, const asset::MeshView& mesh)
