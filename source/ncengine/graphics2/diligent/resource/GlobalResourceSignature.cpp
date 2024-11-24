@@ -1,6 +1,7 @@
 #include "PerFrameResourceSignature.h"
 #include "EnvironmentBufferResource.h"
 #include "TextureBufferResource.h"
+#include "MaterialResourceSignature.h"
 
 #include "ncutility/NcError.h"
 
@@ -25,7 +26,6 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(directionalLightResourceDesc),
         ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(spotLightResourceDesc),
-        ToPipelineResourceDesc(materialResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc)
     };

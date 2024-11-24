@@ -1,6 +1,6 @@
 #include "Pass.h"
 #include "graphics2/diligent/ShaderFactory.h"
-#include "graphics2/diligent/resource/GlobalMeshBuffer.h"
+#include "graphics2/diligent/resource/MeshBuffer.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 
 namespace
@@ -182,9 +182,7 @@ auto MakeDefaultGraphicsPipelineCreateInfo(Diligent::ISwapChain& swapChain,
 auto MakeTestPass(Diligent::IRenderDevice& device,
                   Diligent::ISwapChain& swapChain,
                   ShaderFactory& shaderFactory,
-                  Diligent::IPipelineResourceSignature& globalSignature,
-                  Diligent::IPipelineResourceSignature& componentSignature,
-                  Diligent::IPipelineResourceSignature& materialSignature) -> Pass
+                  Diligent::IPipelineResourceSignature& perFrameResourceSignature) -> Pass
 {
     auto vertexShader = shaderFactory.MakeShaderFromSource(
         std::span{g_vertexShader},
@@ -198,7 +196,7 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
         Diligent::SHADER_TYPE_PIXEL
     );
 
-    auto signatures = std::array{&globalSignature, &componentSignature, &materialSignature};
+    auto signatures = std::array{&perFrameResourceSignature};
     auto layoutElements = GetMeshVertexLayoutElements(0);
     auto createInfo = MakeDefaultGraphicsPipelineCreateInfo(
         swapChain,
@@ -222,9 +220,7 @@ auto MakePasses(Diligent::IRenderDevice& device,
             device,
             swapChain,
             shaderFactory,
-            shaderBindings.GetGlobalSignature().GetResourceSignature(),
-            shaderBindings.GetComponentSignature().GetResourceSignature(),
-            shaderBindings.GetMaterialSignature().GetResourceSignature()
+            shaderBindings.GetPerFrameSignature().GetResourceSignature()
         )
     };
 }

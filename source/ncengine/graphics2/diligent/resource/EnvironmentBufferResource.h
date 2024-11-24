@@ -11,12 +11,12 @@ namespace nc::graphics
 struct CameraRenderState;
 struct LightRenderState;
 
-class GlobalEnvironmentResource
+class EnvironmentBufferResource
 {
     public:
         static constexpr auto UniformBufferName = "EnvironmentDataUniformBuffer";
 
-        explicit GlobalEnvironmentResource(Diligent::IDeviceContext& context,
+        explicit EnvironmentBufferResource(Diligent::IDeviceContext& context,
                                            Diligent::IRenderDevice& device,
                                            Diligent::IShaderResourceVariable& variable);
 

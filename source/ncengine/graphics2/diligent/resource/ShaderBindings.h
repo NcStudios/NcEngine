@@ -1,10 +1,8 @@
 #pragma once
 
-#include "GlobalMeshBuffer.h"
-#include "component/ComponentResourceSignature.h"
-#include "GlobalResourceSignature.h"
+#include "MeshBuffer.h"
+#include "PerFrameResourceSignature.h"
 #include "base/StructuredBuffer.h"
-#include "MaterialResourceSignature.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -24,27 +22,18 @@ class ShaderBindings
                                 uint32_t maxPointLights,
                                 uint32_t maxDirectionalLights,
                                 uint32_t initialMaterialSizeHint)
-            : m_globalSignature{
+            : m_perFrameSignature{
                 context, device,
-                "GlobalResourceSignature",
+                "PerFrameResourceSignature",
                 0,
-                TextureBufferResourceDesc{"TextureBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
-                UniformBufferResourceDesc{"EnvironmentBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS}
-              },
-              m_componentSignature{
-                context, device,
-                "ComponentResourceSignature",
-                1,
                 StructuredBufferResourceDesc{"MeshRendererBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers,     maxMeshRenderers},
                 StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxDirectionalLights, maxDirectionalLights},
                 StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxPointLights,       maxPointLights},
-                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights}
-              },
-              m_materialSignature{
-                context, device,
-                "MaterialResourceSignature",
-                2,
-                StructuredBufferResourceDesc{"MaterialBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxMeshRenderers, initialMaterialSizeHint}}
+                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights},
+                StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxMeshRenderers,     initialMaterialSizeHint},
+                TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
+                UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS}
+              }
         {
         }
 
@@ -52,30 +41,18 @@ class ShaderBindings
                     Diligent::IRenderDevice& device,
                     const FrontendRenderState& renderState);
 
-        auto GetComponentSignature() -> ComponentResourceSignature&
+        auto GetPerFrameSignature() -> PerFrameResourceSignature&
         {
-            return m_componentSignature;
+            return m_perFrameSignature;
         }
 
-        auto GetGlobalSignature() -> GlobalResourceSignature&
-        {
-            return m_globalSignature;
-        }
-
-        auto GetMaterialSignature() -> MaterialResourceSignature&
-        {
-            return m_materialSignature;
-        }
-
-        auto GetMeshBuffer() -> GlobalMeshBuffer&
+        auto GetMeshBuffer() -> MeshBuffer&
         {
             return m_meshBuffer;
         }
 
     private:
-        GlobalResourceSignature m_globalSignature;
-        ComponentResourceSignature m_componentSignature;
-        MaterialResourceSignature m_materialSignature;
-        GlobalMeshBuffer m_meshBuffer;
+        PerFrameResourceSignature m_perFrameSignature;
+        MeshBuffer m_meshBuffer;
 };
 } // namespace nc::graphics

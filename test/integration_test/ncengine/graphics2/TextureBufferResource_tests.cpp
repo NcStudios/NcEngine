@@ -1,5 +1,5 @@
 #include "DiligentEngineFixture.inl"
-#include "graphics2/diligent/resource/GlobalTextureBufferResource.h"
+#include "graphics2/diligent/resource/TextureBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 
 #include "ncengine/asset/AssetData.h"
@@ -11,16 +11,16 @@
 #include <string_view>
 #include <span>
 
-class GlobalTextureBufferResourceTest : public DiligentEngineFixture
+class TextureBufferResourceTest : public DiligentEngineFixture
 {
     protected:
         static constexpr auto maxTextures = 3u;
 
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> signature;
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> srb;
-        std::unique_ptr<nc::graphics::GlobalTextureBufferResource> uut;
+        std::unique_ptr<nc::graphics::TextureBufferResource> uut;
 
-        GlobalTextureBufferResourceTest()
+        TextureBufferResourceTest()
         {
             constexpr auto variableName = "testTexture";
             const auto resourceDesc = nc::graphics::TextureBufferResourceDesc{
@@ -29,7 +29,7 @@ class GlobalTextureBufferResourceTest : public DiligentEngineFixture
                 .maxElementCount = maxTextures
             };
             const auto resource = nc::graphics::ToPipelineResourceDesc(resourceDesc);
-            const auto sampler = nc::graphics::GlobalTextureBufferResource::MakeSamplerDesc(variableName);
+            const auto sampler = nc::graphics::TextureBufferResource::MakeSamplerDesc(variableName);
             auto desc = Diligent::PipelineResourceSignatureDesc{};
             desc.Resources = &resource;
             desc.NumResources = 1;
@@ -39,13 +39,13 @@ class GlobalTextureBufferResourceTest : public DiligentEngineFixture
             desc.UseCombinedTextureSamplers = true;
             engine->GetDevice().CreatePipelineResourceSignature(desc, &signature);
             signature->CreateShaderResourceBinding(&srb);
-            uut = std::make_unique<nc::graphics::GlobalTextureBufferResource>(
+            uut = std::make_unique<nc::graphics::TextureBufferResource>(
                 *srb->GetVariableByName(resource.ShaderStages, variableName),
                 maxTextures
             );
         }
 
-        ~GlobalTextureBufferResourceTest()
+        ~TextureBufferResourceTest()
         {
             FailIfHasErrorOutput();
         }
@@ -92,7 +92,7 @@ const auto normalTexture = nc::asset::TextureWithId{
     .flags = nc::asset::AssetFlags::TextureTypeNormalMap
 };
 
-TEST_F(GlobalTextureBufferResourceTest, Load_singleTexture_succeeds)
+TEST_F(TextureBufferResourceTest, Load_singleTexture_succeeds)
 {
     const auto& expectedTexture = imageTexture1;
     uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
@@ -109,7 +109,7 @@ TEST_F(GlobalTextureBufferResourceTest, Load_singleTexture_succeeds)
     EXPECT_EQ(Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB, desc.Format);
 }
 
-TEST_F(GlobalTextureBufferResourceTest, Load_normalMap_selectsCorrectFormat)
+TEST_F(TextureBufferResourceTest, Load_normalMap_selectsCorrectFormat)
 {
     const auto& expectedTexture = normalTexture;
     uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
@@ -121,7 +121,7 @@ TEST_F(GlobalTextureBufferResourceTest, Load_normalMap_selectsCorrectFormat)
     EXPECT_EQ(Diligent::TEX_FORMAT_RGBA8_UNORM, desc.Format);
 }
 
-TEST_F(GlobalTextureBufferResourceTest, Load_existingTextures_appendsToArray)
+TEST_F(TextureBufferResourceTest, Load_existingTextures_appendsToArray)
 {
     const auto& expectedTexture1 = imageTexture1;
     const auto& expectedTexture2 = imageTexture2;
@@ -143,14 +143,14 @@ TEST_F(GlobalTextureBufferResourceTest, Load_existingTextures_appendsToArray)
     EXPECT_EQ(expectedTexture2.texture.height, secondDesc.GetHeight());
 }
 
-TEST_F(GlobalTextureBufferResourceTest, Load_exceedsMaxTextures_throws)
+TEST_F(TextureBufferResourceTest, Load_exceedsMaxTextures_throws)
 {
     const auto textures = std::array{imageTexture1, imageTexture2, normalTexture};
     uut->Load(textures, engine->GetContext(), engine->GetDevice());
     EXPECT_THROW(uut->Load(textures, engine->GetContext(), engine->GetDevice()), std::exception);
 }
 
-TEST_F(GlobalTextureBufferResourceTest, Load_afterUnload_overwritesExisting)
+TEST_F(TextureBufferResourceTest, Load_afterUnload_overwritesExisting)
 {
     auto initialTextures = std::array{imageTexture1, imageTexture2};
     auto overwriteTextures = std::array{normalTexture};
