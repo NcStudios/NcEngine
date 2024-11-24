@@ -18,7 +18,7 @@ class MaterialRegistry;
 } // namespace graphics
 
 /** @brief Identifier for a MaterialInstance. */
-using MaterialInstanceHandle = uint16_t;
+using MaterialInstanceHandle = uint32_t;
 
 /** @brief Null identifier for a MaterialInstance. */
 constexpr auto NullMaterialInstanceHandle = std::numeric_limits<MaterialInstanceHandle>::max();
