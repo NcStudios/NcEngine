@@ -134,6 +134,7 @@ add_executable(MeshRendererSubsystem_tests
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/InstanceCache.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
 )
 
 target_include_directories(MeshRendererSubsystem_tests

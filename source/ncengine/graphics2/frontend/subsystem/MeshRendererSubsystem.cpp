@@ -20,7 +20,7 @@ MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events, uint32_t maxM
 auto MeshRendererSubsystem::AddInstance(Entity entity,
                                         MaterialInstanceHandle material,
                                         MaterialPasses passes,
-                                        const asset::MeshView& mesh) -> uint32_t
+                                        const asset::MeshView& mesh) -> TransformDataHandle
 {
     const auto transformIndex = m_transformCache.AddInstance(entity);
     m_instanceCache.GetStagingArea().AddInstance(

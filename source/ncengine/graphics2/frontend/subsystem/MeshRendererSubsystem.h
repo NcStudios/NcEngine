@@ -23,7 +23,7 @@ class MeshRendererSubsystem
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
                          const MaterialPasses passes,
-                         const asset::MeshView& mesh) -> uint32_t; // return transformIndex I guess ??
+                         const asset::MeshView& mesh) -> TransformDataHandle; // return transformIndex I guess ??
 
         void RemoveInstance(Entity entity,
                             uint32_t transformIndex,
