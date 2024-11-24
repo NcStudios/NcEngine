@@ -182,7 +182,7 @@ class InstanceCache
         sparse_map<uint32_t> m_entityToIndex;
         std::vector<uint32_t> m_indexToEntity;
         InstanceCacheStaging m_stagingArea;
-        uint32_t m_dirtyBegin = UINT_MAX;
+        uint32_t m_dirtyBegin = NullBatchIndex;
         uint32_t m_initialBatchSize;
 
         void InsertInstance(uint32_t index, const StagedInstance& instance);
