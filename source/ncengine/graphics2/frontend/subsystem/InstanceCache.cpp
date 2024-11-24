@@ -20,17 +20,6 @@ auto WalkBatch(const nc::graphics::Batch& batch)
         batch.instanceOffset + batch.instanceCount
     );
 }
-
-auto BuildBatch(uint32_t batchOffset, const nc::asset::MeshView& mesh)
-{
-    return nc::graphics::Batch{
-        .instanceOffset = batchOffset,
-        .instanceCount = 0,
-        .indexOffset = mesh.firstIndex,
-        .indexCount = mesh.indexCount,
-        .vertexOffset = mesh.firstVertex
-    };
-}
 } // anonymous namespace
 
 namespace nc::graphics
@@ -165,7 +154,7 @@ auto InstanceCache::BuildState() -> BufferUpdateInfo<InstanceData>
 auto InstanceCache::BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>
 {
     NC_PROFILE_SCOPE("InstanceCache::BuildBatches()", ProfileCategory::Rendering);
-    auto out = std::vector<std::vector<Batch>>(passes.size(), {});
+    auto out = std::vector<std::vector<Batch>>(passes.size());
     for (const auto& region : m_batches)
     {
         if (region.batch.instanceCount == 0)
@@ -259,7 +248,7 @@ void InstanceCache::CommitBatchRegions(const std::vector<StagedBatchRegion>& sta
     {
         m_batches.emplace_back(
             BatchKey{passes, mesh.id},
-            BuildBatch(batchIndex, mesh),
+            Batch{batchIndex, mesh},
             m_initialBatchSize
         );
 

@@ -30,7 +30,7 @@ struct BatchKey
 struct BatchRegion
 {
     BatchKey key = BatchKey{};
-    Batch batch = Batch{};
+    Batch batch;
     uint32_t capacity = 0;
 };
 
@@ -100,41 +100,10 @@ class InstanceCacheStaging
         bool m_hasStagedState = false;
 };
 
-
-/**
- * @todo
- * 
-//  * - another bug
-//  *   - go to phys scene, add meshrenderer2, change scene
-//  *     - on add, punching bag dies, on scene change crashes
-//  *   - if you spawn cubes in scene first, then delete, no problems
-//  *   - could be related to purge added today?
- * 
- * - add initial batch size to config
- * - Implement changing Material
- *   - probably make separate issue, its a bit complicated
- *   - need a way for material pass changes to get into here
- *   - current bug: since passes are not updated here, modifying a mesh when
- *     your passes have changed is probably really bad
- *   - don't know if we can handle empty passes currently, we don't really want
- *     to make a batch in this case
-
- * - XX add initial batch size to config
- * - XX finish tests
- * - XX simplify w/ helper functions and such
- * - XX rename weird struct names
- * - XX there's at least one more bug...
- * - XX track dirty ranges
- * - XX implement Clear() for scene changes
- * - XX Test changing mesh
- * - XX split out staging into separate class
- * - XX test performance
- * - XX examine sizes/initial reservation/etc.
- * - XX possible optimization for the future
- *    - have param for initial batch capacity, could do N insertions automatically
- *      in cases where objects are added to same batch over many frames
- */
-
+// CPU-side buffer for InstanceData. Elements are sorted by Batch, where a Batch corresponds to an instanced
+// draw call for all objects that share a mesh and material pass combination. Buffer modifications are held
+// in a staging area to improve performance when adding many elements and to allow concurrent reads and writes
+// from the graphics backend and game logic, respectively.
 class InstanceCache
 {
     public:
@@ -213,7 +182,7 @@ class InstanceCache
         sparse_map<uint32_t> m_entityToIndex;
         std::vector<uint32_t> m_indexToEntity;
         InstanceCacheStaging m_stagingArea;
-        uint32_t m_dirtyBegin = UINT_MAX;
+        uint32_t m_dirtyBegin = NullBatchIndex;
         uint32_t m_initialBatchSize;
 
         void InsertInstance(uint32_t index, const StagedInstance& instance);

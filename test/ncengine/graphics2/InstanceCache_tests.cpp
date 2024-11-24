@@ -50,11 +50,8 @@ struct Batch1
         TestObjectInfo{0, 0, passes, mesh},
         TestObjectInfo{1, 1, passes, mesh},
         TestObjectInfo{2, 2, passes, mesh},
-
-        // look at these
         TestObjectInfo{3, 3, passes, mesh},
         TestObjectInfo{4, 4, passes, mesh}
-
     };
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HostBuffer.h"
+#include "HostStructuredBuffer.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 
@@ -13,7 +13,7 @@ class Transform;
 
 namespace graphics
 {
-using TransformDataHandle = HostBufferHandle;
+using TransformDataHandle = HostStructuredBufferHandle;
 
 // todo: tests
 class TransformCache
@@ -36,7 +36,7 @@ class TransformCache
         void MarkStaticsDirty();
 
     private:
-        HostBuffer<TransformData> m_buffer;
+        HostStructuredBuffer<TransformData> m_buffer;
         std::vector<Entity> m_entities;
 };
 } // namespace graphics
