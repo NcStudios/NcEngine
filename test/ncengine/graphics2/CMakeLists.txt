@@ -45,7 +45,7 @@ target_compile_options(HostBuffer_tests
 target_link_libraries(HostBuffer_tests
     PRIVATE
         gtest_main
-        NcUtility
+        NcMath
 )
 
 add_test(HostBuffer_tests HostBuffer_tests)
