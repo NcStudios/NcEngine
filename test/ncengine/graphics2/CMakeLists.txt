@@ -26,29 +26,29 @@ target_link_libraries(CameraSubsystem_tests
 
 add_test(CameraSubsystem_tests CameraSubsystem_tests)
 
-### HostBuffer Tests ###
-add_executable(HostBuffer_tests
-    HostBuffer_tests.cpp
+### HostStructuredBuffer Tests ###
+add_executable(HostStructuredBuffer_tests
+    HostStructuredBuffer_tests.cpp
 )
 
-target_include_directories(HostBuffer_tests
+target_include_directories(HostStructuredBuffer_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(HostBuffer_tests
+target_compile_options(HostStructuredBuffer_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(HostBuffer_tests
+target_link_libraries(HostStructuredBuffer_tests
     PRIVATE
         gtest_main
         NcMath
 )
 
-add_test(HostBuffer_tests HostBuffer_tests)
+add_test(HostStructuredBuffer_tests HostStructuredBuffer_tests)
 
 ### MaterialPassCache Tests ###
 add_executable(MaterialPassCache_tests

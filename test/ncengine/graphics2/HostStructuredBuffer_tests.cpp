@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "graphics2/frontend/subsystem/HostBuffer.h"
+#include "graphics2/frontend/subsystem/HostStructuredBuffer.h"
 
 #include <algorithm>
 
@@ -8,9 +8,9 @@ struct TestObject
     float value = 0.0f;
 };
 
-TEST(HostBufferTests, HostBufferStaging_HandleAllocation)
+TEST(HostStructuredBufferTests, HostStructuredBufferStaging_HandleAllocation)
 {
-    auto uut = nc::graphics::HostBufferStaging<TestObject>(10);
+    auto uut = nc::graphics::HostStructuredBufferStaging<TestObject>(10);
 
     // handles are consecutive indices
     const auto first = uut.Emplace();
@@ -47,7 +47,7 @@ TEST(HostBufferTests, HostBufferStaging_HandleAllocation)
     EXPECT_EQ(1, recycledSecond);
 }
 
-TEST(HostBufferTests, HostBufferStaging_StagingBounds)
+TEST(HostStructuredBufferTests, HostStructuredBufferStaging_StagingBounds)
 {
     const auto getLargestIndex = [](const auto& staged)
     {
@@ -55,7 +55,7 @@ TEST(HostBufferTests, HostBufferStaging_StagingBounds)
         return std::ranges::max(staged, std::less{}, proj).index;
     };
 
-    auto uut = nc::graphics::HostBufferStaging<TestObject>(10);
+    auto uut = nc::graphics::HostStructuredBufferStaging<TestObject>(10);
 
     // initially empty (bounds are past-the-end index)
     EXPECT_EQ(1, uut.GetStagedBounds());
@@ -124,9 +124,9 @@ TEST(HostBufferTests, HostBufferStaging_StagingBounds)
     }
 }
 
-TEST(HostBufferTests, CommitPendingChanges)
+TEST(HostStructuredBufferTests, CommitPendingChanges)
 {
-    auto uut = nc::graphics::HostBuffer<TestObject>(10);
+    auto uut = nc::graphics::HostStructuredBuffer<TestObject>(10);
     auto& staging = uut.GetStagingArea();
 
     // initial add resizes and marks modified indices dirty
@@ -176,9 +176,9 @@ TEST(HostBufferTests, CommitPendingChanges)
     }
 }
 
-TEST(HostBufferTests, BuildUpdateInfo)
+TEST(HostStructuredBufferTests, BuildUpdateInfo)
 {
-    auto uut = nc::graphics::HostBuffer<TestObject>(10);
+    auto uut = nc::graphics::HostStructuredBuffer<TestObject>(10);
     auto& staging = uut.GetStagingArea();
 
     // empty returns default info
@@ -242,9 +242,9 @@ TEST(HostBufferTests, BuildUpdateInfo)
     }
 }
 
-TEST(HostBufferTests, AccessForWrite)
+TEST(HostStructuredBufferTests, AccessForWrite)
 {
-    auto uut = nc::graphics::HostBuffer<TestObject>(10);
+    auto uut = nc::graphics::HostStructuredBuffer<TestObject>(10);
     auto& staging = uut.GetStagingArea();
     const auto index = staging.Emplace();
     uut.CommitPendingChanges();
@@ -258,9 +258,9 @@ TEST(HostBufferTests, AccessForWrite)
     EXPECT_EQ(100.0f, uut.AccessForRead(index).value);
 }
 
-TEST(HostBufferTests, SortDirtyIndices)
+TEST(HostStructuredBufferTests, SortDirtyIndices)
 {
-    auto uut = nc::graphics::HostBuffer<TestObject>(10);
+    auto uut = nc::graphics::HostStructuredBuffer<TestObject>(10);
     auto& staging = uut.GetStagingArea();
     const auto first = staging.Emplace();
     const auto second = staging.Emplace();

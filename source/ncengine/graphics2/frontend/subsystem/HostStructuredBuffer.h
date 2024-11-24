@@ -9,51 +9,51 @@
 
 namespace nc::graphics
 {
-// Identifier for an element in a HostBuffer.
-using HostBufferHandle = uint32_t;
+// Identifier for an element in a HostStructuredBuffer.
+using HostStructuredBufferHandle = uint32_t;
 
-// A HostBuffer element waiting to be merged into the buffer.
+// A HostStructuredBuffer element waiting to be merged into the buffer.
 template<class T>
 struct StagedBufferItem
 {
     T item;
-    HostBufferHandle index;
+    HostStructuredBufferHandle index;
 };
 
-// HostBuffer interface for adding, removing and updating elements. Events originating
+// HostStructuredBuffer interface for adding, removing and updating elements. Events originating
 // from game logic/API should only be routed here to avoid race conditions with the
 // actual buffer.
 template<class T>
-class HostBufferStaging
+class HostStructuredBufferStaging
 {
     public:
-        explicit HostBufferStaging(uint32_t maxInstances)
+        explicit HostStructuredBufferStaging(uint32_t maxInstances)
             : m_maxIndex{maxInstances}
         {
         }
 
         // API-Facing Functions
         template<class... Args>
-        auto Emplace(Args&&... args) -> HostBufferHandle
+        auto Emplace(Args&&... args) -> HostStructuredBufferHandle
         {
             return m_staged.emplace_back(T(std::forward<Args>(args)...), AssignHandle()).index;
         }
 
-        void Update(HostBufferHandle handle, const T& value)
+        void Update(HostStructuredBufferHandle handle, const T& value)
         {
             m_staged.emplace_back(value, TrackWrite(handle));
         }
 
-        void Erase(HostBufferHandle handle)
+        void Erase(HostStructuredBufferHandle handle)
         {
             m_freeList.push_back(handle);
         }
 
-        // Functions For Use By HostBuffer
-        auto MaxSize()         const -> HostBufferHandle                     { return m_maxIndex; }
+        // Functions For Use By HostStructuredBuffer
+        auto MaxSize()         const -> HostStructuredBufferHandle           { return m_maxIndex; }
         auto HasStagedState()  const -> bool                                 { return !m_staged.empty(); }
         auto GetStaged()       const -> std::span<const StagedBufferItem<T>> { return m_staged; }
-        auto GetStagedBounds() const -> HostBufferHandle                     { return m_largestStagedIndex + 1; }
+        auto GetStagedBounds() const -> HostStructuredBufferHandle           { return m_largestStagedIndex + 1; }
 
         void ClearStaged() noexcept
         {
@@ -73,18 +73,18 @@ class HostBufferStaging
 
     private:
         std::vector<StagedBufferItem<T>> m_staged;
-        std::vector<HostBufferHandle> m_freeList;
-        HostBufferHandle m_nextIndex = 0;
-        HostBufferHandle m_largestStagedIndex = 0;
-        HostBufferHandle m_maxIndex;
+        std::vector<HostStructuredBufferHandle> m_freeList;
+        HostStructuredBufferHandle m_nextIndex = 0;
+        HostStructuredBufferHandle m_largestStagedIndex = 0;
+        HostStructuredBufferHandle m_maxIndex;
 
-        auto TrackWrite(HostBufferHandle handle) -> HostBufferHandle
+        auto TrackWrite(HostStructuredBufferHandle handle) -> HostStructuredBufferHandle
         {
             m_largestStagedIndex = std::max(m_largestStagedIndex, handle);
             return handle;
         }
 
-        auto AssignHandle() -> HostBufferHandle
+        auto AssignHandle() -> HostStructuredBufferHandle
         {
             return TrackWrite([this]()
             {
@@ -112,10 +112,10 @@ class HostBufferStaging
 // the staging area. Once this returns, update tasks are free to run again. BuildUpdateInfo() is called at any point
 // to produce the state to be copied to associated StructuredBuffer<T>.
 template<class T>
-class HostBuffer
+class HostStructuredBuffer
 {
     public:
-        explicit HostBuffer(uint32_t maxInstances)
+        explicit HostStructuredBuffer(uint32_t maxInstances)
             : m_stagingArea{maxInstances}
         {
         }
@@ -123,7 +123,7 @@ class HostBuffer
         // Get an interface for adding/removing elements.
         // IMPORTANT: All API-level events are to go through the staging area. The graphics backend shall decide
         // when it is safe to commit writes to the buffer.
-        auto GetStagingArea() -> HostBufferStaging<T>&
+        auto GetStagingArea() -> HostStructuredBufferStaging<T>&
         {
             return m_stagingArea;
         }
@@ -160,20 +160,20 @@ class HostBuffer
         }
 
         // Mutable element access
-        auto AccessForWrite(HostBufferHandle handle) -> T&
+        auto AccessForWrite(HostStructuredBufferHandle handle) -> T&
         {
             MarkDirty(handle);
             return m_data[handle];
         }
 
         // Immutable element access
-        auto AccessForRead(HostBufferHandle handle) const -> const T&
+        auto AccessForRead(HostStructuredBufferHandle handle) const -> const T&
         {
             return m_data[handle];
         }
 
         // Explicitly track an element modification (if modified through data(), for example).
-        void MarkDirty(HostBufferHandle handle)
+        void MarkDirty(HostStructuredBufferHandle handle)
         {
             m_dirty.push_back(handle);
         }
@@ -243,7 +243,7 @@ class HostBuffer
     private:
         std::vector<T> m_data;
         std::vector<uint32_t> m_dirty;
-        HostBufferStaging<T> m_stagingArea;
+        HostStructuredBufferStaging<T> m_stagingArea;
 
         auto CollectDirtyRanges() -> std::vector<BufferSlice>
         {

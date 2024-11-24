@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HostBuffer.h"
+#include "HostStructuredBuffer.h"
 #include "graphics2/ShaderTypes.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/type/StableAddress.h"
@@ -26,7 +26,7 @@ class MaterialRegistry : public StableAddress
         auto BuildState() -> BufferUpdateInfo<MaterialData>;
 
     private:
-        HostBuffer<MaterialData> m_buffer;
+        HostStructuredBuffer<MaterialData> m_buffer;
         std::vector<MaterialDesc> m_descriptions;
 };
 } // namespace nc::graphics
