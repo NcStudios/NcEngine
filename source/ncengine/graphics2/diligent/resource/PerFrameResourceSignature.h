@@ -42,7 +42,7 @@ class PerFrameResourceSignature
         auto GetPointLightBuffer()      -> StructuredBuffer<PointLightData>&       { return *m_pointLightResource; }
         auto GetSpotLightBuffer()       -> StructuredBuffer<SpotLightData>&        { return *m_spotLightResource; }
         auto GetMaterialDataResource()  -> StructuredBuffer<MaterialData>&         { return *m_materialDataResource; }
-        auto GetTextureBuffer()   -> TextureBufferResource&            { return *m_textureResource; }
+        auto GetTextureBuffer()         -> TextureBufferResource&                  { return *m_textureResource; }
         auto GetEnvironmentBuffer()     -> EnvironmentBufferResource&              { return *m_environmentResource; }
 
     private:
