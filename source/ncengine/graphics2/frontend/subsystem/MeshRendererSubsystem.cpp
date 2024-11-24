@@ -38,11 +38,6 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
                                            uint64_t meshId,
                                            MaterialPasses passes)
 {
-    // if (m_isBatchClearInProgress)
-    // {
-    //     return;
-    // }
-
     m_transformCache.RemoveInstance(transformIndex);
     m_instanceCache.GetStagingArea().RemoveInstance(entity.Index(), passes, meshId);
 }
@@ -71,6 +66,7 @@ void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
 {
     NC_PROFILE_SCOPE("MeshRendererSubsystem::BuildState()", ProfileCategory::Rendering);
+    m_transformCache.CommitPendingChanges();
     m_transformCache.UpdateMatrices(ecs);
     m_instanceCache.CommitPendingChanges();
     return MeshRendererRenderState{
@@ -83,14 +79,10 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
 void MeshRendererSubsystem::OnBeforeSceneLoad()
 {
     m_instanceCache.Purge();
-    // m_isBatchClearInProgress = false;
 }
 
 void MeshRendererSubsystem::Clear() noexcept
 {
-    // m_isBatchClearInProgress = true;
-    // m_transformCache.Clear();
-    // m_instanceCache.Clear();
 }
 
 void MeshRendererSubsystem::OnRebuildStatics()

@@ -46,7 +46,6 @@ class MeshRendererSubsystem
         TransformCache m_transformCache;
         InstanceCache m_instanceCache;
         Connection m_rebuildStaticsConnection;
-        bool m_isBatchClearInProgress = false;
 
         void OnRebuildStatics();
 };

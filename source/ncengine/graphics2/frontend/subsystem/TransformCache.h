@@ -27,7 +27,7 @@ class TransformCache
         // 
         auto AddInstance(Entity entity) -> uint32_t
         {
-            const auto index = m_buffer.get_staging_area().emplace(DirectX::XMMATRIX{});
+            const auto index = m_buffer.GetStagingArea().Emplace(DirectX::XMMATRIX{});
             if (index >= m_entities.size())
             {
                 m_entities.push_back(entity);
@@ -43,21 +43,20 @@ class TransformCache
         void RemoveInstance(uint32_t instance)
         {
             NC_ASSERT(instance < m_entities.size(), "Instance out of bounds");
-            m_buffer.get_staging_area().erase(instance);
+            m_buffer.GetStagingArea().Erase(instance);
             m_entities[instance] = Entity::Null();
         }
 
         void Clear() noexcept
         {
-            m_buffer.clear();
-            m_buffer.shrink_to_fit();
+            m_buffer.Clear();
             m_entities.clear();
             m_entities.shrink_to_fit();
         }
 
-        auto HasPendingChanges() const -> bool
+        void CommitPendingChanges()
         {
-            return !m_buffer.has_dirty_indices();
+            m_buffer.CommitPendingChanges();
         }
 
         // todo? this could be parallel:
@@ -66,18 +65,26 @@ class TransformCache
         void UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
         {
             NC_PROFILE_SCOPE("TransformCache::UpdateMatrices()", ProfileCategory::Rendering);
-            m_buffer.commit_staging_area();
 
             // For all new static instances, grab matrix once
-            for (const auto index : m_buffer.get_dirty_indices())
+            for (const auto index : m_buffer.GetDirtyIndices())
             {
                 const auto entity = m_entities[index];
                 if (entity.IsStatic())
                 {
                     const auto& transform = ecs.Get<Transform>(entity);
-                    m_buffer.access_for_write(index).modelMatrix = transform.TransformationMatrix();
+                    // ahh! this is already a dirty index...
+                    m_buffer.AccessForWrite(index).modelMatrix = transform.TransformationMatrix();
                 }
             }
+
+            // things to try for performance:
+            // - what is cost of just updating all vs. updating dirty?
+            // - what happens if we store FLOAT4X4 instead?
+            // - I assume its ecs.Get() taking all of the time. Is there a way to look closer at to confirm?
+
+
+            auto& pool = ecs.GetPool<Transform>();
 
             // For each dynamic instance, update matrix and mark dirty
             for (auto [i, entity] : std::views::enumerate(m_entities))
@@ -87,16 +94,16 @@ class TransformCache
                     continue;
                 }
 
-                const auto& transform = ecs.Get<Transform>(entity);
                 const auto handle = static_cast<HostBufferHandle>(i);
-                m_buffer.access_for_write(handle).modelMatrix = transform.TransformationMatrix();
+                const auto& transform = pool.Get(entity);
+                m_buffer.AccessForWrite(handle).modelMatrix = transform.TransformationMatrix();
             }
         }
 
         auto BuildState() -> BufferUpdateInfo<TransformData>
         {
             NC_PROFILE_SCOPE("TransformCache::BuildState()", ProfileCategory::Rendering);
-            return m_buffer.build_update_info();
+            return m_buffer.BuildUpdateInfo();
         }
 
         void MarkStaticsDirty()
@@ -106,7 +113,7 @@ class TransformCache
                 if (entity.IsStatic() || !entity.Valid())
                 {
                     const auto handle = static_cast<HostBufferHandle>(i);
-                    m_buffer.mark_dirty(handle);
+                    m_buffer.MarkDirty(handle);
                 }
             }
         }

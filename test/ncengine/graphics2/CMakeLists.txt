@@ -26,6 +26,30 @@ target_link_libraries(CameraSubsystem_tests
 
 add_test(CameraSubsystem_tests CameraSubsystem_tests)
 
+### HostBuffer Tests ###
+add_executable(HostBuffer_tests
+    HostBuffer_tests.cpp
+)
+
+target_include_directories(HostBuffer_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(HostBuffer_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(HostBuffer_tests
+    PRIVATE
+        gtest_main
+        NcUtility
+)
+
+add_test(HostBuffer_tests HostBuffer_tests)
+
 ### InstanceCache Tests ###
 add_executable(InstanceCache_tests
     InstanceCache_tests.cpp
