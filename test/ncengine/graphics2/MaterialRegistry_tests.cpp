@@ -4,24 +4,6 @@
 
 #include "ncutility/NcError.h"
 
-struct UpdateListener
-{
-    nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData> receivedInfo;
-
-    auto MakeCallback()
-    {
-        return [this](const nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>& info)
-        {
-            this->receivedInfo = info;
-        };
-    };
-
-    void Clear()
-    {
-        receivedInfo = nc::graphics::BufferUpdateInfo<nc::graphics::MaterialData>{};
-    }
-};
-
 TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
 {
     const auto expectedDesc = nc::MaterialDesc{
@@ -45,6 +27,7 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
 
     auto uut = nc::graphics::MaterialRegistry{5u};
     const auto actualIndex = uut.CreateInstance(expectedDesc);
+    uut.BuildState();
     const auto actualProperties = uut.GetInstanceData(actualIndex);
     EXPECT_EQ(0u, actualIndex);
     EXPECT_EQ(expectedDesc.properties.diffuseTexture.index, actualProperties.diffuseTexIndex);
@@ -88,70 +71,55 @@ TEST(MaterialRegistryTest, DestroyInstance_recyclesIndex)
 TEST(MaterialRegistryTest, SetInstanceName_doesNotSetDirty)
 {
     auto uut = nc::graphics::MaterialRegistry{5u};
-    auto listener = UpdateListener{};
     auto instance = uut.CreateInstance();
-    uut.CommitPendingChanges(listener.MakeCallback());
+    uut.BuildState();
 
     uut.SetInstanceName(instance, "updated");
-    EXPECT_FALSE(uut.HasPendingChanges());
+    const auto info = uut.BuildState();
+    EXPECT_TRUE(info.instances.empty());
+    EXPECT_TRUE(info.dirtyRanges.empty());
 }
 
-TEST(MaterialRegistryTest, HasPendingChanges_returnsExpectedValue)
+TEST(MaterialRegistryTest, BuildState_multipleWritesToSameInstance_reportsOnce)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
-    EXPECT_FALSE(uut.HasPendingChanges());
-    auto instance = uut.CreateInstance();
-    EXPECT_TRUE(uut.HasPendingChanges());
-    uut.CommitPendingChanges(listener.MakeCallback());
-    EXPECT_FALSE(uut.HasPendingChanges());
-    uut.SetInstanceProperties(instance, nc::MaterialProperties{});
-    EXPECT_TRUE(uut.HasPendingChanges());
-}
-
-TEST(MaterialRegistryTest, CommitPendingChanges_multipleWritesToSameInstance_reportsOnce)
-{
-    auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
     auto instance = uut.CreateInstance();
     uut.SetInstanceProperties(instance, nc::MaterialProperties{});
-    uut.CommitPendingChanges(listener.MakeCallback());
-    ASSERT_EQ(1, listener.receivedInfo.dirtyRanges.size());
-    const auto& [offset, count] = listener.receivedInfo.dirtyRanges[0];
+    const auto info = uut.BuildState();
+    ASSERT_EQ(1, info.dirtyRanges.size());
+    const auto& [offset, count] = info.dirtyRanges[0];
     EXPECT_EQ(0, offset);
     EXPECT_EQ(1, count);
 }
 
-TEST(MaterialRegistryTest, CommitPendingChanges_multipleInstances_reportsAsRanges)
+TEST(MaterialRegistryTest, BuildState_multipleInstances_reportsAsRanges)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
     uut.CreateInstance();
     uut.CreateInstance();
-    uut.CommitPendingChanges(listener.MakeCallback());
-    ASSERT_EQ(1, listener.receivedInfo.dirtyRanges.size());
-    const auto& [offset, count] = listener.receivedInfo.dirtyRanges[0];
+    const auto info = uut.BuildState();
+    ASSERT_EQ(1, info.dirtyRanges.size());
+    const auto& [offset, count] = info.dirtyRanges[0];
     EXPECT_EQ(0, offset);
     EXPECT_EQ(2, count);
 }
 
-TEST(MaterialRegistryTest, CommitPendingChanges_nonContiguousInstanceUpdates_reportsCorrectly)
+TEST(MaterialRegistryTest, BuildState_nonContiguousInstanceUpdates_reportsCorrectly)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
     auto first = uut.CreateInstance();
     uut.CreateInstance();
     auto third = uut.CreateInstance();
-    uut.CommitPendingChanges(listener.MakeCallback());
+    uut.BuildState();
 
     uut.SetInstanceProperties(first, nc::MaterialProperties{});
     uut.SetInstanceProperties(third, nc::MaterialProperties{});
-    uut.CommitPendingChanges(listener.MakeCallback());
-    ASSERT_EQ(2, listener.receivedInfo.dirtyRanges.size());
-    const auto& [firstOffset, firstCount] = listener.receivedInfo.dirtyRanges[0];
+    const auto info = uut.BuildState();
+    ASSERT_EQ(2, info.dirtyRanges.size());
+    const auto& [firstOffset, firstCount] = info.dirtyRanges[0];
     EXPECT_EQ(0, firstOffset);
     EXPECT_EQ(1, firstCount);
-    const auto& [secondOffset, secondCount] = listener.receivedInfo.dirtyRanges[1];
+    const auto& [secondOffset, secondCount] = info.dirtyRanges[1];
     EXPECT_EQ(2, secondOffset);
     EXPECT_EQ(1, secondCount);
 }
