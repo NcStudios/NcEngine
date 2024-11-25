@@ -44,7 +44,6 @@ class GraphicsFrontend
         void Clear() noexcept
         {
             m_cameraSystem.Clear();
-            m_meshRendererSystem.Clear();
         }
 
         auto GetCameraSubsystem()       ->       CameraSubsystem&       { return m_cameraSystem;       }

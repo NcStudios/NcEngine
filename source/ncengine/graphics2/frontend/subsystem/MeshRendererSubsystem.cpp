@@ -82,10 +82,6 @@ void MeshRendererSubsystem::OnBeforeSceneLoad()
     m_instanceCache.Purge();
 }
 
-void MeshRendererSubsystem::Clear() noexcept
-{
-}
-
 void MeshRendererSubsystem::OnRebuildStatics()
 {
     m_transformCache.MarkStaticsDirty();

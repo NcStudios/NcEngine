@@ -18,7 +18,6 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
     const auto& transformData = renderState.meshRendererState.transformData;
     if (!transformData.instances.empty())
     {
-        // NC_PROFILE_SCOPE("ShaderBindings::Update() - TransformData", ProfileCategory::Rendering);
         m_componentSignature.GetTransformBuffer().Update(
             context,
             device,
@@ -29,7 +28,6 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
     const auto& instanceData = renderState.meshRendererState.instanceData;
     if (!instanceData.instances.empty())
     {
-        // NC_PROFILE_SCOPE("ShaderBindings::Update() - InstanceData", ProfileCategory::Rendering);
         m_componentSignature.GetInstanceBuffer().Update(
             context,
             device,

@@ -31,15 +31,11 @@ void TransformCache::RemoveInstance(TransformDataHandle instance)
     m_entities[instance] = Entity::Null();
 }
 
-
 void TransformCache::CommitPendingChanges()
 {
     m_buffer.CommitPendingChanges();
 }
 
-// todo? this could be parallel:
-//  - update statics on this thread
-//  - fire async task tot update range of like 32k at a time
 void TransformCache::UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
 {
     NC_PROFILE_SCOPE("TransformCache::UpdateMatrices()", ProfileCategory::Rendering);
@@ -47,7 +43,7 @@ void TransformCache::UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
     auto data = m_buffer.data();
     auto& pool = ecs.GetPool<Transform>();
 
-    // For all new static instances, grab matrix once
+    // For all new static instances, grab matrix first time.
     for (const auto index : m_buffer.GetDirtyIndices())
     {
         const auto entity = m_entities[index];

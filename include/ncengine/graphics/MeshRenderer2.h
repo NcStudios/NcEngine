@@ -23,8 +23,6 @@ class MeshRenderer2
                                const asset::MeshView& mesh,
                                const MaterialDesc& materialDesc);
 
-        // todo: move instance for move ops
-
         MeshRenderer2(MeshRenderer2&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
               m_meshId{other.m_meshId},
@@ -70,7 +68,6 @@ class MeshRenderer2
     private:
         friend class graphics::MeshRendererSubsystem;
         inline static graphics::MeshRendererSubsystem* s_subsystem = nullptr;
-
         Entity m_self;
         uint64_t m_meshId;
         uint32_t m_transformIndex;

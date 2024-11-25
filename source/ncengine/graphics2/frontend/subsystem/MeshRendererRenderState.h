@@ -4,7 +4,6 @@
 
 namespace nc::graphics
 {
-// @todo 808 Replace PassTarget with this
 struct Batch
 {
     explicit Batch(uint32_t instanceIndex, const asset::MeshView& mesh)
@@ -21,15 +20,6 @@ struct Batch
     uint32_t indexOffset;
     uint32_t indexCount;
     uint32_t vertexOffset;
-};
-
-struct PassTarget
-{
-    uint32_t instanceOffset = UINT32_MAX;
-    uint32_t instanceCount = UINT32_MAX;
-    uint32_t indexOffset = UINT32_MAX;
-    uint32_t indexCount = UINT32_MAX;
-    uint32_t vertexOffset = UINT32_MAX;
 };
 
 struct MeshRendererRenderState

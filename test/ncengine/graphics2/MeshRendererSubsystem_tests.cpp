@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../EcsFixture.inl"
+#include "ncengine/Events.h"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
@@ -18,6 +19,10 @@ const auto g_materialDesc = nc::MaterialDesc{
     .passes = nc::MaterialPass::Toon
 };
 
+constexpr auto g_meshView = nc::asset::MeshView{
+    .id = 42
+};
+
 namespace nc
 {
 MaterialInstance::MaterialInstance(const MaterialDesc&){}
@@ -26,55 +31,134 @@ auto MaterialInstance::GetProperties() const -> const MaterialProperties& { retu
 void MaterialInstance::Release() noexcept {}
 } // namespace nc
 
-// class MeshRendererSubsystemTest : public testing::Test,
-//                                   public EcsFixture
-// {
-//     protected:
-//         static constexpr auto MaxEntities = 20ull;
+class MeshRendererSubsystemTest : public testing::Test,
+                                  public EcsFixture
+{
+    protected:
+        static constexpr auto MaxEntities = 20ull;
+        nc::SystemEvents systemEvents;
+        nc::graphics::MeshRendererSubsystem uut;
 
-//         nc::graphics::MeshRendererSubsystem uut;
+        auto AddEntity(nc::ecs::Ecs& world) -> nc::Entity
+        {
+            const auto entity = world.Emplace<nc::Entity>({});
+            world.Emplace<nc::MeshRenderer2>(
+                entity,
+                g_meshView,
+                g_materialDesc
+            );
 
-//         void AddEntity(nc::ecs::Ecs& world) 
-//         {
-//             const auto entity = world.Emplace<nc::Entity>({});
-//             world.Emplace<nc::MeshRenderer2>(
-//                 entity,
-//                 nc::asset::MeshView{},
-//                 g_materialDesc
-//             );
-//         }
+            return entity;
+        }
 
-//         MeshRendererSubsystemTest()
-//             : EcsFixture{MaxEntities},
-//               uut{MaxEntities, g_materialPasses}
-//         {
-//             GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
-//         }
-// };
+        MeshRendererSubsystemTest()
+            : EcsFixture{MaxEntities},
+              uut{systemEvents, MaxEntities}
+        {
+            GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
+        }
+};
 
-// TEST_F(MeshRendererSubsystemTest, BuildState_Succeeds)
-// {
-//     using namespace nc::graphics;
+TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
+{
+    using namespace nc::graphics;
 
-//     auto world = GetTestWorld();
+    auto world = GetTestWorld();
 
-//     for (auto i = 0u; i < 5; i++)
-//     {
-//         AddEntity(world);
-//     }
+    for (auto i = 0u; i < 5; i++)
+    {
+        AddEntity(world);
+    }
 
-//     auto& registry = GetTestComponentRegistry();
-//     registry.CommitPendingChanges();
+    auto& registry = GetTestComponentRegistry();
+    registry.CommitPendingChanges();
 
+    auto actualRenderState = uut.BuildState(world);
+    const auto& actualTransformState = actualRenderState.transformData;
+    EXPECT_EQ(5, actualTransformState.instances.size());
+    ASSERT_EQ(1, actualTransformState.dirtyRanges.size());
+    EXPECT_EQ(0, actualTransformState.dirtyRanges[0].offset);
+    EXPECT_EQ(5, actualTransformState.dirtyRanges[0].count);
 
-//     auto actualRenderState = uut.BuildState(world);
-//     EXPECT_EQ(actualRenderState.instanceData.instances.size(), 5);
+    const auto& actualInstanceState = actualRenderState.instanceData;
+    EXPECT_EQ(5, actualInstanceState.instances.size());
+    ASSERT_EQ(1, actualInstanceState.dirtyRanges.size());
+    EXPECT_EQ(0, actualInstanceState.dirtyRanges[0].offset);
+    EXPECT_EQ(5, actualInstanceState.dirtyRanges[0].count);
 
+    const auto& actualPassState = actualRenderState.passBatches;
+    ASSERT_EQ(1, actualPassState.size());
+    const auto& actualBatches = actualPassState.at(0);
+    EXPECT_EQ(1, actualBatches.size());
+    const auto& actualBatch = actualBatches.at(0);
+    EXPECT_EQ(0, actualBatch.instanceOffset);
+    EXPECT_EQ(5, actualBatch.instanceCount);
 
-//     EXPECT_EQ(1, actualRenderState.passData.size());
-//     auto& actualToonState = actualRenderState.passData.at(0);
-//     EXPECT_EQ(5, actualToonState.targets.size());
+    registry.Clear();
+}
 
-//     registry.Clear();
+TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
+{
+    auto world = GetTestWorld();
+    auto& registry = GetTestComponentRegistry();
+    const auto first = AddEntity(world);
+    const auto second = AddEntity(world);
+    registry.CommitPendingChanges();
+    uut.BuildState(world); // discard - just updating internal tracking
 
-// }
+    world.Remove<nc::Entity>(first);
+    registry.CommitPendingChanges();
+
+    // Only the remaining transform needs to be updated
+    auto actualRenderState = uut.BuildState(world);
+    const auto& actualTransformState = actualRenderState.transformData;
+    EXPECT_EQ(2, actualTransformState.instances.size());
+    ASSERT_EQ(1, actualTransformState.dirtyRanges.size());
+    EXPECT_EQ(1, actualTransformState.dirtyRanges[0].offset);
+    EXPECT_EQ(1, actualTransformState.dirtyRanges[0].count);
+
+    // Whole instance buffer needs to be updated since we removed the first item
+    const auto& actualInstanceState = actualRenderState.instanceData;
+    EXPECT_EQ(2, actualInstanceState.instances.size());
+    ASSERT_EQ(1, actualInstanceState.dirtyRanges.size());
+    EXPECT_EQ(0, actualInstanceState.dirtyRanges[0].offset);
+    EXPECT_EQ(2, actualInstanceState.dirtyRanges[0].count);
+
+    // Batch reports only one instance
+    const auto& actualPassState = actualRenderState.passBatches;
+    ASSERT_EQ(1, actualPassState.size());
+    const auto& actualBatches = actualPassState.at(0);
+    EXPECT_EQ(1, actualBatches.size());
+    const auto& actualBatch = actualBatches.at(0);
+    EXPECT_EQ(0, actualBatch.instanceOffset);
+    EXPECT_EQ(1, actualBatch.instanceCount);
+
+    registry.Clear();
+}
+
+TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
+{
+    auto world = GetTestWorld();
+    auto& registry = GetTestComponentRegistry();
+    const auto first = AddEntity(world);
+    const auto second = AddEntity(world);
+    registry.CommitPendingChanges();
+    uut.BuildState(world); // discard - just updating internal tracking
+
+    world.Get<nc::MeshRenderer2>(second).SetMesh(nc::asset::MeshView{.id = 100});
+
+    // Split into two batches. Second batch should be offset at index 2, leaving a free space in the first batch.
+    auto actualRenderState = uut.BuildState(world);
+    const auto& actualPassState = actualRenderState.passBatches;
+    ASSERT_EQ(1, actualPassState.size());
+    const auto& actualBatches = actualPassState.at(0);
+    EXPECT_EQ(2, actualBatches.size());
+    const auto& actualBatch1 = actualBatches.at(0);
+    const auto& actualBatch2 = actualBatches.at(1);
+    EXPECT_EQ(0, actualBatch1.instanceOffset);
+    EXPECT_EQ(1, actualBatch1.instanceCount);
+    EXPECT_EQ(2, actualBatch2.instanceOffset);
+    EXPECT_EQ(1, actualBatch2.instanceCount);
+
+    registry.Clear();
+}

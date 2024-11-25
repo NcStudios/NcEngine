@@ -24,7 +24,6 @@ struct GlobalEnvironmentData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
-// @todo 808 Replace MeshRendererData with this
 struct InstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
