@@ -140,7 +140,7 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();
-    const auto first = AddEntity(world);
+    AddEntity(world);
     const auto second = AddEntity(world);
     registry.CommitPendingChanges();
     uut.BuildState(world); // discard - just updating internal tracking
