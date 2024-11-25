@@ -36,11 +36,11 @@ class ShaderBindings
                 device,
                 "ComponentResourceSignature",
                 1,
-                StructuredBufferResourceDesc{"TransformBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers,     maxMeshRenderers}, // don't know about max here...
-                StructuredBufferResourceDesc{"InstanceBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers,     maxMeshRenderers}, // maybe just vs...
-                StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxDirectionalLights, maxDirectionalLights},
-                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxPointLights,       maxPointLights},
-                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights}
+                StructuredBufferResourceDesc{"TransformBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, maxMeshRenderers,     maxMeshRenderers / 2},
+                StructuredBufferResourceDesc{"InstanceBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, maxMeshRenderers,     maxMeshRenderers / 2},
+                StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxDirectionalLights, maxDirectionalLights},
+                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxPointLights,       maxPointLights},
+                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxSpotLights,        maxSpotLights}
               },
               m_materialSignature{
                 context, device,

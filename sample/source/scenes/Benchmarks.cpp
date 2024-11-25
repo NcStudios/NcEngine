@@ -41,18 +41,7 @@ const auto g_meshViews = std::array{
 };
 
 // Need to store ptrs b/c deferred initialization
-const auto g_pbrMaterials = std::array{
-    &nc::sample::DefaultPbrMaterial,
-    &nc::sample::RedPbrMaterial,
-    &nc::sample::GreenPbrMaterial,
-    &nc::sample::BluePbrMaterial,
-    &nc::sample::OrangePbrMaterial,
-    &nc::sample::PurplePbrMaterial,
-    &nc::sample::TealPbrMaterial,
-    &nc::sample::YellowPbrMaterial
-};
-
-const auto g_toonMaterials = std::array{
+const auto g_materials = std::array{
     &nc::sample::material::Default,
     &nc::sample::material::Red,
     &nc::sample::material::Green,
@@ -71,20 +60,12 @@ auto MeshFromPath(std::string_view path) -> const nc::asset::MeshView&
     return *g_meshViews.at(index);
 }
 
-auto RandomPbrMaterial() -> const nc::graphics::PbrMaterial&
+auto RandomMaterial() -> const nc::MaterialDesc&
 {
     static auto index = 0ull;
     ++index;
-    index = index % (g_pbrMaterials.size() - 1);
-    return *g_pbrMaterials.at(index);
-}
-
-auto RandomToonMaterial() -> const nc::MaterialDesc&
-{
-    static auto index = 0ull;
-    ++index;
-    index = index % (g_toonMaterials.size() - 1);
-    return *g_toonMaterials.at(index);
+    index = index % (g_materials.size() - 1);
+    return *g_materials.at(index);
 }
 
 auto AssetCombo(std::string& selection) -> bool
@@ -120,18 +101,6 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
 struct mesh_renderer
 {
     static constexpr auto name = "Mesh Renderer";
-    static inline const auto& maxCount = g_maxEntities;
-    static inline std::function<int()> GetObjectCountCallback = nullptr;
-    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
-    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
-    static inline unsigned SpawnCount = 1000;
-    static inline unsigned DestroyCount = 1000;
-    static inline std::string Mesh = std::string{nc::asset::CubeMesh};
-};
-
-struct toon_renderer
-{
-    static constexpr auto name = "Toon Renderer";
     static inline const auto& maxCount = g_maxEntities;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
@@ -227,7 +196,11 @@ struct entity_hierarchy
                 .parent = parent
             });
 
-            world.Emplace<nc::graphics::MeshRenderer>(child, nc::asset::CubeMesh, RandomPbrMaterial());
+            world.Emplace<nc::MeshRenderer2>(
+                child,
+                MeshFromPath(nc::asset::CubeMesh),
+                RandomMaterial()
+            );
             parent = child;
         }
     }
@@ -293,38 +266,32 @@ void Widget()
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<toon_renderer>(halfCellWidth, [cellWidth](){
-                ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(toon_renderer::Mesh);
-            });
-
-            ImGui::TableNextRow();
-            ImGui::TableNextColumn();
             InnerWidget<static_body>(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(static_body::Mesh);
             });
 
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<rigid_body>(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(static_body::Mesh);
             });
 
-            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<point_light>(halfCellWidth, [](){});
 
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<spot_light>(halfCellWidth, [](){});
 
-            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<entity_hierarchy>(halfCellWidth, [halfCellWidth](){
                 ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
             });
 
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<particle_emitter>(halfCellWidth, [](){});
 
@@ -403,7 +370,11 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, ::mesh_renderer::Mesh, ::RandomPbrMaterial());
+                world.Emplace<MeshRenderer2>(
+                    entity,
+                    MeshFromPath(::mesh_renderer::Mesh),
+                    ::RandomMaterial()
+                );
             }
         );
 
@@ -411,28 +382,6 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::mesh_renderer::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
         ::mesh_renderer::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
         ::mesh_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
-    }
-
-    // Mesh Renderer
-    {
-        const auto handle = world.Emplace<Entity>({.tag = "MeshRenderer Spawner"});
-        auto& spawner = world.Emplace<Spawner>(
-            handle,
-            ncRandom,
-            spawnBehavior,
-            [world](Entity entity) mutable{
-                world.Emplace<MeshRenderer2>(
-                    entity,
-                    MeshFromPath(::toon_renderer::Mesh),
-                    ::RandomToonMaterial()
-                );
-            }
-        );
-
-        world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
-        ::toon_renderer::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
-        ::toon_renderer::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
-        ::toon_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
     // Static Rigid Body
@@ -443,7 +392,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, ::static_body::Mesh, ::RandomPbrMaterial());
+                world.Emplace<MeshRenderer2>(
+                    entity,
+                    MeshFromPath(::static_body::Mesh),
+                    ::RandomMaterial()
+                );
+
                 ::AddRigidBodyForMesh(world, entity, ::static_body::Mesh, BodyType::Static);
             }
         );
@@ -465,7 +419,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
                 world.Emplace<MeshRenderer2>(
                     entity,
                     MeshFromPath(::rigid_body::Mesh),
-                    ::RandomToonMaterial()
+                    ::RandomMaterial()
                 );
 
                 ::AddRigidBodyForMesh(world, entity, ::rigid_body::Mesh);
@@ -554,7 +508,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
                 .maxPosition = Vector3{g_mapExtent * 0.4f, 0.0f, g_mapExtent * 0.4f}
             },
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, asset::CubeMesh, ::RandomPbrMaterial());
+                world.Emplace<MeshRenderer2>(
+                    entity,
+                    MeshFromPath(asset::CubeMesh),
+                    ::RandomMaterial()
+                );
+
                 world.Emplace<FrameLogic>(entity, &::entity_hierarchy::Rotate);
                 ::entity_hierarchy::AttachChildren(world, entity);
             }

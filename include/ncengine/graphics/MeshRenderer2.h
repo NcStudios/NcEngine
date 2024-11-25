@@ -26,7 +26,7 @@ class MeshRenderer2
         MeshRenderer2(MeshRenderer2&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
               m_meshId{other.m_meshId},
-              m_transformIndex{other.m_transformIndex},
+              m_transformDataHandle{other.m_transformDataHandle},
               m_material{std::move(other.m_material)}
         {
         }
@@ -38,7 +38,7 @@ class MeshRenderer2
                 Release();
                 m_self = std::exchange(other.m_self, Entity::Null());
                 m_meshId = other.m_meshId;
-                m_transformIndex = other.m_transformIndex;
+                m_transformDataHandle = other.m_transformDataHandle;
                 m_material = std::move(other.m_material);
             }
 
@@ -70,7 +70,7 @@ class MeshRenderer2
         inline static graphics::MeshRendererSubsystem* s_subsystem = nullptr;
         Entity m_self;
         uint64_t m_meshId;
-        uint32_t m_transformIndex;
+        uint32_t m_transformDataHandle;
         MaterialInstance m_material;
 
         void Release() noexcept;
