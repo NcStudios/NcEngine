@@ -1,5 +1,5 @@
 #include "ShaderBindings.h"
-#include "GlobalEnvironmentResource.h"
+#include "EnvironmentBufferResource.h"
 #include "graphics2/frontend/FrontendRenderState.h"
 
 #include "ncengine/debug/Profile.h"
@@ -11,14 +11,12 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
                             const FrontendRenderState& renderState)
 {
     NC_PROFILE_SCOPE("ShaderBindings::Update()", ProfileCategory::Rendering);
-    m_globalSignature.GetGlobalEnvironment().Update(context,
-                                                    renderState.cameraState, 
-                                                    renderState.lightRenderState);
+    m_perFrameSignature.GetEnvironmentBuffer().Update(context, renderState.cameraState, renderState.lightRenderState);
 
     const auto& transformData = renderState.meshRendererState.transformData;
     if (!transformData.instances.empty())
     {
-        m_componentSignature.GetTransformBuffer().Update(
+        m_perFrameSignature.GetTransformBuffer().Update(
             context,
             device,
             transformData
@@ -28,7 +26,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
     const auto& instanceData = renderState.meshRendererState.instanceData;
     if (!instanceData.instances.empty())
     {
-        m_componentSignature.GetInstanceBuffer().Update(
+        m_perFrameSignature.GetInstanceBuffer().Update(
             context,
             device,
             instanceData
@@ -42,7 +40,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .instances = dirLightData,
             .dirtyRanges = {{0, dirLightData.size()}}
         };
-        m_componentSignature.GetDirectionaLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetDirectionaLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& pointLightData = renderState.lightRenderState.pointLights;
@@ -52,7 +50,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .instances = pointLightData,
             .dirtyRanges = {{0, pointLightData.size()}}
         };
-        m_componentSignature.GetPointLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetPointLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& spotLightData = renderState.lightRenderState.spotLights;
@@ -62,14 +60,13 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .instances = spotLightData,
             .dirtyRanges = {{0, spotLightData.size()}}
         };
-        m_componentSignature.GetSpotLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetSpotLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& materialData = renderState.materialRenderState;
     if (!materialData.instances.empty())
     {
-        NC_PROFILE_SCOPE("ShaderBindings::Update() - MaterialData", ProfileCategory::Rendering);
-        m_materialSignature.GetMaterialDataResource().Update(
+        m_perFrameSignature.GetMaterialDataResource().Update(
             context,
             device,
             materialData

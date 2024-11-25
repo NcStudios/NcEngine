@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics2/diligent/resource/GlobalMeshBuffer.h"
-#include "graphics2/diligent/resource/GlobalTextureBufferResource.h"
+#include "graphics2/diligent/resource/MeshBuffer.h"
+#include "graphics2/diligent/resource/TextureBufferResource.h"
 
 #include "ncengine/asset/AssetData.h"
 #include "ncengine/utility/Signal.h"
@@ -16,8 +16,8 @@ class AssetDispatch
     public:
         AssetDispatch(Diligent::IDeviceContext& context,
                       Diligent::IRenderDevice& device,
-                      GlobalTextureBufferResource& textureBuffer,
-                      GlobalMeshBuffer& meshBuffer,
+                      TextureBufferResource& textureBuffer,
+                      MeshBuffer& meshBuffer,
                       Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                       Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
             : m_context{&context},
@@ -32,8 +32,8 @@ class AssetDispatch
     private:
         Diligent::IDeviceContext* m_context;
         Diligent::IRenderDevice* m_device;
-        GlobalTextureBufferResource* m_textureBuffer;
-        GlobalMeshBuffer* m_meshBuffer;
+        TextureBufferResource* m_textureBuffer;
+        MeshBuffer* m_meshBuffer;
         Connection m_textureConnection;
         Connection m_meshConnection;
 

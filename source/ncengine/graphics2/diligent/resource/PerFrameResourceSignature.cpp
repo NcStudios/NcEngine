@@ -1,0 +1,118 @@
+#include "PerFrameResourceSignature.h"
+#include "EnvironmentBufferResource.h"
+#include "TextureBufferResource.h"
+
+#include "ncutility/NcError.h"
+
+#include <array>
+
+namespace nc::graphics
+{
+PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& context,
+                                                 Diligent::IRenderDevice& device,
+                                                 std::string_view signatureName,
+                                                 uint8_t bindingIndex,
+                                                 const StructuredBufferResourceDesc& transformResourceDesc,
+                                                 const StructuredBufferResourceDesc& instanceResourceDesc,
+                                                 const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                                 const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                                 const StructuredBufferResourceDesc& spotLightResourceDesc,
+                                                 const StructuredBufferResourceDesc& materialResourceDesc,
+                                                 const TextureBufferResourceDesc& textureResourceDesc,
+                                                 const UniformBufferResourceDesc& environmentResourceDesc)
+{
+    const auto resources = std::array{
+        ToPipelineResourceDesc(transformResourceDesc),
+        ToPipelineResourceDesc(instanceResourceDesc),
+        ToPipelineResourceDesc(directionalLightResourceDesc),
+        ToPipelineResourceDesc(pointLightResourceDesc),
+        ToPipelineResourceDesc(spotLightResourceDesc),
+        ToPipelineResourceDesc(materialResourceDesc),
+        ToPipelineResourceDesc(textureResourceDesc),
+        ToPipelineResourceDesc(environmentResourceDesc)
+    };
+
+    const auto sampler = TextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
+    auto desc = Diligent::PipelineResourceSignatureDesc{};
+    desc.Name = signatureName.data();
+    desc.Resources = resources.data(),
+    desc.NumResources = static_cast<uint32_t>(resources.size()),
+    desc.ImmutableSamplers = &sampler,
+    desc.NumImmutableSamplers = 1,
+    desc.BindingIndex = bindingIndex,
+    desc.UseCombinedTextureSamplers = true,
+    device.CreatePipelineResourceSignature(desc, &m_signature);
+
+    if (!m_signature)
+    {
+        throw NcError{"Failed to create resource signature"};
+    }
+
+    m_signature->CreateShaderResourceBinding(&m_srb);
+    if (!m_srb)
+    {
+        throw NcError{"Failed to create shader resource binding"};
+    }
+
+    m_transformResource = std::make_unique<StructuredBuffer<TransformData>>
+    (
+        context,
+        device,
+        GetVariable(transformResourceDesc.shaderType, transformResourceDesc.resourceKey.data(), m_srb),
+        transformResourceDesc
+    );
+
+    m_instanceResource = std::make_unique<StructuredBuffer<InstanceData>>
+    (
+        context,
+        device,
+        GetVariable(instanceResourceDesc.shaderType, instanceResourceDesc.resourceKey.data(), m_srb),
+        instanceResourceDesc
+    );
+
+    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    (
+        context,
+        device,
+        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+        directionalLightResourceDesc
+    );
+
+    m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
+    (
+        context,
+        device,
+        GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
+        pointLightResourceDesc
+    );
+
+    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
+    (
+        context,
+        device,
+        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+        spotLightResourceDesc
+    );
+
+    m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(
+        context,
+        device,
+        GetVariable(materialResourceDesc.shaderType, materialResourceDesc.resourceKey.data(), m_srb),
+        materialResourceDesc
+    );
+
+    m_textureResource = std::make_unique<TextureBufferResource>(
+        GetVariable(textureResourceDesc.shaderType, textureResourceDesc.resourceKey.data(), m_srb),
+        textureResourceDesc.maxElementCount
+    );
+
+    m_environmentResource = std::make_unique<EnvironmentBufferResource>(
+        context,
+        device,
+        GetVariable(environmentResourceDesc.shaderType, environmentResourceDesc.resourceKey.data(), m_srb)
+    );
+}
+
+PerFrameResourceSignature::~PerFrameResourceSignature() noexcept = default;
+
+} // namespace nc::graphics

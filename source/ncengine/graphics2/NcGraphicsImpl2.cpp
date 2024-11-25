@@ -170,7 +170,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
-            m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
+            m_shaderBindings.GetPerFrameSignature().GetTextureBuffer(),
             m_shaderBindings.GetMeshBuffer(),
             m_world,
             modules,
@@ -272,9 +272,7 @@ void NcGraphicsImpl2::Run()
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
     m_shaderBindings.Update(context, device, renderState);
-    m_shaderBindings.GetGlobalSignature().Commit(context);
-    m_shaderBindings.GetComponentSignature().Commit(context);
-    m_shaderBindings.GetMaterialSignature().Commit(context);
+    m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
