@@ -115,7 +115,11 @@ else()
     target_sources(${NC_ENGINE_LIB}
         PRIVATE
             graphics2/Material.cpp
+            graphics2/MeshRenderer2.cpp
             graphics2/GraphicsUtility.cpp
+            graphics2/frontend/subsystem/InstanceCache.cpp
             graphics2/frontend/subsystem/MaterialRegistry.cpp
+            graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
+            graphics2/frontend/subsystem/TransformCache.cpp
     )
 endif()
