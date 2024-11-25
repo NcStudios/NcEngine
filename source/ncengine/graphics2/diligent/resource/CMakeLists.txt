@@ -1,13 +1,11 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        GlobalEnvironmentResource.cpp
-        GlobalMeshBuffer.cpp
-        GlobalResourceSignature.cpp
-        GlobalTextureBufferResource.cpp
-        MaterialResourceSignature.cpp
+        EnvironmentBufferResource.cpp
+        MeshBuffer.cpp
+        PerFrameResourceSignature.cpp
+        TextureBufferResource.cpp
         ResourceTypes.cpp
         ShaderBindings.cpp
 )
 
 add_subdirectory(base)
-add_subdirectory(component)

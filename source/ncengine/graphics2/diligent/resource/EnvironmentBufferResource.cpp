@@ -1,4 +1,4 @@
-#include "GlobalEnvironmentResource.h"
+#include "EnvironmentBufferResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 
@@ -9,7 +9,7 @@
 
 namespace nc::graphics
 {
-GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& context,
+EnvironmentBufferResource::EnvironmentBufferResource(Diligent::IDeviceContext& context,
                                                      Diligent::IRenderDevice& device,
                                                      Diligent::IShaderResourceVariable& variable)
     : m_variable{&variable}
@@ -37,7 +37,7 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IDeviceContext& c
     m_variable->Set(m_uniformBuffer);
 }
 
-void GlobalEnvironmentResource::Update(Diligent::IDeviceContext& context,
+void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
                                        const CameraRenderState& cameraState,
                                        const LightRenderState& lightRenderState)
 {

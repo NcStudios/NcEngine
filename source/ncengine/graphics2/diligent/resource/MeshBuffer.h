@@ -18,7 +18,7 @@ namespace graphics
 {
 auto GetMeshVertexLayoutElements(uint32_t slot = 0u, uint32_t indexOffset = 0u) -> std::array<Diligent::LayoutElement, 7>;
 
-class GlobalMeshBuffer
+class MeshBuffer
 {
     public:
         void SetBuffers(Diligent::IDeviceContext& context);

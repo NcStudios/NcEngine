@@ -1,5 +1,5 @@
 #include "ShaderBindings.h"
-#include "GlobalEnvironmentResource.h"
+#include "EnvironmentBufferResource.h"
 #include "graphics2/frontend/FrontendRenderState.h"
 
 namespace nc::graphics
@@ -8,9 +8,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
                             Diligent::IRenderDevice& device,
                             const FrontendRenderState& renderState)
 {
-    m_globalSignature.GetGlobalEnvironment().Update(context,
-                                                    renderState.cameraState, 
-                                                    renderState.lightRenderState);
+    m_perFrameSignature.GetEnvironmentBuffer().Update(context, renderState.cameraState, renderState.lightRenderState);
 
     /** @todo #794 Once plumbing is finalized with material pass implementation, make sure this is
      *             only sending dirty items. */
@@ -22,7 +20,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .dirtyRanges = {{0, instanceData.size() }}
         };
 
-        m_componentSignature.GetMeshRendererBuffer().Update(context, device, meshBufferUpdateInfo);
+        m_perFrameSignature.GetMeshRendererBuffer().Update(context, device, meshBufferUpdateInfo);
     }
 
     const auto& dirLightData = renderState.lightRenderState.directionalLights;
@@ -32,7 +30,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .instances = dirLightData,
             .dirtyRanges = {{0, dirLightData.size()}}
         };
-        m_componentSignature.GetDirectionaLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetDirectionaLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& pointLightData = renderState.lightRenderState.pointLights;
@@ -42,7 +40,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .instances = pointLightData,
             .dirtyRanges = {{0, pointLightData.size()}}
         };
-        m_componentSignature.GetPointLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetPointLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& spotLightData = renderState.lightRenderState.spotLights;
@@ -52,13 +50,13 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             .instances = spotLightData,
             .dirtyRanges = {{0, spotLightData.size()}}
         };
-        m_componentSignature.GetSpotLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetSpotLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& materialData = renderState.materialRenderState;
     if (!materialData.instances.empty())
     {
-        m_materialSignature.GetMaterialDataResource().Update(
+        m_perFrameSignature.GetMaterialDataResource().Update(
             context,
             device,
             materialData

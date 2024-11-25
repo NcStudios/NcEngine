@@ -1,7 +1,7 @@
 #include "DiligentEngineFixture.inl"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/diligent/resource/base/StructuredBuffer.h"
-#include "graphics2/diligent/resource/MaterialResourceSignature.h"
+#include "graphics2/diligent/resource/PerFrameResourceSignature.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
 #include "ncengine/graphics/Material.h"
 
@@ -16,17 +16,23 @@ class StructuredBufferTest : public DiligentEngineFixture
         static constexpr auto maxInstanceCount = 10u;
         static constexpr auto initialInstanceCount = 3u;
 
-        std::unique_ptr<nc::graphics::MaterialResourceSignature> signature;
+        std::unique_ptr<nc::graphics::PerFrameResourceSignature> signature;
         nc::graphics::StructuredBuffer<nc::graphics::MaterialData>* uut = nullptr;
         std::array<nc::graphics::MaterialData, initialInstanceCount> properties;
 
         StructuredBufferTest()
         {
-            signature = std::make_unique<nc::graphics::MaterialResourceSignature>(
+            signature = std::make_unique<nc::graphics::PerFrameResourceSignature>(
                 engine->GetContext(), engine->GetDevice(),
                 signatureName,
                 bindingIndex,
-                nc::graphics::StructuredBufferResourceDesc{variableName, Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxInstanceCount, initialInstanceCount}
+                nc::graphics::StructuredBufferResourceDesc{"MeshRendererBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, 1, 1},
+                nc::graphics::StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, 1, 1},
+                nc::graphics::StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, 1, 1},
+                nc::graphics::StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, 1, 1},
+                nc::graphics::StructuredBufferResourceDesc{variableName,                 Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxInstanceCount, initialInstanceCount},
+                nc::graphics::TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 1},
+                nc::graphics::UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS}
             );
 
             uut = &signature->GetMaterialDataResource();

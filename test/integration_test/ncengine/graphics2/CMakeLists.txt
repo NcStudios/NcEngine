@@ -44,38 +44,38 @@ target_sources(DiligentEngine_tests
         DiligentEngine_tests.cpp
 )
 
-### GlobalMeshBuffer Tests ###
-add_graphics_test(GlobalMeshBuffer_tests)
+### MeshBuffer Tests ###
+add_graphics_test(MeshBuffer_tests)
 
-target_sources(GlobalMeshBuffer_tests
+target_sources(MeshBuffer_tests
     PRIVATE
-        GlobalMeshBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalMeshBuffer.cpp
+        MeshBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MeshBuffer.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
-target_compile_definitions(GlobalMeshBuffer_tests
+target_compile_definitions(MeshBuffer_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
-### GlobalTextureBufferResource Tests ###
-add_graphics_test(GlobalEnvironmentResource_tests)
+### TextureBufferResource Tests ###
+add_graphics_test(EnvironmentBufferResource_tests)
 
-target_sources(GlobalEnvironmentResource_tests
+target_sources(EnvironmentBufferResource_tests
     PRIVATE
-        GlobalEnvironmentResource_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalEnvironmentResource.cpp
+        EnvironmentBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
-### GlobalTextureBufferResource Tests ###
-add_graphics_test(GlobalTextureBufferResource_tests)
+### TextureBufferResource Tests ###
+add_graphics_test(TextureBufferResource_tests)
 
-target_sources(GlobalTextureBufferResource_tests
+target_sources(TextureBufferResource_tests
     PRIVATE
-        GlobalTextureBufferResource_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
+        TextureBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
@@ -108,9 +108,11 @@ add_graphics_test(StructuredBuffer_tests)
 target_sources(StructuredBuffer_tests
     PRIVATE
         StructuredBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MaterialResourceSignature.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/PerFrameResourceSignature.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
