@@ -102,7 +102,7 @@ TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();
     const auto first = AddEntity(world);
-    const auto second = AddEntity(world);
+    AddEntity(world);
     registry.CommitPendingChanges();
     uut.BuildState(world); // discard - just updating internal tracking
 
