@@ -159,4 +159,28 @@ target_link_libraries(MeshRendererSubsystem_tests
 
 add_test(MeshRendererSubsystem_tests MeshRendererSubsystem_tests)
 
+### TransformCache Tests ###
+add_executable(TransformCache_tests
+    TransformCache_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+)
 
+target_include_directories(TransformCache_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(TransformCache_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(TransformCache_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(TransformCache_tests TransformCache_tests)

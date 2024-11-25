@@ -31,12 +31,6 @@ void TransformCache::RemoveInstance(TransformDataHandle instance)
     m_entities[instance] = Entity::Null();
 }
 
-void TransformCache::Clear() noexcept
-{
-    m_buffer.Clear();
-    m_entities.clear();
-    m_entities.shrink_to_fit();
-}
 
 void TransformCache::CommitPendingChanges()
 {
@@ -63,12 +57,6 @@ void TransformCache::UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
             data[index].matrix = transform.TransformationMatrix();
         }
     }
-
-    // things to try for performance:
-    // - what is cost of just updating all vs. updating dirty?
-    // - what happens if we store FLOAT4X4 instead?
-    // - I assume its ecs.Get() taking all of the time. Is there a way to look closer at to confirm?
-
 
     // For each dynamic instance, update matrix and mark dirty
     for (auto [i, entity] : std::views::enumerate(m_entities))
@@ -99,5 +87,15 @@ void TransformCache::MarkStaticsDirty()
             m_buffer.MarkDirty(static_cast<TransformDataHandle>(i));
         }
     }
+}
+
+auto TransformCache::GetEntity(TransformDataHandle handle) const -> Entity
+{
+    return m_entities.at(handle);
+}
+
+auto TransformCache::GetInstance(TransformDataHandle handle) const -> const TransformData&
+{
+    return m_buffer.AccessForRead(handle);
 }
 } // namespace nc::graphics

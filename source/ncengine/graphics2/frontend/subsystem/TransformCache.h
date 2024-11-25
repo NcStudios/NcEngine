@@ -13,9 +13,10 @@ class Transform;
 
 namespace graphics
 {
+// 
 using TransformDataHandle = HostStructuredBufferHandle;
 
-// todo: tests
+//
 class TransformCache
 {
     public:
@@ -32,8 +33,9 @@ class TransformCache
         void CommitPendingChanges();
         void UpdateMatrices(ecs::ExplicitEcs<Transform> ecs);
         auto BuildState() -> BufferUpdateInfo<TransformData>;
-        void Clear() noexcept;
         void MarkStaticsDirty();
+        auto GetEntity(TransformDataHandle handle) const -> Entity;
+        auto GetInstance(TransformDataHandle handle) const -> const TransformData&;
 
     private:
         HostStructuredBuffer<TransformData> m_buffer;

@@ -78,6 +78,7 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
 
 void MeshRendererSubsystem::OnBeforeSceneLoad()
 {
+    // Call here instead of on Clear() to allow the OnRemove callbacks to fire before purging.
     m_instanceCache.Purge();
 }
 
