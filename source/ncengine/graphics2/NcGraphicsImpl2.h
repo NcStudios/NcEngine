@@ -1,7 +1,7 @@
 #pragma once
 
 #include "diligent/DiligentEngine.h"
-#include "diligent/TestPipeline.h"
+#include "diligent/pass/MaterialPassBackend.h"
 #include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
@@ -23,6 +23,7 @@ class NcGraphicsImpl2 : public NcGraphics
     public:
         NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                        const config::MemorySettings& memorySettings,
+                       std::string_view shadersPath,
                        Registry* registry,
                        ModuleProvider modules,
                        SystemEvents& events,
@@ -46,7 +47,7 @@ class NcGraphicsImpl2 : public NcGraphics
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
         UIBackend m_ui;
-        TestPipeline m_testPipeline;
+        MaterialPassBackend m_materialPassBackend;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
 };

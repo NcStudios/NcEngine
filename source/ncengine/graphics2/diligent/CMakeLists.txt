@@ -15,8 +15,8 @@ target_sources(${NC_ENGINE_LIB}
         DiligentEngine.cpp
         ImGuiImplGLFW.cpp
         ShaderFactory.cpp
-        TestPipeline.cpp
         UIBackend.cpp
 )
 
+add_subdirectory(pass)
 add_subdirectory(resource)

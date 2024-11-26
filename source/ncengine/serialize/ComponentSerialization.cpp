@@ -1,6 +1,7 @@
 #include "ComponentSerialization.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
@@ -31,6 +32,18 @@ auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& 
     serialize::Deserialize(stream, paths);
     serialize::Deserialize(stream, properties);
     return audio::AudioSource{ctx.entityMap.at(id), std::move(paths), properties};
+}
+
+void SerializeDirectionalLight(std::ostream& stream, const graphics::DirectionalLight& out, const SerializationContext&, const std::any&)
+{
+    serialize::Serialize(stream, out);
+}
+
+auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::DirectionalLight
+{
+    auto out = graphics::DirectionalLight{};
+    serialize::Deserialize(stream, out);
+    return out;
 }
 
 void SerializeMeshRenderer(std::ostream& stream, const graphics::MeshRenderer& out, const SerializationContext& ctx, const std::any&)

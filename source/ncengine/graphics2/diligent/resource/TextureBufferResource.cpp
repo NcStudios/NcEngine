@@ -1,4 +1,4 @@
-#include "GlobalTextureBufferResource.h"
+#include "TextureBufferResource.h"
 #include "ncengine/asset/AssetData.h"
 
 #include "TextureLoader.h"
@@ -37,19 +37,7 @@ auto ToTextureSubResData(const nc::asset::Texture& texture) -> Diligent::Texture
 
 namespace nc::graphics
 {
-auto GlobalTextureBufferResource::MakeResourceDesc(std::string_view variableName, uint32_t maxTextures) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc{
-        Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,
-        variableName.data(),
-        maxTextures,
-        Diligent::SHADER_RESOURCE_TYPE_TEXTURE_SRV,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE,
-        Diligent::PIPELINE_RESOURCE_FLAG_RUNTIME_ARRAY
-    };
-}
-
-auto GlobalTextureBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
+auto TextureBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
 {
     return Diligent::ImmutableSamplerDesc{
         Diligent::SHADER_TYPE_PIXEL,
@@ -58,7 +46,7 @@ auto GlobalTextureBufferResource::MakeSamplerDesc(std::string_view variableName)
     };
 }
 
-void GlobalTextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
+void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
                                        Diligent::IDeviceContext& context,
                                        Diligent::IRenderDevice& device)
 {
@@ -103,7 +91,7 @@ void GlobalTextureBufferResource::Load(std::span<const asset::TextureWithId> tex
     SetArrayRegion(m_views.size() - textureCount, textureCount);
 }
 
-void GlobalTextureBufferResource::Unload()
+void TextureBufferResource::Unload()
 {
     m_textures.clear();
     m_textures.shrink_to_fit();
@@ -111,7 +99,7 @@ void GlobalTextureBufferResource::Unload()
     m_views.shrink_to_fit();
 }
 
-void GlobalTextureBufferResource::SetArrayRegion(size_t offset, size_t count)
+void TextureBufferResource::SetArrayRegion(size_t offset, size_t count)
 {
     m_variable->SetArray(
         m_views.data() + offset,

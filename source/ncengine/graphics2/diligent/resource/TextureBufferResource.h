@@ -16,16 +16,15 @@ struct TextureWithId;
 
 namespace graphics
 {
-class GlobalTextureBufferResource
+class TextureBufferResource
 {
     public:
-        explicit GlobalTextureBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures)
+        explicit TextureBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures)
             : m_variable{&variable},
               m_maxTextures{maxTextures}
         {
         }
 
-        static auto MakeResourceDesc(std::string_view variableName, uint32_t maxTextures) -> Diligent::PipelineResourceDesc;
         static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
 
         void Load(std::span<const asset::TextureWithId> textures,

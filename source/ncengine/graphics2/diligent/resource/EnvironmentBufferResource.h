@@ -9,20 +9,18 @@
 namespace nc::graphics
 {
 struct CameraRenderState;
+struct LightRenderState;
 
-class GlobalEnvironmentResource
+class EnvironmentBufferResource
 {
     public:
         static constexpr auto UniformBufferName = "EnvironmentDataUniformBuffer";
 
-        explicit GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
+        explicit EnvironmentBufferResource(Diligent::IDeviceContext& context,
                                            Diligent::IRenderDevice& device,
-                                           Diligent::IDeviceContext& context);
+                                           Diligent::IShaderResourceVariable& variable);
 
-        static auto MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc;
-
-        void Update(const CameraRenderState cameraState,
-                    Diligent::IDeviceContext& context);
+        void Update(Diligent::IDeviceContext& context, const CameraRenderState& cameraState, const LightRenderState& lightRenderState);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

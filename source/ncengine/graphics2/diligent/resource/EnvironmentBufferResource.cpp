@@ -1,5 +1,6 @@
-#include "GlobalEnvironmentResource.h"
+#include "EnvironmentBufferResource.h"
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
+#include "graphics2/frontend/subsystem/LightRenderState.h"
 
 #include "ncutility/NcError.h"
 
@@ -8,9 +9,9 @@
 
 namespace nc::graphics
 {
-GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVariable& variable,
+EnvironmentBufferResource::EnvironmentBufferResource(Diligent::IDeviceContext& context,
                                                      Diligent::IRenderDevice& device,
-                                                     Diligent::IDeviceContext& context)
+                                                     Diligent::IShaderResourceVariable& variable)
     : m_variable{&variable}
 {
     Diligent::CreateUniformBuffer(
@@ -36,18 +37,9 @@ GlobalEnvironmentResource::GlobalEnvironmentResource(Diligent::IShaderResourceVa
     m_variable->Set(m_uniformBuffer);
 }
 
-auto GlobalEnvironmentResource::MakeResourceDesc(std::string_view variableName) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc{
-        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,
-        variableName.data(),
-        Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
-    };
-}
-
-void GlobalEnvironmentResource::Update(const CameraRenderState cameraState,
-                                       Diligent::IDeviceContext& context)
+void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
+                                       const CameraRenderState& cameraState,
+                                       const LightRenderState& lightRenderState)
 {
     auto cbConstants = Diligent::MapHelper<GlobalEnvironmentData>{
         &context,
@@ -57,5 +49,9 @@ void GlobalEnvironmentResource::Update(const CameraRenderState cameraState,
     };
 
     cbConstants->cameraViewProjection = cameraState.viewProjection;
+    cbConstants->cameraPosition = cameraState.position;
+    cbConstants->dirLightsCount = static_cast<uint32_t>(lightRenderState.directionalLights.size());
+    cbConstants->pointLightsCount = static_cast<uint32_t>(lightRenderState.pointLights.size());
+    cbConstants->spotLightsCount = static_cast<uint32_t>(lightRenderState.spotLights.size());
 }
 } // namespace nc::graphics

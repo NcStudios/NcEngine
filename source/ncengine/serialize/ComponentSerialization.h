@@ -12,6 +12,8 @@ struct DeserializationContext;
 
 void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> audio::AudioSource;
+void SerializeDirectionalLight(std::ostream& stream, const graphics::DirectionalLight& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::DirectionalLight;
 void SerializeMeshRenderer(std::ostream& stream, const graphics::MeshRenderer& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeMeshRenderer(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::MeshRenderer;
 void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&);

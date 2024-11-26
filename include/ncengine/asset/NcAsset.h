@@ -55,6 +55,9 @@ class NcAsset : public Module
 
         /** @brief Get the names of all loaded assets as an AssetMap. */
         virtual auto GetLoadedAssets() const noexcept -> AssetMap = 0;
+
+        /** @brief Get the path to a loaded asset given its id. */
+        virtual auto GetAssetPath(AssetType type, size_t id) const -> std::string_view = 0;
 };
 
 /**

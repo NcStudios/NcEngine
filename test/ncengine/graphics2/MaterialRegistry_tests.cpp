@@ -1,55 +1,41 @@
 #include "gtest/gtest.h"
 #include "graphics2/frontend/subsystem/MaterialRegistry.h"
+#include "graphics2/ShaderTypes.h"
 
 #include "ncutility/NcError.h"
-
-struct UpdateListener
-{
-    nc::graphics::MaterialDataUpdateInfo receivedInfo;
-
-    auto MakeCallback()
-    {
-        return [this](const nc::graphics::MaterialDataUpdateInfo& info)
-        {
-            this->receivedInfo = info;
-        };
-    };
-
-    void Clear()
-    {
-        receivedInfo = nc::graphics::MaterialDataUpdateInfo{};
-    }
-};
 
 TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
 {
     const auto expectedDesc = nc::MaterialDesc{
         .name = "test",
         .passes = nc::MaterialPass::Toon,
-        .diffuseTexture = nc::asset::TextureView{
-            .id = 42,
-            .index = 2
-        },
-        .normalTexture = nc::asset::TextureView{
-            .id = 10,
-            .index = 13
-        },
-        .gradientStart = nc::Vector3::One(),
-        .gradientEnd = nc::Vector3::Zero(),
-        .outlineColor = nc::Vector3::Splat(0.5f),
-        .outlineWidth = 0.2f
+        .properties = nc::MaterialProperties{
+            .diffuseTexture = nc::asset::TextureView{
+                .id = 42,
+                .index = 2
+            },
+            .normalTexture = nc::asset::TextureView{
+                .id = 10,
+                .index = 13
+            },
+            .gradientStart = nc::Vector3::One(),
+            .gradientEnd = nc::Vector3::Zero(),
+            .outlineColor = nc::Vector3::Splat(0.5f),
+            .outlineWidth = 0.2f
+        }
     };
 
     auto uut = nc::graphics::MaterialRegistry{5u};
     const auto actualIndex = uut.CreateInstance(expectedDesc);
+    uut.BuildState();
     const auto actualProperties = uut.GetInstanceData(actualIndex);
     EXPECT_EQ(0u, actualIndex);
-    EXPECT_EQ(expectedDesc.diffuseTexture.index, actualProperties.diffuseTexIndex);
-    EXPECT_EQ(expectedDesc.normalTexture.index, actualProperties.normalTexIndex);
-    EXPECT_EQ(expectedDesc.gradientStart, actualProperties.gradientStart);
-    EXPECT_EQ(expectedDesc.gradientEnd, actualProperties.gradientEnd);
-    EXPECT_EQ(expectedDesc.outlineColor, actualProperties.outlineColor);
-    EXPECT_EQ(expectedDesc.outlineWidth, actualProperties.outlineWidth);
+    EXPECT_EQ(expectedDesc.properties.diffuseTexture.index, actualProperties.diffuseTexIndex);
+    EXPECT_EQ(expectedDesc.properties.normalTexture.index, actualProperties.normalTexIndex);
+    EXPECT_EQ(expectedDesc.properties.gradientStart, actualProperties.gradientStart);
+    EXPECT_EQ(expectedDesc.properties.gradientEnd, actualProperties.gradientEnd);
+    EXPECT_EQ(expectedDesc.properties.outlineColor, actualProperties.outlineColor);
+    EXPECT_EQ(expectedDesc.properties.outlineWidth, actualProperties.outlineWidth);
 }
 
 TEST(MaterialRegistryTest, CreateInstance_allocatesSequentialIndices)
@@ -82,62 +68,58 @@ TEST(MaterialRegistryTest, DestroyInstance_recyclesIndex)
     EXPECT_EQ(1, recycled);
 }
 
-TEST(MaterialRegistryTest, HasPendingChanges_returnsExpectedValue)
+TEST(MaterialRegistryTest, SetInstanceName_doesNotSetDirty)
 {
-    auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
-    EXPECT_FALSE(uut.HasPendingChanges());
+    auto uut = nc::graphics::MaterialRegistry{5u};
     auto instance = uut.CreateInstance();
-    EXPECT_TRUE(uut.HasPendingChanges());
-    uut.CommitPendingChanges(listener.MakeCallback());
-    EXPECT_FALSE(uut.HasPendingChanges());
-    uut.SetInstanceDesc(instance, nc::MaterialDesc{});
-    EXPECT_TRUE(uut.HasPendingChanges());
+    uut.BuildState();
+
+    uut.SetInstanceName(instance, "updated");
+    const auto info = uut.BuildState();
+    EXPECT_TRUE(info.instances.empty());
+    EXPECT_TRUE(info.dirtyRanges.empty());
 }
 
-TEST(MaterialRegistryTest, CommitPendingChanges_multipleWritesToSameInstance_reportsOnce)
+TEST(MaterialRegistryTest, BuildState_multipleWritesToSameInstance_reportsOnce)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
     auto instance = uut.CreateInstance();
-    uut.SetInstanceDesc(instance, nc::MaterialDesc{});
-    uut.CommitPendingChanges(listener.MakeCallback());
-    ASSERT_EQ(1, listener.receivedInfo.dirtyRanges.size());
-    const auto& [offset, count] = listener.receivedInfo.dirtyRanges[0];
+    uut.SetInstanceProperties(instance, nc::MaterialProperties{});
+    const auto info = uut.BuildState();
+    ASSERT_EQ(1, info.dirtyRanges.size());
+    const auto& [offset, count] = info.dirtyRanges[0];
     EXPECT_EQ(0, offset);
     EXPECT_EQ(1, count);
 }
 
-TEST(MaterialRegistryTest, CommitPendingChanges_multipleInstances_reportsAsRanges)
+TEST(MaterialRegistryTest, BuildState_multipleInstances_reportsAsRanges)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
     uut.CreateInstance();
     uut.CreateInstance();
-    uut.CommitPendingChanges(listener.MakeCallback());
-    ASSERT_EQ(1, listener.receivedInfo.dirtyRanges.size());
-    const auto& [offset, count] = listener.receivedInfo.dirtyRanges[0];
+    const auto info = uut.BuildState();
+    ASSERT_EQ(1, info.dirtyRanges.size());
+    const auto& [offset, count] = info.dirtyRanges[0];
     EXPECT_EQ(0, offset);
     EXPECT_EQ(2, count);
 }
 
-TEST(MaterialRegistryTest, CommitPendingChanges_nonContiguousInstanceUpdates_reportsCorrectly)
+TEST(MaterialRegistryTest, BuildState_nonContiguousInstanceUpdates_reportsCorrectly)
 {
     auto uut = nc::graphics::MaterialRegistry{3};
-    auto listener = UpdateListener{};
     auto first = uut.CreateInstance();
     uut.CreateInstance();
     auto third = uut.CreateInstance();
-    uut.CommitPendingChanges(listener.MakeCallback());
+    uut.BuildState();
 
-    uut.SetInstanceDesc(first, nc::MaterialDesc{});
-    uut.SetInstanceDesc(third, nc::MaterialDesc{});
-    uut.CommitPendingChanges(listener.MakeCallback());
-    ASSERT_EQ(2, listener.receivedInfo.dirtyRanges.size());
-    const auto& [firstOffset, firstCount] = listener.receivedInfo.dirtyRanges[0];
+    uut.SetInstanceProperties(first, nc::MaterialProperties{});
+    uut.SetInstanceProperties(third, nc::MaterialProperties{});
+    const auto info = uut.BuildState();
+    ASSERT_EQ(2, info.dirtyRanges.size());
+    const auto& [firstOffset, firstCount] = info.dirtyRanges[0];
     EXPECT_EQ(0, firstOffset);
     EXPECT_EQ(1, firstCount);
-    const auto& [secondOffset, secondCount] = listener.receivedInfo.dirtyRanges[1];
+    const auto& [secondOffset, secondCount] = info.dirtyRanges[1];
     EXPECT_EQ(2, secondOffset);
     EXPECT_EQ(1, secondCount);
 }
@@ -148,21 +130,20 @@ TEST(MaterialRegistryTest, AllMethods_indexOutOfBounds_throws)
     const auto badIndex = nc::MaterialInstanceHandle{0};
     EXPECT_THROW(uut.DestroyInstance(badIndex), nc::NcError);
     EXPECT_THROW(uut.GetInstanceDesc(badIndex), nc::NcError);
-    EXPECT_THROW(uut.SetInstanceDesc(badIndex, nc::MaterialDesc()), nc::NcError);
+    EXPECT_THROW(uut.SetInstanceProperties(badIndex, nc::MaterialProperties()), nc::NcError);
     EXPECT_THROW(uut.GetInstanceData(badIndex), nc::NcError);
 }
 
 TEST(MaterialRegistryTest, MaterialInstance_wrapsFunctions)
 {
     const auto originalDesc = nc::MaterialDesc{.name = "original"};
-    const auto newDesc = nc::MaterialDesc{.name = "original"};
     auto uut = nc::graphics::MaterialRegistry{3};
     auto first = nc::MaterialInstance{originalDesc};
     auto second = first.Clone();
-    first.SetDesc(newDesc);
+    first.SetName("new");
 
-    EXPECT_EQ(newDesc.name, first.GetDesc().name);
-    EXPECT_EQ(originalDesc.name, second.GetDesc().name);
+    EXPECT_EQ("new", first.GetName());
+    EXPECT_EQ(originalDesc.name, second.GetName());
 }
 
 TEST(MaterialRegistryTest, MaterialInstance_desctructor_destroysInstanceIfOwner)

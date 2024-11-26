@@ -48,15 +48,18 @@ class ShaderFactory
 
 template<class EngineFactoryT>
 static auto MakeShaderFactory([[maybe_unused]] EngineFactoryT& engineFactory,
-                              Diligent::IRenderDevice& device) -> std::unique_ptr<ShaderFactory>
+                              Diligent::IRenderDevice& device,
+                              [[maybe_unused]] std::string_view shadersPath) -> std::unique_ptr<ShaderFactory>
 {
     auto shaderSourceFactory = Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory>{};
 #if NC_RUNTIME_SHADER_COMPILATION
-    engineFactory.CreateDefaultShaderSourceStreamFactory(nullptr, &shaderSourceFactory);
+    engineFactory.CreateDefaultShaderSourceStreamFactory(shadersPath.data(), &shaderSourceFactory);
     if (!shaderSourceFactory)
     {
         throw NcError{"Failed to create ShaderSourceInputStreamFactory"};
     }
+#else
+(void)shadersPath;
 #endif
     return std::make_unique<ShaderFactory>(device, std::move(shaderSourceFactory));
 }

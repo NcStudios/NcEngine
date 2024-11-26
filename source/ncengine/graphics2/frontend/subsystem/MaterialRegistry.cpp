@@ -7,15 +7,15 @@
 
 namespace
 {
-auto ToMaterialData(const nc::MaterialDesc& desc) -> nc::graphics::MaterialData
+auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::MaterialData
 {
     return nc::graphics::MaterialData{
-        desc.diffuseTexture.index,
-        desc.normalTexture.index,
-        desc.gradientStart,
-        desc.gradientEnd,
-        desc.outlineColor,
-        desc.outlineWidth
+        .gradientStart = properties.gradientStart,
+        .diffuseTexIndex = properties.diffuseTexture.index,
+        .gradientEnd = properties.gradientEnd,
+        .normalTexIndex = properties.normalTexture.index,
+        .outlineColor = properties.outlineColor,
+        .outlineWidth = properties.outlineWidth
     };
 }
 } // anonymous namespace
@@ -23,27 +23,23 @@ auto ToMaterialData(const nc::MaterialDesc& desc) -> nc::graphics::MaterialData
 namespace nc::graphics
 {
 MaterialRegistry::MaterialRegistry(uint32_t maxInstances)
-    : m_maxIndex{static_cast<MaterialInstanceHandle>(maxInstances)}
+    : m_buffer{maxInstances}
 {
     MaterialInstance::s_registry = this;
 }
 
 auto MaterialRegistry::CreateInstance(const MaterialDesc& desc) -> MaterialInstanceHandle
 {
-    if (m_freeList.empty())
+    const auto index = m_buffer.GetStagingArea().Emplace(ToMaterialData(desc.properties));
+    if (index >= m_descriptions.size())
     {
-        NC_ASSERT(m_nextIndex < m_maxIndex, "Max material instances exceeded");
-        m_data.push_back(ToMaterialData(desc));
         m_descriptions.push_back(desc);
-        m_dirty.push_back(m_nextIndex);
-        return m_nextIndex++;
+    }
+    else
+    {
+        m_descriptions[index] = desc;
     }
 
-    const auto index = m_freeList.back();
-    m_freeList.pop_back();
-    m_data[index] = ToMaterialData(desc);
-    m_descriptions[index] = desc;
-    m_dirty.push_back(index);
     return index;
 }
 
@@ -51,7 +47,7 @@ void MaterialRegistry::DestroyInstance(MaterialInstanceHandle index)
 {
     NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
     m_descriptions[index] = MaterialDesc{};
-    m_freeList.push_back(index);
+    m_buffer.GetStagingArea().Erase(index);
 }
 
 auto MaterialRegistry::GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&
@@ -60,62 +56,28 @@ auto MaterialRegistry::GetInstanceDesc(MaterialInstanceHandle index) const -> co
     return m_descriptions[index];
 }
 
-void MaterialRegistry::SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc)
+void MaterialRegistry::SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties)
 {
-    NC_ASSERT(index < m_data.size(), "Invalid MaterialInstanceHandle");
-    m_data[index] = ToMaterialData(desc);
-    m_descriptions[index] = desc;
-    m_dirty.push_back(index);
+    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+    m_buffer.GetStagingArea().Update(index, ToMaterialData(properties));
+    m_descriptions[index].properties = properties;
 }
 
 auto MaterialRegistry::GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&
 {
-    NC_ASSERT(index < m_data.size(), "Invalid MaterialInstanceHandle");
-    return m_data[index];
+    NC_ASSERT(index < m_buffer.size(), "Invalid MaterialInstanceHandle");
+    return m_buffer.AccessForRead(index);
 }
 
-auto MaterialRegistry::HasPendingChanges() const -> bool
+void MaterialRegistry::SetInstanceName(MaterialInstanceHandle index, std::string_view name)
 {
-    return !m_dirty.empty();
+    NC_ASSERT(index < m_descriptions.size(), "Invalid MaterialInstanceHandle");
+    m_descriptions[index].name = std::string{name};
 }
 
-void MaterialRegistry::CommitPendingChanges(std::function<void(const MaterialDataUpdateInfo&)> notifyUpdate)
+auto MaterialRegistry::BuildState() -> BufferUpdateInfo<MaterialData>
 {
-    notifyUpdate(MaterialDataUpdateInfo{
-        .instances = m_data,
-        .dirtyRanges = CollectDirtyRanges()
-    });
-}
-
-auto MaterialRegistry::CollectDirtyRanges() -> std::vector<BufferSlice>
-{
-    auto out = std::vector<BufferSlice>{};
-    if (m_dirty.empty())
-    {
-        return out;
-    }
-
-    std::ranges::sort(m_dirty);
-    auto removed = std::ranges::unique(m_dirty);
-    m_dirty.erase(removed.begin(), removed.end());
-    auto start = m_dirty[0];
-    auto end = start + 1;
-    for (const auto nextEnd : std::views::drop(m_dirty, 1))
-    {
-        if (nextEnd == end)
-        {
-            end += 1;
-        }
-        else
-        {
-            out.emplace_back(start, end - start);
-            start = nextEnd;
-            end = start + 1;
-        }
-    }
-
-    out.emplace_back(start, end - start);
-    m_dirty.clear();
-    return out;
+    m_buffer.CommitPendingChanges();
+    return m_buffer.BuildUpdateInfo();
 }
 } // namespace nc::graphics

@@ -1,4 +1,5 @@
 #include "NcGraphicsImpl2.h"
+#include "diligent/pass/Pass.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -95,6 +96,7 @@ namespace nc::graphics
 {
 #ifdef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                             const config::AssetSettings& assetSettings,
                              const config::GraphicsSettings& graphicsSettings,
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,
@@ -121,7 +123,7 @@ namespace nc::graphics
             });
 
             NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, registry, modules, events, *ncWindow);
+            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, assetSettings.shadersPath, registry, modules, events, *ncWindow);
         }
 
         NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
@@ -131,6 +133,7 @@ namespace nc::graphics
 
 NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                                  const config::MemorySettings& memorySettings,
+                                 std::string_view shadersPath,
                                  Registry* registry,
                                  ModuleProvider modules,
                                  SystemEvents& events,
@@ -139,12 +142,17 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_engine{
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
             window.GetWindowHandle(),
+            shadersPath,
             ::LogCallback
           },
           m_shaderBindings{
             m_engine.GetDevice(),
             m_engine.GetContext(),
             memorySettings.maxTextures,
+            memorySettings.maxRenderers,
+            memorySettings.maxSpotLights,
+            memorySettings.maxPointLights,
+            memorySettings.maxDirectionalLights,
             1000u /** @todo: 782 parameterize with ShaderConfig object */
           },
           m_ui{
@@ -153,18 +161,16 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_testPipeline{
-            m_engine.GetContext(),
+          m_materialPassBackend{MakePasses(
             m_engine.GetDevice(),
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
-            m_shaderBindings.GetGlobalSignature().GetResourceSignature(),
-            m_shaderBindings.GetMaterialSignature().GetResourceSignature()
-          },
+            m_shaderBindings
+          )},
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
-            m_shaderBindings.GetGlobalSignature().GetGlobalTextureBuffer(),
+            m_shaderBindings.GetPerFrameSignature().GetTextureBuffer(),
             m_shaderBindings.GetMeshBuffer(),
             m_world,
             modules,
@@ -246,6 +252,7 @@ void NcGraphicsImpl2::Run()
     auto renderState = m_frontend.BuildRenderState(m_world);
 
     auto& context = m_engine.GetContext();
+    auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
     m_ui.FrameBegin(swapChain);
@@ -259,15 +266,16 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-    m_shaderBindings.Update(renderState, context);
-    m_shaderBindings.GetGlobalSignature().Commit(context);
-    m_shaderBindings.GetMaterialSignature().Commit(context);
+    m_shaderBindings.Update(context, device, renderState);
+    m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_testPipeline.Render(context, m_world);
+    m_materialPassBackend.Render(context, renderState.meshRendererState.passData);
     m_ui.Render(context);
 
     swapChain.Present();
+    context.Flush();
+    context.FinishFrame();
 }
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)

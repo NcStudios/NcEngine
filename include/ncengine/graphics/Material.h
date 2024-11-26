@@ -18,24 +18,26 @@ class MaterialRegistry;
 } // namespace graphics
 
 /** @brief Identifier for a MaterialInstance. */
-using MaterialInstanceHandle = uint16_t;
+using MaterialInstanceHandle = uint32_t;
 
 /** @brief Null identifier for a MaterialInstance. */
 constexpr auto NullMaterialInstanceHandle = std::numeric_limits<MaterialInstanceHandle>::max();
 
-/** @brief Set of flags indicating a MaterialInstance's enabled passes. */
-using MaterialPasses = uint64_t;
-
 /** @brief Material pass flags. */
 struct MaterialPass
 {
-    static constexpr auto Shadow  = MaterialPasses{1 << 0};
-    static constexpr auto Toon    = MaterialPasses{1 << 1};
-    static constexpr auto Alpha   = MaterialPasses{1 << 2};
-    static constexpr auto Depth   = MaterialPasses{1 << 3};
-    static constexpr auto Normals = MaterialPasses{1 << 4};
-    static constexpr auto Outline = MaterialPasses{1 << 5};
+    using type = uint64_t;
+
+    static constexpr auto Shadow  = type{1 << 0};
+    static constexpr auto Toon    = type{1 << 1};
+    static constexpr auto Alpha   = type{1 << 2};
+    static constexpr auto Depth   = type{1 << 3};
+    static constexpr auto Normals = type{1 << 4};
+    static constexpr auto Outline = type{1 << 5};
 };
+
+/** @brief Set of flags indicating a MaterialInstance's enabled passes. */
+using MaterialPasses = MaterialPass::type;
 
 /** @brief Default passes for a toon material. */
 constexpr auto ShadowedToonMaterial = MaterialPass::Shadow |
@@ -46,16 +48,22 @@ constexpr auto ShadowedToonMaterial = MaterialPass::Shadow |
                                       MaterialPass::Outline;
 
 /** @brief Properties for constructing a MaterialInstance. */
-struct MaterialDesc
+struct MaterialProperties
 {
-    std::string name = "DefaultMaterial";
-    MaterialPasses passes = ShadowedToonMaterial;
     asset::TextureView diffuseTexture = asset::TextureView{};
     asset::TextureView normalTexture = asset::TextureView{};
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
-    Vector3 outlineColor = Vector3::One();
+    Vector3 outlineColor = Vector3::Zero();
     float outlineWidth = 1.0f;
+};
+
+/** @brief Properties for constructing a MaterialInstance. */
+struct MaterialDesc
+{
+    std::string name = "DefaultMaterial";
+    MaterialPasses passes = ShadowedToonMaterial;
+    MaterialProperties properties = MaterialProperties{};
 };
 
 /** @brief Owning wrapper around a material in GPU memory. */
@@ -73,11 +81,16 @@ class MaterialInstance
         /** @brief Create a new MaterialInstance from this instance's properties. */
         auto Clone() const -> MaterialInstance;
 
-        /** @brief Get the instance's properties. */
-        auto GetDesc() const -> const MaterialDesc&;
+        /** @name Name Functions */
+        auto GetName() const -> std::string_view;
+        void SetName(std::string_view name);
 
-        /** @brief Update the instance's properties. */
-        void SetDesc(const MaterialDesc& desc);
+        /** @name MaterialPass Functions */
+        auto GetPasses() const -> MaterialPasses;
+
+        /** @name MaterialProperties Functions */
+        auto GetProperties() const -> const MaterialProperties&;
+        void SetProperties(const MaterialProperties& properties);
 
         /** @brief Get the instance's handle. */
         auto GetHandle() const -> MaterialInstanceHandle
@@ -90,6 +103,8 @@ class MaterialInstance
         static inline graphics::MaterialRegistry* s_registry = nullptr;
 
         MaterialInstanceHandle m_handle;
+
+        void Release() noexcept;
 };
 
 inline MaterialInstance::MaterialInstance(MaterialInstance&& other) noexcept
@@ -101,9 +116,15 @@ inline MaterialInstance& MaterialInstance::operator=(MaterialInstance&& other) n
 {
     if (this != &other)
     {
+        Release();
         m_handle = std::exchange(other.m_handle, NullMaterialInstanceHandle);
     }
 
     return *this;
+}
+
+inline MaterialInstance::~MaterialInstance() noexcept
+{
+    Release();
 }
 } // namespace nc

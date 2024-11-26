@@ -1,10 +1,10 @@
 #pragma once
 
+#include "HostStructuredBuffer.h"
 #include "graphics2/ShaderTypes.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/type/StableAddress.h"
 
-#include <functional>
 #include <vector>
 
 namespace nc::graphics
@@ -14,22 +14,19 @@ class MaterialRegistry : public StableAddress
     public:
         explicit MaterialRegistry(uint32_t maxInstances);
 
+        // API-Facing Functions
         auto CreateInstance(const MaterialDesc& desc = MaterialDesc{}) -> MaterialInstanceHandle;
         void DestroyInstance(MaterialInstanceHandle index);
         auto GetInstanceDesc(MaterialInstanceHandle index) const -> const MaterialDesc&;
-        void SetInstanceDesc(MaterialInstanceHandle index, const MaterialDesc& desc);
+        void SetInstanceProperties(MaterialInstanceHandle index, const MaterialProperties& properties);
         auto GetInstanceData(MaterialInstanceHandle index) const -> const MaterialData&;
-        auto HasPendingChanges() const -> bool;
-        void CommitPendingChanges(std::function<void(const MaterialDataUpdateInfo&)> notifyUpdate);
+        void SetInstanceName(MaterialInstanceHandle index, std::string_view name);
+
+        // Graphics Frontend Functions
+        auto BuildState() -> BufferUpdateInfo<MaterialData>;
 
     private:
-        std::vector<MaterialData> m_data;
+        HostStructuredBuffer<MaterialData> m_buffer;
         std::vector<MaterialDesc> m_descriptions;
-        std::vector<MaterialInstanceHandle> m_dirty;
-        std::vector<MaterialInstanceHandle> m_freeList;
-        MaterialInstanceHandle m_nextIndex = 0;
-        MaterialInstanceHandle m_maxIndex;
-
-        auto CollectDirtyRanges() -> std::vector<BufferSlice>;
 };
 } // namespace nc::graphics

@@ -9,6 +9,28 @@ namespace nc::sample
 {
 bool IsInitialized = false;
 
+namespace mesh
+{
+asset::MeshView Cube{};
+asset::MeshView Sphere{};
+asset::MeshView Capsule{};
+asset::MeshView Plane{};
+asset::MeshView HalfPipe{};
+asset::MeshView Ramp{};
+} // namespace mesh
+
+namespace material
+{
+MaterialDesc Default{"DefaultMaterial"};
+MaterialDesc Red{"RedMaterial"};
+MaterialDesc Green{"GreenMaterial"};
+MaterialDesc Blue{"BlueMaterial"};
+MaterialDesc Orange{"OrangeMaterial"};
+MaterialDesc Purple{"PurpleMaterial"};
+MaterialDesc Teal{"TealMaterial"};
+MaterialDesc Yellow{"YellowMaterial"};
+} // namespace material
+
 graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial RedPbrMaterial{"solid_color/Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial GreenPbrMaterial{"solid_color/Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
@@ -106,6 +128,35 @@ void InitializeResources()
         "box/Normal.nca",
         "logo/Normal.nca"
     };
+
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
+}
+
+void ReloadPrefabs()
+{
+    mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
+    mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
+    mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
+    mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
+    mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
+
+    const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
+    material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
+    material::Default.properties.normalTexture = normal;
+    material::Red.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
+    material::Red.properties.normalTexture = normal;
+    material::Green.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
+    material::Green.properties.normalTexture = normal;
+    material::Blue.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
+    material::Blue.properties.normalTexture = normal;
+    material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
+    material::Orange.properties.normalTexture = normal;
+    material::Purple.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
+    material::Purple.properties.normalTexture = normal;
+    material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
+    material::Teal.properties.normalTexture = normal;
+    material::Yellow.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
+    material::Yellow.properties.normalTexture = normal;
 }
 } // namespace sample
