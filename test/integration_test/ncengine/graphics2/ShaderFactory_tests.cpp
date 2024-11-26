@@ -4,6 +4,13 @@
 #include <filesystem>
 #include <fstream>
 
+#ifndef NC_INTEGRATION_TEST_COLLATERAL_DIR
+#error "ShaderFactory_tests requires NC_INTEGRATION_TEST_COLLATERAL_DIR to be defined"
+#endif
+
+constexpr auto g_collateralDir = std::string_view{NC_INTEGRATION_TEST_COLLATERAL_DIR};
+constexpr auto g_collateralFileName = std::string_view{"test.spv"};
+
 constexpr auto g_goodSourceText = std::string_view{
 R"(
 layout(location = 0) out vec4 Color;
@@ -91,3 +98,12 @@ TEST_F(ShaderFactoryTest, NoRuntimeSupport_failurePaths_throw)
 }
 
 #endif
+
+TEST_F(ShaderFactoryTest, MakeShaderFromByteCode_goodSource_succeeds)
+{
+    const auto byteCodePath = fmt::format("{}/{}", g_collateralDir, g_collateralFileName);
+    const auto byteCode = nc::graphics::ReadShaderFile(byteCodePath);
+    auto actual = Diligent::RefCntAutoPtr<Diligent::IShader>{};
+    EXPECT_NO_THROW(actual = uut->MakeShaderFromByteCode(byteCode, "", Diligent::SHADER_TYPE_PIXEL));
+    EXPECT_NE(nullptr, actual);
+}

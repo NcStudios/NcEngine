@@ -187,13 +187,15 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
     auto vertexShader = shaderFactory.MakeShaderFromSource(
         std::span{g_vertexShader},
         "Cube VS",
-        Diligent::SHADER_TYPE_VERTEX
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
     auto pixelShader = shaderFactory.MakeShaderFromSource(
         std::span{g_pixelShader},
         "Cube PS",
-        Diligent::SHADER_TYPE_PIXEL
+        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
     auto signatures = std::array{&perFrameResourceSignature};
