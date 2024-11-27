@@ -275,7 +275,7 @@ struct InnerWidget<entity_hierarchy>
         using T = entity_hierarchy;
         IMGUI_SCOPE(nc::ui::ImGuiId, T::name);
 
-        const auto objectsPerSpawn = 1 + entity_hierarchy::HierarchySize; // 
+        const auto objectsPerSpawn = 1 + entity_hierarchy::HierarchySize;
         g_maxHierarchies = g_maxEntities == 0 ? 0 : g_maxEntities / objectsPerSpawn;
         const auto& currentObjectCount = T::currentCount;
         const auto remainingEntityCount = g_maxEntities - g_currentEntities;
@@ -358,7 +358,6 @@ void Widget()
 
             ImGui::TableNextColumn();
             InnerWidget<entity_hierarchy>{}(halfCellWidth, [halfCellWidth](){
-                // g_maxHierarchies = g_maxEntities == 0 ? 0 : (g_maxEntities - 1) / entity_hierarchy::HierarchySize;
                 ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
             });
@@ -392,7 +391,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::g_maxParticleEmitters = config.maxParticleEmitters - 1;
         ::g_maxPointLights = config.maxPointLights - 1u;
         ::g_maxSpotLights = config.maxSpotLights - 1u;
-        ::g_maxHierarchies = ::g_maxEntities / entity_hierarchy::SpawnCount;
+        ::g_maxHierarchies = ::g_maxEntities / (entity_hierarchy::SpawnCount + 1);
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
