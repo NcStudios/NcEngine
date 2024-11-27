@@ -9,9 +9,9 @@
 
 namespace nc::graphics
 {
-MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers)
+MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers, uint32_t initialBatchSize)
     : m_transformCache{maxMeshRenderers},
-      m_instanceCache{maxMeshRenderers},
+      m_instanceCache{maxMeshRenderers, initialBatchSize},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnRebuildStatics)}
 {
     MeshRenderer2::s_subsystem = this;
