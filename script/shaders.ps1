@@ -20,11 +20,11 @@ if ($DebugShaders)
 Get-ChildItem -Path $InputDir -Filter *.frag |
 Foreach-Object {
     $fileName = $_.BaseName + "Fragment.spv"
-    .$GlslcExe $InputDir\$_ -o $OutputDir\$fileName $debugArg
+    .$GlslcExe -O $InputDir\$_ -o $OutputDir\$fileName $debugArg
 }
 
 Get-ChildItem -Path $InputDir -Filter *.vert |
 Foreach-Object {
     $fileName = $_.BaseName + "Vertex.spv"
-    .$GlslcExe $InputDir\$_ -o $OutputDir\$fileName $debugArg
+    .$GlslcExe -O $InputDir\$_ -o $OutputDir\$fileName $debugArg
 }
