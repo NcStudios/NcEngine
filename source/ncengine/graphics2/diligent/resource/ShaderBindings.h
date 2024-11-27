@@ -21,17 +21,19 @@ class ShaderBindings
                                 uint32_t maxSpotLights,
                                 uint32_t maxPointLights,
                                 uint32_t maxDirectionalLights,
+                                uint32_t initialInstanceSizeHint,
                                 uint32_t initialMaterialSizeHint)
             : m_perFrameSignature{
                 context, device,
                 "PerFrameResourceSignature",
                 0,
-                StructuredBufferResourceDesc{"MeshRendererBufferData",     Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxMeshRenderers,     maxMeshRenderers},
-                StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxDirectionalLights, maxDirectionalLights},
-                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxPointLights,       maxPointLights},
-                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS, maxSpotLights,        maxSpotLights},
-                StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxMeshRenderers,     initialMaterialSizeHint},
-                TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, maxTextures},
+                StructuredBufferResourceDesc{"TransformBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, maxMeshRenderers,     initialInstanceSizeHint},
+                StructuredBufferResourceDesc{"InstanceBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, maxMeshRenderers,     initialInstanceSizeHint},
+                StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxDirectionalLights, maxDirectionalLights},
+                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxPointLights,       maxPointLights},
+                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxSpotLights,        maxSpotLights},
+                StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxMeshRenderers,     initialMaterialSizeHint},
+                TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS}
               }
         {

@@ -24,18 +24,16 @@ struct GlobalEnvironmentData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
-// @todo 808 Replace MeshRendererData with this
 struct InstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
 };
 
-// Object model for MeshRenderers (type: StructuredBuffer element type).
-struct MeshRendererData
+// Object model for Transforms (type: StructuredBuffer element type).
+struct TransformData
 {
-    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity(); // Transforms the object from object space to world space.
-    uint32_t materialIndex = NullMaterialInstanceHandle;
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).

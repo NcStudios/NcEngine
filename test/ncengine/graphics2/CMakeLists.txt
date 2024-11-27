@@ -75,30 +75,6 @@ target_link_libraries(HostStructuredBuffer_tests
 
 add_test(HostStructuredBuffer_tests HostStructuredBuffer_tests)
 
-### MaterialPassCache Tests ###
-add_executable(MaterialPassCache_tests
-    MaterialPassCache_tests.cpp
-)
-
-target_include_directories(MaterialPassCache_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_SOURCE_DIR}
-)
-
-target_compile_options(MaterialPassCache_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(MaterialPassCache_tests
-    PRIVATE
-        gtest_main
-        NcMath
-)
-
-add_test(MaterialPassCache_tests MaterialPassCache_tests)
-
 ### MaterialRegistry Tests ###
 add_executable(MaterialRegistry_tests
     MaterialRegistry_tests.cpp
@@ -130,8 +106,11 @@ add_test(MaterialRegistry_tests MaterialRegistry_tests)
 add_executable(MeshRendererSubsystem_tests
     MeshRendererSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
+    ${NC_SOURCE_DIR}/graphics2/MeshRenderer2.cpp
+    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/InstanceCache.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
 )
 
 target_include_directories(MeshRendererSubsystem_tests
@@ -156,4 +135,28 @@ target_link_libraries(MeshRendererSubsystem_tests
 
 add_test(MeshRendererSubsystem_tests MeshRendererSubsystem_tests)
 
+### TransformCache Tests ###
+add_executable(TransformCache_tests
+    TransformCache_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
+    ${NC_SOURCE_DIR}/ecs/Transform.cpp
+)
 
+target_include_directories(TransformCache_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(TransformCache_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(TransformCache_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(TransformCache_tests TransformCache_tests)

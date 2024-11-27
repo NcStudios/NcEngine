@@ -21,23 +21,25 @@ class PerFrameResourceSignature
 {
     public:
         explicit PerFrameResourceSignature(Diligent::IDeviceContext& context,
-                                         Diligent::IRenderDevice& device,
-                                         std::string_view signatureName,
-                                         uint8_t bindingIndex,
-                                         const StructuredBufferResourceDesc& meshRendererResourceDesc,
-                                         const StructuredBufferResourceDesc& directionalLightResourceDesc,
-                                         const StructuredBufferResourceDesc& pointLightResourceDesc,
-                                         const StructuredBufferResourceDesc& spotLightResourceDesc,
-                                         const StructuredBufferResourceDesc& materialResourceDesc,
-                                         const TextureBufferResourceDesc& textureResourceDesc,
-                                         const UniformBufferResourceDesc& environmentResourceDesc);
+                                           Diligent::IRenderDevice& device,
+                                           std::string_view signatureName,
+                                           uint8_t bindingIndex,
+                                           const StructuredBufferResourceDesc& transformResourceDesc,
+                                           const StructuredBufferResourceDesc& instanceResourceDesc,
+                                           const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                           const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                           const StructuredBufferResourceDesc& spotLightResourceDesc,
+                                           const StructuredBufferResourceDesc& materialResourceDesc,
+                                           const TextureBufferResourceDesc& textureResourceDesc,
+                                           const UniformBufferResourceDesc& environmentResourceDesc);
         ~PerFrameResourceSignature() noexcept;
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY); }
         auto GetResourceSignature()     -> Diligent::IPipelineResourceSignature&   { return *m_signature; }
 
         /* Resource Buffers */
-        auto GetMeshRendererBuffer()    -> StructuredBuffer<MeshRendererData>&     { return *m_meshRendererResource; }
+        auto GetTransformBuffer()       -> StructuredBuffer<TransformData>&        { return *m_transformResource; }
+        auto GetInstanceBuffer()        -> StructuredBuffer<InstanceData>&         { return *m_instanceResource; }
         auto GetDirectionaLightBuffer() -> StructuredBuffer<DirectionalLightData>& { return *m_directionalLightResource; }
         auto GetPointLightBuffer()      -> StructuredBuffer<PointLightData>&       { return *m_pointLightResource; }
         auto GetSpotLightBuffer()       -> StructuredBuffer<SpotLightData>&        { return *m_spotLightResource; }
@@ -48,7 +50,8 @@ class PerFrameResourceSignature
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        std::unique_ptr<StructuredBuffer<MeshRendererData>> m_meshRendererResource;
+        std::unique_ptr<StructuredBuffer<TransformData>> m_transformResource;
+        std::unique_ptr<StructuredBuffer<InstanceData>> m_instanceResource;
         std::unique_ptr<StructuredBuffer<DirectionalLightData>> m_directionalLightResource;
         std::unique_ptr<StructuredBuffer<PointLightData>> m_pointLightResource;
         std::unique_ptr<StructuredBuffer<SpotLightData>> m_spotLightResource;

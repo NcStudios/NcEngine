@@ -47,7 +47,7 @@ constexpr auto ShadowedToonMaterial = MaterialPass::Shadow |
                                       MaterialPass::Normals |
                                       MaterialPass::Outline;
 
-/** @brief Properties for constructing a MaterialInstance. */
+/** @brief Properties of a MaterialInstance passed to shaders. */
 struct MaterialProperties
 {
     asset::TextureView diffuseTexture = asset::TextureView{};

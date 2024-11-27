@@ -1,40 +1,89 @@
 #include "MeshRendererSubsystem.h"
+#include "ncengine/Events.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/GraphicsUtility.h"
 
-#include <ranges>
+#include "ncengine/debug/Profile.h"
 
 namespace nc::graphics
 {
+MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers)
+    : m_transformCache{maxMeshRenderers},
+      m_instanceCache{maxMeshRenderers},
+      m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnRebuildStatics)}
+{
+    MeshRenderer2::s_subsystem = this;
+}
+
+auto MeshRendererSubsystem::AddInstance(Entity entity,
+                                        MaterialInstanceHandle material,
+                                        MaterialPasses passes,
+                                        const asset::MeshView& mesh) -> TransformDataHandle
+{
+    const auto transformIndex = m_transformCache.AddInstance(entity);
+    m_instanceCache.GetStagingArea().AddInstance(
+        entity.Index(),
+        passes,
+        mesh,
+        InstanceData{transformIndex, material}
+    );
+
+    return transformIndex;
+}
+
+void MeshRendererSubsystem::RemoveInstance(Entity entity,
+                                           uint32_t transformIndex,
+                                           uint64_t meshId,
+                                           MaterialPasses passes)
+{
+    m_transformCache.RemoveInstance(transformIndex);
+    m_instanceCache.GetStagingArea().RemoveInstance(entity.Index(), passes, meshId);
+}
+
+void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
+                                            uint32_t transformIndex,
+                                            MaterialInstanceHandle materialIndex,
+                                            MaterialPasses oldPasses,
+                                            MaterialPasses newPasses,
+                                            uint64_t oldMeshId,
+                                            const asset::MeshView& newMesh)
+{
+    m_instanceCache.GetStagingArea().UpdateInstance(
+        entity.Index(),
+        oldPasses,
+        newPasses,
+        oldMeshId,
+        newMesh,
+        InstanceData{
+            transformIndex,
+            materialIndex
+        }
+    );
+}
+
 auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
 {
-    const auto& rendererPool = ecs.GetPool<MeshRenderer2>();
-    const auto entities = rendererPool.GetEntityPool();
-    m_instanceData.clear();
-    m_instanceData.reserve(entities.size());
-    m_passCache.ClearDynamicTargets();
-
-    for (auto [i, entity] : std::views::enumerate(entities))
-    {
-        /** @todo 798 filter static */
-        auto& renderer = ecs.Get<MeshRenderer2>(entity);
-        const auto& material = renderer.GetMaterial();
-        m_passCache.AddDynamicTarget(
-            material.GetPasses(),
-            static_cast<uint32_t>(i),
-            renderer.GetMesh()
-        );
-
-        m_instanceData.emplace_back(
-            ecs.Get<Transform>(entity).TransformationMatrix(),
-            material.GetHandle()
-        );
-    }
-
+    NC_PROFILE_SCOPE("MeshRendererSubsystem::BuildState()", ProfileCategory::Rendering);
+    m_transformCache.CommitPendingChanges();
+    m_transformCache.UpdateMatrices(ecs);
+    m_instanceCache.CommitPendingChanges();
     return MeshRendererRenderState{
-        .instanceData = m_instanceData,
-        .passData = m_passCache.BuildState()
+        .transformData = m_transformCache.BuildState(),
+        .instanceData = m_instanceCache.BuildState(),
+        .passBatches = m_instanceCache.BuildBatches(GetImplementedMaterialPassFlags())
     };
+}
+
+void MeshRendererSubsystem::OnBeforeSceneLoad()
+{
+    // Call here instead of on Clear() to allow the OnRemove callbacks to fire before purging.
+    m_instanceCache.Purge();
+}
+
+void MeshRendererSubsystem::OnRebuildStatics()
+{
+    m_transformCache.MarkStaticsDirty();
 }
 } // namespace nc::graphics

@@ -38,6 +38,7 @@ class NcGraphicsImpl2 : public NcGraphics
         void SetSkybox(const std::string& path) override;
         void ClearEnvironment() override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
+        void OnBeforeSceneLoad() override;
         void Clear() noexcept override;
         void Run();
         void OnResize(const Vector2& dimensions, bool isMinimized);
