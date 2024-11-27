@@ -108,11 +108,11 @@ void VerifyBatch(nc::graphics::InstanceCache& uut,
 {
     const auto key = nc::graphics::BatchKey{BatchDesc::passes, BatchDesc::mesh.id};
     const auto& region = uut.GetRegion(key);
-    EXPECT_EQ(offset, region.batch.instanceOffset);
+    EXPECT_EQ(offset, region.batch.firstInstance);
     EXPECT_EQ(count, region.batch.instanceCount);
     EXPECT_EQ(capacity, region.capacity);
 
-    EXPECT_EQ(BatchDesc::mesh.firstIndex, region.batch.indexOffset);
+    EXPECT_EQ(BatchDesc::mesh.firstIndex, region.batch.firstIndex);
     EXPECT_EQ(BatchDesc::mesh.indexCount, region.batch.indexCount);
     EXPECT_EQ(BatchDesc::mesh.firstVertex, region.batch.vertexOffset);
 }

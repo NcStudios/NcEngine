@@ -91,7 +91,7 @@ TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
     const auto& actualBatch = actualBatches.at(0);
-    EXPECT_EQ(0, actualBatch.instanceOffset);
+    EXPECT_EQ(0, actualBatch.firstInstance);
     EXPECT_EQ(5, actualBatch.instanceCount);
 
     registry.Clear();
@@ -130,7 +130,7 @@ TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
     const auto& actualBatch = actualBatches.at(0);
-    EXPECT_EQ(0, actualBatch.instanceOffset);
+    EXPECT_EQ(0, actualBatch.firstInstance);
     EXPECT_EQ(1, actualBatch.instanceCount);
 
     registry.Clear();
@@ -155,9 +155,9 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
     EXPECT_EQ(2, actualBatches.size());
     const auto& actualBatch1 = actualBatches.at(0);
     const auto& actualBatch2 = actualBatches.at(1);
-    EXPECT_EQ(0, actualBatch1.instanceOffset);
+    EXPECT_EQ(0, actualBatch1.firstInstance);
     EXPECT_EQ(1, actualBatch1.instanceCount);
-    EXPECT_EQ(2, actualBatch2.instanceOffset);
+    EXPECT_EQ(2, actualBatch2.firstInstance);
     EXPECT_EQ(1, actualBatch2.instanceCount);
 
     registry.Clear();

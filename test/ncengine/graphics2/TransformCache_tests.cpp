@@ -74,9 +74,9 @@ TEST(TransformCacheTests, UpdateMatrices)
     const auto& expectedMatrix1 = ecs.Get<nc::Transform>(entity1).TransformationMatrix();
     const auto& expectedMatrix2 = ecs.Get<nc::Transform>(entity2).TransformationMatrix();
     const auto& expectedMatrix3 = ecs.Get<nc::Transform>(entity3).TransformationMatrix();
-    const auto& actualMatrix1 = uut.GetInstance(handle1).matrix;
-    const auto& actualMatrix2 = uut.GetInstance(handle2).matrix;
-    const auto& actualMatrix3 = uut.GetInstance(handle3).matrix;
+    const auto& actualMatrix1 = uut.GetInstance(handle1).modelMatrix;
+    const auto& actualMatrix2 = uut.GetInstance(handle2).modelMatrix;
+    const auto& actualMatrix3 = uut.GetInstance(handle3).modelMatrix;
     EXPECT_TRUE(MatrixEqual(expectedMatrix1, actualMatrix1));
     EXPECT_TRUE(MatrixEqual(expectedMatrix2, actualMatrix2));
     EXPECT_TRUE(MatrixEqual(expectedMatrix3, actualMatrix3));
@@ -149,8 +149,8 @@ TEST(TransformCacheTests, MarkStaticsDirty)
     // Matrices should match what is in the registry.
     const auto& expectedMatrix1 = transform1.TransformationMatrix();
     const auto& expectedMatrix2 = transform2.TransformationMatrix();
-    const auto& actualMatrix1 = uut.GetInstance(handle1).matrix;
-    const auto& actualMatrix2 = uut.GetInstance(handle2).matrix;
+    const auto& actualMatrix1 = uut.GetInstance(handle1).modelMatrix;
+    const auto& actualMatrix2 = uut.GetInstance(handle2).modelMatrix;
     EXPECT_TRUE(MatrixEqual(expectedMatrix1, actualMatrix1));
     EXPECT_TRUE(MatrixEqual(expectedMatrix2, actualMatrix2));
 

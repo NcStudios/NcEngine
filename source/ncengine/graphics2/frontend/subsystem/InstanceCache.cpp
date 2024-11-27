@@ -16,8 +16,8 @@ void IncrementBatchCount(nc::graphics::BatchRegion& region, uint32_t count)
 auto WalkBatch(const nc::graphics::Batch& batch)
 {
     return std::views::iota(
-        batch.instanceOffset,
-        batch.instanceOffset + batch.instanceCount
+        batch.firstInstance,
+        batch.firstInstance + batch.instanceCount
     );
 }
 } // anonymous namespace
@@ -189,7 +189,7 @@ void InstanceCache::Purge() noexcept
                 MoveInstance(currentIndex, insertIndex++);
             }
 
-            region.batch.instanceOffset = bufferEnd;
+            region.batch.firstInstance = bufferEnd;
             region.capacity = std::max(region.batch.instanceCount, m_initialBatchSize);
             bufferEnd += region.capacity;
         }
@@ -262,7 +262,7 @@ void InstanceCache::CommitRemovals(const std::vector<StagedRemoval>& stagedRemov
     {
         const auto instanceIndex = EraseInstance(toRemove.entityId);
         auto& batch = GetRegion(toRemove.key).batch;
-        const auto batchEndIndex = batch.instanceOffset + batch.instanceCount - 1;
+        const auto batchEndIndex = batch.firstInstance + batch.instanceCount - 1;
         --batch.instanceCount;
 
         // If this is the last batch instance, decrementing the count is sufficient, else swap with last.
@@ -291,7 +291,7 @@ void InstanceCache::CommitAdditions(const std::vector<StagedBatchInstances>& sta
                 MoveInstance(currentIndex, currentIndex + shiftBy);
             }
 
-            current.batch.instanceOffset += shiftBy;
+            current.batch.firstInstance += shiftBy;
         }
 
         const auto insertCount = static_cast<uint32_t>(pending.instances.size());
@@ -300,7 +300,7 @@ void InstanceCache::CommitAdditions(const std::vector<StagedBatchInstances>& sta
             continue;
         }
 
-        auto instanceIndex = current.batch.instanceOffset + current.batch.instanceCount;
+        auto instanceIndex = current.batch.firstInstance + current.batch.instanceCount;
         IncrementBatchCount(current, insertCount);
         for (auto& toAdd : pending.instances)
         {
@@ -330,7 +330,7 @@ auto InstanceCache::EvaluateAdditions(const std::vector<StagedBatchInstances>& s
         const auto slotsNeeded = newInstances >= freeSlots ? newInstances - freeSlots : 0u;
         perBatchShift.push_back(accumulatedShifts);
         accumulatedShifts += slotsNeeded;
-        MarkDirtyStartingFrom(current.batch.instanceOffset);
+        MarkDirtyStartingFrom(current.batch.firstInstance);
     }
 
     // Each batch starts with some capacity. This needs to be allocated in addition to the new instance/shift count.

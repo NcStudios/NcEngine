@@ -17,9 +17,9 @@ auto ToDrawAttribs(const nc::graphics::Batch& batch) -> Diligent::DrawIndexedAtt
         Diligent::VT_UINT32,
         drawFlags,
         batch.instanceCount,
-        batch.indexOffset,
+        batch.firstIndex,
         batch.vertexOffset,
-        batch.instanceOffset
+        batch.firstInstance
     };
 }
 

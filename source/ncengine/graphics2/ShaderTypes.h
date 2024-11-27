@@ -33,7 +33,7 @@ struct InstanceData
 // Object model for Transforms (type: StructuredBuffer element type).
 struct TransformData
 {
-    DirectX::XMMATRIX matrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).

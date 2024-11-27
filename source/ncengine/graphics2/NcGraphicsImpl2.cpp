@@ -153,7 +153,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxSpotLights,
             memorySettings.maxPointLights,
             memorySettings.maxDirectionalLights,
-            1000u /** @todo: 782 parameterize with ShaderConfig object */
+            memorySettings.maxRenderers / 2,
+            memorySettings.maxRenderers / 2
           },
           m_ui{
             m_engine.GetDevice(),

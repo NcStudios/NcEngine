@@ -7,17 +7,17 @@ namespace nc::graphics
 struct Batch
 {
     explicit Batch(uint32_t instanceIndex, const asset::MeshView& mesh)
-        : instanceOffset{instanceIndex},
+        : firstInstance{instanceIndex},
           instanceCount{0},
-          indexOffset{mesh.firstIndex},
+          firstIndex{mesh.firstIndex},
           indexCount{mesh.indexCount},
           vertexOffset{mesh.firstVertex}
     {
     }
 
-    uint32_t instanceOffset;
+    uint32_t firstInstance;
     uint32_t instanceCount;
-    uint32_t indexOffset;
+    uint32_t firstIndex;
     uint32_t indexCount;
     uint32_t vertexOffset;
 };
