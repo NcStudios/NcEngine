@@ -33,10 +33,16 @@ class MeshRendererSubsystem
         void SetInstanceMesh(Entity entity,
                              uint32_t transformIndex,
                              MaterialInstanceHandle materialIndex,
-                             MaterialPasses oldPasses,
-                             MaterialPasses newPasses,
+                             MaterialPasses passes,
                              uint64_t oldMeshId,
                              const asset::MeshView& newMesh);
+
+        void SetInstanceMaterial(Entity entity,
+                                 uint32_t transformIndex,
+                                 MaterialInstanceHandle materialIndex,
+                                 MaterialPasses oldPasses,
+                                 MaterialPasses newPasses,
+                                 uint64_t meshId);
 
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
         void OnBeforeSceneLoad();
