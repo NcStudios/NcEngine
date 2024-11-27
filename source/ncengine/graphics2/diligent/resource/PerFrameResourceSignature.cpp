@@ -12,7 +12,8 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                  Diligent::IRenderDevice& device,
                                                  std::string_view signatureName,
                                                  uint8_t bindingIndex,
-                                                 const StructuredBufferResourceDesc& meshRendererResourceDesc,
+                                                 const StructuredBufferResourceDesc& transformResourceDesc,
+                                                 const StructuredBufferResourceDesc& instanceResourceDesc,
                                                  const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                                  const StructuredBufferResourceDesc& pointLightResourceDesc,
                                                  const StructuredBufferResourceDesc& spotLightResourceDesc,
@@ -21,7 +22,8 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                  const UniformBufferResourceDesc& environmentResourceDesc)
 {
     const auto resources = std::array{
-        ToPipelineResourceDesc(meshRendererResourceDesc),
+        ToPipelineResourceDesc(transformResourceDesc),
+        ToPipelineResourceDesc(instanceResourceDesc),
         ToPipelineResourceDesc(directionalLightResourceDesc),
         ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(spotLightResourceDesc),
@@ -52,12 +54,20 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    m_meshRendererResource = std::make_unique<StructuredBuffer<MeshRendererData>>
+    m_transformResource = std::make_unique<StructuredBuffer<TransformData>>
     (
         context,
         device,
-        GetVariable(meshRendererResourceDesc.shaderType, meshRendererResourceDesc.resourceKey.data(), m_srb),
-        meshRendererResourceDesc
+        GetVariable(transformResourceDesc.shaderType, transformResourceDesc.resourceKey.data(), m_srb),
+        transformResourceDesc
+    );
+
+    m_instanceResource = std::make_unique<StructuredBuffer<InstanceData>>
+    (
+        context,
+        device,
+        GetVariable(instanceResourceDesc.shaderType, instanceResourceDesc.resourceKey.data(), m_srb),
+        instanceResourceDesc
     );
 
     m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>

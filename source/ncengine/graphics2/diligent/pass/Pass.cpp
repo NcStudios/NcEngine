@@ -105,13 +105,20 @@ struct PSInput
     float3 WorldPos;
 };
 
-struct MeshRendererData
+struct TransformData
 {
-    float4x4 model;
+    float4x4 modelMatrix;
+};
+
+StructuredBuffer<TransformData> TransformBufferData;
+
+struct InstanceData
+{
+    uint transformIndex;
     uint materialIndex;
 };
 
-StructuredBuffer<MeshRendererData> MeshRendererBufferData;
+StructuredBuffer<InstanceData> InstanceBufferData;
 
 cbuffer EnvironmentBufferData
 {
@@ -125,12 +132,14 @@ cbuffer EnvironmentBufferData
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), MeshRendererBufferData[InstanceID].model);
+    uint transformIndex = InstanceBufferData[InstanceID].transformIndex;
+    uint materialIndex = InstanceBufferData[InstanceID].materialIndex;
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), TransformBufferData[transformIndex].modelMatrix);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize(mul(MeshRendererBufferData[InstanceID].model, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
+    PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].modelMatrix, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
     PSIn.WorldPos = TransformedPos.xyz;
-    PSIn.MaterialIndex = MeshRendererBufferData[InstanceID].materialIndex;
+    PSIn.MaterialIndex = materialIndex;
 }
 )"};
 } // anonymous namespace
@@ -187,13 +196,15 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
     auto vertexShader = shaderFactory.MakeShaderFromSource(
         std::span{g_vertexShader},
         "Cube VS",
-        Diligent::SHADER_TYPE_VERTEX
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
     auto pixelShader = shaderFactory.MakeShaderFromSource(
         std::span{g_pixelShader},
         "Cube PS",
-        Diligent::SHADER_TYPE_PIXEL
+        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
     auto signatures = std::array{&perFrameResourceSignature};

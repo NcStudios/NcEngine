@@ -29,15 +29,23 @@ class ShaderFactory
             return m_streamFactory;
         }
 
+        /** @note HLSL is cross compiled into SPIR-V */
         auto MakeShaderFromSource(std::span<const char> source,
                                   std::string_view name,
                                   Diligent::SHADER_TYPE type,
-                                  Diligent::SHADER_SOURCE_LANGUAGE language = Diligent::SHADER_SOURCE_LANGUAGE_HLSL,
+                                  Diligent::SHADER_SOURCE_LANGUAGE language = Diligent::SHADER_SOURCE_LANGUAGE_GLSL,
                                   std::string_view entryPoint = "main") -> Diligent::RefCntAutoPtr<Diligent::IShader>;
+
+        /** @note Expects SPIR-V bytecode. */
+        auto MakeShaderFromByteCode(std::span<const char> byteCode,
+                                    std::string_view name,
+                                    Diligent::SHADER_TYPE type) -> Diligent::RefCntAutoPtr<Diligent::IShader>;
 
     private:
         Diligent::IRenderDevice* m_device;
         Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory> m_streamFactory;
+
+        auto CreateShader(const Diligent::ShaderCreateInfo& createInfo) -> Diligent::RefCntAutoPtr<Diligent::IShader>;
 };
 
 template<class EngineFactoryT>

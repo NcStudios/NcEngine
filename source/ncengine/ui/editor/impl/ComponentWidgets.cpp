@@ -64,8 +64,8 @@ void MeshAssetDropdown(nc::MeshRenderer2& meshRenderer, nc::asset::NcAsset& ncAs
 {
     /** @todo 353 Get asset views from ncAsset, once implemented */
     const auto meshAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::Mesh);
-    const auto meshView = meshRenderer.GetMesh();
-    auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshView.id)};
+    const auto meshId = meshRenderer.GetMeshId();
+    auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshId)};
     if (nc::ui::Combobox(meshPath, "mesh", meshAssets))
     {
         const auto selectedMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(meshPath);

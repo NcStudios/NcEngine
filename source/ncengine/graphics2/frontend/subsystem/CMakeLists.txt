@@ -5,5 +5,6 @@ target_sources(${NC_ENGINE_LIB}
         LightSubsystem.cpp
         MaterialRegistry.cpp
         MeshRendererSubsystem.cpp
+        TransformCache.cpp
         UISubsystem.cpp
 )

@@ -1,34 +1,52 @@
 #pragma once
 
-#include "MaterialPassCache.h"
 #include "MeshRendererRenderState.h"
-#include "ncengine/ecs/EcsFwd.h"
+#include "TransformCache.h"
+#include "InstanceCache.h"
 
-#include <vector>
+#include "ncengine/ecs/EcsFwd.h"
+#include "ncengine/utility/Signal.h"
 
 namespace nc
 {
 class MeshRenderer2;
+struct SystemEvents;
 class Transform;
 
 namespace graphics
 {
-/*
-Produces a vector of transform matrices for MeshRenderers and their corresponding Entities.
-*/
 class MeshRendererSubsystem
 {
     public:
-        explicit MeshRendererSubsystem(std::span<const MaterialPass::type> passes)
-            : m_passCache{passes}
-        {
-        }
+        explicit MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers);
+
+        auto AddInstance(Entity entity,
+                         MaterialInstanceHandle material,
+                         const MaterialPasses passes,
+                         const asset::MeshView& mesh) -> TransformDataHandle;
+
+        void RemoveInstance(Entity entity,
+                            uint32_t transformIndex,
+                            uint64_t meshId,
+                            MaterialPasses passes);
+
+        void SetInstanceMesh(Entity entity,
+                             uint32_t transformIndex,
+                             MaterialInstanceHandle materialIndex,
+                             MaterialPasses oldPasses,
+                             MaterialPasses newPasses,
+                             uint64_t oldMeshId,
+                             const asset::MeshView& newMesh);
 
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
+        void OnBeforeSceneLoad();
 
     private:
-        std::vector<MeshRendererData> m_instanceData;
-        MaterialPassCache m_passCache;
+        TransformCache m_transformCache;
+        InstanceCache m_instanceCache;
+        Connection m_rebuildStaticsConnection;
+
+        void OnRebuildStatics();
 };
 } // namespace graphics
 } // namespace nc

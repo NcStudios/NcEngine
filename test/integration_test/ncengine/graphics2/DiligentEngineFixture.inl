@@ -62,8 +62,8 @@ class DiligentEngineFixture : public testing::Test
             createInfo.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
             auto& shaderFactory = engine->GetShaderFactory();
-            auto vertexShader = shaderFactory.MakeShaderFromSource(vertexShaderSource, "Test VS", Diligent::SHADER_TYPE_VERTEX);
-            auto pixelShader = shaderFactory.MakeShaderFromSource(pixelShaderSource, "Test PS", Diligent::SHADER_TYPE_PIXEL);
+            auto vertexShader = shaderFactory.MakeShaderFromSource(vertexShaderSource, "Test VS", Diligent::SHADER_TYPE_VERTEX, Diligent::SHADER_SOURCE_LANGUAGE_HLSL);
+            auto pixelShader = shaderFactory.MakeShaderFromSource(pixelShaderSource, "Test PS", Diligent::SHADER_TYPE_PIXEL, Diligent::SHADER_SOURCE_LANGUAGE_HLSL);
             createInfo.pVS = vertexShader;
             createInfo.pPS = pixelShader;
 

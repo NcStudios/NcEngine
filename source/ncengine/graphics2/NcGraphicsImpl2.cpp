@@ -153,7 +153,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxSpotLights,
             memorySettings.maxPointLights,
             memorySettings.maxDirectionalLights,
-            1000u /** @todo: 782 parameterize with ShaderConfig object */
+            memorySettings.maxRenderers / 2,
+            memorySettings.maxRenderers / 2
           },
           m_ui{
             m_engine.GetDevice(),
@@ -216,6 +217,11 @@ void NcGraphicsImpl2::ClearEnvironment()
 {
 }
 
+void NcGraphicsImpl2::OnBeforeSceneLoad()
+{
+    m_frontend.OnBeforeSceneLoad();
+}
+
 void NcGraphicsImpl2::Clear() noexcept
 {
     m_frontend.Clear();
@@ -249,14 +255,14 @@ void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
 
-    auto renderState = m_frontend.BuildRenderState(m_world);
-
     auto& context = m_engine.GetContext();
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
 
     m_ui.FrameBegin(swapChain);
     m_frontend.GetUISubsystem().UpdateUI(m_world);
+
+    auto renderState = m_frontend.BuildRenderState(m_world);
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
     auto* pDSV = swapChain.GetDepthBufferDSV();
@@ -270,7 +276,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_materialPassBackend.Render(context, renderState.meshRendererState.passData);
+    m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
     m_ui.Render(context);
 
     swapChain.Present();

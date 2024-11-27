@@ -46,12 +46,29 @@ auto ShaderFactory::MakeShaderFromSource(std::span<const char> source,
     createInfo.SourceLanguage = language;
     createInfo.CompileFlags = Diligent::SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR |
                               Diligent::SHADER_COMPILE_FLAG_ENABLE_UNBOUNDED_ARRAYS;
+    return CreateShader(createInfo);
+}
 
+auto ShaderFactory::MakeShaderFromByteCode(std::span<const char> byteCode,
+                                           std::string_view name,
+                                           Diligent::SHADER_TYPE type) -> Diligent::RefCntAutoPtr<Diligent::IShader>
+{
+    auto createInfo = Diligent::ShaderCreateInfo{};
+    createInfo.ByteCode = byteCode.data();
+    createInfo.ByteCodeSize = byteCode.size();
+    createInfo.Desc.Name = name.data();
+    createInfo.Desc.ShaderType = type;
+    createInfo.Desc.UseCombinedTextureSamplers = true;
+    return CreateShader(createInfo);
+}
+
+auto ShaderFactory::CreateShader(const Diligent::ShaderCreateInfo& createInfo) -> Diligent::RefCntAutoPtr<Diligent::IShader>
+{
     auto shader = Diligent::RefCntAutoPtr<Diligent::IShader>{};
     m_device->CreateShader(createInfo, &shader);
     if (!shader)
     {
-        throw NcError(fmt::format("Failed to create shader '{}' from source", name));
+        throw NcError(fmt::format("Failed to create shader '{}'", createInfo.Desc.Name));
     }
 
     return shader;
