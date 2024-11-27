@@ -385,12 +385,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 
     {
         const auto& config = config::GetMemorySettings();
-        ::g_maxEntities = config.maxTransforms - 1;
-        ::g_maxRigidBodies = config.maxRigidBodies - 1;
-        ::g_maxRenderers = config.maxRenderers - 1;
-        ::g_maxParticleEmitters = config.maxParticleEmitters - 1;
-        ::g_maxPointLights = config.maxPointLights - 1u;
-        ::g_maxSpotLights = config.maxSpotLights - 1u;
+        ::g_maxEntities = config.maxTransforms;
+        ::g_maxRigidBodies = config.maxRigidBodies;
+        ::g_maxRenderers = config.maxRenderers;
+        ::g_maxParticleEmitters = config.maxParticleEmitters;
+        ::g_maxPointLights = config.maxPointLights;
+        ::g_maxSpotLights = config.maxSpotLights;
         ::g_maxHierarchies = ::g_maxEntities / (entity_hierarchy::SpawnCount + 1);
     }
 
