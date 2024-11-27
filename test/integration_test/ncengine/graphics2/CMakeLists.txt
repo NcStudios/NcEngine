@@ -5,6 +5,8 @@ elseif(UNIX AND NOT APPLE)
     set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/diligent/NativeWindowLinux.cpp)
 endif()
 
+set(NC_INTEGRATION_TEST_COLLATERAL_DIR "${CMAKE_CURRENT_LIST_DIR}/collateral")
+
 # Common setup for graphics integration tests
 function(add_graphics_test target)
     add_executable(${target}
@@ -88,6 +90,11 @@ target_sources(ShaderFactory_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
+target_compile_definitions(ShaderFactory_tests
+    PRIVATE
+        -DNC_INTEGRATION_TEST_COLLATERAL_DIR="${NC_INTEGRATION_TEST_COLLATERAL_DIR}"
+)
+
 ### ShaderFactory Runtime Compilation Tests ###
 add_graphics_test(ShaderFactory_runtimeCompilation_tests)
 
@@ -100,6 +107,11 @@ target_sources(ShaderFactory_runtimeCompilation_tests
 target_compile_definitions(ShaderFactory_runtimeCompilation_tests
     PRIVATE
         -DNC_RUNTIME_SHADER_COMPILATION
+)
+
+target_compile_definitions(ShaderFactory_runtimeCompilation_tests
+    PRIVATE
+        -DNC_INTEGRATION_TEST_COLLATERAL_DIR="${NC_INTEGRATION_TEST_COLLATERAL_DIR}"
 )
 
 ### StructuredBuffer Tests ###
