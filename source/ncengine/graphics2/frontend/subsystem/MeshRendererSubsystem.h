@@ -18,7 +18,9 @@ namespace graphics
 class MeshRendererSubsystem
 {
     public:
-        explicit MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers);
+        explicit MeshRendererSubsystem(SystemEvents& events,
+                                       uint32_t maxEntities,
+                                       uint32_t maxMeshRenderers);
 
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,

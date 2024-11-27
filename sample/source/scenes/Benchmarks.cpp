@@ -384,12 +384,13 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
     ReloadPrefabs();
 
     {
+        // maxes need to account for objects in scene created outside of spawner (ground + light)
         const auto& config = config::GetMemorySettings();
         ::g_maxEntities = config.maxTransforms;
-        ::g_maxRigidBodies = config.maxRigidBodies;
-        ::g_maxRenderers = config.maxRenderers;
+        ::g_maxRigidBodies = config.maxRigidBodies - 1;
+        ::g_maxRenderers = config.maxRenderers - 1;
         ::g_maxParticleEmitters = config.maxParticleEmitters;
-        ::g_maxPointLights = config.maxPointLights;
+        ::g_maxPointLights = config.maxPointLights - 1;
         ::g_maxSpotLights = config.maxSpotLights;
         ::g_maxHierarchies = ::g_maxEntities / (entity_hierarchy::SpawnCount + 1);
     }
@@ -601,11 +602,6 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
     }
 
     g_currentEntities += static_cast<unsigned>(world.GetAll<Entity>().size());
-    g_currentRigidBodies += static_cast<unsigned>(world.GetAll<RigidBody>().size());
-    g_currentRenderers += static_cast<unsigned>(world.GetAll<graphics::ToonRenderer>().size());
-    g_currentParticleEmitters += static_cast<unsigned>(world.GetAll<graphics::ParticleEmitter>().size());
-    g_currentPointLights += static_cast<unsigned>(world.GetAll<graphics::PointLight>().size());
-    g_currentSpotLights += static_cast<unsigned>(world.GetAll<graphics::SpotLight>().size());
 }
 
 void Benchmarks::Unload()
