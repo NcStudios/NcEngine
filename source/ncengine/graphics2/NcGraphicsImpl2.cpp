@@ -176,6 +176,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_world,
             modules,
             events,
+            memorySettings.maxTransforms,
             memorySettings.maxRenderers,
             graphicsSettings.initialBatchSize,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),

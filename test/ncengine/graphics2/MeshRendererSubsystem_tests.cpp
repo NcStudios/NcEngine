@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "../AssetServiceStub.h"
 #include "../EcsFixture.inl"
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Entity.h"
@@ -11,10 +12,6 @@
 #include <array>
 #include <ranges>
 
-constexpr auto g_materialPasses = std::array{
-    nc::MaterialPass::Toon
-};
-
 const auto g_materialDesc = nc::MaterialDesc{
     .passes = nc::MaterialPass::Toon
 };
@@ -22,6 +19,8 @@ const auto g_materialDesc = nc::MaterialDesc{
 constexpr auto g_meshView = nc::asset::MeshView{
     .id = 42
 };
+
+DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
 
 namespace nc
 {
@@ -53,7 +52,7 @@ class MeshRendererSubsystemTest : public testing::Test,
 
         MeshRendererSubsystemTest()
             : EcsFixture{MaxEntities},
-              uut{systemEvents, MaxEntities, 1}
+              uut{systemEvents, MaxEntities, MaxEntities, 1}
         {
             GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
         }
@@ -159,6 +158,21 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
     EXPECT_EQ(1, actualBatch1.instanceCount);
     EXPECT_EQ(2, actualBatch2.firstInstance);
     EXPECT_EQ(1, actualBatch2.instanceCount);
+
+    registry.Clear();
+}
+
+TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMaterial_Succeeds)
+{
+    auto world = GetTestWorld();
+    auto& registry = GetTestComponentRegistry();
+    const auto entity = AddEntity(world);
+    registry.CommitPendingChanges();
+    uut.BuildState(world); // discard - just updating internal tracking
+
+    // Only 1 pass is implemented currently, so we can't actually assign new passes/move to a new batch.
+    // Eventually, we should make this test more interesting.
+    EXPECT_NO_THROW(world.Get<nc::MeshRenderer2>(entity).SetMaterial(g_materialDesc));
 
     registry.Clear();
 }

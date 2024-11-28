@@ -107,7 +107,7 @@ class InstanceCacheStaging
 class InstanceCache
 {
     public:
-        explicit InstanceCache(uint32_t maxMeshRenderers,
+        explicit InstanceCache(uint32_t maxEntities,
                                uint32_t initialBatchSize = 1u);
 
         // Get the staging area for enqueueing buffer writes.
