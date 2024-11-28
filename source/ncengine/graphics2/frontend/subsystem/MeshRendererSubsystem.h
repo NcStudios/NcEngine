@@ -20,7 +20,8 @@ class MeshRendererSubsystem
     public:
         explicit MeshRendererSubsystem(SystemEvents& events,
                                        uint32_t maxEntities,
-                                       uint32_t maxMeshRenderers);
+                                       uint32_t maxMeshRenderers,
+                                       uint32_t initialBatchSize);
 
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
