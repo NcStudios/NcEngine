@@ -4,6 +4,7 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer2.h"
 #include "ncengine/graphics/GraphicsUtility.h"
+#include "asset/AssetService.h"
 
 #include "ncengine/debug/Profile.h"
 
@@ -47,17 +48,39 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
 void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
                                             uint32_t transformIndex,
                                             MaterialInstanceHandle materialIndex,
-                                            MaterialPasses oldPasses,
-                                            MaterialPasses newPasses,
+                                            MaterialPasses passes,
                                             uint64_t oldMeshId,
                                             const asset::MeshView& newMesh)
 {
     m_instanceCache.GetStagingArea().UpdateInstance(
         entity.Index(),
-        oldPasses,
-        newPasses,
+        passes,
+        passes,
         oldMeshId,
         newMesh,
+        InstanceData{
+            transformIndex,
+            materialIndex
+        }
+    );
+}
+
+void MeshRendererSubsystem::SetInstanceMaterial(Entity entity,
+                                                uint32_t transformIndex,
+                                                MaterialInstanceHandle materialIndex,
+                                                MaterialPasses oldPasses,
+                                                MaterialPasses newPasses,
+                                                uint64_t meshId)
+{
+    const auto meshService = asset::AssetService<asset::MeshView>::Get();
+    const auto meshPath = std::string{meshService->GetPath(meshId)};
+    const auto meshView = meshService->Acquire(meshPath);
+    m_instanceCache.GetStagingArea().UpdateInstance(
+        entity.Index(),
+        oldPasses,
+        newPasses,
+        meshId,
+        meshView,
         InstanceData{
             transformIndex,
             materialIndex
