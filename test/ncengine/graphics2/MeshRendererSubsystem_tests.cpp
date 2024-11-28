@@ -52,7 +52,7 @@ class MeshRendererSubsystemTest : public testing::Test,
 
         MeshRendererSubsystemTest()
             : EcsFixture{MaxEntities},
-              uut{systemEvents, MaxEntities, MaxEntities}
+              uut{systemEvents, MaxEntities, MaxEntities, 1}
         {
             GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
         }
