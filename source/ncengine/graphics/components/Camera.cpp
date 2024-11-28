@@ -2,10 +2,6 @@
 #include "ncengine/window/Window.h"
 #include "ncmath/MatrixUtilities.h"
 
-#ifdef NC_EDITOR_ENABLED
-#include "imgui.h"
-#endif
-
 namespace nc::graphics
 {
 Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
@@ -79,11 +75,4 @@ auto Camera::CalculateFrustum() const noexcept -> Frustum
 
     return out;
 }
-
-#ifdef NC_EDITOR_ENABLED
-void Camera::ComponentGuiElement()
-{
-    ImGui::Text("Camera");
-}
-#endif
 } // namespace nc::graphics

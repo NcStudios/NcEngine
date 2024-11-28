@@ -50,7 +50,6 @@ class EcsInterface
             }
 
             Emplace<Hierarchy>(handle, info.parent, std::vector<Entity>{});
-            Emplace<detail::FreeComponentGroup>(handle);
             Emplace<Tag>(handle, std::move(info.tag));
             return handle;
         }
@@ -63,7 +62,7 @@ class EcsInterface
             NC_ASSERT(Contains<Entity>(entity), "Bad entity");
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                return Get<detail::FreeComponentGroup>(entity).template Add<T>(entity, std::forward<Args>(args)...);
+                return m_policy.GetFreeComponentPool().template Emplace<T>(entity, std::forward<Args>(args)...);
             }
             else
             {
@@ -89,7 +88,7 @@ class EcsInterface
 
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                return m_policy.template GetPool<detail::FreeComponentGroup>().Get(entity).template Remove<T>();
+                return m_policy.GetFreeComponentPool().template Remove<T>(entity);
             }
             else
             {
@@ -104,8 +103,7 @@ class EcsInterface
         {
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto& bag = Get<detail::FreeComponentGroup>(entity);
-                return bag.template Get<T>();
+                return m_policy.GetFreeComponentPool().template Get<T>(entity);
             }
             else
             {
@@ -120,8 +118,7 @@ class EcsInterface
         {
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                auto& bag = Get<detail::FreeComponentGroup>(entity);
-                return bag.template Get<T>();
+                return m_policy.GetFreeComponentPool().template Get<T>(entity);
             }
             else
             {
@@ -228,11 +225,7 @@ class EcsInterface
         {
             if constexpr (std::derived_from<T, FreeComponent>)
             {
-                if (!Contains<detail::FreeComponentGroup>(entity))
-                    return false;
-
-                const auto& bag = Get<detail::FreeComponentGroup>(entity);
-                return bag.template Contains<T>();
+                return m_policy.GetFreeComponentPool().template Contains<T>(entity);
             }
             else
             {

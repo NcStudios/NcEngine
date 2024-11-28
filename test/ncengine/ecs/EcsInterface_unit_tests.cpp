@@ -20,7 +20,6 @@ class EcsInterfaceTests : public ::testing::Test
         {
             registry.RegisterType<nc::Tag>(10);
             registry.RegisterType<nc::Transform>(10);
-            registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(10);
             registry.RegisterType<nc::Hierarchy>(10);
             registry.RegisterType<S1>(10);
             registry.RegisterType<S2>(10);
@@ -30,8 +29,6 @@ class EcsInterfaceTests : public ::testing::Test
         void TestFixture_SyncRegistry()
         {
             registry.CommitPendingChanges();
-            for(auto& bag : registry.GetPool<nc::ecs::detail::FreeComponentGroup>())
-                bag.CommitStagedComponents();
         }
 };
 
@@ -48,7 +45,6 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(CanAccess<all, nc::Tag>);
     static_assert(CanAccess<all, nc::Transform>);
     static_assert(CanAccess<all, nc::Hierarchy>);
-    static_assert(CanAccess<all, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<all, S1>);
     static_assert(CanAccess<all, S2>);
 
@@ -57,16 +53,14 @@ TEST_F(EcsInterfaceTests, Aliases_includesExpectedTypes)
     static_assert(CanAccess<basic, nc::Tag>);
     static_assert(CanAccess<basic, nc::Transform>);
     static_assert(CanAccess<basic, nc::Hierarchy>);
-    static_assert(CanAccess<basic, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<basic, S1>);
     static_assert(CanAccess<basic, S2>);
 
-    using strict = nc::ecs::ExplicitEcs<S1>; // includes only FreeComponent + explicit type list
+    using strict = nc::ecs::ExplicitEcs<S1>; // includes only explicit type list
     static_assert(!CanAccess<strict, nc::Entity>);
     static_assert(!CanAccess<strict, nc::Tag>);
     static_assert(!CanAccess<strict, nc::Transform>);
     static_assert(!CanAccess<strict, nc::Hierarchy>);
-    static_assert(CanAccess<strict, nc::ecs::detail::FreeComponentGroup>);
     static_assert(CanAccess<strict, S1>);
     static_assert(!CanAccess<strict, S2>);
 }
@@ -99,7 +93,6 @@ TEST_F(EcsInterfaceTests, Emplace_entity_addsExpectedState)
     EXPECT_TRUE(uut.Contains<nc::Entity>(e));
     EXPECT_TRUE(uut.Contains<nc::Tag>(e));
     EXPECT_TRUE(uut.Contains<nc::Transform>(e));
-    EXPECT_TRUE(uut.Contains<nc::ecs::detail::FreeComponentGroup>(e));
     EXPECT_TRUE(uut.Contains<nc::Hierarchy>(e));
 }
 
