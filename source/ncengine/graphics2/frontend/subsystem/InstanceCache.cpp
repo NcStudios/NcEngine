@@ -103,10 +103,10 @@ void InstanceCacheStaging::Purge(std::span<const BatchRegion> toKeep) noexcept
     m_stagedInstances.shrink_to_fit();
 }
 
-InstanceCache::InstanceCache(uint32_t maxMeshRenderers,
+InstanceCache::InstanceCache(uint32_t maxEntities,
                              uint32_t initialBatchSize)
     : m_batches{},
-      m_entityToIndex{100, maxMeshRenderers},
+      m_entityToIndex{100, maxEntities},
       m_initialBatchSize{initialBatchSize}
 {
     NC_ASSERT(initialBatchSize > 0, "Invalid initial batch size");

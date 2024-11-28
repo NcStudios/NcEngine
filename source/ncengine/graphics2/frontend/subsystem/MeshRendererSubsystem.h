@@ -18,7 +18,9 @@ namespace graphics
 class MeshRendererSubsystem
 {
     public:
-        explicit MeshRendererSubsystem(SystemEvents& events, uint32_t maxMeshRenderers);
+        explicit MeshRendererSubsystem(SystemEvents& events,
+                                       uint32_t maxEntities,
+                                       uint32_t maxMeshRenderers);
 
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
@@ -33,10 +35,16 @@ class MeshRendererSubsystem
         void SetInstanceMesh(Entity entity,
                              uint32_t transformIndex,
                              MaterialInstanceHandle materialIndex,
-                             MaterialPasses oldPasses,
-                             MaterialPasses newPasses,
+                             MaterialPasses passes,
                              uint64_t oldMeshId,
                              const asset::MeshView& newMesh);
+
+        void SetInstanceMaterial(Entity entity,
+                                 uint32_t transformIndex,
+                                 MaterialInstanceHandle materialIndex,
+                                 MaterialPasses oldPasses,
+                                 MaterialPasses newPasses,
+                                 uint64_t meshId);
 
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
         void OnBeforeSceneLoad();

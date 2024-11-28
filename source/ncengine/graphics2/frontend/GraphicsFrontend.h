@@ -23,6 +23,7 @@ class GraphicsFrontend
                          ecs::Ecs world,
                          ModuleProvider modules,
                          SystemEvents& events,
+                         uint32_t maxEntities,
                          uint32_t maxRenderers,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
@@ -30,7 +31,7 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
-              m_meshRendererSystem{events, maxRenderers}
+              m_meshRendererSystem{events, maxEntities, maxRenderers}
         {
         }
 
