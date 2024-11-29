@@ -5,6 +5,7 @@
 #include "subsystem/LightSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
 #include "subsystem/MeshRendererSubsystem.h"
+#include "subsystem/PostProcessSubsystem.h"
 #include "subsystem/UISubsystem.h"
 
 #include "ncengine/ecs/EcsFwd.h"
@@ -46,11 +47,13 @@ class GraphicsFrontend
             m_cameraSystem.Clear();
         }
 
-        auto GetCameraSubsystem()       ->       CameraSubsystem&       { return m_cameraSystem;       }
-        auto GetMeshRendererSubsystem() ->       MeshRendererSubsystem& { return m_meshRendererSystem; }
-        auto GetMaterialRegistry()      ->       MaterialRegistry&      { return m_materialRegistry;   }
-        auto GetUISubsystem()           ->       UISubsystem&           { return m_uiSystem;           }
-        auto GetUISubsystem() const     -> const UISubsystem&           { return m_uiSystem;           }
+        auto GetCameraSubsystem()             ->       CameraSubsystem&       { return m_cameraSystem;       }
+        auto GetMeshRendererSubsystem()       ->       MeshRendererSubsystem& { return m_meshRendererSystem; }
+        auto GetMaterialRegistry()            ->       MaterialRegistry&      { return m_materialRegistry;   }
+        auto GetPostProcessSubsystem()        ->       PostProcessSubsystem&  { return m_postProcessSystem;  }
+        auto GetPostProcessSubsystem()  const -> const PostProcessSubsystem&  { return m_postProcessSystem;  }
+        auto GetUISubsystem()                 ->       UISubsystem&           { return m_uiSystem;           }
+        auto GetUISubsystem()           const -> const UISubsystem&           { return m_uiSystem;           }
 
     private:
         AssetDispatch m_assetDispatch;
@@ -59,5 +62,6 @@ class GraphicsFrontend
         CameraSubsystem m_cameraSystem;
         MeshRendererSubsystem m_meshRendererSystem;
         LightSubsystem m_lightSubsystem;
+        PostProcessSubsystem m_postProcessSystem;
 };
 } // namespace nc::graphics
