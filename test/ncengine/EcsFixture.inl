@@ -1,6 +1,5 @@
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Hierarchy.h"
-#include "ncengine/ecs/detail/FreeComponentGroup.h"
 #include "ncengine/ecs/Tag.h"
 
 class EcsFixture
@@ -14,7 +13,6 @@ class EcsFixture
             m_registry.RegisterType<nc::Transform>(maxEntities);
             m_registry.RegisterType<nc::Hierarchy>(maxEntities);
             m_registry.RegisterType<nc::Tag>(maxEntities);
-            m_registry.RegisterType<nc::ecs::detail::FreeComponentGroup>(maxEntities);
         }
 
         auto GetTestEntityCapacity() const { return m_entityCapacity; }

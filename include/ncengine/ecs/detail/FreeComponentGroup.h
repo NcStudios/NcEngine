@@ -11,24 +11,16 @@
 
 namespace nc::ecs::detail
 {
-class FreeComponentGroup final : public ComponentBase
+class FreeComponentGroup
 {
     public:
-        FreeComponentGroup(Entity entity)
-            : ComponentBase{entity},
-              m_components{},
-              m_toAdd{},
-              m_toRemove{}
-        {
-        }
-
-        ~FreeComponentGroup() = default;
+        FreeComponentGroup() = default;
         FreeComponentGroup(FreeComponentGroup&&) = default;
         FreeComponentGroup& operator=(FreeComponentGroup&&) = default;
         FreeComponentGroup(const FreeComponentGroup&) = delete;
         FreeComponentGroup& operator=(const FreeComponentGroup&) = delete;
 
-        template<std::derived_from<FreeComponent> T, class ... Args>
+        template<std::derived_from<FreeComponent> T, class... Args>
         auto Add(Args&& ... args) -> T&;
 
         template<std::derived_from<FreeComponent> T>
@@ -40,11 +32,8 @@ class FreeComponentGroup final : public ComponentBase
         template<std::derived_from<FreeComponent> T>
         auto Get() const -> T&;
 
-        template<class F>
-        void ForEach(F&& func);
-
-        auto GetComponents() const noexcept -> std::vector<FreeComponent*>;
         void CommitStagedComponents();
+        auto IsPersistentGroup() -> bool;
 
     private:
         std::vector<std::unique_ptr<FreeComponent>> m_components;
@@ -119,12 +108,28 @@ auto FreeComponentGroup::Get() const -> T&
     throw NcError("Component does not exist");
 }
 
-template<class F>
-void FreeComponentGroup::ForEach(F&& func)
+inline void FreeComponentGroup::CommitStagedComponents()
 {
-    for (auto& component : m_components)
+    for(auto i : m_toRemove)
     {
-        func(*component);
+        m_components.at(i) = std::move(m_components.back());
+        m_components.pop_back();
     }
+
+    m_toRemove.clear();
+
+    for(auto& toAdd : m_toAdd)
+    {
+        m_components.push_back(std::move(toAdd));
+    }
+
+    m_toAdd.clear();
+}
+
+inline auto FreeComponentGroup::IsPersistentGroup() -> bool
+{
+    return !m_components.empty()
+        ? m_components[0]->ParentEntity().IsPersistent()
+        : false;
 }
 } // namespace nc::ecs::detail

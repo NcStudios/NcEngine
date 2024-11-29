@@ -16,14 +16,14 @@ constexpr auto TestEntity = Entity{0, 0, 0};
 
 TEST(FreeComponentGroup_unit_test, Add_ValidCall_ConstructsObject)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     auto& component = group.Add<FakeComponent>(TestEntity);
     EXPECT_EQ(component.ParentEntity(), TestEntity);
 }
 
 TEST(FreeComponentGroup_unit_test, Add_ReplaceAfterRemove_ConstructsObject)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();
@@ -34,7 +34,7 @@ TEST(FreeComponentGroup_unit_test, Add_ReplaceAfterRemove_ConstructsObject)
 
 TEST(FreeComponentGroup_unit_test, Add_DoubleCall_Throws)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     EXPECT_THROW(group.Add<FakeComponent>(TestEntity), std::runtime_error);
@@ -42,7 +42,7 @@ TEST(FreeComponentGroup_unit_test, Add_DoubleCall_Throws)
 
 TEST(FreeComponentGroup_unit_test, Remove_ComponentExists_ReturnsTrue)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     EXPECT_TRUE(group.Remove<FakeComponent>());
@@ -53,13 +53,13 @@ TEST(FreeComponentGroup_unit_test, Remove_ComponentExists_ReturnsTrue)
 
 TEST(FreeComponentGroup_unit_test, Remove_ComponentDoesNotExist_ReturnsFalse)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     EXPECT_FALSE(group.Remove<FakeComponent>());
 }
 
 TEST(FreeComponentGroup_unit_test, Remove_DoubleCall_ReturnsFalse)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();
@@ -69,7 +69,7 @@ TEST(FreeComponentGroup_unit_test, Remove_DoubleCall_ReturnsFalse)
 
 TEST(FreeComponentGroup_unit_test, Contains_Exists_ReturnsTrue)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     auto actual = group.Contains<FakeComponent>();
@@ -78,7 +78,7 @@ TEST(FreeComponentGroup_unit_test, Contains_Exists_ReturnsTrue)
 
 TEST(FreeComponentGroup_unit_test, Contains_ExistsStaged_ReturnsTrue)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     auto actual = group.Contains<FakeComponent>();
     EXPECT_TRUE(actual);
@@ -86,14 +86,14 @@ TEST(FreeComponentGroup_unit_test, Contains_ExistsStaged_ReturnsTrue)
 
 TEST(FreeComponentGroup_unit_test, Contains_DoesNotExist_ReturnsFalse)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     auto actual = group.Contains<FakeComponent>();
     EXPECT_FALSE(actual);
 }
 
 TEST(FreeComponentGroup_unit_test, Contains_AfterRemoved_ReturnsFalse)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();
@@ -104,7 +104,7 @@ TEST(FreeComponentGroup_unit_test, Contains_AfterRemoved_ReturnsFalse)
 
 TEST(FreeComponentGroup_unit_test, Get_Exists_Succeeds)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     EXPECT_NO_THROW(group.Get<FakeComponent>());
@@ -112,20 +112,20 @@ TEST(FreeComponentGroup_unit_test, Get_Exists_Succeeds)
 
 TEST(FreeComponentGroup_unit_test, Get_ExistsStaged_Succeeds)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     EXPECT_NO_THROW(group.Get<FakeComponent>());
 }
 
 TEST(FreeComponentGroup_unit_test, Get_DoesNotExist_Throws)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     EXPECT_THROW(group.Get<FakeComponent>(), nc::NcError);
 }
 
 TEST(FreeComponentGroup_unit_test, Get_CallAfterRemoved_ReturnsNull)
 {
-    auto group = FreeComponentGroup{TestEntity};
+    auto group = FreeComponentGroup{};
     group.Add<FakeComponent>(TestEntity);
     group.CommitStagedComponents();
     group.Remove<FakeComponent>();

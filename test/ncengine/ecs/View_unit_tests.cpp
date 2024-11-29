@@ -8,11 +8,6 @@ namespace nc
 Quaternion::Quaternion(float X, float Y, float Z, float W)
     : x{X}, y{Y}, z{Z}, w{W}
 {}
-
-namespace ecs::detail
-{
-void FreeComponentGroup::CommitStagedComponents() {}
-}
 }
 
 struct Fake1 : public ComponentBase
