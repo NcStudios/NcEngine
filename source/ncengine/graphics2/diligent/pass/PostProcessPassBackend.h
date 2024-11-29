@@ -1,9 +1,13 @@
 #pragma once
 
+#include "graphics2/diligent/resource/base/UniformBuffer.h"
 #include "ncengine/graphics/PostProcess.h"
 
+#include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/PipelineState.h"
 
+#include <optional>
 #include <vector>
 
 namespace nc::graphics
@@ -13,7 +17,7 @@ struct PostProcessState;
 
 struct PPPassInstanceData
 {
-    std::vector<const char*> bufferData;
+    std::optional<UniformBuffer> buffer;
     PostProcessEffectId effectId = NullPostProcessEffectId;
     bool enabled = false;
 };
@@ -35,8 +39,11 @@ class PostProcessPassBackend
         {
         }
 
-        void Update(const PostProcessState& postProcessState);
-        void Render(Diligent::IDeviceContext& context, PostProcessBufferResource& resource);
+        void Update(Diligent::IDeviceContext& contet,
+                    const PostProcessState& postProcessState);
+
+        void Render(Diligent::IDeviceContext& context,
+                    PostProcessBufferResource& resource);
 
     private:
         std::vector<PPPass> m_passes;

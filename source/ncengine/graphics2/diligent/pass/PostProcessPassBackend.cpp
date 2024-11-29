@@ -8,14 +8,14 @@
 
 namespace
 {
-auto CopyProperties(const nc::PostProcessPassProperties& properties,
-                    nc::graphics::PPPassInstanceData& instance)
+auto UpdateBuffer(Diligent::IDeviceContext& context,
+                  const nc::PostProcessPassProperties& properties,
+                  nc::graphics::PPPassInstanceData& instance)
 {
     std::visit(
-        [&instance](const auto& unpacked){
-            constexpr auto size = sizeof(unpacked);
-            NC_ASSERT(instance.bufferData.size() == size, "PostProcess buffer size mismatch");
-            std::memcpy(instance.bufferData.data(), static_cast<const void*>(&unpacked), size);
+        [&context, &instance](const auto& unpacked){
+            NC_ASSERT(instance.buffer.has_value(), "Pass instance does not have a UniformBuffer");
+            instance.buffer->Update(context, unpacked);
         },
         properties
     );
@@ -75,7 +75,12 @@ auto FindInstance(std::vector<nc::graphics::PPPass>& passes,
 
 namespace nc::graphics
 {
-void PostProcessPassBackend::Update(const PostProcessState& postProcessState)
+
+// todo: want some kind of generic cbuffer that's owned by each pass instance that has properties
+// todo: definitely pp resource should use SetVariable to assign new buffer, instead of remapping
+
+void PostProcessPassBackend::Update(Diligent::IDeviceContext& context,
+                                    const PostProcessState& postProcessState)
 {
     for (const auto& [effectId, effectPasses, enabled] : postProcessState.toggledEffects)
     {
@@ -90,11 +95,12 @@ void PostProcessPassBackend::Update(const PostProcessState& postProcessState)
 
     for (const auto& [effectId, passId, properties] : postProcessState.modifiedProperties)
     {
-        CopyProperties(properties, FindInstance(m_passes, effectId, passId));
+        UpdateBuffer(context, properties, FindInstance(m_passes, effectId, passId));
     }
 }
 
-void PostProcessPassBackend::Render(Diligent::IDeviceContext& context, PostProcessBufferResource& resource)
+void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
+                                    PostProcessBufferResource& resource)
 {
     for (auto& pass : m_passes)
     {
@@ -105,14 +111,18 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context, PostProce
 
         context.SetPipelineState(pass.pso);
         // render target stuff?...
-        for (const auto& instance : pass.instances)
+        for (auto& instance : pass.instances)
         {
             if (!instance.enabled)
             {
                 continue;
             }
 
-            resource.Update(context, pass.id, instance.bufferData);
+            if (instance.buffer.has_value())
+            {
+                resource.SetVariable(pass.id, instance.buffer->GetBuffer());
+            }
+
             // draw stuff
         }
     }

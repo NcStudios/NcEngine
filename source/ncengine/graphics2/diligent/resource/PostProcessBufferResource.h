@@ -3,46 +3,31 @@
 #include "graphics2/ShaderTypes.h"
 
 #include "ncengine/graphics/PostProcess.h"
-#include "ncutility/NcError.h"
 
-#include "Common/interface/RefCntAutoPtr.hpp"
-#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
-#include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/Buffer.h"
+#include "Graphics/GraphicsEngine/interface/ShaderResourceVariable.h"
 
 namespace nc::graphics
 {
 struct PostProcessState;
 
-// Not sure if this should be its own thing, or in EnvironmentBufferResource...
+// 
+struct PostProcessDataVariable
+{
+    Diligent::IShaderResourceVariable* variable = nullptr;
+    PostProcessPass::type passId = PostProcessPass::None;
+};
+
+// 
 class PostProcessBufferResource
 {
     public:
-        explicit PostProcessBufferResource(Diligent::IDeviceContext& context,
-                                           Diligent::IRenderDevice& device,
-                                           Diligent::IShaderResourceVariable& outlineDataVariable);
+        explicit PostProcessBufferResource(std::vector<PostProcessDataVariable> variables);
 
-        void Update(Diligent::IDeviceContext& context,
-                    PostProcessPass::type passId,
-                    std::span<const char* const> data);
-
-        auto GetOutlineDataShaderVariable() -> Diligent::IShaderResourceVariable&
-        {
-            return *m_outlineDataVariable;
-        }
+        void SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer);
+        auto GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&;
 
     private:
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_outlineDataBuffer;
-        Diligent::IShaderResourceVariable* m_outlineDataVariable;
-
-        auto GetBuffer(PostProcessPass::type passId) -> Diligent::IBuffer&
-        {
-            switch (passId)
-            {
-                case PostProcessPass::Outline: return *m_outlineDataBuffer;
-                default:
-                    NC_ASSERT(false, fmt::format("No variable for PostProcessPass '{}'", passId));
-                    std::unreachable();
-            }
-        }
+        std::vector<PostProcessDataVariable> m_variables;
 };
 } // namespace nc::graphics

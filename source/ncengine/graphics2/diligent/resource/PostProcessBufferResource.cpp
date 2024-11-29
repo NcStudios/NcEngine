@@ -1,32 +1,32 @@
 #include "PostProcessBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 
+#include "ncutility/NcError.h"
+
+#include <ranges>
+
 namespace nc::graphics
 {
-PostProcessBufferResource::PostProcessBufferResource(Diligent::IDeviceContext& context,
-                                                     Diligent::IRenderDevice& device,
-                                                     Diligent::IShaderResourceVariable& variable)
+PostProcessBufferResource::PostProcessBufferResource(std::vector<PostProcessDataVariable> variables)
+    : m_variables{std::move(variables)}
 {
-    // basic init here...
-    (void)context;
-    (void)device;
-    (void)variable;
 }
 
-void PostProcessBufferResource::Update(Diligent::IDeviceContext& context,
-                                       PostProcessPass::type passId,
-                                       std::span<const char* const> data)
+void PostProcessBufferResource::SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer)
 {
-    auto& buffer = GetBuffer(passId);
-    void* mapped = nullptr;
-    context.MapBuffer(
-        &buffer,
-        Diligent::MAP_WRITE,
-        Diligent::MAP_FLAG_DISCARD,
-        mapped
+    GetVariable(passId).Set(&buffer);
+}
+
+auto PostProcessBufferResource::GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&
+{
+    auto pos = std::ranges::find_if(
+        m_variables,
+        [passId](const auto& variable) {
+            return variable.passId == passId;
+        }
     );
 
-    std::memcpy(mapped, data.data(), data.size());
-    context.UnmapBuffer(&buffer, Diligent::MAP_WRITE);
+    NC_ASSERT(pos != m_variables.end(), fmt::format("No variable exists for post process pass '{}'", passId));
+    return *pos->variable;
 }
 } // namespace nc::graphics
