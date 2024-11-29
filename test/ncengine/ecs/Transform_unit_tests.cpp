@@ -41,13 +41,8 @@ void EcsModule::UpdateWorldSpaceMatrices()
         }
     }
 }
-
-namespace detail
-{
-void FreeComponentGroup::CommitStagedComponents() {}
-}
-} // namespace detail
 } // namespace ecs
+} // namespace nc
 
 constexpr auto TestLayer = Entity::layer_type{0u};
 constexpr auto TestFlags = Entity::Flags::None;

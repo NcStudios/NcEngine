@@ -72,6 +72,7 @@ constexpr auto ScreenHeightKey = "screen_height"sv;
 constexpr auto TargetFpsKey = "target_fps"sv;
 constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
 constexpr auto AntialiasingKey = "antialiasing"sv;
+constexpr auto InitialBatchSize = "initial_batch_size"sv;
 constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
 
 // audio
@@ -229,6 +230,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.targetFPS, TargetFpsKey, kvPairs);
         ParseValueIfExists(out.useShadows, UseShadowsKey, kvPairs);
         ParseValueIfExists(out.antialiasing, AntialiasingKey, kvPairs);
+        ParseValueIfExists(out.initialBatchSize, InitialBatchSize, kvPairs);
         ParseValueIfExists(out.useValidationLayers, UseValidationLayersKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::PhysicsSettings>)
@@ -393,6 +395,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, TargetFpsKey, config.graphicsSettings.targetFPS);
     ::WriteKVPair(stream, UseShadowsKey, config.graphicsSettings.useShadows);
     ::WriteKVPair(stream, AntialiasingKey, config.graphicsSettings.antialiasing);
+    ::WriteKVPair(stream, InitialBatchSize, config.graphicsSettings.initialBatchSize);
     ::WriteKVPair(stream, UseValidationLayersKey, config.graphicsSettings.useValidationLayers);
 
     if (writeSections) stream << "[audio_settings]\n";

@@ -6,6 +6,7 @@
 
 #include "ncengine/ecs/ComponentPool.h"
 #include "ncengine/ecs/EntityPool.h"
+#include "ncengine/ecs/FreeComponentPool.h"
 
 namespace nc::ecs
 {
@@ -32,6 +33,7 @@ class ComponentRegistry : public StableAddress
          */
         explicit ComponentRegistry(size_t entityCapacity)
             : m_entities{entityCapacity},
+              m_freePool{entityCapacity},
               m_maxEntities{entityCapacity}
         {
             NC_ASSERT(!s_init, "There may only be one ComponentRegistry instance.");
@@ -103,6 +105,9 @@ class ComponentRegistry : public StableAddress
             return **pos;
         }
 
+        /** @brief Get the pool for all FreeComponents. */
+        auto GetFreeComponentPool() -> FreeComponentPool& { return m_freePool; }
+
         /** @brief Get the entity pool. */
         template<std::same_as<Entity> T>
         auto GetPool() -> EntityPool& { return m_entities; }
@@ -125,12 +130,14 @@ class ComponentRegistry : public StableAddress
         {
             const auto removed = m_entities.RecycleDeadEntities();
             std::ranges::for_each(m_pools, [&removed](auto&& p) { p->CommitStagedComponents(removed); });
+            m_freePool.CommitStagedComponents(removed);
         }
 
         /** @brief Destroy all non-persistent entities and components. */
         void ClearSceneData()
         {
             std::ranges::for_each(m_pools, [](auto&& p) { p->ClearNonPersistent(); });
+            m_freePool.ClearNonPersistent();
             m_entities.ClearNonPersistent();
         }
 
@@ -138,12 +145,14 @@ class ComponentRegistry : public StableAddress
         void Clear()
         {
             std::ranges::for_each(m_pools, [](auto&& p) { p->Clear(); });
+            m_freePool.Clear();
             m_entities.Clear();
         }
 
     private:
         std::vector<std::unique_ptr<ComponentPoolBase>> m_pools;
         EntityPool m_entities;
+        FreeComponentPool m_freePool;
         std::vector<void**> m_refs;
         size_t m_maxEntities;
         size_t m_nextComponentId = std::numeric_limits<size_t>::max();

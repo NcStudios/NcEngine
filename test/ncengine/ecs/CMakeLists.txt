@@ -99,7 +99,6 @@ add_test(ComponentRegistry_unit_tests ComponentRegistry_unit_tests)
 ### EcsInterface Tests ###
 add_executable(EcsInterface_unit_tests
     EcsInterface_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/FreeComponentGroup.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
 )
 
@@ -175,7 +174,6 @@ add_test(EntityPool_unit_tests EntityPool_unit_tests)
 ### FreeComponentGroup Tests ###
 add_executable(FreeComponentGroup_unit_test
     FreeComponentGroup_unit_tests.cpp
-    ${NC_SOURCE_DIR}/ecs/FreeComponentGroup.cpp
 )
 
 target_include_directories(FreeComponentGroup_unit_test
