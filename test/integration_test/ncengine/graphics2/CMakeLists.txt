@@ -69,7 +69,7 @@ target_sources(EnvironmentBufferResource_tests
         EnvironmentBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/UniformBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
 )
 
 ### TextureBufferResource Tests ###
@@ -123,7 +123,7 @@ target_sources(StructuredBuffer_tests
         StructuredBuffer_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/UniformBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/PerFrameResourceSignature.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
@@ -152,11 +152,11 @@ target_link_libraries(UIBackend_tests
         imgui
 )
 
-### UniformBuffer Tests ###
-add_graphics_test(UniformBuffer_tests)
+### DynamicUniformBuffer Tests ###
+add_graphics_test(DynamicUniformBuffer_tests)
 
-target_sources(UniformBuffer_tests
+target_sources(DynamicUniformBuffer_tests
     PRIVATE
-        UniformBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/UniformBuffer.cpp
+    DynamicUniformBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
 )

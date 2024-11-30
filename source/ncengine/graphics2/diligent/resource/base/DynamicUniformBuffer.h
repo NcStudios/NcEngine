@@ -11,15 +11,15 @@
 
 namespace nc::graphics
 {
-class UniformBuffer
+class DynamicUniformBuffer
 {
     public:
         template<TriviallyCopyable T>
-        explicit UniformBuffer(Diligent::IDeviceContext& context,
+        explicit DynamicUniformBuffer(Diligent::IDeviceContext& context,
                                Diligent::IRenderDevice& device,
                                const T& initialData,
-                               std::string_view name = "UniformBuffer")
-            : UniformBuffer{
+                               std::string_view name = "DynamicUniformBuffer")
+            : DynamicUniformBuffer{
                 context,
                 device,
                 static_cast<const void*>(&initialData),
@@ -49,7 +49,7 @@ class UniformBuffer
         Diligent::RefCntAutoPtr<Diligent::IBuffer> m_buffer;
         size_t m_size;
 
-        UniformBuffer(Diligent::IDeviceContext& context,
+        DynamicUniformBuffer(Diligent::IDeviceContext& context,
                       Diligent::IRenderDevice& device,
                       const void* data,
                       size_t size,

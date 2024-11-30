@@ -1,5 +1,5 @@
 #include "DiligentEngineFixture.inl"
-#include "graphics2/diligent/resource/base/UniformBuffer.h"
+#include "graphics2/diligent/resource/base/DynamicUniformBuffer.h"
 #include "ncmath/Vector.h"
 
 struct TestObject
@@ -14,12 +14,12 @@ struct LargeTestObject
     nc::Vector3 v2 = nc::Vector3::Zero();
 };
 
-class UniformBufferTest : public DiligentEngineFixture
+class DynamicUniformBufferTest : public DiligentEngineFixture
 {
     protected:
-        nc::graphics::UniformBuffer uut;
+        nc::graphics::DynamicUniformBuffer uut;
 
-        UniformBufferTest()
+        DynamicUniformBufferTest()
             : uut{
                 engine->GetContext(),
                 engine->GetDevice(),
@@ -29,13 +29,13 @@ class UniformBufferTest : public DiligentEngineFixture
         {
         }
 
-        ~UniformBufferTest()
+        ~DynamicUniformBufferTest()
         {
             FailIfHasErrorOutput();
         }
 };
 
-TEST_F(UniformBufferTest, WriteCases)
+TEST_F(DynamicUniformBufferTest, WriteCases)
 {
     // Has expected size
     constexpr auto expectedSize = sizeof(TestObject);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/UniformBuffer.h"
+#include "base/DynamicUniformBuffer.h"
 
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -29,7 +29,7 @@ class EnvironmentBufferResource
         }
 
     private:
-        UniformBuffer m_buffer;
+        DynamicUniformBuffer m_buffer;
         Diligent::IShaderResourceVariable* m_variable;
 };
 } // namespace nc::graphics

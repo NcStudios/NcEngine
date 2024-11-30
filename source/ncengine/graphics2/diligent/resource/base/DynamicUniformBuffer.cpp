@@ -1,4 +1,4 @@
-#include "UniformBuffer.h"
+#include "DynamicUniformBuffer.h"
 
 #include "ncutility/NcError.h"
 
@@ -6,11 +6,11 @@
 
 namespace nc::graphics
 {
-UniformBuffer::UniformBuffer(Diligent::IDeviceContext& context,
-                             Diligent::IRenderDevice& device,
-                             const void* data,
-                             size_t size,
-                             std::string_view name)
+DynamicUniformBuffer::DynamicUniformBuffer(Diligent::IDeviceContext& context,
+                                           Diligent::IRenderDevice& device,
+                                           const void* data,
+                                           size_t size,
+                                           std::string_view name)
     : m_size{size}
 {
     const auto desc = Diligent::BufferDesc{
@@ -38,15 +38,15 @@ UniformBuffer::UniformBuffer(Diligent::IDeviceContext& context,
     Write(context, data, size); // initial data must be null for dynamic buffers, not sure why
 }
 
-void UniformBuffer::Write(Diligent::IDeviceContext& context, const void* src, size_t size)
+void DynamicUniformBuffer::Write(Diligent::IDeviceContext& context, const void* src, size_t size)
 {
-    NC_ASSERT(size == m_size, "Source size does not match UniformBuffer size");
+    NC_ASSERT(size == m_size, "Source size does not match DynamicUniformBuffer size");
     auto mapped = Map(context);
     std::memcpy(mapped, src, size);
     Unmap(context);
 }
 
-auto UniformBuffer::Map(Diligent::IDeviceContext& context) -> void*
+auto DynamicUniformBuffer::Map(Diligent::IDeviceContext& context) -> void*
 {
     void* mapped = nullptr;
     context.MapBuffer(
@@ -59,7 +59,7 @@ auto UniformBuffer::Map(Diligent::IDeviceContext& context) -> void*
     return mapped;
 }
 
-void UniformBuffer::Unmap(Diligent::IDeviceContext& context)
+void DynamicUniformBuffer::Unmap(Diligent::IDeviceContext& context)
 {
     context.UnmapBuffer(m_buffer.RawPtr(), Diligent::MAP_WRITE);
 }
