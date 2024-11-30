@@ -17,12 +17,6 @@ struct LargeTestObject
 class UniformBufferTest : public DiligentEngineFixture
 {
     protected:
-        static constexpr auto signatureName = "testSignature";
-        static constexpr auto variableName = "testBuffer";
-        static constexpr auto bindingIndex = uint8_t{1};
-        static constexpr auto maxInstanceCount = 10u;
-        static constexpr auto initialInstanceCount = 3u;
-
         nc::graphics::UniformBuffer uut;
 
         UniformBufferTest()
