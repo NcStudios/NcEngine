@@ -14,28 +14,47 @@ namespace nc::graphics
 class UniformBuffer
 {
     public:
+        template<TriviallyCopyable T>
         explicit UniformBuffer(Diligent::IDeviceContext& context,
                                Diligent::IRenderDevice& device,
-                               size_t size,
-                               std::string_view name = "UniformBuffer");
+                               const T& initialData,
+                               std::string_view name = "UniformBuffer")
+            : UniformBuffer{
+                context,
+                device,
+                static_cast<const void*>(&initialData),
+                sizeof(T),
+                name
+              }
+        {
+        }
 
+        auto GetBuffer()     -> Diligent::IBuffer& { return *m_buffer; }
+        auto GetSize() const -> size_t             { return m_size; }
+
+        // Update the buffer contents with a source object.
         template<TriviallyCopyable T>
-        void Update(Diligent::IDeviceContext& context, const T& source)
+        void Write(Diligent::IDeviceContext& context, const T& source)
         {
-            Update(context, static_cast<const void*>(&source), sizeof(source));
+            Write(context, static_cast<const void*>(&source), sizeof(source));
         }
 
-        // could maybe implement read function for testing...
+        // Get a pointer to a mapped region for writing.
+        auto Map(Diligent::IDeviceContext& context) -> void*;
 
-        auto GetBuffer() -> Diligent::IBuffer&
-        {
-            return *m_buffer;
-        }
+        // Unmap the buffer.
+        void Unmap(Diligent::IDeviceContext& context);
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IBuffer> m_buffer;
         size_t m_size;
 
-        void Update(Diligent::IDeviceContext& context, const void* src, size_t size);
+        UniformBuffer(Diligent::IDeviceContext& context,
+                      Diligent::IRenderDevice& device,
+                      const void* data,
+                      size_t size,
+                      std::string_view name);
+
+        void Write(Diligent::IDeviceContext& context, const void* src, size_t size);
 };
 } // namespace nc::graphics

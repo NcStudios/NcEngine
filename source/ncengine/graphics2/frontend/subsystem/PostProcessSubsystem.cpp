@@ -1,4 +1,5 @@
 #include "PostProcessSubsystem.h"
+#include "ncengine/graphics/GraphicsUtility.h"
 
 #include "ncutility/NcError.h"
 
@@ -6,6 +7,33 @@
 
 namespace
 {
+auto BuildEffectStates() -> std::vector<nc::graphics::PostProcessEffectState>
+{
+    auto effects = std::vector<nc::graphics::PostProcessEffectState>{};
+    for (const auto effectId : nc::GetPostProcessEffectIds())
+    {
+        auto properties = std::vector<nc::PostProcessPassProperties>{};
+        auto passes = nc::PostProcessEffectPasses{};
+        for (const auto pass : nc::GetPostProcessEffectPassFlags(effectId))
+        {
+            passes |= pass;
+            if (nc::HasProperties(pass))
+            {
+                properties.push_back(nc::MakeDefaultPassProperties(pass));
+            }
+        }
+
+        effects.emplace_back(
+            effectId,
+            passes,
+            std::move(properties),
+            false
+        );
+    }
+
+    return effects;
+}
+
 auto MatchPostProcessPass(nc::PostProcessPass::type pass,
                           const nc::PostProcessPassProperties& properties) -> bool
 {
@@ -25,8 +53,9 @@ auto MatchPostProcessPass(nc::PostProcessPass::type pass,
 namespace nc::graphics
 {
 PostProcessSubsystem::PostProcessSubsystem()
+    : m_effects{BuildEffectStates()}
 {
-    m_effects.emplace_back(MoebiusEffect);
+    // todo: there will be no initial data in buffers
 }
 
 auto PostProcessSubsystem::IsEnabled(PostProcessEffectId effectId) const -> bool

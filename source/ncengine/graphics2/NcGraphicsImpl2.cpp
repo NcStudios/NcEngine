@@ -180,7 +180,11 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_shaderBindings
           )},
           m_postProcessPassBackend{
-            {}
+            MakePostProcessPasses(
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory()
+            )
           },
           m_frontend{
             m_engine.GetContext(),

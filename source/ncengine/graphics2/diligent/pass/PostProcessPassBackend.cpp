@@ -15,7 +15,7 @@ auto UpdateBuffer(Diligent::IDeviceContext& context,
     std::visit(
         [&context, &instance](const auto& unpacked){
             NC_ASSERT(instance.buffer.has_value(), "Pass instance does not have a UniformBuffer");
-            instance.buffer->Update(context, unpacked);
+            instance.buffer->Write(context, unpacked);
         },
         properties
     );

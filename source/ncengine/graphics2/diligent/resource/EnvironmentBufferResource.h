@@ -1,8 +1,7 @@
 #pragma once
 
-#include "graphics2/ShaderTypes.h"
+#include "base/UniformBuffer.h"
 
-#include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
@@ -20,7 +19,9 @@ class EnvironmentBufferResource
                                            Diligent::IRenderDevice& device,
                                            Diligent::IShaderResourceVariable& variable);
 
-        void Update(Diligent::IDeviceContext& context, const CameraRenderState& cameraState, const LightRenderState& lightRenderState);
+        void Update(Diligent::IDeviceContext& context,
+                    const CameraRenderState& cameraState,
+                    const LightRenderState& lightRenderState);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {
@@ -28,7 +29,7 @@ class EnvironmentBufferResource
         }
 
     private:
-        Diligent::RefCntAutoPtr<Diligent::IBuffer> m_uniformBuffer;
+        UniformBuffer m_buffer;
         Diligent::IShaderResourceVariable* m_variable;
 };
 } // namespace nc::graphics

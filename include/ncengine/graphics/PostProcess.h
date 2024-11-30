@@ -6,10 +6,12 @@
 
 #include "ncmath/Vector.h"
 
+#include <limits>
 #include <variant>
 
 namespace nc
 {
+/** @brief Post process pass flags */
 struct PostProcessPass
 {
     using type = uint64_t;
@@ -21,26 +23,53 @@ struct PostProcessPass
     static constexpr auto Outline = type{1 << 3};
 };
 
+/** @brief Identifier for a post process effect. */
 using PostProcessEffectId = uint32_t;
+
+/** @brief Set of flags indicating the passes used by a post process effect. */
 using PostProcessEffectPasses = PostProcessPass::type;
 
+/** @brief Null identifier for a post process effect. */
 constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId>::max();
 
-constexpr auto MoebiusEffect = PostProcessEffectId{0};
+/** @brief Identifier for the moebius post process effect. */
+constexpr auto MoebiusEffectId = PostProcessEffectId{0};
+
+/** @brief Pass flags for the moebius post process effect. */
 constexpr auto MoebiusEffectPasses = PostProcessPass::Alpha   |
                                      PostProcessPass::Depth   |
                                      PostProcessPass::Normals |
                                      PostProcessPass::Outline;
 
-// might want empty state... not sure
+/** @brief Post process property type representing an uninitialized state. */
 struct EmptyPassProperties {};
 
+/** @brief Properties for the outline pass. */
 struct OutlinePassProperties
 {
     Vector3 color = Vector3::Zero();
     float width = 1.0f;
 };
 
+/** @brief Generic post process property type. */
 using PostProcessPassProperties = std::variant<EmptyPassProperties,
                                                OutlinePassProperties>;
+
+/** @brief Check if a post process pass has a property type. */
+inline auto HasProperties(PostProcessPass::type pass) -> bool
+{
+    return pass == PostProcessPass::Outline;
+}
+
+/** @brief Construct a PostProcessPassProperties holding the property type for a pass. */
+inline auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties
+{
+    switch (pass)
+    {
+        case PostProcessPass::Outline:
+            return PostProcessPassProperties{OutlinePassProperties{}};
+        default:
+            return PostProcessPassProperties{EmptyPassProperties{}};
+    }
+}
 } // namespace nc
