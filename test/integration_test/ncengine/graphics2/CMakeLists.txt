@@ -61,7 +61,7 @@ target_compile_definitions(MeshBuffer_tests
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
-### TextureBufferResource Tests ###
+### EnvironmentBufferResource Tests ###
 add_graphics_test(EnvironmentBufferResource_tests)
 
 target_sources(EnvironmentBufferResource_tests
@@ -69,6 +69,7 @@ target_sources(EnvironmentBufferResource_tests
         EnvironmentBufferResource_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/UniformBuffer.cpp
 )
 
 ### TextureBufferResource Tests ###
@@ -122,6 +123,7 @@ target_sources(StructuredBuffer_tests
         StructuredBuffer_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/UniformBuffer.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/PerFrameResourceSignature.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
@@ -148,4 +150,13 @@ target_sources(UIBackend_tests
 target_link_libraries(UIBackend_tests
     PRIVATE
         imgui
+)
+
+### UniformBuffer Tests ###
+add_graphics_test(UniformBuffer_tests)
+
+target_sources(UniformBuffer_tests
+    PRIVATE
+        UniformBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/UniformBuffer.cpp
 )
