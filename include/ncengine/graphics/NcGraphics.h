@@ -4,7 +4,8 @@
  */
 #pragma once
 
-#include "Camera.h"
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/module/ModuleProvider.h"
 #include "ncengine/type/EngineId.h"
@@ -90,6 +91,21 @@ struct NcGraphics : public Module
      * is not cleared as it can be set on a persistent Entity.
      */
     virtual void ClearEnvironment() = 0;
+
+    /** @brief Returns if a post process effect is enabled. */
+    virtual auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool = 0;
+
+    /** @brief Enabled or disable a post process effect. */
+    virtual void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) = 0;
+
+    /** @brief Get the pass properties for a post process effect. */
+    virtual auto GetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                                PostProcessPass::type pass) const -> const PostProcessPassProperties& = 0;
+
+    /** @brief Set the pass properties for a post process effect. */
+    virtual void SetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                                PostProcessPass::type pass,
+                                                const PostProcessPassProperties& properties) = 0;
 };
 
 /**

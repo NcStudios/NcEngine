@@ -59,6 +59,17 @@ namespace
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
+        auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
+        void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
+        void SetPostProcessEffectProperties(nc::PostProcessEffectId,
+                                            nc::PostProcessPass::type,
+                                            const nc::PostProcessPassProperties&) override {}
+        auto GetPostProcessEffectProperties(nc::PostProcessEffectId,
+                                            nc::PostProcessPass::type) const -> const nc::PostProcessPassProperties& override
+        {
+            static auto dummy = nc::PostProcessPassProperties{};
+            return dummy;
+        }
     };
 } // anonymous namespace
 

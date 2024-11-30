@@ -57,6 +57,17 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     bool IsUiHovered() const noexcept override { return false; }
     void SetSkybox(const std::string&) override {}
     void ClearEnvironment() override {}
+    auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
+    void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
+    void SetPostProcessEffectProperties(nc::PostProcessEffectId,
+                                        nc::PostProcessPass::type,
+                                        const nc::PostProcessPassProperties&) override {}
+    auto GetPostProcessEffectProperties(nc::PostProcessEffectId,
+                                        nc::PostProcessPass::type) const -> const nc::PostProcessPassProperties& override
+    {
+        static auto dummy = nc::PostProcessPassProperties{};
+        return dummy;
+    }
 };
 
 auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
@@ -217,6 +228,40 @@ void NcGraphicsImpl2::SetSkybox(const std::string& path)
 
 void NcGraphicsImpl2::ClearEnvironment()
 {
+}
+
+auto NcGraphicsImpl2::IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool
+{
+    // todo: return m_frontend.GetPostProcessSubsystem().IsEnabled(effectId);
+    (void)effectId;
+    return false;
+}
+
+void NcGraphicsImpl2::SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled)
+{
+    // todo: m_frontend.GetPostProcessSubsystem().SetEnabled(effectId, enabled);
+    (void)effectId;
+    (void)enabled;
+}
+
+auto NcGraphicsImpl2::GetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                                     PostProcessPass::type pass) const -> const PostProcessPassProperties&
+{
+    // todo: return m_frontend.GetPostProcessSubsystem().GetProperties(effectId, pass);
+    (void)effectId;
+    (void)pass;
+    static auto dummy = PostProcessPassProperties{};
+    return dummy;
+}
+
+void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                                     PostProcessPass::type pass,
+                                                     const PostProcessPassProperties& properties)
+{
+    // todo: m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);
+    (void)effectId;
+    (void)pass;
+    (void)properties;
 }
 
 void NcGraphicsImpl2::OnBeforeSceneLoad()
