@@ -8,9 +8,12 @@
 
 namespace
 {
+using namespace nc;
+using namespace nc::graphics;
+
 auto UpdateBuffer(Diligent::IDeviceContext& context,
-                  const nc::PostProcessPassProperties& properties,
-                  nc::graphics::PPPassInstanceData& instance)
+                  const PostProcessPassProperties& properties,
+                  PostProcessPipelineInstance& instance)
 {
     std::visit(
         [&context, &instance](const auto& unpacked){
@@ -21,17 +24,17 @@ auto UpdateBuffer(Diligent::IDeviceContext& context,
     );
 }
 
-void EnableInstance(nc::PostProcessEffectId effectId,
-                    nc::graphics::PPPass& pass)
+void EnableInstance(PostProcessEffectId effectId,
+                    PostProcessPipeline& pass)
 {
     pass.anyEnabled = true;
-    auto instance = std::ranges::find(pass.instances, effectId, &nc::graphics::PPPassInstanceData::effectId);
+    auto instance = std::ranges::find(pass.instances, effectId, &PostProcessPipelineInstance::effectId);
     NC_ASSERT(instance != pass.instances.end(), "Post process pass instance not found");
     instance->enabled = true;
 }
 
-void DisableInstance(nc::PostProcessEffectId effectId,
-                     nc::graphics::PPPass& pass)
+void DisableInstance(PostProcessEffectId effectId,
+                     PostProcessPipeline& pass)
 {
     auto anyEnabled = false;
     for (auto& instance : pass.instances)
@@ -49,14 +52,14 @@ void DisableInstance(nc::PostProcessEffectId effectId,
     pass.anyEnabled = anyEnabled;
 }
 
-auto FindInstance(std::vector<nc::graphics::PPPass>& passes,
-                  nc::PostProcessEffectId effectId,
-                  nc::PostProcessPass::type passId) -> nc::graphics::PPPassInstanceData&
+auto FindInstance(std::vector<PostProcessPipeline>& passes,
+                  PostProcessEffectId effectId,
+                  PostProcessPass::type passId) -> PostProcessPipelineInstance&
 {
-    auto pass = std::ranges::find(passes, passId, &nc::graphics::PPPass::id);
+    auto pass = std::ranges::find(passes, passId, &PostProcessPipeline::id);
     if (pass != passes.end())
     {
-        auto instance = std::ranges::find(pass->instances, effectId, &nc::graphics::PPPassInstanceData::effectId);
+        auto instance = std::ranges::find(pass->instances, effectId, &PostProcessPipelineInstance::effectId);
         if (instance != pass->instances.end())
         {
             return *instance;
@@ -75,10 +78,6 @@ auto FindInstance(std::vector<nc::graphics::PPPass>& passes,
 
 namespace nc::graphics
 {
-
-// todo: want some kind of generic cbuffer that's owned by each pass instance that has properties
-// todo: definitely pp resource should use SetVariable to assign new buffer, instead of remapping
-
 void PostProcessPassBackend::Update(Diligent::IDeviceContext& context,
                                     const PostProcessState& postProcessState)
 {

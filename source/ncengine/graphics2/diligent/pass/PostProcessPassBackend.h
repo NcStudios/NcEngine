@@ -12,7 +12,7 @@ struct PostProcessState;
 class PostProcessPassBackend
 {
     public:
-        explicit PostProcessPassBackend(std::vector<PPPass> passes)
+        explicit PostProcessPassBackend(std::vector<PostProcessPipeline> passes)
             : m_passes{std::move(passes)}
         {
         }
@@ -24,6 +24,6 @@ class PostProcessPassBackend
                     PostProcessBufferResource& resource);
 
     private:
-        std::vector<PPPass> m_passes;
+        std::vector<PostProcessPipeline> m_passes;
 };
 } // namespacae nc::graphics

@@ -38,7 +38,7 @@ constexpr auto g_postProcessEffectIds = std::array{
     nc::MoebiusEffectId
 };
 
-const auto g_postProcessPassFlags = std::array{
+const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
         nc::PostProcessPass::Alpha,
         nc::PostProcessPass::Depth,
@@ -47,9 +47,14 @@ const auto g_postProcessPassFlags = std::array{
     }
 };
 
+const auto g_combinedPostProcessEffectPassFlags = std::array{
+    nc::MoebiusEffectPasses
+};
+
 static_assert(g_materialPassNames.size() == g_materialPassFlags.size());
 static_assert(g_postProcessEffectNames.size() == g_postProcessEffectIds.size());
-static_assert(g_postProcessPassFlags.size() == g_postProcessEffectIds.size());
+static_assert(g_postProcessEffectPassFlags.size() == g_postProcessEffectIds.size());
+static_assert(g_combinedPostProcessEffectPassFlags.size() == g_postProcessEffectIds.size());
 } // anonymous namespace
 
 namespace nc
@@ -86,6 +91,11 @@ auto GetPostProcessEffectIds() -> std::span<const PostProcessEffectId>
 
 auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPass::type>
 {
-    return g_postProcessPassFlags.at(effectId);
+    return g_postProcessEffectPassFlags.at(effectId);
+}
+
+auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPasses
+{
+    return g_combinedPostProcessEffectPassFlags.at(effectId);
 }
 } // namespace nc

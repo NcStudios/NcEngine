@@ -15,7 +15,7 @@ namespace nc::graphics
 class ShaderFactory;
 
 // Post process pass data specific to an effect
-struct PPPassInstanceData
+struct PostProcessPipelineInstance
 {
     std::optional<UniformBuffer> buffer;
     PostProcessEffectId effectId = NullPostProcessEffectId;
@@ -23,16 +23,19 @@ struct PPPassInstanceData
 };
 
 // oops, name conflicts w/ flags struct
-struct PPPass
+struct PostProcessPipeline
 {
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
-    std::vector<PPPassInstanceData> instances;
+    std::vector<PostProcessPipelineInstance> instances;
     PostProcessPass::type id = PostProcessPass::None;
+    uint32_t renderTargetCount = 0u;
+    uint32_t colorRenderTargetIndex = 0u;
+    uint32_t depthRenderTargetIndex = 0u;
     bool anyEnabled = false;
 };
 
 /** @todo This builds no passes */
 auto MakePostProcessPasses(Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
-                           ShaderFactory& shaderFactory) -> std::vector<PPPass>;
+                           ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>;
 } // namespace nc::graphics

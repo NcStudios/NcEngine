@@ -19,7 +19,6 @@ struct PostProcessEffectState
 class PostProcessSubsystem
 {
     public:
-        // todo: need to take in something to know passes
         explicit PostProcessSubsystem();
 
         auto IsEnabled(PostProcessEffectId effectId) const -> bool;

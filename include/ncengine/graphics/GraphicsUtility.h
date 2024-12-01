@@ -36,4 +36,7 @@ auto GetPostProcessEffectIds() -> std::span<const PostProcessEffectId>;
 
 /** @brief Returns a view of the post process passes used by an effect, ordered by ascending flag value. */
 auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPass::type>;
+
+/** @brief Returns the combined post process pass flags used by an effect. */
+auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPasses;
 } // namespace nc

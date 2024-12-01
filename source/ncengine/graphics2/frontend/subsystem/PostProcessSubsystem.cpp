@@ -7,6 +7,20 @@
 
 namespace
 {
+void VerifyPropertyQuery([[maybe_unused]] nc::PostProcessEffectId effectId,
+                         [[maybe_unused]] nc::PostProcessPass::type passId)
+{
+    NC_ASSERT(
+        nc::GetCombinedPostProcessEffectPassFlags(effectId) & passId,
+        fmt::format("Effect '{}' does not use pass '{}'", effectId, passId)
+    );
+
+    NC_ASSERT(
+        nc::HasProperties(passId),
+        fmt::format("Pass '{}' does not have properties", passId)
+    );
+}
+
 auto BuildEffectStates() -> std::vector<nc::graphics::PostProcessEffectState>
 {
     auto effects = std::vector<nc::graphics::PostProcessEffectState>{};
@@ -55,7 +69,6 @@ namespace nc::graphics
 PostProcessSubsystem::PostProcessSubsystem()
     : m_effects{BuildEffectStates()}
 {
-    // todo: there will be no initial data in buffers
 }
 
 auto PostProcessSubsystem::IsEnabled(PostProcessEffectId effectId) const -> bool
@@ -73,6 +86,7 @@ void PostProcessSubsystem::SetEnabled(PostProcessEffectId effectId, bool enabled
 auto PostProcessSubsystem::GetProperties(PostProcessEffectId effectId,
                                          PostProcessPass::type pass) const -> const PostProcessPassProperties&
 {
+    VerifyPropertyQuery(effectId, pass);
     for (const auto& properties : m_effects.at(effectId).properties)
     {
         if (MatchPostProcessPass(pass, properties))
@@ -81,13 +95,14 @@ auto PostProcessSubsystem::GetProperties(PostProcessEffectId effectId,
         }
     }
 
-    throw NcError{"Could also return empty state, I suppose"};
+    std::unreachable();
 }
 
 void PostProcessSubsystem::SetProperties(PostProcessEffectId effectId,
                                          PostProcessPass::type pass,
                                          const PostProcessPassProperties& properties)
 {
+    VerifyPropertyQuery(effectId, pass);
     auto& effect = m_effects.at(effectId);
     for (auto& existing : effect.properties)
     {
@@ -99,7 +114,7 @@ void PostProcessSubsystem::SetProperties(PostProcessEffectId effectId,
         }
     }
 
-    throw NcError{"Could NOP, I suppose"};
+    std::unreachable();
 }
 
 auto PostProcessSubsystem::BuildState() -> PostProcessState
