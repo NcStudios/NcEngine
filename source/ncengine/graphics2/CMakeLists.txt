@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         Material.cpp
         MeshRenderer2.cpp
         NcGraphicsImpl2.cpp
+        PostProcess.cpp
 )
 
 add_subdirectory(diligent)

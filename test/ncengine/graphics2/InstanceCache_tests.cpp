@@ -29,8 +29,7 @@ constexpr auto g_mesh3 = nc::asset::MeshView{
 
 constexpr auto g_allBatches = std::array{
     nc::MaterialPass::Shadow,
-    nc::MaterialPass::Toon,
-    nc::MaterialPass::Alpha
+    nc::MaterialPass::Toon
 };
 
 struct TestObjectInfo
@@ -70,8 +69,7 @@ struct Batch2
 struct Batch3
 {
     static constexpr auto passes = nc::MaterialPass::Shadow |
-                                   nc::MaterialPass::Toon |
-                                   nc::MaterialPass::Alpha;
+                                   nc::MaterialPass::Toon;
     static constexpr auto& mesh = g_mesh1;
     static constexpr auto key = nc::graphics::BatchKey{passes, mesh.id};
     static constexpr auto objects = std::array{
@@ -612,7 +610,7 @@ TEST(InstanceCacheTests, BuildBatches)
     const auto id3 = 2;
     const auto& info1 = Batch1::objects.at(0); // toon
     const auto& info2 = Batch2::objects.at(0); // toon
-    const auto& info3 = Batch3::objects.at(0); // shader | toon | alpha
+    const auto& info3 = Batch3::objects.at(0); // shader | toon
     constexpr auto batchCount = g_allBatches.size();
 
     // no batches - all passes empty
@@ -635,7 +633,6 @@ TEST(InstanceCacheTests, BuildBatches)
         EXPECT_EQ(batchCount, actual.size());
         EXPECT_EQ(1, actual.at(0).size()); // shadow
         EXPECT_EQ(3, actual.at(1).size()); // toon
-        EXPECT_EQ(1, actual.at(2).size()); // alpha
     }
 
     // has empty batch - not reported in passes
@@ -647,7 +644,6 @@ TEST(InstanceCacheTests, BuildBatches)
         EXPECT_EQ(batchCount, actual.size());
         EXPECT_EQ(0, actual.at(0).size()); // shadow
         EXPECT_EQ(2, actual.at(1).size()); // toon
-        EXPECT_EQ(0, actual.at(2).size()); // alpha
     }
 }
 

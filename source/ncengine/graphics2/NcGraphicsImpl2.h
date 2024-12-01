@@ -37,6 +37,13 @@ class NcGraphicsImpl2 : public NcGraphics
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
         void ClearEnvironment() override;
+        auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool override;
+        void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) override;
+        auto GetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                            PostProcessPass::type pass) const -> const PostProcessPassProperties& override;
+        void SetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                            PostProcessPass::type pass,
+                                            const PostProcessPassProperties& properties) override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
         void OnBeforeSceneLoad() override;
         void Clear() noexcept override;
