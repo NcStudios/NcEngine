@@ -25,8 +25,14 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>;
  */
 auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPass::type>;
 
+/** @brief Returns a view of all post process pass names, ordered by ascending flag value. */
+auto GetPostProcessPassNames() -> std::span<const std::string_view>;
+
 /** @brief Returns a view of all post process pass flags, ordered by ascending flag value. */
 auto GetPostProcessPassFlags() -> std::span<const PostProcessPass::type>;
+
+/** @brief Returns the name of a post process pass. */
+auto GetPostProcessPassName(PostProcessPass::type pass) -> std::string_view;
 
 /** @brief Returns a view of all post process effect names, ordered by ascending flag value. */
 auto GetPostProcessEffectNames() -> std::span<const std::string_view>;

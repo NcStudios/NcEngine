@@ -38,7 +38,7 @@ TEST(PostProcessSubsystemTest, GetProperties_getsPropertiesIfExist)
         const auto passIds = nc::GetPostProcessEffectPassFlags(effectId);
         for (const auto passId : passIds)
         {
-            if (nc::HasProperties(passId))
+            if (nc::PassHasProperties(passId))
             {
                 EXPECT_NO_THROW(uut.GetProperties(effectId, passId));
             }
@@ -55,7 +55,7 @@ TEST(PostProcessSubsystemTest, SetProperties_validCall_updatesState)
     auto uut = nc::graphics::PostProcessSubsystem{};
     constexpr auto effect = nc::MoebiusEffectId;
     constexpr auto pass = nc::PostProcessPass::Outline;
-    ASSERT_TRUE(nc::HasProperties(pass));
+    ASSERT_TRUE(nc::PassHasProperties(pass));
 
     const auto expected = nc::OutlinePassProperties{
         .color = nc::Vector3{1.0f, 2.0f, 3.0f},
@@ -78,7 +78,7 @@ TEST(PostProcessSubsystemTest, SetProperties_doesNotHaveProperties_throws)
         const auto passIds = nc::GetPostProcessEffectPassFlags(effectId);
         for (const auto passId : passIds)
         {
-            if (!nc::HasProperties(passId))
+            if (!nc::PassHasProperties(passId))
             {
                 EXPECT_THROW(uut.GetProperties(effectId, passId), nc::NcError);
             }

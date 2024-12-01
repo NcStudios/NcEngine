@@ -51,6 +51,31 @@ target_link_libraries(InstanceCache_tests
 
 add_test(InstanceCache_tests InstanceCache_tests)
 
+### GraphicsUtility Tests ###
+add_executable(GraphicsUtility_tests
+    GraphicsUtility_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+)
+
+target_include_directories(GraphicsUtility_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(GraphicsUtility_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(GraphicsUtility_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(GraphicsUtility_tests GraphicsUtility_tests)
+
 ### HostStructuredBuffer Tests ###
 add_executable(HostStructuredBuffer_tests
     HostStructuredBuffer_tests.cpp
@@ -135,10 +160,37 @@ target_link_libraries(MeshRendererSubsystem_tests
 
 add_test(MeshRendererSubsystem_tests MeshRendererSubsystem_tests)
 
+### PostProcess Tests ###
+add_executable(PostProcess_tests
+    PostProcess_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+    ${NC_SOURCE_DIR}/graphics2/PostProcess.cpp
+)
+
+target_include_directories(PostProcess_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(PostProcess_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(PostProcess_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(PostProcess_tests PostProcess_tests)
+
 ### PostProcessSubsystem Tests ###
 add_executable(PostProcessSubsystem_tests
     PostProcessSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+    ${NC_SOURCE_DIR}/graphics2/PostProcess.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/PostProcessSubsystem.cpp
 )
 

@@ -16,7 +16,7 @@ void VerifyPropertyQuery([[maybe_unused]] nc::PostProcessEffectId effectId,
     );
 
     NC_ASSERT(
-        nc::HasProperties(passId),
+        nc::PassHasProperties(passId),
         fmt::format("Pass '{}' does not have properties", passId)
     );
 }
@@ -31,7 +31,7 @@ auto BuildEffectStates() -> std::vector<nc::graphics::PostProcessEffectState>
         for (const auto pass : nc::GetPostProcessEffectPassFlags(effectId))
         {
             passes |= pass;
-            if (nc::HasProperties(pass))
+            if (nc::PassHasProperties(pass))
             {
                 properties.push_back(nc::MakeDefaultPassProperties(pass));
             }

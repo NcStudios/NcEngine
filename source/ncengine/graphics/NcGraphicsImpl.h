@@ -49,9 +49,10 @@ class NcGraphicsImpl : public NcGraphics
         auto GetPostProcessEffectProperties(PostProcessEffectId,
                                             PostProcessPass::type) const -> const PostProcessPassProperties& override
         {
-            static auto dummy = nc::PostProcessPassProperties{};
+            static auto dummy = PostProcessPassProperties{};
             return dummy;
         }
+
 
     private:
         Registry* m_registry;

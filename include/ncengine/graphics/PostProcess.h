@@ -41,7 +41,7 @@ constexpr auto MoebiusEffectPasses = PostProcessPass::Alpha   |
                                      PostProcessPass::Normals |
                                      PostProcessPass::Outline;
 
-/** @brief Post process property type representing an uninitialized state. */
+/** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};
 
 /** @brief Properties for the outline pass. */
@@ -55,21 +55,9 @@ struct OutlinePassProperties
 using PostProcessPassProperties = std::variant<EmptyPassProperties,
                                                OutlinePassProperties>;
 
-/** @brief Check if a post process pass has a property type. */
-inline auto HasProperties(PostProcessPass::type pass) -> bool
-{
-    return pass == PostProcessPass::Outline;
-}
+/** @brief Returns if a post process pass has a property type. */
+auto PassHasProperties(PostProcessPass::type pass) -> bool;
 
 /** @brief Construct a PostProcessPassProperties holding the property type for a pass. */
-inline auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties
-{
-    switch (pass)
-    {
-        case PostProcessPass::Outline:
-            return PostProcessPassProperties{OutlinePassProperties{}};
-        default:
-            return PostProcessPassProperties{EmptyPassProperties{}};
-    }
-}
+auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties;
 } // namespace nc
