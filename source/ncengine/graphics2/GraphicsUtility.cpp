@@ -10,20 +10,12 @@ namespace
 {
 constexpr auto g_materialPassNames = std::array{
     std::string_view{"Shadow"},
-    std::string_view{"Toon"},
-    std::string_view{"Alpha"},
-    std::string_view{"Depth"},
-    std::string_view{"Normals"},
-    std::string_view{"Outline"}
+    std::string_view{"Toon"}
 };
 
 constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPass::Shadow,
-    nc::MaterialPass::Toon,
-    nc::MaterialPass::Alpha,
-    nc::MaterialPass::Depth,
-    nc::MaterialPass::Normals,
-    nc::MaterialPass::Outline
+    nc::MaterialPass::Toon
 };
 
 constexpr auto g_postProcessPassNames = std::array{
