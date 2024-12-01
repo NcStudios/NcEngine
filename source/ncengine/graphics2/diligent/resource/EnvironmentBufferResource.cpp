@@ -2,8 +2,6 @@
 #include "graphics2/frontend/subsystem/CameraRenderState.h"
 #include "graphics2/frontend/subsystem/LightRenderState.h"
 
-#include "ncutility/NcError.h"
-
 namespace nc::graphics
 {
 EnvironmentBufferResource::EnvironmentBufferResource(Diligent::IDeviceContext& context,
