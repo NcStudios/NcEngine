@@ -49,3 +49,39 @@ TEST(PostProcessSubsystemTest, GetProperties_getsPropertiesIfExist)
         }
     }
 }
+
+TEST(PostProcessSubsystemTest, SetProperties_validCall_updatesState)
+{
+    auto uut = nc::graphics::PostProcessSubsystem{};
+    constexpr auto effect = nc::MoebiusEffectId;
+    constexpr auto pass = nc::PostProcessPass::Outline;
+    ASSERT_TRUE(nc::HasProperties(pass));
+
+    const auto expected = nc::OutlinePassProperties{
+        .color = nc::Vector3{1.0f, 2.0f, 3.0f},
+        .width = 3.0f
+    };
+
+    uut.SetProperties(effect, pass, expected);
+    const auto& properties = uut.GetProperties(effect, pass);
+    const auto& actual = std::get<nc::OutlinePassProperties>(properties);
+    EXPECT_EQ(expected.color, actual.color);
+    EXPECT_EQ(expected.width, actual.width);
+}
+
+TEST(PostProcessSubsystemTest, SetProperties_doesNotHaveProperties_throws)
+{
+    auto uut = nc::graphics::PostProcessSubsystem{};
+    const auto effectIds = nc::GetPostProcessEffectIds();
+    for (const auto effectId : effectIds)
+    {
+        const auto passIds = nc::GetPostProcessEffectPassFlags(effectId);
+        for (const auto passId : passIds)
+        {
+            if (!nc::HasProperties(passId))
+            {
+                EXPECT_THROW(uut.GetProperties(effectId, passId), nc::NcError);
+            }
+        }
+    }
+}
