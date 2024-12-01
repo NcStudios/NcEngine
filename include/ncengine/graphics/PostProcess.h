@@ -56,20 +56,8 @@ using PostProcessPassProperties = std::variant<EmptyPassProperties,
                                                OutlinePassProperties>;
 
 /** @brief Returns if a post process pass has a property type. */
-inline auto HasProperties(PostProcessPass::type pass) -> bool
-{
-    return pass == PostProcessPass::Outline;
-}
+auto PassHasProperties(PostProcessPass::type pass) -> bool;
 
 /** @brief Construct a PostProcessPassProperties holding the property type for a pass. */
-inline auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties
-{
-    switch (pass)
-    {
-        case PostProcessPass::Outline:
-            return PostProcessPassProperties{OutlinePassProperties{}};
-        default:
-            return PostProcessPassProperties{EmptyPassProperties{}};
-    }
-}
+auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties;
 } // namespace nc
