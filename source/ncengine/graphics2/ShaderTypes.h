@@ -24,7 +24,7 @@ struct GlobalEnvironmentData
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
-// 16 bytes with 4 byte alignment (ok??)
+// 16 bytes with 4 byte alignment
 struct OutlinePassData
 {
     Vector3 color = Vector3::Zero();

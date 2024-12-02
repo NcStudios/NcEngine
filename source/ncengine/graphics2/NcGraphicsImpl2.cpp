@@ -181,6 +181,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           )},
           m_postProcessPassBackend{
             MakePostProcessPasses(
+                m_engine.GetContext(),
                 m_engine.GetDevice(),
                 m_engine.GetSwapChain(),
                 m_engine.GetShaderFactory()
@@ -305,6 +306,9 @@ void NcGraphicsImpl2::Run()
     m_ui.FrameBegin(swapChain);
     m_frontend.GetUISubsystem().UpdateUI(m_world);
 
+    m_frontend.GetPostProcessSubsystem().SetEnabled(MoebiusEffectId, true);
+    m_frontend.GetPostProcessSubsystem().SetProperties(MoebiusEffectId, PostProcessPass::Outline, OutlinePassProperties{});
+
     auto renderState = m_frontend.BuildRenderState(m_world);
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
@@ -315,11 +319,14 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
+    m_postProcessPassBackend.Update(context, renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
+    /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
+    // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);
 
     swapChain.Present();

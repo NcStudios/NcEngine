@@ -53,26 +53,35 @@ auto MakePassInstances(Diligent::IDeviceContext& context,
 
 namespace nc::graphics
 {
-auto MakePostProcessPasses(Diligent::IRenderDevice& device,
+auto MakePostProcessPasses(Diligent::IDeviceContext& context,
+                           Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
                            ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>
 {
-    /** @todo I don't have the necessary pieces to flesh this out further */
-    // const auto passIds = GetPostProcessPassFlags();
-    // auto passes = std::vector<PostProcessPipeline>{};
-    // passes.reserve(passIds.size());
-    // for (const auto passId : passIds)
-    // {
-    //     // make PSO...
-    //     // set up render target info...
-    //     // make instances: MakePassInstances(context, device, passId);
-    // }
-    //
-    // return passes;
-
-    (void)device;
     (void)swapChain;
     (void)shaderFactory;
-    return std::vector<PostProcessPipeline>{};
+
+    const auto passIds = GetPostProcessPassFlags();
+    auto passes = std::vector<PostProcessPipeline>{};
+    passes.reserve(passIds.size());
+    for (const auto passId : passIds)
+    {
+        /**
+         * @todo I don't have all the pieces for this - PSO & render targets are missing. Having the instances
+         * here allows backend Update() to be called, but Render() will crash upon enabling a pass. Leaving that
+         * call commented out (in NcGraphicsImpl2) until this is finished.
+         */
+        passes.emplace_back(
+            Diligent::RefCntAutoPtr<Diligent::IPipelineState>{},
+            MakePassInstances(context, device, passId),
+            passId,
+            0,
+            0,
+            0,
+            false
+        );
+    }
+
+    return passes;
 }
 } // namespace nc::graphics

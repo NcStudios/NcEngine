@@ -85,3 +85,71 @@ TEST(PostProcessSubsystemTest, SetProperties_doesNotHaveProperties_throws)
         }
     }
 }
+
+TEST(PostProcessSubsystemTest, BuildState_reportsEnabledAndDisabled)
+{
+    auto uut = nc::graphics::PostProcessSubsystem{};
+
+    // empty succeeds
+    auto state = uut.BuildState();
+    EXPECT_EQ(0, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+
+    // reports enable event
+    uut.SetEnabled(nc::MoebiusEffectId, true);
+    state = uut.BuildState();
+    EXPECT_EQ(1, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+    const auto& enableEvent = state.toggledEffects.at(0);
+    EXPECT_EQ(nc::MoebiusEffectId, enableEvent.effectId);
+    EXPECT_EQ(nc::MoebiusEffectPasses, enableEvent.passes);
+    EXPECT_TRUE(enableEvent.enabled);
+
+    // enable event cleared
+    state = uut.BuildState();
+    EXPECT_EQ(0, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+
+    // reports disable event
+    uut.SetEnabled(nc::MoebiusEffectId, false);
+    state = uut.BuildState();
+    EXPECT_EQ(1, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+    const auto& disableEvent = state.toggledEffects.at(0);
+    EXPECT_EQ(nc::MoebiusEffectId, disableEvent.effectId);
+    EXPECT_EQ(nc::MoebiusEffectPasses, disableEvent.passes);
+    EXPECT_FALSE(disableEvent.enabled);
+
+    // disable event cleared
+    state = uut.BuildState();
+    EXPECT_EQ(0, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+}
+
+TEST(PostProcessSubsystemTest, BuildState_reportsPropertyModification)
+{
+    auto uut = nc::graphics::PostProcessSubsystem{};
+
+    // empty succeeds
+    auto state = uut.BuildState();
+    EXPECT_EQ(0, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+
+    // reports property modification
+    const auto expectedProperties = nc::OutlinePassProperties{nc::Vector3::Up(), 10.0f};
+    uut.SetProperties(nc::MoebiusEffectId, nc::PostProcessPass::Outline, expectedProperties);
+    state = uut.BuildState();
+    EXPECT_EQ(0, state.toggledEffects.size());
+    EXPECT_EQ(1, state.modifiedProperties.size());
+    const auto& modifyEvent = state.modifiedProperties.at(0);
+    EXPECT_EQ(nc::MoebiusEffectId, modifyEvent.effectId);
+    EXPECT_EQ(nc::PostProcessPass::Outline, modifyEvent.pass);
+    const auto& actualProperties = std::get<nc::OutlinePassProperties>(modifyEvent.properties);
+    EXPECT_EQ(expectedProperties.color, actualProperties.color);
+    EXPECT_EQ(expectedProperties.width, actualProperties.width);
+
+    // modify event cleared
+    state = uut.BuildState();
+    EXPECT_EQ(0, state.toggledEffects.size());
+    EXPECT_EQ(0, state.modifiedProperties.size());
+}

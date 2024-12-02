@@ -36,7 +36,8 @@ struct PostProcessPipeline
 };
 
 /** @todo This builds no passes */
-auto MakePostProcessPasses(Diligent::IRenderDevice& device,
+auto MakePostProcessPasses(Diligent::IDeviceContext& context,
+                           Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
                            ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>;
 } // namespace nc::graphics
