@@ -6,6 +6,7 @@
 #include "windows/SceneGraph.h"
 #include "windows/dialogs/CreateEntityDialog.h"
 #include "windows/dialogs/SceneDialogs.h"
+#include "windows/dialogs/PostProcessDialog.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/module/ModuleProvider.h"
@@ -37,6 +38,7 @@ class EditorUI
         NewSceneDialog m_newSceneDialog;
         SaveSceneDialog m_saveSceneDialog;
         LoadSceneDialog m_loadSceneDialog;
+        PostProcessDialog m_postProcessDialog;
 
         auto ProcessInput(const EditorHotkeys& hotkeys, asset::NcAsset& ncAsset) -> OpenState;
         void DrawMenu(EditorContext& ctx);
