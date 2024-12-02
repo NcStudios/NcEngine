@@ -117,6 +117,7 @@ else()
             graphics2/Material.cpp
             graphics2/MeshRenderer2.cpp
             graphics2/GraphicsUtility.cpp
+            graphics2/PostProcess.cpp
             graphics2/frontend/subsystem/InstanceCache.cpp
             graphics2/frontend/subsystem/MaterialRegistry.cpp
             graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
