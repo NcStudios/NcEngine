@@ -1,5 +1,5 @@
 #include "PostProcessPassBackend.h"
-#include "graphics2/diligent/resource/PostProcessBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 
 #include "ncutility/NcError.h"
@@ -99,8 +99,9 @@ void PostProcessPassBackend::Update(Diligent::IDeviceContext& context,
 }
 
 void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
-                                    PostProcessBufferResource& resource)
+                                    PostProcessPropertyBufferResource& resource)
 {
+    constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
     for (auto& pass : m_passes)
     {
         if (!pass.anyEnabled)
@@ -109,7 +110,7 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
         }
 
         context.SetPipelineState(pass.pso);
-        // render target stuff?...
+        // render target stuff...
         for (auto& instance : pass.instances)
         {
             if (!instance.enabled)
@@ -122,7 +123,7 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
                 resource.SetVariable(pass.id, instance.buffer->GetBuffer());
             }
 
-            // draw stuff
+            context.Draw(drawAttribs);
         }
     }
 }

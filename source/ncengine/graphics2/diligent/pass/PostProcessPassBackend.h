@@ -6,7 +6,7 @@
 
 namespace nc::graphics
 {
-class PostProcessBufferResource;
+class PostProcessPropertyBufferResource;
 struct PostProcessState;
 
 class PostProcessPassBackend
@@ -21,7 +21,7 @@ class PostProcessPassBackend
                     const PostProcessState& postProcessState);
 
         void Render(Diligent::IDeviceContext& context,
-                    PostProcessBufferResource& resource);
+                    PostProcessPropertyBufferResource& resource);
 
     private:
         std::vector<PostProcessPipeline> m_passes;

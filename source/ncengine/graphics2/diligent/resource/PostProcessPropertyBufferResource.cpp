@@ -1,4 +1,4 @@
-#include "PostProcessBufferResource.h"
+#include "PostProcessPropertyBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 
 #include "ncutility/NcError.h"
@@ -7,17 +7,17 @@
 
 namespace nc::graphics
 {
-PostProcessBufferResource::PostProcessBufferResource(std::vector<PostProcessDataVariable> variables)
+PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(std::vector<PostProcessDataVariable> variables)
     : m_variables{std::move(variables)}
 {
 }
 
-void PostProcessBufferResource::SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer)
+void PostProcessPropertyBufferResource::SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer)
 {
     GetVariable(passId).Set(&buffer);
 }
 
-auto PostProcessBufferResource::GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&
+auto PostProcessPropertyBufferResource::GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&
 {
     auto pos = std::ranges::find_if(
         m_variables,

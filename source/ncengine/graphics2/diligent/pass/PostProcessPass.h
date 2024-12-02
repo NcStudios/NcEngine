@@ -1,11 +1,12 @@
 #pragma once
 
-#include "graphics2/diligent/resource/base/UniformBuffer.h"
+#include "graphics2/diligent/resource/base/DynamicUniformBuffer.h"
 #include "ncengine/graphics/PostProcess.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "Graphics/GraphicsEngine/interface/PipelineState.h"
+#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 
 #include <optional>
 #include <vector>
@@ -17,12 +18,12 @@ class ShaderFactory;
 // Post process pass data specific to an effect
 struct PostProcessPipelineInstance
 {
-    std::optional<UniformBuffer> buffer;
+    std::optional<DynamicUniformBuffer> buffer;
     PostProcessEffectId effectId = NullPostProcessEffectId;
     bool enabled = false;
 };
 
-// oops, name conflicts w/ flags struct
+// Post process pass data shared by potentially many effects
 struct PostProcessPipeline
 {
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;

@@ -1,28 +1,28 @@
 #pragma once
 
-#include "graphics2/ShaderTypes.h"
-
 #include "ncengine/graphics/PostProcess.h"
 
 #include "Graphics/GraphicsEngine/interface/Buffer.h"
 #include "Graphics/GraphicsEngine/interface/ShaderResourceVariable.h"
 
+#include <vector>
+
 namespace nc::graphics
 {
 struct PostProcessState;
 
-// 
+// Shader resource variable tied to its associated post process pass.
 struct PostProcessDataVariable
 {
     Diligent::IShaderResourceVariable* variable = nullptr;
     PostProcessPass::type passId = PostProcessPass::None;
 };
 
-// 
-class PostProcessBufferResource
+// Set of uniform buffer variables for post process property types. The actual buffers are owned by pass instances.
+class PostProcessPropertyBufferResource
 {
     public:
-        explicit PostProcessBufferResource(std::vector<PostProcessDataVariable> variables);
+        explicit PostProcessPropertyBufferResource(std::vector<PostProcessDataVariable> variables);
 
         void SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer);
         auto GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&;

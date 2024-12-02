@@ -121,18 +121,8 @@ add_graphics_test(StructuredBuffer_tests)
 target_sources(StructuredBuffer_tests
     PRIVATE
         StructuredBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/PerFrameResourceSignature.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
-)
-
-target_compile_definitions(StructuredBuffer_tests
-    PRIVATE
-        -DNC_RUNTIME_SHADER_COMPILATION
 )
 
 ### UIBackend Tests ###
