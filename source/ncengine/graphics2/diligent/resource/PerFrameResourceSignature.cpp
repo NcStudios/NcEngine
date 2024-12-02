@@ -1,5 +1,6 @@
 #include "PerFrameResourceSignature.h"
 #include "EnvironmentBufferResource.h"
+#include "PostProcessPropertyBufferResource.h"
 #include "TextureBufferResource.h"
 
 #include "ncutility/NcError.h"
@@ -9,17 +10,18 @@
 namespace nc::graphics
 {
 PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& context,
-                                                 Diligent::IRenderDevice& device,
-                                                 std::string_view signatureName,
-                                                 uint8_t bindingIndex,
-                                                 const StructuredBufferResourceDesc& transformResourceDesc,
-                                                 const StructuredBufferResourceDesc& instanceResourceDesc,
-                                                 const StructuredBufferResourceDesc& directionalLightResourceDesc,
-                                                 const StructuredBufferResourceDesc& pointLightResourceDesc,
-                                                 const StructuredBufferResourceDesc& spotLightResourceDesc,
-                                                 const StructuredBufferResourceDesc& materialResourceDesc,
-                                                 const TextureBufferResourceDesc& textureResourceDesc,
-                                                 const UniformBufferResourceDesc& environmentResourceDesc)
+                                                     Diligent::IRenderDevice& device,
+                                                     std::string_view signatureName,
+                                                     uint8_t bindingIndex,
+                                                     const StructuredBufferResourceDesc& transformResourceDesc,
+                                                     const StructuredBufferResourceDesc& instanceResourceDesc,
+                                                     const StructuredBufferResourceDesc& directionalLightResourceDesc,
+                                                     const StructuredBufferResourceDesc& pointLightResourceDesc,
+                                                     const StructuredBufferResourceDesc& spotLightResourceDesc,
+                                                     const StructuredBufferResourceDesc& materialResourceDesc,
+                                                     const TextureBufferResourceDesc& textureResourceDesc,
+                                                     const UniformBufferResourceDesc& environmentResourceDesc,
+                                                     const UniformBufferResourceDesc& outlinePassPropertiesDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
@@ -29,7 +31,8 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(spotLightResourceDesc),
         ToPipelineResourceDesc(materialResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
-        ToPipelineResourceDesc(environmentResourceDesc)
+        ToPipelineResourceDesc(environmentResourceDesc),
+        ToPipelineResourceDesc(outlinePassPropertiesDesc)
     };
 
     const auto sampler = TextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
@@ -58,7 +61,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     (
         context,
         device,
-        GetVariable(transformResourceDesc.shaderType, transformResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(transformResourceDesc, m_srb),
         transformResourceDesc
     );
 
@@ -66,7 +69,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     (
         context,
         device,
-        GetVariable(instanceResourceDesc.shaderType, instanceResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(instanceResourceDesc, m_srb),
         instanceResourceDesc
     );
 
@@ -74,7 +77,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     (
         context,
         device,
-        GetVariable(directionalLightResourceDesc.shaderType, directionalLightResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(directionalLightResourceDesc, m_srb),
         directionalLightResourceDesc
     );
 
@@ -82,7 +85,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     (
         context,
         device,
-        GetVariable(pointLightResourceDesc.shaderType, pointLightResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(pointLightResourceDesc, m_srb),
         pointLightResourceDesc
     );
 
@@ -90,26 +93,35 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     (
         context,
         device,
-        GetVariable(spotLightResourceDesc.shaderType, spotLightResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(spotLightResourceDesc, m_srb),
         spotLightResourceDesc
     );
 
     m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(
         context,
         device,
-        GetVariable(materialResourceDesc.shaderType, materialResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(materialResourceDesc, m_srb),
         materialResourceDesc
     );
 
     m_textureResource = std::make_unique<TextureBufferResource>(
-        GetVariable(textureResourceDesc.shaderType, textureResourceDesc.resourceKey.data(), m_srb),
+        GetVariable(textureResourceDesc, m_srb),
         textureResourceDesc.maxElementCount
     );
 
     m_environmentResource = std::make_unique<EnvironmentBufferResource>(
         context,
         device,
-        GetVariable(environmentResourceDesc.shaderType, environmentResourceDesc.resourceKey.data(), m_srb)
+        GetVariable(environmentResourceDesc, m_srb)
+    );
+
+    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
+        std::vector<PostProcessDataVariable>{
+            PostProcessDataVariable{
+                &GetVariable(outlinePassPropertiesDesc, m_srb),
+                PostProcessPass::Outline
+            }
+        }
     );
 }
 

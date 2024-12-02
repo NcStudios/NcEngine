@@ -34,4 +34,9 @@ auto ToPipelineResourceDesc(const StructuredBufferResourceDesc& resourceDesc) ->
 
 auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::IShaderResourceBinding* srb) -> Diligent::IShaderResourceVariable&;
 
+template<class ResourceDesc>
+auto GetVariable(const ResourceDesc& desc, Diligent::IShaderResourceBinding* srb) -> Diligent::IShaderResourceVariable&
+{
+    return GetVariable(desc.shaderType, desc.resourceKey.data(), srb);
+}
 } // namespace nc::graphics7

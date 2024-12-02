@@ -179,6 +179,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetShaderFactory(),
             m_shaderBindings
           )},
+          m_postProcessPassBackend{
+            MakePostProcessPasses(
+                m_engine.GetContext(),
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory()
+            )
+          },
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -232,36 +240,25 @@ void NcGraphicsImpl2::ClearEnvironment()
 
 auto NcGraphicsImpl2::IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool
 {
-    // todo: return m_frontend.GetPostProcessSubsystem().IsEnabled(effectId);
-    (void)effectId;
-    return false;
+    return m_frontend.GetPostProcessSubsystem().IsEnabled(effectId);
 }
 
 void NcGraphicsImpl2::SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled)
 {
-    // todo: m_frontend.GetPostProcessSubsystem().SetEnabled(effectId, enabled);
-    (void)effectId;
-    (void)enabled;
+    m_frontend.GetPostProcessSubsystem().SetEnabled(effectId, enabled);
 }
 
 auto NcGraphicsImpl2::GetPostProcessEffectProperties(PostProcessEffectId effectId,
                                                      PostProcessPass::type pass) const -> const PostProcessPassProperties&
 {
-    // todo: return m_frontend.GetPostProcessSubsystem().GetProperties(effectId, pass);
-    (void)effectId;
-    (void)pass;
-    static auto dummy = PostProcessPassProperties{};
-    return dummy;
+    return m_frontend.GetPostProcessSubsystem().GetProperties(effectId, pass);
 }
 
 void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectId,
                                                      PostProcessPass::type pass,
                                                      const PostProcessPassProperties& properties)
 {
-    // todo: m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);
-    (void)effectId;
-    (void)pass;
-    (void)properties;
+    m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);
 }
 
 void NcGraphicsImpl2::OnBeforeSceneLoad()
@@ -319,11 +316,14 @@ void NcGraphicsImpl2::Run()
     context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
+    m_postProcessPassBackend.Update(context, renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
+    /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
+    // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);
 
     swapChain.Present();

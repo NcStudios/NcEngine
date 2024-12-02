@@ -186,6 +186,33 @@ target_link_libraries(PostProcess_tests
 
 add_test(PostProcess_tests PostProcess_tests)
 
+### PostProcessSubsystem Tests ###
+add_executable(PostProcessSubsystem_tests
+    PostProcessSubsystem_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+    ${NC_SOURCE_DIR}/graphics2/PostProcess.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/PostProcessSubsystem.cpp
+)
+
+target_include_directories(PostProcessSubsystem_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(PostProcessSubsystem_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(PostProcessSubsystem_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(PostProcessSubsystem_tests PostProcessSubsystem_tests)
+
 ### TransformCache Tests ###
 add_executable(TransformCache_tests
     TransformCache_tests.cpp

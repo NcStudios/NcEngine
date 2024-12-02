@@ -46,19 +46,14 @@ target_sources(DiligentEngine_tests
         DiligentEngine_tests.cpp
 )
 
-### MeshBuffer Tests ###
-add_graphics_test(MeshBuffer_tests)
 
-target_sources(MeshBuffer_tests
-    PRIVATE
-        MeshBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MeshBuffer.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
-)
+### DynamicUniformBuffer Tests ###
+add_graphics_test(DynamicUniformBuffer_tests)
 
-target_compile_definitions(MeshBuffer_tests
+target_sources(DynamicUniformBuffer_tests
     PRIVATE
-        -DNC_RUNTIME_SHADER_COMPILATION
+    DynamicUniformBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
 )
 
 ### EnvironmentBufferResource Tests ###
@@ -72,14 +67,19 @@ target_sources(EnvironmentBufferResource_tests
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
 )
 
-### TextureBufferResource Tests ###
-add_graphics_test(TextureBufferResource_tests)
+### MeshBuffer Tests ###
+add_graphics_test(MeshBuffer_tests)
 
-target_sources(TextureBufferResource_tests
+target_sources(MeshBuffer_tests
     PRIVATE
-        TextureBufferResource_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+        MeshBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MeshBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(MeshBuffer_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
 )
 
 ### ShaderFactory Tests ###
@@ -121,18 +121,18 @@ add_graphics_test(StructuredBuffer_tests)
 target_sources(StructuredBuffer_tests
     PRIVATE
         StructuredBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/PerFrameResourceSignature.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
 )
 
-target_compile_definitions(StructuredBuffer_tests
+### TextureBufferResource Tests ###
+add_graphics_test(TextureBufferResource_tests)
+
+target_sources(TextureBufferResource_tests
     PRIVATE
-        -DNC_RUNTIME_SHADER_COMPILATION
+        TextureBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
 )
 
 ### UIBackend Tests ###
@@ -150,13 +150,4 @@ target_sources(UIBackend_tests
 target_link_libraries(UIBackend_tests
     PRIVATE
         imgui
-)
-
-### DynamicUniformBuffer Tests ###
-add_graphics_test(DynamicUniformBuffer_tests)
-
-target_sources(DynamicUniformBuffer_tests
-    PRIVATE
-    DynamicUniformBuffer_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
 )
