@@ -3,6 +3,7 @@
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"
+#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -39,7 +40,8 @@ EditorUI::EditorUI(EditorContext& ctx)
       m_createEntityDialog{ctx.world},
       m_newSceneDialog{ctx.modules.Get<NcScene>()},
       m_saveSceneDialog{ctx.world},
-      m_loadSceneDialog{ctx.world, ctx.modules.Get<NcScene>()}
+      m_loadSceneDialog{ctx.world, ctx.modules.Get<NcScene>()},
+      m_postProcessDialog{}
 {
 }
 
@@ -123,6 +125,8 @@ void EditorUI::DrawDialogs(EditorContext& ctx)
         m_saveSceneDialog.Draw(ctx.dimensions);
     else if (m_loadSceneDialog.IsOpen())
         m_loadSceneDialog.Draw(ctx);
+    else if (m_postProcessDialog.IsOpen())
+        m_postProcessDialog.Draw(ctx.dimensions);
 }
 
 void EditorUI::DrawMenu(EditorContext& ctx)
@@ -154,6 +158,16 @@ void EditorUI::DrawMenu(EditorContext& ctx)
 
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("NcGraphics"))
+            {
+                if (ImGui::MenuItem("Post Process FX"))
+                {
+                    m_postProcessDialog.Open(ctx.modules.Get<graphics::NcGraphics>());
+                }
+
+                ImGui::EndMenu();
+            }
+
 
             ImGui::EndMenu();
         }
