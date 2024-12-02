@@ -306,9 +306,6 @@ void NcGraphicsImpl2::Run()
     m_ui.FrameBegin(swapChain);
     m_frontend.GetUISubsystem().UpdateUI(m_world);
 
-    m_frontend.GetPostProcessSubsystem().SetEnabled(MoebiusEffectId, true);
-    m_frontend.GetPostProcessSubsystem().SetProperties(MoebiusEffectId, PostProcessPass::Outline, OutlinePassProperties{});
-
     auto renderState = m_frontend.BuildRenderState(m_world);
 
     auto* pRTV = swapChain.GetCurrentBackBufferRTV();
