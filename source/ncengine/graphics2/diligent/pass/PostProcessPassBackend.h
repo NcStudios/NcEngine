@@ -6,6 +6,7 @@
 
 namespace nc::graphics
 {
+class PerPassResourceSignature;
 class PostProcessPropertyBufferResource;
 struct PostProcessState;
 
@@ -17,10 +18,12 @@ class PostProcessPassBackend
         {
         }
 
-        void Update(Diligent::IDeviceContext& contet,
+        void Update(Diligent::IDeviceContext& context,
                     const PostProcessState& postProcessState);
 
         void Render(Diligent::IDeviceContext& context,
+                    Diligent::ISwapChain& swapChain,
+                    PerPassResourceSignature& perPassResourceSignature,
                     PostProcessPropertyBufferResource& resource);
 
     private:

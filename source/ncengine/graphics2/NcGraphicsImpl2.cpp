@@ -184,6 +184,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                 m_engine.GetContext(),
                 m_engine.GetDevice(),
                 m_engine.GetSwapChain(),
+                m_shaderBindings.GetPerFrameSignature().GetResourceSignature(),
+                m_shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource(),
                 m_engine.GetShaderFactory()
             )
           },
@@ -308,23 +310,14 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    auto* pRTV = swapChain.GetCurrentBackBufferRTV();
-    auto* pDSV = swapChain.GetDepthBufferDSV();
-    context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-    constexpr auto ClearColor = Vector4{0.050f, 0.050f, 0.050f, 1.0f};
-    context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
     m_postProcessPassBackend.Update(context, renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
+    m_shaderBindings.GetPerPassSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_materialPassBackend.Render(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRendererState.passBatches);
-
-    /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
-    // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
+    m_postProcessPassBackend.Render(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);
 
     swapChain.Present();
@@ -336,5 +329,14 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 {
     (void)isMinimized;
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
+    m_resizeNeeded = true;
+    m_dimensions = dimensions;
+}
+
+void NcGraphicsImpl2::Resize()
+{
+    m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_resizeNeeded = false;
 }
 } // namespace nc::graphics

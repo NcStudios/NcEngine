@@ -30,6 +30,13 @@ class ShaderFactory
         }
 
         /** @note HLSL is cross compiled into SPIR-V */
+        auto MakeShaderFromPath(std::span<const char> path,
+                                std::string_view name,
+                                Diligent::SHADER_TYPE type,
+                                Diligent::SHADER_SOURCE_LANGUAGE language,
+                                std::string_view entryPoint = "main") -> Diligent::RefCntAutoPtr<Diligent::IShader>;
+
+        /** @note HLSL is cross compiled into SPIR-V */
         auto MakeShaderFromSource(std::span<const char> source,
                                   std::string_view name,
                                   Diligent::SHADER_TYPE type,

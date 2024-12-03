@@ -46,7 +46,7 @@ void MaterialPassBackend::Render(Diligent::IDeviceContext& context,
     NC_ASSERT(m_passes.size() == passBatches.size(), "Frontend/Backend passes out of sync.");
     for (auto [pass, batches] : std::views::zip(m_passes, passBatches))
     {
-        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
+        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
         context.SetPipelineState(pass.pso);
         DrawIndexed(context, batches);
 

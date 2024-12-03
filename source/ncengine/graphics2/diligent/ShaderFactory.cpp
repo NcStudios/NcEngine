@@ -24,6 +24,31 @@ auto ReadShaderFile(std::string_view filePath) -> std::vector<char>
     return buffer;
 }
 
+auto ShaderFactory::MakeShaderFromPath(std::span<const char> path,
+                                       std::string_view name,
+                                       Diligent::SHADER_TYPE type,
+                                       Diligent::SHADER_SOURCE_LANGUAGE language,
+                                       std::string_view entryPoint) -> Diligent::RefCntAutoPtr<Diligent::IShader>
+{
+    if (!HasRuntimeCompilationSupport())
+    {
+        throw NcError{"Runtime shader compilation not enabled"};
+    }
+
+    auto createInfo = Diligent::ShaderCreateInfo{};
+    createInfo.FilePath = path.data();
+    createInfo.pShaderSourceStreamFactory = m_streamFactory;
+    createInfo.EntryPoint = entryPoint.data();
+    createInfo.Desc.Name = name.data();
+    createInfo.Desc.ShaderType = type;
+    createInfo.Desc.UseCombinedTextureSamplers = true;
+    createInfo.SourceLanguage = language;
+    createInfo.CompileFlags = Diligent::SHADER_COMPILE_FLAG_PACK_MATRIX_ROW_MAJOR |
+                              Diligent::SHADER_COMPILE_FLAG_ENABLE_UNBOUNDED_ARRAYS;
+
+    return CreateShader(createInfo);
+}
+
 auto ShaderFactory::MakeShaderFromSource(std::span<const char> source,
                                          std::string_view name,
                                          Diligent::SHADER_TYPE type,

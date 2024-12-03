@@ -31,9 +31,9 @@ auto MakePasses(Diligent::IRenderDevice& device,
             swapChain,
             shaderFactory,
             shaderBindings.GetPerFrameSignature().GetResourceSignature(),
-            shaderBindings.GetPerPassSignature().GetPostProcessBufferResource(),
-            "Toon VS",
-            "Toon PS",
+            shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource(),
+            "Toon.psh",
+            "Toon.vsh",
             "Toon Pipeline"
         )
     };

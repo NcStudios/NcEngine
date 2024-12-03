@@ -1,5 +1,8 @@
 #include "PostProcessPassBackend.h"
+#include "graphics2/diligent/pass/PassUtilities.h"
+#include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 
 #include "ncutility/NcError.h"
@@ -99,6 +102,8 @@ void PostProcessPassBackend::Update(Diligent::IDeviceContext& context,
 }
 
 void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
+                                    Diligent::ISwapChain& swapChain,
+                                    PerPassResourceSignature& perPassResourceSignature,
                                     PostProcessPropertyBufferResource& resource)
 {
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
@@ -109,8 +114,9 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
             continue;
         }
 
+        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
         context.SetPipelineState(pass.pso);
-        // render target stuff...
+
         for (auto& instance : pass.instances)
         {
             if (!instance.enabled)
@@ -124,6 +130,11 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
             }
 
             context.Draw(drawAttribs);
+
+            if (IsOffScreenTarget(pass.colorRTIndex, pass.depthRTIndex))
+            {
+                context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
+            }
         }
     }
 }

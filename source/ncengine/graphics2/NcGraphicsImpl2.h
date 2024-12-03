@@ -52,6 +52,7 @@ class NcGraphicsImpl2 : public NcGraphics
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
     private:
+        void Resize();
         ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
@@ -60,6 +61,8 @@ class NcGraphicsImpl2 : public NcGraphics
         PostProcessPassBackend m_postProcessPassBackend;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
+        Vector2 m_dimensions;
+        bool m_resizeNeeded;
 };
 } // namespace graphics
 } // namespace nc

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics2/diligent/resource/base/DynamicUniformBuffer.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
 #include "ncengine/graphics/PostProcess.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -14,6 +15,7 @@
 namespace nc::graphics
 {
 class ShaderFactory;
+class PostProcessSinkBufferResource;
 
 // Post process pass data specific to an effect
 struct PostProcessPipelineInstance
@@ -26,18 +28,27 @@ struct PostProcessPipelineInstance
 // Post process pass data shared by potentially many effects
 struct PostProcessPipeline
 {
+    PostProcessPipeline(Diligent::IRenderDevice& device,
+                        const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
+                        std::vector<PostProcessPipelineInstance> instances_,
+                        PostProcessPass::type passId,
+                        uint32_t colorRTIndex_ = SwapChainColorRTIndex, /** @todo build out support for more than two RT */
+                        uint32_t depthRTIndex_ = SwapChainDepthRTIndex,
+                        uint32_t renderTargetCount_ = 0u);
+
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
     std::vector<PostProcessPipelineInstance> instances;
     PostProcessPass::type id = PostProcessPass::None;
     uint32_t renderTargetCount = 0u;
-    uint32_t colorRenderTargetIndex = 0u;
-    uint32_t depthRenderTargetIndex = 0u;
+    uint32_t colorRTIndex = 0u;
+    uint32_t depthRTIndex = 0u;
     bool anyEnabled = false;
 };
 
-/** @todo This builds no passes */
 auto MakePostProcessPasses(Diligent::IDeviceContext& context,
                            Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
+                           Diligent::IPipelineResourceSignature& perFrameResourceSignature,
+                           nc::graphics::PostProcessSinkBufferResource& postProcessSinkBufferResource,
                            ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>;
 } // namespace nc::graphics

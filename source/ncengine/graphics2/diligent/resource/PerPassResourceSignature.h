@@ -24,7 +24,7 @@ class PerPassResourceSignature
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
         auto GetResourceBinding() -> Diligent::IShaderResourceBinding& { return *m_srb; }
 
-        auto GetPostProcessBufferResource() -> PostProcessSinkBufferResource& { return *m_postProcessBufferResource; }
+        auto GetPostProcessSinkBufferResource() -> PostProcessSinkBufferResource& { return *m_postProcessBufferResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;

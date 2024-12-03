@@ -25,6 +25,13 @@ constexpr auto g_postProcessPassNames = std::array{
     std::string_view{"Outline"}
 };
 
+constexpr auto g_postProcessPassShaderPaths = std::array{
+    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Alpha
+    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Depth
+    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Normal
+    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Outline
+};
+
 constexpr auto g_postProcessPassFlags = std::array{
     nc::PostProcessPass::Alpha,
     nc::PostProcessPass::Depth,
@@ -80,6 +87,11 @@ auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type
 auto GetPostProcessPassNames() -> std::span<const std::string_view>
 {
     return g_postProcessPassNames;
+}
+
+auto GetPostProcessPassShaderPaths() -> std::span<const std::pair<std::string_view, std::string_view>>
+{
+    return g_postProcessPassShaderPaths;
 }
 
 auto GetPostProcessPassFlags() -> std::span<const PostProcessPass::type>

@@ -41,21 +41,6 @@ struct MaterialPass
     uint32_t depthRTIndex;
 };
 
-auto MakeOffscreenGraphicsPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                             Diligent::IShader& pixelShader,
-                                             std::span<Diligent::IPipelineResourceSignature*> signatures,
-                                             std::span<const Diligent::LayoutElement> layoutElements,
-                                             std::string_view name) -> Diligent::GraphicsPipelineStateCreateInfo;
-
-// Dummy Toon MaterialPass
-auto MakeTestPass(Diligent::IRenderDevice& device,
-                  Diligent::ISwapChain& swapChain,
-                  ShaderFactory& shaderFactory,
-                  Diligent::IPipelineResourceSignature& globalSignature,
-                  Diligent::IPipelineResourceSignature& componentSignature,
-                  Diligent::IPipelineResourceSignature& materialSignature,
-                  PostProcessSinkBufferResource& postProcessBufferResource) -> MaterialPass;
-
 // todo 794 This only creates a Toon pass. Add more as they are implemented.
 auto MakePasses(Diligent::IRenderDevice& device,
                 Diligent::ISwapChain& swapChain,
