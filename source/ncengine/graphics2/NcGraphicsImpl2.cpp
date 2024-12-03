@@ -1,5 +1,5 @@
 #include "NcGraphicsImpl2.h"
-#include "diligent/pass/Pass.h"
+#include "diligent/pass/MaterialPass.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -321,7 +321,8 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
+    m_materialPassBackend.Render(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRendererState.passBatches);
+
     /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
     // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);

@@ -13,7 +13,7 @@
 #include <ranges>
 
 const auto g_materialDesc = nc::MaterialDesc{
-    .passes = nc::MaterialPass::Toon
+    .passes = nc::MaterialPassFlag::Toon
 };
 
 constexpr auto g_meshView = nc::asset::MeshView{

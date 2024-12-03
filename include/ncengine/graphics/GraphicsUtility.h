@@ -16,14 +16,14 @@ namespace nc
 auto GetMaterialPassNames() -> std::span<const std::string_view>;
 
 /** @brief Returns a view of all material pass flags, ordered by ascending flag value. */
-auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>;
+auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>;
 
 /**
  * @brief Returns a view of all currently implemented material pass flags.
  * @todo 794 Temporary solution while passes are being implemented. Add passes as they become available.
  *           Eventually, usage of this should switch to GetMaterialPassFlags().
  */
-auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPass::type>;
+auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>;
 
 /** @brief Returns a view of all post process pass names, ordered by ascending flag value. */
 auto GetPostProcessPassNames() -> std::span<const std::string_view>;

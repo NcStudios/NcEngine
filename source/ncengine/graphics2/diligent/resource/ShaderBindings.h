@@ -2,6 +2,7 @@
 
 #include "MeshBuffer.h"
 #include "PerFrameResourceSignature.h"
+#include "PerPassResourceSignature.h"
 #include "base/StructuredBuffer.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -36,7 +37,13 @@ class ShaderBindings
                 TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
                 UniformBufferResourceDesc{"OutlinePassBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
-              }
+              },
+              m_perPassSignature{
+                device,
+                "PerPassResourceSignature",
+                1,
+                TextureBufferResourceDesc{"PostProcessSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10}
+            }
         {
         }
 
@@ -49,6 +56,11 @@ class ShaderBindings
             return m_perFrameSignature;
         }
 
+        auto GetPerPassSignature() -> PerPassResourceSignature&
+        {
+            return m_perPassSignature;
+        }
+
         auto GetMeshBuffer() -> MeshBuffer&
         {
             return m_meshBuffer;
@@ -56,6 +68,7 @@ class ShaderBindings
 
     private:
         PerFrameResourceSignature m_perFrameSignature;
+        PerPassResourceSignature m_perPassSignature;
         MeshBuffer m_meshBuffer;
 };
 } // namespace nc::graphics

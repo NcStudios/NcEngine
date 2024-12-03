@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pass.h"
+#include "MaterialPass.h"
 #include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -9,17 +9,22 @@
 
 namespace nc::graphics
 {
+class PerPassResourceSignature;
+
 class MaterialPassBackend
 {
     public:
-        explicit MaterialPassBackend(std::vector<Pass> passes)
+        explicit MaterialPassBackend(std::vector<MaterialPass> passes)
             : m_passes{std::move(passes)}
         {
         }
 
-        void Render(Diligent::IDeviceContext& context, const std::vector<std::vector<Batch>>& passBatches);
+        void Render(Diligent::IDeviceContext& context,
+                    Diligent::ISwapChain& swapChain,
+                    PerPassResourceSignature& perPassResourceSignature,
+                    const std::vector<std::vector<Batch>>& passBatches);
 
     private:
-        std::vector<Pass> m_passes;
+        std::vector<MaterialPass> m_passes;
 };
 } // namespacae nc::graphics

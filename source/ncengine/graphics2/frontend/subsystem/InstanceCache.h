@@ -121,7 +121,7 @@ class InstanceCache
 
         // Generate draw call information for batches. The return value contains a collection of batches
         // to be drawn per material pass provided in the input 'passes'.
-        auto BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>;
+        auto BuildBatches(std::span<const MaterialPassFlag::type> passes) -> std::vector<std::vector<Batch>>;
 
         // Merge staging area into the buffer.
         // IMPORTANT: Staging area cannot be modified while this is running (game logic cannot be running).

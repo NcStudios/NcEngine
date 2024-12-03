@@ -14,8 +14,8 @@ constexpr auto g_materialPassNames = std::array{
 };
 
 constexpr auto g_materialPassFlags = std::array{
-    nc::MaterialPass::Shadow,
-    nc::MaterialPass::Toon
+    nc::MaterialPassFlag::Shadow,
+    nc::MaterialPassFlag::Toon
 };
 
 constexpr auto g_postProcessPassNames = std::array{
@@ -67,14 +67,14 @@ auto GetMaterialPassNames() -> std::span<const std::string_view>
     return g_materialPassNames;
 }
 
-auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>
+auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
     return g_materialPassFlags;
 }
 
-auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPass::type>
+auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
-    return std::span<const MaterialPass::type>{g_materialPassFlags.data() + 1, 1};
+    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 1};
 }
 
 auto GetPostProcessPassNames() -> std::span<const std::string_view>

@@ -151,7 +151,7 @@ auto InstanceCache::BuildState() -> BufferUpdateInfo<InstanceData>
     };
 }
 
-auto InstanceCache::BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>
+auto InstanceCache::BuildBatches(std::span<const MaterialPassFlag::type> passes) -> std::vector<std::vector<Batch>>
 {
     NC_PROFILE_SCOPE("InstanceCache::BuildBatches()", ProfileCategory::Rendering);
     auto out = std::vector<std::vector<Batch>>(passes.size());
