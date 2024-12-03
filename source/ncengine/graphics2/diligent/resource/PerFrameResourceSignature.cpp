@@ -2,6 +2,7 @@
 #include "EnvironmentBufferResource.h"
 #include "PostProcessPropertyBufferResource.h"
 #include "TextureBufferResource.h"
+#include "WireframeBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -21,6 +22,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferResourceDesc& materialResourceDesc,
                                                      const TextureBufferResourceDesc& textureResourceDesc,
                                                      const UniformBufferResourceDesc& environmentResourceDesc,
+                                                     const UniformBufferResourceDesc& wireframeResourceDesc,
                                                      const UniformBufferResourceDesc& outlinePassPropertiesDesc)
 {
     const auto resources = std::array{
@@ -32,6 +34,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(materialResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
+        ToPipelineResourceDesc(wireframeResourceDesc),
         ToPipelineResourceDesc(outlinePassPropertiesDesc)
     };
 
@@ -113,6 +116,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         context,
         device,
         GetVariable(environmentResourceDesc, m_srb)
+    );
+
+    m_wireframeBufferResource = std::make_unique<WireframeBufferResource>(
+        context,
+        device,
+        GetVariable(wireframeResourceDesc, m_srb)
     );
 
     m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
