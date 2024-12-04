@@ -22,7 +22,7 @@ struct Batch
     uint32_t vertexOffset;
 };
 
-struct MeshRendererRenderState
+struct MeshRenderState
 {
     BufferUpdateInfo<TransformData> transformData;
     BufferUpdateInfo<StaticMeshInstanceData> staticMeshInstanceData;

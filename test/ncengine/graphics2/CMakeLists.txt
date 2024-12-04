@@ -126,17 +126,17 @@ target_link_libraries(MaterialRegistry_tests
 
 add_test(MaterialRegistry_tests MaterialRegistry_tests)
 
-### MeshRendererSubsystem Tests ###
-add_executable(MeshRendererSubsystem_tests
-    MeshRendererSubsystem_tests.cpp
+### MeshSubsystem Tests ###
+add_executable(MeshSubsystem_tests
+    MeshSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/graphics2/MeshRenderer2.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
 )
 
-target_include_directories(MeshRendererSubsystem_tests
+target_include_directories(MeshSubsystem_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_INCLUDE_DIR}/ncengine
@@ -144,19 +144,19 @@ target_include_directories(MeshRendererSubsystem_tests
         ${NC_EXTERNAL_DIR}
 )
 
-target_compile_options(MeshRendererSubsystem_tests
+target_compile_options(MeshSubsystem_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(MeshRendererSubsystem_tests
+target_link_libraries(MeshSubsystem_tests
     PRIVATE
         gtest_main
         NcAsset
         NcMath
 )
 
-add_test(MeshRendererSubsystem_tests MeshRendererSubsystem_tests)
+add_test(MeshSubsystem_tests MeshSubsystem_tests)
 
 ### PostProcess Tests ###
 add_executable(PostProcess_tests

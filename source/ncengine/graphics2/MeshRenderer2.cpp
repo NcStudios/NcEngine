@@ -1,5 +1,5 @@
 #include "ncengine/graphics/MeshRenderer2.h"
-#include "frontend/subsystem/MeshRendererSubsystem.h"
+#include "frontend/subsystem/MeshSubsystem.h"
 
 namespace nc
 {

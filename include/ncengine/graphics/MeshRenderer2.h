@@ -12,7 +12,7 @@ namespace nc
 {
 namespace graphics
 {
-class MeshRendererSubsystem;
+class MeshSubsystem;
 } // namespace graphics
 
 /** @brief Component enabling rendering of an Entity with a given mesh and material. */
@@ -66,8 +66,8 @@ class MeshRenderer2
         void SetMaterial(const MaterialDesc& materialDesc);
 
     private:
-        friend class graphics::MeshRendererSubsystem;
-        inline static graphics::MeshRendererSubsystem* s_subsystem = nullptr;
+        friend class graphics::MeshSubsystem;
+        inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         Entity m_self;
         uint64_t m_meshId;
         uint32_t m_transformDataHandle;

@@ -6,8 +6,8 @@
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/MeshRenderer2.h"
-#include "graphics2/frontend/subsystem/MeshRendererSubsystem.h"
-#include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
+#include "graphics2/frontend/subsystem/MeshSubsystem.h"
+#include "graphics2/frontend/subsystem/MeshRenderState.h"
 
 #include <array>
 #include <ranges>
@@ -30,13 +30,13 @@ auto MaterialInstance::GetProperties() const -> const MaterialProperties& { retu
 void MaterialInstance::Release() noexcept {}
 } // namespace nc
 
-class MeshRendererSubsystemTest : public testing::Test,
+class MeshSubsystemTest : public testing::Test,
                                   public EcsFixture
 {
     protected:
         static constexpr auto MaxEntities = 20ull;
         nc::SystemEvents systemEvents;
-        nc::graphics::MeshRendererSubsystem uut;
+        nc::graphics::MeshSubsystem uut;
 
         auto AddEntity(nc::ecs::Ecs& world) -> nc::Entity
         {
@@ -50,7 +50,7 @@ class MeshRendererSubsystemTest : public testing::Test,
             return entity;
         }
 
-        MeshRendererSubsystemTest()
+        MeshSubsystemTest()
             : EcsFixture{MaxEntities},
               uut{systemEvents, MaxEntities, MaxEntities, 1}
         {
@@ -58,7 +58,7 @@ class MeshRendererSubsystemTest : public testing::Test,
         }
 };
 
-TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
+TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
 {
     using namespace nc::graphics;
 
@@ -96,7 +96,7 @@ TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
     registry.Clear();
 }
 
-TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
+TEST_F(MeshSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();
@@ -135,7 +135,7 @@ TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
     registry.Clear();
 }
 
-TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
+TEST_F(MeshSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();
@@ -162,7 +162,7 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
     registry.Clear();
 }
 
-TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMaterial_Succeeds)
+TEST_F(MeshSubsystemTest, MeshRendererUpdateMaterial_Succeeds)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();

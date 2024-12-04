@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MeshRendererRenderState.h"
+#include "MeshRenderState.h"
 #include "TransformCache.h"
 #include "InstanceCache.h"
 
@@ -15,13 +15,13 @@ class Transform;
 
 namespace graphics
 {
-class MeshRendererSubsystem
+class MeshSubsystem
 {
     public:
-        explicit MeshRendererSubsystem(SystemEvents& events,
-                                       uint32_t maxEntities,
-                                       uint32_t maxMeshRenderers,
-                                       uint32_t initialBatchSize);
+        explicit MeshSubsystem(SystemEvents& events,
+                               uint32_t maxEntities,
+                               uint32_t maxMeshRenderers,
+                               uint32_t initialBatchSize);
 
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
@@ -47,7 +47,7 @@ class MeshRendererSubsystem
                                  MaterialPasses newPasses,
                                  uint64_t meshId);
 
-        auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;
+        auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
 
     private:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics2/ShaderTypes.h"
-#include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
+#include "graphics2/frontend/subsystem/MeshRenderState.h"
 
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/utility/SparseMap.h"

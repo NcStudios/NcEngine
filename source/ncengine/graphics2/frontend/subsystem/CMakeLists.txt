@@ -3,7 +3,7 @@ target_sources(${NC_ENGINE_LIB}
         CameraSubsystem.cpp
         LightSubsystem.cpp
         MaterialRegistry.cpp
-        MeshRendererSubsystem.cpp
+        MeshSubsystem.cpp
         PostProcessSubsystem.cpp
         TransformCache.cpp
         UISubsystem.cpp
