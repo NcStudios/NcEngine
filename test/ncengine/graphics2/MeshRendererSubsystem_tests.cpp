@@ -79,13 +79,13 @@ TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(0, actualTransformState.dirtyRanges[0].offset);
     EXPECT_EQ(5, actualTransformState.dirtyRanges[0].count);
 
-    const auto& actualInstanceState = actualRenderState.meshRendererInstanceData;
+    const auto& actualInstanceState = actualRenderState.staticMeshInstanceData;
     EXPECT_EQ(5, actualInstanceState.instances.size());
     ASSERT_EQ(1, actualInstanceState.dirtyRanges.size());
     EXPECT_EQ(0, actualInstanceState.dirtyRanges[0].offset);
     EXPECT_EQ(5, actualInstanceState.dirtyRanges[0].count);
 
-    const auto& actualPassState = actualRenderState.meshRendererBatches;
+    const auto& actualPassState = actualRenderState.staticMeshBatches;
     ASSERT_EQ(1, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
@@ -117,14 +117,14 @@ TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
     EXPECT_EQ(1, actualTransformState.dirtyRanges[0].count);
 
     // Whole instance buffer needs to be updated since we removed the first item
-    const auto& actualInstanceState = actualRenderState.meshRendererInstanceData;
+    const auto& actualInstanceState = actualRenderState.staticMeshInstanceData;
     EXPECT_EQ(2, actualInstanceState.instances.size());
     ASSERT_EQ(1, actualInstanceState.dirtyRanges.size());
     EXPECT_EQ(0, actualInstanceState.dirtyRanges[0].offset);
     EXPECT_EQ(2, actualInstanceState.dirtyRanges[0].count);
 
     // Batch reports only one instance
-    const auto& actualPassState = actualRenderState.meshRendererBatches;
+    const auto& actualPassState = actualRenderState.staticMeshBatches;
     ASSERT_EQ(1, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
@@ -148,7 +148,7 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
 
     // Split into two batches. Second batch should be offset at index 2, leaving a free space in the first batch.
     auto actualRenderState = uut.BuildState(world);
-    const auto& actualPassState = actualRenderState.meshRendererBatches;
+    const auto& actualPassState = actualRenderState.staticMeshBatches;
     ASSERT_EQ(1, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(2, actualBatches.size());

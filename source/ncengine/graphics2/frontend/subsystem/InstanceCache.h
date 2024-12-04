@@ -41,7 +41,7 @@ struct StagedBatchRegion
     asset::MeshView mesh = asset::MeshView{};
 };
 
-// Instance data for a renderer component waiting to added to a batch.
+// Instance data for a mesh component waiting to added to a batch.
 template<class T>
 struct StagedInstance
 {
@@ -57,14 +57,14 @@ struct StagedBatchInstances
     std::vector<StagedInstance<T>> instances = {};
 };
 
-// Renderer component instance waiting to be removed from a batch.
+// Mesh component instance waiting to be removed from a batch.
 struct StagedRemoval
 {
     BatchKey key = BatchKey{};
     uint32_t entityId = NullBatchIndex;
 };
 
-// InstanceCache interface for adding, removing, and updating renderer component instances. Events
+// InstanceCache interface for adding, removing, and updating mesh component instances. Events
 // originating from game logic/API should only be routed to here to avoid race conditions with the
 // actual InstanceCache buffer.
 template<class T>

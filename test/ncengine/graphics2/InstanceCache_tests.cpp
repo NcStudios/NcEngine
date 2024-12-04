@@ -3,7 +3,7 @@
 
 #include <array>
 
-using TestInstanceCache = nc::graphics::InstanceCache<nc::graphics::MeshRendererInstanceData>;
+using TestInstanceCache = nc::graphics::InstanceCache<nc::graphics::StaticMeshInstanceData>;
 
 constexpr auto g_mesh1 = nc::asset::MeshView{
     .id = 11111111,
@@ -87,7 +87,7 @@ void AddTestInstance(TestInstanceCache& uut, uint32_t entityId, const TestObject
         entityId,
         info.passes,
         info.mesh,
-        nc::graphics::MeshRendererInstanceData{
+        nc::graphics::StaticMeshInstanceData{
             info.transformIndex,
             info.materialIndex
         }
@@ -461,7 +461,7 @@ TEST(InstanceCacheTests, UpdateInstance)
         newInfo1.passes,
         info1.mesh.id,
         newInfo1.mesh,
-        nc::graphics::MeshRendererInstanceData{
+        nc::graphics::StaticMeshInstanceData{
             newInfo1.transformIndex,
             newInfo1.materialIndex
         }
@@ -473,7 +473,7 @@ TEST(InstanceCacheTests, UpdateInstance)
         newInfo2.passes,
         info2.mesh.id,
         newInfo2.mesh,
-        nc::graphics::MeshRendererInstanceData{
+        nc::graphics::StaticMeshInstanceData{
             newInfo2.transformIndex,
             newInfo2.materialIndex
         }

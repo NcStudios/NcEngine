@@ -31,15 +31,15 @@ struct OutlinePassData
     float width = 1.0f;
 };
 
-// Object model for MeshRenderers (type: StructuredBuffer element type).
-struct MeshRendererInstanceData
+// Object model for StaticMeshes (type: StructuredBuffer element type).
+struct StaticMeshInstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
 };
 
-// Object model for SkinnedRenderers (type: StructuredBuffer element type).
-struct SkinnedRendererInstanceData
+// Object model for SkinnedMeshes (type: StructuredBuffer element type).
+struct SkinnedMeshInstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();

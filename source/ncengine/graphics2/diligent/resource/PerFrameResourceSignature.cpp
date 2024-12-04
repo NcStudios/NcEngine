@@ -14,7 +14,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      std::string_view signatureName,
                                                      uint8_t bindingIndex,
                                                      const StructuredBufferResourceDesc& transformResourceDesc,
-                                                     const StructuredBufferResourceDesc& meshRendererInstanceResourceDesc,
+                                                     const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
                                                      const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                                      const StructuredBufferResourceDesc& pointLightResourceDesc,
                                                      const StructuredBufferResourceDesc& spotLightResourceDesc,
@@ -25,7 +25,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
-        ToPipelineResourceDesc(meshRendererInstanceResourceDesc),
+        ToPipelineResourceDesc(staticMeshInstanceResourceDesc),
         ToPipelineResourceDesc(directionalLightResourceDesc),
         ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(spotLightResourceDesc),
@@ -65,12 +65,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         transformResourceDesc
     );
 
-    m_meshRendererInstanceResource = std::make_unique<StructuredBuffer<MeshRendererInstanceData>>
+    m_staticMeshInstanceResource = std::make_unique<StructuredBuffer<StaticMeshInstanceData>>
     (
         context,
         device,
-        GetVariable(meshRendererInstanceResourceDesc, m_srb),
-        meshRendererInstanceResourceDesc
+        GetVariable(staticMeshInstanceResourceDesc, m_srb),
+        staticMeshInstanceResourceDesc
     );
 
     m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>

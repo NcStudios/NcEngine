@@ -25,7 +25,7 @@ struct Batch
 struct MeshRendererRenderState
 {
     BufferUpdateInfo<TransformData> transformData;
-    BufferUpdateInfo<MeshRendererInstanceData> meshRendererInstanceData;
-    std::vector<std::vector<Batch>> meshRendererBatches;
+    BufferUpdateInfo<StaticMeshInstanceData> staticMeshInstanceData;
+    std::vector<std::vector<Batch>> staticMeshBatches;
 };
 } // namespace nc::graphics
