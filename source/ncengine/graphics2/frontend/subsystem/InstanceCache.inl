@@ -1,8 +1,8 @@
 #include "ncengine/debug/Profile.h"
 
-namespace
+namespace nc::graphics
 {
-void IncrementBatchCount(nc::graphics::BatchRegion& region, uint32_t count)
+inline void IncrementBatchCount(BatchRegion& region, uint32_t count)
 {
     region.batch.instanceCount += count;
     if (region.batch.instanceCount > region.capacity)
@@ -11,17 +11,14 @@ void IncrementBatchCount(nc::graphics::BatchRegion& region, uint32_t count)
     }
 }
 
-auto WalkBatch(const nc::graphics::Batch& batch)
+inline auto WalkBatch(const Batch& batch)
 {
     return std::views::iota(
         batch.firstInstance,
         batch.firstInstance + batch.instanceCount
     );
 }
-} // anonymous namespace
 
-namespace nc::graphics
-{
 template<class T>
 void InstanceCacheStaging<T>::AddInstance(uint32_t entityId,
                                           MaterialPasses passes,
