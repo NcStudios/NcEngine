@@ -131,7 +131,7 @@ add_test(MaterialRegistry_tests MaterialRegistry_tests)
 add_executable(MeshRendererSubsystem_tests
     MeshRendererSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/graphics2/MeshRenderer2.cpp
+    ${NC_SOURCE_DIR}/graphics2/StaticMesh.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/InstanceCache.cpp

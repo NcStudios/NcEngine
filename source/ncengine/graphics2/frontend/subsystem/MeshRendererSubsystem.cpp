@@ -2,7 +2,7 @@
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/StaticMesh.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "asset/AssetService.h"
 
@@ -18,7 +18,7 @@ MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events,
       m_instanceCache{maxEntities, initialBatchSize},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnRebuildStatics)}
 {
-    MeshRenderer2::s_subsystem = this;
+    StaticMesh::s_subsystem = this;
 }
 
 auto MeshRendererSubsystem::AddInstance(Entity entity,
@@ -89,7 +89,7 @@ void MeshRendererSubsystem::SetInstanceMaterial(Entity entity,
     );
 }
 
-auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState
+auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<StaticMesh, Transform> ecs) -> MeshRendererRenderState
 {
     NC_PROFILE_SCOPE("MeshRendererSubsystem::BuildState()", ProfileCategory::Rendering);
     m_transformCache.CommitPendingChanges();

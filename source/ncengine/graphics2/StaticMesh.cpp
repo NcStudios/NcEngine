@@ -1,11 +1,11 @@
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/StaticMesh.h"
 #include "frontend/subsystem/MeshRendererSubsystem.h"
 
 namespace nc
 {
-MeshRenderer2::MeshRenderer2(Entity self,
-                             const asset::MeshView& mesh,
-                             const MaterialDesc& materialDesc)
+StaticMesh::StaticMesh(Entity self,
+                       const asset::MeshView& mesh,
+                       const MaterialDesc& materialDesc)
     : m_self{self},
       m_meshId{mesh.id},
       m_transformDataHandle{0},
@@ -19,7 +19,7 @@ MeshRenderer2::MeshRenderer2(Entity self,
     );
 }
 
-void MeshRenderer2::SetMesh(const asset::MeshView& mesh)
+void StaticMesh::SetMesh(const asset::MeshView& mesh)
 {
     s_subsystem->SetInstanceMesh(
         m_self,
@@ -33,7 +33,7 @@ void MeshRenderer2::SetMesh(const asset::MeshView& mesh)
     m_meshId = mesh.id;
 }
 
-void MeshRenderer2::SetMaterial(const MaterialDesc& materialDesc)
+void StaticMesh::SetMaterial(const MaterialDesc& materialDesc)
 {
     const auto currentPasses = m_material.GetPasses();
     m_material = MaterialInstance{materialDesc};
@@ -47,7 +47,7 @@ void MeshRenderer2::SetMaterial(const MaterialDesc& materialDesc)
     );
 }
 
-void MeshRenderer2::Release() noexcept
+void StaticMesh::Release() noexcept
 {
     if (m_self.Valid())
     {

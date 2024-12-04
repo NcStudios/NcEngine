@@ -1,5 +1,5 @@
 /**
- * @file MeshRenderer2.h
+ * @file StaticMesh.h
  * @copyright Jaremie Romer and McCallister Romer 2024
  */
 #pragma once
@@ -16,14 +16,14 @@ class MeshRendererSubsystem;
 } // namespace graphics
 
 /** @brief Component enabling rendering of an Entity with a given mesh and material. */
-class MeshRenderer2
+class StaticMesh
 {
     public:
-        explicit MeshRenderer2(Entity self,
+        explicit StaticMesh(Entity self,
                                const asset::MeshView& mesh,
                                const MaterialDesc& materialDesc);
 
-        MeshRenderer2(MeshRenderer2&& other) noexcept
+        StaticMesh(StaticMesh&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
               m_meshId{other.m_meshId},
               m_transformDataHandle{other.m_transformDataHandle},
@@ -31,7 +31,7 @@ class MeshRenderer2
         {
         }
 
-        MeshRenderer2& operator=(MeshRenderer2&& other) noexcept
+        StaticMesh& operator=(StaticMesh&& other) noexcept
         {
             if (this != &other)
             {
@@ -45,10 +45,10 @@ class MeshRenderer2
             return *this;
         }
 
-        MeshRenderer2(const MeshRenderer2&) = delete;
-        MeshRenderer2& operator=(const MeshRenderer2&) = delete;
+        StaticMesh(const StaticMesh&) = delete;
+        StaticMesh& operator=(const StaticMesh&) = delete;
 
-        ~MeshRenderer2() noexcept
+        ~StaticMesh() noexcept
         {
             Release();
         }
@@ -77,7 +77,7 @@ class MeshRenderer2
 };
 
 template<>
-struct StoragePolicy<MeshRenderer2> : DefaultStoragePolicy
+struct StoragePolicy<StaticMesh> : DefaultStoragePolicy
 {
     static constexpr bool EnableOnAddCallbacks = true;
     static constexpr bool EnableOnCommitCallbacks = false;
