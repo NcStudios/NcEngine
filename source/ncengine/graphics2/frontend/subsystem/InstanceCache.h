@@ -41,30 +41,33 @@ struct StagedBatchRegion
     asset::MeshView mesh = asset::MeshView{};
 };
 
-// InstanceData for a MeshRenderer waiting to added to a batch.
+// Instance data for a renderer component waiting to added to a batch.
+template<class T>
 struct StagedInstance
 {
     uint32_t entityId = NullBatchIndex;
-    InstanceData instanceData = InstanceData{};
+    T instanceData = T{};
 };
 
 // Per-batch staging area.
+template<class T>
 struct StagedBatchInstances
 {
     BatchKey key = BatchKey{};
-    std::vector<StagedInstance> instances = {};
+    std::vector<StagedInstance<T>> instances = {};
 };
 
-// MeshRenderer instance waiting to be removed from a batch.
+// Renderer component instance waiting to be removed from a batch.
 struct StagedRemoval
 {
     BatchKey key = BatchKey{};
     uint32_t entityId = NullBatchIndex;
 };
 
-// InstanceCache interface for adding, removing, and updating MeshRenderer instances. Events
-// originating from game logic/API should only be routed to here to avoid race conditions
-// with the actual InstanceCache buffer.
+// InstanceCache interface for adding, removing, and updating renderer component instances. Events
+// originating from game logic/API should only be routed to here to avoid race conditions with the
+// actual InstanceCache buffer.
+template<class T>
 class InstanceCacheStaging
 {
     public:
@@ -72,7 +75,7 @@ class InstanceCacheStaging
         void AddInstance(uint32_t entityId,
                          MaterialPasses passes,
                          const asset::MeshView& mesh,
-                         const InstanceData& instanceData);
+                         const T& instanceData);
 
         void RemoveInstance(uint32_t entityId,
                             MaterialPasses passes,
@@ -83,27 +86,28 @@ class InstanceCacheStaging
                             MaterialPasses newPasses,
                             uint64_t oldMeshId,
                             const asset::MeshView& newMesh,
-                            const InstanceData& instanceData);
+                            const T& instanceData);
 
         // For Use By InstanceCache
-        auto HasStagedState()        const -> bool                                     { return m_hasStagedState; }
-        auto GetStagedBatchRegions() const -> const std::vector<StagedBatchRegion>&    { return m_stagedRegions; }
-        auto GetStagedInstances()    const -> const std::vector<StagedBatchInstances>& { return m_stagedInstances; }
-        auto GetStagedRemovals()     const -> const std::vector<StagedRemoval>&        { return m_stagedRemovals; }
+        auto HasStagedState()        const -> bool                                        { return m_hasStagedState; }
+        auto GetStagedBatchRegions() const -> const std::vector<StagedBatchRegion>&       { return m_stagedRegions; }
+        auto GetStagedInstances()    const -> const std::vector<StagedBatchInstances<T>>& { return m_stagedInstances; }
+        auto GetStagedRemovals()     const -> const std::vector<StagedRemoval>&           { return m_stagedRemovals; }
         void ClearStaged();
         void Purge(std::span<const BatchRegion> toKeep) noexcept;
 
     private:
         std::vector<StagedBatchRegion> m_stagedRegions;
-        std::vector<StagedBatchInstances> m_stagedInstances;
+        std::vector<StagedBatchInstances<T>> m_stagedInstances;
         std::vector<StagedRemoval> m_stagedRemovals;
         bool m_hasStagedState = false;
 };
 
-// CPU-side buffer for InstanceData. Elements are sorted by Batch, where a Batch corresponds to an instanced
+// CPU-side buffer for instance data types. Elements are sorted by Batch, where a Batch corresponds to an instanced
 // draw call for all objects that share a mesh and material pass combination. Buffer modifications are held
 // in a staging area to improve performance when adding many elements and to allow concurrent reads and writes
 // from the graphics backend and game logic, respectively.
+template<class T>
 class InstanceCache
 {
     public:
@@ -111,13 +115,13 @@ class InstanceCache
                                uint32_t initialBatchSize = 1u);
 
         // Get the staging area for enqueueing buffer writes.
-        auto GetStagingArea() -> InstanceCacheStaging&
+        auto GetStagingArea() -> InstanceCacheStaging<T>&
         {
             return m_stagingArea;
         }
 
         // Build info specifying modified buffer ranges.
-        auto BuildState() -> BufferUpdateInfo<InstanceData>;
+        auto BuildState() -> BufferUpdateInfo<T>;
 
         // Generate draw call information for batches. The return value contains a collection of batches
         // to be drawn per material pass provided in the input 'passes'.
@@ -149,7 +153,7 @@ class InstanceCache
             return m_indexToEntity.at(instanceIndex);
         }
 
-        auto GetInstanceData(uint32_t instanceIndex) const -> const InstanceData&
+        auto GetInstanceData(uint32_t instanceIndex) const -> const T&
         {
             return m_buffer.at(instanceIndex);
         }
@@ -177,22 +181,24 @@ class InstanceCache
         }
 
     private:
-        std::vector<InstanceData> m_buffer;
+        std::vector<T> m_buffer;
         std::vector<BatchRegion> m_batches;
         sparse_map<uint32_t> m_entityToIndex;
         std::vector<uint32_t> m_indexToEntity;
-        InstanceCacheStaging m_stagingArea;
+        InstanceCacheStaging<T> m_stagingArea;
         uint32_t m_dirtyBegin = NullBatchIndex;
         uint32_t m_initialBatchSize;
 
-        void InsertInstance(uint32_t index, const StagedInstance& instance);
+        void InsertInstance(uint32_t index, const StagedInstance<T>& instance);
         void MoveInstance(uint32_t from, uint32_t to);
         auto EraseInstance(uint32_t entityId) -> uint32_t;
         void MarkDirtyStartingFrom(uint32_t instanceIndex);
         void ResetDirtyRange() noexcept;
         void CommitBatchRegions(const std::vector<StagedBatchRegion>& stagedRegions);
         void CommitRemovals(const std::vector<StagedRemoval>& stagedRemovals);
-        void CommitAdditions(const std::vector<StagedBatchInstances>& stagedInstances, size_t newBatchCount);
-        auto EvaluateAdditions(const std::vector<StagedBatchInstances>& stagedInstances, size_t newBatchCount) -> std::vector<uint32_t>;
+        void CommitAdditions(const std::vector<StagedBatchInstances<T>>& stagedInstances, size_t newBatchCount);
+        auto EvaluateAdditions(const std::vector<StagedBatchInstances<T>>& stagedInstances, size_t newBatchCount) -> std::vector<uint32_t>;
 };
 } // namespace nc::graphics
+
+#include "InstanceCache.inl"

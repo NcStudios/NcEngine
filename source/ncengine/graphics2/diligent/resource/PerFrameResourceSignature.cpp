@@ -14,7 +14,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      std::string_view signatureName,
                                                      uint8_t bindingIndex,
                                                      const StructuredBufferResourceDesc& transformResourceDesc,
-                                                     const StructuredBufferResourceDesc& instanceResourceDesc,
+                                                     const StructuredBufferResourceDesc& meshRendererInstanceResourceDesc,
                                                      const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                                      const StructuredBufferResourceDesc& pointLightResourceDesc,
                                                      const StructuredBufferResourceDesc& spotLightResourceDesc,
@@ -25,7 +25,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
-        ToPipelineResourceDesc(instanceResourceDesc),
+        ToPipelineResourceDesc(meshRendererInstanceResourceDesc),
         ToPipelineResourceDesc(directionalLightResourceDesc),
         ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(spotLightResourceDesc),
@@ -65,12 +65,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         transformResourceDesc
     );
 
-    m_instanceResource = std::make_unique<StructuredBuffer<InstanceData>>
+    m_meshRendererInstanceResource = std::make_unique<StructuredBuffer<MeshRendererInstanceData>>
     (
         context,
         device,
-        GetVariable(instanceResourceDesc, m_srb),
-        instanceResourceDesc
+        GetVariable(meshRendererInstanceResourceDesc, m_srb),
+        meshRendererInstanceResourceDesc
     );
 
     m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>

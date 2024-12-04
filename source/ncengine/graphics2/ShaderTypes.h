@@ -32,10 +32,18 @@ struct OutlinePassData
 };
 
 // Object model for MeshRenderers (type: StructuredBuffer element type).
-struct InstanceData
+struct MeshRendererInstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
+};
+
+// Object model for SkinnedRenderers (type: StructuredBuffer element type).
+struct SkinnedRendererInstanceData
+{
+    uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t boneIndex = std::numeric_limits<uint32_t>::max();
 };
 
 // Object model for Transforms (type: StructuredBuffer element type).

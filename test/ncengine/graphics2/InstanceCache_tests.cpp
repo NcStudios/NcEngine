@@ -3,6 +3,8 @@
 
 #include <array>
 
+using TestInstanceCache = nc::graphics::InstanceCache<nc::graphics::MeshRendererInstanceData>;
+
 constexpr auto g_mesh1 = nc::asset::MeshView{
     .id = 11111111,
     .firstVertex = 0,
@@ -79,13 +81,13 @@ struct Batch3
     };
 };
 
-void AddTestInstance(nc::graphics::InstanceCache& uut, uint32_t entityId, const TestObjectInfo& info)
+void AddTestInstance(TestInstanceCache& uut, uint32_t entityId, const TestObjectInfo& info)
 {
     return uut.GetStagingArea().AddInstance(
         entityId,
         info.passes,
         info.mesh,
-        nc::graphics::InstanceData{
+        nc::graphics::MeshRendererInstanceData{
             info.transformIndex,
             info.materialIndex
         }
@@ -93,13 +95,13 @@ void AddTestInstance(nc::graphics::InstanceCache& uut, uint32_t entityId, const 
 }
 
 template<class BatchDesc>
-void RemoveTestInstance(nc::graphics::InstanceCache& uut, uint32_t entityId)
+void RemoveTestInstance(TestInstanceCache& uut, uint32_t entityId)
 {
     uut.GetStagingArea().RemoveInstance(entityId, BatchDesc::passes, BatchDesc::mesh.id);
 }
 
 template<class BatchDesc>
-void VerifyBatch(nc::graphics::InstanceCache& uut,
+void VerifyBatch(TestInstanceCache& uut,
                  uint32_t offset,
                  uint32_t count,
                  uint32_t capacity)
@@ -115,7 +117,7 @@ void VerifyBatch(nc::graphics::InstanceCache& uut,
     EXPECT_EQ(BatchDesc::mesh.firstVertex, region.batch.vertexOffset);
 }
 
-void VerifyInstance(const nc::graphics::InstanceCache& uut,
+void VerifyInstance(const TestInstanceCache& uut,
                     uint32_t entityId,
                     uint32_t instanceIndex,
                     const TestObjectInfo& expectedInfo)
@@ -131,7 +133,7 @@ void VerifyInstance(const nc::graphics::InstanceCache& uut,
 
 TEST(InstanceCacheTest, AddInstance_single)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto& info1 = Batch1::objects.at(0);
     AddTestInstance(uut, id1, info1);
@@ -145,7 +147,7 @@ TEST(InstanceCacheTest, AddInstance_single)
 
 TEST(InstanceCacheTest, AddInstance_multiple)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -167,7 +169,7 @@ TEST(InstanceCacheTest, AddInstance_multiple)
 
 TEST(InstanceCacheTests, AddInstance_multipleBatches)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -195,7 +197,7 @@ TEST(InstanceCacheTests, AddInstance_multipleBatches)
 
 TEST(InstanceCacheTests, AddInstance_hasSubsequentBatches)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -233,7 +235,7 @@ TEST(InstanceCacheTests, AddInstance_hasSubsequentBatches)
 
 TEST(InstanceCacheTests, Remove)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -270,7 +272,7 @@ TEST(InstanceCacheTests, Remove)
 
 TEST(InstanceCacheTests, InsertAfterRemove)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -309,7 +311,7 @@ TEST(InstanceCacheTests, InsertAfterRemove)
 
 TEST(InstanceCacheTests, Purge_clearAll)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -340,7 +342,7 @@ TEST(InstanceCacheTests, Purge_clearAll)
 TEST(InstanceCacheTests, Purge_preservesPersistingObjects)
 {
     const auto batchSize = 2u;
-    auto uut = nc::graphics::InstanceCache{32, batchSize};
+    auto uut = TestInstanceCache{32, batchSize};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -391,7 +393,7 @@ TEST(InstanceCacheTests, Purge_preservesPersistingObjects)
 
 TEST(InstanceCacheTests, AddInstance_afterClear)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -438,7 +440,7 @@ TEST(InstanceCacheTests, AddInstance_afterClear)
 
 TEST(InstanceCacheTests, UpdateInstance)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -459,7 +461,7 @@ TEST(InstanceCacheTests, UpdateInstance)
         newInfo1.passes,
         info1.mesh.id,
         newInfo1.mesh,
-        nc::graphics::InstanceData{
+        nc::graphics::MeshRendererInstanceData{
             newInfo1.transformIndex,
             newInfo1.materialIndex
         }
@@ -471,7 +473,7 @@ TEST(InstanceCacheTests, UpdateInstance)
         newInfo2.passes,
         info2.mesh.id,
         newInfo2.mesh,
-        nc::graphics::InstanceData{
+        nc::graphics::MeshRendererInstanceData{
             newInfo2.transformIndex,
             newInfo2.materialIndex
         }
@@ -500,7 +502,7 @@ TEST(InstanceCacheTests, UpdateInstance)
 
 TEST(InstanceCacheTests, BuildState)
 {
-    auto uut = nc::graphics::InstanceCache{32};
+    auto uut = TestInstanceCache{32};
 
     // empty state - not dirty
     {
@@ -604,7 +606,7 @@ TEST(InstanceCacheTests, BuildState)
 
 TEST(InstanceCacheTests, BuildBatches)
 {
-    auto uut = nc::graphics::InstanceCache{32, 100};
+    auto uut = TestInstanceCache{32, 100};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;
@@ -649,7 +651,7 @@ TEST(InstanceCacheTests, BuildBatches)
 
 TEST(InstanceCacheTests, LargerInitialBatchSize)
 {
-    auto uut = nc::graphics::InstanceCache{32, 100};
+    auto uut = TestInstanceCache{32, 100};
     const auto id1 = 0;
     const auto id2 = 1;
     const auto id3 = 2;

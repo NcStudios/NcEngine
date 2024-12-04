@@ -1,5 +1,3 @@
-#include "InstanceCache.h"
-
 #include "ncengine/debug/Profile.h"
 
 namespace
@@ -24,14 +22,15 @@ auto WalkBatch(const nc::graphics::Batch& batch)
 
 namespace nc::graphics
 {
-void InstanceCacheStaging::AddInstance(uint32_t entityId,
-                                       MaterialPasses passes,
-                                       const asset::MeshView& mesh,
-                                       const InstanceData& instanceData)
+template<class T>
+void InstanceCacheStaging<T>::AddInstance(uint32_t entityId,
+                                          MaterialPasses passes,
+                                          const asset::MeshView& mesh,
+                                          const T& instanceData)
 {
     m_hasStagedState = true;
     const auto key = BatchKey{passes, mesh.id};
-    const auto staging = std::ranges::find(m_stagedInstances, key, &StagedBatchInstances::key);
+    const auto staging = std::ranges::find(m_stagedInstances, key, &StagedBatchInstances<T>::key);
     if (staging != m_stagedInstances.end())
     {
         staging->instances.emplace_back(entityId, instanceData);
@@ -40,7 +39,7 @@ void InstanceCacheStaging::AddInstance(uint32_t entityId,
 
     m_stagedInstances.emplace_back(
         key,
-        std::vector<StagedInstance>{
+        std::vector<StagedInstance<T>>{
             StagedInstance{
                 entityId,
                 instanceData
@@ -51,27 +50,30 @@ void InstanceCacheStaging::AddInstance(uint32_t entityId,
     m_stagedRegions.emplace_back(passes, mesh);
 }
 
-void InstanceCacheStaging::RemoveInstance(uint32_t entityId,
-                                          MaterialPasses passes,
-                                          uint64_t meshId)
+template<class T>
+void InstanceCacheStaging<T>::RemoveInstance(uint32_t entityId,
+                                             MaterialPasses passes,
+                                             uint64_t meshId)
 {
     m_hasStagedState = true;
     m_stagedRemovals.emplace_back(BatchKey{passes, meshId}, entityId);
 }
 
-void InstanceCacheStaging::UpdateInstance(uint32_t entityId,
-                                          MaterialPasses oldPasses,
-                                          MaterialPasses newPasses,
-                                          uint64_t oldMeshId,
-                                          const asset::MeshView& newMesh,
-                                          const InstanceData& instanceData)
+template<class T>
+void InstanceCacheStaging<T>::UpdateInstance(uint32_t entityId,
+                                             MaterialPasses oldPasses,
+                                             MaterialPasses newPasses,
+                                             uint64_t oldMeshId,
+                                             const asset::MeshView& newMesh,
+                                             const T& instanceData)
 {
     m_hasStagedState = true;
     RemoveInstance(entityId, oldPasses, oldMeshId);
     AddInstance(entityId, newPasses, newMesh, instanceData);
 }
 
-void InstanceCacheStaging::ClearStaged()
+template<class T>
+void InstanceCacheStaging<T>::ClearStaged()
 {
     m_hasStagedState = false;
     m_stagedRegions.clear();
@@ -82,7 +84,8 @@ void InstanceCacheStaging::ClearStaged()
     }
 }
 
-void InstanceCacheStaging::Purge(std::span<const BatchRegion> toKeep) noexcept
+template<class T>
+void InstanceCacheStaging<T>::Purge(std::span<const BatchRegion> toKeep) noexcept
 {
     m_stagedRegions.clear();
     m_stagedRegions.shrink_to_fit();
@@ -103,8 +106,9 @@ void InstanceCacheStaging::Purge(std::span<const BatchRegion> toKeep) noexcept
     m_stagedInstances.shrink_to_fit();
 }
 
-InstanceCache::InstanceCache(uint32_t maxEntities,
-                             uint32_t initialBatchSize)
+template<class T>
+InstanceCache<T>::InstanceCache(uint32_t maxEntities,
+                                uint32_t initialBatchSize)
     : m_batches{},
       m_entityToIndex{100, maxEntities},
       m_initialBatchSize{initialBatchSize}
@@ -112,7 +116,8 @@ InstanceCache::InstanceCache(uint32_t maxEntities,
     NC_ASSERT(initialBatchSize > 0, "Invalid initial batch size");
 }
 
-void InstanceCache::CommitPendingChanges()
+template<class T>
+void InstanceCache<T>::CommitPendingChanges()
 {
     NC_PROFILE_SCOPE("InstanceCache::CommitPendingChanges()", ProfileCategory::Rendering);
     if (!m_stagingArea.HasStagedState())
@@ -128,7 +133,8 @@ void InstanceCache::CommitPendingChanges()
     m_stagingArea.ClearStaged();
 }
 
-auto InstanceCache::BuildState() -> BufferUpdateInfo<InstanceData>
+template<class T>
+auto InstanceCache<T>::BuildState() -> BufferUpdateInfo<T>
 {
     // For simplicity, we're only tracking one dirty range from the first modified index to the buffer
     // end. This can result in more copies than necessary for non-shifting insertions and removals, but the
@@ -136,22 +142,23 @@ auto InstanceCache::BuildState() -> BufferUpdateInfo<InstanceData>
     const auto begin = std::exchange(m_dirtyBegin, NullBatchIndex);
     if (begin == NullBatchIndex)
     {
-        return BufferUpdateInfo<InstanceData>{};
+        return BufferUpdateInfo<T>{};
     }
 
     const auto count = static_cast<uint32_t>(m_buffer.size()) - begin;
     if (count == 0)
     {
-        return BufferUpdateInfo<InstanceData>{};
+        return BufferUpdateInfo<T>{};
     }
 
-    return BufferUpdateInfo<InstanceData>{
+    return BufferUpdateInfo<T>{
         .instances = m_buffer,
         .dirtyRanges = {{begin, count}}
     };
 }
 
-auto InstanceCache::BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>
+template<class T>
+auto InstanceCache<T>::BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>
 {
     NC_PROFILE_SCOPE("InstanceCache::BuildBatches()", ProfileCategory::Rendering);
     auto out = std::vector<std::vector<Batch>>(passes.size());
@@ -174,7 +181,8 @@ auto InstanceCache::BuildBatches(std::span<const MaterialPass::type> passes) -> 
     return out;
 }
 
-void InstanceCache::Purge() noexcept
+template<class T>
+void InstanceCache<T>::Purge() noexcept
 {
     CommitPendingChanges();
     m_dirtyBegin = 0u;
@@ -208,24 +216,28 @@ void InstanceCache::Purge() noexcept
     m_stagingArea.Purge(m_batches);
 }
 
-void InstanceCache::MarkDirtyStartingFrom(uint32_t instanceIndex)
+template<class T>
+void InstanceCache<T>::MarkDirtyStartingFrom(uint32_t instanceIndex)
 {
     m_dirtyBegin = std::min(m_dirtyBegin, instanceIndex);
 }
 
-void InstanceCache::ResetDirtyRange() noexcept
+template<class T>
+void InstanceCache<T>::ResetDirtyRange() noexcept
 {
     m_dirtyBegin = NullBatchIndex;
 }
 
-void InstanceCache::InsertInstance(uint32_t index, const StagedInstance& instance)
+template<class T>
+void InstanceCache<T>::InsertInstance(uint32_t index, const StagedInstance<T>& instance)
 {
     m_buffer[index] = instance.instanceData;
     m_indexToEntity[index] = instance.entityId;
     m_entityToIndex.emplace(instance.entityId, index);
 }
 
-void InstanceCache::MoveInstance(uint32_t from, uint32_t to)
+template<class T>
+void InstanceCache<T>::MoveInstance(uint32_t from, uint32_t to)
 {
     m_buffer[to] = m_buffer[from];
     const auto entity = std::exchange(m_indexToEntity[from], NullBatchIndex);
@@ -233,7 +245,8 @@ void InstanceCache::MoveInstance(uint32_t from, uint32_t to)
     m_entityToIndex.at(entity) = to;
 }
 
-auto InstanceCache::EraseInstance(uint32_t entityId) -> uint32_t
+template<class T>
+auto InstanceCache<T>::EraseInstance(uint32_t entityId) -> uint32_t
 {
     const auto instanceIndex = m_entityToIndex.at(entityId);
     m_entityToIndex.erase(entityId);
@@ -241,7 +254,8 @@ auto InstanceCache::EraseInstance(uint32_t entityId) -> uint32_t
     return instanceIndex;
 }
 
-void InstanceCache::CommitBatchRegions(const std::vector<StagedBatchRegion>& stagedRegions)
+template<class T>
+void InstanceCache<T>::CommitBatchRegions(const std::vector<StagedBatchRegion>& stagedRegions)
 {
     auto batchIndex = static_cast<uint32_t>(m_buffer.size());
     for (const auto& [passes, mesh] : stagedRegions)
@@ -256,7 +270,8 @@ void InstanceCache::CommitBatchRegions(const std::vector<StagedBatchRegion>& sta
     }
 }
 
-void InstanceCache::CommitRemovals(const std::vector<StagedRemoval>& stagedRemovals)
+template<class T>
+void InstanceCache<T>::CommitRemovals(const std::vector<StagedRemoval>& stagedRemovals)
 {
     for (const auto& toRemove : stagedRemovals)
     {
@@ -274,7 +289,8 @@ void InstanceCache::CommitRemovals(const std::vector<StagedRemoval>& stagedRemov
     }
 }
 
-void InstanceCache::CommitAdditions(const std::vector<StagedBatchInstances>& stagedInstances, size_t newBatchCount)
+template<class T>
+void InstanceCache<T>::CommitAdditions(const std::vector<StagedBatchInstances<T>>& stagedInstances, size_t newBatchCount)
 {
     NC_ASSERT(m_batches.size() == stagedInstances.size(), "Batch size mismatch");
     const auto perBatchShift = EvaluateAdditions(stagedInstances, newBatchCount);
@@ -310,7 +326,8 @@ void InstanceCache::CommitAdditions(const std::vector<StagedBatchInstances>& sta
     }
 }
 
-auto InstanceCache::EvaluateAdditions(const std::vector<StagedBatchInstances>& stagedInstances, size_t newBatchCount) -> std::vector<uint32_t>
+template<class T>
+auto InstanceCache<T>::EvaluateAdditions(const std::vector<StagedBatchInstances<T>>& stagedInstances, size_t newBatchCount) -> std::vector<uint32_t>
 {
     // Want to minimize number of shifts required when inserting new items. Traverse new instances
     // once to calculate the required shift amount for each batch.

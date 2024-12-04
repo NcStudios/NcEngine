@@ -25,7 +25,7 @@ class PerFrameResourceSignature
                                            std::string_view signatureName,
                                            uint8_t bindingIndex,
                                            const StructuredBufferResourceDesc& transformResourceDesc,
-                                           const StructuredBufferResourceDesc& instanceResourceDesc,
+                                           const StructuredBufferResourceDesc& meshRendererInstanceResourceDesc,
                                            const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                            const StructuredBufferResourceDesc& pointLightResourceDesc,
                                            const StructuredBufferResourceDesc& spotLightResourceDesc,
@@ -39,21 +39,21 @@ class PerFrameResourceSignature
         auto GetResourceSignature()     -> Diligent::IPipelineResourceSignature&   { return *m_signature; }
 
         /* Resource Buffers */
-        auto GetTransformBuffer()           -> StructuredBuffer<TransformData>&        { return *m_transformResource; }
-        auto GetInstanceBuffer()            -> StructuredBuffer<InstanceData>&         { return *m_instanceResource; }
-        auto GetDirectionaLightBuffer()     -> StructuredBuffer<DirectionalLightData>& { return *m_directionalLightResource; }
-        auto GetPointLightBuffer()          -> StructuredBuffer<PointLightData>&       { return *m_pointLightResource; }
-        auto GetSpotLightBuffer()           -> StructuredBuffer<SpotLightData>&        { return *m_spotLightResource; }
-        auto GetMaterialDataResource()      -> StructuredBuffer<MaterialData>&         { return *m_materialDataResource; }
-        auto GetTextureBuffer()             -> TextureBufferResource&                  { return *m_textureResource; }
-        auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&              { return *m_environmentResource; }
-        auto GetPostProcessPropertyBuffer() -> PostProcessPropertyBufferResource&      { return *m_postProcessPropertyResource; }
+        auto GetTransformBuffer()            -> StructuredBuffer<TransformData>&            { return *m_transformResource; }
+        auto GetMeshRendererInstanceBuffer() -> StructuredBuffer<MeshRendererInstanceData>& { return *m_meshRendererInstanceResource; }
+        auto GetDirectionaLightBuffer()      -> StructuredBuffer<DirectionalLightData>&     { return *m_directionalLightResource; }
+        auto GetPointLightBuffer()           -> StructuredBuffer<PointLightData>&           { return *m_pointLightResource; }
+        auto GetSpotLightBuffer()            -> StructuredBuffer<SpotLightData>&            { return *m_spotLightResource; }
+        auto GetMaterialDataResource()       -> StructuredBuffer<MaterialData>&             { return *m_materialDataResource; }
+        auto GetTextureBuffer()              -> TextureBufferResource&                      { return *m_textureResource; }
+        auto GetEnvironmentBuffer()          -> EnvironmentBufferResource&                  { return *m_environmentResource; }
+        auto GetPostProcessPropertyBuffer()  -> PostProcessPropertyBufferResource&          { return *m_postProcessPropertyResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<StructuredBuffer<TransformData>> m_transformResource;
-        std::unique_ptr<StructuredBuffer<InstanceData>> m_instanceResource;
+        std::unique_ptr<StructuredBuffer<MeshRendererInstanceData>> m_meshRendererInstanceResource;
         std::unique_ptr<StructuredBuffer<DirectionalLightData>> m_directionalLightResource;
         std::unique_ptr<StructuredBuffer<PointLightData>> m_pointLightResource;
         std::unique_ptr<StructuredBuffer<SpotLightData>> m_spotLightResource;

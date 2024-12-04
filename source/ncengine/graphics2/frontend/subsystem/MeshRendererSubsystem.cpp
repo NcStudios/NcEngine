@@ -15,7 +15,7 @@ MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events,
                                              uint32_t maxMeshRenderers,
                                              uint32_t initialBatchSize)
     : m_transformCache{maxMeshRenderers},
-      m_instanceCache{maxEntities, initialBatchSize},
+      m_meshRendererInstanceCache{maxEntities, initialBatchSize},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshRendererSubsystem::OnRebuildStatics)}
 {
     MeshRenderer2::s_subsystem = this;
@@ -27,11 +27,11 @@ auto MeshRendererSubsystem::AddInstance(Entity entity,
                                         const asset::MeshView& mesh) -> TransformDataHandle
 {
     const auto transformIndex = m_transformCache.AddInstance(entity);
-    m_instanceCache.GetStagingArea().AddInstance(
+    m_meshRendererInstanceCache.GetStagingArea().AddInstance(
         entity.Index(),
         passes,
         mesh,
-        InstanceData{transformIndex, material}
+        MeshRendererInstanceData{transformIndex, material}
     );
 
     return transformIndex;
@@ -43,7 +43,7 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
                                            MaterialPasses passes)
 {
     m_transformCache.RemoveInstance(transformIndex);
-    m_instanceCache.GetStagingArea().RemoveInstance(entity.Index(), passes, meshId);
+    m_meshRendererInstanceCache.GetStagingArea().RemoveInstance(entity.Index(), passes, meshId);
 }
 
 void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
@@ -53,13 +53,13 @@ void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
                                             uint64_t oldMeshId,
                                             const asset::MeshView& newMesh)
 {
-    m_instanceCache.GetStagingArea().UpdateInstance(
+    m_meshRendererInstanceCache.GetStagingArea().UpdateInstance(
         entity.Index(),
         passes,
         passes,
         oldMeshId,
         newMesh,
-        InstanceData{
+        MeshRendererInstanceData{
             transformIndex,
             materialIndex
         }
@@ -76,13 +76,13 @@ void MeshRendererSubsystem::SetInstanceMaterial(Entity entity,
     const auto meshService = asset::AssetService<asset::MeshView>::Get();
     const auto meshPath = std::string{meshService->GetPath(meshId)};
     const auto meshView = meshService->Acquire(meshPath);
-    m_instanceCache.GetStagingArea().UpdateInstance(
+    m_meshRendererInstanceCache.GetStagingArea().UpdateInstance(
         entity.Index(),
         oldPasses,
         newPasses,
         meshId,
         meshView,
-        InstanceData{
+        MeshRendererInstanceData{
             transformIndex,
             materialIndex
         }
@@ -94,18 +94,18 @@ auto MeshRendererSubsystem::BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform
     NC_PROFILE_SCOPE("MeshRendererSubsystem::BuildState()", ProfileCategory::Rendering);
     m_transformCache.CommitPendingChanges();
     m_transformCache.UpdateMatrices(ecs);
-    m_instanceCache.CommitPendingChanges();
+    m_meshRendererInstanceCache.CommitPendingChanges();
     return MeshRendererRenderState{
         .transformData = m_transformCache.BuildState(),
-        .instanceData = m_instanceCache.BuildState(),
-        .passBatches = m_instanceCache.BuildBatches(GetImplementedMaterialPassFlags())
+        .meshRendererInstanceData = m_meshRendererInstanceCache.BuildState(),
+        .meshRendererBatches = m_meshRendererInstanceCache.BuildBatches(GetImplementedMaterialPassFlags())
     };
 }
 
 void MeshRendererSubsystem::OnBeforeSceneLoad()
 {
     // Call here instead of on Clear() to allow the OnRemove callbacks to fire before purging.
-    m_instanceCache.Purge();
+    m_meshRendererInstanceCache.Purge();
 }
 
 void MeshRendererSubsystem::OnRebuildStatics()

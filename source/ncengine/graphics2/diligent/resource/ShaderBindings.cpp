@@ -23,13 +23,13 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         );
     }
 
-    const auto& instanceData = renderState.meshRendererState.instanceData;
-    if (!instanceData.instances.empty())
+    const auto& meshRendererInstanceData = renderState.meshRendererState.meshRendererInstanceData;
+    if (!meshRendererInstanceData.instances.empty())
     {
-        m_perFrameSignature.GetInstanceBuffer().Update(
+        m_perFrameSignature.GetMeshRendererInstanceBuffer().Update(
             context,
             device,
-            instanceData
+            meshRendererInstanceData
         );
     }
 

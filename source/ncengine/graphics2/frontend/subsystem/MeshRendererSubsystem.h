@@ -52,7 +52,7 @@ class MeshRendererSubsystem
 
     private:
         TransformCache m_transformCache;
-        InstanceCache m_instanceCache;
+        InstanceCache<MeshRendererInstanceData> m_meshRendererInstanceCache;
         Connection m_rebuildStaticsConnection;
 
         void OnRebuildStatics();
