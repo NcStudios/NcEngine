@@ -8,7 +8,7 @@
 namespace
 {
 void VerifyPropertyQuery([[maybe_unused]] nc::PostProcessEffectId effectId,
-                         [[maybe_unused]] nc::PostProcessPass::type passId)
+                         [[maybe_unused]] nc::PostProcessPassFlag::type passId)
 {
     NC_ASSERT(
         nc::GetCombinedPostProcessEffectPassFlags(effectId) & passId,
@@ -48,14 +48,14 @@ auto BuildEffectStates() -> std::vector<nc::graphics::PostProcessEffectState>
     return effects;
 }
 
-auto MatchPostProcessPass(nc::PostProcessPass::type pass,
+auto MatchPostProcessPass(nc::PostProcessPassFlag::type pass,
                           const nc::PostProcessPassProperties& properties) -> bool
 {
     return std::visit(
         [pass](const auto& unpacked) {
             using T = std::decay_t<decltype(unpacked)>;
             if constexpr (std::same_as<T, nc::OutlinePassProperties>)
-                return pass == nc::PostProcessPass::Outline;
+                return pass == nc::PostProcessPassFlag::Outline;
             else
                 return false;
         },
@@ -84,7 +84,7 @@ void PostProcessSubsystem::SetEnabled(PostProcessEffectId effectId, bool enabled
 }
 
 auto PostProcessSubsystem::GetProperties(PostProcessEffectId effectId,
-                                         PostProcessPass::type pass) const -> const PostProcessPassProperties&
+                                         PostProcessPassFlag::type pass) const -> const PostProcessPassProperties&
 {
     VerifyPropertyQuery(effectId, pass);
     for (const auto& properties : m_effects.at(effectId).properties)
@@ -99,7 +99,7 @@ auto PostProcessSubsystem::GetProperties(PostProcessEffectId effectId,
 }
 
 void PostProcessSubsystem::SetProperties(PostProcessEffectId effectId,
-                                         PostProcessPass::type pass,
+                                         PostProcessPassFlag::type pass,
                                          const PostProcessPassProperties& properties)
 {
     VerifyPropertyQuery(effectId, pass);

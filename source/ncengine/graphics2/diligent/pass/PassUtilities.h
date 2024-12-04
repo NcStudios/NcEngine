@@ -44,11 +44,11 @@ auto MakeSwapChainPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
 
 auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
                                    Diligent::IRenderDevice& device,
-                                   nc::PostProcessPass::type passId) -> nc::graphics::DynamicUniformBuffer;
+                                   nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer;
 
 auto MakePostProcessPassInstances(Diligent::IDeviceContext& context,
                                   Diligent::IRenderDevice& device,
-                                  nc::PostProcessPass::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>;
+                                  nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>;
 
 auto MakeOffScreenMaterialPass(Diligent::IRenderDevice& device,
                                Diligent::ISwapChain& swapChain,
@@ -65,7 +65,7 @@ auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
                                   ShaderFactory& shaderFactory,
                                   std::span<Diligent::IPipelineResourceSignature*> signatures,
                                   PostProcessSinkBufferResource& postProcessSinkBufferResource,
-                                  PostProcessPass::type passId,
+                                  PostProcessPassFlag::type passId,
                                   std::string_view pixelShaderPath,
                                   std::string_view vertexShaderPath,
                                   std::string_view pipelineName) -> PostProcessPipeline;
@@ -75,7 +75,7 @@ auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
                                   Diligent::ISwapChain& swapChain,
                                   ShaderFactory& shaderFactory,
                                   std::span<Diligent::IPipelineResourceSignature*> signatures,
-                                  PostProcessPass::type passId,
+                                  PostProcessPassFlag::type passId,
                                   std::string_view pixelShaderPath,
                                   std::string_view vertexShaderPath,
                                   std::string_view pipelineName) -> PostProcessPipeline;

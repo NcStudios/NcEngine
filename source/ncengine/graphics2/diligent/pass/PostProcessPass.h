@@ -32,14 +32,14 @@ struct PostProcessPipeline
     PostProcessPipeline(Diligent::IRenderDevice& device,
                         const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
                         std::vector<PostProcessPipelineInstance> instances_,
-                        PostProcessPass::type passId,
+                        PostProcessPassFlag::type passId,
                         uint32_t colorRTIndex_ = SwapChainColorRTIndex, /** @todo build out support for more than two RT */
                         uint32_t depthRTIndex_ = SwapChainDepthRTIndex,
                         uint32_t renderTargetCount_ = 0u);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
     std::vector<PostProcessPipelineInstance> instances;
-    PostProcessPass::type id = PostProcessPass::None;
+    PostProcessPassFlag::type id = PostProcessPassFlag::None;
     uint32_t renderTargetCount = 0u;
     uint32_t colorRTIndex = 0u;
     uint32_t depthRTIndex = 0u;

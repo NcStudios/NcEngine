@@ -119,7 +119,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         std::vector<PostProcessDataVariable>{
             PostProcessDataVariable{
                 &GetVariable(outlinePassPropertiesDesc, m_srb),
-                PostProcessPass::Outline
+                PostProcessPassFlag::Outline
             }
         }
     );

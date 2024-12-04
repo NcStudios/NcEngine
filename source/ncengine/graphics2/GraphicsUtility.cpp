@@ -33,10 +33,10 @@ constexpr auto g_postProcessPassShaderPaths = std::array{
 };
 
 constexpr auto g_postProcessPassFlags = std::array{
-    nc::PostProcessPass::Alpha,
-    nc::PostProcessPass::Depth,
-    nc::PostProcessPass::Normals,
-    nc::PostProcessPass::Outline
+    nc::PostProcessPassFlag::Alpha,
+    nc::PostProcessPassFlag::Depth,
+    nc::PostProcessPassFlag::Normals,
+    nc::PostProcessPassFlag::Outline
 };
 
 constexpr auto g_postProcessEffectNames = std::array{
@@ -49,10 +49,10 @@ constexpr auto g_postProcessEffectIds = std::array{
 
 const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
-        nc::PostProcessPass::Alpha,
-        nc::PostProcessPass::Depth,
-        nc::PostProcessPass::Normals,
-        nc::PostProcessPass::Outline
+        nc::PostProcessPassFlag::Alpha,
+        nc::PostProcessPassFlag::Depth,
+        nc::PostProcessPassFlag::Normals,
+        nc::PostProcessPassFlag::Outline
     }
 };
 
@@ -94,12 +94,12 @@ auto GetPostProcessPassShaderPaths() -> std::span<const std::pair<std::string_vi
     return g_postProcessPassShaderPaths;
 }
 
-auto GetPostProcessPassFlags() -> std::span<const PostProcessPass::type>
+auto GetPostProcessPassFlags() -> std::span<const PostProcessPassFlag::type>
 {
     return g_postProcessPassFlags;
 }
 
-auto GetPostProcessPassName(PostProcessPass::type pass) -> std::string_view
+auto GetPostProcessPassName(PostProcessPassFlag::type pass) -> std::string_view
 {
     const auto pos = std::ranges::find(g_postProcessPassFlags, pass);
     NC_ASSERT(pos != g_postProcessPassFlags.end(), "Invalid post process pass");
@@ -117,7 +117,7 @@ auto GetPostProcessEffectIds() -> std::span<const PostProcessEffectId>
     return g_postProcessEffectIds;
 }
 
-auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPass::type>
+auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPassFlag::type>
 {
     return g_postProcessEffectPassFlags.at(effectId);
 }

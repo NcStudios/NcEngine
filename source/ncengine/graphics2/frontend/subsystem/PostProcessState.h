@@ -9,14 +9,14 @@ namespace nc::graphics
 struct PostProcessToggle
 {
     PostProcessEffectId effectId = NullPostProcessEffectId;
-    PostProcessEffectPasses passes = PostProcessPass::None;
+    PostProcessEffectPasses passes = PostProcessPassFlag::None;
     bool enabled = false;
 };
 
 struct PostProcessPropertyUpdate
 {
     PostProcessEffectId effectId = NullPostProcessEffectId;
-    PostProcessPass::type pass = PostProcessPass::None;
+    PostProcessPassFlag::type pass = PostProcessPassFlag::None;
     PostProcessPassProperties properties = EmptyPassProperties{};
 };
 

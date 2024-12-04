@@ -12,12 +12,12 @@ PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(std::vector
 {
 }
 
-void PostProcessPropertyBufferResource::SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer)
+void PostProcessPropertyBufferResource::SetVariable(PostProcessPassFlag::type passId, Diligent::IBuffer& buffer)
 {
     GetVariable(passId).Set(&buffer);
 }
 
-auto PostProcessPropertyBufferResource::GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&
+auto PostProcessPropertyBufferResource::GetVariable(PostProcessPassFlag::type passId) -> Diligent::IShaderResourceVariable&
 {
     auto pos = std::ranges::find_if(
         m_variables,

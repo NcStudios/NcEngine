@@ -10,7 +10,7 @@ namespace nc::graphics
 PostProcessPipeline::PostProcessPipeline(Diligent::IRenderDevice& device,
                                          const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
                                          std::vector<PostProcessPipelineInstance> instances_,
-                                         PostProcessPass::type passId,
+                                         PostProcessPassFlag::type passId,
                                          uint32_t colorRTIndex_,
                                          uint32_t depthRTIndex_,
                                          uint32_t renderTargetCount_)

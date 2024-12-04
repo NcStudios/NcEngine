@@ -32,10 +32,10 @@ auto GetPostProcessPassNames() -> std::span<const std::string_view>;
 auto GetPostProcessPassShaderPaths() -> std::span<const std::pair<std::string_view, std::string_view>>;
 
 /** @brief Returns a view of all post process pass flags, ordered by ascending flag value. */
-auto GetPostProcessPassFlags() -> std::span<const PostProcessPass::type>;
+auto GetPostProcessPassFlags() -> std::span<const PostProcessPassFlag::type>;
 
 /** @brief Returns the name of a post process pass. */
-auto GetPostProcessPassName(PostProcessPass::type pass) -> std::string_view;
+auto GetPostProcessPassName(PostProcessPassFlag::type pass) -> std::string_view;
 
 /** @brief Returns a view of all post process effect names, ordered by ascending flag value. */
 auto GetPostProcessEffectNames() -> std::span<const std::string_view>;
@@ -44,7 +44,7 @@ auto GetPostProcessEffectNames() -> std::span<const std::string_view>;
 auto GetPostProcessEffectIds() -> std::span<const PostProcessEffectId>;
 
 /** @brief Returns a view of the post process passes used by an effect, ordered by ascending flag value. */
-auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPass::type>;
+auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPassFlag::type>;
 
 /** @brief Returns the combined post process pass flags used by an effect. */
 auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPasses;

@@ -100,11 +100,11 @@ struct NcGraphics : public Module
 
     /** @brief Get the pass properties for a post process effect. */
     virtual auto GetPostProcessEffectProperties(PostProcessEffectId effectId,
-                                                PostProcessPass::type pass) const -> const PostProcessPassProperties& = 0;
+                                                PostProcessPassFlag::type pass) const -> const PostProcessPassProperties& = 0;
 
     /** @brief Set the pass properties for a post process effect. */
     virtual void SetPostProcessEffectProperties(PostProcessEffectId effectId,
-                                                PostProcessPass::type pass,
+                                                PostProcessPassFlag::type pass,
                                                 const PostProcessPassProperties& properties) = 0;
 };
 
