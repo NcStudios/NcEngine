@@ -25,12 +25,14 @@ auto MakePasses(Diligent::IRenderDevice& device,
                 ShaderFactory& shaderFactory,
                 ShaderBindings& shaderBindings) -> std::vector<MaterialPass>
 {
+    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
+
     return std::vector<MaterialPass>{
         MakeOffScreenMaterialPass(
             device,
             swapChain,
             shaderFactory,
-            shaderBindings.GetPerFrameSignature().GetResourceSignature(),
+            signatures,
             shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource(),
             "Toon.psh",
             "Toon.vsh",

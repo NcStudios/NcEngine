@@ -43,6 +43,7 @@ auto PostProcessSinkBufferResource::Add(Diligent::IRenderDevice& device,
     m_colorRenderTargetViewsRT.reserve(m_colorRenderTargetViewsRT.size() + numColorRenderTargets);
     m_colorRenderTargetViewsSR.reserve(m_colorRenderTargetViewsSR.size() + numColorRenderTargets);
     m_depthRenderTargetViewsRT.reserve(m_depthRenderTargetViewsRT.size() + numDepthRenderTargets);
+    m_depthRenderTargetViewsSR.reserve(m_depthRenderTargetViewsSR.size() + numDepthRenderTargets);
 
     for (auto i = 0u; i < numColorRenderTargets; i++)
     {
@@ -97,24 +98,15 @@ auto PostProcessSinkBufferResource::Add(Diligent::IRenderDevice& device,
         addedIndices.push_back(static_cast<uint32_t>(m_depthRenderTargets.size()));
         m_depthRenderTargets.push_back(std::move(pDepthRenderTarget));
         m_depthRenderTargetViewsRT.push_back(m_depthRenderTargets.back()->GetDefaultView(TEXTURE_VIEW_DEPTH_STENCIL));
+        m_depthRenderTargetViewsSR.push_back(m_depthRenderTargets.back()->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
     }
 
-    // auto combinedViews = std::vector<Diligent::IDeviceObject*>{};
-    // combinedViews.reserve(m_depthRenderTargetViewsRT.size() + m_colorRenderTargetViews.size());
-    // combinedViews.append_range(m_colorRenderTargetViewsSR);
-    // combinedViews.append_range(m_depthRenderTargetViewsRT);
+    auto combinedViews = std::vector<Diligent::IDeviceObject*>{};
+    combinedViews.reserve(m_colorRenderTargetViewsSR.size() + m_depthRenderTargetViewsSR.size());
+    combinedViews.append_range(m_colorRenderTargetViewsSR);
+    combinedViews.append_range(m_depthRenderTargetViewsSR);
 
-    // if (numColorRenderTargets == 0)
-    // {
-    //     // If no color render targets were added, just update the depth render targets that have changed
-    //     SetArrayRegion(combinedViews, combinedViews.size() - numDepthRenderTargets, numDepthRenderTargets);
-    //     return;
-    // }
-
-    // // If color and depth were added, or just color was added, 
-    // // then remap all of the depth targets (always) and the color targets that were added
-    // auto count = numColorRenderTargets + m_depthRenderTargetViewsRT.size();
-    SetArrayRegion(m_colorRenderTargetViewsSR, m_colorRenderTargetViewsSR.size() - numColorRenderTargets, numColorRenderTargets);
+    SetArrayRegion(combinedViews, 0u, combinedViews.size());
     return addedIndices;
 }
 
@@ -140,6 +132,8 @@ void PostProcessSinkBufferResource::Clear()
     m_depthRenderTargets.shrink_to_fit();
     m_depthRenderTargetViewsRT.clear();
     m_depthRenderTargetViewsRT.shrink_to_fit();
+    m_depthRenderTargetViewsSR.clear();
+    m_depthRenderTargetViewsSR.shrink_to_fit();
 }
 
 void PostProcessSinkBufferResource::SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& views, size_t offset, size_t count)

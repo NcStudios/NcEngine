@@ -1,6 +1,7 @@
 #include "PostProcessPass.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/pass/PassUtilities.h"
+#include "graphics2/diligent/resource/ShaderBindings.h"
 
 #include "ncengine/graphics/GraphicsUtility.h"
 
@@ -27,7 +28,7 @@ PostProcessPipeline::PostProcessPipeline(Diligent::IRenderDevice& device,
 auto MakePostProcessPasses(Diligent::IDeviceContext& context,
                            Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
-                           Diligent::IPipelineResourceSignature& perFrameResourceSignature,
+                           ShaderBindings& shaderBindings,
                            nc::graphics::PostProcessSinkBufferResource& postProcessSinkBufferResource,
                            ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>
 {                       
@@ -35,15 +36,15 @@ auto MakePostProcessPasses(Diligent::IDeviceContext& context,
     shaderFactory;
 
     const auto passIds = GetPostProcessPassFlags();
-
     auto passes = std::vector<PostProcessPipeline>{};
 
     if (passIds.empty())
         return passes;
 
     const auto passShaderPaths = GetPostProcessPassShaderPaths();
-    const auto passNames = GetPostProcessEffectNames();
+    const auto passNames = GetPostProcessPassNames();
     passes.reserve(passIds.size());
+    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
 
     if (passIds.size() > 1)
     {
@@ -53,7 +54,7 @@ auto MakePostProcessPasses(Diligent::IDeviceContext& context,
                                                              context,
                                                              swapChain,
                                                              shaderFactory,
-                                                             perFrameResourceSignature,
+                                                             signatures,
                                                              postProcessSinkBufferResource,
                                                              passIds[i],
                                                              passShaderPaths[i].first,
@@ -62,15 +63,15 @@ auto MakePostProcessPasses(Diligent::IDeviceContext& context,
         }
     }
 
-    passes.emplace_back(MakeDefaultPostProcessPass(device,
-                                                    context,
-                                                    swapChain,
-                                                    shaderFactory,
-                                                    perFrameResourceSignature,
-                                                    passIds.back(),
-                                                    passShaderPaths.back().first,
-                                                    passShaderPaths.back().second,
-                                                    passNames.back()));
+    passes.emplace_back(MakeSwapChainPostProcessPass(device,
+                                                   context,
+                                                   swapChain,
+                                                   shaderFactory,
+                                                   signatures,
+                                                   passIds.back(),
+                                                   passShaderPaths.back().first,
+                                                   passShaderPaths.back().second,
+                                                   passNames.back()));
 
     return passes;
 }

@@ -14,6 +14,8 @@
 #include "imgui.h"
 #include "DirectXMath.h"
 
+#include <array>
+
 namespace
 {
 struct NcGraphicsStub2 : nc::graphics::NcGraphics
@@ -184,7 +186,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                 m_engine.GetContext(),
                 m_engine.GetDevice(),
                 m_engine.GetSwapChain(),
-                m_shaderBindings.GetPerFrameSignature().GetResourceSignature(),
+                m_shaderBindings,
                 m_shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource(),
                 m_engine.GetShaderFactory()
             )
@@ -205,6 +207,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
+    SetPostProcessEffectEnabled(MoebiusEffectId, true);
 }
 
 NcGraphicsImpl2::~NcGraphicsImpl2()

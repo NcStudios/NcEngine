@@ -14,6 +14,7 @@
 
 namespace nc::graphics
 {
+class ShaderBindings;
 class ShaderFactory;
 class PostProcessSinkBufferResource;
 
@@ -48,7 +49,7 @@ struct PostProcessPipeline
 auto MakePostProcessPasses(Diligent::IDeviceContext& context,
                            Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
-                           Diligent::IPipelineResourceSignature& perFrameResourceSignature,
+                           ShaderBindings& shaderBindings,
                            nc::graphics::PostProcessSinkBufferResource& postProcessSinkBufferResource,
                            ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>;
 } // namespace nc::graphics

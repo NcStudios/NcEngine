@@ -126,6 +126,7 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
 
             if (instance.buffer.has_value())
             {
+
                 resource.SetVariable(pass.id, instance.buffer->GetBuffer());
             }
 

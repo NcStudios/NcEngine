@@ -26,10 +26,10 @@ constexpr auto g_postProcessPassNames = std::array{
 };
 
 constexpr auto g_postProcessPassShaderPaths = std::array{
-    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Alpha
-    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Depth
-    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Normal
-    std::pair{std::string_view{"PostProcess.vsh"}, std::string_view{"PPWave.psh"}}, // Outline
+    std::pair{std::string_view{"PPWave.psh"}, std::string_view{"PostProcess.vsh"}}, // Alpha
+    std::pair{std::string_view{"PPWave.psh"}, std::string_view{"PostProcess.vsh"}}, // Depth
+    std::pair{std::string_view{"PPWave.psh"}, std::string_view{"PostProcess.vsh"}}, // Normal
+    std::pair{std::string_view{"PPWave.psh"}, std::string_view{"PostProcess.vsh"}}, // Outline
 };
 
 constexpr auto g_postProcessPassFlags = std::array{

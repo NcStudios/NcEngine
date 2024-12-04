@@ -39,6 +39,7 @@ class PostProcessSinkBufferResource
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_depthRenderTargets;
         std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsSR; // Shader resource
         std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsRT; // Render target
+        std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsSR; // Render target
         std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsRT; // Render target
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
