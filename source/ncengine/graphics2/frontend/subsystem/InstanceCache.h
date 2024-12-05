@@ -17,7 +17,7 @@ constexpr auto NullBatchIndex = std::numeric_limits<uint32_t>::max();
 // A batch is uniquely identified by a mesh and set of material passes.
 struct BatchKey
 {
-    MaterialPasses passes = NullBatchIndex;
+    MaterialPassFlags passes = NullBatchIndex;
     uint64_t meshId = std::numeric_limits<uint64_t>::max();
 
     friend auto operator==(const BatchKey& lhs, const BatchKey& rhs) -> bool
@@ -37,7 +37,7 @@ struct BatchRegion
 // A new batch waiting to be added to the instance buffer.
 struct StagedBatchRegion
 {
-    MaterialPasses passes = MaterialPasses{};
+    MaterialPassFlags passes = MaterialPassFlags{};
     asset::MeshView mesh = asset::MeshView{};
 };
 
@@ -70,17 +70,17 @@ class InstanceCacheStaging
     public:
         // API-Facing Functions
         void AddInstance(uint32_t entityId,
-                         MaterialPasses passes,
+                         MaterialPassFlags passes,
                          const asset::MeshView& mesh,
                          const InstanceData& instanceData);
 
         void RemoveInstance(uint32_t entityId,
-                            MaterialPasses passes,
+                            MaterialPassFlags passes,
                             uint64_t meshId);
 
         void UpdateInstance(uint32_t entityId,
-                            MaterialPasses oldPasses,
-                            MaterialPasses newPasses,
+                            MaterialPassFlags oldPasses,
+                            MaterialPassFlags newPasses,
                             uint64_t oldMeshId,
                             const asset::MeshView& newMesh,
                             const InstanceData& instanceData);

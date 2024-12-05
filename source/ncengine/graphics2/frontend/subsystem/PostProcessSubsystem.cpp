@@ -27,7 +27,7 @@ auto BuildEffectStates() -> std::vector<nc::graphics::PostProcessEffectState>
     for (const auto effectId : nc::GetPostProcessEffectIds())
     {
         auto properties = std::vector<nc::PostProcessPassProperties>{};
-        auto passes = nc::PostProcessEffectPasses{};
+        auto passes = nc::PostProcessEffectPassFlags{};
         for (const auto pass : nc::GetPostProcessEffectPassFlags(effectId))
         {
             passes |= pass;

@@ -175,22 +175,22 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_materialPassBackend{MakePasses(
-            m_engine.GetDevice(),
-            m_engine.GetSwapChain(),
-            m_engine.GetShaderFactory(),
-            m_shaderBindings
-          )},
-          m_postProcessPassBackend{
-            MakePostProcessPasses(
+          m_passBackend{
+            MakeMaterialPasses
+            (
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory(),
+                m_shaderBindings
+            ),
+            MakePostProcessPasses
+            (
                 m_engine.GetContext(),
                 m_engine.GetDevice(),
                 m_engine.GetSwapChain(),
-                m_shaderBindings,
-                m_shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource(),
-                m_engine.GetShaderFactory()
-            )
-          },
+                m_engine.GetShaderFactory(),
+                m_shaderBindings
+            )},
           m_frontend{
             m_engine.GetContext(),
             m_engine.GetDevice(),
@@ -313,14 +313,14 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    m_postProcessPassBackend.Update(context, renderState.postProcessState);
+    m_passBackend.Update(context, renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetPerPassSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_materialPassBackend.Render(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRendererState.passBatches);
-    m_postProcessPassBackend.Render(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
+    m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRendererState.passBatches);
+    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);
 
     swapChain.Present();

@@ -11,7 +11,7 @@ namespace nc::graphics
 struct PostProcessEffectState
 {
     PostProcessEffectId effectId = NullPostProcessEffectId;
-    PostProcessEffectPasses passes = PostProcessPassFlag::None;
+    PostProcessEffectPassFlags passes = PostProcessPassFlag::None;
     std::vector<PostProcessPassProperties> properties = {};
     bool enabled = false;
 };

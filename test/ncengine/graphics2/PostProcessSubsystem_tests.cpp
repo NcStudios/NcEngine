@@ -102,7 +102,7 @@ TEST(PostProcessSubsystemTest, BuildState_reportsEnabledAndDisabled)
     EXPECT_EQ(0, state.modifiedProperties.size());
     const auto& enableEvent = state.toggledEffects.at(0);
     EXPECT_EQ(nc::MoebiusEffectId, enableEvent.effectId);
-    EXPECT_EQ(nc::MoebiusEffectPasses, enableEvent.passes);
+    EXPECT_EQ(nc::MoebiusEffectPassFlags, enableEvent.passes);
     EXPECT_TRUE(enableEvent.enabled);
 
     // enable event cleared
@@ -117,7 +117,7 @@ TEST(PostProcessSubsystemTest, BuildState_reportsEnabledAndDisabled)
     EXPECT_EQ(0, state.modifiedProperties.size());
     const auto& disableEvent = state.toggledEffects.at(0);
     EXPECT_EQ(nc::MoebiusEffectId, disableEvent.effectId);
-    EXPECT_EQ(nc::MoebiusEffectPasses, disableEvent.passes);
+    EXPECT_EQ(nc::MoebiusEffectPassFlags, disableEvent.passes);
     EXPECT_FALSE(disableEvent.enabled);
 
     // disable event cleared

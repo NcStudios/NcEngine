@@ -7,7 +7,7 @@
 
 namespace nc::graphics
 {
-PostProcessPipeline::PostProcessPipeline(Diligent::IRenderDevice& device,
+PostProcessPass::PostProcessPass(Diligent::IRenderDevice& device,
                                          const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
                                          std::vector<PostProcessPipelineInstance> instances_,
                                          PostProcessPassFlag::type passId,
@@ -28,15 +28,11 @@ PostProcessPipeline::PostProcessPipeline(Diligent::IRenderDevice& device,
 auto MakePostProcessPasses(Diligent::IDeviceContext& context,
                            Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
-                           ShaderBindings& shaderBindings,
-                           nc::graphics::PostProcessSinkBufferResource& postProcessSinkBufferResource,
-                           ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>
+                           ShaderFactory& shaderFactory,
+                           ShaderBindings& shaderBindings) -> std::vector<PostProcessPass>
 {                       
-    swapChain;
-    shaderFactory;
-
     const auto passIds = GetPostProcessPassFlags();
-    auto passes = std::vector<PostProcessPipeline>{};
+    auto passes = std::vector<PostProcessPass>{};
 
     if (passIds.empty())
         return passes;
@@ -45,33 +41,30 @@ auto MakePostProcessPasses(Diligent::IDeviceContext& context,
     const auto passNames = GetPostProcessPassNames();
     passes.reserve(passIds.size());
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
+    auto& postProcessSinkBuffer = shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource();
 
     if (passIds.size() > 1)
     {
         for (auto i = 0u; i < passIds.size()-1; i++)
         {
-            passes.emplace_back(MakeOffScreenPostProcessPass(device,
-                                                             context,
-                                                             swapChain,
-                                                             shaderFactory,
-                                                             signatures,
-                                                             postProcessSinkBufferResource,
-                                                             passIds[i],
-                                                             passShaderPaths[i].first,
-                                                             passShaderPaths[i].second,
-                                                             passNames[i]));
+            passes.emplace_back(MakeOffScreenPostProcessPass(
+                device, context, swapChain, shaderFactory,
+                signatures,
+                postProcessSinkBuffer,
+                passIds[i],
+                passShaderPaths[i].first,
+                passShaderPaths[i].second,
+                passNames[i]));
         }
     }
 
-    passes.emplace_back(MakeSwapChainPostProcessPass(device,
-                                                   context,
-                                                   swapChain,
-                                                   shaderFactory,
-                                                   signatures,
-                                                   passIds.back(),
-                                                   passShaderPaths.back().first,
-                                                   passShaderPaths.back().second,
-                                                   passNames.back()));
+    passes.emplace_back(MakeSwapChainPostProcessPass(
+        device, context, swapChain, shaderFactory,
+        signatures,
+        passIds.back(),
+        passShaderPaths.back().first,
+        passShaderPaths.back().second,
+        passNames.back()));
 
     return passes;
 }

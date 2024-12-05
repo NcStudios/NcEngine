@@ -25,26 +25,26 @@ class MeshRendererSubsystem
 
         auto AddInstance(Entity entity,
                          MaterialInstanceHandle material,
-                         const MaterialPasses passes,
+                         const MaterialPassFlags passes,
                          const asset::MeshView& mesh) -> TransformDataHandle;
 
         void RemoveInstance(Entity entity,
                             uint32_t transformIndex,
                             uint64_t meshId,
-                            MaterialPasses passes);
+                            MaterialPassFlags passes);
 
         void SetInstanceMesh(Entity entity,
                              uint32_t transformIndex,
                              MaterialInstanceHandle materialIndex,
-                             MaterialPasses passes,
+                             MaterialPassFlags passes,
                              uint64_t oldMeshId,
                              const asset::MeshView& newMesh);
 
         void SetInstanceMaterial(Entity entity,
                                  uint32_t transformIndex,
                                  MaterialInstanceHandle materialIndex,
-                                 MaterialPasses oldPasses,
-                                 MaterialPasses newPasses,
+                                 MaterialPassFlags oldPasses,
+                                 MaterialPassFlags newPasses,
                                  uint64_t meshId);
 
         auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRendererRenderState;

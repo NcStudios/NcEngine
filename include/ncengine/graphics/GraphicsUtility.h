@@ -47,5 +47,5 @@ auto GetPostProcessEffectIds() -> std::span<const PostProcessEffectId>;
 auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPassFlag::type>;
 
 /** @brief Returns the combined post process pass flags used by an effect. */
-auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPasses;
+auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPassFlags;
 } // namespace nc

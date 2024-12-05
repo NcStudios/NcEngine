@@ -1,14 +1,9 @@
-#include "PostProcessPassBackend.h"
+#include "PassBackend.h"
 #include "graphics2/diligent/pass/PassUtilities.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
-
-#include "ncutility/NcError.h"
-
-#include <ranges>
-
 namespace
 {
 using namespace nc;
@@ -28,7 +23,7 @@ auto UpdateBuffer(Diligent::IDeviceContext& context,
 }
 
 void EnableInstance(PostProcessEffectId effectId,
-                    PostProcessPipeline& pass)
+                    PostProcessPass& pass)
 {
     pass.anyEnabled = true;
     auto instance = std::ranges::find(pass.instances, effectId, &PostProcessPipelineInstance::effectId);
@@ -37,7 +32,7 @@ void EnableInstance(PostProcessEffectId effectId,
 }
 
 void DisableInstance(PostProcessEffectId effectId,
-                     PostProcessPipeline& pass)
+                     PostProcessPass& pass)
 {
     auto anyEnabled = false;
     for (auto& instance : pass.instances)
@@ -55,11 +50,11 @@ void DisableInstance(PostProcessEffectId effectId,
     pass.anyEnabled = anyEnabled;
 }
 
-auto FindInstance(std::vector<PostProcessPipeline>& passes,
+auto FindInstance(std::vector<PostProcessPass>& passes,
                   PostProcessEffectId effectId,
                   PostProcessPassFlag::type passId) -> PostProcessPipelineInstance&
 {
-    auto pass = std::ranges::find(passes, passId, &PostProcessPipeline::id);
+    auto pass = std::ranges::find(passes, passId, &PostProcessPass::id);
     if (pass != passes.end())
     {
         auto instance = std::ranges::find(pass->instances, effectId, &PostProcessPipelineInstance::effectId);
@@ -81,12 +76,11 @@ auto FindInstance(std::vector<PostProcessPipeline>& passes,
 
 namespace nc::graphics
 {
-void PostProcessPassBackend::Update(Diligent::IDeviceContext& context,
-                                    const PostProcessState& postProcessState)
+void PassBackend::Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState)
 {
     for (const auto& [effectId, effectPasses, enabled] : postProcessState.toggledEffects)
     {
-        for (auto& pass : m_passes)
+        for (auto& pass : m_postProcessPasses)
         {
             if (pass.id & effectPasses)
             {
@@ -97,17 +91,17 @@ void PostProcessPassBackend::Update(Diligent::IDeviceContext& context,
 
     for (const auto& [effectId, passId, properties] : postProcessState.modifiedProperties)
     {
-        UpdateBuffer(context, properties, FindInstance(m_passes, effectId, passId));
+        UpdateBuffer(context, properties, FindInstance(m_postProcessPasses, effectId, passId));
     }
 }
 
-void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
+void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                                     Diligent::ISwapChain& swapChain,
                                     PerPassResourceSignature& perPassResourceSignature,
-                                    PostProcessPropertyBufferResource& resource)
+                                    PostProcessPropertyBufferResource& )
 {
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
-    for (auto& pass : m_passes)
+    for (auto& pass : m_postProcessPasses)
     {
         if (!pass.anyEnabled)
         {
@@ -115,7 +109,11 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
         }
 
         BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
+
         context.SetPipelineState(pass.pso);
+
+        auto lastIndices = m_materialPassBackend.GetLastRenderTargetIndices();
+        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, lastIndices.first, lastIndices.second);
 
         for (auto& instance : pass.instances)
         {
@@ -124,11 +122,10 @@ void PostProcessPassBackend::Render(Diligent::IDeviceContext& context,
                 continue;
             }
 
-            if (instance.buffer.has_value())
-            {
-
-                resource.SetVariable(pass.id, instance.buffer->GetBuffer());
-            }
+            // if (instance.buffer.has_value())
+            // {
+            //     resource.SetVariable(pass.id, instance.buffer->GetBuffer());
+            // }
 
             context.Draw(drawAttribs);
 

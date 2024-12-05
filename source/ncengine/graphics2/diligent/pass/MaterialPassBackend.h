@@ -5,6 +5,7 @@
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
+#include <utility>
 #include <vector>
 
 namespace nc::graphics
@@ -15,7 +16,9 @@ class MaterialPassBackend
 {
     public:
         explicit MaterialPassBackend(std::vector<MaterialPass> passes)
-            : m_passes{std::move(passes)}
+            : m_passes{std::move(passes)},
+              m_lastColorRenderTargetIndex{0u},
+              m_lastDepthRenderTargetIndex{0u}
         {
         }
 
@@ -23,8 +26,12 @@ class MaterialPassBackend
                     Diligent::ISwapChain& swapChain,
                     PerPassResourceSignature& perPassResourceSignature,
                     const std::vector<std::vector<Batch>>& passBatches);
+        
+        auto GetLastRenderTargetIndices() -> std::pair<uint32_t, uint32_t> {return std::make_pair(m_lastColorRenderTargetIndex, m_lastDepthRenderTargetIndex);}
 
     private:
         std::vector<MaterialPass> m_passes;
+        uint32_t m_lastColorRenderTargetIndex;
+        uint32_t m_lastDepthRenderTargetIndex;
 };
 } // namespacae nc::graphics

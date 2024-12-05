@@ -33,7 +33,7 @@ struct MaterialPassFlag
 };
 
 /** @brief Set of flags indicating a MaterialInstance's enabled passes. */
-using MaterialPasses = MaterialPassFlag::type;
+using MaterialPassFlags = MaterialPassFlag::type;
 
 /** @brief Default passes for a toon material. */
 constexpr auto ShadowedToonMaterial = MaterialPassFlag::Shadow | MaterialPassFlag::Toon;
@@ -53,7 +53,7 @@ struct MaterialProperties
 struct MaterialDesc
 {
     std::string name = "DefaultMaterial";
-    MaterialPasses passes = ShadowedToonMaterial;
+    MaterialPassFlags passes = ShadowedToonMaterial;
     MaterialProperties properties = MaterialProperties{};
 };
 
@@ -77,7 +77,7 @@ class MaterialInstance
         void SetName(std::string_view name);
 
         /** @name MaterialPassFlag Functions */
-        auto GetPasses() const -> MaterialPasses;
+        auto GetPasses() const -> MaterialPassFlags;
 
         /** @name MaterialProperties Functions */
         auto GetProperties() const -> const MaterialProperties&;

@@ -42,7 +42,7 @@ struct MaterialPass
 };
 
 // todo 794 This only creates a Toon pass. Add more as they are implemented.
-auto MakePasses(Diligent::IRenderDevice& device,
+auto MakeMaterialPasses(Diligent::IRenderDevice& device,
                 Diligent::ISwapChain& swapChain,
                 ShaderFactory& shaderFactory,
                 ShaderBindings& shaderBindings)-> std::vector<MaterialPass>;

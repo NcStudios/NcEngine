@@ -31,6 +31,14 @@ struct OutlinePassData
     float width = 1.0f;
 };
 
+// Object model for specifying the index into the color and depth offscreen render target arrays.
+// 16 bytes with 4 byte alignment
+struct PostProcessSinkIndexData
+{
+    uint32_t colorRenderTargetIndex;
+    uint32_t depthRenderTargetIndex;
+};
+
 // Object model for MeshRenderers (type: StructuredBuffer element type).
 struct InstanceData
 {

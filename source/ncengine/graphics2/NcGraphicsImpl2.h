@@ -1,8 +1,7 @@
 #pragma once
 
 #include "diligent/DiligentEngine.h"
-#include "diligent/pass/MaterialPassBackend.h"
-#include "diligent/pass/PostProcessPassBackend.h"
+#include "diligent/pass/PassBackend.h"
 #include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
@@ -57,8 +56,7 @@ class NcGraphicsImpl2 : public NcGraphics
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
         UIBackend m_ui;
-        MaterialPassBackend m_materialPassBackend;
-        PostProcessPassBackend m_postProcessPassBackend;
+        PassBackend m_passBackend;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
         Vector2 m_dimensions;

@@ -3,6 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         MaterialPassBackend.cpp
         MaterialPass.cpp
         PassUtilities.cpp
+        PassBackend.cpp
         PostProcessPass.cpp
-        PostProcessPassBackend.cpp
 )

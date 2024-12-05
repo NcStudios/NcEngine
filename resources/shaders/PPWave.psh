@@ -6,6 +6,12 @@
 Texture2D     PostProcessSinkBufferData[];
 SamplerState  PostProcessSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
+cbuffer PostProcessSinkIndexBufferData
+{
+    uint colorRenderTargetIndex;
+    uint depthRenderTargetIndex;
+};
+
 struct PSInput 
 { 
     float4 Pos : SV_POSITION;
@@ -20,7 +26,7 @@ struct PSOutput
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     float2 DistortedUV = PSIn.UV + float2(sin(PSIn.UV.y * 100) * 0.1 * sin(PSIn.UV.x * 100.0) * 0.05);
-    float4 Color = PostProcessSinkBufferData[0].Sample(PostProcessSinkBufferData_sampler, DistortedUV);
+    float4 Color = PostProcessSinkBufferData[colorRenderTargetIndex].Sample(PostProcessSinkBufferData_sampler, DistortedUV);
 
     PSOut.Color = Color;
 }

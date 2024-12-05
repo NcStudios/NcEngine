@@ -39,10 +39,11 @@ class ShaderBindings
                 UniformBufferResourceDesc{"OutlinePassBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
               },
               m_perPassSignature{
-                device,
+                device, context,
                 "PerPassResourceSignature",
                 1,
-                TextureBufferResourceDesc{"PostProcessSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10}
+                TextureBufferResourceDesc{"PostProcessSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
+                UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
             }
         {
         }

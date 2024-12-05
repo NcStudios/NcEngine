@@ -9,7 +9,7 @@ namespace nc::graphics
 struct PostProcessToggle
 {
     PostProcessEffectId effectId = NullPostProcessEffectId;
-    PostProcessEffectPasses passes = PostProcessPassFlag::None;
+    PostProcessEffectPassFlags passes = PostProcessPassFlag::None;
     bool enabled = false;
 };
 

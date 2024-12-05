@@ -23,7 +23,7 @@ MeshRendererSubsystem::MeshRendererSubsystem(SystemEvents& events,
 
 auto MeshRendererSubsystem::AddInstance(Entity entity,
                                         MaterialInstanceHandle material,
-                                        MaterialPasses passes,
+                                        MaterialPassFlags passes,
                                         const asset::MeshView& mesh) -> TransformDataHandle
 {
     const auto transformIndex = m_transformCache.AddInstance(entity);
@@ -40,7 +40,7 @@ auto MeshRendererSubsystem::AddInstance(Entity entity,
 void MeshRendererSubsystem::RemoveInstance(Entity entity,
                                            uint32_t transformIndex,
                                            uint64_t meshId,
-                                           MaterialPasses passes)
+                                           MaterialPassFlags passes)
 {
     m_transformCache.RemoveInstance(transformIndex);
     m_instanceCache.GetStagingArea().RemoveInstance(entity.Index(), passes, meshId);
@@ -49,7 +49,7 @@ void MeshRendererSubsystem::RemoveInstance(Entity entity,
 void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
                                             uint32_t transformIndex,
                                             MaterialInstanceHandle materialIndex,
-                                            MaterialPasses passes,
+                                            MaterialPassFlags passes,
                                             uint64_t oldMeshId,
                                             const asset::MeshView& newMesh)
 {
@@ -69,8 +69,8 @@ void MeshRendererSubsystem::SetInstanceMesh(Entity entity,
 void MeshRendererSubsystem::SetInstanceMaterial(Entity entity,
                                                 uint32_t transformIndex,
                                                 MaterialInstanceHandle materialIndex,
-                                                MaterialPasses oldPasses,
-                                                MaterialPasses newPasses,
+                                                MaterialPassFlags oldPasses,
+                                                MaterialPassFlags newPasses,
                                                 uint64_t meshId)
 {
     const auto meshService = asset::AssetService<asset::MeshView>::Get();

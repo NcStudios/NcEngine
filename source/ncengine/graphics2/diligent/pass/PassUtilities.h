@@ -14,29 +14,29 @@
 
 namespace nc::graphics
 {
-auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                     Diligent::IShader& pixelShader,
+auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                     Diligent::IShader& vertexShader,
                                      Diligent::ISwapChain& swapChain,
                                      std::span<Diligent::IPipelineResourceSignature*> signatures,
                                      std::span<const Diligent::LayoutElement> layoutElements,
                                      std::string_view name) -> Diligent::GraphicsPipelineStateCreateInfo;
 
-auto MakeOffScreenPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                     Diligent::IShader& pixelShader,
+auto MakeOffScreenPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                     Diligent::IShader& vertexShader,
                                      Diligent::ISwapChain& swapChain,
                                      std::span<Diligent::IPipelineResourceSignature*> signatures,
                                      std::span<const Diligent::LayoutElement> layoutElements,
                                      std::string_view name) -> Diligent::GraphicsPipelineStateCreateInfo;
 
-auto MakeOffScreenPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                                Diligent::IShader& pixelShader,
+auto MakeOffScreenPostProcessPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                                Diligent::IShader& vertexShader,
                                                 Diligent::ISwapChain& swapChain,
                                                 std::span<Diligent::IPipelineResourceSignature*> signatures,
                                                 std::span<const Diligent::LayoutElement> layoutElements,
                                                 std::string_view name) -> Diligent::GraphicsPipelineStateCreateInfo;
 
-auto MakeSwapChainPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                                Diligent::IShader& pixelShader,
+auto MakeSwapChainPostProcessPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                                Diligent::IShader& vertexShader,
                                                 Diligent::ISwapChain& swapChain,
                                                 std::span<Diligent::IPipelineResourceSignature*> signatures,
                                                 std::span<const Diligent::LayoutElement> layoutElements,
@@ -54,9 +54,17 @@ auto MakeOffScreenMaterialPass(Diligent::IRenderDevice& device,
                                Diligent::ISwapChain& swapChain,
                                ShaderFactory& shaderFactory,
                                std::span<Diligent::IPipelineResourceSignature*> signatures,
-                               PostProcessSinkBufferResource& postProcessBufferResource,
-                               std::string_view vertexShaderName,
-                               std::string_view pixelShaderName,
+                               PostProcessSinkBufferResource& postProcessSinkBufferResource,
+                               std::string_view pixelShaderPath,
+                               std::string_view vertexShaderPath,
+                               std::string_view pipelineName) -> MaterialPass;
+
+auto MakeSwapChainMaterialPass(Diligent::IRenderDevice& device,
+                               Diligent::ISwapChain& swapChain,
+                               ShaderFactory& shaderFactory,
+                               std::span<Diligent::IPipelineResourceSignature*> signatures,
+                               std::string_view pixelShaderPath,
+                               std::string_view vertexShaderPath,
                                std::string_view pipelineName) -> MaterialPass;
 
 auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
@@ -68,7 +76,7 @@ auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
                                   PostProcessPassFlag::type passId,
                                   std::string_view pixelShaderPath,
                                   std::string_view vertexShaderPath,
-                                  std::string_view pipelineName) -> PostProcessPipeline;
+                                  std::string_view pipelineName) -> PostProcessPass;
 
 auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
                                   Diligent::IDeviceContext& context,
@@ -78,7 +86,7 @@ auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
                                   PostProcessPassFlag::type passId,
                                   std::string_view pixelShaderPath,
                                   std::string_view vertexShaderPath,
-                                  std::string_view pipelineName) -> PostProcessPipeline;
+                                  std::string_view pipelineName) -> PostProcessPass;
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,

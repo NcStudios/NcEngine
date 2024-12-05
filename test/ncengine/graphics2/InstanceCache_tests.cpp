@@ -36,7 +36,7 @@ struct TestObjectInfo
 {
     uint32_t transformIndex;
     nc::MaterialInstanceHandle materialIndex;
-    nc::MaterialPasses passes;
+    nc::MaterialPassFlags passes;
     nc::asset::MeshView mesh;
 };
 

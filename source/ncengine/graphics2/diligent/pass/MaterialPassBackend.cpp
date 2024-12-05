@@ -52,6 +52,8 @@ void MaterialPassBackend::Render(Diligent::IDeviceContext& context,
 
         if (IsOffScreenTarget(pass.colorRTIndex, pass.depthRTIndex))
         {
+            m_lastColorRenderTargetIndex = pass.colorRTIndex;
+            m_lastDepthRenderTargetIndex = pass.depthRTIndex;
             context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
         }
     }

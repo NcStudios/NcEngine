@@ -57,7 +57,7 @@ const auto g_postProcessEffectPassFlags = std::array{
 };
 
 constexpr auto g_combinedPostProcessEffectPassFlags = std::array{
-    nc::MoebiusEffectPasses
+    nc::MoebiusEffectPassFlags
 };
 
 static_assert(g_materialPassNames.size() == g_materialPassFlags.size());
@@ -122,7 +122,7 @@ auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<co
     return g_postProcessEffectPassFlags.at(effectId);
 }
 
-auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPasses
+auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPassFlags
 {
     return g_combinedPostProcessEffectPassFlags.at(effectId);
 }

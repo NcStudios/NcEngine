@@ -7,10 +7,10 @@
 namespace nc::graphics
 {
 MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
-           const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
-           MaterialPassFlag::type passId,
-           uint32_t colorRTIndex_,
-           uint32_t depthRTIndex_)
+                           const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
+                           MaterialPassFlag::type passId,
+                           uint32_t colorRTIndex_,
+                           uint32_t depthRTIndex_)
     : pso{},
       id{passId},
       colorRTIndex{colorRTIndex_},
@@ -20,10 +20,10 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
     NC_ASSERT(pso, "Failed to create pipeline state object");
 }
 
-auto MakePasses(Diligent::IRenderDevice& device,
-                Diligent::ISwapChain& swapChain,
-                ShaderFactory& shaderFactory,
-                ShaderBindings& shaderBindings) -> std::vector<MaterialPass>
+auto MakeMaterialPasses(Diligent::IRenderDevice& device,
+                        Diligent::ISwapChain& swapChain,
+                        ShaderFactory& shaderFactory,
+                        ShaderBindings& shaderBindings) -> std::vector<MaterialPass>
 {
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
 

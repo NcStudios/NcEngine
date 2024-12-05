@@ -2,6 +2,7 @@
 
 #include "ResourceTypes.h"
 #include "base/StructuredBuffer.h"
+#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "PostProcessSinkBufferResource.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -16,19 +17,23 @@ class PerPassResourceSignature
 {
     public:
         explicit PerPassResourceSignature(Diligent::IRenderDevice& device,
+                                          Diligent::IDeviceContext& context,
                                           std::string_view signatureName,
                                           uint8_t bindingIndex,
-                                          const TextureBufferResourceDesc& postProcessResourceDesc);
+                                          const TextureBufferResourceDesc& postProcessResourceDesc,
+                                          const UniformBufferResourceDesc& postProcessSinkIndexDesc);
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
         auto GetResourceBinding() -> Diligent::IShaderResourceBinding& { return *m_srb; }
 
         auto GetPostProcessSinkBufferResource() -> PostProcessSinkBufferResource& { return *m_postProcessBufferResource; }
+        auto GetPostProcessSinkIndexBufferResource() -> PostProcessSinkIndexBufferResource& { return *m_postProcessSinkIndexBufferResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<PostProcessSinkBufferResource> m_postProcessBufferResource;
+        std::unique_ptr<PostProcessSinkIndexBufferResource> m_postProcessSinkIndexBufferResource;
 };
 } // namespace nc::graphics

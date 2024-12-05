@@ -9,8 +9,8 @@
 
 namespace nc::graphics
 {
-auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                     Diligent::IShader& pixelShader,
+auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                     Diligent::IShader& vertexShader,
                                      Diligent::ISwapChain& swapChain,
                                      std::span<Diligent::IPipelineResourceSignature*> signatures,
                                      std::span<const Diligent::LayoutElement> layoutElements,
@@ -26,8 +26,8 @@ auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& vertexShader,
     ci.ppResourceSignatures = signatures.data();
     ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
-    ci.pVS = &vertexShader;
     ci.pPS = &pixelShader;
+    ci.pVS = &vertexShader;
 
     ci.GraphicsPipeline.NumRenderTargets             = 1;
     ci.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
@@ -41,8 +41,8 @@ auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& vertexShader,
     return ci;
 }
 
-auto MakeOffScreenPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                     Diligent::IShader& pixelShader,
+auto MakeOffScreenPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                     Diligent::IShader& vertexShader,
                                      Diligent::ISwapChain& swapChain,
                                      std::span<Diligent::IPipelineResourceSignature*> signatures,
                                      std::span<const Diligent::LayoutElement> layoutElements,
@@ -50,14 +50,14 @@ auto MakeOffScreenPipelineCreateInfo(Diligent::IShader& vertexShader,
 {
     using namespace Diligent;
 
-    auto ci = MakeSwapChainPipelineCreateInfo(vertexShader, pixelShader, swapChain, signatures, layoutElements, name);
+    auto ci = MakeSwapChainPipelineCreateInfo(pixelShader, vertexShader, swapChain, signatures, layoutElements, name);
     ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
     ci.GraphicsPipeline.DSVFormat     = OffScreenDepthRTFormat;
     return ci;
 }
 
-auto MakeOffScreenPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                                Diligent::IShader& pixelShader,
+auto MakeOffScreenPostProcessPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                                Diligent::IShader& vertexShader,
                                                 Diligent::ISwapChain& swapChain,
                                                 std::span<Diligent::IPipelineResourceSignature*> signatures,
                                                 std::span<const Diligent::LayoutElement> layoutElements,
@@ -65,15 +65,15 @@ auto MakeOffScreenPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
 {
     using namespace Diligent;
 
-    auto ci = MakeSwapChainPipelineCreateInfo(vertexShader, pixelShader, swapChain, signatures, layoutElements, name);
+    auto ci = MakeSwapChainPipelineCreateInfo(pixelShader, vertexShader, swapChain, signatures, layoutElements, name);
     ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
     ci.GraphicsPipeline.DSVFormat     = OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     return ci;
 }
 
-auto MakeSwapChainPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
-                                                Diligent::IShader& pixelShader,
+auto MakeSwapChainPostProcessPipelineCreateInfo(Diligent::IShader& pixelShader,
+                                                Diligent::IShader& vertexShader,
                                                 Diligent::ISwapChain& swapChain,
                                                 std::span<Diligent::IPipelineResourceSignature*> signatures,
                                                 std::span<const Diligent::LayoutElement> layoutElements,
@@ -81,7 +81,7 @@ auto MakeSwapChainPostProcessPipelineCreateInfo(Diligent::IShader& vertexShader,
 {
     using namespace Diligent;
 
-    auto ci = MakeSwapChainPipelineCreateInfo(vertexShader, pixelShader, swapChain, signatures, layoutElements, name);
+    auto ci = MakeSwapChainPipelineCreateInfo(pixelShader, vertexShader, swapChain, signatures, layoutElements, name);
     ci.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     return ci;
 }
@@ -140,13 +140,6 @@ auto MakeOffScreenMaterialPass(Diligent::IRenderDevice& device,
                                std::string_view vertexShaderPath,
                                std::string_view pipelineName) -> MaterialPass
 {
-    auto vertexShader = shaderFactory.MakeShaderFromPath(
-        vertexShaderPath,
-        vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
     auto pixelShader = shaderFactory.MakeShaderFromPath(
         pixelShaderPath,
         pixelShaderPath.data(),
@@ -154,10 +147,17 @@ auto MakeOffScreenMaterialPass(Diligent::IRenderDevice& device,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        vertexShaderPath,
+        vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
     auto layoutElements = GetMeshVertexLayoutElements(0);
     auto createInfo = MakeOffScreenPipelineCreateInfo(
-        *vertexShader,
         *pixelShader,
+        *vertexShader,
         swapChain,
         signatures,
         layoutElements,
@@ -169,6 +169,41 @@ auto MakeOffScreenMaterialPass(Diligent::IRenderDevice& device,
     return MaterialPass(device, createInfo, MaterialPassFlag::Toon, renderTargetIndices[0], renderTargetIndices[1]);
 }
 
+auto MakeSwapChainMaterialPass(Diligent::IRenderDevice& device,
+                               Diligent::ISwapChain& swapChain,
+                               ShaderFactory& shaderFactory,
+                               std::span<Diligent::IPipelineResourceSignature*> signatures,
+                               std::string_view pixelShaderPath,
+                               std::string_view vertexShaderPath,
+                               std::string_view pipelineName) -> MaterialPass
+{
+    auto pixelShader = shaderFactory.MakeShaderFromPath(
+        pixelShaderPath,
+        pixelShaderPath.data(),
+        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        vertexShaderPath,
+        vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    auto layoutElements = GetMeshVertexLayoutElements(0);
+    auto createInfo = MakeSwapChainPipelineCreateInfo(
+        *pixelShader,
+        *vertexShader,
+        swapChain,
+        signatures,
+        layoutElements,
+        pipelineName.data()
+    );
+
+    return MaterialPass(device, createInfo, MaterialPassFlag::Toon, SwapChainColorRTIndex, SwapChainDepthRTIndex);
+}
+
 auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
                                   Diligent::IDeviceContext& context,
                                   Diligent::ISwapChain& swapChain,
@@ -178,15 +213,8 @@ auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
                                   PostProcessPassFlag::type passId,
                                   std::string_view pixelShaderPath,
                                   std::string_view vertexShaderPath,
-                                  std::string_view pipelineName) -> PostProcessPipeline
+                                  std::string_view pipelineName) -> PostProcessPass
 {
-    auto vertexShader = shaderFactory.MakeShaderFromPath(
-        vertexShaderPath,
-        vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
     auto pixelShader = shaderFactory.MakeShaderFromPath(
         pixelShaderPath,
         pixelShaderPath.data(),
@@ -194,10 +222,17 @@ auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        vertexShaderPath,
+        vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
     auto layoutElements = GetMeshVertexLayoutElements(0);
     auto createInfo = MakeOffScreenPostProcessPipelineCreateInfo(
-        *vertexShader,
         *pixelShader,
+        *vertexShader,
         swapChain,
         signatures,
         layoutElements,
@@ -206,7 +241,7 @@ auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
 
     auto renderTargetIndices = postProcessSinkBufferResource.Add(device, 1, 1, swapChain.GetDesc().Width, swapChain.GetDesc().Height);
 
-    return PostProcessPipeline(device, createInfo, MakePostProcessPassInstances(context, device, passId), passId, renderTargetIndices[0], renderTargetIndices[1], static_cast<uint32_t>(renderTargetIndices.size()));
+    return PostProcessPass(device, createInfo, MakePostProcessPassInstances(context, device, passId), passId, renderTargetIndices[0], renderTargetIndices[1], static_cast<uint32_t>(renderTargetIndices.size()));
 }
 
 auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
@@ -217,15 +252,8 @@ auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
                                 PostProcessPassFlag::type passId,
                                 std::string_view pixelShaderPath,
                                 std::string_view vertexShaderPath,
-                                std::string_view pipelineName) -> PostProcessPipeline
+                                std::string_view pipelineName) -> PostProcessPass
 {
-    auto vertexShader = shaderFactory.MakeShaderFromPath(
-        vertexShaderPath,
-        vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
     auto pixelShader = shaderFactory.MakeShaderFromPath(
         pixelShaderPath,
         pixelShaderPath.data(),
@@ -233,17 +261,24 @@ auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        vertexShaderPath,
+        vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
     auto layoutElements = GetMeshVertexLayoutElements(0);
     auto createInfo = MakeSwapChainPostProcessPipelineCreateInfo(
-        *vertexShader,
         *pixelShader,
+        *vertexShader,
         swapChain,
         signatures,
         layoutElements,
         pipelineName.data()
     );
 
-    return PostProcessPipeline(device, createInfo, MakePostProcessPassInstances(context, device, passId), passId, SwapChainColorRTIndex, SwapChainDepthRTIndex, 1);
+    return PostProcessPass(device, createInfo, MakePostProcessPassInstances(context, device, passId), passId, SwapChainColorRTIndex, SwapChainDepthRTIndex, 1);
 }
 
 void BindRenderTarget(Diligent::IDeviceContext& context,

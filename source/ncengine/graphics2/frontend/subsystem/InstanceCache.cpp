@@ -25,7 +25,7 @@ auto WalkBatch(const nc::graphics::Batch& batch)
 namespace nc::graphics
 {
 void InstanceCacheStaging::AddInstance(uint32_t entityId,
-                                       MaterialPasses passes,
+                                       MaterialPassFlags passes,
                                        const asset::MeshView& mesh,
                                        const InstanceData& instanceData)
 {
@@ -52,7 +52,7 @@ void InstanceCacheStaging::AddInstance(uint32_t entityId,
 }
 
 void InstanceCacheStaging::RemoveInstance(uint32_t entityId,
-                                          MaterialPasses passes,
+                                          MaterialPassFlags passes,
                                           uint64_t meshId)
 {
     m_hasStagedState = true;
@@ -60,8 +60,8 @@ void InstanceCacheStaging::RemoveInstance(uint32_t entityId,
 }
 
 void InstanceCacheStaging::UpdateInstance(uint32_t entityId,
-                                          MaterialPasses oldPasses,
-                                          MaterialPasses newPasses,
+                                          MaterialPassFlags oldPasses,
+                                          MaterialPassFlags newPasses,
                                           uint64_t oldMeshId,
                                           const asset::MeshView& newMesh,
                                           const InstanceData& instanceData)

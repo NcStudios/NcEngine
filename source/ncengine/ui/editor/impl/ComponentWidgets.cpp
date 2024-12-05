@@ -73,7 +73,7 @@ void MeshAssetDropdown(nc::MeshRenderer2& meshRenderer, nc::asset::NcAsset& ncAs
     }
 }
 
-auto MaterialPassesWidget(nc::MaterialPasses& passes) -> bool
+auto MaterialPassesWidget(nc::MaterialPassFlags& passes) -> bool
 {
     auto modified = false;
     const auto passInfo = std::views::zip(nc::GetMaterialPassNames(), nc::GetMaterialPassFlags());
