@@ -41,7 +41,7 @@ struct StagedBatchRegion
     asset::MeshView mesh = asset::MeshView{};
 };
 
-// Instance data for a mesh component waiting to added to a batch.
+// Instance data for a mesh component waiting to be added to a batch.
 template<class T>
 struct StagedInstance
 {
