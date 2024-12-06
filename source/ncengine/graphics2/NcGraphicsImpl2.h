@@ -2,6 +2,7 @@
 
 #include "diligent/DiligentEngine.h"
 #include "diligent/pass/PassBackend.h"
+#include "diligent/pass/WireframePass.h"
 #include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
@@ -57,6 +58,7 @@ class NcGraphicsImpl2 : public NcGraphics
         ShaderBindings m_shaderBindings;
         UIBackend m_ui;
         PassBackend m_passBackend;
+        WireframePass m_wireframePass;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
         Vector2 m_dimensions;

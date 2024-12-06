@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MaterialPass.h"
-#include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
+#include "graphics2/frontend/subsystem/MeshRenderState.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 

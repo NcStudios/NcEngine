@@ -4,9 +4,10 @@
 #include "subsystem/CameraSubsystem.h"
 #include "subsystem/LightSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
-#include "subsystem/MeshRendererSubsystem.h"
+#include "subsystem/MeshSubsystem.h"
 #include "subsystem/PostProcessSubsystem.h"
 #include "subsystem/UISubsystem.h"
+#include "subsystem/WireframeRendererSubsystem.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 
@@ -33,7 +34,7 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
-              m_meshRendererSystem{events, maxEntities, maxRenderers, initialBatchSize}
+              m_meshSystem{events, maxEntities, maxRenderers, initialBatchSize}
         {
         }
 
@@ -41,7 +42,7 @@ class GraphicsFrontend
 
         void OnBeforeSceneLoad()
         {
-            m_meshRendererSystem.OnBeforeSceneLoad();
+            m_meshSystem.OnBeforeSceneLoad();
         }
 
         void Clear() noexcept
@@ -49,21 +50,23 @@ class GraphicsFrontend
             m_cameraSystem.Clear();
         }
 
-        auto GetCameraSubsystem()             ->       CameraSubsystem&       { return m_cameraSystem;       }
-        auto GetMeshRendererSubsystem()       ->       MeshRendererSubsystem& { return m_meshRendererSystem; }
-        auto GetMaterialRegistry()            ->       MaterialRegistry&      { return m_materialRegistry;   }
-        auto GetPostProcessSubsystem()        ->       PostProcessSubsystem&  { return m_postProcessSystem;  }
-        auto GetPostProcessSubsystem()  const -> const PostProcessSubsystem&  { return m_postProcessSystem;  }
-        auto GetUISubsystem()                 ->       UISubsystem&           { return m_uiSystem;           }
-        auto GetUISubsystem()           const -> const UISubsystem&           { return m_uiSystem;           }
+        auto GetCameraSubsystem()             ->       CameraSubsystem&            { return m_cameraSystem;       }
+        auto GetMeshSubsystem()               ->       MeshSubsystem&              { return m_meshSystem;         }
+        auto GetMaterialRegistry()            ->       MaterialRegistry&           { return m_materialRegistry;   }
+        auto GetPostProcessSubsystem()        ->       PostProcessSubsystem&       { return m_postProcessSystem;  }
+        auto GetPostProcessSubsystem()  const -> const PostProcessSubsystem&       { return m_postProcessSystem;  }
+        auto GetUISubsystem()                 ->       UISubsystem&                { return m_uiSystem;           }
+        auto GetUISubsystem()           const -> const UISubsystem&                { return m_uiSystem;           }
+        auto GetWireframeSubsystem()          ->       WireframeRendererSubsystem& { return m_wireframeSystem;    }
 
     private:
         AssetDispatch m_assetDispatch;
         MaterialRegistry m_materialRegistry;
         UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
-        MeshRendererSubsystem m_meshRendererSystem;
+        MeshSubsystem m_meshSystem;
         LightSubsystem m_lightSubsystem;
         PostProcessSubsystem m_postProcessSystem;
+        WireframeRendererSubsystem m_wireframeSystem;
 };
 } // namespace nc::graphics
