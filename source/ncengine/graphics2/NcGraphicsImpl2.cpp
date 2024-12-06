@@ -1,5 +1,6 @@
 #include "NcGraphicsImpl2.h"
 #include "diligent/pass/MaterialPass.h"
+#include "diligent/pass/WireframePass.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -190,13 +191,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                 m_engine.GetSwapChain(),
                 m_engine.GetShaderFactory(),
                 m_shaderBindings
-            )
-          },
-          m_wireframePass{
-            m_engine.GetDevice(),
-            m_engine.GetSwapChain(),
-            m_engine.GetShaderFactory(),
-            m_shaderBindings
+            ),
+            WireframePass
+            {
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory(),
+                m_shaderBindings
+            },
           },
           m_frontend{
             m_engine.GetContext(),
@@ -327,7 +329,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRenderState.staticMeshBatches);
-    m_wireframePass.Render(context, renderState.wireframeRenderState);
+    m_passBackend.RenderWireframe(context, renderState.wireframeRenderState);
     m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);
 
