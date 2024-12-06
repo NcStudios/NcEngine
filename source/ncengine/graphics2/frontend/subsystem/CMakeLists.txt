@@ -1,5 +1,6 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
+        BoneCache.cpp
         CameraSubsystem.cpp
         LightSubsystem.cpp
         MaterialRegistry.cpp
