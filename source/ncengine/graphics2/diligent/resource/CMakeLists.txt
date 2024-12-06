@@ -7,6 +7,7 @@ target_sources(${NC_ENGINE_LIB}
         TextureBufferResource.cpp
         ResourceTypes.cpp
         ShaderBindings.cpp
+        WireframeBufferResource.cpp
 )
 
 add_subdirectory(base)

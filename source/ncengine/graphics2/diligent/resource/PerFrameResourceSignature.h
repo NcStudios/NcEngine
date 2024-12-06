@@ -16,6 +16,7 @@ namespace nc::graphics
 class TextureBufferResource;
 class EnvironmentBufferResource;
 class PostProcessPropertyBufferResource;
+class WireframeBufferResource;
 
 class PerFrameResourceSignature
 {
@@ -32,6 +33,7 @@ class PerFrameResourceSignature
                                            const StructuredBufferResourceDesc& materialResourceDesc,
                                            const TextureBufferResourceDesc& textureResourceDesc,
                                            const UniformBufferResourceDesc& environmentResourceDesc,
+                                           const UniformBufferResourceDesc& wireframeResourceDesc,
                                            const UniformBufferResourceDesc& outlinePassPropertiesDesc);
         ~PerFrameResourceSignature() noexcept;
 
@@ -39,15 +41,16 @@ class PerFrameResourceSignature
         auto GetResourceSignature()     -> Diligent::IPipelineResourceSignature&   { return *m_signature; }
 
         /* Resource Buffers */
-        auto GetTransformBuffer()           -> StructuredBuffer<TransformData>&          { return *m_transformResource; }
+        auto GetTransformBuffer()           -> StructuredBuffer<TransformData>&        { return *m_transformResource; }
         auto GetStaticMeshInstanceBuffer()  -> StructuredBuffer<StaticMeshInstanceData>& { return *m_staticMeshInstanceResource; }
-        auto GetDirectionaLightBuffer()     -> StructuredBuffer<DirectionalLightData>&   { return *m_directionalLightResource; }
-        auto GetPointLightBuffer()          -> StructuredBuffer<PointLightData>&         { return *m_pointLightResource; }
-        auto GetSpotLightBuffer()           -> StructuredBuffer<SpotLightData>&          { return *m_spotLightResource; }
-        auto GetMaterialDataResource()      -> StructuredBuffer<MaterialData>&           { return *m_materialDataResource; }
-        auto GetTextureBuffer()             -> TextureBufferResource&                    { return *m_textureResource; }
-        auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&                { return *m_environmentResource; }
-        auto GetPostProcessPropertyBuffer() -> PostProcessPropertyBufferResource&        { return *m_postProcessPropertyResource; }
+        auto GetDirectionaLightBuffer()     -> StructuredBuffer<DirectionalLightData>& { return *m_directionalLightResource; }
+        auto GetPointLightBuffer()          -> StructuredBuffer<PointLightData>&       { return *m_pointLightResource; }
+        auto GetSpotLightBuffer()           -> StructuredBuffer<SpotLightData>&        { return *m_spotLightResource; }
+        auto GetMaterialDataResource()      -> StructuredBuffer<MaterialData>&         { return *m_materialDataResource; }
+        auto GetTextureBuffer()             -> TextureBufferResource&                  { return *m_textureResource; }
+        auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&              { return *m_environmentResource; }
+        auto GetWireframeBuffer()           -> WireframeBufferResource&                { return *m_wireframeBufferResource; }
+        auto GetPostProcessPropertyBuffer() -> PostProcessPropertyBufferResource&      { return *m_postProcessPropertyResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
@@ -60,6 +63,7 @@ class PerFrameResourceSignature
         std::unique_ptr<StructuredBuffer<MaterialData>> m_materialDataResource;
         std::unique_ptr<TextureBufferResource> m_textureResource;
         std::unique_ptr<EnvironmentBufferResource> m_environmentResource;
+        std::unique_ptr<WireframeBufferResource> m_wireframeBufferResource;
         std::unique_ptr<PostProcessPropertyBufferResource> m_postProcessPropertyResource;
 };
 } // namespace nc::graphics

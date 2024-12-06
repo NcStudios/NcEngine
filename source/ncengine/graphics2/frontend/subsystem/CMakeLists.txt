@@ -7,4 +7,5 @@ target_sources(${NC_ENGINE_LIB}
         PostProcessSubsystem.cpp
         TransformCache.cpp
         UISubsystem.cpp
+        WireframeRendererSubsystem.cpp
 )

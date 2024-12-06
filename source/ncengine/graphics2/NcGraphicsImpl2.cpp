@@ -179,6 +179,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetShaderFactory(),
             m_shaderBindings
           )},
+          m_wireframePass{
+            m_engine.GetDevice(),
+            m_engine.GetSwapChain(),
+            m_engine.GetShaderFactory(),
+            m_shaderBindings
+          },
           m_postProcessPassBackend{
             MakePostProcessPasses(
                 m_engine.GetContext(),
@@ -322,6 +328,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_materialPassBackend.Render(context, renderState.meshRenderState.staticMeshBatches);
+    m_wireframePass.Render(context, renderState.wireframeRenderState);
     /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
     // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);

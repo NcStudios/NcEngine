@@ -16,9 +16,9 @@ class DynamicUniformBuffer
     public:
         template<TriviallyCopyable T>
         explicit DynamicUniformBuffer(Diligent::IDeviceContext& context,
-                               Diligent::IRenderDevice& device,
-                               const T& initialData,
-                               std::string_view name = "DynamicUniformBuffer")
+                                      Diligent::IRenderDevice& device,
+                                      const T& initialData,
+                                      std::string_view name = "DynamicUniformBuffer")
             : DynamicUniformBuffer{
                 context,
                 device,
