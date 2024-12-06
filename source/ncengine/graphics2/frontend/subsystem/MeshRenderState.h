@@ -22,10 +22,10 @@ struct Batch
     uint32_t vertexOffset;
 };
 
-struct MeshRendererRenderState
+struct MeshRenderState
 {
     BufferUpdateInfo<TransformData> transformData;
-    BufferUpdateInfo<InstanceData> instanceData;
-    std::vector<std::vector<Batch>> passBatches;
+    BufferUpdateInfo<StaticMeshInstanceData> staticMeshInstanceData;
+    std::vector<std::vector<Batch>> staticMeshBatches;
 };
 } // namespace nc::graphics

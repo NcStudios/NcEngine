@@ -327,7 +327,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_materialPassBackend.Render(context, renderState.meshRendererState.passBatches);
+    m_materialPassBackend.Render(context, renderState.meshRenderState.staticMeshBatches);
     m_wireframePass.Render(context, renderState.wireframeRenderState);
     /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
     // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());

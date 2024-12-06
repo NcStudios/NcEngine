@@ -26,7 +26,7 @@ class PerFrameResourceSignature
                                            std::string_view signatureName,
                                            uint8_t bindingIndex,
                                            const StructuredBufferResourceDesc& transformResourceDesc,
-                                           const StructuredBufferResourceDesc& instanceResourceDesc,
+                                           const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
                                            const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                            const StructuredBufferResourceDesc& pointLightResourceDesc,
                                            const StructuredBufferResourceDesc& spotLightResourceDesc,
@@ -42,7 +42,7 @@ class PerFrameResourceSignature
 
         /* Resource Buffers */
         auto GetTransformBuffer()           -> StructuredBuffer<TransformData>&        { return *m_transformResource; }
-        auto GetInstanceBuffer()            -> StructuredBuffer<InstanceData>&         { return *m_instanceResource; }
+        auto GetStaticMeshInstanceBuffer()  -> StructuredBuffer<StaticMeshInstanceData>& { return *m_staticMeshInstanceResource; }
         auto GetDirectionaLightBuffer()     -> StructuredBuffer<DirectionalLightData>& { return *m_directionalLightResource; }
         auto GetPointLightBuffer()          -> StructuredBuffer<PointLightData>&       { return *m_pointLightResource; }
         auto GetSpotLightBuffer()           -> StructuredBuffer<SpotLightData>&        { return *m_spotLightResource; }
@@ -56,7 +56,7 @@ class PerFrameResourceSignature
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<StructuredBuffer<TransformData>> m_transformResource;
-        std::unique_ptr<StructuredBuffer<InstanceData>> m_instanceResource;
+        std::unique_ptr<StructuredBuffer<StaticMeshInstanceData>> m_staticMeshInstanceResource;
         std::unique_ptr<StructuredBuffer<DirectionalLightData>> m_directionalLightResource;
         std::unique_ptr<StructuredBuffer<PointLightData>> m_pointLightResource;
         std::unique_ptr<StructuredBuffer<SpotLightData>> m_spotLightResource;

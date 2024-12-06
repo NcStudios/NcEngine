@@ -15,7 +15,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      std::string_view signatureName,
                                                      uint8_t bindingIndex,
                                                      const StructuredBufferResourceDesc& transformResourceDesc,
-                                                     const StructuredBufferResourceDesc& instanceResourceDesc,
+                                                     const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
                                                      const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                                      const StructuredBufferResourceDesc& pointLightResourceDesc,
                                                      const StructuredBufferResourceDesc& spotLightResourceDesc,
@@ -27,7 +27,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
-        ToPipelineResourceDesc(instanceResourceDesc),
+        ToPipelineResourceDesc(staticMeshInstanceResourceDesc),
         ToPipelineResourceDesc(directionalLightResourceDesc),
         ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(spotLightResourceDesc),
@@ -68,12 +68,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         transformResourceDesc
     );
 
-    m_instanceResource = std::make_unique<StructuredBuffer<InstanceData>>
+    m_staticMeshInstanceResource = std::make_unique<StructuredBuffer<StaticMeshInstanceData>>
     (
         context,
         device,
-        GetVariable(instanceResourceDesc, m_srb),
-        instanceResourceDesc
+        GetVariable(staticMeshInstanceResourceDesc, m_srb),
+        staticMeshInstanceResourceDesc
     );
 
     m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>

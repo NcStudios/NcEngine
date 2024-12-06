@@ -118,9 +118,8 @@ else()
             graphics2/MeshRenderer2.cpp
             graphics2/GraphicsUtility.cpp
             graphics2/PostProcess.cpp
-            graphics2/frontend/subsystem/InstanceCache.cpp
             graphics2/frontend/subsystem/MaterialRegistry.cpp
-            graphics2/frontend/subsystem/MeshRendererSubsystem.cpp
+            graphics2/frontend/subsystem/MeshSubsystem.cpp
             graphics2/frontend/subsystem/TransformCache.cpp
     )
 endif()
