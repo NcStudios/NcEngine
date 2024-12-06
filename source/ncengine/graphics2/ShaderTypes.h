@@ -124,6 +124,13 @@ struct SpotLightData
     float radius = 1.0f;
 };
 
+// Object model for WireframeRenderers (type: constant buffer)
+struct WireframeData
+{
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+    Vector4 color = Vector4::One();
+};
+
 // Specifies a subrange within a buffer.
 struct BufferSlice
 {
