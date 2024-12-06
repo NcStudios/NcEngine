@@ -3,8 +3,8 @@
 namespace nc::graphics
 {
 WireframeBufferResource::WireframeBufferResource(Diligent::IDeviceContext& context,
-                                         Diligent::IRenderDevice& device,
-                                         Diligent::IShaderResourceVariable& variable)
+                                                 Diligent::IRenderDevice& device,
+                                                 Diligent::IShaderResourceVariable& variable)
     : m_buffer{
         context,
         device,
