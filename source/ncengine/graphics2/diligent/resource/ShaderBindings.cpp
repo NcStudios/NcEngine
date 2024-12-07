@@ -13,7 +13,7 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
     NC_PROFILE_SCOPE("ShaderBindings::Update()", ProfileCategory::Rendering);
     m_perFrameSignature.GetEnvironmentBuffer().Update(context, renderState.cameraState, renderState.lightRenderState);
 
-    const auto& transformData = renderState.meshRendererState.transformData;
+    const auto& transformData = renderState.meshRenderState.transformData;
     if (!transformData.instances.empty())
     {
         m_perFrameSignature.GetTransformBuffer().Update(
@@ -23,13 +23,13 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         );
     }
 
-    const auto& instanceData = renderState.meshRendererState.instanceData;
-    if (!instanceData.instances.empty())
+    const auto& staticMeshInstanceData = renderState.meshRenderState.staticMeshInstanceData;
+    if (!staticMeshInstanceData.instances.empty())
     {
-        m_perFrameSignature.GetInstanceBuffer().Update(
+        m_perFrameSignature.GetStaticMeshInstanceBuffer().Update(
             context,
             device,
-            instanceData
+            staticMeshInstanceData
         );
     }
 

@@ -6,8 +6,8 @@
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/StaticMesh.h"
-#include "graphics2/frontend/subsystem/MeshRendererSubsystem.h"
-#include "graphics2/frontend/subsystem/MeshRendererRenderState.h"
+#include "graphics2/frontend/subsystem/MeshSubsystem.h"
+#include "graphics2/frontend/subsystem/MeshRenderState.h"
 
 #include <array>
 #include <ranges>
@@ -30,13 +30,13 @@ auto MaterialInstance::GetProperties() const -> const MaterialProperties& { retu
 void MaterialInstance::Release() noexcept {}
 } // namespace nc
 
-class MeshRendererSubsystemTest : public testing::Test,
+class MeshSubsystemTest : public testing::Test,
                                   public EcsFixture
 {
     protected:
         static constexpr auto MaxEntities = 20ull;
         nc::SystemEvents systemEvents;
-        nc::graphics::MeshRendererSubsystem uut;
+        nc::graphics::MeshSubsystem uut;
 
         auto AddEntity(nc::ecs::Ecs& world) -> nc::Entity
         {
@@ -50,7 +50,7 @@ class MeshRendererSubsystemTest : public testing::Test,
             return entity;
         }
 
-        MeshRendererSubsystemTest()
+        MeshSubsystemTest()
             : EcsFixture{MaxEntities},
               uut{systemEvents, MaxEntities, MaxEntities, 1}
         {
@@ -58,7 +58,7 @@ class MeshRendererSubsystemTest : public testing::Test,
         }
 };
 
-TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
+TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
 {
     using namespace nc::graphics;
 
@@ -79,13 +79,13 @@ TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(0, actualTransformState.dirtyRanges[0].offset);
     EXPECT_EQ(5, actualTransformState.dirtyRanges[0].count);
 
-    const auto& actualInstanceState = actualRenderState.instanceData;
+    const auto& actualInstanceState = actualRenderState.staticMeshInstanceData;
     EXPECT_EQ(5, actualInstanceState.instances.size());
     ASSERT_EQ(1, actualInstanceState.dirtyRanges.size());
     EXPECT_EQ(0, actualInstanceState.dirtyRanges[0].offset);
     EXPECT_EQ(5, actualInstanceState.dirtyRanges[0].count);
 
-    const auto& actualPassState = actualRenderState.passBatches;
+    const auto& actualPassState = actualRenderState.staticMeshBatches;
     ASSERT_EQ(1, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
@@ -96,7 +96,7 @@ TEST_F(MeshRendererSubsystemTest, BuildState_BuildsExpectedState)
     registry.Clear();
 }
 
-TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
+TEST_F(MeshSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();
@@ -117,14 +117,14 @@ TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
     EXPECT_EQ(1, actualTransformState.dirtyRanges[0].count);
 
     // Whole instance buffer needs to be updated since we removed the first item
-    const auto& actualInstanceState = actualRenderState.instanceData;
+    const auto& actualInstanceState = actualRenderState.staticMeshInstanceData;
     EXPECT_EQ(2, actualInstanceState.instances.size());
     ASSERT_EQ(1, actualInstanceState.dirtyRanges.size());
     EXPECT_EQ(0, actualInstanceState.dirtyRanges[0].offset);
     EXPECT_EQ(2, actualInstanceState.dirtyRanges[0].count);
 
     // Batch reports only one instance
-    const auto& actualPassState = actualRenderState.passBatches;
+    const auto& actualPassState = actualRenderState.staticMeshBatches;
     ASSERT_EQ(1, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
@@ -135,7 +135,7 @@ TEST_F(MeshRendererSubsystemTest, OnRemoveMeshRenderer_UntracksObject)
     registry.Clear();
 }
 
-TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
+TEST_F(MeshSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();
@@ -148,7 +148,7 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
 
     // Split into two batches. Second batch should be offset at index 2, leaving a free space in the first batch.
     auto actualRenderState = uut.BuildState(world);
-    const auto& actualPassState = actualRenderState.passBatches;
+    const auto& actualPassState = actualRenderState.staticMeshBatches;
     ASSERT_EQ(1, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(2, actualBatches.size());
@@ -162,7 +162,7 @@ TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
     registry.Clear();
 }
 
-TEST_F(MeshRendererSubsystemTest, MeshRendererUpdateMaterial_Succeeds)
+TEST_F(MeshSubsystemTest, MeshRendererUpdateMaterial_Succeeds)
 {
     auto world = GetTestWorld();
     auto& registry = GetTestComponentRegistry();

@@ -31,11 +31,19 @@ struct OutlinePassData
     float width = 1.0f;
 };
 
-// Object model for MeshRenderers (type: StructuredBuffer element type).
-struct InstanceData
+// Object model for StaticMeshes (type: StructuredBuffer element type).
+struct StaticMeshInstanceData
 {
     uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
     uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
+};
+
+// Object model for SkinnedMeshes (type: StructuredBuffer element type).
+struct SkinnedMeshInstanceData
+{
+    uint32_t transformIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t boneIndex = std::numeric_limits<uint32_t>::max();
 };
 
 // Object model for Transforms (type: StructuredBuffer element type).
@@ -122,6 +130,13 @@ struct SpotLightData
     float outerAngle = 1.0f;
     Vector3 padding = Vector3::Zero();
     float radius = 1.0f;
+};
+
+// Object model for WireframeRenderers (type: constant buffer)
+struct WireframeData
+{
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+    Vector4 color = Vector4::One();
 };
 
 // Specifies a subrange within a buffer.

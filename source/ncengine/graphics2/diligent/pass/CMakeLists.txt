@@ -4,4 +4,5 @@ target_sources(${NC_ENGINE_LIB}
         Pass.cpp
         PostProcessPass.cpp
         PostProcessPassBackend.cpp
+        WireframePass.cpp
 )
