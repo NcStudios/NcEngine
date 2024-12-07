@@ -26,6 +26,8 @@ struct MeshRenderState
 {
     BufferUpdateInfo<TransformData> transformData;
     BufferUpdateInfo<StaticMeshInstanceData> staticMeshInstanceData;
+    BufferUpdateInfo<SkinnedMeshInstanceData> skinnedMeshInstanceData;
     std::vector<std::vector<Batch>> staticMeshBatches;
+    std::vector<std::vector<Batch>> skinnedMeshBatches;
 };
 } // namespace nc::graphics

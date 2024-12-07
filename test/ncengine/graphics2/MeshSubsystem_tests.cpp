@@ -5,7 +5,7 @@
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/StaticMesh.h"
+#include "ncengine/graphics/Mesh.h"
 #include "graphics2/frontend/subsystem/MeshSubsystem.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
 
