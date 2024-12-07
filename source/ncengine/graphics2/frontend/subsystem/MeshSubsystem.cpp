@@ -174,6 +174,7 @@ auto MeshSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderSta
     m_transformCache.CommitPendingChanges();
     m_transformCache.UpdateMatrices(ecs);
     m_staticMeshInstanceCache.CommitPendingChanges();
+    m_skinnedMeshInstanceCache.CommitPendingChanges();
     return MeshRenderState{
         .transformData = m_transformCache.BuildState(),
         .staticMeshInstanceData = m_staticMeshInstanceCache.BuildState(),
