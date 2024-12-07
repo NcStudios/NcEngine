@@ -11,6 +11,7 @@
 #include "ncengine/graphics/MeshRenderer2.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/SkinnedMesh.h"
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/network/NetworkDispatcher.h"
@@ -763,6 +764,11 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
 
         ImGui::TreePop();
     }
+}
+
+void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext&, const std::any&)
+{
+    (void)skinnedMesh;
 }
 
 void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)

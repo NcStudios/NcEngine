@@ -33,6 +33,7 @@ constexpr size_t WireframeRendererId = 14ull;
 constexpr size_t HierarchyId = 15ull;
 constexpr size_t MeshRenderer2Id = 16ull;
 constexpr size_t DirectionalLightId = 17ull;
+constexpr size_t SkinnedMeshId = 18ull;
 /** @} */
 
 /** @{ */

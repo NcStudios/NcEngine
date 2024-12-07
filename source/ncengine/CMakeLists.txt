@@ -118,6 +118,8 @@ else()
             graphics2/MeshRenderer2.cpp
             graphics2/GraphicsUtility.cpp
             graphics2/PostProcess.cpp
+            graphics2/SkeletalAnimationController.cpp
+            graphics2/SkinnedMesh.cpp
             graphics2/frontend/subsystem/MaterialRegistry.cpp
             graphics2/frontend/subsystem/MeshSubsystem.cpp
             graphics2/frontend/subsystem/TransformCache.cpp

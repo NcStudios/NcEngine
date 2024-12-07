@@ -6,6 +6,7 @@
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
+#include "ncengine/graphics/SkinnedMesh.h"
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/graphics/WireframeRenderer.h"
@@ -81,6 +82,7 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         SerializeSpotLight,
         DeserializeSpotLight
     );
+
     Register<MeshRenderer2>(
         registry,
         maxEntities,
@@ -91,6 +93,18 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         nullptr,
         nullptr
     );
+
+    Register<SkinnedMesh>(
+        registry,
+        maxEntities,
+        SkinnedMeshId,
+        "SkinnedMesh",
+        ui::editor::SkinnedMeshUIWidget,
+        CreateSkinnedMesh,
+        nullptr,
+        nullptr
+    );
+
     Register<graphics::DirectionalLight>(
         registry,
         maxEntities,

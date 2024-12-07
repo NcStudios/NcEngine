@@ -10,6 +10,7 @@
 namespace nc
 {
 class MeshRenderer2;
+class SkinnedMesh;
 struct SystemEvents;
 class Transform;
 
