@@ -67,7 +67,7 @@ void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            // todo: allocate bones
+            /** @todo 833 Allocate space for bones */
             addToCache(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }
@@ -95,7 +95,7 @@ void MeshSubsystem::RemoveInstance(const MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            // todo: free bones
+            /** @todo 833 Free bone allocation */
             removeFromCache(m_skinnedMeshInstanceCache);
             break;
         }
@@ -127,7 +127,7 @@ void MeshSubsystem::SetInstanceMesh(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            // todo: reallocate bones
+            /** @todo 833 Reallocate space for new mesh bones */
             updateInstance(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }

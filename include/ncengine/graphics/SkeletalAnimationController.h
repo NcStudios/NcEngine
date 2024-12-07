@@ -6,12 +6,8 @@
 
 namespace nc
 {
-/** @brief */
+/** @todo 832 Migrate state machine code here. */
 class SkeletalAnimationController
 {
-    public:
-
-    private:
-
 };
 } // namespace nc
