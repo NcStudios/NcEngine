@@ -75,12 +75,4 @@ class StaticMesh
 
         void Release() noexcept;
 };
-
-template<>
-struct StoragePolicy<StaticMesh> : DefaultStoragePolicy
-{
-    static constexpr bool EnableOnAddCallbacks = true;
-    static constexpr bool EnableOnCommitCallbacks = false;
-    static constexpr bool EnableOnRemoveCallbacks = true;
-};
 } // namespace nc
