@@ -6,7 +6,7 @@
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/StaticMesh.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
@@ -239,10 +239,10 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     world.Emplace<VehicleController>(head, segment1, segment2, segment3);
     world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
-    world.Emplace<MeshRenderer2>(head, mesh::Cube, material::Green);
-    world.Emplace<MeshRenderer2>(segment1, mesh::Cube, material::Green);
-    world.Emplace<MeshRenderer2>(segment2, mesh::Cube, material::Green);
-    world.Emplace<MeshRenderer2>(segment3, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(head, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(segment1, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(segment2, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(segment3, mesh::Cube, material::Green);
 
     auto& bodyHead = world.Emplace<RigidBody>(head, Shape::MakeBox(), RigidBodyInfo{.friction = 0.8f});
     auto& bodyNode1 = world.Emplace<RigidBody>(segment1, Shape::MakeBox());
@@ -357,11 +357,11 @@ void BuildGround(ecs::Ecs world)
 
 
 
-    world.Emplace<MeshRenderer2>(ground, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(backWall, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(frontWall, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(leftWall, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(rightWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(ground, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(backWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(frontWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(leftWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(rightWall, mesh::Cube, material::Default);
 
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
     world.Emplace<RigidBody>(backWall, Shape::MakeBox());
@@ -403,10 +403,10 @@ void BuildBridge(ecs::Ecs world)
         .tag = "Ramp"
     });
 
-    world.Emplace<MeshRenderer2>(platform1, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(platform2, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(ramp1, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(ramp2, mesh::Ramp, material::Default);
+    world.Emplace<StaticMesh>(platform1, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(platform2, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(ramp1, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(ramp2, mesh::Ramp, material::Default);
 
     auto& platform1Body = world.Emplace<RigidBody>(
         platform1,
@@ -443,7 +443,7 @@ void BuildBridge(ecs::Ecs world)
             .tag = "Plank"}
         );
 
-        world.Emplace<MeshRenderer2>(plank, mesh::Cube, material::Orange);
+        world.Emplace<StaticMesh>(plank, mesh::Cube, material::Orange);
         return world.Emplace<RigidBody>(plank);
     };
 
@@ -501,7 +501,7 @@ void BuildSteps(ecs::Ecs world)
 
         auto stepMaterial = TealToonMaterial;
         stepMaterial.outlineWidth = 3;
-        world.Emplace<MeshRenderer2>(step, mesh::Cube, material::Blue);
+        world.Emplace<StaticMesh>(step, mesh::Cube, material::Blue);
         world.Emplace<RigidBody>(step)
             .AddConstraint(PointConstraintInfo{
                 .ownerPosition = Vector3{},
@@ -531,7 +531,7 @@ void BuildSteps(ecs::Ecs world)
         .tag = "Rotating Bridge"
     });
 
-    world.Emplace<MeshRenderer2>(rotatingBridge, mesh::Cube, material::Red);
+    world.Emplace<StaticMesh>(rotatingBridge, mesh::Cube, material::Red);
     world.Emplace<RigidBody>(rotatingBridge)
         .AddConstraint(
             HingeConstraintInfo{
@@ -557,7 +557,7 @@ void BuildRotatingSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<MeshRenderer2>(step, mesh::Cube, material::Yellow);
+        world.Emplace<StaticMesh>(step, mesh::Cube, material::Yellow);
         world.Emplace<RigidBody>(step)
             .AddConstraint(
                 SwingTwistConstraintInfo{
@@ -586,7 +586,7 @@ void BuildHalfPipes(ecs::Ecs world)
     auto halfPipeMaterial = BlueHatchedToonMaterial;
     halfPipeMaterial.outlineWidth = 2;
 
-    world.Emplace<MeshRenderer2>(halfPipe2, mesh::HalfPipe, material::Blue);
+    world.Emplace<StaticMesh>(halfPipe2, mesh::HalfPipe, material::Blue);
 }
 
 void BuildHinge(ecs::Ecs world)
@@ -612,8 +612,8 @@ void BuildHinge(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<MeshRenderer2>(anchor, mesh::Cube, material::Default);
-    world.Emplace<MeshRenderer2>(panel, mesh::Cube, material::Purple);
+    world.Emplace<StaticMesh>(anchor, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(panel, mesh::Cube, material::Purple);
 
     world.Emplace<RigidBody>(panel)
         .AddConstraint(
@@ -647,8 +647,8 @@ void BuildPunchingBag(ecs::Ecs world)
         .tag = "Bag"
     });
 
-    world.Emplace<MeshRenderer2>(top, mesh::Cube, material::Purple);
-    world.Emplace<MeshRenderer2>(bag, mesh::Capsule, material::Orange);
+    world.Emplace<StaticMesh>(top, mesh::Cube, material::Purple);
+    world.Emplace<StaticMesh>(bag, mesh::Capsule, material::Orange);
 
     auto& topBody = world.Emplace<RigidBody>(top);
     auto& bagBody = world.Emplace<RigidBody>(bag, Shape::MakeCapsule());
@@ -687,10 +687,10 @@ void BuildChain(ecs::Ecs world)
     nodeInfo.position.x = 3.0f;
     const auto node4 = world.Emplace<Entity>(nodeInfo);
 
-    world.Emplace<MeshRenderer2>(node1, mesh::Capsule, material::Teal);
-    world.Emplace<MeshRenderer2>(node2, mesh::Capsule, material::Teal);
-    world.Emplace<MeshRenderer2>(node3, mesh::Capsule, material::Teal);
-    world.Emplace<MeshRenderer2>(node4, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node1, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node2, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node3, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node4, mesh::Capsule, material::Teal);
 
     const auto capsule = Shape::MakeCapsule();
     auto& node1Body = world.Emplace<RigidBody>(node1, capsule);
@@ -744,9 +744,9 @@ void BuildSliders(ecs::Ecs world)
         .tag = "Slider2"
     });
 
-    world.Emplace<MeshRenderer2>(base, mesh::Cube, material::Red);
-    world.Emplace<MeshRenderer2>(slider1, mesh::Capsule, material::Yellow);
-    world.Emplace<MeshRenderer2>(slider2, mesh::Capsule, material::Yellow);
+    world.Emplace<StaticMesh>(base, mesh::Cube, material::Red);
+    world.Emplace<StaticMesh>(slider1, mesh::Capsule, material::Yellow);
+    world.Emplace<StaticMesh>(slider2, mesh::Capsule, material::Yellow);
 
     auto& baseBody = world.Emplace<RigidBody>(base);
     auto& slider1Body = world.Emplace<RigidBody>(slider1, Shape::MakeCapsule());
@@ -793,9 +793,9 @@ void BuildSwingingBars(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<MeshRenderer2>(pole, mesh::Cube, material::Purple);
-    world.Emplace<MeshRenderer2>(bar1, mesh::Cube, material::Yellow);
-    world.Emplace<MeshRenderer2>(bar2, mesh::Cube, material::Yellow);
+    world.Emplace<StaticMesh>(pole, mesh::Cube, material::Purple);
+    world.Emplace<StaticMesh>(bar1, mesh::Cube, material::Yellow);
+    world.Emplace<StaticMesh>(bar2, mesh::Cube, material::Yellow);
 
     auto& poleBody = world.Emplace<RigidBody>(pole, Shape::MakeCapsule());
     auto& bar1Body = world.Emplace<RigidBody>(bar1);
@@ -892,7 +892,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
             .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         },
         [world](Entity handle) mutable {
-            world.Emplace<MeshRenderer2>(handle, mesh::Cube, material::Default);
+            world.Emplace<StaticMesh>(handle, mesh::Cube, material::Default);
             world.Emplace<RigidBody>(handle, Shape::MakeBox());
         },
         [ncPhysics](bool isPreSpawn, unsigned count) {
@@ -956,7 +956,7 @@ class RayCaster : public FreeComponent
                     // possible the entity was deleted, if so we don't want to check for renderer
                     if (world.Contains<Entity>(entity))
                     {
-                        world.Get<MeshRenderer2>(entity).GetMaterial().SetProperties(material);
+                        world.Get<StaticMesh>(entity).GetMaterial().SetProperties(material);
                     }
                 }
 
@@ -979,9 +979,9 @@ class RayCaster : public FreeComponent
 
         void UpdateHit(ecs::Ecs world, Entity hit)
         {
-            if (world.Contains<MeshRenderer2>(hit))
+            if (world.Contains<StaticMesh>(hit))
             {
-                auto& renderer = world.Get<MeshRenderer2>(hit);
+                auto& renderer = world.Get<StaticMesh>(hit);
                 m_hits.push_back(hit);
                 m_restoreMaterials.push_back(renderer.GetMaterial().GetProperties());
                 renderer.GetMaterial().SetProperties(material::Yellow.properties);
@@ -1025,7 +1025,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Reserve space for default objects so references don't get invalidated
     world.GetPool<Transform>().Reserve(140);
-    world.GetPool<MeshRenderer2>().Reserve(140);
+    world.GetPool<StaticMesh>().Reserve(140);
     // Defer fully initializing physics objects until the whole scene is loaded (also calls reserve on the RigidBody pool).
     ncPhysics->BeginRigidBodyBatch(140);
     SCOPE_EXIT(ncPhysics->EndRigidBodyBatch(););

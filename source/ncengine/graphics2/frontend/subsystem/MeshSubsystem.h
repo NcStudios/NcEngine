@@ -9,8 +9,8 @@
 
 namespace nc
 {
-class MeshRenderer2;
 class SkinnedMesh;
+class StaticMesh;
 struct SystemEvents;
 class Transform;
 
@@ -48,7 +48,7 @@ class MeshSubsystem
                                  MaterialPasses newPasses,
                                  uint64_t meshId);
 
-        auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRenderState;
+        auto BuildState(ecs::ExplicitEcs<StaticMesh, Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
 
     private:

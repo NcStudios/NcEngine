@@ -8,7 +8,7 @@
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/StaticMesh.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SkinnedMesh.h"
 #include "ncengine/graphics/SpotLight.h"
@@ -47,13 +47,13 @@ auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRendere
     return graphics::MeshRenderer{entity};
 }
 
-auto CreateMeshRenderer2(Entity entity, const std::any&) -> MeshRenderer2
+auto CreateStaticMesh(Entity entity, const std::any&) -> StaticMesh
 {
     /** @todo 353 Once NcAsset has the required functionality, we should be fetching assets from it through the component context. */
     auto meshService = asset::AssetService<asset::MeshView>::Get();
     auto textureService = asset::AssetService<asset::TextureView>::Get();
     NC_ASSERT(meshService && textureService, "Asset services not registered");
-    return MeshRenderer2{
+    return StaticMesh{
         entity,
         meshService->Acquire(asset::CubeMesh),
         MaterialDesc{

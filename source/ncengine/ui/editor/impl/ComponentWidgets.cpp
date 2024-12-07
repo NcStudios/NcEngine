@@ -8,7 +8,7 @@
 #include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/StaticMesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SkinnedMesh.h"
@@ -59,18 +59,18 @@ constexpr auto roughnessProp = nc::ui::Property{ getRoughness,    &T::SetRoughne
 constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetallic,  "metallic"  };
 } // namespace mesh_renderer_ext
 
-namespace mesh_renderer2_ext
+namespace static_mesh_ext
 {
-void MeshAssetDropdown(nc::MeshRenderer2& meshRenderer, nc::asset::NcAsset& ncAsset)
+void MeshAssetDropdown(nc::StaticMesh& staticMesh, nc::asset::NcAsset& ncAsset)
 {
     /** @todo 353 Get asset views from ncAsset, once implemented */
     const auto meshAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::Mesh);
-    const auto meshId = meshRenderer.GetMeshId();
+    const auto meshId = staticMesh.GetMeshId();
     auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshId)};
     if (nc::ui::Combobox(meshPath, "mesh", meshAssets))
     {
         const auto selectedMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(meshPath);
-        meshRenderer.SetMesh(selectedMeshView);
+        staticMesh.SetMesh(selectedMeshView);
     }
 }
 
@@ -691,22 +691,22 @@ void MeshRendererUIWidget(graphics::MeshRenderer& renderer, EditorContext&, cons
     ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
 }
 
-void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, const std::any&)
+void StaticMeshUIWidget(StaticMesh& staticMesh, EditorContext& ctx, const std::any&)
 {
-    IMGUI_SCOPE(ui::ImGuiId, "MeshRenderer2");
+    IMGUI_SCOPE(ui::ImGuiId, "StaticMesh");
     auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
 
     ImGui::Separator();
     if (ImGui::TreeNodeEx("Mesh"))
     {
-        mesh_renderer2_ext::MeshAssetDropdown(meshRenderer, ncAsset);
+        static_mesh_ext::MeshAssetDropdown(staticMesh, ncAsset);
         ImGui::TreePop();
     }
 
     ImGui::Separator();
     if (ImGui::TreeNodeEx("Material"))
     {
-        auto& material = meshRenderer.GetMaterial();
+        auto& material = staticMesh.GetMaterial();
         auto passes = material.GetPasses();
         auto properties = material.GetProperties();
         auto passesModified = false;
@@ -728,34 +728,34 @@ void MeshRenderer2UIWidget(MeshRenderer2& meshRenderer, EditorContext& ctx, cons
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Passes"))
         {
-            passesModified = mesh_renderer2_ext::MaterialPassesWidget(passes);
+            passesModified = static_mesh_ext::MaterialPassesWidget(passes);
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Textures"))
         {
-            modified = mesh_renderer2_ext::MaterialTexturesWidget(properties, ncAsset) || modified;
+            modified = static_mesh_ext::MaterialTexturesWidget(properties, ncAsset) || modified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Gradient Color"))
         {
-            modified = mesh_renderer2_ext::MaterialColorWidget(properties) || modified;
+            modified = static_mesh_ext::MaterialColorWidget(properties) || modified;
             ImGui::TreePop();
         }
 
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Outline"))
         {
-            modified = mesh_renderer2_ext::MaterialOutlineWidget(properties) || modified;
+            modified = static_mesh_ext::MaterialOutlineWidget(properties) || modified;
             ImGui::TreePop();
         }
 
         if (passesModified)
         {
-            meshRenderer.SetMaterial(MaterialDesc{std::string{material.GetName()}, passes, properties});
+            staticMesh.SetMaterial(MaterialDesc{std::string{material.GetName()}, passes, properties});
         }
         else if (modified)
         {

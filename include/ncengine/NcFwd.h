@@ -62,7 +62,7 @@ class ToonRenderer;
 
 class SkeletalAnimationController;
 class SkinnedMesh;
-class MeshRenderer2;
+class StaticMesh;
 
 namespace net
 {

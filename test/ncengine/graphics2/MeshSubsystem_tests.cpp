@@ -5,7 +5,7 @@
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/StaticMesh.h"
 #include "graphics2/frontend/subsystem/MeshSubsystem.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
 
@@ -41,7 +41,7 @@ class MeshSubsystemTest : public testing::Test,
         auto AddEntity(nc::ecs::Ecs& world) -> nc::Entity
         {
             const auto entity = world.Emplace<nc::Entity>({});
-            world.Emplace<nc::MeshRenderer2>(
+            world.Emplace<nc::StaticMesh>(
                 entity,
                 g_meshView,
                 g_materialDesc
@@ -54,7 +54,7 @@ class MeshSubsystemTest : public testing::Test,
             : EcsFixture{MaxEntities},
               uut{systemEvents, MaxEntities, MaxEntities, 1}
         {
-            GetTestComponentRegistry().RegisterType<nc::MeshRenderer2>(MaxEntities);
+            GetTestComponentRegistry().RegisterType<nc::StaticMesh>(MaxEntities);
         }
 };
 
@@ -144,7 +144,7 @@ TEST_F(MeshSubsystemTest, MeshRendererUpdateMesh_PatchesTrackedState)
     registry.CommitPendingChanges();
     uut.BuildState(world); // discard - just updating internal tracking
 
-    world.Get<nc::MeshRenderer2>(second).SetMesh(nc::asset::MeshView{.id = 100});
+    world.Get<nc::StaticMesh>(second).SetMesh(nc::asset::MeshView{.id = 100});
 
     // Split into two batches. Second batch should be offset at index 2, leaving a free space in the first batch.
     auto actualRenderState = uut.BuildState(world);
@@ -172,7 +172,7 @@ TEST_F(MeshSubsystemTest, MeshRendererUpdateMaterial_Succeeds)
 
     // Only 1 pass is implemented currently, so we can't actually assign new passes/move to a new batch.
     // Eventually, we should make this test more interesting.
-    EXPECT_NO_THROW(world.Get<nc::MeshRenderer2>(entity).SetMaterial(g_materialDesc));
+    EXPECT_NO_THROW(world.Get<nc::StaticMesh>(entity).SetMaterial(g_materialDesc));
 
     registry.Clear();
 }
