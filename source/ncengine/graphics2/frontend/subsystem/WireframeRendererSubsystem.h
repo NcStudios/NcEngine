@@ -6,7 +6,7 @@
 
 namespace nc
 {
-class MeshRenderer2;
+class StaticMesh;
 class Transform;
 class RigidBody;
 
@@ -19,7 +19,7 @@ class WireframeRendererSubsystem
     public:
         auto BuildState(ecs::ExplicitEcs<Transform,
                                          WireframeRenderer,
-                                         MeshRenderer2,
+                                         StaticMesh,
                                          RigidBody> worldView) -> WireframeRendererRenderState;
 };
 } // namespace graphics

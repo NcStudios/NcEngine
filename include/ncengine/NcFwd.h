@@ -60,7 +60,7 @@ struct SpotLight;
 class ToonRenderer;
 } // namespace graphics
 
-class MeshRenderer2;
+class StaticMesh;
 
 namespace net
 {
