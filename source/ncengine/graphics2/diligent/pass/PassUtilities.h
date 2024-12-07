@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MaterialPass.h"
+#include "PassTypes.h"
 #include "PostProcessPass.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/diligent/resource/PostProcessSinkBufferResource.h"
@@ -95,4 +96,11 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
                       uint32_t depthRenderTargetIndex);
 
 auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool;
+
+auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t;
+
+auto EmptySource() -> RenderTargets;
+auto SwapChainSink() -> RenderTargets;
+auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets;
+auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets;
 } // namespace nc::graphics

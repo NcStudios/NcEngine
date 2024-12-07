@@ -20,6 +20,7 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
     NC_ASSERT(pso, "Failed to create pipeline state object");
 }
 
+
 auto MakeMaterialPasses(Diligent::IRenderDevice& device,
                         Diligent::ISwapChain& swapChain,
                         ShaderFactory& shaderFactory,

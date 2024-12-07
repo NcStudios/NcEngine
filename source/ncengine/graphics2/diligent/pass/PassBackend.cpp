@@ -107,6 +107,36 @@ void DrawIndexed(Diligent::IDeviceContext& context, const std::vector<nc::graphi
 
 namespace nc::graphics
 {
+PassBackend::PassBackend(Diligent::IRenderDevice& device,
+                         Diligent::IDeviceContext& context,
+                         Diligent::ISwapChain& swapChain,
+                         ShaderFactory& shaderFactory,
+                         ShaderBindings& shaderBindings)
+    : m_materialPasses{MakeMaterialPasses
+      (
+          device,
+          swapChain,
+          shaderFactory,
+          shaderBindings
+      )},
+      m_postProcessPasses{MakePostProcessPasses
+      (
+          context,
+          device,
+          swapChain,
+          shaderFactory,
+          shaderBindings
+      )},
+     m_wireframePass{WireframePass
+     {
+         device,
+         swapChain,
+         shaderFactory,
+         shaderBindings
+     }}
+{
+}
+
 void PassBackend::Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState)
 {
     for (const auto& [effectId, effectPasses, enabled] : postProcessState.toggledEffects)

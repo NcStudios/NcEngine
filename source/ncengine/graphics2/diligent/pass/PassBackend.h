@@ -18,10 +18,11 @@ class PerPassResourceSignature;
 class PassBackend
 {
     public:
-        explicit PassBackend(std::vector<MaterialPass> materialPasses, std::vector<PostProcessPass> postProcessPasses, WireframePass wireframePass)
-            : m_materialPasses{std::move(materialPasses)},
-              m_postProcessPasses{std::move(postProcessPasses)},
-              m_wireframePass{std::move(wireframePass)}{}
+        explicit PassBackend(Diligent::IRenderDevice& device,
+                             Diligent::IDeviceContext& context,
+                             Diligent::ISwapChain& swapChain,
+                             ShaderFactory& shaderFactory,
+                             ShaderBindings& shaderBindings);
 
         void Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState);
 

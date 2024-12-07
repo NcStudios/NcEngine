@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         MaterialPass.cpp
         PassUtilities.cpp
         PassBackend.cpp
+        PassManifest.cpp
         PostProcessPass.cpp
         WireframePass.cpp
 )

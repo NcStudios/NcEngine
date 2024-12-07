@@ -1,5 +1,6 @@
 #include "NcGraphicsImpl2.h"
 #include "diligent/pass/MaterialPass.h"
+#include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
 #include "frontend/FrontendRenderState.h"
 
@@ -176,29 +177,36 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_passBackend{
-            MakeMaterialPasses
-            (
-                m_engine.GetDevice(),
-                m_engine.GetSwapChain(),
-                m_engine.GetShaderFactory(),
-                m_shaderBindings
-            ),
-            MakePostProcessPasses
-            (
-                m_engine.GetContext(),
-                m_engine.GetDevice(),
-                m_engine.GetSwapChain(),
-                m_engine.GetShaderFactory(),
-                m_shaderBindings
-            ),
-            WireframePass
+          m_passManifest
+          {
+            std::vector<PassDesc>
             {
-                m_engine.GetDevice(),
-                m_engine.GetSwapChain(),
-                m_engine.GetShaderFactory(),
-                m_shaderBindings
-            },
+                PassDesc{
+                    .passType = PassType::Material,
+                    .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
+                    .sources = EmptySource(),
+                    .sinks = OffScreenSink(0u, 0u)
+                },
+                PassDesc{
+                    .passType = PassType::Wireframe,
+                    .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
+                    .sources = EmptySource(),
+                    .sinks = OffScreenSink(0u, 0u)
+                },
+                PassDesc{
+                    .passType = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
+                    .sources = OffScreenSource(0u, 0u),
+                    .sinks = SwapChainSink()
+                }
+            }
+          },
+          m_passBackend{
+            m_engine.GetDevice(),
+            m_engine.GetContext(),
+            m_engine.GetSwapChain(),
+            m_engine.GetShaderFactory(),
+            m_shaderBindings
           },
           m_frontend{
             m_engine.GetContext(),

@@ -7,6 +7,16 @@
 #include <array>
 #include <span>
 
+namespace
+{
+auto HashCombine(std::size_t hashCode, std::string_view inputString) -> std::size_t
+{
+    std::hash<std::string_view> hasher;
+    hashCode ^= hasher(inputString) + 0x9e3779b9 + (hashCode << 6) + (hashCode >> 2); 
+    return hashCode;
+}
+} // anonymous namespace
+
 namespace nc::graphics
 {
 auto MakeSwapChainPipelineCreateInfo(Diligent::IShader& pixelShader,
@@ -319,4 +329,17 @@ auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTarg
 {
     return (colorRenderTargetIndex != SwapChainColorRTIndex || depthRenderTargetIndex != SwapChainDepthRTIndex);
 }
+
+auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t
+{
+    std::size_t hashCode = 0u;
+    hashCode = HashCombine(hashCode, shaderPaths.pixelShaderPath);
+    return HashCombine(hashCode, shaderPaths.vertexShaderPath);
+}
+
+auto EmptySource() -> RenderTargets { return RenderTargets{}; }
+auto SwapChainSink() -> RenderTargets { return RenderTargets{.colorIndices = std::vector<uint32_t>{SwapChainColorRTIndex}, .depthIndices = std::vector<uint32_t>{SwapChainDepthRTIndex}}; }
+auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets { return RenderTargets{.colorIndices = std::vector<uint32_t>{colorRTIndex}, .depthIndices = std::vector<uint32_t>{depthRTIndex}}; }
+auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets  { return RenderTargets{.colorIndices = std::vector<uint32_t>{colorRTIndex}, .depthIndices = std::vector<uint32_t>{depthRTIndex}}; }
+
 } // namespace nc::graphics

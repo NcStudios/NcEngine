@@ -8,75 +8,6 @@
 
 namespace
 {
-constexpr auto g_pixelShader = std::string_view{
-R"(
-cbuffer EnvironmentBufferData
-{
-    float4x4 cameraViewProjection;
-    float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
-};
-
-cbuffer WireframeBufferData
-{
-    float4x4 wireframeModelMatrix;
-    float4 wireframeColor;
-};
-
-struct PSInput
-{
-    float4 Pos : SV_POSITION;
-};
-
-struct PSOutput
-{
-    float4 Color : SV_TARGET;
-};
-
-void main(in PSInput PSIn, out PSOutput PSOut)
-{
-    PSOut.Color = wireframeColor;
-}
-)"};
-
-constexpr auto g_vertexShader = std::string_view{
-R"(
-struct VSInput
-{
-    float3 Pos : ATTRIB0;
-};
-
-struct PSInput
-{
-    float4 Pos : SV_POSITION;
-};
-
-cbuffer EnvironmentBufferData
-{
-    float4x4 cameraViewProjection;
-    float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
-};
-
-cbuffer WireframeBufferData
-{
-    float4x4 wireframeModelMatrix;
-    float4 wireframeColor;
-};
-
-void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
-{
-    float4 transformedPos = mul(float4(VSIn.Pos, 1.0), wireframeModelMatrix);
-    PSIn.Pos = mul(transformedPos, cameraViewProjection);
-}
-)"};
-
 auto MakePso(Diligent::IRenderDevice& device,
              Diligent::ISwapChain& swapChain,
              nc::graphics::ShaderFactory& shaderFactory,
@@ -84,17 +15,20 @@ auto MakePso(Diligent::IRenderDevice& device,
 {
     using namespace Diligent;
 
-    auto vertexShader = shaderFactory.MakeShaderFromSource(
-        std::span{g_vertexShader},
-        "Wireframe VS",
-        Diligent::SHADER_TYPE_VERTEX,
+    std::string_view pixelShaderPath = "Wireframe.psh";
+    std::string_view vertexShaderPath = "Wireframe.vsh";
+
+    auto pixelShader = shaderFactory.MakeShaderFromPath(
+        pixelShaderPath,
+        pixelShaderPath.data(),
+        Diligent::SHADER_TYPE_PIXEL,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
-    auto pixelShader = shaderFactory.MakeShaderFromSource(
-        std::span{g_pixelShader},
-        "Wireframe PS",
-        Diligent::SHADER_TYPE_PIXEL,
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        vertexShaderPath,
+        vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
