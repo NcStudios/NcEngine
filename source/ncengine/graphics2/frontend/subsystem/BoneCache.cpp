@@ -9,8 +9,8 @@ auto BoneCacheStaging::Allocate(uint32_t count) -> BoneCacheHandle
 {
     const auto slot = std::ranges::find_if(
         m_freeList,
-        [count](const auto& slot) {
-            return count <= slot.capacity;
+        [count](const auto& freeSlot) {
+            return count <= freeSlot.capacity;
         }
     );
 
