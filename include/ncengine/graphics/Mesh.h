@@ -16,7 +16,7 @@ namespace graphics
 class MeshSubsystem;
 } // namespace graphics
 
-/** @brief  */
+/** @brief Type of mesh components. */
 enum class MeshInstanceType : uint8_t
 {
     Static,
@@ -75,6 +75,13 @@ class MeshBase
         auto GetMaterial() -> MaterialInstance& { return m_material; }
         void SetMaterial(const MaterialDesc& materialDesc);
 
+        /** @cond internal */
+        static void RegisterSubsystem(graphics::MeshSubsystem* subsystem)
+        {
+            s_subsystem = subsystem;
+        }
+        /** @endcond internal */
+
     protected:
         ~MeshBase() noexcept
         {
@@ -82,7 +89,6 @@ class MeshBase
         }
 
     private:
-        friend class graphics::MeshSubsystem;
         inline static graphics::MeshSubsystem* s_subsystem = nullptr;
         MeshInstanceContext m_ctx;
         MaterialInstance m_material;

@@ -41,7 +41,7 @@ MeshSubsystem::MeshSubsystem(SystemEvents& events,
       m_skinnedMeshInstanceCache{maxEntities, initialBatchSize},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshSubsystem::OnRebuildStatics)}
 {
-    MeshBase::s_subsystem = this;
+    MeshBase::RegisterSubsystem(this);
 }
 
 void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
