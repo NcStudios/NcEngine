@@ -8,63 +8,96 @@
 namespace nc::graphics
 {
 PostProcessPass::PostProcessPass(Diligent::IRenderDevice& device,
-                                         const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
-                                         std::vector<PostProcessPipelineInstance> instances_,
-                                         PostProcessPassFlag::type passId,
-                                         uint32_t colorRTIndex_,
-                                         uint32_t depthRTIndex_,
-                                         uint32_t renderTargetCount_)
+                                 const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
+                                 std::vector<PostProcessPipelineInstance> instances_,
+                                 PassDesc passDesc)
     : pso{},
       instances{std::move(instances_)},
-      id{passId},
-      colorRTIndex{colorRTIndex_},
-      depthRTIndex{depthRTIndex_},
-      renderTargetCount{renderTargetCount_}
+      passDesc{passDesc}
 {
     device.CreateGraphicsPipelineState(createInfo, &pso);
     NC_ASSERT(pso, "Failed to create pipeline state object");
 }
 
-auto MakePostProcessPasses(Diligent::IDeviceContext& context,
-                           Diligent::IRenderDevice& device,
-                           Diligent::ISwapChain& swapChain,
-                           ShaderFactory& shaderFactory,
-                           ShaderBindings& shaderBindings) -> std::vector<PostProcessPass>
-{                       
-    const auto passIds = GetPostProcessPassFlags();
-    auto passes = std::vector<PostProcessPass>{};
+auto MakePostProcessPass(Diligent::IRenderDevice& device,
+                         Diligent::IDeviceContext& context,
+                         Diligent::ISwapChain& swapChain,
+                         ShaderFactory& shaderFactory,
+                         ShaderBindings& shaderBindings,
+                         PassDesc passDesc) -> PostProcessPass
+{
+    auto pixelShader = shaderFactory.MakeShaderFromPath(
+        passDesc.shaderPaths.pixelShaderPath,
+        passDesc.shaderPaths.pixelShaderPath.data(),
+        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
 
-    if (passIds.empty())
-        return passes;
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        passDesc.shaderPaths.vertexShaderPath,
+        passDesc.shaderPaths.vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
 
-    const auto passShaderPaths = GetPostProcessPassShaderPaths();
-    const auto passNames = GetPostProcessPassNames();
-    passes.reserve(passIds.size());
+    auto layoutElements = GetMeshVertexLayoutElements(0);
+
+    auto ci = Diligent::GraphicsPipelineStateCreateInfo{};
+    ci.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
+    ci.PSODesc.Name = passDesc.name.data();
+    ci.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
-    auto& postProcessSinkBuffer = shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource();
 
-    if (passIds.size() > 1)
+    ci.ppResourceSignatures = signatures.data();
+    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
+
+    ci.pPS = pixelShader;
+    ci.pVS = vertexShader;
+
+    if (passDesc.sinks.first == SwapChainColorRTIndex || passDesc.sinks.second == SwapChainDepthRTIndex)
     {
-        for (auto i = 0u; i < passIds.size()-1; i++)
-        {
-            passes.emplace_back(MakeOffScreenPostProcessPass(
-                device, context, swapChain, shaderFactory,
-                signatures,
-                postProcessSinkBuffer,
-                passIds[i],
-                passShaderPaths[i].first,
-                passShaderPaths[i].second,
-                passNames[i]));
-        }
+        ci.GraphicsPipeline.RTVFormats[0] = swapChain.GetDesc().ColorBufferFormat;
+        ci.GraphicsPipeline.DSVFormat = swapChain.GetDesc().DepthBufferFormat;
+    }
+    else
+    {
+        ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
+        ci.GraphicsPipeline.DSVFormat = OffScreenDepthRTFormat;
     }
 
-    passes.emplace_back(MakeSwapChainPostProcessPass(
-        device, context, swapChain, shaderFactory,
-        signatures,
-        passIds.back(),
-        passShaderPaths.back().first,
-        passShaderPaths.back().second,
-        passNames.back()));
+    ci.GraphicsPipeline.NumRenderTargets             = 1;
+    ci.GraphicsPipeline.PrimitiveTopology            = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode      = Diligent::CULL_MODE_BACK;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = Diligent::True;
+    ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
+    ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
+
+    return PostProcessPass(device,
+                           ci,
+                           MakePostProcessPassInstances(context, device, passDesc.id),
+                           passDesc);
+}
+
+auto MakePostProcessPasses(Diligent::IRenderDevice& device,
+                           Diligent::IDeviceContext& context,
+                           Diligent::ISwapChain& swapChain,
+                           ShaderFactory& shaderFactory,
+                           ShaderBindings& shaderBindings,
+                           const PassManifest& passManifest) -> std::vector<PostProcessPass>
+{
+    auto passes = std::vector<PostProcessPass>{};
+    const auto& passDescs = passManifest.PostProcessPassDescs();
+
+    if (passDescs.empty())
+        return passes;
+
+    passes.reserve(passDescs.size());
+
+    for (auto& passDesc : passDescs)
+    {
+        passes.emplace_back(MakePostProcessPass(device, context, swapChain, shaderFactory, shaderBindings, passDesc));
+    }
 
     return passes;
 }

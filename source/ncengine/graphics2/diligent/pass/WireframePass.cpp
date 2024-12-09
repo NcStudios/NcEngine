@@ -1,4 +1,5 @@
 #include "WireframePass.h"
+#include "PassTypes.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/resource/MeshBuffer.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
@@ -9,25 +10,22 @@
 namespace
 {
 auto MakePso(Diligent::IRenderDevice& device,
-             Diligent::ISwapChain& swapChain,
              nc::graphics::ShaderFactory& shaderFactory,
-             Diligent::IPipelineResourceSignature& perFrameResourceSignature)
+             Diligent::IPipelineResourceSignature& perFrameResourceSignature,
+             const nc::graphics::PassDesc& passDesc)
 {
     using namespace Diligent;
 
-    std::string_view pixelShaderPath = "Wireframe.psh";
-    std::string_view vertexShaderPath = "Wireframe.vsh";
-
     auto pixelShader = shaderFactory.MakeShaderFromPath(
-        pixelShaderPath,
-        pixelShaderPath.data(),
+        passDesc.shaderPaths.pixelShaderPath,
+        passDesc.shaderPaths.pixelShaderPath.data(),
         Diligent::SHADER_TYPE_PIXEL,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
     auto vertexShader = shaderFactory.MakeShaderFromPath(
-        vertexShaderPath,
-        vertexShaderPath.data(),
+        passDesc.shaderPaths.vertexShaderPath,
+        passDesc.shaderPaths.vertexShaderPath.data(),
         Diligent::SHADER_TYPE_VERTEX,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
@@ -37,7 +35,7 @@ auto MakePso(Diligent::IRenderDevice& device,
 
     auto ci = GraphicsPipelineStateCreateInfo{};
     ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
-    ci.PSODesc.Name = "WireframePipeline";
+    ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
     ci.ppResourceSignatures = signatures.data();
@@ -47,8 +45,8 @@ auto MakePso(Diligent::IRenderDevice& device,
     ci.pPS = pixelShader;
 
     ci.GraphicsPipeline.NumRenderTargets             = 1;
-    ci.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
-    ci.GraphicsPipeline.DSVFormat                    = swapChain.GetDesc().DepthBufferFormat;
+    ci.GraphicsPipeline.RTVFormats[0]                = nc::graphics::OffScreenColorRTFormat;
+    ci.GraphicsPipeline.DSVFormat                    = nc::graphics::OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
@@ -70,37 +68,13 @@ auto MakePso(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 WireframePass::WireframePass(Diligent::IRenderDevice& device,
-                             Diligent::ISwapChain& swapChain,
                              ShaderFactory& shaderFactory,
-                             ShaderBindings& shaderBindings)
-    : m_pso{MakePso(device, swapChain, shaderFactory, shaderBindings.GetPerFrameSignature().GetResourceSignature())},
-      m_buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()}
+                             ShaderBindings& shaderBindings,
+                             const PassDesc& passDesc)
+    : pso{MakePso(device, shaderFactory, shaderBindings.GetPerFrameSignature().GetResourceSignature(), passDesc)},
+      buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()},
+      colorRTIndex{passDesc.sinks.first},
+      depthRTIndex{passDesc.sinks.second}
 {
-}
-
-void WireframePass::Render(Diligent::IDeviceContext& context,
-                           const WireframeRendererRenderState& state)
-{
-    if (state.wireframeData.empty())
-    {
-        return;
-    }
-
-    context.SetPipelineState(m_pso);
-    for (const auto& [data, mesh] : state.wireframeData)
-    {
-        m_buffer->Update(context, data);
-        const auto attribs = Diligent::DrawIndexedAttribs{
-            mesh.indexCount,
-            Diligent::VT_UINT32,
-            Diligent::DRAW_FLAG_VERIFY_ALL,
-            1,
-            mesh.firstIndex,
-            mesh.firstVertex,
-            0
-        };
-
-        context.DrawIndexed(attribs);
-    }
 }
 } // namespace nc::graphics

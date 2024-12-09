@@ -7,11 +7,6 @@
 
 namespace nc::graphics
 {
-constexpr auto SwapChainColorRTIndex = std::numeric_limits<uint32_t>::max();
-constexpr auto SwapChainDepthRTIndex = std::numeric_limits<uint32_t>::max();
-constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
-constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
-
 struct StructuredBufferResourceDesc
 {
     std::string resourceKey = "UninitializedStructuredBufferResourceDesc";

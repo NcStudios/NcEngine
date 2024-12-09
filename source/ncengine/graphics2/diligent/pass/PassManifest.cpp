@@ -7,12 +7,41 @@
 
 namespace nc::graphics
 {
-PassManifest::PassManifest(std::vector<PassDesc> passes)
+PassManifest::PassManifest(std::vector<PassDesc> passes,
+                           std::span<const MaterialPassFlag::type> implementedMaterialPasses,
+                           std::span<const PostProcessPassFlag::type> implementedPPPasses,
+                           std::span<const MiscPassFlag::type> implementedMiscPasses)
 {
-    m_passes.reserve(passes.size());
-    for (auto& passDesc : passes)
+    m_materialPassDescs.reserve(implementedMaterialPasses.size());
+    auto materialPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type == PassType::Material; });
+    for (auto& passFlag : implementedMaterialPasses)
     {
-        RegisterPass(std::move(passDesc));
+        auto pos = std::ranges::find_if(materialPasses, [passFlag](PassDesc& passDesc){ return passDesc.id == passFlag; });
+        if (pos != materialPasses.end())
+        {
+            RegisterPass(std::move(*pos));
+        }
+    }
+
+    auto miscPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type != PassType::PostProcess && passDesc.type != PassType::Material; });
+    for (auto& passFlag : implementedMiscPasses)
+    {
+        auto pos = std::ranges::find_if(miscPasses, [passFlag](PassDesc& passDesc){ return passDesc.id == passFlag; });
+        if (pos != miscPasses.end())
+        {
+            RegisterPass(std::move(*pos));
+        }
+    }
+
+    m_postProcessPassDescs.reserve(implementedPPPasses.size());
+    auto postProcessPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type == PassType::PostProcess; });
+    for (auto& passFlag : implementedPPPasses)
+    {
+        auto pos = std::ranges::find_if(postProcessPasses, [passFlag](PassDesc& passDesc){ return passDesc.id == passFlag; });
+        if (pos != postProcessPasses.end())
+        {
+            RegisterPass(std::move(*pos));
+        }
     }
 }
 
@@ -26,12 +55,64 @@ void PassManifest::RegisterPass(PassDesc desc)
         throw nc::NcError("The pass was already registered");
     }
 
-    m_passes.emplace_back(std::move(desc));
+    switch (desc.type)
+    {
+        case PassType::Material:
+            m_materialPassDescs.emplace_back(std::move(desc));
+            break;
+        case PassType::Wireframe:
+            m_wireframePassDesc = desc;
+            break;
+        case PassType::PostProcess:
+            m_postProcessPassDescs.emplace_back(std::move(desc));
+            break;
+        case PassType::None:
+            throw nc::NcError("Pass type not implemented.");
+    }
 }
 
 void PassManifest::Clear()
 {
-    m_passes.clear();
-    m_passes.shrink_to_fit();
+    m_materialPassDescs.clear();
+    m_materialPassDescs.shrink_to_fit();
+    m_postProcessPassDescs.clear();
+    m_postProcessPassDescs.shrink_to_fit();
+    m_wireframePassDesc = PassDesc{};
+}
+
+auto PassManifest::SinkCount() const -> std::pair<uint32_t, uint32_t>
+{
+    auto offscreenRenderTargets = std::make_pair<uint32_t, uint32_t>(0u, 0u);
+
+    for (auto& passDesc : m_materialPassDescs)
+    {
+        if (!IsOffScreenTarget(passDesc.sinks.first, passDesc.sinks.second))
+        {
+            continue;
+        }
+        offscreenRenderTargets.first = std::max(offscreenRenderTargets.first, passDesc.sinks.first);
+        offscreenRenderTargets.second = std::max(offscreenRenderTargets.second, passDesc.sinks.second);
+    }
+
+    for (auto& passDesc : m_postProcessPassDescs)
+    {
+        if (!IsOffScreenTarget(passDesc.sinks.first, passDesc.sinks.second))
+        {
+            continue;
+        }
+        offscreenRenderTargets.first = std::max(offscreenRenderTargets.first, passDesc.sinks.first);
+        offscreenRenderTargets.second = std::max(offscreenRenderTargets.second, passDesc.sinks.second);
+    }
+
+    if (IsOffScreenTarget(m_wireframePassDesc.sinks.first, m_wireframePassDesc.sinks.second))
+    {
+        offscreenRenderTargets.first = std::max(offscreenRenderTargets.first, m_wireframePassDesc.sinks.first);
+        offscreenRenderTargets.second = std::max(offscreenRenderTargets.second, m_wireframePassDesc.sinks.second);
+    }
+
+    offscreenRenderTargets.first += 1;
+    offscreenRenderTargets.second += 1;
+
+    return offscreenRenderTargets;
 }
 } // namespace nc::graphics

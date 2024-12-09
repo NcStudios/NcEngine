@@ -117,8 +117,8 @@ auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
 }
 
 auto MakePostProcessPassInstances(Diligent::IDeviceContext& context,
-                       Diligent::IRenderDevice& device,
-                       nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
+                                  Diligent::IRenderDevice& device,
+                                  nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
 {
     const auto hasProperties = nc::PassHasProperties(passId);
     auto instances = std::vector<nc::graphics::PostProcessPipelineInstance>{};
@@ -214,82 +214,38 @@ auto MakeSwapChainMaterialPass(Diligent::IRenderDevice& device,
     return MaterialPass(device, createInfo, MaterialPassFlag::Toon, SwapChainColorRTIndex, SwapChainDepthRTIndex);
 }
 
-auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
-                                  Diligent::IDeviceContext& context,
-                                  Diligent::ISwapChain& swapChain,
-                                  ShaderFactory& shaderFactory,
-                                  std::span<Diligent::IPipelineResourceSignature*> signatures,
-                                  PostProcessSinkBufferResource& postProcessSinkBufferResource,
-                                  PostProcessPassFlag::type passId,
-                                  std::string_view pixelShaderPath,
-                                  std::string_view vertexShaderPath,
-                                  std::string_view pipelineName) -> PostProcessPass
+void ClearRenderTarget(Diligent::IDeviceContext& context,
+                       Diligent::ISwapChain& swapChain,
+                       nc::graphics::PostProcessSinkBufferResource& postProcessSinkBufferResource,
+                       uint32_t colorRenderTargetIndex,
+                       uint32_t depthRenderTargetIndex)
 {
-    auto pixelShader = shaderFactory.MakeShaderFromPath(
-        pixelShaderPath,
-        pixelShaderPath.data(),
-        Diligent::SHADER_TYPE_PIXEL,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
+    Diligent::ITextureView* pRTV = nullptr;
+    Diligent::ITextureView* pDSV = nullptr;
 
-    auto vertexShader = shaderFactory.MakeShaderFromPath(
-        vertexShaderPath,
-        vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
+    if (colorRenderTargetIndex == SwapChainColorRTIndex)
+    {
+        pRTV = swapChain.GetCurrentBackBufferRTV();
+    }
+    else
+    {
+        pRTV = static_cast<Diligent::ITextureView*>(postProcessSinkBufferResource.GetColorRenderTarget(colorRenderTargetIndex));
+    }
 
-    auto layoutElements = GetMeshVertexLayoutElements(0);
-    auto createInfo = MakeOffScreenPostProcessPipelineCreateInfo(
-        *pixelShader,
-        *vertexShader,
-        swapChain,
-        signatures,
-        layoutElements,
-        pipelineName.data()
-    );
+    if (depthRenderTargetIndex == SwapChainColorRTIndex)
+    {
+        pDSV = swapChain.GetDepthBufferDSV();
+    }
+    else
+    {
+        pDSV = static_cast<Diligent::ITextureView*>(postProcessSinkBufferResource.GetDepthRenderTarget(depthRenderTargetIndex));
+    }
 
-    auto renderTargetIndices = postProcessSinkBufferResource.Add(device, 1, 1, swapChain.GetDesc().Width, swapChain.GetDesc().Height);
-
-    return PostProcessPass(device, createInfo, MakePostProcessPassInstances(context, device, passId), passId, renderTargetIndices[0], renderTargetIndices[1], static_cast<uint32_t>(renderTargetIndices.size()));
+    constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
+    context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
-auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
-                                Diligent::IDeviceContext& context,
-                                Diligent::ISwapChain& swapChain,
-                                ShaderFactory& shaderFactory,
-                                std::span<Diligent::IPipelineResourceSignature*> signatures,
-                                PostProcessPassFlag::type passId,
-                                std::string_view pixelShaderPath,
-                                std::string_view vertexShaderPath,
-                                std::string_view pipelineName) -> PostProcessPass
-{
-    auto pixelShader = shaderFactory.MakeShaderFromPath(
-        pixelShaderPath,
-        pixelShaderPath.data(),
-        Diligent::SHADER_TYPE_PIXEL,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
-    auto vertexShader = shaderFactory.MakeShaderFromPath(
-        vertexShaderPath,
-        vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
-    auto layoutElements = GetMeshVertexLayoutElements(0);
-    auto createInfo = MakeSwapChainPostProcessPipelineCreateInfo(
-        *pixelShader,
-        *vertexShader,
-        swapChain,
-        signatures,
-        layoutElements,
-        pipelineName.data()
-    );
-
-    return PostProcessPass(device, createInfo, MakePostProcessPassInstances(context, device, passId), passId, SwapChainColorRTIndex, SwapChainDepthRTIndex, 1);
-}
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
@@ -319,10 +275,6 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
     }
 
     context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-    constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
-    context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool
@@ -338,8 +290,8 @@ auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t
 }
 
 auto EmptySource() -> RenderTargets { return RenderTargets{}; }
-auto SwapChainSink() -> RenderTargets { return RenderTargets{.colorIndices = std::vector<uint32_t>{SwapChainColorRTIndex}, .depthIndices = std::vector<uint32_t>{SwapChainDepthRTIndex}}; }
-auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets { return RenderTargets{.colorIndices = std::vector<uint32_t>{colorRTIndex}, .depthIndices = std::vector<uint32_t>{depthRTIndex}}; }
-auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets  { return RenderTargets{.colorIndices = std::vector<uint32_t>{colorRTIndex}, .depthIndices = std::vector<uint32_t>{depthRTIndex}}; }
+auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets { return RenderTargets{.colorIndices = std::vector<uint32_t>{colorRTIndex}, .depthIndices = std::vector<uint32_t>{depthRTIndex}}; }
+auto SwapChainSink() -> std::pair<uint32_t, uint32_t> { return std::make_pair(SwapChainColorRTIndex, SwapChainDepthRTIndex); }
+auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> std::pair<uint32_t, uint32_t> { return std::make_pair(colorRTIndex, depthRTIndex); }
 
 } // namespace nc::graphics

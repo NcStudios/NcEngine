@@ -68,26 +68,11 @@ auto MakeSwapChainMaterialPass(Diligent::IRenderDevice& device,
                                std::string_view vertexShaderPath,
                                std::string_view pipelineName) -> MaterialPass;
 
-auto MakeOffScreenPostProcessPass(Diligent::IRenderDevice& device,
-                                  Diligent::IDeviceContext& context,
-                                  Diligent::ISwapChain& swapChain,
-                                  ShaderFactory& shaderFactory,
-                                  std::span<Diligent::IPipelineResourceSignature*> signatures,
-                                  PostProcessSinkBufferResource& postProcessSinkBufferResource,
-                                  PostProcessPassFlag::type passId,
-                                  std::string_view pixelShaderPath,
-                                  std::string_view vertexShaderPath,
-                                  std::string_view pipelineName) -> PostProcessPass;
-
-auto MakeSwapChainPostProcessPass(Diligent::IRenderDevice& device,
-                                  Diligent::IDeviceContext& context,
-                                  Diligent::ISwapChain& swapChain,
-                                  ShaderFactory& shaderFactory,
-                                  std::span<Diligent::IPipelineResourceSignature*> signatures,
-                                  PostProcessPassFlag::type passId,
-                                  std::string_view pixelShaderPath,
-                                  std::string_view vertexShaderPath,
-                                  std::string_view pipelineName) -> PostProcessPass;
+void ClearRenderTarget(Diligent::IDeviceContext& context,
+                       Diligent::ISwapChain& swapChain,
+                       nc::graphics::PostProcessSinkBufferResource& postProcessSinkBufferResource,
+                       uint32_t colorRenderTargetIndex,
+                       uint32_t depthRenderTargetIndex);
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
@@ -95,12 +80,14 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
                       uint32_t colorRenderTargetIndex,
                       uint32_t depthRenderTargetIndex);
 
+
+
 auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool;
 
 auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t;
 
 auto EmptySource() -> RenderTargets;
-auto SwapChainSink() -> RenderTargets;
-auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets;
 auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets;
+auto SwapChainSink() -> std::pair<uint32_t, uint32_t>;
+auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> std::pair<uint32_t, uint32_t>;
 } // namespace nc::graphics

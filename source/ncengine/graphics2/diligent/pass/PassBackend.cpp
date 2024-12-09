@@ -3,6 +3,8 @@
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
+#include "graphics2/diligent/resource/ShaderBindings.h"
+#include "graphics2/diligent/resource/WireframeBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "ncengine/debug/Profile.h"
 
@@ -60,7 +62,7 @@ auto FindInstance(std::vector<PostProcessPass>& passes,
                   PostProcessEffectId effectId,
                   PostProcessPassFlag::type passId) -> PostProcessPipelineInstance&
 {
-    auto pass = std::ranges::find(passes, passId, &PostProcessPass::id);
+    auto pass = std::ranges::find_if(passes, [passId](auto& ppPass) { return ppPass.passDesc.id == passId; });
     if (pass != passes.end())
     {
         auto instance = std::ranges::find(pass->instances, effectId, &PostProcessPipelineInstance::effectId);
@@ -111,30 +113,53 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
                          Diligent::IDeviceContext& context,
                          Diligent::ISwapChain& swapChain,
                          ShaderFactory& shaderFactory,
-                         ShaderBindings& shaderBindings)
-    : m_materialPasses{MakeMaterialPasses
-      (
-          device,
-          swapChain,
-          shaderFactory,
-          shaderBindings
-      )},
-      m_postProcessPasses{MakePostProcessPasses
-      (
-          context,
-          device,
-          swapChain,
-          shaderFactory,
-          shaderBindings
-      )},
-     m_wireframePass{WireframePass
-     {
-         device,
-         swapChain,
-         shaderFactory,
-         shaderBindings
-     }}
+                         ShaderBindings& shaderBindings,
+                         const PassManifest& passManifest)
 {
+    m_materialPasses = MakeMaterialPasses
+    (
+        device,
+        shaderFactory,
+        shaderBindings,
+        passManifest.MaterialPassDescs()
+    );
+
+    m_postProcessPasses = MakePostProcessPasses
+    (
+        device,
+        context,
+        swapChain,
+        shaderFactory,
+        shaderBindings,
+        passManifest
+    );
+
+    m_wireframePass = std::make_unique<WireframePass>
+    (
+        device,
+        shaderFactory,
+        shaderBindings,
+        passManifest.WireframePassDesc()
+    );
+
+    // Create a hardcoded dummy post process pass that always pipes the result of the last rendered render target to the swapchain
+    auto sinkCount = passManifest.SinkCount();
+    auto shaderPaths = ShaderPaths{"PPEnd.psh", "PostProcess.vsh"};
+    auto finalPass = PassDesc
+    {
+        .id = ToPassBaseId(shaderPaths),
+        .name = "Dummy Pass",
+        .type = PassType::PostProcess,
+        .shaderPaths = shaderPaths,
+        .sources = OffScreenSource(sinkCount.first - 1, sinkCount.second - 1),
+        .sinks = SwapChainSink()
+    };
+
+    m_finalPass = std::make_unique<PostProcessPass>(MakePostProcessPass(device, context, swapChain, shaderFactory, shaderBindings, finalPass));
+
+    // Make all the off screen render targets that will be used by the passes
+    auto& postProcessSinks = shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource();
+    postProcessSinks.Add(device, sinkCount.first, sinkCount.second, swapChain.GetDesc().Width, swapChain.GetDesc().Height);
 }
 
 void PassBackend::Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState)
@@ -143,7 +168,7 @@ void PassBackend::Update(Diligent::IDeviceContext& context, const PostProcessSta
     {
         for (auto& pass : m_postProcessPasses)
         {
-            if (pass.id & effectPasses)
+            if (pass.passDesc.id & effectPasses)
             {
                 enabled ? EnableInstance(effectId, pass) : DisableInstance(effectId, pass);
             }
@@ -163,18 +188,21 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
 {
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
     NC_ASSERT(m_materialPasses.size() == passBatches.size(), "Frontend/Backend passes out of sync.");
+
+    auto bound = false;
     for (auto [pass, batches] : std::views::zip(m_materialPasses, passBatches))
     {
         BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
+        if (!bound)
+        {
+            ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), m_materialPasses[0].colorRTIndex, m_materialPasses[0].depthRTIndex);
+            bound = true;
+        }
         context.SetPipelineState(pass.pso);
         DrawIndexed(context, batches);
 
-        if (IsOffScreenTarget(pass.colorRTIndex, pass.depthRTIndex))
-        {
-            m_lastColorRenderTargetIndex = pass.colorRTIndex;
-            m_lastDepthRenderTargetIndex = pass.depthRTIndex;
-            context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
-        }
+        m_lastColorRenderTargetIndex = pass.colorRTIndex;
+        m_lastDepthRenderTargetIndex = pass.depthRTIndex;
     }
 }
 
@@ -183,17 +211,14 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                                     PerPassResourceSignature& perPassResourceSignature,
                                     PostProcessPropertyBufferResource& )
 {
+    NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
     for (auto& pass : m_postProcessPasses)
     {
-        if (!pass.anyEnabled)
-        {
-            continue;
-        }
-
-        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
+        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.passDesc.sinks.first, pass.passDesc.sinks.second);
         context.SetPipelineState(pass.pso);
-        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, m_lastColorRenderTargetIndex, m_lastDepthRenderTargetIndex);
+
+        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, pass.passDesc.sources.colorIndices[0], pass.passDesc.sources.depthIndices[0]);
 
         for (auto& instance : pass.instances)
         {
@@ -208,18 +233,44 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
             // }
 
             context.Draw(drawAttribs);
-
-            if (IsOffScreenTarget(pass.colorRTIndex, pass.depthRTIndex))
-            {
-                context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
-            }
         }
     }
+
+    // Render final post process pass
+    ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
+    BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
+    context.SetPipelineState(m_finalPass->pso);
+    context.Draw(drawAttribs);
 }
 
 void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
+                                  Diligent::ISwapChain& swapChain,
+                                  PerPassResourceSignature& perPassResourceSignature,
                                   const WireframeRendererRenderState& state)
 {
-    m_wireframePass.Render(context, state);
+    NC_PROFILE_SCOPE("PassBackend::RenderWireframe()", ProfileCategory::Rendering);
+    if (state.wireframeData.empty() || !m_wireframePass)
+    {
+        return;
+    }
+
+    BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), m_wireframePass->colorRTIndex, m_wireframePass->depthRTIndex);
+    context.SetPipelineState(m_wireframePass->pso);
+    for (const auto& [data, mesh] : state.wireframeData)
+    {
+        m_wireframePass->buffer->Update(context, data);
+        const auto attribs = Diligent::DrawIndexedAttribs{
+            mesh.indexCount,
+            Diligent::VT_UINT32,
+            Diligent::DRAW_FLAG_VERIFY_ALL,
+            1,
+            mesh.firstIndex,
+            mesh.firstVertex,
+            0
+        };
+
+        context.DrawIndexed(attribs);
+    }
 }
 } // namespace nc::graphics

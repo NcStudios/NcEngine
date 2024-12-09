@@ -9,6 +9,7 @@
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
@@ -182,31 +183,41 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
-                    .passType = PassType::Material,
+                    .id = static_cast<uint64_t>(MaterialPassFlag::Toon),
+                    .name = "Toon",
+                    .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
                     .sources = EmptySource(),
                     .sinks = OffScreenSink(0u, 0u)
                 },
                 PassDesc{
-                    .passType = PassType::Wireframe,
+                    .id = static_cast<uint64_t>(MiscPassFlag::Wireframe),
+                    .name = "Wireframe",
+                    .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
                     .sources = EmptySource(),
                     .sinks = OffScreenSink(0u, 0u)
                 },
                 PassDesc{
-                    .passType = PassType::PostProcess,
+                    .id = static_cast<uint64_t>(PostProcessPassFlag::Alpha),
+                    .name = "Post Process Wave",
+                    .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
                     .sources = OffScreenSource(0u, 0u),
                     .sinks = SwapChainSink()
                 }
-            }
+            },
+            GetImplementedMaterialPassFlags(),
+            GetPostProcessPassFlags(),
+            GetMiscsPassFlags()
           },
           m_passBackend{
             m_engine.GetDevice(),
             m_engine.GetContext(),
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
-            m_shaderBindings
+            m_shaderBindings,
+            m_passManifest
           },
           m_frontend{
             m_engine.GetContext(),
@@ -337,7 +348,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRenderState.staticMeshBatches);
-    m_passBackend.RenderWireframe(context, renderState.wireframeRenderState);
+    m_passBackend.RenderWireframe(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.wireframeRenderState);
     m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
     m_ui.Render(context);
 

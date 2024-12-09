@@ -12,6 +12,15 @@
 
 namespace nc
 {
+/** @brief Pass flags that represent Miscellaneous passes */
+struct MiscPassFlag
+{
+    using type = uint64_t;
+
+    static constexpr auto Wireframe = type{1 << 0};
+    static constexpr auto UI        = type{1 << 1};
+};
+
 /** @brief Returns a view of all material pass names, ordered by ascending flag value. */
 auto GetMaterialPassNames() -> std::span<const std::string_view>;
 
@@ -24,6 +33,9 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>;
  *           Eventually, usage of this should switch to GetMaterialPassFlags().
  */
 auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>;
+
+/** @brief Returns a view of all miscellaneous pass flags, ordered by ascending flag value. */
+auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>;
 
 /** @brief Returns a view of all post process pass names, ordered by ascending flag value. */
 auto GetPostProcessPassNames() -> std::span<const std::string_view>;

@@ -3,6 +3,7 @@
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "MaterialPass.h"
+#include "PassManifest.h"
 #include "PostProcessPass.h"
 #include "WireframePass.h"
 
@@ -22,7 +23,8 @@ class PassBackend
                              Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
                              ShaderFactory& shaderFactory,
-                             ShaderBindings& shaderBindings);
+                             ShaderBindings& shaderBindings,
+                             const PassManifest& passManifest);
 
         void Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState);
 
@@ -32,6 +34,8 @@ class PassBackend
                             const std::vector<std::vector<Batch>>& passBatches);
 
         void RenderWireframe(Diligent::IDeviceContext& context,
+                             Diligent::ISwapChain& swapChain,
+                             PerPassResourceSignature& perPassResourceSignature,
                              const WireframeRendererRenderState& state);
 
         void RenderPostProcess(Diligent::IDeviceContext& context,
@@ -41,8 +45,9 @@ class PassBackend
 
     private:
         std::vector<MaterialPass> m_materialPasses;
+        std::unique_ptr<WireframePass> m_wireframePass;
         std::vector<PostProcessPass> m_postProcessPasses;
-        WireframePass m_wireframePass;
+        std::unique_ptr<PostProcessPass> m_finalPass;
         uint32_t m_lastColorRenderTargetIndex;
         uint32_t m_lastDepthRenderTargetIndex;
 };

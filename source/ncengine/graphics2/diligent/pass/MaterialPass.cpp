@@ -4,6 +4,60 @@
 #include "graphics2/diligent/resource/MeshBuffer.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 
+#include <ranges>
+
+namespace
+{
+using namespace Diligent;
+using namespace nc::graphics;
+
+auto MakeMaterialPass(Diligent::IRenderDevice& device,
+                      ShaderFactory& shaderFactory,
+                      ShaderBindings& shaderBindings,
+                      const PassDesc& passDesc) -> MaterialPass
+{
+    auto pixelShader = shaderFactory.MakeShaderFromPath(
+        passDesc.shaderPaths.pixelShaderPath,
+        passDesc.shaderPaths.pixelShaderPath.data(),
+        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    auto vertexShader = shaderFactory.MakeShaderFromPath(
+        passDesc.shaderPaths.vertexShaderPath,
+        passDesc.shaderPaths.vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    auto layoutElements = GetMeshVertexLayoutElements(0);
+
+    auto ci = GraphicsPipelineStateCreateInfo{};
+    ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+    ci.PSODesc.Name = passDesc.name.data();
+    ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+
+    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature()};
+
+    ci.ppResourceSignatures = signatures.data();
+    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
+
+    ci.pPS = pixelShader;
+    ci.pVS = vertexShader;
+
+    ci.GraphicsPipeline.NumRenderTargets             = 1;
+    ci.GraphicsPipeline.RTVFormats[0]                = OffScreenColorRTFormat;
+    ci.GraphicsPipeline.DSVFormat                    = OffScreenDepthRTFormat;
+    ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
+    ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
+    ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
+
+    return MaterialPass(device, ci, nc::MaterialPassFlag::Toon, passDesc.sinks.first, passDesc.sinks.second);
+}
+} // anonymous namespace
+
 namespace nc::graphics
 {
 MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
@@ -20,25 +74,20 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
     NC_ASSERT(pso, "Failed to create pipeline state object");
 }
 
-
 auto MakeMaterialPasses(Diligent::IRenderDevice& device,
-                        Diligent::ISwapChain& swapChain,
                         ShaderFactory& shaderFactory,
-                        ShaderBindings& shaderBindings) -> std::vector<MaterialPass>
+                        ShaderBindings& shaderBindings,
+                        std::span<const PassDesc> passManifest) -> std::vector<MaterialPass>
 {
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
+    auto materialPasses = std::vector<MaterialPass>{};
+    materialPasses.reserve(passManifest.size());
 
-    return std::vector<MaterialPass>{
-        MakeOffScreenMaterialPass(
-            device,
-            swapChain,
-            shaderFactory,
-            signatures,
-            shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource(),
-            "Toon.psh",
-            "Toon.vsh",
-            "Toon Pipeline"
-        )
-    };
+    for (auto& passDesc : passManifest)
+    {
+        materialPasses.emplace_back(MakeMaterialPass(device, shaderFactory, shaderBindings, passDesc));
+    }
+
+    return materialPasses;
 }
 } // namespace nc::graphics

@@ -18,6 +18,10 @@ constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPassFlag::Toon
 };
 
+constexpr auto g_miscPassFlags = std::array{
+    nc::MiscPassFlag::Wireframe
+};
+
 constexpr auto g_postProcessPassNames = std::array{
     std::string_view{"Alpha"},
     std::string_view{"Depth"},
@@ -82,6 +86,11 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
     return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 1};
+}
+
+auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>
+{
+    return std::span<const MiscPassFlag::type>{g_miscPassFlags.data(), 1};
 }
 
 auto GetPostProcessPassNames() -> std::span<const std::string_view>

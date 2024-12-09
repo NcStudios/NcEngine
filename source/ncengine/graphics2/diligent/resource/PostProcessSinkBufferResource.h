@@ -30,9 +30,9 @@ class PostProcessSinkBufferResource
                     uint32_t renderTargetHeight);
 
         void Clear();
-        auto GetMaxTextureCount() const -> size_t { return m_maxTextures; }
-        auto GetColorRenderTarget(uint32_t index) -> Diligent::IDeviceObject* { return m_colorRenderTargetViewsRT.at(index); };
-        auto GetDepthRenderTarget(uint32_t index) -> Diligent::IDeviceObject* { return m_depthRenderTargetViewsRT.at(index); };
+        auto ColorRenderTargetExists(uint32_t index) const -> bool { return m_colorRenderTargetViewsRT.size() > index + 1; }
+        auto GetColorRenderTarget(uint32_t index) -> Diligent::IDeviceObject* { return m_colorRenderTargetViewsRT.at(index); }
+        auto GetDepthRenderTarget(uint32_t index) -> Diligent::IDeviceObject* { return m_depthRenderTargetViewsRT.at(index); }
 
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_colorRenderTargets;

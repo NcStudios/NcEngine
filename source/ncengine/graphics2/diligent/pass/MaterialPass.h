@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PassManifest.h"
 #include "ncengine/graphics/Material.h"
 #include "graphics2/diligent/resource/PostProcessSinkBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
@@ -43,7 +44,7 @@ struct MaterialPass
 
 // todo 794 This only creates a Toon pass. Add more as they are implemented.
 auto MakeMaterialPasses(Diligent::IRenderDevice& device,
-                Diligent::ISwapChain& swapChain,
-                ShaderFactory& shaderFactory,
-                ShaderBindings& shaderBindings)-> std::vector<MaterialPass>;
+                        ShaderFactory& shaderFactory,
+                        ShaderBindings& shaderBindings,
+                        std::span<const PassDesc> passManifest)-> std::vector<MaterialPass>;
 } // namespace nc::graphics
