@@ -1,0 +1,31 @@
+#ifdef VULKAN
+// NonUniformResourceIndex is not supported by GLSLang
+#   define NonUniformResourceIndex(x) x
+#endif
+
+Texture2D     PostProcessSinkBufferData[];
+SamplerState  PostProcessSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+cbuffer PostProcessSinkIndexBufferData
+{
+    uint colorRenderTargetIndex;
+    uint depthRenderTargetIndex;
+};
+
+struct PSInput 
+{ 
+    float4 Pos : SV_POSITION;
+    float2 UV  : TEX_COORD; 
+};
+
+struct PSOutput
+{
+    float4 Color : SV_TARGET;
+};
+
+void main(in PSInput PSIn, out PSOutput PSOut)
+{
+    float4 Color = PostProcessSinkBufferData[colorRenderTargetIndex].Sample(PostProcessSinkBufferData_sampler, PSIn.UV);
+    Color *= float4(0.8, 0.8, 0.0, 0.0);
+    PSOut.Color = Color;
+}

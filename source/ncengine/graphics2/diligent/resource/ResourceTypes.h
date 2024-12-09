@@ -28,6 +28,13 @@ struct UniformBufferResourceDesc
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
 };
 
+struct DynamicUniformBufferResourceDesc
+{
+    std::string resourceKey = "UninitializedDynamicUniformBufferResourceDesc";
+    Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
+};
+
+auto ToPipelineResourceDesc(const DynamicUniformBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const UniformBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const TextureBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const StructuredBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;

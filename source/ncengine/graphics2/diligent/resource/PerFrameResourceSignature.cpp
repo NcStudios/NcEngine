@@ -1,6 +1,5 @@
 #include "PerFrameResourceSignature.h"
 #include "EnvironmentBufferResource.h"
-#include "PostProcessPropertyBufferResource.h"
 #include "TextureBufferResource.h"
 #include "WireframeBufferResource.h"
 
@@ -22,8 +21,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferResourceDesc& materialResourceDesc,
                                                      const TextureBufferResourceDesc& textureResourceDesc,
                                                      const UniformBufferResourceDesc& environmentResourceDesc,
-                                                     const UniformBufferResourceDesc& wireframeResourceDesc,
-                                                     const UniformBufferResourceDesc& outlinePassPropertiesDesc)
+                                                     const UniformBufferResourceDesc& wireframeResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
@@ -34,8 +32,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(materialResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
-        ToPipelineResourceDesc(wireframeResourceDesc),
-        ToPipelineResourceDesc(outlinePassPropertiesDesc)
+        ToPipelineResourceDesc(wireframeResourceDesc)
     };
 
     const auto sampler = TextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
@@ -122,15 +119,6 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         context,
         device,
         GetVariable(wireframeResourceDesc, m_srb)
-    );
-
-    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
-        std::vector<PostProcessDataVariable>{
-            PostProcessDataVariable{
-                &GetVariable(outlinePassPropertiesDesc, m_srb),
-                PostProcessPassFlag::Outline
-            }
-        }
     );
 }
 

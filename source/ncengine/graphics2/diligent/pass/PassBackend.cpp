@@ -124,6 +124,14 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         passManifest.MaterialPassDescs()
     );
 
+    m_wireframePass = std::make_unique<WireframePass>
+    (
+        device,
+        shaderFactory,
+        shaderBindings,
+        passManifest.WireframePassDesc()
+    );
+
     m_postProcessPasses = MakePostProcessPasses
     (
         device,
@@ -132,14 +140,6 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         shaderFactory,
         shaderBindings,
         passManifest
-    );
-
-    m_wireframePass = std::make_unique<WireframePass>
-    (
-        device,
-        shaderFactory,
-        shaderBindings,
-        passManifest.WireframePassDesc()
     );
 
     // Create a hardcoded dummy post process pass that always pipes the result of the last rendered render target to the swapchain
@@ -208,11 +208,12 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
 
 void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                                     Diligent::ISwapChain& swapChain,
-                                    PerPassResourceSignature& perPassResourceSignature,
-                                    PostProcessPropertyBufferResource& )
+                                    PerPassResourceSignature& perPassResourceSignature)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
+    //auto& propertyBuffer = perPassResourceSignature.GetPostProcessPropertyBuffer();
+
     for (auto& pass : m_postProcessPasses)
     {
         BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.passDesc.sinks.first, pass.passDesc.sinks.second);
@@ -227,18 +228,20 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                 continue;
             }
 
-            // if (instance.buffer.has_value())
-            // {
-            //     resource.SetVariable(pass.id, instance.buffer->GetBuffer());
-            // }
+            if (instance.buffer.has_value())
+            {
+                //propertyBuffer.SetVariable(pass.passDesc.id, instance.buffer->GetBuffer());
+            }
 
             context.Draw(drawAttribs);
         }
+        context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
+
     }
 
     // Render final post process pass
-    ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
     BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
+    ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
     context.SetPipelineState(m_finalPass->pso);
     context.Draw(drawAttribs);

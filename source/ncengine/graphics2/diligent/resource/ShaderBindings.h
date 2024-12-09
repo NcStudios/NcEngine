@@ -36,15 +36,15 @@ class ShaderBindings
                 StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxMeshRenderers,     initialMaterialSizeHint},
                 TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
-                UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
-                UniformBufferResourceDesc{"OutlinePassBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
+                UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS}
               },
               m_perPassSignature{
                 device, context,
                 "PerPassResourceSignature",
                 1,
                 TextureBufferResourceDesc{"PostProcessSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
-                UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
+                UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL},
+                DynamicUniformBufferResourceDesc{"OutlinePassBufferData",  Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
             }
         {
         }

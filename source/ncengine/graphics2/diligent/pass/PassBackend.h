@@ -40,8 +40,7 @@ class PassBackend
 
         void RenderPostProcess(Diligent::IDeviceContext& context,
                                Diligent::ISwapChain& swapChain,
-                               PerPassResourceSignature& perPassResourceSignature,
-                               PostProcessPropertyBufferResource& resource);
+                               PerPassResourceSignature& perPassResourceSignature);
 
     private:
         std::vector<MaterialPass> m_materialPasses;

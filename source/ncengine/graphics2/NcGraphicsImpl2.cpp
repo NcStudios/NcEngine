@@ -204,7 +204,23 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
                     .sources = OffScreenSource(0u, 0u),
-                    .sinks = SwapChainSink()
+                    .sinks = OffScreenSink(1u, 1u)
+                },
+                PassDesc{
+                    .id = static_cast<uint64_t>(PostProcessPassFlag::Depth),
+                    .name = "Post Process Blue",
+                    .type = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPBlue.psh", "PostProcess.vsh"},
+                    .sources = OffScreenSource(1u, 1u),
+                    .sinks = OffScreenSink(2u, 2u)
+                },
+                PassDesc{
+                    .id = static_cast<uint64_t>(PostProcessPassFlag::Outline),
+                    .name = "Post Process Yellow",
+                    .type = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPYellow.psh", "PostProcess.vsh"},
+                    .sources = OffScreenSource(2u, 2u),
+                    .sinks = OffScreenSink(3u, 3u)
                 }
             },
             GetImplementedMaterialPassFlags(),
@@ -349,7 +365,7 @@ void NcGraphicsImpl2::Run()
 
     m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRenderState.staticMeshBatches);
     m_passBackend.RenderWireframe(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.wireframeRenderState);
-    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
+    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature());
     m_ui.Render(context);
 
     swapChain.Present();

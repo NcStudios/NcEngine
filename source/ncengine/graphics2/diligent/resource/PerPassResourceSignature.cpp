@@ -11,11 +11,13 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    std::string_view signatureName,
                                                    uint8_t bindingIndex,
                                                    const TextureBufferResourceDesc& postProcessResourceDesc,
-                                                   const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc)
+                                                   const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc,
+                                                   const DynamicUniformBufferResourceDesc& outlinePassPropertiesDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(postProcessResourceDesc),
-        ToPipelineResourceDesc(postProcessSinkIndexResourceDesc)
+        ToPipelineResourceDesc(postProcessSinkIndexResourceDesc),
+        ToPipelineResourceDesc(outlinePassPropertiesDesc)
     };
 
     const auto sampler = PostProcessSinkBufferResource::MakeSamplerDesc(postProcessResourceDesc.resourceKey);
@@ -48,6 +50,15 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
     m_postProcessSinkIndexBufferResource = std::make_unique<PostProcessSinkIndexBufferResource>(
         context, device,
         GetVariable(postProcessSinkIndexResourceDesc.shaderType, postProcessSinkIndexResourceDesc.resourceKey.data(), m_srb)
+    );
+
+    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
+        std::vector<PostProcessDataVariable>{
+            PostProcessDataVariable{
+                &GetVariable(outlinePassPropertiesDesc, m_srb),
+                PostProcessPassFlag::Outline
+            }
+        }
     );
 }
 } // namespace nc::graphics
