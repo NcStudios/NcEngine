@@ -216,9 +216,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Outline),
-                    .name = "Post Process Yellow",
+                    .name = "Post Process Red",
                     .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{"PPYellow.psh", "PostProcess.vsh"},
+                    .shaderPaths = ShaderPaths{"PPRed.psh", "PostProcess.vsh"},
                     .sources = OffScreenSource(2u, 2u),
                     .sinks = OffScreenSink(3u, 3u)
                 }
