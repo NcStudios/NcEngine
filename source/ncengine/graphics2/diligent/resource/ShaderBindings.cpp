@@ -33,6 +33,16 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         );
     }
 
+    const auto& skinnedMeshInstanceData = renderState.meshRenderState.skinnedMeshInstanceData;
+    if (!skinnedMeshInstanceData.instances.empty())
+    {
+        m_perFrameSignature.GetSkinnedMeshInstanceBuffer().Update(
+            context,
+            device,
+            skinnedMeshInstanceData
+        );
+    }
+
     const auto& dirLightData = renderState.lightRenderState.directionalLights;
     if (!dirLightData.empty())
     {
@@ -70,6 +80,16 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             context,
             device,
             materialData
+        );
+    }
+
+    const auto& boneData = renderState.animationRenderState.boneData;
+    if (!boneData.instances.empty())
+    {
+        m_perFrameSignature.GetBoneDataResource().Update(
+            context,
+            device,
+            boneData
         );
     }
 }

@@ -9,6 +9,7 @@ auto GraphicsFrontend::BuildRenderState(ecs::Ecs world) -> FrontendRenderState
     return FrontendRenderState{
         .cameraState = m_cameraSystem.BuildState(world),
         .meshRenderState = m_meshSystem.BuildState(world),
+        .animationRenderState = SkeletalAnimationRenderState{}, /** @todo #832 */
         .materialRenderState = m_materialRegistry.BuildState(),
         .lightRenderState = m_lightSubsystem.BuildState(world),
         .postProcessState = m_postProcessSystem.BuildState(),
