@@ -130,6 +130,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.memorySettings.maxCubeMaps, actual.memorySettings.maxCubeMaps);
     EXPECT_EQ(expected.memorySettings.maxParticles, actual.memorySettings.maxParticles);
     EXPECT_EQ(expected.memorySettings.maxDirectionalLights, actual.memorySettings.maxDirectionalLights);
+    EXPECT_EQ(expected.memorySettings.maxBones, actual.memorySettings.maxBones);
 
     EXPECT_EQ(expected.graphicsSettings.enabled, actual.graphicsSettings.enabled);
     EXPECT_EQ(expected.graphicsSettings.useNativeResolution, actual.graphicsSettings.useNativeResolution);
