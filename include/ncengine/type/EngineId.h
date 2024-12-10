@@ -54,11 +54,13 @@ namespace update_task_id
 /** @brief Unique engine task id for update phase. */
 constexpr size_t DebugRendererNewFrame = 1ull;
 constexpr size_t ParticleEmitterUpdate = 2ull;
-constexpr size_t AudioSourceUpdate = 3ull;
-constexpr size_t FrameLogicUpdate = 4ull; // Depends on DebugRendererNewFrame
-constexpr size_t PhysicsPipeline = 5ull; // Depends on FrameLogicUpdate
-constexpr size_t CommitStagedChanges = 6ull; // Depends on all other update tasks
-constexpr size_t ParticleEmitterSync = 7ull; // Depends on CommitStagedChanges
+constexpr size_t SkeletalAnimationUpdate = 3ull;
+constexpr size_t AudioSourceUpdate = 4ull;
+constexpr size_t FrameLogicUpdate = 5ull; // Depends on DebugRendererNewFrame
+constexpr size_t PhysicsPipeline = 6ull; // Depends on FrameLogicUpdate
+constexpr size_t CommitStagedChanges = 7ull; // Depends on all other update tasks
+constexpr size_t ParticleEmitterSync = 8ull; // Depends on CommitStagedChanges
+constexpr size_t SkeletalAnimationSync = 9ull; // Depends on CommitStagedChanges
 /** @} */
 } // namespace update_task_id
 

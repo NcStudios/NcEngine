@@ -90,6 +90,11 @@ bool SkeletalAnimationAssetManager::Unload(const std::string& path, asset_flags_
 void SkeletalAnimationAssetManager::UnloadAll(asset_flags_type)
 {
     m_table.clear();
+    m_onUpdate.Emit(SkeletalAnimationUpdateEventData{
+        {},
+        {},
+        UpdateAction::UnloadAll
+    });
 }
 
 auto SkeletalAnimationAssetManager::Acquire(const std::string& path, asset_flags_type) const -> SkeletalAnimationView

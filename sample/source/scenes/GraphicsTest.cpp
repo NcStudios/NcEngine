@@ -7,6 +7,7 @@
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SkeletalAnimator.h"
@@ -14,6 +15,8 @@
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
+
+#include "ncutility/Hash.h"
 
 #include <string>
 #include <iostream>
@@ -197,109 +200,101 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<graphics::PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
 
     // Ogre
-    auto ogre = world.Emplace<Entity>({
-        .position = Vector3{-5.0f, 0.0f, 12.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
-        .scale = Vector3{3.0f, 3.0f, 3.0f},
-        .tag = "ogre"
-    });
-    world.Emplace<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
-    world.Emplace<RigidBody>(
-        ogre,
-        Shape::MakeSphere(),
-        RigidBodyInfo{
-            .type = BodyType::Kinematic
-        }
-    );
-
-    // Ogre Animation
     {
-        using namespace graphics;
-        auto& ogreAnimator = world.Emplace<SkeletalAnimator>(ogre, "ogre.nca", "ogre/idle.nca");
-        auto stopState = ogreAnimator.AddState(anim::Stop
-        {
-            .enterFrom = anim::RootState,
+        auto ogre = world.Emplace<Entity>({
+            .position = Vector3{-5.0f, 0.0f, 12.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
+            .scale = Vector3{3.0f, 3.0f, 3.0f},
+            .tag = "ogre"
+        });
+
+        world.Emplace<RigidBody>(
+            ogre,
+            Shape::MakeSphere(),
+            RigidBodyInfo{
+                .type = BodyType::Kinematic
+            }
+        );
+
+        const auto meshView = asset::AcquireMeshAsset("ogre.nca");
+        auto& renderer = world.Emplace<SkinnedMesh>(ogre, meshView, material::Red, utility::Fnv1a("ogre/idle.nca"));
+        auto& controller = renderer.GetAnimationController();
+        const auto stopState = controller.AddState(StopAnimation{
+            .enterFrom = RootAnimationState,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
         });
 
-        ogreAnimator.AddState(anim::Loop
-        {
-            .enterFrom = stopState,
+        controller.AddState(LoopAnimation{
+            .animId = utility::Fnv1a("ogre/idle.nca"),
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-            .animUid = "ogre/idle.nca",
+            .enterFrom = stopState,
             .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .exitTo = stopState
         });
     }
 
     // Skeleton
-    auto skeleton = world.Emplace<Entity>({
-        .position = Vector3{5.3f, 0.0f, -6.4f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f, 2.0f},
-        .tag = "skeleton"
-    });
-
-    world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
-    world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
-    world.Emplace<RigidBody>(
-        skeleton,
-        Shape::MakeSphere(),
-        RigidBodyInfo{
-            .type = BodyType::Kinematic,
-            .flags = RigidBodyFlags::Trigger
-        }
-    );
-
-    world.Emplace<CollisionListener>(skeleton)
-        .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
-            auto& ogreAnim = ecs.Get<graphics::SkeletalAnimator>(other);
-            ogreAnim.PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);
-            auto& tag = ecs.Get<Tag>(other);
-            GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
-        };
-
-    // Skeleton Animation
     {
-        using namespace graphics;
-        auto& skelAnim = world.Emplace<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton/idle.nca");
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        auto skeleton = world.Emplace<Entity>({
+            .position = Vector3{5.3f, 0.0f, -6.4f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+            .scale = Vector3{2.0f, 2.0f, 2.0f},
+            .tag = "skeleton"
+        });
+
+        const auto meshView = asset::AcquireMeshAsset("skeleton.nca");
+        auto& mesh = world.Emplace<SkinnedMesh>(skeleton, meshView, material::Green, utility::Fnv1a("skeleton/idle.nca"));
+        world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
+        world.Emplace<RigidBody>(
+            skeleton,
+            Shape::MakeSphere(),
+            RigidBodyInfo{
+                .type = BodyType::Kinematic,
+                .flags = RigidBodyFlags::Trigger
+            }
+        );
+
+        world.Emplace<CollisionListener>(skeleton)
+            .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
+                auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetAnimationController();
+                ogreAnim.PlayOnceImmediate(utility::Fnv1a("ogre/attack.nca"), RootAnimationState);
+                auto& tag = ecs.Get<Tag>(other);
+                GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
+            };
+
+        auto& controller = mesh.GetAnimationController();
+        controller.AddState(LoopAnimation{
+            .animId = utility::Fnv1a("skeleton/walk_forward.nca"),
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
-            .animUid = "skeleton/walk_forward.nca",
+            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
         });
 
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        controller.AddState(LoopAnimation{
+            .animId = utility::Fnv1a("skeleton/walk_left.nca"),
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
-            .animUid = "skeleton/walk_left.nca",
+            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
         });
 
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        controller.AddState(LoopAnimation{
+            .animId = utility::Fnv1a("skeleton/walk_back.nca"),
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
-            .animUid = "skeleton/walk_back.nca",
+            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
         });
 
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        controller.AddState(LoopAnimation{
+            .animId = utility::Fnv1a("skeleton/walk_right.nca"),
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
-            .animUid = "skeleton/walk_right.nca",
+            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
         });
 
-        skelAnim.AddState(anim::PlayOnce
-        {
-            .enterFrom = anim::RootState,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
-            .animUid = "skeleton/jump.nca"
+        controller.AddState(PlayOnceAnimation{
+            .animId = utility::Fnv1a("skeleton/jump.nca"),
+            .enterFrom = RootAnimationState,
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
     }
 

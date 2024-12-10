@@ -46,9 +46,21 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
                   Diligent::IPipelineResourceSignature& componentSignature,
                   Diligent::IPipelineResourceSignature& materialSignature) -> Pass;
 
+auto MakeTestSkinnedPass(Diligent::IRenderDevice& device,
+                  Diligent::ISwapChain& swapChain,
+                  ShaderFactory& shaderFactory,
+                  Diligent::IPipelineResourceSignature& globalSignature,
+                  Diligent::IPipelineResourceSignature& componentSignature,
+                  Diligent::IPipelineResourceSignature& materialSignature) -> Pass;
+
 // todo 794 This only creates a Toon pass. Add more as they are implemented.
 auto MakePasses(Diligent::IRenderDevice& device,
                 Diligent::ISwapChain& swapChain,
                 ShaderFactory& shaderFactory,
                 ShaderBindings& shaderBindings)-> std::vector<Pass>;
+
+auto MakeSkinnedPasses(Diligent::IRenderDevice& device,
+                       Diligent::ISwapChain& swapChain,
+                       ShaderFactory& shaderFactory,
+                       ShaderBindings& shaderBindings)-> std::vector<Pass>;
 } // namespace nc::graphics

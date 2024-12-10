@@ -65,6 +65,7 @@ class MeshBase
 
         /** @name General Functions */
         auto GetEntity() const -> Entity { return m_ctx.entity; }
+        auto GetContext() const -> const MeshInstanceContext& { return m_ctx; }
 
         /** @name Mesh Functions */
         auto GetMeshId() const -> uint64_t { return m_ctx.meshId; }
@@ -114,9 +115,10 @@ class SkinnedMesh : public MeshBase
     public:
         explicit SkinnedMesh(Entity self,
                              const asset::MeshView& meshAsset,
-                             const MaterialDesc& materialDesc)
+                             const MaterialDesc& materialDesc,
+                             uint64_t rootAnimationId = UINT64_MAX)
             : MeshBase{self, meshAsset, materialDesc, MeshInstanceType::Skinned},
-              m_controller{}
+              m_controller{rootAnimationId}
         {
         }
 

@@ -1,4 +1,5 @@
 #include "MeshSubsystem.h"
+#include "animation/SkeletalAnimationStorage.h"
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
@@ -37,6 +38,7 @@ MeshSubsystem::MeshSubsystem(SystemEvents& events,
                              uint32_t maxMeshRenderers,
                              uint32_t initialBatchSize)
     : m_transformCache{maxMeshRenderers},
+      m_boneCache{maxMeshRenderers * 100u}, // todo: just a random guess
       m_staticMeshInstanceCache{maxEntities, initialBatchSize},
       m_skinnedMeshInstanceCache{maxEntities, initialBatchSize},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshSubsystem::OnRebuildStatics)}
@@ -67,7 +69,8 @@ void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            /** @todo 833 Allocate space for bones */
+            const auto boneCount = SkeletalAnimationStorage::GetBoneCount(ctx.meshId);
+            ctx.boneDataHandle = m_boneCache.Allocate(boneCount);
             addToCache(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }
@@ -95,7 +98,7 @@ void MeshSubsystem::RemoveInstance(const MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            /** @todo 833 Free bone allocation */
+            m_boneCache.Free(ctx.boneDataHandle);
             removeFromCache(m_skinnedMeshInstanceCache);
             break;
         }
@@ -127,7 +130,9 @@ void MeshSubsystem::SetInstanceMesh(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            /** @todo 833 Reallocate space for new mesh bones */
+            const auto boneCount = SkeletalAnimationStorage::GetBoneCount(ctx.meshId);
+            m_boneCache.Free(ctx.boneDataHandle);
+            ctx.boneDataHandle = m_boneCache.Allocate(boneCount);
             updateInstance(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }

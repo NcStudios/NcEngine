@@ -38,8 +38,21 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
         );
 
         update.Add(
+            nc::update_task_id::SkeletalAnimationUpdate,
+            "SkeletalAnimationUpdate(stub)",
+            []{}
+        );
+
+        update.Add(
             nc::update_task_id::ParticleEmitterSync,
             "ParticleEmitterSync(stub)",
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
+        );
+
+        update.Add(
+            nc::update_task_id::SkeletalAnimationSync,
+            "SkeletalAnimationSync(stub)",
             []{},
             {nc::update_task_id::CommitStagedChanges}
         );
@@ -173,12 +186,20 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_materialPassBackend{MakePasses(
-            m_engine.GetDevice(),
-            m_engine.GetSwapChain(),
-            m_engine.GetShaderFactory(),
-            m_shaderBindings
-          )},
+          m_materialPassBackend{
+            MakePasses(
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory(),
+                m_shaderBindings
+            ),
+            MakeSkinnedPasses(
+                m_engine.GetDevice(),
+                m_engine.GetSwapChain(),
+                m_engine.GetShaderFactory(),
+                m_shaderBindings
+            ),
+          },
           m_wireframePass{
             m_engine.GetDevice(),
             m_engine.GetSwapChain(),
@@ -205,7 +226,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxRenderers,
             graphicsSettings.initialBatchSize,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
-            modules.Get<asset::NcAsset>()->OnMeshUpdate()
+            modules.Get<asset::NcAsset>()->OnMeshUpdate(),
+            modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
+            modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
@@ -282,16 +305,33 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     NC_LOG_TRACE("Building NcGraphics Tasks");
 
     update.Add(
-        nc::update_task_id::ParticleEmitterUpdate,
+        update_task_id::ParticleEmitterUpdate,
         "ParticleEmitterUpdate(stub)",
         []{}
     );
 
     update.Add(
-        nc::update_task_id::ParticleEmitterSync,
+        update_task_id::SkeletalAnimationUpdate,
+        "SkeletalAnimationUpdate",
+        [this]{
+            m_frontend.GetSkeletalAnimationSubsystem().CalculateBoneMatrices();
+        }
+    );
+
+    update.Add(
+        update_task_id::ParticleEmitterSync,
         "ParticleEmitterSync(stub)",
         []{},
-        {nc::update_task_id::CommitStagedChanges}
+        {update_task_id::CommitStagedChanges}
+    );
+
+    update.Add(
+        update_task_id::SkeletalAnimationSync,
+        "SkeletalAnimationSync",
+        [this]{
+            m_frontend.GetSkeletalAnimationSubsystem().UpdateAnimationControllers(m_world);
+        },
+        {update_task_id::CommitStagedChanges}
     );
 
     render.Add(
@@ -328,7 +368,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
     /** @todo #834 Pass skinned batches */
-    m_materialPassBackend.Render(context, renderState.meshRenderState.staticMeshBatches);
+    m_materialPassBackend.Render(context, renderState.meshRenderState.staticMeshBatches, renderState.meshRenderState.skinnedMeshBatches);
     m_wireframePass.Render(context, renderState.wireframeRenderState);
     /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
     // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());

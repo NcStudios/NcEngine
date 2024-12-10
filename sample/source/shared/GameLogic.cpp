@@ -19,7 +19,7 @@ void WasdBasedMovement(Entity self, ecs::Ecs world, float dt)
 
 void WasdBasedSimulatedBodyMovement(Entity self, ecs::Ecs world, float dt)
 {
-    static constexpr float speed = 2.0f;
+    static constexpr float speed = 6.0f;
     auto [leftRight, frontBack] = input::GetAxis() * speed * dt;
     auto q = KeyHeld(input::KeyCode::Q);
     auto e = KeyHeld(input::KeyCode::E);

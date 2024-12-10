@@ -36,11 +36,20 @@ void DrawIndexed(Diligent::IDeviceContext& context, const std::vector<nc::graphi
 namespace nc::graphics
 {
 void MaterialPassBackend::Render(Diligent::IDeviceContext& context,
-                                 const std::vector<std::vector<Batch>>& passBatches)
+                                 const std::vector<std::vector<Batch>>& staticMeshBatches,
+                                 const std::vector<std::vector<Batch>>& skinnedMeshBatches)
 {
     NC_PROFILE_SCOPE("MaterialPassBackend::Render()", ProfileCategory::Rendering);
-    NC_ASSERT(m_passes.size() == passBatches.size(), "Frontend/Backend passes out of sync.");
-    for (auto [pass, batches] : std::views::zip(m_passes, passBatches))
+    NC_ASSERT(m_staticMeshPasses.size() == staticMeshBatches.size(), "Frontend/Backend passes out of sync.");
+    for (auto [pass, batches] : std::views::zip(m_staticMeshPasses, staticMeshBatches))
+    {
+        context.SetPipelineState(pass.pso);
+        DrawIndexed(context, batches);
+    }
+
+    // prob not ok, want to interleave?
+    NC_ASSERT(m_skinnedMeshPasses.size() == skinnedMeshBatches.size(), "Frontend/Backend passes out of sync.");
+    for (auto [pass, batches] : std::views::zip(m_skinnedMeshPasses, skinnedMeshBatches))
     {
         context.SetPipelineState(pass.pso);
         DrawIndexed(context, batches);

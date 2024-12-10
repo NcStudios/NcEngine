@@ -16,10 +16,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      uint8_t bindingIndex,
                                                      const StructuredBufferResourceDesc& transformResourceDesc,
                                                      const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
+                                                     const StructuredBufferResourceDesc& skinnedMeshInstanceResourceDesc,
                                                      const StructuredBufferResourceDesc& directionalLightResourceDesc,
                                                      const StructuredBufferResourceDesc& pointLightResourceDesc,
                                                      const StructuredBufferResourceDesc& spotLightResourceDesc,
                                                      const StructuredBufferResourceDesc& materialResourceDesc,
+                                                     const StructuredBufferResourceDesc& boneResourceDesc,
                                                      const TextureBufferResourceDesc& textureResourceDesc,
                                                      const UniformBufferResourceDesc& environmentResourceDesc,
                                                      const UniformBufferResourceDesc& wireframeResourceDesc,
@@ -28,10 +30,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
         ToPipelineResourceDesc(staticMeshInstanceResourceDesc),
+        ToPipelineResourceDesc(skinnedMeshInstanceResourceDesc),
         ToPipelineResourceDesc(directionalLightResourceDesc),
         ToPipelineResourceDesc(pointLightResourceDesc),
         ToPipelineResourceDesc(spotLightResourceDesc),
         ToPipelineResourceDesc(materialResourceDesc),
+        ToPipelineResourceDesc(boneResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
         ToPipelineResourceDesc(wireframeResourceDesc),
@@ -76,6 +80,14 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         staticMeshInstanceResourceDesc
     );
 
+    m_skinnedMeshInstanceResource = std::make_unique<StructuredBuffer<SkinnedMeshInstanceData>>
+    (
+        context,
+        device,
+        GetVariable(skinnedMeshInstanceResourceDesc, m_srb),
+        skinnedMeshInstanceResourceDesc
+    );
+
     m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
     (
         context,
@@ -105,6 +117,13 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         device,
         GetVariable(materialResourceDesc, m_srb),
         materialResourceDesc
+    );
+
+    m_boneDataResource = std::make_unique<StructuredBuffer<BoneData>>(
+        context,
+        device,
+        GetVariable(boneResourceDesc, m_srb),
+        boneResourceDesc
     );
 
     m_textureResource = std::make_unique<TextureBufferResource>(

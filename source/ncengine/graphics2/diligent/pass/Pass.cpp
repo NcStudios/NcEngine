@@ -112,13 +112,13 @@ struct TransformData
 
 StructuredBuffer<TransformData> TransformBufferData;
 
-struct InstanceData
+struct StaticMeshInstanceData
 {
     uint transformIndex;
     uint materialIndex;
 };
 
-StructuredBuffer<InstanceData> InstanceBufferData;
+StructuredBuffer<StaticMeshInstanceData> StaticInstanceBufferData;
 
 cbuffer EnvironmentBufferData
 {
@@ -132,12 +132,157 @@ cbuffer EnvironmentBufferData
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    uint transformIndex = InstanceBufferData[InstanceID].transformIndex;
-    uint materialIndex = InstanceBufferData[InstanceID].materialIndex;
+    uint transformIndex = StaticInstanceBufferData[InstanceID].transformIndex;
+    uint materialIndex = StaticInstanceBufferData[InstanceID].materialIndex;
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), TransformBufferData[transformIndex].modelMatrix);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
     PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].modelMatrix, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
+    PSIn.WorldPos = TransformedPos.xyz;
+    PSIn.MaterialIndex = materialIndex;
+}
+)"};
+
+constexpr auto g_pixelShaderSkinned = g_pixelShader;
+
+constexpr auto g_vertexShaderSkinned = std::string_view{
+R"(struct VSInput
+{
+    float3 Pos         : ATTRIB0;
+    float3 Normal      : ATTRIB1;
+    float2 UV          : ATTRIB2;
+    float3 Tangent     : ATTRIB3;
+    float3 Bitangent   : ATTRIB4;
+    float4 BoneWeights : ATTRIB5;
+    uint4  BoneIds     : ATTRIB6;
+};
+
+struct PSInput 
+{
+    float4 Pos           : SV_POSITION;
+    float3 Normal        : NORMAL;
+    float2 UV            : TEX_COORD;
+    uint   MaterialIndex;
+    float3 WorldPos;
+};
+
+struct TransformData
+{
+    float4x4 modelMatrix;
+};
+
+StructuredBuffer<TransformData> TransformBufferData;
+
+struct SkinnedMeshInstanceData
+{
+    uint transformIndex;
+    uint materialIndex;
+    uint boneIndex;
+};
+
+StructuredBuffer<SkinnedMeshInstanceData> SkinnedInstanceBufferData;
+
+struct BoneData
+{
+    float4x4 animatedBoneMatrix;
+};
+
+StructuredBuffer<BoneData> BoneBufferData;
+
+cbuffer EnvironmentBufferData
+{
+    float4x4 cameraViewProjection;
+    float3 cameraPosition;
+    uint dirLightsCount;
+    uint pointLightsCount;
+    uint spotLightsCount;
+    float2 padding;
+};
+
+bool IsMatrixNonZero(float4x4 mat)
+{
+    return dot(mat[0], float4(1.0)) + dot(mat[1], float4(1.0)) +
+            dot(mat[2], float4(1.0)) + dot(mat[3], float4(1.0)) > 0.0;
+}
+
+// Super icky, unused offsets are set w/ homogenous extension on translation
+bool IsMatrixNonZeroHom(float4x4 mat)
+{
+    // Check the first three rows for being completely zero
+    bool rowsZero = 
+        all(mat[0] == float4(0.0, 0.0, 0.0, 0.0)) &&
+        all(mat[1] == float4(0.0, 0.0, 0.0, 0.0)) &&
+        all(mat[2] == float4(0.0, 0.0, 0.0, 0.0));
+
+    // Check the last row for [0, 0, 0, 1]
+    bool lastRowValid = all(mat[3] == float4(0.0, 0.0, 0.0, 1.0));
+
+    return !(rowsZero && lastRowValid);
+}
+
+float4x4 ApplyAnimation(uint base, uint4 boneOffsets, float4 boneWeights)
+{
+    float4x4 boneTransform = float4x4(0.0);
+
+    // todo: why are we checking for nonzero matrix? having a hard time finding case where matrix is zero
+
+
+    if (boneWeights[0] > -1.0f)
+    {
+        boneTransform += BoneBufferData[base + boneOffsets[0]].animatedBoneMatrix * boneWeights[0];
+    }
+    if (boneWeights[1] > -1.0f)
+    {
+        boneTransform += BoneBufferData[base + boneOffsets[1]].animatedBoneMatrix * boneWeights[1];
+    }
+    if (boneWeights[2] > -1.0f)
+    {
+        boneTransform += BoneBufferData[base + boneOffsets[2]].animatedBoneMatrix * boneWeights[2];
+    }
+    if (boneWeights[3] > -1.0f)
+    {
+        boneTransform += BoneBufferData[base + boneOffsets[3]].animatedBoneMatrix * boneWeights[3];
+    }
+
+    // if (boneWeights[0] > -1.0f && IsMatrixNonZeroHom(BoneBufferData[base + boneOffsets[0]].animatedBoneMatrix))
+    // {
+    //     boneTransform += BoneBufferData[base + boneOffsets[0]].animatedBoneMatrix * boneWeights[0];
+    // }
+    // if (boneWeights[1] > -1.0f && IsMatrixNonZeroHom(BoneBufferData[base + boneOffsets[1]].animatedBoneMatrix))
+    // {
+    //     boneTransform += BoneBufferData[base + boneOffsets[1]].animatedBoneMatrix * boneWeights[1];
+    // }
+    // if (boneWeights[2] > -1.0f && IsMatrixNonZeroHom(BoneBufferData[base + boneOffsets[2]].animatedBoneMatrix))
+    // {
+    //     boneTransform += BoneBufferData[base + boneOffsets[2]].animatedBoneMatrix * boneWeights[2];
+    // }
+    // if (boneWeights[3] > -1.0f && IsMatrixNonZeroHom(BoneBufferData[base + boneOffsets[3]].animatedBoneMatrix))
+    // {
+    //     boneTransform += BoneBufferData[base + boneOffsets[3]].animatedBoneMatrix * boneWeights[3];
+    // }
+
+    return boneTransform;
+}
+
+void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
+{
+    float4x4 boneTransform = ApplyAnimation(SkinnedInstanceBufferData[InstanceID].boneIndex, VSIn.BoneIds, VSIn.BoneWeights);
+    float4 animatedPos = float4(VSIn.Pos, 1.0);
+    float3 animatedNormal = VSIn.Normal;
+    if (IsMatrixNonZeroHom(boneTransform))
+    {
+        animatedPos = mul(animatedPos, boneTransform);
+        animatedNormal = mul(animatedNormal, boneTransform); // ask Jare what this should be like
+    }
+
+
+    uint transformIndex = SkinnedInstanceBufferData[InstanceID].transformIndex;
+    uint materialIndex = SkinnedInstanceBufferData[InstanceID].materialIndex;
+    float4 TransformedPos = mul(animatedPos, TransformBufferData[transformIndex].modelMatrix);
+    PSIn.Pos = mul(TransformedPos, cameraViewProjection);
+    PSIn.UV  = VSIn.UV;
+    // PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].modelMatrix, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
+    PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].modelMatrix, animatedNormal)); // @TODO #805, compute inverse model matrix CPU-side
     PSIn.WorldPos = TransformedPos.xyz;
     PSIn.MaterialIndex = materialIndex;
 }
@@ -221,6 +366,39 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
     return Pass(device, createInfo, MaterialPass::Toon);
 }
 
+auto MakeTestSkinnedPass(Diligent::IRenderDevice& device,
+                  Diligent::ISwapChain& swapChain,
+                  ShaderFactory& shaderFactory,
+                  Diligent::IPipelineResourceSignature& perFrameResourceSignature) -> Pass
+{
+    auto vertexShader = shaderFactory.MakeShaderFromSource(
+        std::span{g_vertexShaderSkinned},
+        "Cube VS - Skinned",
+        Diligent::SHADER_TYPE_VERTEX,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    auto pixelShader = shaderFactory.MakeShaderFromSource(
+        std::span{g_pixelShaderSkinned},
+        "Cube PS - Skinned",
+        Diligent::SHADER_TYPE_PIXEL,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    auto signatures = std::array{&perFrameResourceSignature};
+    auto layoutElements = GetMeshVertexLayoutElements(0);
+    auto createInfo = MakeDefaultGraphicsPipelineCreateInfo(
+        swapChain,
+        *vertexShader,
+        *pixelShader,
+        signatures,
+        layoutElements,
+        "Test PSO - Skinned"
+    );
+
+    return Pass(device, createInfo, MaterialPass::Toon);
+}
+
 auto MakePasses(Diligent::IRenderDevice& device,
                 Diligent::ISwapChain& swapChain,
                 ShaderFactory& shaderFactory,
@@ -228,6 +406,21 @@ auto MakePasses(Diligent::IRenderDevice& device,
 {
     return std::vector<Pass>{
         MakeTestPass(
+            device,
+            swapChain,
+            shaderFactory,
+            shaderBindings.GetPerFrameSignature().GetResourceSignature()
+        )
+    };
+}
+
+auto MakeSkinnedPasses(Diligent::IRenderDevice& device,
+                       Diligent::ISwapChain& swapChain,
+                       ShaderFactory& shaderFactory,
+                       ShaderBindings& shaderBindings)-> std::vector<Pass>
+{
+    return std::vector<Pass>{
+        MakeTestSkinnedPass(
             device,
             swapChain,
             shaderFactory,

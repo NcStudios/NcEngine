@@ -28,6 +28,11 @@ MaterialInstance::MaterialInstance(const MaterialDesc&){}
 auto MaterialInstance::GetPasses()     const ->       MaterialPasses      { return g_materialDesc.passes;     }
 auto MaterialInstance::GetProperties() const -> const MaterialProperties& { return g_materialDesc.properties; }
 void MaterialInstance::Release() noexcept {}
+
+namespace time
+{
+auto DeltaTime() -> float { return 1.0f / 60.0f; }
+} // namespace time
 } // namespace nc
 
 class MeshSubsystemTest : public testing::Test,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoneIndexCache.h"
 #include "MeshRenderState.h"
 #include "TransformCache.h"
 #include "InstanceCache.h"
@@ -44,6 +45,7 @@ class MeshSubsystem
 
     private:
         TransformCache m_transformCache;
+        BoneIndexCache m_boneCache;
         InstanceCache<StaticMeshInstanceData> m_staticMeshInstanceCache;
         InstanceCache<SkinnedMeshInstanceData> m_skinnedMeshInstanceCache;
         Connection m_rebuildStaticsConnection;
