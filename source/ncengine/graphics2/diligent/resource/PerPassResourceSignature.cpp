@@ -10,17 +10,19 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    Diligent::IDeviceContext& context,
                                                    std::string_view signatureName,
                                                    uint8_t bindingIndex,
-                                                   const TextureBufferResourceDesc& postProcessResourceDesc,
+                                                   const TextureBufferResourceDesc& postProcessColorSinkResourceDesc,
+                                                   const TextureBufferResourceDesc& postProcessDepthSinkResourceDesc,
                                                    const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc,
                                                    const DynamicUniformBufferResourceDesc& outlinePassPropertiesDesc)
 {
     const auto resources = std::array{
-        ToPipelineResourceDesc(postProcessResourceDesc),
+        ToPipelineResourceDesc(postProcessColorSinkResourceDesc),
+        ToPipelineResourceDesc(postProcessDepthSinkResourceDesc),
         ToPipelineResourceDesc(postProcessSinkIndexResourceDesc),
         ToPipelineResourceDesc(outlinePassPropertiesDesc)
     };
 
-    const auto sampler = PostProcessSinkBufferResource::MakeSamplerDesc(postProcessResourceDesc.resourceKey);
+    const auto sampler = PostProcessColorSinkBufferResource::MakeSamplerDesc(postProcessColorSinkResourceDesc.resourceKey);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = resources.data();
@@ -42,9 +44,14 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    m_postProcessBufferResource = std::make_unique<PostProcessSinkBufferResource>(
-        GetVariable(postProcessResourceDesc.shaderType, postProcessResourceDesc.resourceKey.data(), m_srb),
-        postProcessResourceDesc.maxElementCount
+    m_postProcessColorSinkBufferResource = std::make_unique<PostProcessColorSinkBufferResource>(
+        GetVariable(postProcessColorSinkResourceDesc.shaderType, postProcessColorSinkResourceDesc.resourceKey.data(), m_srb),
+        postProcessColorSinkResourceDesc.maxElementCount
+    );
+
+    m_postProcessDepthSinkBufferResource = std::make_unique<PostProcessDepthSinkBufferResource>(
+        GetVariable(postProcessDepthSinkResourceDesc.shaderType, postProcessDepthSinkResourceDesc.resourceKey.data(), m_srb),
+        postProcessDepthSinkResourceDesc.maxElementCount
     );
 
     m_postProcessSinkIndexBufferResource = std::make_unique<PostProcessSinkIndexBufferResource>(

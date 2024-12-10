@@ -2,7 +2,8 @@
 
 #include "ResourceTypes.h"
 #include "base/StructuredBuffer.h"
-#include "PostProcessSinkBufferResource.h"
+#include "PostProcessColorSinkBufferResource.h"
+#include "PostProcessDepthSinkBufferResource.h"
 #include "PostProcessSinkIndexBufferResource.h"
 #include "PostProcessPropertyBufferResource.h"
 
@@ -21,7 +22,8 @@ class PerPassResourceSignature
                                           Diligent::IDeviceContext& context,
                                           std::string_view signatureName,
                                           uint8_t bindingIndex,
-                                          const TextureBufferResourceDesc& postProcessResourceDesc,
+                                          const TextureBufferResourceDesc& postProcessColorRTResourceDesc,
+                                          const TextureBufferResourceDesc& postProcessDepthRTResourceDesc,
                                           const UniformBufferResourceDesc& postProcessSinkIndexDesc,
                                           const DynamicUniformBufferResourceDesc& outlinePassPropertiesDesc);
 
@@ -29,14 +31,16 @@ class PerPassResourceSignature
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
         auto GetResourceBinding() -> Diligent::IShaderResourceBinding& { return *m_srb; }
 
-        auto GetPostProcessSinkBufferResource() -> PostProcessSinkBufferResource& { return *m_postProcessBufferResource; }
+        auto GetPostProcessColorSinkBufferResource() -> PostProcessColorSinkBufferResource& { return *m_postProcessColorSinkBufferResource; }
+        auto GetPostProcessDepthSinkBufferResource() -> PostProcessDepthSinkBufferResource& { return *m_postProcessDepthSinkBufferResource; }
         auto GetPostProcessSinkIndexBufferResource() -> PostProcessSinkIndexBufferResource& { return *m_postProcessSinkIndexBufferResource; }
         auto GetPostProcessPropertyBuffer() -> PostProcessPropertyBufferResource&      { return *m_postProcessPropertyResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
-        std::unique_ptr<PostProcessSinkBufferResource> m_postProcessBufferResource;
+        std::unique_ptr<PostProcessColorSinkBufferResource> m_postProcessColorSinkBufferResource;
+        std::unique_ptr<PostProcessDepthSinkBufferResource> m_postProcessDepthSinkBufferResource;
         std::unique_ptr<PostProcessSinkIndexBufferResource> m_postProcessSinkIndexBufferResource;
         std::unique_ptr<PostProcessPropertyBufferResource> m_postProcessPropertyResource;
 };

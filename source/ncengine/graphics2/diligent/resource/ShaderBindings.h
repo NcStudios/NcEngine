@@ -42,7 +42,8 @@ class ShaderBindings
                 device, context,
                 "PerPassResourceSignature",
                 1,
-                TextureBufferResourceDesc{"PostProcessSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
+                TextureBufferResourceDesc{"PostProcessColorSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
+                TextureBufferResourceDesc{"PostProcessDepthSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
                 UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL},
                 DynamicUniformBufferResourceDesc{"OutlinePassBufferData",  Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
             }

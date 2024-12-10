@@ -227,10 +227,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .sources = SinkTargets{
-                                            .color = std::array<uint32_t, 4>{3u, 1u, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()},
-                                            .depth = std::array<uint32_t, 4>{3u, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()}
-                                          },
+                    .sources = SinkTargets{.color = std::array<uint32_t, 4>{3u, 1u, 0u, 0u}, .depth = std::array<uint32_t, 4>{3u, 0u, 0u, 0u}},
                     .sinks = OffScreenSink(4u, 4u)
                 }
             },
@@ -395,7 +392,8 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 void NcGraphicsImpl2::Resize()
 {
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
     m_resizeNeeded = false;
 }
 } // namespace nc::graphics

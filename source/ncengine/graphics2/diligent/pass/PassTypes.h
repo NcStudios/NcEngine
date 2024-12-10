@@ -16,8 +16,8 @@ constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
 
 struct SinkTargets
 {
-    std::array<uint32_t, 4> color = std::array<uint32_t, 4>{std::numeric_limits<uint32_t>::max()};
-    std::array<uint32_t, 4> depth = std::array<uint32_t, 4>{std::numeric_limits<uint32_t>::max()};;
+    std::array<uint32_t, 4> color = std::array<uint32_t, 4>{0u};
+    std::array<uint32_t, 4> depth = std::array<uint32_t, 4>{0u};
 };
 
 struct ShaderPaths

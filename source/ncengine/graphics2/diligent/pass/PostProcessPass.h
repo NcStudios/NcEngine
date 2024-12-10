@@ -18,7 +18,7 @@ namespace nc::graphics
 {
 class ShaderBindings;
 class ShaderFactory;
-class PostProcessSinkBufferResource;
+class PostProcessColorSinkBufferResource;
 
 // Post process pass data specific to an effect
 struct PostProcessPipelineInstance

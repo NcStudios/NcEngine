@@ -6,7 +6,8 @@ target_sources(${NC_ENGINE_LIB}
         PerPassResourceSignature.cpp
         PostProcessPropertyBufferResource.cpp
         PostProcessSinkIndexBufferResource.cpp
-        PostProcessSinkBufferResource.cpp
+        PostProcessColorSinkBufferResource.cpp
+        PostProcessDepthSinkBufferResource.cpp
         TextureBufferResource.cpp
         ResourceTypes.cpp
         ShaderBindings.cpp

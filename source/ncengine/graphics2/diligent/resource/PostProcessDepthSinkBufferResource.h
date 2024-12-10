@@ -8,19 +8,16 @@
 
 namespace nc::graphics
 {
-class PostProcessSinkBufferResource
+class PostProcessDepthSinkBufferResource
 {
     public:
-        explicit PostProcessSinkBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures)
+        explicit PostProcessDepthSinkBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures)
             : m_variable{&variable},
               m_maxTextures{maxTextures}
         {
         }
 
-        static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
-
         auto Add(Diligent::IRenderDevice& device,
-                 uint32_t numColorRenderTargets,
                  uint32_t numDepthRenderTargets,
                  uint32_t renderTargetWidth,
                  uint32_t renderTargetHeight) -> std::vector<uint32_t>;
@@ -30,16 +27,11 @@ class PostProcessSinkBufferResource
                     uint32_t renderTargetHeight);
 
         void Clear();
-        auto ColorRenderTargetExists(uint32_t index) const -> bool { return m_colorRenderTargetViewsRT.size() > index + 1; }
-        auto GetColorRenderTarget(uint32_t index) -> Diligent::IDeviceObject* { return m_colorRenderTargetViewsRT.at(index); }
         auto GetDepthRenderTarget(uint32_t index) -> Diligent::IDeviceObject* { return m_depthRenderTargetViewsRT.at(index); }
 
     private:
-        std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_colorRenderTargets;
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_depthRenderTargets;
-        std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsSR; // Shader resource
-        std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsRT; // Render target
-        std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsSR; // Render target
+        std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsSR; // Shader Resource
         std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsRT; // Render target
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
