@@ -289,8 +289,13 @@ auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t
     return HashCombine(hashCode, shaderPaths.vertexShaderPath);
 }
 
-auto EmptySource() -> RenderTargets { return RenderTargets{}; }
-auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets { return RenderTargets{.colorIndices = std::vector<uint32_t>{colorRTIndex}, .depthIndices = std::vector<uint32_t>{depthRTIndex}}; }
+auto EmptySource() -> SinkTargets { return SinkTargets{}; }
+auto SingleSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> SinkTargets { return SinkTargets
+                                                                                {
+                                                                                    .color = std::array<uint32_t, 4>{colorRTIndex, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()},
+                                                                                    .depth = std::array<uint32_t, 4>{depthRTIndex, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()}
+                                                                                }; 
+                                                                                }
 auto SwapChainSink() -> std::pair<uint32_t, uint32_t> { return std::make_pair(SwapChainColorRTIndex, SwapChainDepthRTIndex); }
 auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> std::pair<uint32_t, uint32_t> { return std::make_pair(colorRTIndex, depthRTIndex); }
 

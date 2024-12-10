@@ -86,8 +86,8 @@ auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTarg
 
 auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t;
 
-auto EmptySource() -> RenderTargets;
-auto OffScreenSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> RenderTargets;
+auto EmptySource() -> SinkTargets;
+auto SingleSource(uint32_t colorRTIndex, uint32_t depthRTIndex) -> SinkTargets;
 auto SwapChainSink() -> std::pair<uint32_t, uint32_t>;
 auto OffScreenSink(uint32_t colorRTIndex, uint32_t depthRTIndex) -> std::pair<uint32_t, uint32_t>;
 } // namespace nc::graphics

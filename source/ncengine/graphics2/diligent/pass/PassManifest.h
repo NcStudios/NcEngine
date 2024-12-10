@@ -1,9 +1,11 @@
 #pragma once
 
+#include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/Material.h"
 #include "ncengine/graphics/PostProcess.h"
-#include "ncengine/graphics/GraphicsUtility.h"
 #include "PassTypes.h"
+
+#include <vector>
 
 namespace nc::graphics
 {

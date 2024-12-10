@@ -191,6 +191,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .sinks = OffScreenSink(0u, 0u)
                 },
                 PassDesc{
+                    .id = static_cast<uint64_t>(MaterialPassFlag::Normals),
+                    .name = "Normals",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
+                    .sources = EmptySource(),
+                    .sinks = OffScreenSink(1u, 1u)
+                },
+                PassDesc{
                     .id = static_cast<uint64_t>(MiscPassFlag::Wireframe),
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
@@ -203,24 +211,27 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
-                    .sources = OffScreenSource(0u, 0u),
-                    .sinks = OffScreenSink(1u, 1u)
+                    .sources = SingleSource(0u, 0u),
+                    .sinks = OffScreenSink(2u, 2u)
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Depth),
                     .name = "Post Process Blue",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPBlue.psh", "PostProcess.vsh"},
-                    .sources = OffScreenSource(1u, 1u),
-                    .sinks = OffScreenSink(2u, 2u)
+                    .sources = SingleSource(2u, 2u),
+                    .sinks = OffScreenSink(3u, 3u)
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Outline),
-                    .name = "Post Process Red",
+                    .name = "Post Process Outline",
                     .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{"PPRed.psh", "PostProcess.vsh"},
-                    .sources = OffScreenSource(2u, 2u),
-                    .sinks = OffScreenSink(3u, 3u)
+                    .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
+                    .sources = SinkTargets{
+                                            .color = std::array<uint32_t, 4>{3u, 1u, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()},
+                                            .depth = std::array<uint32_t, 4>{3u, std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max()}
+                                          },
+                    .sinks = OffScreenSink(4u, 4u)
                 }
             },
             GetImplementedMaterialPassFlags(),

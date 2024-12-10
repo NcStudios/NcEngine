@@ -151,7 +151,7 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         .name = "Dummy Pass",
         .type = PassType::PostProcess,
         .shaderPaths = shaderPaths,
-        .sources = OffScreenSource(sinkCount.first - 1, sinkCount.second - 1),
+        .sources = SingleSource(sinkCount.first - 1, sinkCount.second - 1),
         .sinks = SwapChainSink()
     };
 
@@ -189,15 +189,10 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
     NC_ASSERT(m_materialPasses.size() == passBatches.size(), "Frontend/Backend passes out of sync.");
 
-    auto bound = false;
     for (auto [pass, batches] : std::views::zip(m_materialPasses, passBatches))
     {
         BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
-        if (!bound)
-        {
-            ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), m_materialPasses[0].colorRTIndex, m_materialPasses[0].depthRTIndex);
-            bound = true;
-        }
+        ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
         context.SetPipelineState(pass.pso);
         DrawIndexed(context, batches);
 
@@ -222,7 +217,7 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
         ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.passDesc.sinks.first, pass.passDesc.sinks.second);
         context.SetPipelineState(pass.pso);
 
-        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, pass.passDesc.sources.colorIndices[0], pass.passDesc.sources.depthIndices[0]);
+        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, pass.passDesc.sources);
 
         for (auto& instance : pass.instances)
         {
@@ -250,7 +245,7 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
     }
     BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
     ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
-    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, finalPassSources.first, finalPassSources.second);
+    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(finalPassSources.first, finalPassSources.second));
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
     context.SetPipelineState(m_finalPass->pso);
     context.Draw(drawAttribs);

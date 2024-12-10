@@ -1,9 +1,12 @@
 #pragma once
 
 #include "base/DynamicUniformBuffer.h"
+#include "graphics2/diligent/pass/PassTypes.h"
 
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+
+#include <array>
 
 namespace nc::graphics
 {
@@ -13,10 +16,10 @@ struct PostProcessSinkIndexBufferResource
         static constexpr auto UniformBufferName = "PostProcessSinkIndexBuffer";
 
         explicit PostProcessSinkIndexBufferResource(Diligent::IDeviceContext& context,
-                                           Diligent::IRenderDevice& device,
-                                           Diligent::IShaderResourceVariable& variable);
+                                                    Diligent::IRenderDevice& device,
+                                                    Diligent::IShaderResourceVariable& variable);
 
-        void Update(Diligent::IDeviceContext& context, uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex);
+        void Update(Diligent::IDeviceContext& context, const SinkTargets& sinkTargets);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <array>
+#include <limits>
 #include <span>
 #include <string_view>
-#include <vector>
 
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 
@@ -13,10 +14,10 @@ constexpr auto SwapChainDepthRTIndex = std::numeric_limits<uint32_t>::max();
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
 
-struct RenderTargets
+struct SinkTargets
 {
-    std::vector<uint32_t> colorIndices = std::vector<uint32_t>{};
-    std::vector<uint32_t> depthIndices = std::vector<uint32_t>{};
+    std::array<uint32_t, 4> color = std::array<uint32_t, 4>{std::numeric_limits<uint32_t>::max()};
+    std::array<uint32_t, 4> depth = std::array<uint32_t, 4>{std::numeric_limits<uint32_t>::max()};;
 };
 
 struct ShaderPaths
@@ -40,7 +41,7 @@ struct PassDesc
     std::string_view name  = "Uninitialized";
     PassType type = PassType::None;
     ShaderPaths shaderPaths = ShaderPaths{};
-    RenderTargets sources = RenderTargets{};
+    SinkTargets sources = SinkTargets{};
     std::pair<uint32_t, uint32_t> sinks = std::make_pair(0u, 0u);
 };
 } // namespace nc::graphics

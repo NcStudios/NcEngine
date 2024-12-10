@@ -8,8 +8,14 @@ SamplerState  PostProcessSinkBufferData_sampler; // By convention, texture sampl
 
 cbuffer PostProcessSinkIndexBufferData
 {
-    uint colorRenderTargetIndex;
-    uint depthRenderTargetIndex;
+    uint colorRT1;
+    uint colorRT2;
+    uint colorRT3;
+    uint colorRT4;
+    uint depthRT1;
+    uint depthRT2;
+    uint depthRT3;
+    uint depthRT4;
 };
 
 struct PSInput 
@@ -25,7 +31,7 @@ struct PSOutput
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    float4 Color = PostProcessSinkBufferData[colorRenderTargetIndex].Sample(PostProcessSinkBufferData_sampler, PSIn.UV);
+    float4 Color = PostProcessSinkBufferData[colorRT1].Sample(PostProcessSinkBufferData_sampler, PSIn.UV);
     Color += float4(0.0, 0.0, 0.2, 0.0);
     PSOut.Color = Color;
 }
