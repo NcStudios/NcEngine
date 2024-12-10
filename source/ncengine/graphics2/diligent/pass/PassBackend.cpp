@@ -212,10 +212,12 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
 {
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
-    //auto& propertyBuffer = perPassResourceSignature.GetPostProcessPropertyBuffer();
 
+    auto enabledPassCount = 0u;
     for (auto& pass : m_postProcessPasses)
     {
+        if (!pass.anyEnabled) continue;
+
         BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.passDesc.sinks.first, pass.passDesc.sinks.second);
         ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), pass.passDesc.sinks.first, pass.passDesc.sinks.second);
         context.SetPipelineState(pass.pso);
@@ -237,13 +239,18 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
             context.Draw(drawAttribs);
         }
         context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
-
+        enabledPassCount++;
     }
 
     // Render final post process pass
+    auto finalPassSources = std::pair<uint32_t, uint32_t>(0u, 0u);
+    if (enabledPassCount)
+    {
+        finalPassSources = std::make_pair(m_postProcessPasses.at(enabledPassCount-1).passDesc.sinks.first, m_postProcessPasses.at(enabledPassCount-1).passDesc.sinks.second);
+    }
     BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
     ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessSinkBufferResource(), SwapChainColorRTIndex, SwapChainDepthRTIndex);
-    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, m_finalPass->passDesc.sources.colorIndices[0], m_finalPass->passDesc.sources.depthIndices[0]);
+    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, finalPassSources.first, finalPassSources.second);
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
     context.SetPipelineState(m_finalPass->pso);
     context.Draw(drawAttribs);
