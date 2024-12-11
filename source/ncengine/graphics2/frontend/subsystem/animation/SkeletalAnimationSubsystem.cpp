@@ -1,6 +1,7 @@
 #include "SkeletalAnimationSubsystem.h"
 #include "SkeletalAnimationCalculations2.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncengine/time/Time.h"
 #include "ncutility/NcError.h"
 
@@ -50,6 +51,8 @@ namespace nc::graphics
 {
 void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
+
     // todo: sort this out
     for (auto& b : m_buffer)
     {
@@ -72,7 +75,6 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             m_completedAnimations.push_back(entity);
         }
 
-        // const auto animationTicks = state.time * animation.ticksPerSecond;
         const auto packedAnimation = [&]()
         {
             if (m_storage.HasAnimation(state.blendFromAnimId))
@@ -104,14 +106,17 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 
 void SkeletalAnimationSubsystem::UpdateAnimationControllers(ecs::ExplicitEcs<SkinnedMesh> ecs)
 {
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::UpdateAnimationControllers()", ProfileCategory::Animation);
+
+    auto& pool = ecs.GetPool<SkinnedMesh>();
     for (const auto entity : m_completedAnimations)
     {
-        ecs.Get<SkinnedMesh>(entity).GetAnimationController().NotifyCompleteState();
+        pool.Get(entity).GetAnimationController().NotifyCompleteState();
     }
 
     m_completedAnimations.clear();
 
-    for (auto& mesh : ecs.GetAll<SkinnedMesh>())
+    for (auto& mesh : pool)
     {
         Transition(mesh);
     }
@@ -165,12 +170,8 @@ void SkeletalAnimationSubsystem::Transition(SkinnedMesh& mesh)
 
 void SkeletalAnimationSubsystem::Start(const MeshInstanceContext& ctx, const nc::AnimationTransition& transition)
 {
-    const auto hasAssets =
-        m_storage.HasRig(ctx.meshId) &&
-        (m_storage.HasAnimation(transition.toAnimId) ||
-         m_storage.HasAnimation(transition.fromAnimId));
-
-    if (!hasAssets)
+    NC_ASSERT(m_storage.HasAnimation(transition.toAnimId), "Transition animation is not loaded");
+    if (!m_storage.HasRig(ctx.meshId)) // boneless mesh is valid, just ignore
     {
         return;
     }
