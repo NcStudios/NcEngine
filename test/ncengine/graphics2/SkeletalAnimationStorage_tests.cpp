@@ -78,7 +78,7 @@ TEST(SkeletalAnimationStorageTest, LoadOperations_acquireExclusiveLock)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         });
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
         auto startTime = std::chrono::high_resolution_clock::now();
 
         // expect this to block for a bit while reader lock is held
