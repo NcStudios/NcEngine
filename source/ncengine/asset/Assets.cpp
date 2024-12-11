@@ -48,6 +48,11 @@ void UnloadAllConvexHullAssets(asset_flags_type flags)
     AssetService<ConvexHullView>::Get()->UnloadAll(flags);
 }
 
+auto AcquireConvexHullAsset(const std::string& path) -> ConvexHullView
+{
+    return AssetService<ConvexHullView>::Get()->Acquire(path);
+}
+
 bool LoadConcaveColliderAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<ConcaveColliderView>::Get()->Load(path, isExternal, flags);
@@ -68,6 +73,11 @@ void UnloadAllConcaveColliderAssets(asset_flags_type flags)
     AssetService<ConcaveColliderView>::Get()->UnloadAll(flags);
 }
 
+auto AcquireConcaveColliderAsset(const std::string& path) -> ConcaveColliderView
+{
+    return AssetService<ConcaveColliderView>::Get()->Acquire(path);
+}
+
 bool LoadCubeMapAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<CubeMapView>::Get()->Load(path, isExternal, flags);
@@ -86,6 +96,11 @@ bool UnloadCubeMapAsset(const std::string& path, asset_flags_type flags)
 void UnloadAllCubeMapAssets(asset_flags_type flags)
 {
     return AssetService<CubeMapView>::Get()->UnloadAll(flags);
+}
+
+auto AcquireCubeMapAsset(const std::string& path) -> CubeMapView
+{
+    return AssetService<CubeMapView>::Get()->Acquire(path);
 }
 
 bool LoadMeshAsset(const std::string& path, bool isExternal, asset_flags_type flags)
@@ -131,6 +146,11 @@ bool UnloadSkeletalAnimationAsset(const std::string& path, asset_flags_type flag
 void UnloadAllSkeletalAnimationAssets(asset_flags_type flags)
 {
     return AssetService<SkeletalAnimationView>::Get()->UnloadAll(flags);
+}
+
+auto AcquireSkeletalAnimationAsset(const std::string& path) -> SkeletalAnimationView
+{
+    return AssetService<SkeletalAnimationView>::Get()->Acquire(path);
 }
 
 bool LoadTextureAsset(const std::string& path, bool isExternal, asset_flags_type flags)
