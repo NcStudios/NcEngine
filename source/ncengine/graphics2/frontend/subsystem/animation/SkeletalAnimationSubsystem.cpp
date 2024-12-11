@@ -2,71 +2,47 @@
 #include "SkeletalAnimationCalculations2.h"
 
 #include "ncengine/time/Time.h"
+#include "ncutility/NcError.h"
 
 namespace
 {
+struct StepResult
+{
+    float ticks;
+    bool completed;
+};
+
 auto GetAnimationDuration(const nc::asset::SkeletalAnimation& animation) -> float
 {
     return static_cast<float>(animation.durationInTicks) / animation.ticksPerSecond;
 }
 
-auto StepAnimationTime(const nc::asset::SkeletalAnimation& animation,
-                       float currentTime,
-                       float dt) -> float
+auto StepAnimationTime(float& timeInOut,
+                       const nc::asset::SkeletalAnimation& animation,
+                       float dt) -> StepResult
 {
-    return std::fmod(currentTime + dt, GetAnimationDuration(animation));
+    const auto duration = GetAnimationDuration(animation);
+    const auto newTime = timeInOut + dt;
+    timeInOut = std::fmod(newTime, duration);
+    return StepResult{
+        timeInOut * animation.ticksPerSecond,
+        newTime > duration
+    };
 }
 
-auto PrepareAnimation(nc::graphics::gfx2::InFlightAnimation& animation,
-                      const nc::asset::SkeletalAnimation* fromAnim,
-                      const nc::asset::SkeletalAnimation* toAnim,
-                      const nc::graphics::gfx2::PackedRig& rig,
-                      float dt) -> nc::graphics::gfx2::PackedAnimation
+auto StepTransition(nc::graphics::gfx2::InFlightAnimation& state,
+                    const nc::asset::SkeletalAnimation& blendFromAnimation,
+                    float dt) -> StepResult
 {
-    if (fromAnim && toAnim)
+    state.currentTransitionTime += dt;
+    const auto normalized = state.currentTransitionTime / state.transitionDuration;
+    state.blendFactor = std::clamp(normalized, 0.0f, 1.0f);
+    if (state.currentTransitionTime >= state.transitionDuration)
     {
-        animation.blendToTime = StepAnimationTime(*toAnim, animation.blendToTime, dt);
-        animation.blendFromTime = StepAnimationTime(*fromAnim, animation.blendFromTime, dt);
-        const auto blendFromTimeTicks = animation.blendFromTime * fromAnim->ticksPerSecond;
-        const auto blendToTimeTicks = animation.blendToTime * toAnim->ticksPerSecond;
-        return nc::graphics::gfx2::ComposeBlendedMatrices(
-            blendFromTimeTicks,
-            blendToTimeTicks,
-            animation.blendFactor,
-            rig.boneNames,
-            *fromAnim,
-            *toAnim
-        );
+        state.blendFromAnimId = nc::NullAnimationId;
     }
 
-    auto [timeInSeconds, animData] = [&animation, fromAnim, toAnim]()
-    {
-        return fromAnim
-            ? std::pair{&animation.blendFromTime, fromAnim}
-            : std::pair{&animation.blendToTime, toAnim};
-    }();
-
-    *timeInSeconds = StepAnimationTime(*animData, *timeInSeconds, dt);
-    const auto timeInTicks = *timeInSeconds * animData->ticksPerSecond;
-    return nc::graphics::gfx2::ComposeMatrices(timeInTicks, rig.boneNames, *animData);
-}
-
-auto HasCompletedAnimationCycle(const nc::graphics::gfx2::InFlightAnimation animation,
-                                const nc::asset::SkeletalAnimation* toAnim,
-                                float dt) -> bool
-{
-    // return toAnim && animation.blendToTime + dt > GetAnimationDuration(*toAnim);
-
-    if (!toAnim)
-        return false;
-
-    const auto dur = GetAnimationDuration(*toAnim);
-    const auto proj = animation.blendToTime + dt;
-
-    if (proj > dur)
-        return true;
-    else
-        return false;
+    return StepAnimationTime(state.blendFromTime, blendFromAnimation, dt);
 }
 } // anonymous namespace
 
@@ -74,69 +50,55 @@ namespace nc::graphics
 {
 void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
-    // todo: would like to preallocate buffer/BoneCache based on capacity from anim system
-
-
-    // icky, 'unused' values are set w/ homogenous extension, should find way to make them 0
-    // std::memset(m_buffer.data(), 0, m_buffer.size() * sizeof(BoneData));
-    const auto m = DirectX::XMMatrixSet(
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
-    // for (auto& b : m_buffer)
-    // {
-    //     b.modelMatrix = m;
-    // }
-
-
+    // todo: sort this out
+    for (auto& b : m_buffer)
+    {
+        b.animatedBoneMatrix = DirectX::XMMatrixSet(0, 0, 0, 0,
+         0, 0, 0, 0,
+         0, 0, 0, 0,
+         0, 0, 0, 1);
+    }
 
     auto boneBuffer = std::vector<BoneData>{};
     const auto dt = time::DeltaTime();
-    const auto _ = m_storage.AcquireLock();
-    for (auto [entity, animation] : std::views::zip(m_animatedEntities, m_animationState))
+    const auto _ = m_storage.AcquireReadLock();
+    for (auto [entity, state] : std::views::zip(m_animatedEntities, m_animationState))
     {
-        // todo: animations might not exist, may need to be nullable?
-        const auto from = m_storage.HasAnimation(animation.blendFromAnim) ? &m_storage.GetAnimation(animation.blendFromAnim) : nullptr;
-        const auto to = m_storage.HasAnimation(animation.blendToAnim) ? &m_storage.GetAnimation(animation.blendToAnim) : nullptr;
-        const auto& rig = m_storage.GetRig(animation.meshId);
-
-        // todo: can/should just clamp here?
-        animation.blendFactor = std::clamp(animation.blendFactor + dt * 8.0f, 0.0f, 1.0f);
-        // if (animation.blendFactor < 1.0f)
-        // {
-        //     animation.blendFactor += dt * 2.0f;
-        // }
-
-        if (::HasCompletedAnimationCycle(animation, to, dt))
+        const auto& rig = m_storage.GetRig(state.meshId);
+        const auto& animation = m_storage.GetAnimation(state.animId);
+        const auto [ticks, completed] = StepAnimationTime(state.time, animation, dt);
+        if (completed)
         {
             m_completedAnimations.push_back(entity);
-            // todo: return here? what the heck else?
         }
 
-        // trying stuff
-        auto packedAnimation =
-            animation.blendFactor >= 1.0f
-                ? ::PrepareAnimation(animation, nullptr, to, rig, dt)
-                : ::PrepareAnimation(animation, from, to, rig, dt);
+        // const auto animationTicks = state.time * animation.ticksPerSecond;
+        const auto packedAnimation = [&]()
+        {
+            if (m_storage.HasAnimation(state.blendFromAnimId))
+            {
+                const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
+                const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
+                return gfx2::ComposeBlendedMatrices(
+                    blendFromTicks,
+                    ticks,
+                    state.blendFactor,
+                    rig.boneNames,
+                    blendFromAnimation,
+                    animation
+                );
+            }
 
+            return gfx2::ComposeMatrices(ticks, rig.boneNames, animation);
+        }();
 
-        // auto packedAnimation = ::PrepareAnimation(animation, from, to, rig, dt);
-
-        // todo: could reuse animatedBones vector to minimize allocs
         gfx2::AnimateBones(rig, packedAnimation, boneBuffer);
 
+        NC_ASSERT(m_buffer.size() >= boneBuffer.size() + state.boneIndex, "BoneDataBuffer out of bounds");
         // todo: BoneCache not implemented here
         // m_boneCache.UpdateRegion(animation.boneIndex, animatedBones);
-        if (animation.boneIndex + boneBuffer.size() > m_buffer.size())
-        {
-            m_buffer.resize(animation.boneIndex + boneBuffer.size(), BoneData{m});
-        }
-
-        std::memcpy(m_buffer.data() + animation.boneIndex, boneBuffer.data(), boneBuffer.size() * sizeof(BoneData));
+        std::memcpy(m_buffer.data() + state.boneIndex, boneBuffer.data(), boneBuffer.size() * sizeof(BoneData));
         boneBuffer.clear();
-        // std::ranges::copy(animatedBones, m_buffer.begin() + animation.boneIndex);
     }
 }
 
@@ -152,6 +114,14 @@ void SkeletalAnimationSubsystem::UpdateAnimationControllers(ecs::ExplicitEcs<Ski
     for (auto& mesh : ecs.GetAll<SkinnedMesh>())
     {
         Transition(mesh);
+    }
+}
+
+void SkeletalAnimationSubsystem::SyncBoneBuffer(size_t boneCapacity)
+{
+    if (boneCapacity > m_buffer.size())
+    {
+        m_buffer.resize(boneCapacity);
     }
 }
 
@@ -197,8 +167,8 @@ void SkeletalAnimationSubsystem::Start(const MeshInstanceContext& ctx, const nc:
 {
     const auto hasAssets =
         m_storage.HasRig(ctx.meshId) &&
-        (m_storage.HasAnimation(transition.prevAnimId) ||
-         m_storage.HasAnimation(transition.curAnimId));
+        (m_storage.HasAnimation(transition.toAnimId) ||
+         m_storage.HasAnimation(transition.fromAnimId));
 
     if (!hasAssets)
     {
@@ -211,11 +181,13 @@ void SkeletalAnimationSubsystem::Start(const MeshInstanceContext& ctx, const nc:
         m_animatedEntities.push_back(ctx.entity);
         m_animationState.emplace_back(
             ctx.meshId,
-            transition.prevAnimId,
-            transition.curAnimId,
+            transition.toAnimId,
+            transition.fromAnimId,
             ctx.boneDataHandle,
             0.0f,
             0.0f,
+            0.0f,
+            transition.transitionDuration,
             0.0f
         );
 
@@ -223,14 +195,16 @@ void SkeletalAnimationSubsystem::Start(const MeshInstanceContext& ctx, const nc:
     }
 
     auto& state = m_animationState.at(std::distance(m_animatedEntities.begin(), pos));
-    const auto blendFromTime = state.blendToTime;
+    const auto blendFromTime = state.time;
     state = gfx2::InFlightAnimation{
         ctx.meshId,
-        transition.prevAnimId,
-        transition.curAnimId,
+        transition.toAnimId,
+        transition.fromAnimId,
         ctx.boneDataHandle,
+        0.0f,
         blendFromTime,
         0.0f,
+        transition.transitionDuration,
         0.0f
     };
 }

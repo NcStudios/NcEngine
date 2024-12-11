@@ -60,18 +60,19 @@ constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetalli
 
 namespace mesh_base_ext
 {
-void MeshNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
+template<class MeshType>
+void MeshNodeWidget(MeshType& meshComponent, nc::asset::NcAsset& ncAsset)
 {
     if (ImGui::TreeNodeEx("Mesh"))
     {
         /** @todo 353 Get asset views from ncAsset, once implemented */
         const auto meshAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::Mesh);
-        const auto meshId = baseMesh.GetMeshId();
+        const auto meshId = meshComponent.GetMeshId();
         auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshId)};
         if (nc::ui::Combobox(meshPath, "mesh", meshAssets))
         {
             const auto selectedMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(meshPath);
-            baseMesh.SetMesh(selectedMeshView);
+            meshComponent.SetMesh(selectedMeshView);
         }
 
         ImGui::TreePop();

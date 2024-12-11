@@ -83,7 +83,8 @@ auto ComposeBlendedMatrices(float blendFromTime,
     // todo: is it ok to only care about hasValue from fromAnim?
     return gfx2::PackedAnimation{
         .offsets = std::vector<DirectX::XMMATRIX>{offsets.begin(), offsets.end()},
-        .hasValues = std::move(fromHasValues)
+        //.hasValues = std::move(fromHasValues)
+        .hasValues = std::move(_)
     };
 }
 
@@ -99,7 +100,12 @@ void AnimateBones(const PackedRig& rig,
     // Replace each boneToParent offset with its animation offset, if present. Else, leave as the original offset.
     for (auto [boneOffset, animOffset, animHasValue] : std::views::zip(boneToParentSandbox, anim.offsets, anim.hasValues))
     {
-        boneOffset = boneOffset * !animHasValue + animOffset * animHasValue;
+        if (animHasValue)
+            boneOffset = animOffset;
+        // else
+            // boneOffset = DirectX::XMMatrixSet(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+
+        // boneOffset = boneOffset * !animHasValue + animOffset * animHasValue;
     }
 
     NC_ASSERT(boneToParentSandbox.size() == rig.offsetChildren.size(), "fuuuck");

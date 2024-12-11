@@ -23,6 +23,8 @@ namespace mesh
 {
 constexpr auto HalfPipePath = "halfpipe.nca";
 constexpr auto RampPath = "ramp.nca";
+constexpr auto OgrePath = "ogre.nca";
+constexpr auto SkeletonPath = "skeleton.nca";
 
 extern asset::MeshView Cube;
 extern asset::MeshView Sphere;
@@ -30,6 +32,8 @@ extern asset::MeshView Capsule;
 extern asset::MeshView Plane;
 extern asset::MeshView HalfPipe;
 extern asset::MeshView Ramp;
+extern asset::MeshView Ogre;
+extern asset::MeshView Skeleton;
 } // namespace mesh
 
 // Colliders
@@ -47,7 +51,22 @@ extern MaterialDesc Orange;
 extern MaterialDesc Purple;
 extern MaterialDesc Teal;
 extern MaterialDesc Yellow;
+extern MaterialDesc Ogre;
+extern MaterialDesc Skeleton;
 } // namespace material
+
+// Animations
+namespace animation
+{
+extern uint64_t OgreIdle;
+extern uint64_t OgreAttack;
+extern uint64_t SkeletonIdle;
+extern uint64_t SkeletonWalkRight;
+extern uint64_t SkeletonWalkLeft;
+extern uint64_t SkeletonWalkForward;
+extern uint64_t SkeletonWalkBack;
+extern uint64_t SkeletonJump;
+} // namespace animation
 
 extern graphics::PbrMaterial DefaultPbrMaterial;
 extern graphics::PbrMaterial RedPbrMaterial;

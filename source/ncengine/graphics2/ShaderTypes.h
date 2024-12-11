@@ -69,10 +69,7 @@ struct BoneData
 {
     // DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
     // setting hom to 1 here doesn't help...
-    DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMatrixSet(0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 1.0f);
+    DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMATRIX{};
 };
 
 // Object model for DirectionalLights (type: StructuredBuffer element type).

@@ -6,6 +6,8 @@ namespace nc::graphics
 {
 auto GraphicsFrontend::BuildRenderState(ecs::Ecs world) -> FrontendRenderState
 {
+    m_animationSystem.SyncBoneBuffer(m_meshSystem.GetBoneCapacity());
+
     return FrontendRenderState{
         .cameraState = m_cameraSystem.BuildState(world),
         .meshRenderState = m_meshSystem.BuildState(world),

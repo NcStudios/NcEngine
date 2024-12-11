@@ -122,6 +122,9 @@ class SkinnedMesh : public MeshBase
         {
         }
 
+        /** @name Mesh Functions */
+        void SetMesh(const asset::MeshView& meshAsset);
+
         /** @name Animation Functions */
         auto GetAnimationController() -> SkeletalAnimationController& { return m_controller; }
 

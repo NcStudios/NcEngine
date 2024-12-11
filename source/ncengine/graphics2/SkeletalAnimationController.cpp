@@ -4,8 +4,10 @@
 
 namespace nc
 {
-SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId)
-    : m_states{4ull, MaxAnimationStates}
+SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
+                                                         float defaultTransitionDuration)
+    : m_states{4ull, MaxAnimationStates},
+      m_defaultTransitionDuration{defaultTransitionDuration}
 {
     m_states.emplace(
         RootAnimationState,
@@ -24,6 +26,7 @@ auto SkeletalAnimationController::AddState(LoopAnimation&& properties) -> Animat
         .exitWhen = std::move(properties.exitWhen),
         .enterFrom = properties.enterFrom,
         .exitTo = properties.exitTo,
+        .transitionDuration = properties.transitionDuration,
         .action = AnimationTransitionType::Loop
     });
 }
@@ -35,6 +38,7 @@ auto SkeletalAnimationController::AddState(PlayOnceAnimation&& properties) -> An
         .enterWhen = std::move(properties.enterWhen),
         .enterFrom = properties.enterFrom,
         .exitTo = properties.exitTo,
+        .transitionDuration = properties.transitionDuration,
         .action = AnimationTransitionType::PlayOnce
     });
 }
@@ -44,6 +48,7 @@ auto SkeletalAnimationController::AddState(StopAnimation&& properties) -> Animat
     return AddStateImpl(AnimationState{
         .enterWhen = std::move(properties.enterWhen),
         .enterFrom = properties.enterFrom,
+        .transitionDuration = properties.transitionDuration,
         .action = AnimationTransitionType::Stop
     });
 }
@@ -73,35 +78,41 @@ void SkeletalAnimationController::RemoveState(AnimationStateId stateId)
 
 void SkeletalAnimationController::LoopImmediate(uint64_t animId,
                                                 TransitionCondition&& exitWhen,
-                                                AnimationStateId exitTo)
+                                                AnimationStateId exitTo,
+                                                float transitionDuration)
 {
     m_queuedState = ImmediateAnimationState;
     m_immediateState = std::make_unique<AnimationState>(AnimationState{
         .animId = animId,
         .enterWhen = std::move(exitWhen),
         .exitTo = exitTo,
+        .transitionDuration = transitionDuration,
         .action = AnimationTransitionType::Loop
     });
 }
 
 void SkeletalAnimationController::PlayOnceImmediate(uint64_t animId,
-                                                    AnimationStateId exitTo)
+                                                    AnimationStateId exitTo,
+                                                    float transitionDuration)
 {
     m_queuedState = ImmediateAnimationState;
     m_immediateState = std::make_unique<AnimationState>(AnimationState{
         .animId = animId,
         .exitTo = exitTo,
+        .transitionDuration = transitionDuration,
         .action = AnimationTransitionType::PlayOnce
     });
 }
 
 void SkeletalAnimationController::StopImmediate(TransitionCondition&& exitWhen,
-                                                AnimationStateId exitTo)
+                                                AnimationStateId exitTo,
+                                                float transitionDuration)
 {
     m_queuedState = ImmediateAnimationState;
     m_immediateState = std::make_unique<AnimationState>(AnimationState{
         .exitWhen = std::move(exitWhen),
         .exitTo = exitTo,
+        .transitionDuration = transitionDuration,
         .action = AnimationTransitionType::Stop
     });
 }
@@ -110,12 +121,15 @@ auto SkeletalAnimationController::CheckForTransition() -> AnimationTransition
 {
     const auto cycleCompleted = std::exchange(m_cycleCompleted, false);
 
-    if (m_activeState != m_queuedState)
+    if (m_queuedState != NullAnimationState)
     {
         return TransitionQueuedState();
     }
-
-    if (m_immediateState)
+    else if (m_activeState == NullAnimationState)
+    {
+        return AnimationTransition{};
+    }
+    else if (m_immediateState)
     {
         if (ShouldExitState(*m_immediateState, cycleCompleted))
         {
@@ -124,11 +138,6 @@ auto SkeletalAnimationController::CheckForTransition() -> AnimationTransition
             return TransitionState(*m_immediateState, m_states.at(exitTo), exitTo);
         }
 
-        return AnimationTransition{};
-    }
-
-    if (m_activeState == NullAnimationState)
-    {
         return AnimationTransition{};
     }
 
@@ -151,6 +160,11 @@ auto SkeletalAnimationController::CheckForTransition() -> AnimationTransition
     return AnimationTransition{};
 }
 
+void SkeletalAnimationController::RefreshAnimation()
+{
+    m_queuedState = m_activeState;
+}
+
 void SkeletalAnimationController::NotifyCompleteState()
 {
     m_cycleCompleted = true;
@@ -168,33 +182,56 @@ auto SkeletalAnimationController::GetCurrentAnimationId() const -> uint64_t
 {
     switch (m_activeState)
     {
-        case ImmediateAnimationState: return m_immediateState->animId;
-        case NullAnimationState:      return NullAnimationId;
-        default:                      return m_states.at(m_activeState).animId;
+        case ImmediateAnimationState:
+            return m_queuedState == NullAnimationId
+                ? m_immediateState->animId
+                : m_prevImmediateAnimId;
+        case NullAnimationState:
+            return NullAnimationId;
+        default:
+            return m_states.at(m_activeState).animId;
     }
+}
+
+auto SkeletalAnimationController::CalculateTransitionDuration(float requestedDuration) const -> float
+{
+    return requestedDuration == UseDefaultTransitionDuration
+        ? m_defaultTransitionDuration
+        : requestedDuration;
 }
 
 auto SkeletalAnimationController::TransitionQueuedState() -> AnimationTransition
 {
     const auto curAnim = GetCurrentAnimationId();
-    m_activeState = m_queuedState;
+    m_prevImmediateAnimId = NullAnimationId;
+    m_activeState = std::exchange(m_queuedState, NullAnimationState);
     switch (m_activeState)
     {
         case ImmediateAnimationState:
             return AnimationTransition{
-                curAnim,
                 m_immediateState->animId,
+                curAnim,
+                CalculateTransitionDuration(m_immediateState->transitionDuration),
                 m_immediateState->action
             };
         case RootAnimationState:
             return AnimationTransition{
-                curAnim,
                 m_states.at(RootAnimationState).animId,
+                curAnim,
+                m_defaultTransitionDuration,
                 AnimationTransitionType::Loop
             };
         default:
-            NC_ASSERT(false, "Unexpected animation state queued");
-            std::unreachable();
+            // this is used to recreate animation state when mesh has changed
+            auto& state = m_states.at(m_activeState);
+            return AnimationTransition{
+                state.animId,
+                state.animId,
+                CalculateTransitionDuration(state.transitionDuration),
+                state.action
+            };
+            // NC_ASSERT(false, "Unexpected animation state queued");
+            // std::unreachable();
     }
 }
 
@@ -203,10 +240,10 @@ auto SkeletalAnimationController::TransitionState(AnimationState& from,
                                                   AnimationStateId toId) -> AnimationTransition
 {
     m_activeState = toId;
-    m_queuedState = toId;
     return AnimationTransition{
-        from.animId,
         to.animId,
+        from.animId,
+        CalculateTransitionDuration(to.transitionDuration),
         to.action
     };
 }

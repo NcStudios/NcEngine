@@ -22,8 +22,9 @@ class SkeletalAnimationSubsystem
         // IMPORTANT: Must not run concurrently with game logic.
         void UpdateAnimationControllers(ecs::ExplicitEcs<SkinnedMesh> ecs);
 
-        // todo:
-        // SyncBoneBufferSize()
+        // Resize the bone buffer based on the most recent capacity (from MeshSubsystem).
+        // IMPORTANT: Must not run concurrently with CalculateBoneMatrices().
+        void SyncBoneBuffer(size_t boneCapacity);
 
         auto BuildState() -> SkeletalAnimationRenderState;
         void Clear() noexcept;

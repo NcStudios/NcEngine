@@ -33,7 +33,8 @@ auto MakeSkinnedInstanceData(const nc::MeshInstanceContext& ctx,
 
 namespace nc::graphics
 {
-MeshSubsystem::MeshSubsystem(SystemEvents& events,
+MeshSubsystem::MeshSubsystem(SkeletalAnimationStorage& animationStorage,
+                             SystemEvents& events,
                              uint32_t maxEntities,
                              uint32_t maxMeshRenderers,
                              uint32_t initialBatchSize)
@@ -41,9 +42,18 @@ MeshSubsystem::MeshSubsystem(SystemEvents& events,
       m_boneCache{maxMeshRenderers * 100u}, // todo: just a random guess
       m_staticMeshInstanceCache{maxEntities, initialBatchSize},
       m_skinnedMeshInstanceCache{maxEntities, initialBatchSize},
+      m_animationStorage{&animationStorage},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshSubsystem::OnRebuildStatics)}
 {
     MeshBase::RegisterSubsystem(this);
+}
+
+auto MeshSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
+{
+    const auto _ = m_animationStorage->AcquireReadLock();
+    return m_animationStorage->HasRig(meshId)
+        ? static_cast<uint32_t>(m_animationStorage->GetRig(meshId).vertexToBone.size())
+        : 0u;
 }
 
 void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
@@ -69,8 +79,11 @@ void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            const auto boneCount = SkeletalAnimationStorage::GetBoneCount(ctx.meshId);
-            ctx.boneDataHandle = m_boneCache.Allocate(boneCount);
+            const auto boneCount = GetRigBoneCount(mesh.id);
+            ctx.boneDataHandle = boneCount > 0
+                ? m_boneCache.Allocate(boneCount)
+                : NullBoneCacheHandle;
+
             addToCache(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }
@@ -130,9 +143,16 @@ void MeshSubsystem::SetInstanceMesh(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            const auto boneCount = SkeletalAnimationStorage::GetBoneCount(ctx.meshId);
-            m_boneCache.Free(ctx.boneDataHandle);
-            ctx.boneDataHandle = m_boneCache.Allocate(boneCount);
+            if (ctx.boneDataHandle != NullBoneCacheHandle)
+            {
+                m_boneCache.Free(ctx.boneDataHandle);
+            }
+
+            const auto boneCount = GetRigBoneCount(newMesh.id);
+            ctx.boneDataHandle = boneCount > 0
+                ? m_boneCache.Allocate(boneCount)
+                : NullBoneCacheHandle;
+
             updateInstance(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }

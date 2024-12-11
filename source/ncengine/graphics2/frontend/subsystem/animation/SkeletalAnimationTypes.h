@@ -81,11 +81,13 @@ struct PackedAnimationDecomposed
 struct InFlightAnimation
 {
     uint64_t meshId;
-    uint64_t blendFromAnim;
-    uint64_t blendToAnim;
+    uint64_t animId;
+    uint64_t blendFromAnimId;
     uint32_t boneIndex;
+    float time;
     float blendFromTime;
-    float blendToTime;
+    float currentTransitionTime;
+    float transitionDuration;
     float blendFactor;
 };
 } // namespace nc::anim

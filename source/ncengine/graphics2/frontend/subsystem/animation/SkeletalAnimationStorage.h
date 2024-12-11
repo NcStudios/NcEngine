@@ -3,107 +3,45 @@
 #include "SkeletalAnimationTypes.h"
 #include "ncengine/asset/AssetData.h"
 
-#include "ncutility/Hash.h"
-
-#include <mutex>
-#include <ranges>
+#include <shared_mutex>
+#include <span>
 #include <unordered_map>
-#include <vector>
 
 namespace nc::graphics
 {
+// Storage for skeletal animation assets
+// NOTE: Assets are routed here instead of being stored in the asset manager because:
+//       1. Tasks access these at from the update graph, which requires synchronizing read/write access
+//          with game logic, which could load at any time.
+//       2. Mesh bone data must be transformed to the PackedRig format.
 class SkeletalAnimationStorage
 {
     public:
-        // todo: for debugging
-        SkeletalAnimationStorage()
-        {
-            s_instance = this;
-        }
+        // Synchronization Functions
+        [[nodiscard]] auto AcquireReadLock()  { return std::shared_lock{m_mutex}; }
+        [[nodiscard]] auto AcquireWriteLock() { return std::unique_lock{m_mutex}; }
 
-        // Get a lock over all asset storage.
-        // IMPORTANT: A lock must be aquired prior to all queries. Load operations acquire a lock internally.
-        [[nodiscard]] auto AcquireLock() { return std::lock_guard{m_mutex}; }
+        // Querries
+        // IMPORTANT: A read lock must be aquired prior to all queries.
+        auto HasAnimation(uint64_t animId) const -> bool                            { return m_animations.contains(animId); }
+        auto GetAnimation(uint64_t animId) const -> const asset::SkeletalAnimation& { return m_animations.at(animId);       }
+        auto HasRig(uint64_t meshId)       const -> bool                            { return m_rigs.contains(meshId);       }
+        auto GetRig(uint64_t meshId)       const -> const gfx2::PackedRig&          { return m_rigs.at(meshId);             }
 
-        auto HasAnimation(uint64_t animId) const -> bool { return m_animations.contains(animId); }
-
-        // Get the animation data for a given animation asset.
-        auto GetAnimation(uint64_t animId) -> const asset::SkeletalAnimation& { return m_animations.at(animId); }
-
-        auto HasRig(uint64_t meshId) const -> bool { return m_rigs.contains(meshId); }
-
-        // Get the bone data for a given mesh asset.
-        auto GetRig(uint64_t meshId) -> const gfx2::PackedRig& { return m_rigs.at(meshId); }
-
-        // should not be static!!!
-        static auto GetBoneCount(uint64_t meshId) -> uint32_t
-        {
-            // is this right?
-            const auto _ = s_instance->AcquireLock();
-            return static_cast<uint32_t>(s_instance->m_rigs.at(meshId).vertexToBone.size());
-            // return static_cast<uint32_t>(s_instance->m_rigs.at(meshId).boneNames.size());
-        }
-
-
+        // AssetDispatch Functions
+        // NOTE: These operations acquire a write lock internally.
         void LoadAnimations(std::span<const std::string> ids,
-                            std::span<const asset::SkeletalAnimation> animations)
-        {
-            const auto _ = AcquireLock();
-            m_animations.reserve(m_animations.size() + ids.size());
-            for (const auto [id, animation] : std::views::zip(ids, animations))
-            {
-                m_animations.emplace(utility::Fnv1a(id), animation);
-            }
-        }
-
-        void UnloadAnimation(const std::string& id)
-        {
-            const auto _ = AcquireLock();
-            m_animations.erase(utility::Fnv1a(id));
-        }
-
-        void UnloadAnimations()
-        {
-            const auto _ = AcquireLock();
-            m_animations.clear();
-        }
-
+                            std::span<const asset::SkeletalAnimation> animations);
+        void UnloadAnimation(const std::string& id);
+        void UnloadAnimations();
         void LoadBones(std::span<const std::string> ids,
-                       std::span<const asset::BonesData> bones)
-        {
-            auto rigs = std::vector<gfx2::PackedRig>{};
-            rigs.reserve(bones.size());
-            std::ranges::transform(
-                bones,
-                std::back_inserter(rigs),
-                [](const auto& in) { return gfx2::PackedRig(in); }
-            );
-
-            const auto _ = AcquireLock();
-            m_rigs.reserve(m_rigs.size() + ids.size());
-            for (auto [id, rig] : std::views::zip(ids, rigs))
-            {
-                m_rigs.emplace(utility::Fnv1a(id), std::move(rig));
-            }
-        }
-
-        void UnloadBones(const std::string& id)
-        {
-            const auto _ = AcquireLock();
-            m_rigs.erase(utility::Fnv1a(id));
-        }
-
-        void UnloadBones()
-        {
-            const auto _ = AcquireLock();
-            m_rigs.clear();
-        }
+                       std::span<const asset::BonesData> bones);
+        void UnloadBones(const std::string& id);
+        void UnloadBones();
 
     private:
         std::unordered_map<uint64_t, asset::SkeletalAnimation> m_animations;
         std::unordered_map<uint64_t, gfx2::PackedRig> m_rigs;
-        std::mutex m_mutex;
-
-        static inline SkeletalAnimationStorage* s_instance = nullptr;
+        std::shared_mutex m_mutex;
 };
 } // namespace nc::graphics

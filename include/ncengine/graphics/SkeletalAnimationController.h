@@ -22,6 +22,9 @@ constexpr auto MaxAnimationStates = 32ull;                                      
 using TransitionCondition = std::move_only_function<bool()>;                      ///< Condition that determines whether an animation state transition should occur.
 constexpr bool ConditionNever() { return false; }                                 ///< Convenience condition for disabling enter/exit conditions.
 
+/** @brief Used on an animation state to use the SkeletalAnimationController's default duration for transitions. */
+constexpr auto UseDefaultTransitionDuration = -1.0f;
+
 /** @brief Animation state machine node that loops until the exit condition is met. */
 struct LoopAnimation
 {
@@ -30,6 +33,7 @@ struct LoopAnimation
     AnimationStateId enterFrom = RootAnimationState;
     TransitionCondition exitWhen = ConditionNever;
     AnimationStateId exitTo = RootAnimationState;
+    float transitionDuration = UseDefaultTransitionDuration;
 };
 
 /** @brief Animation state machine node that plays once before transitioning to the exitTo state. */
@@ -39,6 +43,7 @@ struct PlayOnceAnimation
     AnimationStateId enterFrom = RootAnimationState;
     AnimationStateId exitTo = RootAnimationState;
     TransitionCondition enterWhen = ConditionNever;
+    float transitionDuration = UseDefaultTransitionDuration;
 };
 
 /** @brief Animation state machine node that stops an animation. */
@@ -46,6 +51,7 @@ struct StopAnimation
 {
     AnimationStateId enterFrom = RootAnimationState;
     TransitionCondition enterWhen = ConditionNever;
+    float transitionDuration = UseDefaultTransitionDuration;
 };
 
 /** @cond internal */
@@ -64,18 +70,19 @@ struct AnimationState
     TransitionCondition exitWhen = ConditionNever;
     AnimationStateId enterFrom = NullAnimationState;
     AnimationStateId exitTo = NullAnimationState;
+    float transitionDuration = UseDefaultTransitionDuration;
     AnimationTransitionType action = AnimationTransitionType::Loop;
     std::vector<AnimationStateId> successors = {};
 };
 
 struct AnimationTransition
 {
-    uint64_t prevAnimId = NullAnimationId;
-    uint64_t curAnimId = NullAnimationId;
+    uint64_t toAnimId = NullAnimationId;
+    uint64_t fromAnimId = NullAnimationId;
+    float transitionDuration = 0.0f;
     AnimationTransitionType type = AnimationTransitionType::Continue;
 };
 /** @endcond internal */
-
 
 /** @brief State machine that controls animation transitions for a SkinnedMesh. */
 class SkeletalAnimationController
@@ -87,7 +94,8 @@ class SkeletalAnimationController
          * The controller is initialized with a default state that loops the animation asset specified by animationId.
          * This state is set with the id 'RootState' and cannot not be removed.
          */
-        explicit SkeletalAnimationController(uint64_t animationId = NullAnimationId);
+        explicit SkeletalAnimationController(uint64_t animationId = NullAnimationId,
+                                             float defaultTransitionDuration = 0.3f);
 
         /**
          * @name State Machine Functions
@@ -97,11 +105,10 @@ class SkeletalAnimationController
         auto AddState(LoopAnimation&& properties) -> AnimationStateId;
         auto AddState(PlayOnceAnimation&& properties) -> AnimationStateId;
         auto AddState(StopAnimation&& properties) -> AnimationStateId;
-        void SetRootAnimation(uint64_t animationId);
         void RemoveState(AnimationStateId stateId);
-
-
-        // todo: I think transition from immediate to immediate is broken - overwrites on queue, so prevAnim will be wrong
+        void SetRootAnimation(uint64_t animationId);
+        auto GetDefaultTransitionDuration() const -> float { return m_defaultTransitionDuration; }
+        void SetDefaultTransitionDuration(float dur) { m_defaultTransitionDuration = dur; }
 
         /**
          * @name Immediate Transition Functions
@@ -111,15 +118,19 @@ class SkeletalAnimationController
          */
         void LoopImmediate(uint64_t animId,
                            TransitionCondition&& exitWhen,
-                           AnimationStateId exitTo = RootAnimationState);
+                           AnimationStateId exitTo = RootAnimationState,
+                           float transitionDuration = UseDefaultTransitionDuration);
 
         void PlayOnceImmediate(uint64_t animId,
-                               AnimationStateId exitTo = RootAnimationState);
+                               AnimationStateId exitTo = RootAnimationState,
+                               float transitionDuration = UseDefaultTransitionDuration);
 
         void StopImmediate(TransitionCondition&& exitWhen,
-                           AnimationStateId exitTo = RootAnimationState);
+                           AnimationStateId exitTo = RootAnimationState,
+                           float transitionDuration = UseDefaultTransitionDuration);
 
         /** @cond internal */
+        void RefreshAnimation();
         auto CheckForTransition() -> AnimationTransition;
         void NotifyCompleteState();
         /** @endcond internal */
@@ -130,10 +141,13 @@ class SkeletalAnimationController
         AnimationStateId m_activeState = NullAnimationState;
         AnimationStateId m_queuedState = RootAnimationState;
         AnimationStateId m_nextStateId = RootAnimationState + 1;
+        float m_defaultTransitionDuration;
+        uint64_t m_prevImmediateAnimId = NullAnimationId;
         bool m_cycleCompleted = false;
 
         auto AddStateImpl(AnimationState&& in) -> AnimationStateId;
         auto GetCurrentAnimationId() const -> uint64_t;
+        auto CalculateTransitionDuration(float requestedDuration) const -> float;
         auto TransitionQueuedState() -> AnimationTransition;
         auto TransitionState(AnimationState& from, AnimationState& to, AnimationStateId toId) -> AnimationTransition;
         auto ShouldExitState(AnimationState& current, bool cycleCompleted) -> bool;

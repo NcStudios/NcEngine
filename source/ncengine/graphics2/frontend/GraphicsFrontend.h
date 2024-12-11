@@ -47,7 +47,13 @@ class GraphicsFrontend
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
-              m_meshSystem{events, maxEntities, maxRenderers, initialBatchSize}
+              m_meshSystem{
+                m_animationSystem.GetStorage(),
+                events,
+                maxEntities,
+                maxRenderers,
+                initialBatchSize
+              }
         {
         }
 

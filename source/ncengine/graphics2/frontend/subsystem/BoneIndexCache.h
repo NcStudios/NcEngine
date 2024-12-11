@@ -2,12 +2,16 @@
 
 #include "ncengine/utility/SparseMap.h"
 
+#include <limits>
 #include <vector>
 
 namespace nc::graphics
 {
 // Identifier for a range of bones in the BoneCache.
 using BoneCacheHandle = uint32_t;
+
+// Invalid or empty bone cache allocation.
+constexpr auto NullBoneCacheHandle = std::numeric_limits<uint32_t>::max();
 
 // BoneCache interface for allocating and freeing bone ranges. Events originating from game logic/API should only be
 // routed here to avoid race conditions with the actual buffer.

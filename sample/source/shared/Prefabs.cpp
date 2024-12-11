@@ -2,6 +2,7 @@
 
 #include "ncengine/asset/Assets.h"
 #include "ncengine/config/Config.h"
+#include "ncutility/Hash.h"
 
 #include <filesystem>
 
@@ -17,6 +18,8 @@ asset::MeshView Capsule{};
 asset::MeshView Plane{};
 asset::MeshView HalfPipe{};
 asset::MeshView Ramp{};
+asset::MeshView Ogre{};
+asset::MeshView Skeleton{};
 } // namespace mesh
 
 namespace material
@@ -29,7 +32,23 @@ MaterialDesc Orange{"OrangeMaterial"};
 MaterialDesc Purple{"PurpleMaterial"};
 MaterialDesc Teal{"TealMaterial"};
 MaterialDesc Yellow{"YellowMaterial"};
+MaterialDesc Ogre{"OgreMaterial"};
+MaterialDesc Skeleton{"SkeletonMaterial"};
 } // namespace material
+
+// Animations
+namespace animation
+{
+// todo: we don't have acquire func for anims, plat-specific paths here won't hash equivalently...
+uint64_t OgreIdle{utility::Fnv1a("ogre\\idle.nca")};
+uint64_t OgreAttack{utility::Fnv1a("ogre\\attack.nca")};
+uint64_t SkeletonIdle{utility::Fnv1a("skeleton\\idle.nca")};
+uint64_t SkeletonWalkRight{utility::Fnv1a("skeleton\\walk_right.nca")};
+uint64_t SkeletonWalkLeft{utility::Fnv1a("skeleton\\walk_left.nca")};
+uint64_t SkeletonWalkForward{utility::Fnv1a("skeleton\\walk_forward.nca")};
+uint64_t SkeletonWalkBack{utility::Fnv1a("skeleton\\walk_back.nca")};
+uint64_t SkeletonJump{utility::Fnv1a("skeleton\\jump.nca")};
+} // namespace animation
 
 graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
 graphics::PbrMaterial RedPbrMaterial{"solid_color/Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
@@ -103,30 +122,27 @@ void InitializeResources()
     LoadAssets(assetSettings.cubeMapsPath, asset::AssetFlags::None, &asset::LoadCubeMapAssets);
     LoadAssets(assetSettings.hullCollidersPath, asset::AssetFlags::None, &asset::LoadConvexHullAssets);
     LoadAssets(assetSettings.meshesPath, asset::AssetFlags::None, &asset::LoadMeshAssets);
+    LoadAssets(assetSettings.skeletalAnimationsPath, asset::AssetFlags::None, &asset::LoadSkeletalAnimationAssets);
     LoadFont(UIFont);
 
     std::vector<std::string> textures
     {
-        "box/BaseColor.nca",
-        "box/Roughness.nca",
-        "line/hatch.nca",
-        "logo/BaseColor.nca",
-        "logo/Metallic.nca",
-        "logo/Roughness.nca",
         "solid_color/Blue.nca",
         "solid_color/Green.nca",
         "solid_color/Red.nca",
         "solid_color/Orange.nca",
         "solid_color/Purple.nca",
         "solid_color/Teal.nca",
-        "solid_color/Yellow.nca"
+        "solid_color/Yellow.nca",
+        "ogre/BaseColor.nca",
+        "skeleton/BaseColor.nca",
     };
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
 
-    std::vector<std::string> normalMaps 
+    std::vector<std::string> normalMaps
     {
-        "box/Normal.nca",
-        "logo/Normal.nca"
+        "ogre/Normal.nca",
+        "skeleton/Normal.nca"
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
@@ -140,6 +156,8 @@ void ReloadPrefabs()
     mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
     mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
+    mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
+    mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
 
     const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
     material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
@@ -158,5 +176,9 @@ void ReloadPrefabs()
     material::Teal.properties.normalTexture = normal;
     material::Yellow.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
     material::Yellow.properties.normalTexture = normal;
+    material::Ogre.properties.diffuseTexture = asset::AcquireTextureAsset("ogre/BaseColor.nca");
+    material::Ogre.properties.normalTexture = asset::AcquireTextureAsset("ogre/Normal.nca");
+    material::Skeleton.properties.diffuseTexture = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
+    material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
 }
 } // namespace sample
