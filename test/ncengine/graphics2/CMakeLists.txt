@@ -211,6 +211,32 @@ target_link_libraries(PostProcessSubsystem_tests
 
 add_test(PostProcessSubsystem_tests PostProcessSubsystem_tests)
 
+### SkeletalAnimationStorage Tests ###
+add_executable(SkeletalAnimationStorage_tests
+    SkeletalAnimationStorage_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationTypes.cpp
+)
+
+target_include_directories(SkeletalAnimationStorage_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(SkeletalAnimationStorage_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SkeletalAnimationStorage_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(SkeletalAnimationStorage_tests SkeletalAnimationStorage_tests)
+
 ### TransformCache Tests ###
 add_executable(TransformCache_tests
     TransformCache_tests.cpp

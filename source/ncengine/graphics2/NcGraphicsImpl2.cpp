@@ -205,7 +205,9 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxRenderers,
             graphicsSettings.initialBatchSize,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
-            modules.Get<asset::NcAsset>()->OnMeshUpdate()
+            modules.Get<asset::NcAsset>()->OnMeshUpdate(),
+            modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
+            modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
