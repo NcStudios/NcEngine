@@ -69,8 +69,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         auto& renderer = world.Emplace<SkinnedMesh>(ogre, mesh::Ogre, material::Ogre, animation::OgreIdle);
         auto& controller = renderer.GetAnimationController();
         const auto stopState = controller.AddState(StopAnimation{
-            .enterFrom = RootAnimationState,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+            .enterFrom = RootAnimationState
         });
 
         controller.AddState(LoopAnimation{
@@ -141,8 +141,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
         controller.AddState(PlayOnceAnimation{
             .animId = animation::SkeletonJump,
-            .enterFrom = RootAnimationState,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
+            .enterFrom = RootAnimationState
         });
     }
 

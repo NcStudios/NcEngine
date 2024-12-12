@@ -40,17 +40,17 @@ struct LoopAnimation
 struct PlayOnceAnimation
 {
     uint64_t animId = NullAnimationId;
+    TransitionCondition enterWhen = ConditionNever;
     AnimationStateId enterFrom = RootAnimationState;
     AnimationStateId exitTo = RootAnimationState;
-    TransitionCondition enterWhen = ConditionNever;
     float transitionDuration = UseDefaultTransitionDuration;
 };
 
 /** @brief Animation state machine node that stops an animation. */
 struct StopAnimation
 {
-    AnimationStateId enterFrom = RootAnimationState;
     TransitionCondition enterWhen = ConditionNever;
+    AnimationStateId enterFrom = RootAnimationState;
     float transitionDuration = UseDefaultTransitionDuration;
 };
 
@@ -102,11 +102,12 @@ class SkeletalAnimationController
          * 
          * Animation transitions are managed automatically based on the properties of current animation states.
          */
+        auto GetActiveState() const -> AnimationStateId { return m_activeState; }
+        auto GetCurrentAnimationId() const -> uint64_t;
         auto AddState(LoopAnimation&& properties) -> AnimationStateId;
         auto AddState(PlayOnceAnimation&& properties) -> AnimationStateId;
         auto AddState(StopAnimation&& properties) -> AnimationStateId;
-        void RemoveState(AnimationStateId stateId);
-        void SetRootAnimation(uint64_t animationId);
+        void SetAnimation(AnimationStateId stateId, uint64_t animationId);
         auto GetDefaultTransitionDuration() const -> float { return m_defaultTransitionDuration; }
         void SetDefaultTransitionDuration(float dur) { m_defaultTransitionDuration = dur; }
 
@@ -142,12 +143,12 @@ class SkeletalAnimationController
         AnimationStateId m_queuedState = RootAnimationState;
         AnimationStateId m_nextStateId = RootAnimationState + 1;
         float m_defaultTransitionDuration;
-        uint64_t m_prevImmediateAnimId = NullAnimationId;
+        uint64_t m_prevAnimId = NullAnimationId;
         bool m_cycleCompleted = false;
 
         auto AddStateImpl(AnimationState&& in) -> AnimationStateId;
-        auto GetCurrentAnimationId() const -> uint64_t;
         auto CalculateTransitionDuration(float requestedDuration) const -> float;
+        void QueueImmediateTransition();
         auto TransitionQueuedState() -> AnimationTransition;
         auto TransitionState(AnimationState& from, AnimationState& to, AnimationStateId toId) -> AnimationTransition;
         auto ShouldExitState(AnimationState& current, bool cycleCompleted) -> bool;
