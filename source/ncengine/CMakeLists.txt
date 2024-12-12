@@ -115,9 +115,10 @@ else()
     target_sources(${NC_ENGINE_LIB}
         PRIVATE
             graphics2/Material.cpp
-            graphics2/StaticMesh.cpp
+            graphics2/Mesh.cpp
             graphics2/GraphicsUtility.cpp
             graphics2/PostProcess.cpp
+            graphics2/SkeletalAnimationController.cpp
             graphics2/frontend/subsystem/MaterialRegistry.cpp
             graphics2/frontend/subsystem/MeshSubsystem.cpp
             graphics2/frontend/subsystem/TransformCache.cpp

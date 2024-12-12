@@ -7,7 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/NcGraphics.h"
-#include "ncengine/graphics/StaticMesh.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"

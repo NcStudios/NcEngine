@@ -3,7 +3,7 @@
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/StaticMesh.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/RigidBody.h"
 #include "asset/AssetService.h"

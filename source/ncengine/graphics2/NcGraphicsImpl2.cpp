@@ -327,6 +327,7 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
+    /** @todo #834 Pass skinned batches */
     m_materialPassBackend.Render(context, renderState.meshRenderState.staticMeshBatches);
     m_wireframePass.Render(context, renderState.wireframeRenderState);
     /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */

@@ -7,8 +7,8 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/GraphicsUtility.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/StaticMesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
@@ -58,18 +58,23 @@ constexpr auto roughnessProp = nc::ui::Property{ getRoughness,    &T::SetRoughne
 constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetallic,  "metallic"  };
 } // namespace mesh_renderer_ext
 
-namespace static_mesh_ext
+namespace mesh_base_ext
 {
-void MeshAssetDropdown(nc::StaticMesh& staticMesh, nc::asset::NcAsset& ncAsset)
+void MeshNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
 {
-    /** @todo 353 Get asset views from ncAsset, once implemented */
-    const auto meshAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::Mesh);
-    const auto meshId = staticMesh.GetMeshId();
-    auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshId)};
-    if (nc::ui::Combobox(meshPath, "mesh", meshAssets))
+    if (ImGui::TreeNodeEx("Mesh"))
     {
-        const auto selectedMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(meshPath);
-        staticMesh.SetMesh(selectedMeshView);
+        /** @todo 353 Get asset views from ncAsset, once implemented */
+        const auto meshAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::Mesh);
+        const auto meshId = baseMesh.GetMeshId();
+        auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshId)};
+        if (nc::ui::Combobox(meshPath, "mesh", meshAssets))
+        {
+            const auto selectedMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(meshPath);
+            baseMesh.SetMesh(selectedMeshView);
+        }
+
+        ImGui::TreePop();
     }
 }
 
@@ -126,7 +131,71 @@ auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
     modified = nc::ui::DragFloat(properties.outlineWidth, "width", 0.1f, 0.0f, 10.0f) || modified;
     return modified;
 }
-} // namespace mesh_renderer2_ext
+
+auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
+{
+    if (ImGui::TreeNodeEx("Material"))
+    {
+        auto& material = baseMesh.GetMaterial();
+        auto passes = material.GetPasses();
+        auto properties = material.GetProperties();
+        auto passesModified = false;
+        auto modified = false;
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Metadata"))
+        {
+            ImGui::Text("Handle: %hu", material.GetHandle());
+            auto materialName = std::string{material.GetName()};
+            if (nc::ui::InputText(materialName, "name"))
+            {
+                material.SetName(materialName);
+            }
+
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Passes"))
+        {
+            passesModified = MaterialPassesWidget(passes);
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Textures"))
+        {
+            modified = MaterialTexturesWidget(properties, ncAsset) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Gradient Color"))
+        {
+            modified = MaterialColorWidget(properties) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Outline"))
+        {
+            modified = MaterialOutlineWidget(properties) || modified;
+            ImGui::TreePop();
+        }
+
+        if (passesModified)
+        {
+            baseMesh.SetMaterial(nc::MaterialDesc{std::string{material.GetName()}, passes, properties});
+        }
+        else if (modified)
+        {
+            material.SetProperties(properties);
+        }
+
+        ImGui::TreePop();
+    }
+}
+} // namespace mesh_base_ext
 
 namespace rigid_body_ext
 {
@@ -696,73 +765,22 @@ void StaticMeshUIWidget(StaticMesh& staticMesh, EditorContext& ctx, const std::a
     auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
 
     ImGui::Separator();
-    if (ImGui::TreeNodeEx("Mesh"))
-    {
-        static_mesh_ext::MeshAssetDropdown(staticMesh, ncAsset);
-        ImGui::TreePop();
-    }
+    mesh_base_ext::MeshNodeWidget(staticMesh, ncAsset);
 
     ImGui::Separator();
-    if (ImGui::TreeNodeEx("Material"))
-    {
-        auto& material = staticMesh.GetMaterial();
-        auto passes = material.GetPasses();
-        auto properties = material.GetProperties();
-        auto passesModified = false;
-        auto modified = false;
+    mesh_base_ext::MaterialNodeWidget(staticMesh, ncAsset);
+}
 
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Metadata"))
-        {
-            ImGui::Text("Handle: %hu", material.GetHandle());
-            auto materialName = std::string{material.GetName()};
-            if (ui::InputText(materialName, "name"))
-            {
-                material.SetName(materialName);
-            }
+void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "SkinnedMesh");
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
 
-            ImGui::TreePop();
-        }
+    ImGui::Separator();
+    mesh_base_ext::MeshNodeWidget(skinnedMesh, ncAsset);
 
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Passes"))
-        {
-            passesModified = static_mesh_ext::MaterialPassesWidget(passes);
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Textures"))
-        {
-            modified = static_mesh_ext::MaterialTexturesWidget(properties, ncAsset) || modified;
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Gradient Color"))
-        {
-            modified = static_mesh_ext::MaterialColorWidget(properties) || modified;
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Outline"))
-        {
-            modified = static_mesh_ext::MaterialOutlineWidget(properties) || modified;
-            ImGui::TreePop();
-        }
-
-        if (passesModified)
-        {
-            staticMesh.SetMaterial(MaterialDesc{std::string{material.GetName()}, passes, properties});
-        }
-        else if (modified)
-        {
-            material.SetProperties(properties);
-        }
-
-        ImGui::TreePop();
-    }
+    ImGui::Separator();
+    mesh_base_ext::MaterialNodeWidget(skinnedMesh, ncAsset);
 }
 
 void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
