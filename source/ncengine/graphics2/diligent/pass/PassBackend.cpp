@@ -150,7 +150,7 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         .name = "Dummy Pass",
         .type = PassType::PostProcess,
         .shaderPaths = shaderPaths,
-        .colorSources = SingleSource(passManifest.FinalColorTarget()),
+        .colorSources = SingleSource(FinalColorTarget()),
         .colorSink = SwapChainColorRTIndex,
         .depthSink = SwapChainDepthRTIndex
     };
@@ -194,55 +194,17 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
 
     for (auto [pass, batches] : std::views::zip(m_materialPasses, passBatches))
     {
-        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
-        ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), pass.colorRTIndex, pass.depthRTIndex);
+        BindRenderTarget(context, swapChain,
+                         perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                         perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                         pass.colorRTIndex, pass.depthRTIndex);
+        ClearRenderTarget(context, swapChain,
+                          perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                          perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                          pass.colorRTIndex, pass.depthRTIndex);
         context.SetPipelineState(pass.pso);
         DrawIndexed(context, batches);
     }
-}
-
-void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
-                                    Diligent::ISwapChain& swapChain,
-                                    PerPassResourceSignature& perPassResourceSignature)
-{
-    NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
-    constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
-
-    auto enabledPassCount = 0u;
-    for (auto& pass : m_postProcessPasses)
-    {
-        if (!pass.anyEnabled) continue;
-
-        BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), pass.passDesc.colorSink, pass.passDesc.depthSink);
-        ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), pass.passDesc.colorSink, pass.passDesc.depthSink);
-        context.SetPipelineState(pass.pso);
-        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, pass.passDesc.colorSources, pass.passDesc.depthSources);
-
-        for (auto& instance : pass.instances)
-        {
-            if (!instance.enabled)
-            {
-                continue;
-            }
-
-            if (instance.buffer.has_value())
-            {
-                //propertyBuffer.SetVariable(pass.passDesc.id, instance.buffer->GetBuffer());
-            }
-
-            context.Draw(drawAttribs);
-        }
-        context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
-        enabledPassCount++;
-    }
-
-    // Render final post process pass
-    BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), m_finalPass->passDesc.colorSink, m_finalPass->passDesc.depthSink);
-    ClearRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), m_finalPass->passDesc.colorSink, m_finalPass->passDesc.depthSink);
-    context.SetPipelineState(m_finalPass->pso);
-    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(m_finalPass->passDesc.colorSources[0]), NoTargets());
-    context.Draw(drawAttribs);
-    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
 
 void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
@@ -256,8 +218,12 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
         return;
     }
 
-    BindRenderTarget(context, swapChain, perPassResourceSignature.GetPostProcessColorSinkBufferResource(), perPassResourceSignature.GetPostProcessDepthSinkBufferResource(), m_wireframePass->colorRTIndex, m_wireframePass->depthRTIndex);
+    BindRenderTarget(context, swapChain,
+                     perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                     perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                     m_wireframePass->colorRTIndex, m_wireframePass->depthRTIndex);
     context.SetPipelineState(m_wireframePass->pso);
+
     for (const auto& [data, mesh] : state.wireframeData)
     {
         m_wireframePass->buffer->Update(context, data);
@@ -273,5 +239,84 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
 
         context.DrawIndexed(attribs);
     }
+}
+
+void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
+                                    Diligent::ISwapChain& swapChain,
+                                    PerPassResourceSignature& perPassResourceSignature)
+{
+    NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
+    constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
+
+    auto enabledPassCount = 0u;
+    for (auto& pass : m_postProcessPasses)
+    {
+        if (!pass.anyEnabled) continue;
+
+        BindRenderTarget(context, swapChain,
+                         perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                         perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                         pass.passDesc.colorSink, pass.passDesc.depthSink);
+        ClearRenderTarget(context, swapChain,
+                          perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                          perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                          pass.passDesc.colorSink, pass.passDesc.depthSink);
+
+        context.SetPipelineState(pass.pso);
+        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, pass.passDesc.colorSources, pass.passDesc.depthSources);
+
+        for (auto& instance : pass.instances)
+        {
+            if (!instance.enabled) continue;
+            /** @todo: Fix property buffer */
+            //if (instance.buffer.has_value()) propertyBuffer.SetVariable(pass.passDesc.id, instance.buffer->GetBuffer());
+            context.Draw(drawAttribs);
+        }
+        context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
+        enabledPassCount++;
+    }
+
+    // Render final post process pass
+    BindRenderTarget(context, swapChain,
+                     perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                     perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                     m_finalPass->passDesc.colorSink,  m_finalPass->passDesc.depthSink);
+    ClearRenderTarget(context, swapChain,
+                      perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                      perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                      m_finalPass->passDesc.colorSink, m_finalPass->passDesc.depthSink);
+
+    context.SetPipelineState(m_finalPass->pso);
+    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(FinalColorTarget()), NoTargets()); /** @todo FinalColorTarget is too expensive to do every frame. Only do on change of pass state */
+    context.Draw(drawAttribs);
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
+}
+
+auto PassBackend::FinalColorTarget() const -> uint32_t
+{
+    for (auto& postProcessPass : std::ranges::reverse_view(m_postProcessPasses))
+    {
+        if (postProcessPass.anyEnabled)
+        {
+            return postProcessPass.passDesc.colorSink;
+        }
+    }
+
+    if (m_wireframePass)
+    {
+        return m_wireframePass->colorRTIndex;
+    }
+
+    for (auto& materialPass : std::ranges::reverse_view(m_materialPasses))
+    {
+        const auto implementedPasses = GetImplementedMaterialPassFlags();
+        auto pos = std::ranges::find_if(implementedPasses, [materialPass](auto& passFlag){ return materialPass.id == passFlag; });
+        if (pos != implementedPasses.end()) /** @todo: We also need to check to see if passBatches is empty for this material */
+        {
+            return materialPass.colorRTIndex;
+        }
+    }
+
+    return 0u;
 }
 } // namespace nc::graphics

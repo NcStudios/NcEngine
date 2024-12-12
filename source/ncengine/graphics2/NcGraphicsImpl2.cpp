@@ -205,7 +205,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = 0u // Composited on top of Toon
                 },
                 PassDesc{
-                    .id = static_cast<uint64_t>(PostProcessPassFlag::Alpha),
+                    .id = static_cast<uint64_t>(PostProcessPassFlag::Wave),
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
@@ -213,21 +213,13 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = 2u // Every post process pass gets its own render target
                 },
                 PassDesc{
-                    .id = static_cast<uint64_t>(PostProcessPassFlag::Depth),
-                    .name = "Post Process Blue",
-                    .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{"PPBlue.psh", "PostProcess.vsh"},
-                    .colorSources = SingleSource(2u), // Input is output of Post Process Wave 
-                    .colorSink = 3u // Gets its own render target
-                },
-                PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Outline),
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{3u, 1u}, // Input is output of Post Process Blue, and Normals
+                    .colorSources = std::vector{2u, 1u}, // Input is output of Post Process Wave, and output of Normals
                     .depthSources = SingleSource(0u), // Input is depth output of Toon,
-                    .colorSink = 4u
+                    .colorSink = 3u
                 }
             },
             GetImplementedMaterialPassFlags(),

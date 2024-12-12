@@ -90,24 +90,4 @@ void PassManifest::Clear()
     m_postProcessPassDescs.shrink_to_fit();
     m_wireframePassDesc = PassDesc{};
 }
-
-auto PassManifest::FinalColorTarget() const -> uint32_t
-{
-    if (!m_postProcessPassDescs.empty())
-    {
-        return m_postProcessPassDescs.back().colorSink;
-    }
-
-    if (m_wireframePassDesc.id != 0)
-    {
-        return m_wireframePassDesc.colorSink;
-    }
-
-    if (!m_materialPassDescs.empty())
-    {
-        return m_materialPassDescs.back().colorSink;
-    }
-
-    return 0u;
-}
 } // namespace nc::graphics

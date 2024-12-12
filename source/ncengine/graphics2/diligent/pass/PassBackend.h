@@ -42,6 +42,8 @@ class PassBackend
                                Diligent::ISwapChain& swapChain,
                                PerPassResourceSignature& perPassResourceSignature);
 
+        auto FinalColorTarget() const -> uint32_t;
+
     private:
         std::vector<MaterialPass> m_materialPasses;
         std::unique_ptr<WireframePass> m_wireframePass;

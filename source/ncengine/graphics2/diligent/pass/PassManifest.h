@@ -22,7 +22,6 @@ class PassManifest
         auto WireframePassDesc() const -> const PassDesc& { return m_wireframePassDesc; }
         auto ColorSinkCount() const -> uint32_t { return m_colorSinkCount; }
         auto DepthSinkCount() const -> uint32_t  { return m_depthSinkCount; }
-        auto FinalColorTarget() const -> uint32_t;
         void Clear();
 
     private:
