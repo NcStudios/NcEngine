@@ -112,13 +112,13 @@ struct TransformData
 
 StructuredBuffer<TransformData> TransformBufferData;
 
-struct InstanceData
+struct StaticMeshInstanceData
 {
     uint transformIndex;
     uint materialIndex;
 };
 
-StructuredBuffer<InstanceData> InstanceBufferData;
+StructuredBuffer<StaticMeshInstanceData> StaticInstanceBufferData;
 
 cbuffer EnvironmentBufferData
 {
@@ -132,8 +132,8 @@ cbuffer EnvironmentBufferData
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    uint transformIndex = InstanceBufferData[InstanceID].transformIndex;
-    uint materialIndex = InstanceBufferData[InstanceID].materialIndex;
+    uint transformIndex = StaticInstanceBufferData[InstanceID].transformIndex;
+    uint materialIndex = StaticInstanceBufferData[InstanceID].materialIndex;
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), TransformBufferData[transformIndex].modelMatrix);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
