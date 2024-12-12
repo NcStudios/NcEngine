@@ -63,6 +63,7 @@ struct MemorySettings
     unsigned maxTextures = 1000;
     unsigned maxCubeMaps = 10;
     unsigned maxParticles = 100000;
+    unsigned maxBones = 100000;
 };
 
 /** @brief Options for configuring NcGraphics. */

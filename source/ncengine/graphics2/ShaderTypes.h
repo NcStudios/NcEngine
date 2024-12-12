@@ -64,6 +64,12 @@ struct MaterialData
     float outlineWidth = 1.0f;
 };
 
+// Object model for animation bones (type: StructuredBuffer element type).
+struct BoneData
+{
+    DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMatrixIdentity();
+};
+
 // Object model for DirectionalLights (type: StructuredBuffer element type).
 // Not targeting shadows for directional lights at the moment.
 // 32 bytes with a 16-byte alignment.
