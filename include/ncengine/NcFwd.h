@@ -60,6 +60,8 @@ struct SpotLight;
 class ToonRenderer;
 } // namespace graphics
 
+class SkeletalAnimationController;
+class SkinnedMesh;
 class StaticMesh;
 
 namespace net

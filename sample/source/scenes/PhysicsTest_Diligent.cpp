@@ -6,7 +6,7 @@
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
-#include "ncengine/graphics/StaticMesh.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
