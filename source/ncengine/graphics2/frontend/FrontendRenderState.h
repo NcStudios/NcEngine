@@ -1,5 +1,6 @@
 #pragma once
 
+#include "subsystem/animation/SkeletalAnimationRenderState.h"
 #include "subsystem/CameraRenderState.h"
 #include "subsystem/LightRenderState.h"
 #include "subsystem/MeshRenderState.h"

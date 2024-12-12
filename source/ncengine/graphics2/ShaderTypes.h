@@ -67,8 +67,6 @@ struct MaterialData
 // Object model for skeletal animations (type: StructuredBuffer element type).
 struct BoneData
 {
-    // DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
-    // setting hom to 1 here doesn't help...
     DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMATRIX{};
 };
 

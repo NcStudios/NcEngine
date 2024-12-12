@@ -177,8 +177,10 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxSpotLights,
             memorySettings.maxPointLights,
             memorySettings.maxDirectionalLights,
+            memorySettings.maxBones,
             memorySettings.maxRenderers / 2,
-            memorySettings.maxRenderers / 2
+            memorySettings.maxRenderers / 2,
+            memorySettings.maxBones / 4
           },
           m_ui{
             m_engine.GetDevice(),
