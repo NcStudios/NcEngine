@@ -116,7 +116,7 @@ class SkinnedMesh : public MeshBase
         explicit SkinnedMesh(Entity self,
                              const asset::MeshView& meshAsset,
                              const MaterialDesc& materialDesc,
-                             uint64_t rootAnimationId = UINT64_MAX)
+                             uint64_t rootAnimationId = NullAnimationId)
             : MeshBase{self, meshAsset, materialDesc, MeshInstanceType::Skinned},
               m_controller{rootAnimationId}
         {
