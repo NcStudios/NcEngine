@@ -11,6 +11,8 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
                            std::span<const MaterialPassFlag::type> implementedMaterialPasses,
                            std::span<const PostProcessPassFlag::type> implementedPPPasses,
                            std::span<const MiscPassFlag::type> implementedMiscPasses)
+    : m_colorSinkCount{1u},
+      m_depthSinkCount{1u}
 {
     m_materialPassDescs.reserve(implementedMaterialPasses.size());
     auto materialPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type == PassType::Material; });
@@ -69,6 +71,15 @@ void PassManifest::RegisterPass(PassDesc desc)
         case PassType::None:
             throw nc::NcError("Pass type not implemented.");
     }
+
+    if (desc.colorSink != NoTarget)
+    {
+        m_colorSinkCount = std::max(m_colorSinkCount, desc.colorSink) + 1;
+    }
+    if (desc.depthSink != NoTarget)
+    {
+        m_depthSinkCount = std::max(m_depthSinkCount, desc.depthSink) + 1;
+    }
 }
 
 void PassManifest::Clear()
@@ -80,39 +91,23 @@ void PassManifest::Clear()
     m_wireframePassDesc = PassDesc{};
 }
 
-auto PassManifest::SinkCount() const -> std::pair<uint32_t, uint32_t>
+auto PassManifest::FinalColorTarget() const -> uint32_t
 {
-    auto offscreenRenderTargets = std::make_pair<uint32_t, uint32_t>(0u, 0u);
-
-    for (auto& passDesc : m_materialPassDescs)
+    if (!m_postProcessPassDescs.empty())
     {
-        if (!IsOffScreenTarget(passDesc.sinks.first, passDesc.sinks.second))
-        {
-            continue;
-        }
-        offscreenRenderTargets.first = std::max(offscreenRenderTargets.first, passDesc.sinks.first);
-        offscreenRenderTargets.second = std::max(offscreenRenderTargets.second, passDesc.sinks.second);
+        return m_postProcessPassDescs.back().colorSink;
     }
 
-    for (auto& passDesc : m_postProcessPassDescs)
+    if (m_wireframePassDesc.id != 0)
     {
-        if (!IsOffScreenTarget(passDesc.sinks.first, passDesc.sinks.second))
-        {
-            continue;
-        }
-        offscreenRenderTargets.first = std::max(offscreenRenderTargets.first, passDesc.sinks.first);
-        offscreenRenderTargets.second = std::max(offscreenRenderTargets.second, passDesc.sinks.second);
+        return m_wireframePassDesc.colorSink;
     }
 
-    if (IsOffScreenTarget(m_wireframePassDesc.sinks.first, m_wireframePassDesc.sinks.second))
+    if (!m_materialPassDescs.empty())
     {
-        offscreenRenderTargets.first = std::max(offscreenRenderTargets.first, m_wireframePassDesc.sinks.first);
-        offscreenRenderTargets.second = std::max(offscreenRenderTargets.second, m_wireframePassDesc.sinks.second);
+        return m_materialPassDescs.back().colorSink;
     }
 
-    offscreenRenderTargets.first += 1;
-    offscreenRenderTargets.second += 1;
-
-    return offscreenRenderTargets;
+    return 0u;
 }
 } // namespace nc::graphics

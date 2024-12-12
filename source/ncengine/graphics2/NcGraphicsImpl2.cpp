@@ -187,48 +187,47 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-                    .sources = EmptySource(),
-                    .sinks = OffScreenSink(0u, 0u)
+                    .colorSink = 0u,
+                    .depthSink = 0u
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(MaterialPassFlag::Normals),
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .sources = EmptySource(),
-                    .sinks = OffScreenSink(1u, 1u)
+                    .colorSink = 1u // Gets its own render target
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(MiscPassFlag::Wireframe),
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .sources = EmptySource(),
-                    .sinks = OffScreenSink(0u, 0u)
+                    .colorSink = 0u // Composited on top of Toon
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Alpha),
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
-                    .sources = SingleSource(0u, 0u),
-                    .sinks = OffScreenSink(2u, 2u)
+                    .colorSources = SingleSource(0u), // Input is output of Toon + Wireframe
+                    .colorSink = 2u // Every post process pass gets its own render target
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Depth),
                     .name = "Post Process Blue",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPBlue.psh", "PostProcess.vsh"},
-                    .sources = SingleSource(2u, 2u),
-                    .sinks = OffScreenSink(3u, 3u)
+                    .colorSources = SingleSource(2u), // Input is output of Post Process Wave 
+                    .colorSink = 3u // Gets its own render target
                 },
                 PassDesc{
                     .id = static_cast<uint64_t>(PostProcessPassFlag::Outline),
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .sources = SinkTargets{.color = std::array<uint32_t, 4>{3u, 1u, 0u, 0u}, .depth = std::array<uint32_t, 4>{3u, 0u, 0u, 0u}},
-                    .sinks = OffScreenSink(4u, 4u)
+                    .colorSources = std::vector{3u, 1u}, // Input is output of Post Process Blue, and Normals
+                    .depthSources = SingleSource(0u), // Input is depth output of Toon,
+                    .colorSink = 4u
                 }
             },
             GetImplementedMaterialPassFlags(),

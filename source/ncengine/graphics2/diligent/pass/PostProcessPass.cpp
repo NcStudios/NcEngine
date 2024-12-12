@@ -55,21 +55,20 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
     ci.pPS = pixelShader;
     ci.pVS = vertexShader;
 
-    if (passDesc.sinks.first == SwapChainColorRTIndex || passDesc.sinks.second == SwapChainDepthRTIndex)
+    if (passDesc.colorSink == SwapChainColorRTIndex)
     {
         ci.GraphicsPipeline.RTVFormats[0] = swapChain.GetDesc().ColorBufferFormat;
-        ci.GraphicsPipeline.DSVFormat = swapChain.GetDesc().DepthBufferFormat;
     }
     else
     {
         ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
-        ci.GraphicsPipeline.DSVFormat = OffScreenDepthRTFormat;
     }
 
+    ci.GraphicsPipeline.DSVFormat                    = Diligent::TEX_FORMAT_UNKNOWN;
     ci.GraphicsPipeline.NumRenderTargets             = 1;
     ci.GraphicsPipeline.PrimitiveTopology            = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = Diligent::CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = Diligent::True;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = Diligent::False;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
 

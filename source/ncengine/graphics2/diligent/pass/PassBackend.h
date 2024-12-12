@@ -47,7 +47,5 @@ class PassBackend
         std::unique_ptr<WireframePass> m_wireframePass;
         std::vector<PostProcessPass> m_postProcessPasses;
         std::unique_ptr<PostProcessPass> m_finalPass;
-        uint32_t m_lastColorRenderTargetIndex;
-        uint32_t m_lastDepthRenderTargetIndex;
 };
 } // namespace nc::graphics

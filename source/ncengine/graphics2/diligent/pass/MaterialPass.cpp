@@ -45,16 +45,16 @@ auto MakeMaterialPass(Diligent::IRenderDevice& device,
     ci.pPS = pixelShader;
     ci.pVS = vertexShader;
 
-    ci.GraphicsPipeline.NumRenderTargets             = 1;
+    ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == NoTarget ? 0 : 1;
     ci.GraphicsPipeline.RTVFormats[0]                = OffScreenColorRTFormat;
-    ci.GraphicsPipeline.DSVFormat                    = OffScreenDepthRTFormat;
+    ci.GraphicsPipeline.DSVFormat                    = passDesc.depthSink == NoTarget ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == NoTarget ? False : True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
 
-    return MaterialPass(device, ci, nc::MaterialPassFlag::Toon, passDesc.sinks.first, passDesc.sinks.second);
+    return MaterialPass(device, ci, nc::MaterialPassFlag::Toon, passDesc.colorSink, passDesc.depthSink);
 }
 } // anonymous namespace
 

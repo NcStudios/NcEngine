@@ -33,8 +33,9 @@ auto PostProcessDepthSinkBufferResource::Add(Diligent::IRenderDevice& device,
 
     for (auto i = 0u; i < numDepthRenderTargets; i++)
     {
+        auto rtName = "Depth Render Target: " + std::to_string(i);
         TextureDesc depthRenderTargetDesc;
-        depthRenderTargetDesc.Name = "Depth Render Target";
+        depthRenderTargetDesc.Name = rtName.data();
         depthRenderTargetDesc.Type = RESOURCE_DIM_TEX_2D;
         depthRenderTargetDesc.Width = renderTargetWidth;
         depthRenderTargetDesc.Height = renderTargetHeight;

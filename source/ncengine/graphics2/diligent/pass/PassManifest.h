@@ -20,7 +20,9 @@ class PassManifest
         auto MaterialPassDescs() const -> std::span<const PassDesc> { return m_materialPassDescs; }
         auto PostProcessPassDescs() const -> std::span<const PassDesc> { return m_postProcessPassDescs; }
         auto WireframePassDesc() const -> const PassDesc& { return m_wireframePassDesc; }
-        auto SinkCount() const -> std::pair<uint32_t, uint32_t>;
+        auto ColorSinkCount() const -> uint32_t { return m_colorSinkCount; }
+        auto DepthSinkCount() const -> uint32_t  { return m_depthSinkCount; }
+        auto FinalColorTarget() const -> uint32_t;
         void Clear();
 
     private:
@@ -28,5 +30,7 @@ class PassManifest
         std::vector<PassDesc> m_materialPassDescs;
         std::vector<PassDesc> m_postProcessPassDescs;
         PassDesc m_wireframePassDesc;
+        uint32_t m_colorSinkCount;
+        uint32_t m_depthSinkCount;
 };
 } // namespace nc::graphics

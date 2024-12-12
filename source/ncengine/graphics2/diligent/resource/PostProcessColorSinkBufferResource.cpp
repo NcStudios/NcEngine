@@ -42,8 +42,9 @@ auto PostProcessColorSinkBufferResource::Add(Diligent::IRenderDevice& device,
 
     for (auto i = 0u; i < numColorRenderTargets; i++)
     {
+        auto rtName = "Color Render Target: " + std::to_string(i);
         TextureDesc colorRenderTargetDesc;
-        colorRenderTargetDesc.Name = "Color Render Target";
+        colorRenderTargetDesc.Name = rtName.data();
         colorRenderTargetDesc.Type = RESOURCE_DIM_TEX_2D;
         colorRenderTargetDesc.Width = renderTargetWidth;
         colorRenderTargetDesc.Height = renderTargetHeight;

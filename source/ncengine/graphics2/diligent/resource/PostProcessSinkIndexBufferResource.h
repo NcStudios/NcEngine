@@ -19,7 +19,7 @@ struct PostProcessSinkIndexBufferResource
                                                     Diligent::IRenderDevice& device,
                                                     Diligent::IShaderResourceVariable& variable);
 
-        void Update(Diligent::IDeviceContext& context, const SinkTargets& sinkTargets);
+        void Update(Diligent::IDeviceContext& context, std::span<const uint32_t> colorSources, std::span<const uint32_t> depthSources);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

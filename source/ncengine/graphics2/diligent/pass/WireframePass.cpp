@@ -44,12 +44,12 @@ auto MakePso(Diligent::IRenderDevice& device,
     ci.pVS = vertexShader;
     ci.pPS = pixelShader;
 
-    ci.GraphicsPipeline.NumRenderTargets             = 1;
+    ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == nc::graphics::NoTarget ? 0 : 1;
     ci.GraphicsPipeline.RTVFormats[0]                = nc::graphics::OffScreenColorRTFormat;
-    ci.GraphicsPipeline.DSVFormat                    = nc::graphics::OffScreenDepthRTFormat;
+    ci.GraphicsPipeline.DSVFormat                    = passDesc.depthSink == nc::graphics::NoTarget ? TEX_FORMAT_UNKNOWN : nc::graphics::OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == nc::graphics::NoTarget ? False : True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
     ci.GraphicsPipeline.RasterizerDesc.FillMode      = FILL_MODE_WIREFRAME;
@@ -73,8 +73,8 @@ WireframePass::WireframePass(Diligent::IRenderDevice& device,
                              const PassDesc& passDesc)
     : pso{MakePso(device, shaderFactory, shaderBindings.GetPerFrameSignature().GetResourceSignature(), passDesc)},
       buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()},
-      colorRTIndex{passDesc.sinks.first},
-      depthRTIndex{passDesc.sinks.second}
+      colorRTIndex{passDesc.colorSink},
+      depthRTIndex{passDesc.depthSink}
 {
 }
 } // namespace nc::graphics
