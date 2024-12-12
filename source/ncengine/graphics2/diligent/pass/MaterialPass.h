@@ -43,7 +43,6 @@ struct MaterialPass
     uint32_t depthRTIndex;
 };
 
-// todo 794 This only creates a Toon pass. Add more as they are implemented.
 auto MakeMaterialPasses(Diligent::IRenderDevice& device,
                         ShaderFactory& shaderFactory,
                         ShaderBindings& shaderBindings,

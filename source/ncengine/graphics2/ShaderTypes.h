@@ -32,7 +32,7 @@ struct OutlinePassData
 };
 
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
-// 16 bytes with 4 byte alignment
+// 32 bytes with 4 byte alignment
 struct PostProcessSinkIndexData
 {
     uint32_t colorRenderTargetIndex1;

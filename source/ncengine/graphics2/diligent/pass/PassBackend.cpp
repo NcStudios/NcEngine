@@ -248,7 +248,6 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
 
-    auto enabledPassCount = 0u;
     for (auto& pass : m_postProcessPasses)
     {
         if (!pass.anyEnabled) continue;
@@ -273,7 +272,6 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
             context.Draw(drawAttribs);
         }
         context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
-        enabledPassCount++;
     }
 
     // Render final post process pass
@@ -287,7 +285,8 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                       m_finalPass->passDesc.colorSink, m_finalPass->passDesc.depthSink);
 
     context.SetPipelineState(m_finalPass->pso);
-    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(FinalColorTarget()), NoTargets()); /** @todo FinalColorTarget is too expensive to do every frame. Only do on change of pass state */
+    /** @todo FinalColorTarget() is too expensive to do every frame. Only do when material pass contents change (if emptied) or if PP pass is disabled/enabled */
+    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(FinalColorTarget()), NoTargets());
     context.Draw(drawAttribs);
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
