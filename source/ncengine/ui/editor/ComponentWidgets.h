@@ -19,6 +19,7 @@ void DirectionalLightUIWidget(graphics::DirectionalLight& directionalLight, Edit
 void PointLightUIWidget(graphics::PointLight& pointLight, EditorContext&, const std::any&);
 void SpotLightUIWidget(graphics::SpotLight& spotLight, EditorContext&, const std::any&);
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator& skeletalAnimator, EditorContext&, const std::any&);
+void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext&, const std::any&);
 void ToonRendererUIWidget(graphics::ToonRenderer& toonRenderer, EditorContext&, const std::any&);
 void NetworkDispatcherUIWidget(net::NetworkDispatcher& networkDispatcher, EditorContext&, const std::any&);
 void CollisionListenerUIWidget(CollisionListener& listener, EditorContext&, const std::any&);

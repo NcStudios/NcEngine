@@ -2,9 +2,10 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         GraphicsUtility.cpp
         Material.cpp
+        Mesh.cpp
         NcGraphicsImpl2.cpp
         PostProcess.cpp
-        StaticMesh.cpp
+        SkeletalAnimationController.cpp
 )
 
 add_subdirectory(diligent)
