@@ -59,16 +59,32 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
     {
         ci.GraphicsPipeline.RTVFormats[0] = swapChain.GetDesc().ColorBufferFormat;
     }
+    else if (passDesc.colorSink == NoTarget)
+    {
+        ci.GraphicsPipeline.RTVFormats[0] = Diligent::TEX_FORMAT_UNKNOWN;
+    }
     else
     {
         ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
     }
 
-    ci.GraphicsPipeline.DSVFormat                    = Diligent::TEX_FORMAT_UNKNOWN;
-    ci.GraphicsPipeline.NumRenderTargets             = 1;
+    if (passDesc.depthSink == SwapChainDepthRTIndex)
+    {
+        ci.GraphicsPipeline.DSVFormat = swapChain.GetDesc().DepthBufferFormat;
+    }
+    else if (passDesc.depthSink == NoTarget)
+    {
+        ci.GraphicsPipeline.DSVFormat = Diligent::TEX_FORMAT_UNKNOWN;
+    }
+    else
+    {
+        ci.GraphicsPipeline.DSVFormat = OffScreenDepthRTFormat;
+    }
+
+    ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == NoTarget ? 0 : 1;
     ci.GraphicsPipeline.PrimitiveTopology            = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = Diligent::CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = Diligent::False;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == NoTarget ? Diligent::False : Diligent::True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
 

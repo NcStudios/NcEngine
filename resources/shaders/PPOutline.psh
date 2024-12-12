@@ -34,7 +34,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
 {
     float4 Color = PostProcessColorSinkBufferData[colorRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
     float4 Normals = PostProcessColorSinkBufferData[colorRT2].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    float4 Depth = PostProcessDepthSinkBufferData[depthRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
+    float Depth = PostProcessDepthSinkBufferData[depthRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV).r;
     Color *= Normals;
-    PSOut.Color = Depth * 1.5;
+    PSOut.Color = float4(0.0, Depth, 0.0, 0.0);
 }

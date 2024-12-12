@@ -41,7 +41,7 @@ auto PostProcessDepthSinkBufferResource::Add(Diligent::IRenderDevice& device,
         depthRenderTargetDesc.Height = renderTargetHeight;
         depthRenderTargetDesc.MipLevels = 1;
         depthRenderTargetDesc.Format = TEX_FORMAT_D32_FLOAT;
-        depthRenderTargetDesc.BindFlags = BIND_DEPTH_STENCIL;
+        depthRenderTargetDesc.BindFlags = BIND_DEPTH_STENCIL | BIND_SHADER_RESOURCE;
         depthRenderTargetDesc.ClearValue.Format = depthRenderTargetDesc.Format;
         depthRenderTargetDesc.ClearValue.DepthStencil.Depth = 1;
         depthRenderTargetDesc.ClearValue.DepthStencil.Stencil = 0;
