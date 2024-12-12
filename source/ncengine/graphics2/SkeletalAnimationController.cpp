@@ -2,6 +2,8 @@
 
 #include "ncutility/ScopeExit.h"
 
+#include <utility>
+
 namespace nc
 {
 SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
