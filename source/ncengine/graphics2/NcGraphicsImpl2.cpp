@@ -60,10 +60,10 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
     auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
     void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
     void SetPostProcessEffectProperties(nc::PostProcessEffectId,
-                                        nc::PostProcessPass::type,
+                                        nc::PostProcessPassFlag::type,
                                         const nc::PostProcessPassProperties&) override {}
     auto GetPostProcessEffectProperties(nc::PostProcessEffectId,
-                                        nc::PostProcessPass::type) const -> const nc::PostProcessPassProperties& override
+                                        nc::PostProcessPassFlag::type) const -> const nc::PostProcessPassProperties& override
     {
         static auto dummy = nc::PostProcessPassProperties{};
         return dummy;
@@ -257,13 +257,13 @@ void NcGraphicsImpl2::SetPostProcessEffectEnabled(PostProcessEffectId effectId, 
 }
 
 auto NcGraphicsImpl2::GetPostProcessEffectProperties(PostProcessEffectId effectId,
-                                                     PostProcessPass::type pass) const -> const PostProcessPassProperties&
+                                                     PostProcessPassFlag::type pass) const -> const PostProcessPassProperties&
 {
     return m_frontend.GetPostProcessSubsystem().GetProperties(effectId, pass);
 }
 
 void NcGraphicsImpl2::SetPostProcessEffectProperties(PostProcessEffectId effectId,
-                                                     PostProcessPass::type pass,
+                                                     PostProcessPassFlag::type pass,
                                                      const PostProcessPassProperties& properties)
 {
     m_frontend.GetPostProcessSubsystem().SetProperties(effectId, pass, properties);

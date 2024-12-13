@@ -21,7 +21,7 @@ TEST(PostProcessTest, MakeDefaultPassProperties_succeedsForAllPasses)
 
 TEST(PostProcessTest, MakeDefaultPassProperties_invalidPass_throws)
 {
-    EXPECT_THROW(nc::MakeDefaultPassProperties(nc::PostProcessPass::None), nc::NcError);
+    EXPECT_THROW(nc::MakeDefaultPassProperties(nc::PostProcessPassFlag::None), nc::NcError);
 }
 
 TEST(PostProcessTest, MakeDefaultPassProperties_ifPassHasProperties_returnsNonEmptyResult)

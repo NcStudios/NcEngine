@@ -62,10 +62,10 @@ namespace
         auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
         void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
         void SetPostProcessEffectProperties(nc::PostProcessEffectId,
-                                            nc::PostProcessPass::type,
+                                            nc::PostProcessPassFlag::type,
                                             const nc::PostProcessPassProperties&) override {}
         auto GetPostProcessEffectProperties(nc::PostProcessEffectId,
-                                            nc::PostProcessPass::type) const -> const nc::PostProcessPassProperties& override
+                                            nc::PostProcessPassFlag::type) const -> const nc::PostProcessPassProperties& override
         {
             static auto dummy = nc::PostProcessPassProperties{};
             return dummy;

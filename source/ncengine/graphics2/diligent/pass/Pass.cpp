@@ -148,7 +148,7 @@ namespace nc::graphics
 {
 Pass::Pass(Diligent::IRenderDevice& device,
            const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
-           MaterialPass::type passId)
+           MaterialPassFlag::type passId)
     : pso{},
       id{passId}
 {
@@ -218,7 +218,7 @@ auto MakeTestPass(Diligent::IRenderDevice& device,
         "Test PSO"
     );
 
-    return Pass(device, createInfo, MaterialPass::Toon);
+    return Pass(device, createInfo, MaterialPassFlag::Toon);
 }
 
 auto MakePasses(Diligent::IRenderDevice& device,
