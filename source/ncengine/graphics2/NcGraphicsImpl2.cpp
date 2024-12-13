@@ -183,7 +183,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
-                    .id = static_cast<uint64_t>(MaterialPassFlag::Toon),
+                    .id = MaterialPassFlag::Toon,
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -191,21 +191,21 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = 0u
                 },
                 PassDesc{
-                    .id = static_cast<uint64_t>(MaterialPassFlag::Normals),
+                    .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
                     .colorSink = 1u // Gets its own render target
                 },
                 PassDesc{
-                    .id = static_cast<uint64_t>(MiscPassFlag::Wireframe),
+                    .id = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
                     .colorSink = 0u // Composited on top of Toon
                 },
                 PassDesc{
-                    .id = static_cast<uint64_t>(PostProcessPassFlag::Wave),
+                    .id = PostProcessPassFlag::Wave,
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
@@ -213,7 +213,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .colorSink = 2u // Every post process pass gets its own render target
                 },
                 PassDesc{
-                    .id = static_cast<uint64_t>(PostProcessPassFlag::Outline),
+                    .id = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
