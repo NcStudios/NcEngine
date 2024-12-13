@@ -17,19 +17,6 @@ namespace
 using namespace nc;
 using namespace nc::graphics;
 
-auto UpdateBuffer(Diligent::IDeviceContext& context,
-                  const PostProcessPassProperties& properties,
-                  PostProcessPipelineInstance& instance)
-{
-    std::visit(
-        [&context, &instance](const auto& unpacked){
-            NC_ASSERT(instance.buffer.has_value(), "Pass instance does not have a UniformBuffer");
-            instance.buffer->Write(context, unpacked);
-        },
-        properties
-    );
-}
-
 void EnableInstance(PostProcessEffectId effectId,
                     PostProcessPass& pass)
 {
@@ -110,7 +97,6 @@ void DrawIndexed(Diligent::IDeviceContext& context, const std::vector<nc::graphi
 namespace nc::graphics
 {
 PassBackend::PassBackend(Diligent::IRenderDevice& device,
-                         Diligent::IDeviceContext& context,
                          Diligent::ISwapChain& swapChain,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
@@ -135,7 +121,6 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
     m_postProcessPasses = MakePostProcessPasses
     (
         device,
-        context,
         swapChain,
         shaderFactory,
         shaderBindings,
@@ -155,7 +140,7 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         .depthSink = SwapChainDepthRTIndex
     };
 
-    m_finalPass = std::make_unique<PostProcessPass>(MakePostProcessPass(device, context, swapChain, shaderFactory, shaderBindings, finalPass));
+    m_finalPass = std::make_unique<PostProcessPass>(MakePostProcessPass(device, swapChain, shaderFactory, shaderBindings, finalPass));
 
     // Make all the off screen render targets that will be used by the passes
     auto& postProcessColorSinks = shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource();
@@ -165,7 +150,7 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
     postProcessDepthSinks.Add(device, passManifest.DepthSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
 }
 
-void PassBackend::Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState)
+void PassBackend::Update(const PostProcessState& postProcessState)
 {
     for (const auto& [effectId, effectPasses, enabled] : postProcessState.toggledEffects)
     {
@@ -180,7 +165,8 @@ void PassBackend::Update(Diligent::IDeviceContext& context, const PostProcessSta
 
     for (const auto& [effectId, passId, properties] : postProcessState.modifiedProperties)
     {
-        UpdateBuffer(context, properties, FindInstance(m_postProcessPasses, effectId, passId));
+        FindInstance(m_postProcessPasses, effectId, passId).properties = properties;
+        // UpdateBuffer(context, properties, FindInstance(m_postProcessPasses, effectId, passId));
     }
 }
 
@@ -247,6 +233,7 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
 {
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
+    auto& propertyBuffer = perPassResourceSignature.GetPostProcessPropertyBuffer();
 
     for (auto& pass : m_postProcessPasses)
     {
@@ -268,6 +255,11 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
         {
             if (!instance.enabled) continue;
             /** @todo: Fix property buffer */
+            if (instance.properties.has_value())
+            {
+                propertyBuffer.Update(context, instance.properties.value());
+            }
+
             //if (instance.buffer.has_value()) propertyBuffer.SetVariable(pass.passDesc.id, instance.buffer->GetBuffer());
             context.Draw(drawAttribs);
         }

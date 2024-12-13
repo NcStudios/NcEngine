@@ -16,13 +16,11 @@
 
 namespace nc::graphics
 {
-auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
-                                   Diligent::IRenderDevice& device,
-                                   nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer;
+// auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
+//                                    Diligent::IRenderDevice& device,
+//                                    nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer;
 
-auto MakePostProcessPassInstances(Diligent::IDeviceContext& context,
-                                  Diligent::IRenderDevice& device,
-                                  nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>;
+auto MakePostProcessPassInstances(nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>;
 void ClearRenderTarget(Diligent::IDeviceContext& context,
                        Diligent::ISwapChain& swapChain,
                        nc::graphics::PostProcessColorSinkBufferResource& postProcessSinkBufferResource,

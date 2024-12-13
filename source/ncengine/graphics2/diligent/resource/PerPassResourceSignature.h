@@ -25,7 +25,7 @@ class PerPassResourceSignature
                                           const TextureBufferResourceDesc& postProcessColorRTResourceDesc,
                                           const TextureBufferResourceDesc& postProcessDepthRTResourceDesc,
                                           const UniformBufferResourceDesc& postProcessSinkIndexDesc,
-                                          const DynamicUniformBufferResourceDesc& outlinePassPropertiesDesc);
+                                          const UniformBufferResourceDesc& outlinePassPropertiesDesc);
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
@@ -34,7 +34,7 @@ class PerPassResourceSignature
         auto GetPostProcessColorSinkBufferResource() -> PostProcessColorSinkBufferResource& { return *m_postProcessColorSinkBufferResource; }
         auto GetPostProcessDepthSinkBufferResource() -> PostProcessDepthSinkBufferResource& { return *m_postProcessDepthSinkBufferResource; }
         auto GetPostProcessSinkIndexBufferResource() -> PostProcessSinkIndexBufferResource& { return *m_postProcessSinkIndexBufferResource; }
-        auto GetPostProcessPropertyBuffer() -> PostProcessPropertyBufferResource&      { return *m_postProcessPropertyResource; }
+        auto GetPostProcessPropertyBuffer()          -> PostProcessPropertyBufferResource&  { return *m_postProcessPropertyResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;

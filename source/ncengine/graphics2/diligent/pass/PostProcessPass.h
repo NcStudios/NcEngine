@@ -23,7 +23,7 @@ class PostProcessColorSinkBufferResource;
 // Post process pass data specific to an effect
 struct PostProcessPipelineInstance
 {
-    std::optional<DynamicUniformBuffer> buffer;
+    std::optional<PostProcessPassProperties> properties;
     PostProcessEffectId effectId = NullPostProcessEffectId;
     bool enabled = false;
 };
@@ -43,14 +43,12 @@ struct PostProcessPass
 };
 
 auto MakePostProcessPass(Diligent::IRenderDevice& device,
-                         Diligent::IDeviceContext& context,
                          Diligent::ISwapChain& swapChain,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
                          PassDesc passDesc) -> PostProcessPass;
 
 auto MakePostProcessPasses(Diligent::IRenderDevice& device,
-                           Diligent::IDeviceContext& context,
                            Diligent::ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
                            ShaderBindings& shaderBindings,

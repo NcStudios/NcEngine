@@ -19,29 +19,27 @@ auto HashCombine(std::size_t hashCode, std::string_view inputString) -> std::siz
 
 namespace nc::graphics
 {
-auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
-                                   Diligent::IRenderDevice& device,
-                                   nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer
-{
-    switch (passId)
-    {
-        case nc::PostProcessPassFlag::Outline:
-        {
-            return nc::graphics::DynamicUniformBuffer(
-                context,
-                device,
-                nc::graphics::OutlinePassData{},
-                "OutlineDataBuffer"
-            );
-        }
-    }
+// auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
+//                                    Diligent::IRenderDevice& device,
+//                                    nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer
+// {
+//     switch (passId)
+//     {
+//         case nc::PostProcessPassFlag::Outline:
+//         {
+//             return nc::graphics::DynamicUniformBuffer(
+//                 context,
+//                 device,
+//                 nc::graphics::OutlinePassData{},
+//                 "OutlineDataBuffer"
+//             );
+//         }
+//     }
 
-    throw nc::NcError(fmt::format("Unexpected post process pass '{}'", passId));
-}
+//     throw nc::NcError(fmt::format("Unexpected post process pass '{}'", passId));
+// }
 
-auto MakePostProcessPassInstances(Diligent::IDeviceContext& context,
-                                  Diligent::IRenderDevice& device,
-                                  nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
+auto MakePostProcessPassInstances(nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
 {
     const auto hasProperties = nc::PassHasProperties(passId);
     auto instances = std::vector<nc::graphics::PostProcessPipelineInstance>{};
@@ -54,7 +52,7 @@ auto MakePostProcessPassInstances(Diligent::IDeviceContext& context,
 
         instances.emplace_back(
             hasProperties
-                ? std::optional{MakePostProcessPropertyBuffer(context, device, passId)}
+                ? std::optional{MakeDefaultPassProperties(passId)}
                 : std::nullopt,
             effectId,
             false

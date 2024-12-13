@@ -20,13 +20,12 @@ class PassBackend
 {
     public:
         explicit PassBackend(Diligent::IRenderDevice& device,
-                             Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
                              ShaderFactory& shaderFactory,
                              ShaderBindings& shaderBindings,
                              const PassManifest& passManifest);
 
-        void Update(Diligent::IDeviceContext& context, const PostProcessState& postProcessState);
+        void Update(const PostProcessState& postProcessState);
 
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,

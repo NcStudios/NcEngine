@@ -228,7 +228,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           },
           m_passBackend{
             m_engine.GetDevice(),
-            m_engine.GetContext(),
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings,
@@ -356,7 +355,7 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    m_passBackend.Update(context, renderState.postProcessState);
+    m_passBackend.Update(renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
     m_shaderBindings.GetPerPassSignature().Commit(context);

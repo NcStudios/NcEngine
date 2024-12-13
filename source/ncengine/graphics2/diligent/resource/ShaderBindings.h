@@ -45,7 +45,7 @@ class ShaderBindings
                 TextureBufferResourceDesc{"PostProcessColorSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
                 TextureBufferResourceDesc{"PostProcessDepthSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
                 UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL},
-                DynamicUniformBufferResourceDesc{"OutlinePassBufferData",  Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
+                UniformBufferResourceDesc{"OutlinePassBufferData",          Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL} // todo: can move to per frame, me thinks
             }
         {
         }

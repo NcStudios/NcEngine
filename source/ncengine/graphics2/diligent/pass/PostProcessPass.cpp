@@ -20,7 +20,6 @@ PostProcessPass::PostProcessPass(Diligent::IRenderDevice& device,
 }
 
 auto MakePostProcessPass(Diligent::IRenderDevice& device,
-                         Diligent::IDeviceContext& context,
                          Diligent::ISwapChain& swapChain,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
@@ -90,12 +89,11 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
 
     return PostProcessPass(device,
                            ci,
-                           MakePostProcessPassInstances(context, device, passDesc.id),
+                           MakePostProcessPassInstances(passDesc.id),
                            passDesc);
 }
 
 auto MakePostProcessPasses(Diligent::IRenderDevice& device,
-                           Diligent::IDeviceContext& context,
                            Diligent::ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
                            ShaderBindings& shaderBindings,
@@ -111,7 +109,7 @@ auto MakePostProcessPasses(Diligent::IRenderDevice& device,
 
     for (auto& passDesc : passDescs)
     {
-        passes.emplace_back(MakePostProcessPass(device, context, swapChain, shaderFactory, shaderBindings, passDesc));
+        passes.emplace_back(MakePostProcessPass(device, swapChain, shaderFactory, shaderBindings, passDesc));
     }
 
     return passes;

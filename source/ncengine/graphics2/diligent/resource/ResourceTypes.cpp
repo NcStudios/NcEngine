@@ -23,17 +23,6 @@ auto ToCommonShaderType(Diligent::SHADER_TYPE shaderType) -> Diligent::SHADER_TY
 
 namespace nc::graphics
 {
-auto ToPipelineResourceDesc(const DynamicUniformBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc
-{
-    return Diligent::PipelineResourceDesc
-    {
-        resourceDesc.shaderType,
-        resourceDesc.resourceKey.data(),
-        Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC
-    };
-}
-
 auto ToPipelineResourceDesc(const UniformBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc
