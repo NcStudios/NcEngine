@@ -1,5 +1,6 @@
 #include "SkeletalAnimationCalculations2.h"
 
+#include "ncengine/debug/Profile.h"
 #include "ncmath/MatrixUtilities.h"
 #include "ncutility/NcError.h"
 
@@ -13,9 +14,13 @@ auto GetAnimationOffsets(float timeInTicks,
                          const std::vector<std::string>& boneNames,
                          const asset::SkeletalAnimation& animation) -> PackedAnimationDecomposed
 {
+    NC_PROFILE_SCOPE("GetAnimationOffsets()", ProfileCategory::Animation);
     auto animationMatrices = PackedAnimationDecomposed{};
     animationMatrices.offsets.reserve(boneNames.size());
     animationMatrices.hasValues.reserve(boneNames.size());
+
+    // todo: can we just create above w/ defaults and just use at(index) = m when we have a hit?
+    // todo: can we use hashes in PackedRig and lookup using heterogeneous lookup?
 
     for (const auto& boneName : boneNames)
     {
@@ -38,17 +43,58 @@ auto GetAnimationOffsets(float timeInTicks,
     return animationMatrices;
 }
 
+void GetAnimationOffsets2(float timeInTicks,
+                         const std::vector<std::string>& boneNames,
+                         const asset::SkeletalAnimation& animation,
+                         PackedAnimationDecomposed& out)
+{
+    NC_PROFILE_SCOPE("GetAnimationOffsets()", ProfileCategory::Animation);
+    out.offsets.clear();
+    out.hasValues.clear();
+    if (boneNames.size() > out.offsets.capacity())
+    {
+        out.offsets.reserve(boneNames.size());
+        out.hasValues.reserve(boneNames.size());
+    }
+
+    // todo: can we just create above w/ defaults and just use at(index) = m when we have a hit?
+    // todo: can we use hashes in PackedRig and lookup using heterogeneous lookup?
+
+    for (const auto& boneName : boneNames)
+    {
+        auto iter = animation.framesPerBone.find(boneName);
+        if (iter == animation.framesPerBone.end())
+        {
+           out.offsets.push_back(DecomposedMatrix{});
+           out.hasValues.push_back(0);
+           continue;
+        }
+
+        out.offsets.emplace_back(
+            GetInterpolatedPosition(timeInTicks, iter->second.positionFrames),
+            GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
+            GetInterpolatedScale(timeInTicks, iter->second.scaleFrames)
+        );
+
+        out.hasValues.push_back(1);
+    }
+}
+
 auto ComposeMatrices(float timeInTicks,
                      const std::vector<std::string>& boneNames,
                      const asset::SkeletalAnimation& animation) -> PackedAnimation
 {
+    NC_PROFILE_SCOPE("ComposeMatrices()", ProfileCategory::Animation);
     auto [offsets, hasValues] = GetAnimationOffsets(timeInTicks, boneNames, animation);
     auto packedAnimation = PackedAnimation{ .offsets = std::vector<DirectX::XMMATRIX>{}, .hasValues = std::move(hasValues) };
     packedAnimation.offsets.reserve(packedAnimation.hasValues.size());
 
     std::ranges::transform(offsets, std::back_inserter(packedAnimation.offsets), [](auto&& offset)
     {
-        return ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot) * ToTransMatrix(offset.pos);
+        // return ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot) * ToTransMatrix(offset.pos);
+        auto m = ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot);
+        m.r[3] = ToXMVectorHomogeneous(offset.pos);
+        return m;
     });
 
     return packedAnimation;
@@ -61,30 +107,32 @@ auto ComposeBlendedMatrices(float blendFromTime,
                             const asset::SkeletalAnimation& blendFromAnim,
                             const asset::SkeletalAnimation& blendToAnim) -> PackedAnimation
 {
+    NC_PROFILE_SCOPE("ComposeBlendedMatrices()", ProfileCategory::Animation);
+
     auto [fromOffsets, fromHasValues] = GetAnimationOffsets(blendFromTime, boneNames, blendFromAnim);
     
     // todo: it doesn't look like hasValues is used on this, can refactor?
-    auto [toOffsets, _] = GetAnimationOffsets(blendToTime, boneNames, blendToAnim);
-    // auto [toOffsets, toHasValues] = GetAnimationOffsets(blendToTime, boneNames, blendToAnim);
+    auto [toOffsets, toHasValues] = GetAnimationOffsets(blendToTime, boneNames, blendToAnim);
 
 
     NC_ASSERT(fromOffsets.size() == toOffsets.size(), "fuuck");
 
-    auto interpolate = [blendFactor](auto& blendFromOffset, auto& blendToOffset)
-    {
-        return ToScaleMatrix(Lerp(blendFromOffset.scale, blendToOffset.scale, blendFactor)) *
-               ToRotMatrix(Normalize(Slerp(blendFromOffset.rot, blendToOffset.rot, blendFactor))) *
-               ToTransMatrix(Lerp(blendFromOffset.pos, blendToOffset.pos, blendFactor));
+    auto interpolate = [blendFactor](auto& from, auto& to) {
+        const auto scale = XMVectorLerp(ToXMVector(from.scale), ToXMVector(to.scale), blendFactor);
+        const auto rot = XMQuaternionSlerp(ToXMVector(from.rot), ToXMVector(to.rot), blendFactor);
+        const auto pos = XMVectorLerp(ToXMVectorHomogeneous(from.pos), ToXMVectorHomogeneous(to.pos), blendFactor);
+        auto m = XMMatrixScalingFromVector(scale) * XMMatrixRotationQuaternion(rot);
+        m.r[3] = pos;
+        return m;
     };
 
     auto offsets = std::views::zip_transform(interpolate, fromOffsets, toOffsets);
-
 
     // todo: is it ok to only care about hasValue from fromAnim?
     return gfx2::PackedAnimation{
         .offsets = std::vector<DirectX::XMMATRIX>{offsets.begin(), offsets.end()},
         //.hasValues = std::move(fromHasValues)
-        .hasValues = std::move(_)
+        .hasValues = std::move(toHasValues)
     };
 }
 
@@ -92,6 +140,7 @@ void AnimateBones(const PackedRig& rig,
                   const PackedAnimation& anim,
                   std::vector<BoneData>& bonesOut)
 {
+    NC_PROFILE_SCOPE("AnimateBones()", ProfileCategory::Animation);
     // Copy the boneToParent vector to perform modifications in place.
     auto boneToParentSandbox = rig.boneToParent;
 
@@ -145,13 +194,11 @@ struct InterpolationFrames
 template<class FrameType>
 auto GetFrames(float timeInTicks, const std::vector<FrameType>& frames)
 {
-    // todo: can we bin search here?
-
-    const auto to = std::ranges::find_if(
+    const auto to = std::ranges::lower_bound(
         std::views::drop(frames, 1),
-        [timeInTicks](auto&& frame){
-            return timeInTicks < frame.timeInTicks;
-        }
+        timeInTicks,
+        std::less{},
+        &FrameType::timeInTicks
     );
 
     return InterpolationFrames{std::prev(to), to};

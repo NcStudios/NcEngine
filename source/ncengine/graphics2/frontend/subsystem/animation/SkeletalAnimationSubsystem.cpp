@@ -51,7 +51,7 @@ namespace nc::graphics
 {
 void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
-    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
+    NC_PROFILE_TASK("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
     m_boneCache.CommitPendingChanges();
     auto boneBuffer = std::vector<BoneData>{};
     const auto dt = time::DeltaTime();
@@ -93,7 +93,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 
 void SkeletalAnimationSubsystem::UpdateAnimationControllers(ecs::ExplicitEcs<SkinnedMesh> ecs)
 {
-    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::UpdateAnimationControllers()", ProfileCategory::Animation);
+    NC_PROFILE_TASK("SkeletalAnimationSubsystem::UpdateAnimationControllers()", ProfileCategory::Animation);
 
     auto& pool = ecs.GetPool<SkinnedMesh>();
     for (const auto entity : m_completedAnimations)
