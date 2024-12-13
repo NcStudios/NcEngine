@@ -52,16 +52,7 @@ namespace nc::graphics
 void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
     NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
-
-    // todo: sort this out
-    for (auto& b : m_buffer)
-    {
-        b.animatedBoneMatrix = DirectX::XMMatrixSet(0, 0, 0, 0,
-         0, 0, 0, 0,
-         0, 0, 0, 0,
-         0, 0, 0, 1);
-    }
-
+    m_boneCache.CommitPendingChanges();
     auto boneBuffer = std::vector<BoneData>{};
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
@@ -95,11 +86,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
         }();
 
         gfx2::AnimateBones(rig, packedAnimation, boneBuffer);
-
-        NC_ASSERT(m_buffer.size() >= boneBuffer.size() + state.boneIndex, "BoneDataBuffer out of bounds");
-        // todo: BoneCache not implemented here
-        // m_boneCache.UpdateRegion(animation.boneIndex, animatedBones);
-        std::memcpy(m_buffer.data() + state.boneIndex, boneBuffer.data(), boneBuffer.size() * sizeof(BoneData));
+        m_boneCache.UpdateRegion(boneBuffer, state.boneIndex);
         boneBuffer.clear();
     }
 }
@@ -122,26 +109,14 @@ void SkeletalAnimationSubsystem::UpdateAnimationControllers(ecs::ExplicitEcs<Ski
     }
 }
 
-void SkeletalAnimationSubsystem::SyncBoneBuffer(size_t boneCapacity)
-{
-    if (boneCapacity > m_buffer.size())
-    {
-        m_buffer.resize(boneCapacity);
-    }
-}
-
 auto SkeletalAnimationSubsystem::BuildState() -> SkeletalAnimationRenderState
 {
-    // todo: use BoneCache
-    if (m_buffer.empty())
-    {
-        return SkeletalAnimationRenderState{};
-    }
+    return SkeletalAnimationRenderState{m_boneCache.BuildUpdateInfo()};
+}
 
-    return SkeletalAnimationRenderState{
-        m_buffer,
-        { {0, static_cast<uint32_t>(m_buffer.size())} }
-    };
+void SkeletalAnimationSubsystem::OnBeforeSceneLoad()
+{
+    m_boneCache.Purge();
 }
 
 void SkeletalAnimationSubsystem::Clear() noexcept
@@ -151,8 +126,6 @@ void SkeletalAnimationSubsystem::Clear() noexcept
     m_animatedEntities.shrink_to_fit();
     m_animationState.clear();
     m_animationState.shrink_to_fit();
-    m_buffer.clear();
-    m_buffer.shrink_to_fit();
 }
 
 
@@ -170,8 +143,8 @@ void SkeletalAnimationSubsystem::Transition(SkinnedMesh& mesh)
 
 void SkeletalAnimationSubsystem::Start(const MeshInstanceContext& ctx, const nc::AnimationTransition& transition)
 {
-    NC_ASSERT(m_storage.HasAnimation(transition.toAnimId), "Transition animation is not loaded");
-    if (!m_storage.HasRig(ctx.meshId)) // boneless mesh is valid, just ignore
+    // Null animation and boneless mesh are valid, just ignore
+    if (transition.toAnimId == NullAnimationId || !m_storage.HasRig(ctx.meshId))
     {
         return;
     }

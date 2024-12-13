@@ -28,12 +28,14 @@ class GraphicsFrontend
                          SystemEvents& events,
                          uint32_t maxEntities,
                          uint32_t maxRenderers,
+                         uint32_t maxBones,
                          uint32_t initialBatchSize,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
                          Signal<const asset::SkeletalAnimationUpdateEventData&>& onAnimationEvent,
                          Signal<const asset::BoneUpdateEventData&>& onBoneEvent)
-            : m_assetDispatch{
+            : m_animationSystem{maxBones},
+              m_assetDispatch{
                 context,
                 device,
                 textureBuffer,
@@ -49,6 +51,7 @@ class GraphicsFrontend
               m_cameraSystem{},
               m_meshSystem{
                 m_animationSystem.GetStorage(),
+                m_animationSystem.GetBoneCacheStaging(),
                 events,
                 maxEntities,
                 maxRenderers,
@@ -61,6 +64,7 @@ class GraphicsFrontend
 
         void OnBeforeSceneLoad()
         {
+            m_animationSystem.OnBeforeSceneLoad();
             m_meshSystem.OnBeforeSceneLoad();
         }
 

@@ -108,9 +108,23 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
     );
 }
 
-struct mesh_renderer
+struct static_mesh
 {
-    static constexpr auto name = "Mesh Renderer";
+    static constexpr auto name = "Static Mesh";
+    static inline const auto& maxCount = g_maxRenderers;
+    static inline auto& currentCount = g_currentRenderers;
+    static inline std::function<int()> GetObjectCountCallback = nullptr;
+    static inline std::function<void(unsigned)> SpawnCallback = nullptr;
+    static inline std::function<void(unsigned)> DestroyCallback = nullptr;
+    static inline unsigned SpawnCount = 1000;
+    static inline unsigned DestroyCount = 1000;
+    static inline std::string Mesh = std::string{nc::asset::CubeMesh};
+};
+
+struct skinned_mesh
+{
+    // todo...
+    static constexpr auto name = "Skinned Mesh";
     static inline const auto& maxCount = g_maxRenderers;
     static inline auto& currentCount = g_currentRenderers;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
@@ -331,38 +345,42 @@ void Widget()
         {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<mesh_renderer>{}(halfCellWidth, [cellWidth](){
+            InnerWidget<static_mesh>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(mesh_renderer::Mesh);
+                AssetCombo(static_mesh::Mesh);
             });
 
+            ImGui::TableNextColumn();
+            InnerWidget<skinned_mesh>{}(halfCellWidth, [](){
+            });
+
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<static_body>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(static_body::Mesh);
             });
 
-            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<rigid_body>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(static_body::Mesh);
             });
 
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<point_light>{}(halfCellWidth, [](){});
 
-            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<spot_light>{}(halfCellWidth, [](){});
 
+            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<entity_hierarchy>{}(halfCellWidth, [halfCellWidth](){
                 ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
             });
 
-            ImGui::TableNextRow();
             ImGui::TableNextColumn();
             InnerWidget<particle_emitter>{}(halfCellWidth, [](){});
 
@@ -438,9 +456,9 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
     };
 
-    // Mesh Renderer
+    // Static Mesh
     {
-        const auto handle = world.Emplace<Entity>({.tag = "MeshRenderer Spawner"});
+        const auto handle = world.Emplace<Entity>({.tag = "StaticMesh Spawner"});
         auto& spawner = world.Emplace<Spawner>(
             handle,
             ncRandom,
@@ -448,16 +466,39 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             [world](Entity entity) mutable{
                 world.Emplace<StaticMesh>(
                     entity,
-                    MeshFromPath(::mesh_renderer::Mesh),
+                    MeshFromPath(::static_mesh::Mesh),
                     ::RandomMaterial()
                 );
             }
         );
 
         world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
-        ::mesh_renderer::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
-        ::mesh_renderer::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
-        ::mesh_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+        ::static_mesh::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::static_mesh::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::static_mesh::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+    }
+
+    // Skinned Mesh
+    {
+        const auto handle = world.Emplace<Entity>({.tag = "SkinnedMesh Spawner"});
+        auto& spawner = world.Emplace<Spawner>(
+            handle,
+            ncRandom,
+            spawnBehavior,
+            [world](Entity entity) mutable{
+                world.Emplace<SkinnedMesh>(
+                    entity,
+                    mesh::Ogre,
+                    material::Ogre,
+                    animation::OgreIdle
+                );
+            }
+        );
+
+        world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
+        ::skinned_mesh::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::skinned_mesh::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::skinned_mesh::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
     // Static Rigid Body

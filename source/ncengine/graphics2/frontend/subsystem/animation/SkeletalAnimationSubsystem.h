@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoneCache.h"
 #include "SkeletalAnimationRenderState.h"
 #include "SkeletalAnimationStorage.h"
 #include "SkeletalAnimationTypes.h"
@@ -12,7 +13,13 @@ namespace nc::graphics
 class SkeletalAnimationSubsystem
 {
     public:
-        auto GetStorage() -> SkeletalAnimationStorage& { return m_storage; }
+        explicit SkeletalAnimationSubsystem(uint32_t maxBones)
+            : m_boneCache{maxBones}
+        {
+        }
+
+        auto GetStorage()          -> SkeletalAnimationStorage& { return m_storage; }
+        auto GetBoneCacheStaging() -> BoneCacheStaging&         { return m_boneCache.GetStagingArea(); }
 
         // Update graph task to process calculate bone transform based on in-flight animations.
         // NOTE: No scheduling requirements - operates entirely on internal or otherwised synchronized data.
@@ -22,11 +29,8 @@ class SkeletalAnimationSubsystem
         // IMPORTANT: Must not run concurrently with game logic.
         void UpdateAnimationControllers(ecs::ExplicitEcs<SkinnedMesh> ecs);
 
-        // Resize the bone buffer based on the most recent capacity (from MeshSubsystem).
-        // IMPORTANT: Must not run concurrently with CalculateBoneMatrices().
-        void SyncBoneBuffer(size_t boneCapacity);
-
         auto BuildState() -> SkeletalAnimationRenderState;
+        void OnBeforeSceneLoad();
         void Clear() noexcept;
 
     private:
@@ -36,7 +40,7 @@ class SkeletalAnimationSubsystem
         std::vector<gfx2::InFlightAnimation> m_animationState;
         std::vector<Entity> m_completedAnimations;
 
-        std::vector<BoneData> m_buffer; // todo replace with bone cache
+        BoneCache m_boneCache;
 
         void Transition(SkinnedMesh& mesh);
         void Start(const MeshInstanceContext& ctx, const AnimationTransition& transition);

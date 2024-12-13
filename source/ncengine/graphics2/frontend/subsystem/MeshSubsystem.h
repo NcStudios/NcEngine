@@ -1,9 +1,9 @@
 #pragma once
 
-#include "BoneIndexCache.h"
 #include "MeshRenderState.h"
 #include "TransformCache.h"
 #include "InstanceCache.h"
+#include "animation/BoneCache.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/utility/Signal.h"
@@ -23,6 +23,7 @@ class MeshSubsystem
 {
     public:
         explicit MeshSubsystem(SkeletalAnimationStorage& animationStorage,
+                               BoneCacheStaging& boneCacheStaging,
                                SystemEvents& events,
                                uint32_t maxEntities,
                                uint32_t maxMeshRenderers,
@@ -43,17 +44,15 @@ class MeshSubsystem
                                  const MaterialInstance& material,
                                  MaterialPasses oldPasses);
 
-        // todo: make sure synchronization is safe here
-        auto GetBoneCapacity() const -> size_t { return m_boneCache.GetCapacity(); }
         auto BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
 
     private:
         TransformCache m_transformCache;
-        BoneIndexCache m_boneCache;
         InstanceCache<StaticMeshInstanceData> m_staticMeshInstanceCache;
         InstanceCache<SkinnedMeshInstanceData> m_skinnedMeshInstanceCache;
         SkeletalAnimationStorage* m_animationStorage;
+        BoneCacheStaging* m_boneCache;
         Connection m_rebuildStaticsConnection;
 
         auto GetRigBoneCount(uint64_t meshId) -> uint32_t;

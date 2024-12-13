@@ -39,7 +39,7 @@ MaterialDesc Skeleton{"SkeletonMaterial"};
 // Animations
 namespace animation
 {
-// todo: we don't have acquire func for anims, plat-specific paths here won't hash equivalently...
+// todo: plat-specific paths won't work here...
 uint64_t OgreIdle{utility::Fnv1a("ogre\\idle.nca")};
 uint64_t OgreAttack{utility::Fnv1a("ogre\\attack.nca")};
 uint64_t SkeletonIdle{utility::Fnv1a("skeleton\\idle.nca")};

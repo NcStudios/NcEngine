@@ -1,11 +1,13 @@
-#include "BoneIndexCache.h"
+#include "BoneCache.h"
+
+#include "ncutility/NcError.h"
 
 #include <cstring>
 #include <ranges>
 
 namespace nc::graphics
 {
-auto BoneIndexCache::Allocate(uint32_t count) -> BoneCacheHandle
+auto BoneCacheStaging::Allocate(uint32_t count) -> BoneCacheHandle
 {
     const auto slot = std::ranges::find_if(
         m_freeList,
@@ -39,7 +41,7 @@ auto BoneIndexCache::Allocate(uint32_t count) -> BoneCacheHandle
     return handle;
 }
 
-void BoneIndexCache::Free(BoneCacheHandle handle)
+void BoneCacheStaging::Free(BoneCacheHandle handle)
 {
     const auto capacity = m_allocations.at(handle);
     m_allocations.erase(handle);
@@ -86,5 +88,73 @@ void BoneIndexCache::Free(BoneCacheHandle handle)
 
     // can't be combined with an existing slot so make a new one
     m_freeList.emplace(pos, handle, capacity);
+}
+
+void BoneCacheStaging::Purge()
+{
+    auto maxIndex = 0u;
+    for (const auto& [offset, capacity] : std::views::zip(m_allocations.keys(), m_allocations.values()))
+    {
+        maxIndex = std::max(maxIndex, offset + capacity);
+    }
+
+    m_nextIndex = maxIndex;
+
+    for (const auto& [offset, capacity] : std::exchange(m_freeList, {}))
+    {
+        if (offset >= maxIndex)
+        {
+            continue;
+        }
+        else if (offset + capacity >= maxIndex)
+        {
+            m_freeList.emplace_back(offset, maxIndex);
+        }
+        else
+        {
+            m_freeList.emplace_back(offset, capacity);
+        }
+    }
+}
+
+void BoneCache::CommitPendingChanges()
+{
+    // todo: sort this out
+    for (auto& b : m_data)
+    {
+        b.animatedBoneMatrix = DirectX::XMMatrixSet(
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 0, 0, 1
+        );
+    }
+
+    const auto newCapacity = m_staging.GetCapacity();
+    if (newCapacity > m_data.size())
+    {
+        m_data.resize(newCapacity);
+    }
+}
+
+void BoneCache::UpdateRegion(std::span<const BoneData> bones, BoneCacheHandle boneIndex)
+{
+    NC_ASSERT(m_data.size() >= bones.size() + boneIndex, "BoneCache write out of bounds");
+    std::memcpy(m_data.data() + boneIndex, bones.data(), bones.size() * sizeof(BoneData));
+}
+
+auto BoneCache::BuildUpdateInfo() -> BufferUpdateInfo<BoneData>
+{
+    const auto size = static_cast<uint32_t>(m_data.size());
+    return size != 0u
+        ? BufferUpdateInfo<BoneData>{m_data, { {0, size} }}
+        : BufferUpdateInfo<BoneData>{};
+}
+
+void BoneCache::Purge()
+{
+    m_data.clear();
+    m_data.shrink_to_fit();
+    m_staging.Purge();
 }
 } // namespace nc::graphics

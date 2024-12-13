@@ -133,9 +133,9 @@ add_executable(MeshSubsystem_tests
     ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/BoneIndexCache.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneCache.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculations2.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.cpp

@@ -34,15 +34,16 @@ auto MakeSkinnedInstanceData(const nc::MeshInstanceContext& ctx,
 namespace nc::graphics
 {
 MeshSubsystem::MeshSubsystem(SkeletalAnimationStorage& animationStorage,
+                             BoneCacheStaging& boneCacheStaging,
                              SystemEvents& events,
                              uint32_t maxEntities,
                              uint32_t maxMeshRenderers,
                              uint32_t initialBatchSize)
     : m_transformCache{maxMeshRenderers},
-      m_boneCache{maxMeshRenderers * 100u}, // todo: just a random guess
       m_staticMeshInstanceCache{maxEntities, initialBatchSize},
       m_skinnedMeshInstanceCache{maxEntities, initialBatchSize},
       m_animationStorage{&animationStorage},
+      m_boneCache{&boneCacheStaging},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshSubsystem::OnRebuildStatics)}
 {
     MeshBase::RegisterSubsystem(this);
@@ -81,7 +82,7 @@ void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
         {
             const auto boneCount = GetRigBoneCount(mesh.id);
             ctx.boneDataHandle = boneCount > 0
-                ? m_boneCache.Allocate(boneCount)
+                ? m_boneCache->Allocate(boneCount)
                 : NullBoneCacheHandle;
 
             addToCache(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
@@ -111,7 +112,7 @@ void MeshSubsystem::RemoveInstance(const MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            m_boneCache.Free(ctx.boneDataHandle);
+            m_boneCache->Free(ctx.boneDataHandle);
             removeFromCache(m_skinnedMeshInstanceCache);
             break;
         }
@@ -145,12 +146,12 @@ void MeshSubsystem::SetInstanceMesh(MeshInstanceContext& ctx,
         {
             if (ctx.boneDataHandle != NullBoneCacheHandle)
             {
-                m_boneCache.Free(ctx.boneDataHandle);
+                m_boneCache->Free(ctx.boneDataHandle);
             }
 
             const auto boneCount = GetRigBoneCount(newMesh.id);
             ctx.boneDataHandle = boneCount > 0
-                ? m_boneCache.Allocate(boneCount)
+                ? m_boneCache->Allocate(boneCount)
                 : NullBoneCacheHandle;
 
             updateInstance(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
