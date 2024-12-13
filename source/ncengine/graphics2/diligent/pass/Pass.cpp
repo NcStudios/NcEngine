@@ -198,6 +198,34 @@ struct BoneData
 
 StructuredBuffer<BoneData> BoneBufferData;
 
+bool IsValidBoneIndex(uint boneIndex)
+{
+    return boneIndex != 4294967295;
+}
+
+bool IsValidAnimationTransform(float4x4 mat)
+{
+    // Check for zero matrix, ignoring homogenous coord
+    return all(mat[0] != 0.0) ||
+           all(mat[1] != 0.0) ||
+           all(mat[2] != 0.0) ||
+           mat[3].xyz != float3(0.0, 0.0, 0.0);
+}
+
+float4x4 CombineBoneMatrices(uint base, uint4 boneOffsets, float4 boneWeights)
+{
+    float4x4 boneTransform = float4x4(0.0);
+    for (int i = 0; i < 4; i++)
+    {
+        if (boneWeights[i] > 0.0f)
+        {
+            boneTransform += BoneBufferData[base + boneOffsets[i]].animatedBoneMatrix * boneWeights[i];
+        }
+    }
+
+    return boneTransform;
+}
+
 #else
 
 struct StaticMeshInstanceData
@@ -223,68 +251,20 @@ cbuffer EnvironmentBufferData
     float2 padding;
 };
 
-bool IsMatrixNonZero(float4x4 mat)
-{
-    return dot(mat[0], float4(1.0)) +
-           dot(mat[1], float4(1.0)) +
-           dot(mat[2], float4(1.0)) +
-           dot(mat[3], float4(1.0)) > 0.0;
-}
-
-bool IsMatrixNonZeroHom(float4x4 mat)
-{
-    // can be improved for sure
-
-    // Check the first three rows for being completely zero
-    bool rowsZero = 
-        all(mat[0] == float4(0.0, 0.0, 0.0, 0.0)) &&
-        all(mat[1] == float4(0.0, 0.0, 0.0, 0.0)) &&
-        all(mat[2] == float4(0.0, 0.0, 0.0, 0.0));
-
-    // Check the last row for [0, 0, 0, 1]
-    bool lastRowValid = all(mat[3] == float4(0.0, 0.0, 0.0, 1.0));
-
-    return !rowsZero || !lastRowValid;
-}
-
-float4x4 ApplyAnimation(uint base, uint4 boneOffsets, float4 boneWeights)
-{
-    float4x4 boneTransform = float4x4(0.0);
-
-    if (boneWeights[0] > -1.0f)
-    {
-        boneTransform += BoneBufferData[base + boneOffsets[0]].animatedBoneMatrix * boneWeights[0];
-    }
-    if (boneWeights[1] > -1.0f)
-    {
-        boneTransform += BoneBufferData[base + boneOffsets[1]].animatedBoneMatrix * boneWeights[1];
-    }
-    if (boneWeights[2] > -1.0f)
-    {
-        boneTransform += BoneBufferData[base + boneOffsets[2]].animatedBoneMatrix * boneWeights[2];
-    }
-    if (boneWeights[3] > -1.0f)
-    {
-        boneTransform += BoneBufferData[base + boneOffsets[3]].animatedBoneMatrix * boneWeights[3];
-    }
-
-    return boneTransform;
-}
-
-void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
+void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 {
     INSTANCE_DATA instance = INSTANCE_BUFFER[InstanceID];
     float4 pos = float4(VSIn.Pos, 1.0);
     float3 normal = VSIn.Normal;
 
 #ifdef ENABLE_SKINNING
-    if (instance.boneIndex != 4294967295)
+    if (IsValidBoneIndex(instance.boneIndex))
     {
-        float4x4 boneTransform = ApplyAnimation(instance.boneIndex, VSIn.BoneIds, VSIn.BoneWeights);
-        if (IsMatrixNonZeroHom(boneTransform))
+        float4x4 animatedTransform = CombineBoneMatrices(instance.boneIndex, VSIn.BoneIds, VSIn.BoneWeights);
+        if (IsValidAnimationTransform(animatedTransform))
         {
-            pos = mul(pos, boneTransform);
-            normal = mul(normal, boneTransform); // ask Jare what this should be like
+            pos = mul(pos, animatedTransform);
+            normal = mul(normal, animatedTransform); // ask Jare what this should be like
         }
     }
 #endif // ENABLE_SKINNING
@@ -292,7 +272,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     uint transformIndex = instance.transformIndex;
     float4 worldPos = mul(pos, TransformBufferData[transformIndex].modelMatrix);
     PSIn.Pos = mul(worldPos, cameraViewProjection);
-    PSIn.UV  = VSIn.UV;
+    PSIn.UV = VSIn.UV;
     PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].modelMatrix, normal)); // @TODO #805, compute inverse model matrix CPU-side
     PSIn.WorldPos = worldPos.xyz;
     PSIn.MaterialIndex = instance.materialIndex;

@@ -119,22 +119,13 @@ void BoneCacheStaging::Purge()
 
 void BoneCache::CommitPendingChanges()
 {
-    // todo: sort this out
-    for (auto& b : m_data)
-    {
-        b.animatedBoneMatrix = DirectX::XMMatrixSet(
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 1
-        );
-    }
-
     const auto newCapacity = m_staging.GetCapacity();
     if (newCapacity > m_data.size())
     {
         m_data.resize(newCapacity);
     }
+
+    std::memset(m_data.data(), 0, m_data.size() * sizeof(BoneData));
 }
 
 void BoneCache::UpdateRegion(std::span<const BoneData> bones, BoneCacheHandle boneIndex)
