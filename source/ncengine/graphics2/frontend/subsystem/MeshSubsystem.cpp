@@ -112,7 +112,11 @@ void MeshSubsystem::RemoveInstance(const MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            m_boneCache->Free(ctx.boneDataHandle);
+            if (ctx.boneDataHandle != NullBoneCacheHandle)
+            {
+                m_boneCache->Free(ctx.boneDataHandle);
+            }
+
             removeFromCache(m_skinnedMeshInstanceCache);
             break;
         }

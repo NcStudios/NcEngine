@@ -86,7 +86,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
         }();
 
         gfx2::AnimateBones(rig, packedAnimation, boneBuffer);
-        m_boneCache.UpdateRegion(boneBuffer, state.boneIndex);
+        m_boneCache.UpdateRegion(state.boneIndex, boneBuffer);
         boneBuffer.clear();
     }
 }

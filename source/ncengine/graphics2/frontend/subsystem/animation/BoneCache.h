@@ -62,16 +62,16 @@ class BoneCache
         }
 
         // Get the staging area for allocating bones.
-        auto GetStagingArea() -> BoneCacheStaging&
-        {
-            return m_staging;
-        }
+        auto GetStagingArea() -> BoneCacheStaging& { return m_staging; }
+
+        // Get total buffer size
+        auto GetCapacity() const -> size_t { return m_data.size(); }
 
         // Zero the buffer and reallocate based on staged allocations.
         void CommitPendingChanges();
 
         // Update a range of bones at the offset owned by boneIndex.
-        void UpdateRegion(std::span<const BoneData> bones, BoneCacheHandle boneIndex);
+        void UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones);
 
         // Build info specifying modified buffer ranges.
         auto BuildUpdateInfo() -> BufferUpdateInfo<BoneData>;

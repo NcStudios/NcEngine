@@ -1,3 +1,29 @@
+### BoneCache Tests ###
+add_executable(BoneCache_tests
+    BoneCache_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneCache.cpp
+)
+
+target_include_directories(BoneCache_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${NC_EXTERNAL_DIR}
+)
+
+target_compile_options(BoneCache_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(BoneCache_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(BoneCache_tests BoneCache_tests)
+
 ### CameraSubsystem Tests ###
 add_executable(CameraSubsystem_tests
     CameraSubsystem_tests.cpp

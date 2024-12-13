@@ -128,7 +128,7 @@ void BoneCache::CommitPendingChanges()
     std::memset(m_data.data(), 0, m_data.size() * sizeof(BoneData));
 }
 
-void BoneCache::UpdateRegion(std::span<const BoneData> bones, BoneCacheHandle boneIndex)
+void BoneCache::UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones)
 {
     NC_ASSERT(m_data.size() >= bones.size() + boneIndex, "BoneCache write out of bounds");
     std::memcpy(m_data.data() + boneIndex, bones.data(), bones.size() * sizeof(BoneData));
@@ -144,8 +144,8 @@ auto BoneCache::BuildUpdateInfo() -> BufferUpdateInfo<BoneData>
 
 void BoneCache::Purge()
 {
-    m_data.clear();
-    m_data.shrink_to_fit();
     m_staging.Purge();
+    m_data.resize(m_staging.GetCapacity());
+    m_data.shrink_to_fit();
 }
 } // namespace nc::graphics

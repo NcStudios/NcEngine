@@ -26,7 +26,7 @@ auto GetAnimationOffsets(float timeInTicks,
            animationMatrices.hasValues.push_back(0);
            continue;
         }
-        
+
         animationMatrices.offsets.emplace_back
         (
             GetInterpolatedPosition(timeInTicks, iter->second.positionFrames),
@@ -135,60 +135,71 @@ void AnimateBones(const PackedRig& rig,
     );
 }
 
-auto GetInterpolatedPosition(float timeInTicks, const std::vector<asset::PositionFrame>& positionFrames) -> Vector3
+template<class Iterator>
+struct InterpolationFrames
 {
-    NC_ASSERT(positionFrames.size() > 0, "Animation has no position data for the node.");
-    if (positionFrames.size() == 1) return positionFrames[0].position;
+    const Iterator from;
+    const Iterator to;
+};
 
-    const auto nextFrame = std::ranges::find_if(
-        std::views::drop(positionFrames, 1),
-        [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;}
+template<class FrameType>
+auto GetFrames(float timeInTicks, const std::vector<FrameType>& frames)
+{
+    // todo: can we bin search here?
+
+    const auto to = std::ranges::find_if(
+        std::views::drop(frames, 1),
+        [timeInTicks](auto&& frame){
+            return timeInTicks < frame.timeInTicks;
+        }
     );
 
-    NC_ASSERT(nextFrame != positionFrames.end(), fmt::format("Animation has no position data at time {}", timeInTicks));
-    const auto frame = std::prev(nextFrame);
-    const auto deltaTimeInTicks = nextFrame->timeInTicks - frame->timeInTicks;
-    const auto interpolationFactor = (timeInTicks - frame->timeInTicks) / deltaTimeInTicks;
-    NC_ASSERT(interpolationFactor >= 0.0f && interpolationFactor <= 1.0f, fmt::format("Error calculating the interpolation factor: {}", interpolationFactor));
+    return InterpolationFrames{std::prev(to), to};
+}
 
-    return Lerp(frame->position, nextFrame->position, interpolationFactor);
+auto GetInterpolationFactor(float timeInTicks, float frameTicks, float nextFrameTicks) -> float
+{
+    const auto deltaTimeInTicks = nextFrameTicks - frameTicks;
+    return (timeInTicks - frameTicks) / deltaTimeInTicks;
+}
+
+auto GetInterpolatedPosition(float timeInTicks, const std::vector<asset::PositionFrame>& positionFrames) -> Vector3
+{
+    // could these load XMVECTORS? we interpolate here and later on, then construct matrices.
+
+    if (positionFrames.size() > 1)
+    {
+        const auto [from, to] = GetFrames(timeInTicks, positionFrames);
+        const auto factor = GetInterpolationFactor(timeInTicks, from->timeInTicks, to->timeInTicks);
+        return Lerp(from->position, to->position, factor);
+    }
+
+    return positionFrames[0].position;
 }
 
 auto GetInterpolatedRotation(float timeInTicks, const std::vector<asset::RotationFrame>& rotationFrames) -> Quaternion
 {
-    NC_ASSERT(rotationFrames.size() > 0, "Animation has no rotation data for the node.");
-    if (rotationFrames.size() == 1) return Normalize(rotationFrames[0].rotation);
+    // todo: need to normalize?
 
-    const auto nextFrame = std::ranges::find_if(
-        std::views::drop(rotationFrames, 1),
-        [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;}
-    );
+    if (rotationFrames.size() > 1)
+    {
+        const auto [from, to] = GetFrames(timeInTicks, rotationFrames);
+        const auto factor = GetInterpolationFactor(timeInTicks, from->timeInTicks, to->timeInTicks);
+        return Normalize(Slerp(from->rotation, to->rotation, factor));
+    }
 
-    NC_ASSERT(nextFrame != rotationFrames.end(), fmt::format("Animation has no rotation data at time {}", timeInTicks));
-    const auto frame = std::prev(nextFrame);
-    const auto deltaTimeInTicks = nextFrame->timeInTicks - frame->timeInTicks;
-    const auto interpolationFactor = (timeInTicks - frame->timeInTicks) / deltaTimeInTicks;
-    NC_ASSERT(interpolationFactor >= 0.0f && interpolationFactor <= 1.0f, fmt::format("Error calculating the interpolation factor: {}", interpolationFactor));
-
-    return Normalize(Slerp(frame->rotation, nextFrame->rotation, interpolationFactor));
+    return Normalize(rotationFrames[0].rotation);
 }
 
 auto GetInterpolatedScale(float timeInTicks, const std::vector<asset::ScaleFrame>& scaleFrames) -> Vector3
 {
-    NC_ASSERT(scaleFrames.size() > 0, "Animation has no scale data for the node.");
-    if (scaleFrames.size() == 1) return scaleFrames[0].scale;
+    if (scaleFrames.size() > 1)
+    {
+        const auto [from, to] = GetFrames(timeInTicks, scaleFrames);
+        const auto factor = GetInterpolationFactor(timeInTicks, from->timeInTicks, to->timeInTicks);
+        return Lerp(from->scale, to->scale, factor);
+    }
 
-    const auto nextFrame = std::ranges::find_if(
-        std::views::drop(scaleFrames, 1),
-        [timeInTicks](auto&& frame){ return timeInTicks < frame.timeInTicks;}
-    );
-
-    NC_ASSERT(nextFrame != scaleFrames.end(), fmt::format("Animation has no scale data at time {}", timeInTicks));
-    const auto frame = std::prev(nextFrame);
-    const auto deltaTimeInTicks = nextFrame->timeInTicks - frame->timeInTicks;
-    const auto interpolationFactor = (timeInTicks - frame->timeInTicks) / deltaTimeInTicks;
-    NC_ASSERT(interpolationFactor >= 0.0f && interpolationFactor <= 1.0f, fmt::format("Error calculating the interpolation factor: {}", interpolationFactor));
-
-    return Lerp(frame->scale, nextFrame->scale, interpolationFactor);
+    return scaleFrames[0].scale;
 }
 } // namespace nc::graphics
