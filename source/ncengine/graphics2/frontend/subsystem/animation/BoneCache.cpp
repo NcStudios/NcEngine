@@ -119,13 +119,12 @@ void BoneCacheStaging::Purge()
 
 void BoneCache::CommitPendingChanges()
 {
+    std::ranges::fill(m_data, BoneData{});
     const auto newCapacity = m_staging.GetCapacity();
     if (newCapacity > m_data.size())
     {
         m_data.resize(newCapacity);
     }
-
-    std::memset(m_data.data(), 0, m_data.size() * sizeof(BoneData));
 }
 
 void BoneCache::UpdateRegion(BoneCacheHandle boneIndex, std::span<const BoneData> bones)
