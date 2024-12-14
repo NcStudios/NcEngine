@@ -8,7 +8,7 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
 {
     const auto expectedDesc = nc::MaterialDesc{
         .name = "test",
-        .passes = nc::MaterialPass::Toon,
+        .passes = nc::MaterialPassFlag::Toon,
         .properties = nc::MaterialProperties{
             .diffuseTexture = nc::asset::TextureView{
                 .id = 42,

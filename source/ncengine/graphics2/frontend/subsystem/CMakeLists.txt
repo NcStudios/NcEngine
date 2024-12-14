@@ -9,3 +9,5 @@ target_sources(${NC_ENGINE_LIB}
         UISubsystem.cpp
         WireframeRendererSubsystem.cpp
 )
+
+add_subdirectory(animation)

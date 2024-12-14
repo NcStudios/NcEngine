@@ -54,7 +54,7 @@ void DisableInstance(PostProcessEffectId effectId,
 
 auto FindInstance(std::vector<PostProcessPipeline>& passes,
                   PostProcessEffectId effectId,
-                  PostProcessPass::type passId) -> PostProcessPipelineInstance&
+                  PostProcessPassFlag::type passId) -> PostProcessPipelineInstance&
 {
     auto pass = std::ranges::find(passes, passId, &PostProcessPipeline::id);
     if (pass != passes.end())

@@ -136,7 +136,7 @@ void MeshSubsystem::SetInstanceMesh(MeshInstanceContext& ctx,
 
 void MeshSubsystem::SetInstanceMaterial(const MeshInstanceContext& ctx,
                                         const MaterialInstance& material,
-                                        MaterialPasses oldPasses)
+                                        MaterialPassFlags oldPasses)
 {
     const auto meshService = asset::AssetService<asset::MeshView>::Get();
     const auto meshPath = std::string{meshService->GetPath(ctx.meshId)};

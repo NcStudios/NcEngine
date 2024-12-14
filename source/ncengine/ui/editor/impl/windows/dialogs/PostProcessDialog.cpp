@@ -7,7 +7,7 @@
 namespace
 {
 void DrawPostProcessPassInfo(nc::PostProcessEffectId effectId,
-                             nc::PostProcessPass::type passId,
+                             nc::PostProcessPassFlag::type passId,
                              nc::graphics::NcGraphics* ncGraphics)
 {
     ImGui::Separator();
@@ -26,7 +26,7 @@ void DrawPostProcessPassInfo(nc::PostProcessEffectId effectId,
                     modified = nc::ui::DragFloat(copy.width, "width", 0.05f, 0.1f, 10.0f) || modified;
                     if (modified)
                     {
-                        ncGraphics->SetPostProcessEffectProperties(effectId, nc::PostProcessPass::Outline, copy);
+                        ncGraphics->SetPostProcessEffectProperties(effectId, nc::PostProcessPassFlag::Outline, copy);
                     }
                 }
             },

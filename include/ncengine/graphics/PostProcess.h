@@ -12,7 +12,7 @@
 namespace nc
 {
 /** @brief Post process pass flags */
-struct PostProcessPass
+struct PostProcessPassFlag
 {
     using type = uint64_t;
 
@@ -27,7 +27,7 @@ struct PostProcessPass
 using PostProcessEffectId = uint32_t;
 
 /** @brief Set of flags indicating the passes used by a post process effect. */
-using PostProcessEffectPasses = PostProcessPass::type;
+using PostProcessEffectPassFlags = PostProcessPassFlag::type;
 
 /** @brief Null identifier for a post process effect. */
 constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId>::max();
@@ -36,10 +36,10 @@ constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId
 constexpr auto MoebiusEffectId = PostProcessEffectId{0};
 
 /** @brief Pass flags for the moebius post process effect. */
-constexpr auto MoebiusEffectPasses = PostProcessPass::Alpha   |
-                                     PostProcessPass::Depth   |
-                                     PostProcessPass::Normals |
-                                     PostProcessPass::Outline;
+constexpr auto MoebiusEffectPassFlags = PostProcessPassFlag::Alpha   |
+                                     PostProcessPassFlag::Depth   |
+                                     PostProcessPassFlag::Normals |
+                                     PostProcessPassFlag::Outline;
 
 /** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};
@@ -56,8 +56,8 @@ using PostProcessPassProperties = std::variant<EmptyPassProperties,
                                                OutlinePassProperties>;
 
 /** @brief Returns if a post process pass has a property type. */
-auto PassHasProperties(PostProcessPass::type pass) -> bool;
+auto PassHasProperties(PostProcessPassFlag::type pass) -> bool;
 
 /** @brief Construct a PostProcessPassProperties holding the property type for a pass. */
-auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties;
+auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPassProperties;
 } // namespace nc
