@@ -138,16 +138,27 @@ bool MeshAssetManager::Unload(const std::string& path, asset_flags_type)
                 m_indexData
             }
         );
+
+        m_onBoneUpdate.Emit(BoneUpdateEventData{
+            {},
+            {path},
+            UpdateAction::Unload
+        });
     }
     return true;
 }
 
 void MeshAssetManager::UnloadAll(asset_flags_type)
 {
-    /** We don't want to emit a signal with empty data. **/
+    /** We don't want to emit a signal for mesh data with empty data. **/
     m_accessors.clear();
     m_vertexData.clear();
     m_indexData.clear();
+    m_onBoneUpdate.Emit(BoneUpdateEventData{
+        {},
+        {},
+        UpdateAction::UnloadAll
+    });
 }
 
 auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshView

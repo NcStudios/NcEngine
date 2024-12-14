@@ -33,5 +33,11 @@ void MeshBase::Release() noexcept
         s_subsystem->RemoveInstance(m_ctx, m_material);
     }
 }
+
+void SkinnedMesh::SetMesh(const asset::MeshView& meshAsset)
+{
+    MeshBase::SetMesh(meshAsset);
+    m_controller.RefreshAnimation();
+}
 } // namespace nc
 

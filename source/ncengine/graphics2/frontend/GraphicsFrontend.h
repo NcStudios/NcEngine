@@ -1,5 +1,6 @@
 #pragma once
 
+#include "subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
 #include "subsystem/LightSubsystem.h"
@@ -29,8 +30,20 @@ class GraphicsFrontend
                          uint32_t maxRenderers,
                          uint32_t initialBatchSize,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
-                         Signal<const asset::MeshUpdateEventData&>& onMeshEvent)
-            : m_assetDispatch{context, device, textureBuffer, meshBuffer, onTextureEvent, onMeshEvent},
+                         Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
+                         Signal<const asset::SkeletalAnimationUpdateEventData&>& onAnimationEvent,
+                         Signal<const asset::BoneUpdateEventData&>& onBoneEvent)
+            : m_assetDispatch{
+                context,
+                device,
+                textureBuffer,
+                meshBuffer,
+                m_animationSystem.GetStorage(),
+                onTextureEvent,
+                onMeshEvent,
+                onAnimationEvent,
+                onBoneEvent
+              },
               m_materialRegistry{maxRenderers},
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
@@ -50,16 +63,18 @@ class GraphicsFrontend
             m_cameraSystem.Clear();
         }
 
-        auto GetCameraSubsystem()             ->       CameraSubsystem&            { return m_cameraSystem;       }
-        auto GetMeshSubsystem()               ->       MeshSubsystem&              { return m_meshSystem;         }
-        auto GetMaterialRegistry()            ->       MaterialRegistry&           { return m_materialRegistry;   }
-        auto GetPostProcessSubsystem()        ->       PostProcessSubsystem&       { return m_postProcessSystem;  }
-        auto GetPostProcessSubsystem()  const -> const PostProcessSubsystem&       { return m_postProcessSystem;  }
-        auto GetUISubsystem()                 ->       UISubsystem&                { return m_uiSystem;           }
-        auto GetUISubsystem()           const -> const UISubsystem&                { return m_uiSystem;           }
-        auto GetWireframeSubsystem()          ->       WireframeRendererSubsystem& { return m_wireframeSystem;    }
+        auto GetCameraSubsystem()                  ->       CameraSubsystem&            { return m_cameraSystem;      }
+        auto GetMeshSubsystem()                    ->       MeshSubsystem&              { return m_meshSystem;        }
+        auto GetMaterialRegistry()                 ->       MaterialRegistry&           { return m_materialRegistry;  }
+        auto GetPostProcessSubsystem()             ->       PostProcessSubsystem&       { return m_postProcessSystem; }
+        auto GetPostProcessSubsystem()       const -> const PostProcessSubsystem&       { return m_postProcessSystem; }
+        auto GetSkeletalAnimationSubsystem()       ->       SkeletalAnimationSubsystem& { return m_animationSystem;   }
+        auto GetUISubsystem()                      ->       UISubsystem&                { return m_uiSystem;          }
+        auto GetUISubsystem()                const -> const UISubsystem&                { return m_uiSystem;          }
+        auto GetWireframeSubsystem()               ->       WireframeRendererSubsystem& { return m_wireframeSystem;   }
 
     private:
+        SkeletalAnimationSubsystem m_animationSystem;
         AssetDispatch m_assetDispatch;
         MaterialRegistry m_materialRegistry;
         UISubsystem m_uiSystem;

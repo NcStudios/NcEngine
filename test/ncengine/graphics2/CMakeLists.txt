@@ -132,6 +132,7 @@ add_executable(MeshSubsystem_tests
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+    ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
 )
@@ -210,6 +211,57 @@ target_link_libraries(PostProcessSubsystem_tests
 )
 
 add_test(PostProcessSubsystem_tests PostProcessSubsystem_tests)
+
+### SkeletalAnimationController Tests ###
+add_executable(SkeletalAnimationController_tests
+    SkeletalAnimationController_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
+)
+
+target_include_directories(SkeletalAnimationController_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(SkeletalAnimationController_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SkeletalAnimationController_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(SkeletalAnimationController_tests SkeletalAnimationController_tests)
+
+### SkeletalAnimationStorage Tests ###
+add_executable(SkeletalAnimationStorage_tests
+    SkeletalAnimationStorage_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationTypes.cpp
+)
+
+target_include_directories(SkeletalAnimationStorage_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(SkeletalAnimationStorage_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SkeletalAnimationStorage_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(SkeletalAnimationStorage_tests SkeletalAnimationStorage_tests)
 
 ### TransformCache Tests ###
 add_executable(TransformCache_tests
