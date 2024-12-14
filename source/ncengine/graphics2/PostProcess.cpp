@@ -6,20 +6,20 @@
 
 namespace nc
 {
-auto PassHasProperties(PostProcessPass::type pass) -> bool
+auto PassHasProperties(PostProcessPassFlag::type pass) -> bool
 {
-    return pass == PostProcessPass::Outline;
+    return pass == PostProcessPassFlag::Outline;
 }
 
-auto MakeDefaultPassProperties(PostProcessPass::type pass) -> PostProcessPassProperties
+auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPassProperties
 {
     switch (pass)
     {
-        case PostProcessPass::Alpha:
-        case PostProcessPass::Depth:
-        case PostProcessPass::Normals:
+        case PostProcessPassFlag::Alpha:
+        case PostProcessPassFlag::Depth:
+        case PostProcessPassFlag::Normals:
             return PostProcessPassProperties{EmptyPassProperties{}};
-        case PostProcessPass::Outline:
+        case PostProcessPassFlag::Outline:
             return PostProcessPassProperties{OutlinePassProperties{}};
         default:
             // Explicitly enumerate above and fail here so tests can catch if an update to this gets missed.

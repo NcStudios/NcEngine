@@ -14,8 +14,8 @@ constexpr auto g_materialPassNames = std::array{
 };
 
 constexpr auto g_materialPassFlags = std::array{
-    nc::MaterialPass::Shadow,
-    nc::MaterialPass::Toon
+    nc::MaterialPassFlag::Shadow,
+    nc::MaterialPassFlag::Toon
 };
 
 constexpr auto g_postProcessPassNames = std::array{
@@ -26,10 +26,10 @@ constexpr auto g_postProcessPassNames = std::array{
 };
 
 constexpr auto g_postProcessPassFlags = std::array{
-    nc::PostProcessPass::Alpha,
-    nc::PostProcessPass::Depth,
-    nc::PostProcessPass::Normals,
-    nc::PostProcessPass::Outline
+    nc::PostProcessPassFlag::Alpha,
+    nc::PostProcessPassFlag::Depth,
+    nc::PostProcessPassFlag::Normals,
+    nc::PostProcessPassFlag::Outline
 };
 
 constexpr auto g_postProcessEffectNames = std::array{
@@ -42,15 +42,15 @@ constexpr auto g_postProcessEffectIds = std::array{
 
 const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
-        nc::PostProcessPass::Alpha,
-        nc::PostProcessPass::Depth,
-        nc::PostProcessPass::Normals,
-        nc::PostProcessPass::Outline
+        nc::PostProcessPassFlag::Alpha,
+        nc::PostProcessPassFlag::Depth,
+        nc::PostProcessPassFlag::Normals,
+        nc::PostProcessPassFlag::Outline
     }
 };
 
 constexpr auto g_combinedPostProcessEffectPassFlags = std::array{
-    nc::MoebiusEffectPasses
+    nc::MoebiusEffectPassFlags
 };
 
 static_assert(g_materialPassNames.size() == g_materialPassFlags.size());
@@ -67,14 +67,14 @@ auto GetMaterialPassNames() -> std::span<const std::string_view>
     return g_materialPassNames;
 }
 
-auto GetMaterialPassFlags() -> std::span<const MaterialPass::type>
+auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
     return g_materialPassFlags;
 }
 
-auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPass::type>
+auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
-    return std::span<const MaterialPass::type>{g_materialPassFlags.data() + 1, 1};
+    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 1};
 }
 
 auto GetPostProcessPassNames() -> std::span<const std::string_view>
@@ -82,12 +82,12 @@ auto GetPostProcessPassNames() -> std::span<const std::string_view>
     return g_postProcessPassNames;
 }
 
-auto GetPostProcessPassFlags() -> std::span<const PostProcessPass::type>
+auto GetPostProcessPassFlags() -> std::span<const PostProcessPassFlag::type>
 {
     return g_postProcessPassFlags;
 }
 
-auto GetPostProcessPassName(PostProcessPass::type pass) -> std::string_view
+auto GetPostProcessPassName(PostProcessPassFlag::type pass) -> std::string_view
 {
     const auto pos = std::ranges::find(g_postProcessPassFlags, pass);
     NC_ASSERT(pos != g_postProcessPassFlags.end(), "Invalid post process pass");
@@ -105,12 +105,12 @@ auto GetPostProcessEffectIds() -> std::span<const PostProcessEffectId>
     return g_postProcessEffectIds;
 }
 
-auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPass::type>
+auto GetPostProcessEffectPassFlags(PostProcessEffectId effectId) -> std::span<const PostProcessPassFlag::type>
 {
     return g_postProcessEffectPassFlags.at(effectId);
 }
 
-auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPasses
+auto GetCombinedPostProcessEffectPassFlags(PostProcessEffectId effectId) -> PostProcessEffectPassFlags
 {
     return g_combinedPostProcessEffectPassFlags.at(effectId);
 }

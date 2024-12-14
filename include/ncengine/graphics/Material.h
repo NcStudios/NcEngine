@@ -24,7 +24,7 @@ using MaterialInstanceHandle = uint32_t;
 constexpr auto NullMaterialInstanceHandle = std::numeric_limits<MaterialInstanceHandle>::max();
 
 /** @brief Material pass flags. */
-struct MaterialPass
+struct MaterialPassFlag
 {
     using type = uint64_t;
 
@@ -33,10 +33,10 @@ struct MaterialPass
 };
 
 /** @brief Set of flags indicating a MaterialInstance's enabled passes. */
-using MaterialPasses = MaterialPass::type;
+using MaterialPassFlags = MaterialPassFlag::type;
 
 /** @brief Default passes for a toon material. */
-constexpr auto ShadowedToonMaterial = MaterialPass::Shadow | MaterialPass::Toon;
+constexpr auto ShadowedToonMaterial = MaterialPassFlag::Shadow | MaterialPassFlag::Toon;
 
 /** @brief Properties of a MaterialInstance passed to shaders. */
 struct MaterialProperties
@@ -53,7 +53,7 @@ struct MaterialProperties
 struct MaterialDesc
 {
     std::string name = "DefaultMaterial";
-    MaterialPasses passes = ShadowedToonMaterial;
+    MaterialPassFlags passes = ShadowedToonMaterial;
     MaterialProperties properties = MaterialProperties{};
 };
 
@@ -77,7 +77,7 @@ class MaterialInstance
         void SetName(std::string_view name);
 
         /** @name MaterialPass Functions */
-        auto GetPasses() const -> MaterialPasses;
+        auto GetPasses() const -> MaterialPassFlags;
 
         /** @name MaterialProperties Functions */
         auto GetProperties() const -> const MaterialProperties&;

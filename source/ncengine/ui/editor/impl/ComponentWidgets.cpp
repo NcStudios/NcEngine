@@ -78,7 +78,7 @@ void MeshNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
     }
 }
 
-auto MaterialPassesWidget(nc::MaterialPasses& passes) -> bool
+auto MaterialPassFlagsWidget(nc::MaterialPassFlags& passes) -> bool
 {
     auto modified = false;
     const auto passInfo = std::views::zip(nc::GetMaterialPassNames(), nc::GetMaterialPassFlags());
@@ -158,7 +158,7 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         ImGui::Separator();
         if (ImGui::TreeNodeEx("Passes"))
         {
-            passesModified = MaterialPassesWidget(passes);
+            passesModified = MaterialPassFlagsWidget(passes);
             ImGui::TreePop();
         }
 
