@@ -162,10 +162,10 @@ add_executable(MeshSubsystem_tests
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneCache.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationTypes.cpp
 )
 
 target_include_directories(MeshSubsystem_tests
@@ -271,8 +271,8 @@ add_test(SkeletalAnimationController_tests SkeletalAnimationController_tests)
 ### SkeletalAnimationStorage Tests ###
 add_executable(SkeletalAnimationStorage_tests
     SkeletalAnimationStorage_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationTypes.cpp
 )
 
 target_include_directories(SkeletalAnimationStorage_tests

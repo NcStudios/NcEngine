@@ -31,7 +31,7 @@ auto StepAnimationTime(float& timeInOut,
     };
 }
 
-auto StepTransition(nc::graphics::gfx2::InFlightAnimation& state,
+auto StepTransition(nc::graphics::InFlightAnimation& state,
                     const nc::asset::SkeletalAnimation& blendFromAnimation,
                     float dt) -> StepResult
 {
@@ -175,7 +175,7 @@ void SkeletalAnimationSubsystem::Start(const MeshInstanceContext& ctx, const nc:
 
     auto& state = m_animationState.at(std::distance(m_animatedEntities.begin(), pos));
     const auto blendFromTime = state.time;
-    state = gfx2::InFlightAnimation{
+    state = InFlightAnimation{
         ctx.meshId,
         transition.toAnimId,
         transition.fromAnimId,

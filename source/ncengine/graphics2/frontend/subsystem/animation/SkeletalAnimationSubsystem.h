@@ -1,15 +1,29 @@
 #pragma once
 
 #include "BoneCache.h"
+#include "Rig.h"
 #include "SkeletalAnimationRenderState.h"
 #include "SkeletalAnimationStorage.h"
-#include "SkeletalAnimationTypes.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/Mesh.h"
 
 namespace nc::graphics
 {
+
+struct InFlightAnimation
+{
+    uint64_t meshId;
+    uint64_t animId;
+    uint64_t blendFromAnimId;
+    uint32_t boneIndex;
+    float time;
+    float blendFromTime;
+    float currentTransitionTime;
+    float transitionDuration;
+    float blendFactor;
+};
+
 class SkeletalAnimationSubsystem
 {
     public:
@@ -37,7 +51,7 @@ class SkeletalAnimationSubsystem
         SkeletalAnimationStorage m_storage;
 
         std::vector<Entity> m_animatedEntities;
-        std::vector<gfx2::InFlightAnimation> m_animationState;
+        std::vector<InFlightAnimation> m_animationState;
         std::vector<Entity> m_completedAnimations;
 
         BoneCache m_boneCache;

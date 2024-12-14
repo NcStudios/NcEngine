@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SkeletalAnimationTypes.h"
+#include "Rig.h"
 #include "graphics2/ShaderTypes.h"
 
 #include "ncengine/ecs/Component.h"
@@ -17,11 +17,11 @@ namespace nc::graphics::gfx3
 class SkeletalAnimationCalculator
 {
     public:
-        auto Animate(const gfx2::PackedRig& rig,
+        auto Animate(const Rig& rig,
                      const asset::SkeletalAnimation& animation,
                      float timeInTicks) -> std::span<const BoneData>;
 
-        auto Animate(const gfx2::PackedRig& rig,
+        auto Animate(const Rig& rig,
                      const asset::SkeletalAnimation& blendFromAnimation,
                      float blendFromTicks,
                      const asset::SkeletalAnimation& blendToAnimation,
@@ -34,6 +34,6 @@ class SkeletalAnimationCalculator
         std::vector<DecomposedMatrixXM> m_fromOffsetsDecomposed;
         std::vector<DecomposedMatrixXM> m_toOffsetsDecomposed;
 
-        void Prepare(const gfx2::PackedRig& rig, bool blended);
+        void Prepare(const Rig& rig, bool blended);
 };
 } // namespace nc::graphics::gfx2

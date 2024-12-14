@@ -74,7 +74,7 @@ auto GetInterpolatedScale(float timeInTicks, const std::vector<asset::ScaleFrame
 }
 
 // Calculate offset matrices for a single (unblended) animation
-void CalculateOffsets(const gfx2::PackedRig& rig,
+void CalculateOffsets(const Rig& rig,
                       const asset::SkeletalAnimation& animation,
                       float timeInTicks,
                       std::vector<XMMATRIX>& offsetsOut)
@@ -98,7 +98,7 @@ void CalculateOffsets(const gfx2::PackedRig& rig,
 }
 
 // Calculate decomposed offsets to be blended with another animation
-void CalculateOffsetsForBlending(const gfx2::PackedRig& rig,
+void CalculateOffsetsForBlending(const Rig& rig,
                                  const asset::SkeletalAnimation& animation,
                                  float timeInTicks,
                                  std::vector<DecomposedMatrixXM>& offsetsOut)
@@ -141,7 +141,7 @@ void BlendOffsets(const std::vector<DecomposedMatrixXM>& fromOffsets,
     );
 }
 
-void AnimateBones(const gfx2::PackedRig& rig,
+void AnimateBones(const Rig& rig,
                   std::vector<XMMATRIX>& offsets,
                   std::vector<BoneData>& bonesOut)
 {
@@ -170,7 +170,7 @@ void AnimateBones(const gfx2::PackedRig& rig,
 
 namespace nc::graphics::gfx3
 {
-auto SkeletalAnimationCalculator::Animate(const gfx2::PackedRig& rig,
+auto SkeletalAnimationCalculator::Animate(const Rig& rig,
                                           const asset::SkeletalAnimation& animation,
                                           float timeInTicks) -> std::span<const BoneData>
 {
@@ -180,7 +180,7 @@ auto SkeletalAnimationCalculator::Animate(const gfx2::PackedRig& rig,
     return std::span<const BoneData>{m_boneBuffer};
 }
 
-auto SkeletalAnimationCalculator::Animate(const gfx2::PackedRig& rig,
+auto SkeletalAnimationCalculator::Animate(const Rig& rig,
                                           const asset::SkeletalAnimation& blendFromAnimation,
                                           float blendFromTicks,
                                           const asset::SkeletalAnimation& blendToAnimation,
@@ -195,7 +195,7 @@ auto SkeletalAnimationCalculator::Animate(const gfx2::PackedRig& rig,
     return std::span<const BoneData>{m_boneBuffer};
 }
 
-void SkeletalAnimationCalculator::Prepare(const gfx2::PackedRig& rig, bool blended)
+void SkeletalAnimationCalculator::Prepare(const Rig& rig, bool blended)
 {
     const auto boneCapacity = rig.boneToParent.size();
     const auto vertexToBoneCapacity = rig.vertexToBone.size();

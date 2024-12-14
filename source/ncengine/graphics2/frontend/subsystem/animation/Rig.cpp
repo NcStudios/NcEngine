@@ -1,5 +1,6 @@
-#include "SkeletalAnimationTypes.h"
+#include "Rig.h"
 
+#include <algorithm>
 #include <ranges>
 
 namespace
@@ -18,9 +19,9 @@ auto GetGlobalInverseTransform(const std::vector<nc::asset::BoneSpaceToParentSpa
 }
 } // anonymous namespace
 
-namespace nc::graphics::gfx2
+namespace nc::graphics
 {
-PackedRig::PackedRig(const asset::BonesData& bonesData)
+Rig::Rig(const asset::BonesData& bonesData)
     : vertexToBone{},
       boneToParent{},
       globalInverseTransform{GetGlobalInverseTransform(bonesData.boneSpaceToParentSpace)},
