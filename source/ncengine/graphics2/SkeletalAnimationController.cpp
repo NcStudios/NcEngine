@@ -2,6 +2,8 @@
 
 #include "ncutility/ScopeExit.h"
 
+#include <utility>
+
 namespace nc
 {
 SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
@@ -20,7 +22,7 @@ SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
 
 auto SkeletalAnimationController::GetCurrentAnimationId() const -> uint64_t
 {
-    // Id is cached here if transition from immediate -> immediate is queued
+    // Id is cached here if queued transition overwrote the current id (e.g. immediate -> immediate)
     if (m_prevAnimId != NullAnimationId)
     {
         return m_prevAnimId;
@@ -77,7 +79,6 @@ void SkeletalAnimationController::SetAnimation(AnimationStateId stateId, uint64_
     const auto oldId = std::exchange(m_states.at(stateId).animId, animationId);
     if (m_activeState == stateId)
     {
-        // m_activeState = NullAnimationState;
         m_queuedState = stateId;
         m_prevAnimId = oldId;
     }
@@ -192,7 +193,6 @@ auto SkeletalAnimationController::CalculateTransitionDuration(float requestedDur
 void SkeletalAnimationController::QueueImmediateTransition()
 {
     m_queuedState = ImmediateAnimationState;
-    // If we're in immediate state, current id will be overwritten. Cache it.
     if (m_immediateState)
     {
         m_prevAnimId = m_immediateState->animId;
@@ -204,31 +204,16 @@ auto SkeletalAnimationController::TransitionQueuedState() -> AnimationTransition
     const auto curAnim = GetCurrentAnimationId();
     m_prevAnimId = NullAnimationId;
     m_activeState = std::exchange(m_queuedState, NullAnimationState);
-    switch (m_activeState)
-    {
-        case ImmediateAnimationState:
-            return AnimationTransition{
-                m_immediateState->animId,
-                curAnim,
-                CalculateTransitionDuration(m_immediateState->transitionDuration),
-                m_immediateState->action
-            };
-        case RootAnimationState:
-            return AnimationTransition{
-                m_states.at(RootAnimationState).animId,
-                curAnim,
-                m_defaultTransitionDuration,
-                AnimationTransitionType::Loop
-            };
-        default:
-            auto& state = m_states.at(m_activeState);
-            return AnimationTransition{
-                state.animId,
-                curAnim,
-                CalculateTransitionDuration(state.transitionDuration),
-                state.action
-            };
-    }
+    auto& state = m_activeState == ImmediateAnimationState
+        ? *m_immediateState
+        : m_states.at(m_activeState);
+
+    return AnimationTransition{
+        state.animId,
+        curAnim,
+        CalculateTransitionDuration(state.transitionDuration),
+        state.action
+    };
 }
 
 auto SkeletalAnimationController::TransitionState(AnimationState& from,

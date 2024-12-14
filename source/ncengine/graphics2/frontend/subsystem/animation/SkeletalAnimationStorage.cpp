@@ -23,7 +23,7 @@ void SkeletalAnimationStorage::UnloadAnimation(const std::string& id)
     m_animations.erase(utility::Fnv1a(id));
 }
 
-void SkeletalAnimationStorage::UnloadAnimations()
+void SkeletalAnimationStorage::UnloadAllAnimations()
 {
     const auto _ = AcquireWriteLock();
     m_animations.clear();
@@ -54,7 +54,7 @@ void SkeletalAnimationStorage::UnloadBones(const std::string& id)
     m_rigs.erase(utility::Fnv1a(id));
 }
 
-void SkeletalAnimationStorage::UnloadBones()
+void SkeletalAnimationStorage::UnloadAllBones()
 {
     const auto _ = AcquireWriteLock();
     m_rigs.clear();

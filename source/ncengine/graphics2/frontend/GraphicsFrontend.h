@@ -1,5 +1,6 @@
 #pragma once
 
+#include "subsystem/animation/SkeletalAnimationSubsystem.h"
 #include "subsystem/AssetDispatch.h"
 #include "subsystem/CameraSubsystem.h"
 #include "subsystem/LightSubsystem.h"

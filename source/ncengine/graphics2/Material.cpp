@@ -23,7 +23,7 @@ void MaterialInstance::SetName(std::string_view name)
     s_registry->SetInstanceName(m_handle, name);
 }
 
-auto MaterialInstance::GetPasses() const -> MaterialPasses
+auto MaterialInstance::GetPasses() const -> MaterialPassFlags
 {
     return s_registry->GetInstanceDesc(m_handle).passes;
 }

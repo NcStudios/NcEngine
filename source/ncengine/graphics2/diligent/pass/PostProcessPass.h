@@ -28,7 +28,7 @@ struct PostProcessPipeline
 {
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
     std::vector<PostProcessPipelineInstance> instances;
-    PostProcessPass::type id = PostProcessPass::None;
+    PostProcessPassFlag::type id = PostProcessPassFlag::None;
     uint32_t renderTargetCount = 0u;
     uint32_t colorRenderTargetIndex = 0u;
     uint32_t depthRenderTargetIndex = 0u;

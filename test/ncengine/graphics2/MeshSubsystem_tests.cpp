@@ -14,7 +14,7 @@
 #include <ranges>
 
 const auto g_materialDesc = nc::MaterialDesc{
-    .passes = nc::MaterialPass::Toon
+    .passes = nc::MaterialPassFlag::Toon
 };
 
 constexpr auto g_meshView = nc::asset::MeshView{
@@ -26,7 +26,7 @@ DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asse
 namespace nc
 {
 MaterialInstance::MaterialInstance(const MaterialDesc&){}
-auto MaterialInstance::GetPasses()     const ->       MaterialPasses      { return g_materialDesc.passes;     }
+auto MaterialInstance::GetPasses()     const ->       MaterialPassFlags      { return g_materialDesc.passes;     }
 auto MaterialInstance::GetProperties() const -> const MaterialProperties& { return g_materialDesc.properties; }
 void MaterialInstance::Release() noexcept {}
 

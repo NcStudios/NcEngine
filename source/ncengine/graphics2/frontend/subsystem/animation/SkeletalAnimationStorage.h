@@ -33,11 +33,11 @@ class SkeletalAnimationStorage
         void LoadAnimations(std::span<const std::string> ids,
                             std::span<const asset::SkeletalAnimation> animations);
         void UnloadAnimation(const std::string& id);
-        void UnloadAnimations();
+        void UnloadAllAnimations();
         void LoadBones(std::span<const std::string> ids,
                        std::span<const asset::BonesData> bones);
         void UnloadBones(const std::string& id);
-        void UnloadBones();
+        void UnloadAllBones();
 
     private:
         std::unordered_map<uint64_t, asset::SkeletalAnimation> m_animations;

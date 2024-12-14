@@ -11,21 +11,22 @@
 
 namespace nc
 {
-constexpr auto NullAnimationId = std::numeric_limits<uint64_t>::max();            ///< Null animation asset identifier.
+/** @brief Identifier for a null animation asset. */
+constexpr auto NullAnimationId = std::numeric_limits<uint64_t>::max();
 
-using AnimationStateId = uint32_t;                                                ///< Id for a SkeletalAnimationController node.
-constexpr auto NullAnimationState = std::numeric_limits<AnimationStateId>::max(); ///< Empty animation state node id.
-constexpr auto RootAnimationState = AnimationStateId{0u};                         ///< Default animation state node id.
-constexpr auto ImmediateAnimationState = NullAnimationState - 1u;                 ///< Immediate animation state node id.
-constexpr auto MaxAnimationStates = 32ull;                                        ///< Max state count for a SkeletalAnimationController.
+/** @name Animation State Id Types */
+using AnimationStateId = uint32_t;
+constexpr auto NullAnimationState = std::numeric_limits<AnimationStateId>::max();
+constexpr auto RootAnimationState = AnimationStateId{0u};
+constexpr auto ImmediateAnimationState = NullAnimationState - 1u;
+constexpr auto MaxAnimationStates = 32ull;
 
-using TransitionCondition = std::move_only_function<bool()>;                      ///< Condition that determines whether an animation state transition should occur.
-constexpr bool ConditionNever() { return false; }                                 ///< Convenience condition for disabling enter/exit conditions.
-
-/** @brief Used on an animation state to use the SkeletalAnimationController's default duration for transitions. */
+/** @name Animation Transition Types */
+using TransitionCondition = std::move_only_function<bool()>;
+constexpr bool ConditionNever() { return false; }
 constexpr auto UseDefaultTransitionDuration = -1.0f;
 
-/** @brief Animation state machine node that loops until the exit condition is met. */
+/** @brief Animation state that loops until the exit condition is met. */
 struct LoopAnimation
 {
     uint64_t animId = NullAnimationId;
@@ -36,7 +37,7 @@ struct LoopAnimation
     float transitionDuration = UseDefaultTransitionDuration;
 };
 
-/** @brief Animation state machine node that plays once before transitioning to the exitTo state. */
+/** @brief Animation state that plays once before transitioning to the exitTo state. */
 struct PlayOnceAnimation
 {
     uint64_t animId = NullAnimationId;
@@ -46,7 +47,7 @@ struct PlayOnceAnimation
     float transitionDuration = UseDefaultTransitionDuration;
 };
 
-/** @brief Animation state machine node that stops an animation. */
+/** @brief Animation state that stops the state machine.. */
 struct StopAnimation
 {
     TransitionCondition enterWhen = ConditionNever;
@@ -132,8 +133,8 @@ class SkeletalAnimationController
 
         /** @cond internal */
         void RefreshAnimation();
-        auto CheckForTransition() -> AnimationTransition;
         void NotifyCompleteState();
+        auto CheckForTransition() -> AnimationTransition;
         /** @endcond internal */
 
     private:

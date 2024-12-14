@@ -15,7 +15,7 @@ struct PostProcessState;
 struct PostProcessDataVariable
 {
     Diligent::IShaderResourceVariable* variable = nullptr;
-    PostProcessPass::type passId = PostProcessPass::None;
+    PostProcessPassFlag::type passId = PostProcessPassFlag::None;
 };
 
 // Set of uniform buffer variables for post process property types. The actual buffers are owned by pass instances.
@@ -24,8 +24,8 @@ class PostProcessPropertyBufferResource
     public:
         explicit PostProcessPropertyBufferResource(std::vector<PostProcessDataVariable> variables);
 
-        void SetVariable(PostProcessPass::type passId, Diligent::IBuffer& buffer);
-        auto GetVariable(PostProcessPass::type passId) -> Diligent::IShaderResourceVariable&;
+        void SetVariable(PostProcessPassFlag::type passId, Diligent::IBuffer& buffer);
+        auto GetVariable(PostProcessPassFlag::type passId) -> Diligent::IShaderResourceVariable&;
 
     private:
         std::vector<PostProcessDataVariable> m_variables;

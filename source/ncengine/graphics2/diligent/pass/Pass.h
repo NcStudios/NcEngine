@@ -17,7 +17,7 @@ class ShaderFactory;
 struct Pass
 {
     explicit Pass(Diligent::RefCntAutoPtr<Diligent::IPipelineState> state,
-                  MaterialPass::type passId)
+                  MaterialPassFlag::type passId)
         : pso{std::move(state)},
           id{passId}
     {
@@ -25,10 +25,10 @@ struct Pass
 
     explicit Pass(Diligent::IRenderDevice& device,
                   const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
-                  MaterialPass::type passId);
+                  MaterialPassFlag::type passId);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
-    MaterialPass::type id;
+    MaterialPassFlag::type id;
 };
 
 auto MakeDefaultGraphicsPipelineCreateInfo(Diligent::ISwapChain& swapChain,

@@ -62,4 +62,4 @@ PackedRig::PackedRig(const asset::BonesData& bonesData)
         }
     });
 }
-} // namespace nc::anim
+} // namespace nc::graphics

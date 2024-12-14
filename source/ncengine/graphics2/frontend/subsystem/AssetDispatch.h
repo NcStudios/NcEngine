@@ -91,7 +91,7 @@ class AssetDispatch
                 }
                 case asset::UpdateAction::UnloadAll:
                 {
-                    m_animationStorage->UnloadAnimations();
+                    m_animationStorage->UnloadAllAnimations();
                     break;
                 }
             }
@@ -114,7 +114,7 @@ class AssetDispatch
                 }
                 case asset::UpdateAction::UnloadAll:
                 {
-                    m_animationStorage->UnloadBones();
+                    m_animationStorage->UnloadAllBones();
                     break;
                 }
             }
