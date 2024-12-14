@@ -3,7 +3,6 @@ target_sources(${NC_ENGINE_LIB}
         BoneCache.cpp
         SkeletalAnimationCalculator.cpp
         SkeletalAnimationSubsystem.cpp
-        SkeletalAnimationCalculations2.cpp
         SkeletalAnimationStorage.cpp
         SkeletalAnimationTypes.cpp
 )

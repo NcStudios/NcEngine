@@ -1,5 +1,4 @@
 #include "SkeletalAnimationSubsystem.h"
-#include "SkeletalAnimationCalculations2.h"
 #include "SkeletalAnimationCalculator.h"
 
 #include "ncengine/debug/Profile.h"
@@ -94,30 +93,6 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 
             m_boneCache.UpdateRegion(state.boneIndex, bones);
         }
-
-
-        // const auto packedAnimation = [&]()
-        // {
-        //     if (m_storage.HasAnimation(state.blendFromAnimId))
-        //     {
-        //         const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
-        //         const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
-        //         return gfx2::ComposeBlendedMatrices(
-        //             blendFromTicks,
-        //             ticks,
-        //             state.blendFactor,
-        //             rig.boneNames,
-        //             blendFromAnimation,
-        //             animation
-        //         );
-        //     }
-
-        //     return gfx2::ComposeMatrices(ticks, rig.boneNames, animation);
-        // }();
-
-        // gfx2::AnimateBones(rig, packedAnimation, boneBuffer);
-        // m_boneCache.UpdateRegion(state.boneIndex, boneBuffer);
-        // boneBuffer.clear();
     }
 }
 

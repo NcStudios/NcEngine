@@ -74,16 +74,12 @@ auto GetInterpolatedScale(float timeInTicks, const std::vector<asset::ScaleFrame
 }
 
 // Calculate offset matrices for a single (unblended) animation
-void CalculateOffsets(const std::vector<std::string>& boneNames,
+void CalculateOffsets(const gfx2::PackedRig& rig,
                       const asset::SkeletalAnimation& animation,
                       float timeInTicks,
-                      std::vector<XMMATRIX>& offsetsOut,
-                      std::vector<uint8_t>& hasValuesOut)
+                      std::vector<XMMATRIX>& offsetsOut)
 {
-    // todo: can we just write boneToParentHere? if boneNames and boneToParent are in sync,
-    // I think that gets rid of the whole 'hasValues' concept...
-
-    for (const auto& boneName : boneNames)
+    for (const auto [boneName, parent] : std::views::zip(rig.boneNames, rig.boneToParent))
     {
         const auto iter = animation.framesPerBone.find(boneName);
         if (iter != animation.framesPerBone.end())
@@ -94,26 +90,22 @@ void CalculateOffsets(const std::vector<std::string>& boneNames,
                 GetInterpolatedPosition(timeInTicks, iter->second.positionFrames)
             ));
 
-            hasValuesOut.push_back(1);
             continue;
         }
 
-        offsetsOut.push_back(XMMATRIX{});
-        hasValuesOut.push_back(0);
+        offsetsOut.push_back(parent);
     }
 }
 
 // Calculate decomposed offsets to be blended with another animation
-void CalculateOffsets(const std::vector<std::string>& boneNames,
-                      const asset::SkeletalAnimation& animation,
-                      float timeInTicks,
-                      std::vector<DecomposedMatrixXM>& offsetsOut,
-                      std::vector<uint8_t>* hasValuesOut = nullptr)
+void CalculateOffsetsForBlending(const gfx2::PackedRig& rig,
+                                 const asset::SkeletalAnimation& animation,
+                                 float timeInTicks,
+                                 std::vector<DecomposedMatrixXM>& offsetsOut)
 {
-    NC_PROFILE_SCOPE("CalculateOffsets()", ProfileCategory::Animation); // prob don't keep
-    for (const auto& boneName : boneNames)
+    for (const auto [boneName, parent] : std::views::zip(rig.boneNames, rig.boneToParent))
     {
-        auto iter = animation.framesPerBone.find(boneName);
+        const auto iter = animation.framesPerBone.find(boneName);
         if (iter != animation.framesPerBone.end())
         {
             offsetsOut.emplace_back(
@@ -122,15 +114,10 @@ void CalculateOffsets(const std::vector<std::string>& boneNames,
                 GetInterpolatedPosition(timeInTicks, iter->second.positionFrames)
             );
 
-            if (hasValuesOut)
-                hasValuesOut->push_back(1);
-
             continue;
         }
 
-        offsetsOut.push_back(DecomposedMatrixXM{});
-        if (hasValuesOut)
-            hasValuesOut->push_back(0);
+        offsetsOut.push_back(DecomposeMatrix(parent));
     }
 }
 
@@ -140,10 +127,6 @@ void BlendOffsets(const std::vector<DecomposedMatrixXM>& fromOffsets,
                   float blendFactor,
                   std::vector<XMMATRIX>& offsetsOut)
 {
-    NC_PROFILE_SCOPE("ComposeBlendedOffsets()", ProfileCategory::Animation); // prob don't keep
-
-    NC_ASSERT(fromOffsets.size() == toOffsets.size(), "fuuck");
-
     std::ranges::transform(
         std::views::zip(fromOffsets, toOffsets),
         std::back_inserter(offsetsOut),
@@ -159,20 +142,9 @@ void BlendOffsets(const std::vector<DecomposedMatrixXM>& fromOffsets,
 }
 
 void AnimateBones(const gfx2::PackedRig& rig,
-                  const std::vector<uint8_t>& hasValues,
                   std::vector<XMMATRIX>& offsets,
                   std::vector<BoneData>& bonesOut)
 {
-    NC_PROFILE_SCOPE("AnimateBones()", ProfileCategory::Animation);
-
-    // Replace each boneToParent offset with its animation offset, if present. Else, leave as the original offset.
-    // Replace unanimated offsets with the original offset
-    for (auto [offset, original, animHasValue] : std::views::zip(offsets, rig.boneToParent, hasValues))
-    {
-        if (!animHasValue)
-            offset = original;
-    }
-
     // Multiply each child (siblings are contiguous) with its parent.
     for (auto [parent, childrenIndex] : std::views::zip(offsets, rig.offsetChildren))
     {
@@ -181,8 +153,6 @@ void AnimateBones(const gfx2::PackedRig& rig,
             child = XMMatrixMultiply(child, parent);
         }
     }
-
-    bonesOut.reserve(rig.vertexToBone.size());
 
     // Create a final transform for each bone by multiplying the (vertex-space-to-bone-space matrix) with the (bone-space-to-animated-parent-bone-space matrix) with the (global inverse transform matrix).
     // This outputs a matrix that can be used to transform a vertex into its final animated position.
@@ -204,9 +174,9 @@ auto SkeletalAnimationCalculator::Animate(const gfx2::PackedRig& rig,
                                           const asset::SkeletalAnimation& animation,
                                           float timeInTicks) -> std::span<const BoneData>
 {
-    Prepare(rig.boneNames.size());
-    CalculateOffsets(rig.boneNames, animation, timeInTicks, m_offsets, m_hasValues);
-    AnimateBones(rig, m_hasValues, m_offsets, m_boneBuffer);
+    Prepare(rig, false);
+    CalculateOffsets(rig, animation, timeInTicks, m_offsets);
+    AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
 }
 
@@ -217,28 +187,36 @@ auto SkeletalAnimationCalculator::Animate(const gfx2::PackedRig& rig,
                                           float blendToTicks,
                                           float blendFactor) -> std::span<const BoneData>
 {
-    Prepare(rig.boneNames.size());
-    CalculateOffsets(rig.boneNames, blendToAnimation, blendToTicks, m_toOffsetsDecomposed, &m_hasValues);
-    CalculateOffsets(rig.boneNames, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed, nullptr);
+    Prepare(rig, true);
+    CalculateOffsetsForBlending(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
+    CalculateOffsetsForBlending(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
     BlendOffsets(m_fromOffsetsDecomposed, m_toOffsetsDecomposed, blendFactor, m_offsets);
-    AnimateBones(rig, m_hasValues, m_offsets, m_boneBuffer);
+    AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
 }
 
-void SkeletalAnimationCalculator::Prepare(size_t boneCapacity)
+void SkeletalAnimationCalculator::Prepare(const gfx2::PackedRig& rig, bool blended)
 {
+    const auto boneCapacity = rig.boneToParent.size();
+    const auto vertexToBoneCapacity = rig.vertexToBone.size();
     m_boneBuffer.clear();
+    if (vertexToBoneCapacity > m_boneBuffer.capacity())
+    {
+        m_boneBuffer.reserve(vertexToBoneCapacity);
+    }
+
     m_offsets.clear();
     m_fromOffsetsDecomposed.clear();
     m_toOffsetsDecomposed.clear();
-    m_hasValues.clear();
 
-    if (boneCapacity > m_boneBuffer.capacity())
+    if (boneCapacity > m_offsets.capacity())
     {
-        m_boneBuffer.reserve(boneCapacity); // ok?
         m_offsets.reserve(boneCapacity);
-        m_toOffsetsDecomposed.reserve(boneCapacity);
-        m_hasValues.reserve(boneCapacity);
+        if (blended)
+        {
+            m_fromOffsetsDecomposed.reserve(boneCapacity);
+            m_toOffsetsDecomposed.reserve(boneCapacity);
+        }
     }
 }
 } // namespace nc::graphics

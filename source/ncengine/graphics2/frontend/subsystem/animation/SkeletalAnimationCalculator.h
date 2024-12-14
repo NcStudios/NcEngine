@@ -33,8 +33,7 @@ class SkeletalAnimationCalculator
         std::vector<DirectX::XMMATRIX> m_offsets;
         std::vector<DecomposedMatrixXM> m_fromOffsetsDecomposed;
         std::vector<DecomposedMatrixXM> m_toOffsetsDecomposed;
-        std::vector<uint8_t> m_hasValues;
 
-        void Prepare(size_t boneCapacity);
+        void Prepare(const gfx2::PackedRig& rig, bool blended);
 };
 } // namespace nc::graphics::gfx2

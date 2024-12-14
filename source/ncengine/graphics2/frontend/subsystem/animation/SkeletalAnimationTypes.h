@@ -33,51 +33,6 @@ struct PackedRig
     std::vector<uint32_t> offsetsMap;
 };
 
-/**
- * @brief The raw data members that get composed into a DirectX::XMMATRIX.
- * 
- * We need this raw data as we need to interpolate between two DecomposedMatrix types in the case of blending between states 
- * rather than attempting to interpolate between two DirectX::XMMATRIX types.
- */
-struct DecomposedMatrix
-{
-    Vector3 pos;
-    Quaternion rot;
-    Vector3 scale; // todo: we construct a default one of these somewhere; shouldn't scale be One()?
-};
-
-/**
- * @brief A quick wrapper representing a bool, avoiding a std::vector<bool>.
- */
-using HasValue = uint8_t;
-
-/**
- * @brief The interpolated DirectX::XMMATRIX objects representing the animated transformation matrix per PackedRig::boneToParent node.
- * 
- * The items in both vectors below sync up exactly to the PackedRig::boneToParent vector. Because some PackedRig::boneToParent items will not 
- * have animation data, we need the hasValues vector to act as a 'sparse set'.
- */
-struct PackedAnimation
-{
-    std::vector<DirectX::XMMATRIX> offsets;
-    std::vector<HasValue> hasValues;
-};
-
-/**
- * @brief The pre-interpolated DecomposedMatrix objects representing the animated transformation matrix per PackedRig::boneToParent node.
- * 
- * The items in both vectors below sync up exactly to the PackedRig::boneToParent vector. Because some PackedRig::boneToParent items will not 
- * have animation data, we need the hasValues vector to act as a 'sparse set'.
- * 
- * We need this raw data as we need to interpolate between two DecomposedMatrix types in the case of blending between states 
- * rather than attempting to interpolate between two DirectX::XMMATRIX types.
- */
-struct PackedAnimationDecomposed
-{
-    std::vector<DecomposedMatrix> offsets;
-    std::vector<HasValue> hasValues;
-};
-
 struct InFlightAnimation
 {
     uint64_t meshId;
