@@ -2,6 +2,7 @@
 #include "diligent/pass/MaterialPass.h"
 #include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
+#include "diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -364,7 +365,7 @@ void NcGraphicsImpl2::Run()
 
     m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRenderState.staticMeshBatches);
     m_passBackend.RenderWireframe(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.wireframeRenderState);
-    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature());
+    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature());
     m_ui.Render(context);
 
     swapChain.Present();

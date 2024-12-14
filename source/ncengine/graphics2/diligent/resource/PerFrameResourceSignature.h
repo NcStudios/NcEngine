@@ -35,7 +35,8 @@ class PerFrameResourceSignature
                                            const StructuredBufferResourceDesc& boneResourceDesc,
                                            const TextureBufferResourceDesc& textureResourceDesc,
                                            const UniformBufferResourceDesc& environmentResourceDesc,
-                                           const UniformBufferResourceDesc& wireframeResourceDesc);
+                                           const UniformBufferResourceDesc& wireframeResourceDesc,
+                                           const UniformBufferResourceDesc& outlinePassPropertiesDesc);
         ~PerFrameResourceSignature() noexcept;
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY); }
@@ -53,6 +54,7 @@ class PerFrameResourceSignature
         auto GetTextureBuffer()             -> TextureBufferResource&                     { return *m_textureResource; }
         auto GetEnvironmentBuffer()         -> EnvironmentBufferResource&                 { return *m_environmentResource; }
         auto GetWireframeBuffer()           -> WireframeBufferResource&                   { return *m_wireframeBufferResource; }
+        auto GetPostProcessPropertyBuffer() -> PostProcessPropertyBufferResource&         { return *m_postProcessPropertyResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
@@ -68,5 +70,6 @@ class PerFrameResourceSignature
         std::unique_ptr<TextureBufferResource> m_textureResource;
         std::unique_ptr<EnvironmentBufferResource> m_environmentResource;
         std::unique_ptr<WireframeBufferResource> m_wireframeBufferResource;
+        std::unique_ptr<PostProcessPropertyBufferResource> m_postProcessPropertyResource;
 };
 } // namespace nc::graphics

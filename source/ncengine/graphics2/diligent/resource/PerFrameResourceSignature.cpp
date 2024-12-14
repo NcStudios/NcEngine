@@ -2,6 +2,7 @@
 #include "EnvironmentBufferResource.h"
 #include "TextureBufferResource.h"
 #include "WireframeBufferResource.h"
+#include "PostProcessPropertyBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -23,7 +24,8 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferResourceDesc& boneResourceDesc,
                                                      const TextureBufferResourceDesc& textureResourceDesc,
                                                      const UniformBufferResourceDesc& environmentResourceDesc,
-                                                     const UniformBufferResourceDesc& wireframeResourceDesc)
+                                                     const UniformBufferResourceDesc& wireframeResourceDesc,
+                                                     const UniformBufferResourceDesc& outlinePassPropertiesDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
@@ -36,7 +38,8 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(boneResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
-        ToPipelineResourceDesc(wireframeResourceDesc)
+        ToPipelineResourceDesc(wireframeResourceDesc),
+        ToPipelineResourceDesc(outlinePassPropertiesDesc)
     };
 
     const auto sampler = TextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
@@ -138,6 +141,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         context,
         device,
         GetVariable(wireframeResourceDesc, m_srb)
+    );
+
+    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
+        context,
+        device,
+        GetVariable(outlinePassPropertiesDesc.shaderType, outlinePassPropertiesDesc.resourceKey.data(), m_srb)
     );
 }
 

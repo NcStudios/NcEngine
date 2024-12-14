@@ -1,4 +1,7 @@
 #include "PerPassResourceSignature.h"
+#include "PostProcessColorSinkBufferResource.h"
+#include "PostProcessDepthSinkBufferResource.h"
+#include "PostProcessSinkIndexBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -12,14 +15,12 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    uint8_t bindingIndex,
                                                    const TextureBufferResourceDesc& postProcessColorSinkResourceDesc,
                                                    const TextureBufferResourceDesc& postProcessDepthSinkResourceDesc,
-                                                   const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc,
-                                                   const UniformBufferResourceDesc& outlinePassPropertiesDesc)
+                                                   const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(postProcessColorSinkResourceDesc),
         ToPipelineResourceDesc(postProcessDepthSinkResourceDesc),
-        ToPipelineResourceDesc(postProcessSinkIndexResourceDesc),
-        ToPipelineResourceDesc(outlinePassPropertiesDesc)
+        ToPipelineResourceDesc(postProcessSinkIndexResourceDesc)
     };
 
     const auto sampler = PostProcessColorSinkBufferResource::MakeSamplerDesc(postProcessColorSinkResourceDesc.resourceKey);
@@ -57,12 +58,6 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
     m_postProcessSinkIndexBufferResource = std::make_unique<PostProcessSinkIndexBufferResource>(
         context, device,
         GetVariable(postProcessSinkIndexResourceDesc.shaderType, postProcessSinkIndexResourceDesc.resourceKey.data(), m_srb)
-    );
-
-    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
-        context,
-        device,
-        GetVariable(outlinePassPropertiesDesc.shaderType, outlinePassPropertiesDesc.resourceKey.data(), m_srb)
     );
 }
 } // namespace nc::graphics

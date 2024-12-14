@@ -1,7 +1,8 @@
 #include "PassBackend.h"
-#include "graphics2/diligent/pass/PassUtilities.h"
+#include "PassUtilities.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
@@ -229,11 +230,12 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
 
 void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                                     Diligent::ISwapChain& swapChain,
-                                    PerPassResourceSignature& perPassResourceSignature)
+                                    PerPassResourceSignature& perPassResourceSignature,
+                                    PerFrameResourceSignature& perFrameResourceSignature)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
-    auto& propertyBuffer = perPassResourceSignature.GetPostProcessPropertyBuffer();
+    auto& propertyBuffer = perFrameResourceSignature.GetPostProcessPropertyBuffer();
 
     for (auto& pass : m_postProcessPasses)
     {

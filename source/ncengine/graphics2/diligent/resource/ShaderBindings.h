@@ -40,7 +40,8 @@ class ShaderBindings
                 StructuredBufferResourceDesc{"BoneBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, maxBones,             initialBonesSizeHint},
                 TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
-                UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS}
+                UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
+                UniformBufferResourceDesc{"OutlinePassBufferData",          Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
               },
               m_perPassSignature{
                 device, context,
@@ -48,8 +49,7 @@ class ShaderBindings
                 1,
                 TextureBufferResourceDesc{"PostProcessColorSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
                 TextureBufferResourceDesc{"PostProcessDepthSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
-                UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL},
-                UniformBufferResourceDesc{"OutlinePassBufferData",          Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL} // todo: can move to per frame, me thinks
+                UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
             }
         {
         }

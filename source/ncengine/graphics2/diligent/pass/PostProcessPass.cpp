@@ -1,6 +1,7 @@
 #include "PostProcessPass.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/pass/PassUtilities.h"
+#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 
 #include "ncengine/graphics/GraphicsUtility.h"

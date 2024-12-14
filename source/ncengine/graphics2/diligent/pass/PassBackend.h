@@ -13,8 +13,9 @@
 
 namespace nc::graphics
 {
-class PostProcessPropertyBufferResource;
+class PerFrameResourceSignature;
 class PerPassResourceSignature;
+class PostProcessPropertyBufferResource;
 
 class PassBackend
 {
@@ -39,7 +40,8 @@ class PassBackend
 
         void RenderPostProcess(Diligent::IDeviceContext& context,
                                Diligent::ISwapChain& swapChain,
-                               PerPassResourceSignature& perPassResourceSignature);
+                               PerPassResourceSignature& perPassResourceSignature,
+                               PerFrameResourceSignature& perFrameResourceSignature);
 
         auto FinalColorTarget() const -> uint32_t;
 
