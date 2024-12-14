@@ -3,7 +3,7 @@
 #include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/RigidBody.h"
 #include "asset/AssetService.h"
@@ -13,14 +13,14 @@
 
 namespace
 {
-auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::MeshRenderer2> worldView) -> nc::asset::MeshView
+auto GetMeshView(nc::Entity target, nc::ecs::ExplicitEcs<nc::StaticMesh> worldView) -> nc::asset::MeshView
 {
     static const auto meshService = nc::asset::AssetService<nc::asset::MeshView>::Get();
     static const auto defaultMeshView = meshService->Acquire(nc::asset::CubeMesh);
 
-    if (worldView.Contains<nc::MeshRenderer2>(target))
+    if (worldView.Contains<nc::StaticMesh>(target))
     {
-        const auto id = worldView.Get<nc::MeshRenderer2>(target).GetMeshId();
+        const auto id = worldView.Get<nc::StaticMesh>(target).GetMeshId();
         const auto path = std::string{meshService->GetPath(id)};
         return meshService->Acquire(path);
     }
@@ -76,7 +76,7 @@ namespace nc::graphics
 {
 auto WireframeRendererSubsystem::BuildState(ecs::ExplicitEcs<Transform,
                                                              WireframeRenderer,
-                                                             MeshRenderer2,
+                                                             StaticMesh,
                                                              RigidBody> worldView) -> WireframeRendererRenderState
 {
     OPTICK_CATEGORY("WireframeRendererSubsystem::Execute", Optick::Category::Rendering);

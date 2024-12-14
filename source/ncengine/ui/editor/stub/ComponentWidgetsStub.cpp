@@ -13,11 +13,12 @@ void TransformUIWidget(Transform&, EditorContext&, const std::any&) {}
 void AudioSourceUIWidget(audio::AudioSource&, EditorContext&, const std::any&) {}
 void DirectionalLightUIWidget(graphics::DirectionalLight&, EditorContext&, const std::any&) {}
 void MeshRendererUIWidget(graphics::MeshRenderer&, EditorContext&, const std::any&) {}
-void MeshRenderer2UIWidget(MeshRenderer2&, EditorContext&, const std::any&);
+void StaticMeshUIWidget(StaticMesh&, EditorContext&, const std::any&);
 void ParticleEmitterUIWidget(graphics::ParticleEmitter&, EditorContext&, const std::any&) {}
 void PointLightUIWidget(graphics::PointLight&, EditorContext&, const std::any&) {}
 void SpotLightUIWidget(graphics::SpotLight&, EditorContext&, const std::any&) {}
 void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, EditorContext&, const std::any&) {}
+void SkinnedMeshUIWidget(SkinnedMesh&, EditorContext&, const std::any&) {}
 void ToonRendererUIWidget(graphics::ToonRenderer&, EditorContext&, const std::any&) {}
 void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const std::any&) {}
 void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&) {}

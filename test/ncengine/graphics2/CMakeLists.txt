@@ -130,7 +130,7 @@ add_test(MaterialRegistry_tests MaterialRegistry_tests)
 add_executable(MeshSubsystem_tests
     MeshSubsystem_tests.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/graphics2/MeshRenderer2.cpp
+    ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp

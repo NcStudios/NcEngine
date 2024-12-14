@@ -254,13 +254,10 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
         for (auto& instance : pass.instances)
         {
             if (!instance.enabled) continue;
-            /** @todo: Fix property buffer */
             if (instance.properties.has_value())
             {
                 propertyBuffer.Update(context, instance.properties.value());
             }
-
-            //if (instance.buffer.has_value()) propertyBuffer.SetVariable(pass.passDesc.id, instance.buffer->GetBuffer());
             context.Draw(drawAttribs);
         }
         context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());

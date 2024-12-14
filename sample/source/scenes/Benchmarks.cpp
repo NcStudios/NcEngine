@@ -7,7 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/NcGraphics.h"
-#include "ncengine/graphics/MeshRenderer2.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -213,7 +213,7 @@ struct entity_hierarchy
                 .parent = parent
             });
 
-            world.Emplace<nc::MeshRenderer2>(
+            world.Emplace<nc::StaticMesh>(
                 child,
                 MeshFromPath(nc::asset::CubeMesh),
                 RandomMaterial()
@@ -428,7 +428,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<MeshRenderer2>(ground, mesh::Cube, material::Blue);
+    world.Emplace<StaticMesh>(ground, mesh::Cube, material::Blue);
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
@@ -446,7 +446,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<MeshRenderer2>(
+                world.Emplace<StaticMesh>(
                     entity,
                     MeshFromPath(::mesh_renderer::Mesh),
                     ::RandomMaterial()
@@ -468,7 +468,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<MeshRenderer2>(
+                world.Emplace<StaticMesh>(
                     entity,
                     MeshFromPath(::static_body::Mesh),
                     ::RandomMaterial()
@@ -492,7 +492,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<MeshRenderer2>(
+                world.Emplace<StaticMesh>(
                     entity,
                     MeshFromPath(::rigid_body::Mesh),
                     ::RandomMaterial()
@@ -584,7 +584,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
                 .maxPosition = Vector3{g_mapExtent * 0.4f, 0.0f, g_mapExtent * 0.4f}
             },
             [world](Entity entity) mutable{
-                world.Emplace<MeshRenderer2>(
+                world.Emplace<StaticMesh>(
                     entity,
                     MeshFromPath(asset::CubeMesh),
                     ::RandomMaterial()

@@ -49,6 +49,7 @@ constexpr auto MaxTexturesKey = "max_textures"sv;
 constexpr auto MaxCubeMapsKey = "max_cubemaps"sv;
 constexpr auto MaxParticlesKey = "max_particles"sv;
 constexpr auto MaxDirectionalLightsKey = "max_directional_lights"sv;
+constexpr auto MaxBonesKey = "max_bones"sv;
 
 // physics
 constexpr auto PhysicsEnabledKey = "physics_enabled"sv;
@@ -219,6 +220,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.maxCubeMaps, MaxCubeMapsKey, kvPairs);
         ParseValueIfExists(out.maxParticles, MaxParticlesKey, kvPairs);
         ParseValueIfExists(out.maxDirectionalLights, MaxDirectionalLightsKey, kvPairs);
+        ParseValueIfExists(out.maxBones, MaxBonesKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::GraphicsSettings>)
     {
@@ -372,6 +374,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, MaxCubeMapsKey, config.memorySettings.maxCubeMaps);
     ::WriteKVPair(stream, MaxParticlesKey, config.memorySettings.maxParticles);
     ::WriteKVPair(stream, MaxDirectionalLightsKey, config.memorySettings.maxDirectionalLights);
+    ::WriteKVPair(stream, MaxBonesKey, config.memorySettings.maxBones);
 
     if (writeSections) stream << "[physics_settings]\n";
     ::WriteKVPair(stream, PhysicsEnabledKey, config.physicsSettings.enabled);

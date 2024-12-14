@@ -19,6 +19,12 @@ cbuffer PostProcessSinkIndexBufferData
     uint depthRT4;
 };
 
+cbuffer OutlinePassBufferData
+{
+    float3 outlineColor;
+    float outlineWidth;
+};
+
 struct PSInput 
 { 
     float4 Pos : SV_POSITION;
@@ -35,5 +41,5 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float4 Color = PostProcessColorSinkBufferData[colorRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
     float4 Normals = PostProcessColorSinkBufferData[colorRT2].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
     float Depth = PostProcessDepthSinkBufferData[depthRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV).r;
-    PSOut.Color = Color;
+    PSOut.Color = Color + float4(outlineColor, 1.0);
 }

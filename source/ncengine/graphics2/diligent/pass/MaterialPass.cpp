@@ -54,7 +54,7 @@ auto MakeMaterialPass(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
 
-    return MaterialPass(device, ci, nc::MaterialPassFlag::Toon, passDesc.colorSink, passDesc.depthSink);
+    return MaterialPass(device, ci, passDesc.id, passDesc.colorSink, passDesc.depthSink);
 }
 } // anonymous namespace
 

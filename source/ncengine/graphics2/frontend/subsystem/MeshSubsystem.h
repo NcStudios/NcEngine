@@ -9,7 +9,8 @@
 
 namespace nc
 {
-class MeshRenderer2;
+class MaterialInstance;
+struct MeshInstanceContext;
 struct SystemEvents;
 class Transform;
 
@@ -23,36 +24,28 @@ class MeshSubsystem
                                uint32_t maxMeshRenderers,
                                uint32_t initialBatchSize);
 
-        auto AddInstance(Entity entity,
-                         MaterialInstanceHandle material,
-                         const MaterialPassFlags passes,
-                         const asset::MeshView& mesh) -> TransformDataHandle;
+        void AddInstance(MeshInstanceContext& ctx,
+                         const MaterialInstance& material,
+                         const asset::MeshView& mesh);
 
-        void RemoveInstance(Entity entity,
-                            uint32_t transformIndex,
-                            uint64_t meshId,
-                            MaterialPassFlags passes);
+        void RemoveInstance(const MeshInstanceContext& ctx,
+                            const MaterialInstance& material);
 
-        void SetInstanceMesh(Entity entity,
-                             uint32_t transformIndex,
-                             MaterialInstanceHandle materialIndex,
-                             MaterialPassFlags passes,
-                             uint64_t oldMeshId,
+        void SetInstanceMesh(MeshInstanceContext& ctx,
+                             const MaterialInstance& material,
                              const asset::MeshView& newMesh);
 
-        void SetInstanceMaterial(Entity entity,
-                                 uint32_t transformIndex,
-                                 MaterialInstanceHandle materialIndex,
-                                 MaterialPassFlags oldPasses,
-                                 MaterialPassFlags newPasses,
-                                 uint64_t meshId);
+        void SetInstanceMaterial(const MeshInstanceContext& ctx,
+                                 const MaterialInstance& material,
+                                 MaterialPassFlags oldPasses);
 
-        auto BuildState(ecs::ExplicitEcs<MeshRenderer2, Transform> ecs) -> MeshRenderState;
+        auto BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();
 
     private:
         TransformCache m_transformCache;
         InstanceCache<StaticMeshInstanceData> m_staticMeshInstanceCache;
+        InstanceCache<SkinnedMeshInstanceData> m_skinnedMeshInstanceCache;
         Connection m_rebuildStaticsConnection;
 
         void OnRebuildStatics();
