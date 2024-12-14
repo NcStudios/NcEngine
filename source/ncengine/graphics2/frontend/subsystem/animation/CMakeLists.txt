@@ -1,6 +1,7 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
         BoneCache.cpp
+        SkeletalAnimationCalculator.cpp
         SkeletalAnimationSubsystem.cpp
         SkeletalAnimationCalculations2.cpp
         SkeletalAnimationStorage.cpp

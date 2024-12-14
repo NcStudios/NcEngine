@@ -1,5 +1,6 @@
 #include "SkeletalAnimationSubsystem.h"
 #include "SkeletalAnimationCalculations2.h"
+#include "SkeletalAnimationCalculator.h"
 
 #include "ncengine/debug/Profile.h"
 #include "ncengine/time/Time.h"
@@ -54,6 +55,8 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
     NC_PROFILE_TASK("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
     m_boneCache.CommitPendingChanges();
     auto boneBuffer = std::vector<BoneData>{};
+    auto calculator = gfx3::SkeletalAnimationCalculator{};
+
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
     for (auto [entity, state] : std::views::zip(m_animatedEntities, m_animationState))
@@ -66,28 +69,55 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             m_completedAnimations.push_back(entity);
         }
 
-        const auto packedAnimation = [&]()
+        if (m_storage.HasAnimation(state.blendFromAnimId))
         {
-            if (m_storage.HasAnimation(state.blendFromAnimId))
-            {
-                const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
-                const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
-                return gfx2::ComposeBlendedMatrices(
-                    blendFromTicks,
-                    ticks,
-                    state.blendFactor,
-                    rig.boneNames,
-                    blendFromAnimation,
-                    animation
-                );
-            }
+            const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
+            const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
+            const auto bones = calculator.Animate(
+                rig,
+                blendFromAnimation,
+                blendFromTicks,
+                animation,
+                ticks,
+                state.blendFactor
+            );
 
-            return gfx2::ComposeMatrices(ticks, rig.boneNames, animation);
-        }();
+            m_boneCache.UpdateRegion(state.boneIndex, bones);
+        }
+        else
+        {
+            const auto bones = calculator.Animate(
+                rig,
+                animation,
+                ticks
+            );
 
-        gfx2::AnimateBones(rig, packedAnimation, boneBuffer);
-        m_boneCache.UpdateRegion(state.boneIndex, boneBuffer);
-        boneBuffer.clear();
+            m_boneCache.UpdateRegion(state.boneIndex, bones);
+        }
+
+
+        // const auto packedAnimation = [&]()
+        // {
+        //     if (m_storage.HasAnimation(state.blendFromAnimId))
+        //     {
+        //         const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
+        //         const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
+        //         return gfx2::ComposeBlendedMatrices(
+        //             blendFromTicks,
+        //             ticks,
+        //             state.blendFactor,
+        //             rig.boneNames,
+        //             blendFromAnimation,
+        //             animation
+        //         );
+        //     }
+
+        //     return gfx2::ComposeMatrices(ticks, rig.boneNames, animation);
+        // }();
+
+        // gfx2::AnimateBones(rig, packedAnimation, boneBuffer);
+        // m_boneCache.UpdateRegion(state.boneIndex, boneBuffer);
+        // boneBuffer.clear();
     }
 }
 
