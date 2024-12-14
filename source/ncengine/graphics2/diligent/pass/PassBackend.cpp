@@ -129,10 +129,11 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
 
     // Create a hardcoded dummy post process pass that always pipes the result of the last rendered render target to the swapchain
     auto shaderPaths = ShaderPaths{"PPEnd.psh", "PostProcess.vsh"};
+    auto name = "Final Pass";
     auto finalPass = PassDesc
     {
-        .id = ToPassBaseId(shaderPaths),
-        .name = "Dummy Pass",
+        .id = ToPassBaseId(shaderPaths, name),
+        .name = name,
         .type = PassType::PostProcess,
         .shaderPaths = shaderPaths,
         .colorSources = SingleSource(FinalColorTarget()),
@@ -166,7 +167,6 @@ void PassBackend::Update(const PostProcessState& postProcessState)
     for (const auto& [effectId, passId, properties] : postProcessState.modifiedProperties)
     {
         FindInstance(m_postProcessPasses, effectId, passId).properties = properties;
-        // UpdateBuffer(context, properties, FindInstance(m_postProcessPasses, effectId, passId));
     }
 }
 
@@ -274,7 +274,6 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                       m_finalPass->passDesc.colorSink, m_finalPass->passDesc.depthSink);
 
     context.SetPipelineState(m_finalPass->pso);
-    /** @todo FinalColorTarget() is too expensive to do every frame. Only do when material pass contents change (if emptied) or if PP pass is disabled/enabled */
     perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(FinalColorTarget()), NoTargets());
     context.Draw(drawAttribs);
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
@@ -299,7 +298,7 @@ auto PassBackend::FinalColorTarget() const -> uint32_t
     {
         const auto implementedPasses = GetImplementedMaterialPassFlags();
         auto pos = std::ranges::find_if(implementedPasses, [materialPass](auto& passFlag){ return materialPass.id == passFlag; });
-        if (pos != implementedPasses.end()) /** @todo: We also need to check to see if passBatches is empty for this material */
+        if (pos != implementedPasses.end())
         {
             return materialPass.colorRTIndex;
         }

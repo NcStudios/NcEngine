@@ -151,10 +151,11 @@ auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTarg
     return (colorRenderTargetIndex != SwapChainColorRTIndex || depthRenderTargetIndex != SwapChainDepthRTIndex);
 }
 
-auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t
+auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t
 {
     std::size_t hashCode = 0u;
     hashCode = HashCombine(hashCode, shaderPaths.pixelShaderPath);
+    hashCode = HashCombine(hashCode, name);
     return HashCombine(hashCode, shaderPaths.vertexShaderPath);
 }
 

@@ -78,7 +78,7 @@ class MaterialInstance
         auto GetName() const -> std::string_view;
         void SetName(std::string_view name);
 
-        /** @name MaterialPassFlag Functions */
+        /** @name MaterialPass Functions */
         auto GetPasses() const -> MaterialPassFlags;
 
         /** @name MaterialProperties Functions */

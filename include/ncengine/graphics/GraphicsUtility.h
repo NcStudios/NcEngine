@@ -39,9 +39,6 @@ auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>;
 /** @brief Returns a view of all post process pass names, ordered by ascending flag value. */
 auto GetPostProcessPassNames() -> std::span<const std::string_view>;
 
-/** @brief Returns a view of all post process pass shader paths (vert, pixel), ordered by ascending flag value. */
-auto GetPostProcessPassShaderPaths() -> std::span<const std::pair<std::string_view, std::string_view>>;
-
 /** @brief Returns a view of all post process pass flags, ordered by ascending flag value. */
 auto GetPostProcessPassFlags() -> std::span<const PostProcessPassFlag::type>;
 

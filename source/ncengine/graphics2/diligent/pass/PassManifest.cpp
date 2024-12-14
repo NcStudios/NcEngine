@@ -49,7 +49,7 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
 
 void PassManifest::RegisterPass(PassDesc desc)
 {
-    auto passId = ToPassBaseId(desc.shaderPaths);
+    auto passId = ToPassBaseId(desc.shaderPaths, desc.name);
     auto pos = std::ranges::find(m_ids, passId);
 
     if (pos != m_ids.end())

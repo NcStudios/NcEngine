@@ -12,33 +12,26 @@
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 #include "Graphics/GraphicsEngine/interface/PipelineResourceSignature.h"
 
+#include <string_view>
 #include <vector>
 
 namespace nc::graphics
 {
-// auto MakePostProcessPropertyBuffer(Diligent::IDeviceContext& context,
-//                                    Diligent::IRenderDevice& device,
-//                                    nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer;
-
 auto MakePostProcessPassInstances(nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>;
+auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t;
+auto NoTargets() -> std::vector<uint32_t>;
+auto SingleSource(uint32_t target) -> std::vector<uint32_t>;
+auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool;
 void ClearRenderTarget(Diligent::IDeviceContext& context,
                        Diligent::ISwapChain& swapChain,
                        nc::graphics::PostProcessColorSinkBufferResource& postProcessSinkBufferResource,
                        nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
                        uint32_t colorRenderTargetIndex,
                        uint32_t depthRenderTargetIndex);
-
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
                       nc::graphics::PostProcessColorSinkBufferResource& postProcessColorSinkBufferResource,
                       nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
                       uint32_t colorRenderTargetIndex,
                       uint32_t depthRenderTargetIndex);
-
-auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool;
-
-/** @todo Add pass ID to prevent collisions */
-auto ToPassBaseId(const ShaderPaths& shaderPaths) -> size_t;
-auto NoTargets() -> std::vector<uint32_t>;
-auto SingleSource(uint32_t target) -> std::vector<uint32_t>;
 } // namespace nc::graphics

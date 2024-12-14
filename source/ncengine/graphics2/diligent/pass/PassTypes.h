@@ -14,6 +14,11 @@ constexpr auto SwapChainColorRTIndex = std::numeric_limits<uint32_t>::max();
 constexpr auto SwapChainDepthRTIndex = std::numeric_limits<uint32_t>::max();
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
+constexpr auto MainColor = 0u;
+constexpr auto MainDepth = 0u;
+constexpr auto NormalsColor = 1u;
+constexpr auto PPWaveColor = 2u;
+constexpr auto PPOutlineColor = 3u;
 
 struct ShaderPaths
 {

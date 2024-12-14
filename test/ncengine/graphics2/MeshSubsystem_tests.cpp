@@ -13,7 +13,7 @@
 #include <ranges>
 
 const auto g_materialDesc = nc::MaterialDesc{
-    .passes = nc::MaterialPassFlag::Toon
+    .passes = nc::MaterialPassFlag::Toon | nc::MaterialPassFlag::Normals
 };
 
 constexpr auto g_meshView = nc::asset::MeshView{
@@ -25,13 +25,13 @@ DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asse
 namespace nc
 {
 MaterialInstance::MaterialInstance(const MaterialDesc&){}
-auto MaterialInstance::GetPasses()     const ->       MaterialPassFlags      { return g_materialDesc.passes;     }
+auto MaterialInstance::GetPasses()     const ->       MaterialPassFlags   { return g_materialDesc.passes;     }
 auto MaterialInstance::GetProperties() const -> const MaterialProperties& { return g_materialDesc.properties; }
 void MaterialInstance::Release() noexcept {}
 } // namespace nc
 
 class MeshSubsystemTest : public testing::Test,
-                                  public EcsFixture
+                          public EcsFixture
 {
     protected:
         static constexpr auto MaxEntities = 20ull;
@@ -110,7 +110,7 @@ TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(3, actualSkinnedInstanceState.dirtyRanges[0].count);
 
     const auto& actualStaticPassBatches = actualRenderState.staticMeshBatches;
-    ASSERT_EQ(1, actualStaticPassBatches.size());
+    ASSERT_EQ(2, actualStaticPassBatches.size());
     const auto& actualStaticBatches = actualStaticPassBatches.at(0);
     EXPECT_EQ(1, actualStaticBatches.size());
     const auto& actualStaticBatch = actualStaticBatches.at(0);
@@ -118,7 +118,7 @@ TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(5, actualStaticBatch.instanceCount);
 
     const auto& actualSkinnedPassBatches = actualRenderState.skinnedMeshBatches;
-    ASSERT_EQ(1, actualSkinnedPassBatches.size());
+    ASSERT_EQ(2, actualSkinnedPassBatches.size());
     const auto& actualSkinnedBatches = actualSkinnedPassBatches.at(0);
     EXPECT_EQ(1, actualSkinnedBatches.size());
     const auto& actualSkinnedBatch = actualSkinnedBatches.at(0);
@@ -157,7 +157,7 @@ TEST_F(MeshSubsystemTest, OnRemoveMesh_UntracksObject)
 
     // Batch reports only one instance
     const auto& actualPassState = actualRenderState.staticMeshBatches;
-    ASSERT_EQ(1, actualPassState.size());
+    ASSERT_EQ(2, actualPassState.size());
     const auto& actualBatches = actualPassState.at(0);
     EXPECT_EQ(1, actualBatches.size());
     const auto& actualBatch = actualBatches.at(0);
@@ -186,7 +186,7 @@ TEST_F(MeshSubsystemTest, UpdateMesh_UsingSetMesh_PatchesTrackedState)
     auto actualRenderState = uut.BuildState(world);
     auto verifyBatches = [](const auto& actualPassState)
     {
-        ASSERT_EQ(1, actualPassState.size());
+        ASSERT_EQ(2, actualPassState.size());
         const auto& actualBatches = actualPassState.at(0);
         EXPECT_EQ(2, actualBatches.size());
         const auto& actualBatch1 = actualBatches.at(0);

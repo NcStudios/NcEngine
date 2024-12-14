@@ -41,7 +41,7 @@ auto BuildEffectStates() -> std::vector<nc::graphics::PostProcessEffectState>
             effectId,
             passes,
             std::move(properties),
-            true
+            false
         );
     }
 

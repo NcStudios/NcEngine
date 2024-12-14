@@ -189,39 +189,39 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-                    .colorSink = 0u,
-                    .depthSink = 0u
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .colorSink = 1u // Gets its own render target
+                    .colorSink = NormalsColor
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .colorSink = 0u // Composited on top of Toon
+                    .colorSink = MainColor
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Wave,
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
-                    .colorSources = SingleSource(0u), // Input is output of Toon + Wireframe
-                    .colorSink = 2u // Every post process pass gets its own render target
+                    .colorSources = SingleSource(MainColor),
+                    .colorSink = PPWaveColor
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{2u, 1u}, // Input is output of Post Process Wave, and output of Normals
-                    .depthSources = SingleSource(0u), // Input is depth output of Toon,
-                    .colorSink = 3u
+                    .colorSources = std::vector{PPWaveColor, NormalsColor},
+                    .depthSources = SingleSource(MainDepth),
+                    .colorSink = PPOutlineColor
                 }
             },
             GetImplementedMaterialPassFlags(),
@@ -251,7 +251,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
 {
-    SetPostProcessEffectEnabled(MoebiusEffectId, true);
 }
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
