@@ -3,6 +3,7 @@
 #include "MeshRenderState.h"
 #include "TransformCache.h"
 #include "InstanceCache.h"
+#include "animation/BoneCache.h"
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/utility/Signal.h"
@@ -16,10 +17,14 @@ class Transform;
 
 namespace graphics
 {
+class SkeletalAnimationStorage;
+
 class MeshSubsystem
 {
     public:
-        explicit MeshSubsystem(SystemEvents& events,
+        explicit MeshSubsystem(SkeletalAnimationStorage& animationStorage,
+                               BoneCacheStaging& boneCacheStaging,
+                               SystemEvents& events,
                                uint32_t maxEntities,
                                uint32_t maxMeshRenderers,
                                uint32_t initialBatchSize);
@@ -46,8 +51,11 @@ class MeshSubsystem
         TransformCache m_transformCache;
         InstanceCache<StaticMeshInstanceData> m_staticMeshInstanceCache;
         InstanceCache<SkinnedMeshInstanceData> m_skinnedMeshInstanceCache;
+        SkeletalAnimationStorage* m_animationStorage;
+        BoneCacheStaging* m_boneCache;
         Connection m_rebuildStaticsConnection;
 
+        auto GetRigBoneCount(uint64_t meshId) -> uint32_t;
         void OnRebuildStatics();
 };
 } // namespace graphics

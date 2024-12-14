@@ -8,6 +8,7 @@
 #include "ncengine/graphics/Mesh.h"
 #include "graphics2/frontend/subsystem/MeshSubsystem.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
+#include "graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.h"
 
 #include <array>
 #include <ranges>
@@ -35,6 +36,8 @@ class MeshSubsystemTest : public testing::Test,
 {
     protected:
         static constexpr auto MaxEntities = 20ull;
+        nc::graphics::SkeletalAnimationStorage animationStorage;
+        nc::graphics::BoneCache boneCache{10};
         nc::SystemEvents systemEvents;
         nc::graphics::MeshSubsystem uut;
 
@@ -64,7 +67,14 @@ class MeshSubsystemTest : public testing::Test,
 
         MeshSubsystemTest()
             : EcsFixture{MaxEntities},
-              uut{systemEvents, MaxEntities, MaxEntities, 1}
+              uut{
+                animationStorage,
+                boneCache.GetStagingArea(),
+                systemEvents,
+                MaxEntities,
+                MaxEntities,
+                1
+              }
         {
             GetTestComponentRegistry().RegisterType<nc::StaticMesh>(MaxEntities);
             GetTestComponentRegistry().RegisterType<nc::SkinnedMesh>(MaxEntities);
