@@ -264,7 +264,7 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
         if (IsValidAnimationTransform(animatedTransform))
         {
             pos = mul(pos, animatedTransform);
-            normal = mul(normal, animatedTransform); // ask Jare what this should be like
+            normal = mul(animatedTransform, normal); // ask Jare what this should be like
         }
     }
 #endif // ENABLE_SKINNING

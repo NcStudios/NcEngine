@@ -43,43 +43,6 @@ auto GetAnimationOffsets(float timeInTicks,
     return animationMatrices;
 }
 
-void GetAnimationOffsets2(float timeInTicks,
-                         const std::vector<std::string>& boneNames,
-                         const asset::SkeletalAnimation& animation,
-                         PackedAnimationDecomposed& out)
-{
-    NC_PROFILE_SCOPE("GetAnimationOffsets()", ProfileCategory::Animation);
-    out.offsets.clear();
-    out.hasValues.clear();
-    if (boneNames.size() > out.offsets.capacity())
-    {
-        out.offsets.reserve(boneNames.size());
-        out.hasValues.reserve(boneNames.size());
-    }
-
-    // todo: can we just create above w/ defaults and just use at(index) = m when we have a hit?
-    // todo: can we use hashes in PackedRig and lookup using heterogeneous lookup?
-
-    for (const auto& boneName : boneNames)
-    {
-        auto iter = animation.framesPerBone.find(boneName);
-        if (iter == animation.framesPerBone.end())
-        {
-           out.offsets.push_back(DecomposedMatrix{});
-           out.hasValues.push_back(0);
-           continue;
-        }
-
-        out.offsets.emplace_back(
-            GetInterpolatedPosition(timeInTicks, iter->second.positionFrames),
-            GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
-            GetInterpolatedScale(timeInTicks, iter->second.scaleFrames)
-        );
-
-        out.hasValues.push_back(1);
-    }
-}
-
 auto ComposeMatrices(float timeInTicks,
                      const std::vector<std::string>& boneNames,
                      const asset::SkeletalAnimation& animation) -> PackedAnimation
@@ -89,13 +52,15 @@ auto ComposeMatrices(float timeInTicks,
     auto packedAnimation = PackedAnimation{ .offsets = std::vector<DirectX::XMMATRIX>{}, .hasValues = std::move(hasValues) };
     packedAnimation.offsets.reserve(packedAnimation.hasValues.size());
 
-    std::ranges::transform(offsets, std::back_inserter(packedAnimation.offsets), [](auto&& offset)
-    {
-        // return ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot) * ToTransMatrix(offset.pos);
-        auto m = ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot);
-        m.r[3] = ToXMVectorHomogeneous(offset.pos);
-        return m;
-    });
+    std::ranges::transform(
+        offsets,
+        std::back_inserter(packedAnimation.offsets),
+        [](auto&& offset){
+            auto m = ToScaleMatrix(offset.scale) * ToRotMatrix(offset.rot);
+            m.r[3] = ToXMVectorHomogeneous(offset.pos);
+            return m;
+        }
+    );
 
     return packedAnimation;
 }
@@ -151,8 +116,6 @@ void AnimateBones(const PackedRig& rig,
     {
         if (animHasValue)
             boneOffset = animOffset;
-        // else
-            // boneOffset = DirectX::XMMatrixSet(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
         // boneOffset = boneOffset * !animHasValue + animOffset * animHasValue;
     }
