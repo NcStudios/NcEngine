@@ -37,7 +37,7 @@ class MeshSubsystem
 
         void SetInstanceMaterial(const MeshInstanceContext& ctx,
                                  const MaterialInstance& material,
-                                 MaterialPasses oldPasses);
+                                 MaterialPassFlags oldPasses);
 
         auto BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderState;
         void OnBeforeSceneLoad();

@@ -7,11 +7,11 @@ namespace
 {
 auto MakeBuffer(Diligent::IDeviceContext& context,
                 Diligent::IRenderDevice& device,
-                nc::PostProcessPass::type passId) -> nc::graphics::DynamicUniformBuffer
+                nc::PostProcessPassFlag::type passId) -> nc::graphics::DynamicUniformBuffer
 {
     switch (passId)
     {
-        case nc::PostProcessPass::Outline:
+        case nc::PostProcessPassFlag::Outline:
         {
             return nc::graphics::DynamicUniformBuffer(
                 context,
@@ -27,7 +27,7 @@ auto MakeBuffer(Diligent::IDeviceContext& context,
 
 auto MakePassInstances(Diligent::IDeviceContext& context,
                        Diligent::IRenderDevice& device,
-                       nc::PostProcessPass::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
+                       nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
 {
     const auto hasProperties = nc::PassHasProperties(passId);
     auto instances = std::vector<nc::graphics::PostProcessPipelineInstance>{};

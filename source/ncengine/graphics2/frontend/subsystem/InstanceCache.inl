@@ -21,7 +21,7 @@ inline auto WalkBatch(const Batch& batch)
 
 template<class T>
 void InstanceCacheStaging<T>::AddInstance(uint32_t entityId,
-                                          MaterialPasses passes,
+                                          MaterialPassFlags passes,
                                           const asset::MeshView& mesh,
                                           const T& instanceData)
 {
@@ -49,7 +49,7 @@ void InstanceCacheStaging<T>::AddInstance(uint32_t entityId,
 
 template<class T>
 void InstanceCacheStaging<T>::RemoveInstance(uint32_t entityId,
-                                             MaterialPasses passes,
+                                             MaterialPassFlags passes,
                                              uint64_t meshId)
 {
     m_hasStagedState = true;
@@ -58,8 +58,8 @@ void InstanceCacheStaging<T>::RemoveInstance(uint32_t entityId,
 
 template<class T>
 void InstanceCacheStaging<T>::UpdateInstance(uint32_t entityId,
-                                             MaterialPasses oldPasses,
-                                             MaterialPasses newPasses,
+                                             MaterialPassFlags oldPasses,
+                                             MaterialPassFlags newPasses,
                                              uint64_t oldMeshId,
                                              const asset::MeshView& newMesh,
                                              const T& instanceData)
@@ -155,7 +155,7 @@ auto InstanceCache<T>::BuildState() -> BufferUpdateInfo<T>
 }
 
 template<class T>
-auto InstanceCache<T>::BuildBatches(std::span<const MaterialPass::type> passes) -> std::vector<std::vector<Batch>>
+auto InstanceCache<T>::BuildBatches(std::span<const MaterialPassFlag::type> passes) -> std::vector<std::vector<Batch>>
 {
     NC_PROFILE_SCOPE("InstanceCache::BuildBatches()", ProfileCategory::Rendering);
     auto out = std::vector<std::vector<Batch>>(passes.size());
