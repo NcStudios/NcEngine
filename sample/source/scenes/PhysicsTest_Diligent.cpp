@@ -499,8 +499,6 @@ void BuildSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        auto stepMaterial = TealToonMaterial;
-        stepMaterial.outlineWidth = 3;
         world.Emplace<StaticMesh>(step, mesh::Cube, material::Blue);
         world.Emplace<RigidBody>(step)
             .AddConstraint(PointConstraintInfo{
@@ -583,8 +581,6 @@ void BuildHalfPipes(ecs::Ecs world)
         .tag = "Half Pipe",
         .flags = Entity::Flags::Static
     });
-    auto halfPipeMaterial = BlueHatchedToonMaterial;
-    halfPipeMaterial.outlineWidth = 2;
 
     world.Emplace<StaticMesh>(halfPipe2, mesh::HalfPipe, material::Blue);
 }
