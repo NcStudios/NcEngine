@@ -31,7 +31,8 @@ class PassBackend
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
-                            const std::vector<std::vector<Batch>>& passBatches);
+                            const std::vector<std::vector<Batch>>& staticPassBatches,
+                            const std::vector<std::vector<Batch>>& skinnedPassBatches);
 
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
@@ -46,7 +47,8 @@ class PassBackend
         auto FinalColorTarget() const -> uint32_t;
 
     private:
-        std::vector<MaterialPass> m_materialPasses;
+        std::vector<MaterialPass> m_staticMaterialPasses;
+        std::vector<MaterialPass> m_skinnedMaterialPasses;
         std::unique_ptr<WireframePass> m_wireframePass;
         std::vector<PostProcessPass> m_postProcessPasses;
         std::unique_ptr<PostProcessPass> m_finalPass;
