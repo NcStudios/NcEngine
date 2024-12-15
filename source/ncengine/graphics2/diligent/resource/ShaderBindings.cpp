@@ -1,5 +1,8 @@
 #include "ShaderBindings.h"
 #include "EnvironmentBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "graphics2/frontend/FrontendRenderState.h"
 
 #include "ncengine/debug/Profile.h"

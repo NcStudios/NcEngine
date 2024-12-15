@@ -1,0 +1,30 @@
+cbuffer EnvironmentBufferData
+{
+    float4x4 cameraViewProjection;
+    float3 cameraPosition;
+    uint dirLightsCount;
+    uint pointLightsCount;
+    uint spotLightsCount;
+    float2 padding;
+};
+
+cbuffer WireframeBufferData
+{
+    float4x4 wireframeModelMatrix;
+    float4 wireframeColor;
+};
+
+struct PSInput
+{
+    float4 Pos : SV_POSITION;
+};
+
+struct PSOutput
+{
+    float4 Color : SV_TARGET;
+};
+
+void main(in PSInput PSIn, out PSOutput PSOut)
+{
+    PSOut.Color = wireframeColor;
+}

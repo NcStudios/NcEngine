@@ -1,8 +1,9 @@
 target_sources(${NC_ENGINE_LIB}
     PRIVATE
-        MaterialPassBackend.cpp
-        Pass.cpp
+        MaterialPass.cpp
+        PassBackend.cpp
+        PassManifest.cpp
+        PassUtilities.cpp
         PostProcessPass.cpp
-        PostProcessPassBackend.cpp
         WireframePass.cpp
 )

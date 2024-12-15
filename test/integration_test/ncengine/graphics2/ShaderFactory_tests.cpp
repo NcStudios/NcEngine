@@ -78,14 +78,14 @@ TEST_F(ShaderFactoryTest, RuntimeSupport_happyPaths_succeed)
 
     EXPECT_NO_THROW(uut->MakeShaderFromSource(g_goodSource, "", g_shaderType));
 
-    const auto source = nc::graphics::ReadShaderFile(testShaderPath.string());
+    const auto source = uut->ReadShaderFile(testShaderPath.string());
     EXPECT_NO_THROW(uut->MakeShaderFromSource(source, "", g_shaderType));
 }
 
 TEST_F(ShaderFactoryTest, RuntimeSupport_failurePaths_throw)
 {
     EXPECT_THROW(uut->MakeShaderFromSource(g_badSource, "", g_shaderType), nc::NcError);
-    EXPECT_THROW(nc::graphics::ReadShaderFile("not_a_shader.psh"), nc::NcError);
+    EXPECT_THROW(uut->ReadShaderFile("not_a_shader.psh"), nc::NcError);
     ClearErrorOutput();
 }
 
@@ -102,7 +102,7 @@ TEST_F(ShaderFactoryTest, NoRuntimeSupport_failurePaths_throw)
 TEST_F(ShaderFactoryTest, MakeShaderFromByteCode_goodSource_succeeds)
 {
     const auto byteCodePath = fmt::format("{}/{}", g_collateralDir, g_collateralFileName);
-    const auto byteCode = nc::graphics::ReadShaderFile(byteCodePath);
+    const auto byteCode = uut->ReadShaderFile(byteCodePath);
     auto actual = Diligent::RefCntAutoPtr<Diligent::IShader>{};
     EXPECT_NO_THROW(actual = uut->MakeShaderFromByteCode(byteCode, "", Diligent::SHADER_TYPE_PIXEL));
     EXPECT_NE(nullptr, actual);
