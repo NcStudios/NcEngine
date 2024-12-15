@@ -5,6 +5,27 @@
 
 #include <ranges>
 
+namespace
+{
+[[maybe_unused]]
+void VerifyMaterialPasses(const std::vector<nc::graphics::PassDesc>& staticPasses,
+                          const std::vector<nc::graphics::PassDesc>& skinnedPasses)
+{
+    if (staticPasses.size() != skinnedPasses.size())
+    {
+        throw nc::NcError{"Static/Skinned MaterialPass count must be equal."};
+    }
+
+    for (const auto [lhs, rhs] : std::views::zip(staticPasses, skinnedPasses))
+    {
+        if (lhs.colorSink != rhs.colorSink || lhs.depthSink != rhs.depthSink)
+        {
+            throw nc::NcError{"Static/Skinned MaterialPass render target indices out of sync."};
+        }
+    }
+}
+} // anonymous namespace
+
 namespace nc::graphics
 {
 PassManifest::PassManifest(std::vector<PassDesc> passes,
@@ -14,37 +35,39 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
     : m_colorSinkCount{1u},
       m_depthSinkCount{1u}
 {
-    m_materialPassDescs.reserve(implementedMaterialPasses.size());
-    auto materialPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type == PassType::Material; });
-    for (auto& passFlag : implementedMaterialPasses)
+    auto registerMatches = [this](const auto& descs, const auto& passFlags, auto matchType)
     {
-        auto pos = std::ranges::find_if(materialPasses, [passFlag](PassDesc& passDesc){ return passDesc.id == passFlag; });
-        if (pos != materialPasses.end())
-        {
-            RegisterPass(std::move(*pos));
-        }
-    }
+        auto matches = descs
+            | std::views::filter(
+                [matchType](const PassDesc& passDesc) {
+                    return std::to_underlying(passDesc.type) & std::to_underlying(matchType);
+              }
+        );
 
-    auto miscPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type != PassType::PostProcess && passDesc.type != PassType::Material; });
-    for (auto& passFlag : implementedMiscPasses)
-    {
-        auto pos = std::ranges::find_if(miscPasses, [passFlag](PassDesc& passDesc){ return passDesc.id == passFlag; });
-        if (pos != miscPasses.end())
+        for (const auto passFlag : passFlags)
         {
-            RegisterPass(std::move(*pos));
+            auto pos = std::ranges::find(matches, passFlag, &PassDesc::id);
+            if (pos != matches.end())
+            {
+                RegisterPass(std::move(*pos));
+            }
         }
-    }
+    };
+
+    m_staticMaterialPassDescs.reserve(implementedMaterialPasses.size());
+    registerMatches(passes, implementedMaterialPasses, PassType::Material);
+
+    m_skinnedMaterialPassDescs.reserve(implementedMaterialPasses.size());
+    registerMatches(passes, implementedMaterialPasses, PassType::SkinnedMaterial);
+
+    registerMatches(passes, implementedMiscPasses, PassType::Wireframe);
 
     m_postProcessPassDescs.reserve(implementedPPPasses.size());
-    auto postProcessPasses = passes | std::views::filter([](const PassDesc& passDesc) { return passDesc.type == PassType::PostProcess; });
-    for (auto& passFlag : implementedPPPasses)
-    {
-        auto pos = std::ranges::find_if(postProcessPasses, [passFlag](PassDesc& passDesc){ return passDesc.id == passFlag; });
-        if (pos != postProcessPasses.end())
-        {
-            RegisterPass(std::move(*pos));
-        }
-    }
+    registerMatches(passes, implementedPPPasses, PassType::PostProcess);
+
+#ifndef NC_PROD_BUILD
+    VerifyMaterialPasses(m_staticMaterialPassDescs, m_skinnedMaterialPassDescs);
+#endif
 }
 
 void PassManifest::RegisterPass(PassDesc desc)
@@ -60,7 +83,10 @@ void PassManifest::RegisterPass(PassDesc desc)
     switch (desc.type)
     {
         case PassType::Material:
-            m_materialPassDescs.emplace_back(std::move(desc));
+            m_staticMaterialPassDescs.emplace_back(std::move(desc));
+            break;
+        case PassType::SkinnedMaterial:
+            m_skinnedMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::Wireframe:
             m_wireframePassDesc = std::move(desc);
@@ -84,8 +110,10 @@ void PassManifest::RegisterPass(PassDesc desc)
 
 void PassManifest::Clear()
 {
-    m_materialPassDescs.clear();
-    m_materialPassDescs.shrink_to_fit();
+    m_staticMaterialPassDescs.clear();
+    m_staticMaterialPassDescs.shrink_to_fit();
+    m_skinnedMaterialPassDescs.clear();
+    m_skinnedMaterialPassDescs.shrink_to_fit();
     m_postProcessPassDescs.clear();
     m_postProcessPassDescs.shrink_to_fit();
     m_wireframePassDesc = PassDesc{};

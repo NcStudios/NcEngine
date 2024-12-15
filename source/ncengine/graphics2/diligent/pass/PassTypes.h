@@ -28,11 +28,12 @@ struct ShaderPaths
 
 enum class PassType : uint8_t
 {
-    None,
-    Material,
-    Wireframe,
-    PostProcess,
-    UI
+    None            = 0,
+    Material        = 1,
+    SkinnedMaterial = 1 << 1,
+    Wireframe       = 1 << 2,
+    PostProcess     = 1 << 3,
+    UI              = 1 << 4
 };
 
 struct PassDesc

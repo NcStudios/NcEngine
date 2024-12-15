@@ -82,7 +82,6 @@ auto MakeMaterialPasses(Diligent::IRenderDevice& device,
                         ShaderBindings& shaderBindings,
                         std::span<const PassDesc> passManifest) -> std::vector<MaterialPass>
 {
-    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
     auto materialPasses = std::vector<MaterialPass>{};
     materialPasses.reserve(passManifest.size());
 
