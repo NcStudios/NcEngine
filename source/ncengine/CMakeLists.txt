@@ -122,5 +122,6 @@ else()
             graphics2/frontend/subsystem/MaterialRegistry.cpp
             graphics2/frontend/subsystem/MeshSubsystem.cpp
             graphics2/frontend/subsystem/TransformCache.cpp
+            graphics2/frontend/subsystem/animation/BoneCache.cpp
     )
 endif()
