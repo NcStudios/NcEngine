@@ -49,7 +49,7 @@ auto ShaderFactory::ReadShaderFile(std::string_view filePath) -> std::vector<cha
     auto file = std::ifstream(shaderPath, std::ios::ate | std::ios::binary);
     if (!file.is_open() || file.tellg() == -1)
     {
-        throw NcError(fmt::format("Failed to open shader file '{}'", shaderPath));
+        throw NcError(fmt::format("Failed to open shader file '{}/{}'", m_shadersPath, shaderPath));
     }
 
     const auto fileSize = static_cast<uint32_t>(file.tellg());
@@ -58,7 +58,7 @@ auto ShaderFactory::ReadShaderFile(std::string_view filePath) -> std::vector<cha
     file.read(buffer.data(), fileSize);
     if (file.fail())
     {
-        throw NcError(fmt::format("Failed to read shader file '{}'", shaderPath));
+        throw NcError(fmt::format("Failed to read shader file '{}/{}'", m_shadersPath, shaderPath));
     }
 
     return buffer;

@@ -103,12 +103,20 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
                          ShaderBindings& shaderBindings,
                          const PassManifest& passManifest)
 {
-    m_materialPasses = MakeMaterialPasses
+    m_staticMaterialPasses = MakeMaterialPasses
     (
         device,
         shaderFactory,
         shaderBindings,
-        passManifest.MaterialPassDescs()
+        passManifest.StaticMaterialPassDescs()
+    );
+
+    m_skinnedMaterialPasses = MakeMaterialPasses
+    (
+        device,
+        shaderFactory,
+        shaderBindings,
+        passManifest.SkinnedMaterialPassDescs()
     );
 
     m_wireframePass = std::make_unique<WireframePass>
@@ -174,23 +182,39 @@ void PassBackend::Update(const PostProcessState& postProcessState)
 void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
                                  Diligent::ISwapChain& swapChain,
                                  PerPassResourceSignature& perPassResourceSignature,
-                                 const std::vector<std::vector<Batch>>& passBatches)
+                                 const std::vector<std::vector<Batch>>& staticPassBatches,
+                                 const std::vector<std::vector<Batch>>& skinnedPassBatches)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
-    NC_ASSERT(m_materialPasses.size() == passBatches.size(), "Frontend/Backend passes out of sync.");
+    NC_ASSERT(
+        m_staticMaterialPasses.size() == staticPassBatches.size() &&
+        m_skinnedMaterialPasses.size() == skinnedPassBatches.size(),
+        "Frontend/Backend passes out of sync."
+    );
 
-    for (auto [pass, batches] : std::views::zip(m_materialPasses, passBatches))
+    auto passView = std::views::zip(
+        m_staticMaterialPasses,
+        m_skinnedMaterialPasses,
+        staticPassBatches,
+        skinnedPassBatches
+    );
+
+    for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
+        // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain,
                          perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
                          perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
-                         pass.colorRTIndex, pass.depthRTIndex);
+                         staticPass.colorRTIndex, staticPass.depthRTIndex);
         ClearRenderTarget(context, swapChain,
                           perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
                           perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
-                          pass.colorRTIndex, pass.depthRTIndex);
-        context.SetPipelineState(pass.pso);
-        DrawIndexed(context, batches);
+                          staticPass.colorRTIndex, staticPass.depthRTIndex);
+
+        context.SetPipelineState(staticPass.pso);
+        DrawIndexed(context, staticBatches);
+        context.SetPipelineState(skinnedPass.pso);
+        DrawIndexed(context, skinnedBatches);
     }
 }
 
@@ -296,7 +320,7 @@ auto PassBackend::FinalColorTarget() const -> uint32_t
         return m_wireframePass->colorRTIndex;
     }
 
-    for (auto& materialPass : std::ranges::reverse_view(m_materialPasses))
+    for (auto& materialPass : std::ranges::reverse_view(m_staticMaterialPasses))
     {
         const auto implementedPasses = GetImplementedMaterialPassFlags();
         auto pos = std::ranges::find_if(implementedPasses, [materialPass](auto& passFlag){ return materialPass.id == passFlag; });
