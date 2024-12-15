@@ -252,7 +252,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
-          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
+          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
+          m_resizeNeeded{false}
 {
 }
 
@@ -349,6 +350,11 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
+
+    if (m_resizeNeeded)
+    {
+        Resize();
+    }
 
     auto& context = m_engine.GetContext();
     auto& device = m_engine.GetDevice();

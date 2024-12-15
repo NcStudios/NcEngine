@@ -63,7 +63,7 @@ void PassManifest::RegisterPass(PassDesc desc)
             m_materialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::Wireframe:
-            m_wireframePassDesc = desc;
+            m_wireframePassDesc = std::move(desc);
             break;
         case PassType::PostProcess:
             m_postProcessPassDescs.emplace_back(std::move(desc));

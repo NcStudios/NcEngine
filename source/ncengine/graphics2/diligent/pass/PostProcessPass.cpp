@@ -26,15 +26,17 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
                          ShaderBindings& shaderBindings,
                          PassDesc passDesc) -> PostProcessPass
 {
-    auto pixelShader = shaderFactory.MakeShaderFromPath(
-        passDesc.shaderPaths.pixelShaderPath,
+    auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
+    auto pixelShader = shaderFactory.MakeShaderFromSource(
+        pixelShaderSource,
         passDesc.shaderPaths.pixelShaderPath.data(),
         Diligent::SHADER_TYPE_PIXEL,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
-    auto vertexShader = shaderFactory.MakeShaderFromPath(
-        passDesc.shaderPaths.vertexShaderPath,
+    auto vertexShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.vertexShaderPath);
+    auto vertexShader = shaderFactory.MakeShaderFromSource(
+        vertexShaderSource,
         passDesc.shaderPaths.vertexShaderPath.data(),
         Diligent::SHADER_TYPE_VERTEX,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
