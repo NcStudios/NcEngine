@@ -1,6 +1,9 @@
 #pragma once
 
+#include "PassManifest.h"
 #include "graphics2/diligent/resource/base/DynamicUniformBuffer.h"
+#include "graphics2/diligent/resource/ResourceTypes.h"
+
 #include "ncengine/graphics/PostProcess.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -13,31 +16,41 @@
 
 namespace nc::graphics
 {
+class ShaderBindings;
 class ShaderFactory;
+class PostProcessColorSinkBufferResource;
 
 // Post process pass data specific to an effect
 struct PostProcessPipelineInstance
 {
-    std::optional<DynamicUniformBuffer> buffer;
+    std::optional<PostProcessPassProperties> properties;
     PostProcessEffectId effectId = NullPostProcessEffectId;
     bool enabled = false;
 };
 
 // Post process pass data shared by potentially many effects
-struct PostProcessPipeline
+struct PostProcessPass
 {
+    PostProcessPass(Diligent::IRenderDevice& device,
+                    const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
+                    std::vector<PostProcessPipelineInstance> instances_,
+                    PassDesc passDesc);
+
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
     std::vector<PostProcessPipelineInstance> instances;
-    PostProcessPassFlag::type id = PostProcessPassFlag::None;
-    uint32_t renderTargetCount = 0u;
-    uint32_t colorRenderTargetIndex = 0u;
-    uint32_t depthRenderTargetIndex = 0u;
+    PassDesc passDesc;
     bool anyEnabled = false;
 };
 
-/** @todo This builds no passes */
-auto MakePostProcessPasses(Diligent::IDeviceContext& context,
-                           Diligent::IRenderDevice& device,
+auto MakePostProcessPass(Diligent::IRenderDevice& device,
+                         Diligent::ISwapChain& swapChain,
+                         ShaderFactory& shaderFactory,
+                         ShaderBindings& shaderBindings,
+                         PassDesc passDesc) -> PostProcessPass;
+
+auto MakePostProcessPasses(Diligent::IRenderDevice& device,
                            Diligent::ISwapChain& swapChain,
-                           ShaderFactory& shaderFactory) -> std::vector<PostProcessPipeline>;
+                           ShaderFactory& shaderFactory,
+                           ShaderBindings& shaderBindings,
+                           const PassManifest& passManifest) -> std::vector<PostProcessPass>;
 } // namespace nc::graphics

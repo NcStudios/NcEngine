@@ -1,6 +1,10 @@
 #include "WireframePass.h"
+#include "PassTypes.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/resource/MeshBuffer.h"
+#include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
+#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
 
@@ -8,93 +12,26 @@
 
 namespace
 {
-constexpr auto g_pixelShader = std::string_view{
-R"(
-cbuffer EnvironmentBufferData
-{
-    float4x4 cameraViewProjection;
-    float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
-};
-
-cbuffer WireframeBufferData
-{
-    float4x4 wireframeModelMatrix;
-    float4 wireframeColor;
-};
-
-struct PSInput
-{
-    float4 Pos : SV_POSITION;
-};
-
-struct PSOutput
-{
-    float4 Color : SV_TARGET;
-};
-
-void main(in PSInput PSIn, out PSOutput PSOut)
-{
-    PSOut.Color = wireframeColor;
-}
-)"};
-
-constexpr auto g_vertexShader = std::string_view{
-R"(
-struct VSInput
-{
-    float3 Pos : ATTRIB0;
-};
-
-struct PSInput
-{
-    float4 Pos : SV_POSITION;
-};
-
-cbuffer EnvironmentBufferData
-{
-    float4x4 cameraViewProjection;
-    float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
-};
-
-cbuffer WireframeBufferData
-{
-    float4x4 wireframeModelMatrix;
-    float4 wireframeColor;
-};
-
-void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
-{
-    float4 transformedPos = mul(float4(VSIn.Pos, 1.0), wireframeModelMatrix);
-    PSIn.Pos = mul(transformedPos, cameraViewProjection);
-}
-)"};
-
 auto MakePso(Diligent::IRenderDevice& device,
-             Diligent::ISwapChain& swapChain,
              nc::graphics::ShaderFactory& shaderFactory,
-             Diligent::IPipelineResourceSignature& perFrameResourceSignature)
+             Diligent::IPipelineResourceSignature& perFrameResourceSignature,
+             const nc::graphics::PassDesc& passDesc)
 {
     using namespace Diligent;
 
-    auto vertexShader = shaderFactory.MakeShaderFromSource(
-        std::span{g_vertexShader},
-        "Wireframe VS",
-        Diligent::SHADER_TYPE_VERTEX,
+    auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
+    auto pixelShader = shaderFactory.MakeShaderFromSource(
+        pixelShaderSource,
+        passDesc.shaderPaths.pixelShaderPath.data(),
+        Diligent::SHADER_TYPE_PIXEL,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
-    auto pixelShader = shaderFactory.MakeShaderFromSource(
-        std::span{g_pixelShader},
-        "Wireframe PS",
-        Diligent::SHADER_TYPE_PIXEL,
+    auto vertexShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.vertexShaderPath);
+    auto vertexShader = shaderFactory.MakeShaderFromSource(
+        vertexShaderSource,
+        passDesc.shaderPaths.vertexShaderPath.data(),
+        Diligent::SHADER_TYPE_VERTEX,
         Diligent::SHADER_SOURCE_LANGUAGE_HLSL
     );
 
@@ -103,7 +40,7 @@ auto MakePso(Diligent::IRenderDevice& device,
 
     auto ci = GraphicsPipelineStateCreateInfo{};
     ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
-    ci.PSODesc.Name = "WireframePipeline";
+    ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
     ci.ppResourceSignatures = signatures.data();
@@ -112,12 +49,12 @@ auto MakePso(Diligent::IRenderDevice& device,
     ci.pVS = vertexShader;
     ci.pPS = pixelShader;
 
-    ci.GraphicsPipeline.NumRenderTargets             = 1;
-    ci.GraphicsPipeline.RTVFormats[0]                = swapChain.GetDesc().ColorBufferFormat;
-    ci.GraphicsPipeline.DSVFormat                    = swapChain.GetDesc().DepthBufferFormat;
+    ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == nc::graphics::NoTarget ? 0 : 1;
+    ci.GraphicsPipeline.RTVFormats[0]                = nc::graphics::OffScreenColorRTFormat;
+    ci.GraphicsPipeline.DSVFormat                    = passDesc.depthSink == nc::graphics::NoTarget ? TEX_FORMAT_UNKNOWN : nc::graphics::OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = True;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == nc::graphics::NoTarget ? False : True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
     ci.GraphicsPipeline.RasterizerDesc.FillMode      = FILL_MODE_WIREFRAME;
@@ -136,37 +73,13 @@ auto MakePso(Diligent::IRenderDevice& device,
 namespace nc::graphics
 {
 WireframePass::WireframePass(Diligent::IRenderDevice& device,
-                             Diligent::ISwapChain& swapChain,
                              ShaderFactory& shaderFactory,
-                             ShaderBindings& shaderBindings)
-    : m_pso{MakePso(device, swapChain, shaderFactory, shaderBindings.GetPerFrameSignature().GetResourceSignature())},
-      m_buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()}
+                             ShaderBindings& shaderBindings,
+                             const PassDesc& passDesc)
+    : pso{MakePso(device, shaderFactory, shaderBindings.GetPerFrameSignature().GetResourceSignature(), passDesc)},
+      buffer{&shaderBindings.GetPerFrameSignature().GetWireframeBuffer()},
+      colorRTIndex{passDesc.colorSink},
+      depthRTIndex{passDesc.depthSink}
 {
-}
-
-void WireframePass::Render(Diligent::IDeviceContext& context,
-                           const WireframeRendererRenderState& state)
-{
-    if (state.wireframeData.empty())
-    {
-        return;
-    }
-
-    context.SetPipelineState(m_pso);
-    for (const auto& [data, mesh] : state.wireframeData)
-    {
-        m_buffer->Update(context, data);
-        const auto attribs = Diligent::DrawIndexedAttribs{
-            mesh.indexCount,
-            Diligent::VT_UINT32,
-            Diligent::DRAW_FLAG_VERIFY_ALL,
-            1,
-            mesh.firstIndex,
-            mesh.firstVertex,
-            0
-        };
-
-        context.DrawIndexed(attribs);
-    }
 }
 } // namespace nc::graphics

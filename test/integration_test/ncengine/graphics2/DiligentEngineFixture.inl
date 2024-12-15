@@ -22,7 +22,7 @@ class DiligentEngineFixture : public testing::Test
             engine = std::make_unique<nc::graphics::DiligentEngine>(
                 engineCI,
                 window->GetWindowHandle(),
-                "dummyPath",
+                "",
                 &DiligentEngineFixture::LogCallback
             );
         }

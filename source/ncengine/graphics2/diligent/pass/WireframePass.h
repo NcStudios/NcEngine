@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics2/frontend/subsystem/WireframeRendererState.h"
+#include "PassManifest.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -12,19 +13,15 @@ class ShaderBindings;
 class ShaderFactory;
 class WireframeBufferResource;
 
-class WireframePass
+struct WireframePass
 {
-    public:
-        explicit WireframePass(Diligent::IRenderDevice& device,
-                               Diligent::ISwapChain& swapChain,
-                               ShaderFactory& shaderFactory,
-                               ShaderBindings& shaderBindings);
-
-        void Render(Diligent::IDeviceContext& context,
-                    const WireframeRendererRenderState& state);
-
-    private:
-        Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pso;
-        WireframeBufferResource* m_buffer;
+    explicit WireframePass(Diligent::IRenderDevice& device,
+                            ShaderFactory& shaderFactory,
+                            ShaderBindings& shaderBindings,
+                            const PassDesc& passDesc);
+    Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
+    WireframeBufferResource* buffer;
+    uint32_t colorRTIndex;
+    uint32_t depthRTIndex;
 };
 } // namespace nc::graphics

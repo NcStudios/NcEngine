@@ -17,10 +17,8 @@ struct PostProcessPassFlag
     using type = uint64_t;
 
     static constexpr auto None    = type{0};
-    static constexpr auto Alpha   = type{1 << 0};
-    static constexpr auto Depth   = type{1 << 1};
-    static constexpr auto Normals = type{1 << 2};
-    static constexpr auto Outline = type{1 << 3};
+    static constexpr auto Wave    = type{1 << 0}; /** @todo: Remove once MoebiusEffect is fully implemented. */
+    static constexpr auto Outline = type{1 << 1};
 };
 
 /** @brief Identifier for a post process effect. */
@@ -36,10 +34,8 @@ constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId
 constexpr auto MoebiusEffectId = PostProcessEffectId{0};
 
 /** @brief Pass flags for the moebius post process effect. */
-constexpr auto MoebiusEffectPassFlags = PostProcessPassFlag::Alpha   |
-                                     PostProcessPassFlag::Depth   |
-                                     PostProcessPassFlag::Normals |
-                                     PostProcessPassFlag::Outline;
+constexpr auto MoebiusEffectPassFlags = PostProcessPassFlag::Wave   |
+                                        PostProcessPassFlag::Outline;
 
 /** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};

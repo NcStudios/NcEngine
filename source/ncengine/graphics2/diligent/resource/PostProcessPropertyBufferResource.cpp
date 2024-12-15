@@ -3,30 +3,42 @@
 
 #include "ncutility/NcError.h"
 
+#include <concepts>
 #include <ranges>
 
 namespace nc::graphics
 {
-PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(std::vector<PostProcessDataVariable> variables)
-    : m_variables{std::move(variables)}
+PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(Diligent::IDeviceContext& context,
+                                                                     Diligent::IRenderDevice& device,
+                                                                     Diligent::IShaderResourceVariable& outlinePassVariable)
+
+    : m_outlinePassBuffer{
+        context,
+        device,
+        OutlinePassData{},
+        "OutlinePassDataUniformBuffer"
+      },
+      m_outlinePassVariable{&outlinePassVariable}
 {
+    m_outlinePassVariable->Set(&m_outlinePassBuffer.GetBuffer());
 }
 
-void PostProcessPropertyBufferResource::SetVariable(PostProcessPassFlag::type passId, Diligent::IBuffer& buffer)
+void PostProcessPropertyBufferResource::Update(Diligent::IDeviceContext& context,
+                                               const PostProcessPassProperties& properties)
 {
-    GetVariable(passId).Set(&buffer);
-}
-
-auto PostProcessPropertyBufferResource::GetVariable(PostProcessPassFlag::type passId) -> Diligent::IShaderResourceVariable&
-{
-    auto pos = std::ranges::find_if(
-        m_variables,
-        [passId](const auto& variable) {
-            return variable.passId == passId;
-        }
+    std::visit(
+        [&context, this](auto&& unpacked){
+            using T = std::decay_t<decltype(unpacked)>;
+            if constexpr (std::same_as<T, OutlinePassProperties>)
+            {
+                m_outlinePassBuffer.Write(context, unpacked);
+            }
+            else
+            {
+                NC_ASSERT(false, "Unhandled PostProcessPassProperties inner type");
+            }
+        },
+        properties
     );
-
-    NC_ASSERT(pos != m_variables.end(), fmt::format("No variable exists for post process pass '{}'", passId));
-    return *pos->variable;
 }
 } // namespace nc::graphics

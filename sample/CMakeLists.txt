@@ -44,7 +44,7 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/resources/nca
 )
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/
         DESTINATION    sample/nca/shaders
-        FILES_MATCHING REGEX ".*\.(fxh)"
+        FILES_MATCHING REGEX ".*\.(fxh|psh|vsh)"
 )
 install(DIRECTORY      ${PROJECT_SOURCE_DIR}/resources/shaders/compiled/
         DESTINATION    sample/nca/shaders

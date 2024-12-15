@@ -3,7 +3,11 @@ target_sources(${NC_ENGINE_LIB}
         EnvironmentBufferResource.cpp
         MeshBuffer.cpp
         PerFrameResourceSignature.cpp
+        PerPassResourceSignature.cpp
         PostProcessPropertyBufferResource.cpp
+        PostProcessSinkIndexBufferResource.cpp
+        PostProcessColorSinkBufferResource.cpp
+        PostProcessDepthSinkBufferResource.cpp
         TextureBufferResource.cpp
         ResourceTypes.cpp
         ShaderBindings.cpp

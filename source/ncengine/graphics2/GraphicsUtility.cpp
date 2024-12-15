@@ -10,25 +10,29 @@ namespace
 {
 constexpr auto g_materialPassNames = std::array{
     std::string_view{"Shadow"},
-    std::string_view{"Toon"}
+    std::string_view{"Toon"},
+    std::string_view{"Normals"},
+    std::string_view{"Alpha"}
 };
 
 constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPassFlag::Shadow,
-    nc::MaterialPassFlag::Toon
+    nc::MaterialPassFlag::Toon,
+    nc::MaterialPassFlag::Normals,
+    nc::MaterialPassFlag::Alpha,
+};
+
+constexpr auto g_miscPassFlags = std::array{
+    nc::MiscPassFlag::Wireframe
 };
 
 constexpr auto g_postProcessPassNames = std::array{
-    std::string_view{"Alpha"},
-    std::string_view{"Depth"},
-    std::string_view{"Normals"},
+    std::string_view{"Wave"},
     std::string_view{"Outline"}
 };
 
 constexpr auto g_postProcessPassFlags = std::array{
-    nc::PostProcessPassFlag::Alpha,
-    nc::PostProcessPassFlag::Depth,
-    nc::PostProcessPassFlag::Normals,
+    nc::PostProcessPassFlag::Wave,
     nc::PostProcessPassFlag::Outline
 };
 
@@ -42,9 +46,7 @@ constexpr auto g_postProcessEffectIds = std::array{
 
 const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
-        nc::PostProcessPassFlag::Alpha,
-        nc::PostProcessPassFlag::Depth,
-        nc::PostProcessPassFlag::Normals,
+        nc::PostProcessPassFlag::Wave,
         nc::PostProcessPassFlag::Outline
     }
 };
@@ -74,7 +76,12 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 
 auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
-    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 1};
+    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 2};
+}
+
+auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>
+{
+    return std::span<const MiscPassFlag::type>{g_miscPassFlags.data(), 1};
 }
 
 auto GetPostProcessPassNames() -> std::span<const std::string_view>
