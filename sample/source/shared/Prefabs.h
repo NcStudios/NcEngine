@@ -26,7 +26,6 @@ constexpr auto RampPath = "ramp.nca";
 constexpr auto OgrePath = "ogre.nca";
 constexpr auto SkeletonPath = "skeleton.nca";
 constexpr auto CavePath = "cave.nca";
-constexpr auto CaveCeilingPath = "cave_ceiling.nca";
 
 extern asset::MeshView Cube;
 extern asset::MeshView Sphere;
@@ -37,7 +36,6 @@ extern asset::MeshView Ramp;
 extern asset::MeshView Ogre;
 extern asset::MeshView Skeleton;
 extern asset::MeshView Cave;
-extern asset::MeshView CaveCeiling;
 } // namespace mesh
 
 // Colliders
@@ -58,7 +56,6 @@ extern MaterialDesc Yellow;
 extern MaterialDesc Ogre;
 extern MaterialDesc Skeleton;
 extern MaterialDesc Cave;
-extern MaterialDesc CaveCeiling;
 } // namespace material
 
 // Animations

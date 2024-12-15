@@ -15,7 +15,6 @@
 #include "ncengine/physics/RigidBody.h"
 
 #include <string>
-#include <iostream>
 
 namespace nc::sample
 {
@@ -99,7 +98,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
                 auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetAnimationController();
                 ogreAnim.PlayOnceImmediate(animation::OgreAttack);
                 auto& tag = ecs.Get<Tag>(other);
-                GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
+                GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
             };
 
         auto& animator = world.Emplace<SkinnedMesh>(
@@ -148,15 +147,6 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
 
     world.Emplace<StaticMesh>(cave_floor, mesh::Cave, material::Cave);
-
-    const auto cave_ceiling = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
-        .scale = Vector3{1.5f, 1.5f, 1.5f},
-        .tag = "cave_ceiling"
-    });
-
-    world.Emplace<StaticMesh>(cave_ceiling, mesh::CaveCeiling, material::CaveCeiling);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

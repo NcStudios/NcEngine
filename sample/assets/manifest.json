@@ -60,13 +60,6 @@
             }
         },
         {
-            "sourcePath": "raw/model/cave_ceiling.fbx",
-            "assetName": "mesh/cave_ceiling",
-            "options": {
-                "optimizeMesh": true
-            }
-        },
-        {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "mesh/ramp",
             "options": {
@@ -126,14 +119,6 @@
         {
             "sourcePath": "raw/image/cave/Normal.png",
             "assetName": "texture/cave/Normal"
-        },
-        {
-            "sourcePath": "raw/image/cave_ceiling/BaseColor.png",
-            "assetName": "texture/cave_ceiling/BaseColor"
-        },
-        {
-            "sourcePath": "raw/image/cave_ceiling/Normal.png",
-            "assetName": "texture/cave_ceiling/Normal"
         },
         {
             "sourcePath": "raw/image/ogre/BaseColor.png",

@@ -21,7 +21,6 @@ asset::MeshView Ramp{};
 asset::MeshView Ogre{};
 asset::MeshView Skeleton{};
 asset::MeshView Cave{};
-asset::MeshView CaveCeiling{};
 } // namespace mesh
 
 namespace material
@@ -37,7 +36,6 @@ MaterialDesc Yellow{"YellowMaterial"};
 MaterialDesc Ogre{"OgreMaterial"};
 MaterialDesc Skeleton{"SkeletonMaterial"};
 MaterialDesc Cave{"CaveMaterial"};
-MaterialDesc CaveCeiling{"CaveCeilingMaterial"};
 } // namespace material
 
 namespace animation
@@ -109,8 +107,7 @@ void InitializeResources()
         "solid_color/Yellow.nca",
         "ogre/BaseColor.nca",
         "skeleton/BaseColor.nca",
-        "cave/BaseColor.nca",
-        "cave_ceiling/BaseColor.nca"
+        "cave/BaseColor.nca"
     };
 
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
@@ -119,8 +116,7 @@ void InitializeResources()
     {
         "ogre/Normal.nca",
         "skeleton/Normal.nca",
-        "cave/Normal.nca",
-        "cave_ceiling/Normal.nca"
+        "cave/Normal.nca"
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
@@ -139,7 +135,6 @@ void ReloadPrefabs()
     mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
     mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
     mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
-    mesh::CaveCeiling = asset::AcquireMeshAsset(mesh::CaveCeilingPath);
 
     const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
     material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
@@ -164,7 +159,5 @@ void ReloadPrefabs()
     material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
     material::Cave.properties.diffuseTexture = asset::AcquireTextureAsset("cave/BaseColor.nca");
     material::Cave.properties.normalTexture = asset::AcquireTextureAsset("cave/Normal.nca");
-    material::CaveCeiling.properties.diffuseTexture = asset::AcquireTextureAsset("cave_ceiling/BaseColor.nca");
-    material::CaveCeiling.properties.normalTexture = asset::AcquireTextureAsset("cave_ceiling/Normal.nca");
 }
 } // namespace sample
