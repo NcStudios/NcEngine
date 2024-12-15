@@ -46,7 +46,7 @@ class ShaderFactory
     private:
         Diligent::IRenderDevice* m_device;
         Diligent::RefCntAutoPtr<Diligent::IShaderSourceInputStreamFactory> m_streamFactory;
-        std::string_view m_shadersPath;
+        std::string m_shadersPath;
 
         auto CreateShader(const Diligent::ShaderCreateInfo& createInfo) -> Diligent::RefCntAutoPtr<Diligent::IShader>;
 };

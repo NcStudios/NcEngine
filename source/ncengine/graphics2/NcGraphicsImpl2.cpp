@@ -207,10 +207,25 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = MainDepth
                 },
                 PassDesc{
+                    .id = MaterialPassFlag::Toon,
+                    .name = "ToonSkinned",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
+                },
+                PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
+                    .colorSink = NormalsColor
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::Normals,
+                    .name = "NormalsSkinned",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
                     .colorSink = NormalsColor
                 },
                 PassDesc{
