@@ -54,7 +54,7 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
         }
     };
 
-    m_materialPassDescs.reserve(implementedMaterialPasses.size());
+    m_staticMaterialPassDescs.reserve(implementedMaterialPasses.size());
     registerMatches(passes, implementedMaterialPasses, PassType::Material);
 
     m_skinnedMaterialPassDescs.reserve(implementedMaterialPasses.size());
@@ -66,7 +66,7 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
     registerMatches(passes, implementedPPPasses, PassType::PostProcess);
 
 #ifndef NC_PROD_BUILD
-    VerifyMaterialPasses(m_materialPassDescs, m_skinnedMaterialPassDescs);
+    VerifyMaterialPasses(m_staticMaterialPassDescs, m_skinnedMaterialPassDescs);
 #endif
 }
 
@@ -83,7 +83,7 @@ void PassManifest::RegisterPass(PassDesc desc)
     switch (desc.type)
     {
         case PassType::Material:
-            m_materialPassDescs.emplace_back(std::move(desc));
+            m_staticMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::SkinnedMaterial:
             m_skinnedMaterialPassDescs.emplace_back(std::move(desc));
@@ -110,8 +110,8 @@ void PassManifest::RegisterPass(PassDesc desc)
 
 void PassManifest::Clear()
 {
-    m_materialPassDescs.clear();
-    m_materialPassDescs.shrink_to_fit();
+    m_staticMaterialPassDescs.clear();
+    m_staticMaterialPassDescs.shrink_to_fit();
     m_skinnedMaterialPassDescs.clear();
     m_skinnedMaterialPassDescs.shrink_to_fit();
     m_postProcessPassDescs.clear();

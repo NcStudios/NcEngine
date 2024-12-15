@@ -49,14 +49,6 @@ MeshSubsystem::MeshSubsystem(SkeletalAnimationStorage& animationStorage,
     MeshBase::RegisterSubsystem(this);
 }
 
-auto MeshSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
-{
-    const auto _ = m_animationStorage->AcquireReadLock();
-    return m_animationStorage->HasRig(meshId)
-        ? static_cast<uint32_t>(m_animationStorage->GetRig(meshId).vertexToBone.size())
-        : 0u;
-}
-
 void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
                                 const MaterialInstance& material,
                                 const asset::MeshView& mesh)
@@ -219,6 +211,14 @@ void MeshSubsystem::OnBeforeSceneLoad()
     // Call here instead of on Clear() to allow the OnRemove callbacks to fire before purging.
     m_staticMeshInstanceCache.Purge();
     m_skinnedMeshInstanceCache.Purge();
+}
+
+auto MeshSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
+{
+    const auto _ = m_animationStorage->AcquireReadLock();
+    return m_animationStorage->HasRig(meshId)
+        ? static_cast<uint32_t>(m_animationStorage->GetRig(meshId).vertexToBone.size())
+        : 0u;
 }
 
 void MeshSubsystem::OnRebuildStatics()

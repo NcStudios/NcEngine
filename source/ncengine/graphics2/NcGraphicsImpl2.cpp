@@ -233,7 +233,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .colorSink = MainColor
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Wave,
@@ -417,9 +418,28 @@ void NcGraphicsImpl2::Run()
     m_shaderBindings.GetPerPassSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRenderState.staticMeshBatches, renderState.meshRenderState.skinnedMeshBatches);
-    m_passBackend.RenderWireframe(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.wireframeRenderState);
-    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature());
+    m_passBackend.RenderMaterial(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.meshRenderState.staticMeshBatches,
+        renderState.meshRenderState.skinnedMeshBatches
+    );
+
+    m_passBackend.RenderWireframe(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.wireframeRenderState
+    );
+
+    m_passBackend.RenderPostProcess(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        m_shaderBindings.GetPerFrameSignature()
+    );
+
     m_ui.Render(context);
 
     swapChain.Present();

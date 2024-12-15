@@ -108,7 +108,15 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         device,
         shaderFactory,
         shaderBindings,
-        passManifest.MaterialPassDescs()
+        passManifest.StaticMaterialPassDescs()
+    );
+
+    m_skinnedMaterialPasses = MakeMaterialPasses
+    (
+        device,
+        shaderFactory,
+        shaderBindings,
+        passManifest.SkinnedMaterialPassDescs()
     );
 
     m_skinnedMaterialPasses = MakeMaterialPasses
@@ -186,7 +194,12 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
                                  const std::vector<std::vector<Batch>>& skinnedPassBatches)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
-    NC_ASSERT(staticPassBatches.size() == skinnedPassBatches.size(), "Static/Skinned batch count must be equal.");
+    NC_ASSERT(
+        m_staticMaterialPasses.size() == staticPassBatches.size() &&
+        m_skinnedMaterialPasses.size() == skinnedPassBatches.size(),
+        "Frontend/Backend passes out of sync."
+    );
+
     auto passView = std::views::zip(
         m_staticMaterialPasses,
         m_skinnedMaterialPasses,
@@ -196,16 +209,15 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
 
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
+        // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain,
                          perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
                          perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
-                         staticPass.colorRTIndex,
-                         staticPass.depthRTIndex);
+                         staticPass.colorRTIndex, staticPass.depthRTIndex);
         ClearRenderTarget(context, swapChain,
                           perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
                           perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
-                          staticPass.colorRTIndex,
-                          staticPass.depthRTIndex);
+                          staticPass.colorRTIndex, staticPass.depthRTIndex);
 
         context.SetPipelineState(staticPass.pso);
         DrawIndexed(context, staticBatches);

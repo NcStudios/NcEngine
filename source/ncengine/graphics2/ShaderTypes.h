@@ -78,7 +78,7 @@ struct MaterialData
     float outlineWidth = 1.0f;
 };
 
-// Object model for skeletal animations (type: StructuredBuffer element type).
+// Object model for animated bones (type: StructuredBuffer element type).
 struct BoneData
 {
     DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMATRIX{};

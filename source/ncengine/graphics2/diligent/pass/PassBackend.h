@@ -31,8 +31,8 @@ class PassBackend
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
-                            const std::vector<std::vector<Batch>>& staticBatches,
-                            const std::vector<std::vector<Batch>>& skinnedBatches);
+                            const std::vector<std::vector<Batch>>& staticPassBatches,
+                            const std::vector<std::vector<Batch>>& skinnedPassBatches);
 
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
