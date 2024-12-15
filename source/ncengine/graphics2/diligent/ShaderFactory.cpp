@@ -1,29 +1,10 @@
 #include "ShaderFactory.h"
 
+#include <filesystem>
 #include <fstream>
 
 namespace nc::graphics
 {
-auto ReadShaderFile(std::string_view filePath) -> std::vector<char>
-{
-    auto file = std::ifstream(filePath.data(), std::ios::ate | std::ios::binary);
-    if (!file.is_open() || file.tellg() == -1)
-    {
-        throw NcError(fmt::format("Failed to open shader file '{}'", filePath));
-    }
-
-    const auto fileSize = static_cast<uint32_t>(file.tellg());
-    auto buffer = std::vector<char>(fileSize);
-    file.seekg(0);
-    file.read(buffer.data(), fileSize);
-    if (file.fail())
-    {
-        throw NcError(fmt::format("Failed to read shader file '{}'", filePath));
-    }
-
-    return buffer;
-}
-
 auto ShaderFactory::MakeShaderFromSource(std::span<const char> source,
                                          std::string_view name,
                                          Diligent::SHADER_TYPE type,
@@ -60,6 +41,27 @@ auto ShaderFactory::MakeShaderFromByteCode(std::span<const char> byteCode,
     createInfo.Desc.ShaderType = type;
     createInfo.Desc.UseCombinedTextureSamplers = true;
     return CreateShader(createInfo);
+}
+
+auto ShaderFactory::ReadShaderFile(std::string_view filePath) -> std::vector<char>
+{
+    auto shaderPath = (std::filesystem::path(m_shadersPath) / filePath).string();
+    auto file = std::ifstream(shaderPath, std::ios::ate | std::ios::binary);
+    if (!file.is_open() || file.tellg() == -1)
+    {
+        throw NcError(fmt::format("Failed to open shader file '{}'", shaderPath));
+    }
+
+    const auto fileSize = static_cast<uint32_t>(file.tellg());
+    auto buffer = std::vector<char>(fileSize);
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    if (file.fail())
+    {
+        throw NcError(fmt::format("Failed to read shader file '{}'", shaderPath));
+    }
+
+    return buffer;
 }
 
 auto ShaderFactory::CreateShader(const Diligent::ShaderCreateInfo& createInfo) -> Diligent::RefCntAutoPtr<Diligent::IShader>

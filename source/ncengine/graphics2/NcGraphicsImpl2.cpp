@@ -1,5 +1,8 @@
 #include "NcGraphicsImpl2.h"
-#include "diligent/pass/Pass.h"
+#include "diligent/pass/MaterialPass.h"
+#include "diligent/pass/PassUtilities.h"
+#include "diligent/pass/WireframePass.h"
+#include "diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -7,12 +10,15 @@
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Registry.h"
+#include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
 #include "ncengine/utility/Log.h"
 
 #include "imgui.h"
 #include "DirectXMath.h"
+
+#include <array>
 
 namespace
 {
@@ -175,25 +181,60 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             window.GetWindowHandle(),
             modules.Get<asset::NcAsset>()->OnFontUpdate()
           },
-          m_materialPassBackend{MakePasses(
-            m_engine.GetDevice(),
-            m_engine.GetSwapChain(),
-            m_engine.GetShaderFactory(),
-            m_shaderBindings
-          )},
-          m_wireframePass{
-            m_engine.GetDevice(),
-            m_engine.GetSwapChain(),
-            m_engine.GetShaderFactory(),
-            m_shaderBindings
+          m_passManifest
+          {
+            std::vector<PassDesc>
+            {
+                PassDesc{
+                    .id = MaterialPassFlag::Toon,
+                    .name = "Toon",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::Normals,
+                    .name = "Normals",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
+                    .colorSink = NormalsColor
+                },
+                PassDesc{
+                    .id = MiscPassFlag::Wireframe,
+                    .name = "Wireframe",
+                    .type = PassType::Wireframe,
+                    .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
+                    .colorSink = MainColor
+                },
+                PassDesc{
+                    .id = PostProcessPassFlag::Wave,
+                    .name = "Post Process Wave",
+                    .type = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
+                    .colorSources = SingleSource(MainColor),
+                    .colorSink = PPWaveColor
+                },
+                PassDesc{
+                    .id = PostProcessPassFlag::Outline,
+                    .name = "Post Process Outline",
+                    .type = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
+                    .colorSources = std::vector{PPWaveColor, NormalsColor},
+                    .depthSources = SingleSource(MainDepth),
+                    .colorSink = PPOutlineColor
+                }
+            },
+            GetImplementedMaterialPassFlags(),
+            GetPostProcessPassFlags(),
+            GetMiscsPassFlags()
           },
-          m_postProcessPassBackend{
-            MakePostProcessPasses(
-                m_engine.GetContext(),
-                m_engine.GetDevice(),
-                m_engine.GetSwapChain(),
-                m_engine.GetShaderFactory()
-            )
+          m_passBackend{
+            m_engine.GetDevice(),
+            m_engine.GetSwapChain(),
+            m_engine.GetShaderFactory(),
+            m_shaderBindings,
+            m_passManifest
           },
           m_frontend{
             m_engine.GetContext(),
@@ -211,7 +252,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnSkeletalAnimationUpdate(),
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
-          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)}
+          m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
+          m_resizeNeeded{false}
 {
 }
 
@@ -309,6 +351,11 @@ void NcGraphicsImpl2::Run()
 {
     NC_PROFILE_TASK("Render", Optick::Category::Rendering);
 
+    if (m_resizeNeeded)
+    {
+        Resize();
+    }
+
     auto& context = m_engine.GetContext();
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
@@ -318,24 +365,15 @@ void NcGraphicsImpl2::Run()
 
     auto renderState = m_frontend.BuildRenderState(m_world);
 
-    auto* pRTV = swapChain.GetCurrentBackBufferRTV();
-    auto* pDSV = swapChain.GetDepthBufferDSV();
-    context.SetRenderTargets(1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-    constexpr auto ClearColor = Vector4{0.050f, 0.050f, 0.050f, 1.0f};
-    context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-    m_postProcessPassBackend.Update(context, renderState.postProcessState);
+    m_passBackend.Update(renderState.postProcessState);
     m_shaderBindings.Update(context, device, renderState);
     m_shaderBindings.GetPerFrameSignature().Commit(context);
+    m_shaderBindings.GetPerPassSignature().Commit(context);
     m_shaderBindings.GetMeshBuffer().SetBuffers(context);
 
-    /** @todo #834 Pass skinned batches */
-    m_materialPassBackend.Render(context, renderState.meshRenderState.staticMeshBatches);
-    m_wireframePass.Render(context, renderState.wireframeRenderState);
-    /** @todo Post process PSOs are currently null. Add this call in somewhere once implemented. */
-    // m_postProcessPassBackend.Render(context, m_shaderBindings.GetPerFrameSignature().GetPostProcessPropertyBuffer());
+    m_passBackend.RenderMaterial(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.meshRenderState.staticMeshBatches);
+    m_passBackend.RenderWireframe(context, swapChain, m_shaderBindings.GetPerPassSignature(), renderState.wireframeRenderState);
+    m_passBackend.RenderPostProcess(context, swapChain, m_shaderBindings.GetPerPassSignature(), m_shaderBindings.GetPerFrameSignature());
     m_ui.Render(context);
 
     swapChain.Present();
@@ -347,5 +385,15 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 {
     (void)isMinimized;
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
+    m_resizeNeeded = true;
+    m_dimensions = dimensions;
+}
+
+void NcGraphicsImpl2::Resize()
+{
+    m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_resizeNeeded = false;
 }
 } // namespace nc::graphics

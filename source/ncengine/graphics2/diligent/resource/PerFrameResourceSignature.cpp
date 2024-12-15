@@ -1,8 +1,8 @@
 #include "PerFrameResourceSignature.h"
 #include "EnvironmentBufferResource.h"
-#include "PostProcessPropertyBufferResource.h"
 #include "TextureBufferResource.h"
 #include "WireframeBufferResource.h"
+#include "PostProcessPropertyBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -144,12 +144,9 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
     );
 
     m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
-        std::vector<PostProcessDataVariable>{
-            PostProcessDataVariable{
-                &GetVariable(outlinePassPropertiesDesc, m_srb),
-                PostProcessPassFlag::Outline
-            }
-        }
+        context,
+        device,
+        GetVariable(outlinePassPropertiesDesc.shaderType, outlinePassPropertiesDesc.resourceKey.data(), m_srb)
     );
 }
 

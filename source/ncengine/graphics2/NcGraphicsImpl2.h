@@ -1,9 +1,8 @@
 #pragma once
 
 #include "diligent/DiligentEngine.h"
-#include "diligent/pass/MaterialPassBackend.h"
-#include "diligent/pass/PostProcessPassBackend.h"
-#include "diligent/pass/WireframePass.h"
+#include "diligent/pass/PassBackend.h"
+#include "diligent/pass/PassManifest.h"
 #include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
 #include "frontend/GraphicsFrontend.h"
@@ -53,15 +52,17 @@ class NcGraphicsImpl2 : public NcGraphics
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
     private:
+        void Resize();
         ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
         UIBackend m_ui;
-        MaterialPassBackend m_materialPassBackend;
-        WireframePass m_wireframePass;
-        PostProcessPassBackend m_postProcessPassBackend;
+        PassManifest m_passManifest;
+        PassBackend m_passBackend;
         GraphicsFrontend m_frontend;
         Connection m_onResizeConnection;
+        Vector2 m_dimensions;
+        bool m_resizeNeeded;
 };
 } // namespace graphics
 } // namespace nc
