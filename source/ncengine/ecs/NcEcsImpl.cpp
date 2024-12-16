@@ -43,10 +43,17 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
             m_registry->CommitPendingChanges();
             UpdateWorldSpaceMatrices();
         },
+        {update_task_id::FrameLogicUpdate}
+    );
+
+    update.Add
+    (
+        update_task_id::UpdateTransforms,
+        "UpdateTransforms",
+        [this] { UpdateWorldSpaceMatrices(); },
         {
             update_task_id::AudioSourceUpdate,
             update_task_id::ParticleEmitterUpdate,
-            update_task_id::SkeletalAnimationUpdate,
             update_task_id::PhysicsPipeline
         }
     );

@@ -186,6 +186,7 @@ target_link_libraries(MeshSubsystem_tests
         gtest_main
         NcAsset
         NcMath
+        Taskflow
 )
 
 add_test(MeshSubsystem_tests MeshSubsystem_tests)
@@ -267,6 +268,32 @@ target_link_libraries(SkeletalAnimationController_tests
 )
 
 add_test(SkeletalAnimationController_tests SkeletalAnimationController_tests)
+
+### SkeletalAnimationCalculator Tests ###
+add_executable(SkeletalAnimationCalculator_tests
+    SkeletalAnimationCalculator_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp
+)
+
+target_include_directories(SkeletalAnimationCalculator_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(SkeletalAnimationCalculator_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SkeletalAnimationCalculator_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(SkeletalAnimationCalculator_tests SkeletalAnimationCalculator_tests)
 
 ### SkeletalAnimationStorage Tests ###
 add_executable(SkeletalAnimationStorage_tests

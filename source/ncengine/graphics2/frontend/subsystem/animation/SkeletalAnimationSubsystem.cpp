@@ -49,18 +49,51 @@ auto StepTransition(nc::graphics::InFlightAnimation& state,
 
 namespace nc::graphics
 {
+auto ISkeletalAnimationSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
+{
+    const auto _ = m_storage.AcquireReadLock();
+    return m_storage.HasRig(meshId)
+        ? static_cast<uint32_t>(m_storage.GetRig(meshId).vertexToBone.size())
+        : 0u;
+}
+
+auto ISkeletalAnimationSubsystem::AllocateBones(uint64_t meshId) -> BoneCacheHandle
+{
+    const auto boneCount = GetRigBoneCount(meshId);
+    return boneCount > 0
+        ? m_boneCache.GetStagingArea().Allocate(boneCount)
+        : NullBoneCacheHandle;
+}
+
+void ISkeletalAnimationSubsystem::NotifyRemove(Entity entity, BoneCacheHandle boneIndex)
+{
+    m_removed.push_back(entity);
+    if (boneIndex != NullBoneCacheHandle)
+    {
+        m_boneCache.GetStagingArea().Free(boneIndex);
+    }
+}
+
+void SkeletalAnimationSubsystem::Update(ecs::ExplicitEcs<SkinnedMesh> ecs)
+{
+    NC_PROFILE_TASK("SkeletalAnimationSubsystem::Update()", ProfileCategory::Animation);
+
+    auto& pool = ecs.GetPool<SkinnedMesh>();
+    CommitPendingChanges();
+    Transition(pool);
+    CalculateBoneMatrices();
+    NotifyCompletedAnimations(pool);
+}
+
 void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
-    NC_PROFILE_TASK("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
-    m_boneCache.CommitPendingChanges();
-    auto boneBuffer = std::vector<BoneData>{};
-    auto calculator = gfx3::SkeletalAnimationCalculator{};
+    NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
 
+    auto context = SkeletalAnimationContext{};
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
     for (auto [entity, state] : std::views::zip(m_animatedEntities, m_animationState))
     {
-        const auto& rig = m_storage.GetRig(state.meshId);
         const auto& animation = m_storage.GetAnimation(state.animId);
         const auto [ticks, completed] = StepAnimationTime(state.time, animation, dt);
         if (completed)
@@ -68,11 +101,13 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             m_completedAnimations.push_back(entity);
         }
 
+        const auto& rig = m_storage.GetRig(state.meshId);
         if (m_storage.HasAnimation(state.blendFromAnimId))
         {
             const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
             const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
-            const auto bones = calculator.Animate(
+            Animate(
+                context,
                 rig,
                 blendFromAnimation,
                 blendFromTicks,
@@ -80,38 +115,45 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
                 ticks,
                 state.blendFactor
             );
-
-            m_boneCache.UpdateRegion(state.boneIndex, bones);
         }
         else
         {
-            const auto bones = calculator.Animate(
-                rig,
-                animation,
-                ticks
-            );
-
-            m_boneCache.UpdateRegion(state.boneIndex, bones);
+            Animate(context, rig, animation, ticks);
         }
+
+        m_boneCache.UpdateRegion(state.boneIndex, context.animatedBones);
     }
 }
 
-void SkeletalAnimationSubsystem::UpdateAnimationControllers(ecs::ExplicitEcs<SkinnedMesh> ecs)
+void SkeletalAnimationSubsystem::CommitPendingChanges()
 {
-    NC_PROFILE_TASK("SkeletalAnimationSubsystem::UpdateAnimationControllers()", ProfileCategory::Animation);
+    // todo: we have another pop-swap thing below - make some algorithm finally?
 
-    auto& pool = ecs.GetPool<SkinnedMesh>();
+    for (const auto toRemove : m_removed)
+    {
+        auto pos = std::ranges::find(m_animatedEntities, toRemove);
+        if (pos != m_animatedEntities.end())
+        {
+            const auto index = (size_t)std::distance(m_animatedEntities.begin(), pos);
+            *pos = m_animatedEntities.back();
+            m_animatedEntities.pop_back();
+            m_animationState.at(index) = std::move(m_animationState.back());
+            m_animationState.pop_back();
+        }
+    }
+
+    m_removed.clear();
+    m_boneCache.CommitPendingChanges();
+}
+
+void SkeletalAnimationSubsystem::NotifyCompletedAnimations(ecs::ComponentPool<SkinnedMesh>& pool)
+{
     for (const auto entity : m_completedAnimations)
     {
         pool.Get(entity).GetAnimationController().NotifyCompleteState();
     }
 
     m_completedAnimations.clear();
-
-    for (auto& mesh : pool)
-    {
-        Transition(mesh);
-    }
 }
 
 auto SkeletalAnimationSubsystem::BuildState() -> SkeletalAnimationRenderState
@@ -122,27 +164,35 @@ auto SkeletalAnimationSubsystem::BuildState() -> SkeletalAnimationRenderState
 void SkeletalAnimationSubsystem::OnBeforeSceneLoad()
 {
     m_boneCache.Purge();
+    m_animatedEntities.shrink_to_fit();
+    m_animationState.shrink_to_fit();
+    m_removed.shrink_to_fit();
+    m_completedAnimations.clear();
+    m_completedAnimations.shrink_to_fit();
 }
 
 void SkeletalAnimationSubsystem::Clear() noexcept
 {
-    // todo: insufficient - does not handle persistent entities:
-    m_animatedEntities.clear();
-    m_animatedEntities.shrink_to_fit();
-    m_animationState.clear();
-    m_animationState.shrink_to_fit();
+    // if mesh subsystem notifies on all removes, we can just move to OnBeforeSceneLoad() I think
 }
 
-
-void SkeletalAnimationSubsystem::Transition(SkinnedMesh& mesh)
+void SkeletalAnimationSubsystem::Transition(ecs::ComponentPool<SkinnedMesh>& pool)
 {
-    const auto transition = mesh.GetAnimationController().CheckForTransition();
-    switch (transition.type)
+    for (auto& mesh : pool)
     {
-        case AnimationTransitionType::Continue: return;
-        case AnimationTransitionType::Loop:     [[fallthrough]];
-        case AnimationTransitionType::PlayOnce: return Start(mesh.GetContext(), transition);
-        case AnimationTransitionType::Stop:     return Stop(mesh.GetContext());
+        const auto transition = mesh.GetAnimationController().CheckForTransition();
+        switch (transition.type)
+        {
+            case AnimationTransitionType::Continue:
+                break;
+            case AnimationTransitionType::Loop:
+            case AnimationTransitionType::PlayOnce:
+                Start(mesh.GetContext(), transition);
+                break;
+            case AnimationTransitionType::Stop:
+                Stop(mesh.GetContext());
+                break;
+        }
     }
 }
 

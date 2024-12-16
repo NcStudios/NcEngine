@@ -40,27 +40,22 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
         update.Add(
             nc::update_task_id::ParticleEmitterUpdate,
             "ParticleEmitterUpdate(stub)",
-            []{}
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
         );
 
         update.Add(
             nc::update_task_id::SkeletalAnimationUpdate,
             "SkeletalAnimationUpdate(stub)",
-            []{}
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
         );
 
         update.Add(
             nc::update_task_id::ParticleEmitterSync,
             "ParticleEmitterSync(stub)",
             []{},
-            {nc::update_task_id::CommitStagedChanges}
-        );
-
-        update.Add(
-            nc::update_task_id::SkeletalAnimationSync,
-            "SkeletalAnimationSync(stub)",
-            []{},
-            {nc::update_task_id::CommitStagedChanges}
+            {nc::update_task_id::UpdateTransforms}
         );
 
         render.Add(
@@ -360,29 +355,24 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     update.Add(
         update_task_id::ParticleEmitterUpdate,
         "ParticleEmitterUpdate(stub)",
-        []{}
+        []{},
+        {update_task_id::CommitStagedChanges}
+    );
+
+
+
+    update.Add(
+        update_task_id::ParticleEmitterSync,
+        "ParticleEmitterSync(stub)",
+        []{},
+        {update_task_id::UpdateTransforms}
     );
 
     update.Add(
         update_task_id::SkeletalAnimationUpdate,
         "SkeletalAnimationUpdate",
         [this]{
-            m_frontend.GetSkeletalAnimationSubsystem().CalculateBoneMatrices();
-        }
-    );
-
-    update.Add(
-        update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync(stub)",
-        []{},
-        {update_task_id::CommitStagedChanges}
-    );
-
-    update.Add(
-        update_task_id::SkeletalAnimationSync,
-        "SkeletalAnimationSync",
-        [this]{
-            m_frontend.GetSkeletalAnimationSubsystem().UpdateAnimationControllers(m_world);
+            m_frontend.GetSkeletalAnimationSubsystem().Update(m_world);
         },
         {update_task_id::CommitStagedChanges}
     );

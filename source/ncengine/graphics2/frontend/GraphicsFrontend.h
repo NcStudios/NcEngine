@@ -51,8 +51,7 @@ class GraphicsFrontend
               m_uiSystem{world, modules, events},
               m_cameraSystem{},
               m_meshSystem{
-                m_animationSystem.GetStorage(),
-                m_animationSystem.GetBoneCacheStaging(),
+                m_animationSystem,
                 events,
                 maxEntities,
                 maxRenderers,

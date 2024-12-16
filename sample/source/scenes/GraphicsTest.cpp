@@ -49,6 +49,37 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto lv3Handle = world.Emplace<Entity>({.position = Vector3{4.5f, 6.0f, -8.4f}, .tag = "Point Light 3"});
     world.Emplace<graphics::PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
 
+
+    // Test
+    {
+        auto spawner = world.Emplace<Entity>();
+        world.Emplace<FrameLogic>(
+            spawner,
+            [e = Entity{}, t = 0.0f](Entity, ecs::Ecs world, float dt) mutable {
+                if (t < 0.25f)
+                {
+                    t += dt;
+                    return;
+                }
+
+                t = 0.0f;
+
+                if (!e.Valid())
+                {
+                    e = world.Emplace<Entity>();
+                    world.Emplace<SkinnedMesh>(e, mesh::Ogre, material::Ogre, animation::OgreIdle);
+                    return;
+                }
+
+
+
+                world.Remove<Entity>(e);
+                e = Entity{};
+            }
+        );
+    }
+
+
     // Ogre
     {
         auto ogre = world.Emplace<Entity>({

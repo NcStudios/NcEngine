@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#define NC_OUTPUT_TASKFLOW 1
+
 namespace
 {
 // Internal TaskGraph interface
