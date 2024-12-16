@@ -204,6 +204,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
+                    .depthSources = SingleSource(SpotShadowDepth),
                     .colorSink = MainColor,
                     .depthSink = MainDepth
                 },
@@ -212,6 +213,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
+                    .depthSources = SingleSource(SpotShadowDepth),
                     .colorSink = MainColor,
                     .depthSink = MainDepth
                 },
