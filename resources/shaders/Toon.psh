@@ -28,6 +28,19 @@ struct MaterialData
     float outlineWidth;
 };
 
+cbuffer PerPassInstanceBufferData
+{
+    uint colorRT1;
+    uint colorRT2;
+    uint colorRT3;
+    uint colorRT4;
+    uint depthRT1;
+    uint depthRT2;
+    uint depthRT3;
+    uint depthRT4;
+    uint spotLightIndex;
+};
+
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
 StructuredBuffer<DirectionalLightData> DirectionalLightBufferData : register(t2);
 StructuredBuffer<PointLightData> PointLightBufferData : register(t3);
@@ -46,6 +59,13 @@ struct PSOutput
 {
     float4 Color : SV_TARGET;
 };
+
+const float4x4 biasMat = float4x4( 
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.5, 0.5, 0.0, 1.0 
+);
 
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -69,7 +89,8 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     for (int i = 0; i < spotLightsCount; i++)
     {
         LightInfluence influence = SpotLightRadiance(SpotLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
+        float shadowAmount = ShadowCalculation(biasMat * float4(PSIn.WorldPos, 1.0f) * SpotLightBufferData[i].viewProj, depthRT1);
+        finalColor += influence.color * (1.0  -  shadowAmount) * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
 
     Color *= float4(finalColor, 1.0);

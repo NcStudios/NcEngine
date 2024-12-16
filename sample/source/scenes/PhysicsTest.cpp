@@ -1079,6 +1079,15 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         }),
         Vector3{1.0f, 1.0f, 1.0f}
     );
+
+    world.Emplace<graphics::SpotLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{5.0f, 3.0f, -1.0f},
+            .rotation = nc::Quaternion::FromEulerAngles(0.0f, -1.31f, 0.0f),
+            .tag = "Spot Light"
+        }),
+        Vector3{1.0f, 1.0f, 1.0f}
+    );
 }
 
 void PhysicsTest::Unload()

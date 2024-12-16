@@ -1,3 +1,6 @@
+Texture2D     PostProcessDepthSinkBufferData[];
+SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
 struct DirectionalLightData
 {
     float3 color;
@@ -104,4 +107,43 @@ LightInfluence SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float
 
     LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
     return lightInfluence;
+}
+
+float ShadowCalculation(float4 fragPosLightSpace, int shadowMapRTIndex)
+{
+    // Perform perspective divide
+    float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    // Get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+
+    // Check whether current frag pos is in shadow
+    float shadow = 0.0;
+    int textureWidth;
+    int textureHeight;
+    PostProcessDepthSinkBufferData[shadowMapRTIndex].GetDimensions(textureWidth, textureHeight);
+    float2 texelSize = 1.0 / float2(textureWidth, 0);
+    int sampleRadius = 2;
+
+    for (int y = -sampleRadius; y <= sampleRadius; y++)
+    {
+        for (int x = -sampleRadius; x <= sampleRadius; x++)
+        {
+            // Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+            float closestDepth = PostProcessDepthSinkBufferData[shadowMapRTIndex].Sample(PostProcessColorSinkBufferData_sampler, projCoords.xy + float2(x, y) * texelSize).r;
+            if (currentDepth > closestDepth)
+            {
+                shadow += 1.0f;
+            }
+        }
+    }
+
+    shadow /= pow((sampleRadius * 2 + 1), 2);
+
+    if (projCoords.z > 1.0 || projCoords.z < 0)
+    {
+        shadow = 0.0;
+    }
+
+    return shadow;
 }
