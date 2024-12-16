@@ -8,9 +8,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
@@ -19,7 +17,6 @@
 #include "ncutility/Hash.h"
 
 #include <string>
-#include <iostream>
 
 namespace nc::sample
 {
@@ -31,15 +28,7 @@ GraphicsTest::GraphicsTest(SampleUI* ui)
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
-
-    std::vector<std::string> cubemaps
-    {
-        "night_sky.nca"
-    };
-
-    asset::LoadCubeMapAssets(cubemaps);
-
-    modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
+    modules.Get<graphics::NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
@@ -49,40 +38,9 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto lv3Handle = world.Emplace<Entity>({.position = Vector3{4.5f, 6.0f, -8.4f}, .tag = "Point Light 3"});
     world.Emplace<graphics::PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
 
-
-    // Test
-    {
-        auto spawner = world.Emplace<Entity>();
-        world.Emplace<FrameLogic>(
-            spawner,
-            [e = Entity{}, t = 0.0f](Entity, ecs::Ecs world, float dt) mutable {
-                if (t < 0.25f)
-                {
-                    t += dt;
-                    return;
-                }
-
-                t = 0.0f;
-
-                if (!e.Valid())
-                {
-                    e = world.Emplace<Entity>();
-                    world.Emplace<SkinnedMesh>(e, mesh::Ogre, material::Ogre, animation::OgreIdle);
-                    return;
-                }
-
-
-
-                world.Remove<Entity>(e);
-                e = Entity{};
-            }
-        );
-    }
-
-
     // Ogre
     {
-        auto ogre = world.Emplace<Entity>({
+        const auto ogre = world.Emplace<Entity>({
             .position = Vector3{-5.0f, 0.0f, 12.0f},
             .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
             .scale = Vector3{3.0f, 3.0f, 3.0f},
@@ -97,14 +55,19 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             }
         );
 
-        auto& renderer = world.Emplace<SkinnedMesh>(ogre, mesh::Ogre, material::Ogre, animation::OgreIdle);
-        auto& controller = renderer.GetAnimationController();
-        const auto stopState = controller.AddState(StopAnimation{
+        auto& animator = world.Emplace<SkinnedMesh>(
+            ogre,
+            mesh::Ogre,
+            material::Ogre,
+            animation::OgreIdle
+        ).GetAnimationController();
+
+        const auto stopState = animator.AddState(StopAnimation{
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .enterFrom = RootAnimationState
         });
 
-        controller.AddState(LoopAnimation{
+        animator.AddState(LoopAnimation{
             .animId = animation::OgreIdle,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .enterFrom = stopState,
@@ -115,14 +78,13 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Skeleton
     {
-        auto skeleton = world.Emplace<Entity>({
+        const auto skeleton = world.Emplace<Entity>({
             .position = Vector3{5.3f, 0.0f, -6.4f},
             .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
             .scale = Vector3{2.0f, 2.0f, 2.0f},
             .tag = "skeleton"
         });
 
-        auto& mesh = world.Emplace<SkinnedMesh>(skeleton, mesh::Skeleton, material::Skeleton, animation::SkeletonIdle);
         world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
         world.Emplace<RigidBody>(
             skeleton,
@@ -136,63 +98,57 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         world.Emplace<CollisionListener>(skeleton)
             .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
                 auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetAnimationController();
-                ogreAnim.PlayOnceImmediate(animation::OgreAttack, RootAnimationState);
+                ogreAnim.PlayOnceImmediate(animation::OgreAttack);
                 auto& tag = ecs.Get<Tag>(other);
-                GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
+                GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
             };
 
-        auto& controller = mesh.GetAnimationController();
-        controller.AddState(LoopAnimation{
+        auto& animator = world.Emplace<SkinnedMesh>(
+            skeleton,
+            mesh::Skeleton,
+            material::Skeleton,
+            animation::SkeletonIdle
+        ).GetAnimationController();
+
+        animator.AddState(LoopAnimation{
             .animId = animation::SkeletonWalkForward,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
-            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
         });
 
-        controller.AddState(LoopAnimation{
+        animator.AddState(LoopAnimation{
             .animId = animation::SkeletonWalkLeft,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
-            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
         });
 
-        controller.AddState(LoopAnimation{
-            .animId = animation::SkeletonWalkBack,
+        animator.AddState(LoopAnimation{
+            .animId = animation::SkeletonWalkBackward,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
-            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
         });
 
-        controller.AddState(LoopAnimation{
+        animator.AddState(LoopAnimation{
             .animId = animation::SkeletonWalkRight,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
-            .enterFrom = RootAnimationState,
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
         });
 
-        controller.AddState(PlayOnceAnimation{
+        animator.AddState(PlayOnceAnimation{
             .animId = animation::SkeletonJump,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
-            .enterFrom = RootAnimationState
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
     }
 
     // Cave
-    // auto cave_floor = world.Emplace<Entity>({
-    //     .position = Vector3{0.0f, 0.0f, 0.0f},
-    //     .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
-    //     .scale = Vector3{1.5f, 1.5f, 1.5f},
-    //     .tag = "cave_floor"
-    // });
-    // world.Emplace<graphics::MeshRenderer>(cave_floor, "cave.nca", caveMaterial);
+    const auto cave_floor = world.Emplace<Entity>({
+        .position = Vector3{0.0f, 0.0f, 0.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
+        .scale = Vector3{1.5f, 1.5f, 1.5f},
+        .tag = "cave_floor"
+    });
 
-    // auto cave_ceiling = world.Emplace<Entity>({
-    //     .position = Vector3{0.0f, 0.0f, 0.0f},
-    //     .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
-    //     .scale = Vector3{1.5f, 1.5f, 1.5f},
-    //     .tag = "cave_ceiling"
-    // });
-    // world.Emplace<graphics::MeshRenderer>(cave_ceiling, "cave_ceiling.nca", caveCeilingMaterial);
+    world.Emplace<StaticMesh>(cave_floor, mesh::Cave, material::Cave);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

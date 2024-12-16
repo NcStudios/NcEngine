@@ -32,8 +32,8 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
                            std::span<const MaterialPassFlag::type> implementedMaterialPasses,
                            std::span<const PostProcessPassFlag::type> implementedPPPasses,
                            std::span<const MiscPassFlag::type> implementedMiscPasses)
-    : m_colorSinkCount{1u},
-      m_depthSinkCount{1u}
+    : m_colorSinkCount{0u},
+      m_depthSinkCount{0u}
 {
     auto registerMatches = [this](const auto& descs, const auto& passFlags, auto matchType)
     {
@@ -98,13 +98,13 @@ void PassManifest::RegisterPass(PassDesc desc)
             throw nc::NcError("Pass type not implemented.");
     }
 
-    if (desc.colorSink != NoTarget)
+    if (desc.colorSink != NoTarget && desc.colorSink != SwapChainColorRTIndex)
     {
-        m_colorSinkCount = std::max(m_colorSinkCount, desc.colorSink) + 1;
+        m_colorSinkCount = std::max(m_colorSinkCount, desc.colorSink + 1);
     }
-    if (desc.depthSink != NoTarget)
+    if (desc.depthSink != NoTarget && desc.depthSink != SwapChainDepthRTIndex)
     {
-        m_depthSinkCount = std::max(m_depthSinkCount, desc.depthSink) + 1;
+        m_depthSinkCount = std::max(m_depthSinkCount, desc.depthSink + 1);
     }
 }
 

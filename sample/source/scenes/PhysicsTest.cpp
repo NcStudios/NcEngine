@@ -6,6 +6,7 @@
 
 #include "ncengine/NcEngine.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
@@ -238,12 +239,10 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     world.Emplace<VehicleController>(head, segment1, segment2, segment3);
     world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
 
-    auto wormMaterial = GreenToonMaterial;
-    wormMaterial.outlineWidth = 1;
-    world.Emplace<graphics::ToonRenderer>(head, asset::CubeMesh, wormMaterial);
-    world.Emplace<graphics::ToonRenderer>(segment1, asset::CubeMesh, wormMaterial);
-    world.Emplace<graphics::ToonRenderer>(segment2, asset::CubeMesh, wormMaterial);
-    world.Emplace<graphics::ToonRenderer>(segment3, asset::CubeMesh, wormMaterial);
+    world.Emplace<StaticMesh>(head, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(segment1, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(segment2, mesh::Cube, material::Green);
+    world.Emplace<StaticMesh>(segment3, mesh::Cube, material::Green);
 
     auto& bodyHead = world.Emplace<RigidBody>(head, Shape::MakeBox(), RigidBodyInfo{.friction = 0.8f});
     auto& bodyNode1 = world.Emplace<RigidBody>(segment1, Shape::MakeBox());
@@ -356,12 +355,13 @@ void BuildGround(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    auto& groundRenderer = world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, DefaultHatchedToonMaterial);
-    groundRenderer.SetHatchingTiling(60);
-    world.Emplace<graphics::ToonRenderer>(backWall, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(frontWall, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(leftWall, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(rightWall, asset::CubeMesh, DefaultToonMaterial);
+
+
+    world.Emplace<StaticMesh>(ground, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(backWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(frontWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(leftWall, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(rightWall, mesh::Cube, material::Default);
 
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
     world.Emplace<RigidBody>(backWall, Shape::MakeBox());
@@ -403,10 +403,10 @@ void BuildBridge(ecs::Ecs world)
         .tag = "Ramp"
     });
 
-    world.Emplace<graphics::ToonRenderer>(platform1, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(platform2, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(ramp1, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(ramp2, RampMesh, DefaultToonMaterial);
+    world.Emplace<StaticMesh>(platform1, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(platform2, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(ramp1, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(ramp2, mesh::Ramp, material::Default);
 
     auto& platform1Body = world.Emplace<RigidBody>(
         platform1,
@@ -443,7 +443,7 @@ void BuildBridge(ecs::Ecs world)
             .tag = "Plank"}
         );
 
-        world.Emplace<graphics::ToonRenderer>(plank, asset::CubeMesh, OrangeToonMaterial);
+        world.Emplace<StaticMesh>(plank, mesh::Cube, material::Orange);
         return world.Emplace<RigidBody>(plank);
     };
 
@@ -490,7 +490,7 @@ void BuildBridge(ecs::Ecs world)
 void BuildSteps(ecs::Ecs world)
 {
     const auto stepParent = world.Emplace<Entity>({.tag = "Steps"});
-    auto buildStep = [&world, stepParent](const Vector3& position, const Vector3& scale, uint32_t hatchTiling = 8u)
+    auto buildStep = [&world, stepParent](const Vector3& position, const Vector3& scale, uint32_t = 8u)
     {
         const auto step = world.Emplace<Entity>({
             .position = position,
@@ -499,10 +499,7 @@ void BuildSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        auto stepMaterial = TealToonMaterial;
-        stepMaterial.outlineWidth = 3;
-        auto& renderer = world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, stepMaterial);
-        renderer.SetHatchingTiling(hatchTiling);
+        world.Emplace<StaticMesh>(step, mesh::Cube, material::Blue);
         world.Emplace<RigidBody>(step)
             .AddConstraint(PointConstraintInfo{
                 .ownerPosition = Vector3{},
@@ -532,7 +529,7 @@ void BuildSteps(ecs::Ecs world)
         .tag = "Rotating Bridge"
     });
 
-    world.Emplace<graphics::ToonRenderer>(rotatingBridge, asset::CubeMesh, RedToonMaterial);
+    world.Emplace<StaticMesh>(rotatingBridge, mesh::Cube, material::Red);
     world.Emplace<RigidBody>(rotatingBridge)
         .AddConstraint(
             HingeConstraintInfo{
@@ -558,7 +555,7 @@ void BuildRotatingSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<graphics::ToonRenderer>(step, asset::CubeMesh, YellowToonMaterial);
+        world.Emplace<StaticMesh>(step, mesh::Cube, material::Yellow);
         world.Emplace<RigidBody>(step)
             .AddConstraint(
                 SwingTwistConstraintInfo{
@@ -584,10 +581,8 @@ void BuildHalfPipes(ecs::Ecs world)
         .tag = "Half Pipe",
         .flags = Entity::Flags::Static
     });
-    auto halfPipeMaterial = BlueHatchedToonMaterial;
-    halfPipeMaterial.outlineWidth = 2;
 
-    world.Emplace<graphics::ToonRenderer>(halfPipe2, HalfPipeMesh, halfPipeMaterial);
+    world.Emplace<StaticMesh>(halfPipe2, mesh::HalfPipe, material::Blue);
 }
 
 void BuildHinge(ecs::Ecs world)
@@ -613,8 +608,8 @@ void BuildHinge(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<graphics::ToonRenderer>(anchor, asset::CubeMesh, DefaultToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(panel, asset::CubeMesh, PurpleToonMaterial);
+    world.Emplace<StaticMesh>(anchor, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(panel, mesh::Cube, material::Purple);
 
     world.Emplace<RigidBody>(panel)
         .AddConstraint(
@@ -648,8 +643,8 @@ void BuildPunchingBag(ecs::Ecs world)
         .tag = "Bag"
     });
 
-    world.Emplace<graphics::ToonRenderer>(top, asset::CubeMesh, PurpleToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(bag, asset::CapsuleMesh, OrangeToonMaterial);
+    world.Emplace<StaticMesh>(top, mesh::Cube, material::Purple);
+    world.Emplace<StaticMesh>(bag, mesh::Capsule, material::Orange);
 
     auto& topBody = world.Emplace<RigidBody>(top);
     auto& bagBody = world.Emplace<RigidBody>(bag, Shape::MakeCapsule());
@@ -688,10 +683,10 @@ void BuildChain(ecs::Ecs world)
     nodeInfo.position.x = 3.0f;
     const auto node4 = world.Emplace<Entity>(nodeInfo);
 
-    world.Emplace<graphics::ToonRenderer>(node1, asset::CapsuleMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(node2, asset::CapsuleMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(node3, asset::CapsuleMesh, TealToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(node4, asset::CapsuleMesh, TealToonMaterial);
+    world.Emplace<StaticMesh>(node1, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node2, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node3, mesh::Capsule, material::Teal);
+    world.Emplace<StaticMesh>(node4, mesh::Capsule, material::Teal);
 
     const auto capsule = Shape::MakeCapsule();
     auto& node1Body = world.Emplace<RigidBody>(node1, capsule);
@@ -745,9 +740,9 @@ void BuildSliders(ecs::Ecs world)
         .tag = "Slider2"
     });
 
-    world.Emplace<graphics::ToonRenderer>(base, asset::CubeMesh, RedToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(slider1, asset::CapsuleMesh, YellowToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(slider2, asset::CapsuleMesh, YellowToonMaterial);
+    world.Emplace<StaticMesh>(base, mesh::Cube, material::Red);
+    world.Emplace<StaticMesh>(slider1, mesh::Capsule, material::Yellow);
+    world.Emplace<StaticMesh>(slider2, mesh::Capsule, material::Yellow);
 
     auto& baseBody = world.Emplace<RigidBody>(base);
     auto& slider1Body = world.Emplace<RigidBody>(slider1, Shape::MakeCapsule());
@@ -794,9 +789,9 @@ void BuildSwingingBars(ecs::Ecs world)
         .parent = root
     });
 
-    world.Emplace<graphics::ToonRenderer>(pole, asset::CubeMesh, PurpleToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(bar1, asset::CubeMesh, YellowToonMaterial);
-    world.Emplace<graphics::ToonRenderer>(bar2, asset::CubeMesh, YellowToonMaterial);
+    world.Emplace<StaticMesh>(pole, mesh::Cube, material::Purple);
+    world.Emplace<StaticMesh>(bar1, mesh::Cube, material::Yellow);
+    world.Emplace<StaticMesh>(bar2, mesh::Cube, material::Yellow);
 
     auto& poleBody = world.Emplace<RigidBody>(pole, Shape::MakeCapsule());
     auto& bar1Body = world.Emplace<RigidBody>(bar1);
@@ -893,7 +888,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
             .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
         },
         [world](Entity handle) mutable {
-            world.Emplace<graphics::ToonRenderer>(handle, asset::CubeMesh, DefaultToonMaterial);
+            world.Emplace<StaticMesh>(handle, mesh::Cube, material::Default);
             world.Emplace<RigidBody>(handle, Shape::MakeBox());
         },
         [ncPhysics](bool isPreSpawn, unsigned count) {
@@ -957,7 +952,7 @@ class RayCaster : public FreeComponent
                     // possible the entity was deleted, if so we don't want to check for renderer
                     if (world.Contains<Entity>(entity))
                     {
-                        world.Get<graphics::ToonRenderer>(entity).SetMaterial(material);
+                        world.Get<StaticMesh>(entity).GetMaterial().SetProperties(material);
                     }
                 }
 
@@ -975,17 +970,17 @@ class RayCaster : public FreeComponent
         graphics::NcGraphics* m_ncGraphics;
         CollisionQuery m_query = CollisionQuery{};
         std::vector<Entity> m_hits;
-        std::vector<graphics::ToonMaterial> m_restoreMaterials;
+        std::vector<MaterialProperties> m_restoreMaterials;
         Entity m_shapeParent = Entity::Null();
 
         void UpdateHit(ecs::Ecs world, Entity hit)
         {
-            if (world.Contains<graphics::ToonRenderer>(hit))
+            if (world.Contains<StaticMesh>(hit))
             {
-                auto& renderer = world.Get<graphics::ToonRenderer>(hit);
+                auto& renderer = world.Get<StaticMesh>(hit);
                 m_hits.push_back(hit);
-                m_restoreMaterials.push_back(renderer.GetMaterial());
-                renderer.SetMaterial(YellowToonMaterial);
+                m_restoreMaterials.push_back(renderer.GetMaterial().GetProperties());
+                renderer.GetMaterial().SetProperties(material::Yellow.properties);
             }
         }
 
@@ -1017,6 +1012,7 @@ PhysicsTest::PhysicsTest(SampleUI* ui)
 
 void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
+    ReloadPrefabs();
     m_sampleUI->SetWidgetCallback(Widget);
 
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
@@ -1025,7 +1021,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Reserve space for default objects so references don't get invalidated
     world.GetPool<Transform>().Reserve(140);
-    world.GetPool<graphics::ToonRenderer>().Reserve(140);
+    world.GetPool<StaticMesh>().Reserve(140);
     // Defer fully initializing physics objects until the whole scene is loaded (also calls reserve on the RigidBody pool).
     ncPhysics->BeginRigidBodyBatch(140);
     SCOPE_EXIT(ncPhysics->EndRigidBodyBatch(););
@@ -1067,12 +1063,21 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<graphics::PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 40.0f, 0.0f},
+            .position = Vector3{4.0f, 50.0f, 35.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{0.8f, 0.8f, 0.8f},
-        180.0f
+        300.0f
+    );
+
+    world.Emplace<graphics::DirectionalLight>(
+        world.Emplace<Entity>({
+            .position = Vector3{0.0f, 40.0f, 0.0f},
+            .rotation = nc::Quaternion::FromEulerAngles(-1.892f, 0.809f, -2.661f),
+            .tag = "Directional Light"
+        }),
+        Vector3{1.0f, 1.0f, 1.0f}
     );
 }
 

@@ -25,6 +25,7 @@ constexpr auto HalfPipePath = "halfpipe.nca";
 constexpr auto RampPath = "ramp.nca";
 constexpr auto OgrePath = "ogre.nca";
 constexpr auto SkeletonPath = "skeleton.nca";
+constexpr auto CavePath = "cave.nca";
 
 extern asset::MeshView Cube;
 extern asset::MeshView Sphere;
@@ -34,6 +35,7 @@ extern asset::MeshView HalfPipe;
 extern asset::MeshView Ramp;
 extern asset::MeshView Ogre;
 extern asset::MeshView Skeleton;
+extern asset::MeshView Cave;
 } // namespace mesh
 
 // Colliders
@@ -53,6 +55,7 @@ extern MaterialDesc Teal;
 extern MaterialDesc Yellow;
 extern MaterialDesc Ogre;
 extern MaterialDesc Skeleton;
+extern MaterialDesc Cave;
 } // namespace material
 
 // Animations
@@ -61,39 +64,18 @@ namespace animation
 extern uint64_t OgreIdle;
 extern uint64_t OgreAttack;
 extern uint64_t SkeletonIdle;
+extern uint64_t SkeletonJump;
 extern uint64_t SkeletonWalkRight;
 extern uint64_t SkeletonWalkLeft;
 extern uint64_t SkeletonWalkForward;
-extern uint64_t SkeletonWalkBack;
-extern uint64_t SkeletonJump;
+extern uint64_t SkeletonWalkBackward;
 } // namespace animation
 
-extern graphics::PbrMaterial DefaultPbrMaterial;
-extern graphics::PbrMaterial RedPbrMaterial;
-extern graphics::PbrMaterial GreenPbrMaterial;
-extern graphics::PbrMaterial BluePbrMaterial;
-extern graphics::PbrMaterial OrangePbrMaterial;
-extern graphics::PbrMaterial PurplePbrMaterial;
-extern graphics::PbrMaterial TealPbrMaterial;
-extern graphics::PbrMaterial YellowPbrMaterial;
-
-extern graphics::ToonMaterial DefaultToonMaterial;
-extern graphics::ToonMaterial RedToonMaterial;
-extern graphics::ToonMaterial GreenToonMaterial;
-extern graphics::ToonMaterial BlueToonMaterial;
-extern graphics::ToonMaterial OrangeToonMaterial;
-extern graphics::ToonMaterial PurpleToonMaterial;
-extern graphics::ToonMaterial TealToonMaterial;
-extern graphics::ToonMaterial YellowToonMaterial;
-
-extern graphics::ToonMaterial DefaultHatchedToonMaterial;
-extern graphics::ToonMaterial RedHatchedToonMaterial;
-extern graphics::ToonMaterial GreenHatchedToonMaterial;
-extern graphics::ToonMaterial BlueHatchedToonMaterial;
-extern graphics::ToonMaterial OrangeHatchedToonMaterial;
-extern graphics::ToonMaterial PurpleHatchedToonMaterial;
-extern graphics::ToonMaterial TealHatchedToonMaterial;
-extern graphics::ToonMaterial YellowHatchedToonMaterial;
+// CubeMaps
+namespace cubemap
+{
+constexpr auto NightSkyPath = "night_sky.nca";
+} // namespace cubemap
 
 // Fonts
 extern asset::FontInfo UIFont;
