@@ -166,59 +166,57 @@ void AnimateBones(const Rig& rig,
             }
     );
 }
-
-void PrepareContext(SkeletalAnimationContext ctx,
-                    const Rig& rig,
-                    bool blended)
-{
-    const auto boneCapacity = rig.boneToParent.size();
-    const auto vertexToBoneCapacity = rig.vertexToBone.size();
-    ctx.animatedBones.clear();
-    if (vertexToBoneCapacity > ctx.animatedBones.capacity())
-    {
-        ctx.animatedBones.reserve(vertexToBoneCapacity);
-    }
-
-    ctx.offsets.clear();
-    ctx.fromOffsetsDecomposed.clear();
-    ctx.toOffsetsDecomposed.clear();
-
-    if (boneCapacity > ctx.offsets.capacity())
-    {
-        ctx.offsets.reserve(boneCapacity);
-        if (blended)
-        {
-            ctx.fromOffsetsDecomposed.reserve(boneCapacity);
-            ctx.toOffsetsDecomposed.reserve(boneCapacity);
-        }
-    }
-}
 } // anonymous namespace
 
 namespace nc::graphics
 {
-void Animate(SkeletalAnimationContext ctx,
-             const Rig& rig,
-             const asset::SkeletalAnimation& animation,
-             float timeInTicks)
+auto SkeletalAnimationCalculator::Animate(const Rig& rig,
+                                          const asset::SkeletalAnimation& animation,
+                                          float timeInTicks) -> std::span<const BoneData>
 {
-    PrepareContext(ctx, rig, false);
-    CalculateOffsets(rig, animation, timeInTicks, ctx.offsets);
-    AnimateBones(rig, ctx.offsets, ctx.animatedBones);
+    Prepare(rig, false);
+    CalculateOffsets(rig, animation, timeInTicks, m_offsets);
+    AnimateBones(rig, m_offsets, m_boneBuffer);
+    return std::span<const BoneData>{m_boneBuffer};
 }
 
-void Animate(SkeletalAnimationContext ctx,
-             const Rig& rig,
-             const asset::SkeletalAnimation& blendFromAnimation,
-             float blendFromTicks,
-             const asset::SkeletalAnimation& blendToAnimation,
-             float blendToTicks,
-             float blendFactor)
+auto SkeletalAnimationCalculator::Animate(const Rig& rig,
+                                          const asset::SkeletalAnimation& blendFromAnimation,
+                                          float blendFromTicks,
+                                          const asset::SkeletalAnimation& blendToAnimation,
+                                          float blendToTicks,
+                                          float blendFactor) -> std::span<const BoneData>
 {
-    PrepareContext(ctx, rig, true);
-    CalculateOffsetsForBlending(rig, blendToAnimation, blendToTicks, ctx.toOffsetsDecomposed);
-    CalculateOffsetsForBlending(rig, blendFromAnimation, blendFromTicks, ctx.fromOffsetsDecomposed);
-    BlendOffsets(ctx.fromOffsetsDecomposed, ctx.toOffsetsDecomposed, blendFactor, ctx.offsets);
-    AnimateBones(rig, ctx.offsets, ctx.animatedBones);
+    Prepare(rig, true);
+    CalculateOffsetsForBlending(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
+    CalculateOffsetsForBlending(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
+    BlendOffsets(m_fromOffsetsDecomposed, m_toOffsetsDecomposed, blendFactor, m_offsets);
+    AnimateBones(rig, m_offsets, m_boneBuffer);
+    return std::span<const BoneData>{m_boneBuffer};
+}
+
+void SkeletalAnimationCalculator::Prepare(const Rig& rig, bool blended)
+{
+    const auto boneCapacity = rig.boneToParent.size();
+    const auto vertexToBoneCapacity = rig.vertexToBone.size();
+    m_boneBuffer.clear();
+    if (vertexToBoneCapacity > m_boneBuffer.capacity())
+    {
+        m_boneBuffer.reserve(vertexToBoneCapacity);
+    }
+
+    m_offsets.clear();
+    m_fromOffsetsDecomposed.clear();
+    m_toOffsetsDecomposed.clear();
+
+    if (boneCapacity > m_offsets.capacity())
+    {
+        m_offsets.reserve(boneCapacity);
+        if (blended)
+        {
+            m_fromOffsetsDecomposed.reserve(boneCapacity);
+            m_toOffsetsDecomposed.reserve(boneCapacity);
+        }
+    }
 }
 } // namespace nc::graphics

@@ -40,14 +40,14 @@ MaterialDesc Cave{"CaveMaterial"};
 
 namespace animation
 {
-uint64_t OgreIdle{utility::Fnv1a(std::filesystem::path("orgre/idle.nca").string())};
-uint64_t OgreAttack{utility::Fnv1a(std::filesystem::path("ogre/attack.nca").string())};
-uint64_t SkeletonIdle{utility::Fnv1a(std::filesystem::path("skeleton/idle.nca").string())};
-uint64_t SkeletonJump{utility::Fnv1a(std::filesystem::path("skeleton/jump.nca").string())};
-uint64_t SkeletonWalkRight{utility::Fnv1a(std::filesystem::path("skeleton/walk_right.nca").string())};
-uint64_t SkeletonWalkLeft{utility::Fnv1a(std::filesystem::path("skeleton/walk_left.nca").string())};
-uint64_t SkeletonWalkForward{utility::Fnv1a(std::filesystem::path("skeleton/walk_forward.nca").string())};
-uint64_t SkeletonWalkBackward{utility::Fnv1a(std::filesystem::path("skeleton/walk_back.nca").string())};
+uint64_t OgreIdle{utility::Fnv1a(std::filesystem::path("ogre\\idle.nca").string())};
+uint64_t OgreAttack{utility::Fnv1a(std::filesystem::path("ogre\\attack.nca").string())};
+uint64_t SkeletonIdle{utility::Fnv1a(std::filesystem::path("skeleton\\idle.nca").string())};
+uint64_t SkeletonJump{utility::Fnv1a(std::filesystem::path("skeleton\\jump.nca").string())};
+uint64_t SkeletonWalkRight{utility::Fnv1a(std::filesystem::path("skeleton\\walk_right.nca").string())};
+uint64_t SkeletonWalkLeft{utility::Fnv1a(std::filesystem::path("skeleton\\walk_left.nca").string())};
+uint64_t SkeletonWalkForward{utility::Fnv1a(std::filesystem::path("skeleton\\walk_forward.nca").string())};
+uint64_t SkeletonWalkBackward{utility::Fnv1a(std::filesystem::path("skeleton\\walk_back.nca").string())};
 } // namespace animation
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};

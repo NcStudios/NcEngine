@@ -147,28 +147,28 @@ TEST(SkeletalAnimationCalculatorTest, Rig_constructedFromBonesData)
 TEST(SkeletalAnimationCalculatorTest, Animate_single_succeeds)
 {
     const auto rig = nc::graphics::Rig{g_bonesData};
-    auto ctx = nc::graphics::SkeletalAnimationContext{};
+    auto uut = nc::graphics::SkeletalAnimationCalculator{};
 
-    nc::graphics::Animate(ctx, rig, g_animation, 0.0f);
-    ASSERT_EQ(rig.vertexToBone.size(), ctx.animatedBones.size());
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, ctx.animatedBones[0].animatedBoneMatrix));
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, ctx.animatedBones[1].animatedBoneMatrix));
+    auto actual = uut.Animate(rig, g_animation, 0.0f);
+    ASSERT_EQ(rig.vertexToBone.size(), actual.size());
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[0].animatedBoneMatrix));
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[1].animatedBoneMatrix));
 
-    nc::graphics::Animate(ctx, rig, g_animation, 0.5f);
-    ASSERT_EQ(rig.vertexToBone.size(), ctx.animatedBones.size());
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, ctx.animatedBones[0].animatedBoneMatrix));
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, ctx.animatedBones[1].animatedBoneMatrix));
+    actual = uut.Animate(rig, g_animation, 0.5f);
+    ASSERT_EQ(rig.vertexToBone.size(), actual.size());
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[0].animatedBoneMatrix));
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[1].animatedBoneMatrix));
 
-    nc::graphics::Animate(ctx, rig, g_animation, 1.0f);
-    ASSERT_EQ(rig.vertexToBone.size(), ctx.animatedBones.size());
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, ctx.animatedBones[0].animatedBoneMatrix));
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, ctx.animatedBones[1].animatedBoneMatrix));
+    actual = uut.Animate(rig, g_animation, 1.0f);
+    ASSERT_EQ(rig.vertexToBone.size(), actual.size());
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[0].animatedBoneMatrix));
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[1].animatedBoneMatrix));
 }
 
 TEST(SkeletalAnimationCalculatorTest, Animate_blended_succeeds)
 {
     const auto rig = nc::graphics::Rig{g_bonesData};
-    auto ctx = nc::graphics::SkeletalAnimationContext{};
+    auto uut = nc::graphics::SkeletalAnimationCalculator{};
 
     // Since we're blending between the same animation, this allows using blend factors 0/0.5/1 to get the same
     // interpolated results as the above test (e.g. if blend from uses frames at t=0, and blend at t=1, then we
@@ -177,20 +177,20 @@ TEST(SkeletalAnimationCalculatorTest, Animate_blended_succeeds)
     constexpr auto blendToTicks = 1.0f;
 
     auto blendFactor = 0.0f;
-    nc::graphics::Animate(ctx, rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
-    ASSERT_EQ(rig.vertexToBone.size(), ctx.animatedBones.size());
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, ctx.animatedBones[0].animatedBoneMatrix));
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, ctx.animatedBones[1].animatedBoneMatrix));
+    auto actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
+    ASSERT_EQ(rig.vertexToBone.size(), actual.size());
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[0].animatedBoneMatrix));
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0, actual[1].animatedBoneMatrix));
 
     blendFactor = 0.5f;
-    nc::graphics::Animate(ctx, rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
-    ASSERT_EQ(rig.vertexToBone.size(), ctx.animatedBones.size());
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, ctx.animatedBones[0].animatedBoneMatrix));
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, ctx.animatedBones[1].animatedBoneMatrix));
+    actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
+    ASSERT_EQ(rig.vertexToBone.size(), actual.size());
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[0].animatedBoneMatrix));
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT0_5, actual[1].animatedBoneMatrix));
 
     blendFactor = 1.0f;
-    nc::graphics::Animate(ctx, rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
-    ASSERT_EQ(rig.vertexToBone.size(), ctx.animatedBones.size());
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, ctx.animatedBones[0].animatedBoneMatrix));
-    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, ctx.animatedBones[1].animatedBoneMatrix));
+    actual = uut.Animate(rig, g_animation, blendFromTicks, g_animation, blendToTicks, blendFactor);
+    ASSERT_EQ(rig.vertexToBone.size(), actual.size());
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[0].animatedBoneMatrix));
+    EXPECT_TRUE(MatrixEqual(expectedMatrixT1, actual[1].animatedBoneMatrix));
 }

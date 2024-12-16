@@ -89,7 +89,7 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
 {
     NC_PROFILE_SCOPE("SkeletalAnimationSubsystem::CalculateBoneMatrices()", ProfileCategory::Animation);
 
-    auto context = SkeletalAnimationContext{};
+    auto calculator = SkeletalAnimationCalculator{};
     const auto dt = time::DeltaTime();
     const auto _ = m_storage.AcquireReadLock();
     for (auto [entity, state] : std::views::zip(m_animatedEntities, m_animationState))
@@ -101,13 +101,17 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
             m_completedAnimations.push_back(entity);
         }
 
-        const auto& rig = m_storage.GetRig(state.meshId);
-        if (m_storage.HasAnimation(state.blendFromAnimId))
+        const auto bones = [&]()
         {
+            const auto& rig = m_storage.GetRig(state.meshId);
+            if (!m_storage.HasAnimation(state.blendFromAnimId))
+            {
+                return calculator.Animate(rig, animation, ticks);
+            }
+
             const auto& blendFromAnimation = m_storage.GetAnimation(state.blendFromAnimId);
             const auto [blendFromTicks, unused] = StepTransition(state, blendFromAnimation, dt);
-            Animate(
-                context,
+            return calculator.Animate(
                 rig,
                 blendFromAnimation,
                 blendFromTicks,
@@ -115,13 +119,9 @@ void SkeletalAnimationSubsystem::CalculateBoneMatrices()
                 ticks,
                 state.blendFactor
             );
-        }
-        else
-        {
-            Animate(context, rig, animation, ticks);
-        }
+        }();
 
-        m_boneCache.UpdateRegion(state.boneIndex, context.animatedBones);
+        m_boneCache.UpdateRegion(state.boneIndex, bones);
     }
 }
 
