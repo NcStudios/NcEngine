@@ -212,6 +212,7 @@ target_link_libraries(PassManifest_tests
         gtest_main
         Diligent-GraphicsEngineVk-static
         fmt::fmt
+        NcMath
 )
 
 ### PostProcess Tests ###
