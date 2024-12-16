@@ -32,8 +32,8 @@ struct OutlinePassData
 };
 
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
-// 32 bytes with 4 byte alignment
-struct PostProcessSinkIndexData
+// 36 bytes with 4 byte alignment
+struct PerPassInstanceData
 {
     uint32_t colorRenderTargetIndex1;
     uint32_t colorRenderTargetIndex2;
@@ -43,6 +43,7 @@ struct PostProcessSinkIndexData
     uint32_t depthRenderTargetIndex2;
     uint32_t depthRenderTargetIndex3;
     uint32_t depthRenderTargetIndex4;
+    uint32_t spotLightIndex;
 };
 
 // Object model for StaticMeshes (type: StructuredBuffer element type).

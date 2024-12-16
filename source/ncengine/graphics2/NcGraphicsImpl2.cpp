@@ -2,7 +2,7 @@
 #include "diligent/pass/MaterialPass.h"
 #include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
-#include "diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "diligent/resource/PerPassInstanceBufferResource.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -185,6 +185,20 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           {
             std::vector<PassDesc>
             {
+               PassDesc{
+                    .id = MaterialPassFlag::SpotShadow,
+                    .name = "SpotShadowMap",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "SpotShadow.vsh"},
+                    .depthSink = SpotShadowDepth
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::SpotShadow,
+                    .name = "SpotShadowMap",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "SpotShadowSkinned.vsh"},
+                    .depthSink = SpotShadowDepth
+                },
                 PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "Toon",

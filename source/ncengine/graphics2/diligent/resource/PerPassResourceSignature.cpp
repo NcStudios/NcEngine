@@ -1,7 +1,7 @@
 #include "PerPassResourceSignature.h"
 #include "PostProcessColorSinkBufferResource.h"
 #include "PostProcessDepthSinkBufferResource.h"
-#include "PostProcessSinkIndexBufferResource.h"
+#include "PerPassInstanceBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -15,12 +15,12 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    uint8_t bindingIndex,
                                                    const TextureBufferResourceDesc& postProcessColorSinkResourceDesc,
                                                    const TextureBufferResourceDesc& postProcessDepthSinkResourceDesc,
-                                                   const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc)
+                                                   const UniformBufferResourceDesc& perPassInstanceResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(postProcessColorSinkResourceDesc),
         ToPipelineResourceDesc(postProcessDepthSinkResourceDesc),
-        ToPipelineResourceDesc(postProcessSinkIndexResourceDesc)
+        ToPipelineResourceDesc(perPassInstanceResourceDesc)
     };
 
     const auto sampler = PostProcessColorSinkBufferResource::MakeSamplerDesc(postProcessColorSinkResourceDesc.resourceKey);
@@ -55,9 +55,9 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         postProcessDepthSinkResourceDesc.maxElementCount
     );
 
-    m_postProcessSinkIndexBufferResource = std::make_unique<PostProcessSinkIndexBufferResource>(
+    m_perPassInstanceBufferResource = std::make_unique<PerPassInstanceBufferResource>(
         context, device,
-        GetVariable(postProcessSinkIndexResourceDesc.shaderType, postProcessSinkIndexResourceDesc.resourceKey.data(), m_srb)
+        GetVariable(perPassInstanceResourceDesc.shaderType, perPassInstanceResourceDesc.resourceKey.data(), m_srb)
     );
 }
 } // namespace nc::graphics

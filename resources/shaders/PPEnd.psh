@@ -7,7 +7,7 @@ Texture2D     PostProcessColorSinkBufferData[];
 Texture2D     PostProcessDepthSinkBufferData[];
 SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer PostProcessSinkIndexBufferData
+cbuffer PerPassInstanceBufferData
 {
     uint colorRT1;
     uint colorRT2;
@@ -17,6 +17,7 @@ cbuffer PostProcessSinkIndexBufferData
     uint depthRT2;
     uint depthRT3;
     uint depthRT4;
+    uint spotLightIndex;
 };
 
 struct PSInput 

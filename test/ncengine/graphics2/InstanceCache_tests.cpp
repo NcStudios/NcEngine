@@ -30,7 +30,7 @@ constexpr auto g_mesh3 = nc::asset::MeshView{
 };
 
 constexpr auto g_allBatches = std::array{
-    nc::MaterialPassFlag::Shadow,
+    nc::MaterialPassFlag::SpotShadow,
     nc::MaterialPassFlag::Toon
 };
 
@@ -70,7 +70,7 @@ struct Batch2
 
 struct Batch3
 {
-    static constexpr auto passes = nc::MaterialPassFlag::Shadow |
+    static constexpr auto passes = nc::MaterialPassFlag::SpotShadow |
                                    nc::MaterialPassFlag::Toon;
     static constexpr auto& mesh = g_mesh1;
     static constexpr auto key = nc::graphics::BatchKey{passes, mesh.id};

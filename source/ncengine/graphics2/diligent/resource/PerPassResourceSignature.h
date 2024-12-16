@@ -13,7 +13,7 @@ namespace nc::graphics
 {
 class PostProcessColorSinkBufferResource;
 class PostProcessDepthSinkBufferResource;
-struct PostProcessSinkIndexBufferResource;
+struct PerPassInstanceBufferResource;
 
 class PerPassResourceSignature
 {
@@ -24,7 +24,7 @@ class PerPassResourceSignature
                                           uint8_t bindingIndex,
                                           const TextureBufferResourceDesc& postProcessColorRTResourceDesc,
                                           const TextureBufferResourceDesc& postProcessDepthRTResourceDesc,
-                                          const UniformBufferResourceDesc& postProcessSinkIndexDesc);
+                                          const UniformBufferResourceDesc& perPassInstanceDesc);
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
         auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
@@ -32,13 +32,13 @@ class PerPassResourceSignature
 
         auto GetPostProcessColorSinkBufferResource() -> PostProcessColorSinkBufferResource& { return *m_postProcessColorSinkBufferResource; }
         auto GetPostProcessDepthSinkBufferResource() -> PostProcessDepthSinkBufferResource& { return *m_postProcessDepthSinkBufferResource; }
-        auto GetPostProcessSinkIndexBufferResource() -> PostProcessSinkIndexBufferResource& { return *m_postProcessSinkIndexBufferResource; }
+        auto GetPerPassInstanceBufferResource() -> PerPassInstanceBufferResource& { return *m_perPassInstanceBufferResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<PostProcessColorSinkBufferResource> m_postProcessColorSinkBufferResource;
         std::unique_ptr<PostProcessDepthSinkBufferResource> m_postProcessDepthSinkBufferResource;
-        std::unique_ptr<PostProcessSinkIndexBufferResource> m_postProcessSinkIndexBufferResource;
+        std::unique_ptr<PerPassInstanceBufferResource> m_perPassInstanceBufferResource;
 };
 } // namespace nc::graphics

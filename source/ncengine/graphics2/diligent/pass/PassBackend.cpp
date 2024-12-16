@@ -2,7 +2,7 @@
 #include "PassUtilities.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "graphics2/diligent/resource/PerPassInstanceBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
@@ -211,6 +211,8 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
                           perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
                           staticPass.colorRTIndex, staticPass.depthRTIndex);
 
+        perPassResourceSignature.GetPerPassInstanceBufferResource().Update(context, NoTargets(), NoTargets(), 0u); /* @todo: When wiring up multiple shadow casters rather than a single one, this has to be incremented once per spot light. */
+
         context.SetPipelineState(staticPass.pso);
         DrawIndexed(context, staticBatches);
         context.SetPipelineState(skinnedPass.pso);
@@ -275,7 +277,7 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                           pass.passDesc.colorSink, pass.passDesc.depthSink);
 
         context.SetPipelineState(pass.pso);
-        perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, pass.passDesc.colorSources, pass.passDesc.depthSources);
+        perPassResourceSignature.GetPerPassInstanceBufferResource().Update(context, pass.passDesc.colorSources, pass.passDesc.depthSources, std::numeric_limits<uint32_t>::max());
 
         for (auto& instance : pass.instances)
         {
@@ -300,7 +302,7 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                       m_finalPass->passDesc.colorSink, m_finalPass->passDesc.depthSink);
 
     context.SetPipelineState(m_finalPass->pso);
-    perPassResourceSignature.GetPostProcessSinkIndexBufferResource().Update(context, SingleSource(FinalColorTarget()), NoTargets());
+    perPassResourceSignature.GetPerPassInstanceBufferResource().Update(context, SingleSource(FinalColorTarget()), NoTargets(), std::numeric_limits<uint32_t>::max());
     context.Draw(drawAttribs);
     context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }

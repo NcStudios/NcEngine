@@ -4,6 +4,7 @@
 
 #include <limits>
 #include <span>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -19,6 +20,7 @@ constexpr auto MainDepth = 0u;
 constexpr auto NormalsColor = 1u;
 constexpr auto PPWaveColor = 2u;
 constexpr auto PPOutlineColor = 3u;
+constexpr auto SpotShadowDepth = 4u;
 
 struct ShaderPaths
 {

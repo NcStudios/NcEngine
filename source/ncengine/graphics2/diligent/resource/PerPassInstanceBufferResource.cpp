@@ -1,4 +1,4 @@
-#include "PostProcessSinkIndexBufferResource.h"
+#include "PerPassInstanceBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -6,20 +6,20 @@
 
 namespace nc::graphics
 {
-PostProcessSinkIndexBufferResource::PostProcessSinkIndexBufferResource(Diligent::IDeviceContext& context,
+PerPassInstanceBufferResource::PerPassInstanceBufferResource(Diligent::IDeviceContext& context,
                                                                        Diligent::IRenderDevice& device,
                                                                        Diligent::IShaderResourceVariable& variable)
     : m_buffer{
         context,
         device,
-        PostProcessSinkIndexData{},
+        PerPassInstanceData{},
         UniformBufferName},
       m_variable{&variable}
 {
     m_variable->Set(&m_buffer.GetBuffer());
 }
 
-void PostProcessSinkIndexBufferResource::Update(Diligent::IDeviceContext& context, std::span<const uint32_t> colorSources, std::span<const uint32_t> depthSources)
+void PerPassInstanceBufferResource::Update(Diligent::IDeviceContext& context, std::span<const uint32_t> colorSources, std::span<const uint32_t> depthSources, uint32_t spotLightIndex)
 {
     NC_ASSERT(colorSources.size() <= 4u, "Only four color sources supported.");
     NC_ASSERT(depthSources.size() <= 4u, "Only four depth sources supported.");
@@ -37,10 +37,11 @@ void PostProcessSinkIndexBufferResource::Update(Diligent::IDeviceContext& contex
         depthSourcesArray.at(i) = depthSources[i];
     }
 
-    const auto data = PostProcessSinkIndexData
+    const auto data = PerPassInstanceData
     {
         colorSourcesArray[0], colorSourcesArray[1], colorSourcesArray[2], colorSourcesArray[3],
         depthSourcesArray[0], depthSourcesArray[1], depthSourcesArray[2], depthSourcesArray[3],
+        spotLightIndex
     };
     m_buffer.Write(context, data);
 }

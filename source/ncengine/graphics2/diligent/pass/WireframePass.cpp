@@ -4,7 +4,7 @@
 #include "graphics2/diligent/resource/MeshBuffer.h"
 #include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
 #include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "graphics2/diligent/resource/PerPassInstanceBufferResource.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
 

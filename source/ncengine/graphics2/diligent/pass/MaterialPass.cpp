@@ -2,7 +2,7 @@
 #include "PassUtilities.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/resource/MeshBuffer.h"
-#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "graphics2/diligent/resource/PerPassInstanceBufferResource.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 
 #include <ranges>
@@ -17,21 +17,29 @@ auto MakeMaterialPass(Diligent::IRenderDevice& device,
                       ShaderBindings& shaderBindings,
                       const PassDesc& passDesc) -> MaterialPass
 {
-    auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
-    auto pixelShader = shaderFactory.MakeShaderFromSource(
-        pixelShaderSource,
-        passDesc.shaderPaths.pixelShaderPath.data(),
-        Diligent::SHADER_TYPE_PIXEL,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
+    auto pixelShader = Diligent::RefCntAutoPtr<IShader>{nullptr};
+    if (passDesc.shaderPaths.pixelShaderPath != "Uninitialized")
+    {
+        auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
+        pixelShader = shaderFactory.MakeShaderFromSource(
+            pixelShaderSource,
+            passDesc.shaderPaths.pixelShaderPath.data(),
+            Diligent::SHADER_TYPE_PIXEL,
+            Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+        );
+    }
 
-    auto vertexShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.vertexShaderPath);
-    auto vertexShader = shaderFactory.MakeShaderFromSource(
-        vertexShaderSource,
-        passDesc.shaderPaths.vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
+    auto vertexShader = Diligent::RefCntAutoPtr<IShader>{nullptr};
+    if (passDesc.shaderPaths.vertexShaderPath != "Uninitialized")
+    {
+        auto vertexShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.vertexShaderPath);
+        vertexShader = shaderFactory.MakeShaderFromSource(
+            vertexShaderSource,
+            passDesc.shaderPaths.vertexShaderPath.data(),
+            Diligent::SHADER_TYPE_VERTEX,
+            Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+        );
+    }
 
     auto layoutElements = GetMeshVertexLayoutElements(0);
 
@@ -40,7 +48,7 @@ auto MakeMaterialPass(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature()};
+    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
 
     ci.ppResourceSignatures = signatures.data();
     ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
@@ -49,7 +57,7 @@ auto MakeMaterialPass(Diligent::IRenderDevice& device,
     ci.pVS = vertexShader;
 
     ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == NoTarget ? 0 : 1;
-    ci.GraphicsPipeline.RTVFormats[0]                = OffScreenColorRTFormat;
+    ci.GraphicsPipeline.RTVFormats[0]                = passDesc.colorSink == NoTarget ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
     ci.GraphicsPipeline.DSVFormat                    = passDesc.depthSink == NoTarget ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
