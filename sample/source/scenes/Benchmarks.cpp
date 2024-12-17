@@ -350,8 +350,7 @@ void Widget()
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<skinned_mesh>{}(halfCellWidth, [](){
-            });
+            InnerWidget<skinned_mesh>{}(halfCellWidth, [](){});
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();

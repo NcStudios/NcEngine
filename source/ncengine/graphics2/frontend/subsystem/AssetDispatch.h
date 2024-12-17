@@ -64,7 +64,7 @@ class AssetDispatch
                 }
                 case asset::UpdateAction::Unload:
                 {
-                    throw "unhandled action";
+                    throw NcError{"Unexpected UpdateAction"};
                 }
             }
         }

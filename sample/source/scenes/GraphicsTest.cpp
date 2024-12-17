@@ -14,8 +14,6 @@
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
 
-#include "ncutility/Hash.h"
-
 #include <string>
 
 namespace nc::sample

@@ -5,7 +5,6 @@
 #include "subsystem/LightRenderState.h"
 #include "subsystem/MeshRenderState.h"
 #include "subsystem/PostProcessState.h"
-#include "subsystem/animation/SkeletalAnimationRenderState.h"
 #include "subsystem/WireframeRendererState.h"
 
 namespace nc::graphics

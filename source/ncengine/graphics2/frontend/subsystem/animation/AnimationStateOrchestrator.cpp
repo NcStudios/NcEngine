@@ -43,17 +43,13 @@ void AnimationStateOrchestrator::NotifyCompleted(ecs::ComponentPool<SkinnedMesh>
 
 void AnimationStateOrchestrator::Purge() noexcept
 {
-    // todo: could wipe all better???
-
-
     auto newEnd = 0ull;
-    for (auto i = 0ull; i < m_animatedEntities.size(); ++i)
+    for (auto [entity, state] : std::views::zip(m_animatedEntities, m_animationState))
     {
-        auto& e = m_animatedEntities[i];
-        if (e.IsPersistent())
+        if (entity.IsPersistent())
         {
-            m_animatedEntities[newEnd] = e;
-            m_animationState[newEnd] = std::move(m_animationState[i]);
+            m_animatedEntities[newEnd] = entity;
+            m_animationState[newEnd] = state;
             ++newEnd;
         }
     }

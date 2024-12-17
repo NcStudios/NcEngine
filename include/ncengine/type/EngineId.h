@@ -59,8 +59,8 @@ constexpr size_t ParticleEmitterUpdate = 4ull; // Depends on CommitStagedChanges
 constexpr size_t SkeletalAnimationUpdate = 5ull; // Depends on CommitStagedChanges
 constexpr size_t AudioSourceUpdate = 6ull; // Depends on CommitStagedChanges
 constexpr size_t PhysicsPipeline = 7ull; // Depends on CommitStagedChanges
-constexpr size_t UpdateTransforms = 9ull; // Depends on physics, audio, and particle update
-constexpr size_t ParticleEmitterSync = 8ull; // Depends on UpdateTransforms
+constexpr size_t UpdateTransforms = 8ull; // Depends on physics, audio, and particle update
+constexpr size_t ParticleEmitterSync = 9ull; // Depends on UpdateTransforms
 /** @} */
 } // namespace update_task_id
 
