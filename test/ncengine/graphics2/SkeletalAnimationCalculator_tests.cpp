@@ -130,8 +130,10 @@ TEST(SkeletalAnimationCalculatorTest, Rig_constructedFromBonesData)
     EXPECT_TRUE(MatrixEqual(DirectX::XMMatrixIdentity(), uut.globalInverseTransform));
 
     EXPECT_TRUE(std::ranges::equal(
-        std::views::keys(g_bonesData.boneMapping),
-        uut.boneNames
+        g_bonesData.boneSpaceToParentSpace,
+        uut.boneNames,
+        std::equal_to{},
+        &nc::asset::BoneSpaceToParentSpace::boneName
     ));
 
     EXPECT_TRUE(std::ranges::equal(
