@@ -23,14 +23,15 @@ constexpr auto g_buttonWidth = 100.0f;
 constexpr auto g_buttonHeight = 20.0f;
 auto g_maxEntities = 0u;
 auto g_maxRigidBodies = 0u;
-auto g_maxRenderers = 0u;
+auto g_maxMeshes = 0u;
 auto g_maxParticleEmitters = 0u;
 auto g_maxPointLights = 0u;
 auto g_maxSpotLights = 0u;
 auto g_maxHierarchies = 0u;
 auto g_currentEntities = 0u;
 auto g_currentRigidBodies = 0u;
-auto g_currentRenderers = 0u;
+auto g_currentStaticMeshes = 0u;
+auto g_currentSkinnedMeshes = 0u;
 auto g_currentParticleEmitters = 0u;
 auto g_currentPointLights = 0u;
 auto g_currentSpotLights = 0u;
@@ -111,8 +112,8 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
 struct static_mesh
 {
     static constexpr auto name = "Static Mesh";
-    static inline const auto& maxCount = g_maxRenderers;
-    static inline auto& currentCount = g_currentRenderers;
+    static inline const auto& maxCount = g_maxMeshes;
+    static inline auto& currentCount = g_currentStaticMeshes;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -123,16 +124,14 @@ struct static_mesh
 
 struct skinned_mesh
 {
-    // todo...
     static constexpr auto name = "Skinned Mesh";
-    static inline const auto& maxCount = g_maxRenderers;
-    static inline auto& currentCount = g_currentRenderers;
+    static inline const auto& maxCount = g_maxMeshes;
+    static inline auto& currentCount = g_currentSkinnedMeshes;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
     static inline unsigned SpawnCount = 1000;
     static inline unsigned DestroyCount = 1000;
-    static inline std::string Mesh = std::string{nc::asset::CubeMesh};
 };
 
 struct static_body
@@ -364,7 +363,7 @@ void Widget()
             ImGui::TableNextColumn();
             InnerWidget<rigid_body>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(static_body::Mesh);
+                AssetCombo(rigid_body::Mesh);
             });
 
             ImGui::TableNextRow();
@@ -406,7 +405,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         const auto& config = config::GetMemorySettings();
         ::g_maxEntities = config.maxTransforms;
         ::g_maxRigidBodies = config.maxRigidBodies - 1;
-        ::g_maxRenderers = config.maxRenderers - 1;
+        ::g_maxMeshes = config.maxRenderers - 1;
         ::g_maxParticleEmitters = config.maxParticleEmitters;
         ::g_maxPointLights = config.maxPointLights - 1;
         ::g_maxSpotLights = config.maxSpotLights;
@@ -649,7 +648,8 @@ void Benchmarks::Unload()
 {
     g_currentEntities = 0u;
     g_currentRigidBodies = 0u;
-    g_currentRenderers = 0u;
+    g_currentStaticMeshes = 0u;
+    g_currentSkinnedMeshes = 0u;
     g_currentParticleEmitters = 0u;
     g_currentPointLights = 0u;
     g_currentSpotLights = 0u;

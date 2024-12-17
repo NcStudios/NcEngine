@@ -70,7 +70,6 @@ class GraphicsFrontend
 
         void Clear() noexcept
         {
-            m_animationSystem.Clear();
             m_cameraSystem.Clear();
         }
 

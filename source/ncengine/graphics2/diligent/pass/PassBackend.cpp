@@ -119,14 +119,6 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         passManifest.SkinnedMaterialPassDescs()
     );
 
-    m_skinnedMaterialPasses = MakeMaterialPasses
-    (
-        device,
-        shaderFactory,
-        shaderBindings,
-        passManifest.SkinnedMaterialPassDescs()
-    );
-
     m_wireframePass = std::make_unique<WireframePass>
     (
         device,

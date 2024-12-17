@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AnimationStateOrchestrator.h"
 #include "BoneCache.h"
 #include "Rig.h"
 #include "SkeletalAnimationRenderState.h"
@@ -10,19 +11,6 @@
 
 namespace nc::graphics
 {
-struct InFlightAnimation
-{
-    uint64_t meshId = 0;
-    uint64_t animId = 0;
-    uint64_t blendFromAnimId = 0;
-    uint32_t boneIndex = 0;
-    float time = 0.0f;
-    float blendFromTime = 0.0f;
-    float currentTransitionTime = 0.0f;
-    float transitionDuration = 0.0f;
-    float blendFactor = 0.0f;
-};
-
 // Animation system interface for consumption by other graphics subsystems.
 class ISkeletalAnimationSubsystem
 {
@@ -58,18 +46,13 @@ class SkeletalAnimationSubsystem : public ISkeletalAnimationSubsystem
         void Update(ecs::ExplicitEcs<SkinnedMesh> ecs);
         auto BuildState() -> SkeletalAnimationRenderState;
         void OnBeforeSceneLoad();
-        void Clear() noexcept;
 
     private:
-        std::vector<Entity> m_animatedEntities;
-        std::vector<InFlightAnimation> m_animationState;
+        AnimationStateOrchestrator m_stateOrchestrator;
         std::vector<Entity> m_completedAnimations;
 
         void CommitPendingChanges();
         void CalculateBoneMatrices();
         void NotifyCompletedAnimations(ecs::ComponentPool<SkinnedMesh>& pool);
-        void Transition(ecs::ComponentPool<SkinnedMesh>& pool);
-        void Start(const MeshInstanceContext& ctx, const AnimationTransition& transition);
-        void Stop(const MeshInstanceContext& ctx);
 };
 } // namespace nc::graphics

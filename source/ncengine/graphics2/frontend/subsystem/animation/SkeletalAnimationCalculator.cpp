@@ -73,51 +73,46 @@ auto GetInterpolatedScale(float timeInTicks, const std::vector<asset::ScaleFrame
     return ToXMVector(scaleFrames[0].scale);
 }
 
-// Calculate offset matrices for a single (unblended) animation
+// Blended animations use DecomposedMatrixXM for OutType, otherwise offsets are XMMATRIX
+template<class OutType>
 void CalculateOffsets(const Rig& rig,
                       const asset::SkeletalAnimation& animation,
                       float timeInTicks,
-                      std::vector<XMMATRIX>& offsetsOut)
+                      std::vector<OutType>& offsetsOut)
 {
     for (const auto [boneName, parent] : std::views::zip(rig.boneNames, rig.boneToParent))
     {
         const auto iter = animation.framesPerBone.find(boneName);
         if (iter != animation.framesPerBone.end())
         {
-            offsetsOut.push_back(ComposeMatrix(
-                GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
-                GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
-                GetInterpolatedPosition(timeInTicks, iter->second.positionFrames)
-            ));
+            if constexpr (std::same_as<OutType, DecomposedMatrixXM>)
+            {
+                offsetsOut.emplace_back(
+                    GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
+                    GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
+                    GetInterpolatedPosition(timeInTicks, iter->second.positionFrames)
+                );
+            }
+            else
+            {
+                offsetsOut.push_back(ComposeMatrix(
+                    GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
+                    GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
+                    GetInterpolatedPosition(timeInTicks, iter->second.positionFrames)
+                ));
+            }
 
             continue;
         }
 
-        offsetsOut.push_back(parent);
-    }
-}
-
-// Calculate decomposed offsets to be blended with another animation
-void CalculateOffsetsForBlending(const Rig& rig,
-                                 const asset::SkeletalAnimation& animation,
-                                 float timeInTicks,
-                                 std::vector<DecomposedMatrixXM>& offsetsOut)
-{
-    for (const auto [boneName, parent] : std::views::zip(rig.boneNames, rig.boneToParent))
-    {
-        const auto iter = animation.framesPerBone.find(boneName);
-        if (iter != animation.framesPerBone.end())
+        if constexpr (std::same_as<OutType, DecomposedMatrixXM>)
         {
-            offsetsOut.emplace_back(
-                GetInterpolatedScale(timeInTicks, iter->second.scaleFrames),
-                GetInterpolatedRotation(timeInTicks, iter->second.rotationFrames),
-                GetInterpolatedPosition(timeInTicks, iter->second.positionFrames)
-            );
-
-            continue;
+            offsetsOut.push_back(DecomposeMatrix(parent));
         }
-
-        offsetsOut.push_back(DecomposeMatrix(parent));
+        else
+        {
+            offsetsOut.push_back(parent);
+        }
     }
 }
 
@@ -188,8 +183,8 @@ auto SkeletalAnimationCalculator::Animate(const Rig& rig,
                                           float blendFactor) -> std::span<const BoneData>
 {
     Prepare(rig, true);
-    CalculateOffsetsForBlending(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
-    CalculateOffsetsForBlending(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
+    CalculateOffsets(rig, blendToAnimation, blendToTicks, m_toOffsetsDecomposed);
+    CalculateOffsets(rig, blendFromAnimation, blendFromTicks, m_fromOffsetsDecomposed);
     BlendOffsets(m_fromOffsetsDecomposed, m_toOffsetsDecomposed, blendFactor, m_offsets);
     AnimateBones(rig, m_offsets, m_boneBuffer);
     return std::span<const BoneData>{m_boneBuffer};
