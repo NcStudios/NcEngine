@@ -1,4 +1,5 @@
 #include "SmokeTest.h"
+#include "shared/Prefabs.h"
 
 #include "ncengine/asset/Assets.h"
 #include "ncengine/asset/DefaultAssets.h"
@@ -6,14 +7,11 @@
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
-#include "ncengine/ecs/Registry.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/ToonRenderer.h"
-#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
@@ -21,6 +19,8 @@
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/serialize/SceneSerialization.h"
+
+#include "ncutility/Hash.h"
 
 #include <fstream>
 
@@ -64,6 +64,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     // its primary logic. After a few frames, we save a scene fragment and reload the scene, this time also reading
     // the fragment. After a few more frames, we quit. Ideally, this should be run with validation layers enabled.
 
+    ReloadPrefabs();
     world.GetPool<RigidBody>().Reserve(30ull);
     static auto isSecondPass = false;
     world.Emplace<FrameLogic>(
@@ -108,7 +109,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             .scale = Vector3{10.0f, 1.0f, 10.0f}
         });
 
-        world.Emplace<graphics::ToonRenderer>(ground);
+        world.Emplace<StaticMesh>(ground, mesh::Cube, material::Default);
         auto& groundBody = world.Emplace<RigidBody>(
             ground,
             Shape::MakeBox(),
@@ -165,9 +166,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .position = Vector3::Up() * 4.0f
     });
 
-    world.Emplace<graphics::MeshRenderer>(animatedCube);
-    world.Emplace<graphics::ToonRenderer>(animatedCube);
-    world.Emplace<graphics::SkeletalAnimator>(animatedCube, "DefaultCube.nca", "DefaultCubeAnimation.nca");
+    world.Emplace<SkinnedMesh>(animatedCube, mesh::Cube, material::Default, utility::Fnv1a("DefaultCubeAnimation.nca"));
     world.Emplace<audio::AudioSource>(
         animatedCube,
         std::vector<std::string>{
@@ -193,12 +192,12 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     const auto capsule1 = world.Emplace<Entity>({.position = Vector3{3.5f, 0.0f, 0.0f}});
     const auto capsule2 = world.Emplace<Entity>({.position = Vector3{3.5f, 3.0f, 0.0f}});
 
-    world.Emplace<graphics::MeshRenderer>(box1, asset::CubeMesh);
-    world.Emplace<graphics::MeshRenderer>(box2, asset::CubeMesh);
-    world.Emplace<graphics::ToonRenderer>(sphere1, asset::SphereMesh);
-    world.Emplace<graphics::ToonRenderer>(sphere2, asset::SphereMesh);
-    world.Emplace<graphics::ToonRenderer>(capsule1, asset::CapsuleMesh);
-    world.Emplace<graphics::ToonRenderer>(capsule2, asset::CapsuleMesh);
+    world.Emplace<StaticMesh>(box1, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(box2, mesh::Cube, material::Default);
+    world.Emplace<StaticMesh>(sphere1, mesh::Sphere, material::Default);
+    world.Emplace<StaticMesh>(sphere2, mesh::Sphere, material::Default);
+    world.Emplace<StaticMesh>(capsule1, mesh::Capsule, material::Default);
+    world.Emplace<StaticMesh>(capsule2, mesh::Capsule, material::Default);
 
     auto& box1Body = world.Emplace<RigidBody>(box1);
     auto& box2Body = world.Emplace<RigidBody>(box2);

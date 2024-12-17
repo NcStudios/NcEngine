@@ -1,10 +1,11 @@
 #include "NcWindowImpl.h"
-#include "NcEngine.h"
-#include "config/Config.h"
-#include "graphics/GraphicsUtilities.h"
 #include "input/InputInternal.h"
-#include "window/Window.h"
-#include "ui/ImGuiUtility.h"
+
+#include "ncengine/NcEngine.h"
+#include "ncengine/config/Config.h"
+#include "ncengine/graphics/GraphicsUtility.h"
+#include "ncengine/window/Window.h"
+#include "ncengine/ui/ImGuiUtility.h"
 
 #include "ncmath/Math.h"
 #include "ncutility/NcError.h"
@@ -113,7 +114,7 @@ namespace nc::window
     void NcWindowImpl::SetDimensions(int width, int height) noexcept
     {
         m_dimensions = Vector2{static_cast<float>(width), static_cast<float>(height)};
-        m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+        m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
         glfwSetWindowSize(m_window, width, height);
         const auto minimized = static_cast<bool>(glfwGetWindowAttrib(m_window, GLFW_ICONIFIED));
         m_onResize.Emit(m_dimensions, minimized);
@@ -187,7 +188,7 @@ namespace nc::window
                 m_dimensions = windowInfo.dimensions;
             }
 
-            m_screenExtent = graphics::AdjustDimensionsToAspectRatio(m_dimensions);
+            m_screenExtent = AdjustDimensionsToAspectRatio(m_dimensions);
             auto width = Clamp((int)m_dimensions.x, 0, nativeWidth);
             auto height = Clamp((int)m_dimensions.y, 0, nativeHeight);
             auto monitor = windowInfo.launchInFullScreen ? glfwGetPrimaryMonitor() : nullptr;

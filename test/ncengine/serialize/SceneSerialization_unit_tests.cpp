@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "ncengine/config/Config.h"
-#include "ncengine/ecs/Registry.h"
 
 #include "ncutility/BinarySerialization.h"
 

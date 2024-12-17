@@ -2,7 +2,6 @@
 #include "EntityContextMenu.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/ecs/View.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/ui/ImGuiUtility.h"
@@ -185,22 +184,54 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
             else if (ImGui::Selectable("Cube"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Cube"});
-                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::CubeMesh);
+                ctx.world.Emplace<StaticMesh>(
+                    ctx.selectedEntity,
+                    asset::AcquireMeshAsset(asset::CubeMesh),
+                    MaterialDesc{
+                        .properties = {
+                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                        }
+                    });
             }
             else if (ImGui::Selectable("Sphere"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Sphere"});
-                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::SphereMesh);
+                ctx.world.Emplace<StaticMesh>(
+                    ctx.selectedEntity,
+                    asset::AcquireMeshAsset(asset::SphereMesh),
+                    MaterialDesc{
+                        .properties = {
+                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                        }
+                    });
             }
             else if (ImGui::Selectable("Capsule"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Capsule"});
-                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::CapsuleMesh);
+                ctx.world.Emplace<StaticMesh>(
+                    ctx.selectedEntity,
+                    asset::AcquireMeshAsset(asset::CapsuleMesh),
+                    MaterialDesc{
+                        .properties = {
+                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                        }
+                    });
             }
             else if (ImGui::Selectable("Plane"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.tag = "Plane"});
-                ctx.world.Emplace<graphics::MeshRenderer>(ctx.selectedEntity, asset::PlaneMesh);
+                ctx.world.Emplace<StaticMesh>(
+                    ctx.selectedEntity,
+                    asset::AcquireMeshAsset(asset::PlaneMesh),
+                    MaterialDesc{
+                        .properties = {
+                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                        }
+                    });
             }
 
             ImGui::EndMenu();

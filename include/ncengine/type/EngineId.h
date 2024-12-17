@@ -18,22 +18,18 @@ constexpr size_t EngineIdRangeEnd = 100ull;
 /** @brief Unique engine component id. */
 constexpr size_t TagId = 1ull;
 constexpr size_t TransformId = 2ull;
-constexpr size_t MeshRendererId = 3ull;
-constexpr size_t ToonRendererId = 4ull;
+constexpr size_t StaticMeshId = 3ull;
+constexpr size_t SkinnedMeshId = 4ull;
 constexpr size_t PointLightId = 5ull;
 constexpr size_t SpotLightId = 6ull;
-constexpr size_t SkeletalAnimatorId = 7ull;
+constexpr size_t DirectionalLightId = 7ull;
 constexpr size_t ParticleEmitterId = 8ull;
 constexpr size_t RigidBodyId = 9ull;
 constexpr size_t AudioSourceId = 10ull;
 constexpr size_t FrameLogicId = 11ull;
 constexpr size_t CollisionListenerId = 12ull;
-constexpr size_t NetworkDispatcherId = 13ull;
-constexpr size_t WireframeRendererId = 14ull;
-constexpr size_t HierarchyId = 15ull;
-constexpr size_t StaticMeshId = 16ull;
-constexpr size_t DirectionalLightId = 17ull;
-constexpr size_t SkinnedMeshId = 18ull;
+constexpr size_t WireframeRendererId = 13ull;
+constexpr size_t HierarchyId = 14ull;
 /** @} */
 
 /** @{ */

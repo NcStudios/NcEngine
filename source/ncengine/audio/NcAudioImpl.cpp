@@ -2,7 +2,6 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/View.h"
 #include "ncengine/utility/Log.h"
 
 #include <cstring>

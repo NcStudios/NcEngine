@@ -3,7 +3,6 @@
 #include "../EcsFixture.inl"
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Entity.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Mesh.h"
 #include "graphics2/frontend/subsystem/MeshSubsystem.h"
