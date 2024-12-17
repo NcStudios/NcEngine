@@ -1,3 +1,29 @@
+### AnimationStateOrchestrator Tests ###
+add_executable(AnimationStateOrchestrator_tests
+    AnimationStateOrchestrator_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
+)
+
+target_include_directories(AnimationStateOrchestrator_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(AnimationStateOrchestrator_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(AnimationStateOrchestrator_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(AnimationStateOrchestrator_tests AnimationStateOrchestrator_tests)
+
 ### BoneCache Tests ###
 add_executable(BoneCache_tests
     BoneCache_tests.cpp
