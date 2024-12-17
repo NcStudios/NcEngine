@@ -41,7 +41,7 @@ float ReadDepth(float sampledDepth)
     float nearClip = 0.1f;
     float farClip = 400.0f;
     float linearDepth = (2.0f * nearClip) / (farClip + nearClip - sampledDepth * (farClip - nearClip));
-    return pow(linearDepth, 4.0f);
+    return pow(linearDepth, 2.0f);
 }
 
 float ReadNormal(float3 sampledNormal)
@@ -65,16 +65,16 @@ float2 GetKernelUV(float2 uv, float2 texel, float outlineWidth, float2 kernelCoo
     return uv + outlineWidth * texel * kernelCoord;
 }
 
+static float3x3 SobelXKernel = {1,  0, -1,
+                                2,  0, -2,
+                                1,  0, -1};
+
+static float3x3 SobelYKernel = {1,  2,  1,
+                                0,  0,  0,
+                               -1, -2, -1};
+
 float DepthOutline(Texture2D tex, SamplerState texSampler, float2 uv, float screenWidth, float screenHeight, float outlineWidth)
 {
-    float3x3 SobelXKernel = {1,  0, -1,
-                             2,  0, -2,
-                             1,  0, -1};
-
-    float3x3 SobelYKernel = {1,  2,  1,
-                             0,  0,  0,
-                            -1, -2, -1};
-
     float2 texel = float2(1.0f / screenWidth, 1.0f / screenHeight); // Dimensions of a single texel in the image
 
     // Kernel
@@ -82,6 +82,7 @@ float DepthOutline(Texture2D tex, SamplerState texSampler, float2 uv, float scre
     float t10, t11, t12;
     float t20, t21, t22;
 
+    // Build the kernel (a 3x3 grid of texels, the 8 texels surrounding the current texel and the current texel)
     t00 = SampleDepth(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1,  1)));
     t01 = SampleDepth(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1,  0)));
     t02 = SampleDepth(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1, -1)));
@@ -94,6 +95,7 @@ float DepthOutline(Texture2D tex, SamplerState texSampler, float2 uv, float scre
     t21 = SampleDepth(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1,  0)));
     t22 = SampleDepth(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1,  1)));
     
+    // Apply the Sobel X and Sobel Y kernels to the kernel
     float xSobelValue = SobelXKernel[0][0] * t00 + SobelXKernel[0][1] * t01 + SobelXKernel[0][2] * t02 +
                         SobelXKernel[1][0] * t10 + SobelXKernel[1][1] * t11 + SobelXKernel[1][2] * t12 +
                         SobelXKernel[2][0] * t20 + SobelXKernel[2][1] * t21 + SobelXKernel[2][2] * t22;
@@ -105,48 +107,45 @@ float DepthOutline(Texture2D tex, SamplerState texSampler, float2 uv, float scre
     return sqrt(xSobelValue * xSobelValue + ySobelValue * ySobelValue);
 }
 
+static float lowThreshold = 0.023f;     // Suppress weak edges
+static float highThreshold = 0.025f;     // Detect strong edges
+static float edgeExponent = 1.0f;      // Emphasize edges non-linearly
+
 float NormalOutline(Texture2D tex, SamplerState texSampler, float2 uv, float screenWidth, float screenHeight, float outlineWidth)
 {
-    float3x3 SobelXKernel = {1,  0, -1,
-                             2,  0, -2,
-                             1,  0, -1};
+    float2 texel = float2(1.0f / screenWidth, 1.0f / screenHeight);
 
-    float3x3 SobelYKernel = {1,  2,  1,
-                             0,  0,  0,
-                            -1, -2, -1};
+    // Sample center normal (used for comparison)
+    float centerNormal = SampleNormal(tex, texSampler, uv);
 
-    float2 texel = float2(1.0f / screenWidth, 1.0f / screenHeight); // Dimensions of a single texel in the image
+    // Kernel sampling
+    float t00 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1,  1))) - centerNormal);
+    float t01 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1,  0))) - centerNormal);
+    float t02 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1, -1))) - centerNormal);
 
-    // Kernel
-    float t00, t01, t02;
-    float t10, t11, t12;
-    float t20, t21, t22;
+    float t10 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 0, -1))) - centerNormal);
+    float t11 = 0.0; // Center texel already handled
+    float t12 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 0,  1))) - centerNormal);
 
-    t00 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1,  1)));
-    t01 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1,  0)));
-    t02 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2(-1, -1)));
+    float t20 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1, -1))) - centerNormal);
+    float t21 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1,  0))) - centerNormal);
+    float t22 = abs(SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1,  1))) - centerNormal);
 
-    t10 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 0, -1)));
-    t11 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 0,  0)));
-    t12 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 0,  1)));
+    // Apply Sobel kernels to compute gradients
+    float xGradient = t00 + 2.0 * t01 + t02 - (t20 + 2.0 * t21 + t22);
+    float yGradient = t00 + 2.0 * t10 + t20 - (t02 + 2.0 * t12 + t22);
 
-    t20 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1, -1)));
-    t21 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1,  0)));
-    t22 = SampleNormal(tex, texSampler, GetKernelUV(uv, texel, outlineWidth, float2( 1,  1)));
-    
-    float xSobelValue = SobelXKernel[0][0] * t00 + SobelXKernel[0][1] * t01 + SobelXKernel[0][2] * t02 +
-                        SobelXKernel[1][0] * t10 + SobelXKernel[1][1] * t11 + SobelXKernel[1][2] * t12 +
-                        SobelXKernel[2][0] * t20 + SobelXKernel[2][1] * t21 + SobelXKernel[2][2] * t22;
+    // Edge magnitude
+    float edgeMagnitude = sqrt(xGradient * xGradient + yGradient * yGradient);
 
-    float ySobelValue = SobelYKernel[0][0] * t00 + SobelYKernel[0][1] * t01 + SobelYKernel[0][2] * t02 +
-                        SobelYKernel[1][0] * t10 + SobelYKernel[1][1] * t11 + SobelYKernel[1][2] * t12 +
-                        SobelYKernel[2][0] * t20 + SobelYKernel[2][1] * t21 + SobelYKernel[2][2] * t22;
+    // Suppress noise and weak edges
+    float filteredEdge = smoothstep(lowThreshold, highThreshold, edgeMagnitude);
 
-    float outlineMagnitude = sqrt(xSobelValue * xSobelValue + ySobelValue * ySobelValue);
-    outlineMagnitude = saturate(outlineMagnitude * 10.0f); // Scale and clamp
-    return outlineMagnitude;
+    // Apply non-linear scaling and intensity
+    filteredEdge = pow(filteredEdge, edgeExponent);
+
+    return saturate(filteredEdge);
 }
-
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
@@ -169,7 +168,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
                                         screenHeight,
                                         outlineWidth);
 
-    float outline = depthOutline * 25.0 + normalOutline;
+    float outline = depthOutline  + normalOutline;
 
     PSOut.Color = lerp(Color, float4(outlineColor, 1.0f), outline);
     PSOut.Color.a = 1.0;

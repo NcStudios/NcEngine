@@ -49,9 +49,9 @@ struct PSOutput
 
 float LightBand(float lightAmount)
 {
-    if (lightAmount < 0.5)
+    if (lightAmount < 0.2)
     {
-        lightAmount = 0.5;
+        lightAmount = 0.1;
     }
     else
     {
@@ -66,28 +66,30 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
     float alpha = Color.a;
     float3 finalColor = {0.0f, 0.0f, 0.0f};
+    float lightInfluence = 0.0f;
 
     for (int i = 0; i < dirLightsCount; i++)
     {
         LightInfluence influence = DirectionalLightRadiance(DirectionalLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
         finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
+        lightInfluence += influence.specularAmt + influence.diffuseAmt;
     }
     for (int i = 0; i < pointLightsCount; i++)
     {
         LightInfluence influence = PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
         finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
+        lightInfluence += influence.specularAmt + influence.diffuseAmt;
     }
     for (int i = 0; i < spotLightsCount; i++)
     {
         LightInfluence influence = SpotLightRadiance(SpotLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
         finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
+        lightInfluence += influence.specularAmt + influence.diffuseAmt;
     }
 
-    float3 magic = float3(0.2125f, 0.7154f, 0.0721f);
-    float lightAmount = dot(magic, finalColor);
-    float bandedLightAmount = LightBand(lightAmount);
+    float bandedLightAmount = LightBand(lightInfluence);
 
     Color *= float4(finalColor * bandedLightAmount, 1.0);
     Color.a = alpha;
-    PSOut.Color = Color;
+    PSOut.Color = Color; //float4(bandedLightAmount, 0.0f, 0.0f, 1.0f);
 }
