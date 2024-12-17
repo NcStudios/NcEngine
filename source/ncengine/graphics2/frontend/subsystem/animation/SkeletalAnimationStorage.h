@@ -3,6 +3,7 @@
 #include "Rig.h"
 #include "ncengine/asset/AssetData.h"
 
+#include <mutex>
 #include <shared_mutex>
 #include <span>
 #include <unordered_map>
