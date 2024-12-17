@@ -157,6 +157,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& camera = world.Emplace<graphics::SceneNavigationCamera>(cameraHandle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
     modules.Get<graphics::NcGraphics>()->SetCamera(&camera);
+
+    auto ncGraphics = modules.Get<graphics::NcGraphics>();
+    ncGraphics->SetPostProcessEffectEnabled(nc::MoebiusEffectId, true);
+    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 0.15f}});
 }
 
 void GraphicsTest::Unload()

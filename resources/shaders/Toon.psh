@@ -47,6 +47,17 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
+float LightBand(float lightAmount)
+{
+    if (lightAmount < 0.5)
+    {
+        lightAmount = 0.5;
+    }
+    else
+    {
+        return 0.75;
+    }
+}
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
@@ -72,7 +83,11 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
 
-    Color *= float4(finalColor, 1.0);
+    float3 magic = float3(0.2125f, 0.7154f, 0.0721f);
+    float lightAmount = dot(magic, finalColor);
+    float bandedLightAmount = LightBand(lightAmount);
+
+    Color *= float4(finalColor * bandedLightAmount, 1.0);
     Color.a = alpha;
     PSOut.Color = Color;
 }

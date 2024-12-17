@@ -53,5 +53,5 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 Color;
     uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
     Color = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV);
-    PSOut.Color = Color;
+    PSOut.Color = lerp(Color, float4(PSIn.Normal.x, PSIn.Normal.y, PSIn.Normal.z, 1.0), MaterialBufferData[PSIn.MaterialIndex].outlineWidth);
 }

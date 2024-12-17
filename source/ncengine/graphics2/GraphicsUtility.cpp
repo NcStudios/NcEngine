@@ -27,12 +27,10 @@ constexpr auto g_miscPassFlags = std::array{
 };
 
 constexpr auto g_postProcessPassNames = std::array{
-    std::string_view{"Wave"},
     std::string_view{"Outline"}
 };
 
 constexpr auto g_postProcessPassFlags = std::array{
-    nc::PostProcessPassFlag::Wave,
     nc::PostProcessPassFlag::Outline
 };
 
@@ -46,7 +44,6 @@ constexpr auto g_postProcessEffectIds = std::array{
 
 const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
-        nc::PostProcessPassFlag::Wave,
         nc::PostProcessPassFlag::Outline
     }
 };
