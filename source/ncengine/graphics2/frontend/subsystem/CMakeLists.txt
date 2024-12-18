@@ -4,6 +4,7 @@ target_sources(${NC_ENGINE_LIB}
         LightSubsystem.cpp
         MaterialRegistry.cpp
         MeshSubsystem.cpp
+        ParticleSubsystem.cpp
         PostProcessSubsystem.cpp
         TransformCache.cpp
         UISubsystem.cpp

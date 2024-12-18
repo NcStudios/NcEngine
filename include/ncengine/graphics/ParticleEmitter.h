@@ -15,6 +15,7 @@
 namespace nc::graphics
 {
 class ParticleEmitterSystem;
+class ParticleSubsystem;
 
 struct ParticleEmissionInfo
 {
@@ -57,20 +58,36 @@ struct ParticleInfo
 class ParticleEmitter final : public ComponentBase
 {
     public:
+        // need move ops?
         ParticleEmitter(Entity entity, ParticleInfo info);
+        ~ParticleEmitter() noexcept;
+
+        // prob not ok
+        ParticleEmitter(ParticleEmitter&&) = default;
+        ParticleEmitter& operator=(ParticleEmitter&&) = default;
 
         auto GetInfo() const noexcept -> const ParticleInfo& { return m_info; }
         void SetInfo(const ParticleInfo& info);
         void Emit(size_t count);
 
-        void RegisterSystem(ParticleEmitterSystem* system);
+        // todo: delete
+        void RegisterSystem(ParticleEmitterSystem*) {}
+
+        /** @cond internal */
+        static void RegisterSubsystem(ParticleSubsystem* subsystem)
+        {
+            s_subsystem = subsystem;
+        }
+        /** @endcond internal */
 
     private:
+        static inline ParticleSubsystem* s_subsystem = nullptr;
+
         ParticleInfo m_info;
-        ParticleEmitterSystem* m_emitterSystem;
 };
 } // namespace nc::graphics
 
+// todo: delete
 namespace nc
 {
 template<>

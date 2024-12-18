@@ -13,6 +13,7 @@
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
 #include "graphics/system/ParticleEmitterSystem.h"
+#include "graphics2/frontend/subsystem/ParticleSubsystem.h"
 #include "physics/DeferredPhysicsCreateState.h"
 
 #include "ncutility/ScopeExit.h"
@@ -37,6 +38,12 @@ namespace graphics
 {
 void ParticleEmitterSystem::Emit(Entity, size_t) {}
 void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
+
+
+void ParticleSubsystem::AddEmitter(graphics::ParticleEmitter&) {}
+void ParticleSubsystem::RemoveEmitter(Entity) {}
+void ParticleSubsystem::UpdateEmitter(graphics::ParticleEmitter&) {}
+void ParticleSubsystem::Emit(Entity, size_t) {}
 } // namespace graphics
 
 
