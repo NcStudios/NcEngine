@@ -11,6 +11,7 @@ SamplerState  TextureBufferData_sampler; // By convention, texture samplers must
 cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
+    float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint dirLightsCount;
     uint pointLightsCount;
@@ -50,14 +51,14 @@ struct PSOutput
 float LightBand(float lightAmount)
 {
     // Define the range for the soft transition
-    float lowerEdge = 0.475; // Start of the soft blend
+    float lowerEdge = 0.49; // Start of the soft blend
     float upperEdge = 0.50; // End of the soft blend
 
     // Smoothly blend between the two bands
     float blendFactor = smoothstep(lowerEdge, upperEdge, lightAmount);
 
     // Define the values for the bands
-    float bandLow = 0.3;
+    float bandLow = 0.2;
     float bandHigh = 0.75;
 
     // Interpolate between the two bands

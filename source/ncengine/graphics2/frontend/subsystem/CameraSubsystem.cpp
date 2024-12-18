@@ -43,12 +43,17 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
                 m_mainCamera->ViewMatrix(),
                 m_mainCamera->ProjectionMatrix()
             ),
+            .invProjection = m_mainCamera->InverseProjectionMatrix(),
             .position = transform.Position()
         };
     }
 
+    auto viewProj = MakeDefaultViewProjection();
+    auto inverseProj = DirectX::XMMatrixInverse(nullptr, viewProj);
+
     return CameraRenderState{
-        .viewProjection = MakeDefaultViewProjection(),
+        .viewProjection = viewProj,
+        .invProjection = inverseProj,
         .position = Vector3::Zero()
     };
 }

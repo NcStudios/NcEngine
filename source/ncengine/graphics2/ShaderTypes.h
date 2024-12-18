@@ -16,6 +16,7 @@ namespace nc::graphics
 struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX cameraInvProjection = DirectX::XMMatrixIdentity();
     Vector3 cameraPosition = Vector3::One();
     uint32_t dirLightsCount = 0;
     uint32_t pointLightsCount = 0;
