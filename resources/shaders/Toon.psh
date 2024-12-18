@@ -49,14 +49,19 @@ struct PSOutput
 
 float LightBand(float lightAmount)
 {
-    if (lightAmount < 0.2)
-    {
-        lightAmount = 0.1;
-    }
-    else
-    {
-        return 0.75;
-    }
+    // Define the range for the soft transition
+    float lowerEdge = 0.475; // Start of the soft blend
+    float upperEdge = 0.50; // End of the soft blend
+
+    // Smoothly blend between the two bands
+    float blendFactor = smoothstep(lowerEdge, upperEdge, lightAmount);
+
+    // Define the values for the bands
+    float bandLow = 0.3;
+    float bandHigh = 0.75;
+
+    // Interpolate between the two bands
+    return lerp(bandLow, bandHigh, blendFactor);
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -66,30 +71,24 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
     float alpha = Color.a;
     float3 finalColor = {0.0f, 0.0f, 0.0f};
-    float lightInfluence = 0.0f;
 
     for (int i = 0; i < dirLightsCount; i++)
     {
         LightInfluence influence = DirectionalLightRadiance(DirectionalLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
-        lightInfluence += influence.specularAmt + influence.diffuseAmt;
+        finalColor += influence.color * LightBand(influence.specularAmt + influence.diffuseAmt);
     }
     for (int i = 0; i < pointLightsCount; i++)
     {
         LightInfluence influence = PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
-        lightInfluence += influence.specularAmt + influence.diffuseAmt;
+        finalColor += influence.color * LightBand(influence.specularAmt + influence.diffuseAmt);
     }
     for (int i = 0; i < spotLightsCount; i++)
     {
         LightInfluence influence = SpotLightRadiance(SpotLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
-        lightInfluence += influence.specularAmt + influence.diffuseAmt;
+        finalColor += influence.color * LightBand(influence.specularAmt + influence.diffuseAmt);
     }
 
-    float bandedLightAmount = LightBand(lightInfluence);
-
-    Color *= float4(finalColor * bandedLightAmount, 1.0);
+    Color *= float4(finalColor, 1.0);
     Color.a = alpha;
-    PSOut.Color = Color; //float4(bandedLightAmount, 0.0f, 0.0f, 1.0f);
+    PSOut.Color = Color;
 }
