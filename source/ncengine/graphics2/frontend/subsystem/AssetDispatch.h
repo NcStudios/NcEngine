@@ -6,6 +6,7 @@
 
 #include "ncengine/asset/AssetData.h"
 #include "ncengine/utility/Signal.h"
+#include "ncutility/NcError.h"
 
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -63,7 +64,7 @@ class AssetDispatch
                 }
                 case asset::UpdateAction::Unload:
                 {
-                    throw "unhandled action";
+                    throw NcError{"Unexpected UpdateAction"};
                 }
             }
         }

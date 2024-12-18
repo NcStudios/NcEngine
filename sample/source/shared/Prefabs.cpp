@@ -40,14 +40,19 @@ MaterialDesc Cave{"CaveMaterial"};
 
 namespace animation
 {
-uint64_t OgreIdle{utility::Fnv1a(std::filesystem::path("orgre/idle.nca").string())};
-uint64_t OgreAttack{utility::Fnv1a(std::filesystem::path("ogre/attack.nca").string())};
-uint64_t SkeletonIdle{utility::Fnv1a(std::filesystem::path("skeleton/idle.nca").string())};
-uint64_t SkeletonJump{utility::Fnv1a(std::filesystem::path("skeleton/jump.nca").string())};
-uint64_t SkeletonWalkRight{utility::Fnv1a(std::filesystem::path("skeleton/walk_right.nca").string())};
-uint64_t SkeletonWalkLeft{utility::Fnv1a(std::filesystem::path("skeleton/walk_left.nca").string())};
-uint64_t SkeletonWalkForward{utility::Fnv1a(std::filesystem::path("skeleton/walk_forward.nca").string())};
-uint64_t SkeletonWalkBackward{utility::Fnv1a(std::filesystem::path("skeleton/walk_back.nca").string())};
+auto MakeAnimId(std::string_view path) -> uint64_t
+{
+    return utility::Fnv1a(std::filesystem::path(path).make_preferred().string());
+}
+
+uint64_t OgreIdle{MakeAnimId("ogre/idle.nca")};
+uint64_t OgreAttack{MakeAnimId("ogre/attack.nca")};
+uint64_t SkeletonIdle{MakeAnimId("skeleton/idle.nca")};
+uint64_t SkeletonJump{MakeAnimId("skeleton/jump.nca")};
+uint64_t SkeletonWalkRight{MakeAnimId("skeleton/walk_right.nca")};
+uint64_t SkeletonWalkLeft{MakeAnimId("skeleton/walk_left.nca")};
+uint64_t SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
+uint64_t SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
 } // namespace animation
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};

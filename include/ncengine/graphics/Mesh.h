@@ -65,6 +65,7 @@ class MeshBase
 
         /** @name General Functions */
         auto GetEntity() const -> Entity { return m_ctx.entity; }
+        auto GetContext() const -> const MeshInstanceContext& { return m_ctx; }
 
         /** @name Mesh Functions */
         auto GetMeshId() const -> uint64_t { return m_ctx.meshId; }

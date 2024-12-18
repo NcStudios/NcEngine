@@ -119,6 +119,12 @@ else()
             graphics2/GraphicsUtility.cpp
             graphics2/PostProcess.cpp
             graphics2/SkeletalAnimationController.cpp
+            graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
+            graphics2/frontend/subsystem/animation/BoneCache.cpp
+            graphics2/frontend/subsystem/animation/Rig.cpp
+            graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp
+            graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
+            graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.cpp
             graphics2/frontend/subsystem/MaterialRegistry.cpp
             graphics2/frontend/subsystem/MeshSubsystem.cpp
             graphics2/frontend/subsystem/TransformCache.cpp

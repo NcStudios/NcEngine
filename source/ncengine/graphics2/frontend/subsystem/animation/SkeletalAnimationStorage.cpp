@@ -2,6 +2,7 @@
 
 #include "ncutility/Hash.h"
 
+#include <algorithm>
 #include <ranges>
 
 namespace nc::graphics
@@ -32,12 +33,12 @@ void SkeletalAnimationStorage::UnloadAllAnimations()
 void SkeletalAnimationStorage::LoadBones(std::span<const std::string> ids,
                                          std::span<const asset::BonesData> bones)
 {
-    auto rigs = std::vector<gfx2::PackedRig>{};
+    auto rigs = std::vector<Rig>{};
     rigs.reserve(bones.size());
     std::ranges::transform(
         bones,
         std::back_inserter(rigs),
-        [](const auto& in) { return gfx2::PackedRig(in); }
+        [](const auto& in) { return Rig(in); }
     );
 
     const auto _ = AcquireWriteLock();

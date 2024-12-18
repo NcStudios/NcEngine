@@ -40,14 +40,22 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
         update.Add(
             nc::update_task_id::ParticleEmitterUpdate,
             "ParticleEmitterUpdate(stub)",
-            []{}
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
+        );
+
+        update.Add(
+            nc::update_task_id::SkeletalAnimationUpdate,
+            "SkeletalAnimationUpdate(stub)",
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
         );
 
         update.Add(
             nc::update_task_id::ParticleEmitterSync,
             "ParticleEmitterSync(stub)",
             []{},
-            {nc::update_task_id::CommitStagedChanges}
+            {nc::update_task_id::UpdateTransforms}
         );
 
         render.Add(
@@ -345,16 +353,28 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     NC_LOG_TRACE("Building NcGraphics Tasks");
 
     update.Add(
-        nc::update_task_id::ParticleEmitterUpdate,
+        update_task_id::ParticleEmitterUpdate,
         "ParticleEmitterUpdate(stub)",
-        []{}
+        []{},
+        {update_task_id::CommitStagedChanges}
+    );
+
+
+
+    update.Add(
+        update_task_id::ParticleEmitterSync,
+        "ParticleEmitterSync(stub)",
+        []{},
+        {update_task_id::UpdateTransforms}
     );
 
     update.Add(
-        nc::update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync(stub)",
-        []{},
-        {nc::update_task_id::CommitStagedChanges}
+        update_task_id::SkeletalAnimationUpdate,
+        "SkeletalAnimationUpdate",
+        [this]{
+            m_frontend.GetSkeletalAnimationSubsystem().Update(m_world);
+        },
+        {update_task_id::CommitStagedChanges}
     );
 
     render.Add(

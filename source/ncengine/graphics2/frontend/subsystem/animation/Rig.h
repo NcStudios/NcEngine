@@ -1,29 +1,25 @@
 #pragma once
 
-#include "ncengine/ecs/Component.h"
 #include "ncasset/Assets.h"
 
-#include <limits>
+#include "DirectXMath.h"
 
-namespace nc::graphics::gfx2
+#include <limits>
+#include <vector>
+
+namespace nc::graphics
 {
-/**
- * @brief Used to traverse the flattened offsets tree.
- */
+// Used to traverse the flattened offsets tree.
 struct OffsetChildren
 {
     uint32_t indexOfFirstChild;
     uint32_t numChildren;
 };
 
-/**
- * @brief An SoA representation of nc::asset::BonesData.
- * 
- * SkeletalAnimationSystem uses this type to efficiently perform animation transformation calculations.
- */
-struct PackedRig
+// An SoA representation of nc::asset::BonesData.
+struct Rig
 {
-    PackedRig(const nc::asset::BonesData& bonesData);
+    explicit Rig(const nc::asset::BonesData& bonesData);
 
     std::vector<DirectX::XMMATRIX> vertexToBone;
     std::vector<DirectX::XMMATRIX> boneToParent;
@@ -32,4 +28,4 @@ struct PackedRig
     std::vector<OffsetChildren> offsetChildren;
     std::vector<uint32_t> offsetsMap;
 };
-} // namespace nc::anim
+} // namespace nc::graphics

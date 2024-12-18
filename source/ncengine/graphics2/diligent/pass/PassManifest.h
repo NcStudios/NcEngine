@@ -16,6 +16,7 @@ class PassManifest
                               std::span<const MaterialPassFlag::type> implementedMaterialPasses,
                               std::span<const PostProcessPassFlag::type> implementedPPPasses,
                               std::span<const MiscPassFlag::type> implementedMiscPasses);
+
         void RegisterPass(PassDesc desc);
         auto StaticMaterialPassDescs() const -> std::span<const PassDesc> { return m_staticMaterialPassDescs; }
         auto SkinnedMaterialPassDescs() const -> std::span<const PassDesc> { return m_skinnedMaterialPassDescs; }
