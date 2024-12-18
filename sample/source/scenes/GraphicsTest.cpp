@@ -2,22 +2,19 @@
 #include "shared/Prefabs.h"
 #include "shared/GameLogic.h"
 
-#include "imgui/imgui.h"
 #include "ncengine/NcEngine.h"
 #include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/NcGraphics.h"
-#include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
 
 #include <string>
-#include <iostream>
 
 namespace nc::sample
 {
@@ -29,165 +26,7 @@ GraphicsTest::GraphicsTest(SampleUI* ui)
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
-
-    std::vector<std::string> textures
-    {
-        "ogre/BaseColor.nca",
-        "ogre/Roughness.nca",
-        "ogre/Metallic.nca",
-        "cave/BaseColor.nca",
-        "cave/Roughness.nca",
-        "cave/Metallic.nca",
-        "cave_ceiling/BaseColor.nca",
-        "cave_ceiling/Roughness.nca",
-        "cave_ceiling/Metallic.nca",
-        "skeleton/BaseColor.nca",
-        "skeleton/Roughness.nca",
-        "skeleton/Metallic.nca",
-        "denim/BaseColor.nca",
-        "denim/Roughness.nca",
-        "denim/Metallic.nca",
-        "marble/BaseColor.nca",
-        "marble/Roughness.nca",
-        "marble/Metallic.nca",
-        "metal/BaseColor.nca",
-        "metal/Roughness.nca",
-        "metal/Metallic.nca",
-        "plastic/BaseColor.nca",
-        "plastic/Roughness.nca",
-        "plastic/Metallic.nca",
-        "silver/BaseColor.nca",
-        "silver/Roughness.nca",
-        "silver/Metallic.nca",
-        "stone/BaseColor.nca",
-        "stone/Roughness.nca",
-        "stone/Metallic.nca",
-        "tile/BaseColor.nca",
-        "tile/Roughness.nca",
-        "tile/Metallic.nca",
-        "wood/BaseColor.nca",
-        "wood/Roughness.nca",
-        "wood/Metallic.nca"
-    };
-
-    std::vector<std::string> normals
-    {
-        "ogre/Normal.nca",
-        "cave/Normal.nca",
-        "cave_ceiling/Normal.nca",
-        "skeleton/Normal.nca",
-        "denim/Normal.nca",
-        "marble/Normal.nca",
-        "metal/Normal.nca",
-        "plastic/Normal.nca",
-        "silver/Normal.nca",
-        "stone/Normal.nca",
-        "tile/Normal.nca",
-        "wood/Normal.nca"
-    };
-
-    std::vector<std::string> cubemaps
-    {
-        "night_sky.nca"
-    };
-
-    std::vector<std::string> meshes
-    {
-        "ogre.nca",
-        "skeleton.nca",
-        "cave.nca",
-        "cave_ceiling.nca"
-    };
-
-    std::vector<std::string> animations
-    {
-        "ogre/idle.nca",
-        "ogre/attack.nca",
-        "skeleton/idle.nca",
-        "skeleton/walk_right.nca",
-        "skeleton/walk_back.nca",
-        "skeleton/walk_forward.nca",
-        "skeleton/walk_left.nca",
-        "skeleton/jump.nca",
-    };
-
-    asset::LoadSkeletalAnimationAssets(animations);
-    asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
-    asset::LoadTextureAssets(normals, false, asset::AssetFlags::TextureTypeNormalMap);
-    asset::LoadMeshAssets(meshes);
-    asset::LoadCubeMapAssets(cubemaps);
-
-    auto ogreMaterial = graphics::PbrMaterial{
-        .baseColor  = "ogre/BaseColor.nca",
-        .normal     = "ogre/Normal.nca",
-        .roughness  = "ogre/Roughness.nca",
-        .metallic   = "ogre/Metallic.nca"
-    };
-
-    auto skeletonMaterial = graphics::PbrMaterial{
-        .baseColor  = "skeleton/BaseColor.nca",
-        .normal     = "skeleton/Normal.nca",
-        .roughness  = "skeleton/Roughness.nca",
-        .metallic   = "skeleton/Metallic.nca"
-    };
-
-    auto caveMaterial = graphics::PbrMaterial{
-        .baseColor  = "cave/BaseColor.nca",
-        .normal     = "cave/Normal.nca",
-        .roughness  = "cave/Roughness.nca",
-        .metallic   = "cave/Metallic.nca"
-    };
-
-    auto caveCeilingMaterial = graphics::PbrMaterial{
-        .baseColor  = "cave_ceiling/BaseColor.nca",
-        .normal     = "cave_ceiling/Normal.nca",
-        .roughness  = "cave_ceiling/Roughness.nca",
-        .metallic   = "cave_ceiling/Metallic.nca"
-    };
-
-    auto marbleMaterial = graphics::PbrMaterial{
-        .baseColor  = "marble/BaseColor.nca",
-        .normal     = "marble/Normal.nca",
-        .roughness  = "marble/Roughness.nca",
-        .metallic   = "marble/Metallic.nca"
-    };
-
-    auto metalMaterial = graphics::PbrMaterial{
-        .baseColor  = "metal/BaseColor.nca",
-        .normal     = "metal/Normal.nca",
-        .roughness  = "metal/Roughness.nca",
-        .metallic   = "metal/Metallic.nca"
-    };
-
-    auto denimMaterial = graphics::PbrMaterial{
-        .baseColor  = "denim/BaseColor.nca",
-        .normal     = "denim/Normal.nca",
-        .roughness  = "denim/Roughness.nca",
-        .metallic   = "denim/Metallic.nca"
-    };
-
-    auto plasticMaterial = graphics::PbrMaterial{
-        .baseColor  = "plastic/BaseColor.nca",
-        .normal     = "plastic/Normal.nca",
-        .roughness  = "plastic/Roughness.nca",
-        .metallic   = "plastic/Metallic.nca"
-    };
-
-    auto stoneMaterial = graphics::PbrMaterial{
-        .baseColor  = "stone/BaseColor.nca",
-        .normal     = "stone/Normal.nca",
-        .roughness  = "stone/Roughness.nca",
-        .metallic   = "stone/Metallic.nca"
-    };
-
-    auto tileMaterial = graphics::PbrMaterial{
-        .baseColor  = "tile/BaseColor.nca",
-        .normal     = "tile/Normal.nca",
-        .roughness  = "tile/Roughness.nca",
-        .metallic   = "tile/Metallic.nca"
-    };
-
-    modules.Get<graphics::NcGraphics>()->SetSkybox("night_sky.nca");
+    modules.Get<graphics::NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
@@ -198,176 +37,116 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<graphics::PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
 
     // Ogre
-    auto ogre = world.Emplace<Entity>({
-        .position = Vector3{-5.0f, 0.0f, 12.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
-        .scale = Vector3{3.0f, 3.0f, 3.0f},
-        .tag = "ogre"
-    });
-    world.Emplace<graphics::MeshRenderer>(ogre, "ogre.nca", ogreMaterial);
-    world.Emplace<RigidBody>(
-        ogre,
-        Shape::MakeSphere(),
-        RigidBodyInfo{
-            .type = BodyType::Kinematic
-        }
-    );
-
-    // Ogre Animation
     {
-        using namespace graphics;
-        auto& ogreAnimator = world.Emplace<SkeletalAnimator>(ogre, "ogre.nca", "ogre/idle.nca");
-        auto stopState = ogreAnimator.AddState(anim::Stop
-        {
-            .enterFrom = anim::RootState,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
+        const auto ogre = world.Emplace<Entity>({
+            .position = Vector3{-5.0f, 0.0f, 12.0f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 1.0f, 0.0f),
+            .scale = Vector3{3.0f, 3.0f, 3.0f},
+            .tag = "ogre"
         });
 
-        ogreAnimator.AddState(anim::Loop
-        {
-            .enterFrom = stopState,
+        world.Emplace<RigidBody>(
+            ogre,
+            Shape::MakeSphere(),
+            RigidBodyInfo{
+                .type = BodyType::Kinematic
+            }
+        );
+
+        auto& animator = world.Emplace<SkinnedMesh>(
+            ogre,
+            mesh::Ogre,
+            material::Ogre,
+            animation::OgreIdle
+        ).GetAnimationController();
+
+        const auto stopState = animator.AddState(StopAnimation{
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
-            .animUid = "ogre/idle.nca",
+            .enterFrom = RootAnimationState
+        });
+
+        animator.AddState(LoopAnimation{
+            .animId = animation::OgreIdle,
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
+            .enterFrom = stopState,
             .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .exitTo = stopState
         });
     }
 
     // Skeleton
-    auto skeleton = world.Emplace<Entity>({
-        .position = Vector3{5.3f, 0.0f, -6.4f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
-        .scale = Vector3{2.0f, 2.0f, 2.0f},
-        .tag = "skeleton"
-    });
-
-    world.Emplace<graphics::MeshRenderer>(skeleton, "skeleton.nca", skeletonMaterial);
-    world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
-    world.Emplace<RigidBody>(
-        skeleton,
-        Shape::MakeSphere(),
-        RigidBodyInfo{
-            .type = BodyType::Kinematic,
-            .flags = RigidBodyFlags::Trigger
-        }
-    );
-
-    world.Emplace<CollisionListener>(skeleton)
-        .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
-            auto& ogreAnim = ecs.Get<graphics::SkeletalAnimator>(other);
-            ogreAnim.PlayOnceImmediate("ogre/attack.nca", graphics::anim::RootState);
-            auto& tag = ecs.Get<Tag>(other);
-            GameLog::Log(std::string{"Collision Enter: "} + tag.value.c_str());
-        };
-
-    // Skeleton Animation
     {
-        using namespace graphics;
-        auto& skelAnim = world.Emplace<SkeletalAnimator>(skeleton, "skeleton.nca", "skeleton/idle.nca");
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        const auto skeleton = world.Emplace<Entity>({
+            .position = Vector3{5.3f, 0.0f, -6.4f},
+            .rotation = Quaternion::FromEulerAngles(0.0f, 0.5f, 0.0f),
+            .scale = Vector3{2.0f, 2.0f, 2.0f},
+            .tag = "skeleton"
+        });
+
+        world.Emplace<FrameLogic>(skeleton, WasdBasedSimulatedBodyMovement);
+        world.Emplace<RigidBody>(
+            skeleton,
+            Shape::MakeSphere(),
+            RigidBodyInfo{
+                .type = BodyType::Kinematic,
+                .flags = RigidBodyFlags::Trigger
+            }
+        );
+
+        world.Emplace<CollisionListener>(skeleton)
+            .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
+                auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetAnimationController();
+                ogreAnim.PlayOnceImmediate(animation::OgreAttack);
+                auto& tag = ecs.Get<Tag>(other);
+                GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
+            };
+
+        auto& animator = world.Emplace<SkinnedMesh>(
+            skeleton,
+            mesh::Skeleton,
+            material::Skeleton,
+            animation::SkeletonIdle
+        ).GetAnimationController();
+
+        animator.AddState(LoopAnimation{
+            .animId = animation::SkeletonWalkForward,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
-            .animUid = "skeleton/walk_forward.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
         });
 
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        animator.AddState(LoopAnimation{
+            .animId = animation::SkeletonWalkLeft,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
-            .animUid = "skeleton/walk_left.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
         });
 
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        animator.AddState(LoopAnimation{
+            .animId = animation::SkeletonWalkBackward,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
-            .animUid = "skeleton/walk_back.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
         });
 
-        skelAnim.AddState(anim::Loop
-        {
-            .enterFrom = anim::RootState,
+        animator.AddState(LoopAnimation{
+            .animId = animation::SkeletonWalkRight,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
-            .animUid = "skeleton/walk_right.nca",
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
         });
 
-        skelAnim.AddState(anim::PlayOnce
-        {
-            .enterFrom = anim::RootState,
-            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);},
-            .animUid = "skeleton/jump.nca"
+        animator.AddState(PlayOnceAnimation{
+            .animId = animation::SkeletonJump,
+            .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
     }
 
     // Cave
-    auto cave_floor = world.Emplace<Entity>({
+    const auto cave_floor = world.Emplace<Entity>({
         .position = Vector3{0.0f, 0.0f, 0.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
         .scale = Vector3{1.5f, 1.5f, 1.5f},
         .tag = "cave_floor"
     });
-    world.Emplace<graphics::MeshRenderer>(cave_floor, "cave.nca", caveMaterial);
 
-    auto cave_ceiling = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 0.0f, 0.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 1.5708f, 0.0f),
-        .scale = Vector3{1.5f, 1.5f, 1.5f},
-        .tag = "cave_ceiling"
-    });
-    world.Emplace<graphics::MeshRenderer>(cave_ceiling, "cave_ceiling.nca", caveCeilingMaterial);
-
-    auto marbleSphere = world.Emplace<Entity>({
-        .position = Vector3{6.0f, 3.0f, 13.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "marble"
-    });
-    world.Emplace<graphics::MeshRenderer>(marbleSphere, "DefaultSphere.nca", marbleMaterial);
-
-    auto metalSphere = world.Emplace<Entity>({
-        .position = Vector3{8.0f, 3.0f, 12.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "metal"
-    });
-    world.Emplace<graphics::MeshRenderer>(metalSphere, "DefaultSphere.nca", metalMaterial);
-
-    auto denimSphere = world.Emplace<Entity>({
-        .position = Vector3{9.0f, 3.0f, 10.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "denim"
-    });
-    world.Emplace<graphics::MeshRenderer>(denimSphere, "DefaultSphere.nca", denimMaterial);
-
-    auto plasticSphere = world.Emplace<Entity>({
-        .position = Vector3{6.0f, 5.0f, 13.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "plastic"
-    });
-    world.Emplace<graphics::MeshRenderer>(plasticSphere, "DefaultSphere.nca", plasticMaterial);
-
-    auto stoneSphere = world.Emplace<Entity>({
-        .position = Vector3{8.0f, 5.0f, 12.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "stone"
-    });
-    world.Emplace<graphics::MeshRenderer>(stoneSphere, "DefaultSphere.nca", stoneMaterial);
-
-    auto tileSphere = world.Emplace<Entity>({
-        .position = Vector3{9.0f, 5.0f, 10.0f},
-        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
-        .tag = "tile"
-    });
-    world.Emplace<graphics::MeshRenderer>(tileSphere, "DefaultSphere.nca", tileMaterial);
+    world.Emplace<StaticMesh>(cave_floor, mesh::Cave, material::Cave);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

@@ -2,6 +2,7 @@
 
 #include "ncengine/asset/Assets.h"
 #include "ncengine/config/Config.h"
+#include "ncutility/Hash.h"
 
 #include <filesystem>
 
@@ -9,34 +10,50 @@ namespace nc::sample
 {
 bool IsInitialized = false;
 
-graphics::PbrMaterial DefaultPbrMaterial{asset::DefaultBaseColor, asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial RedPbrMaterial{"solid_color/Red.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial GreenPbrMaterial{"solid_color/Green.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial BluePbrMaterial{"solid_color/Blue.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial OrangePbrMaterial{"solid_color/Orange.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial PurplePbrMaterial{"solid_color/Purple.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial TealPbrMaterial{"solid_color/Teal.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
-graphics::PbrMaterial YellowPbrMaterial{"solid_color/Yello.nca", asset::DefaultNormal, asset::DefaultRoughness, asset::DefaultMetallic};
+namespace mesh
+{
+asset::MeshView Cube{};
+asset::MeshView Sphere{};
+asset::MeshView Capsule{};
+asset::MeshView Plane{};
+asset::MeshView HalfPipe{};
+asset::MeshView Ramp{};
+asset::MeshView Ogre{};
+asset::MeshView Skeleton{};
+asset::MeshView Cave{};
+} // namespace mesh
 
-constexpr auto outlineWidth = 2;
-graphics::ToonMaterial DefaultToonMaterial{asset::DefaultBaseColor, outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial RedToonMaterial{"solid_color/Red.nca", outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial GreenToonMaterial{"solid_color/Green.nca", outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial BlueToonMaterial{"solid_color/Blue.nca", outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial OrangeToonMaterial{"solid_color/Orange.nca", outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial PurpleToonMaterial{"solid_color/Purple.nca", outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial TealToonMaterial{"solid_color/Teal.nca", outlineWidth, asset::DefaultBaseColor, 8};
-graphics::ToonMaterial YellowToonMaterial{"solid_color/Yellow.nca", outlineWidth, asset::DefaultBaseColor, 8};
+namespace material
+{
+MaterialDesc Default{"DefaultMaterial"};
+MaterialDesc Red{"RedMaterial"};
+MaterialDesc Green{"GreenMaterial"};
+MaterialDesc Blue{"BlueMaterial"};
+MaterialDesc Orange{"OrangeMaterial"};
+MaterialDesc Purple{"PurpleMaterial"};
+MaterialDesc Teal{"TealMaterial"};
+MaterialDesc Yellow{"YellowMaterial"};
+MaterialDesc Ogre{"OgreMaterial"};
+MaterialDesc Skeleton{"SkeletonMaterial"};
+MaterialDesc Cave{"CaveMaterial"};
+} // namespace material
 
-constexpr auto toonHatch = "line/hatch.nca";
-graphics::ToonMaterial DefaultHatchedToonMaterial{asset::DefaultBaseColor, outlineWidth, toonHatch, 8};
-graphics::ToonMaterial RedHatchedToonMaterial{"solid_color/Red.nca", outlineWidth, toonHatch, 8};
-graphics::ToonMaterial GreenHatchedToonMaterial{"solid_color/Green.nca", outlineWidth, toonHatch, 8};
-graphics::ToonMaterial BlueHatchedToonMaterial{"solid_color/Blue.nca", outlineWidth, toonHatch, 8};
-graphics::ToonMaterial OrangeHatchedToonMaterial{"solid_color/Orange.nca", outlineWidth, toonHatch, 8};
-graphics::ToonMaterial PurpleHatchedToonMaterial{"solid_color/Purple.nca", outlineWidth, toonHatch, 8};
-graphics::ToonMaterial TealHatchedToonMaterial{"solid_color/Teal.nca", outlineWidth, toonHatch, 8};
-graphics::ToonMaterial YellowHatchedToonMaterial{"solid_color/Yellow.nca", outlineWidth, toonHatch, 8};
+namespace animation
+{
+auto MakeAnimId(std::string_view path) -> uint64_t
+{
+    return utility::Fnv1a(std::filesystem::path(path).make_preferred().string());
+}
+
+uint64_t OgreIdle{MakeAnimId("ogre/idle.nca")};
+uint64_t OgreAttack{MakeAnimId("ogre/attack.nca")};
+uint64_t SkeletonIdle{MakeAnimId("skeleton/idle.nca")};
+uint64_t SkeletonJump{MakeAnimId("skeleton/jump.nca")};
+uint64_t SkeletonWalkRight{MakeAnimId("skeleton/walk_right.nca")};
+uint64_t SkeletonWalkLeft{MakeAnimId("skeleton/walk_left.nca")};
+uint64_t SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
+uint64_t SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
+} // namespace animation
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
@@ -81,31 +98,71 @@ void InitializeResources()
     LoadAssets(assetSettings.cubeMapsPath, asset::AssetFlags::None, &asset::LoadCubeMapAssets);
     LoadAssets(assetSettings.hullCollidersPath, asset::AssetFlags::None, &asset::LoadConvexHullAssets);
     LoadAssets(assetSettings.meshesPath, asset::AssetFlags::None, &asset::LoadMeshAssets);
+    LoadAssets(assetSettings.skeletalAnimationsPath, asset::AssetFlags::None, &asset::LoadSkeletalAnimationAssets);
     LoadFont(UIFont);
 
     std::vector<std::string> textures
     {
-        "box/BaseColor.nca",
-        "box/Roughness.nca",
-        "line/hatch.nca",
-        "logo/BaseColor.nca",
-        "logo/Metallic.nca",
-        "logo/Roughness.nca",
         "solid_color/Blue.nca",
         "solid_color/Green.nca",
         "solid_color/Red.nca",
         "solid_color/Orange.nca",
         "solid_color/Purple.nca",
         "solid_color/Teal.nca",
-        "solid_color/Yellow.nca"
+        "solid_color/Yellow.nca",
+        "ogre/BaseColor.nca",
+        "skeleton/BaseColor.nca",
+        "cave/BaseColor.nca"
     };
+
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
 
-    std::vector<std::string> normalMaps 
+    std::vector<std::string> normalMaps
     {
-        "box/Normal.nca",
-        "logo/Normal.nca"
+        "ogre/Normal.nca",
+        "skeleton/Normal.nca",
+        "cave/Normal.nca"
     };
+
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
+
+    asset::LoadCubeMapAsset(cubemap::NightSkyPath);
+}
+
+void ReloadPrefabs()
+{
+    mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
+    mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
+    mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
+    mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
+    mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
+    mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
+    mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
+    mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
+
+    const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
+    material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
+    material::Default.properties.normalTexture = normal;
+    material::Red.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
+    material::Red.properties.normalTexture = normal;
+    material::Green.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
+    material::Green.properties.normalTexture = normal;
+    material::Blue.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
+    material::Blue.properties.normalTexture = normal;
+    material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
+    material::Orange.properties.normalTexture = normal;
+    material::Purple.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
+    material::Purple.properties.normalTexture = normal;
+    material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
+    material::Teal.properties.normalTexture = normal;
+    material::Yellow.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
+    material::Yellow.properties.normalTexture = normal;
+    material::Ogre.properties.diffuseTexture = asset::AcquireTextureAsset("ogre/BaseColor.nca");
+    material::Ogre.properties.normalTexture = asset::AcquireTextureAsset("ogre/Normal.nca");
+    material::Skeleton.properties.diffuseTexture = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
+    material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
+    material::Cave.properties.diffuseTexture = asset::AcquireTextureAsset("cave/BaseColor.nca");
+    material::Cave.properties.normalTexture = asset::AcquireTextureAsset("cave/Normal.nca");
 }
 } // namespace sample

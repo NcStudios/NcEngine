@@ -13,7 +13,7 @@ void SetDefaultUIStyle();
 
 namespace color
 {
-constexpr auto Black = Vector4{0.009f, 0.009f, 0.009f, 1.000f};
+constexpr auto Black = Vector4{0.04f,  0.04f,  0.04f,  1.000f};
 constexpr auto White = Vector4{1.000f, 1.000f, 1.000f, 1.000f};
 constexpr auto Clear = Vector4{0.000f, 0.000f, 0.000f, 0.000f};
 constexpr auto Red   = Vector4{1.000f, 0.200f, 0.100f, 1.000f};
@@ -26,13 +26,13 @@ namespace default_scheme
 constexpr auto Title           = color::Black;
 constexpr auto Border          = color::Black;
 constexpr auto Text            = color::White;
-constexpr auto Button          = color::Black;
+constexpr auto Button          = Vector4{0.05f,  0.05f,  0.05f,  1.0f};
 constexpr auto Separator       = Vector4{0.410f, 0.410f, 0.410f, 0.500f};
 constexpr auto Tabs            = Vector4{0.072f, 0.072f, 0.072f, 0.750f};
-constexpr auto WindowBG        = Vector4{0.018f, 0.018f, 0.018f, 0.750f};
-constexpr auto ChildBG         = Vector4{0.035f, 0.035f, 0.035f, 0.750f};
-constexpr auto PopupBG         = Vector4{0.018f, 0.018f, 0.018f, 1.000f};
-constexpr auto ScrollBarBG     = Vector4{0.017f, 0.017f, 0.017f, 0.530f};
+constexpr auto WindowBG        = Vector4{0.128f, 0.128f, 0.128f, 0.750f};
+constexpr auto ChildBG         = Vector4{0.145f, 0.145f, 0.145f, 0.750f};
+constexpr auto PopupBG         = Vector4{0.128f, 0.128f, 0.128f, 1.000f};
+constexpr auto ScrollBarBG     = Vector4{0.117f, 0.117f, 0.117f, 0.530f};
 constexpr auto DimBg           = Vector4{0.740f, 0.740f, 0.740f, 0.350f};
 constexpr auto WindowHighlight = Vector4{1.000f, 1.000f, 1.000f, 0.700f};
 constexpr auto Active          = Vector4{0.610f, 0.610f, 0.610f, 0.390f};

@@ -52,14 +52,12 @@ TEST(ConfigTests, Read_partialConfig_succeeds)
     auto stream = std::istringstream
     {
         "project_name=PartialCollateral\n"
-        "log_file_path=Partial.log\n"
         "max_transforms=100\n"
         "use_validation_layers=1\n"
     };
 
     const auto actual = nc::config::Read(stream);
     EXPECT_STREQ("PartialCollateral", actual.projectSettings.projectName.c_str());
-    EXPECT_STREQ("Partial.log", actual.projectSettings.logFilePath.c_str());
     EXPECT_EQ(100, actual.memorySettings.maxTransforms);
     EXPECT_TRUE(actual.graphicsSettings.useValidationLayers);
 }
@@ -104,8 +102,6 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     const auto actual = nc::config::Load(filepath);
 
     EXPECT_EQ(expected.projectSettings.projectName, actual.projectSettings.projectName);
-    EXPECT_EQ(expected.projectSettings.logFilePath, actual.projectSettings.logFilePath);
-    EXPECT_EQ(expected.projectSettings.logMaxFileSize, actual.projectSettings.logMaxFileSize);
 
     EXPECT_FLOAT_EQ(expected.engineSettings.timeStep, actual.engineSettings.timeStep);
     EXPECT_FLOAT_EQ(expected.engineSettings.maxTimeStep, actual.engineSettings.maxTimeStep);
@@ -133,16 +129,15 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.memorySettings.maxTextures, actual.memorySettings.maxTextures);
     EXPECT_EQ(expected.memorySettings.maxCubeMaps, actual.memorySettings.maxCubeMaps);
     EXPECT_EQ(expected.memorySettings.maxParticles, actual.memorySettings.maxParticles);
+    EXPECT_EQ(expected.memorySettings.maxDirectionalLights, actual.memorySettings.maxDirectionalLights);
+    EXPECT_EQ(expected.memorySettings.maxBones, actual.memorySettings.maxBones);
 
     EXPECT_EQ(expected.graphicsSettings.enabled, actual.graphicsSettings.enabled);
-    EXPECT_EQ(expected.graphicsSettings.api, actual.graphicsSettings.api);
     EXPECT_EQ(expected.graphicsSettings.useNativeResolution, actual.graphicsSettings.useNativeResolution);
     EXPECT_EQ(expected.graphicsSettings.launchInFullscreen, actual.graphicsSettings.launchInFullscreen);
     EXPECT_EQ(expected.graphicsSettings.screenWidth, actual.graphicsSettings.screenWidth);
     EXPECT_EQ(expected.graphicsSettings.screenHeight, actual.graphicsSettings.screenHeight);
     EXPECT_EQ(expected.graphicsSettings.targetFPS, actual.graphicsSettings.targetFPS);
-    EXPECT_FLOAT_EQ(expected.graphicsSettings.nearClip, actual.graphicsSettings.nearClip);
-    EXPECT_FLOAT_EQ(expected.graphicsSettings.farClip, actual.graphicsSettings.farClip);
     EXPECT_EQ(expected.graphicsSettings.useShadows, actual.graphicsSettings.useShadows);
     EXPECT_EQ(expected.graphicsSettings.antialiasing, actual.graphicsSettings.antialiasing);
     EXPECT_EQ(expected.graphicsSettings.useValidationLayers, actual.graphicsSettings.useValidationLayers);

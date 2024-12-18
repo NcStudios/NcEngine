@@ -1,5 +1,7 @@
 #include "GraphicsTypes.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
@@ -80,5 +82,37 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         DeserializeSpotLight
     );
 
+    Register<StaticMesh>(
+        registry,
+        maxEntities,
+        StaticMeshId,
+        "StaticMesh",
+        ui::editor::StaticMeshUIWidget,
+        CreateStaticMesh,
+        nullptr,
+        nullptr
+    );
+
+    Register<SkinnedMesh>(
+        registry,
+        maxEntities,
+        SkinnedMeshId,
+        "SkinnedMesh",
+        ui::editor::SkinnedMeshUIWidget,
+        CreateSkinnedMesh,
+        nullptr,
+        nullptr
+    );
+
+    Register<graphics::DirectionalLight>(
+        registry,
+        maxEntities,
+        DirectionalLightId,
+        "DirectionalLight",
+        ui::editor::DirectionalLightUIWidget,
+        CreateDirectionalLight,
+        SerializeDirectionalLight,
+        DeserializeDirectionalLight
+    );
 }
 } // namespace nc

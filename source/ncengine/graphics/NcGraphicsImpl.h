@@ -41,6 +41,18 @@ class NcGraphicsImpl : public NcGraphics
         void Clear() noexcept override;
         void Run();
         void OnResize(const Vector2& dimensions, bool isMinimized);
+        auto IsPostProcessEffectEnabled(PostProcessEffectId) const -> bool override { return false; }
+        void SetPostProcessEffectEnabled(PostProcessEffectId, bool) override {}
+        void SetPostProcessEffectProperties(PostProcessEffectId,
+                                            PostProcessPassFlag::type,
+                                            const PostProcessPassProperties&) override {}
+        auto GetPostProcessEffectProperties(PostProcessEffectId,
+                                            PostProcessPassFlag::type) const -> const PostProcessPassProperties& override
+        {
+            static auto dummy = PostProcessPassProperties{};
+            return dummy;
+        }
+
 
     private:
         Registry* m_registry;

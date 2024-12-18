@@ -70,7 +70,8 @@ struct NcAudioStub : public nc::audio::NcAudio
         update.Add(
             nc::update_task_id::AudioSourceUpdate,
             "AudioSourceUpdate(stub)",
-            []{}
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
         );
     }
 
@@ -133,7 +134,8 @@ void NcAudioImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&
     update.Add(
         update_task_id::AudioSourceUpdate,
         "AudioSourceUpdate",
-        [this]{ Run(); }
+        [this]{ Run(); },
+        {update_task_id::CommitStagedChanges}
     );
 }
 

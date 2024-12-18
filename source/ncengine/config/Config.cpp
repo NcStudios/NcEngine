@@ -18,8 +18,6 @@ using namespace std::literals;
 
 // project
 constexpr auto ProjectNameKey = "project_name"sv;
-constexpr auto LogFilePathKey = "log_file_path"sv;
-constexpr auto LogMaxFileSizeKey = "log_max_file_size"sv;
 
 // engine
 constexpr auto TimeStepKey = "time_step"sv;
@@ -50,6 +48,8 @@ constexpr auto MaxSpotLightsKey = "max_spot_lights"sv;
 constexpr auto MaxTexturesKey = "max_textures"sv;
 constexpr auto MaxCubeMapsKey = "max_cubemaps"sv;
 constexpr auto MaxParticlesKey = "max_particles"sv;
+constexpr auto MaxDirectionalLightsKey = "max_directional_lights"sv;
+constexpr auto MaxBonesKey = "max_bones"sv;
 
 // physics
 constexpr auto PhysicsEnabledKey = "physics_enabled"sv;
@@ -66,17 +66,14 @@ constexpr auto SleepThresholdKey = "sleep_threshold"sv;
 
 // graphics
 constexpr auto GraphicsEnabledKey = "graphics_enabled"sv;
-constexpr auto ApiKey = "api"sv;
-constexpr auto IsHeadlessKey = "is_headless"sv;
 constexpr auto UseNativeResolutionKey = "use_native_resolution"sv;
 constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
 constexpr auto ScreenWidthKey = "screen_width"sv;
 constexpr auto ScreenHeightKey = "screen_height"sv;
 constexpr auto TargetFpsKey = "target_fps"sv;
-constexpr auto NearClipKey = "near_clip"sv;
-constexpr auto FarClipKey = "far_clip"sv;
 constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
 constexpr auto AntialiasingKey = "antialiasing"sv;
+constexpr auto InitialBatchSize = "initial_batch_size"sv;
 constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
 
 // audio
@@ -189,8 +186,6 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     if constexpr (std::same_as<Struct_t, nc::config::ProjectSettings>)
     {
         ParseValueIfExists(out.projectName, ProjectNameKey, kvPairs);
-        ParseValueIfExists(out.logFilePath, LogFilePathKey, kvPairs);
-        ParseValueIfExists(out.logMaxFileSize, LogMaxFileSizeKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::EngineSettings>)
     {
@@ -224,21 +219,20 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.maxTextures, MaxTexturesKey, kvPairs);
         ParseValueIfExists(out.maxCubeMaps, MaxCubeMapsKey, kvPairs);
         ParseValueIfExists(out.maxParticles, MaxParticlesKey, kvPairs);
+        ParseValueIfExists(out.maxDirectionalLights, MaxDirectionalLightsKey, kvPairs);
+        ParseValueIfExists(out.maxBones, MaxBonesKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::GraphicsSettings>)
     {
         ParseValueIfExists(out.enabled, GraphicsEnabledKey, kvPairs);
-        ParseValueIfExists(out.api, ApiKey, kvPairs);
-        ParseValueIfExists(out.isHeadless, IsHeadlessKey, kvPairs);
         ParseValueIfExists(out.useNativeResolution, UseNativeResolutionKey, kvPairs);
         ParseValueIfExists(out.launchInFullscreen, LaunchInFullscreenKey, kvPairs);
         ParseValueIfExists(out.screenWidth, ScreenWidthKey, kvPairs);
         ParseValueIfExists(out.screenHeight, ScreenHeightKey, kvPairs);
         ParseValueIfExists(out.targetFPS, TargetFpsKey, kvPairs);
-        ParseValueIfExists(out.nearClip, NearClipKey, kvPairs);
-        ParseValueIfExists(out.farClip, FarClipKey, kvPairs);
         ParseValueIfExists(out.useShadows, UseShadowsKey, kvPairs);
         ParseValueIfExists(out.antialiasing, AntialiasingKey, kvPairs);
+        ParseValueIfExists(out.initialBatchSize, InitialBatchSize, kvPairs);
         ParseValueIfExists(out.useValidationLayers, UseValidationLayersKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::PhysicsSettings>)
@@ -349,8 +343,6 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 {
     if (writeSections) stream << "[project_settings]\n";
     ::WriteKVPair(stream, ProjectNameKey, config.projectSettings.projectName);
-    ::WriteKVPair(stream, LogFilePathKey, config.projectSettings.logFilePath);
-    ::WriteKVPair(stream, LogMaxFileSizeKey, config.projectSettings.logMaxFileSize);
 
     if (writeSections) stream << "[engine_settings]\n";
     ::WriteKVPair(stream, TimeStepKey, config.engineSettings.timeStep);
@@ -381,6 +373,8 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, MaxTexturesKey, config.memorySettings.maxTextures);
     ::WriteKVPair(stream, MaxCubeMapsKey, config.memorySettings.maxCubeMaps);
     ::WriteKVPair(stream, MaxParticlesKey, config.memorySettings.maxParticles);
+    ::WriteKVPair(stream, MaxDirectionalLightsKey, config.memorySettings.maxDirectionalLights);
+    ::WriteKVPair(stream, MaxBonesKey, config.memorySettings.maxBones);
 
     if (writeSections) stream << "[physics_settings]\n";
     ::WriteKVPair(stream, PhysicsEnabledKey, config.physicsSettings.enabled);
@@ -397,17 +391,14 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[graphics_settings]\n";
     ::WriteKVPair(stream, GraphicsEnabledKey, config.graphicsSettings.enabled);
-    ::WriteKVPair(stream, ApiKey, config.graphicsSettings.api);
-    ::WriteKVPair(stream, IsHeadlessKey, config.graphicsSettings.isHeadless);
     ::WriteKVPair(stream, UseNativeResolutionKey, config.graphicsSettings.useNativeResolution);
     ::WriteKVPair(stream, LaunchInFullscreenKey, config.graphicsSettings.launchInFullscreen);
     ::WriteKVPair(stream, ScreenWidthKey, config.graphicsSettings.screenWidth);
     ::WriteKVPair(stream, ScreenHeightKey, config.graphicsSettings.screenHeight);
     ::WriteKVPair(stream, TargetFpsKey, config.graphicsSettings.targetFPS);
-    ::WriteKVPair(stream, NearClipKey, config.graphicsSettings.nearClip);
-    ::WriteKVPair(stream, FarClipKey, config.graphicsSettings.farClip);
     ::WriteKVPair(stream, UseShadowsKey, config.graphicsSettings.useShadows);
     ::WriteKVPair(stream, AntialiasingKey, config.graphicsSettings.antialiasing);
+    ::WriteKVPair(stream, InitialBatchSize, config.graphicsSettings.initialBatchSize);
     ::WriteKVPair(stream, UseValidationLayersKey, config.graphicsSettings.useValidationLayers);
 
     if (writeSections) stream << "[audio_settings]\n";
@@ -418,8 +409,6 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 bool Validate(const Config& config)
 {
     return (config.projectSettings.projectName != "") &&
-           (config.projectSettings.logFilePath != "") &&
-           (config.projectSettings.logMaxFileSize > 0) &&
            (config.engineSettings.timeStep >= 0.0f) &&
            (config.engineSettings.maxTimeStep > 0.0f) &&
            (config.assetSettings.audioClipsPath != "") &&
@@ -430,12 +419,9 @@ bool Validate(const Config& config)
            (config.assetSettings.texturesPath != "") &&
            (config.assetSettings.cubeMapsPath != "") &&
            (config.assetSettings.fontsPath != "") &&
-           (config.graphicsSettings.api != "") &&
            (config.graphicsSettings.screenWidth != 0) &&
            (config.graphicsSettings.screenHeight != 0) &&
            (config.graphicsSettings.targetFPS != 0) &&
-           (config.graphicsSettings.nearClip > 0.0f) &&
-           (config.graphicsSettings.farClip > 0.0f) &&
            (config.graphicsSettings.antialiasing > 0) &&
            ValidatePhysicsSettings(config.physicsSettings) &&
            ValidateBufferFrames(config.audioSettings.bufferFrames);

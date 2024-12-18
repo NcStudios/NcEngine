@@ -1,10 +1,6 @@
-#include "graphics/Camera.h"
-#include "ecs/Registry.h"
-#include "window/Window.h"
-
-#ifdef NC_EDITOR_ENABLED
-#include "imgui/imgui.h"
-#endif
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/window/Window.h"
+#include "ncmath/MatrixUtilities.h"
 
 namespace nc::graphics
 {
@@ -23,8 +19,8 @@ auto Camera::CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const
     using namespace DirectX;
     const auto viewProj = XMMatrixMultiply(m_view, m_projection);
     const auto viewProjInv = XMMatrixInverse(nullptr, viewProj);
-    const auto nearNDC = XMVectorSet(normalizedDeviceCoords.x, normalizedDeviceCoords.y, 0.0f, 1.0f);
-    const auto farNDC = XMVectorSet(normalizedDeviceCoords.x, normalizedDeviceCoords.y, 1.0f, 1.0f);
+    const auto nearNDC = XMVectorSet(normalizedDeviceCoords.x, -normalizedDeviceCoords.y, 0.0f, 1.0f);
+    const auto farNDC = XMVectorSet(normalizedDeviceCoords.x, -normalizedDeviceCoords.y, 1.0f, 1.0f);
     auto nearWorld = XMVector4Transform(nearNDC, viewProjInv);
     auto farWorld = XMVector4Transform(farNDC, viewProjInv);
     nearWorld = XMVectorDivide(nearWorld, XMVectorSplatW(nearWorld));
@@ -44,6 +40,7 @@ void Camera::UpdateViewMatrix(DirectX::FXMMATRIX transformationMatrix)
 void Camera::UpdateProjectionMatrix(float width, float height)
 {
     m_projection = DirectX::XMMatrixPerspectiveFovRH(m_properties.fov, width / height, m_properties.nearClip, m_properties.farClip);
+    m_projection.r[1] = DirectX::XMVectorScale(m_projection.r[1], -1);
 }
 
 auto Camera::CalculateFrustum() const noexcept -> Frustum
@@ -78,11 +75,4 @@ auto Camera::CalculateFrustum() const noexcept -> Frustum
 
     return out;
 }
-
-#ifdef NC_EDITOR_ENABLED
-void Camera::ComponentGuiElement()
-{
-    ImGui::Text("Camera");
-}
-#endif
 } // namespace nc::graphics

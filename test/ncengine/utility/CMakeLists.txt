@@ -1,3 +1,33 @@
+### Log Tests ###
+add_executable(Log_tests
+    Log_tests.cpp
+    ${NC_SOURCE_DIR}/utility/Log.cpp
+    ${NC_SOURCE_DIR}/utility/FileLogger.cpp
+)
+
+target_include_directories(Log_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+)
+
+target_compile_definitions(Log_tests
+    PRIVATE
+        -DNC_LOG_LEVEL=2
+)
+
+target_compile_options(Log_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(Log_tests
+    PRIVATE
+        NcUtility
+        gtest_main
+)
+
+add_test(Log_tests Log_tests)
+
 ### Signal Tests ###
 add_executable(Signal_unit_tests
     Signal_unit_tests.cpp

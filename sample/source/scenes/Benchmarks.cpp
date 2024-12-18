@@ -7,6 +7,7 @@
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -21,9 +22,20 @@ constexpr auto g_mapExtent = 150.0f;
 constexpr auto g_buttonWidth = 100.0f;
 constexpr auto g_buttonHeight = 20.0f;
 auto g_maxEntities = 0u;
+auto g_maxRigidBodies = 0u;
+auto g_maxMeshes = 0u;
+auto g_maxParticleEmitters = 0u;
 auto g_maxPointLights = 0u;
 auto g_maxSpotLights = 0u;
+auto g_maxHierarchies = 0u;
 auto g_currentEntities = 0u;
+auto g_currentRigidBodies = 0u;
+auto g_currentStaticMeshes = 0u;
+auto g_currentSkinnedMeshes = 0u;
+auto g_currentParticleEmitters = 0u;
+auto g_currentPointLights = 0u;
+auto g_currentSpotLights = 0u;
+auto g_currentHierarchies = 0u;
 
 constexpr auto g_assets = std::array{
     std::string_view{nc::asset::CubeMesh},
@@ -32,43 +44,39 @@ constexpr auto g_assets = std::array{
     std::string_view{nc::sample::RampMesh}
 };
 
+const auto g_meshViews = std::array{
+    &nc::sample::mesh::Cube,
+    &nc::sample::mesh::Sphere,
+    &nc::sample::mesh::Capsule,
+    &nc::sample::mesh::Ramp
+};
+
 // Need to store ptrs b/c deferred initialization
-const auto g_pbrMaterials = std::array{
-    &nc::sample::DefaultPbrMaterial,
-    &nc::sample::RedPbrMaterial,
-    &nc::sample::GreenPbrMaterial,
-    &nc::sample::BluePbrMaterial,
-    &nc::sample::OrangePbrMaterial,
-    &nc::sample::PurplePbrMaterial,
-    &nc::sample::TealPbrMaterial,
-    &nc::sample::YellowPbrMaterial
+const auto g_materials = std::array{
+    &nc::sample::material::Default,
+    &nc::sample::material::Red,
+    &nc::sample::material::Green,
+    &nc::sample::material::Blue,
+    &nc::sample::material::Orange,
+    &nc::sample::material::Purple,
+    &nc::sample::material::Teal,
+    &nc::sample::material::Yellow
 };
 
-const auto g_toonMaterials = std::array{
-    &nc::sample::DefaultToonMaterial,
-    &nc::sample::RedToonMaterial,
-    &nc::sample::GreenToonMaterial,
-    &nc::sample::BlueToonMaterial,
-    &nc::sample::OrangeToonMaterial,
-    &nc::sample::PurpleToonMaterial,
-    &nc::sample::TealToonMaterial,
-    &nc::sample::YellowToonMaterial
-};
-
-auto RandomPbrMaterial() -> const nc::graphics::PbrMaterial&
+auto MeshFromPath(std::string_view path) -> const nc::asset::MeshView&
 {
-    static auto index = 0ull;
-    ++index;
-    index = index % (g_pbrMaterials.size() - 1);
-    return *g_pbrMaterials.at(index);
+    const auto pos = std::ranges::find(g_assets, path);
+    NC_ASSERT(pos != g_assets.end(), "Mesh not found");
+    const auto index = std::distance(g_assets.begin(), pos);
+    return *g_meshViews.at(index);
 }
 
-auto RandomToonMaterial() -> const nc::graphics::ToonMaterial&
+auto RandomMaterial() -> const nc::MaterialDesc&
 {
     static auto index = 0ull;
     ++index;
-    index = index % (g_toonMaterials.size() - 1);
-    return *g_toonMaterials.at(index);
+    index = index % (g_materials.size() - 1);
+    return *g_materials.at(index);
 }
 
 auto AssetCombo(std::string& selection) -> bool
@@ -101,10 +109,11 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
     );
 }
 
-struct mesh_renderer
+struct static_mesh
 {
-    static constexpr auto name = "Mesh Renderer";
-    static inline const auto& maxCount = g_maxEntities;
+    static constexpr auto name = "Static Mesh";
+    static inline const auto& maxCount = g_maxMeshes;
+    static inline auto& currentCount = g_currentStaticMeshes;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -113,22 +122,23 @@ struct mesh_renderer
     static inline std::string Mesh = std::string{nc::asset::CubeMesh};
 };
 
-struct toon_renderer
+struct skinned_mesh
 {
-    static constexpr auto name = "Toon Renderer";
-    static inline const auto& maxCount = g_maxEntities;
+    static constexpr auto name = "Skinned Mesh";
+    static inline const auto& maxCount = g_maxMeshes;
+    static inline auto& currentCount = g_currentSkinnedMeshes;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
     static inline unsigned SpawnCount = 1000;
     static inline unsigned DestroyCount = 1000;
-    static inline std::string Mesh = std::string{nc::asset::CubeMesh};
 };
 
 struct static_body
 {
     static constexpr auto name = "Static Body";
-    static inline const auto& maxCount = g_maxEntities;
+    static inline const auto& maxCount = g_maxRigidBodies;
+    static inline auto& currentCount = g_currentRigidBodies;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -140,7 +150,8 @@ struct static_body
 struct rigid_body
 {
     static constexpr auto name = "Rigid Body";
-    static inline const auto& maxCount = g_maxEntities;
+    static inline const auto& maxCount = g_maxRigidBodies;
+    static inline auto& currentCount = g_currentRigidBodies;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -153,6 +164,7 @@ struct point_light
 {
     static constexpr auto name = "Point Light";
     static inline const auto& maxCount = g_maxPointLights;
+    static inline auto& currentCount = g_currentPointLights;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -164,6 +176,7 @@ struct spot_light
 {
     static constexpr auto name = "Spot Light";
     static inline const auto& maxCount = g_maxSpotLights;
+    static inline auto& currentCount = g_currentSpotLights;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -174,7 +187,8 @@ struct spot_light
 struct particle_emitter
 {
     static constexpr auto name = "Particle Emitter";
-    static inline const auto& maxCount = g_maxEntities;
+    static inline const auto& maxCount = g_maxParticleEmitters;
+    static inline auto& currentCount = g_currentParticleEmitters;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -185,7 +199,8 @@ struct particle_emitter
 struct entity_hierarchy
 {
     static constexpr auto name = "Entity Hierarchy";
-    static inline const auto& maxCount = g_maxEntities;
+    static inline const auto& maxCount = g_maxHierarchies;
+    static inline auto& currentCount = g_currentHierarchies;
     static inline std::function<int()> GetObjectCountCallback = nullptr;
     static inline std::function<void(unsigned)> SpawnCallback = nullptr;
     static inline std::function<void(unsigned)> DestroyCallback = nullptr;
@@ -211,53 +226,111 @@ struct entity_hierarchy
                 .parent = parent
             });
 
-            world.Emplace<nc::graphics::MeshRenderer>(child, nc::asset::CubeMesh, RandomPbrMaterial());
+            world.Emplace<nc::StaticMesh>(
+                child,
+                MeshFromPath(nc::asset::CubeMesh),
+                RandomMaterial()
+            );
             parent = child;
         }
     }
 };
 
 template<class T>
-void InnerWidget(float buttonWidth, auto&& extension = [](){})
+struct InnerWidget
 {
-    IMGUI_SCOPE(nc::ui::ImGuiId, T::name);
-    const auto currentObjectCount = static_cast<unsigned>(T::GetObjectCountCallback());
-    const auto remainingEntityCount = g_maxEntities - g_currentEntities;
-    const auto maxObjectCount = nc::Min(T::maxCount - currentObjectCount, remainingEntityCount);
-
-    ImGui::Spacing();
-    ImGui::Text("%s", T::name);
-
-    ImGui::SetNextItemWidth(buttonWidth);
-    nc::ui::InputU32(T::SpawnCount, "##spawncount");
-    T::SpawnCount = nc::Clamp(T::SpawnCount, 0u, maxObjectCount);
-
-    ImGui::SameLine();
-
-    ImGui::SetNextItemWidth(buttonWidth);
-    nc::ui::InputU32(T::DestroyCount, "##destroycount");
-
-    if(ImGui::Button("Spawn", {buttonWidth, 0}))
+    void operator()(float buttonWidth, auto&& extension = [](){})
     {
-        T::SpawnCallback(T::SpawnCount);
-        g_currentEntities += T::SpawnCount;
+        IMGUI_SCOPE(nc::ui::ImGuiId, T::name);
+        const auto& currentObjectCount = T::currentCount;
+        const auto remainingEntityCount = g_maxEntities - g_currentEntities;
+        const auto maxObjectCount = nc::Min(T::maxCount - currentObjectCount, remainingEntityCount);
+
+        ImGui::Spacing();
+        ImGui::Text("%s (%u)", T::name, currentObjectCount);
+
+        ImGui::SetNextItemWidth(buttonWidth);
+        nc::ui::InputU32(T::SpawnCount, "##spawncount");
+        T::SpawnCount = nc::Clamp(T::SpawnCount, 0u, maxObjectCount);
+
+        ImGui::SameLine();
+
+        ImGui::SetNextItemWidth(buttonWidth);
+        nc::ui::InputU32(T::DestroyCount, "##destroycount");
+
+        if(ImGui::Button("Spawn", {buttonWidth, 0}))
+        {
+            T::SpawnCallback(T::SpawnCount);
+            T::currentCount += T::SpawnCount;
+            g_currentEntities += T::SpawnCount;
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Destroy", {buttonWidth, 0}))
+        {
+            T::DestroyCallback(T::DestroyCount);
+            const auto actualDestroyed = nc::Min(T::DestroyCount, currentObjectCount);
+            T::currentCount -= actualDestroyed;
+            g_currentEntities -= actualDestroyed;
+        }
+
+        extension();
+        ImGui::Spacing();
     }
+};
 
-    ImGui::SameLine();
-
-    if(ImGui::Button("Destroy", {buttonWidth, 0}))
+template<>
+struct InnerWidget<entity_hierarchy>
+{
+    void operator()(float buttonWidth, auto&& extension = [](){})
     {
-        T::DestroyCallback(T::DestroyCount);
-        g_currentEntities -= nc::Min(T::DestroyCount, currentObjectCount);
-    }
+        using T = entity_hierarchy;
+        IMGUI_SCOPE(nc::ui::ImGuiId, T::name);
 
-    extension();
-    ImGui::Spacing();
-}
+        const auto objectsPerSpawn = 1 + entity_hierarchy::HierarchySize;
+        g_maxHierarchies = g_maxEntities == 0 ? 0 : g_maxEntities / objectsPerSpawn;
+        const auto& currentObjectCount = T::currentCount;
+        const auto remainingEntityCount = g_maxEntities - g_currentEntities;
+        const auto maxObjectCount = nc::Min(g_maxHierarchies - currentObjectCount, remainingEntityCount / objectsPerSpawn);
+
+        ImGui::Spacing();
+        ImGui::Text("%s (%u)", T::name, currentObjectCount);
+
+        ImGui::SetNextItemWidth(buttonWidth);
+        nc::ui::InputU32(T::SpawnCount, "##spawncount");
+        T::SpawnCount = nc::Clamp(T::SpawnCount, 0u, maxObjectCount);
+
+        ImGui::SameLine();
+
+        ImGui::SetNextItemWidth(buttonWidth);
+        nc::ui::InputU32(T::DestroyCount, "##destroycount");
+
+        if(ImGui::Button("Spawn", {buttonWidth, 0}))
+        {
+            T::SpawnCallback(T::SpawnCount);
+            T::currentCount += T::SpawnCount;
+            g_currentEntities += objectsPerSpawn * T::SpawnCount;
+        }
+
+        ImGui::SameLine();
+
+        if(ImGui::Button("Destroy", {buttonWidth, 0}))
+        {
+            T::DestroyCallback(T::DestroyCount);
+            const auto actualDestroyed = nc::Min(T::DestroyCount, currentObjectCount);
+            T::currentCount -= actualDestroyed;
+            g_currentEntities -= (actualDestroyed * objectsPerSpawn);
+        }
+
+        extension();
+        ImGui::Spacing();
+    }
+};
 
 void Widget()
 {
-    ImGui::Text("Objects: %u", g_currentEntities);
+    ImGui::Text("Objects: %u (max: %u)", g_currentEntities, g_maxEntities);
     nc::ui::ChildWindow("Benchmarks", []()
     {
         const auto [cellWidth, halfCellWidth] = []()
@@ -271,46 +344,43 @@ void Widget()
         {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<mesh_renderer>(halfCellWidth, [cellWidth](){
+            InnerWidget<static_mesh>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(mesh_renderer::Mesh);
+                AssetCombo(static_mesh::Mesh);
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<toon_renderer>(halfCellWidth, [cellWidth](){
-                ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(toon_renderer::Mesh);
-            });
+            InnerWidget<skinned_mesh>{}(halfCellWidth, [](){});
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<static_body>(halfCellWidth, [cellWidth](){
+            InnerWidget<static_body>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
                 AssetCombo(static_body::Mesh);
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<rigid_body>(halfCellWidth, [cellWidth](){
+            InnerWidget<rigid_body>{}(halfCellWidth, [cellWidth](){
                 ImGui::SetNextItemWidth(cellWidth);
-                AssetCombo(static_body::Mesh);
+                AssetCombo(rigid_body::Mesh);
             });
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<point_light>(halfCellWidth, [](){});
+            InnerWidget<point_light>{}(halfCellWidth, [](){});
 
             ImGui::TableNextColumn();
-            InnerWidget<spot_light>(halfCellWidth, [](){});
+            InnerWidget<spot_light>{}(halfCellWidth, [](){});
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            InnerWidget<entity_hierarchy>(halfCellWidth, [halfCellWidth](){
+            InnerWidget<entity_hierarchy>{}(halfCellWidth, [halfCellWidth](){
                 ImGui::SetNextItemWidth(halfCellWidth);
                 nc::ui::InputU32(entity_hierarchy::HierarchySize, "Hierarchy Size");
             });
 
             ImGui::TableNextColumn();
-            InnerWidget<particle_emitter>(halfCellWidth, [](){});
+            InnerWidget<particle_emitter>{}(halfCellWidth, [](){});
 
             ImGui::EndTable();
         }
@@ -327,11 +397,18 @@ Benchmarks::Benchmarks(SampleUI* ui)
 
 void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 {
+    ReloadPrefabs();
+
     {
+        // maxes need to account for objects in scene created outside of spawner (ground + light)
         const auto& config = config::GetMemorySettings();
         ::g_maxEntities = config.maxTransforms;
-        ::g_maxPointLights = config.maxPointLights - 1u;
-        ::g_maxSpotLights = config.maxSpotLights - 1u;
+        ::g_maxRigidBodies = config.maxRigidBodies - 1;
+        ::g_maxMeshes = config.maxRenderers - 1;
+        ::g_maxParticleEmitters = config.maxParticleEmitters;
+        ::g_maxPointLights = config.maxPointLights - 1;
+        ::g_maxSpotLights = config.maxSpotLights;
+        ::g_maxHierarchies = ::g_maxEntities / (entity_hierarchy::SpawnCount + 1);
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
@@ -367,7 +444,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<graphics::ToonRenderer>(ground, asset::CubeMesh, BlueToonMaterial);
+    world.Emplace<StaticMesh>(ground, mesh::Cube, material::Blue);
     world.Emplace<RigidBody>(ground, Shape::MakeBox());
 
     const auto spawnBehavior = SpawnBehavior{
@@ -377,40 +454,49 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .maxRotation = Vector3::Splat(std::numbers::pi_v<float> * 2.0f)
     };
 
-    // Mesh Renderer
+    // Static Mesh
     {
-        const auto handle = world.Emplace<Entity>({.tag = "MeshRenderer Spawner"});
+        const auto handle = world.Emplace<Entity>({.tag = "StaticMesh Spawner"});
         auto& spawner = world.Emplace<Spawner>(
             handle,
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, ::mesh_renderer::Mesh, ::RandomPbrMaterial());
+                world.Emplace<StaticMesh>(
+                    entity,
+                    MeshFromPath(::static_mesh::Mesh),
+                    ::RandomMaterial()
+                );
             }
         );
 
         world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
-        ::mesh_renderer::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
-        ::mesh_renderer::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
-        ::mesh_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+        ::static_mesh::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::static_mesh::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::static_mesh::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
-    // Toon Renderer
+    // Skinned Mesh
     {
-        const auto handle = world.Emplace<Entity>({.tag = "ToonRenderer Spawner"});
+        const auto handle = world.Emplace<Entity>({.tag = "SkinnedMesh Spawner"});
         auto& spawner = world.Emplace<Spawner>(
             handle,
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::ToonRenderer>(entity, ::toon_renderer::Mesh, ::RandomToonMaterial());
+                world.Emplace<SkinnedMesh>(
+                    entity,
+                    mesh::Ogre,
+                    material::Ogre,
+                    animation::OgreIdle
+                );
             }
         );
 
         world.Emplace<FrameLogic>(handle, InvokeFreeComponent<Spawner>{});
-        ::toon_renderer::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
-        ::toon_renderer::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
-        ::toon_renderer::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
+        ::skinned_mesh::GetObjectCountCallback = std::bind_front(&Spawner::GetObjectCount, &spawner);
+        ::skinned_mesh::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
+        ::skinned_mesh::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
     // Static Rigid Body
@@ -421,7 +507,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, ::static_body::Mesh, ::RandomPbrMaterial());
+                world.Emplace<StaticMesh>(
+                    entity,
+                    MeshFromPath(::static_body::Mesh),
+                    ::RandomMaterial()
+                );
+
                 ::AddRigidBodyForMesh(world, entity, ::static_body::Mesh, BodyType::Static);
             }
         );
@@ -440,7 +531,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::ToonRenderer>(entity, ::rigid_body::Mesh, ::RandomToonMaterial());
+                world.Emplace<StaticMesh>(
+                    entity,
+                    MeshFromPath(::rigid_body::Mesh),
+                    ::RandomMaterial()
+                );
+
                 ::AddRigidBodyForMesh(world, entity, ::rigid_body::Mesh);
             }
         );
@@ -527,7 +623,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
                 .maxPosition = Vector3{g_mapExtent * 0.4f, 0.0f, g_mapExtent * 0.4f}
             },
             [world](Entity entity) mutable{
-                world.Emplace<graphics::MeshRenderer>(entity, asset::CubeMesh, ::RandomPbrMaterial());
+                world.Emplace<StaticMesh>(
+                    entity,
+                    MeshFromPath(asset::CubeMesh),
+                    ::RandomMaterial()
+                );
+
                 world.Emplace<FrameLogic>(entity, &::entity_hierarchy::Rotate);
                 ::entity_hierarchy::AttachChildren(world, entity);
             }
@@ -545,6 +646,13 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
 void Benchmarks::Unload()
 {
     g_currentEntities = 0u;
+    g_currentRigidBodies = 0u;
+    g_currentStaticMeshes = 0u;
+    g_currentSkinnedMeshes = 0u;
+    g_currentParticleEmitters = 0u;
+    g_currentPointLights = 0u;
+    g_currentSpotLights = 0u;
+    g_currentHierarchies = 0u;
     m_sampleUI->SetWidgetCallback(nullptr);
 }
 } // namespace nc::sample

@@ -2,7 +2,6 @@
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/detail/FreeComponentGroup.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/Events.h"
 #include "ncengine/task/TaskGraph.h"
@@ -42,14 +41,16 @@ void EcsModule::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
         [this]
         {
             m_registry->CommitPendingChanges();
-            auto groups = m_registry->GetPool<ecs::detail::FreeComponentGroup>().GetComponents();
-            for (auto& group : groups)
-            {
-                group.CommitStagedComponents();
-            }
-
             UpdateWorldSpaceMatrices();
         },
+        {update_task_id::FrameLogicUpdate}
+    );
+
+    update.Add
+    (
+        update_task_id::UpdateTransforms,
+        "UpdateTransforms",
+        [this] { UpdateWorldSpaceMatrices(); },
         {
             update_task_id::AudioSourceUpdate,
             update_task_id::ParticleEmitterUpdate,

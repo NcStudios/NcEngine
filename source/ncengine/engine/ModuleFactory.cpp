@@ -51,6 +51,7 @@ auto BuildModuleRegistry(Registry* registry,
                                                          BuildDefaultAssetMap()));
 
     moduleRegistry->Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
+                                                               config.assetSettings,
                                                                config.graphicsSettings,
                                                                config.memorySettings,
                                                                ModuleProvider{moduleRegistry.get()},

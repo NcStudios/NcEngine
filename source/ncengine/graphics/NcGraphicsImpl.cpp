@@ -14,7 +14,7 @@
 #include "ncengine/window/Window.h"
 #include "window/NcWindowImpl.h"
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 namespace
 {
@@ -59,6 +59,17 @@ namespace
         bool IsUiHovered() const noexcept override { return false; }
         void SetSkybox(const std::string&) override {}
         void ClearEnvironment() override {}
+        auto IsPostProcessEffectEnabled(nc::PostProcessEffectId) const -> bool override { return false; }
+        void SetPostProcessEffectEnabled(nc::PostProcessEffectId, bool) override {}
+        void SetPostProcessEffectProperties(nc::PostProcessEffectId,
+                                            nc::PostProcessPassFlag::type,
+                                            const nc::PostProcessPassProperties&) override {}
+        auto GetPostProcessEffectProperties(nc::PostProcessEffectId,
+                                            nc::PostProcessPassFlag::type) const -> const nc::PostProcessPassProperties& override
+        {
+            static auto dummy = nc::PostProcessPassProperties{};
+            return dummy;
+        }
     };
 } // anonymous namespace
 
@@ -66,6 +77,7 @@ namespace nc::graphics
 {
 #ifndef NC_USE_DILIGENT
     auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                             const config::AssetSettings& ,
                              const config::GraphicsSettings& graphicsSettings,
                              const config::MemorySettings& memorySettings,
                              ModuleProvider modules,
@@ -83,7 +95,6 @@ namespace nc::graphics
             ncWindow->SetWindow(window::WindowInfo
             {
                 .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .isHeadless = graphicsSettings.isHeadless,
                 .useNativeResolution = graphicsSettings.useNativeResolution,
                 .launchInFullScreen = graphicsSettings.launchInFullscreen,
                 .isResizable = false

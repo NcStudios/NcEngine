@@ -60,13 +60,11 @@ namespace nc
 {
 auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngine>
 {
-    utility::detail::InitializeLog(config.projectSettings);
     NC_LOG_INFO("Creating NcEngine instance v{}", NC_PROJECT_VERSION);
     ::LogConfig(config);
     if (!config::Validate(config))
     {
         NC_LOG_ERROR("NcEngine initialization failed: invalid config");
-        utility::detail::CloseLog();
         throw NcError("NcEngine initialization failed: invalid config");
     }
 
@@ -92,7 +90,6 @@ NcEngineImpl::NcEngineImpl(const config::Config& config)
 NcEngineImpl::~NcEngineImpl() noexcept
 {
     Shutdown();
-    utility::detail::CloseLog();
 }
 
 void NcEngineImpl::Start(std::unique_ptr<Scene> initialScene)

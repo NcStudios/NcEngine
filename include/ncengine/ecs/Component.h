@@ -54,10 +54,6 @@ class FreeComponent : public ComponentBase
             : ComponentBase{entity} {}
 
         virtual ~FreeComponent() = default;
-
-        #ifdef NC_EDITOR_ENABLED
-        virtual void ComponentGuiElement();
-        #endif
 };
 
 /** @brief Requirements for the Registry to recognize a pooled component. */

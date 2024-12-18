@@ -4,7 +4,8 @@
  */
 #pragma once
 
-#include "Camera.h"
+#include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
 #include "ncengine/module/ModuleProvider.h"
 #include "ncengine/type/EngineId.h"
@@ -17,6 +18,7 @@ struct SystemEvents;
 
 namespace config
 {
+struct AssetSettings;
 struct GraphicsSettings;
 struct MemorySettings;
 struct ProjectSettings;
@@ -24,13 +26,6 @@ struct ProjectSettings;
 
 namespace graphics
 {
-namespace api
-{
-constexpr std::string_view D3D11    = std::string_view("d3d11");
-constexpr std::string_view D3D12    = std::string_view("d3d12");
-constexpr std::string_view Vulkan   = std::string_view("vulkan");
-} // namespace api
-
 /** @brief Graphics module interface.
  * 
  * Update Tasks
@@ -96,20 +91,29 @@ struct NcGraphics : public Module
      * is not cleared as it can be set on a persistent Entity.
      */
     virtual void ClearEnvironment() = 0;
+
+    /** @brief Returns if a post process effect is enabled. */
+    virtual auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool = 0;
+
+    /** @brief Enabled or disable a post process effect. */
+    virtual void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) = 0;
+
+    /** @brief Get the pass properties for a post process effect. */
+    virtual auto GetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                                PostProcessPassFlag::type pass) const -> const PostProcessPassProperties& = 0;
+
+    /** @brief Set the pass properties for a post process effect. */
+    virtual void SetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                                PostProcessPassFlag::type pass,
+                                                const PostProcessPassProperties& properties) = 0;
 };
 
 /**
- * @brief Get a collection of the graphics APIs that are supported on the platform and device.
- * @return A collection of the names of the supported graphics APIs.
- */
-auto GetSupportedApis() -> std::span<const std::string_view>;
-
-/**
  * @brief Build an NcGraphics instance.
- * 
- * The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
+ * @note The NcAsset, NcScene, and NcWindow modules must be registered prior to initializing NcGraphics.
  */
 auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
+                         const config::AssetSettings& assetSettings,
                          const config::GraphicsSettings& graphicsSettings,
                          const config::MemorySettings& memorySettings,
                          ModuleProvider modules,

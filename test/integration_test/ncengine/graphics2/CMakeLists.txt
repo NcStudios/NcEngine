@@ -1,27 +1,19 @@
 # Platform-specific values for graphics integration tests
 if(WIN32)
-    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Win32.cpp
-                                  ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineWin32.cpp
-    )
+    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/diligent/NativeWindowWin32.cpp)
 elseif(UNIX AND NOT APPLE)
-    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/NcGraphicsImpl2Linux.cpp
-                                  ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngineLinux.cpp
-    )
-
-    set(DILIGENT_RPATH_DIRS "")
-    foreach(target ${DILIGENT_LIBRARIES})
-        get_target_property(TARGET_DIR ${target} BINARY_DIR)
-        if(TARGET_DIR)
-            list(APPEND DILIGENT_RPATH_DIRS "${TARGET_DIR}")
-        endif()
-    endforeach()
-
-    list(JOIN DILIGENT_RPATH_DIRS ";" RPATH_STRING)
+    set(GraphicsTestCommonSources ${NC_SOURCE_DIR}/graphics2/diligent/NativeWindowLinux.cpp)
 endif()
+
+set(NC_INTEGRATION_TEST_COLLATERAL_DIR "${CMAKE_CURRENT_LIST_DIR}/collateral")
 
 # Common setup for graphics integration tests
 function(add_graphics_test target)
-    add_executable(${target} ${GraphicsTestCommonSources})
+    add_executable(${target}
+        ${GraphicsTestCommonSources}
+        ${NC_SOURCE_DIR}/graphics2/diligent/DiligentEngine.cpp
+    )
+
     add_test(${target} ${target})
 
     target_include_directories(${target}
@@ -44,29 +36,51 @@ function(add_graphics_test target)
             NcMath
             ${DILIGENT_LIBRARIES}
     )
-
-    if(UNIX AND NOT APPLE)
-        set_target_properties(${target}
-            PROPERTIES
-                BUILD_RPATH "${DILIGENT_RPATH_DIRS}"
-        )
-    endif()
 endfunction()
 
-### GlobalTextureBufferResource Tests ###
-add_graphics_test(GlobalTextureBufferResource_tests)
+### DiligentEngine Tests ###
+add_graphics_test(DiligentEngine_tests)
 
-target_sources(GlobalTextureBufferResource_tests
+target_sources(DiligentEngine_tests
     PRIVATE
-        GlobalTextureBufferResource_tests.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalTextureBufferResource.cpp
-        ${NC_SOURCE_DIR}/graphics2/diligent/resource/GlobalResourceSignature.cpp
+        DiligentEngine_tests.cpp
 )
 
-# Just need this for one test to get them in the directory
-if(WIN32)
-    copy_required_dlls(GlobalTextureBufferResource_tests)
-endif()
+
+### DynamicUniformBuffer Tests ###
+add_graphics_test(DynamicUniformBuffer_tests)
+
+target_sources(DynamicUniformBuffer_tests
+    PRIVATE
+    DynamicUniformBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
+)
+
+### EnvironmentBufferResource Tests ###
+add_graphics_test(EnvironmentBufferResource_tests)
+
+target_sources(EnvironmentBufferResource_tests
+    PRIVATE
+        EnvironmentBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/EnvironmentBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/DynamicUniformBuffer.cpp
+)
+
+### MeshBuffer Tests ###
+add_graphics_test(MeshBuffer_tests)
+
+target_sources(MeshBuffer_tests
+    PRIVATE
+        MeshBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/MeshBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(MeshBuffer_tests
+    PRIVATE
+        -DNC_RUNTIME_SHADER_COMPILATION
+)
 
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
@@ -75,6 +89,11 @@ target_sources(ShaderFactory_tests
     PRIVATE
         ShaderFactory_tests.cpp
         ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+)
+
+target_compile_definitions(ShaderFactory_tests
+    PRIVATE
+        -DNC_INTEGRATION_TEST_COLLATERAL_DIR="${NC_INTEGRATION_TEST_COLLATERAL_DIR}"
 )
 
 ### ShaderFactory Runtime Compilation Tests ###
@@ -91,8 +110,44 @@ target_compile_definitions(ShaderFactory_runtimeCompilation_tests
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
-if(WIN32)
-    add_subdirectory(win32)
-elseif(UNIX AND NOT APPLE)
-    add_subdirectory(linux)
-endif()
+target_compile_definitions(ShaderFactory_runtimeCompilation_tests
+    PRIVATE
+        -DNC_INTEGRATION_TEST_COLLATERAL_DIR="${NC_INTEGRATION_TEST_COLLATERAL_DIR}"
+)
+
+### StructuredBuffer Tests ###
+add_graphics_test(StructuredBuffer_tests)
+
+target_sources(StructuredBuffer_tests
+    PRIVATE
+        StructuredBuffer_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/base/StructuredBuffer.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+)
+
+### TextureBufferResource Tests ###
+add_graphics_test(TextureBufferResource_tests)
+
+target_sources(TextureBufferResource_tests
+    PRIVATE
+        TextureBufferResource_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/TextureBufferResource.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/resource/ResourceTypes.cpp
+)
+
+### UIBackend Tests ###
+add_graphics_test(UIBackend_tests)
+
+target_sources(UIBackend_tests
+    PRIVATE
+    UIBackend_tests.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/UIBackend.cpp
+        ${NC_SOURCE_DIR}/graphics2/diligent/ImGuiImplGLFW.cpp
+        ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/UISubsystem.cpp
+        ${NC_SOURCE_DIR}/ui/editor/stub/EditorStub.cpp
+)
+
+target_link_libraries(UIBackend_tests
+    PRIVATE
+        imgui
+)

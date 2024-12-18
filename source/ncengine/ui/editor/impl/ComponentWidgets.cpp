@@ -1,9 +1,13 @@
 #include "ui/editor/ComponentWidgets.h"
 #include "assets/AssetWrapper.h"
 #include "ncengine/Events.h"
+#include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
+#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/GraphicsUtility.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
@@ -18,6 +22,9 @@
 #include "ncengine/ui/ImGuiStyle.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncengine/ui/editor/EditorContext.h"
+
+/** @todo 353 Remove once NcAsset has this functionality. */
+#include "asset/AssetService.h"
 
 #include <array>
 #include <ranges>
@@ -50,6 +57,146 @@ constexpr auto normalProp    = nc::ui::Property{ getNormal,       &T::SetNormal,
 constexpr auto roughnessProp = nc::ui::Property{ getRoughness,    &T::SetRoughness, "roughness" };
 constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetallic,  "metallic"  };
 } // namespace mesh_renderer_ext
+
+namespace mesh_base_ext
+{
+template<class MeshType>
+void MeshNodeWidget(MeshType& meshComponent, nc::asset::NcAsset& ncAsset)
+{
+    if (ImGui::TreeNodeEx("Mesh"))
+    {
+        /** @todo 353 Get asset views from ncAsset, once implemented */
+        const auto meshAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::Mesh);
+        const auto meshId = meshComponent.GetMeshId();
+        auto meshPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::Mesh, meshId)};
+        if (nc::ui::Combobox(meshPath, "mesh", meshAssets))
+        {
+            const auto selectedMeshView = nc::asset::AssetService<nc::asset::MeshView>::Get()->Acquire(meshPath);
+            meshComponent.SetMesh(selectedMeshView);
+        }
+
+        ImGui::TreePop();
+    }
+}
+
+auto MaterialPassesWidget(nc::MaterialPassFlags& passes) -> bool
+{
+    auto modified = false;
+    const auto passInfo = std::views::zip(nc::GetMaterialPassNames(), nc::GetMaterialPassFlags());
+    for (const auto& [name, flag] : passInfo)
+    {
+        auto isEnabled = static_cast<bool>(passes & flag);
+        if (nc::ui::Checkbox(isEnabled, name.data()))
+        {
+            modified = true;
+            isEnabled ? passes |= flag : passes &= ~flag;
+        }
+    }
+
+    return modified;
+}
+
+auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
+{
+    /** @todo 353 Get asset views from ncAsset, once implemented */
+    constexpr auto assetType = nc::asset::AssetType::Texture;
+    const auto textureAssets = nc::ui::editor::GetLoadedAssets(assetType);
+    auto diffusePath = std::string{ncAsset.GetAssetPath(assetType, properties.diffuseTexture.id)};
+    auto normalPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTexture.id)};
+    auto modified = false;
+    if (nc::ui::Combobox(diffusePath, "diffuse", textureAssets))
+    {
+        modified = true;
+        properties.diffuseTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffusePath);
+    }
+
+    if (nc::ui::Combobox(normalPath, "normal", textureAssets))
+    {
+        modified = true;
+        properties.normalTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalPath);
+    }
+
+    return modified;
+}
+
+auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
+{
+    auto modified = nc::ui::InputColor3(properties.gradientStart, "start");
+    modified = nc::ui::InputColor3(properties.gradientEnd, "end") || modified;
+    return modified;
+}
+
+auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
+{
+    auto modified = nc::ui::InputColor3(properties.outlineColor, "color");
+    modified = nc::ui::DragFloat(properties.outlineWidth, "width", 0.1f, 0.0f, 10.0f) || modified;
+    return modified;
+}
+
+auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
+{
+    if (ImGui::TreeNodeEx("Material"))
+    {
+        auto& material = baseMesh.GetMaterial();
+        auto passes = material.GetPasses();
+        auto properties = material.GetProperties();
+        auto passesModified = false;
+        auto modified = false;
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Metadata"))
+        {
+            ImGui::Text("Handle: %hu", material.GetHandle());
+            auto materialName = std::string{material.GetName()};
+            if (nc::ui::InputText(materialName, "name"))
+            {
+                material.SetName(materialName);
+            }
+
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Passes"))
+        {
+            passesModified = MaterialPassesWidget(passes);
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Textures"))
+        {
+            modified = MaterialTexturesWidget(properties, ncAsset) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Gradient Color"))
+        {
+            modified = MaterialColorWidget(properties) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Outline"))
+        {
+            modified = MaterialOutlineWidget(properties) || modified;
+            ImGui::TreePop();
+        }
+
+        if (passesModified)
+        {
+            baseMesh.SetMaterial(nc::MaterialDesc{std::string{material.GetName()}, passes, properties});
+        }
+        else if (modified)
+        {
+            material.SetProperties(properties);
+        }
+
+        ImGui::TreePop();
+    }
+}
+} // namespace mesh_base_ext
 
 namespace rigid_body_ext
 {
@@ -613,6 +760,30 @@ void MeshRendererUIWidget(graphics::MeshRenderer& renderer, EditorContext&, cons
     ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
 }
 
+void StaticMeshUIWidget(StaticMesh& staticMesh, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "StaticMesh");
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
+
+    ImGui::Separator();
+    mesh_base_ext::MeshNodeWidget(staticMesh, ncAsset);
+
+    ImGui::Separator();
+    mesh_base_ext::MaterialNodeWidget(staticMesh, ncAsset);
+}
+
+void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext& ctx, const std::any&)
+{
+    IMGUI_SCOPE(ui::ImGuiId, "SkinnedMesh");
+    auto& ncAsset = *ctx.modules.Get<asset::NcAsset>();
+
+    ImGui::Separator();
+    mesh_base_ext::MeshNodeWidget(skinnedMesh, ncAsset);
+
+    ImGui::Separator();
+    mesh_base_ext::MaterialNodeWidget(skinnedMesh, ncAsset);
+}
+
 void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
@@ -652,13 +823,22 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&,
     ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
 }
 
+void DirectionalLightUIWidget(graphics::DirectionalLight& light, EditorContext&, const std::any&)
+{
+    ui::InputColor3(light.color, "color");
+}
+
 void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
+#ifndef NC_USE_DILIGENT
     ui::InputColor3(light.ambientColor, "ambientColor");
     ui::InputColor3(light.diffuseColor, "diffuseColor");
+#else
+    ui::InputColor3(light.diffuseColor, "color");
+#endif
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 

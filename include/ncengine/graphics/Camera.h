@@ -82,10 +82,6 @@ class Camera : public FreeComponent
          */
         virtual void DisableUpdate() noexcept {}
 
-        #ifdef NC_EDITOR_ENABLED
-        void ComponentGuiElement() override;
-        #endif
-
     private:
         DirectX::XMMATRIX m_view;
         DirectX::XMMATRIX m_projection;

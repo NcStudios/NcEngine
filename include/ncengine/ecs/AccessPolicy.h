@@ -9,7 +9,6 @@
 #include "ncengine/ecs/Hierarchy.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/ecs/detail/FreeComponentGroup.h"
 
 #include <concepts>
 #include <type_traits>
@@ -40,8 +39,8 @@ class AccessPolicy
         using FilterType = std::conditional_t<Base == FilterBase::All,
             detail::AllFilter,
             std::conditional_t<Base == FilterBase::Basic,
-                detail::MatchFilter<Entity, Hierarchy, Tag, Transform, detail::FreeComponentGroup, Includes...>,
-                detail::MatchFilter<detail::FreeComponentGroup, Includes...>>>;
+                detail::MatchFilter<Entity, Hierarchy, Tag, Transform, Includes...>,
+                detail::MatchFilter<Includes...>>>;
 
         /** @brief Indicates whether all requested types are accessible by the policy. */
         template<class... TargetIncludes>
@@ -81,6 +80,18 @@ class AccessPolicy
         auto GetPool() -> decltype(auto)
         {
             return m_registry->GetPool<T>();
+        }
+
+        /** @brief Get the pool for all FreeComponents. */
+        auto GetFreeComponentPool() -> decltype(auto)
+        {
+            return m_registry->GetFreeComponentPool();
+        }
+
+        /** @brief Get the pool for all FreeComponents. */
+        auto GetFreeComponentPool() const -> decltype(auto)
+        {
+            return m_registry->GetFreeComponentPool();
         }
 
         /** @brief Get a range of pointers to all ComponentPoolBase instances. */

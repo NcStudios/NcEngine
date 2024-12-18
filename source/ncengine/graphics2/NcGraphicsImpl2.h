@@ -1,20 +1,17 @@
 #pragma once
 
-#include "AssetDispatch.h"
 #include "diligent/DiligentEngine.h"
-#include "diligent/TestPipeline.h"
+#include "diligent/pass/PassBackend.h"
+#include "diligent/pass/PassManifest.h"
+#include "diligent/UIBackend.h"
 #include "diligent/resource/ShaderBindings.h"
-#include "ncengine/asset/AssetData.h"
-#include "ncengine/asset/NcAsset.h"
+#include "frontend/GraphicsFrontend.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/module/ModuleProvider.h"
 
-#include <memory>
-
 namespace nc
 {
-class Scene;
-
 namespace window
 {
 class NcWindow;
@@ -27,6 +24,7 @@ class NcGraphicsImpl2 : public NcGraphics
     public:
         NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                        const config::MemorySettings& memorySettings,
+                       std::string_view shadersPath,
                        Registry* registry,
                        ModuleProvider modules,
                        SystemEvents& events,
@@ -40,20 +38,31 @@ class NcGraphicsImpl2 : public NcGraphics
         bool IsUiHovered() const noexcept override;
         void SetSkybox(const std::string& path) override;
         void ClearEnvironment() override;
+        auto IsPostProcessEffectEnabled(PostProcessEffectId effectId) const -> bool override;
+        void SetPostProcessEffectEnabled(PostProcessEffectId effectId, bool enabled) override;
+        auto GetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                            PostProcessPassFlag::type pass) const -> const PostProcessPassProperties& override;
+        void SetPostProcessEffectProperties(PostProcessEffectId effectId,
+                                            PostProcessPassFlag::type pass,
+                                            const PostProcessPassProperties& properties) override;
         void OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks& render) override;
+        void OnBeforeSceneLoad() override;
         void Clear() noexcept override;
         void Run();
-        void Update();
         void OnResize(const Vector2& dimensions, bool isMinimized);
 
     private:
-        Registry* m_registry;
-        Connection m_onResizeConnection;
+        void Resize();
+        ecs::Ecs m_world;
         DiligentEngine m_engine;
         ShaderBindings m_shaderBindings;
-        AssetDispatch m_assetDispatch;
-        TestPipeline m_testPipeline;
-        Camera* m_mainCamera = nullptr;
+        UIBackend m_ui;
+        PassManifest m_passManifest;
+        PassBackend m_passBackend;
+        GraphicsFrontend m_frontend;
+        Connection m_onResizeConnection;
+        Vector2 m_dimensions;
+        bool m_resizeNeeded;
 };
 } // namespace graphics
 } // namespace nc

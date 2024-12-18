@@ -93,9 +93,25 @@ inline DirectX::XMMATRIX ToRotMatrix(const Vector3& a, float r)
     return DirectX::XMMatrixRotationAxis(ToXMVector(a), r);
 }
 
-inline auto ComposeMatrix(const Vector3& scale, const Quaternion& rot, const Vector3& pos) -> DirectX::XMMATRIX
+inline auto ComposeMatrix(DirectX::FXMVECTOR scale,
+                          DirectX::FXMVECTOR rotation,
+                          DirectX::FXMVECTOR position) -> DirectX::XMMATRIX
 {
-    return ToScaleMatrix(scale) * ToRotMatrix(rot) * ToTransMatrix(pos);
+    auto matrix = DirectX::XMMatrixScalingFromVector(scale) *
+                  DirectX::XMMatrixRotationQuaternion(rotation);
+    matrix.r[3] = position;
+    return matrix;
+}
+
+inline auto ComposeMatrix(const Vector3& scale,
+                          const Quaternion& rotation,
+                          const Vector3& position) -> DirectX::XMMATRIX
+{
+    return ComposeMatrix(
+        ToXMVector(scale),
+        ToXMVector(rotation),
+        ToXMVectorHomogeneous(position)
+    );
 }
 
 inline float GetMaxScaleExtent(DirectX::FXMMATRIX matrix)

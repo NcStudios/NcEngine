@@ -5,7 +5,7 @@
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Entity.h"
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 #include <string_view>
 

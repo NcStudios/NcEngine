@@ -1,0 +1,127 @@
+#include "DiligentEngineFixture.inl"
+
+class DiligentEngineTests : public DiligentEngineFixture
+{
+    protected:
+        ~DiligentEngineTests()
+        {
+            FailIfHasErrorOutput();
+        }
+};
+
+static const char* VSSource = R"(
+struct PSInput 
+{ 
+    float4 Pos   : SV_POSITION; 
+    float3 Color : COLOR; 
+};
+
+void main(in  uint    VertId : SV_VertexID,
+          out PSInput PSIn) 
+{
+    float4 Pos[4];
+    Pos[0] = float4(-1.0, -1.0, 0.0, 1.0);  // Bottom-left corner
+    Pos[1] = float4(-1.0,  1.0, 0.0, 1.0);  // Top-left corner
+    Pos[2] = float4( 1.0,  1.0, 0.0, 1.0);  // Top-right corner
+    Pos[3] = float4( 1.0, -1.0, 0.0, 1.0);  // Bottom-right corner
+
+    float3 Color = float3(1.0, 0.0, 0.0); // red
+
+    PSIn.Pos   = Pos[VertId];
+    PSIn.Color = Color;
+}
+)";
+
+// Pixel shader simply outputs interpolated vertex color
+static const char* PSSource = R"(
+struct PSInput 
+{ 
+    float4 Pos   : SV_POSITION; 
+    float3 Color : COLOR; 
+};
+
+struct PSOutput
+{ 
+    float4 Color : SV_TARGET; 
+};
+
+void main(in  PSInput  PSIn,
+          out PSOutput PSOut)
+{
+    PSOut.Color = float4(PSIn.Color.rgb, 1.0);
+}
+)";
+
+void SetupSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState** ppPso)
+{
+    using namespace Diligent;
+
+    GraphicsPipelineStateCreateInfo PSOCreateInfo;
+    PSOCreateInfo.PSODesc.Name = "Simple square PSO";
+    PSOCreateInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
+    PSOCreateInfo.GraphicsPipeline.NumRenderTargets             = 1;
+    PSOCreateInfo.GraphicsPipeline.RTVFormats[0]                = engine->GetSwapChain().GetDesc().ColorBufferFormat;
+    PSOCreateInfo.GraphicsPipeline.DSVFormat                    = engine->GetSwapChain().GetDesc().DepthBufferFormat;
+    PSOCreateInfo.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    PSOCreateInfo.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_NONE;
+    PSOCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
+
+    ShaderCreateInfo ShaderCI;
+    ShaderCI.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
+    ShaderCI.Desc.UseCombinedTextureSamplers = true;
+
+    RefCntAutoPtr<IShader> pVS;
+    {
+        ShaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+        ShaderCI.EntryPoint      = "main";
+        ShaderCI.Desc.Name       = "Square vertex shader";
+        ShaderCI.Source          = VSSource;
+        engine->GetDevice().CreateShader(ShaderCI, &pVS);
+    }
+
+    RefCntAutoPtr<IShader> pPS;
+    {
+        ShaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+        ShaderCI.EntryPoint      = "main";
+        ShaderCI.Desc.Name       = "Square pixel shader";
+        ShaderCI.Source          = PSSource;
+        engine->GetDevice().CreateShader(ShaderCI, &pPS);
+    }
+
+    PSOCreateInfo.pVS = pVS;
+    PSOCreateInfo.pPS = pPS;
+    engine->GetDevice().CreateGraphicsPipelineState(PSOCreateInfo, ppPso);
+}
+
+void RenderSquare(nc::graphics::DiligentEngine* engine, Diligent::IPipelineState* pPso)
+{
+    using namespace Diligent;
+
+    const float ClearColor[] = {0.350f, 0.350f, 0.350f, 1.0f};
+    auto* pRTV = engine->GetSwapChain().GetCurrentBackBufferRTV();
+    auto* pDSV = engine->GetSwapChain().GetDepthBufferDSV();
+    engine->GetContext().SetRenderTargets(1, &pRTV, pDSV, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    engine->GetContext().ClearRenderTarget(pRTV, ClearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    engine->GetContext().ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    engine->GetContext().SetPipelineState(pPso);
+
+    DrawAttribs drawAttrs;
+    drawAttrs.NumVertices = 4;
+    engine->GetContext().Draw(drawAttrs);
+}
+
+TEST_F(DiligentEngineTests, CreateDiligentEngine_RenderTriangle_Succeeds)
+{
+    Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
+    SetupSquare(engine.get(), m_pPSO.RawDblPtr());
+
+    auto frameCountMax = 60u;
+    auto currentFrameIndex = 0u;
+    while (currentFrameIndex < frameCountMax)
+    {
+        window->ProcessSystemMessages();
+        RenderSquare(engine.get(), m_pPSO.RawPtr());
+        engine->GetSwapChain().Present();
+        currentFrameIndex++;
+    }
+}

@@ -2,7 +2,7 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         FrameManager.cpp
         GpuAllocator.cpp
-        Imgui.cpp
+        ImguiVulkan.cpp
         Initializers.cpp
         NcVulkan.cpp
         PerFrameGpuContext.cpp

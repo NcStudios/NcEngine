@@ -8,6 +8,7 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
@@ -33,6 +34,7 @@ REGISTER_TYPE(Transform);
 REGISTER_TYPE(audio::AudioSource);
 REGISTER_TYPE(ecs::detail::FreeComponentGroup);
 REGISTER_TYPE(graphics::Camera);
+REGISTER_TYPE(graphics::DirectionalLight);
 REGISTER_TYPE(graphics::MeshRenderer);
 REGISTER_TYPE(graphics::ToonRenderer);
 REGISTER_TYPE(graphics::ParticleEmitter);

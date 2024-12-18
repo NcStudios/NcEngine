@@ -29,6 +29,31 @@ else()
     set(VMA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/source/external/vma_fallback")
 endif()
 
+# GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(glfw
+                     GIT_REPOSITORY https://github.com/glfw/glfw.git
+                     GIT_TAG        3.3.9
+                     GIT_SHALLOW    TRUE
+)
+
+# Dear ImGui
+FetchContent_Declare(imgui
+                     GIT_REPOSITORY https://github.com/NcStudios/imgui.git
+                     GIT_TAG        v1.91.5+nc.1
+                     GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(glfw imgui)
+
+# Dear ImGui target needs to be available before diligent. Also, it doesn't have a cmake lists, so we add it via script.
+include(cmake/AddImguiTarget.cmake)
+disable_warnings_for_headers(imgui)
+
 # Taskflow
 set(TF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(TF_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -39,18 +64,8 @@ FetchContent_Declare(taskflow
                      GIT_SHALLOW    TRUE
 )
 
-# GLFW
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-FetchContent_Declare(glfw
-                     GIT_REPOSITORY https://github.com/glfw/glfw.git
-                     GIT_TAG        3.3.9
-                     GIT_SHALLOW    TRUE
-)
-
 # Optick
+set(OPTICK_INSTALL_TARGETS OFF CACHE BOOL "" FORCE)
 if(${NC_PROFILING_ENABLED})
     set(OPTICK_ENABLED ON CACHE BOOL "" FORCE)
 else()
@@ -69,6 +84,7 @@ set(CPP_RTTI_ENABLED ON CACHE BOOL "" FORCE)
 set(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 set(ENABLE_OBJECT_STREAM OFF CACHE BOOL "" FORCE)
 set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
+set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
                      GIT_TAG        v5.1.0
@@ -82,27 +98,25 @@ set(DILIGENT_INSTALL_TOOLS OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_SAMPLES OFF CACHE BOOL "" FORCE)
 set(DILIGENT_INSTALL_FX OFF CACHE BOOL "" FORCE)
 set(DILIGENT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-set(DILIGENT_NO_RENDER_STATE_PACKAGER OFF CACHE BOOL "" FORCE)
+set(DILIGENT_NO_RENDER_STATE_PACKAGER ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_ARCHIVER ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_DIRECT3D11 ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_DIRECT3D12 ON CACHE BOOL "" FORCE)
 set(DILIGENT_NO_OPENGL ON CACHE BOOL "" FORCE)
 set(DILIGENT_NO_METAL ON CACHE BOOL "" FORCE)
+set(DILIGENT_NO_WEBGPU ON CACHE BOOL "" FORCE)
 if(NC_RUNTIME_SHADER_COMPILATION)
     set(DILIGENT_NO_GLSLANG OFF CACHE BOOL "" FORCE)
 else()
     set(DILIGENT_NO_GLSLANG ON CACHE BOOL "" FORCE)
 endif()
 
-list(APPEND DILIGENT_LIBRARIES
-            Diligent-TargetPlatform
-            Diligent-GraphicsEngineVk-shared
-            Diligent-TextureLoader
+set(DILIGENT_LIBRARIES Diligent-GraphicsEngineVk-static
+                       Diligent-TargetPlatform
+                       Diligent-GraphicsTools
+                       Diligent-TextureLoader
+                       Diligent-Imgui
 )
-
-if(WIN32)
-    list(APPEND DILIGENT_LIBRARIES 
-                Diligent-GraphicsEngineD3D11-shared
-                Diligent-GraphicsEngineD3D12-shared
-    )
-endif()
 
 FetchContent_Declare(DiligentCore
                      GIT_REPOSITORY https://github.com/DiligentGraphics/DiligentCore.git
@@ -126,7 +140,7 @@ FetchContent_Declare(DirectXMath
 )
 
 # fmt - we only need because GCC hasn't implemented std::format yet. Can be removed eventually.
-set(FMT_INSTALL ON)
+set(FMT_INSTALL OFF)
 FetchContent_Declare(fmt
                      GIT_REPOSITORY https://github.com/fmtlib/fmt.git
                      GIT_TAG        10.1.1
@@ -134,13 +148,16 @@ FetchContent_Declare(fmt
 )
 
 # Fetch all required sources
-FetchContent_MakeAvailable(taskflow glfw optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
+FetchContent_MakeAvailable(taskflow optick JoltPhysics DirectXMath fmt DiligentCore DiligentTools)
 
 # Silence warnings
 disable_warnings_for_headers(Taskflow)
 disable_warnings_for_headers(DirectXMath)
 disable_warnings_for_headers(fmt)
 disable_warnings_for_headers(Jolt)
+disable_warnings_for_headers(Diligent-GraphicsTools)
+
+disable_warnings_for_target(Diligent-Imgui)
 
 # Tell Jolt to use our profile implementation. This introduces a circular dependency between Jolt/NcEngine,
 # which GCC struggles with (but it could be coerced), so we just exclude Jolt events from nix profiling.

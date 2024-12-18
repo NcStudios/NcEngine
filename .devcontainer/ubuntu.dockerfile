@@ -13,6 +13,7 @@ RUN echo 'Types: deb\nURIs: http://archive.ubuntu.com/ubuntu/\nSuites: lunar\nCo
 
 # Core Packages
 RUN apt update && apt install -y \
+    wget \
     git \
     make \
     ninja-build \
@@ -24,7 +25,6 @@ RUN apt update && apt install -y \
     python3 \
     python3-pip \
     python3.12-venv \
-    libvulkan-dev \
     xorg-dev \
     xvfb
 
@@ -41,6 +41,13 @@ RUN apt install -y \
     libxcursor-dev \
     libxi-dev \
     libtinfo5
+
+# Get VulkanSDK from LunarG repo (ATM the default libvulkan-dev + vulkan-validationlayers-dev result in version mismatch)
+RUN wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | apt-key add - && \
+    wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.3.296-noble.list https://packages.lunarg.com/vulkan/1.3.296/lunarg-vulkan-1.3.296-noble.list && \
+    apt update && \
+    apt install -y \
+    vulkan-sdk
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 

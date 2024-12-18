@@ -42,13 +42,13 @@ TEST(AccessPolicyTests, ConvertibleTo_lessRestrictiveTypeList_isFalse)
 TEST(AccessPolicyTests, HasAccess_allAllowed_isTrue)
 {
     static_assert(explicitPolicy::HasAccess<S1, S2>);
-    static_assert(basicPolicy::HasAccess<S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup>);
-    static_assert(allPolicy::HasAccess<S1, S2, nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup, int>);
+    static_assert(basicPolicy::HasAccess<S1, S2, nc::Entity, nc::Transform, nc::Tag>);
+    static_assert(allPolicy::HasAccess<S1, S2, nc::Entity, nc::Transform, nc::Tag, int>);
 }
 
 TEST(AccessPolicyTests, HasAccess_anyNotAllowed_isFalse)
 {
-    static_assert(!explicitPolicy::HasAccess<nc::Entity, nc::Transform, nc::Tag, nc::ecs::detail::FreeComponentGroup, int>);
+    static_assert(!explicitPolicy::HasAccess<nc::Entity, nc::Transform, nc::Tag, int>);
     static_assert(!basicPolicy::HasAccess<int>);
 }
 

@@ -16,22 +16,24 @@ constexpr size_t EngineIdRangeEnd = 100ull;
 
 /** @{ */
 /** @brief Unique engine component id. */
-constexpr size_t FreeComponentGroupId = 1ull;
-constexpr size_t TagId = 2ull;
-constexpr size_t TransformId = 3ull;
-constexpr size_t MeshRendererId = 4ull;
-constexpr size_t ToonRendererId = 5ull;
-constexpr size_t PointLightId = 6ull;
-constexpr size_t SpotLightId = 7ull;
-constexpr size_t SkeletalAnimatorId = 8ull;
-constexpr size_t ParticleEmitterId = 9ull;
-constexpr size_t RigidBodyId = 10ull;
-constexpr size_t AudioSourceId = 11ull;
-constexpr size_t FrameLogicId = 12ull;
-constexpr size_t CollisionListenerId = 13ull;
-constexpr size_t NetworkDispatcherId = 14ull;
-constexpr size_t WireframeRendererId = 15ull;
-constexpr size_t HierarchyId = 16ull;
+constexpr size_t TagId = 1ull;
+constexpr size_t TransformId = 2ull;
+constexpr size_t MeshRendererId = 3ull;
+constexpr size_t ToonRendererId = 4ull;
+constexpr size_t PointLightId = 5ull;
+constexpr size_t SpotLightId = 6ull;
+constexpr size_t SkeletalAnimatorId = 7ull;
+constexpr size_t ParticleEmitterId = 8ull;
+constexpr size_t RigidBodyId = 9ull;
+constexpr size_t AudioSourceId = 10ull;
+constexpr size_t FrameLogicId = 11ull;
+constexpr size_t CollisionListenerId = 12ull;
+constexpr size_t NetworkDispatcherId = 13ull;
+constexpr size_t WireframeRendererId = 14ull;
+constexpr size_t HierarchyId = 15ull;
+constexpr size_t StaticMeshId = 16ull;
+constexpr size_t DirectionalLightId = 17ull;
+constexpr size_t SkinnedMeshId = 18ull;
 /** @} */
 
 /** @{ */
@@ -51,12 +53,14 @@ namespace update_task_id
 {
 /** @brief Unique engine task id for update phase. */
 constexpr size_t DebugRendererNewFrame = 1ull;
-constexpr size_t ParticleEmitterUpdate = 2ull;
-constexpr size_t AudioSourceUpdate = 3ull;
-constexpr size_t FrameLogicUpdate = 4ull; // Depends on DebugRendererNewFrame
-constexpr size_t PhysicsPipeline = 5ull; // Depends on FrameLogicUpdate
-constexpr size_t CommitStagedChanges = 6ull; // Depends on all other update tasks
-constexpr size_t ParticleEmitterSync = 7ull; // Depends on CommitStagedChanges
+constexpr size_t FrameLogicUpdate = 2ull; // Depends on DebugRendererNewFrame
+constexpr size_t CommitStagedChanges = 3ull; // Depends on FrameLogicUpdate
+constexpr size_t ParticleEmitterUpdate = 4ull; // Depends on CommitStagedChanges
+constexpr size_t SkeletalAnimationUpdate = 5ull; // Depends on CommitStagedChanges
+constexpr size_t AudioSourceUpdate = 6ull; // Depends on CommitStagedChanges
+constexpr size_t PhysicsPipeline = 7ull; // Depends on CommitStagedChanges
+constexpr size_t UpdateTransforms = 8ull; // Depends on physics, audio, and particle update
+constexpr size_t ParticleEmitterSync = 9ull; // Depends on UpdateTransforms
 /** @} */
 } // namespace update_task_id
 
