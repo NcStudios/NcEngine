@@ -75,9 +75,11 @@ jobs:
         with:
           sdkVersion: 1.3.261.1
 
-      - name: Install Software (Linux)
+      - name: Setup Linux
         if: ${{ matrix.shortName == 'Linux' }}
-        uses: ./.github/workflows/linux_setup.yml
+        uses: ./.github/actions/linux_setup
+        with:
+          sdkVersion: 1.3.261.1
 
       # - name: Download VulkanSDK and Drivers (Linux)
       #   if: ${{ matrix.shortName == 'Linux' }}
