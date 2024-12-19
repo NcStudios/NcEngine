@@ -7,9 +7,6 @@
 
 #include <algorithm>
 
-
-
-
 namespace
 {
 struct CameraProperties
@@ -63,16 +60,12 @@ void ParticleSubsystem::RemoveEmitter(Entity entity)
 
 void ParticleSubsystem::UpdateEmitter(graphics::ParticleEmitter& emitter)
 {
-    // todo: NC_ASSERT(m_flag.Get() != EMITTERS_LOCKED)
-    NC_ASSERT_STATE(m_taskState, TaskStateUnlocked);
     auto pos = FindState(m_emitterStates, m_toAdd, emitter.GetEntity());
     pos->UpdateInfo(emitter.GetInfo());
 }
 
 void ParticleSubsystem::Emit(Entity entity, size_t count)
 {
-    // todo: NC_ASSERT(m_flag.Get() != EMITTERS_LOCKED)
-    NC_ASSERT_STATE(m_taskState, TaskStateUnlocked);
     auto pos = FindState(m_emitterStates, m_toAdd, entity);
     pos->Emit(count);
 }
@@ -80,16 +73,6 @@ void ParticleSubsystem::Emit(Entity entity, size_t count)
 void ParticleSubsystem::Update(Camera* mainCamera)
 {
     NC_PROFILE_TASK("ParticleSubystem::Update()", Optick::Category::VFX);
-    
-    // todo: SCOPED_TRANSITION??
-    NC_TRANSITION_STATE(m_taskState, TaskStateUnlocked, TaskStateLocked);
-    // todo: 
-    // #ifndef PROD_BUILD
-    // NC_ASSERT(EMITTERS_LOCKED != compare_exchange(m_flag, EMITTERS_LOCKED))
-    // SCOPE_EXIT(exchange back)
-    // #endif
-
-    
     const float dt = time::DeltaTime();
     const auto [camPosition, camRotation, camForward] = [this, mainCamera]()
     {
@@ -125,14 +108,10 @@ void ParticleSubsystem::Update(Camera* mainCamera)
             m_particleDataHostBuffer.emplace_back(m, texture.index);
         }
     }
-
-    NC_TRANSITION_STATE(m_taskState, TaskStateLocked, TaskStateUnlocked);
 }
 
 void ParticleSubsystem::CommitPendingChanges()
 {
-    // todo: compare_exchange(m_flag, EMITTERS_LOCKED)
-
     NC_PROFILE_TASK("ParticleSubsystem::CommitPendingChanges()", Optick::Category::VFX);
     m_emitterStates.insert(
         m_emitterStates.cend(),
