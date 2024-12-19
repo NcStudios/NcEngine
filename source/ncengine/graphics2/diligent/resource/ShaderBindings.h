@@ -23,6 +23,7 @@ class ShaderBindings
                                 uint32_t maxPointLights,
                                 uint32_t maxDirectionalLights,
                                 uint32_t maxBones,
+                                uint32_t maxParticles,
                                 uint32_t initialInstanceSizeHint,
                                 uint32_t initialMaterialSizeHint,
                                 uint32_t initialBonesSizeHint)
@@ -38,6 +39,7 @@ class ShaderBindings
                 StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxSpotLights,        maxSpotLights},
                 StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxMeshRenderers,     initialMaterialSizeHint},
                 StructuredBufferResourceDesc{"BoneBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, maxBones,             initialBonesSizeHint},
+                StructuredBufferResourceDesc{"ParticleBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  maxParticles,         maxParticles}, // initial size???
                 TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
                 UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},

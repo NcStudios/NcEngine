@@ -6,6 +6,7 @@
 #include "subsystem/LightSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
 #include "subsystem/MeshSubsystem.h"
+#include "subsystem/ParticleSubsystem.h"
 #include "subsystem/PostProcessSubsystem.h"
 #include "subsystem/UISubsystem.h"
 #include "subsystem/WireframeRendererSubsystem.h"
@@ -30,6 +31,7 @@ class GraphicsFrontend
                          uint32_t maxEntities,
                          uint32_t maxRenderers,
                          uint32_t maxBones,
+                         uint32_t maxParticles,
                          uint32_t initialBatchSize,
                          Signal<const asset::TextureUpdateEventData&>& onTextureEvent,
                          Signal<const asset::MeshUpdateEventData&>& onMeshEvent,
@@ -56,6 +58,10 @@ class GraphicsFrontend
                 maxEntities,
                 maxRenderers,
                 initialBatchSize
+              },
+              m_particleSystem{
+                world,
+                maxParticles
               }
         {
         }
@@ -71,6 +77,7 @@ class GraphicsFrontend
         void Clear() noexcept
         {
             m_cameraSystem.Clear();
+            m_particleSystem.Clear();
         }
 
         auto GetCameraSubsystem()                  ->       CameraSubsystem&            { return m_cameraSystem;      }
@@ -79,6 +86,7 @@ class GraphicsFrontend
         auto GetPostProcessSubsystem()             ->       PostProcessSubsystem&       { return m_postProcessSystem; }
         auto GetPostProcessSubsystem()       const -> const PostProcessSubsystem&       { return m_postProcessSystem; }
         auto GetSkeletalAnimationSubsystem()       ->       SkeletalAnimationSubsystem& { return m_animationSystem;   }
+        auto GetParticleSubsystem()                ->       ParticleSubsystem&          { return m_particleSystem;    }
         auto GetUISubsystem()                      ->       UISubsystem&                { return m_uiSystem;          }
         auto GetUISubsystem()                const -> const UISubsystem&                { return m_uiSystem;          }
         auto GetWireframeSubsystem()               ->       WireframeRendererSubsystem& { return m_wireframeSystem;   }
@@ -90,6 +98,7 @@ class GraphicsFrontend
         UISubsystem m_uiSystem;
         CameraSubsystem m_cameraSystem;
         MeshSubsystem m_meshSystem;
+        ParticleSubsystem m_particleSystem;
         LightSubsystem m_lightSubsystem;
         PostProcessSubsystem m_postProcessSystem;
         WireframeRendererSubsystem m_wireframeSystem;

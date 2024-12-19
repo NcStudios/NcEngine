@@ -84,6 +84,14 @@ struct BoneData
     DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMATRIX{};
 };
 
+// todo: rename once gfx1 is gone
+// Object model for particles (type: StructuredBuffer element type).
+struct ParticleData2
+{
+    DirectX::XMMATRIX model = DirectX::XMMATRIX{};
+    uint32_t textureIndex = std::numeric_limits<uint32_t>::max();
+};
+
 // Object model for DirectionalLights (type: StructuredBuffer element type).
 // Not targeting shadows for directional lights at the moment.
 // 32 bytes with a 16-byte alignment.

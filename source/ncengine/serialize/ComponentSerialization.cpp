@@ -69,7 +69,7 @@ auto DeserializeMeshRenderer(std::istream& stream, const DeserializationContext&
 
 void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
 {
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
+    serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
     serialize::Serialize(stream, out.GetInfo());
 }
 

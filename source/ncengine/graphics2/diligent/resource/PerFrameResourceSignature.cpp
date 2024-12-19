@@ -22,6 +22,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferResourceDesc& spotLightResourceDesc,
                                                      const StructuredBufferResourceDesc& materialResourceDesc,
                                                      const StructuredBufferResourceDesc& boneResourceDesc,
+                                                     const StructuredBufferResourceDesc& particleResourceDesc,
                                                      const TextureBufferResourceDesc& textureResourceDesc,
                                                      const UniformBufferResourceDesc& environmentResourceDesc,
                                                      const UniformBufferResourceDesc& wireframeResourceDesc,
@@ -36,6 +37,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(spotLightResourceDesc),
         ToPipelineResourceDesc(materialResourceDesc),
         ToPipelineResourceDesc(boneResourceDesc),
+        ToPipelineResourceDesc(particleResourceDesc),
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
         ToPipelineResourceDesc(wireframeResourceDesc),
@@ -124,6 +126,13 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         device,
         GetVariable(boneResourceDesc, m_srb),
         boneResourceDesc
+    );
+
+    m_particleDataResource = std::make_unique<StructuredBuffer<ParticleData2>>(
+        context,
+        device,
+        GetVariable(particleResourceDesc, m_srb),
+        particleResourceDesc
     );
 
     m_textureResource = std::make_unique<TextureBufferResource>(

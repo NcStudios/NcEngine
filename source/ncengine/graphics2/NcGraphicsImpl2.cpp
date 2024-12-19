@@ -179,6 +179,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxPointLights,
             memorySettings.maxDirectionalLights,
             memorySettings.maxBones,
+            memorySettings.maxParticles,
             memorySettings.maxRenderers / 2,
             memorySettings.maxRenderers / 2,
             memorySettings.maxBones / 4
@@ -232,6 +233,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = MainDepth
                 },
                 PassDesc{
+                    .id = MiscPassFlag::Particle,
+                    .name = "Particle",
+                    .type = PassType::Particle,
+                    .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
+                },
+                PassDesc{
                     .id = PostProcessPassFlag::Wave,
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
@@ -271,6 +280,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxTransforms,
             memorySettings.maxRenderers,
             memorySettings.maxBones,
+            memorySettings.maxParticles,
             graphicsSettings.initialBatchSize,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
@@ -352,19 +362,23 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 {
     NC_LOG_TRACE("Building NcGraphics Tasks");
 
+    // todo: this barely depends on game logic
     update.Add(
         update_task_id::ParticleEmitterUpdate,
-        "ParticleEmitterUpdate(stub)",
-        []{},
+        "ParticleEmitterUpdate",
+        [this]{
+            m_frontend.GetParticleSubsystem().Update(GetCamera());
+        },
         {update_task_id::CommitStagedChanges}
     );
 
-
-
+    // todo: this doesn't depend on transforms - just Logic + ParticleUpdate
     update.Add(
         update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync(stub)",
-        []{},
+        "ParticleEmitterSync",
+        [this]{
+            m_frontend.GetParticleSubsystem().CommitPendingChanges();
+        },
         {update_task_id::UpdateTransforms}
     );
 
@@ -421,6 +435,13 @@ void NcGraphicsImpl2::Run()
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
         renderState.wireframeRenderState
+    );
+
+    m_passBackend.RenderParticle(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.particleRenderState
     );
 
     m_passBackend.RenderPostProcess(

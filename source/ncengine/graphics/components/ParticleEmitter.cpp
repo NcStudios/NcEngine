@@ -4,20 +4,11 @@
 namespace nc::graphics
 {
 ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
-    : ComponentBase{entity},
+    : m_self{entity},
       m_info{info}
 {
     s_subsystem->AddEmitter(*this);
 }
-
-ParticleEmitter::~ParticleEmitter() noexcept
-{
-    if (ParentEntity().Valid())
-    {
-        s_subsystem->RemoveEmitter(ParentEntity());
-    }
-}
-
 
 void ParticleEmitter::SetInfo(const ParticleInfo& info)
 {
@@ -27,6 +18,14 @@ void ParticleEmitter::SetInfo(const ParticleInfo& info)
 
 void ParticleEmitter::Emit(size_t count)
 {
-    s_subsystem->Emit(ParentEntity(), count);
+    s_subsystem->Emit(m_self, count);
+}
+
+void ParticleEmitter::Release() noexcept
+{
+    if (m_self.Valid())
+    {
+        s_subsystem->RemoveEmitter(m_self);
+    }
 }
 } // namespace nc::graphics

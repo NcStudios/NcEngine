@@ -55,17 +55,39 @@ struct ParticleInfo
     ParticleKinematicInfo kinematic;
 };
 
-class ParticleEmitter final : public ComponentBase
+
+// todo: color property
+
+class ParticleEmitter
 {
     public:
-        // need move ops?
         ParticleEmitter(Entity entity, ParticleInfo info);
-        ~ParticleEmitter() noexcept;
 
-        // prob not ok
-        ParticleEmitter(ParticleEmitter&&) = default;
-        ParticleEmitter& operator=(ParticleEmitter&&) = default;
+        ParticleEmitter(ParticleEmitter&& other) noexcept
+            : m_self{std::exchange(other.m_self, Entity::Null())},
+              m_info{other.m_info}
+        {
+        }
 
+        ParticleEmitter& operator=(ParticleEmitter&& other) noexcept
+        {
+            if (this != &other)
+            {
+                Release();
+                m_self = std::exchange(other.m_self, Entity::Null());
+                m_info = std::move(other.m_info);
+            }
+
+            return *this;
+        }
+
+        ~ParticleEmitter() noexcept
+        {
+            Release();
+        }
+
+
+        auto GetEntity() const -> Entity { return m_self; }
         auto GetInfo() const noexcept -> const ParticleInfo& { return m_info; }
         void SetInfo(const ParticleInfo& info);
         void Emit(size_t count);
@@ -83,7 +105,10 @@ class ParticleEmitter final : public ComponentBase
     private:
         static inline ParticleSubsystem* s_subsystem = nullptr;
 
+        Entity m_self;
         ParticleInfo m_info;
+
+        void Release() noexcept;
 };
 } // namespace nc::graphics
 

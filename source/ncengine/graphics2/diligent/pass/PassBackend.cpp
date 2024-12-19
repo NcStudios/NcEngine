@@ -127,6 +127,14 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         passManifest.WireframePassDesc()
     );
 
+    m_particlePass = std::make_unique<ParticlePass>
+    (
+        device,
+        shaderFactory,
+        shaderBindings,
+        passManifest.ParticlePassDesc()
+    );
+
     m_postProcessPasses = MakePostProcessPasses
     (
         device,
@@ -250,6 +258,35 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
 
         context.DrawIndexed(attribs);
     }
+}
+
+void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
+                                 Diligent::ISwapChain& swapChain,
+                                 PerPassResourceSignature& perPassResourceSignature,
+                                 const ParticleRenderState& state)
+{
+    if (state.particleData.instances.empty() || !m_particlePass)
+    {
+        return;
+    }
+
+    BindRenderTarget(context, swapChain,
+                     perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
+                     perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                     m_particlePass->colorRTIndex, m_particlePass->depthRTIndex);
+
+    context.SetPipelineState(m_particlePass->pso);
+    const auto attribs = Diligent::DrawIndexedAttribs{
+        state.mesh.indexCount,
+        Diligent::VT_UINT32,
+        Diligent::DRAW_FLAG_VERIFY_ALL,
+        static_cast<uint32_t>(state.particleData.dirtyRanges.at(0).count),
+        state.mesh.firstIndex,
+        state.mesh.firstVertex,
+        0
+    };
+
+    context.DrawIndexed(attribs);
 }
 
 void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,

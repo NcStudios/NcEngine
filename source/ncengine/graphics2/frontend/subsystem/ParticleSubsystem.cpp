@@ -7,6 +7,9 @@
 
 #include <algorithm>
 
+
+
+
 namespace
 {
 struct CameraProperties
@@ -48,10 +51,9 @@ ParticleSubsystem::ParticleSubsystem(ecs::Ecs world,
     ParticleEmitter::RegisterSubsystem(this);
 }
 
-// API Facing Functions
 void ParticleSubsystem::AddEmitter(graphics::ParticleEmitter& emitter)
 {
-    m_toAdd.emplace_back(m_world, emitter.ParentEntity(), emitter.GetInfo(), &m_random);
+    m_toAdd.emplace_back(m_world, emitter.GetEntity(), emitter.GetInfo(), &m_random);
 }
 
 void ParticleSubsystem::RemoveEmitter(Entity entity)
@@ -59,36 +61,49 @@ void ParticleSubsystem::RemoveEmitter(Entity entity)
     m_toRemove.push_back(entity);
 }
 
-
 void ParticleSubsystem::UpdateEmitter(graphics::ParticleEmitter& emitter)
 {
-    auto pos = FindState(m_emitterStates, m_toAdd, emitter.ParentEntity());
+    // todo: NC_ASSERT(m_flag.Get() != EMITTERS_LOCKED)
+    NC_ASSERT_STATE(m_taskState, TaskStateUnlocked);
+    auto pos = FindState(m_emitterStates, m_toAdd, emitter.GetEntity());
     pos->UpdateInfo(emitter.GetInfo());
 }
 
 void ParticleSubsystem::Emit(Entity entity, size_t count)
 {
+    // todo: NC_ASSERT(m_flag.Get() != EMITTERS_LOCKED)
+    NC_ASSERT_STATE(m_taskState, TaskStateUnlocked);
     auto pos = FindState(m_emitterStates, m_toAdd, entity);
     pos->Emit(count);
 }
 
-void ParticleSubsystem::Update()
+void ParticleSubsystem::Update(Camera* mainCamera)
 {
     NC_PROFILE_TASK("ParticleSubystem::Update()", Optick::Category::VFX);
+    
+    // todo: SCOPED_TRANSITION??
+    NC_TRANSITION_STATE(m_taskState, TaskStateUnlocked, TaskStateLocked);
+    // todo: 
+    // #ifndef PROD_BUILD
+    // NC_ASSERT(EMITTERS_LOCKED != compare_exchange(m_flag, EMITTERS_LOCKED))
+    // SCOPE_EXIT(exchange back)
+    // #endif
+
+    
     const float dt = time::DeltaTime();
-    const auto [camPosition, camRotation, camForward] = [this]()
+    const auto [camPosition, camRotation, camForward] = [this, mainCamera]()
     {
-        // todo: ...
-        // if (auto camera = m_getCamera())
-        // {
-        //     const auto& transform = m_world.Get<Transform>(camera->ParentEntity());
-        //     return ::CameraProperties
-        //     {
-        //         .position = transform->PositionXM(),
-        //         .rotation = transform->RotationXM(),
-        //         .forward = transform->ForwardXM()
-        //     };
-        // }
+        if (mainCamera)
+        {
+            // todo: reading transform here is undesirable
+            const auto& transform = m_world.Get<Transform>(mainCamera->ParentEntity());
+            return ::CameraProperties
+            {
+                .position = transform.PositionXM(),
+                .rotation = transform.RotationXM(),
+                .forward = transform.ForwardXM()
+            };
+        }
 
         return ::CameraProperties{};
     }();
@@ -103,17 +118,21 @@ void ParticleSubsystem::Update()
     m_particleDataHostBuffer.clear();
     for (const auto& state : m_emitterStates)
     {
-        // todo: should just id store in emitter...
+        // todo: should just store id/view in emitter...
         const auto texture = asset::AcquireTextureAsset(state.GetTexture());
         for (const auto& m : state.GetMatrices())
         {
             m_particleDataHostBuffer.emplace_back(m, texture.index);
         }
     }
+
+    NC_TRANSITION_STATE(m_taskState, TaskStateLocked, TaskStateUnlocked);
 }
 
 void ParticleSubsystem::CommitPendingChanges()
 {
+    // todo: compare_exchange(m_flag, EMITTERS_LOCKED)
+
     NC_PROFILE_TASK("ParticleSubsystem::CommitPendingChanges()", Optick::Category::VFX);
     m_emitterStates.insert(
         m_emitterStates.cend(),
