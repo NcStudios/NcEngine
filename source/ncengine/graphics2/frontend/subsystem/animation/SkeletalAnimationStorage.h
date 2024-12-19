@@ -1,8 +1,9 @@
 #pragma once
 
-#include "SkeletalAnimationTypes.h"
+#include "Rig.h"
 #include "ncengine/asset/AssetData.h"
 
+#include <mutex>
 #include <shared_mutex>
 #include <span>
 #include <unordered_map>
@@ -26,7 +27,7 @@ class SkeletalAnimationStorage
         auto HasAnimation(uint64_t animId) const -> bool                            { return m_animations.contains(animId); }
         auto GetAnimation(uint64_t animId) const -> const asset::SkeletalAnimation& { return m_animations.at(animId);       }
         auto HasRig(uint64_t meshId)       const -> bool                            { return m_rigs.contains(meshId);       }
-        auto GetRig(uint64_t meshId)       const -> const gfx2::PackedRig&          { return m_rigs.at(meshId);             }
+        auto GetRig(uint64_t meshId)       const -> const Rig&                      { return m_rigs.at(meshId);             }
 
         // AssetDispatch Functions
         // NOTE: These operations acquire a write lock internally.
@@ -41,7 +42,7 @@ class SkeletalAnimationStorage
 
     private:
         std::unordered_map<uint64_t, asset::SkeletalAnimation> m_animations;
-        std::unordered_map<uint64_t, gfx2::PackedRig> m_rigs;
+        std::unordered_map<uint64_t, Rig> m_rigs;
         std::shared_mutex m_mutex;
 };
 } // namespace nc::graphics

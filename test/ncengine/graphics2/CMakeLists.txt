@@ -1,3 +1,29 @@
+### AnimationStateOrchestrator Tests ###
+add_executable(AnimationStateOrchestrator_tests
+    AnimationStateOrchestrator_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
+)
+
+target_include_directories(AnimationStateOrchestrator_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(AnimationStateOrchestrator_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(AnimationStateOrchestrator_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(AnimationStateOrchestrator_tests AnimationStateOrchestrator_tests)
+
 ### BoneCache Tests ###
 add_executable(BoneCache_tests
     BoneCache_tests.cpp
@@ -161,7 +187,12 @@ add_executable(MeshSubsystem_tests
     ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/AnimationStateOrchestrator.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/BoneCache.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.cpp
 )
 
 target_include_directories(MeshSubsystem_tests
@@ -182,6 +213,7 @@ target_link_libraries(MeshSubsystem_tests
         gtest_main
         NcAsset
         NcMath
+        Taskflow
 )
 
 add_test(MeshSubsystem_tests MeshSubsystem_tests)
@@ -293,11 +325,37 @@ target_link_libraries(SkeletalAnimationController_tests
 
 add_test(SkeletalAnimationController_tests SkeletalAnimationController_tests)
 
+### SkeletalAnimationCalculator Tests ###
+add_executable(SkeletalAnimationCalculator_tests
+    SkeletalAnimationCalculator_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationCalculator.cpp
+)
+
+target_include_directories(SkeletalAnimationCalculator_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(SkeletalAnimationCalculator_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(SkeletalAnimationCalculator_tests
+    PRIVATE
+        gtest_main
+        NcMath
+)
+
+add_test(SkeletalAnimationCalculator_tests SkeletalAnimationCalculator_tests)
+
 ### SkeletalAnimationStorage Tests ###
 add_executable(SkeletalAnimationStorage_tests
     SkeletalAnimationStorage_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/Rig.cpp
     ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.cpp
-    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/animation/SkeletalAnimationTypes.cpp
 )
 
 target_include_directories(SkeletalAnimationStorage_tests

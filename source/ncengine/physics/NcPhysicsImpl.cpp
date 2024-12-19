@@ -36,7 +36,7 @@ class NcPhysicsStub : public nc::NcPhysics
                 nc::update_task_id::PhysicsPipeline,
                 "PhysicsPipeline(stub)",
                 []{},
-                {nc::update_task_id::FrameLogicUpdate}
+                {nc::update_task_id::CommitStagedChanges}
             );
         }
 
@@ -119,7 +119,7 @@ void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTask
         update_task_id::PhysicsPipeline,
         "PhysicsPipeline",
         [this](){ this->Run(); },
-        {update_task_id::FrameLogicUpdate}
+        {update_task_id::CommitStagedChanges}
     );
 }
 

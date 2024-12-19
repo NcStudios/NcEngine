@@ -17,13 +17,12 @@ class Transform;
 
 namespace graphics
 {
-class SkeletalAnimationStorage;
+class ISkeletalAnimationSubsystem;
 
 class MeshSubsystem
 {
     public:
-        explicit MeshSubsystem(SkeletalAnimationStorage& animationStorage,
-                               BoneCacheStaging& boneCacheStaging,
+        explicit MeshSubsystem(ISkeletalAnimationSubsystem& animationSystem,
                                SystemEvents& events,
                                uint32_t maxEntities,
                                uint32_t maxMeshRenderers,
@@ -51,11 +50,9 @@ class MeshSubsystem
         TransformCache m_transformCache;
         InstanceCache<StaticMeshInstanceData> m_staticMeshInstanceCache;
         InstanceCache<SkinnedMeshInstanceData> m_skinnedMeshInstanceCache;
-        SkeletalAnimationStorage* m_animationStorage;
-        BoneCacheStaging* m_boneCache;
+        ISkeletalAnimationSubsystem* m_animationSystem;
         Connection m_rebuildStaticsConnection;
 
-        auto GetRigBoneCount(uint64_t meshId) -> uint32_t;
         void OnRebuildStatics();
 };
 } // namespace graphics
