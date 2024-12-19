@@ -160,7 +160,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     auto ncGraphics = modules.Get<graphics::NcGraphics>();
     ncGraphics->SetPostProcessEffectEnabled(nc::MoebiusEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 0.03f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f}});
 }
 
 void GraphicsTest::Unload()

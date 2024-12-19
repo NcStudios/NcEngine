@@ -57,7 +57,21 @@ float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
     float4 view = cameraInvProjection * float4(ndc, 1.0);
     view.xyz /= view.w;
     float linearDepth = -view.z;
-    return (linearDepth - nearClip) / (farClip - nearClip);
+    float normalizedDepth =  (linearDepth - nearClip) / (farClip - nearClip);
+    return pow(normalizedDepth, 2.0f);
+}
+
+float ReadDepth(float sampledDepth)
+{
+    float nearClip = 0.1f;
+    float farClip = 400.0f;
+    float linearDepth = (2.0f * nearClip) / (farClip + nearClip - sampledDepth * (farClip - nearClip));
+    return pow(linearDepth, 4.0f);
+}
+
+float SampleDepth(Texture2D tex, SamplerState texSampler, float2 uv)
+{
+    return ReadDepth(tex.Sample(texSampler, uv).r);
 }
 
 float Sample(Texture2D tex, SamplerState smplr, float2 uv)
@@ -83,15 +97,15 @@ float DepthOutline(Texture2D tex, SamplerState smplr, float2 uv, float screenWid
     float2 texel = float2(1.0f / screenWidth, 1.0f / screenHeight) * inOutlineWidth; // Dimensions of a single texel in the image
 
     // Build the kernel (a 3x3 grid of texels, the 8 texels surrounding the current texel and the current texel)
-    float t00 = Sample(tex, smplr, GetKernelUV(uv, texel, float2(-1,  1)));
-    float t01 = Sample(tex, smplr, GetKernelUV(uv, texel, float2(-1,  0)));
-    float t02 = Sample(tex, smplr, GetKernelUV(uv, texel, float2(-1, -1)));
-    float t10 = Sample(tex, smplr, GetKernelUV(uv, texel, float2( 0, -1)));
-    float t11 = Sample(tex, smplr, GetKernelUV(uv, texel, float2( 0,  0)));
-    float t12 = Sample(tex, smplr, GetKernelUV(uv, texel, float2( 0,  1)));
-    float t20 = Sample(tex, smplr, GetKernelUV(uv, texel, float2( 1, -1)));
-    float t21 = Sample(tex, smplr, GetKernelUV(uv, texel, float2( 1,  0)));
-    float t22 = Sample(tex, smplr, GetKernelUV(uv, texel, float2( 1,  1)));
+    float t00 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2(-1,  1)));
+    float t01 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2(-1,  0)));
+    float t02 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2(-1, -1)));
+    float t10 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2( 0, -1)));
+    float t11 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2( 0,  0)));
+    float t12 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2( 0,  1)));
+    float t20 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2( 1, -1)));
+    float t21 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2( 1,  0)));
+    float t22 = SampleDepth(tex, smplr, GetKernelUV(uv, texel, float2( 1,  1)));
     
     // Apply the Sobel X and Sobel Y kernels to the kernel
     float xSobelValue = SobelXKernel[0][0] * t00 + SobelXKernel[0][1] * t01 + SobelXKernel[0][2] * t02 +
@@ -105,9 +119,9 @@ float DepthOutline(Texture2D tex, SamplerState smplr, float2 uv, float screenWid
     return sqrt(xSobelValue * xSobelValue + ySobelValue * ySobelValue);
 }
 
-static float lowThreshold = 0.023f;     // Suppress weak edges
+static float lowThreshold = 0.008f;     // Suppress weak edges
 static float highThreshold = 0.025f;     // Detect strong edges
-static float edgeExponent = 1.0f;      // Emphasize edges non-linearly
+static float edgeExponent = 1.5f;      // Emphasize edges non-linearly
 
 float NormalOutline(Texture2D tex, SamplerState smplr, float2 uv, float screenWidth, float screenHeight, float inOutlineWidth)
 {
@@ -135,7 +149,7 @@ float NormalOutline(Texture2D tex, SamplerState smplr, float2 uv, float screenWi
     float filteredEdge = smoothstep(lowThreshold, highThreshold, edgeMagnitude);
 
     // Apply non-linear scaling and intensity
-    filteredEdge = pow(filteredEdge, edgeExponent);
+    filteredEdge = pow(filteredEdge * 1.5, edgeExponent);
 
     return saturate(filteredEdge);
 }
@@ -149,7 +163,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     // Get normalized depth. Use this transform the outline width to scale with depth, so it isn't fixed with the screen size.
     // (We don't want a consistent 20 pixel outline when we are far away and when we're really close, for example.)
     float normalizedDepth = SampleNormalizeDepth(PostProcessDepthSinkBufferData[depthRT1], PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    float depthNormalizedOutlineWidth = (outlineWidth/10) * (1/max(0.0000001, normalizedDepth));
+    float depthNormalizedOutlineWidth = outlineWidth / 150 * 1/normalizedDepth;
 
     float depthOutline = DepthOutline(PostProcessDepthSinkBufferData[depthRT1],
                                       PostProcessColorSinkBufferData_sampler,
@@ -165,10 +179,10 @@ void main(in PSInput PSIn, out PSOutput PSOut)
                                         screenHeight,
                                         depthNormalizedOutlineWidth);
 
-    float outline = (depthOutline  + normalOutline);
+    float outline = (depthOutline + normalOutline);
 
     float4 Color = PostProcessColorSinkBufferData[colorRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    PSOut.Color = lerp(Color, float4(outlineColor, 1.0f), outline);
+    PSOut.Color = lerp(Color, float4(outlineColor, 1.0f), normalOutline);
     PSOut.Color.a = 1.0;
 
     // PSOut.Color = float4(normalizedDepth);

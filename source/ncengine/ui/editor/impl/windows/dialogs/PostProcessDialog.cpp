@@ -23,7 +23,7 @@ void DrawPostProcessPassInfo(nc::PostProcessEffectId effectId,
                     IMGUI_SCOPE(nc::ui::Indent);
                     auto copy = unpacked;
                     auto modified = nc::ui::InputColor3(copy.color, "color");
-                    modified = nc::ui::DragFloat(copy.width, "width", 0.001f, 0.001f, 5.0f) || modified;
+                    modified = nc::ui::DragFloat(copy.width, "width", 0.1f, 1.0f, 15.0f) || modified;
                     if (modified)
                     {
                         ncGraphics->SetPostProcessEffectProperties(effectId, nc::PostProcessPassFlag::Outline, copy);
