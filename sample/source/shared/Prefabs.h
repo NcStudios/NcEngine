@@ -3,8 +3,6 @@
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/Material.h"
-#include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/ToonRenderer.h"
 
 namespace nc::sample
 {

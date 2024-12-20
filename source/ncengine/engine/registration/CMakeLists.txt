@@ -4,6 +4,5 @@ target_sources(${NC_ENGINE_LIB}
         CoreTypes.cpp
         GraphicsTypes.cpp
         LogicTypes.cpp
-        NetworkTypes.cpp
         PhysicsTypes.cpp
 )

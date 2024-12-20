@@ -42,7 +42,8 @@ auto ToPipelineResourceDesc(const StructuredBufferResourceDesc& resourceDesc) ->
         resourceDesc.resourceKey.data(),
         1,
         Diligent::SHADER_RESOURCE_TYPE_BUFFER_SRV,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE,
+        Diligent::PIPELINE_RESOURCE_FLAG_NO_DYNAMIC_BUFFERS
     };
 }
 

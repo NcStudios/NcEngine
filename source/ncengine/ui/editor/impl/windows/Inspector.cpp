@@ -1,6 +1,5 @@
 #include "Inspector.h"
 #include "EntityContextMenu.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/ui/ImGuiUtility.h"
 
 #include <string_view>

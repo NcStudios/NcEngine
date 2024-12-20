@@ -3,7 +3,6 @@
 #include "registration/CoreTypes.h"
 #include "registration/GraphicsTypes.h"
 #include "registration/LogicTypes.h"
-#include "registration/NetworkTypes.h"
 #include "registration/PhysicsTypes.h"
 #include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/utility/Log.h"
@@ -20,7 +19,6 @@ auto BuildRegistry(size_t maxEntities) -> std::unique_ptr<ecs::ComponentRegistry
     RegisterPhysicsTypes(*registry, maxEntities);
     RegisterLogicTypes(*registry, maxEntities);
     RegisterAudioTypes(*registry, maxEntities);
-    RegisterNetworkTypes(*registry, maxEntities);
     return registry;
 }
 } // namespace nc
