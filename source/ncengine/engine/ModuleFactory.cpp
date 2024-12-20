@@ -5,8 +5,9 @@
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/ecs/ComponentRegistry.h"
+#include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/NcEcs.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/math/Random.h"
 #include "ncengine/module/ModuleRegistry.h"
@@ -34,12 +35,13 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
 
 namespace nc
 {
-auto BuildModuleRegistry(Registry* registry,
+auto BuildModuleRegistry(ecs::ComponentRegistry& registry,
                          const task::AsyncDispatcher& dispatcher,
                          SystemEvents& events,
                          const config::Config& config) -> std::unique_ptr<ModuleRegistry>
 {
     NC_LOG_INFO("Building module registry");
+    auto world = ecs::Ecs{registry};
     auto moduleRegistry = std::make_unique<nc::ModuleRegistry>();
     moduleRegistry->Register(nc::window::BuildWindowModule(config.projectSettings,
                                                            config.graphicsSettings.enabled,
@@ -55,17 +57,17 @@ auto BuildModuleRegistry(Registry* registry,
                                                                config.graphicsSettings,
                                                                config.memorySettings,
                                                                ModuleProvider{moduleRegistry.get()},
-                                                               registry,
+                                                               world,
                                                                events));
 
     moduleRegistry->Register(nc::BuildPhysicsModule(config.memorySettings,
                                                     config.physicsSettings,
-                                                    registry->GetEcs(),
+                                                    world,
                                                     dispatcher,
                                                     events));
 
-    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, registry->GetEcs()));
-    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry->GetImpl(), events));
+    moduleRegistry->Register(nc::audio::BuildAudioModule(config.audioSettings, world));
+    moduleRegistry->Register(nc::ecs::BuildEcsModule(registry, events));
     moduleRegistry->Register(std::make_unique<nc::Random>());
     return moduleRegistry;
 }
