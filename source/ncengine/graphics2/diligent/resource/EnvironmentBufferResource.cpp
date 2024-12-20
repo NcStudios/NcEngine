@@ -25,9 +25,7 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
     const auto data = GlobalEnvironmentData{
         .cameraViewProjection = cameraState.viewProjection,
         .cameraPosition = cameraState.position,
-        .dirLightsCount = static_cast<uint32_t>(lightRenderState.directionalLights.size()),
-        .pointLightsCount = static_cast<uint32_t>(lightRenderState.pointLights.size()),
-        .spotLightsCount = static_cast<uint32_t>(lightRenderState.spotLights.size())
+        .lightCount = static_cast<uint32_t>(lightRenderState.lights.size())
     };
 
     m_buffer.Write(context, data);

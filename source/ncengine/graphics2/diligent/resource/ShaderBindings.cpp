@@ -46,34 +46,14 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         );
     }
 
-    const auto& dirLightData = renderState.lightRenderState.directionalLights;
-    if (!dirLightData.empty())
+    const auto& lightData = renderState.lightRenderState.lights;
+    if (!lightData.empty())
     {
-        auto lightBufferUpdateInfo = BufferUpdateInfo<DirectionalLightData>{
-            .instances = dirLightData,
-            .dirtyRanges = {{0, dirLightData.size()}}
+        auto lightBufferUpdateInfo = BufferUpdateInfo<LightData>{
+            .instances = lightData,
+            .dirtyRanges = {{0, lightData.size()}}
         };
-        m_perFrameSignature.GetDirectionaLightBuffer().Update(context, device, lightBufferUpdateInfo);
-    }
-
-    const auto& pointLightData = renderState.lightRenderState.pointLights;
-    if (!pointLightData.empty())
-    {
-        auto lightBufferUpdateInfo = BufferUpdateInfo<PointLightData>{
-            .instances = pointLightData,
-            .dirtyRanges = {{0, pointLightData.size()}}
-        };
-        m_perFrameSignature.GetPointLightBuffer().Update(context, device, lightBufferUpdateInfo);
-    }
-
-    const auto& spotLightData = renderState.lightRenderState.spotLights;
-    if (!spotLightData.empty())
-    {
-        auto lightBufferUpdateInfo = BufferUpdateInfo<SpotLightData>{
-            .instances = spotLightData,
-            .dirtyRanges = {{0, spotLightData.size()}}
-        };
-        m_perFrameSignature.GetSpotLightBuffer().Update(context, device, lightBufferUpdateInfo);
+        m_perFrameSignature.GetLightBuffer().Update(context, device, lightBufferUpdateInfo);
     }
 
     const auto& materialData = renderState.materialRenderState;

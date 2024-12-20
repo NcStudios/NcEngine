@@ -1,31 +1,22 @@
-struct DirectionalLightData
-{
+struct LightData {
     float3 color;
-    float padding;
-    float3 direction;
-    float padding2;
-};
+    int type; // 0: Directional, 1: Point, 2: Spot
 
-struct PointLightData
-{
-    float4x4 viewProj;
-    float3 position;
-    int castsShadows;
-    float3 color;
-    float radius;
-};
+    // Common data
+    float3 position; // Only used for Point and Spot lights
+    float innerAngle;  // Only used for Spot lights
 
-struct SpotLightData
-{
-    float4x4 viewProj;
-    float3 position;
-    int castsShadows;
-    float3 color;
-    float innerAngle;
+    // DirectionalLightData specific
     float3 direction;
-    float outerAngle;
-    float3 padding;
-    float radius;
+    float outerAngle;  // Only used for Spot lights
+
+    float radius;      // Only used for Point and Spot lights
+    int castsShadows;
+    int pad1; // combine?
+    int pad2;
+
+    // PointLightData and SpotLightData
+    float4x4 viewProj; // Shadow mapping
 };
 
 struct LightInfluence
@@ -35,7 +26,7 @@ struct LightInfluence
     float diffuseAmt;
 };
 
-LightInfluence DirectionalLightRadiance(DirectionalLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(-light.direction); // Vector from light to fragment
@@ -52,7 +43,7 @@ LightInfluence DirectionalLightRadiance(DirectionalLightData light, float3 fragW
     return lightInfluence;
 }
 
-LightInfluence PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence PointLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
@@ -75,7 +66,7 @@ LightInfluence PointLightRadiance(PointLightData light, float3 fragWorldPos, flo
     return lightInfluence;
 }
 
-LightInfluence SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
