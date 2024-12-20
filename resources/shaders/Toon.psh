@@ -53,26 +53,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence;
-        uint lightType = LightBufferData[i].type;
-
-        if (lightType == 0)
-        {
-            influence = DirectionalLightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        }
-        else if (lightType == 1)
-        {
-            influence = PointLightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        }
-        else if (lightType == 2)
-        {
-            influence = SpotLightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        }
-        else
-        {
-            continue;
-        }
-
+        LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
         finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
 

@@ -12,16 +12,12 @@
 namespace nc::graphics
 {
 // Object model for environment data (type: constant buffer)
-// 96 bytes with a 16-byte alignment.
+// 80 bytes with a 16-byte alignment.
 struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
     Vector3 cameraPosition = Vector3::One();
     uint32_t lightCount = 0;
-    // uint32_t dirLightsCount = 0;
-    // uint32_t pointLightsCount = 0;
-    // uint32_t spotLightsCount = 0;
-    // Vector2 padding = Vector2::Zero();
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
@@ -85,19 +81,19 @@ struct BoneData
     DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMATRIX{};
 };
 
-
-struct LightType
-{
-    static constexpr auto Directional = 0;
-    static constexpr auto Point = 1;
-    static constexpr auto Spot = 2;
-    static constexpr auto Uninitialized = -1;
-};
-
+// Object model for lights (directional/point/spot) (type: StructuredBuffer element type).
+// 128 bytes with a 16-byte alignment.
 struct LightData
 {
+    struct LightType
+    {
+        static constexpr int Directional = 0;
+        static constexpr int Point = 1;
+        static constexpr int Spot = 2;
+        static constexpr int Uninitialized = -1;
+    };
 
-    // todo: fix/reorder c'tors
+    // Construct from DirectionalLight
     LightData(const Vector3& col,
               const Vector3& dir)
         : color{col},
@@ -106,57 +102,54 @@ struct LightData
     {
     }
 
+    // Construct from PointLight
     LightData(const Vector3& col,
               const Vector3& pos,
-              int32_t castsShadows_,
+              int32_t enableShadows,
               float rad,
               DirectX::FXMMATRIX viewProj)
         : color{col},
           type{LightType::Point},
           position{pos},
           radius{rad},
-          castsShadows{castsShadows_},
+          castsShadows{enableShadows},
           viewProjection{viewProj}
     {
     }
 
+    // Construct from SpotLight
     LightData(const Vector3& col,
               const Vector3& pos,
-              float innerAngle_,
+              float inAngle,
               const Vector3& dir,
-              float outerAngle_,
+              float outAngle,
               float rad,
-              int32_t castsShadows_,
+              int32_t enableShadows,
               DirectX::FXMMATRIX viewProj)
         : color{col},
           type{LightType::Spot},
           position{pos},
-          innerAngle{innerAngle_},
+          innerAngle{inAngle},
           direction{dir},
-          outerAngle{outerAngle_},
+          outerAngle{outAngle},
           radius{rad},
-          castsShadows{castsShadows_},
+          castsShadows{enableShadows},
           viewProjection{viewProj}
     {
     }
 
     Vector3 color = Vector3::One();
-    int type = LightType::Uninitialized; // 0: Directional, 1: Point, 2: Spot
-
-    Vector3 position = Vector3::Zero(); // Only used for Point and Spot lights
-    float innerAngle = 1.0f;  // Only used for Spot lights
-
+    int type = LightType::Uninitialized;
+    Vector3 position = Vector3::Zero();
+    float innerAngle = 1.0f;
     Vector3 direction = Vector3::Down();
-    float outerAngle = 1.0f;  // Only used for Spot lights
-
-    float radius = 1.0f;      // Only used for Point and Spot lights
+    float outerAngle = 1.0f;
+    float radius = 1.0f;
     int castsShadows = 0;
-    int pad1; // combine?
-    int pad2;
-
-    DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{}; // Shadow mapping
+    int pad1 = 0;
+    int pad2 = 0;
+    DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };
-
 
 // Object model for DirectionalLights (type: StructuredBuffer element type).
 // Not targeting shadows for directional lights at the moment.

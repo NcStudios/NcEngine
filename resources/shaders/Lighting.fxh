@@ -1,22 +1,15 @@
 struct LightData {
     float3 color;
     int type; // 0: Directional, 1: Point, 2: Spot
-
-    // Common data
-    float3 position; // Only used for Point and Spot lights
-    float innerAngle;  // Only used for Spot lights
-
-    // DirectionalLightData specific
+    float3 position;
+    float innerAngle;
     float3 direction;
-    float outerAngle;  // Only used for Spot lights
-
-    float radius;      // Only used for Point and Spot lights
+    float outerAngle;
+    float radius;
     int castsShadows;
-    int pad1; // combine?
+    int pad1;
     int pad2;
-
-    // PointLightData and SpotLightData
-    float4x4 viewProj; // Shadow mapping
+    float4x4 viewProj;
 };
 
 struct LightInfluence
@@ -95,4 +88,20 @@ LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 ca
 
     LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
     return lightInfluence;
+}
+
+LightInfluence LightRadiance(LightData light, float3 fragWorldPos, float3 cameraPos, float3 normal)
+{
+    if (light.type == 0)
+    {
+        return DirectionalLightRadiance(light, fragWorldPos, cameraPos, normal);
+    }
+    else if (light.type == 1)
+    {
+        return PointLightRadiance(light, fragWorldPos, cameraPos, normal);
+    }
+    else
+    {
+        return SpotLightRadiance(light, fragWorldPos, cameraPos, normal);
+    }
 }

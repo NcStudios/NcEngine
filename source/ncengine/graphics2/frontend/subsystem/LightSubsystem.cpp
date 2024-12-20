@@ -5,7 +5,6 @@
 #include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
-#include "ncengine/graphics/Light.h"
 
 #include <ranges>
 
@@ -39,58 +38,9 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace nc::graphics
 {
-
-// struct LightPropertyVisitor
-// {
-    
-
-//     std::vector<LightData>& data;
-//     Transform* transform = nullptr;
-
-//     void operator()(const DirectionalLightProperties& properties)
-//     {
-//         data.emplace_back(properties.color, transform->Forward());
-//     }
-
-//     void operator()(const PointLightProperties& properties)
-//     {
-//         data.emplace_back(
-//             properties.color,
-//             transform->Position(),
-//             0,
-//             properties.radius,
-//             pointlight2::CalculateLightViewProjectionMatrix(transform->TransformationMatrix())
-//         );
-//     }
-
-//     void operator()(const SpotLightProperties& properties)
-//     {
-//         data.emplace_back(
-//             properties.color,
-//             transform->Position(),
-//             properties.innerAngle,
-//             transform->Forward(),
-//             properties.outerAngle,
-//             properties.radius,
-//             0,
-//             spotlight2::CalculateLightViewProjectionMatrix(transform->TransformationMatrix())
-//         );
-//     }
-
-// };
-
-auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Light, Transform> ecs) -> LightRenderState
+auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState
 {
     m_data.clear();
-
-    // auto visitor = LightPropertyVisitor{m_data};
-    // const auto& pool = ecs.GetPool<Light>();
-    // for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
-    // {
-    //     visitor.transform = &ecs.Get<Transform>(entity);
-    //     std::visit(visitor, light.properties);
-    // }
-
 
     { // Directional Lights
         const auto& pool = ecs.GetPool<DirectionalLight>();
