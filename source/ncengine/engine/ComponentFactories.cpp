@@ -4,15 +4,10 @@
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/MeshRenderer.h"
-#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SpotLight.h"
-#include "ncengine/graphics/ToonRenderer.h"
-#include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 
@@ -39,11 +34,6 @@ auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::Particle
 auto CreatePointLight(Entity, const std::any&) -> graphics::PointLight
 {
     return graphics::PointLight{};
-}
-
-auto CreateMeshRenderer(Entity entity, const std::any&) -> graphics::MeshRenderer
-{
-    return graphics::MeshRenderer{entity};
 }
 
 auto CreateStaticMesh(Entity entity, const std::any&) -> StaticMesh
@@ -82,24 +72,9 @@ auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh
     };
 }
 
-auto CreateToonRenderer(Entity entity, const std::any&) -> graphics::ToonRenderer
-{
-    return graphics::ToonRenderer{entity};
-}
-
-auto CreateSkeletalAnimator(Entity entity, const std::any&) -> graphics::SkeletalAnimator
-{
-    return graphics::SkeletalAnimator{entity, "dummyMesh", "dummyAnimation"};
-}
-
 auto CreateSpotLight(Entity, const std::any&) -> graphics::SpotLight
 {
     return graphics::SpotLight{};
-}
-
-auto CreateNetworkDispatcher(Entity entity, const std::any&) -> net::NetworkDispatcher
-{
-    return net::NetworkDispatcher{entity};
 }
 
 auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody

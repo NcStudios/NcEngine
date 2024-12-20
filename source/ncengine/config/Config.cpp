@@ -38,7 +38,6 @@ constexpr auto FontsPathKey = "fonts_path"sv;
 
 // memory
 constexpr auto MaxRigidBodiesKey = "max_rigid_bodies"sv;
-constexpr auto MaxNetworkDispatchersKey = "max_network_dispatchers"sv;
 constexpr auto MaxParticleEmittersKey = "max_particle_emitters"sv;
 constexpr auto MaxRenderersKey = "max_renderers"sv;
 constexpr auto MaxTransformsKey = "max_transforms"sv;
@@ -209,7 +208,6 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     else if constexpr (std::same_as<Struct_t, nc::config::MemorySettings>)
     {
         ParseValueIfExists(out.maxRigidBodies, MaxRigidBodiesKey, kvPairs);
-        ParseValueIfExists(out.maxNetworkDispatchers, MaxNetworkDispatchersKey, kvPairs);
         ParseValueIfExists(out.maxParticleEmitters, MaxParticleEmittersKey, kvPairs);
         ParseValueIfExists(out.maxRenderers, MaxRenderersKey, kvPairs);
         ParseValueIfExists(out.maxTransforms, MaxTransformsKey, kvPairs);
@@ -363,7 +361,6 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[memory_settings]\n";
     ::WriteKVPair(stream, MaxRigidBodiesKey, config.memorySettings.maxRigidBodies);
-    ::WriteKVPair(stream, MaxNetworkDispatchersKey, config.memorySettings.maxNetworkDispatchers);
     ::WriteKVPair(stream, MaxParticleEmittersKey, config.memorySettings.maxParticleEmitters);
     ::WriteKVPair(stream, MaxPointLightsKey, config.memorySettings.maxPointLights);
     ::WriteKVPair(stream, MaxRenderersKey, config.memorySettings.maxRenderers);

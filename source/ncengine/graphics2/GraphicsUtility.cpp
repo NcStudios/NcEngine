@@ -64,6 +64,29 @@ static_assert(g_combinedPostProcessEffectPassFlags.size() == g_postProcessEffect
 
 namespace nc
 {
+auto AdjustDimensionsToAspectRatio(const Vector2& dimensions) -> Vector2
+{
+    auto width = dimensions.x;
+    auto height = dimensions.y;
+
+    if (FloatEqual(height, 0.0f))
+    {
+        height = 0.00000001f;
+    }
+
+    auto currentAspectRatio = width / height;
+    if (currentAspectRatio > AspectRatio)
+    {
+        width = AspectRatio * height;
+    }
+    else
+    {
+        height = width / AspectRatio;
+    }
+
+    return Vector2{width, height};
+}
+
 auto GetMaterialPassNames() -> std::span<const std::string_view>
 {
     return g_materialPassNames;

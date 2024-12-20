@@ -1,7 +1,6 @@
 #include "EditorUI.h"
 #include "ui/editor/Editor.h"
 #include "ncengine/Events.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/physics/NcPhysics.h"

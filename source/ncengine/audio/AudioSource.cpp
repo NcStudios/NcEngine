@@ -1,5 +1,4 @@
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/ecs/Registry.h"
 
 namespace
 {

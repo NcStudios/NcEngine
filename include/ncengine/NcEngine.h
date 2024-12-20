@@ -6,7 +6,7 @@
 
 #include "ncengine/Events.h"
 #include "ncengine/config/Config.h"
-#include "ncengine/ecs/Registry.h"
+#include "ncengine/ecs/ComponentRegistry.h"
 #include "ncengine/module/ModuleRegistry.h"
 #include "ncengine/scene/Scene.h"
 #include "ncengine/task/TaskFwd.h"
