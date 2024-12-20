@@ -1,28 +1,31 @@
-#include "ncengine/graphics/ParticleEmitter.h"
-// #include "graphics/system/ParticleEmitterSystem.h"
+#include "graphics/ParticleEmitter.h"
+#include "graphics2/frontend/subsystem/ParticleSubsystem.h"
 
 namespace nc::graphics
 {
 ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
-    : ComponentBase{entity},
-      m_info{info},
-      m_emitterSystem{nullptr}
+    : m_self{entity},
+      m_info{info}
 {
+    s_subsystem->AddEmitter(*this);
 }
 
-void ParticleEmitter::SetInfo(const ParticleInfo&)
+void ParticleEmitter::SetInfo(const ParticleInfo& info)
 {
-    // m_info = info;
-    // return m_emitterSystem->UpdateInfo(*this);
+    m_info = info;
+    return s_subsystem->UpdateEmitter(*this);
 }
 
-void ParticleEmitter::Emit(size_t)
+void ParticleEmitter::Emit(size_t count)
 {
-    // m_emitterSystem->Emit(ParentEntity(), count);
+    s_subsystem->Emit(m_self, count);
 }
 
-void ParticleEmitter::RegisterSystem(ParticleEmitterSystem*)
+void ParticleEmitter::Release() noexcept
 {
-    // m_emitterSystem = system;
+    if (m_self.Valid())
+    {
+        s_subsystem->RemoveEmitter(m_self);
+    }
 }
 } // namespace nc::graphics
