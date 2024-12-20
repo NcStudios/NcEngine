@@ -1,8 +1,8 @@
 #pragma once
 
+#include "EmitterState.h"
 #include "ParticleRenderState.h"
 
-#include "particle/EmitterState.h"
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -13,14 +13,9 @@ namespace nc::graphics
 {
 class ParticleSubsystem
 {
-
-    static constexpr int TaskStateUnlocked = 0;
-    static constexpr int TaskStateLocked = 1;
-
     public:
-        // todo: explicit?
-        ParticleSubsystem(ecs::Ecs world,
-                          uint32_t maxParticles);
+        explicit ParticleSubsystem(ecs::Ecs world,
+                                   uint32_t maxParticles);
 
         // API Facing Functions
         void AddEmitter(ParticleEmitter& emitter);
@@ -28,9 +23,11 @@ class ParticleSubsystem
         void UpdateEmitter(ParticleEmitter& emitter);
         void Emit(Entity entity, size_t count);
 
-
+        // Update Graph Tasks
         void Update(Camera* mainCamera);
         void CommitPendingChanges();
+
+        // GraphcsFrontend Functions
         auto BuildState() -> ParticleRenderState;
         void Clear() noexcept;
 
