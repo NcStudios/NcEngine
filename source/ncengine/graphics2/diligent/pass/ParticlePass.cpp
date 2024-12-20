@@ -53,10 +53,8 @@ auto MakePso(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.DSVFormat                    = passDesc.depthSink == nc::graphics::NoTarget ? TEX_FORMAT_UNKNOWN : nc::graphics::OffScreenDepthRTFormat;
     ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
-    NC_ASSERT(passDesc.depthSink != nc::graphics::NoTarget, "nope");
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
     ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
-    // ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == nc::graphics::NoTarget ? False : True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
     ci.GraphicsPipeline.RasterizerDesc.FillMode      = FILL_MODE_SOLID;
@@ -68,7 +66,6 @@ auto MakePso(Diligent::IRenderDevice& device,
     renderTarget.BlendOp     = BLEND_OPERATION_ADD;
     renderTarget.SrcBlendAlpha = BLEND_FACTOR_ONE;
     renderTarget.DestBlendAlpha = BLEND_FACTOR_INV_SRC_ALPHA;
-    // renderTarget.DestBlendAlpha = BLEND_FACTOR_ZERO;
     renderTarget.BlendOpAlpha   = BLEND_OPERATION_ADD;
 
     auto pso = RefCntAutoPtr<IPipelineState>{};

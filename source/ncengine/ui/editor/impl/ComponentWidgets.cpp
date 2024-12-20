@@ -530,7 +530,7 @@ void MakeDefaultConstraint(nc::RigidBody& body, nc::Transform& transform)
 
 namespace particle_emitter_ext
 {
-using T = nc::graphics::ParticleEmitter;
+using T = nc::ParticleEmitter;
 
 #define DECLARE_SETTER(name, memberAccess)     \
 constexpr auto name = [](auto& obj, auto& v)   \
@@ -738,7 +738,7 @@ void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext& ctx, const std
     mesh_base_ext::MaterialNodeWidget(skinnedMesh, ncAsset);
 }
 
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
+void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext&, const std::any&)
 {
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;

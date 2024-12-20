@@ -128,7 +128,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         boneResourceDesc
     );
 
-    m_particleDataResource = std::make_unique<StructuredBuffer<ParticleData2>>(
+    m_particleDataResource = std::make_unique<StructuredBuffer<ParticleData>>(
         context,
         device,
         GetVariable(particleResourceDesc, m_srb),

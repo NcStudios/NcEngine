@@ -1,7 +1,7 @@
 #include "graphics/ParticleEmitter.h"
 #include "graphics2/frontend/subsystem/ParticleSubsystem.h"
 
-namespace nc::graphics
+namespace nc
 {
 ParticleEmitter::ParticleEmitter(Entity entity, ParticleInfo info)
     : m_self{entity},
@@ -28,4 +28,4 @@ void ParticleEmitter::Release() noexcept
         s_subsystem->RemoveEmitter(m_self);
     }
 }
-} // namespace nc::graphics
+} // namespace nc

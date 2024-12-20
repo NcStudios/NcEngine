@@ -33,9 +33,9 @@ auto asset::AcquireAudioClipAsset(const std::string&) -> asset::AudioClipView
 
 namespace graphics
 {
-void ParticleSubsystem::AddEmitter(graphics::ParticleEmitter&) {}
+void ParticleSubsystem::AddEmitter(ParticleEmitter&) {}
 void ParticleSubsystem::RemoveEmitter(Entity) {}
-void ParticleSubsystem::UpdateEmitter(graphics::ParticleEmitter&) {}
+void ParticleSubsystem::UpdateEmitter(ParticleEmitter&) {}
 void ParticleSubsystem::Emit(Entity, size_t) {}
 } // namespace graphics
 
@@ -114,8 +114,8 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expectedInfo = nc::graphics::ParticleInfo{};
-    const auto expected = nc::graphics::ParticleEmitter{g_staticEntity, expectedInfo};
+    const auto expectedInfo = nc::ParticleInfo{};
+    const auto expected = nc::ParticleEmitter{g_staticEntity, expectedInfo};
     nc::SerializeParticleEmitter(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeParticleEmitter(stream, g_deserializationContext, nullptr);
     const auto& actualInfo = actual.GetInfo();

@@ -43,19 +43,19 @@ auto DeserializeDirectionalLight(std::istream& stream, const DeserializationCont
     return out;
 }
 
-void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
+void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
     serialize::Serialize(stream, out.GetInfo());
 }
 
-auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::ParticleEmitter
+auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> ParticleEmitter
 {
     auto id = uint32_t{};
-    auto particleInfo = graphics::ParticleInfo{};
+    auto particleInfo = ParticleInfo{};
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, particleInfo);
-    return graphics::ParticleEmitter{ctx.entityMap.at(id), particleInfo};
+    return ParticleEmitter{ctx.entityMap.at(id), particleInfo};
 }
 
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext&, const std::any&)

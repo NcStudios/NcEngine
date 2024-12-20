@@ -591,7 +591,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::ParticleEmitter>(entity, graphics::ParticleInfo{
+                world.Emplace<ParticleEmitter>(entity, ParticleInfo{
                     .emission = {
                         .periodicEmissionCount = 15u,
                         .periodicEmissionFrequency = 0.1f

@@ -26,9 +26,9 @@ auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic
     return FrameLogic{entity, nullptr};
 }
 
-auto CreateParticleEmitter(Entity entity, const std::any&) -> graphics::ParticleEmitter
+auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter
 {
-    return graphics::ParticleEmitter{entity, graphics::ParticleInfo{}};
+    return ParticleEmitter{entity, ParticleInfo{}};
 }
 
 auto CreatePointLight(Entity, const std::any&) -> graphics::PointLight

@@ -19,7 +19,7 @@ auto ComputeMvp(const particle::Particle& particle,
            DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadVector3(&particle.position));
 }
 
-particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
+particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset, Random* random)
 {
     const auto& [emission, init, kinematic] = info;
     return particle::Particle
@@ -51,7 +51,10 @@ void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFa
 
 namespace nc::particle
 {
-EmitterState::EmitterState(ecs::ExplicitEcs<Transform> transforms, Entity entity, const graphics::ParticleInfo& info, Random* random)
+EmitterState::EmitterState(ecs::ExplicitEcs<Transform> transforms,
+                           Entity entity,
+                           const ParticleInfo& info,
+                           Random* random)
     : m_info{ info },
       m_transforms{ transforms },
       m_entity{ entity },
@@ -116,7 +119,7 @@ void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const
     }
 }
 
-void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
+void EmitterState::UpdateInfo(const ParticleInfo& info)
 {
     // delay resize so we don't blow up the particle task
     if (info.emission.maxParticleCount != m_info.emission.maxParticleCount)

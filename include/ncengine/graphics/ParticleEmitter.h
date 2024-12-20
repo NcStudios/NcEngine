@@ -12,10 +12,12 @@
 
 #include <string>
 
-namespace nc::graphics
+namespace nc
 {
-class ParticleEmitterSystem;
+namespace graphics
+{
 class ParticleSubsystem;
+} // namespace graphics
 
 struct ParticleEmissionInfo
 {
@@ -92,33 +94,19 @@ class ParticleEmitter
         void SetInfo(const ParticleInfo& info);
         void Emit(size_t count);
 
-        // todo: delete
-        void RegisterSystem(ParticleEmitterSystem*) {}
-
         /** @cond internal */
-        static void RegisterSubsystem(ParticleSubsystem* subsystem)
+        static void RegisterSubsystem(graphics::ParticleSubsystem* subsystem)
         {
             s_subsystem = subsystem;
         }
         /** @endcond internal */
 
     private:
-        static inline ParticleSubsystem* s_subsystem = nullptr;
+        static inline graphics::ParticleSubsystem* s_subsystem = nullptr;
 
         Entity m_self;
         ParticleInfo m_info;
 
         void Release() noexcept;
-};
-} // namespace nc::graphics
-
-// todo: delete
-namespace nc
-{
-template<>
-struct StoragePolicy<graphics::ParticleEmitter> : DefaultStoragePolicy
-{
-    static constexpr bool EnableOnAddCallbacks = true;
-    static constexpr bool EnableOnRemoveCallbacks = true;
 };
 } // namespace nc

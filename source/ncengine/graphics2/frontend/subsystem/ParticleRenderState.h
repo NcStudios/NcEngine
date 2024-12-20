@@ -6,7 +6,7 @@ namespace nc::graphics
 {
 struct ParticleRenderState
 {
-    BufferUpdateInfo<ParticleData2> particleData;
+    BufferUpdateInfo<ParticleData> particleData;
     asset::MeshView mesh;
 };
 } // namespace nc::graphics

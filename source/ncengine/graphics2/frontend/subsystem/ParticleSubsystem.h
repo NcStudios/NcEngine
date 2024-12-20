@@ -23,9 +23,9 @@ class ParticleSubsystem
                           uint32_t maxParticles);
 
         // API Facing Functions
-        void AddEmitter(graphics::ParticleEmitter& emitter);
+        void AddEmitter(ParticleEmitter& emitter);
         void RemoveEmitter(Entity entity);
-        void UpdateEmitter(graphics::ParticleEmitter& emitter);
+        void UpdateEmitter(ParticleEmitter& emitter);
         void Emit(Entity entity, size_t count);
 
 
@@ -40,7 +40,7 @@ class ParticleSubsystem
         std::vector<Entity> m_toRemove;
         Random m_random;
         ecs::Ecs m_world;
-        std::vector<ParticleData2> m_particleDataHostBuffer; // structured buffer?...
+        std::vector<ParticleData> m_particleDataHostBuffer;
         uint32_t m_maxParticles;
 
         void SortEmitters(DirectX::FXMVECTOR cameraPosition);

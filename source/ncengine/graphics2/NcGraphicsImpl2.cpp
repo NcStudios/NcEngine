@@ -166,16 +166,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_shaderBindings{
             m_engine.GetDevice(),
             m_engine.GetContext(),
-            memorySettings.maxTextures,
-            memorySettings.maxRenderers,
-            memorySettings.maxSpotLights,
-            memorySettings.maxPointLights,
-            memorySettings.maxDirectionalLights,
-            memorySettings.maxBones,
-            memorySettings.maxParticles,
-            memorySettings.maxRenderers / 2,
-            memorySettings.maxRenderers / 2,
-            memorySettings.maxBones / 4
+            memorySettings
           },
           m_ui{
             m_engine.GetDevice(),

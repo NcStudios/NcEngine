@@ -84,9 +84,8 @@ struct BoneData
     DirectX::XMMATRIX animatedBoneMatrix = DirectX::XMMATRIX{};
 };
 
-// todo: rename once gfx1 is gone
 // Object model for particles (type: StructuredBuffer element type).
-struct ParticleData2
+struct ParticleData
 {
     DirectX::XMMATRIX model = DirectX::XMMATRIX{};
     uint32_t textureIndex = std::numeric_limits<uint32_t>::max();

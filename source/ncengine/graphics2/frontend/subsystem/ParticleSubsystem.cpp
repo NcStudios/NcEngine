@@ -48,7 +48,7 @@ ParticleSubsystem::ParticleSubsystem(ecs::Ecs world,
     ParticleEmitter::RegisterSubsystem(this);
 }
 
-void ParticleSubsystem::AddEmitter(graphics::ParticleEmitter& emitter)
+void ParticleSubsystem::AddEmitter(ParticleEmitter& emitter)
 {
     m_toAdd.emplace_back(m_world, emitter.GetEntity(), emitter.GetInfo(), &m_random);
 }
@@ -58,7 +58,7 @@ void ParticleSubsystem::RemoveEmitter(Entity entity)
     m_toRemove.push_back(entity);
 }
 
-void ParticleSubsystem::UpdateEmitter(graphics::ParticleEmitter& emitter)
+void ParticleSubsystem::UpdateEmitter(ParticleEmitter& emitter)
 {
     auto pos = FindState(m_emitterStates, m_toAdd, emitter.GetEntity());
     pos->UpdateInfo(emitter.GetInfo());
@@ -135,8 +135,8 @@ auto ParticleSubsystem::BuildState() -> ParticleRenderState
 {
     const auto count = std::min(static_cast<uint32_t>(m_particleDataHostBuffer.size()), m_maxParticles); // we don't want to crash when exceeding maxParticles, just discard
     const auto updateInfo = count > 0u
-        ? BufferUpdateInfo<ParticleData2>{m_particleDataHostBuffer, { {0, count} }}
-        : BufferUpdateInfo<ParticleData2>{};
+        ? BufferUpdateInfo<ParticleData>{m_particleDataHostBuffer, { {0, count} }}
+        : BufferUpdateInfo<ParticleData>{};
 
     return ParticleRenderState{
         .particleData = updateInfo,
