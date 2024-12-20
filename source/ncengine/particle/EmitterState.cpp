@@ -1,5 +1,4 @@
 #include "EmitterState.h"
-#include "ecs/Registry.h"
 #include "math/Random.h"
 #include "ncmath/Math.h"
 

@@ -12,12 +12,6 @@ option(NC_RUNTIME_SHADER_COMPILATION "Enable compiling shaders at runtime" ON)
 option(NC_PROFILING_ENABLED "Enable profiling with Optick" OFF)
 option(NC_PROD_BUILD "Only build NcEngine production binaries." OFF)
 
-# Diligent feature flag
-option(NC_USE_DILIGENT "Enable DiligentGraphics" OFF)
-if(NC_USE_DILIGENT)
-    add_definitions(-DNC_USE_DILIGENT)
-endif()
-
 # Variables
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

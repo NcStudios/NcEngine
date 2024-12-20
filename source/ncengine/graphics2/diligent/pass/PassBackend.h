@@ -11,6 +11,7 @@
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
+#include <memory>
 #include <vector>
 
 namespace nc::graphics

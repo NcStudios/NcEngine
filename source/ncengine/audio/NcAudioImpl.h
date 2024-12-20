@@ -4,7 +4,6 @@
 #include "ncengine/audio/NcAudio.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/task/TaskGraph.h"
 
 #include <mutex>

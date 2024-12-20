@@ -119,7 +119,6 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.assetSettings.fontsPath, actual.assetSettings.fontsPath);
 
     EXPECT_EQ(expected.memorySettings.maxRigidBodies, actual.memorySettings.maxRigidBodies);
-    EXPECT_EQ(expected.memorySettings.maxNetworkDispatchers, actual.memorySettings.maxNetworkDispatchers);
     EXPECT_EQ(expected.memorySettings.maxParticleEmitters, actual.memorySettings.maxParticleEmitters);
     EXPECT_EQ(expected.memorySettings.maxRenderers, actual.memorySettings.maxRenderers);
     EXPECT_EQ(expected.memorySettings.maxTransforms, actual.memorySettings.maxTransforms);

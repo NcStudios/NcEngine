@@ -1,12 +1,9 @@
 #include "ComponentSerialization.h"
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
-#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -46,27 +43,6 @@ auto DeserializeDirectionalLight(std::istream& stream, const DeserializationCont
     return out;
 }
 
-void SerializeMeshRenderer(std::ostream& stream, const graphics::MeshRenderer& out, const SerializationContext& ctx, const std::any&)
-{
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    serialize::Serialize(stream, out.GetMeshPath());
-    serialize::Serialize(stream, out.GetMaterial());
-    serialize::Serialize(stream, out.GetTechniqueType());
-}
-
-auto DeserializeMeshRenderer(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::MeshRenderer
-{
-    auto id = uint32_t{};
-    auto mesh = std::string{};
-    auto material = graphics::PbrMaterial{};
-    auto technique = graphics::TechniqueType{};
-    serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, mesh);
-    serialize::Deserialize(stream, material);
-    serialize::Deserialize(stream, technique);
-    return graphics::MeshRenderer{ctx.entityMap.at(id), std::move(mesh), std::move(material), technique};
-}
-
 void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
@@ -104,24 +80,6 @@ auto DeserializeSpotLight(std::istream& stream, const DeserializationContext&, c
     auto out = graphics::SpotLight{};
     serialize::Deserialize(stream, out);
     return out;
-}
-
-void SerializeToonRenderer(std::ostream& stream, const graphics::ToonRenderer& out, const SerializationContext& ctx, const std::any&)
-{
-    nc::serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
-    nc::serialize::Serialize(stream, out.GetMeshPath());
-    nc::serialize::Serialize(stream, out.GetMaterial());
-}
-
-auto DeserializeToonRenderer(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::ToonRenderer
-{
-    auto id = uint32_t{};
-    auto mesh = std::string{};
-    auto material = graphics::ToonMaterial{};
-    serialize::Deserialize(stream, id);
-    serialize::Deserialize(stream, mesh);
-    serialize::Deserialize(stream, material);
-    return graphics::ToonRenderer{ctx.entityMap.at(id), std::move(mesh), std::move(material)};
 }
 
 void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const SerializationContext& ctx, const std::any&)

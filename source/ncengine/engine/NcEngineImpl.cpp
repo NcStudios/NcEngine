@@ -75,9 +75,8 @@ auto InitializeNcEngine(const config::Config& config) -> std::unique_ptr<NcEngin
 NcEngineImpl::NcEngineImpl(const config::Config& config)
     : m_timer{::BuildTimer(config.engineSettings)},
       m_registry{BuildRegistry(config.memorySettings.maxTransforms)},
-      m_legacyRegistry{*m_registry},
       m_executor{::BuildExecutor(config.engineSettings)},
-      m_modules{BuildModuleRegistry(&m_legacyRegistry, GetAsyncDispatcher(), m_events, config)},
+      m_modules{BuildModuleRegistry(*m_registry, GetAsyncDispatcher(), m_events, config)},
       m_onQuitConnection{m_events.quit.Connect(this, &NcEngineImpl::Stop, SignalPriority::Lowest)},
       m_isRunning{false}
 {

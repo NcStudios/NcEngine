@@ -51,21 +51,13 @@ namespace graphics
 struct NcGraphics;
 class Camera;
 struct DirectionalLight;
-class MeshRenderer;
 class ParticleEmitter;
 struct PointLight;
 class SceneNavigationCamera;
-class SkeletalAnimator;
 struct SpotLight;
-class ToonRenderer;
 } // namespace graphics
 
 class SkeletalAnimationController;
 class SkinnedMesh;
 class StaticMesh;
-
-namespace net
-{
-class NetworkDispatcher;
-} // namespace net
 } // namespac nc

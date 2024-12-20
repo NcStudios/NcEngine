@@ -9,13 +9,10 @@
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/MeshRenderer.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SkeletalAnimator.h"
 #include "ncengine/graphics/SpotLight.h"
-#include "ncengine/graphics/ToonRenderer.h"
-#include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
 
@@ -35,13 +32,11 @@ REGISTER_TYPE(audio::AudioSource);
 REGISTER_TYPE(ecs::detail::FreeComponentGroup);
 REGISTER_TYPE(graphics::Camera);
 REGISTER_TYPE(graphics::DirectionalLight);
-REGISTER_TYPE(graphics::MeshRenderer);
-REGISTER_TYPE(graphics::ToonRenderer);
 REGISTER_TYPE(graphics::ParticleEmitter);
 REGISTER_TYPE(graphics::PointLight);
-REGISTER_TYPE(graphics::SkeletalAnimator);
 REGISTER_TYPE(graphics::SpotLight);
-REGISTER_TYPE(net::NetworkDispatcher);
+REGISTER_TYPE(StaticMesh);
+REGISTER_TYPE(SkinnedMesh);
 REGISTER_TYPE(CollisionListener);
 REGISTER_TYPE(Constraint);
 REGISTER_TYPE(RigidBody);
