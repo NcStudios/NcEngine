@@ -6,7 +6,7 @@
 #include "subsystem/LightSubsystem.h"
 #include "subsystem/MaterialRegistry.h"
 #include "subsystem/MeshSubsystem.h"
-#include "subsystem/ParticleSubsystem.h"
+#include "subsystem/particle/ParticleSubsystem.h"
 #include "subsystem/PostProcessSubsystem.h"
 #include "subsystem/UISubsystem.h"
 #include "subsystem/WireframeRendererSubsystem.h"

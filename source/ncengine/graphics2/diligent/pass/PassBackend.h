@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
-#include "graphics2/frontend/subsystem/ParticleRenderState.h"
+#include "graphics2/frontend/subsystem/particle/ParticleRenderState.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "MaterialPass.h"
 #include "ParticlePass.h"

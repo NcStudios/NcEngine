@@ -10,7 +10,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
-#include "graphics2/frontend/subsystem/ParticleSubsystem.h"
+#include "graphics2/frontend/subsystem/particle/ParticleSubsystem.h"
 #include "physics/DeferredPhysicsCreateState.h"
 
 #include "ncutility/ScopeExit.h"

@@ -4,7 +4,6 @@ target_sources(${NC_ENGINE_LIB}
         LightSubsystem.cpp
         MaterialRegistry.cpp
         MeshSubsystem.cpp
-        ParticleSubsystem.cpp
         PostProcessSubsystem.cpp
         TransformCache.cpp
         UISubsystem.cpp
@@ -12,3 +11,4 @@ target_sources(${NC_ENGINE_LIB}
 )
 
 add_subdirectory(animation)
+add_subdirectory(particle)

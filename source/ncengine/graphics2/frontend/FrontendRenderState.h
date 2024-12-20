@@ -4,7 +4,7 @@
 #include "subsystem/CameraRenderState.h"
 #include "subsystem/LightRenderState.h"
 #include "subsystem/MeshRenderState.h"
-#include "subsystem/ParticleRenderState.h"
+#include "subsystem/particle/ParticleRenderState.h"
 #include "subsystem/PostProcessState.h"
 #include "subsystem/WireframeRendererState.h"
 

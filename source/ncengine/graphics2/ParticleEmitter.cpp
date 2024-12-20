@@ -1,5 +1,5 @@
 #include "graphics/ParticleEmitter.h"
-#include "graphics2/frontend/subsystem/ParticleSubsystem.h"
+#include "graphics2/frontend/subsystem/particle/ParticleSubsystem.h"
 
 namespace nc
 {
