@@ -89,6 +89,7 @@ auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
     engineCI.EnableValidation = enableValidation;
     engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
+    engineCI.Features.WireframeFill = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     return engineCI;
 }
 
