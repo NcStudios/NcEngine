@@ -491,6 +491,13 @@ void ConstraintWidget(nc::Constraint& constraint, nc::RigidBody& body, nc::ecs::
         if (ImGui::Button(buttonText))
         {
             body.RemoveConstraint(constraint.GetId());
+            // Constraint dangles now - need to clean up and get out.
+            if (isConstraintOpen)
+            {
+                ImGui::TreePop();
+            }
+
+            return;
         }
     }
 
