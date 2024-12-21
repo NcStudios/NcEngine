@@ -3,7 +3,6 @@
 
 #include "TextureLoader.h"
 #include "ncutility/NcError.h"
-#include "fmt/format.h"
 
 namespace nc::graphics
 {
@@ -36,7 +35,6 @@ auto PostProcessDepthSinkBufferResource::Add(Diligent::IRenderDevice& device,
         }
         m_depthRenderTargetsMsaa.reserve(m_depthRenderTargetsMsaa.size() + numDepthRenderTargets);
         m_depthRenderTargetViewsRTMsaa.reserve(m_depthRenderTargetViewsRTMsaa.size() + numDepthRenderTargets);
-        m_depthRenderTargetViewsSRMsaa.reserve(m_depthRenderTargetViewsSRMsaa.size() + numDepthRenderTargets);
     }
     else
     {
@@ -77,7 +75,6 @@ auto PostProcessDepthSinkBufferResource::Add(Diligent::IRenderDevice& device,
             addedIndices.push_back(static_cast<uint32_t>(m_depthRenderTargetsMsaa.size()));
             m_depthRenderTargetsMsaa.push_back(std::move(pDepthRenderTarget));
             m_depthRenderTargetViewsRTMsaa.push_back(m_depthRenderTargetsMsaa.back()->GetDefaultView(TEXTURE_VIEW_DEPTH_STENCIL));
-            m_depthRenderTargetViewsSRMsaa.push_back(m_depthRenderTargetsMsaa.back()->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
         }
         else
         {
@@ -88,14 +85,7 @@ auto PostProcessDepthSinkBufferResource::Add(Diligent::IRenderDevice& device,
         }
     }
 
-    if (numSamples > 1)
-    {
-        SetArrayRegion(m_depthRenderTargetViewsSRMsaa, m_depthRenderTargetViewsSR.size(), m_depthRenderTargetViewsSRMsaa.size());
-    }
-    else
-    {
-        SetArrayRegion(m_depthRenderTargetViewsSR, 0u, m_depthRenderTargetViewsSR.size());
-    }
+    SetArrayRegion(m_depthRenderTargetViewsSR, 0u, m_depthRenderTargetViewsSR.size());
     return addedIndices;
 }
 
@@ -117,17 +107,11 @@ void PostProcessDepthSinkBufferResource::Resize(Diligent::IRenderDevice& device,
 void PostProcessDepthSinkBufferResource::Clear()
 {
     m_depthRenderTargets.clear();
-    m_depthRenderTargets.shrink_to_fit();
     m_depthRenderTargetViewsRT.clear();
-    m_depthRenderTargetViewsRT.shrink_to_fit();
     m_depthRenderTargetViewsSR.clear();
-    m_depthRenderTargetViewsSR.shrink_to_fit();
 
-    m_depthRenderTargetsMsaa.shrink_to_fit();
+    m_depthRenderTargetsMsaa.clear();
     m_depthRenderTargetViewsRTMsaa.clear();
-    m_depthRenderTargetViewsRTMsaa.shrink_to_fit();
-    m_depthRenderTargetViewsSRMsaa.clear();
-    m_depthRenderTargetViewsSRMsaa.shrink_to_fit();
 }
 
 void PostProcessDepthSinkBufferResource::SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& views, size_t offset, size_t count)

@@ -82,32 +82,20 @@ void PassManifest::RegisterPass(PassDesc desc)
         throw nc::NcError("The pass was already registered");
     }
 
-    if (desc.colorSink != NoTarget && desc.colorSink != SwapChainColorRTIndex)
-        m_colorSinkCount = std::max(m_colorSinkCount, desc.colorSink + 1);
-    if (desc.depthSink != NoTarget && desc.depthSink != SwapChainDepthRTIndex)
-        m_depthSinkCount = std::max(m_depthSinkCount, desc.depthSink + 1);
+    SetMaxIndices(desc.colorSink, desc.depthSink, false);
 
     switch (desc.type)
     {
         case PassType::Material:
-            if (desc.colorSink != NoTarget && desc.colorSink != SwapChainColorRTIndex)
-                m_colorSinkCountMsaa = std::max(m_colorSinkCountMsaa, desc.colorSink + 1);
-            if (desc.depthSink != NoTarget && desc.depthSink != SwapChainDepthRTIndex)
-                m_depthSinkCountMsaa = std::max(m_depthSinkCountMsaa, desc.depthSink + 1);
+            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_staticMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::SkinnedMaterial:
-            if (desc.colorSink != NoTarget && desc.colorSink != SwapChainColorRTIndex)
-                m_colorSinkCountMsaa = std::max(m_colorSinkCountMsaa, desc.colorSink + 1);
-            if (desc.depthSink != NoTarget && desc.depthSink != SwapChainDepthRTIndex)
-                m_depthSinkCountMsaa = std::max(m_depthSinkCountMsaa, desc.depthSink + 1);
+            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_skinnedMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::Wireframe:
-            if (desc.colorSink != NoTarget && desc.colorSink != SwapChainColorRTIndex)
-                m_colorSinkCountMsaa = std::max(m_colorSinkCountMsaa, desc.colorSink + 1);
-            if (desc.depthSink != NoTarget && desc.depthSink != SwapChainDepthRTIndex)
-                m_depthSinkCountMsaa = std::max(m_depthSinkCountMsaa, desc.depthSink + 1);
+            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_wireframePassDesc = std::move(desc);
             break;
         case PassType::PostProcess:
@@ -131,5 +119,20 @@ void PassManifest::Clear()
     m_colorSinkCount = 0u;
     m_depthSinkCountMsaa = 0u;
     m_depthSinkCount = 0u;
+}
+
+void PassManifest::SetMaxIndices(uint32_t colorRT, uint32_t depthRT, bool isMsaa)
+{
+    auto& colorToModify = isMsaa ? m_colorSinkCountMsaa : m_colorSinkCount;
+    auto& depthToModify = isMsaa ? m_depthSinkCountMsaa : m_depthSinkCount;
+
+    if (colorRT != NoTarget && colorRT != SwapChainColorRTIndex)
+    {
+        colorToModify = std::max(colorToModify, colorRT + 1);
+    }
+    if (depthRT != NoTarget && depthRT != SwapChainDepthRTIndex)
+    {
+        depthToModify = std::max(depthToModify, depthRT + 1);
+    }
 }
 } // namespace nc::graphics

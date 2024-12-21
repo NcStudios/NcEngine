@@ -29,6 +29,7 @@ class PassManifest
         void Clear();
 
     private:
+        void SetMaxIndices(uint32_t colorRT, uint32_t depthRT, bool isMsaa);
         std::vector<size_t> m_ids;
         std::vector<PassDesc> m_staticMaterialPassDescs;
         std::vector<PassDesc> m_skinnedMaterialPassDescs;

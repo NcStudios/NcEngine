@@ -1,9 +1,9 @@
 #include "PostProcessColorSinkBufferResource.h"
+
 #include "ncengine/asset/AssetData.h"
 
 #include "TextureLoader.h"
 #include "ncutility/NcError.h"
-#include "fmt/format.h"
 
 namespace nc::graphics
 {
@@ -40,7 +40,6 @@ auto PostProcessColorSinkBufferResource::Add(Diligent::IRenderDevice& device,
         }
         m_colorRenderTargetsMsaa.reserve(m_colorRenderTargetsMsaa.size() + numColorRenderTargets);
         m_colorRenderTargetViewsRTMsaa.reserve(m_colorRenderTargetViewsRTMsaa.size() + numColorRenderTargets);
-        m_colorRenderTargetViewsSRMsaa.reserve(m_colorRenderTargetViewsSRMsaa.size() + numColorRenderTargets);
     }
     else
     {
@@ -83,7 +82,6 @@ auto PostProcessColorSinkBufferResource::Add(Diligent::IRenderDevice& device,
             addedIndices.push_back(static_cast<uint32_t>(m_colorRenderTargetsMsaa.size()));
             m_colorRenderTargetsMsaa.push_back(std::move(pColorRenderTarget));
             m_colorRenderTargetViewsRTMsaa.push_back(m_colorRenderTargetsMsaa.back()->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET));
-            m_colorRenderTargetViewsSRMsaa.push_back(m_colorRenderTargetsMsaa.back()->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
         }
         else
         {
@@ -94,14 +92,7 @@ auto PostProcessColorSinkBufferResource::Add(Diligent::IRenderDevice& device,
         }
     }
 
-    if (numSamples > 1)
-    {
-        SetArrayRegion(m_colorRenderTargetViewsSRMsaa, m_colorRenderTargetViewsSR.size(), m_colorRenderTargetViewsSRMsaa.size());
-    }
-    else
-    {
-        SetArrayRegion(m_colorRenderTargetViewsSR, 0u, m_colorRenderTargetViewsSR.size());
-    }
+    SetArrayRegion(m_colorRenderTargetViewsSR, 0u, m_colorRenderTargetViewsSR.size());
     return addedIndices;
 }
 
@@ -123,18 +114,11 @@ void PostProcessColorSinkBufferResource::Resize(Diligent::IRenderDevice& device,
 void PostProcessColorSinkBufferResource::Clear()
 {
     m_colorRenderTargets.clear();
-    m_colorRenderTargets.shrink_to_fit();
     m_colorRenderTargetViewsRT.clear();
-    m_colorRenderTargetViewsRT.shrink_to_fit();
     m_colorRenderTargetViewsSR.clear();
-    m_colorRenderTargetViewsSR.shrink_to_fit();
 
     m_colorRenderTargetsMsaa.clear();
-    m_colorRenderTargetsMsaa.shrink_to_fit();
     m_colorRenderTargetViewsRTMsaa.clear();
-    m_colorRenderTargetViewsRTMsaa.shrink_to_fit();
-    m_colorRenderTargetViewsSRMsaa.clear();
-    m_colorRenderTargetViewsSRMsaa.shrink_to_fit();
 }
 
 void PostProcessColorSinkBufferResource::SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& views, size_t offset, size_t count)

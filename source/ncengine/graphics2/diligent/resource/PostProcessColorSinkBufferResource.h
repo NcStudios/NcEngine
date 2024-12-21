@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Common/interface/RefCntAutoPtr.hpp"
-#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 
 #include <vector>
 
@@ -41,7 +41,6 @@ class PostProcessColorSinkBufferResource
         std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsSR; // Shader resource
         std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsRT; // Render target
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_colorRenderTargetsMsaa;
-        std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsSRMsaa; // Shader resource
         std::vector<Diligent::IDeviceObject*> m_colorRenderTargetViewsRTMsaa; // Render target
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;

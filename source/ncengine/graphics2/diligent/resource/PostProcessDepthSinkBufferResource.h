@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Common/interface/RefCntAutoPtr.hpp"
-#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
+#include "Graphics/GraphicsEngine/interface/RenderDevice.h"
 
 #include <vector>
 
@@ -39,7 +39,6 @@ class PostProcessDepthSinkBufferResource
         std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsSR; // Shader Resource
         std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsRT; // Render target
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_depthRenderTargetsMsaa;
-        std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsSRMsaa; // Shader Resource
         std::vector<Diligent::IDeviceObject*> m_depthRenderTargetViewsRTMsaa; // Render target
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
