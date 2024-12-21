@@ -2,32 +2,6 @@ find_package(Vulkan REQUIRED)
 
 set(NC_TEST_COLLATERAL_DIRECTORY ${PROJECT_SOURCE_DIR}/test/ncengine/asset/collateral/)
 
-### AssetId Tests ###
-add_executable(AssetId_tests
-    AssetId_tests.cpp
-)
-
-target_include_directories(AssetId_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_INCLUDE_DIR}/ncengine
-        ${NC_SOURCE_DIR}
-)
-
-target_compile_options(AssetId_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(AssetId_tests
-    PRIVATE
-        NcAsset
-        NcUtility
-        gtest_main
-)
-
-add_test(AssetId_tests AssetId_tests)
-
 ### AssetUtilities Tests ###
 add_executable(AssetUtilities_tests
     AssetUtilities_tests.cpp
