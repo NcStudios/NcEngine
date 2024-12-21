@@ -276,6 +276,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
           m_resizeNeeded{false},
           m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount}
+{
 }
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
