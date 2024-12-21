@@ -27,11 +27,13 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        nc::graphics::PostProcessColorSinkBufferResource& postProcessSinkBufferResource,
                        nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
                        uint32_t colorRenderTargetIndex,
-                       uint32_t depthRenderTargetIndex);
+                       uint32_t depthRenderTargetIndex,
+                       bool isMsaa);
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
                       nc::graphics::PostProcessColorSinkBufferResource& postProcessColorSinkBufferResource,
                       nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
                       uint32_t colorRenderTargetIndex,
-                      uint32_t depthRenderTargetIndex);
+                      uint32_t depthRenderTargetIndex,
+                      bool isMsaa);
 } // namespace nc::graphics

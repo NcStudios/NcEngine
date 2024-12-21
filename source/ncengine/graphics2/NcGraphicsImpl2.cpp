@@ -192,38 +192,38 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = MainColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = MainColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .colorSink = NormalsColor
+                    .colorSink = NormalsColorMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
-                    .colorSink = NormalsColor
+                    .colorSink = NormalsColorMsaa
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = MainColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Wave,
@@ -252,7 +252,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings,
-            m_passManifest
+            m_passManifest,
+            graphicsSettings.antialiasing
           },
           m_frontend{
             m_engine.GetContext(),
@@ -272,7 +273,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_resizeNeeded{false}
+          m_resizeNeeded{false},
+          m_numSamples{graphicsSettings.antialiasing} /* @todo: Check for device support */
 {
 }
 
@@ -433,7 +435,7 @@ void NcGraphicsImpl2::Run()
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 {
-    (void)isMinimized;
+    if (isMinimized) return;
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
     m_resizeNeeded = true;
     m_dimensions = dimensions;
@@ -442,8 +444,8 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 void NcGraphicsImpl2::Resize()
 {
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
+    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
     m_resizeNeeded = false;
 }
 } // namespace nc::graphics
