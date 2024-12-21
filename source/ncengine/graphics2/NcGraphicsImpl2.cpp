@@ -160,6 +160,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
         : m_world{world},
           m_engine{
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
+            DeviceCapability{.msaaSampleCount = graphicsSettings.antialiasing},
             window.GetWindowHandle(),
             shadersPath,
             ::LogCallback
@@ -253,7 +254,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetShaderFactory(),
             m_shaderBindings,
             m_passManifest,
-            graphicsSettings.antialiasing
+            m_engine.GetDeviceCapability().msaaSampleCount
           },
           m_frontend{
             m_engine.GetContext(),
@@ -274,8 +275,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
           m_resizeNeeded{false},
-          m_numSamples{graphicsSettings.antialiasing} /* @todo: Check for device support */
-{
+          m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount}
 }
 
 NcGraphicsImpl2::~NcGraphicsImpl2()
