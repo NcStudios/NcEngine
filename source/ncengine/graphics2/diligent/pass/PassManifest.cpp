@@ -32,10 +32,10 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
                            std::span<const MaterialPassFlag::type> implementedMaterialPasses,
                            std::span<const PostProcessPassFlag::type> implementedPPPasses,
                            std::span<const MiscPassFlag::type> implementedMiscPasses)
-    : m_colorSinkCount{0u},
-      m_colorSinkCountMsaa{0u},
-      m_depthSinkCount{0u},
-      m_depthSinkCountMsaa{0u}
+    : m_colorSinkCountMsaa{0u},
+      m_colorSinkCount{0u},
+      m_depthSinkCountMsaa{0u},
+      m_depthSinkCount{0u}
 {
     auto registerMatches = [this](const auto& descs, const auto& passFlags, auto matchType)
     {
