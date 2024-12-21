@@ -46,5 +46,6 @@ struct MaterialPass
 auto MakeMaterialPasses(Diligent::IRenderDevice& device,
                         ShaderFactory& shaderFactory,
                         ShaderBindings& shaderBindings,
-                        std::span<const PassDesc> passManifest)-> std::vector<MaterialPass>;
+                        std::span<const PassDesc> passManifest,
+                        uint32_t numSamples = 1u)-> std::vector<MaterialPass>;
 } // namespace nc::graphics

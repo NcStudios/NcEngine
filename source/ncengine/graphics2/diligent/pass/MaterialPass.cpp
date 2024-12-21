@@ -15,7 +15,8 @@ using namespace nc::graphics;
 auto MakeMaterialPass(Diligent::IRenderDevice& device,
                       ShaderFactory& shaderFactory,
                       ShaderBindings& shaderBindings,
-                      const PassDesc& passDesc) -> MaterialPass
+                      const PassDesc& passDesc,
+                      uint32_t numSamples) -> MaterialPass
 {
     auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
     auto pixelShader = shaderFactory.MakeShaderFromSource(
@@ -56,6 +57,7 @@ auto MakeMaterialPass(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == NoTarget ? False : True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
+    ci.GraphicsPipeline.SmplDesc.Count               = static_cast<uint8_t>(numSamples);
 
     return MaterialPass(device, ci, passDesc.id, passDesc.colorSink, passDesc.depthSink);
 }
@@ -80,14 +82,15 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
 auto MakeMaterialPasses(Diligent::IRenderDevice& device,
                         ShaderFactory& shaderFactory,
                         ShaderBindings& shaderBindings,
-                        std::span<const PassDesc> passManifest) -> std::vector<MaterialPass>
+                        std::span<const PassDesc> passManifest,
+                        uint32_t numSamples) -> std::vector<MaterialPass>
 {
     auto materialPasses = std::vector<MaterialPass>{};
     materialPasses.reserve(passManifest.size());
 
     for (auto& passDesc : passManifest)
     {
-        materialPasses.emplace_back(MakeMaterialPass(device, shaderFactory, shaderBindings, passDesc));
+        materialPasses.emplace_back(MakeMaterialPass(device, shaderFactory, shaderBindings, passDesc, numSamples));
     }
 
     return materialPasses;
