@@ -491,6 +491,13 @@ void ConstraintWidget(nc::Constraint& constraint, nc::RigidBody& body, nc::ecs::
         if (ImGui::Button(buttonText))
         {
             body.RemoveConstraint(constraint.GetId());
+            // Constraint dangles now - need to clean up and get out.
+            if (isConstraintOpen)
+            {
+                ImGui::TreePop();
+            }
+
+            return;
         }
     }
 
@@ -610,6 +617,7 @@ void FrameLogicUIWidget(FrameLogic&, EditorContext&, const std::any&)
 
 void TagUIWidget(Tag& tag, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "Tag");
     ui::InputText(tag.value, "tag");
 }
 
@@ -685,6 +693,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "AudioSource");
     ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
     ui::PropertyWidget(audio_source_ext::outerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 200.0f);
@@ -740,6 +749,7 @@ void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext& ctx, const std
 
 void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "ParticleEmitter");
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 30.0f;
@@ -779,11 +789,13 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&,
 
 void DirectionalLightUIWidget(graphics::DirectionalLight& light, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "DirectionalLight");
     ui::InputColor3(light.color, "color");
 }
 
 void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "PointLight");
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
@@ -793,6 +805,7 @@ void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::
 
 void SpotLightUIWidget(graphics::SpotLight& light, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "SpotLight");
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
     constexpr auto max = 3.14159f;

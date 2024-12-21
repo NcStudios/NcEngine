@@ -63,6 +63,7 @@ class NcGraphicsImpl2 : public NcGraphics
         Connection m_onResizeConnection;
         Vector2 m_dimensions;
         bool m_resizeNeeded;
+        uint32_t m_numSamples;
 };
 } // namespace graphics
 } // namespace nc

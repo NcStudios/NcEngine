@@ -18,7 +18,8 @@ struct WireframePass
     explicit WireframePass(Diligent::IRenderDevice& device,
                             ShaderFactory& shaderFactory,
                             ShaderBindings& shaderBindings,
-                            const PassDesc& passDesc);
+                            const PassDesc& passDesc,
+                            uint32_t numSamples = 1u);
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
     WireframeBufferResource* buffer;
     uint32_t colorRTIndex;
