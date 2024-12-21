@@ -19,6 +19,7 @@ namespace graphics
 class ParticleSubsystem;
 } // namespace graphics
 
+/** @brief  */
 struct ParticleEmissionInfo
 {
     unsigned maxParticleCount = 100u;
@@ -27,6 +28,7 @@ struct ParticleEmissionInfo
     float periodicEmissionFrequency = 0.0f;
 };
 
+/** @brief  */
 struct ParticleInitInfo
 {
     float lifetime = 5.0f;
@@ -36,11 +38,9 @@ struct ParticleInitInfo
     float rotationMax = 0.0f;
     float scaleMin = 1.0f;
     float scaleMax = 1.0f;
-    asset::TextureView texture = asset::TextureView{}; // maybe don't include here, take this separate in c'tor? don't want default ever...
-    // todo: component factor needs to be updated too
-    // std::string particleTexturePath = asset::DefaultParticle; // todo: make Textureview
 };
 
+/** @brief  */
 struct ParticleKinematicInfo
 {
     Vector3 velocityMin = Vector3::Zero();
@@ -52,6 +52,7 @@ struct ParticleKinematicInfo
     float scaleOverTimeFactor = 0.0f;
 };
 
+/** @brief  */
 struct ParticleInfo
 {
     ParticleEmissionInfo emission;
@@ -59,10 +60,13 @@ struct ParticleInfo
     ParticleKinematicInfo kinematic;
 };
 
+/** @brief  */
 class ParticleEmitter
 {
     public:
-        ParticleEmitter(Entity entity, ParticleInfo info);
+        ParticleEmitter(Entity entity,
+                        const asset::TextureView& texture,
+                        const ParticleInfo& info = {});
 
         ParticleEmitter(ParticleEmitter&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
@@ -87,10 +91,18 @@ class ParticleEmitter
             Release();
         }
 
-
+        /** @name General Functions */
         auto GetEntity() const -> Entity { return m_self; }
+
+        /** @name Texture Functions */
+        auto GetTexture() const noexcept -> const asset::TextureView& { return m_texture; }
+        void SetTexture(const asset::TextureView& texture);
+
+        /** @name ParticleInfo Functions */
         auto GetInfo() const noexcept -> const ParticleInfo& { return m_info; }
         void SetInfo(const ParticleInfo& info);
+
+        /** @brief Emit count number of particles, saturating at maxParticleCount. */
         void Emit(size_t count);
 
         /** @cond internal */
@@ -104,6 +116,7 @@ class ParticleEmitter
         static inline graphics::ParticleSubsystem* s_subsystem = nullptr;
 
         Entity m_self;
+        asset::TextureView m_texture;
         ParticleInfo m_info;
 
         void Release() noexcept;

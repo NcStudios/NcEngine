@@ -51,7 +51,8 @@ ParticleSubsystem::ParticleSubsystem(ecs::Ecs world,
 
 void ParticleSubsystem::AddEmitter(ParticleEmitter& emitter)
 {
-    m_toAdd.emplace_back(m_world, emitter.GetEntity(), emitter.GetInfo(), &m_random);
+    const auto pos = m_world.Get<Transform>(emitter.GetEntity()).PositionXM();
+    m_toAdd.emplace_back(pos, emitter.GetEntity(), emitter.GetTexture().index, emitter.GetInfo(), &m_random);
 }
 
 void ParticleSubsystem::RemoveEmitter(Entity entity)
@@ -59,16 +60,20 @@ void ParticleSubsystem::RemoveEmitter(Entity entity)
     m_toRemove.push_back(entity);
 }
 
-void ParticleSubsystem::UpdateEmitter(ParticleEmitter& emitter)
+void ParticleSubsystem::UpdateEmitterInfo(Entity entity, const ParticleInfo& info)
 {
-    auto pos = FindState(m_emitterStates, m_toAdd, emitter.GetEntity());
-    pos->UpdateInfo(emitter.GetInfo());
+    FindState(m_emitterStates, m_toAdd, entity)->UpdateInfo(info);
+}
+
+void ParticleSubsystem::UpdateEmitterTexture(Entity entity, uint32_t textureIndex)
+{
+    FindState(m_emitterStates, m_toAdd, entity)->UpdateTexture(textureIndex);
 }
 
 void ParticleSubsystem::Emit(Entity entity, size_t count)
 {
-    auto pos = FindState(m_emitterStates, m_toAdd, entity);
-    pos->Emit(count);
+    const auto pos = m_world.Get<Transform>(entity).PositionXM();
+    FindState(m_emitterStates, m_toAdd, entity)->Emit(pos, count);
 }
 
 void ParticleSubsystem::Update(Camera* mainCamera)
@@ -94,7 +99,8 @@ void ParticleSubsystem::Update(Camera* mainCamera)
 
     for (auto& state : m_emitterStates)
     {
-        state.Update(dt, camRotation, camForward);
+        const auto position = m_world.Get<Transform>(state.GetEntity()).PositionXM();
+        state.Update(position, camRotation, camForward, dt);
     }
 
     SortEmitters(camPosition);
@@ -102,7 +108,7 @@ void ParticleSubsystem::Update(Camera* mainCamera)
     m_particleDataHostBuffer.clear();
     for (const auto& state : m_emitterStates)
     {
-        const auto textureIndex = state.GetTexture();
+        const auto textureIndex = state.GetTextureIndex();
         for (const auto& m : state.GetMatrices())
         {
             m_particleDataHostBuffer.emplace_back(m, textureIndex);

@@ -51,22 +51,23 @@ void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFa
 
 namespace nc::particle
 {
-EmitterState::EmitterState(ecs::ExplicitEcs<Transform> transforms,
+EmitterState::EmitterState(DirectX::FXMVECTOR position,
                            Entity entity,
+                           uint32_t textureIndex,
                            const ParticleInfo& info,
                            Random* random)
-    : m_info{ info },
-      m_transforms{ transforms },
+    : m_textureIndex{textureIndex},
+      m_info{ info },
       m_entity{ entity },
       m_random{ random }
 {
     m_particles.reserve(info.emission.maxParticleCount);
-    Emit(m_info.emission.initialEmissionCount);
+    Emit(position, m_info.emission.initialEmissionCount);
 }
 
-void EmitterState::Emit(size_t count)
+void EmitterState::Emit(DirectX::FXMVECTOR position, size_t count)
 {
-    m_lastPosition = m_transforms.Get<Transform>(m_entity).PositionXM();
+    m_lastPosition = position;
     auto parentPosition = Vector3{};
     DirectX::XMStoreVector3(&parentPosition, m_lastPosition);
     const auto particleCount = Min(count, m_particles.capacity() - m_particles.size());
@@ -80,7 +81,10 @@ void EmitterState::Emit(size_t count)
     );
 }
 
-void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward)
+void EmitterState::Update(DirectX::FXMVECTOR position,
+                          DirectX::FXMVECTOR camRotation,
+                          DirectX::FXMVECTOR camForward,
+                          float dt)
 {
     if (m_needsResize)
     {
@@ -93,7 +97,7 @@ void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const
         m_needsResize = false;
     }
 
-    PeriodicEmission(dt);
+    PeriodicEmission(position, dt);
     m_matrices.clear();
 
     if (m_particles.empty())
@@ -130,7 +134,12 @@ void EmitterState::UpdateInfo(const ParticleInfo& info)
     m_info = info;
 }
 
-void EmitterState::PeriodicEmission(float dt)
+void EmitterState::UpdateTexture(uint32_t textureIndex)
+{
+    m_textureIndex = textureIndex;
+}
+
+void EmitterState::PeriodicEmission(DirectX::FXMVECTOR position, float dt)
 {
     if (m_info.emission.periodicEmissionFrequency > 0.0f)
     {
@@ -138,7 +147,7 @@ void EmitterState::PeriodicEmission(float dt)
         if (m_emissionCounter > m_info.emission.periodicEmissionFrequency)
         {
             m_emissionCounter = 0.0f;
-            Emit(m_info.emission.periodicEmissionCount);
+            Emit(position, m_info.emission.periodicEmissionCount);
         }
     }
 }

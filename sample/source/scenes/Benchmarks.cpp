@@ -592,15 +592,15 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<ParticleEmitter>(entity, ParticleInfo{
+                world.Emplace<ParticleEmitter>(
+                    entity,
+                    asset::AcquireTextureAsset(asset::DefaultParticle),
+                    ParticleInfo{
                     .emission = {
                         .periodicEmissionCount = 15u,
                         .periodicEmissionFrequency = 0.1f
                     },
-                    .init = {
-                        .texture = asset::AcquireTextureAsset(asset::DefaultParticle)
-                        // todo need to set tex here
-                    },
+                    .init = {},
                     .kinematic = {
                         .velocityMin = Vector3::One() * -2.0f,
                         .velocityMax = Vector3::One() * 2.0f,

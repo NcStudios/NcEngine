@@ -20,7 +20,8 @@ class ParticleSubsystem
         // API Facing Functions
         void AddEmitter(ParticleEmitter& emitter);
         void RemoveEmitter(Entity entity);
-        void UpdateEmitter(ParticleEmitter& emitter);
+        void UpdateEmitterInfo(Entity entity, const ParticleInfo& info);
+        void UpdateEmitterTexture(Entity entity, uint32_t textureIndex);
         void Emit(Entity entity, size_t count);
 
         // Update Graph Tasks

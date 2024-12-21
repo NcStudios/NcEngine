@@ -45,7 +45,8 @@ namespace graphics
 {
 void ParticleSubsystem::AddEmitter(ParticleEmitter&) {}
 void ParticleSubsystem::RemoveEmitter(Entity) {}
-void ParticleSubsystem::UpdateEmitter(ParticleEmitter&) {}
+void ParticleSubsystem::UpdateEmitterInfo(Entity, const ParticleInfo&) {}
+void ParticleSubsystem::UpdateEmitterTexture(Entity, uint32_t) {}
 void ParticleSubsystem::Emit(Entity, size_t) {}
 } // namespace graphics
 
@@ -126,10 +127,15 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 
     // todo: make sure texture loading is working somehow
     auto stream = std::stringstream{};
+    const auto expectedTexture = nc::asset::AcquireTextureAsset(0);
     const auto expectedInfo = nc::ParticleInfo{};
-    const auto expected = nc::ParticleEmitter{g_staticEntity, expectedInfo};
+    const auto expected = nc::ParticleEmitter{g_staticEntity, expectedTexture, expectedInfo};
     nc::SerializeParticleEmitter(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeParticleEmitter(stream, g_deserializationContext, nullptr);
+    const auto& actualTexture = actual.GetTexture();
+    EXPECT_EQ(expectedTexture.id, actualTexture.id);
+    EXPECT_EQ(expectedTexture.index, actualTexture.index);
+
     const auto& actualInfo = actual.GetInfo();
     EXPECT_EQ(expectedInfo.emission.maxParticleCount, actualInfo.emission.maxParticleCount);
     EXPECT_EQ(expectedInfo.emission.initialEmissionCount, actualInfo.emission.initialEmissionCount);
@@ -142,7 +148,6 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
     EXPECT_EQ(expectedInfo.init.rotationMax, actualInfo.init.rotationMax);
     EXPECT_EQ(expectedInfo.init.scaleMin, actualInfo.init.scaleMin);
     EXPECT_EQ(expectedInfo.init.scaleMax, actualInfo.init.scaleMax);
-    EXPECT_EQ(expectedInfo.init.texture.id, actualInfo.init.texture.id);
     EXPECT_EQ(expectedInfo.kinematic.velocityMin, actualInfo.kinematic.velocityMin);
     EXPECT_EQ(expectedInfo.kinematic.velocityMax, actualInfo.kinematic.velocityMax);
     EXPECT_EQ(expectedInfo.kinematic.velocityOverTimeFactor, actualInfo.kinematic.velocityOverTimeFactor);

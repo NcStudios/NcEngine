@@ -28,7 +28,14 @@ auto CreateFrameLogic(Entity entity, const std::any&) -> FrameLogic
 
 auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter
 {
-    return ParticleEmitter{entity, ParticleInfo{}};
+    /** @todo 353 Once NcAsset has the required functionality, we should be fetching assets from it through the component context. */
+    auto textureService = asset::AssetService<asset::TextureView>::Get();
+    NC_ASSERT(textureService, "Asset services not registered");
+    return ParticleEmitter{
+        entity,
+        textureService->Acquire(asset::DefaultParticle),
+        ParticleInfo{}
+    };
 }
 
 auto CreatePointLight(Entity, const std::any&) -> graphics::PointLight

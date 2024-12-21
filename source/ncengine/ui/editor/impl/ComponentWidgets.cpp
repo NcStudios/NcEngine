@@ -756,7 +756,15 @@ void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 30.0f;
-    auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
+    // auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
+
+    // todo: tree nodes
+    auto texture = emitter.GetTexture();
+    if (particle_emitter_ext::TextureViewWidget(texture, *ctx.modules.Get<asset::NcAsset>()))
+    {
+        emitter.SetTexture(texture);
+    }
+
     ImGui::Text("%s", "Init");
     ImGui::Separator();
     ui::PropertyWidget(particle_emitter_ext::lifetimeProp, emitter, &ui::DragFloat, step, 0.1f, 120.0f);
@@ -766,11 +774,6 @@ void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const
     ui::PropertyWidget(particle_emitter_ext::initRotationMaxProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
     ui::PropertyWidget(particle_emitter_ext::initScaleMinProp, emitter, &ui::DragFloat, step, ui::g_minScale, ui::g_maxScale);
     ui::PropertyWidget(particle_emitter_ext::initScaleMaxProp, emitter, &ui::DragFloat, step, ui::g_minScale, ui::g_maxScale);
-    auto info = emitter.GetInfo();
-    if (particle_emitter_ext::TextureViewWidget(info.init.texture, *ctx.modules.Get<asset::NcAsset>()))
-    {
-        emitter.SetInfo(info);
-    }
 
     ImGui::Text("%s", "Emission");
     ImGui::Separator();
