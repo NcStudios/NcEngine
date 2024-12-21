@@ -34,7 +34,7 @@ class IAssetService : public IAssetServiceBase
         virtual bool Unload(const InputType& input, asset_flags_type flags = AssetFlags::None) = 0;
         virtual void UnloadAll(asset_flags_type flags = AssetFlags::None) = 0;
         virtual auto Acquire(const InputType& input, asset_flags_type flags = AssetFlags::None) const -> data_type = 0;
-        virtual auto Acquire(AssetId, asset_flags_type  = AssetFlags::None) const -> data_type = 0;
+        virtual auto Acquire(AssetId, asset_flags_type = AssetFlags::None) const -> data_type = 0;
         virtual bool IsLoaded(const InputType& input, asset_flags_type flags = AssetFlags::None) const = 0;
 };
 
