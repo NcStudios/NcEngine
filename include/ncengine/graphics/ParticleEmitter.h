@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include "ncengine/asset/DefaultAssets.h"
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/ecs/Component.h"
 
 #include "ncmath/Vector.h"
@@ -36,7 +36,9 @@ struct ParticleInitInfo
     float rotationMax = 0.0f;
     float scaleMin = 1.0f;
     float scaleMax = 1.0f;
-    std::string particleTexturePath = asset::DefaultParticle;
+    asset::TextureView texture = asset::TextureView{}; // maybe don't include here, take this separate in c'tor? don't want default ever...
+    // todo: component factor needs to be updated too
+    // std::string particleTexturePath = asset::DefaultParticle; // todo: make Textureview
 };
 
 struct ParticleKinematicInfo
@@ -56,9 +58,6 @@ struct ParticleInfo
     ParticleInitInfo init;
     ParticleKinematicInfo kinematic;
 };
-
-
-// todo: color property
 
 class ParticleEmitter
 {

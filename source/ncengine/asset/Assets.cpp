@@ -178,6 +178,11 @@ auto AcquireTextureAsset(const std::string& path) -> TextureView
     return AssetService<TextureView>::Get()->Acquire(path);
 }
 
+auto AcquireTextureAsset(AssetId id) -> TextureView
+{
+    return AssetService<TextureView>::Get()->Acquire(id);
+}
+
 bool LoadFont(const FontInfo& font, bool isExternal, asset_flags_type flags)
 {
     return AssetService<FontView, FontInfo>::Get()->Load(font, isExternal, flags);

@@ -1,6 +1,7 @@
 #include "ParticleSubsystem.h"
 
 #include "ncengine/asset/Assets.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/time/Time.h"
 #include "ncengine/debug/Profile.h"
@@ -101,11 +102,10 @@ void ParticleSubsystem::Update(Camera* mainCamera)
     m_particleDataHostBuffer.clear();
     for (const auto& state : m_emitterStates)
     {
-        // todo: should just store id/view in emitter...
-        const auto texture = asset::AcquireTextureAsset(state.GetTexture());
+        const auto textureIndex = state.GetTexture();
         for (const auto& m : state.GetMatrices())
         {
-            m_particleDataHostBuffer.emplace_back(m, texture.index);
+            m_particleDataHostBuffer.emplace_back(m, textureIndex);
         }
     }
 }

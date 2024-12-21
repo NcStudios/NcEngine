@@ -25,11 +25,21 @@ DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc
 
 namespace nc
 {
-auto asset::AcquireAudioClipAsset(const std::string&) -> asset::AudioClipView
+namespace asset
+{
+auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
 {
     static auto view = AudioClipView{};
     return view;
 }
+
+auto AcquireTextureAsset(AssetId) -> TextureView
+{
+    static auto view = TextureView{};
+    return view;
+}
+} // namespace asset
+
 
 namespace graphics
 {
@@ -113,6 +123,8 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 {
+
+    // todo: make sure texture loading is working somehow
     auto stream = std::stringstream{};
     const auto expectedInfo = nc::ParticleInfo{};
     const auto expected = nc::ParticleEmitter{g_staticEntity, expectedInfo};
@@ -130,7 +142,7 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
     EXPECT_EQ(expectedInfo.init.rotationMax, actualInfo.init.rotationMax);
     EXPECT_EQ(expectedInfo.init.scaleMin, actualInfo.init.scaleMin);
     EXPECT_EQ(expectedInfo.init.scaleMax, actualInfo.init.scaleMax);
-    EXPECT_EQ(expectedInfo.init.particleTexturePath, actualInfo.init.particleTexturePath);
+    EXPECT_EQ(expectedInfo.init.texture.id, actualInfo.init.texture.id);
     EXPECT_EQ(expectedInfo.kinematic.velocityMin, actualInfo.kinematic.velocityMin);
     EXPECT_EQ(expectedInfo.kinematic.velocityMax, actualInfo.kinematic.velocityMax);
     EXPECT_EQ(expectedInfo.kinematic.velocityOverTimeFactor, actualInfo.kinematic.velocityOverTimeFactor);

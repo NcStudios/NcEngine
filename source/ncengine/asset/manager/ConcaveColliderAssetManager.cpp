@@ -67,6 +67,19 @@ auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_t
     };
 }
 
+auto ConcaveColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConcaveColliderView
+{
+    const auto index = m_concaveColliders.index(id);
+    NC_ASSERT(index != m_concaveColliders.NullIndex, fmt::format("Asset is not loaded: '{}'", id));
+    const auto& collider = m_concaveColliders.at(index);
+    return ConcaveColliderView
+    {
+        .id = id,
+        .triangles = std::span<const Triangle>{collider.triangles},
+        .maxExtent = collider.maxExtent
+    };
+}
+
 bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_concaveColliders.contains(path);

@@ -3,6 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -596,7 +597,10 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
                         .periodicEmissionCount = 15u,
                         .periodicEmissionFrequency = 0.1f
                     },
-                    .init = {},
+                    .init = {
+                        .texture = asset::AcquireTextureAsset(asset::DefaultParticle)
+                        // todo need to set tex here
+                    },
                     .kinematic = {
                         .velocityMin = Vector3::One() * -2.0f,
                         .velocityMax = Vector3::One() * 2.0f,

@@ -35,7 +35,7 @@ class EmitterState
 
         auto GetInfo()         const noexcept -> const ParticleInfo&                   { return m_info; }
         auto GetEntity()       const noexcept -> Entity                                { return m_entity; }
-        auto GetTexture()      const noexcept -> const std::string&                    { return m_info.init.particleTexturePath; }
+        auto GetTexture()      const noexcept -> uint32_t                              { return m_info.init.texture.index; }
         auto GetMatrices()     const noexcept -> const std::vector<DirectX::XMMATRIX>& { return m_matrices; }
         auto GetLastPosition() const noexcept -> DirectX::FXMVECTOR                    { return m_lastPosition; }
 

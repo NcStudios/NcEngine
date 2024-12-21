@@ -1,4 +1,6 @@
 #include "ComponentSerialization.h"
+#include "ncengine/asset/Assets.h"
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -13,6 +15,18 @@
 
 namespace nc
 {
+void Serialize(std::ostream& stream, const asset::TextureView& out)
+{
+    serialize::Serialize(stream, out.id);
+}
+
+auto Deserialize(std::istream& stream) -> asset::TextureView
+{
+    auto textureId = uint64_t{};
+    serialize::Deserialize(stream, textureId);
+    return asset::AcquireTextureAsset(textureId);
+}
+
 void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
@@ -45,6 +59,7 @@ auto DeserializeDirectionalLight(std::istream& stream, const DeserializationCont
 
 void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
 {
+    // todo: can no longer just serialize the TextureView - index is not guaranteed to be the same...
     serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
     serialize::Serialize(stream, out.GetInfo());
 }
