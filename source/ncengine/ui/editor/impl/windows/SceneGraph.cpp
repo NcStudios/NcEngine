@@ -100,7 +100,7 @@ auto SceneGraph::PassFilter(Tag& tag) -> bool
 
 void SceneGraph::Graph(EditorContext& ctx, CreateEntityDialog& createEntity)
 {
-    for(auto entity : ctx.world.GetAll<Entity>())
+    for(auto entity : std::views::reverse(ctx.world.GetAll<Entity>()))
     {
         auto& hierarchy = ctx.world.Get<Hierarchy>(entity);
         auto& tag = ctx.world.Get<Tag>(entity);
