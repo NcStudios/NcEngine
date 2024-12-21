@@ -94,12 +94,16 @@ void TextureAssetManager::UnloadAll(asset_flags_type)
 
 auto TextureAssetManager::Acquire(const std::string& path, asset_flags_type) const -> TextureView
 {
-    const auto hash = m_table.hash(path);
-    const auto index = m_table.index(hash);
-    NC_ASSERT(index != m_table.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
-    return TextureView
-    {
-        .id = hash,
+    NC_ASSERT(m_table.contains(path), fmt::format("Texture is not loaded: '{}'", path));
+    return Acquire(m_table.hash(path));
+}
+
+auto TextureAssetManager::Acquire(AssetId id, asset_flags_type) const -> TextureView
+{
+    const auto index = m_table.index(id);
+    NC_ASSERT(index != m_table.NullIndex, fmt::format("Texture is not loaded: '{}'", id));
+    return TextureView{
+        .id = id,
         .index = static_cast<uint32_t>(index)
     };
 }

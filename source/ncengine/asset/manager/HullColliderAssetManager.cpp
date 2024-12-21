@@ -55,13 +55,17 @@ void HullColliderAssetManager::UnloadAll(asset_flags_type)
 
 auto HullColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConvexHullView
 {
-    const auto hash = m_hullColliders.hash(path);
-    const auto index = m_hullColliders.index(hash);
-    NC_ASSERT(index != m_hullColliders.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+    NC_ASSERT(m_hullColliders.contains(path), fmt::format("ConvexHull is not loaded: '{}'", path));
+    return Acquire(m_hullColliders.hash(path));
+}
+
+auto HullColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConvexHullView
+{
+    const auto index = m_hullColliders.index(id);
+    NC_ASSERT(index != m_hullColliders.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
     const auto& collider = m_hullColliders.at(index);
-    return ConvexHullView
-    {
-        .id = hash,
+    return ConvexHullView{
+        .id = id,
         .vertices = std::span<const Vector3>{collider.vertices},
         .extents = collider.extents,
         .maxExtent = collider.maxExtent

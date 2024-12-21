@@ -2,11 +2,11 @@
 #include "animation/SkeletalAnimationSubsystem.h"
 #include "animation/SkeletalAnimationStorage.h"
 #include "ncengine/Events.h"
+#include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/GraphicsUtility.h"
-#include "asset/AssetService.h"
 
 #include "ncengine/debug/Profile.h"
 
@@ -142,17 +142,13 @@ void MeshSubsystem::SetInstanceMaterial(const MeshInstanceContext& ctx,
                                         const MaterialInstance& material,
                                         MaterialPassFlags oldPasses)
 {
-    const auto meshService = asset::AssetService<asset::MeshView>::Get();
-    const auto meshPath = std::string{meshService->GetPath(ctx.meshId)};
-    const auto meshView = meshService->Acquire(meshPath);
-
-    auto updateInstance = [&ctx, &material, &meshView, oldPasses](const auto& instanceData, auto& cache) {
+    auto updateInstance = [&ctx, &material, oldPasses](const auto& instanceData, auto& cache) {
         cache.GetStagingArea().UpdateInstance(
             ctx.entity.Index(),
             oldPasses,
             material.GetPasses(),
             ctx.meshId,
-            meshView,
+            asset::AcquireMeshAsset(ctx.meshId),
             instanceData
         );
     };

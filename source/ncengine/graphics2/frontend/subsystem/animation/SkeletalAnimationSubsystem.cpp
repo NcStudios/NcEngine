@@ -40,7 +40,7 @@ auto StepTransition(nc::graphics::InFlightAnimation& state,
     state.blendFactor = std::clamp(normalized, 0.0f, 1.0f);
     if (state.currentTransitionTime >= state.transitionDuration)
     {
-        state.blendFromAnimId = nc::NullAnimationId;
+        state.blendFromAnimId = nc::asset::NullAssetId;
     }
 
     return StepAnimationTime(state.blendFromTime, blendFromAnimation, dt);

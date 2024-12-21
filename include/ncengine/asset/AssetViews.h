@@ -17,12 +17,13 @@ struct ImFont;
 
 namespace nc::asset
 {
-constexpr auto NullAssetId = std::numeric_limits<size_t>::max();
+using AssetId = uint64_t;
+constexpr auto NullAssetId = std::numeric_limits<AssetId>::max();
 constexpr auto NullAssetIndex = std::numeric_limits<uint32_t>::max();
 
 struct AudioClipView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     std::span<const double> leftChannel;
     std::span<const double> rightChannel;
     size_t samplesPerChannel = 0ull;
@@ -30,14 +31,14 @@ struct AudioClipView
 
 struct ConcaveColliderView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     std::span<const Triangle> triangles;
     float maxExtent = 0.0f;
 };
 
 struct ConvexHullView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     std::span<const Vector3> vertices;
     Vector3 extents;
     float maxExtent = 0.0f;
@@ -51,14 +52,14 @@ enum class CubeMapUsage
 
 struct CubeMapView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     CubeMapUsage usage = CubeMapUsage::Skybox;
     uint32_t index = NullAssetIndex;
 };
 
 struct MeshView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     uint32_t firstVertex = NullAssetIndex;
     uint32_t vertexCount = NullAssetIndex;
     uint32_t firstIndex = NullAssetIndex;
@@ -68,7 +69,7 @@ struct MeshView
 
 struct TextureView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     uint32_t index = NullAssetIndex;
 };
 
@@ -105,7 +106,7 @@ struct ShaderView
 
 struct SkeletalAnimationView
 {
-    size_t id = NullAssetId;
+    AssetId id = NullAssetId;
     uint32_t index = NullAssetIndex;
 };
 

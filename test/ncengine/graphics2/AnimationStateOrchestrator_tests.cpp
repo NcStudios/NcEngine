@@ -75,7 +75,7 @@ TEST_F(AnimationStateOrchestratorTest, Transition_notAnimatable_doesNotAddState)
 
     // Transition to null animation does not create state
     g_nextTransition = nc::AnimationTransition{
-        .toAnimId = nc::NullAnimationId,
+        .toAnimId = nc::asset::NullAssetId,
         .type = nc::AnimationTransitionType::Loop
     };
 

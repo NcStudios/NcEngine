@@ -99,12 +99,16 @@ void SkeletalAnimationAssetManager::UnloadAll(asset_flags_type)
 
 auto SkeletalAnimationAssetManager::Acquire(const std::string& path, asset_flags_type) const -> SkeletalAnimationView
 {
-    const auto hash = m_table.hash(path);
-    const auto index = m_table.index(hash);
-    NC_ASSERT(index != m_table.NullIndex, fmt::format("Asset is not loaded: {}", path));
-    return SkeletalAnimationView
-    {
-        .id = hash,
+    NC_ASSERT(m_table.contains(path), fmt::format("SkeletalAnimation is not loaded: {}", path));
+    return Acquire(m_table.hash(path));
+}
+
+auto SkeletalAnimationAssetManager::Acquire(AssetId id, asset_flags_type) const -> SkeletalAnimationView
+{
+    const auto index = m_table.index(id);
+    NC_ASSERT(index != m_table.NullIndex, fmt::format("SkeletalAnimation is not loaded: {}", id));
+    return SkeletalAnimationView{
+        .id = id,
         .index = static_cast<uint32_t>(index)
     };
 }
