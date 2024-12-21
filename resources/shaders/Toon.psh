@@ -12,10 +12,7 @@ cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
     float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
+    uint lightCount;
 };
 
 struct MaterialData
@@ -29,9 +26,7 @@ struct MaterialData
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
-StructuredBuffer<DirectionalLightData> DirectionalLightBufferData : register(t2);
-StructuredBuffer<PointLightData> PointLightBufferData : register(t3);
-StructuredBuffer<SpotLightData> SpotLightBufferData : register(t4);
+StructuredBuffer<LightData> LightBufferData : register(t2);
 
 struct PSInput 
 { 
@@ -56,19 +51,9 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float alpha = Color.a;
     float3 finalColor = {0.0f, 0.0f, 0.0f};
 
-    for (int i = 0; i < dirLightsCount; i++)
+    for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = DirectionalLightRadiance(DirectionalLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
-    }
-    for (int i = 0; i < pointLightsCount; i++)
-    {
-        LightInfluence influence = PointLightRadiance(PointLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
-    }
-    for (int i = 0; i < spotLightsCount; i++)
-    {
-        LightInfluence influence = SpotLightRadiance(SpotLightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
         finalColor += influence.color * influence.specularAmt + influence.color * influence.diffuseAmt;
     }
 
