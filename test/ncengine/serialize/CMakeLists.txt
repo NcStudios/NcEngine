@@ -4,9 +4,7 @@ add_executable(ComponentSerialization_integration_tests
     ${NC_SOURCE_DIR}/serialize/ComponentSerialization.cpp
     ${NC_SOURCE_DIR}/audio/AudioSource.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
-    ${NC_SOURCE_DIR}/graphics/components/MeshRenderer.cpp
-    ${NC_SOURCE_DIR}/graphics/components/ParticleEmitter.cpp
-    ${NC_SOURCE_DIR}/graphics/components/ToonRenderer.cpp
+    ${NC_SOURCE_DIR}/graphics2/ParticleEmitter.cpp
 )
 
 target_include_directories(ComponentSerialization_integration_tests

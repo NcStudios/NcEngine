@@ -14,11 +14,23 @@ constexpr auto SwapChainColorRTIndex = std::numeric_limits<uint32_t>::max();
 constexpr auto SwapChainDepthRTIndex = std::numeric_limits<uint32_t>::max();
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
+
+/* MSAA Color Target Indices */
+constexpr auto MainColorMsaa = 0u;
+constexpr auto NormalsColorMsaa = 1u;
+
+/* Color Target Indices */
 constexpr auto MainColor = 0u;
-constexpr auto MainDepth = 0u;
 constexpr auto NormalsColor = 1u;
 constexpr auto PPWaveColor = 2u;
 constexpr auto PPOutlineColor = 3u;
+
+/* MSAA Depth Target Indices */
+constexpr auto MainDepthMsaa = 0u;
+constexpr auto NormalsDepthMsaa = 1u;
+
+/* Depth Target Indices */
+constexpr auto MainDepth = 0u;
 
 struct ShaderPaths
 {

@@ -8,12 +8,9 @@
 #include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
-#include "ncengine/graphics/ToonRenderer.h"
-#include "ncengine/network/NetworkDispatcher.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsLimits.h"
@@ -41,22 +38,6 @@ constexpr auto outerRadiusProp = nc::ui::Property{ &T::GetOuterRadius, &T::SetOu
 constexpr auto spatialProp     = nc::ui::Property{ &T::IsSpatial,      &T::SetSpatial,     "spatial"    };
 constexpr auto loopProp        = nc::ui::Property{ &T::IsLooping,      &T::SetLooping,     "loop"       };
 } // namespace audio_source_ext
-
-namespace mesh_renderer_ext
-{
-using T = nc::graphics::MeshRenderer;
-
-constexpr auto getBaseColor = [](auto& obj) { return obj.GetMaterial().baseColor; };
-constexpr auto getNormal    = [](auto& obj) { return obj.GetMaterial().normal;    };
-constexpr auto getRoughness = [](auto& obj) { return obj.GetMaterial().roughness; };
-constexpr auto getMetallic  = [](auto& obj) { return obj.GetMaterial().metallic;  };
-
-constexpr auto meshProp      = nc::ui::Property{ &T::GetMeshPath, &T::SetMesh,      "mesh"      };
-constexpr auto baseColorProp = nc::ui::Property{ getBaseColor,    &T::SetBaseColor, "baseColor" };
-constexpr auto normalProp    = nc::ui::Property{ getNormal,       &T::SetNormal,    "normal"    };
-constexpr auto roughnessProp = nc::ui::Property{ getRoughness,    &T::SetRoughness, "roughness" };
-constexpr auto metallicProp  = nc::ui::Property{ getMetallic,     &T::SetMetallic,  "metallic"  };
-} // namespace mesh_renderer_ext
 
 namespace mesh_base_ext
 {
@@ -510,6 +491,13 @@ void ConstraintWidget(nc::Constraint& constraint, nc::RigidBody& body, nc::ecs::
         if (ImGui::Button(buttonText))
         {
             body.RemoveConstraint(constraint.GetId());
+            // Constraint dangles now - need to clean up and get out.
+            if (isConstraintOpen)
+            {
+                ImGui::TreePop();
+            }
+
+            return;
         }
     }
 
@@ -619,22 +607,6 @@ constexpr auto rotationMaxProp = nc::ui::Property{ getRotationMax, setRotationMa
 constexpr auto rotationOverTimeFactorProp = nc::ui::Property{ getRotationOverTime, setRotationOverTime, "angVelOverTime" };
 constexpr auto scaleOverTimeFactoryProp = nc::ui::Property{ getScaleOverTime, setScaleOverTime, "scaleOverTime" };
 } // namespace particle_emitter_ext
-
-namespace toon_renderer_ext
-{
-using T = nc::graphics::ToonRenderer;
-
-constexpr auto getBaseColor    = [](auto& obj) { return obj.GetMaterial().baseColor;      };
-constexpr auto getOutlineWidth = [](auto& obj) { return obj.GetMaterial().outlineWidth;        };
-constexpr auto getHatching     = [](auto& obj) { return obj.GetMaterial().hatching;       };
-constexpr auto getTiling       = [](auto& obj) { return obj.GetMaterial().hatchingTiling; };
-
-constexpr auto meshProp           = nc::ui::Property{ &T::GetMeshPath, &T::SetMesh,           "mesh"         };
-constexpr auto baseColorProp      = nc::ui::Property{ getBaseColor,    &T::SetBaseColor,      "baseColor"    };
-constexpr auto outlineWidthProp   = nc::ui::Property{ getOutlineWidth, &T::SetOutlineWidth,   "outlineWidthPercentage" };
-constexpr auto hatchingProp       = nc::ui::Property{ getHatching,     &T::SetHatching,       "hatching"     };
-constexpr auto hatchingTilingProp = nc::ui::Property{ getTiling,       &T::SetHatchingTiling, "tiling"       };
-} // namespace toon_renderer_ext
 } // anonymous namespace
 
 namespace nc::ui::editor
@@ -645,6 +617,7 @@ void FrameLogicUIWidget(FrameLogic&, EditorContext&, const std::any&)
 
 void TagUIWidget(Tag& tag, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "Tag");
     ui::InputText(tag.value, "tag");
 }
 
@@ -720,6 +693,7 @@ void TransformUIWidget(Transform& transform, EditorContext& ctx, const std::any&
 
 void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "AudioSource");
     ui::PropertyWidget(audio_source_ext::gainProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 1.0f);
     ui::PropertyWidget(audio_source_ext::innerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 20.0f);
     ui::PropertyWidget(audio_source_ext::outerRadiusProp, audioSource, &ui::DragFloat, 0.1f, 0.0f, 200.0f);
@@ -749,17 +723,6 @@ void AudioSourceUIWidget(audio::AudioSource& audioSource, EditorContext&, const 
         audioSource.AddClip(asset::DefaultAudioClip);
 }
 
-void MeshRendererUIWidget(graphics::MeshRenderer& renderer, EditorContext&, const std::any&)
-{
-    auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
-    auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
-    ui::PropertyWidget(mesh_renderer_ext::meshProp, renderer, &ui::Combobox, meshes);
-    ui::PropertyWidget(mesh_renderer_ext::baseColorProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(mesh_renderer_ext::normalProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(mesh_renderer_ext::roughnessProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(mesh_renderer_ext::metallicProp, renderer, &ui::Combobox, textures);
-}
-
 void StaticMeshUIWidget(StaticMesh& staticMesh, EditorContext& ctx, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "StaticMesh");
@@ -786,6 +749,7 @@ void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext& ctx, const std
 
 void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "ParticleEmitter");
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 30.0f;
@@ -825,25 +789,23 @@ void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&,
 
 void DirectionalLightUIWidget(graphics::DirectionalLight& light, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "DirectionalLight");
     ui::InputColor3(light.color, "color");
 }
 
 void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "PointLight");
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
-#ifndef NC_USE_DILIGENT
-    ui::InputColor3(light.ambientColor, "ambientColor");
-    ui::InputColor3(light.diffuseColor, "diffuseColor");
-#else
     ui::InputColor3(light.diffuseColor, "color");
-#endif
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
 void SpotLightUIWidget(graphics::SpotLight& light, EditorContext&, const std::any&)
 {
+    IMGUI_SCOPE(ui::ImGuiId, "SpotLight");
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
     constexpr auto max = 3.14159f;
@@ -851,25 +813,6 @@ void SpotLightUIWidget(graphics::SpotLight& light, EditorContext&, const std::an
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);
-}
-
-void SkeletalAnimatorUIWidget(graphics::SkeletalAnimator&, EditorContext&, const std::any&)
-{
-}
-
-void ToonRendererUIWidget(graphics::ToonRenderer& renderer, EditorContext&, const std::any&)
-{
-    auto meshes = ui::editor::GetLoadedAssets(asset::AssetType::Mesh);
-    auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
-    ui::PropertyWidget(toon_renderer_ext::meshProp, renderer, &ui::Combobox, meshes);
-    ui::PropertyWidget(toon_renderer_ext::baseColorProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(toon_renderer_ext::outlineWidthProp, renderer, &ui::InputU32);
-    ui::PropertyWidget(toon_renderer_ext::hatchingProp, renderer, &ui::Combobox, textures);
-    ui::PropertyWidget(toon_renderer_ext::hatchingTilingProp, renderer, &ui::InputU32);
-}
-
-void NetworkDispatcherUIWidget(net::NetworkDispatcher&, EditorContext&, const std::any&)
-{
 }
 
 void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&)

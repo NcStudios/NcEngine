@@ -1,11 +1,12 @@
 #include "MeshSubsystem.h"
+#include "animation/SkeletalAnimationSubsystem.h"
 #include "animation/SkeletalAnimationStorage.h"
 #include "ncengine/Events.h"
+#include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/GraphicsUtility.h"
-#include "asset/AssetService.h"
 
 #include "ncengine/debug/Profile.h"
 
@@ -33,8 +34,7 @@ auto MakeSkinnedInstanceData(const nc::MeshInstanceContext& ctx,
 
 namespace nc::graphics
 {
-MeshSubsystem::MeshSubsystem(SkeletalAnimationStorage& animationStorage,
-                             BoneCacheStaging& boneCacheStaging,
+MeshSubsystem::MeshSubsystem(ISkeletalAnimationSubsystem& animationSystem,
                              SystemEvents& events,
                              uint32_t maxEntities,
                              uint32_t maxMeshRenderers,
@@ -42,8 +42,7 @@ MeshSubsystem::MeshSubsystem(SkeletalAnimationStorage& animationStorage,
     : m_transformCache{maxMeshRenderers},
       m_staticMeshInstanceCache{maxEntities, initialBatchSize},
       m_skinnedMeshInstanceCache{maxEntities, initialBatchSize},
-      m_animationStorage{&animationStorage},
-      m_boneCache{&boneCacheStaging},
+      m_animationSystem{&animationSystem},
       m_rebuildStaticsConnection{events.rebuildStatics.Connect(this, &MeshSubsystem::OnRebuildStatics)}
 {
     MeshBase::RegisterSubsystem(this);
@@ -72,11 +71,7 @@ void MeshSubsystem::AddInstance(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            const auto boneCount = GetRigBoneCount(mesh.id);
-            ctx.boneDataHandle = boneCount > 0
-                ? m_boneCache->Allocate(boneCount)
-                : NullBoneCacheHandle;
-
+            ctx.boneDataHandle = m_animationSystem->AllocateBones(mesh.id);
             addToCache(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }
@@ -104,11 +99,7 @@ void MeshSubsystem::RemoveInstance(const MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            if (ctx.boneDataHandle != NullBoneCacheHandle)
-            {
-                m_boneCache->Free(ctx.boneDataHandle);
-            }
-
+            m_animationSystem->NotifyRemove(ctx.entity, ctx.boneDataHandle);
             removeFromCache(m_skinnedMeshInstanceCache);
             break;
         }
@@ -140,16 +131,7 @@ void MeshSubsystem::SetInstanceMesh(MeshInstanceContext& ctx,
         }
         case MeshInstanceType::Skinned:
         {
-            if (ctx.boneDataHandle != NullBoneCacheHandle)
-            {
-                m_boneCache->Free(ctx.boneDataHandle);
-            }
-
-            const auto boneCount = GetRigBoneCount(newMesh.id);
-            ctx.boneDataHandle = boneCount > 0
-                ? m_boneCache->Allocate(boneCount)
-                : NullBoneCacheHandle;
-
+            ctx.boneDataHandle = m_animationSystem->AllocateBones(newMesh.id);
             updateInstance(MakeSkinnedInstanceData(ctx, material), m_skinnedMeshInstanceCache);
             break;
         }
@@ -160,17 +142,13 @@ void MeshSubsystem::SetInstanceMaterial(const MeshInstanceContext& ctx,
                                         const MaterialInstance& material,
                                         MaterialPassFlags oldPasses)
 {
-    const auto meshService = asset::AssetService<asset::MeshView>::Get();
-    const auto meshPath = std::string{meshService->GetPath(ctx.meshId)};
-    const auto meshView = meshService->Acquire(meshPath);
-
-    auto updateInstance = [&ctx, &material, &meshView, oldPasses](const auto& instanceData, auto& cache) {
+    auto updateInstance = [&ctx, &material, oldPasses](const auto& instanceData, auto& cache) {
         cache.GetStagingArea().UpdateInstance(
             ctx.entity.Index(),
             oldPasses,
             material.GetPasses(),
             ctx.meshId,
-            meshView,
+            asset::AcquireMeshAsset(ctx.meshId),
             instanceData
         );
     };
@@ -211,14 +189,6 @@ void MeshSubsystem::OnBeforeSceneLoad()
     // Call here instead of on Clear() to allow the OnRemove callbacks to fire before purging.
     m_staticMeshInstanceCache.Purge();
     m_skinnedMeshInstanceCache.Purge();
-}
-
-auto MeshSubsystem::GetRigBoneCount(uint64_t meshId) -> uint32_t
-{
-    const auto _ = m_animationStorage->AcquireReadLock();
-    return m_animationStorage->HasRig(meshId)
-        ? static_cast<uint32_t>(m_animationStorage->GetRig(meshId).vertexToBone.size())
-        : 0u;
 }
 
 void MeshSubsystem::OnRebuildStatics()

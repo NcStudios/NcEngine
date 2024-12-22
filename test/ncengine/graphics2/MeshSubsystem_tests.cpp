@@ -3,12 +3,11 @@
 #include "../EcsFixture.inl"
 #include "ncengine/Events.h"
 #include "ncengine/ecs/Entity.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/graphics/Mesh.h"
 #include "graphics2/frontend/subsystem/MeshSubsystem.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
-#include "graphics2/frontend/subsystem/animation/SkeletalAnimationStorage.h"
+#include "graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.h"
 
 #include <array>
 #include <ranges>
@@ -29,6 +28,11 @@ MaterialInstance::MaterialInstance(const MaterialDesc&){}
 auto MaterialInstance::GetPasses()     const ->       MaterialPassFlags   { return g_materialDesc.passes;     }
 auto MaterialInstance::GetProperties() const -> const MaterialProperties& { return g_materialDesc.properties; }
 void MaterialInstance::Release() noexcept {}
+
+namespace time
+{
+auto DeltaTime() -> float { return 1.0f / 60.0f; }
+} // namespace time
 } // namespace nc
 
 class MeshSubsystemTest : public testing::Test,
@@ -36,8 +40,7 @@ class MeshSubsystemTest : public testing::Test,
 {
     protected:
         static constexpr auto MaxEntities = 20ull;
-        nc::graphics::SkeletalAnimationStorage animationStorage;
-        nc::graphics::BoneCache boneCache{10};
+        nc::graphics::SkeletalAnimationSubsystem animationSystem{20};
         nc::SystemEvents systemEvents;
         nc::graphics::MeshSubsystem uut;
 
@@ -68,8 +71,7 @@ class MeshSubsystemTest : public testing::Test,
         MeshSubsystemTest()
             : EcsFixture{MaxEntities},
               uut{
-                animationStorage,
-                boneCache.GetStagingArea(),
+                animationSystem,
                 systemEvents,
                 MaxEntities,
                 MaxEntities,

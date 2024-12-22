@@ -9,7 +9,6 @@
 #include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/ecs/Ecs.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/scene/NcScene.h"
 #include "ncengine/task/TaskGraph.h"
@@ -24,7 +23,7 @@ namespace
 {
 struct NcGraphicsStub2 : nc::graphics::NcGraphics
 {
-    NcGraphicsStub2(nc::Registry*)
+    NcGraphicsStub2()
     {
         // client app may still make imgui calls (font loading, etc.), so we need a context
         ImGui::CreateContext();
@@ -40,14 +39,22 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
         update.Add(
             nc::update_task_id::ParticleEmitterUpdate,
             "ParticleEmitterUpdate(stub)",
-            []{}
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
+        );
+
+        update.Add(
+            nc::update_task_id::SkeletalAnimationUpdate,
+            "SkeletalAnimationUpdate(stub)",
+            []{},
+            {nc::update_task_id::CommitStagedChanges}
         );
 
         update.Add(
             nc::update_task_id::ParticleEmitterSync,
             "ParticleEmitterSync(stub)",
             []{},
-            {nc::update_task_id::CommitStagedChanges}
+            {nc::update_task_id::UpdateTransforms}
         );
 
         render.Add(
@@ -82,6 +89,7 @@ auto MakeEngineCreateInfo(bool enableValidation) -> Diligent::EngineCreateInfo
     engineCI.EnableValidation = enableValidation;
     engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     engineCI.Features.ShaderResourceRuntimeArrays = Diligent::DEVICE_FEATURE_STATE_ENABLED;
+    engineCI.Features.WireframeFill = Diligent::DEVICE_FEATURE_STATE_ENABLED;
     return engineCI;
 }
 
@@ -111,53 +119,48 @@ void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
 
 namespace nc::graphics
 {
-#ifdef NC_USE_DILIGENT
-    auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
-                             const config::AssetSettings& assetSettings,
-                             const config::GraphicsSettings& graphicsSettings,
-                             const config::MemorySettings& memorySettings,
-                             ModuleProvider modules,
-                             Registry* registry,
-                             SystemEvents& events) -> std::unique_ptr<NcGraphics>
+auto BuildGraphicsModule(const config::ProjectSettings&,
+                         const config::AssetSettings& assetSettings,
+                         const config::GraphicsSettings& graphicsSettings,
+                         const config::MemorySettings& memorySettings,
+                         ModuleProvider modules,
+                         ecs::Ecs world,
+                         SystemEvents& events) -> std::unique_ptr<NcGraphics>
+{
+    if (graphicsSettings.enabled)
     {
-        (void)projectSettings;
-        (void)memorySettings;
-        (void)events;
+        auto ncWindow = modules.Get<window::NcWindow>();
+        NC_ASSERT(modules.Get<asset::NcAsset>(), "NcGraphics requires NcAsset to be registered before it.");
+        NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
+        NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
 
-        if (graphicsSettings.enabled)
+        ncWindow->SetWindow(window::WindowInfo
         {
-            auto ncWindow = modules.Get<window::NcWindow>();
-            NC_ASSERT(modules.Get<asset::NcAsset>(), "NcGraphics requires NcAsset to be registered before it.");
-            NC_ASSERT(ncWindow, "NcGraphics requires NcWindow to be registered before it.");
-            NC_ASSERT(modules.Get<NcScene>(), "NcGraphics requires NcScene to be registered before it.");
+            .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
+            .useNativeResolution = graphicsSettings.useNativeResolution,
+            .launchInFullScreen = graphicsSettings.launchInFullscreen,
+            .isResizable = false
+        });
 
-            ncWindow->SetWindow(window::WindowInfo
-            {
-                .dimensions = Vector2{static_cast<float>(graphicsSettings.screenWidth), static_cast<float>(graphicsSettings.screenHeight)},
-                .useNativeResolution = graphicsSettings.useNativeResolution,
-                .launchInFullScreen = graphicsSettings.launchInFullscreen,
-                .isResizable = false
-            });
-
-            NC_LOG_TRACE("Building NcGraphics module");
-            return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, assetSettings.shadersPath, registry, modules, events, *ncWindow);
-        }
-
-        NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
-        return std::make_unique<NcGraphicsStub2>(registry);
+        NC_LOG_TRACE("Building NcGraphics module");
+        return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, assetSettings.shadersPath, world, modules, events, *ncWindow);
     }
-#endif
+
+    NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
+    return std::make_unique<NcGraphicsStub2>();
+}
 
 NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                                  const config::MemorySettings& memorySettings,
                                  std::string_view shadersPath,
-                                 Registry* registry,
+                                 ecs::Ecs world,
                                  ModuleProvider modules,
                                  SystemEvents& events,
                                  window::NcWindow& window)
-        : m_world{registry->GetEcs()},
+        : m_world{world},
           m_engine{
             MakeEngineCreateInfo(graphicsSettings.useValidationLayers),
+            DeviceCapability{.msaaSampleCount = graphicsSettings.antialiasing},
             window.GetWindowHandle(),
             shadersPath,
             ::LogCallback
@@ -190,40 +193,40 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = MainColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = MainColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .colorSink = NormalsColor,
-                    .depthSink = SwapChainDepthRTIndex
+                    .colorSink = NormalsColorMsaa,
+                    .depthSink = NormalsDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
-                    .colorSink = NormalsColor,
-                    .depthSink = SwapChainDepthRTIndex
+                    .colorSink = NormalsColorMsaa,
+                    .depthSink = NormalsDepthMsaa
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = MainColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Outline,
@@ -244,7 +247,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetSwapChain(),
             m_engine.GetShaderFactory(),
             m_shaderBindings,
-            m_passManifest
+            m_passManifest,
+            m_engine.GetDeviceCapability().msaaSampleCount
           },
           m_frontend{
             m_engine.GetContext(),
@@ -264,7 +268,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             modules.Get<asset::NcAsset>()->OnBoneUpdate()
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
-          m_resizeNeeded{false}
+          m_resizeNeeded{false},
+          m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount}
 {
 }
 
@@ -339,16 +344,28 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
     NC_LOG_TRACE("Building NcGraphics Tasks");
 
     update.Add(
-        nc::update_task_id::ParticleEmitterUpdate,
+        update_task_id::ParticleEmitterUpdate,
         "ParticleEmitterUpdate(stub)",
-        []{}
+        []{},
+        {update_task_id::CommitStagedChanges}
+    );
+
+
+
+    update.Add(
+        update_task_id::ParticleEmitterSync,
+        "ParticleEmitterSync(stub)",
+        []{},
+        {update_task_id::UpdateTransforms}
     );
 
     update.Add(
-        nc::update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync(stub)",
-        []{},
-        {nc::update_task_id::CommitStagedChanges}
+        update_task_id::SkeletalAnimationUpdate,
+        "SkeletalAnimationUpdate",
+        [this]{
+            m_frontend.GetSkeletalAnimationSubsystem().Update(m_world);
+        },
+        {update_task_id::CommitStagedChanges}
     );
 
     render.Add(
@@ -413,7 +430,7 @@ void NcGraphicsImpl2::Run()
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 {
-    (void)isMinimized;
+    if (isMinimized) return;
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
     m_resizeNeeded = true;
     m_dimensions = dimensions;
@@ -422,8 +439,8 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 void NcGraphicsImpl2::Resize()
 {
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
+    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
+    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
     m_resizeNeeded = false;
 }
 } // namespace nc::graphics

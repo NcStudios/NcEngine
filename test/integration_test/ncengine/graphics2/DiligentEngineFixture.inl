@@ -21,6 +21,7 @@ class DiligentEngineFixture : public testing::Test
             engineCI.Features.BindlessResources = Diligent::DEVICE_FEATURE_STATE_ENABLED;
             engine = std::make_unique<nc::graphics::DiligentEngine>(
                 engineCI,
+                nc::graphics::DeviceCapability{},
                 window->GetWindowHandle(),
                 "",
                 &DiligentEngineFixture::LogCallback

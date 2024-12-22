@@ -163,7 +163,15 @@ void MeshAssetManager::UnloadAll(asset_flags_type)
 
 auto MeshAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshView
 {
+    NC_ASSERT(m_accessors.contains(path), fmt::format("Mesh is not loaded: '{}'", path));
     return m_accessors.at(path);
+}
+
+auto MeshAssetManager::Acquire(AssetId id, asset_flags_type) const -> MeshView
+{
+    const auto index = m_accessors.index(id);
+    NC_ASSERT(index != m_accessors.NullIndex, fmt::format("Mesh is not loaded: '{}'", id));
+    return m_accessors.at(index);
 }
 
 bool MeshAssetManager::IsLoaded(const std::string& path, asset_flags_type) const

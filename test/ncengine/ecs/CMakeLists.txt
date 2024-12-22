@@ -248,31 +248,3 @@ target_link_libraries(Transform_unit_tests
 )
 
 add_test(Transform_unit_tests Transform_unit_tests)
-
-### View Tests ###
-add_executable(View_unit_tests
-    View_unit_tests.cpp
-)
-
-target_include_directories(View_unit_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_INCLUDE_DIR}/ncengine
-        ${NC_SOURCE_DIR}
-        ${NC_EXTERNAL_DIR}
-)
-
-target_compile_options(View_unit_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(View_unit_tests
-    PRIVATE
-        NcMath
-        NcUtility
-        gtest
-)
-
-add_test(View_unit_tests View_unit_tests)
-

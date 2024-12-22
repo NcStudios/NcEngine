@@ -11,10 +11,10 @@ namespace nc::graphics
 PostProcessPass::PostProcessPass(Diligent::IRenderDevice& device,
                                  const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
                                  std::vector<PostProcessPipelineInstance> instances_,
-                                 PassDesc passDesc)
+                                 PassDesc passDesc_)
     : pso{},
       instances{std::move(instances_)},
-      passDesc{passDesc}
+      passDesc{passDesc_}
 {
     device.CreateGraphicsPipelineState(createInfo, &pso);
     NC_ASSERT(pso, "Failed to create pipeline state object");

@@ -6,7 +6,7 @@ TEST(SkeletalAnimationControllerTest, GetCurrentAnimationId_returnsUntransitione
     auto uut = nc::SkeletalAnimationController{1};
 
     // null state until first transition
-    EXPECT_EQ(nc::NullAnimationId, uut.GetCurrentAnimationId());
+    EXPECT_EQ(nc::asset::NullAssetId, uut.GetCurrentAnimationId());
     uut.CheckForTransition();
     EXPECT_EQ(1, uut.GetCurrentAnimationId());
 
@@ -27,7 +27,7 @@ TEST(SkeletalAnimationControllerTest, GetCurrentAnimationId_returnsUntransitione
     uut.StopImmediate([&exitStop](){ return exitStop; });
     EXPECT_EQ(3, uut.GetCurrentAnimationId());
     uut.CheckForTransition();
-    EXPECT_EQ(nc::NullAnimationId, uut.GetCurrentAnimationId());
+    EXPECT_EQ(nc::asset::NullAssetId, uut.GetCurrentAnimationId());
     exitStop = true;
     uut.CheckForTransition(); // back to root
     EXPECT_EQ(1, uut.GetCurrentAnimationId());
@@ -81,7 +81,7 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_afterConstruction_enter
 {
     auto uut = nc::SkeletalAnimationController{1, 0.1f};
     const auto actual = uut.CheckForTransition();
-    EXPECT_EQ(nc::NullAnimationId, actual.fromAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, actual.fromAnimId);
     EXPECT_EQ(1, actual.toAnimId);
     EXPECT_FLOAT_EQ(0.1f, actual.transitionDuration);
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
@@ -93,7 +93,7 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_immediateStateQueued_en
 
     uut.PlayOnceImmediate(2);
     const auto actual = uut.CheckForTransition();
-    EXPECT_EQ(nc::NullAnimationId, actual.fromAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, actual.fromAnimId);
     EXPECT_EQ(2, actual.toAnimId);
     EXPECT_FLOAT_EQ(0.1f, actual.transitionDuration);
     EXPECT_EQ(nc::ImmediateAnimationState, uut.GetActiveState());
@@ -145,7 +145,7 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediateStopState_tr
     uut.StopImmediate([&exit](){ return exit; });
     const auto stopTransition = uut.CheckForTransition();
     EXPECT_EQ(1, stopTransition.fromAnimId);
-    EXPECT_EQ(nc::NullAnimationId, stopTransition.toAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, stopTransition.toAnimId);
     EXPECT_EQ(nc::AnimationTransitionType::Stop, stopTransition.type);
     EXPECT_EQ(nc::ImmediateAnimationState, uut.GetActiveState());
 
@@ -156,7 +156,7 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_inImmediateStopState_tr
     // exits back to root on condition
     exit = true;
     const auto exitTransition = uut.CheckForTransition();
-    EXPECT_EQ(nc::NullAnimationId, exitTransition.fromAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, exitTransition.fromAnimId);
     EXPECT_EQ(1, exitTransition.toAnimId);
     EXPECT_EQ(nc::AnimationTransitionType::Loop, exitTransition.type);
     EXPECT_EQ(nc::RootAnimationState, uut.GetActiveState());
@@ -245,12 +245,12 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_successorCycle_transiti
     // expect to repeatedly cycle from root -> stop -> loop
     const auto stopTransition = uut.CheckForTransition();
     EXPECT_EQ(1, stopTransition.fromAnimId);
-    EXPECT_EQ(nc::NullAnimationId, stopTransition.toAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, stopTransition.toAnimId);
     EXPECT_EQ(nc::AnimationTransitionType::Stop, stopTransition.type);
     EXPECT_EQ(stopState, uut.GetActiveState());
 
     const auto loopTransition = uut.CheckForTransition();
-    EXPECT_EQ(nc::NullAnimationId, loopTransition.fromAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, loopTransition.fromAnimId);
     EXPECT_EQ(2, loopTransition.toAnimId);
     EXPECT_EQ(nc::AnimationTransitionType::Loop, loopTransition.type);
     EXPECT_EQ(loopState, uut.GetActiveState());
@@ -263,7 +263,7 @@ TEST(SkeletalAnimationControllerTest, CheckForTransition_successorCycle_transiti
 
     const auto stopTransition2 = uut.CheckForTransition();
     EXPECT_EQ(1, stopTransition2.fromAnimId);
-    EXPECT_EQ(nc::NullAnimationId, stopTransition2.toAnimId);
+    EXPECT_EQ(nc::asset::NullAssetId, stopTransition2.toAnimId);
     EXPECT_EQ(nc::AnimationTransitionType::Stop, stopTransition2.type);
     EXPECT_EQ(stopState, uut.GetActiveState());
 }

@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/graphics/Camera.h"
 #include "ncengine/graphics/PostProcess.h"
 #include "ncengine/module/Module.h"
@@ -13,7 +14,6 @@
 
 namespace nc
 {
-class Registry;
 struct SystemEvents;
 
 namespace config
@@ -117,7 +117,7 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          const config::GraphicsSettings& graphicsSettings,
                          const config::MemorySettings& memorySettings,
                          ModuleProvider modules,
-                         Registry* registry,
+                         ecs::Ecs world,
                          SystemEvents& events) -> std::unique_ptr<NcGraphics>;
 } // namespace graphics
 } // namespace nc

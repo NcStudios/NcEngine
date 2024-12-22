@@ -27,7 +27,7 @@ enum class MeshInstanceType : uint8_t
 struct MeshInstanceContext
 {
     Entity entity = Entity::Null();
-    uint64_t meshId = std::numeric_limits<uint64_t>::max();
+    asset::AssetId meshId = std::numeric_limits<uint64_t>::max();
     uint32_t transformDataHandle = std::numeric_limits<uint32_t>::max();
     uint32_t boneDataHandle = std::numeric_limits<uint32_t>::max();
     MeshInstanceType type = MeshInstanceType::Static;
@@ -65,6 +65,7 @@ class MeshBase
 
         /** @name General Functions */
         auto GetEntity() const -> Entity { return m_ctx.entity; }
+        auto GetContext() const -> const MeshInstanceContext& { return m_ctx; }
 
         /** @name Mesh Functions */
         auto GetMeshId() const -> uint64_t { return m_ctx.meshId; }
@@ -115,7 +116,7 @@ class SkinnedMesh : public MeshBase
         explicit SkinnedMesh(Entity self,
                              const asset::MeshView& meshAsset,
                              const MaterialDesc& materialDesc,
-                             uint64_t rootAnimationId = NullAnimationId)
+                             asset::AssetId rootAnimationId = asset::NullAssetId)
             : MeshBase{self, meshAsset, materialDesc, MeshInstanceType::Skinned},
               m_controller{rootAnimationId}
         {

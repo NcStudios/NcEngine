@@ -25,7 +25,7 @@ class NcGraphicsImpl2 : public NcGraphics
         NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                        const config::MemorySettings& memorySettings,
                        std::string_view shadersPath,
-                       Registry* registry,
+                       ecs::Ecs world,
                        ModuleProvider modules,
                        SystemEvents& events,
                        window::NcWindow& window);
@@ -63,6 +63,7 @@ class NcGraphicsImpl2 : public NcGraphics
         Connection m_onResizeConnection;
         Vector2 m_dimensions;
         bool m_resizeNeeded;
+        uint32_t m_numSamples;
 };
 } // namespace graphics
 } // namespace nc

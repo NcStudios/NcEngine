@@ -6,7 +6,6 @@
 
 #include "ncengine/ecs/EcsFwd.h"
 
-
 #include <vector>
 
 namespace nc
@@ -24,9 +23,7 @@ class LightSubsystem
         auto BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState;
 
     private:
-        std::vector<DirectionalLightData> m_directionalLights;
-        std::vector<PointLightData> m_pointLights;
-        std::vector<SpotLightData> m_spotLights;
+        std::vector<LightData> m_data;
 };
 } // namespace graphics
 } // namespace nc

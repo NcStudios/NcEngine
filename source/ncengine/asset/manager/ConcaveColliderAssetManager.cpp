@@ -55,13 +55,17 @@ void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
 
 auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
 {
-    const auto hash = m_concaveColliders.hash(path);
-    const auto index = m_concaveColliders.index(hash);
-    NC_ASSERT(index != m_concaveColliders.NullIndex, fmt::format("Asset is not loaded: '{}'", path));
+    NC_ASSERT(m_concaveColliders.contains(path), fmt::format("Asset is not loaded: '{}'", path));
+    return Acquire(m_concaveColliders.hash(path));
+}
+
+auto ConcaveColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConcaveColliderView
+{
+    const auto index = m_concaveColliders.index(id);
+    NC_ASSERT(index != m_concaveColliders.NullIndex, fmt::format("ConcaveCollider is not loaded: '{}'", id));
     const auto& collider = m_concaveColliders.at(index);
-    return ConcaveColliderView
-    {
-        .id = hash,
+    return ConcaveColliderView{
+        .id = id,
         .triangles = std::span<const Triangle>{collider.triangles},
         .maxExtent = collider.maxExtent
     };

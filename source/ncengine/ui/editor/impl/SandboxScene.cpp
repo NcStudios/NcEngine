@@ -1,6 +1,5 @@
 #include "SandboxScene.h"
 #include "EditorCamera.h"
-#include "ncengine/ecs/Registry.h"
 #include "ncengine/serialize/SceneSerialization.h"
 
 #include <fstream>

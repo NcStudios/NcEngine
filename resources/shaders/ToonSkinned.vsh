@@ -97,10 +97,7 @@ cbuffer EnvironmentBufferData
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
     float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
+    uint lightCount;
 };
 
 void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)

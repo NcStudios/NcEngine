@@ -47,7 +47,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
                        nc::graphics::PostProcessColorSinkBufferResource& postProcessColorSinkBufferResource,
                        nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
                        uint32_t colorRenderTargetIndex,
-                       uint32_t depthRenderTargetIndex)
+                       uint32_t depthRenderTargetIndex,
+                       bool isMsaa)
 {
     Diligent::ITextureView* pRTV = nullptr;
     Diligent::ITextureView* pDSV = nullptr;
@@ -60,7 +61,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pRTV = static_cast<Diligent::ITextureView*>(postProcessColorSinkBufferResource.GetColorRenderTarget(colorRenderTargetIndex));
+            pRTV = isMsaa ? static_cast<Diligent::ITextureView*>(postProcessColorSinkBufferResource.GetMsaaSrv(colorRenderTargetIndex)) :
+                            static_cast<Diligent::ITextureView*>(postProcessColorSinkBufferResource.GetSrv(colorRenderTargetIndex));
         }
     }
 
@@ -72,7 +74,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pDSV = static_cast<Diligent::ITextureView*>(postProcessDepthSinkBufferResource.GetDepthRenderTarget(depthRenderTargetIndex));
+            pDSV = isMsaa ? static_cast<Diligent::ITextureView*>(postProcessDepthSinkBufferResource.GetMsaaDSV(depthRenderTargetIndex)) :
+                            static_cast<Diligent::ITextureView*>(postProcessDepthSinkBufferResource.GetDSV(depthRenderTargetIndex));
         }
     }
 
@@ -94,7 +97,8 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
                       nc::graphics::PostProcessColorSinkBufferResource& postProcessColorSinkBufferResource,
                       nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
                       uint32_t colorRenderTargetIndex,
-                      uint32_t depthRenderTargetIndex)
+                      uint32_t depthRenderTargetIndex,
+                      bool isMsaa)
 {
     Diligent::ITextureView* pRTV = nullptr;
     Diligent::ITextureView* pDSV = nullptr;
@@ -107,7 +111,8 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pRTV = static_cast<Diligent::ITextureView*>(postProcessColorSinkBufferResource.GetColorRenderTarget(colorRenderTargetIndex));
+            pRTV = isMsaa ? static_cast<Diligent::ITextureView*>(postProcessColorSinkBufferResource.GetMsaaSrv(colorRenderTargetIndex)) :
+                            static_cast<Diligent::ITextureView*>(postProcessColorSinkBufferResource.GetSrv(colorRenderTargetIndex));
         }
     }
 
@@ -119,7 +124,8 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pDSV = static_cast<Diligent::ITextureView*>(postProcessDepthSinkBufferResource.GetDepthRenderTarget(depthRenderTargetIndex));
+            pDSV = isMsaa ? static_cast<Diligent::ITextureView*>(postProcessDepthSinkBufferResource.GetMsaaDSV(depthRenderTargetIndex)) :
+                            static_cast<Diligent::ITextureView*>(postProcessDepthSinkBufferResource.GetDSV(depthRenderTargetIndex));
         }
     }
 

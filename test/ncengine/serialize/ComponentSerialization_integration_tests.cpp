@@ -4,15 +4,12 @@
 
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/MeshRenderer.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
-#include "ncengine/graphics/ToonRenderer.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
-#include "graphics/system/ParticleEmitterSystem.h"
 #include "physics/DeferredPhysicsCreateState.h"
 
 #include "ncutility/ScopeExit.h"
@@ -32,13 +29,6 @@ auto asset::AcquireAudioClipAsset(const std::string&) -> asset::AudioClipView
     static auto view = AudioClipView{};
     return view;
 }
-
-namespace graphics
-{
-void ParticleEmitterSystem::Emit(Entity, size_t) {}
-void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter&) {}
-} // namespace graphics
-
 
 auto g_mockConstraints = std::unordered_map<nc::Entity::index_type, std::vector<nc::Constraint>>{};
 
@@ -111,22 +101,6 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
     EXPECT_EQ(expectedFlags, actualProperties.flags);
 }
 
-TEST(ComponentSerializationTests, RoundTrip_meshRenderer_preservesValues)
-{
-    auto stream = std::stringstream{};
-    auto expectedMaterial = nc::graphics::PbrMaterial{"base", "normal", "rough", "metal"};
-    const auto expected = nc::graphics::MeshRenderer{g_staticEntity, "mesh.nca", expectedMaterial};
-    nc::SerializeMeshRenderer(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeMeshRenderer(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.GetMeshPath(), actual.GetMeshPath());
-    EXPECT_EQ(expected.GetTechniqueType(), actual.GetTechniqueType());
-    const auto& actualMaterial = actual.GetMaterial();
-    EXPECT_EQ(expectedMaterial.baseColor, actualMaterial.baseColor);
-    EXPECT_EQ(expectedMaterial.normal, actualMaterial.normal);
-    EXPECT_EQ(expectedMaterial.roughness, actualMaterial.roughness);
-    EXPECT_EQ(expectedMaterial.metallic, actualMaterial.metallic);
-}
-
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 {
     auto stream = std::stringstream{};
@@ -186,21 +160,6 @@ TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
     EXPECT_EQ(expected.innerAngle, actual.innerAngle);
     EXPECT_EQ(expected.outerAngle, actual.outerAngle);
     EXPECT_EQ(expected.radius, actual.radius);
-}
-
-TEST(ComponentSerializationTests, RoundTrip_toonRenderer_preservesValues)
-{
-    auto stream = std::stringstream{};
-    const auto expectedMaterial = nc::graphics::ToonMaterial{"base", 2, "hatch", 2};
-    const auto expected = nc::graphics::ToonRenderer{g_staticEntity, "mesh.nca", expectedMaterial};
-    nc::SerializeToonRenderer(stream, expected, g_serializationContext, nullptr);
-    const auto actual = nc::DeserializeToonRenderer(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.GetMeshPath(), actual.GetMeshPath());
-    const auto& actualMaterial = actual.GetMaterial();
-    EXPECT_EQ(expectedMaterial.baseColor, actualMaterial.baseColor);
-    EXPECT_EQ(expectedMaterial.outlineWidth, actualMaterial.outlineWidth);
-    EXPECT_EQ(expectedMaterial.hatching, actualMaterial.hatching);
-    EXPECT_EQ(expectedMaterial.hatchingTiling, actualMaterial.hatchingTiling);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)

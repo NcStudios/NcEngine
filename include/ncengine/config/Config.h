@@ -52,7 +52,6 @@ struct AssetSettings
 struct MemorySettings
 {
     unsigned maxRigidBodies = 15000;
-    unsigned maxNetworkDispatchers = 0;
     unsigned maxParticleEmitters = 1000;
     unsigned maxRenderers = 100000;
     unsigned maxTransforms = 100000;

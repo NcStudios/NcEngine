@@ -9,6 +9,7 @@
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
 
+#include <memory>
 #include <vector>
 
 namespace nc::graphics
@@ -24,7 +25,8 @@ class PassBackend
                              Diligent::ISwapChain& swapChain,
                              ShaderFactory& shaderFactory,
                              ShaderBindings& shaderBindings,
-                             const PassManifest& passManifest);
+                             const PassManifest& passManifest,
+                             uint32_t numSamples = 1u);
 
         void Update(const PostProcessState& postProcessState);
 
@@ -52,5 +54,8 @@ class PassBackend
         std::unique_ptr<WireframePass> m_wireframePass;
         std::vector<PostProcessPass> m_postProcessPasses;
         std::unique_ptr<PostProcessPass> m_finalPass;
+        uint32_t m_numSamples;
+        uint32_t m_colorSinkCountMsaa;
+        uint32_t m_depthSinkCountMsaa;
 };
 } // namespace nc::graphics
