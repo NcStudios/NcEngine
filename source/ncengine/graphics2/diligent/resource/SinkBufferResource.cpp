@@ -1,4 +1,4 @@
-#include "PostProcessColorSinkBufferResource.h"
+#include "SinkBufferResource.h"
 
 #include "ncutility/NcError.h"
 

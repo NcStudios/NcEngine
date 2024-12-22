@@ -1,5 +1,5 @@
 #include "PerPassResourceSignature.h"
-#include "PostProcessColorSinkBufferResource.h"
+#include "SinkBufferResource.h"
 #include "PostProcessSinkIndexBufferResource.h"
 
 #include "ncutility/NcError.h"

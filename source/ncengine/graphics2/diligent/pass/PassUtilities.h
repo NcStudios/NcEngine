@@ -4,7 +4,7 @@
 #include "PassTypes.h"
 #include "PostProcessPass.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
-#include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
+#include "graphics2/diligent/resource/SinkBufferResource.h"
 #include "graphics2/diligent/ShaderFactory.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
