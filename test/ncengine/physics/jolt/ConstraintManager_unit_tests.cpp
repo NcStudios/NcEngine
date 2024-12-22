@@ -170,17 +170,16 @@ TEST_F(ConstraintManagerTest, UpdateConstraint_disabled_preservesDisabledState)
     auto body1 = CreateBody();
     auto body2 = CreateBody();
     auto& constraint = uut.AddConstraint(initialInfo, g_entity1, *body1, g_entity2, *body2);
-    const auto handle = uut.GetConstraintHandle(constraint.GetId());
 
     uut.EnableConstraint(constraint, false);
     constraint.GetInfo() = updatedInfo;
     uut.UpdateConstraint(constraint);
     EXPECT_FALSE(constraint.IsEnabled());
-    EXPECT_FALSE(handle->GetEnabled());
+    EXPECT_FALSE(uut.GetConstraintHandle(constraint.GetId())->GetEnabled());
 
     uut.UpdateConstraintTarget(constraint, nc::Entity::Null(), &JPH::Body::sFixedToWorld);
     EXPECT_FALSE(constraint.IsEnabled());
-    EXPECT_FALSE(handle->GetEnabled());
+    EXPECT_FALSE(uut.GetConstraintHandle(constraint.GetId())->GetEnabled());
 }
 
 TEST_F(ConstraintManagerTest, UpdateConstraintTarget_attachedToOtherBody_attachToNewBody_updatesMapping)

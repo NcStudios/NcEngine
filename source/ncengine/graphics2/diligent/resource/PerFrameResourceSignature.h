@@ -28,9 +28,7 @@ class PerFrameResourceSignature
                                            const StructuredBufferResourceDesc& transformResourceDesc,
                                            const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
                                            const StructuredBufferResourceDesc& skinnedMeshInstanceResourceDesc,
-                                           const StructuredBufferResourceDesc& directionalLightResourceDesc,
-                                           const StructuredBufferResourceDesc& pointLightResourceDesc,
-                                           const StructuredBufferResourceDesc& spotLightResourceDesc,
+                                           const StructuredBufferResourceDesc& lightResourceDesc,
                                            const StructuredBufferResourceDesc& materialResourceDesc,
                                            const StructuredBufferResourceDesc& boneResourceDesc,
                                            const StructuredBufferResourceDesc& particleResourceDesc,
@@ -47,9 +45,7 @@ class PerFrameResourceSignature
         auto GetTransformBuffer()           -> StructuredBuffer<TransformData>&           { return *m_transformResource; }
         auto GetStaticMeshInstanceBuffer()  -> StructuredBuffer<StaticMeshInstanceData>&  { return *m_staticMeshInstanceResource; }
         auto GetSkinnedMeshInstanceBuffer() -> StructuredBuffer<SkinnedMeshInstanceData>& { return *m_skinnedMeshInstanceResource; }
-        auto GetDirectionaLightBuffer()     -> StructuredBuffer<DirectionalLightData>&    { return *m_directionalLightResource; }
-        auto GetPointLightBuffer()          -> StructuredBuffer<PointLightData>&          { return *m_pointLightResource; }
-        auto GetSpotLightBuffer()           -> StructuredBuffer<SpotLightData>&           { return *m_spotLightResource; }
+        auto GetLightBuffer()               -> StructuredBuffer<LightData>&               { return *m_lightDataResource; }
         auto GetMaterialDataResource()      -> StructuredBuffer<MaterialData>&            { return *m_materialDataResource; }
         auto GetBoneDataResource()          -> StructuredBuffer<BoneData>&                { return *m_boneDataResource; }
         auto GetParticleDataBuffer()        -> StructuredBuffer<ParticleData>&            { return *m_particleDataResource; }
@@ -64,9 +60,7 @@ class PerFrameResourceSignature
         std::unique_ptr<StructuredBuffer<TransformData>> m_transformResource;
         std::unique_ptr<StructuredBuffer<StaticMeshInstanceData>> m_staticMeshInstanceResource;
         std::unique_ptr<StructuredBuffer<SkinnedMeshInstanceData>> m_skinnedMeshInstanceResource;
-        std::unique_ptr<StructuredBuffer<DirectionalLightData>> m_directionalLightResource;
-        std::unique_ptr<StructuredBuffer<PointLightData>> m_pointLightResource;
-        std::unique_ptr<StructuredBuffer<SpotLightData>> m_spotLightResource;
+        std::unique_ptr<StructuredBuffer<LightData>> m_lightDataResource;
         std::unique_ptr<StructuredBuffer<MaterialData>> m_materialDataResource;
         std::unique_ptr<StructuredBuffer<BoneData>> m_boneDataResource;
         std::unique_ptr<StructuredBuffer<ParticleData>> m_particleDataResource;

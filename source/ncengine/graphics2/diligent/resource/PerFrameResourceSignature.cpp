@@ -17,9 +17,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferResourceDesc& transformResourceDesc,
                                                      const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
                                                      const StructuredBufferResourceDesc& skinnedMeshInstanceResourceDesc,
-                                                     const StructuredBufferResourceDesc& directionalLightResourceDesc,
-                                                     const StructuredBufferResourceDesc& pointLightResourceDesc,
-                                                     const StructuredBufferResourceDesc& spotLightResourceDesc,
+                                                     const StructuredBufferResourceDesc& lightResourceDesc,
                                                      const StructuredBufferResourceDesc& materialResourceDesc,
                                                      const StructuredBufferResourceDesc& boneResourceDesc,
                                                      const StructuredBufferResourceDesc& particleResourceDesc,
@@ -32,9 +30,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(transformResourceDesc),
         ToPipelineResourceDesc(staticMeshInstanceResourceDesc),
         ToPipelineResourceDesc(skinnedMeshInstanceResourceDesc),
-        ToPipelineResourceDesc(directionalLightResourceDesc),
-        ToPipelineResourceDesc(pointLightResourceDesc),
-        ToPipelineResourceDesc(spotLightResourceDesc),
+        ToPipelineResourceDesc(lightResourceDesc),
         ToPipelineResourceDesc(materialResourceDesc),
         ToPipelineResourceDesc(boneResourceDesc),
         ToPipelineResourceDesc(particleResourceDesc),
@@ -90,28 +86,12 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         skinnedMeshInstanceResourceDesc
     );
 
-    m_directionalLightResource = std::make_unique<StructuredBuffer<DirectionalLightData>>
+    m_lightDataResource = std::make_unique<StructuredBuffer<LightData>>
     (
         context,
         device,
-        GetVariable(directionalLightResourceDesc, m_srb),
-        directionalLightResourceDesc
-    );
-
-    m_pointLightResource = std::make_unique<StructuredBuffer<PointLightData>>
-    (
-        context,
-        device,
-        GetVariable(pointLightResourceDesc, m_srb),
-        pointLightResourceDesc
-    );
-
-    m_spotLightResource = std::make_unique<StructuredBuffer<SpotLightData>>
-    (
-        context,
-        device,
-        GetVariable(spotLightResourceDesc, m_srb),
-        spotLightResourceDesc
+        GetVariable(lightResourceDesc, m_srb),
+        lightResourceDesc
     );
 
     m_materialDataResource = std::make_unique<StructuredBuffer<MaterialData>>(

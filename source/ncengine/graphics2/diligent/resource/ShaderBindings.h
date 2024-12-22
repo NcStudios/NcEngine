@@ -27,23 +27,22 @@ class ShaderBindings
                 StructuredBufferResourceDesc{"TransformBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
                 StructuredBufferResourceDesc{"StaticInstanceBufferData",   Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
                 StructuredBufferResourceDesc{"SkinnedInstanceBufferData",  Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
-                StructuredBufferResourceDesc{"DirectionalLightBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  memorySettings.maxDirectionalLights, memorySettings.maxDirectionalLights},
-                StructuredBufferResourceDesc{"PointLightBufferData",       Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  memorySettings.maxPointLights,       memorySettings.maxPointLights},
-                StructuredBufferResourceDesc{"SpotLightBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  memorySettings.maxSpotLights,        memorySettings.maxSpotLights},
+                StructuredBufferResourceDesc{"LightBufferData",            Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  memorySettings.maxDirectionalLights + memorySettings.maxPointLights + memorySettings.maxSpotLights, memorySettings.maxDirectionalLights + memorySettings.maxPointLights + memorySettings.maxSpotLights},
+
                 StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
                 StructuredBufferResourceDesc{"BoneBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxBones,             memorySettings.maxBones / 4},
                 StructuredBufferResourceDesc{"ParticleBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,         memorySettings.maxParticles / 4},
                 TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
                 UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
                 UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
-                UniformBufferResourceDesc{"OutlinePassBufferData",          Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
+                UniformBufferResourceDesc{"OutlinePassBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
               },
               m_perPassSignature{
                 device, context,
                 "PerPassResourceSignature",
                 1,
-                TextureBufferResourceDesc{"PostProcessColorSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
-                TextureBufferResourceDesc{"PostProcessDepthSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 10},
+                TextureBufferResourceDesc{"PostProcessColorSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 20},
+                TextureBufferResourceDesc{"PostProcessDepthSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 20},
                 UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
             }
         {

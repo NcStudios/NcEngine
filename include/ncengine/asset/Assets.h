@@ -25,6 +25,7 @@ bool LoadAudioClipAssets(std::span<const std::string> paths, bool isExternal = f
 bool UnloadAudioClipAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllAudioClipAssets(asset_flags_type flags = AssetFlags::None);
 auto AcquireAudioClipAsset(const std::string& path) -> AudioClipView;
+auto AcquireAudioClipAsset(AssetId id) -> AudioClipView;
 
 /** Supported file types: .nca */
 bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
@@ -32,6 +33,7 @@ bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExtern
 bool UnloadConcaveColliderAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllConcaveColliderAssets(asset_flags_type flags = AssetFlags::None);
 auto AcquireConcaveColliderAsset(const std::string& path) -> ConcaveColliderView;
+auto AcquireConcaveColliderAsset(AssetId id) -> ConcaveColliderView;
 
 /** Supported file types: .nca */
 bool LoadConvexHullAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
@@ -39,6 +41,7 @@ bool LoadConvexHullAssets(std::span<const std::string> paths, bool isExternal = 
 bool UnloadConvexHullAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllConvexHullAssets(asset_flags_type flags = AssetFlags::None);
 auto AcquireConvexHullAsset(const std::string& path) -> ConvexHullView;
+auto AcquireConvexHullAsset(AssetId id) -> ConvexHullView;
 
 /** Supported file types: .nca 
 *  @note Unloading textures invalidates all CubeMapViews. It is intended
@@ -48,6 +51,7 @@ bool LoadCubeMapAssets(std::span<const std::string> paths, bool isExternal = fal
 bool UnloadCubeMapAsset(const std::string& paths, asset_flags_type flags = AssetFlags::None);
 void UnloadAllCubeMapAssets(asset_flags_type flags = AssetFlags::None);
 auto AcquireCubeMapAsset(const std::string& path) -> CubeMapView;
+auto AcquireCubeMapAsset(AssetId id) -> CubeMapView;
 
 /** Supported file types: .nca 
  *  @note Unloading meshes invalidates all MeshViews. It is intended
@@ -57,6 +61,7 @@ bool LoadMeshAssets(std::span<const std::string> paths, bool isExternal = false,
 bool UnloadMeshAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllMeshAssets(asset_flags_type flags = AssetFlags::None);
 auto AcquireMeshAsset(const std::string& path) -> MeshView;
+auto AcquireMeshAsset(AssetId id) -> MeshView;
 
 /** Supported file types: .nca 
  *  @note Unloading textures invalidates all TextureViews. It is intended
@@ -76,6 +81,7 @@ bool LoadSkeletalAnimationAssets(std::span<const std::string> paths, bool isExte
 bool UnloadSkeletalAnimationAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
 void UnloadAllSkeletalAnimationAssets(asset_flags_type flags = AssetFlags::None);
 auto AcquireSkeletalAnimationAsset(const std::string& path) -> SkeletalAnimationView;
+auto AcquireSkeletalAnimationAsset(AssetId id) -> SkeletalAnimationView;
 
 /** Supported file types: .ttf */
 bool LoadFont(const FontInfo& font, bool isExternal = false, asset_flags_type flags = AssetFlags::None);

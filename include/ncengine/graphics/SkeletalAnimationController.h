@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/utility/SparseMap.h"
 
 #include <functional>
@@ -11,9 +12,6 @@
 
 namespace nc
 {
-/** @brief Identifier for a null animation asset. */
-constexpr auto NullAnimationId = std::numeric_limits<uint64_t>::max();
-
 /** @name Animation State Id Types */
 using AnimationStateId = uint32_t;
 constexpr auto NullAnimationState = std::numeric_limits<AnimationStateId>::max();
@@ -29,7 +27,7 @@ constexpr auto UseDefaultTransitionDuration = -1.0f;
 /** @brief Animation state that loops until the exit condition is met. */
 struct LoopAnimation
 {
-    uint64_t animId = NullAnimationId;
+    asset::AssetId animId = asset::NullAssetId;
     TransitionCondition enterWhen = ConditionNever;
     AnimationStateId enterFrom = RootAnimationState;
     TransitionCondition exitWhen = ConditionNever;
@@ -40,7 +38,7 @@ struct LoopAnimation
 /** @brief Animation state that plays once before transitioning to the exitTo state. */
 struct PlayOnceAnimation
 {
-    uint64_t animId = NullAnimationId;
+    asset::AssetId animId = asset::NullAssetId;
     TransitionCondition enterWhen = ConditionNever;
     AnimationStateId enterFrom = RootAnimationState;
     AnimationStateId exitTo = RootAnimationState;
@@ -66,7 +64,7 @@ enum class AnimationTransitionType : uint8_t
 
 struct AnimationState
 {
-    uint64_t animId = NullAnimationId;
+    asset::AssetId animId = asset::NullAssetId;
     TransitionCondition enterWhen = ConditionNever;
     TransitionCondition exitWhen = ConditionNever;
     AnimationStateId enterFrom = NullAnimationState;
@@ -78,8 +76,8 @@ struct AnimationState
 
 struct AnimationTransition
 {
-    uint64_t toAnimId = NullAnimationId;
-    uint64_t fromAnimId = NullAnimationId;
+    asset::AssetId toAnimId = asset::NullAssetId;
+    asset::AssetId fromAnimId = asset::NullAssetId;
     float transitionDuration = 0.0f;
     AnimationTransitionType type = AnimationTransitionType::Continue;
 };
@@ -95,7 +93,7 @@ class SkeletalAnimationController
          * The controller is initialized with a default state that loops the animation asset specified by animationId.
          * This state is set with the id 'RootState' and cannot not be removed.
          */
-        explicit SkeletalAnimationController(uint64_t animationId = NullAnimationId,
+        explicit SkeletalAnimationController(asset::AssetId animationId = asset::NullAssetId,
                                              float defaultTransitionDuration = 0.3f);
 
         /**
@@ -144,7 +142,7 @@ class SkeletalAnimationController
         AnimationStateId m_queuedState = RootAnimationState;
         AnimationStateId m_nextStateId = RootAnimationState + 1;
         float m_defaultTransitionDuration;
-        uint64_t m_prevAnimId = NullAnimationId;
+        asset::AssetId m_prevAnimId = asset::NullAssetId;
         bool m_cycleCompleted = false;
 
         auto AddStateImpl(AnimationState&& in) -> AnimationStateId;

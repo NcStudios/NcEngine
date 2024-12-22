@@ -11,11 +11,48 @@ void EnsureContextFlushed(Diligent::IDeviceContext* context)
     if (context)
         context->Flush();
 }
+
+auto QueryDeviceCapability(Diligent::IRenderDevice* device, Diligent::ISwapChain* swapChain, const nc::graphics::DeviceCapability& requestedCaps)
+{
+    auto supportedDeviceCaps = nc::graphics::DeviceCapability{};
+
+    // Supported MSAA sample count
+    const auto& colorFormat = device->GetTextureFormatInfoExt(swapChain->GetDesc().ColorBufferFormat);
+    const auto& depthFormat = device->GetTextureFormatInfoExt(swapChain->GetDesc().DepthBufferFormat);
+
+    auto requestedMsaaCount = requestedCaps.msaaSampleCount;
+    auto supportedMsaaCount = colorFormat.SampleCounts & depthFormat.SampleCounts;
+
+    // We only support a max of 8 samples because of texture formats used.
+    if (requestedMsaaCount > 7 && supportedMsaaCount & Diligent::SAMPLE_COUNT_8)
+    {
+        supportedDeviceCaps.msaaSampleCount = 8;
+    }
+    else if (requestedMsaaCount > 3 && supportedMsaaCount & Diligent::SAMPLE_COUNT_4)
+    {
+        supportedDeviceCaps.msaaSampleCount = 4;
+    }
+    else if (requestedMsaaCount > 1 && supportedMsaaCount & Diligent::SAMPLE_COUNT_2)
+    {
+        supportedDeviceCaps.msaaSampleCount = 2;
+    }
+    else
+    {
+        if (requestedMsaaCount > 1)
+        {
+            NC_LOG_TRACE("Multisampling not supported on this device.");
+        }
+        supportedDeviceCaps.msaaSampleCount = 1;
+    }
+
+    return supportedDeviceCaps;
+}
 } // anonymous namespace
 
 namespace nc::graphics
 {
 DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInfo,
+                               DeviceCapability requestedCaps,
                                GLFWwindow* windowHandle,
                                std::string_view shadersPath,
                                Diligent::DebugMessageCallbackType logCallback)
@@ -48,6 +85,8 @@ DiligentEngine::DiligentEngine(const Diligent::EngineCreateInfo& engineCreateInf
         EnsureContextFlushed(m_pImmediateContext);
         throw nc::NcError("Failed to create swapchain.");
     }
+
+    m_deviceCapability = QueryDeviceCapability(m_pDevice, m_pSwapChain, requestedCaps);
 
     m_shaderFactory = MakeShaderFactory(*pFactoryVk, *m_pDevice, shadersPath);
     NC_LOG_TRACE("Successfully initialized rendering engine.");

@@ -28,6 +28,11 @@ auto AcquireAudioClipAsset(const std::string& path) -> AudioClipView
     return AssetService<AudioClipView>::Get()->Acquire(path);
 }
 
+auto AcquireAudioClipAsset(AssetId id) -> AudioClipView
+{
+    return AssetService<AudioClipView>::Get()->Acquire(id);
+}
+
 bool LoadConvexHullAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<ConvexHullView>::Get()->Load(path, isExternal, flags);
@@ -51,6 +56,11 @@ void UnloadAllConvexHullAssets(asset_flags_type flags)
 auto AcquireConvexHullAsset(const std::string& path) -> ConvexHullView
 {
     return AssetService<ConvexHullView>::Get()->Acquire(path);
+}
+
+auto AcquireConvexHullAsset(AssetId id) -> ConvexHullView
+{
+    return AssetService<ConvexHullView>::Get()->Acquire(id);
 }
 
 bool LoadConcaveColliderAsset(const std::string& path, bool isExternal, asset_flags_type flags)
@@ -78,6 +88,11 @@ auto AcquireConcaveColliderAsset(const std::string& path) -> ConcaveColliderView
     return AssetService<ConcaveColliderView>::Get()->Acquire(path);
 }
 
+auto AcquireConcaveColliderAsset(AssetId id) -> ConcaveColliderView
+{
+    return AssetService<ConcaveColliderView>::Get()->Acquire(id);
+}
+
 bool LoadCubeMapAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<CubeMapView>::Get()->Load(path, isExternal, flags);
@@ -103,6 +118,11 @@ auto AcquireCubeMapAsset(const std::string& path) -> CubeMapView
     return AssetService<CubeMapView>::Get()->Acquire(path);
 }
 
+auto AcquireCubeMapAsset(AssetId id) -> CubeMapView
+{
+    return AssetService<CubeMapView>::Get()->Acquire(id);
+}
+
 bool LoadMeshAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
     return AssetService<MeshView>::Get()->Load(path, isExternal, flags);
@@ -125,7 +145,12 @@ void UnloadAllMeshAssets(asset_flags_type flags)
 
 auto AcquireMeshAsset(const std::string& path) -> MeshView
 {
-    return AssetService<MeshView>::Get()->Acquire(path, AssetFlags::None);
+    return AssetService<MeshView>::Get()->Acquire(path);
+}
+
+auto AcquireMeshAsset(AssetId id) -> MeshView
+{
+    return AssetService<MeshView>::Get()->Acquire(id);
 }
 
 bool LoadSkeletalAnimationAsset(const std::string& path, bool isExternal, asset_flags_type flags)
@@ -151,6 +176,11 @@ void UnloadAllSkeletalAnimationAssets(asset_flags_type flags)
 auto AcquireSkeletalAnimationAsset(const std::string& path) -> SkeletalAnimationView
 {
     return AssetService<SkeletalAnimationView>::Get()->Acquire(path);
+}
+
+auto AcquireSkeletalAnimationAsset(AssetId id) -> SkeletalAnimationView
+{
+    return AssetService<SkeletalAnimationView>::Get()->Acquire(id);
 }
 
 bool LoadTextureAsset(const std::string& path, bool isExternal, asset_flags_type flags)

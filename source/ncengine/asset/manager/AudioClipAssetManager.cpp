@@ -55,17 +55,8 @@ void AudioClipAssetManager::UnloadAll(asset_flags_type)
 
 auto AudioClipAssetManager::Acquire(const std::string& path, asset_flags_type) const -> AudioClipView
 {
-    const auto hash = m_audioClips.hash(path);
-    const auto index = m_audioClips.index(hash);
-    NC_ASSERT(index != m_audioClips.NullIndex, fmt::format("AudioClip is not loaded: '{}'", path));
-    const auto& clip = m_audioClips.at(index);
-    return AudioClipView
-    {
-        .id = hash,
-        .leftChannel = std::span<const double>{clip.leftChannel},
-        .rightChannel = std::span<const double>{clip.rightChannel},
-        .samplesPerChannel = clip.samplesPerChannel
-    };
+    NC_ASSERT(m_audioClips.contains(path), fmt::format("AudioClip is not loaded: '{}'", path));
+    return Acquire(m_audioClips.hash(path));
 }
 
 auto AudioClipAssetManager::Acquire(AssetId id, asset_flags_type) const -> AudioClipView
@@ -73,8 +64,7 @@ auto AudioClipAssetManager::Acquire(AssetId id, asset_flags_type) const -> Audio
     const auto index = m_audioClips.index(id);
     NC_ASSERT(index != m_audioClips.NullIndex, fmt::format("AudioClip is not loaded: '{}'", id));
     const auto& clip = m_audioClips.at(index);
-    return AudioClipView
-    {
+    return AudioClipView{
         .id = id,
         .leftChannel = std::span<const double>{clip.leftChannel},
         .rightChannel = std::span<const double>{clip.rightChannel},

@@ -12,15 +12,12 @@
 namespace nc::graphics
 {
 // Object model for environment data (type: constant buffer)
-// 96 bytes with a 16-byte alignment.
+// 80 bytes with a 16-byte alignment.
 struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
     Vector3 cameraPosition = Vector3::One();
-    uint32_t dirLightsCount = 0;
-    uint32_t pointLightsCount = 0;
-    uint32_t spotLightsCount = 0;
-    Vector2 padding = Vector2::Zero();
+    uint32_t lightCount = 0;
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
@@ -91,72 +88,74 @@ struct ParticleData
     uint32_t textureIndex = std::numeric_limits<uint32_t>::max();
 };
 
-// Object model for DirectionalLights (type: StructuredBuffer element type).
-// Not targeting shadows for directional lights at the moment.
-// 32 bytes with a 16-byte alignment.
-struct DirectionalLightData
-{ 
-    DirectionalLightData(Vector3 color_, Vector3 direction_)
-        : color{color_},
-          direction{direction_}{}
-
-    Vector3 color = Vector3::One();
-    float padding1 = 0.0f;
-    Vector3 direction = Vector3::One();
-    float padding2 = 0.0f;
-};
-
-// Object model for PointLights (type: StructuredBuffer element type).
-// 96 bytes with a 16-byte alignment.
-struct PointLightData
-{
-    PointLightData(DirectX::XMMATRIX viewProjection_,
-                   Vector3 position_,
-                   int32_t castsShadows_,
-                   Vector3 color_,
-                   float radius_)
-        : viewProjection{viewProjection_},
-          position{position_},
-          castsShadows{castsShadows_},
-          color{color_},
-          radius{radius_}{}
-    DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
-    Vector3 position = Vector3::Zero();
-    int castsShadows = 0;
-    Vector3 color = Vector3::One();
-    float radius = 1.0f;
-};
-
-
-// Object model for SpotLights (type: StructuredBuffer element type).
+// Object model for lights (directional/point/spot) (type: StructuredBuffer element type).
 // 128 bytes with a 16-byte alignment.
-struct SpotLightData
+struct LightData
 {
-    SpotLightData(DirectX::XMMATRIX viewProjection_,
-                  Vector3 position_,
-                  int32_t castsShadows_,
-                  Vector3 color_,
-                  float innerAngle_,
-                  Vector3 direction_,
-                  float outerAngle_,
-                  float radius_)
-        : viewProjection{viewProjection_},
-          position{position_},
-          castsShadows{castsShadows_},
-          color{color_},
-          innerAngle{innerAngle_},
-          direction{direction_},
-          outerAngle{outerAngle_},
-          radius{radius_}{}
-    DirectX::XMMATRIX viewProjection = DirectX::XMMatrixIdentity();
-    Vector3 position = Vector3::Zero();
-    int castsShadows = 0;
+    struct LightType
+    {
+        static constexpr int Directional = 0;
+        static constexpr int Point = 1;
+        static constexpr int Spot = 2;
+        static constexpr int Uninitialized = -1;
+    };
+
+    // Construct from DirectionalLight
+    LightData(const Vector3& col,
+              const Vector3& dir)
+        : color{col},
+          type{LightType::Directional},
+          direction{dir}
+    {
+    }
+
+    // Construct from PointLight
+    LightData(const Vector3& col,
+              const Vector3& pos,
+              int32_t enableShadows,
+              float rad,
+              DirectX::FXMMATRIX viewProj)
+        : color{col},
+          type{LightType::Point},
+          position{pos},
+          radius{rad},
+          castsShadows{enableShadows},
+          viewProjection{viewProj}
+    {
+    }
+
+    // Construct from SpotLight
+    LightData(const Vector3& col,
+              const Vector3& pos,
+              float inAngle,
+              const Vector3& dir,
+              float outAngle,
+              float rad,
+              int32_t enableShadows,
+              DirectX::FXMMATRIX viewProj)
+        : color{col},
+          type{LightType::Spot},
+          position{pos},
+          innerAngle{inAngle},
+          direction{dir},
+          outerAngle{outAngle},
+          radius{rad},
+          castsShadows{enableShadows},
+          viewProjection{viewProj}
+    {
+    }
+
     Vector3 color = Vector3::One();
+    int type = LightType::Uninitialized;
+    Vector3 position = Vector3::Zero();
     float innerAngle = 1.0f;
-    Vector3 direction = Vector3::One();
+    Vector3 direction = Vector3::Down();
     float outerAngle = 1.0f;
-    Vector3 padding = Vector3::Zero();
     float radius = 1.0f;
+    int castsShadows = 0;
+    int pad1 = 0;
+    int pad2 = 0;
+    DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };
 
 // Object model for WireframeRenderers (type: constant buffer)

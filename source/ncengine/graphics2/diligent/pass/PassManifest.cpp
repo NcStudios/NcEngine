@@ -32,7 +32,9 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
                            std::span<const MaterialPassFlag::type> implementedMaterialPasses,
                            std::span<const PostProcessPassFlag::type> implementedPPPasses,
                            std::span<const MiscPassFlag::type> implementedMiscPasses)
-    : m_colorSinkCount{0u},
+    : m_colorSinkCountMsaa{0u},
+      m_colorSinkCount{0u},
+      m_depthSinkCountMsaa{0u},
       m_depthSinkCount{0u}
 {
     auto registerMatches = [this](const auto& descs, const auto& passFlags, auto matchType)
@@ -80,15 +82,20 @@ void PassManifest::RegisterPass(PassDesc desc)
         throw nc::NcError("The pass was already registered");
     }
 
+    SetMaxIndices(desc.colorSink, desc.depthSink, false);
+
     switch (desc.type)
     {
         case PassType::Material:
+            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_staticMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::SkinnedMaterial:
+            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_skinnedMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::Wireframe:
+            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_wireframePassDesc = std::move(desc);
             break;
         case PassType::Particle:
@@ -99,15 +106,6 @@ void PassManifest::RegisterPass(PassDesc desc)
             break;
         case PassType::None:
             throw nc::NcError("Pass type not implemented.");
-    }
-
-    if (desc.colorSink != NoTarget && desc.colorSink != SwapChainColorRTIndex)
-    {
-        m_colorSinkCount = std::max(m_colorSinkCount, desc.colorSink + 1);
-    }
-    if (desc.depthSink != NoTarget && desc.depthSink != SwapChainDepthRTIndex)
-    {
-        m_depthSinkCount = std::max(m_depthSinkCount, desc.depthSink + 1);
     }
 }
 
@@ -120,5 +118,24 @@ void PassManifest::Clear()
     m_postProcessPassDescs.clear();
     m_postProcessPassDescs.shrink_to_fit();
     m_wireframePassDesc = PassDesc{};
+    m_colorSinkCountMsaa = 0u;
+    m_colorSinkCount = 0u;
+    m_depthSinkCountMsaa = 0u;
+    m_depthSinkCount = 0u;
+}
+
+void PassManifest::SetMaxIndices(uint32_t colorRT, uint32_t depthRT, bool isMsaa)
+{
+    auto& colorToModify = isMsaa ? m_colorSinkCountMsaa : m_colorSinkCount;
+    auto& depthToModify = isMsaa ? m_depthSinkCountMsaa : m_depthSinkCount;
+
+    if (colorRT != NoTarget && colorRT != SwapChainColorRTIndex)
+    {
+        colorToModify = std::max(colorToModify, colorRT + 1);
+    }
+    if (depthRT != NoTarget && depthRT != SwapChainDepthRTIndex)
+    {
+        depthToModify = std::max(depthToModify, depthRT + 1);
+    }
 }
 } // namespace nc::graphics
