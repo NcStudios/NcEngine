@@ -12,7 +12,7 @@
 namespace nc::graphics
 {
 class SinkBufferResource;
-struct PostProcessSinkIndexBufferResource;
+class SinkIndexBufferResource;
 
 class PerPassResourceSignature
 {
@@ -31,13 +31,13 @@ class PerPassResourceSignature
         auto GetResourceBinding()         -> Diligent::IShaderResourceBinding&     { return *m_srb; }
         auto GetColorSinkBufferResource() -> SinkBufferResource&                   { return *m_colorSinkBufferResource; }
         auto GetDepthSinkBufferResource() -> SinkBufferResource&                   { return *m_depthSinkBufferResource; }
-        auto GetSinkIndexBufferResource() -> PostProcessSinkIndexBufferResource&   { return *m_sinkIndexBufferResource; }
+        auto GetSinkIndexBufferResource() -> SinkIndexBufferResource&              { return *m_sinkIndexBufferResource; }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
         Diligent::RefCntAutoPtr<Diligent::IPipelineResourceSignature> m_signature;
         std::unique_ptr<SinkBufferResource> m_colorSinkBufferResource;
         std::unique_ptr<SinkBufferResource> m_depthSinkBufferResource;
-        std::unique_ptr<PostProcessSinkIndexBufferResource> m_sinkIndexBufferResource;
+        std::unique_ptr<SinkIndexBufferResource> m_sinkIndexBufferResource;
 };
 } // namespace nc::graphics

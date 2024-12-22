@@ -2,7 +2,7 @@
 #include "diligent/pass/MaterialPass.h"
 #include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
-#include "diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "diligent/resource/SinkIndexBufferResource.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"

@@ -1,6 +1,6 @@
 #include "PerPassResourceSignature.h"
 #include "SinkBufferResource.h"
-#include "PostProcessSinkIndexBufferResource.h"
+#include "SinkIndexBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -54,7 +54,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         MakeDepthSinkBufferDesc(depthSinkResourceDesc.maxElementCount)
     );
 
-    m_sinkIndexBufferResource = std::make_unique<PostProcessSinkIndexBufferResource>(
+    m_sinkIndexBufferResource = std::make_unique<SinkIndexBufferResource>(
         context, device,
         GetVariable(sinkIndexResourceDesc.shaderType, sinkIndexResourceDesc.resourceKey.data(), m_srb)
     );
