@@ -1,13 +1,80 @@
 #include "PostProcessColorSinkBufferResource.h"
 
-#include "ncengine/asset/AssetData.h"
-
-#include "TextureLoader.h"
 #include "ncutility/NcError.h"
+
+namespace
+{
+struct SinkTargets
+{
+    std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>>& textures;
+    std::vector<Diligent::IDeviceObject*>& textureViews;
+    std::vector<Diligent::IDeviceObject*>* shaderResources = nullptr;
+};
+
+auto MakeTextureDesc(const nc::graphics::SinkBufferResourceDesc& desc,
+                     uint32_t width,
+                     uint32_t height,
+                     uint32_t numSamples) -> Diligent::TextureDesc
+{
+    Diligent::TextureDesc textureDesc{};
+    textureDesc.Type = Diligent::RESOURCE_DIM_TEX_2D;
+    textureDesc.Width = width;
+    textureDesc.Height = height;
+    textureDesc.MipLevels = 1;
+    textureDesc.Format = desc.format;
+    textureDesc.BindFlags = desc.bindFlags;
+    textureDesc.ClearValue = desc.clearValue;
+    textureDesc.SampleCount = numSamples;
+    return textureDesc;
+}
+
+auto MakeTexture(Diligent::IRenderDevice& device,
+                 const Diligent::TextureDesc& desc) -> Diligent::RefCntAutoPtr<Diligent::ITexture>
+{
+    Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+    device.CreateTexture(desc, nullptr, &texture);
+    if (!texture)
+    {
+        throw nc::NcError("Failed to create texture");
+    }
+
+    return texture;
+}
+} // anonymous namespace
 
 namespace nc::graphics
 {
-auto PostProcessColorSinkBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
+auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
+{
+    return SinkBufferResourceDesc{
+        .name = "Color Render Target",
+        .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
+        .format = Diligent::TEX_FORMAT_RGBA8_UNORM,
+        .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
+        .clearValue = Diligent::OptimizedClearValue{
+            .Format = Diligent::TEX_FORMAT_RGBA8_UNORM,
+            .Color = {0.0f, 0.0f, 0.0f, 0.0f}
+        },
+        .maxTextures = maxTextures
+    };
+}
+
+auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
+{
+    return SinkBufferResourceDesc{
+        .name = "Depth Render Target",
+        .viewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL,
+        .format = Diligent::TEX_FORMAT_D32_FLOAT,
+        .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_DEPTH_STENCIL,
+        .clearValue = Diligent::OptimizedClearValue{
+            .Format = Diligent::TEX_FORMAT_D32_FLOAT,
+            .DepthStencil = Diligent::DepthStencilClearValue{1.0f, 0}
+        },
+        .maxTextures = maxTextures
+    };
+}
+
+auto SinkBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
 {
     return Diligent::ImmutableSamplerDesc{
         Diligent::SHADER_TYPE_PIXEL,
@@ -16,112 +83,77 @@ auto PostProcessColorSinkBufferResource::MakeSamplerDesc(std::string_view variab
     };
 }
 
-auto PostProcessColorSinkBufferResource::Add(Diligent::IRenderDevice& device,
-                                             uint32_t numColorRenderTargets,
-                                             uint32_t renderTargetWidth,
-                                             uint32_t renderTargetHeight,
-                                             uint32_t numSamples) -> std::vector<uint32_t>
+void SinkBufferResource::Add(Diligent::IRenderDevice& device,
+                             uint32_t numRenderTargets,
+                             uint32_t renderTargetWidth,
+                             uint32_t renderTargetHeight,
+                             uint32_t numSamples)
 {
     using namespace Diligent;
-
-    auto addedIndices = std::vector<uint32_t>{};
-    addedIndices.reserve(numColorRenderTargets);
-
-    if (numColorRenderTargets == 0)
+    if (numRenderTargets == 0)
     {
-        return addedIndices;
+        return;
     }
 
-    if (numSamples > 1)
+    auto targets = numSamples > 1
+        ? SinkTargets{m_texturesMsaa, m_textureViewsMsaa, nullptr}
+        : SinkTargets{m_textures, m_textureViews, &m_shaderResources};
+
+    if (numRenderTargets + targets.textures.size() > m_desc.maxTextures)
     {
-        if (numColorRenderTargets + m_colorRenderTargetsMsaa.size() > m_maxTextures)
-        {
-            throw NcError{"Max texture count exceeded"};
-        }
-        m_colorRenderTargetsMsaa.reserve(m_colorRenderTargetsMsaa.size() + numColorRenderTargets);
-        m_colorRenderTargetViewsRTMsaa.reserve(m_colorRenderTargetViewsRTMsaa.size() + numColorRenderTargets);
-    }
-    else
-    {
-        if (numColorRenderTargets + m_colorRenderTargets.size() > m_maxTextures)
-        {
-            throw NcError{"Max texture count exceeded"};
-        }
-        m_colorRenderTargets.reserve(m_colorRenderTargets.size() + numColorRenderTargets);
-        m_colorRenderTargetViewsRT.reserve(m_colorRenderTargetViewsRT.size() + numColorRenderTargets);
-        m_colorRenderTargetViewsSR.reserve(m_colorRenderTargetViewsSR.size() + numColorRenderTargets);
+        throw NcError{"Max texture count exceeded"};
     }
 
-    for (auto i = 0u; i < numColorRenderTargets; i++)
+    targets.textures.reserve(targets.textures.size() + numRenderTargets);
+    targets.textureViews.reserve(targets.textureViews.size() + numRenderTargets);
+    if (targets.shaderResources)
     {
-        auto rtName = "Color Render Target: " + std::to_string(i);
-        TextureDesc colorRenderTargetDesc;
-        colorRenderTargetDesc.Name = rtName.data();
-        colorRenderTargetDesc.Type = RESOURCE_DIM_TEX_2D;
-        colorRenderTargetDesc.Width = renderTargetWidth;
-        colorRenderTargetDesc.Height = renderTargetHeight;
-        colorRenderTargetDesc.MipLevels = 1;
-        colorRenderTargetDesc.Format = TEX_FORMAT_RGBA8_UNORM;
-        colorRenderTargetDesc.BindFlags = BIND_SHADER_RESOURCE | BIND_RENDER_TARGET;
-        colorRenderTargetDesc.ClearValue.Format = colorRenderTargetDesc.Format;
-        colorRenderTargetDesc.ClearValue.Color[0] = 0.350f;
-        colorRenderTargetDesc.ClearValue.Color[1] = 0.350f;
-        colorRenderTargetDesc.ClearValue.Color[2] = 0.350f;
-        colorRenderTargetDesc.ClearValue.Color[3] = 1.0f;
-        colorRenderTargetDesc.SampleCount = numSamples;
+        targets.shaderResources->reserve(targets.shaderResources->size() + numRenderTargets);
+    }
 
-        RefCntAutoPtr<ITexture> pColorRenderTarget;
-        device.CreateTexture(colorRenderTargetDesc, nullptr, &pColorRenderTarget);
-        if (!pColorRenderTarget)
-        {
-            throw NcError("Failed to create texture");
-        }
+    auto renderTargetDesc = MakeTextureDesc(m_desc, renderTargetWidth, renderTargetHeight, numSamples);
+    for (auto i = 0u; i < numRenderTargets; i++)
+    {
+        const auto rtName = fmt::format("{}: {}", m_desc.name, i);
+        renderTargetDesc.Name = rtName.data();
 
-        if (numSamples > 1)
+        auto& renderTarget = targets.textures.emplace_back(MakeTexture(device, renderTargetDesc));
+        targets.textureViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
+        if (targets.shaderResources)
         {
-            addedIndices.push_back(static_cast<uint32_t>(m_colorRenderTargetsMsaa.size()));
-            m_colorRenderTargetsMsaa.push_back(std::move(pColorRenderTarget));
-            m_colorRenderTargetViewsRTMsaa.push_back(m_colorRenderTargetsMsaa.back()->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET));
-        }
-        else
-        {
-            addedIndices.push_back(static_cast<uint32_t>(m_colorRenderTargets.size()));
-            m_colorRenderTargets.push_back(std::move(pColorRenderTarget));
-            m_colorRenderTargetViewsRT.push_back(m_colorRenderTargets.back()->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET));
-            m_colorRenderTargetViewsSR.push_back(m_colorRenderTargets.back()->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+            targets.shaderResources->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
         }
     }
 
-    SetArrayRegion(m_colorRenderTargetViewsSR, 0u, m_colorRenderTargetViewsSR.size());
-    return addedIndices;
+    SetArrayRegion(m_shaderResources, 0u, m_shaderResources.size());
 }
 
-void PostProcessColorSinkBufferResource::Resize(Diligent::IRenderDevice& device,
-                                       uint32_t renderTargetWidth,
-                                       uint32_t renderTargetHeight,
-                                       uint32_t numSamples)
+void SinkBufferResource::Resize(Diligent::IRenderDevice& device,
+                                uint32_t renderTargetWidth,
+                                uint32_t renderTargetHeight,
+                                uint32_t numSamples)
 {
-    auto numColorRenderTargets = static_cast<uint32_t>(m_colorRenderTargets.size());
-    auto numColorRenderTargetsMsaa = static_cast<uint32_t>(m_colorRenderTargetsMsaa.size());
+    auto numRenderTargets = static_cast<uint32_t>(m_textures.size());
+    auto numRenderTargetsMsaa = static_cast<uint32_t>(m_texturesMsaa.size());
     Clear();
-    Add(device, numColorRenderTargets, renderTargetWidth, renderTargetHeight, 1);
+    Add(device, numRenderTargets, renderTargetWidth, renderTargetHeight, 1);
     if (numSamples > 1)
     {
-        Add(device, numColorRenderTargetsMsaa, renderTargetWidth, renderTargetHeight, numSamples);
+        Add(device, numRenderTargetsMsaa, renderTargetWidth, renderTargetHeight, numSamples);
     }
 }
 
-void PostProcessColorSinkBufferResource::Clear()
+void SinkBufferResource::Clear()
 {
-    m_colorRenderTargets.clear();
-    m_colorRenderTargetViewsRT.clear();
-    m_colorRenderTargetViewsSR.clear();
+    m_textures.clear();
+    m_textureViews.clear();
+    m_shaderResources.clear();
 
-    m_colorRenderTargetsMsaa.clear();
-    m_colorRenderTargetViewsRTMsaa.clear();
+    m_texturesMsaa.clear();
+    m_textureViewsMsaa.clear();
 }
 
-void PostProcessColorSinkBufferResource::SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& views, size_t offset, size_t count)
+void SinkBufferResource::SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& views, size_t offset, size_t count)
 {
     m_variable->SetArray(
         views.data(),

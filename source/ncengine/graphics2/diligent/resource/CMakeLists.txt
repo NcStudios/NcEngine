@@ -7,7 +7,6 @@ target_sources(${NC_ENGINE_LIB}
         PostProcessPropertyBufferResource.cpp
         PostProcessSinkIndexBufferResource.cpp
         PostProcessColorSinkBufferResource.cpp
-        PostProcessDepthSinkBufferResource.cpp
         TextureBufferResource.cpp
         ResourceTypes.cpp
         ShaderBindings.cpp
