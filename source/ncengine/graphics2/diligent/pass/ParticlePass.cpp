@@ -14,7 +14,8 @@ namespace
 auto MakePso(Diligent::IRenderDevice& device,
              nc::graphics::ShaderFactory& shaderFactory,
              Diligent::IPipelineResourceSignature& perFrameResourceSignature,
-             const nc::graphics::PassDesc& passDesc)
+             const nc::graphics::PassDesc& passDesc,
+             uint32_t numSamples)
 {
     using namespace Diligent;
 
@@ -58,6 +59,7 @@ auto MakePso(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
     ci.GraphicsPipeline.RasterizerDesc.FillMode      = FILL_MODE_SOLID;
+    ci.GraphicsPipeline.SmplDesc.Count               = static_cast<uint8_t>(numSamples);
 
     auto& renderTarget = ci.GraphicsPipeline.BlendDesc.RenderTargets[0];
     renderTarget.BlendEnable = true;
@@ -84,8 +86,15 @@ namespace nc::graphics
 ParticlePass::ParticlePass(Diligent::IRenderDevice& device,
                            ShaderFactory& shaderFactory,
                            ShaderBindings& shaderBindings,
-                           const PassDesc& passDesc)
-    : pso{MakePso(device, shaderFactory, shaderBindings.GetPerFrameSignature().GetResourceSignature(), passDesc)},
+                           const PassDesc& passDesc,
+                           uint32_t numSamples)
+    : pso{MakePso(
+        device,
+        shaderFactory,
+        shaderBindings.GetPerFrameSignature().GetResourceSignature(),
+        passDesc,
+        numSamples
+      )},
       colorRTIndex{passDesc.colorSink},
       depthRTIndex{passDesc.depthSink}
 {

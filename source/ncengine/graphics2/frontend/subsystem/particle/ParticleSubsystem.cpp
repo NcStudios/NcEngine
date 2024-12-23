@@ -118,6 +118,7 @@ void ParticleSubsystem::Update(Camera* mainCamera)
 
 void ParticleSubsystem::CommitPendingChanges()
 {
+
     NC_PROFILE_TASK("ParticleSubsystem::CommitPendingChanges()", Optick::Category::VFX);
     m_emitterStates.insert(
         m_emitterStates.cend(),
@@ -135,6 +136,9 @@ void ParticleSubsystem::CommitPendingChanges()
     }
 
     m_toRemove.clear();
+
+    throw NcError{""};
+
 }
 
 auto ParticleSubsystem::BuildState() -> ParticleRenderState

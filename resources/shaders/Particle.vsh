@@ -16,10 +16,7 @@ cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
     float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
+    uint lightCount;
 };
 
 struct ParticleData

@@ -16,7 +16,8 @@ struct ParticlePass
     explicit ParticlePass(Diligent::IRenderDevice& device,
                           ShaderFactory& shaderFactory,
                           ShaderBindings& shaderBindings,
-                          const PassDesc& passDesc);
+                          const PassDesc& passDesc,
+                          uint32_t numSamples);
 
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
     uint32_t colorRTIndex;

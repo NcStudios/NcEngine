@@ -143,7 +143,8 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
         device,
         shaderFactory,
         shaderBindings,
-        passManifest.ParticlePassDesc()
+        passManifest.ParticlePassDesc(),
+        m_numSamples
     );
 
     m_postProcessPasses = MakePostProcessPasses
