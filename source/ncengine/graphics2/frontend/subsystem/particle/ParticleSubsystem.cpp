@@ -17,17 +17,33 @@ struct CameraProperties
     DirectX::XMVECTOR forward = DirectX::g_XMIdentityR2;
 };
 
+auto GetCameraProperties(nc::ecs::Ecs world, nc::graphics::Camera* mainCamera) -> CameraProperties
+{
+    if (mainCamera)
+    {
+        const auto& transform = world.Get<nc::Transform>(mainCamera->ParentEntity());
+        return ::CameraProperties
+        {
+            .position = transform.PositionXM(),
+            .rotation = transform.RotationXM(),
+            .forward = transform.ForwardXM()
+        };
+    }
+
+    return ::CameraProperties{};
+}
+
 struct PermutationData
 {
-    int index;
-    float distance;
+    int index = 0;
+    float distance = 0.0f;
 };
 
-auto FindState(std::vector<nc::particle::EmitterState>& states,
-               std::vector<nc::particle::EmitterState>& staged,
+auto FindState(std::vector<nc::graphics::EmitterState>& states,
+               std::vector<nc::graphics::EmitterState>& staged,
                nc::Entity entity)
 {
-    constexpr auto proj = &nc::particle::EmitterState::GetEntity;
+    constexpr auto proj = &nc::graphics::EmitterState::GetEntity;
     auto pos = std::ranges::find(states, entity, proj);
     if (pos == states.end())
     {
@@ -42,7 +58,7 @@ auto FindState(std::vector<nc::particle::EmitterState>& states,
 namespace nc::graphics
 {
 ParticleSubsystem::ParticleSubsystem(ecs::Ecs world,
-                    uint32_t maxParticles)
+                                     uint32_t maxParticles)
     : m_world{world},
       m_maxParticles{maxParticles}
 {
@@ -51,8 +67,14 @@ ParticleSubsystem::ParticleSubsystem(ecs::Ecs world,
 
 void ParticleSubsystem::AddEmitter(ParticleEmitter& emitter)
 {
-    const auto pos = m_world.Get<Transform>(emitter.GetEntity()).PositionXM();
-    m_toAdd.emplace_back(pos, emitter.GetEntity(), emitter.GetTexture().index, emitter.GetInfo(), &m_random);
+    const auto& transform = m_world.Get<Transform>(emitter.GetEntity());
+    m_toAdd.emplace_back(
+        transform.PositionXM(),
+        emitter.GetEntity(),
+        emitter.GetTexture().index,
+        emitter.GetInfo(),
+        &m_random
+    );
 }
 
 void ParticleSubsystem::RemoveEmitter(Entity entity)
@@ -79,24 +101,9 @@ void ParticleSubsystem::Emit(Entity entity, size_t count)
 void ParticleSubsystem::Update(Camera* mainCamera)
 {
     NC_PROFILE_TASK("ParticleSubystem::Update()", Optick::Category::VFX);
+    CommitPendingChanges();
     const float dt = time::DeltaTime();
-    const auto [camPosition, camRotation, camForward] = [this, mainCamera]()
-    {
-        if (mainCamera)
-        {
-            // todo: reading transform here is undesirable
-            const auto& transform = m_world.Get<Transform>(mainCamera->ParentEntity());
-            return ::CameraProperties
-            {
-                .position = transform.PositionXM(),
-                .rotation = transform.RotationXM(),
-                .forward = transform.ForwardXM()
-            };
-        }
-
-        return ::CameraProperties{};
-    }();
-
+    const auto [camPosition, camRotation, camForward] = GetCameraProperties(m_world, mainCamera);
     for (auto& state : m_emitterStates)
     {
         const auto position = m_world.Get<Transform>(state.GetEntity()).PositionXM();
@@ -104,22 +111,20 @@ void ParticleSubsystem::Update(Camera* mainCamera)
     }
 
     SortEmitters(camPosition);
-
     m_particleDataHostBuffer.clear();
     for (const auto& state : m_emitterStates)
     {
         const auto textureIndex = state.GetTextureIndex();
-        for (const auto& m : state.GetMatrices())
+        for (const auto& matrix : state.GetMatrices())
         {
-            m_particleDataHostBuffer.emplace_back(m, textureIndex);
+            m_particleDataHostBuffer.emplace_back(matrix, textureIndex);
         }
     }
 }
 
 void ParticleSubsystem::CommitPendingChanges()
 {
-
-    NC_PROFILE_TASK("ParticleSubsystem::CommitPendingChanges()", Optick::Category::VFX);
+    NC_PROFILE_SCOPE("ParticleSubsystem::CommitPendingChanges()", Optick::Category::VFX);
     m_emitterStates.insert(
         m_emitterStates.cend(),
         std::make_move_iterator(m_toAdd.begin()),
@@ -136,9 +141,6 @@ void ParticleSubsystem::CommitPendingChanges()
     }
 
     m_toRemove.clear();
-
-    throw NcError{""};
-
 }
 
 auto ParticleSubsystem::BuildState() -> ParticleRenderState
@@ -162,8 +164,6 @@ void ParticleSubsystem::Clear() noexcept
     m_toAdd.shrink_to_fit();
     m_toRemove.clear();
     m_toRemove.shrink_to_fit();
-
-    // ?
     m_particleDataHostBuffer.clear();
     m_particleDataHostBuffer.shrink_to_fit();
 }

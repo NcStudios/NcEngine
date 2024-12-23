@@ -162,6 +162,29 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
     modules.Get<audio::NcAudio>()->RegisterListener(cameraHandle);
 
+    const auto particles = world.Emplace<Entity>({});
+    world.Emplace<ParticleEmitter>(
+        particles,
+        asset::AcquireTextureAsset(asset::DefaultParticle),
+        ParticleInfo{
+            .emission = {
+                .periodicEmissionCount = 3u,
+                .periodicEmissionFrequency = 0.05f
+            },
+            .init = {
+                .positionMin = Vector3::Splat(-15.0f),
+                .positionMax = Vector3::Splat(15.0f),
+                .scaleMin = 0.05f,
+                .scaleMax = 0.5f
+            },
+            .kinematic = {
+                .velocityMin = Vector3::Splat(-2.0f),
+                .velocityMax = Vector3::Splat(2.0f)
+            }
+        }
+    );
+
+
     const auto animatedCube = world.Emplace<Entity>({
         .position = Vector3::Up() * 4.0f
     });

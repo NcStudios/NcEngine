@@ -8,7 +8,7 @@ namespace
 {
 using namespace nc;
 
-auto ComputeMvp(const particle::Particle& particle,
+auto ComputeMvp(const graphics::Particle& particle,
                 const DirectX::FXMVECTOR& camRotation,
                 const DirectX::FXMVECTOR& camForward) -> DirectX::XMMATRIX
 {
@@ -19,10 +19,12 @@ auto ComputeMvp(const particle::Particle& particle,
            DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadVector3(&particle.position));
 }
 
-particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& positionOffset, Random* random)
+auto CreateParticle(const ParticleInfo& info,
+                    const Vector3& positionOffset,
+                    Random* random) -> graphics::Particle
 {
     const auto& [emission, init, kinematic] = info;
-    return particle::Particle
+    return graphics::Particle
     {
         .maxLifetime = init.lifetime,
         .currentLifetime = 0.0f,
@@ -34,7 +36,7 @@ particle::Particle CreateParticle(const ParticleInfo& info, const Vector3& posit
     };
 }
 
-void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+void ApplyKinematics(graphics::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
 {
     auto& vel = particle->linearVelocity;
     vel = vel + vel * velOverTimeFactor;
@@ -49,7 +51,7 @@ void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFa
 }
 } // anonymous namespace
 
-namespace nc::particle
+namespace nc::graphics
 {
 EmitterState::EmitterState(DirectX::FXMVECTOR position,
                            Entity entity,
@@ -107,19 +109,24 @@ void EmitterState::Update(DirectX::FXMVECTOR position,
     const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
     const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
 
+    auto end = m_particles.size();
     for (auto& particle : std::views::reverse(m_particles))
     {
         particle.currentLifetime += dt;
         if (particle.currentLifetime >= particle.maxLifetime)
         {
-            particle = m_particles.back();
-            m_particles.pop_back();
+            particle = m_particles.at(--end);
         }
         else
         {
             ApplyKinematics(&particle, dt, velOverTimeFactor, rotOverTimeFactor, sclOverTimeFactor);
             m_matrices.push_back(::ComputeMvp(particle, camRotation, camForward));
         }
+    }
+
+    if (end != m_particles.size())
+    {
+        m_particles.erase(m_particles.begin() + end, m_particles.end());
     }
 }
 
@@ -151,4 +158,4 @@ void EmitterState::PeriodicEmission(DirectX::FXMVECTOR position, float dt)
         }
     }
 }
-} // namespace nc::particle
+} // namespace nc::graphics

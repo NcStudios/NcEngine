@@ -15,17 +15,20 @@
 
 namespace nc
 {
-void Serialize(std::ostream& stream, const asset::TextureView& in)
+namespace asset
+{
+void Serialize(std::ostream& stream, const TextureView& in)
 {
     serialize::Serialize(stream, in.id);
 }
 
-void Deserialize(std::istream& stream, asset::TextureView& out)
+void Deserialize(std::istream& stream, TextureView& out)
 {
     auto textureId = uint64_t{};
     serialize::Deserialize(stream, textureId);
     out = asset::AcquireTextureAsset(textureId);
 }
+} // namespace asset
 
 void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&)
 {

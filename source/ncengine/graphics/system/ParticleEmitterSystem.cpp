@@ -149,7 +149,7 @@ void ParticleEmitterSystem::Emit(Entity entity, size_t count)
 
 void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
 {
-    auto findPred = [entity = emitter.GetEntity()](particle::EmitterState& state)
+    auto findPred = [entity = emitter.ParentEntity()](particle::EmitterState& state)
     {
         return state.GetEntity() == entity;
     };
@@ -167,7 +167,7 @@ void ParticleEmitterSystem::UpdateInfo(graphics::ParticleEmitter& emitter)
 
 void ParticleEmitterSystem::Add(graphics::ParticleEmitter& emitter)
 {
-    m_toAdd.emplace_back(m_registry->GetEcs(), emitter.GetEntity(), emitter.GetInfo(), &m_random);
+    m_toAdd.emplace_back(m_registry->GetEcs(), emitter.ParentEntity(), emitter.GetInfo(), &m_random);
     emitter.RegisterSystem(this);
 }
 

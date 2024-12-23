@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace nc::particle
+namespace nc::graphics
 {
 struct Particle
 {
@@ -58,4 +58,4 @@ class EmitterState
         float m_emissionCounter = 0.0f;
         bool m_needsResize = false;
 };
-} // namespace nc::particle
+} // namespace nc::graphics

@@ -33,10 +33,11 @@ auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
     return view;
 }
 
+auto g_mockTextureView = TextureView{.id = 1, .index = 1};
+
 auto AcquireTextureAsset(AssetId) -> TextureView
 {
-    static auto view = TextureView{};
-    return view;
+    return g_mockTextureView;
 }
 } // namespace asset
 
@@ -131,10 +132,15 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
     const auto expectedInfo = nc::ParticleInfo{};
     const auto expected = nc::ParticleEmitter{g_staticEntity, expectedTexture, expectedInfo};
     nc::SerializeParticleEmitter(stream, expected, g_serializationContext, nullptr);
+
+    // Mock a different texture load order prior to deserializing - want to verify textures are (de)serialized purely based on id.
+    const auto expectedTextureIndex = expectedTexture.index + 10;
+    nc::asset::g_mockTextureView.index = expectedTextureIndex;
+
     const auto actual = nc::DeserializeParticleEmitter(stream, g_deserializationContext, nullptr);
     const auto& actualTexture = actual.GetTexture();
     EXPECT_EQ(expectedTexture.id, actualTexture.id);
-    EXPECT_EQ(expectedTexture.index, actualTexture.index);
+    EXPECT_EQ(expectedTextureIndex, actualTexture.index);
 
     const auto& actualInfo = actual.GetInfo();
     EXPECT_EQ(expectedInfo.emission.maxParticleCount, actualInfo.emission.maxParticleCount);

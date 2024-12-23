@@ -8,9 +8,6 @@
 #include "ncengine/ecs/Component.h"
 
 #include "ncmath/Vector.h"
-#include "ncmath/Quaternion.h"
-
-#include <string>
 
 namespace nc
 {
@@ -19,7 +16,7 @@ namespace graphics
 class ParticleSubsystem;
 } // namespace graphics
 
-/** @brief  */
+/** @brief Describes particle emission behavior for a ParticleEmitter. */
 struct ParticleEmissionInfo
 {
     unsigned maxParticleCount = 100u;
@@ -28,7 +25,7 @@ struct ParticleEmissionInfo
     float periodicEmissionFrequency = 0.0f;
 };
 
-/** @brief  */
+/** @brief Describes initial particle properties. */
 struct ParticleInitInfo
 {
     float lifetime = 5.0f;
@@ -40,7 +37,7 @@ struct ParticleInitInfo
     float scaleMax = 1.0f;
 };
 
-/** @brief  */
+/** @brief Describes particle motion over time. */
 struct ParticleKinematicInfo
 {
     Vector3 velocityMin = Vector3::Zero();
@@ -52,7 +49,7 @@ struct ParticleKinematicInfo
     float scaleOverTimeFactor = 0.0f;
 };
 
-/** @brief  */
+/** @brief Settings for a ParticleEmitter. */
 struct ParticleInfo
 {
     ParticleEmissionInfo emission;
@@ -60,7 +57,7 @@ struct ParticleInfo
     ParticleKinematicInfo kinematic;
 };
 
-/** @brief  */
+/** @brief Component for creating particle effects. */
 class ParticleEmitter
 {
     public:
@@ -70,6 +67,7 @@ class ParticleEmitter
 
         ParticleEmitter(ParticleEmitter&& other) noexcept
             : m_self{std::exchange(other.m_self, Entity::Null())},
+              m_texture{other.m_texture},
               m_info{other.m_info}
         {
         }
@@ -80,7 +78,8 @@ class ParticleEmitter
             {
                 Release();
                 m_self = std::exchange(other.m_self, Entity::Null());
-                m_info = std::move(other.m_info);
+                m_texture = other.m_texture;
+                m_info = other.m_info;
             }
 
             return *this;

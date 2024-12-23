@@ -50,13 +50,6 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
             {nc::update_task_id::CommitStagedChanges}
         );
 
-        update.Add(
-            nc::update_task_id::ParticleEmitterSync,
-            "ParticleEmitterSync(stub)",
-            []{},
-            {nc::update_task_id::UpdateTransforms}
-        );
-
         render.Add(
             nc::render_task_id::Render,
             "Render(stub)",
@@ -350,7 +343,6 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 {
     NC_LOG_TRACE("Building NcGraphics Tasks");
 
-    // todo: this barely depends on game logic
     update.Add(
         update_task_id::ParticleEmitterUpdate,
         "ParticleEmitterUpdate",
@@ -358,16 +350,6 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
             m_frontend.GetParticleSubsystem().Update(GetCamera());
         },
         {update_task_id::CommitStagedChanges}
-    );
-
-    // todo: this doesn't depend on transforms - just Logic + ParticleUpdate
-    update.Add(
-        update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync",
-        [this]{
-            m_frontend.GetParticleSubsystem().CommitPendingChanges();
-        },
-        {update_task_id::UpdateTransforms}
     );
 
     update.Add(

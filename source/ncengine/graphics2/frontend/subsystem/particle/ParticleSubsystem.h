@@ -24,23 +24,23 @@ class ParticleSubsystem
         void UpdateEmitterTexture(Entity entity, uint32_t textureIndex);
         void Emit(Entity entity, size_t count);
 
-        // Update Graph Tasks
+        // Update Graph Task
         void Update(Camera* mainCamera);
-        void CommitPendingChanges();
 
         // GraphcsFrontend Functions
         auto BuildState() -> ParticleRenderState;
         void Clear() noexcept;
 
     private:
-        std::vector<particle::EmitterState> m_emitterStates;
-        std::vector<particle::EmitterState> m_toAdd;
+        std::vector<EmitterState> m_emitterStates;
+        std::vector<EmitterState> m_toAdd;
         std::vector<Entity> m_toRemove;
         Random m_random;
         ecs::Ecs m_world;
         std::vector<ParticleData> m_particleDataHostBuffer;
         uint32_t m_maxParticles;
 
+        void CommitPendingChanges();
         void SortEmitters(DirectX::FXMVECTOR cameraPosition);
 };
 } // namespace nc::graphics
