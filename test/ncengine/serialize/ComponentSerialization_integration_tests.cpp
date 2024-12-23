@@ -125,8 +125,6 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 {
-
-    // todo: make sure texture loading is working somehow
     auto stream = std::stringstream{};
     const auto expectedTexture = nc::asset::AcquireTextureAsset(0);
     const auto expectedInfo = nc::ParticleInfo{};

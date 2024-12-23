@@ -184,7 +184,6 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         }
     );
 
-
     const auto animatedCube = world.Emplace<Entity>({
         .position = Vector3::Up() * 4.0f
     });

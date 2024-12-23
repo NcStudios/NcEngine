@@ -296,7 +296,7 @@ void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
         state.mesh.indexCount,
         Diligent::VT_UINT32,
         Diligent::DRAW_FLAG_VERIFY_ALL,
-        static_cast<uint32_t>(state.particleData.dirtyRanges.at(0).count),
+        static_cast<uint32_t>(state.particleData.instances.size()),
         state.mesh.firstIndex,
         state.mesh.firstVertex,
         0
