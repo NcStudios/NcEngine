@@ -48,16 +48,16 @@ struct ProjectSettings;
 
 namespace graphics
 {
+class ParticleEmitter;
+} // namespace graphics
+
 struct NcGraphics;
 class Camera;
 struct DirectionalLight;
-class ParticleEmitter;
 struct PointLight;
 class SceneNavigationCamera;
-struct SpotLight;
-} // namespace graphics
-
 class SkeletalAnimationController;
 class SkinnedMesh;
+struct SpotLight;
 class StaticMesh;
 } // namespac nc

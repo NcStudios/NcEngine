@@ -2,9 +2,7 @@
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
+#include "ncengine/graphics/Light.h"
 
 #include <ranges>
 

@@ -22,7 +22,7 @@ auto IsWithinWindow(const nc::Vector2& pos) -> bool
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc
 {
 SceneNavigationCamera::SceneNavigationCamera(Entity entity,
                                              const CameraProperties& cameraProperties,
@@ -108,4 +108,4 @@ auto SceneNavigationCamera::Dolly(float dt, float speedMult) -> Vector3
     m_dollyVelocity = Lerp(m_dollyVelocity, 0.0f, 5.0f * dt);
     return Vector3{0.0f, 0.0f, m_dollyVelocity};
 }
-} // namespace nc::graphics
+} // namespace nc

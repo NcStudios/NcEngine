@@ -8,11 +8,9 @@
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/ecs/detail/FreeComponentGroup.h"
 #include "ncengine/graphics/Camera.h"
-#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/RigidBody.h"
 
@@ -30,11 +28,11 @@ REGISTER_TYPE(Tag);
 REGISTER_TYPE(Transform);
 REGISTER_TYPE(audio::AudioSource);
 REGISTER_TYPE(ecs::detail::FreeComponentGroup);
-REGISTER_TYPE(graphics::Camera);
-REGISTER_TYPE(graphics::DirectionalLight);
+REGISTER_TYPE(Camera);
+REGISTER_TYPE(DirectionalLight);
 REGISTER_TYPE(graphics::ParticleEmitter);
-REGISTER_TYPE(graphics::PointLight);
-REGISTER_TYPE(graphics::SpotLight);
+REGISTER_TYPE(PointLight);
+REGISTER_TYPE(SpotLight);
 REGISTER_TYPE(StaticMesh);
 REGISTER_TYPE(SkinnedMesh);
 REGISTER_TYPE(CollisionListener);

@@ -1,10 +1,8 @@
 #include "GraphicsTypes.h"
 #include "ncengine/graphics/Camera.h"
-#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 
 namespace nc
@@ -44,7 +42,7 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         DeserializeParticleEmitter
     );
 
-    Register<graphics::PointLight>(
+    Register<PointLight>(
         registry,
         maxEntities,
         PointLightId,
@@ -55,7 +53,7 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         DeserializePointLight
     );
 
-    Register<graphics::SpotLight>(
+    Register<SpotLight>(
         registry,
         maxEntities,
         SpotLightId,
@@ -66,7 +64,7 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         DeserializeSpotLight
     );
 
-    Register<graphics::DirectionalLight>(
+    Register<DirectionalLight>(
         registry,
         maxEntities,
         DirectionalLightId,
@@ -77,7 +75,7 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         DeserializeDirectionalLight
     );
 
-    Register<graphics::WireframeRenderer>(
+    Register<WireframeRenderer>(
         registry,
         maxEntities,
         WireframeRendererId,
