@@ -62,7 +62,7 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
     m_skinnedMaterialPassDescs.reserve(implementedMaterialPasses.size());
     registerMatches(passes, implementedMaterialPasses, PassType::SkinnedMaterial);
 
-    registerMatches(passes, implementedMiscPasses, PassType::Wireframe);
+    registerMatches(passes, implementedMiscPasses, PassType::Wireframe | PassType::Particle);
 
     m_postProcessPassDescs.reserve(implementedPPPasses.size());
     registerMatches(passes, implementedPPPasses, PassType::PostProcess);
@@ -97,6 +97,9 @@ void PassManifest::RegisterPass(PassDesc desc)
         case PassType::Wireframe:
             SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_wireframePassDesc = std::move(desc);
+            break;
+        case PassType::Particle:
+            m_particlePassDesc = std::move(desc);
             break;
         case PassType::PostProcess:
             m_postProcessPassDescs.emplace_back(std::move(desc));

@@ -51,12 +51,12 @@ namespace graphics
 struct NcGraphics;
 class Camera;
 struct DirectionalLight;
-class ParticleEmitter;
 struct PointLight;
 class SceneNavigationCamera;
 struct SpotLight;
 } // namespace graphics
 
+class ParticleEmitter;
 class SkeletalAnimationController;
 class SkinnedMesh;
 class StaticMesh;

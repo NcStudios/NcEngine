@@ -2,6 +2,7 @@
 #include "assets/AssetWrapper.h"
 #include "ncengine/Events.h"
 #include "ncengine/asset/NcAsset.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
@@ -537,7 +538,7 @@ void MakeDefaultConstraint(nc::RigidBody& body, nc::Transform& transform)
 
 namespace particle_emitter_ext
 {
-using T = nc::graphics::ParticleEmitter;
+using T = nc::ParticleEmitter;
 
 #define DECLARE_SETTER(name, memberAccess)     \
 constexpr auto name = [](auto& obj, auto& v)   \
@@ -546,6 +547,21 @@ constexpr auto name = [](auto& obj, auto& v)   \
     info.memberAccess = v;                     \
     obj.SetInfo(std::move(info));              \
 };
+
+auto TextureViewWidget(nc::asset::TextureView& view, nc::asset::NcAsset& ncAsset) -> bool
+{
+    /** @todo 353 Get asset views from ncAsset, once implemented */
+    constexpr auto assetType = nc::asset::AssetType::Texture;
+    const auto textureAssets = nc::ui::editor::GetLoadedAssets(assetType);
+    auto path = std::string{ncAsset.GetAssetPath(assetType, view.id)};
+    if (nc::ui::Combobox(path, "texture", textureAssets))
+    {
+        view = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(path);
+        return true;
+    }
+
+    return false;
+}
 
 constexpr auto getMaxParticleCount = [](auto& obj) { return obj.GetInfo().emission.maxParticleCount; };
 constexpr auto getInitialEmissionCount = [](auto& obj) { return obj.GetInfo().emission.initialEmissionCount; };
@@ -558,7 +574,6 @@ constexpr auto getInitRotationMin = [](auto& obj) { return obj.GetInfo().init.ro
 constexpr auto getInitRotationMax = [](auto& obj) { return obj.GetInfo().init.rotationMax; };
 constexpr auto getInitScaleMin = [](auto& obj) { return obj.GetInfo().init.scaleMin; };
 constexpr auto getInitScaleMax = [](auto& obj) { return obj.GetInfo().init.scaleMax; };
-constexpr auto getTexture = [](auto& obj) { return obj.GetInfo().init.particleTexturePath; };
 constexpr auto getVelocityMin = [](auto& obj) { return obj.GetInfo().kinematic.velocityMin; };
 constexpr auto getVelocityMax = [](auto& obj) { return obj.GetInfo().kinematic.velocityMax; };
 constexpr auto getVelocityOverTime = [](auto& obj) { return obj.GetInfo().kinematic.velocityOverTimeFactor; };
@@ -578,7 +593,6 @@ DECLARE_SETTER(setInitRotationMin, init.rotationMin);
 DECLARE_SETTER(setInitRotationMax, init.rotationMax);
 DECLARE_SETTER(setInitScaleMin, init.scaleMin);
 DECLARE_SETTER(setInitScaleMax, init.scaleMax);
-DECLARE_SETTER(setTexture, init.particleTexturePath);
 DECLARE_SETTER(setVelocityMin, kinematic.velocityMin);
 DECLARE_SETTER(setVelocityMax, kinematic.velocityMax);
 DECLARE_SETTER(setVelocityOverTime, kinematic.velocityOverTimeFactor);
@@ -598,7 +612,6 @@ constexpr auto initRotationMinProp = nc::ui::Property{ getInitRotationMin, setIn
 constexpr auto initRotationMaxProp = nc::ui::Property{ getInitRotationMax, setInitRotationMax, "rotMax" };
 constexpr auto initScaleMinProp = nc::ui::Property{ getInitScaleMin, setInitScaleMin, "scaleMin" };
 constexpr auto initScaleMaxProp = nc::ui::Property{ getInitScaleMax, setInitScaleMax, "scaleMax" };
-constexpr auto textureProp = nc::ui::Property{ getTexture, setTexture, "texture" };
 constexpr auto velocityMinProp = nc::ui::Property{ getVelocityMin, setVelocityMin, "velMin" };
 constexpr auto velocityMaxProp = nc::ui::Property{ getVelocityMax, setVelocityMax, "velMax" };
 constexpr auto velocityOverTimeFactorProp = nc::ui::Property{ getVelocityOverTime, setVelocityOverTime, "velOverTime" };
@@ -747,44 +760,64 @@ void SkinnedMeshUIWidget(SkinnedMesh& skinnedMesh, EditorContext& ctx, const std
     mesh_base_ext::MaterialNodeWidget(skinnedMesh, ncAsset);
 }
 
-void ParticleEmitterUIWidget(graphics::ParticleEmitter& emitter, EditorContext&, const std::any&)
+void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "ParticleEmitter");
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 30.0f;
-    auto textures = ui::editor::GetLoadedAssets(asset::AssetType::Texture);
-    ImGui::Text("%s", "Init");
-    ImGui::Separator();
-    ui::PropertyWidget(particle_emitter_ext::lifetimeProp, emitter, &ui::DragFloat, step, 0.1f, 120.0f);
-    ui::PropertyWidget(particle_emitter_ext::initPositionMinProp, emitter, &ui::InputPosition);
-    ui::PropertyWidget(particle_emitter_ext::initPositionMaxProp, emitter, &ui::InputPosition);
-    ui::PropertyWidget(particle_emitter_ext::initRotationMinProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
-    ui::PropertyWidget(particle_emitter_ext::initRotationMaxProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
-    ui::PropertyWidget(particle_emitter_ext::initScaleMinProp, emitter, &ui::DragFloat, step, ui::g_minScale, ui::g_maxScale);
-    ui::PropertyWidget(particle_emitter_ext::initScaleMaxProp, emitter, &ui::DragFloat, step, ui::g_minScale, ui::g_maxScale);
-    ui::PropertyWidget(particle_emitter_ext::textureProp, emitter, &ui::Combobox, textures);
 
-    ImGui::Text("%s", "Emission");
     ImGui::Separator();
-    ui::PropertyWidget(particle_emitter_ext::maxParticleCountProp, emitter, &ui::InputU32);
-    ui::PropertyWidget(particle_emitter_ext::initialEmissionCountProp, emitter, &ui::InputU32);
-    ui::PropertyWidget(particle_emitter_ext::periodicEmissionCountProp, emitter, &ui::InputU32);
-    ui::PropertyWidget(particle_emitter_ext::periodicEmissionFrequencyProp, emitter, &ui::DragFloat, step, min, max);
+    if (ImGui::TreeNodeEx("Texture"))
+    {
+        auto texture = emitter.GetTexture();
+        if (particle_emitter_ext::TextureViewWidget(texture, *ctx.modules.Get<asset::NcAsset>()))
+        {
+            emitter.SetTexture(texture);
+        }
 
-    constexpr auto minVel = -100.0f;
-    constexpr auto maxVel = 100.0f;
-    constexpr auto minFactor = -30.0f;
-    constexpr auto maxFactor = 30.0f;
-    ImGui::Text("%s", "Kinematic");
+        ImGui::TreePop();
+    }
+
     ImGui::Separator();
-    ui::PropertyWidget(particle_emitter_ext::velocityMinProp, emitter, &ui::InputVector3, step, minVel, maxVel);
-    ui::PropertyWidget(particle_emitter_ext::velocityMaxProp, emitter, &ui::InputVector3, step, minVel, maxVel);
-    ui::PropertyWidget(particle_emitter_ext::velocityOverTimeFactorProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
-    ui::PropertyWidget(particle_emitter_ext::rotationMinProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
-    ui::PropertyWidget(particle_emitter_ext::rotationMaxProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
-    ui::PropertyWidget(particle_emitter_ext::rotationOverTimeFactorProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
-    ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
+    if (ImGui::TreeNodeEx("Init"))
+    {
+        ui::PropertyWidget(particle_emitter_ext::lifetimeProp, emitter, &ui::DragFloat, step, 0.1f, 120.0f);
+        ui::PropertyWidget(particle_emitter_ext::initPositionMinProp, emitter, &ui::InputPosition);
+        ui::PropertyWidget(particle_emitter_ext::initPositionMaxProp, emitter, &ui::InputPosition);
+        ui::PropertyWidget(particle_emitter_ext::initRotationMinProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
+        ui::PropertyWidget(particle_emitter_ext::initRotationMaxProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
+        ui::PropertyWidget(particle_emitter_ext::initScaleMinProp, emitter, &ui::DragFloat, step, ui::g_minScale, ui::g_maxScale);
+        ui::PropertyWidget(particle_emitter_ext::initScaleMaxProp, emitter, &ui::DragFloat, step, ui::g_minScale, ui::g_maxScale);
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+    if (ImGui::TreeNodeEx("Emission"))
+    {
+        ui::PropertyWidget(particle_emitter_ext::maxParticleCountProp, emitter, &ui::InputU32);
+        ui::PropertyWidget(particle_emitter_ext::initialEmissionCountProp, emitter, &ui::InputU32);
+        ui::PropertyWidget(particle_emitter_ext::periodicEmissionCountProp, emitter, &ui::InputU32);
+        ui::PropertyWidget(particle_emitter_ext::periodicEmissionFrequencyProp, emitter, &ui::DragFloat, step, min, max);
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+    if (ImGui::TreeNodeEx("Kinematic"))
+    {
+        constexpr auto minVel = -100.0f;
+        constexpr auto maxVel = 100.0f;
+        constexpr auto minFactor = -30.0f;
+        constexpr auto maxFactor = 30.0f;
+        ui::PropertyWidget(particle_emitter_ext::velocityMinProp, emitter, &ui::InputVector3, step, minVel, maxVel);
+        ui::PropertyWidget(particle_emitter_ext::velocityMaxProp, emitter, &ui::InputVector3, step, minVel, maxVel);
+        ui::PropertyWidget(particle_emitter_ext::velocityOverTimeFactorProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
+        ui::PropertyWidget(particle_emitter_ext::rotationMinProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
+        ui::PropertyWidget(particle_emitter_ext::rotationMaxProp, emitter, &ui::DragFloat, step, ui::g_minAngle, ui::g_maxAngle);
+        ui::PropertyWidget(particle_emitter_ext::rotationOverTimeFactorProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
+        ui::PropertyWidget(particle_emitter_ext::scaleOverTimeFactoryProp, emitter, &ui::DragFloat, step, minFactor, maxFactor);
+        ImGui::TreePop();
+    }
 }
 
 void DirectionalLightUIWidget(graphics::DirectionalLight& light, EditorContext&, const std::any&)

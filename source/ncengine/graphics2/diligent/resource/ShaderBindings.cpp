@@ -45,6 +45,16 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
         );
     }
 
+    const auto& particleData = renderState.particleRenderState.particleData;
+    if (!particleData.instances.empty())
+    {
+        m_perFrameSignature.GetParticleDataBuffer().Update(
+            context,
+            device,
+            particleData
+        );
+    }
+
     const auto& lightData = renderState.lightRenderState.lights;
     if (!lightData.empty())
     {

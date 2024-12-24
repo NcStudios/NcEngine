@@ -22,6 +22,7 @@ class PassManifest
         auto SkinnedMaterialPassDescs() const -> std::span<const PassDesc> { return m_skinnedMaterialPassDescs; }
         auto PostProcessPassDescs() const -> std::span<const PassDesc> { return m_postProcessPassDescs; }
         auto WireframePassDesc() const -> const PassDesc& { return m_wireframePassDesc; }
+        auto ParticlePassDesc() const -> const PassDesc& { return m_particlePassDesc; }
         auto ColorSinkCountMsaa() const -> uint32_t { return m_colorSinkCountMsaa; }
         auto ColorSinkCount() const -> uint32_t { return m_colorSinkCount; }
         auto DepthSinkCountMsaa() const -> uint32_t  { return m_depthSinkCountMsaa; }
@@ -35,6 +36,7 @@ class PassManifest
         std::vector<PassDesc> m_skinnedMaterialPassDescs;
         std::vector<PassDesc> m_postProcessPassDescs;
         PassDesc m_wireframePassDesc;
+        PassDesc m_particlePassDesc;
         uint32_t m_colorSinkCountMsaa;
         uint32_t m_colorSinkCount;
         uint32_t m_depthSinkCountMsaa;

@@ -1,8 +1,10 @@
 #pragma once
 
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
+#include "graphics2/frontend/subsystem/particle/ParticleRenderState.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "MaterialPass.h"
+#include "ParticlePass.h"
 #include "PassManifest.h"
 #include "PostProcessPass.h"
 #include "WireframePass.h"
@@ -41,6 +43,11 @@ class PassBackend
                              PerPassResourceSignature& perPassResourceSignature,
                              const WireframeRendererRenderState& state);
 
+        void RenderParticle(Diligent::IDeviceContext& context,
+                            Diligent::ISwapChain& swapChain,
+                            PerPassResourceSignature& perPassResourceSignature,
+                            const ParticleRenderState& state);
+
         void RenderPostProcess(Diligent::IDeviceContext& context,
                                Diligent::ISwapChain& swapChain,
                                PerPassResourceSignature& perPassResourceSignature,
@@ -52,6 +59,7 @@ class PassBackend
         std::vector<MaterialPass> m_staticMaterialPasses;
         std::vector<MaterialPass> m_skinnedMaterialPasses;
         std::unique_ptr<WireframePass> m_wireframePass;
+        std::unique_ptr<ParticlePass> m_particlePass;
         std::vector<PostProcessPass> m_postProcessPasses;
         std::unique_ptr<PostProcessPass> m_finalPass;
         uint32_t m_numSamples;

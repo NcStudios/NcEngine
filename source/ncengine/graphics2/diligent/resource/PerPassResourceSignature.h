@@ -25,6 +25,8 @@ class PerPassResourceSignature
                                           const TextureBufferResourceDesc& depthRTResourceDesc,
                                           const UniformBufferResourceDesc& sinkIndexDesc);
 
+        ~PerPassResourceSignature() noexcept;
+
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
 
         auto GetResourceSignature()       -> Diligent::IPipelineResourceSignature& { return *m_signature; }

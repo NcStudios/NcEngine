@@ -4,18 +4,19 @@
  */
 #pragma once
 
-#include "ncengine/asset/DefaultAssets.h"
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/ecs/Component.h"
 
 #include "ncmath/Vector.h"
-#include "ncmath/Quaternion.h"
 
-#include <string>
-
-namespace nc::graphics
+namespace nc
 {
-class ParticleEmitterSystem;
+namespace graphics
+{
+class ParticleSubsystem;
+} // namespace graphics
 
+/** @brief Describes particle emission behavior for a ParticleEmitter. */
 struct ParticleEmissionInfo
 {
     unsigned maxParticleCount = 100u;
@@ -24,6 +25,7 @@ struct ParticleEmissionInfo
     float periodicEmissionFrequency = 0.0f;
 };
 
+/** @brief Describes initial particle properties. */
 struct ParticleInitInfo
 {
     float lifetime = 5.0f;
@@ -33,9 +35,9 @@ struct ParticleInitInfo
     float rotationMax = 0.0f;
     float scaleMin = 1.0f;
     float scaleMax = 1.0f;
-    std::string particleTexturePath = asset::DefaultParticle;
 };
 
+/** @brief Describes particle motion over time. */
 struct ParticleKinematicInfo
 {
     Vector3 velocityMin = Vector3::Zero();
@@ -47,6 +49,7 @@ struct ParticleKinematicInfo
     float scaleOverTimeFactor = 0.0f;
 };
 
+/** @brief Settings for a ParticleEmitter. */
 struct ParticleInfo
 {
     ParticleEmissionInfo emission;
@@ -54,29 +57,67 @@ struct ParticleInfo
     ParticleKinematicInfo kinematic;
 };
 
-class ParticleEmitter final : public ComponentBase
+/** @brief Component for creating particle effects. */
+class ParticleEmitter
 {
     public:
-        ParticleEmitter(Entity entity, ParticleInfo info);
+        ParticleEmitter(Entity entity,
+                        const asset::TextureView& texture,
+                        const ParticleInfo& info = {});
 
+        ParticleEmitter(ParticleEmitter&& other) noexcept
+            : m_self{std::exchange(other.m_self, Entity::Null())},
+              m_texture{other.m_texture},
+              m_info{other.m_info}
+        {
+        }
+
+        ParticleEmitter& operator=(ParticleEmitter&& other) noexcept
+        {
+            if (this != &other)
+            {
+                Release();
+                m_self = std::exchange(other.m_self, Entity::Null());
+                m_texture = other.m_texture;
+                m_info = other.m_info;
+            }
+
+            return *this;
+        }
+
+        ~ParticleEmitter() noexcept
+        {
+            Release();
+        }
+
+        /** @name General Functions */
+        auto GetEntity() const -> Entity { return m_self; }
+
+        /** @name Texture Functions */
+        auto GetTexture() const noexcept -> const asset::TextureView& { return m_texture; }
+        void SetTexture(const asset::TextureView& texture);
+
+        /** @name ParticleInfo Functions */
         auto GetInfo() const noexcept -> const ParticleInfo& { return m_info; }
         void SetInfo(const ParticleInfo& info);
+
+        /** @brief Emit count number of particles, saturating at maxParticleCount. */
         void Emit(size_t count);
 
-        void RegisterSystem(ParticleEmitterSystem* system);
+        /** @cond internal */
+        static void RegisterSubsystem(graphics::ParticleSubsystem* subsystem)
+        {
+            s_subsystem = subsystem;
+        }
+        /** @endcond internal */
 
     private:
-        ParticleInfo m_info;
-        ParticleEmitterSystem* m_emitterSystem;
-};
-} // namespace nc::graphics
+        static inline graphics::ParticleSubsystem* s_subsystem = nullptr;
 
-namespace nc
-{
-template<>
-struct StoragePolicy<graphics::ParticleEmitter> : DefaultStoragePolicy
-{
-    static constexpr bool EnableOnAddCallbacks = true;
-    static constexpr bool EnableOnRemoveCallbacks = true;
+        Entity m_self;
+        asset::TextureView m_texture;
+        ParticleInfo m_info;
+
+        void Release() noexcept;
 };
 } // namespace nc

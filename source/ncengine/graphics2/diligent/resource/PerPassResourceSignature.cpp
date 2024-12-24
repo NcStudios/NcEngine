@@ -59,4 +59,6 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         GetVariable(sinkIndexResourceDesc.shaderType, sinkIndexResourceDesc.resourceKey.data(), m_srb)
     );
 }
+
+PerPassResourceSignature::~PerPassResourceSignature() = default;
 } // namespace nc::graphics
