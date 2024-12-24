@@ -8,7 +8,7 @@ namespace
 {
 using namespace nc;
 
-auto ComputeMvp(const particle::Particle& particle,
+auto ComputeMvp(const graphics::Particle& particle,
                 const DirectX::FXMVECTOR& camRotation,
                 const DirectX::FXMVECTOR& camForward) -> DirectX::XMMATRIX
 {
@@ -19,10 +19,12 @@ auto ComputeMvp(const particle::Particle& particle,
            DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadVector3(&particle.position));
 }
 
-particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vector3& positionOffset, Random* random)
+auto CreateParticle(const ParticleInfo& info,
+                    const Vector3& positionOffset,
+                    Random* random) -> graphics::Particle
 {
     const auto& [emission, init, kinematic] = info;
-    return particle::Particle
+    return graphics::Particle
     {
         .maxLifetime = init.lifetime,
         .currentLifetime = 0.0f,
@@ -34,7 +36,7 @@ particle::Particle CreateParticle(const graphics::ParticleInfo& info, const Vect
     };
 }
 
-void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
+void ApplyKinematics(graphics::Particle* particle, float dt, float velOverTimeFactor, float rotOverTimeFactor, float sclOverTimeFactor)
 {
     auto& vel = particle->linearVelocity;
     vel = vel + vel * velOverTimeFactor;
@@ -49,21 +51,25 @@ void ApplyKinematics(particle::Particle* particle, float dt, float velOverTimeFa
 }
 } // anonymous namespace
 
-namespace nc::particle
+namespace nc::graphics
 {
-EmitterState::EmitterState(ecs::ExplicitEcs<Transform> transforms, Entity entity, const graphics::ParticleInfo& info, Random* random)
-    : m_info{ info },
-      m_transforms{ transforms },
+EmitterState::EmitterState(DirectX::FXMVECTOR position,
+                           Entity entity,
+                           uint32_t textureIndex,
+                           const ParticleInfo& info,
+                           Random* random)
+    : m_textureIndex{textureIndex},
+      m_info{ info },
       m_entity{ entity },
       m_random{ random }
 {
     m_particles.reserve(info.emission.maxParticleCount);
-    Emit(m_info.emission.initialEmissionCount);
+    Emit(position, m_info.emission.initialEmissionCount);
 }
 
-void EmitterState::Emit(size_t count)
+void EmitterState::Emit(DirectX::FXMVECTOR position, size_t count)
 {
-    m_lastPosition = m_transforms.Get<Transform>(m_entity).PositionXM();
+    m_lastPosition = position;
     auto parentPosition = Vector3{};
     DirectX::XMStoreVector3(&parentPosition, m_lastPosition);
     const auto particleCount = Min(count, m_particles.capacity() - m_particles.size());
@@ -77,7 +83,10 @@ void EmitterState::Emit(size_t count)
     );
 }
 
-void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const DirectX::FXMVECTOR& camForward)
+void EmitterState::Update(DirectX::FXMVECTOR position,
+                          DirectX::FXMVECTOR camRotation,
+                          DirectX::FXMVECTOR camForward,
+                          float dt)
 {
     if (m_needsResize)
     {
@@ -90,7 +99,7 @@ void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const
         m_needsResize = false;
     }
 
-    PeriodicEmission(dt);
+    PeriodicEmission(position, dt);
     m_matrices.clear();
 
     if (m_particles.empty())
@@ -100,13 +109,13 @@ void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const
     const auto rotOverTimeFactor = m_info.kinematic.rotationOverTimeFactor * dt;
     const auto sclOverTimeFactor = m_info.kinematic.scaleOverTimeFactor * dt;
 
+    auto end = m_particles.size();
     for (auto& particle : std::views::reverse(m_particles))
     {
         particle.currentLifetime += dt;
         if (particle.currentLifetime >= particle.maxLifetime)
         {
-            particle = m_particles.back();
-            m_particles.pop_back();
+            particle = m_particles.at(--end);
         }
         else
         {
@@ -114,9 +123,14 @@ void EmitterState::Update(float dt, const DirectX::FXMVECTOR& camRotation, const
             m_matrices.push_back(::ComputeMvp(particle, camRotation, camForward));
         }
     }
+
+    if (end != m_particles.size())
+    {
+        m_particles.erase(m_particles.begin() + end, m_particles.end());
+    }
 }
 
-void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
+void EmitterState::UpdateInfo(const ParticleInfo& info)
 {
     // delay resize so we don't blow up the particle task
     if (info.emission.maxParticleCount != m_info.emission.maxParticleCount)
@@ -127,7 +141,12 @@ void EmitterState::UpdateInfo(const graphics::ParticleInfo& info)
     m_info = info;
 }
 
-void EmitterState::PeriodicEmission(float dt)
+void EmitterState::UpdateTexture(uint32_t textureIndex)
+{
+    m_textureIndex = textureIndex;
+}
+
+void EmitterState::PeriodicEmission(DirectX::FXMVECTOR position, float dt)
 {
     if (m_info.emission.periodicEmissionFrequency > 0.0f)
     {
@@ -135,8 +154,8 @@ void EmitterState::PeriodicEmission(float dt)
         if (m_emissionCounter > m_info.emission.periodicEmissionFrequency)
         {
             m_emissionCounter = 0.0f;
-            Emit(m_info.emission.periodicEmissionCount);
+            Emit(position, m_info.emission.periodicEmissionCount);
         }
     }
 }
-} // namespace nc::particle
+} // namespace nc::graphics

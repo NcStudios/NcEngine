@@ -11,6 +11,7 @@ auto GraphicsFrontend::BuildRenderState(ecs::Ecs world) -> FrontendRenderState
         .meshRenderState = m_meshSystem.BuildState(world),
         .animationRenderState = m_animationSystem.BuildState(),
         .materialRenderState = m_materialRegistry.BuildState(),
+        .particleRenderState = m_particleSystem.BuildState(),
         .lightRenderState = m_lightSubsystem.BuildState(world),
         .postProcessState = m_postProcessSystem.BuildState(),
         .wireframeRenderState = m_wireframeSystem.BuildState(world)

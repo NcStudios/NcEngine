@@ -11,3 +11,4 @@ target_sources(${NC_ENGINE_LIB}
 )
 
 add_subdirectory(animation)
+add_subdirectory(particle)

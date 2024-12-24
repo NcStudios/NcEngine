@@ -33,7 +33,7 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         nullptr
     );
 
-    Register<graphics::ParticleEmitter>(
+    Register<ParticleEmitter>(
         registry,
         maxEntities,
         ParticleEmitterId,
