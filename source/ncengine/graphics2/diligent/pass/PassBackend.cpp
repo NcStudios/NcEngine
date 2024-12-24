@@ -285,8 +285,8 @@ void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
     }
 
     BindRenderTarget(context, swapChain,
-                     perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
-                     perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                     perPassResourceSignature.GetColorSinkBufferResource(),
+                     perPassResourceSignature.GetDepthSinkBufferResource(),
                      m_particlePass->colorRTIndex,
                      m_particlePass->depthRTIndex,
                      m_numSamples > 1);
