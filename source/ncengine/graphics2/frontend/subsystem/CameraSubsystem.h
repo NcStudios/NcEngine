@@ -3,11 +3,11 @@
 
 namespace nc
 {
+class Camera;
 class Transform;
 
 namespace graphics
 {
-class Camera;
 struct CameraRenderState;
 
 class CameraSubsystem final

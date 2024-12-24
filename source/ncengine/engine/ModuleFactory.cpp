@@ -52,13 +52,13 @@ auto BuildModuleRegistry(ecs::ComponentRegistry& registry,
                                                          config.memorySettings,
                                                          BuildDefaultAssetMap()));
 
-    moduleRegistry->Register(nc::graphics::BuildGraphicsModule(config.projectSettings,
-                                                               config.assetSettings,
-                                                               config.graphicsSettings,
-                                                               config.memorySettings,
-                                                               ModuleProvider{moduleRegistry.get()},
-                                                               world,
-                                                               events));
+    moduleRegistry->Register(nc::BuildGraphicsModule(config.projectSettings,
+                                                     config.assetSettings,
+                                                     config.graphicsSettings,
+                                                     config.memorySettings,
+                                                     ModuleProvider{moduleRegistry.get()},
+                                                     world,
+                                                     events));
 
     moduleRegistry->Register(nc::BuildPhysicsModule(config.memorySettings,
                                                     config.physicsSettings,

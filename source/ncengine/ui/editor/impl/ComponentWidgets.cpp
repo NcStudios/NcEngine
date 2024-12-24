@@ -6,12 +6,10 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/Tag.h"
 #include "ncengine/ecs/Transform.h"
-#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/GraphicsUtility.h"
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/PhysicsLimits.h"
@@ -820,13 +818,13 @@ void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const
     }
 }
 
-void DirectionalLightUIWidget(graphics::DirectionalLight& light, EditorContext&, const std::any&)
+void DirectionalLightUIWidget(DirectionalLight& light, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "DirectionalLight");
     ui::InputColor3(light.color, "color");
 }
 
-void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::any&)
+void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "PointLight");
     constexpr auto step = 0.1f;
@@ -836,7 +834,7 @@ void PointLightUIWidget(graphics::PointLight& light, EditorContext&, const std::
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
-void SpotLightUIWidget(graphics::SpotLight& light, EditorContext&, const std::any&)
+void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "SpotLight");
     constexpr auto step = 0.01f;

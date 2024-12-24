@@ -10,7 +10,7 @@
 
 #include <vector>
 
-namespace nc::graphics
+namespace nc
 {
 /** @brief Specifies the source a WireframeRenderer should pull from. */
 enum class WireframeSource
@@ -56,4 +56,4 @@ struct WireframeRenderer
     std::vector<DirectX::XMMATRIX> instances;
     Vector4 color;
 };
-} // namespace nc::graphics
+} // namespace nc

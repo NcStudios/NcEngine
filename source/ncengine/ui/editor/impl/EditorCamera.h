@@ -10,11 +10,11 @@ namespace nc
 {
 namespace ui::editor
 {
-class EditorCamera : public graphics::SceneNavigationCamera
+class EditorCamera : public SceneNavigationCamera
 {
     public:
         explicit EditorCamera(Entity self, ModuleProvider modules, input::KeyCode hotkey)
-            : graphics::SceneNavigationCamera{self}, m_modules{modules}, m_hotkey{hotkey}
+            : SceneNavigationCamera{self}, m_modules{modules}, m_hotkey{hotkey}
         {
         }
 

@@ -17,7 +17,7 @@ struct CameraProperties
     DirectX::XMVECTOR forward = DirectX::g_XMIdentityR2;
 };
 
-auto GetCameraProperties(nc::ecs::Ecs world, nc::graphics::Camera* mainCamera) -> CameraProperties
+auto GetCameraProperties(nc::ecs::Ecs world, nc::Camera* mainCamera) -> CameraProperties
 {
     if (mainCamera)
     {
