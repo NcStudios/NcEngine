@@ -4,8 +4,7 @@
 #include "PassTypes.h"
 #include "PostProcessPass.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
-#include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
+#include "graphics2/diligent/resource/SinkBufferResource.h"
 #include "graphics2/diligent/ShaderFactory.h"
 
 #include "Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -24,15 +23,15 @@ auto SingleSource(uint32_t target) -> std::vector<uint32_t>;
 auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool;
 void ClearRenderTarget(Diligent::IDeviceContext& context,
                        Diligent::ISwapChain& swapChain,
-                       nc::graphics::PostProcessColorSinkBufferResource& postProcessSinkBufferResource,
-                       nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
+                       SinkBufferResource& colorSinkBufferResource,
+                       SinkBufferResource& depthSinkBufferResource,
                        uint32_t colorRenderTargetIndex,
                        uint32_t depthRenderTargetIndex,
                        bool isMsaa);
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
-                      nc::graphics::PostProcessColorSinkBufferResource& postProcessColorSinkBufferResource,
-                      nc::graphics::PostProcessDepthSinkBufferResource& postProcessDepthSinkBufferResource,
+                      SinkBufferResource& colorSinkBufferResource,
+                      SinkBufferResource& depthSinkBufferResource,
                       uint32_t colorRenderTargetIndex,
                       uint32_t depthRenderTargetIndex,
                       bool isMsaa);

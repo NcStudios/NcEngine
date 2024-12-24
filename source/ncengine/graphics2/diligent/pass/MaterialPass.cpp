@@ -2,7 +2,7 @@
 #include "PassUtilities.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/resource/MeshBuffer.h"
-#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "graphics2/diligent/resource/SinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
 
 #include <ranges>

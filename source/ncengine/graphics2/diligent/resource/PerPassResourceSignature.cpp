@@ -1,7 +1,6 @@
 #include "PerPassResourceSignature.h"
-#include "PostProcessColorSinkBufferResource.h"
-#include "PostProcessDepthSinkBufferResource.h"
-#include "PostProcessSinkIndexBufferResource.h"
+#include "SinkBufferResource.h"
+#include "SinkIndexBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -13,17 +12,17 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    Diligent::IDeviceContext& context,
                                                    std::string_view signatureName,
                                                    uint8_t bindingIndex,
-                                                   const TextureBufferResourceDesc& postProcessColorSinkResourceDesc,
-                                                   const TextureBufferResourceDesc& postProcessDepthSinkResourceDesc,
-                                                   const UniformBufferResourceDesc& postProcessSinkIndexResourceDesc)
+                                                   const TextureBufferResourceDesc& colorSinkResourceDesc,
+                                                   const TextureBufferResourceDesc& depthSinkResourceDesc,
+                                                   const UniformBufferResourceDesc& sinkIndexResourceDesc)
 {
     const auto resources = std::array{
-        ToPipelineResourceDesc(postProcessColorSinkResourceDesc),
-        ToPipelineResourceDesc(postProcessDepthSinkResourceDesc),
-        ToPipelineResourceDesc(postProcessSinkIndexResourceDesc)
+        ToPipelineResourceDesc(colorSinkResourceDesc),
+        ToPipelineResourceDesc(depthSinkResourceDesc),
+        ToPipelineResourceDesc(sinkIndexResourceDesc)
     };
 
-    const auto sampler = PostProcessColorSinkBufferResource::MakeSamplerDesc(postProcessColorSinkResourceDesc.resourceKey);
+    const auto sampler = SinkBufferResource::MakeSamplerDesc(colorSinkResourceDesc.resourceKey);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = resources.data();
@@ -45,19 +44,19 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    m_postProcessColorSinkBufferResource = std::make_unique<PostProcessColorSinkBufferResource>(
-        GetVariable(postProcessColorSinkResourceDesc.shaderType, postProcessColorSinkResourceDesc.resourceKey.data(), m_srb),
-        postProcessColorSinkResourceDesc.maxElementCount
+    m_colorSinkBufferResource = std::make_unique<SinkBufferResource>(
+        GetVariable(colorSinkResourceDesc.shaderType, colorSinkResourceDesc.resourceKey.data(), m_srb),
+        MakeColorSinkBufferDesc(colorSinkResourceDesc.maxElementCount)
     );
 
-    m_postProcessDepthSinkBufferResource = std::make_unique<PostProcessDepthSinkBufferResource>(
-        GetVariable(postProcessDepthSinkResourceDesc.shaderType, postProcessDepthSinkResourceDesc.resourceKey.data(), m_srb),
-        postProcessDepthSinkResourceDesc.maxElementCount
+    m_depthSinkBufferResource = std::make_unique<SinkBufferResource>(
+        GetVariable(depthSinkResourceDesc.shaderType, depthSinkResourceDesc.resourceKey.data(), m_srb),
+        MakeDepthSinkBufferDesc(depthSinkResourceDesc.maxElementCount)
     );
 
-    m_postProcessSinkIndexBufferResource = std::make_unique<PostProcessSinkIndexBufferResource>(
+    m_sinkIndexBufferResource = std::make_unique<SinkIndexBufferResource>(
         context, device,
-        GetVariable(postProcessSinkIndexResourceDesc.shaderType, postProcessSinkIndexResourceDesc.resourceKey.data(), m_srb)
+        GetVariable(sinkIndexResourceDesc.shaderType, sinkIndexResourceDesc.resourceKey.data(), m_srb)
     );
 }
 

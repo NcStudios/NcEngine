@@ -5,12 +5,11 @@ target_sources(${NC_ENGINE_LIB}
         PerFrameResourceSignature.cpp
         PerPassResourceSignature.cpp
         PostProcessPropertyBufferResource.cpp
-        PostProcessSinkIndexBufferResource.cpp
-        PostProcessColorSinkBufferResource.cpp
-        PostProcessDepthSinkBufferResource.cpp
-        TextureBufferResource.cpp
         ResourceTypes.cpp
         ShaderBindings.cpp
+        SinkBufferResource.cpp
+        SinkIndexBufferResource.cpp
+        TextureBufferResource.cpp
         WireframeBufferResource.cpp
 )
 

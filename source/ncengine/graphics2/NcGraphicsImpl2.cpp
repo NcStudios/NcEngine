@@ -2,7 +2,7 @@
 #include "diligent/pass/MaterialPass.h"
 #include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
-#include "diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "diligent/resource/SinkIndexBufferResource.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -438,9 +438,11 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 
 void NcGraphicsImpl2::Resize()
 {
-    m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
-    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
+    const auto width = static_cast<uint32_t>(m_dimensions.x);
+    const auto height = static_cast<uint32_t>(m_dimensions.y);
+    m_engine.GetSwapChain().Resize(width, height);
+    m_shaderBindings.GetPerPassSignature().GetColorSinkBufferResource().Resize(m_engine.GetDevice(), width, height, m_numSamples);
+    m_shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource().Resize(m_engine.GetDevice(), width, height, m_numSamples);
     m_resizeNeeded = false;
 }
 } // namespace nc::graphics

@@ -2,9 +2,9 @@
 #include "PassUtilities.h"
 #include "graphics2/diligent/resource/PerPassResourceSignature.h"
 #include "graphics2/diligent/resource/PostProcessPropertyBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 #include "graphics2/diligent/resource/ShaderBindings.h"
+#include "graphics2/diligent/resource/SinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
 #include "ncengine/debug/Profile.h"
@@ -108,8 +108,8 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
       m_depthSinkCountMsaa{0u}
 {
     // Sink target buffers
-    auto& postProcessColorSinks = shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource();
-    auto& postProcessDepthSinks = shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource();
+    auto& postProcessColorSinks = shaderBindings.GetPerPassSignature().GetColorSinkBufferResource();
+    auto& postProcessDepthSinks = shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource();
 
     m_staticMaterialPasses = MakeMaterialPasses
     (
@@ -224,8 +224,8 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
         skinnedPassBatches
     );
 
-    auto& colorSinkBuffer = perPassResourceSignature.GetPostProcessColorSinkBufferResource();
-    auto& depthSinkBuffer = perPassResourceSignature.GetPostProcessDepthSinkBufferResource();
+    auto& colorSinkBuffer = perPassResourceSignature.GetColorSinkBufferResource();
+    auto& depthSinkBuffer = perPassResourceSignature.GetDepthSinkBufferResource();
 
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
@@ -251,8 +251,8 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
         return;
     }
 
-    auto& colorSinkBuffer = perPassResourceSignature.GetPostProcessColorSinkBufferResource();
-    auto& depthSinkBuffer = perPassResourceSignature.GetPostProcessDepthSinkBufferResource();
+    auto& colorSinkBuffer = perPassResourceSignature.GetColorSinkBufferResource();
+    auto& depthSinkBuffer = perPassResourceSignature.GetDepthSinkBufferResource();
 
     BindRenderTarget(context, swapChain, colorSinkBuffer, depthSinkBuffer, m_wireframePass->colorRTIndex, m_wireframePass->depthRTIndex, m_numSamples > 1);
     context.SetPipelineState(m_wireframePass->pso);
@@ -285,8 +285,8 @@ void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
     }
 
     BindRenderTarget(context, swapChain,
-                     perPassResourceSignature.GetPostProcessColorSinkBufferResource(),
-                     perPassResourceSignature.GetPostProcessDepthSinkBufferResource(),
+                     perPassResourceSignature.GetColorSinkBufferResource(),
+                     perPassResourceSignature.GetDepthSinkBufferResource(),
                      m_particlePass->colorRTIndex,
                      m_particlePass->depthRTIndex,
                      m_numSamples > 1);
@@ -313,9 +313,9 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
     auto& propertyBuffer = perFrameResourceSignature.GetPostProcessPropertyBuffer();
-    auto& colorSinkBuffer = perPassResourceSignature.GetPostProcessColorSinkBufferResource();
-    auto& depthSinkBuffer = perPassResourceSignature.GetPostProcessDepthSinkBufferResource();
-    auto& sinkIndexBuffer = perPassResourceSignature.GetPostProcessSinkIndexBufferResource();
+    auto& colorSinkBuffer = perPassResourceSignature.GetColorSinkBufferResource();
+    auto& depthSinkBuffer = perPassResourceSignature.GetDepthSinkBufferResource();
+    auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
 
     // If MSAA samples are set to be greater than 1 in the config, all PassType::Material, PassType::SkinnedMaterial and PassType::Misc passes are multisampled.
     // These need to be resolved before used by the post process passes.
