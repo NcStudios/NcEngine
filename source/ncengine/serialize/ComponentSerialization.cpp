@@ -1,4 +1,6 @@
 #include "ComponentSerialization.h"
+#include "ncengine/asset/Assets.h"
+#include "ncengine/asset/AssetViews.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -11,6 +13,21 @@
 
 namespace nc
 {
+namespace asset
+{
+void Serialize(std::ostream& stream, const TextureView& in)
+{
+    serialize::Serialize(stream, in.id);
+}
+
+void Deserialize(std::istream& stream, TextureView& out)
+{
+    auto textureId = uint64_t{};
+    serialize::Deserialize(stream, textureId);
+    out = asset::AcquireTextureAsset(textureId);
+}
+} // namespace asset
+
 void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
     serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
@@ -41,19 +58,22 @@ auto DeserializeDirectionalLight(std::istream& stream, const DeserializationCont
     return out;
 }
 
-void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
+void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&)
 {
-    serialize::Serialize(stream, ctx.entityMap.at(out.ParentEntity()));
+    serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
+    serialize::Serialize(stream, out.GetTexture());
     serialize::Serialize(stream, out.GetInfo());
 }
 
-auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::ParticleEmitter
+auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> ParticleEmitter
 {
     auto id = uint32_t{};
-    auto particleInfo = graphics::ParticleInfo{};
+    auto texture = asset::TextureView{};
+    auto particleInfo = ParticleInfo{};
     serialize::Deserialize(stream, id);
+    serialize::Deserialize(stream, texture);
     serialize::Deserialize(stream, particleInfo);
-    return graphics::ParticleEmitter{ctx.entityMap.at(id), particleInfo};
+    return ParticleEmitter{ctx.entityMap.at(id), texture, particleInfo};
 }
 
 void SerializePointLight(std::ostream& stream, const PointLight& out, const SerializationContext&, const std::any&)

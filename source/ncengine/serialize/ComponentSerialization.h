@@ -14,8 +14,8 @@ void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, c
 auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> audio::AudioSource;
 void SerializeDirectionalLight(std::ostream& stream, const DirectionalLight& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> DirectionalLight;
-void SerializeParticleEmitter(std::ostream& stream, const graphics::ParticleEmitter& out, const SerializationContext& ctx, const std::any&);
-auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::ParticleEmitter;
+void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> ParticleEmitter;
 void SerializePointLight(std::ostream& stream, const PointLight& out, const SerializationContext& ctx, const std::any&);
 auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> PointLight;
 void SerializeSpotLight(std::ostream& stream, const SpotLight& out, const SerializationContext& ctx, const std::any&);

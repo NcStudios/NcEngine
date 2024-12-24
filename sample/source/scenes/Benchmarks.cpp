@@ -3,6 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -591,7 +592,10 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::ParticleEmitter>(entity, graphics::ParticleInfo{
+                world.Emplace<ParticleEmitter>(
+                    entity,
+                    asset::AcquireTextureAsset(asset::DefaultParticle),
+                    ParticleInfo{
                     .emission = {
                         .periodicEmissionCount = 15u,
                         .periodicEmissionFrequency = 0.1f

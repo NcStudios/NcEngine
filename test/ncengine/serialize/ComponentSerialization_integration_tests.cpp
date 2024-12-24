@@ -8,6 +8,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
+#include "graphics2/frontend/subsystem/particle/ParticleSubsystem.h"
 #include "physics/DeferredPhysicsCreateState.h"
 
 #include "ncutility/ScopeExit.h"
@@ -22,11 +23,32 @@ DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc
 
 namespace nc
 {
-auto asset::AcquireAudioClipAsset(const std::string&) -> asset::AudioClipView
+namespace asset
+{
+auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
 {
     static auto view = AudioClipView{};
     return view;
 }
+
+auto g_mockTextureView = TextureView{.id = 1, .index = 1};
+
+auto AcquireTextureAsset(AssetId) -> TextureView
+{
+    return g_mockTextureView;
+}
+} // namespace asset
+
+
+namespace graphics
+{
+void ParticleSubsystem::AddEmitter(ParticleEmitter&) {}
+void ParticleSubsystem::RemoveEmitter(Entity) {}
+void ParticleSubsystem::UpdateEmitterInfo(Entity, const ParticleInfo&) {}
+void ParticleSubsystem::UpdateEmitterTexture(Entity, uint32_t) {}
+void ParticleSubsystem::Emit(Entity, size_t) {}
+} // namespace graphics
+
 
 auto g_mockConstraints = std::unordered_map<nc::Entity::index_type, std::vector<nc::Constraint>>{};
 
@@ -102,10 +124,20 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expectedInfo = nc::graphics::ParticleInfo{};
-    const auto expected = nc::graphics::ParticleEmitter{g_staticEntity, expectedInfo};
+    const auto expectedTexture = nc::asset::AcquireTextureAsset(0);
+    const auto expectedInfo = nc::ParticleInfo{};
+    const auto expected = nc::ParticleEmitter{g_staticEntity, expectedTexture, expectedInfo};
     nc::SerializeParticleEmitter(stream, expected, g_serializationContext, nullptr);
+
+    // Mock a different texture load order prior to deserializing - want to verify textures are (de)serialized purely based on id.
+    const auto expectedTextureIndex = expectedTexture.index + 10;
+    nc::asset::g_mockTextureView.index = expectedTextureIndex;
+
     const auto actual = nc::DeserializeParticleEmitter(stream, g_deserializationContext, nullptr);
+    const auto& actualTexture = actual.GetTexture();
+    EXPECT_EQ(expectedTexture.id, actualTexture.id);
+    EXPECT_EQ(expectedTextureIndex, actualTexture.index);
+
     const auto& actualInfo = actual.GetInfo();
     EXPECT_EQ(expectedInfo.emission.maxParticleCount, actualInfo.emission.maxParticleCount);
     EXPECT_EQ(expectedInfo.emission.initialEmissionCount, actualInfo.emission.initialEmissionCount);
@@ -118,7 +150,6 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
     EXPECT_EQ(expectedInfo.init.rotationMax, actualInfo.init.rotationMax);
     EXPECT_EQ(expectedInfo.init.scaleMin, actualInfo.init.scaleMin);
     EXPECT_EQ(expectedInfo.init.scaleMax, actualInfo.init.scaleMax);
-    EXPECT_EQ(expectedInfo.init.particleTexturePath, actualInfo.init.particleTexturePath);
     EXPECT_EQ(expectedInfo.kinematic.velocityMin, actualInfo.kinematic.velocityMin);
     EXPECT_EQ(expectedInfo.kinematic.velocityMax, actualInfo.kinematic.velocityMax);
     EXPECT_EQ(expectedInfo.kinematic.velocityOverTimeFactor, actualInfo.kinematic.velocityOverTimeFactor);

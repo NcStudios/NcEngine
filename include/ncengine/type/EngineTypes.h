@@ -30,7 +30,7 @@ REGISTER_TYPE(audio::AudioSource);
 REGISTER_TYPE(ecs::detail::FreeComponentGroup);
 REGISTER_TYPE(Camera);
 REGISTER_TYPE(DirectionalLight);
-REGISTER_TYPE(graphics::ParticleEmitter);
+REGISTER_TYPE(ParticleEmitter);
 REGISTER_TYPE(PointLight);
 REGISTER_TYPE(SpotLight);
 REGISTER_TYPE(StaticMesh);

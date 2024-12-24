@@ -40,7 +40,6 @@ struct NcGraphicsStub2 : nc::NcGraphics
         using namespace nc::render_task_id;
         update.Add(ParticleEmitterUpdate,   "ParticleEmitterUpdate(stub)",   []{}, {CommitStagedChanges});
         update.Add(SkeletalAnimationUpdate, "SkeletalAnimationUpdate(stub)", []{}, {CommitStagedChanges});
-        update.Add(ParticleEmitterSync,     "ParticleEmitterSync(stub)",     []{}, {UpdateTransforms});
         render.Add(Render,                  "Render(stub)",                  []{});
     }
 
@@ -150,15 +149,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_shaderBindings{
             m_engine.GetDevice(),
             m_engine.GetContext(),
-            memorySettings.maxTextures,
-            memorySettings.maxRenderers,
-            memorySettings.maxSpotLights,
-            memorySettings.maxPointLights,
-            memorySettings.maxDirectionalLights,
-            memorySettings.maxBones,
-            memorySettings.maxRenderers / 2,
-            memorySettings.maxRenderers / 2,
-            memorySettings.maxBones / 4
+            memorySettings
           },
           m_ui{
             m_engine.GetDevice(),
@@ -209,6 +200,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = MainDepthMsaa
                 },
                 PassDesc{
+                    .id = MiscPassFlag::Particle,
+                    .name = "Particle",
+                    .type = PassType::Particle,
+                    .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
+                },
+                PassDesc{
                     .id = PostProcessPassFlag::Wave,
                     .name = "Post Process Wave",
                     .type = PassType::PostProcess,
@@ -249,6 +248,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxTransforms,
             memorySettings.maxRenderers,
             memorySettings.maxBones,
+            memorySettings.maxParticles,
             graphicsSettings.initialBatchSize,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
@@ -333,18 +333,11 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 
     update.Add(
         update_task_id::ParticleEmitterUpdate,
-        "ParticleEmitterUpdate(stub)",
-        []{},
+        "ParticleEmitterUpdate",
+        [this]{
+            m_frontend.GetParticleSubsystem().Update(GetCamera());
+        },
         {update_task_id::CommitStagedChanges}
-    );
-
-
-
-    update.Add(
-        update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync(stub)",
-        []{},
-        {update_task_id::UpdateTransforms}
     );
 
     update.Add(
@@ -400,6 +393,13 @@ void NcGraphicsImpl2::Run()
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
         renderState.wireframeRenderState
+    );
+
+    m_passBackend.RenderParticle(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.particleRenderState
     );
 
     m_passBackend.RenderPostProcess(
