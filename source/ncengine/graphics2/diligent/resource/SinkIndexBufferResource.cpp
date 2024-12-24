@@ -1,4 +1,4 @@
-#include "PostProcessSinkIndexBufferResource.h"
+#include "SinkIndexBufferResource.h"
 
 #include "ncutility/NcError.h"
 
@@ -6,9 +6,9 @@
 
 namespace nc::graphics
 {
-PostProcessSinkIndexBufferResource::PostProcessSinkIndexBufferResource(Diligent::IDeviceContext& context,
-                                                                       Diligent::IRenderDevice& device,
-                                                                       Diligent::IShaderResourceVariable& variable)
+SinkIndexBufferResource::SinkIndexBufferResource(Diligent::IDeviceContext& context,
+                                                 Diligent::IRenderDevice& device,
+                                                 Diligent::IShaderResourceVariable& variable)
     : m_buffer{
         context,
         device,
@@ -19,7 +19,9 @@ PostProcessSinkIndexBufferResource::PostProcessSinkIndexBufferResource(Diligent:
     m_variable->Set(&m_buffer.GetBuffer());
 }
 
-void PostProcessSinkIndexBufferResource::Update(Diligent::IDeviceContext& context, std::span<const uint32_t> colorSources, std::span<const uint32_t> depthSources)
+void SinkIndexBufferResource::Update(Diligent::IDeviceContext& context,
+                                     std::span<const uint32_t> colorSources,
+                                     std::span<const uint32_t> depthSources)
 {
     NC_ASSERT(colorSources.size() <= 4u, "Only four color sources supported.");
     NC_ASSERT(depthSources.size() <= 4u, "Only four depth sources supported.");
