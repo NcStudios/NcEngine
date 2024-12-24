@@ -181,6 +181,7 @@ add_test(MaterialRegistry_tests MaterialRegistry_tests)
 ### MeshSubsystem Tests ###
 add_executable(MeshSubsystem_tests
     MeshSubsystem_tests.cpp
+    ${NC_SOURCE_DIR}/asset/Assets.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
     ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp

@@ -23,7 +23,7 @@ SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
 auto SkeletalAnimationController::GetCurrentAnimationId() const -> uint64_t
 {
     // Id is cached here if queued transition overwrote the current id (e.g. immediate -> immediate)
-    if (m_prevAnimId != NullAnimationId)
+    if (m_prevAnimId != asset::NullAssetId)
     {
         return m_prevAnimId;
     }
@@ -33,7 +33,7 @@ auto SkeletalAnimationController::GetCurrentAnimationId() const -> uint64_t
         case ImmediateAnimationState:
             return m_immediateState->animId;
         case NullAnimationState:
-            return NullAnimationId;
+            return asset::NullAssetId;
         default:
             return m_states.at(m_activeState).animId;
     }
@@ -202,7 +202,7 @@ void SkeletalAnimationController::QueueImmediateTransition()
 auto SkeletalAnimationController::TransitionQueuedState() -> AnimationTransition
 {
     const auto curAnim = GetCurrentAnimationId();
-    m_prevAnimId = NullAnimationId;
+    m_prevAnimId = asset::NullAssetId;
     m_activeState = std::exchange(m_queuedState, NullAnimationState);
     auto& state = m_activeState == ImmediateAnimationState
         ? *m_immediateState

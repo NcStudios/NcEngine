@@ -8,8 +8,6 @@ namespace nc::graphics
 {
 struct LightRenderState
 {
-    std::span<const DirectionalLightData> directionalLights;
-    std::span<const PointLightData> pointLights;
-    std::span<const SpotLightData> spotLights;
+    std::span<const LightData> lights;
 };
 } // namespace nc::graphics

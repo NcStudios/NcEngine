@@ -65,7 +65,7 @@ void AnimationStateOrchestrator::AddAnimation(const MeshInstanceContext& ctx,
                                               const SkeletalAnimationStorage& storage)
 {
     // Null animation and boneless mesh are valid, just ignore
-    if (transition.toAnimId == NullAnimationId || !storage.HasRig(ctx.meshId))
+    if (transition.toAnimId == asset::NullAssetId || !storage.HasRig(ctx.meshId))
     {
         return;
     }

@@ -1,31 +1,15 @@
-struct DirectionalLightData
-{
+struct LightData {
     float3 color;
-    float padding;
-    float3 direction;
-    float padding2;
-};
-
-struct PointLightData
-{
-    float4x4 viewProj;
+    int type; // 0: Directional, 1: Point, 2: Spot
     float3 position;
-    int castsShadows;
-    float3 color;
-    float radius;
-};
-
-struct SpotLightData
-{
-    float4x4 viewProj;
-    float3 position;
-    int castsShadows;
-    float3 color;
     float innerAngle;
     float3 direction;
     float outerAngle;
-    float3 padding;
     float radius;
+    int castsShadows;
+    int pad1;
+    int pad2;
+    float4x4 viewProj;
 };
 
 struct LightInfluence
@@ -35,7 +19,7 @@ struct LightInfluence
     float diffuseAmt;
 };
 
-LightInfluence DirectionalLightRadiance(DirectionalLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(-light.direction); // Vector from light to fragment
@@ -52,7 +36,7 @@ LightInfluence DirectionalLightRadiance(DirectionalLightData light, float3 fragW
     return lightInfluence;
 }
 
-LightInfluence PointLightRadiance(PointLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence PointLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
@@ -75,7 +59,7 @@ LightInfluence PointLightRadiance(PointLightData light, float3 fragWorldPos, flo
     return lightInfluence;
 }
 
-LightInfluence SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
+LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
@@ -104,4 +88,20 @@ LightInfluence SpotLightRadiance(SpotLightData light, float3 fragWorldPos, float
 
     LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
     return lightInfluence;
+}
+
+LightInfluence LightRadiance(LightData light, float3 fragWorldPos, float3 cameraPos, float3 normal)
+{
+    if (light.type == 0)
+    {
+        return DirectionalLightRadiance(light, fragWorldPos, cameraPos, normal);
+    }
+    else if (light.type == 1)
+    {
+        return PointLightRadiance(light, fragWorldPos, cameraPos, normal);
+    }
+    else
+    {
+        return SpotLightRadiance(light, fragWorldPos, cameraPos, normal);
+    }
 }
