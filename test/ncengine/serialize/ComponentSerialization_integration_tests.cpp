@@ -176,6 +176,10 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
     EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
     EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
+    EXPECT_EQ(expectedMaterialDesc.properties.outlineColor, actualMaterialProperties.outlineColor);
+    EXPECT_EQ(expectedMaterialDesc.properties.outlineWidth, actualMaterialProperties.outlineWidth);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -216,6 +220,10 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
     EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
     EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
+    EXPECT_EQ(expectedMaterialDesc.properties.outlineColor, actualMaterialProperties.outlineColor);
+    EXPECT_EQ(expectedMaterialDesc.properties.outlineWidth, actualMaterialProperties.outlineWidth);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
