@@ -3,11 +3,9 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/ComponentRegistry.h"
-#include "ncengine/graphics/DirectionalLight.h"
-#include "ncengine/graphics/ParticleEmitter.h"
-#include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/SpotLight.h"
+#include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 
@@ -38,9 +36,9 @@ auto CreateParticleEmitter(Entity entity, const std::any&) -> ParticleEmitter
     };
 }
 
-auto CreatePointLight(Entity, const std::any&) -> graphics::PointLight
+auto CreatePointLight(Entity, const std::any&) -> PointLight
 {
-    return graphics::PointLight{};
+    return PointLight{};
 }
 
 auto CreateStaticMesh(Entity entity, const std::any&) -> StaticMesh
@@ -79,9 +77,9 @@ auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh
     };
 }
 
-auto CreateSpotLight(Entity, const std::any&) -> graphics::SpotLight
+auto CreateSpotLight(Entity, const std::any&) -> SpotLight
 {
-    return graphics::SpotLight{};
+    return SpotLight{};
 }
 
 auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody
@@ -89,8 +87,8 @@ auto CreateRigidBody(Entity entity, const std::any&) -> RigidBody
     return RigidBody{entity};
 }
 
-auto CreateDirectionalLight(Entity, const std::any&) -> graphics::DirectionalLight
+auto CreateDirectionalLight(Entity, const std::any&) -> DirectionalLight
 {
-    return graphics::DirectionalLight{};
+    return DirectionalLight{};
 }
 } // namespace nc

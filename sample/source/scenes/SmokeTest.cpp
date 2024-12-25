@@ -10,8 +10,8 @@
 #include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/Camera.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/ParticleEmitter.h"
-#include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/WireframeRenderer.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/Constraints.h"
@@ -131,9 +131,9 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
             .scale = Vector3{9.0f, 0.5f, 9.0f}
         });
 
-        world.Emplace<graphics::WireframeRenderer>(
+        world.Emplace<WireframeRenderer>(
             trigger,
-            graphics::WireframeSource::Collider,
+            WireframeSource::Collider,
             trigger,
             Vector4{0.9f, 0.1f, 0.7f, 1.0f}
         );
@@ -156,8 +156,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     }
 
     const auto cameraHandle = world.Emplace<Entity>({.position = Vector3{0.0f, 0.0f, -15.0f}});
-    auto& camera = world.Emplace<graphics::Camera>(cameraHandle);
-    auto ncGraphics = modules.Get<graphics::NcGraphics>();
+    auto& camera = world.Emplace<Camera>(cameraHandle);
+    auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
     modules.Get<audio::NcAudio>()->RegisterListener(cameraHandle);
@@ -205,7 +205,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
         .parent = animatedCube
     });
 
-    world.Emplace<graphics::PointLight>(pointLight);
+    world.Emplace<PointLight>(pointLight);
 
     const auto box1 = world.Emplace<Entity>({.position = Vector3{-1.0f, 0.0f, 0.0f}});
     const auto box2 = world.Emplace<Entity>({.position = Vector3{1.0f, 0.0f, 0.0f}});

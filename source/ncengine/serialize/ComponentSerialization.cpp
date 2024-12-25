@@ -2,11 +2,9 @@
 #include "ncengine/asset/Assets.h"
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -76,14 +74,14 @@ auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& 
     return audio::AudioSource{ctx.entityMap.at(id), std::move(paths), properties};
 }
 
-void SerializeDirectionalLight(std::ostream& stream, const graphics::DirectionalLight& out, const SerializationContext&, const std::any&)
+void SerializeDirectionalLight(std::ostream& stream, const DirectionalLight& out, const SerializationContext&, const std::any&)
 {
     serialize::Serialize(stream, out);
 }
 
-auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::DirectionalLight
+auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext&, const std::any&) -> DirectionalLight
 {
-    auto out = graphics::DirectionalLight{};
+    auto out = DirectionalLight{};
     serialize::Deserialize(stream, out);
     return out;
 }
@@ -154,26 +152,26 @@ auto DeserializeParticleEmitter(std::istream& stream, const DeserializationConte
     return ParticleEmitter{ctx.entityMap.at(id), texture, particleInfo};
 }
 
-void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext&, const std::any&)
+void SerializePointLight(std::ostream& stream, const PointLight& out, const SerializationContext&, const std::any&)
 {
     serialize::Serialize(stream, out);
 }
 
-auto DeserializePointLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::PointLight
+auto DeserializePointLight(std::istream& stream, const DeserializationContext&, const std::any&) -> PointLight
 {
-    auto out = graphics::PointLight{};
+    auto out = PointLight{};
     serialize::Deserialize(stream, out);
     return out;
 }
 
-void SerializeSpotLight(std::ostream& stream, const graphics::SpotLight& out, const SerializationContext&, const std::any&)
+void SerializeSpotLight(std::ostream& stream, const SpotLight& out, const SerializationContext&, const std::any&)
 {
     serialize::Serialize(stream, out);
 }
 
-auto DeserializeSpotLight(std::istream& stream, const DeserializationContext&, const std::any&) -> graphics::SpotLight
+auto DeserializeSpotLight(std::istream& stream, const DeserializationContext&, const std::any&) -> SpotLight
 {
-    auto out = graphics::SpotLight{};
+    auto out = SpotLight{};
     serialize::Deserialize(stream, out);
     return out;
 }

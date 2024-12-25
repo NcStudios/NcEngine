@@ -13,7 +13,7 @@ constexpr auto g_flags = nc::Entity::Flags::Persistent |
                          nc::Entity::Flags::Internal |
                          nc::Entity::Flags::Static;
 
-auto g_gameState = std::optional<nc::ecs::BasicEcs<nc::graphics::WireframeRenderer>>{};
+auto g_gameState = std::optional<nc::ecs::BasicEcs<nc::WireframeRenderer>>{};
 auto g_bucket = nc::Entity::Null();
 auto g_entities = std::array<nc::Entity, static_cast<size_t>(nc::debug::WireframeType::Count)>{};
 
@@ -31,7 +31,7 @@ constexpr auto ToMeshPath(nc::debug::WireframeType type) -> const char*
 
 namespace nc::debug
 {
-void DebugRendererInitialize(ecs::BasicEcs<graphics::WireframeRenderer> gameState)
+void DebugRendererInitialize(ecs::BasicEcs<WireframeRenderer> gameState)
 {
     NC_ASSERT(!g_bucket.Valid(), "Debug rendering already initialized");
     g_gameState = gameState;
@@ -46,7 +46,7 @@ void DebugRendererInitialize(ecs::BasicEcs<graphics::WireframeRenderer> gameStat
             .flags = g_flags
         });
 
-        gameState.Emplace<graphics::WireframeRenderer>(
+        gameState.Emplace<WireframeRenderer>(
             entity,
             asset::MeshView{},
             std::vector<DirectX::XMMATRIX>{}
@@ -60,7 +60,7 @@ void DebugRendererNewFrame()
     for (auto [i, entity] : std::views::enumerate(g_entities))
     {
         const auto type = static_cast<WireframeType>(i);
-        auto& renderer = g_gameState.value().Get<graphics::WireframeRenderer>(entity);
+        auto& renderer = g_gameState.value().Get<WireframeRenderer>(entity);
         renderer.mesh = asset::AcquireMeshAsset(ToMeshPath(type));
         renderer.instances.clear();
     }
@@ -71,7 +71,7 @@ void DebugRendererAddWireframe(WireframeType type, DirectX::FXMMATRIX matrix)
     NC_ASSERT(g_gameState.has_value(), "Debug rendering not initialized");
     const auto index = static_cast<size_t>(type);
     const auto entity = g_entities.at(index);
-    g_gameState.value().Get<graphics::WireframeRenderer>(entity).instances.push_back(matrix);
+    g_gameState.value().Get<WireframeRenderer>(entity).instances.push_back(matrix);
 }
 } // namespace nc::debug
 #endif

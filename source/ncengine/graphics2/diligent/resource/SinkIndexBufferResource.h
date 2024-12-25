@@ -10,16 +10,18 @@
 
 namespace nc::graphics
 {
-struct PostProcessSinkIndexBufferResource
+class SinkIndexBufferResource
 {
     public:
         static constexpr auto UniformBufferName = "PostProcessSinkIndexBuffer";
 
-        explicit PostProcessSinkIndexBufferResource(Diligent::IDeviceContext& context,
-                                                    Diligent::IRenderDevice& device,
-                                                    Diligent::IShaderResourceVariable& variable);
+        explicit SinkIndexBufferResource(Diligent::IDeviceContext& context,
+                                         Diligent::IRenderDevice& device,
+                                         Diligent::IShaderResourceVariable& variable);
 
-        void Update(Diligent::IDeviceContext& context, std::span<const uint32_t> colorSources, std::span<const uint32_t> depthSources);
+        void Update(Diligent::IDeviceContext& context,
+                    std::span<const uint32_t> colorSources,
+                    std::span<const uint32_t> depthSources);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

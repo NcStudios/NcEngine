@@ -9,11 +9,10 @@ namespace nc
 class StaticMesh;
 class Transform;
 class RigidBody;
+struct WireframeRenderer;
 
 namespace graphics
 {
-struct WireframeRenderer;
-
 class WireframeRendererSubsystem
 {
     public:

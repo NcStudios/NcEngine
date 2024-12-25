@@ -11,7 +11,7 @@
 
 namespace nc::debug
 {
-void DebugRendererInitialize(ecs::BasicEcs<graphics::WireframeRenderer> gameState);
+void DebugRendererInitialize(ecs::BasicEcs<WireframeRenderer> gameState);
 void DebugRendererNewFrame();
 void DebugRendererAddWireframe(WireframeType type, DirectX::FXMMATRIX matrix);
 } // namespace nc::debug

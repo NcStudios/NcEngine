@@ -6,9 +6,9 @@
 #include "ncengine/asset/Assets.h"
 #include "ncengine/ecs/FrameLogic.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
-#include "ncengine/graphics/NcGraphics.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/Mesh.h"
-#include "ncengine/graphics/PointLight.h"
+#include "ncengine/graphics/NcGraphics.h"
 #include "ncengine/graphics/SceneNavigationCamera.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
@@ -26,15 +26,15 @@ GraphicsTest::GraphicsTest(SampleUI* ui)
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
-    modules.Get<graphics::NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
+    modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
-    world.Emplace<graphics::PointLight>(lvHandle, Vector3(0.0f, 0.0f, 0.0f), Vector3(0.946f, 0.671f, 0.278f), 26.6f);
+    world.Emplace<PointLight>(lvHandle, Vector3(0.0f, 0.0f, 0.0f), Vector3(0.946f, 0.671f, 0.278f), 26.6f);
     auto lv2Handle = world.Emplace<Entity>({.position = Vector3{6.5f, 9.0f, 9.6f}, .tag = "Point Light 2"});
-    world.Emplace<graphics::PointLight>(lv2Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 0.723f, 0.608f), 13.4f);
+    world.Emplace<PointLight>(lv2Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 0.723f, 0.608f), 13.4f);
     auto lv3Handle = world.Emplace<Entity>({.position = Vector3{4.5f, 6.0f, -8.4f}, .tag = "Point Light 3"});
-    world.Emplace<graphics::PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
+    world.Emplace<PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
 
     // Ogre
     {
@@ -154,9 +154,9 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .rotation = Quaternion::FromEulerAngles(0.239f, 0.0f, 0.021f),
         .tag = "Main Camera"
     });
-    auto& camera = world.Emplace<graphics::SceneNavigationCamera>(cameraHandle);
-    world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
-    modules.Get<graphics::NcGraphics>()->SetCamera(&camera);
+    auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle);
+    world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
+    modules.Get<NcGraphics>()->SetCamera(&camera);
 }
 
 void GraphicsTest::Unload()

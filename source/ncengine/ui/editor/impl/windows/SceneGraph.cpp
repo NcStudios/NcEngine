@@ -16,9 +16,9 @@ auto MakeSelectedEntityWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc::E
         .flags = nc::ui::editor::EditorObjectFlags
     });
 
-    world.Emplace<nc::graphics::WireframeRenderer>(
+    world.Emplace<nc::WireframeRenderer>(
         entity,
-        nc::graphics::WireframeSource::Renderer,
+        nc::WireframeSource::Renderer,
         nc::Entity::Null(),
         nc::Vector4{1.0f, 0.0f, 0.0f, 1.0f}
     );
@@ -34,9 +34,9 @@ auto MakeSelectedColliderWireFrame(nc::ecs::Ecs world, nc::Entity parent) -> nc:
         .flags = nc::ui::editor::EditorObjectFlags
     });
 
-    world.Emplace<nc::graphics::WireframeRenderer>(
+    world.Emplace<nc::WireframeRenderer>(
         entity,
-        nc::graphics::WireframeSource::Collider,
+        nc::WireframeSource::Collider,
         nc::Entity::Null(),
         nc::Vector4{0.0f, 1.0f, 0.0f, 1.0f}
     );
@@ -78,8 +78,8 @@ void SceneGraph::OnClose(EditorContext& ctx)
 void SceneGraph::SetEntitySelection(EditorContext& ctx, Entity entity)
 {
     ctx.selectedEntity = entity;
-    ctx.world.Get<graphics::WireframeRenderer>(m_selectedEntityWireframe).target = entity;
-    ctx.world.Get<graphics::WireframeRenderer>(m_selectedColliderWireframe).target =
+    ctx.world.Get<WireframeRenderer>(m_selectedEntityWireframe).target = entity;
+    ctx.world.Get<WireframeRenderer>(m_selectedColliderWireframe).target =
         (entity.Valid() && ctx.world.Contains<RigidBody>(entity))
         ? entity
         : Entity::Null();
@@ -169,17 +169,17 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
             if (ImGui::Selectable("DirectionalLight"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "DirectionalLight"});
-                ctx.world.Emplace<graphics::DirectionalLight>(ctx.selectedEntity);
+                ctx.world.Emplace<DirectionalLight>(ctx.selectedEntity);
             }
             if (ImGui::Selectable("PointLight"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "PointLight"});
-                ctx.world.Emplace<graphics::PointLight>(ctx.selectedEntity);
+                ctx.world.Emplace<PointLight>(ctx.selectedEntity);
             }
             if (ImGui::Selectable("SpotLight"))
             {
                 ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "SpotLight"});
-                ctx.world.Emplace<graphics::SpotLight>(ctx.selectedEntity);
+                ctx.world.Emplace<SpotLight>(ctx.selectedEntity);
             }
             else if (ImGui::Selectable("Cube"))
             {

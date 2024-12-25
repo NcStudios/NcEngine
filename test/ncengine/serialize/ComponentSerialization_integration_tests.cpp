@@ -4,11 +4,9 @@
 
 #include "ncengine/Events.h"
 #include "ncengine/audio/AudioSource.h"
-#include "ncengine/graphics/DirectionalLight.h"
 #include "ncengine/graphics/Mesh.h"
+#include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/ParticleEmitter.h"
-#include "ncengine/graphics/PointLight.h"
-#include "ncengine/graphics/SpotLight.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -269,7 +267,7 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::DirectionalLight{nc::Vector3::Splat(7.0f)};
+    const auto expected = nc::DirectionalLight{nc::Vector3::Splat(7.0f)};
     nc::SerializeDirectionalLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeDirectionalLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.color, actual.color);
@@ -278,7 +276,7 @@ TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
+    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.ambientColor, actual.ambientColor);
@@ -289,7 +287,7 @@ TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::graphics::SpotLight{nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
+    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
     nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.color, actual.color);
