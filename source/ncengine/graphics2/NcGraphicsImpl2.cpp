@@ -210,7 +210,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
                     .colorSink = NormalsColorMsaa,
-                    .depthSink = NormalsDepthMsaa
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
@@ -218,7 +218,23 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
                     .colorSink = NormalsColorMsaa,
-                    .depthSink = NormalsDepthMsaa
+                    .depthSink = MainDepthMsaa
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::Depth,
+                    .name = "Depth",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
+                    .depthSink = MainDepth,
+                    .isMsaa = false
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::Depth,
+                    .name = "Depth",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
+                    .depthSink = MainDepth,
+                    .isMsaa = false
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
@@ -235,7 +251,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
                     .colorSources = std::vector{MainColor, NormalsColor},
                     .depthSources = SingleSource(MainDepth),
-                    .colorSink = PPOutlineColor
+                    .colorSink = PPOutlineColor,
+                    .isMsaa = false
                 }
             },
             GetImplementedMaterialPassFlags(),

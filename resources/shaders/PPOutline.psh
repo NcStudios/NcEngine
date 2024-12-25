@@ -12,10 +12,7 @@ cbuffer EnvironmentBufferData
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
     float3 cameraPosition;
-    uint dirLightsCount;
-    uint pointLightsCount;
-    uint spotLightsCount;
-    float2 padding;
+    uint lightCount;
 };
 
 cbuffer PostProcessSinkIndexBufferData
@@ -163,7 +160,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     // Get normalized depth. Use this transform the outline width to scale with depth, so it isn't fixed with the screen size.
     // (We don't want a consistent 20 pixel outline when we are far away and when we're really close, for example.)
     float normalizedDepth = SampleNormalizeDepth(PostProcessDepthSinkBufferData[depthRT1], PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    float depthNormalizedOutlineWidth = outlineWidth / 150 * 1/normalizedDepth;
+    float depthNormalizedOutlineWidth = outlineWidth * (1-normalizedDepth);
 
     float depthOutline = DepthOutline(PostProcessDepthSinkBufferData[depthRT1],
                                       PostProcessColorSinkBufferData_sampler,
@@ -182,7 +179,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float outline = (depthOutline + normalOutline);
 
     float4 Color = PostProcessColorSinkBufferData[colorRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    PSOut.Color = lerp(Color, float4(outlineColor, 1.0f), normalOutline);
+    PSOut.Color = lerp(Color, float4(outlineColor, 1.0f), outline);
     PSOut.Color.a = 1.0;
 
     // PSOut.Color = float4(normalizedDepth);

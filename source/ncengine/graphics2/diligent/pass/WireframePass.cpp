@@ -2,6 +2,7 @@
 #include "PassTypes.h"
 #include "graphics2/diligent/ShaderFactory.h"
 #include "graphics2/diligent/resource/MeshBuffer.h"
+#include "graphics2/diligent/pass/PassUtilities.h"
 #include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
 #include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
 #include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
@@ -20,23 +21,6 @@ auto MakePso(Diligent::IRenderDevice& device,
 {
     using namespace Diligent;
 
-    auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
-    auto pixelShader = shaderFactory.MakeShaderFromSource(
-        pixelShaderSource,
-        passDesc.shaderPaths.pixelShaderPath.data(),
-        Diligent::SHADER_TYPE_PIXEL,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
-    auto vertexShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.vertexShaderPath);
-    auto vertexShader = shaderFactory.MakeShaderFromSource(
-        vertexShaderSource,
-        passDesc.shaderPaths.vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
-    auto signatures = std::array{&perFrameResourceSignature};
     auto layoutElements = nc::graphics::GetMeshVertexLayoutElements(0);
 
     auto ci = GraphicsPipelineStateCreateInfo{};
@@ -44,9 +28,12 @@ auto MakePso(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
+    auto signatures = std::array{&perFrameResourceSignature};
     ci.ppResourceSignatures = signatures.data();
     ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
+    RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
+    RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
     ci.pVS = vertexShader;
     ci.pPS = pixelShader;
 

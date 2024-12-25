@@ -132,6 +132,27 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
     context.SetRenderTargets(colorRenderTargetIndex == NoTarget ? 0 : 1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
+auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>
+{
+    Diligent::RefCntAutoPtr<Diligent::IShader> shader;
+    const auto& shaderPath = shaderType == Diligent::SHADER_TYPE_VERTEX ? shaderPaths.vertexShaderPath : shaderPaths.pixelShaderPath;
+
+    if (shaderPath == "Uninitialized")
+    {
+        return shader;
+    }
+
+    auto source = shaderFactory.ReadShaderFile(shaderPath);
+    shader = shaderFactory.MakeShaderFromSource(
+        source,
+        shaderPath.data(),
+        shaderType,
+        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
+    );
+
+    return shader;
+}
+
 auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool
 {
     return (colorRenderTargetIndex != SwapChainColorRTIndex || depthRenderTargetIndex != SwapChainDepthRTIndex);

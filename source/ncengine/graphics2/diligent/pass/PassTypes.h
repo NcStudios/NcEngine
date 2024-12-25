@@ -57,5 +57,6 @@ struct PassDesc
     std::vector<uint32_t> depthSources = std::vector<uint32_t>{};
     uint32_t colorSink = NoTarget;
     uint32_t depthSink = NoTarget;
+    bool isMsaa = true;
 };
 } // namespace nc::graphics

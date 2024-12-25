@@ -224,6 +224,7 @@ add_executable(PassManifest_tests
 PassManifest_tests.cpp
     ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
     ${NC_SOURCE_DIR}/graphics2/PostProcess.cpp
+    ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
     ${NC_SOURCE_DIR}/graphics2/diligent/pass/PassManifest.cpp
     ${NC_SOURCE_DIR}/graphics2/diligent/pass/PassUtilities.cpp
 )

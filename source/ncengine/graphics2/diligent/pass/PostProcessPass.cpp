@@ -8,8 +8,10 @@
 
 namespace nc::graphics
 {
-PostProcessPass::PostProcessPass(Diligent::IRenderDevice& device,
-                                 const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
+using namespace Diligent;
+
+PostProcessPass::PostProcessPass(IRenderDevice& device,
+                                 const GraphicsPipelineStateCreateInfo& createInfo,
                                  std::vector<PostProcessPipelineInstance> instances_,
                                  PassDesc passDesc_)
     : pso{},
@@ -20,40 +22,25 @@ PostProcessPass::PostProcessPass(Diligent::IRenderDevice& device,
     NC_ASSERT(pso, "Failed to create pipeline state object");
 }
 
-auto MakePostProcessPass(Diligent::IRenderDevice& device,
-                         Diligent::ISwapChain& swapChain,
+auto MakePostProcessPass(IRenderDevice& device,
+                         ISwapChain& swapChain,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
                          PassDesc passDesc) -> PostProcessPass
 {
-    auto pixelShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.pixelShaderPath);
-    auto pixelShader = shaderFactory.MakeShaderFromSource(
-        pixelShaderSource,
-        passDesc.shaderPaths.pixelShaderPath.data(),
-        Diligent::SHADER_TYPE_PIXEL,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
-    auto vertexShaderSource = shaderFactory.ReadShaderFile(passDesc.shaderPaths.vertexShaderPath);
-    auto vertexShader = shaderFactory.MakeShaderFromSource(
-        vertexShaderSource,
-        passDesc.shaderPaths.vertexShaderPath.data(),
-        Diligent::SHADER_TYPE_VERTEX,
-        Diligent::SHADER_SOURCE_LANGUAGE_HLSL
-    );
-
     auto layoutElements = GetMeshVertexLayoutElements(0);
 
-    auto ci = Diligent::GraphicsPipelineStateCreateInfo{};
-    ci.PSODesc.PipelineType = Diligent::PIPELINE_TYPE_GRAPHICS;
+    auto ci = GraphicsPipelineStateCreateInfo{};
+    ci.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
     ci.PSODesc.Name = passDesc.name.data();
-    ci.PSODesc.ResourceLayout.DefaultVariableType = Diligent::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+    ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
     auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
-
     ci.ppResourceSignatures = signatures.data();
     ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
+    RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
+    RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
     ci.pPS = pixelShader;
     ci.pVS = vertexShader;
 
@@ -63,7 +50,7 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
     }
     else if (passDesc.colorSink == NoTarget)
     {
-        ci.GraphicsPipeline.RTVFormats[0] = Diligent::TEX_FORMAT_UNKNOWN;
+        ci.GraphicsPipeline.RTVFormats[0] = TEX_FORMAT_UNKNOWN;
     }
     else
     {
@@ -76,7 +63,7 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
     }
     else if (passDesc.depthSink == NoTarget)
     {
-        ci.GraphicsPipeline.DSVFormat = Diligent::TEX_FORMAT_UNKNOWN;
+        ci.GraphicsPipeline.DSVFormat = TEX_FORMAT_UNKNOWN;
     }
     else
     {
@@ -84,9 +71,9 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
     }
 
     ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == NoTarget ? 0 : 1;
-    ci.GraphicsPipeline.PrimitiveTopology            = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    ci.GraphicsPipeline.RasterizerDesc.CullMode      = Diligent::CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == NoTarget ? Diligent::False : Diligent::True;
+    ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == NoTarget ? False : True;
     ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
 
@@ -96,8 +83,8 @@ auto MakePostProcessPass(Diligent::IRenderDevice& device,
                            passDesc);
 }
 
-auto MakePostProcessPasses(Diligent::IRenderDevice& device,
-                           Diligent::ISwapChain& swapChain,
+auto MakePostProcessPasses(IRenderDevice& device,
+                           ISwapChain& swapChain,
                            ShaderFactory& shaderFactory,
                            ShaderBindings& shaderBindings,
                            const PassManifest& passManifest) -> std::vector<PostProcessPass>
