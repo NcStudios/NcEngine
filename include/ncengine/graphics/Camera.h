@@ -6,7 +6,7 @@
 
 #include "DirectXMath.h"
 
-namespace nc::graphics
+namespace nc
 {
 /** @brief Properties for controlling a camera's frustum. */
 struct CameraProperties
@@ -94,4 +94,4 @@ class Camera : public FreeComponent
         DirectX::XMMATRIX m_inverseProjection;
         CameraProperties m_properties;
 };
-} // namespace nc::graphics
+} // namespace nc

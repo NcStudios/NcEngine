@@ -2,7 +2,7 @@
 #include "ncengine/window/Window.h"
 #include "ncmath/MatrixUtilities.h"
 
-namespace nc::graphics
+namespace nc
 {
 Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     : FreeComponent(entity),
@@ -77,4 +77,4 @@ auto Camera::CalculateFrustum() const noexcept -> Frustum
 
     return out;
 }
-} // namespace nc::graphics
+} // namespace nc

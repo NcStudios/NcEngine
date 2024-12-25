@@ -161,7 +161,7 @@ void EditorUI::DrawMenu(EditorContext& ctx)
             {
                 if (ImGui::MenuItem("Post Process FX"))
                 {
-                    m_postProcessDialog.Open(ctx.modules.Get<graphics::NcGraphics>());
+                    m_postProcessDialog.Open(ctx.modules.Get<NcGraphics>());
                 }
 
                 ImGui::EndMenu();

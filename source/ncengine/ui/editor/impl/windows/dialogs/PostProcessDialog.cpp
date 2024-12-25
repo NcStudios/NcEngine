@@ -8,7 +8,7 @@ namespace
 {
 void DrawPostProcessPassInfo(nc::PostProcessEffectId effectId,
                              nc::PostProcessPassFlag::type passId,
-                             nc::graphics::NcGraphics* ncGraphics)
+                             nc::NcGraphics* ncGraphics)
 {
     ImGui::Separator();
     ImGui::Text("\t%s Pass", nc::GetPostProcessPassName(passId).data());

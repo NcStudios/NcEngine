@@ -4,6 +4,7 @@
 #include "subsystem/CameraRenderState.h"
 #include "subsystem/LightRenderState.h"
 #include "subsystem/MeshRenderState.h"
+#include "subsystem/particle/ParticleRenderState.h"
 #include "subsystem/PostProcessState.h"
 #include "subsystem/WireframeRendererState.h"
 
@@ -15,6 +16,7 @@ struct FrontendRenderState
     MeshRenderState meshRenderState;
     SkeletalAnimationRenderState animationRenderState;
     BufferUpdateInfo<MaterialData> materialRenderState;
+    ParticleRenderState particleRenderState;
     LightRenderState lightRenderState;
     PostProcessState postProcessState;
     WireframeRendererRenderState wireframeRenderState;

@@ -2,8 +2,6 @@
 
 #include "PassManifest.h"
 #include "ncengine/graphics/Material.h"
-#include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"

@@ -59,7 +59,7 @@ TEST_F(CameraSubsystemTest, BuildState_validCamera_updatesCameraAndReturnsViewPr
 {
     auto world = GetTestWorld();
     const auto entity = world.Emplace<nc::Entity>({});
-    auto& camera = world.Emplace<nc::graphics::Camera>(entity);
+    auto& camera = world.Emplace<nc::Camera>(entity);
     uut.Set(&camera);
     const auto projection = camera.ProjectionMatrix();
     const auto initialView = camera.ViewMatrix();

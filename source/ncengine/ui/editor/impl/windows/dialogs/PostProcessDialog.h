@@ -4,10 +4,7 @@
 
 namespace nc
 {
-namespace graphics
-{
 struct NcGraphics;
-} // namespace graphics
 
 namespace ui::editor
 {
@@ -19,7 +16,7 @@ class PostProcessDialog : public ModalDialog
         explicit PostProcessDialog() noexcept
             : ModalDialog{DialogSize}, m_ncGraphics{} {}
 
-        void Open(graphics::NcGraphics* ncGraphics) noexcept
+        void Open(NcGraphics* ncGraphics) noexcept
         {
             m_ncGraphics = ncGraphics;
             OpenPopup();
@@ -28,7 +25,7 @@ class PostProcessDialog : public ModalDialog
         void Draw(const ImVec2& dimensions);
 
     private:
-        graphics::NcGraphics* m_ncGraphics = nullptr;
+        NcGraphics* m_ncGraphics = nullptr;
 };
 } // namespace ui::editor
 } // namespace nc

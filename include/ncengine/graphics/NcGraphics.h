@@ -24,8 +24,6 @@ struct MemorySettings;
 struct ProjectSettings;
 } // namespace config
 
-namespace graphics
-{
 /** @brief Graphics module interface.
  * 
  * Update Tasks
@@ -33,18 +31,16 @@ namespace graphics
  *     Depends On: None
  *     Component Access: WireframeRenderer
  *   ParticleEmitterUpdate
- *     Depends On: None
- *     Component Access: None
- *  ParticleEmitterSync
  *     Depends On: CommitStagedChanges
- *     Component Access: ParticleEmitter
+ *     Component Access:
+ *       Read: ParticleEmitter, Transform
  * 
  * Render Tasks
  *   Render
  *     Depends On: None
  *     Component Access:
- *       Write: Camera, SkeletalAnimator, WireframeRenderer
- *       Read: MeshRenderer, ToonRenderer, PointLight, SpotLight, Transform
+ *       Write: Camera, WireframeRenderer
+ *       Read: StaticMesh, SkinnedMesh, DirectionalLight, PointLight, SpotLight, Transform
 */
 struct NcGraphics : public Module
 {
@@ -119,5 +115,4 @@ auto BuildGraphicsModule(const config::ProjectSettings& projectSettings,
                          ModuleProvider modules,
                          ecs::Ecs world,
                          SystemEvents& events) -> std::unique_ptr<NcGraphics>;
-} // namespace graphics
 } // namespace nc

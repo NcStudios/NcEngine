@@ -3,6 +3,7 @@
 #include "shared/spawner/Spawner.h"
 
 #include "ncengine/NcEngine.h"
+#include "ncengine/asset/DefaultAssets.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/ecs/InvokeFreeComponent.h"
 #include "ncengine/graphics/ParticleEmitter.h"
@@ -412,12 +413,12 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
     }
 
     m_sampleUI->SetWidgetCallback(::Widget);
-    auto ncGraphics = modules.Get<graphics::NcGraphics>();
+    auto ncGraphics = modules.Get<NcGraphics>();
     auto ncRandom = modules.Get<Random>();
 
     ncGraphics->SetSkybox(asset::DefaultSkyboxCubeMap);
 
-    world.Emplace<graphics::PointLight>(
+    world.Emplace<PointLight>(
         world.Emplace<Entity>({
             .position = Vector3{0.0f, 41.0f, -12.0f},
             .tag = "Point Light"
@@ -433,8 +434,8 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Main Camera"
     });
 
-    auto& camera = world.Emplace<graphics::SceneNavigationCamera>(cameraHandle);
-    world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<graphics::SceneNavigationCamera>{});
+    auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle);
+    world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
     ncGraphics->SetCamera(&camera);
 
     auto ground = world.Emplace<Entity>({
@@ -555,7 +556,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 50.0f);
+                world.Emplace<PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 50.0f);
             }
         );
 
@@ -573,7 +574,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::SpotLight>(entity);
+                world.Emplace<SpotLight>(entity);
             }
         );
 
@@ -591,7 +592,10 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<graphics::ParticleEmitter>(entity, graphics::ParticleInfo{
+                world.Emplace<ParticleEmitter>(
+                    entity,
+                    asset::AcquireTextureAsset(asset::DefaultParticle),
+                    ParticleInfo{
                     .emission = {
                         .periodicEmissionCount = 15u,
                         .periodicEmissionFrequency = 0.1f

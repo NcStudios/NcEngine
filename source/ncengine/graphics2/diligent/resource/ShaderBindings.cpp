@@ -1,8 +1,7 @@
 #include "ShaderBindings.h"
 #include "EnvironmentBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessColorSinkBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessDepthSinkBufferResource.h"
-#include "graphics2/diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "graphics2/diligent/resource/SinkBufferResource.h"
+#include "graphics2/diligent/resource/SinkIndexBufferResource.h"
 #include "graphics2/frontend/FrontendRenderState.h"
 
 #include "ncengine/debug/Profile.h"
@@ -43,6 +42,16 @@ void ShaderBindings::Update(Diligent::IDeviceContext& context,
             context,
             device,
             skinnedMeshInstanceData
+        );
+    }
+
+    const auto& particleData = renderState.particleRenderState.particleData;
+    if (!particleData.instances.empty())
+    {
+        m_perFrameSignature.GetParticleDataBuffer().Update(
+            context,
+            device,
+            particleData
         );
     }
 

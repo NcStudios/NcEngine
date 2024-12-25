@@ -7,7 +7,7 @@
 
 namespace
 {
-constexpr auto g_defaultProperties = nc::graphics::CameraProperties{};
+constexpr auto g_defaultProperties = nc::CameraProperties{};
 const auto g_defaultView = DirectX::XMMatrixLookAtRH(
     DirectX::g_XMIdentityR3,
     DirectX::g_XMIdentityR2,

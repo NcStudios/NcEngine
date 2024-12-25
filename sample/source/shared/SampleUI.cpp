@@ -32,7 +32,7 @@ namespace nc::sample
     {
         auto ncScene = engine->GetModuleRegistry()->Get<NcScene>();
         auto ui = std::make_unique<SampleUI>(ncScene);
-        auto* graphics = engine->GetModuleRegistry()->Get<graphics::NcGraphics>();
+        auto* graphics = engine->GetModuleRegistry()->Get<NcGraphics>();
         graphics->SetUi(ui.get());
         return ui;
     }

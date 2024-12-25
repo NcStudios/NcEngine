@@ -2,7 +2,7 @@
 #include "diligent/pass/MaterialPass.h"
 #include "diligent/pass/PassUtilities.h"
 #include "diligent/pass/WireframePass.h"
-#include "diligent/resource/PostProcessSinkIndexBufferResource.h"
+#include "diligent/resource/SinkIndexBufferResource.h"
 #include "frontend/FrontendRenderState.h"
 
 #include "ncengine/asset/NcAsset.h"
@@ -21,7 +21,7 @@
 
 namespace
 {
-struct NcGraphicsStub2 : nc::graphics::NcGraphics
+struct NcGraphicsStub2 : nc::NcGraphics
 {
     NcGraphicsStub2()
     {
@@ -36,36 +36,15 @@ struct NcGraphicsStub2 : nc::graphics::NcGraphics
 
     void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks& render)
     {
-        update.Add(
-            nc::update_task_id::ParticleEmitterUpdate,
-            "ParticleEmitterUpdate(stub)",
-            []{},
-            {nc::update_task_id::CommitStagedChanges}
-        );
-
-        update.Add(
-            nc::update_task_id::SkeletalAnimationUpdate,
-            "SkeletalAnimationUpdate(stub)",
-            []{},
-            {nc::update_task_id::CommitStagedChanges}
-        );
-
-        update.Add(
-            nc::update_task_id::ParticleEmitterSync,
-            "ParticleEmitterSync(stub)",
-            []{},
-            {nc::update_task_id::UpdateTransforms}
-        );
-
-        render.Add(
-            nc::render_task_id::Render,
-            "Render(stub)",
-            []{}
-        );
+        using namespace nc::update_task_id;
+        using namespace nc::render_task_id;
+        update.Add(ParticleEmitterUpdate,   "ParticleEmitterUpdate(stub)",   []{}, {CommitStagedChanges});
+        update.Add(SkeletalAnimationUpdate, "SkeletalAnimationUpdate(stub)", []{}, {CommitStagedChanges});
+        render.Add(Render,                  "Render(stub)",                  []{});
     }
 
-    void SetCamera(nc::graphics::Camera*) noexcept override {}
-    auto GetCamera() noexcept -> nc::graphics::Camera* override { return nullptr; }
+    void SetCamera(nc::Camera*) noexcept override {}
+    auto GetCamera() noexcept -> nc::Camera* override { return nullptr; }
     void SetUi(nc::ui::IUI*) noexcept override {}
     bool IsUiHovered() const noexcept override { return false; }
     void SetSkybox(const std::string&) override {}
@@ -117,7 +96,7 @@ void LogCallback(Diligent::DEBUG_MESSAGE_SEVERITY severity,
 }
 } // anonymous namespace
 
-namespace nc::graphics
+namespace nc
 {
 auto BuildGraphicsModule(const config::ProjectSettings&,
                          const config::AssetSettings& assetSettings,
@@ -143,13 +122,15 @@ auto BuildGraphicsModule(const config::ProjectSettings&,
         });
 
         NC_LOG_TRACE("Building NcGraphics module");
-        return std::make_unique<NcGraphicsImpl2>(graphicsSettings, memorySettings, assetSettings.shadersPath, world, modules, events, *ncWindow);
+        return std::make_unique<graphics::NcGraphicsImpl2>(graphicsSettings, memorySettings, assetSettings.shadersPath, world, modules, events, *ncWindow);
     }
 
     NC_LOG_TRACE("Graphics disabled - building NcGraphics stub");
     return std::make_unique<NcGraphicsStub2>();
 }
 
+namespace graphics
+{
 NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSettings,
                                  const config::MemorySettings& memorySettings,
                                  std::string_view shadersPath,
@@ -168,15 +149,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           m_shaderBindings{
             m_engine.GetDevice(),
             m_engine.GetContext(),
-            memorySettings.maxTextures,
-            memorySettings.maxRenderers,
-            memorySettings.maxSpotLights,
-            memorySettings.maxPointLights,
-            memorySettings.maxDirectionalLights,
-            memorySettings.maxBones,
-            memorySettings.maxRenderers / 2,
-            memorySettings.maxRenderers / 2,
-            memorySettings.maxBones / 4
+            memorySettings
           },
           m_ui{
             m_engine.GetDevice(),
@@ -245,6 +218,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = MainDepthMsaa
                 },
                 PassDesc{
+                    .id = MiscPassFlag::Particle,
+                    .name = "Particle",
+                    .type = PassType::Particle,
+                    .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
+                    .colorSink = MainColor,
+                    .depthSink = MainDepth
+                },
+                PassDesc{
                     .id = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
@@ -278,6 +259,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             memorySettings.maxTransforms,
             memorySettings.maxRenderers,
             memorySettings.maxBones,
+            memorySettings.maxParticles,
             graphicsSettings.initialBatchSize,
             modules.Get<asset::NcAsset>()->OnTextureUpdate(),
             modules.Get<asset::NcAsset>()->OnMeshUpdate(),
@@ -362,18 +344,11 @@ void NcGraphicsImpl2::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTa
 
     update.Add(
         update_task_id::ParticleEmitterUpdate,
-        "ParticleEmitterUpdate(stub)",
-        []{},
+        "ParticleEmitterUpdate",
+        [this]{
+            m_frontend.GetParticleSubsystem().Update(GetCamera());
+        },
         {update_task_id::CommitStagedChanges}
-    );
-
-
-
-    update.Add(
-        update_task_id::ParticleEmitterSync,
-        "ParticleEmitterSync(stub)",
-        []{},
-        {update_task_id::UpdateTransforms}
     );
 
     update.Add(
@@ -431,6 +406,13 @@ void NcGraphicsImpl2::Run()
         renderState.wireframeRenderState
     );
 
+    m_passBackend.RenderParticle(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature(),
+        renderState.particleRenderState
+    );
+
     m_passBackend.RenderPostProcess(
         context,
         swapChain,
@@ -455,9 +437,12 @@ void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 
 void NcGraphicsImpl2::Resize()
 {
-    m_engine.GetSwapChain().Resize(static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y));
-    m_shaderBindings.GetPerPassSignature().GetPostProcessColorSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
-    m_shaderBindings.GetPerPassSignature().GetPostProcessDepthSinkBufferResource().Resize(m_engine.GetDevice(), static_cast<uint32_t>(m_dimensions.x), static_cast<uint32_t>(m_dimensions.y), m_numSamples);
+    const auto width = static_cast<uint32_t>(m_dimensions.x);
+    const auto height = static_cast<uint32_t>(m_dimensions.y);
+    m_engine.GetSwapChain().Resize(width, height);
+    m_shaderBindings.GetPerPassSignature().GetColorSinkBufferResource().Resize(m_engine.GetDevice(), width, height, m_numSamples);
+    m_shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource().Resize(m_engine.GetDevice(), width, height, m_numSamples);
     m_resizeNeeded = false;
 }
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

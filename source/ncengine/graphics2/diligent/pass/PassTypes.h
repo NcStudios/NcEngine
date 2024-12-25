@@ -2,6 +2,8 @@
 
 #include "Graphics/GraphicsEngine/interface/GraphicsTypes.h"
 
+#include "ncengine/utility/EnumUtilities.h"
+
 #include <limits>
 #include <span>
 #include <string_view>
@@ -44,8 +46,9 @@ enum class PassType : uint8_t
     Material        = 1,
     SkinnedMaterial = 1 << 1,
     Wireframe       = 1 << 2,
-    PostProcess     = 1 << 3
-};
+    Particle        = 1 << 3,
+    PostProcess     = 1 << 4
+}; DEFINE_BITWISE_OPERATORS(PassType);
 
 struct PassDesc
 {

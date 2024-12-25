@@ -20,7 +20,7 @@ void EditorCamera::Run(Entity, ecs::Ecs world, float dt)
 void EditorCamera::Enable()
 {
     m_enabled = true;
-    auto gfx = m_modules.Get<nc::graphics::NcGraphics>();
+    auto gfx = m_modules.Get<NcGraphics>();
     auto restoreTo = gfx->GetCamera();
     if (restoreTo)
     {
@@ -38,18 +38,18 @@ void EditorCamera::Enable()
 void EditorCamera::Disable(ecs::Ecs world)
 {
     m_enabled = false;
-    auto gfx = m_modules.Get<nc::graphics::NcGraphics>();
+    auto gfx = m_modules.Get<NcGraphics>();
     const auto currentCamera = gfx->GetCamera();
     if (currentCamera == this)
     {
         auto isRestoreCameraValid =
             m_handleToRestore.Valid() &&
             world.Contains<Transform>(m_handleToRestore) &&
-            world.Contains<graphics::Camera>(m_handleToRestore);
+            world.Contains<Camera>(m_handleToRestore);
 
         if (isRestoreCameraValid)
         {
-            auto& toRestore = world.Get<graphics::Camera>(m_handleToRestore);
+            auto& toRestore = world.Get<Camera>(m_handleToRestore);
             toRestore.EnableUpdate();
             gfx->SetCamera(&toRestore);
         }

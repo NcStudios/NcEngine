@@ -10,13 +10,13 @@
 
 namespace nc
 {
-class Transform;
-namespace graphics
-{
 struct DirectionalLight;
 struct PointLight;
 struct SpotLight;
+class Transform;
 
+namespace graphics
+{
 class LightSubsystem
 {
     public:

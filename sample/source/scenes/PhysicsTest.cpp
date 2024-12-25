@@ -93,7 +93,7 @@ void Widget()
     ImGui::EndChild();
 }
 
-struct FollowCamera : public graphics::Camera
+struct FollowCamera : public Camera
 {
     static constexpr auto MinDistance = 2.0f;
     static constexpr auto MaxDistance = 30.0f;
@@ -108,7 +108,7 @@ struct FollowCamera : public graphics::Camera
                  float initialHeight = 12.0f,
                  float initialDistance = -12.0f,
                  float initialSpeed = 75.0f)
-        : graphics::Camera{self},
+        : Camera{self},
           target{target_},
           followHeight{initialHeight},
           followDistance{initialDistance},
@@ -841,10 +841,10 @@ void BuildTriggers(ecs::Ecs world)
 
     static constexpr auto white = Vector4::Splat(1.0f);
     static constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
-    constexpr auto source = graphics::WireframeSource::Collider;
-    world.Emplace<graphics::WireframeRenderer>(box, source, box, white);
-    world.Emplace<graphics::WireframeRenderer>(sphere, source, sphere, white);
-    world.Emplace<graphics::WireframeRenderer>(capsule, source, capsule, white);
+    constexpr auto source = WireframeSource::Collider;
+    world.Emplace<WireframeRenderer>(box, source, box, white);
+    world.Emplace<WireframeRenderer>(sphere, source, sphere, white);
+    world.Emplace<WireframeRenderer>(capsule, source, capsule, white);
 
     const auto info = RigidBodyInfo{
         .type = BodyType::Static,
@@ -858,13 +858,13 @@ void BuildTriggers(ecs::Ecs world)
     auto setPink = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            ecs.Get<graphics::WireframeRenderer>(self).color = pink;
+            ecs.Get<WireframeRenderer>(self).color = pink;
     };
 
     auto setWhite = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            ecs.Get<graphics::WireframeRenderer>(self).color = white;
+            ecs.Get<WireframeRenderer>(self).color = white;
     };
 
     world.Emplace<CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
@@ -907,7 +907,7 @@ void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)
 class RayCaster : public FreeComponent
 {
     public:
-        RayCaster(Entity self, graphics::NcGraphics* ncGraphics)
+        RayCaster(Entity self, NcGraphics* ncGraphics)
             : FreeComponent{self},
               m_ncGraphics{ncGraphics}
         {
@@ -967,7 +967,7 @@ class RayCaster : public FreeComponent
         }
 
     private:
-        graphics::NcGraphics* m_ncGraphics;
+        NcGraphics* m_ncGraphics;
         CollisionQuery m_query = CollisionQuery{};
         std::vector<Entity> m_hits;
         std::vector<MaterialProperties> m_restoreMaterials;
@@ -997,9 +997,9 @@ class RayCaster : public FreeComponent
                 }
             );
 
-            world.Emplace<graphics::WireframeRenderer>(
+            world.Emplace<WireframeRenderer>(
                 m_shapeParent,
-                graphics::WireframeSource::Collider,
+                WireframeSource::Collider,
                 m_shapeParent
             );
         }
@@ -1015,7 +1015,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ReloadPrefabs();
     m_sampleUI->SetWidgetCallback(Widget);
 
-    auto ncGraphics = modules.Get<graphics::NcGraphics>();
+    auto ncGraphics = modules.Get<NcGraphics>();
     auto ncRandom = modules.Get<Random>();
     auto ncPhysics = modules.Get<NcPhysics>();
 
@@ -1063,7 +1063,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     BuildChain(world);
     BuildTriggers(world);
 
-    world.Emplace<graphics::PointLight>(
+    world.Emplace<PointLight>(
         world.Emplace<Entity>({
             .position = Vector3{4.0f, 50.0f, 35.0f},
             .tag = "Point Light"
@@ -1073,7 +1073,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         300.0f
     );
 
-    world.Emplace<graphics::DirectionalLight>(
+    world.Emplace<DirectionalLight>(
         world.Emplace<Entity>({
             .position = Vector3{0.0f, 40.0f, 0.0f},
             .rotation = nc::Quaternion::FromEulerAngles(-1.892f, 0.809f, -2.661f),

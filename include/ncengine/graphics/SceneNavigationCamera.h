@@ -5,10 +5,6 @@
 
 namespace nc
 {
-class Registry;
-
-namespace graphics
-{
 /** @brief Movement settings for SceneNavigationCamera. */
 struct SceneCameraConfig
 {
@@ -64,5 +60,4 @@ class SceneNavigationCamera : public Camera
         auto PanAndTilt(float dt, float speedMult, const Vector3& tiltAxis) -> Quaternion;
         auto Dolly(float dt, float speedMult) -> Vector3;
 };
-} // namespace graphics
 } // namespace nc
