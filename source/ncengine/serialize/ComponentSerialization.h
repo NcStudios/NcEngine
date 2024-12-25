@@ -14,6 +14,10 @@ void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, c
 auto DeserializeAudioSource(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> audio::AudioSource;
 void SerializeDirectionalLight(std::ostream& stream, const graphics::DirectionalLight& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeDirectionalLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> graphics::DirectionalLight;
+void SerializeSkinnedMesh(std::ostream& stream, const SkinnedMesh& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeSkinnedMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> SkinnedMesh;
+void SerializeStaticMesh(std::ostream& stream, const StaticMesh& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeStaticMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> StaticMesh;
 void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> ParticleEmitter;
 void SerializePointLight(std::ostream& stream, const graphics::PointLight& out, const SerializationContext& ctx, const std::any&);

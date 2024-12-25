@@ -4,7 +4,14 @@ add_executable(ComponentSerialization_integration_tests
     ${NC_SOURCE_DIR}/serialize/ComponentSerialization.cpp
     ${NC_SOURCE_DIR}/audio/AudioSource.cpp
     ${NC_SOURCE_DIR}/ecs/Transform.cpp
+    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+    ${NC_SOURCE_DIR}/graphics2/Material.cpp
+    ${NC_SOURCE_DIR}/graphics2/Mesh.cpp
     ${NC_SOURCE_DIR}/graphics2/ParticleEmitter.cpp
+    ${NC_SOURCE_DIR}/graphics2/SkeletalAnimationController.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MaterialRegistry.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/MeshSubsystem.cpp
+    ${NC_SOURCE_DIR}/graphics2/frontend/subsystem/TransformCache.cpp
 )
 
 target_include_directories(ComponentSerialization_integration_tests

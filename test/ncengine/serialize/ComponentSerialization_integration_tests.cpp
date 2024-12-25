@@ -2,14 +2,19 @@
 #include "serialize/ComponentSerialization.h"
 #include "../AssetServiceStub.h"
 
+#include "ncengine/Events.h"
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/graphics/DirectionalLight.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/graphics/ParticleEmitter.h"
 #include "ncengine/graphics/PointLight.h"
 #include "ncengine/graphics/SpotLight.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
+#include "graphics2/frontend/subsystem/MaterialRegistry.h"
+#include "graphics2/frontend/subsystem/animation/SkeletalAnimationSubsystem.h"
+#include "graphics2/frontend/subsystem/MeshSubsystem.h"
 #include "graphics2/frontend/subsystem/particle/ParticleSubsystem.h"
 #include "physics/DeferredPhysicsCreateState.h"
 
@@ -23,24 +28,22 @@ DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::HullCo
 DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
 DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::asset::TextureView, std::string);
 
+constexpr auto g_maxEntities = 10u;
+
 namespace nc
 {
+auto g_systemEvents = SystemEvents{};
+
 namespace asset
 {
-auto AcquireAudioClipAsset(const std::string&) -> AudioClipView
-{
-    static auto view = AudioClipView{};
-    return view;
-}
-
+auto g_mockAudioClipView = AudioClipView{};
+auto g_mockMeshView = MeshView{.id = 1};
 auto g_mockTextureView = TextureView{.id = 1, .index = 1};
 
-auto AcquireTextureAsset(AssetId) -> TextureView
-{
-    return g_mockTextureView;
-}
+auto AcquireAudioClipAsset(const std::string&) -> AudioClipView { return g_mockAudioClipView; }
+auto AcquireMeshAsset(AssetId)                 -> MeshView      { return g_mockMeshView; }
+auto AcquireTextureAsset(AssetId)              -> TextureView   { return g_mockTextureView; }
 } // namespace asset
-
 
 namespace graphics
 {
@@ -49,8 +52,22 @@ void ParticleSubsystem::RemoveEmitter(Entity) {}
 void ParticleSubsystem::UpdateEmitterInfo(Entity, const ParticleInfo&) {}
 void ParticleSubsystem::UpdateEmitterTexture(Entity, uint32_t) {}
 void ParticleSubsystem::Emit(Entity, size_t) {}
-} // namespace graphics
 
+auto ISkeletalAnimationSubsystem::AllocateBones(asset::AssetId) -> BoneCacheHandle { return 0; }
+void ISkeletalAnimationSubsystem::NotifyRemove(Entity, BoneCacheHandle) {}
+
+struct MockAnimationSubsystem : public ISkeletalAnimationSubsystem
+{
+    MockAnimationSubsystem(uint32_t maxBones)
+        : ISkeletalAnimationSubsystem{maxBones}
+    {
+    }
+};
+
+auto g_mockSkeletalAnimationSubsystem = MockAnimationSubsystem{10};
+auto g_mockMeshSubsystem = MeshSubsystem{g_mockSkeletalAnimationSubsystem, g_systemEvents, g_maxEntities, g_maxEntities, 1};
+auto g_mockMaterialRegistry = MaterialRegistry{g_maxEntities};
+} // namespace graphics
 
 auto g_mockConstraints = std::unordered_map<nc::Entity::index_type, std::vector<nc::Constraint>>{};
 
@@ -123,22 +140,102 @@ TEST(ComponentSerializationTests, RoundTrip_audioSource_preservesValues)
     EXPECT_EQ(expectedFlags, actualProperties.flags);
 }
 
+TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
+{
+    // Reset mocks
+    nc::asset::g_mockMeshView = {.id = 1, .firstIndex = 0};
+    nc::asset::g_mockTextureView = {.id = 1, .index = 0};
+
+    const auto expectedMesh = nc::asset::g_mockMeshView;
+    const auto expectedMaterialDesc = nc::MaterialDesc{
+        .name = "mock",
+        .properties = nc::MaterialProperties{
+            .diffuseTexture = nc::asset::g_mockTextureView,
+            .normalTexture = nc::asset::g_mockTextureView,
+            .gradientStart = nc::Vector3::Up(),
+            .gradientEnd = nc::Vector3::Right(),
+            .outlineWidth = 3.5f
+        }
+    };
+
+    const auto expected = nc::StaticMesh{g_entity, expectedMesh, expectedMaterialDesc};
+    auto stream = std::stringstream{};
+    nc::SerializeStaticMesh(stream, expected, g_serializationContext, nullptr);
+
+    // Simulate a different load order prior to deserializing - want to verify assets are (de)serialized purely based on id.
+    nc::asset::g_mockMeshView.firstIndex = 100;
+    nc::asset::g_mockTextureView.index = 200;
+
+    const auto actual = nc::DeserializeStaticMesh(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(expected.GetEntity(), actual.GetEntity());
+    EXPECT_EQ(expectedMesh.id, actual.GetMeshId());
+    EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
+    EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
+    const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
+    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTexture.id, actualMaterialProperties.diffuseTexture.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
+    EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
+    EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
+}
+
+TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
+{
+    // Reset mocks
+    nc::asset::g_mockMeshView = {.id = 1, .firstIndex = 0};
+    nc::asset::g_mockTextureView = {.id = 1, .index = 0};
+
+    const auto expectedMesh = nc::asset::g_mockMeshView;
+    const auto expectedAnimId = nc::asset::AssetId{42};
+    const auto expectedMaterialDesc = nc::MaterialDesc{
+        .name = "mock",
+        .properties = nc::MaterialProperties{
+            .diffuseTexture = nc::asset::g_mockTextureView,
+            .normalTexture = nc::asset::g_mockTextureView,
+            .gradientStart = nc::Vector3::Up(),
+            .gradientEnd = nc::Vector3::Right(),
+            .outlineWidth = 3.5f
+        }
+    };
+
+    const auto expected = nc::SkinnedMesh{g_entity, expectedMesh, expectedMaterialDesc, expectedAnimId};
+    auto stream = std::stringstream{};
+    nc::SerializeSkinnedMesh(stream, expected, g_serializationContext, nullptr);
+
+    // Simulate a different load order prior to deserializing - want to verify assets are (de)serialized purely based on id.
+    nc::asset::g_mockMeshView.firstIndex = 100;
+    nc::asset::g_mockTextureView.index = 200;
+
+    const auto actual = nc::DeserializeSkinnedMesh(stream, g_deserializationContext, nullptr);
+    EXPECT_EQ(expected.GetEntity(), actual.GetEntity());
+    EXPECT_EQ(expectedMesh.id, actual.GetMeshId());
+    EXPECT_EQ(expectedAnimId, actual.GetAnimationController().GetAnimation(nc::RootAnimationState));
+    EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
+    EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
+    const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
+    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTexture.id, actualMaterialProperties.diffuseTexture.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
+    EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
+    EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
+}
+
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 {
+    // Reset mocks
+    nc::asset::g_mockTextureView = {.id = 1, .index = 0};
+
     auto stream = std::stringstream{};
-    const auto expectedTexture = nc::asset::AcquireTextureAsset(0);
+    const auto expectedTexture = nc::asset::g_mockTextureView;
     const auto expectedInfo = nc::ParticleInfo{};
     const auto expected = nc::ParticleEmitter{g_staticEntity, expectedTexture, expectedInfo};
     nc::SerializeParticleEmitter(stream, expected, g_serializationContext, nullptr);
 
-    // Mock a different texture load order prior to deserializing - want to verify textures are (de)serialized purely based on id.
-    const auto expectedTextureIndex = expectedTexture.index + 10;
-    nc::asset::g_mockTextureView.index = expectedTextureIndex;
+    // Simulate a different load order prior to deserializing - want to verify assets are (de)serialized purely based on id.
+    nc::asset::g_mockTextureView.index = 100;
 
     const auto actual = nc::DeserializeParticleEmitter(stream, g_deserializationContext, nullptr);
     const auto& actualTexture = actual.GetTexture();
     EXPECT_EQ(expectedTexture.id, actualTexture.id);
-    EXPECT_EQ(expectedTextureIndex, actualTexture.index);
+    EXPECT_EQ(100, actualTexture.index);
 
     const auto& actualInfo = actual.GetInfo();
     EXPECT_EQ(expectedInfo.emission.maxParticleCount, actualInfo.emission.maxParticleCount);
