@@ -30,7 +30,7 @@ constexpr auto g_maxEntities = 10u;
 
 namespace nc
 {
-auto g_systemEvents = SystemEvents{};
+auto g_systemEvents = std::make_unique<SystemEvents>();
 
 namespace asset
 {
@@ -63,7 +63,7 @@ struct MockAnimationSubsystem : public ISkeletalAnimationSubsystem
 };
 
 auto g_mockSkeletalAnimationSubsystem = MockAnimationSubsystem{10};
-auto g_mockMeshSubsystem = MeshSubsystem{g_mockSkeletalAnimationSubsystem, g_systemEvents, g_maxEntities, g_maxEntities, 1};
+auto g_mockMeshSubsystem = MeshSubsystem{g_mockSkeletalAnimationSubsystem, *g_systemEvents, g_maxEntities, g_maxEntities, 1};
 auto g_mockMaterialRegistry = MaterialRegistry{g_maxEntities};
 } // namespace graphics
 
