@@ -53,5 +53,5 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 Color;
     uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
     Color = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV);
-    PSOut.Color = float4(NormalsToIntensity(PSIn.Normal), NormalsToIntensity(Color.rgb), 1.0, 1.0);
+    PSOut.Color = float4(PSIn.Normal, 1.0);
 }
