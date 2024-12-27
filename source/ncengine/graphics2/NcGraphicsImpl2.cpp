@@ -162,6 +162,22 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
+                    .id = MaterialPassFlag::Depth,
+                    .name = "Depth",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
+                    .depthSink = MainDepth,
+                    .isMsaa = false
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::Depth,
+                    .name = "Depth",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
+                    .depthSink = MainDepth,
+                    .isMsaa = false
+                },
+                PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "Toon",
                     .type = PassType::Material,
@@ -192,22 +208,6 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
                     .colorSink = NormalsColorMsaa,
                     .depthSink = MainDepthMsaa
-                },
-                PassDesc{
-                    .id = MaterialPassFlag::Depth,
-                    .name = "Depth",
-                    .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
-                    .depthSink = MainDepth,
-                    .isMsaa = false
-                },
-                PassDesc{
-                    .id = MaterialPassFlag::Depth,
-                    .name = "Depth",
-                    .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
-                    .depthSink = MainDepth,
-                    .isMsaa = false
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,

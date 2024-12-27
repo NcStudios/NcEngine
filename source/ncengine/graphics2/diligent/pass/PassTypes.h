@@ -32,7 +32,7 @@ constexpr auto MainDepthMsaa = 0u;
 constexpr auto NormalsDepthMsaa = 1u;
 
 /* Depth Target Indices */
-constexpr auto MainDepth = 0u;
+constexpr auto MainDepth = 2u;
 
 struct ShaderPaths
 {

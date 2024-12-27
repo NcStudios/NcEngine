@@ -29,16 +29,16 @@ struct MaterialPassFlag
     using type = uint64_t;
 
     static constexpr auto Shadow  = type{1 << 0};
-    static constexpr auto Toon    = type{1 << 1};
-    static constexpr auto Normals = type{1 << 2};
-    static constexpr auto Depth   = type{1 << 3};
+    static constexpr auto Depth   = type{1 << 1};
+    static constexpr auto Toon    = type{1 << 2};
+    static constexpr auto Normals = type{1 << 3};
 };
 
 /** @brief Set of flags indicating a MaterialInstance's enabled passes. */
 using MaterialPassFlags = MaterialPassFlag::type;
 
 /** @brief Default passes for a toon material. */
-constexpr auto ShadowedToonMaterial = MaterialPassFlag::Shadow | MaterialPassFlag::Toon | MaterialPassFlag::Normals | MaterialPassFlag::Depth;
+constexpr auto ShadowedToonMaterial = MaterialPassFlag::Shadow | MaterialPassFlag::Depth | MaterialPassFlag::Toon | MaterialPassFlag::Normals;
 
 /** @brief Properties of a MaterialInstance passed to shaders. */
 struct MaterialProperties
