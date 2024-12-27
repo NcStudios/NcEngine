@@ -18,6 +18,10 @@ void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, 
 auto DeserializeParticleEmitter(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> ParticleEmitter;
 void SerializePointLight(std::ostream& stream, const PointLight& out, const SerializationContext& ctx, const std::any&);
 auto DeserializePointLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> PointLight;
+void SerializeSkinnedMesh(std::ostream& stream, const SkinnedMesh& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeSkinnedMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> SkinnedMesh;
+void SerializeStaticMesh(std::ostream& stream, const StaticMesh& out, const SerializationContext& ctx, const std::any&);
+auto DeserializeStaticMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> StaticMesh;
 void SerializeSpotLight(std::ostream& stream, const SpotLight& out, const SerializationContext& ctx, const std::any&);
 auto DeserializeSpotLight(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> SpotLight;
 void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const SerializationContext&, const std::any&);

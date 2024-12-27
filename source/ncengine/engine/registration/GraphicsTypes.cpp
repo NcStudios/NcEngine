@@ -9,15 +9,15 @@ namespace nc
 {
 void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
 {
-        Register<StaticMesh>(
+    Register<StaticMesh>(
         registry,
         maxEntities,
         StaticMeshId,
         "StaticMesh",
         ui::editor::StaticMeshUIWidget,
         CreateStaticMesh,
-        nullptr,
-        nullptr
+        SerializeStaticMesh,
+        DeserializeStaticMesh
     );
 
     Register<SkinnedMesh>(
@@ -27,8 +27,8 @@ void RegisterGraphicsTypes(ecs::ComponentRegistry& registry, size_t maxEntities)
         "SkinnedMesh",
         ui::editor::SkinnedMeshUIWidget,
         CreateSkinnedMesh,
-        nullptr,
-        nullptr
+        SerializeSkinnedMesh,
+        DeserializeSkinnedMesh
     );
 
     Register<ParticleEmitter>(

@@ -4,6 +4,7 @@
 #include "ncengine/audio/AudioSource.h"
 #include "ncengine/graphics/Light.h"
 #include "ncengine/graphics/ParticleEmitter.h"
+#include "ncengine/graphics/Mesh.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "ncengine/serialize/SceneSerialization.h"
@@ -27,6 +28,33 @@ void Deserialize(std::istream& stream, TextureView& out)
     out = asset::AcquireTextureAsset(textureId);
 }
 } // namespace asset
+
+void SerializeMaterialDesc(std::ostream& stream, const MaterialInstance& out)
+{
+    const auto& properties = out.GetProperties();
+    serialize::Serialize(stream, std::string{out.GetName()}); // don't want to serialize as string_view!
+    serialize::Serialize(stream, out.GetPasses());
+    serialize::Serialize(stream, properties.diffuseTexture); // serialize properties individually so we hit the special handling for textures
+    serialize::Serialize(stream, properties.normalTexture);
+    serialize::Serialize(stream, properties.gradientStart);
+    serialize::Serialize(stream, properties.gradientEnd);
+    serialize::Serialize(stream, properties.outlineColor);
+    serialize::Serialize(stream, properties.outlineWidth);
+}
+
+auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
+{
+    auto out = MaterialDesc{};
+    serialize::Deserialize(stream, out.name);
+    serialize::Deserialize(stream, out.passes);
+    serialize::Deserialize(stream, out.properties.diffuseTexture);
+    serialize::Deserialize(stream, out.properties.normalTexture);
+    serialize::Deserialize(stream, out.properties.gradientStart);
+    serialize::Deserialize(stream, out.properties.gradientEnd);
+    serialize::Deserialize(stream, out.properties.outlineColor);
+    serialize::Deserialize(stream, out.properties.outlineWidth);
+    return out;
+}
 
 void SerializeAudioSource(std::ostream& stream, const audio::AudioSource& out, const SerializationContext& ctx, const std::any&)
 {
@@ -56,6 +84,54 @@ auto DeserializeDirectionalLight(std::istream& stream, const DeserializationCont
     auto out = DirectionalLight{};
     serialize::Deserialize(stream, out);
     return out;
+}
+
+void SerializeSkinnedMesh(std::ostream& stream, const SkinnedMesh& out, const SerializationContext& ctx, const std::any&)
+{
+    serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
+    serialize::Serialize(stream, out.GetMeshId());
+    SerializeMaterialDesc(stream, out.GetMaterial());
+    serialize::Serialize(stream, out.GetAnimationController().GetAnimation(RootAnimationState));
+}
+
+auto DeserializeSkinnedMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> SkinnedMesh
+{
+    auto entityId = uint32_t{};
+    auto meshId = asset::AssetId{};
+    auto animId = asset::AssetId{};
+    serialize::Deserialize(stream, entityId);
+    serialize::Deserialize(stream, meshId);
+    auto materialDesc = DeserializeMaterialDesc(stream);
+    serialize::Deserialize(stream, animId);
+
+    return SkinnedMesh{
+        ctx.entityMap.at(entityId),
+        asset::AcquireMeshAsset(meshId),
+        materialDesc,
+        animId
+    };
+}
+
+void SerializeStaticMesh(std::ostream& stream, const StaticMesh& out, const SerializationContext& ctx, const std::any&)
+{
+    serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
+    serialize::Serialize(stream, out.GetMeshId());
+    SerializeMaterialDesc(stream, out.GetMaterial());
+}
+
+auto DeserializeStaticMesh(std::istream& stream, const DeserializationContext& ctx, const std::any&) -> StaticMesh
+{
+    auto entityId = uint32_t{};
+    auto meshId = asset::AssetId{};
+    serialize::Deserialize(stream, entityId);
+    serialize::Deserialize(stream, meshId);
+    auto materialDesc = DeserializeMaterialDesc(stream);
+
+    return StaticMesh{
+        ctx.entityMap.at(entityId),
+        asset::AcquireMeshAsset(meshId),
+        materialDesc
+    };
 }
 
 void SerializeParticleEmitter(std::ostream& stream, const ParticleEmitter& out, const SerializationContext& ctx, const std::any&)

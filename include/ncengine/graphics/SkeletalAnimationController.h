@@ -106,7 +106,8 @@ class SkeletalAnimationController
         auto AddState(LoopAnimation&& properties) -> AnimationStateId;
         auto AddState(PlayOnceAnimation&& properties) -> AnimationStateId;
         auto AddState(StopAnimation&& properties) -> AnimationStateId;
-        void SetAnimation(AnimationStateId stateId, uint64_t animationId);
+        auto GetAnimation(AnimationStateId stateId) const -> asset::AssetId;
+        void SetAnimation(AnimationStateId stateId, asset::AssetId animationId);
         auto GetDefaultTransitionDuration() const -> float { return m_defaultTransitionDuration; }
         void SetDefaultTransitionDuration(float dur) { m_defaultTransitionDuration = dur; }
 
@@ -116,12 +117,12 @@ class SkeletalAnimationController
          * Immediate transitions interrupt the state machine and move to the specified state. Control is returned to
          * the state machine upon the exit condition being met, or the immediate animation finishing, for PlayOnce.
          */
-        void LoopImmediate(uint64_t animId,
+        void LoopImmediate(asset::AssetId animId,
                            TransitionCondition&& exitWhen,
                            AnimationStateId exitTo = RootAnimationState,
                            float transitionDuration = UseDefaultTransitionDuration);
 
-        void PlayOnceImmediate(uint64_t animId,
+        void PlayOnceImmediate(asset::AssetId animId,
                                AnimationStateId exitTo = RootAnimationState,
                                float transitionDuration = UseDefaultTransitionDuration);
 
