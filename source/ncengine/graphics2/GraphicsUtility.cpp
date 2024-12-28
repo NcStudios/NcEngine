@@ -36,11 +36,11 @@ constexpr auto g_postProcessPassFlags = std::array{
 };
 
 constexpr auto g_postProcessEffectNames = std::array{
-    std::string_view{"MoebiusEffect"}
+    std::string_view{"OutlinedToonEffect"}
 };
 
 constexpr auto g_postProcessEffectIds = std::array{
-    nc::MoebiusEffectId
+    nc::OutlinedToonEffectId
 };
 
 const auto g_postProcessEffectPassFlags = std::array{
@@ -50,7 +50,7 @@ const auto g_postProcessEffectPassFlags = std::array{
 };
 
 constexpr auto g_combinedPostProcessEffectPassFlags = std::array{
-    nc::MoebiusEffectPassFlags
+    nc::OutlinedToonEffectPassFlags
 };
 
 static_assert(g_materialPassNames.size() == g_materialPassFlags.size());

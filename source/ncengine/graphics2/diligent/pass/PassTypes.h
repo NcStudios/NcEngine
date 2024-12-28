@@ -29,10 +29,9 @@ constexpr auto PPOutlineColor = 3u;
 
 /* MSAA Depth Target Indices */
 constexpr auto MainDepthMsaa = 0u;
-constexpr auto NormalsDepthMsaa = 1u;
 
 /* Depth Target Indices */
-constexpr auto MainDepth = 2u;
+constexpr auto MainDepth = 1u;
 
 struct ShaderPaths
 {

@@ -1039,8 +1039,8 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& camera = world.Emplace<FollowCamera>(cameraHandle, vehicle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);
-    ncGraphics->SetPostProcessEffectEnabled(nc::MoebiusEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f, .depthThreshold = 0.360f, .normalThreshold = 0.190f}});
+    ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f, .depthThreshold = 0.360f, .normalThreshold = 0.190f}});
 
     // Ray Caster
     auto rayCaster = world.Emplace<Entity>({.tag = "RayCaster"});

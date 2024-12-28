@@ -29,11 +29,11 @@ using PostProcessEffectPassFlags = PostProcessPassFlag::type;
 /** @brief Null identifier for a post process effect. */
 constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId>::max();
 
-/** @brief Identifier for the moebius post process effect. */
-constexpr auto MoebiusEffectId = PostProcessEffectId{0};
+/** @brief Identifier for the outlined toon post process effect. */
+constexpr auto OutlinedToonEffectId = PostProcessEffectId{0};
 
-/** @brief Pass flags for the moebius post process effect. */
-constexpr auto MoebiusEffectPassFlags = PostProcessPassFlag::Outline;
+/** @brief Pass flags for the outlined toon post process effect. */
+constexpr auto OutlinedToonEffectPassFlags = PostProcessPassFlag::Outline;
 
 /** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};

@@ -137,5 +137,4 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float edge = max(normalsEdge, depthEdge);
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
     PSOut.Color = lerp(sceneColor, float4(outlineColor, 1.0f), edge);
-    //PSOut.Color = float4(normalTex.Sample(smplr, PSIn.UV).a, normalTex.Sample(smplr, PSIn.UV).a, normalTex.Sample(smplr, PSIn.UV).a, 1.0);
 }

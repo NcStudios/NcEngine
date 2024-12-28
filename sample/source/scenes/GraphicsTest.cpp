@@ -160,8 +160,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     modules.Get<NcGraphics>()->SetCamera(&camera);
 
     auto ncGraphics = modules.Get<NcGraphics>();
-    ncGraphics->SetPostProcessEffectEnabled(nc::MoebiusEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f}});
+    ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f}});
 }
 
 void GraphicsTest::Unload()
