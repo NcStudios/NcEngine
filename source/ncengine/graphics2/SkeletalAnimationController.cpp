@@ -6,7 +6,7 @@
 
 namespace nc
 {
-SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
+SkeletalAnimationController::SkeletalAnimationController(asset::AssetId animationId,
                                                          float defaultTransitionDuration)
     : m_states{4ull, MaxAnimationStates},
       m_defaultTransitionDuration{defaultTransitionDuration}
@@ -20,7 +20,7 @@ SkeletalAnimationController::SkeletalAnimationController(uint64_t animationId,
     );
 }
 
-auto SkeletalAnimationController::GetCurrentAnimationId() const -> uint64_t
+auto SkeletalAnimationController::GetCurrentAnimationId() const -> asset::AssetId
 {
     // Id is cached here if queued transition overwrote the current id (e.g. immediate -> immediate)
     if (m_prevAnimId != asset::NullAssetId)
@@ -74,7 +74,12 @@ auto SkeletalAnimationController::AddState(StopAnimation&& properties) -> Animat
     });
 }
 
-void SkeletalAnimationController::SetAnimation(AnimationStateId stateId, uint64_t animationId)
+auto SkeletalAnimationController::GetAnimation(AnimationStateId stateId) const -> asset::AssetId
+{
+    return m_states.at(stateId).animId;
+}
+
+void SkeletalAnimationController::SetAnimation(AnimationStateId stateId, asset::AssetId animationId)
 {
     const auto oldId = std::exchange(m_states.at(stateId).animId, animationId);
     if (m_activeState == stateId)
@@ -84,7 +89,7 @@ void SkeletalAnimationController::SetAnimation(AnimationStateId stateId, uint64_
     }
 }
 
-void SkeletalAnimationController::LoopImmediate(uint64_t animId,
+void SkeletalAnimationController::LoopImmediate(asset::AssetId animId,
                                                 TransitionCondition&& exitWhen,
                                                 AnimationStateId exitTo,
                                                 float transitionDuration)
@@ -99,7 +104,7 @@ void SkeletalAnimationController::LoopImmediate(uint64_t animId,
     });
 }
 
-void SkeletalAnimationController::PlayOnceImmediate(uint64_t animId,
+void SkeletalAnimationController::PlayOnceImmediate(asset::AssetId animId,
                                                     AnimationStateId exitTo,
                                                     float transitionDuration)
 {
