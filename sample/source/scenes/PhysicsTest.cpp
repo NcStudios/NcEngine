@@ -490,7 +490,7 @@ void BuildBridge(ecs::Ecs world)
 void BuildSteps(ecs::Ecs world)
 {
     const auto stepParent = world.Emplace<Entity>({.tag = "Steps"});
-    auto buildStep = [&world, stepParent](const Vector3& position, const Vector3& scale, uint32_t = 8u)
+    auto buildStep = [&world, stepParent](const Vector3& position, const Vector3& scale, const nc::MaterialDesc& mat, uint32_t = 8u)
     {
         const auto step = world.Emplace<Entity>({
             .position = position,
@@ -499,7 +499,7 @@ void BuildSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<StaticMesh>(step, mesh::Cube, material::Blue);
+        world.Emplace<StaticMesh>(step, mesh::Cube, mat);
         world.Emplace<RigidBody>(step)
             .AddConstraint(PointConstraintInfo{
                 .ownerPosition = Vector3{},
@@ -507,7 +507,7 @@ void BuildSteps(ecs::Ecs world)
             });
     };
 
-    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f});
+    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f}, material::Yellow);
 
     constexpr auto smallStepScale = Vector3{1.0f, 0.5f, 1.0f};
     constexpr auto smallStepBasePosition = Vector3{-5.5f, 5.0f, 36.0f};
@@ -518,7 +518,7 @@ void BuildSteps(ecs::Ecs world)
             const auto x = -1.01f * static_cast<float>(i);
             const auto y = -0.3f * static_cast<float>(i);
             const auto z = 1.01f* static_cast<float>(j);
-            buildStep(smallStepBasePosition + Vector3{x, y, z}, smallStepScale, 2);
+            buildStep(smallStepBasePosition + Vector3{x, y, z}, smallStepScale, material::Blue, 2);
         }
     }
 
@@ -741,8 +741,8 @@ void BuildSliders(ecs::Ecs world)
     });
 
     world.Emplace<StaticMesh>(base, mesh::Cube, material::Red);
-    world.Emplace<StaticMesh>(slider1, mesh::Capsule, material::Yellow);
-    world.Emplace<StaticMesh>(slider2, mesh::Capsule, material::Yellow);
+    world.Emplace<StaticMesh>(slider1, mesh::Capsule, material::Orange);
+    world.Emplace<StaticMesh>(slider2, mesh::Capsule, material::Orange);
 
     auto& baseBody = world.Emplace<RigidBody>(base);
     auto& slider1Body = world.Emplace<RigidBody>(slider1, Shape::MakeCapsule());
@@ -1040,7 +1040,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::MoebiusEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::MoebiusEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f, .depthThreshold = 0.360f, .normalThreshold = 0.190f}});
 
     // Ray Caster
     auto rayCaster = world.Emplace<Entity>({.tag = "RayCaster"});

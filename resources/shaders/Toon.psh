@@ -24,6 +24,10 @@ struct MaterialData
     uint diffuseTexture;
     float3 gradientEnd;
     uint normalIndex;
+    float normalIntensity;
+    float padding1;
+    float padding2;
+    float padding3;
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);

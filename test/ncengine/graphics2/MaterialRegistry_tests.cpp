@@ -19,7 +19,8 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
                 .index = 13
             },
             .gradientStart = nc::Vector3::One(),
-            .gradientEnd = nc::Vector3::Zero()
+            .gradientEnd = nc::Vector3::Zero(),
+            .normalIntensity = 1.0f
         }
     };
 

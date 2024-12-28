@@ -63,16 +63,9 @@ float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
 
 static float normalThresholdConstant = 0.15f;
 static float normalThresholdScale = 20.0f;
-float GetViewDirDepthOffset(Texture2D depthTex, Texture2D normalTex, SamplerState smplr, float2 uv)
+float GetViewDirDepthOffset(float nDotV)
 {
-    float rawDepth = depthTex.Sample(smplr, uv);
-    float3 ndc = float3(uv * 2.0f - 1.0f, rawDepth);
-    float4 clipPos = cameraInvProjection * float4(ndc, 1.0f);
-    float4 worldPos = clipPos / clipPos.w;
-    float3 viewDir = normalize(cameraPosition - worldPos.xyz);
-    float3 viewNormals = normalTex.Sample(smplr, uv).rgb;
-    float NDotV = 1 - dot(viewNormals, -viewDir);
-    return saturate((NDotV - normalThresholdConstant) / 1 - normalThresholdConstant) * normalThresholdScale + 1;
+    return saturate((nDotV - normalThresholdConstant) / 1 - normalThresholdConstant) * normalThresholdScale + 1;
 }
 
 float OutlineDepth(Texture2D depthTex, float normalThreshold, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
@@ -134,7 +127,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float2 ULUV = PSIn.UV + float2(-texelSize.x * outlineWidthHalfFloor, texelSize.y * outlineWidthHalfCeil);
 
     // Get depth outline. Calculate the view dir to modulate depth to fix some artifacts.
-    float normalThresholdForDepth = GetViewDirDepthOffset(depthTex, normalTex, smplr, PSIn.UV);
+    float normalThresholdForDepth = GetViewDirDepthOffset(normalTex.Sample(smplr, PSIn.UV).a);
     float depthEdge = OutlineDepth(depthTex, normalThresholdForDepth, smplr, LLUV, URUV, LRUV, ULUV);
 
     // Get the normals outline.
@@ -144,4 +137,5 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float edge = max(normalsEdge, depthEdge);
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
     PSOut.Color = lerp(sceneColor, float4(outlineColor, 1.0f), edge);
+    //PSOut.Color = float4(normalTex.Sample(smplr, PSIn.UV).a, normalTex.Sample(smplr, PSIn.UV).a, normalTex.Sample(smplr, PSIn.UV).a, 1.0);
 }

@@ -73,6 +73,10 @@ struct MaterialData
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
     Vector3 gradientEnd = Vector3::Splat(11.0f);
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
+    float normalIntensity = 1.0f;
+    float padding1;
+    float padding2;
+    float padding3;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).
