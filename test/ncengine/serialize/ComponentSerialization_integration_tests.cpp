@@ -152,7 +152,7 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
             .normalTexture = nc::asset::g_mockTextureView,
             .gradientStart = nc::Vector3::Up(),
             .gradientEnd = nc::Vector3::Right(),
-            .outlineWidth = 3.5f
+            .normalIntensity = 3.5f
         }
     };
 
@@ -176,8 +176,7 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
-    EXPECT_EQ(expectedMaterialDesc.properties.outlineColor, actualMaterialProperties.outlineColor);
-    EXPECT_EQ(expectedMaterialDesc.properties.outlineWidth, actualMaterialProperties.outlineWidth);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -195,7 +194,7 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
             .normalTexture = nc::asset::g_mockTextureView,
             .gradientStart = nc::Vector3::Up(),
             .gradientEnd = nc::Vector3::Right(),
-            .outlineWidth = 3.5f
+            .normalIntensity = 3.5f
         }
     };
 
@@ -220,8 +219,7 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
-    EXPECT_EQ(expectedMaterialDesc.properties.outlineColor, actualMaterialProperties.outlineColor);
-    EXPECT_EQ(expectedMaterialDesc.properties.outlineWidth, actualMaterialProperties.outlineWidth);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)

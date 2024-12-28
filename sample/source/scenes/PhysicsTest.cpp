@@ -507,7 +507,7 @@ void BuildSteps(ecs::Ecs world)
             });
     };
 
-    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f}, material::Yellow);
+    buildStep(Vector3{-29.1f, 2.0f, 40.0f}, Vector3{10.0f, 1.0f, 10.0f}, material::Purple);
 
     constexpr auto smallStepScale = Vector3{1.0f, 0.5f, 1.0f};
     constexpr auto smallStepBasePosition = Vector3{-5.5f, 5.0f, 36.0f};
@@ -555,7 +555,7 @@ void BuildRotatingSteps(ecs::Ecs world)
             .tag = "Step"
         });
 
-        world.Emplace<StaticMesh>(step, mesh::Cube, material::Yellow);
+        world.Emplace<StaticMesh>(step, mesh::Cube, material::Purple);
         world.Emplace<RigidBody>(step)
             .AddConstraint(
                 SwingTwistConstraintInfo{
