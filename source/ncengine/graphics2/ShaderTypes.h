@@ -12,25 +12,27 @@
 namespace nc::graphics
 {
 // Object model for environment data (type: constant buffer)
-// 80 bytes with a 16-byte alignment.
 struct GlobalEnvironmentData
 {
     DirectX::XMMATRIX cameraViewProjection = DirectX::XMMatrixIdentity();
     DirectX::XMMATRIX cameraInvProjection = DirectX::XMMatrixIdentity();
     Vector3 cameraPosition = Vector3::One();
     uint32_t lightCount = 0;
+    float nearClip = 0.1f;
+    float farClip = 400.0f;
+    int padding[2];
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
-// 16 bytes with 4 byte alignment
 struct OutlinePassData
 {
     Vector3 color = Vector3::Zero();
     float width = 1.0f;
+    float depthThreshold = 0.8f;
+    float normalThreshold = 0.4f;
 };
 
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
-// 32 bytes with 4 byte alignment
 struct PostProcessSinkIndexData
 {
     uint32_t colorRenderTargetIndex1;
@@ -65,15 +67,12 @@ struct TransformData
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).
-// 48 bytes with a 16-byte alignment.
 struct MaterialData
 {
     Vector3 gradientStart = Vector3::Splat(10.0f);
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
     Vector3 gradientEnd = Vector3::Splat(11.0f);
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
-    Vector3 outlineColor = Vector3::Splat(12.0f);
-    float outlineWidth = 1.0f;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).
@@ -90,7 +89,6 @@ struct ParticleData
 };
 
 // Object model for lights (directional/point/spot) (type: StructuredBuffer element type).
-// 128 bytes with a 16-byte alignment.
 struct LightData
 {
     struct LightType

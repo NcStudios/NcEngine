@@ -99,20 +99,6 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
     return modified;
 }
 
-auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
-{
-    auto modified = nc::ui::InputColor3(properties.gradientStart, "start");
-    modified = nc::ui::InputColor3(properties.gradientEnd, "end") || modified;
-    return modified;
-}
-
-auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
-{
-    auto modified = nc::ui::InputColor3(properties.outlineColor, "color");
-    modified = nc::ui::DragFloat(properties.outlineWidth, "width", 0.1f, 0.0f, 10.0f) || modified;
-    return modified;
-}
-
 auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
 {
     if (ImGui::TreeNodeEx("Material"))
@@ -151,19 +137,6 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         }
 
         ImGui::Separator();
-        if (ImGui::TreeNodeEx("Gradient Color"))
-        {
-            modified = MaterialColorWidget(properties) || modified;
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Outline"))
-        {
-            modified = MaterialOutlineWidget(properties) || modified;
-            ImGui::TreePop();
-        }
-
         if (passesModified)
         {
             baseMesh.SetMaterial(nc::MaterialDesc{std::string{material.GetName()}, passes, properties});

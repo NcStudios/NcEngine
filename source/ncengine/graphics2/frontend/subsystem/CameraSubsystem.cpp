@@ -44,7 +44,9 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
                 m_mainCamera->ProjectionMatrix()
             ),
             .invProjection = m_mainCamera->InverseProjectionMatrix(),
-            .position = transform.Position()
+            .position = transform.Position(),
+            .nearClip = g_defaultProperties.nearClip,
+            .farClip = g_defaultProperties.farClip
         };
     }
 
@@ -54,7 +56,9 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
     return CameraRenderState{
         .viewProjection = viewProj,
         .invProjection = inverseProj,
-        .position = Vector3::Zero()
+        .position = Vector3::Zero(),
+        .nearClip = g_defaultProperties.nearClip,
+        .farClip = g_defaultProperties.farClip
     };
 }
 } // namespace nc::graphics

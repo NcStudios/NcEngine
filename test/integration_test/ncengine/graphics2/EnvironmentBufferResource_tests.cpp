@@ -60,7 +60,10 @@ TEST_F(EnvironmentBufferResourceTest, Update_succeeds)
 {
     auto cameraState = nc::graphics::CameraRenderState{
         .viewProjection = DirectX::XMMatrixPerspectiveFovRH(90.0f, 16.0f / 9.0f, 0.1f, 100.0f),
-        .position = nc::Vector3::Zero()
+        .invProjection = DirectX::XMMatrixIdentity(),
+        .position = nc::Vector3::Zero(),
+        .nearClip = 0.1f,
+        .farClip = 400.0f
     };
 
     auto lightRenderState = nc::graphics::LightRenderState{};

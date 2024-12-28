@@ -47,8 +47,6 @@ struct MaterialProperties
     asset::TextureView normalTexture = asset::TextureView{};
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
-    Vector3 outlineColor = Vector3::Zero();
-    float outlineWidth = 1.0f;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

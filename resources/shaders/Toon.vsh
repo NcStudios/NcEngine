@@ -36,8 +36,9 @@ cbuffer EnvironmentBufferData
     float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint lightCount;
+    float nearClip;
+    float farClip;
 };
-
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstanceBufferData[InstanceID].transformIndex;

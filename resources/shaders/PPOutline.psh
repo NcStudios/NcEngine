@@ -15,6 +15,8 @@ cbuffer EnvironmentBufferData
     float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint lightCount;
+    float nearClip;
+    float farClip;
 };
 
 cbuffer PostProcessSinkIndexBufferData
@@ -33,6 +35,8 @@ cbuffer OutlinePassBufferData
 {
     float3 outlineColor;
     float outlineWidth;
+    float depthThreshold;
+    float normalsThreshold;
 };
 
 struct PSInput 
@@ -45,9 +49,6 @@ struct PSOutput
 {
     float4 Color : SV_TARGET;
 };
-
-static float nearClip = 0.1f;
-static float farClip = 400.0f;
 
 // Depth is non-linear. Linearize it and normalize it.
 float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
@@ -74,8 +75,6 @@ float GetViewDirDepthOffset(Texture2D depthTex, Texture2D normalTex, SamplerStat
     return saturate((NDotV - normalThresholdConstant) / 1 - normalThresholdConstant) * normalThresholdScale + 1;
 }
 
-static float depthThreshold = 0.8f;
-
 float OutlineDepth(Texture2D depthTex, float normalThreshold, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
 {
     // Sample depth texture at four corners
@@ -90,13 +89,10 @@ float OutlineDepth(Texture2D depthTex, float normalThreshold, SamplerState smplr
     float depthEdge = sqrt(pow(depthDiagDif0, 2) + pow(depthDiagDif1, 2));
 
     // Modulate by threshold
-    depthThreshold = depthThreshold * depthLL * normalThreshold;
-    depthEdge = depthEdge > depthThreshold ? 1.0f : 0.0f;
-
-    return depthEdge;
+    float modulateDepthThreshold = depthThreshold * depthLL * normalThreshold;
+    return depthEdge > modulateDepthThreshold ? 1.0f : 0.0f;
 }
 
-static float normalsThreshold = 0.4f;
 float OutlineNormals(Texture2D normalsTex, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
 {
     // Sample normals texture at four corners
@@ -111,8 +107,7 @@ float OutlineNormals(Texture2D normalsTex, SamplerState smplr, float2 LLUV, floa
     float normalsEdge = sqrt(dot(normalsDiagDif0, normalsDiagDif0) + dot(normalsDiagDif1, normalsDiagDif1));
 
     // Modulate by threshold
-    normalsEdge = normalsEdge > normalsThreshold ? 1.0f : 0.0f;
-    return normalsEdge;
+    return normalsEdge > normalsThreshold ? 1.0f : 0.0f;
 }
 
 void main(in PSInput PSIn, out PSOutput PSOut)

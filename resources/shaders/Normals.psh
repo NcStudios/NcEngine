@@ -14,16 +14,15 @@ cbuffer EnvironmentBufferData
     float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint lightCount;
+    float nearClip;
+    float farClip;
 };
-
 struct MaterialData
 {
     float3 gradientStart;
     uint diffuseTexture;
     float3 gradientEnd;
     uint normalIndex;
-    float3 outlineColor;
-    float outlineWidth;
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);

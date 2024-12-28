@@ -26,7 +26,9 @@ void EnvironmentBufferResource::Update(Diligent::IDeviceContext& context,
         .cameraViewProjection = cameraState.viewProjection,
         .cameraInvProjection = cameraState.invProjection,
         .cameraPosition = cameraState.position,
-        .lightCount = static_cast<uint32_t>(lightRenderState.lights.size())
+        .lightCount = static_cast<uint32_t>(lightRenderState.lights.size()),
+        .nearClip = cameraState.nearClip,
+        .farClip = cameraState.farClip
     };
 
     m_buffer.Write(context, data);

@@ -59,7 +59,9 @@ TEST(PostProcessSubsystemTest, SetProperties_validCall_updatesState)
 
     const auto expected = nc::OutlinePassProperties{
         .color = nc::Vector3{1.0f, 2.0f, 3.0f},
-        .width = 3.0f
+        .width = 3.0f,
+        .depthThreshold = 0.8f,
+        .normalThreshold = 0.4f
     };
 
     uut.SetProperties(effect, pass, expected);
@@ -147,6 +149,8 @@ TEST(PostProcessSubsystemTest, BuildState_reportsPropertyModification)
     const auto& actualProperties = std::get<nc::OutlinePassProperties>(modifyEvent.properties);
     EXPECT_EQ(expectedProperties.color, actualProperties.color);
     EXPECT_EQ(expectedProperties.width, actualProperties.width);
+    EXPECT_EQ(expectedProperties.depthThreshold, actualProperties.depthThreshold);
+    EXPECT_EQ(expectedProperties.normalThreshold, actualProperties.normalThreshold);
 
     // modify event cleared
     state = uut.BuildState();
