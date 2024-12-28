@@ -20,7 +20,8 @@ struct GlobalEnvironmentData
     uint32_t lightCount = 0;
     float nearClip = 0.1f;
     float farClip = 400.0f;
-    int padding[2];
+    int padding1 = 0;
+    int padding2 = 0;
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
@@ -74,9 +75,9 @@ struct MaterialData
     Vector3 gradientEnd = Vector3::Splat(11.0f);
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
     float normalIntensity = 1.0f;
-    float padding1;
-    float padding2;
-    float padding3;
+    float padding1 = 0;
+    float padding2 = 0;
+    float padding3 = 0;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).
