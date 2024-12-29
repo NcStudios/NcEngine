@@ -1,3 +1,5 @@
+// Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
+
 #ifdef VULKAN
 // NonUniformResourceIndex is not supported by GLSLang
 #   define NonUniformResourceIndex(x) x
@@ -44,12 +46,206 @@ float RgbToLuma(float3 rgb){
     return sqrt(dot(rgb, float3(0.299, 0.587, 0.114)));
 }
 
+static float EdgeThresholdMin = 0.0312f;
+static float EdgeThresholdMax = 0.125;
+static uint Iterations = 12;
+
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
     SamplerState smplr = PostProcessColorSinkBufferData_sampler;
     Texture2D colorTex = PostProcessColorSinkBufferData[colorRT1];
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
-    float sceneLuminosity = RgbToLuma(sceneColor.rgb);
-    PSOut.Color = float4(sceneLuminosity, sceneLuminosity, sceneLuminosity, 1.0f);
+
+    // Get screen dimensions
+    uint screenWidth, screenHeight;
+    colorTex.GetDimensions(screenWidth, screenHeight);
+    float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
+
+    /***********************
+    / Get edge luminescence
+    /***********************/
+    // Get luminescence for four texels in a cross shape surrounding the current texel
+    float curLuma   = RgbToLuma(colorTex.Sample(smplr, PSIn.UV).rgb);
+    float downLuma  = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 0, -1) * texelSize)).rgb);
+    float upLuma    = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 0,  1) * texelSize)).rgb);
+    float leftLuma  = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2(-1,  0) * texelSize)).rgb);
+    float rightLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 1,  0) * texelSize)).rgb);
+
+    // Get luminescence min and max values
+    float minLuma = min(curLuma, min(min(downLuma, upLuma), min(leftLuma, rightLuma)));
+    float maxLuma = max(curLuma, max(max(downLuma, upLuma), max(leftLuma, rightLuma)));
+    float rangeLuma = maxLuma - minLuma;
+
+    // Skip performing AA on any texel that is out of threshold
+    if (rangeLuma < max(EdgeThresholdMin, maxLuma * EdgeThresholdMax))
+    {
+        PSOut.Color = sceneColor;
+        return;
+    }
+
+    // Get four remaining surrounding texels (diagonals) surrounding the current texel
+    float LLLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2(-1, -1) * texelSize)).rgb);
+    float URLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 1,  1) * texelSize)).rgb);
+    float LRLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 1, -1) * texelSize)).rgb);
+    float ULLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2(-1,  1) * texelSize)).rgb);
+
+    // Get luminescence of all edges
+    float downUpLuma      = downLuma + upLuma;
+    float leftRightLuma   = leftLuma + rightLuma;
+    float leftCornerLuma  = LLLuma   + ULLuma;
+    float downCornerLuma  = LLLuma   + LRLuma;
+    float rightCornerLuma = LRLuma   + URLuma;
+    float upCornerLuma    = URLuma   + ULLuma;
+
+    /**********************
+    / Get edge orientation
+    /**********************/
+    // Get an estimated gradient along the horizontal and vertical axes.
+    float edgeHoriz = abs(-2.0 * leftLuma + leftCornerLuma) + abs(-2.0 * curLuma + downUpLuma) * 2.0    + abs(-2.0 * rightLuma + rightCornerLuma);
+    float edgeVert  = abs(-2.0 * upLuma + upCornerLuma)     + abs(-2.0 * curLuma + leftRightLuma) * 2.0 + abs(-2.0 * downLuma + downCornerLuma);
+    float isHorizontalEdge = (edgeHoriz >= edgeVert);
+
+    // Get the luminescence of the two texels in the direction opposite of the edge
+    float oppLuma1 = isHorizontalEdge ? downLuma : leftLuma;
+    float oppLuma2 = isHorizontalEdge ? upLuma : rightLuma;
+
+    // Get gradient in this direction
+    float gradient1 = oppLuma1 - curLuma;
+    float gradient2 = oppLuma2 - curLuma;
+
+    // Which gradient is the steepest?
+    bool isGradient1Steepest = abs(gradient1) >= abs(gradient2);
+    float scaledGradient = 0.25 * max(abs(gradient1), abs(gradient2));
+
+    /******************************
+    / Average luma values at edge
+    /******************************/
+    float stepLength = isHorizontalEdge ? texelSize.y : texelSize.x;
+    float localAvgLuma = 0.0;
+
+    if (isGradient1Steepest)
+    {
+        // Switch direction
+        stepLength = -stepLength;
+        localAvgLuma = 0.5 * (oppLuma1 + curLuma);
+    }
+    else
+    {
+        localAvgLuma = 0.5 * (oppLuma2 + curLuma);
+    }
+
+    // Move UV forward in correct direction by half a pixel
+    float2 currentUV = PSIn.UV;
+    if (isHorizontalEdge)
+    {
+        currentUV.y += stepLength * 0.5;
+    }
+    else
+    {
+        currentUV.x += stepLength * 0.5;
+    }
+
+    /************************
+    / Explore bounds of edge
+    /************************/
+    float2 offset = isHorizontalEdge ? float2(texelSize.x, 0.0) : float2(0.0, texelSize.y);
+    float2 newUV1 = currentUV - offset;
+    float2 newUV2 = currentUV + offset;
+
+    // Read the luminescence at both extremities of the current exploration segment and get delta against the average
+    float endLuma1 = RgbToLuma(colorTex.Sample(smplr, newUV1).rgb);
+    float endLuma2 = RgbToLuma(colorTex.Sample(smplr, newUV2).rgb);
+    endLuma1 -= localAvgLuma;
+    endLuma2 -= localAvgLuma;
+
+    // Have we reached an edge?
+    bool reached1 = abs(endLuma1) >= scaledGradient;
+    bool reached2 = abs(endLuma2) >= scaledGradient;
+    bool bothReached = reached1 && reached2;
+
+    // If we haven't reached a side, keep exploring
+    if (!reached1) newUV1 -= offset;
+    if (!reached2) newUV2 -= offset;
+
+    int quality[7] = {1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0};
+
+    // Iterate until bothReached is true
+    if (!bothReached)
+    {
+        for (int i = 2; i < Iterations; i++)
+        {
+            if (!reached1)
+            {
+                endLuma1 = RgbToLuma(colorTex.Sample(smplr, newUV1).rgb);
+                endLuma1 -= localAvgLuma;
+            }
+
+            if (!reached2)
+            {
+                endLuma2 = RgbToLuma(colorTex.Sample(smplr, newUV2).rgb);
+                endLuma2 -= localAvgLuma;
+            }
+
+            reached1 = abs(endLuma1) >= scaledGradient;
+            reached2 = abs(endLuma2) >= scaledGradient;
+            bothReached = reached1 && reached2;
+
+            if (!reached1)
+            {
+                newUV1 -= offset * quality[i];
+            }
+            if (!reached2)
+            {
+                newUV2 += offset * quality[i];
+            }
+
+            if (bothReached) { break; }
+        }
+    }
+
+    /*****************
+    / Estimate offset
+    /*****************/
+    float distance1 = isHorizontalEdge ? (PSIn.UV.x - newUV1.x) : (PSIn.UV.y - newUV1.y);
+    float distance2 = isHorizontalEdge ? (newUV2.x - PSIn.UV.x) : (newUV2.y - PSIn.UV.y);
+
+    // In which direction is the extremity of the edge closer?
+    bool isDirection1 = distance1 < distance2;
+    float distanceFinal = min(distance1, distance2);
+
+    // Offset the UV in the direction of the closest side of the edge
+    float edgeThickness = distance1 + distance2;
+    float pixelOffset = -distanceFinal / edgeThickness + 0.5;
+
+    // Is the luminescence of the current pixel smaller than the local average?
+    bool isCurLumaSmaller = curLuma < localAvgLuma;
+    bool correctVariation = ((isDirection1 ? endLuma1 : endLuma2) < 0.0) != isCurLumaSmaller;
+    float finalOffset = correctVariation ? pixelOffset : 0.0;
+
+    /***********************
+    / Subpixel antialiasing
+    /***********************/
+    // Get full weighted luminescence average over 3x3 neighborhood
+    float iterationsF = float(Iterations);
+    float averageLuma = (1.0 / 12.0f) * (2.0 * (downUpLuma + leftRightLuma) + leftCornerLuma + rightCornerLuma);
+    float subpixelOffset1 = clamp(abs(averageLuma - curLuma)/rangeLuma, 0.0, 1.0);
+    float subpixelOffset2 = (-2.0 * subpixelOffset1 + 3.0) * subpixelOffset1 * subpixelOffset1;
+    float subpixelOffsetFinal = subpixelOffset2 * subpixelOffset2 * 0.75;
+    finalOffset = max(finalOffset, subpixelOffsetFinal);
+
+    float2 finalUV = PSIn.UV;
+    if (isHorizontalEdge)
+    {
+        finalUV.y += finalOffset * stepLength;
+    }
+    else
+    {
+        finalUV.x += finalOffset * stepLength;
+    }
+
+    float3 finalColor = colorTex.Sample(smplr, finalUV).rgb;
+    
+    float3 debugCol = lerp(sceneColor.rgb, float3(0.0f, 0.0f, 1.0f), 0.75f);
+    PSOut.Color = float4(finalColor, 1.0f);
 }
