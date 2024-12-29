@@ -49,6 +49,7 @@ float RgbToLuma(float3 rgb){
 static float EdgeThresholdMin = 0.0312f;
 static float EdgeThresholdMax = 0.125;
 static uint Iterations = 12;
+static float SubpixelQuality = 0.75f;
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
@@ -165,10 +166,16 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     bool bothReached = reached1 && reached2;
 
     // If we haven't reached a side, keep exploring
-    if (!reached1) newUV1 -= offset;
-    if (!reached2) newUV2 -= offset;
+    if (!reached1)
+    {
+        newUV1 -= offset;
+    }
+    if (!reached2)
+    {
+        newUV2 += offset;
+    }
 
-    int quality[7] = {1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0};
+    float quality[7] = {1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0};
 
     // Iterate until bothReached is true
     if (!bothReached)
@@ -178,13 +185,13 @@ void main(in PSInput PSIn, out PSOutput PSOut)
             if (!reached1)
             {
                 endLuma1 = RgbToLuma(colorTex.Sample(smplr, newUV1).rgb);
-                endLuma1 -= localAvgLuma;
+                endLuma1 = endLuma1 - localAvgLuma;
             }
 
             if (!reached2)
             {
                 endLuma2 = RgbToLuma(colorTex.Sample(smplr, newUV2).rgb);
-                endLuma2 -= localAvgLuma;
+                endLuma2 = endLuma2 - localAvgLuma;
             }
 
             reached1 = abs(endLuma1) >= scaledGradient;
@@ -228,10 +235,10 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     /***********************/
     // Get full weighted luminescence average over 3x3 neighborhood
     float iterationsF = float(Iterations);
-    float averageLuma = (1.0 / 12.0f) * (2.0 * (downUpLuma + leftRightLuma) + leftCornerLuma + rightCornerLuma);
+    float averageLuma = (1.0 / iterationsF) * (2.0 * (downUpLuma + leftRightLuma) + leftCornerLuma + rightCornerLuma);
     float subpixelOffset1 = clamp(abs(averageLuma - curLuma)/rangeLuma, 0.0, 1.0);
     float subpixelOffset2 = (-2.0 * subpixelOffset1 + 3.0) * subpixelOffset1 * subpixelOffset1;
-    float subpixelOffsetFinal = subpixelOffset2 * subpixelOffset2 * 0.75;
+    float subpixelOffsetFinal = subpixelOffset2 * subpixelOffset2 * SubpixelQuality;
     finalOffset = max(finalOffset, subpixelOffsetFinal);
 
     float2 finalUV = PSIn.UV;
@@ -245,7 +252,5 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     }
 
     float3 finalColor = colorTex.Sample(smplr, finalUV).rgb;
-    
-    float3 debugCol = lerp(sceneColor.rgb, float3(0.0f, 0.0f, 1.0f), 0.75f);
     PSOut.Color = float4(finalColor, 1.0f);
 }
