@@ -20,6 +20,7 @@ auto MakePostProcessPassInstances(nc::PostProcessPassFlag::type passId) -> std::
 auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t;
 auto NoTargets() -> std::vector<uint32_t>;
 auto SingleSource(uint32_t target) -> std::vector<uint32_t>;
+auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>;
 auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool;
 void ClearRenderTarget(Diligent::IDeviceContext& context,
                        Diligent::ISwapChain& swapChain,

@@ -230,8 +230,8 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
-        BindRenderTarget(context, swapChain, colorSinkBuffer, depthSinkBuffer, staticPass.colorRTIndex, staticPass.depthRTIndex, m_numSamples > 1);
-        ClearRenderTarget(context, swapChain, colorSinkBuffer, depthSinkBuffer, staticPass.colorRTIndex, staticPass.depthRTIndex, m_numSamples > 1);
+        BindRenderTarget(context, swapChain, colorSinkBuffer, depthSinkBuffer, staticPass.colorRTIndex, staticPass.depthRTIndex, staticPass.isMsaa && m_numSamples > 1);
+        ClearRenderTarget(context, swapChain, colorSinkBuffer, depthSinkBuffer, staticPass.colorRTIndex, staticPass.depthRTIndex, staticPass.isMsaa && m_numSamples > 1);
 
         context.SetPipelineState(staticPass.pso);
         DrawIndexed(context, staticBatches);

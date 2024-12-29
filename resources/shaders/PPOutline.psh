@@ -1,3 +1,5 @@
+// Much credit given to: https://roystan.net/articles/outline-shader/
+
 #ifdef VULKAN
 // NonUniformResourceIndex is not supported by GLSLang
 #   define NonUniformResourceIndex(x) x
@@ -6,6 +8,16 @@
 Texture2D     PostProcessColorSinkBufferData[];
 Texture2D     PostProcessDepthSinkBufferData[];
 SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+cbuffer EnvironmentBufferData
+{
+    float4x4 cameraViewProjection;
+    float4x4 cameraInvProjection;
+    float3 cameraPosition;
+    uint lightCount;
+    float nearClip;
+    float farClip;
+};
 
 cbuffer PostProcessSinkIndexBufferData
 {
@@ -23,6 +35,8 @@ cbuffer OutlinePassBufferData
 {
     float3 outlineColor;
     float outlineWidth;
+    float depthThreshold;
+    float normalsThreshold;
 };
 
 struct PSInput 
@@ -36,10 +50,91 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
+// Depth is non-linear. Linearize it and normalize it.
+float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
+{
+    float rawDepth = tex.Sample(smplr, uv).r;
+    float3 ndc = float3(uv * 2.0 - 1.0, rawDepth);
+    float4 view = cameraInvProjection * float4(ndc, 1.0);
+    view.xyz /= view.w;
+    float linearDepth = -view.z;
+    return (linearDepth - nearClip) / (farClip - nearClip);
+}
+
+static float normalThresholdConstant = 0.15f;
+static float normalThresholdScale = 20.0f;
+float GetViewDirDepthOffset(float nDotV)
+{
+    return saturate((nDotV - normalThresholdConstant) / 1 - normalThresholdConstant) * normalThresholdScale + 1;
+}
+
+float OutlineDepth(Texture2D depthTex, float normalThreshold, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
+{
+    // Sample depth texture at four corners
+    float depthLL = SampleNormalizeDepth(depthTex, smplr, LLUV);
+    float depthUR = SampleNormalizeDepth(depthTex, smplr, URUV);
+    float depthLR = SampleNormalizeDepth(depthTex, smplr, LRUV);
+    float depthUL = SampleNormalizeDepth(depthTex, smplr, ULUV);
+
+    // Get the difference between the diagonals
+    float depthDiagDif0 = abs((depthUR - depthLL) * 100);
+    float depthDiagDif1 = abs((depthUL - depthLR) * 100);
+    float depthEdge = sqrt(pow(depthDiagDif0, 2) + pow(depthDiagDif1, 2));
+
+    // Modulate by threshold
+    float modulateDepthThreshold = depthThreshold * depthLL * normalThreshold;
+    return depthEdge > modulateDepthThreshold ? 1.0f : 0.0f;
+}
+
+float OutlineNormals(Texture2D normalsTex, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
+{
+    // Sample normals texture at four corners
+    float3 normalsLL = normalsTex.Sample(smplr, LLUV);
+    float3 normalsUR = normalsTex.Sample(smplr, URUV);
+    float3 normalsLR = normalsTex.Sample(smplr, LRUV);
+    float3 normalsUL = normalsTex.Sample(smplr, ULUV);
+
+    // Get the difference between the diagonals
+    float3 normalsDiagDif0 = (normalsUR - normalsLL) * 2;
+    float3 normalsDiagDif1 = (normalsUL - normalsLR) * 2;
+    float normalsEdge = sqrt(dot(normalsDiagDif0, normalsDiagDif0) + dot(normalsDiagDif1, normalsDiagDif1));
+
+    // Modulate by threshold
+    return normalsEdge > normalsThreshold ? 1.0f : 0.0f;
+}
+
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    float4 Color = PostProcessColorSinkBufferData[colorRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    float4 Normals = PostProcessColorSinkBufferData[colorRT2].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);
-    float Depth = PostProcessDepthSinkBufferData[depthRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV).r;
-    PSOut.Color = Color + float4(outlineColor, 1.0);
+    // Alias the resource names
+    SamplerState smplr = PostProcessColorSinkBufferData_sampler;
+    Texture2D depthTex = PostProcessDepthSinkBufferData[depthRT1];
+    Texture2D colorTex = PostProcessColorSinkBufferData[colorRT1];
+    Texture2D normalTex = PostProcessColorSinkBufferData[colorRT2];
+
+    // Get screen dimensions
+    uint screenWidth, screenHeight;
+    colorTex.GetDimensions(screenWidth, screenHeight);
+    float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
+
+    // Get the offset from the current texel for the texel to sample
+    float outlineWidthHalfFloor = floor(outlineWidth * 0.5);
+    float outlineWidthHalfCeil = ceil(outlineWidth * 0.5);
+
+    // Get UV coords for four texels in a 'four corners' shape surrounding the current texel
+    float2 LLUV = PSIn.UV - float2(texelSize.x, texelSize.y) * outlineWidthHalfFloor;
+    float2 URUV = PSIn.UV + float2(texelSize.x, texelSize.y) * outlineWidthHalfCeil;
+    float2 LRUV = PSIn.UV + float2(texelSize.x * outlineWidthHalfCeil, -texelSize.y * outlineWidthHalfFloor);
+    float2 ULUV = PSIn.UV + float2(-texelSize.x * outlineWidthHalfFloor, texelSize.y * outlineWidthHalfCeil);
+
+    // Get depth outline. Calculate the view dir to modulate depth to fix some artifacts.
+    float normalThresholdForDepth = GetViewDirDepthOffset(normalTex.Sample(smplr, PSIn.UV).a);
+    float depthEdge = OutlineDepth(depthTex, normalThresholdForDepth, smplr, LLUV, URUV, LRUV, ULUV);
+
+    // Get the normals outline.
+    float normalsEdge = OutlineNormals(normalTex, smplr, LLUV, URUV, LRUV, ULUV);
+
+    // Composite the edge onto the scene color.
+    float edge = max(normalsEdge, depthEdge);
+    float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
+    PSOut.Color = lerp(sceneColor, float4(outlineColor, 1.0f), edge);
 }

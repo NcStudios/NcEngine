@@ -108,8 +108,7 @@ auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
 
 auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
 {
-    auto modified = nc::ui::InputColor3(properties.outlineColor, "color");
-    modified = nc::ui::DragFloat(properties.outlineWidth, "width", 0.1f, 0.0f, 10.0f) || modified;
+    auto modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f);
     return modified;
 }
 

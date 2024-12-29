@@ -20,8 +20,7 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
             },
             .gradientStart = nc::Vector3::One(),
             .gradientEnd = nc::Vector3::Zero(),
-            .outlineColor = nc::Vector3::Splat(0.5f),
-            .outlineWidth = 0.2f
+            .normalIntensity = 1.0f
         }
     };
 
@@ -34,8 +33,6 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
     EXPECT_EQ(expectedDesc.properties.normalTexture.index, actualProperties.normalTexIndex);
     EXPECT_EQ(expectedDesc.properties.gradientStart, actualProperties.gradientStart);
     EXPECT_EQ(expectedDesc.properties.gradientEnd, actualProperties.gradientEnd);
-    EXPECT_EQ(expectedDesc.properties.outlineColor, actualProperties.outlineColor);
-    EXPECT_EQ(expectedDesc.properties.outlineWidth, actualProperties.outlineWidth);
 }
 
 TEST(MaterialRegistryTest, CreateInstance_allocatesSequentialIndices)

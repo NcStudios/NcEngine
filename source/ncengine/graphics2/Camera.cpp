@@ -8,6 +8,7 @@ Camera::Camera(Entity entity, const CameraProperties& properties) noexcept
     : FreeComponent(entity),
       m_view{},
       m_projection{},
+      m_inverseProjection{},
       m_properties{properties}
 {
     auto [width, height] = window::GetScreenExtent();
@@ -41,6 +42,7 @@ void Camera::UpdateProjectionMatrix(float width, float height)
 {
     m_projection = DirectX::XMMatrixPerspectiveFovRH(m_properties.fov, width / height, m_properties.nearClip, m_properties.farClip);
     m_projection.r[1] = DirectX::XMVectorScale(m_projection.r[1], -1);
+    m_inverseProjection = DirectX::XMMatrixInverse(nullptr, m_projection);
 }
 
 auto Camera::CalculateFrustum() const noexcept -> Frustum

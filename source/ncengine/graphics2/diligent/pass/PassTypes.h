@@ -31,12 +31,12 @@ constexpr auto PPOutlineColor = 3u;
 constexpr auto MainDepthMsaa = 0u;
 
 /* Depth Target Indices */
-constexpr auto MainDepth = 0u;
+constexpr auto MainDepth = 1u;
 
 struct ShaderPaths
 {
-    std::string_view pixelShaderPath = "Uninitialized";
-    std::string_view vertexShaderPath = "Uninitialized";
+    std::string_view pixelShaderPath = "";
+    std::string_view vertexShaderPath = "";
 };
 
 enum class PassType : uint8_t
@@ -52,12 +52,13 @@ enum class PassType : uint8_t
 struct PassDesc
 {
     uint64_t id = 0;
-    std::string_view name  = "Uninitialized";
+    std::string_view name  = "";
     PassType type = PassType::None;
     ShaderPaths shaderPaths = ShaderPaths{};
     std::vector<uint32_t> colorSources = std::vector<uint32_t>{};
     std::vector<uint32_t> depthSources = std::vector<uint32_t>{};
     uint32_t colorSink = NoTarget;
     uint32_t depthSink = NoTarget;
+    bool isMsaa = true;
 };
 } // namespace nc::graphics

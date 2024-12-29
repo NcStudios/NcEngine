@@ -162,6 +162,22 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
+                    .id = MaterialPassFlag::Depth,
+                    .name = "Depth",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
+                    .depthSink = MainDepth,
+                    .isMsaa = false
+                },
+                PassDesc{
+                    .id = MaterialPassFlag::Depth,
+                    .name = "Depth",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
+                    .depthSink = MainDepth,
+                    .isMsaa = false
+                },
+                PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "Toon",
                     .type = PassType::Material,
@@ -182,14 +198,16 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .colorSink = NormalsColorMsaa
+                    .colorSink = NormalsColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
-                    .colorSink = NormalsColorMsaa
+                    .colorSink = NormalsColorMsaa,
+                    .depthSink = MainDepthMsaa
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
@@ -208,21 +226,14 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSink = MainDepth
                 },
                 PassDesc{
-                    .id = PostProcessPassFlag::Wave,
-                    .name = "Post Process Wave",
-                    .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{"PPWave.psh", "PostProcess.vsh"},
-                    .colorSources = SingleSource(MainColor),
-                    .colorSink = PPWaveColor
-                },
-                PassDesc{
                     .id = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{PPWaveColor, NormalsColor},
+                    .colorSources = std::vector{MainColor, NormalsColor},
                     .depthSources = SingleSource(MainDepth),
-                    .colorSink = PPOutlineColor
+                    .colorSink = PPOutlineColor,
+                    .isMsaa = false
                 }
             },
             GetImplementedMaterialPassFlags(),

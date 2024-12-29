@@ -149,10 +149,13 @@ void ReloadPrefabs()
     material::Red.properties.normalTexture = normal;
     material::Green.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
     material::Green.properties.normalTexture = normal;
+    material::Green.properties.normalIntensity = 4.0f;
     material::Blue.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
     material::Blue.properties.normalTexture = normal;
+    material::Blue.properties.normalIntensity = .220f;
     material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
     material::Orange.properties.normalTexture = normal;
+    material::Orange.properties.normalIntensity = .10f;
     material::Purple.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
     material::Purple.properties.normalTexture = normal;
     material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
@@ -161,9 +164,12 @@ void ReloadPrefabs()
     material::Yellow.properties.normalTexture = normal;
     material::Ogre.properties.diffuseTexture = asset::AcquireTextureAsset("ogre/BaseColor.nca");
     material::Ogre.properties.normalTexture = asset::AcquireTextureAsset("ogre/Normal.nca");
+    material::Ogre.properties.normalIntensity = .280f;
     material::Skeleton.properties.diffuseTexture = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
     material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
+    material::Skeleton.properties.normalIntensity = .420f;
     material::Cave.properties.diffuseTexture = asset::AcquireTextureAsset("cave/BaseColor.nca");
     material::Cave.properties.normalTexture = asset::AcquireTextureAsset("cave/Normal.nca");
+    material::Cave.properties.normalIntensity = .420f;
 }
 } // namespace sample

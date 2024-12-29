@@ -37,19 +37,29 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
     {
         const auto& transform = ecs.Get<Transform>(m_mainCamera->ParentEntity());
         m_mainCamera->UpdateViewMatrix(transform.TransformationMatrix());
+        const auto& properties = m_mainCamera->GetProperties();
 
         return CameraRenderState{
             .viewProjection = DirectX::XMMatrixMultiply(
                 m_mainCamera->ViewMatrix(),
                 m_mainCamera->ProjectionMatrix()
             ),
-            .position = transform.Position()
+            .invProjection = m_mainCamera->InverseProjectionMatrix(),
+            .position = transform.Position(),
+            .nearClip = properties.nearClip,
+            .farClip = properties.farClip
         };
     }
 
+    auto viewProj = MakeDefaultViewProjection();
+    auto inverseProj = DirectX::XMMatrixInverse(nullptr, viewProj);
+
     return CameraRenderState{
-        .viewProjection = MakeDefaultViewProjection(),
-        .position = Vector3::Zero()
+        .viewProjection = viewProj,
+        .invProjection = inverseProj,
+        .position = Vector3::Zero(),
+        .nearClip = g_defaultProperties.nearClip,
+        .farClip = g_defaultProperties.farClip
     };
 }
 } // namespace nc::graphics

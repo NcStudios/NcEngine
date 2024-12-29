@@ -11,8 +11,11 @@ SamplerState  TextureBufferData_sampler; // By convention, texture samplers must
 cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
+    float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint lightCount;
+    float nearClip;
+    float farClip;
 };
 
 struct MaterialData
@@ -21,8 +24,10 @@ struct MaterialData
     uint diffuseTexture;
     float3 gradientEnd;
     uint normalIndex;
-    float3 outlineColor;
-    float outlineWidth;
+    float normalIntensity;
+    float padding1;
+    float padding2;
+    float padding3;
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
@@ -41,11 +46,12 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
     uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
     Color = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV);
-    PSOut.Color = Color;
+    float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
+    float3 adjustedNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity;
+    PSOut.Color = float4(adjustedNormals, 1-dot(PSIn.Normal, -viewDir));
 }

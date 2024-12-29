@@ -10,16 +10,16 @@ namespace
 {
 constexpr auto g_materialPassNames = std::array{
     std::string_view{"Shadow"},
+    std::string_view{"Depth"},
     std::string_view{"Toon"},
-    std::string_view{"Normals"},
-    std::string_view{"Alpha"}
+    std::string_view{"Normals"}
 };
 
 constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPassFlag::Shadow,
+    nc::MaterialPassFlag::Depth,
     nc::MaterialPassFlag::Toon,
-    nc::MaterialPassFlag::Normals,
-    nc::MaterialPassFlag::Alpha,
+    nc::MaterialPassFlag::Normals
 };
 
 constexpr auto g_miscPassFlags = std::array{
@@ -28,32 +28,29 @@ constexpr auto g_miscPassFlags = std::array{
 };
 
 constexpr auto g_postProcessPassNames = std::array{
-    std::string_view{"Wave"},
     std::string_view{"Outline"}
 };
 
 constexpr auto g_postProcessPassFlags = std::array{
-    nc::PostProcessPassFlag::Wave,
     nc::PostProcessPassFlag::Outline
 };
 
 constexpr auto g_postProcessEffectNames = std::array{
-    std::string_view{"MoebiusEffect"}
+    std::string_view{"OutlinedToonEffect"}
 };
 
 constexpr auto g_postProcessEffectIds = std::array{
-    nc::MoebiusEffectId
+    nc::OutlinedToonEffectId
 };
 
 const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
-        nc::PostProcessPassFlag::Wave,
         nc::PostProcessPassFlag::Outline
     }
 };
 
 constexpr auto g_combinedPostProcessEffectPassFlags = std::array{
-    nc::MoebiusEffectPassFlags
+    nc::OutlinedToonEffectPassFlags
 };
 
 static_assert(g_materialPassNames.size() == g_materialPassFlags.size());
@@ -100,7 +97,7 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 
 auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
-    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 2};
+    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 3};
 }
 
 auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>

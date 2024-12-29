@@ -15,8 +15,11 @@ struct PSOutput
 cbuffer EnvironmentBufferData
 {
     float4x4 cameraViewProjection;
+    float4x4 cameraInvProjection;
     float3 cameraPosition;
     uint lightCount;
+    float nearClip;
+    float farClip;
 };
 
 struct ParticleData

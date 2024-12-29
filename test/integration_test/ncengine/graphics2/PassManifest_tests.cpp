@@ -76,7 +76,7 @@ TEST(PassManifestTest, DifferentPassNameSameShader_AddedToManifest)
 
     auto uut = PassManifest(passDescs, materialPassFlags, std::span<const PostProcessPassFlag::type>{}, std::span<const MiscPassFlag::type>{});
     EXPECT_EQ(uut.ColorSinkCount(), 1);
-    EXPECT_EQ(uut.DepthSinkCount(), 1);
+    EXPECT_EQ(uut.DepthSinkCount(), 2); // MainDepth is set to be index 1 instead of zero to avoid collision with MainDepthMsaa
 }
 
 TEST(PassManifestTest, PassesRenderOnlyToSwapchain_SinkCountsAreZero)

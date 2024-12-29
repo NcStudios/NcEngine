@@ -15,8 +15,6 @@ auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPas
 {
     switch (pass)
     {
-        case PostProcessPassFlag::Wave:
-            return PostProcessPassProperties{EmptyPassProperties{}};
         case PostProcessPassFlag::Outline:
             return PostProcessPassProperties{OutlinePassProperties{}};
         default:

@@ -17,8 +17,7 @@ struct PostProcessPassFlag
     using type = uint64_t;
 
     static constexpr auto None    = type{0};
-    static constexpr auto Wave    = type{1 << 0}; /** @todo: Remove once MoebiusEffect is fully implemented. */
-    static constexpr auto Outline = type{1 << 1};
+    static constexpr auto Outline = type{1 << 0};
 };
 
 /** @brief Identifier for a post process effect. */
@@ -30,12 +29,11 @@ using PostProcessEffectPassFlags = PostProcessPassFlag::type;
 /** @brief Null identifier for a post process effect. */
 constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId>::max();
 
-/** @brief Identifier for the moebius post process effect. */
-constexpr auto MoebiusEffectId = PostProcessEffectId{0};
+/** @brief Identifier for the outlined toon post process effect. */
+constexpr auto OutlinedToonEffectId = PostProcessEffectId{0};
 
-/** @brief Pass flags for the moebius post process effect. */
-constexpr auto MoebiusEffectPassFlags = PostProcessPassFlag::Wave   |
-                                        PostProcessPassFlag::Outline;
+/** @brief Pass flags for the outlined toon post process effect. */
+constexpr auto OutlinedToonEffectPassFlags = PostProcessPassFlag::Outline;
 
 /** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};
@@ -45,6 +43,8 @@ struct OutlinePassProperties
 {
     Vector3 color = Vector3::Zero();
     float width = 1.0f;
+    float depthThreshold = 0.8f;
+    float normalThreshold = 0.4f;
 };
 
 /** @brief Generic post process property type. */

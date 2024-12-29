@@ -14,8 +14,7 @@ auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::M
         .diffuseTexIndex = properties.diffuseTexture.index,
         .gradientEnd = properties.gradientEnd,
         .normalTexIndex = properties.normalTexture.index,
-        .outlineColor = properties.outlineColor,
-        .outlineWidth = properties.outlineWidth
+        .normalIntensity = properties.normalIntensity
     };
 }
 } // anonymous namespace

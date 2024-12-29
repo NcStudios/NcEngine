@@ -51,8 +51,17 @@ class Camera : public FreeComponent
          */
         auto ProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_projection; }
 
+        /**
+         * @brief Get the camera's inverse projection matrix.
+         * @return DirectX::FXMMATRIX
+         */
+        auto InverseProjectionMatrix() const noexcept -> DirectX::FXMMATRIX { return m_inverseProjection; }
+
         /** @brief Unproject 2D normalized device coordinates into 3D points on the near and far planes. */
         auto CastToNearAndFarPlanes(const Vector2& normalizedDeviceCoords) const -> NearFarPoints;
+
+        /** @brief Get the camera properties. */
+        auto GetProperties() const -> const CameraProperties& { return m_properties; };
 
         /**
          * @brief Calculate the camera's viewport.
@@ -85,6 +94,7 @@ class Camera : public FreeComponent
     private:
         DirectX::XMMATRIX m_view;
         DirectX::XMMATRIX m_projection;
+        DirectX::XMMATRIX m_inverseProjection;
         CameraProperties m_properties;
 };
 } // namespace nc
