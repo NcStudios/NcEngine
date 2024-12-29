@@ -46,8 +46,8 @@ float RgbToLuma(float3 rgb){
     return sqrt(dot(rgb, float3(0.299, 0.587, 0.114)));
 }
 
-static float EdgeThresholdMin = 0.0312f;
-static float EdgeThresholdMax = 0.125;
+static float EdgeThresholdMin = 0.0005f;
+static float EdgeThresholdMax = 0.225;
 static uint Iterations = 12;
 static float SubpixelQuality = 0.75f;
 
