@@ -157,11 +157,10 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     auto& camera = world.Emplace<SceneNavigationCamera>(cameraHandle);
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<SceneNavigationCamera>{});
-    modules.Get<NcGraphics>()->SetCamera(&camera);
-
     auto ncGraphics = modules.Get<NcGraphics>();
+    ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 1.0f});
 }
 
 void GraphicsTest::Unload()

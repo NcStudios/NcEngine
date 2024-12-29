@@ -82,6 +82,37 @@ target_compile_definitions(MeshBuffer_tests
         -DNC_RUNTIME_SHADER_COMPILATION
 )
 
+
+### PassManifest Tests ###
+add_executable(PassManifest_tests
+PassManifest_tests.cpp
+    ${NC_SOURCE_DIR}/graphics2/GraphicsUtility.cpp
+    ${NC_SOURCE_DIR}/graphics2/PostProcess.cpp
+    ${NC_SOURCE_DIR}/graphics2/diligent/ShaderFactory.cpp
+    ${NC_SOURCE_DIR}/graphics2/diligent/pass/PassManifest.cpp
+    ${NC_SOURCE_DIR}/graphics2/diligent/pass/PassUtilities.cpp
+)
+
+target_include_directories(PassManifest_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+        ${diligentcore_SOURCE_DIR}
+)
+
+target_compile_options(PassManifest_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(PassManifest_tests
+    PRIVATE
+        gtest_main
+        Diligent-GraphicsEngineVk-static
+        fmt::fmt
+        NcMath
+)
+
 ### ShaderFactory Tests ###
 add_graphics_test(ShaderFactory_tests)
 

@@ -137,7 +137,7 @@ auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent:
     Diligent::RefCntAutoPtr<Diligent::IShader> shader;
     const auto& shaderPath = shaderType == Diligent::SHADER_TYPE_VERTEX ? shaderPaths.vertexShaderPath : shaderPaths.pixelShaderPath;
 
-    if (shaderPath == "Uninitialized")
+    if (shaderPath == "")
     {
         return shader;
     }

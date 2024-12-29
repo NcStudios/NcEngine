@@ -37,6 +37,7 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
     {
         const auto& transform = ecs.Get<Transform>(m_mainCamera->ParentEntity());
         m_mainCamera->UpdateViewMatrix(transform.TransformationMatrix());
+        const auto& properties = m_mainCamera->GetProperties();
 
         return CameraRenderState{
             .viewProjection = DirectX::XMMatrixMultiply(
@@ -45,8 +46,8 @@ auto CameraSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> CameraRende
             ),
             .invProjection = m_mainCamera->InverseProjectionMatrix(),
             .position = transform.Position(),
-            .nearClip = g_defaultProperties.nearClip,
-            .farClip = g_defaultProperties.farClip
+            .nearClip = properties.nearClip,
+            .farClip = properties.farClip
         };
     }
 

@@ -122,16 +122,16 @@ TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(3, actualSkinnedInstanceState.dirtyRanges[0].count);
 
     const auto& actualStaticPassBatches = actualRenderState.staticMeshBatches;
-    ASSERT_EQ(2, actualStaticPassBatches.size());
-    const auto& actualStaticBatches = actualStaticPassBatches.at(0);
+    ASSERT_EQ(3, actualStaticPassBatches.size());
+    const auto& actualStaticBatches = actualStaticPassBatches.at(1);
     EXPECT_EQ(1, actualStaticBatches.size());
     const auto& actualStaticBatch = actualStaticBatches.at(0);
     EXPECT_EQ(0, actualStaticBatch.firstInstance);
     EXPECT_EQ(5, actualStaticBatch.instanceCount);
 
     const auto& actualSkinnedPassBatches = actualRenderState.skinnedMeshBatches;
-    ASSERT_EQ(2, actualSkinnedPassBatches.size());
-    const auto& actualSkinnedBatches = actualSkinnedPassBatches.at(0);
+    ASSERT_EQ(3, actualSkinnedPassBatches.size());
+    const auto& actualSkinnedBatches = actualSkinnedPassBatches.at(1);
     EXPECT_EQ(1, actualSkinnedBatches.size());
     const auto& actualSkinnedBatch = actualSkinnedBatches.at(0);
     EXPECT_EQ(0, actualSkinnedBatch.firstInstance);
@@ -169,8 +169,8 @@ TEST_F(MeshSubsystemTest, OnRemoveMesh_UntracksObject)
 
     // Batch reports only one instance
     const auto& actualPassState = actualRenderState.staticMeshBatches;
-    ASSERT_EQ(2, actualPassState.size());
-    const auto& actualBatches = actualPassState.at(0);
+    ASSERT_EQ(3, actualPassState.size());
+    const auto& actualBatches = actualPassState.at(1);
     EXPECT_EQ(1, actualBatches.size());
     const auto& actualBatch = actualBatches.at(0);
     EXPECT_EQ(0, actualBatch.firstInstance);
@@ -198,8 +198,8 @@ TEST_F(MeshSubsystemTest, UpdateMesh_UsingSetMesh_PatchesTrackedState)
     auto actualRenderState = uut.BuildState(world);
     auto verifyBatches = [](const auto& actualPassState)
     {
-        ASSERT_EQ(2, actualPassState.size());
-        const auto& actualBatches = actualPassState.at(0);
+        ASSERT_EQ(3, actualPassState.size());
+        const auto& actualBatches = actualPassState.at(1);
         EXPECT_EQ(2, actualBatches.size());
         const auto& actualBatch1 = actualBatches.at(0);
         const auto& actualBatch2 = actualBatches.at(1);
