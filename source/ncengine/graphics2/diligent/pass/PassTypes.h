@@ -26,6 +26,7 @@ constexpr auto MainColor = 0u;
 constexpr auto NormalsColor = 1u;
 constexpr auto PPWaveColor = 2u;
 constexpr auto PPOutlineColor = 3u;
+constexpr auto PPFxaaColor = 4u;
 
 /* MSAA Depth Target Indices */
 constexpr auto MainDepthMsaa = 0u;
