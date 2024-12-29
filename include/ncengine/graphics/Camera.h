@@ -63,9 +63,6 @@ class Camera : public FreeComponent
         /** @brief Get the camera properties. */
         auto GetProperties() const -> const CameraProperties& { return m_properties; };
 
-        /** @brief Set the camera properties */
-        void SetProperties(CameraProperties properties) { m_properties = std::move(properties); };
-
         /**
          * @brief Calculate the camera's viewport.
          * @return Frustum
