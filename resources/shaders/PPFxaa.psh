@@ -1,10 +1,5 @@
 // Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 
-#ifdef VULKAN
-// NonUniformResourceIndex is not supported by GLSLang
-#   define NonUniformResourceIndex(x) x
-#endif
-
 Texture2D     PostProcessColorSinkBufferData[];
 Texture2D     PostProcessDepthSinkBufferData[];
 SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
