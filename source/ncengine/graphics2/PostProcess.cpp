@@ -17,6 +17,8 @@ auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPas
     {
         case PostProcessPassFlag::Outline:
             return PostProcessPassProperties{OutlinePassProperties{}};
+        case PostProcessPassFlag::Fxaa:
+            return PostProcessPassProperties{};
         default:
             // Explicitly enumerate above and fail here so tests can catch if an update to this gets missed.
             NC_ASSERT(false, "Unexpected PostProcessPass");
