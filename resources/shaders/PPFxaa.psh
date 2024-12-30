@@ -59,16 +59,16 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
 
     /***********************
-    / Get edge luminescence
+    / Get edge luminance
     /***********************/
-    // Get luminescence for four texels in a cross shape surrounding the current texel
+    // Get luminance for four texels in a cross shape surrounding the current texel
     float curLuma   = RgbToLuma(colorTex.Sample(smplr, PSIn.UV).rgb);
     float downLuma  = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 0, -1) * texelSize)).rgb);
     float upLuma    = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 0,  1) * texelSize)).rgb);
     float leftLuma  = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2(-1,  0) * texelSize)).rgb);
     float rightLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 1,  0) * texelSize)).rgb);
 
-    // Get luminescence min and max values
+    // Get luminance min and max values
     float minLuma = min(curLuma, min(min(downLuma, upLuma), min(leftLuma, rightLuma)));
     float maxLuma = max(curLuma, max(max(downLuma, upLuma), max(leftLuma, rightLuma)));
     float rangeLuma = maxLuma - minLuma;
@@ -86,7 +86,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float LRLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2( 1, -1) * texelSize)).rgb);
     float ULLuma = RgbToLuma(colorTex.Sample(smplr, PSIn.UV + (float2(-1,  1) * texelSize)).rgb);
 
-    // Get luminescence of all edges
+    // Get luminance of all edges
     float downUpLuma      = downLuma + upLuma;
     float leftRightLuma   = leftLuma + rightLuma;
     float leftCornerLuma  = LLLuma   + ULLuma;
@@ -102,7 +102,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float edgeVert  = abs(-2.0 * upLuma + upCornerLuma)     + abs(-2.0 * curLuma + leftRightLuma) * 2.0 + abs(-2.0 * downLuma + downCornerLuma);
     float isHorizontalEdge = (edgeHoriz >= edgeVert);
 
-    // Get the luminescence of the two texels in the direction opposite of the edge
+    // Get the luminance of the two texels in the direction opposite of the edge
     float oppLuma1 = isHorizontalEdge ? downLuma : leftLuma;
     float oppLuma2 = isHorizontalEdge ? upLuma : rightLuma;
 
@@ -149,7 +149,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float2 newUV1 = currentUV - offset;
     float2 newUV2 = currentUV + offset;
 
-    // Read the luminescence at both extremities of the current exploration segment and get delta against the average
+    // Read the luminance at both extremities of the current exploration segment and get delta against the average
     float endLuma1 = RgbToLuma(colorTex.Sample(smplr, newUV1).rgb);
     float endLuma2 = RgbToLuma(colorTex.Sample(smplr, newUV2).rgb);
     endLuma1 -= localAvgLuma;
@@ -220,7 +220,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float edgeThickness = distance1 + distance2;
     float pixelOffset = -distanceFinal / edgeThickness + 0.5;
 
-    // Is the luminescence of the current pixel smaller than the local average?
+    // Is the luminance of the current pixel smaller than the local average?
     bool isCurLumaSmaller = curLuma < localAvgLuma;
     bool correctVariation = ((isDirection1 ? endLuma1 : endLuma2) < 0.0) != isCurLumaSmaller;
     float finalOffset = correctVariation ? pixelOffset : 0.0;
@@ -228,7 +228,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     /***********************
     / Subpixel antialiasing
     /***********************/
-    // Get full weighted luminescence average over 3x3 neighborhood
+    // Get full weighted luminance average over 3x3 neighborhood
     float iterationsF = float(Iterations);
     float averageLuma = (1.0 / iterationsF) * (2.0 * (downUpLuma + leftRightLuma) + leftCornerLuma + rightCornerLuma);
     float subpixelOffset1 = clamp(abs(averageLuma - curLuma)/rangeLuma, 0.0, 1.0);
