@@ -234,6 +234,15 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .depthSources = SingleSource(MainDepth),
                     .colorSink = PPOutlineColor,
                     .isMsaa = false
+                },
+                PassDesc{
+                    .id = PostProcessPassFlag::Fxaa,
+                    .name = "Post Process FXAA",
+                    .type = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPFxaa.psh", "PostProcess.vsh"},
+                    .colorSources = std::vector{PPOutlineColor},
+                    .colorSink = PPFxaaColor,
+                    .isMsaa = false
                 }
             },
             GetImplementedMaterialPassFlags(),
