@@ -17,6 +17,7 @@ asset::MeshView Cube{};
 asset::MeshView Sphere{};
 asset::MeshView Capsule{};
 asset::MeshView Plane{};
+asset::MeshView Wheel{};
 asset::MeshView HalfPipe{};
 asset::MeshView Ramp{};
 asset::MeshView Ogre{};
@@ -136,6 +137,7 @@ void ReloadPrefabs()
     mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
+    mesh::Wheel = asset::AcquireMeshAsset(asset::WheelMesh);
     mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
     mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
