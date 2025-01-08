@@ -83,23 +83,25 @@ void Vehicle::NotifyModifyEngine()
 void Vehicle::NotifyModifyTransmission()
 {
     // If gear count changed, need to make sure we're still in a valid gear.
-    // note: 0 is neutral so gears arrays are indexed from 1
+    // note: 0 is neutral so gears arrays are indexed from 1; reverse gears are negative
     auto& transmission = ToController(m_handle)->GetTransmission();
     const auto currentGear = transmission.GetCurrentGear();
     const auto& settings = m_info.transmission;
-    if (currentGear > 0 && currentGear > settings.gears.size())
+    if (currentGear > 0)
     {
-        transmission.Set(
-            static_cast<int>(settings.gears.size()),
-            transmission.GetClutchFriction()
-        );
+        const auto maxGear = static_cast<int>(settings.gears.size());
+        if (currentGear > maxGear)
+        {
+            transmission.Set(maxGear, transmission.GetClutchFriction());
+        }
     }
-    else if (currentGear < 0 && -currentGear > settings.reverseGears.size())
+    else if (currentGear < 0)
     {
-        transmission.Set(
-            -static_cast<int>(settings.reverseGears.size()),
-            transmission.GetClutchFriction()
-        );
+        const auto maxGear = -static_cast<int>(settings.reverseGears.size());
+        if (currentGear < maxGear)
+        {
+            transmission.Set(maxGear, transmission.GetClutchFriction());
+        }
     }
 
     physics::SetVehicleTransmissionSettings(settings, transmission);
