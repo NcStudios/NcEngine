@@ -111,6 +111,7 @@ add_executable(RigidBody_unit_tests
     ${NC_SOURCE_DIR}/physics/jolt/BodyFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintManager.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/VehicleManager.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
 )
 
@@ -160,5 +161,34 @@ target_link_libraries(Shape_unit_tests
 )
 
 add_test(Shape_unit_tests Shape_unit_tests)
+
+### Vehicle Tests ###
+add_executable(Vehicle_unit_tests
+    Vehicle_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/Vehicle.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+)
+
+target_include_directories(Vehicle_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(Vehicle_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(Vehicle_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        Jolt
+        gtest_main
+)
+
+add_test(Vehicle_unit_tests Vehicle_unit_tests)
 
 add_subdirectory(jolt)

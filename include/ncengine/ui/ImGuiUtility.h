@@ -1,6 +1,6 @@
 /**
  * @file ImGuiUtility.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2025
  * 
  * @note Unless otherwise noted, all functions in this file must only be called
  *       during UI rendering. Calls should be made only from within IUI::Draw()
@@ -89,8 +89,11 @@ auto InputAngles(Vector3& value, const char* label) -> bool;
 /** @brief Vector3 UI widget constrained for scale inputs. */
 auto InputScale(Vector3& value, const char* label, float min = g_minScale, float max = g_maxScale) -> bool;
 
-/** @brief Vector3 UI widget constraint for normalized axis inputs. */
+/** @brief Vector3 UI widget constrained for normalized axis inputs. */
 auto InputAxis(Vector3& value, const char* label, float min = -1.0f, float max = 1.0f) -> bool;
+
+/** @brief Vector3 UI widget constrained for two orthonormal axis inputs. */
+auto InputReferenceFrame(Vector3& basis, Vector3& normal, const char* basisLabel, const char* normalLabel) -> bool;
 
 /** @brief RGB color picker UI widget. */
 auto InputColor3(Vector3& value, const char* label) -> bool;
@@ -289,7 +292,7 @@ inline auto InputU64(uint64_t& value, const char* label) -> bool
 
 inline auto DragFloat(float& value, const char* label, float speed, float min, float max) -> bool
 {
-    return ImGui::DragFloat(label, &value, speed, min, max);
+    return ImGui::DragFloat(label, &value, speed, min, max, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 }
 
 inline auto Checkbox(bool& value, const char* name) -> bool
@@ -299,28 +302,28 @@ inline auto Checkbox(bool& value, const char* name) -> bool
 
 inline auto InputVector3(Vector3& value, const char* label, float speed, float min, float max) -> bool
 {
-    return ImGui::DragFloat3(label, &value.x, speed, min, max);
+    return ImGui::DragFloat3(label, &value.x, speed, min, max, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 }
 
 inline auto InputPosition(Vector3& value, const char* label) -> bool
 {
-    return ImGui::DragFloat3(label, &value.x, 1.0f, g_minPos, g_maxPos);
+    return ImGui::DragFloat3(label, &value.x, 1.0f, g_minPos, g_maxPos, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 }
 
 inline auto InputAngles(Vector3& value, const char* label) -> bool
 {
-    return ImGui::DragFloat3(label, &value.x, 0.1f, g_minAngle, g_maxAngle);
+    return ImGui::DragFloat3(label, &value.x, 0.1f, g_minAngle, g_maxAngle, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 }
 
 inline auto InputScale(Vector3& value, const char* label, float min, float max) -> bool
 {
-    return ImGui::DragFloat3(label, &value.x, 0.5f, min, max);
+    return ImGui::DragFloat3(label, &value.x, 0.5f, min, max, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 }
 
 inline auto InputAxis(Vector3& value, const char* label, float min, float max) -> bool
 {
     const auto previous = value;
-    if (ImGui::DragFloat3(label, &value.x, 0.1f, min, max))
+    if (ImGui::DragFloat3(label, &value.x, 0.1f, min, max, "%.3f", ImGuiSliderFlags_AlwaysClamp))
     {
         // When a component is changed to a maximum, other values are still potentially non-zero. These cases need to
         // be hard reset to the correct axis otherwise normalization prevents ever being able to reach it.
@@ -339,6 +342,24 @@ inline auto InputAxis(Vector3& value, const char* label, float min, float max) -
     }
 
     return false;
+}
+
+inline auto InputReferenceFrame(Vector3& basis, Vector3& normal, const char* basisLabel, const char* normalLabel) -> bool
+{
+    auto modified = false;
+    if (InputAxis(basis, basisLabel))
+    {
+        normal = ClosestOrthogonal(normal, basis);
+        modified = true;
+    }
+
+    if (InputAxis(normal, normalLabel))
+    {
+        basis = ClosestOrthogonal(basis, normal);
+        modified = true;
+    }
+
+    return modified;
 }
 
 inline auto InputColor(Vector3& value, const char* label) -> bool

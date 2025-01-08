@@ -2,6 +2,7 @@
 #include "EventDispatch.h"
 #include "jolt/Conversion.h"
 #include "jolt/ShapeFactory.h"
+#include "jolt/VehicleAnimator.h"
 
 #include "ncengine/debug/Profile.h"
 #include "ncengine/config/Config.h"
@@ -81,14 +82,25 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                              std::unique_ptr<DeferredPhysicsCreateState> deferredState)
     : m_ecs{world},
       m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
-      m_constraintManager{m_jolt.physicsSystem, memorySettings.maxTransforms},
+      m_constraintFactory{m_jolt.physicsSystem},
+      m_constraintManager{
+        m_jolt.physicsSystem,
+        m_constraintFactory,
+        memorySettings.maxTransforms
+      },
+      m_vehicleManager{
+        m_jolt.physicsSystem,
+        m_constraintFactory,
+        memorySettings.maxTransforms
+      },
       m_bodyManager{
         world.GetPool<Transform>(),
         world.GetPool<RigidBody>(),
         memorySettings.maxTransforms,
         m_jolt.physicsSystem,
         m_shapeFactory,
-        m_constraintManager
+        m_constraintManager,
+        m_vehicleManager
       },
       m_queryManager{
         m_jolt.physicsSystem.GetNarrowPhaseQuery(),
@@ -144,6 +156,19 @@ void NcPhysicsImpl::SyncTransforms()
         auto& transform = m_ecs.Get<Transform>(body.GetEntity());
         transform.SetPositionAndRotationXM(position, orientation);
     }
+
+    auto& transformPool = m_ecs.GetPool<Transform>();
+    for (const auto& vehicle : m_vehicleManager.GetVehicles())
+    {
+        if (vehicle && !vehicle->IsEnabled())
+        {
+            continue;
+        }
+
+        const auto& assemblies = vehicle->GetWheelAssemblies();
+        const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
+        AnimateVehicle(assemblies, constraint, transformPool);
+    }
 }
 
 void NcPhysicsImpl::OnBeforeSceneLoad()
@@ -165,6 +190,7 @@ void NcPhysicsImpl::Clear() noexcept
 {
     m_jolt.contactListener.Clear();
     m_constraintManager.Clear();
+    m_vehicleManager.Clear();
     m_bodyManager.Clear();
     m_bodyManager.DeferCleanup(true);
 }
@@ -173,7 +199,8 @@ void NcPhysicsImpl::BeginRigidBodyBatch(size_t bodyCountHint)
 {
     NC_ASSERT(
         m_deferredState->bodyBatchIndex == DeferredPhysicsCreateState::NullBatch &&
-        m_deferredState->constraintBatchIndex == DeferredPhysicsCreateState::NullBatch,
+        m_deferredState->constraintBatchIndex == DeferredPhysicsCreateState::NullBatch &&
+        m_deferredState->vehicleBatchIndex == DeferredPhysicsCreateState::NullBatch,
         "RigidBody batch already in progress"
     );
 
@@ -185,13 +212,15 @@ void NcPhysicsImpl::BeginRigidBodyBatch(size_t bodyCountHint)
 
     m_deferredState->bodyBatchIndex = m_bodyManager.BeginBatch(bodyCountHint);
     m_deferredState->constraintBatchIndex = m_constraintManager.BeginBatch();
+    m_deferredState->vehicleBatchIndex = m_vehicleManager.BeginBatch();
 }
 
 void NcPhysicsImpl::EndRigidBodyBatch()
 {
     NC_ASSERT(
         m_deferredState->bodyBatchIndex != DeferredPhysicsCreateState::NullBatch &&
-        m_deferredState->constraintBatchIndex != DeferredPhysicsCreateState::NullBatch,
+        m_deferredState->constraintBatchIndex != DeferredPhysicsCreateState::NullBatch &&
+        m_deferredState->vehicleBatchIndex != DeferredPhysicsCreateState::NullBatch,
         "No RigidBody batch is in progress"
     );
 
@@ -214,6 +243,7 @@ void NcPhysicsImpl::EndRigidBodyBatch()
     }
 
     m_constraintManager.EndBatch(std::exchange(m_deferredState->constraintBatchIndex, DeferredPhysicsCreateState::NullBatch));
+    m_vehicleManager.EndBatch(std::exchange(m_deferredState->vehicleBatchIndex, DeferredPhysicsCreateState::NullBatch));
 }
 } // namespace physics
 } // namespace nc

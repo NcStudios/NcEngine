@@ -7,4 +7,6 @@ target_sources(${NC_ENGINE_LIB}
         ConstraintManager.cpp
         JobSystem.cpp
         JoltApi.cpp
+        VehicleAnimator.cpp
+        VehicleManager.cpp
 )

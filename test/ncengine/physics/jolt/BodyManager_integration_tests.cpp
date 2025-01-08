@@ -1,7 +1,9 @@
 #include "JoltApiFixture.inl"
 #include "physics/jolt/BodyManager.h"
+#include "physics/jolt/ConstraintFactory.h"
 #include "physics/jolt/ConstraintManager.h"
 #include "physics/jolt/ShapeFactory.h"
+#include "physics/jolt/VehicleManager.h"
 
 class BodyManagerTest : public JoltApiFixture
 {
@@ -10,20 +12,25 @@ class BodyManagerTest : public JoltApiFixture
         nc::ecs::ComponentPool<nc::Transform> transformPool;
         nc::ecs::ComponentPool<nc::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;
+        nc::physics::ConstraintFactory constraintFactory;
         nc::physics::ConstraintManager constraintManager;
+        nc::physics::VehicleManager vehicleManager;
         nc::physics::BodyManager uut;
 
         BodyManagerTest()
             : transformPool{maxEntities, nc::ComponentHandler<nc::Transform>{}},
               rigidBodyPool{maxEntities, nc::ComponentHandler<nc::RigidBody>{}},
-              constraintManager{joltApi.physicsSystem, maxEntities},
+              constraintFactory{joltApi.physicsSystem},
+              constraintManager{joltApi.physicsSystem, constraintFactory, maxEntities},
+              vehicleManager{joltApi.physicsSystem, constraintFactory, maxEntities},
               uut{
                   transformPool,
                   rigidBodyPool,
                   maxEntities,
                   joltApi.physicsSystem,
                   shapeFactory,
-                  constraintManager
+                  constraintManager,
+                  vehicleManager
               }
         {
         }

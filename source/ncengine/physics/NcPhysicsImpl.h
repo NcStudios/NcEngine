@@ -4,8 +4,10 @@
 #include "jolt/JoltApi.h"
 #include "jolt/BodyManager.h"
 #include "jolt/CollisionQueryManager.h"
+#include "jolt/ConstraintFactory.h"
 #include "jolt/ConstraintManager.h"
 #include "jolt/ShapeFactory.h"
+#include "jolt/VehicleManager.h"
 
 #include "ncengine/ecs/Ecs.h"
 #include "ncengine/physics/NcPhysics.h"
@@ -50,7 +52,9 @@ class NcPhysicsImpl final : public NcPhysics
         ecs::Ecs m_ecs;
         JoltApi m_jolt;
         ShapeFactory m_shapeFactory;
+        ConstraintFactory m_constraintFactory;
         ConstraintManager m_constraintManager;
+        VehicleManager m_vehicleManager;
         BodyManager m_bodyManager;
         CollisionQueryManager m_queryManager;
         std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;

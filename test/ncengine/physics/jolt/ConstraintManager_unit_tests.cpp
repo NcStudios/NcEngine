@@ -1,5 +1,6 @@
 #include "JoltApiFixture.inl"
 #include "physics/jolt/Conversion.h"
+#include "physics/jolt/ConstraintFactory.h"
 #include "physics/jolt/ConstraintManager.h"
 
 #include "Jolt/Physics/Constraints/PointConstraint.h"
@@ -7,10 +8,12 @@
 class ConstraintManagerTest : public JoltApiFixture
 {
     protected:
+        nc::physics::ConstraintFactory constraintFactory;
         nc::physics::ConstraintManager uut;
 
         ConstraintManagerTest()
-            : uut{joltApi.physicsSystem, 100u}
+            : constraintFactory{joltApi.physicsSystem},
+              uut{joltApi.physicsSystem, constraintFactory, 100u}
         {
         }
 };
@@ -393,6 +396,7 @@ TEST_F(ConstraintManagerTest, Clear_withNullptrsInList_succeeds)
     EXPECT_NO_THROW(uut.Clear());
     EXPECT_EQ(0ull, uut.GetConstraints(g_entity1).size());
     EXPECT_EQ(0ull, uut.GetConstraints(g_entity2).size());
+    EXPECT_TRUE(joltApi.physicsSystem.GetConstraints().empty());
 
     DestroyBody(body1);
     DestroyBody(body2);

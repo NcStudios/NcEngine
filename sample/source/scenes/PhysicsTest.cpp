@@ -16,6 +16,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/RigidBody.h"
+#include "ncengine/physics/Vehicle.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncutility/ScopeExit.h"
 
@@ -181,16 +182,44 @@ class VehicleController : public FreeComponent
         Entity m_node2;
         Entity m_node3;
         float m_jumpCooldownRemaining = 0.0f;
+        float m_previousThrottle = 0.0f;
+        float m_previousSteer = 0.0f;
         bool m_jumpOnCooldown = false;
 
         void MoveController(ecs::Ecs world)
         {
-            auto& rBody = world.Get<RigidBody>(ParentEntity());
+            // could have separate vehicle/non move types
 
-            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * ForceMultiplier);
+            auto& rBody = world.Get<RigidBody>(ParentEntity());
+            auto& controller = *rBody.GetVehicle();
+
+            const auto [side, forward] = input::GetAxis();
+            auto brake = 0.0f;
+
+            constexpr auto throttleRate = 1.0f;
+            constexpr auto steerRate = 2.0f;
+            constexpr auto dt = 1.0f / 60.0f;
+            if (side)
+            {
+                m_previousSteer = std::clamp(m_previousSteer + side * steerRate * dt, -1.0f, 1.0f);
+            }
+            else
+            {
+                m_previousSteer = 0.0f;
+            }
+            if (forward)
+            {
+                m_previousThrottle = std::clamp(m_previousThrottle + forward * throttleRate * dt, -1.0f, 1.0f);
+            }
+            else
+            {
+                m_previousThrottle = 0.0f;
+                brake = 0.5f;
+            }
+
+            controller.SetInput(m_previousThrottle, m_previousSteer, brake, 0.0f);
+
+
             if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * ForceMultiplier);
             if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * ForceMultiplier);
 
@@ -212,27 +241,32 @@ class VehicleController : public FreeComponent
 
 auto BuildVehicle(ecs::Ecs world) -> Entity
 {
+    constexpr auto headScale = 1.0f;
+    constexpr auto segment1Scale = 0.8f;
+    constexpr auto segment2Scale = 0.6f;
+    constexpr auto segment3Scale = 0.4f;
     const auto head = world.Emplace<Entity>({
-        .scale = Vector3::Splat(1.0f),
+        .position = Vector3{0.0f, 2.0f, 1.0f},
+        .scale = Vector3::Splat(headScale),
         .tag = "Worm Head",
         .layer = PlayerLayer
     });
 
     const auto segment1 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 2.0f, -0.9f},
-        .scale = Vector3::Splat(0.8f),
+        .scale = Vector3::Splat(segment1Scale),
         .tag = "Worm Segment 1"
     });
 
     const auto segment2 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 2.0f, -1.6f},
-        .scale = Vector3::Splat(0.6f),
+        .scale = Vector3::Splat(segment2Scale),
         .tag = "Worm Segment 2"
     });
 
     const auto segment3 = world.Emplace<Entity>({
         .position = Vector3{0.0f, 2.0f, -2.1f},
-        .scale = Vector3::Splat(0.4f),
+        .scale = Vector3::Splat(segment3Scale),
         .tag = "Worm Segment 3"
     });
 
@@ -244,10 +278,145 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     world.Emplace<StaticMesh>(segment2, mesh::Cube, material::Green);
     world.Emplace<StaticMesh>(segment3, mesh::Cube, material::Green);
 
-    auto& bodyHead = world.Emplace<RigidBody>(head, Shape::MakeBox(), RigidBodyInfo{.friction = 0.8f});
-    auto& bodyNode1 = world.Emplace<RigidBody>(segment1, Shape::MakeBox());
-    auto& bodyNode2 = world.Emplace<RigidBody>(segment2, Shape::MakeBox());
-    auto& bodyNode3 = world.Emplace<RigidBody>(segment3, Shape::MakeBox());
+    auto& bodyHead = world.Emplace<RigidBody>(
+        head,
+        Shape::MakeBox(),
+        RigidBodyInfo{
+            .friction = 0.8f,
+            .flags = RigidBodyFlags::DisableSleeping
+        }
+    );
+
+    auto& bodyNode1 = world.Emplace<RigidBody>(
+        segment1,
+        Shape::MakeBox(),
+        RigidBodyInfo{
+            .mass = 0.1f
+            // .gravityMultiplier = 0.0f
+        }
+    );
+
+    auto& bodyNode2 = world.Emplace<RigidBody>(
+        segment2,
+        Shape::MakeBox(),
+        RigidBodyInfo{
+            .mass = 0.1f
+            // .gravityMultiplier = 0.0f
+        }
+    );
+
+    auto& bodyNode3 = world.Emplace<RigidBody>(
+        segment3,
+        Shape::MakeBox(),
+        RigidBodyInfo{
+            .mass = 0.1f
+            // .gravityMultiplier = 0.0f
+        }
+    );
+
+
+
+
+    // constexpr auto offsetLR = 0.5f + radius + 0.01f;
+    // constexpr auto offsetUD = 0.5f + radius + 0.01f;
+    // constexpr auto offsetFB = 0.4f;
+
+
+    // const auto suspensionOffsetLR = offsetLR - suspensionMaxLength * 0.5f;
+    // const auto suspensionScale = Vector3{0.1f, suspensionMaxLength, 0.1f};
+    // const auto sFL = world.Emplace<Entity>({.position = Vector3{-suspensionOffsetLR, -offsetUD + suspensionMaxLength * 0.5f,  offsetFB}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, DegreesToRadians(-55.0f)), .scale = suspensionScale, .parent = head});
+    // const auto sFR = world.Emplace<Entity>({.position = Vector3{ suspensionOffsetLR, -offsetUD + suspensionMaxLength * 0.5f,  offsetFB}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, DegreesToRadians( 55.0f)), .scale = suspensionScale, .parent = head});
+    // const auto sBL = world.Emplace<Entity>({.position = Vector3{-suspensionOffsetLR, -offsetUD + suspensionMaxLength * 0.5f, -offsetFB}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, DegreesToRadians(-55.0f)), .scale = suspensionScale, .parent = head});
+    // const auto sBR = world.Emplace<Entity>({.position = Vector3{ suspensionOffsetLR, -offsetUD + suspensionMaxLength * 0.5f, -offsetFB}, .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, DegreesToRadians( 55.0f)), .scale = suspensionScale, .parent = head});
+    // world.Emplace<StaticMesh>(sFL, mesh::Cube, material::Purple);
+    // world.Emplace<StaticMesh>(sFR, mesh::Cube, material::Purple);
+    // world.Emplace<StaticMesh>(sBL, mesh::Cube, material::Purple);
+    // world.Emplace<StaticMesh>(sBR, mesh::Cube, material::Purple);
+
+
+    // const auto wheelOffset = Vector3{0.0f, -0.25f - radius, 0.0f};
+    // const auto wheelScale = Vector3{width, radius * 2.0f, radius * 2.0f};
+
+    // const auto fl = world.Emplace<Entity>({.position = Vector3{-offsetLR, -offsetUD + 0.2f + suspensionMaxLength * 0.5f,  offsetFB}, .scale = wheelScale, .parent = head});
+    // const auto fr = world.Emplace<Entity>({.position = Vector3{ offsetLR, -offsetUD + 0.2f + suspensionMaxLength * 0.5f,  offsetFB}, .scale = wheelScale, .parent = head});
+    // const auto bl = world.Emplace<Entity>({.position = Vector3{-offsetLR, -offsetUD + 0.2f + suspensionMaxLength * 0.5f, -offsetFB}, .scale = wheelScale, .parent = head});
+    // const auto br = world.Emplace<Entity>({.position = Vector3{ offsetLR, -offsetUD + 0.2f + suspensionMaxLength * 0.5f, -offsetFB}, .scale = wheelScale, .parent = head});
+
+    // const auto fl1 = world.Emplace<Entity>({.position = Vector3{-offsetLR, -offsetUD + 0.2f + suspensionMaxLength * 0.5f,  0.0f}, .scale = wheelScale, .parent = segment1});
+    // const auto fr1 = world.Emplace<Entity>({.position = Vector3{ offsetLR, -offsetUD + 0.2f + suspensionMaxLength * 0.5f,  0.0f}, .scale = wheelScale, .parent = segment1});
+
+    // world.Emplace<StaticMesh>(fl, mesh::Wheel, material::Yellow);
+    // world.Emplace<StaticMesh>(fr, mesh::Wheel, material::Yellow);
+    // world.Emplace<StaticMesh>(bl, mesh::Wheel, material::Yellow);
+    // world.Emplace<StaticMesh>(br, mesh::Wheel, material::Yellow);
+    // world.Emplace<StaticMesh>(fl1, mesh::Wheel, material::Yellow);
+    // world.Emplace<StaticMesh>(fr1, mesh::Wheel, material::Yellow);
+
+
+    auto makeAssembly = [&world](Entity parent, float parentScale, float steeringAngle, float springFrequency, bool powered, float zOffset = 0.0f) {
+        constexpr auto width = 0.4f;
+        constexpr auto radius = 0.3f;
+        constexpr auto suspensionMinLength = 0.05f;
+        constexpr auto suspensionMaxLength = 0.2f;
+        constexpr auto diameter = radius * 2.0f;
+        const auto wheelScale = Vector3{width, diameter, diameter};
+
+        const auto inverseParentScale = 1.0f / parentScale;
+
+        const auto offsetLR = (inverseParentScale + width) * 0.5f + 0.01f;
+        const auto offsetUD = (inverseParentScale) * 0.5f;
+        const auto leftPosition  = Vector3{-offsetLR, -offsetUD, zOffset};
+        const auto rightPosition = Vector3{ offsetLR, -offsetUD, zOffset};
+
+
+        const auto left  = world.Emplace<Entity>({.position = leftPosition,  .scale = wheelScale * inverseParentScale, .parent = parent});
+        const auto right = world.Emplace<Entity>({.position = rightPosition, .scale = wheelScale * inverseParentScale, .parent = parent});
+        world.Emplace<StaticMesh>(left, mesh::Wheel, material::Yellow);
+        world.Emplace<StaticMesh>(right, mesh::Wheel, material::Yellow);
+
+        return WheelAssembly{
+            .leftWheel  = WheelMount{.position = leftPosition,  .target = left},
+            .rightWheel = WheelMount{.position = rightPosition, .target = right},
+            .wheelSpec = WheelSpec{.radius = radius, .width = width, .maxSteerAngle = steeringAngle},
+            .suspension = Suspension{
+                .minLength = suspensionMinLength,
+                .maxLength = suspensionMaxLength,
+                .spring = SpringSettings{
+                    .frequency = springFrequency
+                }
+            },
+            .differential = powered ? Differential{} : Differential::MakeDisabled()
+        };
+    };
+
+    const auto orientation = VehicleOrientation{
+        .maxRollAngle = 0.3f,
+    };
+
+    const auto engine = VehicleEngine{
+        .maxTorque = 1000.0f,
+        .minRPM = 100.0f,
+        .maxRPM = 1000.0f
+    };
+
+    const auto transmission = VehicleTransmission{
+        .gears = {4.0f, 3.0f, 2.0f, 1.0f, 0.75f},
+        .shiftTime = 0.1f,
+        .shiftLatency = 0.1f,
+        .shiftUpRPM = 400.0f,
+        .shiftDownRPM = 200.0f,
+        .clutchRelease = 0.1f
+    };
+
+    bodyHead.AddVehicle(VehicleInfo{
+        .orientation = orientation,
+        .engine = engine,
+        .transmission = transmission,
+        .wheelAssemblies = {
+            makeAssembly(head, headScale, 1.2f, 1.5f, true, 0.5f),
+            makeAssembly(head, headScale, 0.0f, 3.0f, false, -0.5f)
+        }
+    });
 
     bodyHead.AddConstraint(
         PointConstraintInfo{

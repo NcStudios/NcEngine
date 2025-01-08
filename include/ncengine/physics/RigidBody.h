@@ -1,12 +1,13 @@
 /**
  * @file RigidBody.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
 #include "ncengine/ecs/Component.h"
 #include "ncengine/ecs/Transform.h"
 #include "ncengine/physics/Constraints.h"
+#include "ncengine/physics/Vehicle.h"
 #include "ncengine/physics/Shape.h"
 
 namespace nc
@@ -59,6 +60,9 @@ struct RigidBodyFlags
      * scaling.
      */
     static constexpr Type IgnoreTransformScaling = 0x4;
+
+    /** @brief Force RigidBody to always be in an awake state (incompatible with BodyType::Static). */
+    static constexpr Type DisableSleeping = 0x8;
 };
 
 /** @brief Determines movement and collision behavior of a RigidBody. */
@@ -182,6 +186,8 @@ class RigidBody
         auto ScalesWithTransform() const -> bool { return !IgnoreTransformScaling(); }
         auto IgnoreTransformScaling() const -> bool { return m_info.flags & RigidBodyFlags::IgnoreTransformScaling; }
         void IgnoreTransformScaling(bool value);
+        auto DisableSleeping() const -> bool { return m_info.flags & RigidBodyFlags::DisableSleeping; }
+        void DisableSleeping(bool value);
 
         /**
          * @name Velocity Functions
@@ -217,8 +223,17 @@ class RigidBody
         void RemoveConstraint(ConstraintId constraintId);
 
         /** @brief View all of the constraints attached to the RigidBody. */
-        auto GetConstraints() -> std::span<Constraint>;
+        auto GetConstraints()       -> std::span<Constraint>;
         auto GetConstraints() const -> std::span<const Constraint>;
+
+        /**
+         * @name Vehicle Functions
+         * @note A RigidBody may only have one Vehicle. Currently, Vehicles are not serialized with the RigidBody.
+         */
+        auto AddVehicle(VehicleInfo createInfo) -> Vehicle&;
+        void RemoveVehicle();
+        auto GetVehicle()       ->       Vehicle*;
+        auto GetVehicle() const -> const Vehicle*;
 
         /**
          * @name Simulated Body Functions
