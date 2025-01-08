@@ -413,7 +413,7 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
         .engine = engine,
         .transmission = transmission,
         .wheelAssemblies = {
-            makeAssembly(head, headScale, 1.2f, 1.5f, true, 0.5f),
+            makeAssembly(head, headScale, 0.8f, 1.5f, true, 0.5f),
             makeAssembly(head, headScale, 0.0f, 3.0f, false, -0.5f)
         }
     });
