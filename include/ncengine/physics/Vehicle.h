@@ -44,8 +44,8 @@ struct VehicleTransmission
     float shiftLatency = 0.5f;               ///< delay between gear shifts [units: s, range >= 0]
     float shiftUpRPM = 4000.0f;              ///< rpm at which upshift occurs [range: (shiftDownRPM, VehicleEninge::maxRPM]]
     float shiftDownRPM = 2000.0f;            ///< rpm at which downshift occurs [range: (0, shiftUpRPM)]
-    float clutchRelease = 0.3f;              ///< time takes to release clutch [units: s, range >= 0]
-    float clutchStrength = 10.0f;            ///< strength of clutch when fully engaged [units: k m^2 s^-1, range: >= 0]
+    float clutchRelease = 0.3f;              ///< time it takes to release clutch [units: s, range >= 0]
+    float clutchStrength = 10.0f;            ///< strength of clutch when fully engaged (higher values handle more torque but are harder to engage) [units: k m^2 s^-1, range: >= 0]
 
     static constexpr auto defaultGears = std::initializer_list<float>{ 2.66f, 1.78f, 1.3f, 1.0f, 0.74f };
 };
@@ -98,7 +98,7 @@ struct Suspension
 
     static auto MakeDisabled() -> Suspension
     {
-        return Suspension{0.0f, 0.0f, SpringSettings{0.0f, 0.0f}};
+        return Suspension{0.0f, 0.0001f, SpringSettings{0.0f, 0.0f}};
     }
 };
 
@@ -124,7 +124,7 @@ struct WheelAssembly
     WheelMount leftWheel{};      ///< settings for the left wheel
     WheelMount rightWheel{};     ///< settings for the right wheel
     WheelSpec wheelSpec{};       ///< shared wheel settings
-    Suspension suspension{};     ///< suspension settings shared across enabled wheels
+    Suspension suspension{};     ///< shared suspension settings
     Differential differential{}; ///< optional differential settings
 
     auto WheelCount() const -> size_t
@@ -164,7 +164,7 @@ class Vehicle
         /**
          * @name Vehicle Input
          * @note Vehicle input does not wake the owning RigidBody. The RigidBody can be awakened when needed, or
-         *       it may be desirable to disable sleeping entirely.
+         *       RigidBodyFlags::DisableSleeping may be set.
          * 
          * Throttle values range from [-1, 1] indicating reverse/forward direction and throttle amount.
          * Steering values range from [-1, 1] indicating left/right steering angle and amount.
@@ -227,6 +227,4 @@ class Vehicle
         VehicleHandle m_handle;
         VehicleId m_id;
 };
-
-constexpr auto s = sizeof(Vehicle);
 } // namespace nc

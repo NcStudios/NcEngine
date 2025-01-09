@@ -13,11 +13,10 @@ using namespace DirectX;
 auto GetWheelRotation(const JPH::Wheel& wheel) -> XMVECTOR
 {
     const auto* settings = wheel.GetSettings();
-    const auto up = nc::physics::ToXMVector(settings->mWheelUp);
-    const auto forward = nc::physics::ToXMVector(settings->mWheelForward);
-    const auto right = XMVector3Normalize(XMVector3Cross(up, forward));
+    const auto right = nc::physics::ToXMVector(settings->mWheelUp.Cross(settings->mWheelForward).Normalized());
+    const auto steerAxis = nc::physics::ToXMVector(settings->mSteeringAxis);
     const auto spinRotation = XMQuaternionRotationAxis(right, wheel.GetRotationAngle());
-    const auto steerRotation = XMQuaternionRotationAxis(up, wheel.GetSteerAngle());
+    const auto steerRotation = XMQuaternionRotationAxis(steerAxis, wheel.GetSteerAngle());
     return XMQuaternionMultiply(spinRotation, steerRotation);
 }
 

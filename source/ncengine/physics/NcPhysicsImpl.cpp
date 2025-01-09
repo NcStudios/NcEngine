@@ -160,7 +160,7 @@ void NcPhysicsImpl::SyncTransforms()
     auto& transformPool = m_ecs.GetPool<Transform>();
     for (const auto& vehicle : m_vehicleManager.GetVehicles())
     {
-        if (vehicle && !vehicle->IsEnabled())
+        if (!vehicle->IsEnabled())
         {
             continue;
         }

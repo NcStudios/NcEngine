@@ -77,7 +77,7 @@ enum class BodyType : uint8_t
 struct RigidBodyInfo
 {
     float mass = 1000.0f;                                 ///< mass of the body in kg [0.1, 100000]
-    float friction = 0.2f;                                ///< friction of the body [0, 1]
+    float friction = 0.4f;                                ///< friction of the body [0, 1]
     float restitution = 0.0f;                             ///< elasticity of collision response [0, 1]
     float linearDamping = 0.0f;                           ///< linear motion damping [0, 1]
     float angularDamping = 0.0f;                          ///< angular motion damping [0, 1]

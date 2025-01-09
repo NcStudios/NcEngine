@@ -144,26 +144,20 @@ auto MakeWheelSettings(const nc::WheelMount& wheelMount,
                        const nc::WheelSpec& wheelSpec,
                        const nc::Suspension& suspensionInfo) -> JPH::Ref<JPH::WheelSettingsWV>
 {
-    /**
-     * @todo 863 We want to parameterize friction curves somehow - not sure what's the right way yet.
-     *   possible default longitudinal:
-     *     curve.AddPoint(0.0f, 0.0f);
-     *     curve.AddPoint(0.06f, 1.2f);
-     *     curve.AddPoint(0.2f, 1.0f);
-     *   lateral:
-     *     curve.AddPoint(0.0f, 0.0f);
-     *     curve.AddPoint(3.0f, 1.2f);
-     *     curve.AddPoint(20.0f, 1.0f);
-     */
+    /** @todo 863 We want to parameterize friction curves somehow - not sure what's the right way yet. */
     static auto longitudinalFriction = [](){
         auto curve = JPH::LinearCurve{};
-        curve.AddPoint(0.0f, 1.0f);
+        curve.AddPoint(0.0f, 0.0f);
+        curve.AddPoint(0.06f, 1.2f);
+        curve.AddPoint(0.2f, 1.0f);
         return curve;
     }();
 
     static auto lateralFriction = [](){
         auto curve = JPH::LinearCurve{};
-        curve.AddPoint(0.0f, 1.0f);
+        curve.AddPoint(0.0f, 0.0f);
+        curve.AddPoint(3.0f, 1.2f);
+        curve.AddPoint(20.0f, 1.0f);
         return curve;
     }();
 
