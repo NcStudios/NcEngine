@@ -148,7 +148,7 @@ struct VehicleInfo
     std::vector<WheelAssembly> wheelAssemblies{WheelAssembly{}}; ///< vehicle wheels (at least one wheel assembly with an enabled differential is required)
 };
 
-/** @brief */
+/** @brief A vehicle that can be added to a RigidBody. */
 class Vehicle
 {
     public:
