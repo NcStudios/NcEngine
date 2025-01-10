@@ -13,7 +13,7 @@ target_compile_definitions(NcJolt
 )
 
 target_include_directories(NcJolt
-    PRIVATE
+    PUBLIC
         ${PROJECT_SOURCE_DIR}/source/ncjolt
 )
 
