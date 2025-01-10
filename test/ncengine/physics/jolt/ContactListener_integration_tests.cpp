@@ -15,7 +15,7 @@ class ContactListenerTest : public ::testing::Test
 {
     protected:
         ContactListenerTest()
-            : joltApi{nc::physics::JoltPhysics::Initialize(
+            : joltApi{
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = 1024 * 1024 * 4,
@@ -23,7 +23,7 @@ class ContactListenerTest : public ::testing::Test
                     .maxContacts = 8
                   },
                   nc::task::AsyncDispatcher{}
-              )},
+              },
               uut{joltApi.contactListener}
         {
         }

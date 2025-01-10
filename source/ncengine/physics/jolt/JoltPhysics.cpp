@@ -41,25 +41,10 @@ void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
     )};
 }
 
-auto JoltPhysics::Initialize(const config::MemorySettings& memorySettings,
-                             const config::PhysicsSettings& physicsSettings,
-                             const task::AsyncDispatcher& dispatcher) -> JoltPhysics
-{
-    return JoltPhysics{
-        std::make_unique<jolt::JoltApi>(),
-        memorySettings,
-        physicsSettings,
-        dispatcher
-    };
-}
-
-JoltPhysics::~JoltPhysics() noexcept = default;
-
-JoltPhysics::JoltPhysics(std::unique_ptr<jolt::JoltApi>&& joltApi,
-                         const config::MemorySettings& memorySettings,
+JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
                          const config::PhysicsSettings& physicsSettings,
                          const task::AsyncDispatcher& dispatcher)
-    : api{std::move(joltApi)},
+    : api{std::make_unique<jolt::JoltApi>()},
       tempAllocator{physicsSettings.tempAllocatorSize},
       contactListener{physicsSystem},
       jobSystem{BuildJobSystem(dispatcher)}
@@ -77,4 +62,6 @@ JoltPhysics::JoltPhysics(std::unique_ptr<jolt::JoltApi>&& joltApi,
     physicsSystem.SetPhysicsSettings(ToJoltSettings(physicsSettings));
     physicsSystem.SetContactListener(&contactListener);
 }
+
+JoltPhysics::~JoltPhysics() noexcept = default;
 } // namespace nc::physics

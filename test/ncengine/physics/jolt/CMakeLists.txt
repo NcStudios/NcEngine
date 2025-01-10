@@ -174,25 +174,25 @@ target_link_libraries(ConstraintManager_unit_tests
 
 add_test(ConstraintManager_unit_tests ConstraintManager_unit_tests)
 
-### JoltApi Tests ###
-add_executable(JoltApi_unit_tests
-    JoltApi_unit_tests.cpp
+### JoltPhysics Tests ###
+add_executable(JoltPhysics_unit_tests
+    JoltPhysics_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ContactListener.cpp
 )
 
-target_include_directories(JoltApi_unit_tests
+target_include_directories(JoltPhysics_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(JoltApi_unit_tests
+target_compile_options(JoltPhysics_unit_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(JoltApi_unit_tests
+target_link_libraries(JoltPhysics_unit_tests
     PRIVATE
         NcMath
         NcUtility
@@ -200,7 +200,7 @@ target_link_libraries(JoltApi_unit_tests
         gtest_main
 )
 
-add_test(JoltApi_unit_tests JoltApi_unit_tests)
+add_test(JoltPhysics_unit_tests JoltPhysics_unit_tests)
 
 ### Jolt Conversion Tests ###
 add_executable(JoltConversion_unit_tests

@@ -15,7 +15,7 @@ class JoltApiFixture : public ::testing::Test
         JoltApiFixture(uint32_t tempAllocatorSize = 1024 * 1024 * 4,
                        uint32_t maxBodyPairs = 8,
                        uint32_t maxContacts = 4)
-            : joltApi{nc::physics::JoltPhysics::Initialize(
+            : joltApi{
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = tempAllocatorSize,
@@ -23,7 +23,7 @@ class JoltApiFixture : public ::testing::Test
                     .maxContacts = maxContacts
                   },
                   nc::task::AsyncDispatcher{}
-              )}
+              }
         {
         }
 

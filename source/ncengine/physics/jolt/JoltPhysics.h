@@ -31,11 +31,11 @@ namespace physics
 
 struct JoltPhysics : public StableAddress
 {
-    ~JoltPhysics() noexcept;
+    JoltPhysics(const config::MemorySettings& memorySettings,
+                const config::PhysicsSettings& physicsSettings,
+                const task::AsyncDispatcher& dispatcher);
 
-    static auto Initialize(const config::MemorySettings& memorySettings,
-                           const config::PhysicsSettings& physicsSettings,
-                           const task::AsyncDispatcher& dispatcher) -> JoltPhysics;
+    ~JoltPhysics() noexcept;
 
     void Update(float dt, int steps = 1)
     {
@@ -54,12 +54,6 @@ struct JoltPhysics : public StableAddress
     JPH::PhysicsSystem physicsSystem;
     ContactListener contactListener;
     std::unique_ptr<JPH::JobSystem> jobSystem;
-
-    private:
-        JoltPhysics(std::unique_ptr<jolt::JoltApi>&& joltApi,
-                    const config::MemorySettings& memorySettings,
-                    const config::PhysicsSettings& physicsSettings,
-                    const task::AsyncDispatcher& dispatcher);
 };
 } // namespace physics
 } // namespace nc
