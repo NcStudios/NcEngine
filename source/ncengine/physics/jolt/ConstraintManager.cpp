@@ -1,4 +1,5 @@
 #include "ConstraintManager.h"
+#include "ConstraintFactory.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSystem.h"
@@ -12,7 +13,7 @@ auto ConstraintManager::AddConstraint(const ConstraintInfo& createInfo,
                                       Entity target,
                                       JPH::Body& targetBody) -> Constraint&
 {
-    auto handle = m_factory.MakeConstraint(createInfo, ownerBody, targetBody);
+    auto handle = m_factory->MakeConstraint(createInfo, ownerBody, targetBody);
     if (!m_isBatchInProgress)
     {
         m_physicsSystem->AddConstraint(handle);
@@ -244,7 +245,7 @@ void ConstraintManager::ReplaceInternalConstraint(const Constraint& replaceWith,
                                                   JPH::Body* referenced)
 {
     m_physicsSystem->RemoveConstraint(toReplace);
-    auto newHandle = m_factory.MakeConstraint(replaceWith.GetInfo(), *owner, *referenced);
+    auto newHandle = m_factory->MakeConstraint(replaceWith.GetInfo(), *owner, *referenced);
     newHandle->SetEnabled(replaceWith.IsEnabled());
     m_physicsSystem->AddConstraint(newHandle);
     m_handles.at(replaceWith.GetId()) = newHandle;

@@ -160,6 +160,17 @@ void RigidBody::UseContinuousDetection(bool value)
         : m_info.flags & ~RigidBodyFlags::ContinuousDetection;
 }
 
+void RigidBody::DisableSleeping(bool value)
+{
+    if (m_info.type != BodyType::Static)
+    {
+        ToBody(m_handle)->SetAllowSleeping(!value);
+        m_info.flags = value
+            ? m_info.flags | RigidBodyFlags::DisableSleeping
+            : m_info.flags & ~RigidBodyFlags::DisableSleeping;
+    }
+}
+
 auto RigidBody::GetLinearVelocity() const -> Vector3
 {
     return ToVector3(ToBody(m_handle)->GetLinearVelocity());
@@ -248,6 +259,26 @@ auto RigidBody::GetConstraints() -> std::span<Constraint>
 auto RigidBody::GetConstraints() const -> std::span<const Constraint>
 {
     return s_ctx->constraintManager.GetConstraints(m_self);
+}
+
+auto RigidBody::AddVehicle(VehicleInfo createInfo) -> Vehicle&
+{
+    return s_ctx->vehicleManager.AddVehicle(std::move(createInfo), m_self, *ToBody(m_handle));
+}
+
+void RigidBody::RemoveVehicle()
+{
+    s_ctx->vehicleManager.RemoveVehicle(m_self);
+}
+
+auto RigidBody::GetVehicle() -> Vehicle*
+{
+    return s_ctx->vehicleManager.GetVehicle(m_self);
+}
+
+auto RigidBody::GetVehicle() const -> const Vehicle*
+{
+    return s_ctx->vehicleManager.GetVehicle(m_self);
 }
 
 void RigidBody::SetSimulatedBodyPosition(Transform& transform,

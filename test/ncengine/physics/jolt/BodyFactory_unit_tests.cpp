@@ -32,7 +32,8 @@ constexpr auto g_dynamicProperties = nc::RigidBodyInfo{
     .gravityMultiplier = 0.1f,
     .type = nc::BodyType::Dynamic,
     .freedom = nc::DegreeOfFreedom::TranslationY,
-    .flags = nc::RigidBodyFlags::ContinuousDetection
+    .flags = nc::RigidBodyFlags::ContinuousDetection |
+             nc::RigidBodyFlags::DisableSleeping
 };
 
 TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
@@ -54,6 +55,7 @@ TEST_F(BodyFactoryTest, MakeBody_setsBodyProperties)
     EXPECT_EQ(JPH::EMotionType::Dynamic, actualBody->GetMotionType());
     EXPECT_EQ(nc::physics::ObjectLayer::Dynamic, actualBody->GetObjectLayer());
     EXPECT_FALSE(actualBody->IsSensor());
+    EXPECT_FALSE(actualBody->GetAllowSleeping());
     EXPECT_EQ(nc::Entity::Hash{}(g_entity), actualBody->GetUserData());
     EXPECT_EQ(expectedProperties.friction, actualBody->GetFriction());
     EXPECT_EQ(expectedProperties.restitution, actualBody->GetRestitution());

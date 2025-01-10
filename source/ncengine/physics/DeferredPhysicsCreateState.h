@@ -23,5 +23,6 @@ struct DeferredPhysicsCreateState
     std::vector<DeferredConstraint> constraints; // constraints waiting to be added to the simulation
     size_t bodyBatchIndex = NullBatch;           // index of the first body of a batch add operation
     size_t constraintBatchIndex = NullBatch;     // index of the first constraint of a batch add operation
+    size_t vehicleBatchIndex = NullBatch;        // index of the first vehicle of a batch add operation
 };
 } // namespace nc::physics

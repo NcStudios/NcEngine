@@ -29,6 +29,7 @@ extern asset::MeshView Cube;
 extern asset::MeshView Sphere;
 extern asset::MeshView Capsule;
 extern asset::MeshView Plane;
+extern asset::MeshView Wheel;
 extern asset::MeshView HalfPipe;
 extern asset::MeshView Ramp;
 extern asset::MeshView Ogre;

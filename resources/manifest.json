@@ -61,6 +61,13 @@
             "options": {
                 "optimizeMesh": true
             }
+        },
+        {
+            "sourcePath": "raw/model/DefaultWheel.fbx",
+            "assetName": "mesh/DefaultWheel",
+            "options": {
+                "optimizeMesh": true
+            }
         }
     ],
     "texture": [

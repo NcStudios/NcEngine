@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ConstraintFactory.h"
 #include "ncengine/ecs/Entity.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/utility/SparseMap.h"
@@ -10,12 +9,15 @@
 
 namespace JPH
 {
+class Body;
 class Constraint;
 class PhysicsSystem;
 } // namespace JPH
 
 namespace nc::physics
 {
+class ConstraintFactory;
+
 // Pair of entity indices associated with a constraint
 struct ConstraintPair
 {
@@ -42,9 +44,11 @@ class ConstraintManager
     public:
         static constexpr auto ConstraintMapSizeHint = 1000u;
 
-        explicit ConstraintManager(JPH::PhysicsSystem& physicsSystem, uint32_t maxEntities)
+        explicit ConstraintManager(JPH::PhysicsSystem& physicsSystem,
+                                   ConstraintFactory& constraintFactory,
+                                   uint32_t maxEntities)
             : m_physicsSystem{&physicsSystem},
-              m_factory{physicsSystem},
+              m_factory{&constraintFactory},
               m_entityState{std::min(ConstraintMapSizeHint, maxEntities), maxEntities}
         {
             Constraint::s_manager = this;
@@ -78,7 +82,7 @@ class ConstraintManager
 
     private:
         JPH::PhysicsSystem* m_physicsSystem;
-        ConstraintFactory m_factory;
+        ConstraintFactory* m_factory;
         std::vector<JPH::Constraint*> m_handles;
         std::vector<ConstraintPair> m_pairs;
         std::vector<uint32_t> m_freeIndices;

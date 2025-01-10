@@ -3,6 +3,7 @@
 
 #include "physics/jolt/BodyManager.h"
 #include "physics/jolt/ComponentContext.h"
+#include "physics/jolt/ConstraintFactory.h"
 #include "physics/jolt/ConstraintManager.h"
 #include "physics/jolt/ShapeFactory.h"
 
@@ -19,14 +20,16 @@ BodyManager::BodyManager(ecs::ComponentPool<Transform>& transformPool,
                          uint32_t maxEntities,
                          JPH::PhysicsSystem& physicsSystem,
                          ShapeFactory& shapeFactory,
-                         ConstraintManager& constraintManager)
+                         ConstraintManager& constraintManager,
+                         VehicleManager& vehicleManager)
     : m_transformPool{&transformPool},
       m_bodies{maxEntities, maxEntities},
       m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
       m_ctx{std::make_unique<ComponentContext>(
         physicsSystem.GetBodyInterfaceNoLock(),
         shapeFactory,
-        constraintManager
+        constraintManager,
+        vehicleManager
       )}
 {
     nc::RigidBody::SetContext(m_ctx.get());
@@ -58,14 +61,17 @@ class RigidBodyTest : public JoltApiFixture
         RigidBodyTest()
             : transformPool{10, nc::ComponentHandler<nc::Transform>{}},
               rigidBodyPool{10ull, nc::ComponentHandler<nc::RigidBody>{}},
-              constraintManager{joltApi.physicsSystem, 10},
+              constraintFactory{joltApi.physicsSystem},
+              constraintManager{joltApi.physicsSystem, constraintFactory, 10},
+              vehicleManager{joltApi.physicsSystem, constraintFactory, 10},
               bodyManager{
                   transformPool,
                   rigidBodyPool,
                   10,
                   joltApi.physicsSystem,
                   shapeFactory,
-                  constraintManager
+                  constraintManager,
+                  vehicleManager
               }
         {
         }
@@ -74,7 +80,9 @@ class RigidBodyTest : public JoltApiFixture
         nc::ecs::ComponentPool<nc::Transform> transformPool;
         nc::ecs::ComponentPool<nc::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;
+        nc::physics::ConstraintFactory constraintFactory;
         nc::physics::ConstraintManager constraintManager;
+        nc::physics::VehicleManager vehicleManager;
         nc::physics::BodyManager bodyManager;
         std::vector<JPH::Body*> bodies;
 
@@ -90,7 +98,7 @@ class RigidBodyTest : public JoltApiFixture
 };
 
 constexpr auto g_entity = nc::Entity{0, 0, nc::Entity::Flags::None};
-constexpr auto g_staticEntity = nc::Entity{0, 0, nc::Entity::Flags::Static};
+constexpr auto g_staticEntity = nc::Entity{1, 0, nc::Entity::Flags::Static};
 constexpr auto g_shape = nc::Shape::MakeBox();
 
 constexpr auto g_dynamicInfo = nc::RigidBodyInfo{
@@ -237,6 +245,10 @@ TEST_F(RigidBodyTest, RigidBodyFlagFunctions_validFlags_setExpectedState)
     uut.IgnoreTransformScaling(false);
     EXPECT_FALSE(uut.IgnoreTransformScaling());
     EXPECT_TRUE(uut.ScalesWithTransform());
+
+    uut.DisableSleeping(true);
+    EXPECT_TRUE(uut.DisableSleeping());
+    EXPECT_FALSE(body->GetAllowSleeping());
 }
 
 TEST_F(RigidBodyTest, RigidBodyFlagFunctions_incompatibleFlags_doesNotModifyState)
@@ -258,6 +270,11 @@ TEST_F(RigidBodyTest, RigidBodyFlagFunctions_incompatibleFlags_doesNotModifyStat
     EXPECT_FALSE(body->IsSensor());
     EXPECT_TRUE(uut.UseContinuousDetection());
     EXPECT_EQ(JPH::EMotionQuality::LinearCast, body->GetMotionProperties()->GetMotionQuality());
+
+    // don't need to check body state here - motion props are null
+    auto staticUut = CreateRigidBody(g_staticEntity, g_shape, g_staticInfo);
+    staticUut.DisableSleeping(true);
+    EXPECT_FALSE(staticUut.DisableSleeping());
 }
 
 TEST_F(RigidBodyTest, SetBody_dynamicToStatic_updateInternalState)
