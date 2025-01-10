@@ -175,8 +175,8 @@ class VehicleController : public FreeComponent
     static constexpr auto torqueForce = 250.0f;
     static constexpr auto jumpForce = 5000.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
-    constexpr auto throttleRate = 2.0f;
-    constexpr auto steerRate = 2.0f;
+    static constexpr auto throttleRate = 2.0f;
+    static constexpr auto steerRate = 2.0f;
 
     public:
         VehicleController(Entity self)
