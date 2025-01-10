@@ -253,32 +253,6 @@ target_link_libraries(Layers_unit_tests
 
 add_test(Layers_unit_tests Layers_unit_tests)
 
-### PhysicsAllocator Tests ###
-add_executable(PhysicsAllocator_unit_tests
-    PhysicsAllocator_unit_tests.cpp
-)
-
-target_include_directories(PhysicsAllocator_unit_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_SOURCE_DIR}
-)
-
-target_compile_options(PhysicsAllocator_unit_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(PhysicsAllocator_unit_tests
-    PRIVATE
-        NcMath
-        NcUtility
-        Jolt
-        gtest_main
-)
-
-add_test(PhysicsAllocator_unit_tests PhysicsAllocator_unit_tests)
-
 ### ShapeFactory Tests ###
 add_executable(ShapeFactory_unit_tests
     ShapeFactory_unit_tests.cpp

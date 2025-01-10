@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Allocator.h"
 #include "ContactListener.h"
 #include "JobSystem.h"
 #include "Layers.h"
+
 #include "ncengine/type/StableAddress.h"
+#include "ncjolt/Allocator.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/PhysicsSettings.h"
@@ -47,7 +48,7 @@ struct JoltPhysics : public StableAddress
     }
 
     std::unique_ptr<jolt::JoltApi> api;
-    TempAllocator tempAllocator;
+    jolt::TempAllocator tempAllocator;
     LayerMap layerMap;
     ObjectVsBroadPhaseLayerFilter objectVsBroadphaseFilter;
     ObjectLayerPairFilter objectLayerPairFilter;
