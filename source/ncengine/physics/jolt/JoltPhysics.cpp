@@ -1,6 +1,8 @@
-#include "JoltApi.h"
-#include "Profiler.inl"
+#include "JoltPhysics.h"
 #include "ncengine/config/Config.h"
+
+#include "ncjolt/JoltApi.h"
+#include "ncjolt/Profiler.inl"
 #include "ncutility/NcError.h"
 
 #include "Jolt/Core/Factory.h"
@@ -8,8 +10,6 @@
 
 namespace
 {
-auto g_factory = std::unique_ptr<JPH::Factory>{};
-
 auto ToJoltSettings(const nc::config::PhysicsSettings& in) -> JPH::PhysicsSettings
 {
     auto out = JPH::PhysicsSettings{};
@@ -41,31 +41,28 @@ void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
     )};
 }
 
-auto JoltApi::Initialize(const config::MemorySettings& memorySettings,
+auto JoltPhysics::Initialize(const config::MemorySettings& memorySettings,
+                             const config::PhysicsSettings& physicsSettings,
+                             const task::AsyncDispatcher& dispatcher) -> JoltPhysics
+{
+    return JoltPhysics{
+        std::make_unique<jolt::JoltApi>(),
+        memorySettings,
+        physicsSettings,
+        dispatcher
+    };
+}
+
+JoltPhysics::~JoltPhysics() noexcept = default;
+
+JoltPhysics::JoltPhysics(std::unique_ptr<jolt::JoltApi>&& joltApi,
+                         const config::MemorySettings& memorySettings,
                          const config::PhysicsSettings& physicsSettings,
-                         const task::AsyncDispatcher& dispatcher) -> JoltApi
-{
-    RegisterAllocator();
-    g_factory = std::make_unique<JPH::Factory>();
-    JPH::Factory::sInstance = g_factory.get();
-    JPH::RegisterTypes();
-    return JoltApi{memorySettings, physicsSettings, dispatcher};
-}
-
-JoltApi::~JoltApi() noexcept
-{
-    JPH::UnregisterTypes();
-    g_factory = nullptr;
-    JPH::Factory::sInstance = nullptr;
-}
-
-JoltApi::JoltApi(const config::MemorySettings& memorySettings,
-                 const config::PhysicsSettings& physicsSettings,
-                 const task::AsyncDispatcher& dispatcher)
-    : tempAllocator{physicsSettings.tempAllocatorSize},
+                         const task::AsyncDispatcher& dispatcher)
+    : api{std::move(joltApi)},
+      tempAllocator{physicsSettings.tempAllocatorSize},
       contactListener{physicsSystem},
       jobSystem{BuildJobSystem(dispatcher)}
-
 {
     physicsSystem.Init(
         memorySettings.maxRigidBodies,

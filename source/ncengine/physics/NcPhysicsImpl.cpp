@@ -81,7 +81,7 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                              SystemEvents&,
                              std::unique_ptr<DeferredPhysicsCreateState> deferredState)
     : m_ecs{world},
-      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
+      m_jolt{JoltPhysics::Initialize(memorySettings, physicsSettings, dispatcher)},
       m_constraintFactory{m_jolt.physicsSystem},
       m_constraintManager{
         m_jolt.physicsSystem,

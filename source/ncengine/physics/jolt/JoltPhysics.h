@@ -20,17 +20,22 @@ struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
+namespace jolt
+{
+class JoltApi;
+} // namespace jolt
+
 namespace physics
 {
 [[noreturn]] void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error);
 
-struct JoltApi : public StableAddress
+struct JoltPhysics : public StableAddress
 {
-    ~JoltApi() noexcept;
+    ~JoltPhysics() noexcept;
 
     static auto Initialize(const config::MemorySettings& memorySettings,
                            const config::PhysicsSettings& physicsSettings,
-                           const task::AsyncDispatcher& dispatcher) -> JoltApi;
+                           const task::AsyncDispatcher& dispatcher) -> JoltPhysics;
 
     void Update(float dt, int steps = 1)
     {
@@ -41,6 +46,7 @@ struct JoltApi : public StableAddress
         }
     }
 
+    std::unique_ptr<jolt::JoltApi> api;
     TempAllocator tempAllocator;
     LayerMap layerMap;
     ObjectVsBroadPhaseLayerFilter objectVsBroadphaseFilter;
@@ -50,9 +56,10 @@ struct JoltApi : public StableAddress
     std::unique_ptr<JPH::JobSystem> jobSystem;
 
     private:
-        JoltApi(const config::MemorySettings& memorySettings,
-                const config::PhysicsSettings& physicsSettings,
-                const task::AsyncDispatcher& dispatcher);
+        JoltPhysics(std::unique_ptr<jolt::JoltApi>&& joltApi,
+                    const config::MemorySettings& memorySettings,
+                    const config::PhysicsSettings& physicsSettings,
+                    const task::AsyncDispatcher& dispatcher);
 };
 } // namespace physics
 } // namespace nc

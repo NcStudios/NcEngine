@@ -2,7 +2,7 @@
 #include "ContactListener_stub.inl"
 #include "JobSystem_stub.inl"
 #include "ncengine/config/Config.h"
-#include "physics/jolt/JoltApi.h"
+#include "physics/jolt/JoltPhysics.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
@@ -10,12 +10,12 @@
 class JoltApiFixture : public ::testing::Test
 {
     protected:
-        nc::physics::JoltApi joltApi;
+        nc::physics::JoltPhysics joltApi;
 
         JoltApiFixture(uint32_t tempAllocatorSize = 1024 * 1024 * 4,
                        uint32_t maxBodyPairs = 8,
                        uint32_t maxContacts = 4)
-            : joltApi{nc::physics::JoltApi::Initialize(
+            : joltApi{nc::physics::JoltPhysics::Initialize(
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = tempAllocatorSize,
