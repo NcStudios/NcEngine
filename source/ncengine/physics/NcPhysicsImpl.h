@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DeferredPhysicsCreateState.h"
-#include "jolt/JoltApi.h"
+#include "jolt/JoltPhysics.h"
 #include "jolt/BodyManager.h"
 #include "jolt/CollisionQueryManager.h"
 #include "jolt/ConstraintFactory.h"
@@ -50,7 +50,7 @@ class NcPhysicsImpl final : public NcPhysics
 
     private:
         ecs::Ecs m_ecs;
-        JoltApi m_jolt;
+        JoltPhysics m_jolt;
         ShapeFactory m_shapeFactory;
         ConstraintFactory m_constraintFactory;
         ConstraintManager m_constraintManager;

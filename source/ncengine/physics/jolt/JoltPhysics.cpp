@@ -1,6 +1,8 @@
-#include "JoltApi.h"
-#include "Profiler.inl"
+#include "JoltPhysics.h"
 #include "ncengine/config/Config.h"
+
+#include "ncjolt/JoltApi.h"
+#include "ncjolt/Profiler.inl"
 #include "ncutility/NcError.h"
 
 #include "Jolt/Core/Factory.h"
@@ -8,8 +10,6 @@
 
 namespace
 {
-auto g_factory = std::unique_ptr<JPH::Factory>{};
-
 auto ToJoltSettings(const nc::config::PhysicsSettings& in) -> JPH::PhysicsSettings
 {
     auto out = JPH::PhysicsSettings{};
@@ -41,31 +41,13 @@ void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
     )};
 }
 
-auto JoltApi::Initialize(const config::MemorySettings& memorySettings,
+JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
                          const config::PhysicsSettings& physicsSettings,
-                         const task::AsyncDispatcher& dispatcher) -> JoltApi
-{
-    RegisterAllocator();
-    g_factory = std::make_unique<JPH::Factory>();
-    JPH::Factory::sInstance = g_factory.get();
-    JPH::RegisterTypes();
-    return JoltApi{memorySettings, physicsSettings, dispatcher};
-}
-
-JoltApi::~JoltApi() noexcept
-{
-    JPH::UnregisterTypes();
-    g_factory = nullptr;
-    JPH::Factory::sInstance = nullptr;
-}
-
-JoltApi::JoltApi(const config::MemorySettings& memorySettings,
-                 const config::PhysicsSettings& physicsSettings,
-                 const task::AsyncDispatcher& dispatcher)
-    : tempAllocator{physicsSettings.tempAllocatorSize},
+                         const task::AsyncDispatcher& dispatcher)
+    : api{std::make_unique<jolt::JoltApi>()},
+      tempAllocator{physicsSettings.tempAllocatorSize},
       contactListener{physicsSystem},
       jobSystem{BuildJobSystem(dispatcher)}
-
 {
     physicsSystem.Init(
         memorySettings.maxRigidBodies,
@@ -80,4 +62,6 @@ JoltApi::JoltApi(const config::MemorySettings& memorySettings,
     physicsSystem.SetPhysicsSettings(ToJoltSettings(physicsSettings));
     physicsSystem.SetContactListener(&contactListener);
 }
+
+JoltPhysics::~JoltPhysics() noexcept = default;
 } // namespace nc::physics

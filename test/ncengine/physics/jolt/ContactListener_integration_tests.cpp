@@ -2,7 +2,7 @@
 #include "JobSystem_stub.inl"
 #include "physics/jolt/ContactListener.h"
 #include "physics/jolt/Conversion.h"
-#include "physics/jolt/JoltApi.h"
+#include "physics/jolt/JoltPhysics.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/physics/RigidBody.h"
 
@@ -15,7 +15,7 @@ class ContactListenerTest : public ::testing::Test
 {
     protected:
         ContactListenerTest()
-            : joltApi{nc::physics::JoltApi::Initialize(
+            : joltApi{
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = 1024 * 1024 * 4,
@@ -23,13 +23,13 @@ class ContactListenerTest : public ::testing::Test
                     .maxContacts = 8
                   },
                   nc::task::AsyncDispatcher{}
-              )},
+              },
               uut{joltApi.contactListener}
         {
         }
 
     public:
-        nc::physics::JoltApi joltApi;
+        nc::physics::JoltPhysics joltApi;
         nc::physics::ContactListener& uut;
         std::vector<nc::physics::CollisionPair> lastOnEnter;
         std::vector<nc::physics::OverlappingPair> lastOnTriggerEnter;

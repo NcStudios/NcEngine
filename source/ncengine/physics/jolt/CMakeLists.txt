@@ -5,8 +5,8 @@ target_sources(${NC_ENGINE_LIB}
         ContactListener.cpp
         ConstraintFactory.cpp
         ConstraintManager.cpp
+        JoltPhysics.cpp
         JobSystem.cpp
-        JoltApi.cpp
         VehicleAnimator.cpp
         VehicleManager.cpp
 )

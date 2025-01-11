@@ -2,7 +2,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "physics/jolt/ConstraintManager.h"
-#include "physics/jolt/Profiler.inl"
+#include "ncjolt/Profiler.inl"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/Body.h"

@@ -15,7 +15,7 @@
 #define NC_ALIGNED_FREE_HOOK(ptr)
 #endif
 
-namespace nc::physics
+namespace nc::jolt
 {
 inline auto AllocateImpl(size_t size) -> void*
 {
@@ -137,4 +137,4 @@ private:
     uint32_t m_size;
     uint32_t m_top = 0;
 };
-} // namespace nc::physics
+} // namespace nc::jolt
