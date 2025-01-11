@@ -101,6 +101,7 @@ constexpr auto HasAnyZeroElement(const Vector3& vec) noexcept -> bool;
 constexpr auto HasUniformElements(const Vector3& vec) noexcept -> bool;
 inline    auto OrthogonalTo(const Vector3& vec) noexcept -> Vector3;
 inline    void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept;
+inline    auto ClosestOrthogonal(const Vector3& target, const Vector3& reference) noexcept -> Vector3;
 
 /** @name Vector4 Functions */
 constexpr auto operator ==(const Vector4& lhs, const Vector4& rhs) noexcept -> bool;
@@ -345,6 +346,18 @@ void OrthogonalBasis(const Vector3& vec, Vector3* a, Vector3* b) noexcept
 {
     *a = OrthogonalTo(vec);
     *b = CrossProduct(*a, vec);
+}
+
+auto ClosestOrthogonal(const Vector3& target, const Vector3& reference) noexcept -> Vector3
+{
+    constexpr auto parallelThreshold = 0.999f;
+    const auto projection = Dot(target, reference);
+    if (std::fabs(projection) < parallelThreshold)
+    {
+        return Normalize(target - reference * projection);
+    }
+
+    return OrthogonalTo(reference);
 }
 
 /* Vector 4 Implementation */

@@ -78,5 +78,6 @@ extern asset::MeshView Plane;
 extern asset::MeshView Ramp;
 extern asset::MeshView Skeleton;
 extern asset::MeshView Sphere;
+extern asset::MeshView Wheel;
 } // namespace mesh
 } // namespace nc::sample

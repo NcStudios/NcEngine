@@ -22,6 +22,7 @@ namespace nc::physics
 struct ComponentContext;
 class ConstraintManager;
 class ShapeFactory;
+class VehicleManager;
 
 class BodyManager : public StableAddress
 {
@@ -33,7 +34,8 @@ class BodyManager : public StableAddress
                     uint32_t maxEntities,
                     JPH::PhysicsSystem& physicsSystem,
                     ShapeFactory& shapeFactory,
-                    ConstraintManager& constraintManager);
+                    ConstraintManager& constraintManager,
+                    VehicleManager& vehicleManager);
 
         ~BodyManager() noexcept;
 
@@ -54,7 +56,6 @@ class BodyManager : public StableAddress
         ecs::ComponentPool<Transform>* m_transformPool;
         sparse_map<JPH::BodyID> m_bodies;
         BodyFactory m_bodyFactory;
-        ConstraintManager* m_constraintManager;
         std::unique_ptr<ComponentContext> m_ctx;
         std::unique_ptr<Connections> m_connections;
         bool m_deferInitialization = false;

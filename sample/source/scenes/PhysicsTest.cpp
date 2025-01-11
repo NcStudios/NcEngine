@@ -16,15 +16,27 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/RigidBody.h"
+#include "ncengine/physics/Vehicle.h"
 #include "ncengine/ui/ImGuiUtility.h"
 #include "ncutility/ScopeExit.h"
 
 namespace nc::sample
 {
+enum class CharacterType
+{
+    Worm = 0,
+    Vehicle = 1
+};
+
 enum class CastMode
 {
     RayCast = 0,
     CollideShape = 1
+};
+
+constexpr auto CharacterTypeNames = std::array{
+    std::string_view{"Worm"},
+    std::string_view{"Vehicle"}
 };
 
 constexpr auto CastModeNames = std::array{
@@ -34,11 +46,13 @@ constexpr auto CastModeNames = std::array{
 
 std::function<void(unsigned)> SpawnFunc = nullptr;
 std::function<void(unsigned)> DestroyFunc = nullptr;
-
+std::function<void()> SpawnCharacterFunc = nullptr;
 constexpr auto PlayerLayer = Entity::layer_type{10};
 auto SpawnCount = 1000;
 auto DestroyCount = 1000;
-auto ForceMultiplier = 1.0f;
+auto CharacterEntities = std::vector<Entity>{};
+auto SelectedCharacterType = CharacterType::Worm;
+auto SelectedCharacterTypeName = std::string{CharacterTypeNames[0]};
 auto LogCollisionEvents = true;
 auto LogTriggerEvents = true;
 auto SelectedCastMode = CastMode::RayCast;
@@ -51,7 +65,14 @@ void Widget()
     {
         ui::Checkbox(LogCollisionEvents, "logCollisions");
         ui::Checkbox(LogTriggerEvents, "logTriggers");
-        ui::DragFloat(ForceMultiplier, "forceMultiplier");
+        if (ui::Combobox(SelectedCharacterTypeName, "character", CharacterTypeNames))
+        {
+            const auto pos = std::ranges::find(CharacterTypeNames, SelectedCharacterTypeName);
+            NC_ASSERT(pos != CharacterTypeNames.end(), "Invalid CharacterType");
+            SelectedCharacterType = static_cast<CharacterType>(std::distance(CharacterTypeNames.begin(), pos));
+            SpawnCharacterFunc();
+        }
+
         if (ui::Combobox(SelectedCastModeName, "castMode", CastModeNames))
         {
             const auto pos = std::ranges::find(CastModeNames, SelectedCastModeName);
@@ -154,15 +175,18 @@ class VehicleController : public FreeComponent
     static constexpr auto torqueForce = 250.0f;
     static constexpr auto jumpForce = 5000.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
+    static constexpr auto throttleRate = 2.0f;
+    static constexpr auto steerRate = 2.0f;
 
     public:
-        VehicleController(Entity self, Entity node1, Entity node2, Entity node3)
-            : FreeComponent{self}, m_node1{node1}, m_node2{node2}, m_node3{node3}
+        VehicleController(Entity self)
+            : FreeComponent{self}
         {
         }
 
         void Run(Entity, ecs::Ecs world, float dt)
         {
+            auto& body = world.Get<RigidBody>(ParentEntity());
             if (m_jumpOnCooldown)
             {
                 m_jumpCooldownRemaining -= dt;
@@ -173,7 +197,98 @@ class VehicleController : public FreeComponent
                 }
             }
 
-            MoveController(world);
+            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
+            {
+                m_jumpOnCooldown = true;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                body.AddImpulse(dir);
+            }
+
+            if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
+            {
+                m_jumpOnCooldown = true;
+                const auto dir = Vector3::Up() * jumpForce;
+                body.AddImpulse(dir);
+            }
+
+            auto& controller = *body.GetVehicle();
+            const auto [side, forward] = input::GetAxis();
+            auto brake = 0.0f;
+
+            if (side)
+            {
+                m_previousSteer = std::clamp(m_previousSteer + side * steerRate * dt, -1.0f, 1.0f);
+            }
+            else
+            {
+                m_previousSteer = 0.0f;
+            }
+            if (forward)
+            {
+                m_previousThrottle = std::clamp(m_previousThrottle + forward * throttleRate * dt, -1.0f, 1.0f);
+            }
+            else
+            {
+                m_previousThrottle = 0.0f;
+                brake = 0.5f;
+            }
+
+            controller.SetInput(m_previousThrottle, m_previousSteer, brake, 0.0f);
+        }
+
+    private:
+        float m_jumpCooldownRemaining = 0.0f;
+        float m_previousThrottle = 0.0f;
+        float m_previousSteer = 0.0f;
+        bool m_jumpOnCooldown = false;
+};
+
+class WormController : public FreeComponent
+{
+    static constexpr auto force = 250.0f;
+    static constexpr auto torqueForce = 250.0f;
+    static constexpr auto jumpForce = 5000.0f;
+    static constexpr auto jumpCooldownTime = 0.3f;
+
+    public:
+        WormController(Entity self, Entity node1, Entity node2, Entity node3)
+            : FreeComponent{self}, m_node1{node1}, m_node2{node2}, m_node3{node3}
+        {
+        }
+
+        void Run(Entity, ecs::Ecs world, float dt)
+        {
+            auto& body = world.Get<RigidBody>(ParentEntity());
+            if (m_jumpOnCooldown)
+            {
+                m_jumpCooldownRemaining -= dt;
+                if (m_jumpCooldownRemaining < 0.0f)
+                {
+                    m_jumpCooldownRemaining = jumpCooldownTime;
+                    m_jumpOnCooldown = false;
+                }
+            }
+
+            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
+            {
+                m_jumpOnCooldown = true;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                body.AddImpulse(dir);
+            }
+
+            if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
+            {
+                m_jumpOnCooldown = true;
+                const auto dir = Vector3::Up() * jumpForce;
+                body.AddImpulse(dir);
+            }
+
+            if(KeyHeld(input::KeyCode::W)) body.AddImpulse(Vector3::Front() * force);
+            if(KeyHeld(input::KeyCode::S)) body.AddImpulse(Vector3::Back() * force);
+            if(KeyHeld(input::KeyCode::A)) body.AddImpulse(Vector3::Left() * force);
+            if(KeyHeld(input::KeyCode::D)) body.AddImpulse(Vector3::Right() * force);
+            if(KeyHeld(input::KeyCode::Q)) body.AddTorque(Vector3::Down() * torqueForce);
+            if(KeyHeld(input::KeyCode::E)) body.AddTorque(Vector3::Up() * torqueForce);
         }
 
     private:
@@ -182,95 +297,77 @@ class VehicleController : public FreeComponent
         Entity m_node3;
         float m_jumpCooldownRemaining = 0.0f;
         bool m_jumpOnCooldown = false;
-
-        void MoveController(ecs::Ecs world)
-        {
-            auto& rBody = world.Get<RigidBody>(ParentEntity());
-
-            if(KeyHeld(input::KeyCode::W)) rBody.AddImpulse(Vector3::Front() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::S)) rBody.AddImpulse(Vector3::Back() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::A)) rBody.AddImpulse(Vector3::Left() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::D)) rBody.AddImpulse(Vector3::Right() * force * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::Q)) rBody.AddTorque(Vector3::Down() * torqueForce * ForceMultiplier);
-            if(KeyHeld(input::KeyCode::E)) rBody.AddTorque(Vector3::Up() * torqueForce * ForceMultiplier);
-
-            if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
-            {
-                m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f * ForceMultiplier;
-                rBody.AddImpulse(dir);
-            }
-
-            if (!m_jumpOnCooldown && KeyDown(input::KeyCode::LeftShift))
-            {
-                m_jumpOnCooldown = true;
-                const auto dir = Vector3::Up() * jumpForce * ForceMultiplier;
-                rBody.AddImpulse(dir);
-            }
-        }
 };
 
-auto BuildVehicle(ecs::Ecs world) -> Entity
+auto BuildWorm(ecs::Ecs world) -> Entity
 {
-    const auto head = world.Emplace<Entity>({
-        .scale = Vector3::Splat(1.0f),
-        .tag = "Worm Head",
-        .layer = PlayerLayer
-    });
+    auto makeNode = [&world](std::string tag,
+                             float zOffset,
+                             float scale,
+                             Entity::layer_type layer = Entity::layer_type{},
+                             float friction = 0.2f,
+                             RigidBodyFlags::Type flags = RigidBodyFlags::None) -> RigidBody& {
+        const auto entity = world.Emplace<Entity>({
+            .position = Vector3{0.0f, 2.0f, zOffset},
+            .scale = Vector3::Splat(scale),
+            .tag = std::move(tag),
+            .layer = layer
+        });
 
-    const auto segment1 = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 2.0f, -0.9f},
-        .scale = Vector3::Splat(0.8f),
-        .tag = "Worm Segment 1"
-    });
+        world.Emplace<StaticMesh>(entity, mesh::Cube, material::Green);
+        return world.Emplace<RigidBody>(
+            entity,
+            Shape::MakeBox(),
+            RigidBodyInfo{
+                .friction = friction,
+                .flags = flags
+            }
+        );
+    };
 
-    const auto segment2 = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 2.0f, -1.6f},
-        .scale = Vector3::Splat(0.6f),
-        .tag = "Worm Segment 2"
-    });
+    constexpr auto headScale = 1.0f;
+    constexpr auto segment1Scale = 0.8f;
+    constexpr auto segment2Scale = 0.6f;
+    constexpr auto segment3Scale = 0.4f;
+    auto& bodyHead     = makeNode("Worm Head",       1.0f, headScale, PlayerLayer, 0.8f, RigidBodyFlags::DisableSleeping);
+    auto& bodySegment1 = makeNode("Worm Segment 1", -0.9f, segment1Scale);
+    auto& bodySegment2 = makeNode("Worm Segment 2", -1.6f, segment2Scale);
+    auto& bodySegment3 = makeNode("Worm Segment 3", -2.1f, segment3Scale);
 
-    const auto segment3 = world.Emplace<Entity>({
-        .position = Vector3{0.0f, 2.0f, -2.1f},
-        .scale = Vector3::Splat(0.4f),
-        .tag = "Worm Segment 3"
-    });
+    const auto head = bodyHead.GetEntity();
+    const auto segment1 = bodySegment1.GetEntity();
+    const auto segment2 = bodySegment2.GetEntity();
+    const auto segment3 = bodySegment3.GetEntity();
+    CharacterEntities.push_back(head);
+    CharacterEntities.push_back(segment1);
+    CharacterEntities.push_back(segment2);
+    CharacterEntities.push_back(segment3);
 
-    world.Emplace<VehicleController>(head, segment1, segment2, segment3);
-    world.Emplace<FrameLogic>(head, InvokeFreeComponent<VehicleController>{});
-
-    world.Emplace<StaticMesh>(head, mesh::Cube, material::Green);
-    world.Emplace<StaticMesh>(segment1, mesh::Cube, material::Green);
-    world.Emplace<StaticMesh>(segment2, mesh::Cube, material::Green);
-    world.Emplace<StaticMesh>(segment3, mesh::Cube, material::Green);
-
-    auto& bodyHead = world.Emplace<RigidBody>(head, Shape::MakeBox(), RigidBodyInfo{.friction = 0.8f});
-    auto& bodyNode1 = world.Emplace<RigidBody>(segment1, Shape::MakeBox());
-    auto& bodyNode2 = world.Emplace<RigidBody>(segment2, Shape::MakeBox());
-    auto& bodyNode3 = world.Emplace<RigidBody>(segment3, Shape::MakeBox());
+    world.Emplace<WormController>(head, segment1, segment2, segment3);
+    world.Emplace<FrameLogic>(head, InvokeFreeComponent<WormController>{});
 
     bodyHead.AddConstraint(
         PointConstraintInfo{
             .ownerPosition = Vector3{0.0f, -0.1f, -0.6f},
             .targetPosition = Vector3{0.0f, 0.0f, 0.5f}
         },
-        bodyNode1
+        bodySegment1
     );
 
-    bodyNode1.AddConstraint(
+    bodySegment1.AddConstraint(
         PointConstraintInfo{
             .ownerPosition = Vector3{0.0f, -0.1f, -0.5f},
             .targetPosition = Vector3{0.0f, 0.0f, 0.4f}
         },
-        bodyNode2
+        bodySegment2
     );
 
-    bodyNode2.AddConstraint(
+    bodySegment2.AddConstraint(
         PointConstraintInfo{
             .ownerPosition = Vector3{0.0f, -0.1f, -0.4f},
             .targetPosition = Vector3{0.0f, 0.0f, 0.3f}
         },
-        bodyNode3
+        bodySegment3
     );
 
     static constexpr auto log = [](const char* eventType, Entity other, ecs::Ecs ecs)
@@ -304,6 +401,104 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     );
 
     return head;
+}
+
+auto BuildVehicle(ecs::Ecs world) -> Entity
+{
+    constexpr auto carScale = Vector3{1.0f, 0.5f, 2.0f};
+    constexpr auto width = 0.4f;
+    constexpr auto radius = 0.3f;
+    constexpr auto suspensionMinLength = 0.05f;
+    constexpr auto suspensionMaxLength = 0.3f;
+    constexpr auto diameter = radius * 2.0f;
+    constexpr auto wheelScale = Vector3{width, diameter, diameter};
+    constexpr auto offsetLR = (carScale.x + width) * 0.5f + 0.02f;
+    constexpr auto offsetUD = carScale.y * 0.5f;
+    constexpr auto flPosition = Vector3{-offsetLR, -offsetUD,  1.0f};
+    constexpr auto frPosition = Vector3{ offsetLR, -offsetUD,  1.0f};
+    constexpr auto blPosition = Vector3{-offsetLR, -offsetUD, -1.0f};
+    constexpr auto brPosition = Vector3{ offsetLR, -offsetUD, -1.0f};
+
+    const auto car     = world.Emplace<Entity>({.position = Vector3{0.0f, 2.0f, 1.0f}, .tag = "Car", .layer = PlayerLayer});
+    const auto wheelFL = world.Emplace<Entity>({.position = flPosition, .scale = wheelScale, .parent = car, .tag = "FL"});
+    const auto wheelFR = world.Emplace<Entity>({.position = frPosition, .scale = wheelScale, .parent = car, .tag = "FR"});
+    const auto wheelBL = world.Emplace<Entity>({.position = blPosition, .scale = wheelScale, .parent = car, .tag = "BL"});
+    const auto wheelBR = world.Emplace<Entity>({.position = brPosition, .scale = wheelScale, .parent = car, .tag = "BR"});
+    const auto carMesh = world.Emplace<Entity>({.scale = carScale, .parent = car, .tag = "CarMesh"});
+
+    world.Emplace<StaticMesh>(wheelFL, mesh::Wheel, material::Yellow);
+    world.Emplace<StaticMesh>(wheelFR, mesh::Wheel, material::Yellow);
+    world.Emplace<StaticMesh>(wheelBL, mesh::Wheel, material::Yellow);
+    world.Emplace<StaticMesh>(wheelBR, mesh::Wheel, material::Yellow);
+    world.Emplace<StaticMesh>(carMesh, mesh::Cube,  material::Green);
+
+    CharacterEntities.push_back(car);
+    world.Emplace<VehicleController>(car);
+    world.Emplace<FrameLogic>(car, InvokeFreeComponent<VehicleController>{});
+    auto& body = world.Emplace<RigidBody>(
+        car,
+        Shape::MakeBox(carScale),
+        RigidBodyInfo{.flags = RigidBodyFlags::DisableSleeping}
+    );
+
+    body.AddVehicle(VehicleInfo{
+        .orientation = VehicleOrientation{
+            .maxRollAngle = 0.3f,
+        },
+        .engine = VehicleEngine{
+            .maxTorque = 1500.0f,
+            .minRPM = 100.0f,
+            .maxRPM = 800.0f
+        },
+        .transmission = VehicleTransmission{
+            .gears = {3.0f, 2.5f, 1.8f, 1.0f},
+            .shiftTime = 0.1f,
+            .shiftLatency = 0.2f,
+            .shiftUpRPM = 400.0f,
+            .shiftDownRPM = 200.0f,
+            .clutchRelease = 0.1f,
+            .clutchStrength = 50.0f
+        },
+        .wheelAssemblies = {
+            WheelAssembly{
+                .leftWheel  = WheelMount{.position = flPosition, .target = wheelFL},
+                .rightWheel = WheelMount{.position = frPosition, .target = wheelFR},
+                .wheelSpec = WheelSpec{
+                    .radius = radius,
+                    .width = width,
+                    .maxSteerAngle = 0.8f
+                },
+                .suspension = Suspension{
+                    .minLength = suspensionMinLength,
+                    .maxLength = suspensionMaxLength,
+                    .spring = SpringSettings{
+                        .frequency = 1.5f,
+                        .damping = 0.5f
+                    }
+                }
+            },
+            WheelAssembly{
+                .leftWheel  = WheelMount{.position = blPosition, .target = wheelBL},
+                .rightWheel = WheelMount{.position = brPosition, .target = wheelBR},
+                .wheelSpec = WheelSpec{
+                    .radius = radius,
+                    .width = width,
+                    .maxSteerAngle = 0.0
+                },
+                .suspension = Suspension{
+                    .minLength = suspensionMinLength,
+                    .maxLength = suspensionMaxLength,
+                    .spring = SpringSettings{
+                        .frequency = 2.0f,
+                        .damping = 0.5f
+                    }
+                },
+                .differential = Differential::MakeDisabled()
+            }
+        }
+    });
+
+    return car;
 }
 
 void BuildGround(ecs::Ecs world)
@@ -1014,7 +1209,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     ReloadPrefabs();
     m_sampleUI->SetWidgetCallback(Widget);
-
     auto ncGraphics = modules.Get<NcGraphics>();
     auto ncRandom = modules.Get<Random>();
     auto ncPhysics = modules.Get<NcPhysics>();
@@ -1026,9 +1220,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     ncPhysics->BeginRigidBodyBatch(140);
     SCOPE_EXIT(ncPhysics->EndRigidBodyBatch(););
 
-    // Vehicle
-    const auto vehicle = BuildVehicle(world);
-
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
         .position = Vector3{0.0f, 12.0f, -12.0f},
@@ -1036,11 +1227,28 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Main Camera"
     });
 
-    auto& camera = world.Emplace<FollowCamera>(cameraHandle, vehicle);
+    auto& camera = world.Emplace<FollowCamera>(cameraHandle, Entity::Null());
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
     ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f, .depthThreshold = 0.360f, .normalThreshold = 0.190f}});
+
+    // Character
+    SpawnCharacterFunc = [world, cameraHandle]() mutable
+    {
+        for (const auto entity : CharacterEntities)
+        {
+            world.Remove<Entity>(entity);
+        }
+
+        const auto newCharacter = SelectedCharacterType == CharacterType::Worm
+            ? BuildWorm(world)
+            : BuildVehicle(world);
+
+        world.Get<FollowCamera>(cameraHandle).target = newCharacter;
+    };
+
+    SpawnCharacterFunc();
 
     // Ray Caster
     auto rayCaster = world.Emplace<Entity>({.tag = "RayCaster"});
@@ -1086,5 +1294,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 void PhysicsTest::Unload()
 {
     m_sampleUI->SetWidgetCallback(nullptr);
+    CharacterEntities.clear();
 }
 } // namespace nc::sample

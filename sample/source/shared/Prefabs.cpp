@@ -23,6 +23,7 @@ asset::MeshView Plane{};
 asset::MeshView Ramp{};
 asset::MeshView Skeleton{};
 asset::MeshView Sphere{};
+asset::MeshView Wheel{};
 } // namespace mesh
 
 namespace material
@@ -146,6 +147,7 @@ void ReloadPrefabs()
     mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
     mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
     mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::Wheel = asset::AcquireMeshAsset(asset::WheelMesh);
 
     const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
     material::Blue.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");

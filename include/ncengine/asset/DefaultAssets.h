@@ -1,6 +1,6 @@
 /**
  * @file NcAsset.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2025
  * 
  * @note Assets in this file are guaranteed to be loaded before each call to
  *       `Scene::Load()`.
@@ -23,6 +23,9 @@ constexpr auto CapsuleMesh = "DefaultCapsule.nca";
 
 /** @brief Name of the default skybox mesh asset. */
 constexpr auto SkyboxMesh = "DefaultSkyboxMesh.nca";
+
+/** @brief Name of the default wheel mesh asset. */
+constexpr auto WheelMesh = "DefaultWheel.nca";
 
 /** @brief Name of the default base color texture asset. */
 constexpr auto DefaultBaseColor = "DefaultBaseColor.nca";

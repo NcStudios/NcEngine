@@ -28,15 +28,16 @@ BodyManager::BodyManager(ecs::ComponentPool<Transform>& transformPool,
                          uint32_t maxEntities,
                          JPH::PhysicsSystem& physicsSystem,
                          ShapeFactory& shapeFactory,
-                         ConstraintManager& constraintManager)
+                         ConstraintManager& constraintManager,
+                         VehicleManager& vehicleManager)
     : m_transformPool{&transformPool},
       m_bodies{std::min(BodyMapSizeHint, maxEntities), maxEntities},
       m_bodyFactory{physicsSystem.GetBodyInterfaceNoLock(), shapeFactory},
-      m_constraintManager{&constraintManager},
       m_ctx{std::make_unique<ComponentContext>(
           physicsSystem.GetBodyInterfaceNoLock(),
           shapeFactory,
-          constraintManager
+          constraintManager,
+          vehicleManager
       )},
       m_connections{Connections::Connect(this, rigidBodyPool)}
 {
@@ -74,7 +75,8 @@ void BodyManager::RemoveBody(Entity toRemove)
 
     const auto bodyId = m_bodies.at(toRemove.Index());
     m_bodies.erase(toRemove.Index());
-    m_constraintManager->RemoveConstraints(toRemove);
+    m_ctx->constraintManager.RemoveConstraints(toRemove);
+    m_ctx->vehicleManager.RemoveVehicle(toRemove);
     m_ctx->interface.RemoveBody(bodyId);
     m_ctx->interface.DestroyBody(bodyId);
 }

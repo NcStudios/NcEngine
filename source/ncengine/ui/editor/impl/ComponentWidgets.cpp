@@ -181,10 +181,12 @@ namespace rigid_body_ext
 {
 using T = nc::RigidBody;
 
-constexpr bool (T::*getIgnoreTransformScaling)() const    = &T::IgnoreTransformScaling;
-constexpr void (T::*setIgnoreTransformScaling)(bool)      = &T::IgnoreTransformScaling;
-constexpr bool (T::*getUseContinuousDetection)() const = &T::UseContinuousDetection;
-constexpr void (T::*setUseContinuousDetection)(bool)   = &T::UseContinuousDetection;
+constexpr bool (T::*getIgnoreTransformScaling)()     const = &T::IgnoreTransformScaling;
+constexpr void (T::*setIgnoreTransformScaling)(bool)       = &T::IgnoreTransformScaling;
+constexpr bool (T::*getUseContinuousDetection)()     const = &T::UseContinuousDetection;
+constexpr void (T::*setUseContinuousDetection)(bool)       = &T::UseContinuousDetection;
+constexpr bool (T::*getDisableSleeping)()            const = &T::DisableSleeping;
+constexpr void (T::*setDisableSleeping)(bool)              = &T::DisableSleeping;
 
 constexpr auto getBodyType = [](auto& body)
 {
@@ -208,6 +210,7 @@ constexpr auto gravityMultiplierProp      = nc::ui::Property{ &T::GetGravityMult
 constexpr auto triggerProp                = nc::ui::Property{ &T::IsTrigger,             &T::SetTrigger,            "isTrigger"              };
 constexpr auto scalesWithTransformProp    = nc::ui::Property{ getIgnoreTransformScaling, setIgnoreTransformScaling, "ignoreTransformScaling" };
 constexpr auto useContinuousDetectionProp = nc::ui::Property{ getUseContinuousDetection, setUseContinuousDetection, "continousDetection"     };
+constexpr auto disableSleeping            = nc::ui::Property{ getDisableSleeping,        setDisableSleeping,        "disableSleeping"        };
 
 void BoxProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
 {
@@ -361,42 +364,12 @@ struct ConstraintVisitor
     static constexpr auto Pi = std::numbers::pi_v<float>;
     static constexpr auto HalfPi = Pi * 0.5f;
 
-    auto ClosestOrthogonal(const nc::Vector3& target, const nc::Vector3& reference) -> nc::Vector3
-    {
-        constexpr auto parallelThreshold = 0.999f;
-        const auto projection = Dot(target, reference);
-        if (std::fabs(projection) < parallelThreshold)
-        {
-            return Normalize(target - reference * projection);
-        }
-
-        return OrthogonalTo(reference);
-    }
-
-    auto InputReferenceFrame(nc::Vector3& basis, nc::Vector3& normal, const char* basisLabel, const char* normalLabel) -> bool
-    {
-        auto dirty = false;
-        if (nc::ui::InputAxis(basis, basisLabel))
-        {
-            normal = ClosestOrthogonal(normal, basis);
-            dirty = true;
-        }
-
-        if (nc::ui::InputAxis(normal, normalLabel))
-        {
-            basis = ClosestOrthogonal(basis, normal);
-            dirty = true;
-        }
-
-        return dirty;
-    }
-
     auto operator()(nc::FixedConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
-        dirty = InputReferenceFrame(constraint.ownerRight, constraint.ownerUp, "ownerRight", "ownerUp") || dirty;
+        dirty = nc::ui::InputReferenceFrame(constraint.ownerRight, constraint.ownerUp, "ownerRight", "ownerUp") || dirty;
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
-        dirty = InputReferenceFrame(constraint.targetRight, constraint.targetUp, "targetRight", "targetUp") || dirty;
+        dirty = nc::ui::InputReferenceFrame(constraint.targetRight, constraint.targetUp, "targetRight", "targetUp") || dirty;
         return dirty;
     }
 
@@ -420,9 +393,9 @@ struct ConstraintVisitor
     auto operator()(nc::HingeConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
-        dirty = InputReferenceFrame(constraint.ownerHingeAxis, constraint.ownerNormalAxis, "ownerHingeAxis", "ownerNormalAxis") || dirty;
+        dirty = nc::ui::InputReferenceFrame(constraint.ownerHingeAxis, constraint.ownerNormalAxis, "ownerHingeAxis", "ownerNormalAxis") || dirty;
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
-        dirty = InputReferenceFrame(constraint.targetHingeAxis, constraint.targetNormalAxis, "targetHingeAxis", "targetNormalAxis") || dirty;
+        dirty = nc::ui::InputReferenceFrame(constraint.targetHingeAxis, constraint.targetNormalAxis, "targetHingeAxis", "targetNormalAxis") || dirty;
 
         constexpr auto minAngle = 0.001f;
         const auto minLimitUpperBound = constraint.maxLimit == 0.0f ? -minAngle : 0.0f;
@@ -439,10 +412,10 @@ struct ConstraintVisitor
     auto operator()(nc::SliderConstraintInfo& constraint) -> bool
     {
         auto dirty = nc::ui::InputPosition(constraint.ownerPosition, "ownerPosition");
-        dirty = InputReferenceFrame(constraint.ownerSliderAxis, constraint.ownerNormalAxis, "ownerSliderAxis", "ownerNormalAxis") || dirty;
+        dirty = nc::ui::InputReferenceFrame(constraint.ownerSliderAxis, constraint.ownerNormalAxis, "ownerSliderAxis", "ownerNormalAxis") || dirty;
 
         dirty = nc::ui::InputPosition(constraint.targetPosition, "targetPosition") || dirty;
-        dirty = InputReferenceFrame(constraint.targetSliderAxis, constraint.targetNormalAxis, "targetSliderAxis", "targetNormalAxis") || dirty;
+        dirty = nc::ui::InputReferenceFrame(constraint.targetSliderAxis, constraint.targetNormalAxis, "targetSliderAxis", "targetNormalAxis") || dirty;
 
         constexpr auto minLength = 0.001f;
         const auto minLimitUpperBound = constraint.maxLimit == 0.0f ? -minLength : 0.0f;
@@ -530,6 +503,314 @@ void MakeDefaultConstraint(nc::RigidBody& body, nc::Transform& transform)
         .ownerUp = transform.Up(),
         .targetPosition = transform.Position()
     });
+}
+
+auto VehicleOrientationWidget(nc::VehicleOrientation& settings) -> bool
+{
+    // We cannot modify internal vehicle basis after construction - only allow/report writes to roll angle
+    {
+        IMGUI_SCOPE(nc::ui::DisableIf, true);
+        nc::ui::InputVector3(settings.up, "up");
+        nc::ui::InputVector3(settings.forward, "forward");
+    }
+
+    if (nc::ui::DragFloat(settings.maxRollAngle, "maxRollAngle", 0.01f, 0.0f, nc::ui::g_maxAngle * 0.5f))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+auto VehicleEngineWidget(nc::VehicleEngine& settings) -> bool
+{
+    auto modified = false;
+    modified = nc::ui::DragFloat(settings.maxTorque, "maxTorque", 1.0f,  0.0f,            FLT_MAX)         || modified;
+    modified = nc::ui::DragFloat(settings.minRPM,    "minRPM",    1.0f,  0.0f,            settings.maxRPM) || modified;
+    modified = nc::ui::DragFloat(settings.maxRPM,    "maxRPM",    1.0f,  settings.minRPM, FLT_MAX)         || modified;
+    modified = nc::ui::DragFloat(settings.inertia,   "inertia",   0.1f,  0.1f,            20.0f)           || modified;
+    modified = nc::ui::DragFloat(settings.damping,   "damping",   0.01f, 0.0f,            1.0f)            || modified;
+    return modified;
+}
+
+auto GearRatiosWidget(std::vector<float>& ratios, bool isForward) -> bool
+{
+    constexpr auto buttonSize = ImVec2{16.0f, 19.0f};
+    auto modified = false;
+    ImGui::Text(isForward ? "Forward" : "Reverse");
+    ImGui::SameLine();
+
+    {
+        IMGUI_SCOPE(nc::ui::StyleColor, ImGuiCol_Text, nc::ui::color::Green);
+        if (ImGui::Button("+", buttonSize))
+        {
+            const auto defaultRatio = isForward ? 2.66f : -2.66f;
+            ratios.push_back(ratios.empty() ? defaultRatio : ratios.back() * 0.75f);
+            modified = true;
+        }
+    }
+
+    ImGui::Separator();
+
+    const auto isOnlyGear = ratios.size() == 1;
+    const auto [min, max] = isForward ? nc::Vector2{0.01f, FLT_MAX} : nc::Vector2{-FLT_MAX, -0.01f};
+    std::ptrdiff_t removed = -1;
+    for (auto [i, ratio] : std::views::enumerate(ratios))
+    {
+        IMGUI_SCOPE(nc::ui::ImGuiId, static_cast<int>(i));
+        modified = nc::ui::DragFloat(ratio, "##v", 0.01f, min, max) || modified;
+        ImGui::SameLine();
+        IMGUI_SCOPE(nc::ui::DisableIf, isOnlyGear);
+        IMGUI_SCOPE(nc::ui::StyleColor, ImGuiCol_Text, nc::ui::color::Red);
+        if (ImGui::Button("-", buttonSize))
+        {
+            removed = i;
+        }
+    }
+
+    if (removed != -1)
+    {
+        modified = true;
+        ratios.erase(ratios.begin() + removed);
+    }
+
+    return modified;
+}
+
+auto GearBoxWidget(std::vector<float>& forwardRatios, std::vector<float>& reverseRatios) -> bool
+{
+    auto modified = false;
+    if (ImGui::TreeNodeEx("Gears", 0))
+    {
+        if (ImGui::BeginTable("##geartable", 2, ImGuiTableFlags_Borders))
+        {
+            ImGui::TableNextRow();
+
+            {
+                IMGUI_SCOPE(nc::ui::ImGuiId, "fwd_gear_tag");
+                ImGui::TableNextColumn();
+                modified = GearRatiosWidget(forwardRatios, true) || modified;
+            }
+
+            {
+                IMGUI_SCOPE(nc::ui::ImGuiId, "rev_gear_tag");
+                ImGui::TableNextColumn();
+                modified = GearRatiosWidget(reverseRatios, false) || modified;
+            }
+
+            ImGui::EndTable();
+        }
+
+        ImGui::TreePop();
+    }
+
+    return modified;
+}
+
+auto VehicleTransmissionWidget(nc::VehicleTransmission& settings, float maxRPM) -> bool
+{
+    auto modified = GearBoxWidget(settings.gears, settings.reverseGears);
+    modified = nc::ui::DragFloat(settings.shiftTime,      "shiftTime",      0.05f, 0.0f,                  3.0f)                || modified;
+    modified = nc::ui::DragFloat(settings.shiftLatency,   "shiftLatency",   0.05f, 0.0f,                  3.0f)                || modified;
+    modified = nc::ui::DragFloat(settings.shiftUpRPM,     "shiftUpRPM",     1.0f,  settings.shiftDownRPM, maxRPM)              || modified;
+    modified = nc::ui::DragFloat(settings.shiftDownRPM,   "shiftDownRPM",   1.0f,  0.0f,                  settings.shiftUpRPM) || modified;
+    modified = nc::ui::DragFloat(settings.clutchRelease,  "clutchRelease",  0.05f, 0.0f,                  3.0f)                || modified;
+    modified = nc::ui::DragFloat(settings.clutchStrength, "clutchStrength", 0.1f,  0.0f,                  100.0f)              || modified;
+    return modified;
+}
+
+auto WheelMountWidget(nc::WheelMount& wheel, nc::ecs::Ecs world) -> bool
+{
+    IMGUI_SCOPE(nc::ui::DisableIf, wheel.id == -1);
+    constexpr auto nullTargetName = std::string_view{"Null"};
+    const auto target = wheel.target;
+    auto targetName = target.Valid()
+        ? world.Get<nc::Tag>(target).value
+        : std::string{nullTargetName};
+
+    if (nc::ui::InputText(targetName, "target"))
+    {
+        if (targetName.empty() || targetName == nullTargetName)
+        {
+            wheel.target = nc::Entity::Null();
+        }
+        else
+        {
+            auto& tagPool = world.GetPool<nc::Tag>();
+            auto tags = tagPool.GetComponents();
+            auto tagPos = std::ranges::find(tags, targetName, &nc::Tag::value);
+            if (tagPos != tags.end())
+            {
+                wheel.target = tagPool.GetParent(&*tagPos);
+            }
+        }
+    }
+
+    // don't need to notify update for entity
+    nc::ui::DragAndDropTarget<nc::Entity>([&wheel](nc::Entity* drop){ wheel.target = *drop; });
+
+    auto modified = false;
+    modified = nc::ui::InputPosition(wheel.position,                "position")       || modified;
+    modified = nc::ui::InputReferenceFrame(wheel.up, wheel.forward, "up", "forward")  || modified;
+    modified = nc::ui::InputAxis(wheel.steeringAxis,                "steeringAxis")   || modified;
+    modified = nc::ui::InputAxis(wheel.suspensionAxis,              "suspensionAxis") || modified;
+    return modified;
+};
+
+auto WheelSpecWidget(nc::WheelSpec& spec) -> bool
+{
+    auto modified = false;
+    modified = nc::ui::DragFloat(spec.radius,             "radius",             0.05f, 0.05f, 20.0f)     || modified;
+    modified = nc::ui::DragFloat(spec.width,              "width",              0.05f, 0.05f, 20.0f)     || modified;
+    modified = nc::ui::DragFloat(spec.inertia,            "inertia",            0.05f, 0.05f, 20.0f)     || modified;
+    modified = nc::ui::DragFloat(spec.damping,            "damping",            0.05f, 0.0f,  1.0f)      || modified;
+    modified = nc::ui::DragFloat(spec.maxSteerAngle,      "maxSteerAngle",      0.05f, 0.0f,  1.570795f) || modified;
+    modified = nc::ui::DragFloat(spec.maxBrakeTorque,     "maxBrakeTorque",     1.0f,  0.0f,  FLT_MAX)   || modified;
+    modified = nc::ui::DragFloat(spec.maxHandBrakeTorque, "maxHandBrakeTorque", 1.0f,  0.0f,  FLT_MAX)   || modified;
+    return modified;
+}
+
+auto SuspensionWidget(nc::Suspension& suspension) -> bool
+{
+    constexpr auto step = 0.01f;
+    auto modified = false;
+    auto& [min, max, spring] = suspension;
+    modified = nc::ui::DragFloat(min,              "minLength",       step,  0.0f,       max - step) || modified;
+    modified = nc::ui::DragFloat(max,              "maxLength",       step,  min + step, 100.0f)     || modified;
+    modified = nc::ui::DragFloat(spring.frequency, "springFrequency", 0.1f,  0.1f,       30.0f)      || modified;
+    modified = nc::ui::DragFloat(spring.damping,   "springDamping",   0.05f, 0.0f,       5.0f)       || modified;
+    return modified;
+}
+
+auto DifferentialWidget(nc::Differential& differential, bool hasOneDifferential) -> bool
+{
+    auto modified = false;
+
+    {
+        auto enabled = differential.IsEnabled();
+        IMGUI_SCOPE(nc::ui::DisableIf, hasOneDifferential && enabled);
+        if (nc::ui::Checkbox(enabled, "enabled"))
+        {
+            differential = enabled ? nc::Differential{} : nc::Differential::MakeDisabled();
+            modified = true;
+        }
+    }
+
+    modified = nc::ui::DragFloat(differential.ratio,            "ratio",            0.1f, 0.01f,  20.0f)   || modified;
+    modified = nc::ui::DragFloat(differential.limitedSlipRatio, "limitedSlipRatio", 0.1f, 1.001f, FLT_MAX) || modified;
+    return modified;
+}
+
+auto WheelAssemblyWidget(nc::WheelAssembly& assembly, nc::ecs::Ecs world, bool hasOneDifferential) -> bool
+{
+    auto modified = false;
+    if (ImGui::TreeNodeEx("Left Wheel"))
+    {
+        modified = WheelMountWidget(assembly.leftWheel, world) || modified;
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Right Wheel"))
+    {
+        modified = WheelMountWidget(assembly.rightWheel, world) || modified;
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Wheel Spec"))
+    {
+        modified = WheelSpecWidget(assembly.wheelSpec) || modified;
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Suspension"))
+    {
+        modified = SuspensionWidget(assembly.suspension) || modified;
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Differential"))
+    {
+        modified = DifferentialWidget(assembly.differential, hasOneDifferential) || modified;
+        ImGui::TreePop();
+    }
+
+    return modified;
+}
+
+void VehicleWidget(nc::Vehicle& vehicle, nc::ecs::Ecs world)
+{
+    if (auto enabled = vehicle.IsEnabled(); nc::ui::Checkbox(enabled, "enabled"))
+    {
+        vehicle.Enable(enabled);
+    }
+
+    if (ImGui::TreeNodeEx("Orientation", 0))
+    {
+        auto orientation = vehicle.GetOrientation();
+        if (VehicleOrientationWidget(orientation))
+            vehicle.SetMaxRollAngle(orientation.maxRollAngle);
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Engine", 0))
+    {
+        if (VehicleEngineWidget(vehicle.GetEngine()))
+            vehicle.NotifyModifyEngine();
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("Transmission", 0))
+    {
+        if (VehicleTransmissionWidget(vehicle.GetTransmission(), vehicle.GetEngine().maxRPM))
+            vehicle.NotifyModifyTransmission();
+        ImGui::TreePop();
+    }
+
+    std::ptrdiff_t removedAssembly = -1;
+    const auto hasOneAssembly = vehicle.GetAssemblyCount() == 1;
+    const auto hasOneDifferential = vehicle.GetDifferentialCount() == 1;
+    constexpr auto treeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_AllowOverlap;
+    for (auto [index, assembly] : std::views::enumerate(vehicle.GetWheelAssemblies()))
+    {
+        IMGUI_SCOPE(nc::ui::ImGuiId, static_cast<int>(index));
+        const auto isOpen = ImGui::TreeNodeEx("Wheel Assembly", treeFlags);
+
+        {
+            const auto disableRemoval = hasOneAssembly || (hasOneDifferential && assembly.IsPowered());
+            IMGUI_SCOPE(nc::ui::DisableIf, disableRemoval);
+            IMGUI_SCOPE(nc::ui::StyleColor, ImGuiCol_Text, nc::ui::color::Red);
+            constexpr auto buttonText = "Remove";
+            nc::ui::SameLineRightAligned(ImGui::CalcTextSize(buttonText).x);
+            if (ImGui::Button(buttonText))
+            {
+                removedAssembly = index;
+            }
+        }
+
+        if (isOpen)
+        {
+            if (WheelAssemblyWidget(assembly, world, hasOneDifferential))
+                vehicle.NotifyModifyWheelAssembly(static_cast<size_t>(index));
+            ImGui::TreePop();
+        }
+    }
+
+    if (removedAssembly != -1)
+    {
+        vehicle.RemoveWheelAssembly(static_cast<size_t>(removedAssembly));
+    }
+
+    if (ImGui::Button("Add (1-Wheel)"))
+    {
+        vehicle.AddWheelAssembly(nc::WheelAssembly{.rightWheel = nc::WheelMount::MakeDisabled()});
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Add (2-Wheel)"))
+    {
+        vehicle.AddWheelAssembly(nc::WheelAssembly{});
+    }
 }
 } // namespace rigid_body_ext
 
@@ -924,6 +1205,7 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
         }
 
         ui::PropertyWidget(rigid_body_ext::scalesWithTransformProp, body, &ui::Checkbox);
+        ui::PropertyWidget(rigid_body_ext::disableSleeping, body, &ui::Checkbox);
         ImGui::TreePop();
     }
 
@@ -939,6 +1221,35 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
         if (ImGui::Button("Add Constraint"))
         {
             rigid_body_ext::MakeDefaultConstraint(body, ctx.world.Get<Transform>(body.GetEntity()));
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+    if (ImGui::TreeNodeEx("Vehicle", 0))
+    {
+        auto vehicle = body.GetVehicle();
+        if (!vehicle)
+        {
+            if (ImGui::Button("Add"))
+            {
+                body.AddVehicle(VehicleInfo{});
+            }
+        }
+        else
+        {
+            {
+                IMGUI_SCOPE(ui::StyleColor, ImGuiCol_Text, ui::color::Red);
+                if (ImGui::Button("Remove"))
+                {
+                    body.RemoveVehicle();
+                    ImGui::TreePop();
+                    return;
+                }
+            }
+
+            rigid_body_ext::VehicleWidget(*vehicle, ctx.world);
         }
 
         ImGui::TreePop();
