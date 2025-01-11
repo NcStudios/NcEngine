@@ -1,6 +1,6 @@
 /**
  * @file AssetsFwd.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -9,8 +9,8 @@ namespace nc::asset
 struct AudioClip;
 struct BonesData;
 struct ConcaveCollider;
+struct ConvexHull;
 struct CubeMap;
-struct HullCollider;
 struct Mesh;
 struct MeshVertex;
 struct SkeletalAnimation;

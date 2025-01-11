@@ -19,7 +19,7 @@ bool HullColliderAssetManager::Load(const std::string& path, bool isExternal, as
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    m_hullColliders.emplace(path, ImportHullCollider(fullPath));
+    m_hullColliders.emplace(path, ImportConvexHull(fullPath));
     return true;
 }
 
@@ -63,12 +63,8 @@ auto HullColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> Co
 {
     const auto index = m_hullColliders.index(id);
     NC_ASSERT(index != m_hullColliders.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
-    const auto& collider = m_hullColliders.at(index);
     return ConvexHullView{
-        .id = id,
-        .vertices = std::span<const Vector3>{collider.vertices},
-        .extents = collider.extents,
-        .maxExtent = collider.maxExtent
+        .id = id
     };
 }
 

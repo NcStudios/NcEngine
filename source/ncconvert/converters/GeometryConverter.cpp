@@ -5,12 +5,18 @@
 #include "utility/Path.h"
 #include "utility/Log.h"
 
+#include "ncasset/Assets.h"
+#include "ncjolt/JoltApi.h"
+#include "ncjolt/ShapeUtility.h"
+#include "ncjolt/Profiler.inl"
+#include "ncutility/NcError.h"
+
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "fmt/format.h"
-#include "ncasset/Assets.h"
-#include "ncutility/NcError.h"
+#include "Jolt/Jolt.h"
+#include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 
 #include <algorithm>
 #include <array>
@@ -415,7 +421,7 @@ class GeometryConverter::impl
             };
         }
 
-        auto ImportHullCollider(const std::filesystem::path& path) -> asset::HullCollider
+        auto ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull
         {
             const auto mesh = ::ReadFbx(path, &m_importer, hullColliderFlags)->mMeshes[0];
 
@@ -430,10 +436,11 @@ class GeometryConverter::impl
                 LOG("Warning: Bad values detected in mesh. {} values have been set to 0.", count);
             }
 
-            return asset::HullCollider{
+            const auto shape = jolt::BuildConvexHull(convertedVertices);
+            return asset::ConvexHull{
                 GetMeshVertexExtents(convertedVertices),
                 FindFurthestDistanceFromOrigin(convertedVertices),
-                std::move(convertedVertices)
+                jolt::SerializeShape(*shape)
             };
         }
 
@@ -476,6 +483,7 @@ class GeometryConverter::impl
 
     private:
         Assimp::Importer m_importer;
+        jolt::JoltApi m_joltApi;
 };
 
 GeometryConverter::GeometryConverter()
@@ -490,9 +498,9 @@ auto GeometryConverter::ImportConcaveCollider(const std::filesystem::path& path)
     return m_impl->ImportConcaveCollider(path);
 }
 
-auto GeometryConverter::ImportHullCollider(const std::filesystem::path& path) -> asset::HullCollider
+auto GeometryConverter::ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull
 {
-    return m_impl->ImportHullCollider(path);
+    return m_impl->ImportConvexHull(path);
 }
 
 auto GeometryConverter::ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName, bool optimize) -> asset::Mesh

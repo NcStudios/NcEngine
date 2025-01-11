@@ -39,9 +39,6 @@ struct ConcaveColliderView
 struct ConvexHullView
 {
     AssetId id = NullAssetId;
-    std::span<const Vector3> vertices;
-    Vector3 extents;
-    float maxExtent = 0.0f;
 };
 
 enum class CubeMapUsage

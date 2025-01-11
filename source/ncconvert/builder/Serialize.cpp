@@ -37,9 +37,9 @@ void Serialize(std::ostream& stream, const asset::CubeMap& data, uint64_t versio
     SerializeImpl(stream, data, asset::MagicNumber::cubeMap, version);
 }
 
-void Serialize(std::ostream& stream, const asset::HullCollider& data, uint64_t version)
+void Serialize(std::ostream& stream, const asset::ConvexHull& data, uint64_t version)
 {
-    SerializeImpl(stream, data, asset::MagicNumber::hullCollider, version);
+    SerializeImpl(stream, data, asset::MagicNumber::convexHull, version);
 }
 
 void Serialize(std::ostream& stream, const asset::Mesh& data, uint64_t version)

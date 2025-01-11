@@ -74,16 +74,16 @@ auto ImportCubeMap(const std::filesystem::path& ncaPath) -> CubeMap
     return ImportCubeMap(file);
 }
 
-auto ImportHullCollider(std::istream& data) -> HullCollider
+auto ImportConvexHull(std::istream& data) -> ConvexHull
 {
-    auto [header, asset] = DeserializeHullCollider(data);
+    auto [header, asset] = DeserializeConvexHull(data);
     return asset;
 }
 
-auto ImportHullCollider(const std::filesystem::path& ncaPath) -> HullCollider
+auto ImportConvexHull(const std::filesystem::path& ncaPath) -> ConvexHull
 {
     auto file = ::OpenNca(ncaPath);
-    return ImportHullCollider(file);
+    return ImportConvexHull(file);
 }
 
 auto ImportMesh(std::istream& data) -> Mesh

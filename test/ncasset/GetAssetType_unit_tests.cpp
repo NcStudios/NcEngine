@@ -21,7 +21,7 @@ TEST(GetAssetTypeTests, ValidMagicNumber_succeeds)
     SetMagicNumber(header, nc::asset::MagicNumber::cubeMap);
     EXPECT_EQ(nc::asset::AssetType::CubeMap, nc::asset::GetAssetType(header));
 
-    SetMagicNumber(header, nc::asset::MagicNumber::hullCollider);
+    SetMagicNumber(header, nc::asset::MagicNumber::convexHull);
     EXPECT_EQ(nc::asset::AssetType::HullCollider, nc::asset::GetAssetType(header));
 
     SetMagicNumber(header, nc::asset::MagicNumber::mesh);

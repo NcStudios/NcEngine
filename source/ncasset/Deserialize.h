@@ -29,7 +29,7 @@ auto DeserializeConcaveCollider(std::istream& stream) -> DeserializedResult<Conc
 auto DeserializeCubeMap(std::istream& stream) -> DeserializedResult<CubeMap>;
 
 /** @brief Construct a HullCollider from data in a binary stream. */
-auto DeserializeHullCollider(std::istream& stream) -> DeserializedResult<HullCollider>;
+auto DeserializeConvexHull(std::istream& stream) -> DeserializedResult<ConvexHull>;
 
 /** @brief Construct a Mesh from data in a binary stream. */
 auto DeserializeMesh(std::istream& stream) -> DeserializedResult<Mesh>;

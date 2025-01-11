@@ -93,8 +93,8 @@ void Inspect(const std::filesystem::path& ncaPath)
         }
         case asset::AssetType::HullCollider:
         {
-            const auto asset = asset::ImportHullCollider(ncaPath);
-            LOG(concaveColliderTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, asset.vertices.size());
+            /** @todo 693 investigate how to add back */
+            LOG("HullCollider not supported");
             break;
         }
         case asset::AssetType::Mesh:

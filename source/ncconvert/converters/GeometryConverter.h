@@ -19,7 +19,7 @@ class GeometryConverter
         auto ImportConcaveCollider(const std::filesystem::path& path) -> asset::ConcaveCollider;
 
         /** Process an fbx file as geometry for a hull collider. */
-        auto ImportHullCollider(const std::filesystem::path& path) -> asset::HullCollider;
+        auto ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull;
 
         /** Process an fbx file as geometry for a mesh renderer. Supply a subResourceName of the mesh to extract if there are multiple meshes in the fbx file. */
         auto ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName = std::nullopt, bool optimize = false) -> asset::Mesh;
