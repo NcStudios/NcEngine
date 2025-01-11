@@ -13,31 +13,34 @@ bool IsInitialized = false;
 
 namespace mesh
 {
-asset::MeshView Cube{};
-asset::MeshView Sphere{};
 asset::MeshView Capsule{};
-asset::MeshView Plane{};
-asset::MeshView HalfPipe{};
-asset::MeshView Ramp{};
-asset::MeshView Ogre{};
-asset::MeshView Skeleton{};
 asset::MeshView Cave{};
+asset::MeshView Cube{};
+asset::MeshView Guy{};
+asset::MeshView HalfPipe{};
+asset::MeshView Ogre{};
+asset::MeshView Plane{};
+asset::MeshView Ramp{};
+asset::MeshView Skeleton{};
+asset::MeshView Sphere{};
 } // namespace mesh
 
 namespace material
 {
-MaterialDesc Default{"DefaultMaterial"};
-MaterialDesc Red{"RedMaterial"};
-MaterialDesc Green{"GreenMaterial"};
 MaterialDesc Blue{"BlueMaterial"};
+MaterialDesc Cave{"CaveMaterial"};
+MaterialDesc Default{"DefaultMaterial"};
+MaterialDesc Green{"GreenMaterial"};
+MaterialDesc Guy{"GuyMaterial"};
+MaterialDesc Ogre{"OgreMaterial"};
 MaterialDesc Orange{"OrangeMaterial"};
 MaterialDesc Purple{"PurpleMaterial"};
+MaterialDesc Red{"RedMaterial"};
+MaterialDesc Skeleton{"SkeletonMaterial"};
 MaterialDesc Teal{"TealMaterial"};
 MaterialDesc Yellow{"YellowMaterial"};
-MaterialDesc Ogre{"OgreMaterial"};
-MaterialDesc Skeleton{"SkeletonMaterial"};
-MaterialDesc Cave{"CaveMaterial"};
 } // namespace material
+
 
 namespace animation
 {
@@ -104,16 +107,17 @@ void InitializeResources()
 
     std::vector<std::string> textures
     {
-        "solid_color/Blue.nca",
-        "solid_color/Green.nca",
-        "solid_color/Red.nca",
-        "solid_color/Orange.nca",
-        "solid_color/Purple.nca",
-        "solid_color/Teal.nca",
-        "solid_color/Yellow.nca",
+        "cave/BaseColor.nca",
+        "guy_base_color.nca",
         "ogre/BaseColor.nca",
         "skeleton/BaseColor.nca",
-        "cave/BaseColor.nca"
+        "solid_color/Blue.nca",
+        "solid_color/Green.nca",
+        "solid_color/Orange.nca",
+        "solid_color/Purple.nca",
+        "solid_color/Red.nca",
+        "solid_color/Teal.nca",
+        "solid_color/Yellow.nca"
     };
 
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
@@ -132,44 +136,60 @@ void InitializeResources()
 
 void ReloadPrefabs()
 {
-    mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
-    mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
-    mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
-    mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
+    mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
+    mesh::Guy = asset::AcquireMeshAsset(mesh::GuyPath);
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
     mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
+    mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
+    mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
     mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
-    mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
+    mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
 
     const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
-    material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
-    material::Default.properties.normalTexture = normal;
-    material::Red.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
-    material::Red.properties.normalTexture = normal;
-    material::Green.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
-    material::Green.properties.normalTexture = normal;
-    material::Green.properties.normalIntensity = 4.0f;
     material::Blue.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Blue.nca");
     material::Blue.properties.normalTexture = normal;
     material::Blue.properties.normalIntensity = .220f;
-    material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
-    material::Orange.properties.normalTexture = normal;
-    material::Orange.properties.normalIntensity = .10f;
-    material::Purple.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
-    material::Purple.properties.normalTexture = normal;
-    material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
-    material::Teal.properties.normalTexture = normal;
-    material::Yellow.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
-    material::Yellow.properties.normalTexture = normal;
-    material::Ogre.properties.diffuseTexture = asset::AcquireTextureAsset("ogre/BaseColor.nca");
-    material::Ogre.properties.normalTexture = asset::AcquireTextureAsset("ogre/Normal.nca");
-    material::Ogre.properties.normalIntensity = .280f;
-    material::Skeleton.properties.diffuseTexture = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
-    material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
-    material::Skeleton.properties.normalIntensity = .420f;
+
     material::Cave.properties.diffuseTexture = asset::AcquireTextureAsset("cave/BaseColor.nca");
     material::Cave.properties.normalTexture = asset::AcquireTextureAsset("cave/Normal.nca");
     material::Cave.properties.normalIntensity = .420f;
+
+    material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
+    material::Default.properties.normalTexture = normal;
+
+    material::Green.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Green.nca");
+    material::Green.properties.normalTexture = normal;
+    material::Green.properties.normalIntensity = 4.0f;
+
+    material::Guy.properties.diffuseTexture = asset::AcquireTextureAsset("guy_base_color.nca");
+    material::Guy.properties.normalTexture = normal;
+    material::Guy.properties.normalIntensity = .39f;
+
+    material::Ogre.properties.diffuseTexture = asset::AcquireTextureAsset("ogre/BaseColor.nca");
+    material::Ogre.properties.normalTexture = asset::AcquireTextureAsset("ogre/Normal.nca");
+    material::Ogre.properties.normalIntensity = .280f;
+
+    material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
+    material::Orange.properties.normalTexture = normal;
+    material::Orange.properties.normalIntensity = .10f;
+
+    material::Purple.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Purple.nca");
+    material::Purple.properties.normalTexture = normal;
+
+    material::Red.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Red.nca");
+    material::Red.properties.normalTexture = normal;
+
+    material::Skeleton.properties.diffuseTexture = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
+    material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
+    material::Skeleton.properties.normalIntensity = .420f;
+
+    material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");
+    material::Teal.properties.normalTexture = normal;
+
+    material::Yellow.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Yellow.nca");
+    material::Yellow.properties.normalTexture = normal;
+
 }
 } // namespace sample

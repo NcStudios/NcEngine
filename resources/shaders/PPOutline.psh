@@ -112,8 +112,8 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
 
     // Get the offset from the current texel for the texel to sample
-    float outlineWidthHalfFloor = floor(outlineWidth * 0.5);
-    float outlineWidthHalfCeil = ceil(outlineWidth * 0.5);
+    float outlineWidthHalfFloor = outlineWidth * 0.5f;
+    float outlineWidthHalfCeil = outlineWidth;
 
     // Get UV coords for four texels in a 'four corners' shape surrounding the current texel
     float2 LLUV = PSIn.UV - float2(texelSize.x, texelSize.y) * outlineWidthHalfFloor;
