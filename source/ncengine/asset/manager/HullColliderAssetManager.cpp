@@ -61,7 +61,7 @@ auto HullColliderAssetManager::Acquire(const std::string& path, asset_flags_type
 
 auto HullColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConvexHullView
 {
-    const auto index = m_hullColliders.index(id);
+    [[maybe_unused]] const auto index = m_hullColliders.index(id);
     NC_ASSERT(index != m_hullColliders.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
     return ConvexHullView{
         .id = id
