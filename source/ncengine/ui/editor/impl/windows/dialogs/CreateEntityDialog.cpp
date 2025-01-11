@@ -8,6 +8,7 @@ void CreateEntityDialog::Draw(const ImVec2& dimensions, Entity& selectedEntity)
     {
         ui::InputText(m_tag, "tag");
         ui::InputU8(m_layer, "layer");
+        ui::InputU8(m_userData, "userData");
         ImGui::Checkbox("static", &m_staticFlag);
         ImGui::Checkbox("persistent", &m_persistentFlag);
         ImGui::Checkbox("noCollisionNotifications", &m_noCollisionFlag);
@@ -25,7 +26,8 @@ void CreateEntityDialog::Draw(const ImVec2& dimensions, Entity& selectedEntity)
                 .parent = selectedEntity,
                 .tag = m_tag,
                 .layer = m_layer,
-                .flags = BuildFlags()
+                .flags = BuildFlags(),
+                .userData = m_userData
             });
 
             ClosePopup();

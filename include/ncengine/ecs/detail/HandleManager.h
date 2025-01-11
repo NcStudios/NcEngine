@@ -18,14 +18,20 @@ class HandleManager
         {
         }
 
-        Entity GenerateNewHandle(Entity::layer_type layer, Entity::flags_type flags)
+        Entity GenerateNewHandle(Entity::layer_type layer,
+                                 Entity::flags_type flags,
+                                 Entity::user_data_type userData)
         {
-            if(m_freeHandles.empty())
-                return Entity{m_nextIndex++, layer, flags};
+            const auto index = [this](){
+                if (m_freeHandles.empty())
+                    return m_nextIndex++;
 
-            auto index = m_freeHandles.back();
-            m_freeHandles.pop_back();
-            return Entity{index, layer, flags};
+                const auto recycled = m_freeHandles.back();
+                m_freeHandles.pop_back();
+                return recycled;
+            }();
+
+            return Entity{index, layer, flags, userData};
         }
 
         void ReclaimHandle(Entity handle)

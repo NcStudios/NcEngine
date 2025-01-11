@@ -29,9 +29,11 @@ class EntityPool : public StableAddress
             : m_entities{maxEntities / 4u, maxEntities} {}
 
         /** @brief Add an entity. */
-        auto Add(Entity::layer_type layer, Entity::flags_type flags) -> Entity
+        auto Add(Entity::layer_type layer,
+                 Entity::flags_type flags,
+                 Entity::user_data_type userData) -> Entity
         {
-            const auto handle = m_handleManager.GenerateNewHandle(layer, flags);
+            const auto handle = m_handleManager.GenerateNewHandle(layer, flags, userData);
             m_entities.emplace(handle.Index(), handle);
             if(handle.IsPersistent())
                 m_persistent.push_back(handle);

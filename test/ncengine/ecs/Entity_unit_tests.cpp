@@ -63,6 +63,14 @@ TEST(Entity_unit_tests, Flags_ExtractsFlags)
     EXPECT_EQ(actual, expected);
 }
 
+TEST(Entity_unit_tests, UserData_ExtractsUserData)
+{
+    Entity::user_data_type expected = 2u;
+    auto handle = Entity{0u, 1u, 0u, expected};
+    Entity::user_data_type actual = handle.UserData();
+    EXPECT_EQ(actual, expected);
+}
+
 TEST(Entity_unit_tests, IsStatic_FlagSet_ReturnsTrue)
 {
     auto flags = Entity::Flags::Static;
@@ -121,25 +129,31 @@ TEST(Entity_unit_tests, IsInternal_FlagNotSet_ReturnsFalse)
 
 TEST(Entity_unit_tests, Hash_AllValues_ReturnsExpectedHash)
 {
-    constexpr auto handle = Entity{uint32_t{0x01234567}, uint8_t{0x89}, uint8_t{0xAB}};
+    constexpr auto handle = Entity{uint32_t{0x01234567}, uint8_t{0x89}, uint8_t{0xAB}, uint8_t{0xCD}};
     constexpr auto uut = Entity::Hash();
     constexpr auto actual = uut(handle);
-    constexpr auto expected = size_t{0x00000123456789AB}; // top 4 bytes empty | index | layer | flags
+    constexpr auto expected = size_t{0x000123456789ABCD}; // top byte empty | index | layer | flags | userData
     EXPECT_EQ(expected, actual);
 }
 
-TEST(Entity_unit_tests, FromHash_NoFlags_ReconstructsEntity)
+TEST(Entity_unit_tests, FromHash_NoValues_ReconstructsEntity)
 {
-    constexpr auto expectedEntity = Entity{42u, 0u, 0u};
+    constexpr auto expectedEntity = Entity{42u, 0u, 0u, 0u};
     constexpr auto hash = Entity::Hash{}(expectedEntity);
     constexpr auto actualEntity = Entity::FromHash(hash);
-    EXPECT_EQ(expectedEntity, actualEntity);
+    EXPECT_EQ(expectedEntity.Index(), actualEntity.Index());
+    EXPECT_EQ(expectedEntity.Layer(), actualEntity.Layer());
+    EXPECT_EQ(expectedEntity.Flags(), actualEntity.Flags());
+    EXPECT_EQ(expectedEntity.UserData(), actualEntity.UserData());
 }
 
 TEST(Entity_unit_tests, FromHash_AllValues_ReconstructsEntity)
 {
-    constexpr auto expectedEntity = Entity{128u, 7u, nc::Entity::Flags::Static | nc::Entity::Flags::NoSerialize};
+    constexpr auto expectedEntity = Entity{128u, 7u, nc::Entity::Flags::Static | nc::Entity::Flags::NoSerialize, 2u};
     constexpr auto hash = Entity::Hash{}(expectedEntity);
     constexpr auto actualEntity = Entity::FromHash(hash);
-    EXPECT_EQ(expectedEntity, actualEntity);
+    EXPECT_EQ(expectedEntity.Index(), actualEntity.Index());
+    EXPECT_EQ(expectedEntity.Layer(), actualEntity.Layer());
+    EXPECT_EQ(expectedEntity.Flags(), actualEntity.Flags());
+    EXPECT_EQ(expectedEntity.UserData(), actualEntity.UserData());
 }
