@@ -207,26 +207,29 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<PointLight>(pointLight);
 
-    const auto box1 = world.Emplace<Entity>({.position = Vector3{-1.0f, 0.0f, 0.0f}});
-    const auto box2 = world.Emplace<Entity>({.position = Vector3{1.0f, 0.0f, 0.0f}});
-    const auto sphere1 = world.Emplace<Entity>({.position = Vector3{-4.0f, 1.0f, 0.0f}});
-    const auto sphere2 = world.Emplace<Entity>({.position = Vector3{-3.0f, 0.0f, 0.0f}});
-    const auto capsule1 = world.Emplace<Entity>({.position = Vector3{3.5f, 0.0f, 0.0f}});
-    const auto capsule2 = world.Emplace<Entity>({.position = Vector3{3.5f, 3.0f, 0.0f}});
+    const auto box1     = world.Emplace<Entity>({.position = Vector3{-1.0f, 0.0f, 0.0f}});
+    const auto box2     = world.Emplace<Entity>({.position = Vector3{ 1.0f, 0.0f, 0.0f}});
+    const auto sphere1  = world.Emplace<Entity>({.position = Vector3{-4.0f, 1.0f, 0.0f}});
+    const auto sphere2  = world.Emplace<Entity>({.position = Vector3{-3.0f, 0.0f, 0.0f}});
+    const auto capsule1 = world.Emplace<Entity>({.position = Vector3{ 3.5f, 0.0f, 0.0f}});
+    const auto capsule2 = world.Emplace<Entity>({.position = Vector3{ 3.5f, 3.0f, 0.0f}});
+    const auto hull     = world.Emplace<Entity>({.position = Vector3{ 1.0f, 1.0f, 1.0f}});
 
-    world.Emplace<StaticMesh>(box1, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(box2, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(sphere1, mesh::Sphere, material::Default);
-    world.Emplace<StaticMesh>(sphere2, mesh::Sphere, material::Default);
+    world.Emplace<StaticMesh>(box1,     mesh::Cube,    material::Default);
+    world.Emplace<StaticMesh>(box2,     mesh::Cube,    material::Default);
+    world.Emplace<StaticMesh>(sphere1,  mesh::Sphere,  material::Default);
+    world.Emplace<StaticMesh>(sphere2,  mesh::Sphere,  material::Default);
     world.Emplace<StaticMesh>(capsule1, mesh::Capsule, material::Default);
     world.Emplace<StaticMesh>(capsule2, mesh::Capsule, material::Default);
+    world.Emplace<StaticMesh>(hull,     mesh::Ramp,    material::Default);
 
-    auto& box1Body = world.Emplace<RigidBody>(box1);
-    auto& box2Body = world.Emplace<RigidBody>(box2);
-    auto& sphere1Body = world.Emplace<RigidBody>(sphere1);
-    auto& sphere2Body = world.Emplace<RigidBody>(sphere2);
-    auto& capsule1Body = world.Emplace<RigidBody>(capsule1);
-    auto& capsule2Body = world.Emplace<RigidBody>(capsule2);
+    auto& box1Body     = world.Emplace<RigidBody>(box1,     Shape::MakeBox());
+    auto& box2Body     = world.Emplace<RigidBody>(box2,     Shape::MakeBox());
+    auto& sphere1Body  = world.Emplace<RigidBody>(sphere1,  Shape::MakeSphere());
+    auto& sphere2Body  = world.Emplace<RigidBody>(sphere2,  Shape::MakeSphere());
+    auto& capsule1Body = world.Emplace<RigidBody>(capsule1, Shape::MakeCapsule());
+    auto& capsule2Body = world.Emplace<RigidBody>(capsule2, Shape::MakeCapsule());
+    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::Ramp));
 
     world.Emplace<CollisionListener>(
         box1,
@@ -239,6 +242,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     box1Body.AddImpulse(Vector3::Up() * 5000.0f);
     sphere1Body.AddImpulse(Vector3::Up() * 5000.0f);
     capsule1Body.AddImpulse(Vector3::Up() * 5000.0f);
+    hullBody.AddImpulse(Vector3::Up() * 5000.0f);
 
     box1Body.AddConstraint(
         PointConstraintInfo{
