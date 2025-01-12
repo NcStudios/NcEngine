@@ -11,6 +11,11 @@ namespace nc::sample
 {
 bool IsInitialized = false;
 
+auto MakeAnimId(std::string_view path) -> uint64_t
+{
+    return utility::Fnv1a(std::filesystem::path(path).make_preferred().string());
+}
+
 namespace mesh
 {
 asset::MeshView Cube{};
@@ -42,20 +47,20 @@ MaterialDesc Cave{"CaveMaterial"};
 
 namespace animation
 {
-auto MakeAnimId(std::string_view path) -> uint64_t
-{
-    return utility::Fnv1a(std::filesystem::path(path).make_preferred().string());
-}
-
-uint64_t OgreIdle{MakeAnimId("ogre/idle.nca")};
-uint64_t OgreAttack{MakeAnimId("ogre/attack.nca")};
-uint64_t SkeletonIdle{MakeAnimId("skeleton/idle.nca")};
-uint64_t SkeletonJump{MakeAnimId("skeleton/jump.nca")};
-uint64_t SkeletonWalkRight{MakeAnimId("skeleton/walk_right.nca")};
-uint64_t SkeletonWalkLeft{MakeAnimId("skeleton/walk_left.nca")};
-uint64_t SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
-uint64_t SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
+asset::AssetId OgreIdle{MakeAnimId("ogre/idle.nca")};
+asset::AssetId OgreAttack{MakeAnimId("ogre/attack.nca")};
+asset::AssetId SkeletonIdle{MakeAnimId("skeleton/idle.nca")};
+asset::AssetId SkeletonJump{MakeAnimId("skeleton/jump.nca")};
+asset::AssetId SkeletonWalkRight{MakeAnimId("skeleton/walk_right.nca")};
+asset::AssetId SkeletonWalkLeft{MakeAnimId("skeleton/walk_left.nca")};
+asset::AssetId SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
+asset::AssetId SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
 } // namespace animation
+
+namespace convex_hull
+{
+asset::AssetId Ramp{MakeAnimId(RampPath)};
+} // namespace convex_hull
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 

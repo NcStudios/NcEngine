@@ -50,6 +50,12 @@ auto GetMeshView(nc::ShapeType shape) -> nc::asset::MeshView
             static const auto view = AssetService<MeshView>::Get()->Acquire(CapsuleMesh);
             return view;
         }
+        case nc::ShapeType::ConvexHull:
+        {
+            /** @todo 567 currently have no renderable geometry for these */
+            static const auto view = AssetService<MeshView>::Get()->Acquire(CubeMesh);
+            return view;
+        }
         default:
         {
             throw nc::NcError("Unknown Shape");

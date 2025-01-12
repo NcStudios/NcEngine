@@ -51,9 +51,8 @@ auto NormalizeScaleForShape(ShapeType shape,
     switch (shape)
     {
         case ShapeType::Box:
-        {
+        case ShapeType::ConvexHull:
             break;
-        }
         case ShapeType::Sphere:
         {
             if (!HasUniformElements(allowedScale))

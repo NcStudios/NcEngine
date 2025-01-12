@@ -3,7 +3,11 @@
 #include "utility/EnumExtensions.h"
 
 #include "ncasset/Import.h"
+#include "ncjolt/ShapeUtility.h"
 #include "ncutility/NcError.h"
+
+#include "Jolt/Jolt.h"
+#include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 
 namespace
 {
@@ -29,11 +33,11 @@ constexpr auto cubeMapTemplate =
 R"(Data
   face side length {})";
 
-constexpr auto hullColliderTemplate =
+constexpr auto convexHullTemplate =
 R"(Data
-  extents        {}, {}, {}
-  max extent     {}
-  triangle count {})";
+  extents      {}, {}, {}
+  max extent   {}
+  vertex count {})";
 
 constexpr auto meshTemplate =
 R"(Data
@@ -93,8 +97,16 @@ void Inspect(const std::filesystem::path& ncaPath)
         }
         case asset::AssetType::HullCollider:
         {
-            /** @todo 693 investigate how to add back */
-            LOG("HullCollider not supported");
+            const auto asset = asset::ImportConvexHull(ncaPath);
+            const auto shape = jolt::DeserializeShape(asset.blob);
+            if (shape->GetSubType() != JPH::EShapeSubType::ConvexHull)
+            {
+                LOG("Unexpected binary format for ConvexHull")
+                break;
+            }
+
+            const auto hull = static_cast<const JPH::ConvexHullShape*>(shape.GetPtr());
+            LOG(convexHullTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, hull->GetNumPoints());
             break;
         }
         case asset::AssetType::Mesh:

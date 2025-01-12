@@ -22,6 +22,8 @@
 /** @todo 353 Remove once NcAsset has this functionality. */
 #include "asset/AssetService.h"
 
+#include "ncutility/Hash.h"
+
 #include <array>
 #include <ranges>
 
@@ -251,6 +253,25 @@ void CapsuleProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
     if (heightModified | radiusModified | positionModified)
     {
         body.SetShape(nc::Shape::MakeCapsule(height, radius, position), transformScale);
+    }
+}
+
+void ConvexHullProperties(nc::RigidBody& body, const nc::Vector3& transformScale, nc::asset::NcAsset& ncAsset)
+{
+    const auto& shape = body.GetShape();
+    const auto hullId = shape.GetAssetId();
+    auto scale = shape.GetLocalScale();
+    if (nc::ui::InputScale(scale, "scale"))
+    {
+        body.SetShape(nc::Shape::MakeConvexHull(hullId, scale), transformScale);
+    }
+
+    const auto hullAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::HullCollider);
+    auto hullPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::HullCollider, hullId)};
+    if (nc::ui::Combobox(hullPath, "asset", hullAssets))
+    {
+        const auto selectedView = nc::asset::AssetService<nc::asset::ConvexHullView>::Get()->Acquire(hullPath);
+        body.SetShape(nc::Shape::MakeConvexHull(selectedView.id, scale), transformScale);
     }
 }
 
@@ -1149,14 +1170,26 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
                 case ShapeType::Box:     { body.SetShape(Shape::MakeBox(),     transformScale); break; }
                 case ShapeType::Sphere:  { body.SetShape(Shape::MakeSphere(),  transformScale); break; }
                 case ShapeType::Capsule: { body.SetShape(Shape::MakeCapsule(), transformScale); break; }
+                case ShapeType::ConvexHull:
+                {
+                    static constexpr auto defaultHullId = utility::Fnv1a(asset::DefaultHullCollider);
+                    body.SetShape(Shape::MakeConvexHull(defaultHullId), transformScale);
+                    break;
+                }
             }
         }
 
         switch (body.GetShape().GetType())
         {
-            case ShapeType::Box:     { rigid_body_ext::BoxProperties(body,     transformScale); break; }
-            case ShapeType::Sphere:  { rigid_body_ext::SphereProperties(body,  transformScale); break; }
-            case ShapeType::Capsule: { rigid_body_ext::CapsuleProperties(body, transformScale); break;}
+            case ShapeType::Box:        { rigid_body_ext::BoxProperties(body,     transformScale); break; }
+            case ShapeType::Sphere:     { rigid_body_ext::SphereProperties(body,  transformScale); break; }
+            case ShapeType::Capsule:    { rigid_body_ext::CapsuleProperties(body, transformScale); break; }
+            case ShapeType::ConvexHull:
+            {
+                auto ncAsset = ctx.modules.Get<asset::NcAsset>();
+                rigid_body_ext::ConvexHullProperties(body, transformScale, *ncAsset);
+                break;
+            }
         }
         ImGui::TreePop();
     }

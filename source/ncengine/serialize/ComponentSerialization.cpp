@@ -179,9 +179,24 @@ void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const Serial
     serialize::Serialize(stream, ctx.entityMap.at(out.GetEntity()));
 
     const auto& shape = out.GetShape();
-    serialize::Serialize(stream, shape.GetType());
-    serialize::Serialize(stream, shape.GetLocalScale());
-    serialize::Serialize(stream, shape.GetLocalPosition());
+    const auto shapeType = shape.GetType();
+    serialize::Serialize(stream, shapeType);
+    switch (shapeType)
+    {
+        case ShapeType::Box:
+        case ShapeType::Sphere:
+        case ShapeType::Capsule:
+            serialize::Serialize(stream, shape.GetLocalScale());
+            serialize::Serialize(stream, shape.GetLocalPosition());
+            break;
+        case ShapeType::ConvexHull:
+            serialize::Serialize(stream, shape.GetAssetId());
+            serialize::Serialize(stream, shape.GetLocalScale());
+            break;
+        default:
+            throw NcError{fmt::format("Unknown ShapeType '{}'", std::to_underlying(shapeType))};
+    }
+
     serialize::Serialize(stream, out.GetInfo());
 
     auto&& constraints = out.GetConstraints();
@@ -255,14 +270,29 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
 {
     auto id = uint32_t{};
     auto shapeType = ShapeType{};
+    auto shapeAsset = asset::AssetId{};
     auto shapeScale = Vector3{};
     auto shapePosition = Vector3{};
     auto info = RigidBodyInfo{};
     auto constraintCount = size_t{};
     serialize::Deserialize(stream, id);
     serialize::Deserialize(stream, shapeType);
-    serialize::Deserialize(stream, shapeScale);
-    serialize::Deserialize(stream, shapePosition);
+    switch (shapeType)
+    {
+        case ShapeType::Box:
+        case ShapeType::Sphere:
+        case ShapeType::Capsule:
+            serialize::Deserialize(stream, shapeScale);
+            serialize::Deserialize(stream, shapePosition);
+            break;
+        case ShapeType::ConvexHull:
+            serialize::Deserialize(stream, shapeAsset);
+            serialize::Deserialize(stream, shapeScale);
+            break;
+        default:
+            throw NcError{fmt::format("Deserialized Unknown ShapeType: '{}'", std::to_underlying(shapeType))};
+    }
+
     serialize::Deserialize(stream, info);
     serialize::Deserialize(stream, constraintCount);
 
@@ -284,9 +314,10 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
         using namespace nc::physics;
         switch (shapeType)
         {
-            case ShapeType::Box:     return Shape::MakeBox(shapeScale, shapePosition);
-            case ShapeType::Sphere:  return Shape::MakeSphere(shapeScale.x * 0.5f, shapePosition);
-            case ShapeType::Capsule: return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f, shapePosition);
+            case ShapeType::Box:        return Shape::MakeBox(shapeScale, shapePosition);
+            case ShapeType::Sphere:     return Shape::MakeSphere(shapeScale.x * 0.5f, shapePosition);
+            case ShapeType::Capsule:    return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f, shapePosition);
+            case ShapeType::ConvexHull: return Shape::MakeConvexHull(shapeAsset, shapeScale);
             default:
                 throw NcError{fmt::format("Deserialized Unknown ShapeType: '{}'", std::to_underlying(shapeType))};
         }

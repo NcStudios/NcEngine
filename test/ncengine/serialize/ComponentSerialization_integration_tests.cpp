@@ -358,6 +358,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
     EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
@@ -378,6 +379,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
     EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
@@ -399,6 +401,28 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
     EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
+}
+
+TEST(ComponentSerializationTests, RoundTrip_rigidBody_convexHull_preservesValues)
+{
+    auto stream = std::stringstream{};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
+    const auto expectedShape = nc::Shape::MakeConvexHull(
+        nc::asset::AssetId{42},
+        nc::Vector3::Splat(5.0f)
+    );
+
+    const auto expected = nc::RigidBody{g_entity, expectedShape};
+    nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeRigidBody(stream, g_deserializationContext, userData);
+
+    const auto& actualShape = actual.GetShape();
+    EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
+    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
+    EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(expectedShape.GetAssetId(), actualShape.GetAssetId());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)

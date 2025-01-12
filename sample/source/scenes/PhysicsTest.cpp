@@ -245,9 +245,9 @@ class VehicleController : public FreeComponent
 
 class WormController : public FreeComponent
 {
-    static constexpr auto force = 250.0f;
-    static constexpr auto torqueForce = 250.0f;
-    static constexpr auto jumpForce = 5000.0f;
+    static constexpr auto force = 300.0f;
+    static constexpr auto torqueForce = 10000.0f;
+    static constexpr auto jumpForce = 7000.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
     public:
@@ -272,7 +272,7 @@ class WormController : public FreeComponent
             if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 3.0f;
                 body.AddImpulse(dir);
             }
 
@@ -329,7 +329,7 @@ auto BuildWorm(ecs::Ecs world) -> Entity
     constexpr auto segment1Scale = 0.8f;
     constexpr auto segment2Scale = 0.6f;
     constexpr auto segment3Scale = 0.4f;
-    auto& bodyHead     = makeNode("Worm Head",       1.0f, headScale, PlayerLayer, 0.8f, RigidBodyFlags::DisableSleeping);
+    auto& bodyHead     = makeNode("Worm Head",       1.0f, headScale, PlayerLayer, 0.5f, RigidBodyFlags::DisableSleeping);
     auto& bodySegment1 = makeNode("Worm Segment 1", -0.9f, segment1Scale);
     auto& bodySegment2 = makeNode("Worm Segment 2", -1.6f, segment2Scale);
     auto& bodySegment3 = makeNode("Worm Segment 3", -2.1f, segment3Scale);
@@ -622,6 +622,14 @@ void BuildBridge(ecs::Ecs world)
     world.Emplace<RigidBody>(
         ramp1,
         nc::Shape::MakeBox(),
+        nc::RigidBodyInfo{
+            .type = BodyType::Static
+        }
+    );
+
+    world.Emplace<RigidBody>(
+        ramp2,
+        nc::Shape::MakeConvexHull(convex_hull::Ramp),
         nc::RigidBodyInfo{
             .type = BodyType::Static
         }

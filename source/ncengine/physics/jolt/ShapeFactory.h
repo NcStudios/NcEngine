@@ -1,59 +1,46 @@
 #pragma once
 
-#include "Conversion.h"
+#include "ncengine/asset/AssetViews.h"
+#include "ncengine/utility/Signal.h"
 
-#include "Jolt/Physics/Collision/Shape/BoxShape.h"
-#include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
-#include "Jolt/Physics/Collision/Shape/ScaledShape.h"
-#include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
-#include "Jolt/Physics/Collision/Shape/SphereShape.h"
+#include "Jolt/Jolt.h"
+#include "Jolt/Physics/Collision/Shape/Shape.h"
 
-namespace nc::physics
+#include <unordered_map>
+
+namespace JPH
+{
+class Vec3;
+} // namespace JPH
+
+namespace nc
+{
+struct Shape;
+
+namespace asset
+{
+struct ConvexHullUpdateEventData;
+} // namespace asset
+
+namespace physics
 {
 class ShapeFactory
 {
     static constexpr auto boxConvexRadius = 0.025f;
 
     public:
-        auto MakeShape(const Shape& shape,
-                       const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>
-        {
-            const auto type = shape.GetType();
-            const auto localPosition = ToJoltVec3(shape.GetLocalPosition());
-            const auto localScale = ToJoltVec3(shape.GetLocalScale());
-            const auto worldScale = localScale * additionalScaling;
+        explicit ShapeFactory(Signal<const asset::ConvexHullUpdateEventData&>& onConvexHullUpdate);
 
-            /** @todo: 693, 694 support additional shape types */
-            switch (type)
-            {
-                case ShapeType::Box:
-                    return MakeBox(worldScale * 0.5f, localPosition * additionalScaling);
-                case ShapeType::Sphere:
-                    return MakeSphere(worldScale.GetX() * 0.5f, localPosition * additionalScaling);
-                case ShapeType::Capsule:
-                    return MakeCapsule(worldScale.GetY() * 0.5f, worldScale.GetX() * 0.5f, localPosition * additionalScaling);
-                default:
-                    NC_ASSERT(false, fmt::format("Unhandled ShapeType '{}'", std::to_underlying(type)));
-                    std::unreachable();
-            };
-        }
-
-        auto MakeBox(const JPH::Vec3& halfExtents, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
-        {
-            return ApplyLocalOffsets(MakeRef<JPH::BoxShape>(halfExtents, boxConvexRadius), localPosition);
-        }
-
-        auto MakeSphere(float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
-        {
-            return ApplyLocalOffsets(MakeRef<JPH::SphereShape>(radius), localPosition);
-        }
-
-        auto MakeCapsule(float halfHeight, float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
-        {
-            return ApplyLocalOffsets(MakeRef<JPH::CapsuleShape>(halfHeight, radius), localPosition);
-        }
+        auto MakeShape(const Shape& shape, const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>;
+        auto MakeBox(const JPH::Vec3& halfExtents, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
+        auto MakeSphere(float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
+        auto MakeCapsule(float halfHeight, float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
+        auto MakeConvexHull(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
 
     private:
+        std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_convexHulls;
+        Connection m_convexHullUpdateConnection;
+
         template<class T, class... Args>
         auto MakeRef(Args&&... args) -> JPH::Ref<JPH::Shape>
         {
@@ -61,9 +48,12 @@ class ShapeFactory
         }
 
         auto ApplyLocalOffsets(const JPH::Ref<JPH::Shape>& shape,
-                               const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
-        {
-            return MakeRef<JPH::RotatedTranslatedShape>(localPosition, JPH::Quat::sIdentity(), shape.GetPtr());
-        }
+                               const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
+
+        auto ApplyScale(const JPH::Ref<JPH::Shape>& shape,
+                        const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
+
+        void OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event);
 };
-} // namespace nc::physics
+} // namespace physics
+} // namespace nc

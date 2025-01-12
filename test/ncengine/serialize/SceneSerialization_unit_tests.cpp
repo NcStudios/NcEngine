@@ -14,13 +14,14 @@ class NcAssetMock : public NcAsset
 {
     public:
         // Stubs
-        auto OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>& override { return m_boneSignal; }
-        auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override { return m_cubeMapSignal; }
-        auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>& override { return m_meshSignal; }
-        auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
-        auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override { return m_textureSignal; }
-        auto OnFontUpdate() noexcept -> Signal<>& override { return m_fontSignal; }
-        auto GetAssetPath(AssetType, size_t) const -> std::string_view override { return ""; }
+        auto OnBoneUpdate()               noexcept -> Signal<const BoneUpdateEventData&>&              override { return m_boneSignal; }
+        auto OnCubeMapUpdate()            noexcept -> Signal<const CubeMapUpdateEventData&>&           override { return m_cubeMapSignal; }
+        auto OnMeshUpdate()               noexcept -> Signal<const MeshUpdateEventData&>&              override { return m_meshSignal; }
+        auto OnSkeletalAnimationUpdate()  noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
+        auto OnTextureUpdate()            noexcept -> Signal<const TextureUpdateEventData&>&           override { return m_textureSignal; }
+        auto OnConvexHullUpdate()         noexcept -> Signal<const ConvexHullUpdateEventData&>&        override { return m_convexHullSignal; }
+        auto OnFontUpdate()               noexcept -> Signal<>&                                        override { return m_fontSignal; }
+        auto GetAssetPath(AssetType, size_t) const -> std::string_view                                 override { return ""; }
 
         // Mocks
         void LoadAssets(const AssetMap& assets) override
@@ -41,6 +42,7 @@ class NcAssetMock : public NcAsset
         Signal<const MeshUpdateEventData&> m_meshSignal;
         Signal<const SkeletalAnimationUpdateEventData&> m_animSignal;
         Signal<const TextureUpdateEventData&> m_textureSignal;
+        Signal<const ConvexHullUpdateEventData&> m_convexHullSignal;
         Signal<> m_fontSignal;
 };
 

@@ -61,6 +61,7 @@ class RigidBodyTest : public JoltApiFixture
         RigidBodyTest()
             : transformPool{10, nc::ComponentHandler<nc::Transform>{}},
               rigidBodyPool{10ull, nc::ComponentHandler<nc::RigidBody>{}},
+              shapeFactory{convexHullSignal},
               constraintFactory{joltApi.physicsSystem},
               constraintManager{joltApi.physicsSystem, constraintFactory, 10},
               vehicleManager{joltApi.physicsSystem, constraintFactory, 10},
@@ -77,6 +78,7 @@ class RigidBodyTest : public JoltApiFixture
         }
 
     public:
+        nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
         nc::ecs::ComponentPool<nc::Transform> transformPool;
         nc::ecs::ComponentPool<nc::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;

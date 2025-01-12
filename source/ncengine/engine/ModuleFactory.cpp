@@ -63,6 +63,7 @@ auto BuildModuleRegistry(ecs::ComponentRegistry& registry,
     moduleRegistry->Register(nc::BuildPhysicsModule(config.memorySettings,
                                                     config.physicsSettings,
                                                     world,
+                                                    *moduleRegistry->Get<asset::NcAsset>(),
                                                     dispatcher,
                                                     events));
 

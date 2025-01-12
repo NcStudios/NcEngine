@@ -95,8 +95,8 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
             return nc::Shape::MakeSphere();
         else if (mesh == nc::asset::CapsuleMesh)
             return nc::Shape::MakeCapsule();
-        else if (mesh == nc::sample::RampMesh) // todo: #693
-            return nc::Shape::MakeBox();
+        else if (mesh == nc::sample::RampMesh)
+            return nc::Shape::MakeConvexHull(nc::sample::convex_hull::Ramp);
         else
             throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
     }();

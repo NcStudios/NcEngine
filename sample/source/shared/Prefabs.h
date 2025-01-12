@@ -37,10 +37,6 @@ extern asset::MeshView Skeleton;
 extern asset::MeshView Cave;
 } // namespace mesh
 
-// Colliders
-constexpr auto RampHullCollider = "ramp.nca";
-constexpr auto HalfPipeConcaveCollider = "halfpipe.nca";
-
 // Materials
 namespace material
 {
@@ -60,14 +56,14 @@ extern MaterialDesc Cave;
 // Animations
 namespace animation
 {
-extern uint64_t OgreIdle;
-extern uint64_t OgreAttack;
-extern uint64_t SkeletonIdle;
-extern uint64_t SkeletonJump;
-extern uint64_t SkeletonWalkRight;
-extern uint64_t SkeletonWalkLeft;
-extern uint64_t SkeletonWalkForward;
-extern uint64_t SkeletonWalkBackward;
+extern asset::AssetId OgreIdle;
+extern asset::AssetId OgreAttack;
+extern asset::AssetId SkeletonIdle;
+extern asset::AssetId SkeletonJump;
+extern asset::AssetId SkeletonWalkRight;
+extern asset::AssetId SkeletonWalkLeft;
+extern asset::AssetId SkeletonWalkForward;
+extern asset::AssetId SkeletonWalkBackward;
 } // namespace animation
 
 // CubeMaps
@@ -75,6 +71,13 @@ namespace cubemap
 {
 constexpr auto NightSkyPath = "night_sky.nca";
 } // namespace cubemap
+
+// ConvexHulls
+namespace convex_hull
+{
+constexpr auto RampPath = "ramp.nca";
+extern asset::AssetId Ramp;
+} // namespace collider
 
 // Fonts
 extern asset::FontInfo UIFont;

@@ -3,6 +3,7 @@ add_executable(BodyFactory_unit_tests
     BodyFactory_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/BodyFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
     ${NC_SOURCE_DIR}/physics/Shape.cpp
 )
 
@@ -37,6 +38,7 @@ add_executable(BodyManager_integration_tests
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintManager.cpp
     ${NC_SOURCE_DIR}/physics/jolt/VehicleManager.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
     ${NC_SOURCE_DIR}/physics/RigidBody.cpp
     ${NC_SOURCE_DIR}/physics/Shape.cpp
 )
@@ -257,6 +259,7 @@ add_test(Layers_unit_tests Layers_unit_tests)
 add_executable(ShapeFactory_unit_tests
     ShapeFactory_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
 )
 
 target_include_directories(ShapeFactory_unit_tests
