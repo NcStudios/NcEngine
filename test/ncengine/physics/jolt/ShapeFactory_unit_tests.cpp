@@ -31,7 +31,12 @@ class ShapeFactoryTest : public JoltApiFixture
         void LoadMockConvexHull()
         {
             const auto shape = nc::jolt::BuildConvexHull(g_hullVertices);
-            const auto asset = nc::asset::ConvexHull{.blob = nc::jolt::SerializeShape(*shape)};
+            const auto asset = nc::asset::ConvexHull{
+                .extents = nc::Vector3{},
+                .maxExtent = 0.0f,
+                .blob = nc::jolt::SerializeShape(*shape)
+            };
+
             convexHullSignal.Emit(nc::asset::ConvexHullUpdateEventData{
                 std::span{&asset, 1},
                 std::span{&g_assetId, 1},
