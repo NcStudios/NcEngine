@@ -31,6 +31,7 @@ jobs:
           - os: ubuntu-24.04
             shortName: Linux
             generator: "Ninja"
+            cmakeEnv: "CXX=/usr/bin/g++-14"
           - variant: Dev
             cmakeArgs: "-DNC_PROFILING_ENABLED=ON"
           - variant: Prod

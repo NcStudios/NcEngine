@@ -58,7 +58,7 @@ TEST_F(BuildAndImportTest, Texture_from_png)
     }
 }
 
-TEST_F(BuildAndImportTest, ConcaveCollider_from_fbx)
+TEST_F(BuildAndImportTest, MeshCollider_from_fbx)
 {
     namespace test_data = collateral::plane_fbx;
     const auto inFile = test_data::filePath;
@@ -67,13 +67,18 @@ TEST_F(BuildAndImportTest, ConcaveCollider_from_fbx)
     auto builder = nc::convert::Builder{};
     ASSERT_TRUE(builder.Build(nc::asset::AssetType::ConcaveCollider, target));
 
-    const auto asset = nc::asset::ImportConcaveCollider(outFile);
+    const auto asset = nc::asset::ImportMeshCollider(outFile);
 
     EXPECT_EQ(asset.extents, test_data::meshVertexExtents);
     EXPECT_FLOAT_EQ(asset.maxExtent, test_data::furthestDistanceFromOrigin);
-    EXPECT_EQ(asset.triangles.size(), test_data::triangleCount);
+    EXPECT_FALSE(asset.blob.empty());
 
-    for (const auto& tri : asset.triangles)
+    auto reconstituted = nc::jolt::DeserializeShape(asset.blob);
+    auto actualMesh = UpcastToMeshShape(reconstituted.GetPtr());
+    const auto actualTriangles = GetTriangles(*actualMesh, test_data::triangleCount);
+    ASSERT_EQ(test_data::triangleCount, actualTriangles.size());
+
+    for (const auto& tri : actualTriangles)
     {
         const auto pos = std::ranges::find(test_data::possibleTriangles, tri);
         EXPECT_NE(pos, test_data::possibleTriangles.cend());

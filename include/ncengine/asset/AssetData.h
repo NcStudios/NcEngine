@@ -79,10 +79,18 @@ struct TextureUpdateEventData
     UpdateAction updateAction;
 };
 
-/** @brief Event data for convex hull load and unload operations. */
+/** @brief Event data for ConvexHull load and unload operations. */
 struct ConvexHullUpdateEventData
 {
     std::span<const ConvexHull> convexHulls;
+    std::span<const AssetId> ids;
+    UpdateAction updateAction;
+};
+
+/** @brief Event data for MeshCollider load and unload operations. */
+struct MeshColliderUpdateEventData
+{
+    std::span<const MeshCollider> colliders;
     std::span<const AssetId> ids;
     UpdateAction updateAction;
 };

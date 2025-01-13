@@ -30,7 +30,7 @@ class HullColliderAssetManager : public IAssetService<ConvexHullView, std::strin
         auto OnUpdate() -> Signal<const ConvexHullUpdateEventData&>& { return m_onUpdate; }
 
     private:
-        BasicStringTable<DefaultStringTablePolicy> m_map;
+        StringTable m_map;
         std::string m_assetDirectory;
         Signal<const ConvexHullUpdateEventData&> m_onUpdate;
 };

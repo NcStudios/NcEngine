@@ -32,8 +32,6 @@ struct AudioClipView
 struct ConcaveColliderView
 {
     AssetId id = NullAssetId;
-    std::span<const Triangle> triangles;
-    float maxExtent = 0.0f;
 };
 
 struct ConvexHullView

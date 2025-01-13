@@ -23,11 +23,11 @@ constexpr auto audioClipTemplate =
 R"(Data
   samples count {})";
 
-constexpr auto concaveColliderTemplate =
+constexpr auto meshColliderTemplate =
 R"(Data
-  extents       {}, {}, {}
-  max extent    {}
-  vertex count  {})";
+  extents    {}, {}, {}
+  max extent {}
+  blob size  {})";
 
 constexpr auto cubeMapTemplate =
 R"(Data
@@ -85,8 +85,8 @@ void Inspect(const std::filesystem::path& ncaPath)
         }
         case asset::AssetType::ConcaveCollider:
         {
-            const auto asset = asset::ImportConcaveCollider(ncaPath);
-            LOG(concaveColliderTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, asset.triangles.size());
+            const auto asset = asset::ImportMeshCollider(ncaPath);
+            LOG(meshColliderTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, asset.blob.size());
             break;
         }
         case asset::AssetType::CubeMap:

@@ -50,16 +50,16 @@ auto ImportAudioClip(const std::filesystem::path& ncaPath) -> AudioClip
     return ImportAudioClip(file);
 }
 
-auto ImportConcaveCollider(std::istream& data) -> ConcaveCollider
+auto ImportMeshCollider(std::istream& data) -> MeshCollider
 {
-    auto [header, asset] = DeserializeConcaveCollider(data);
+    auto [header, asset] = DeserializeMeshCollider(data);
     return asset;
 }
 
-auto ImportConcaveCollider(const std::filesystem::path& ncaPath) -> ConcaveCollider
+auto ImportMeshCollider(const std::filesystem::path& ncaPath) -> MeshCollider
 {
     auto file = ::OpenNca(ncaPath);
-    return ImportConcaveCollider(file);
+    return ImportMeshCollider(file);
 }
 
 auto ImportCubeMap(std::istream& data) -> CubeMap
