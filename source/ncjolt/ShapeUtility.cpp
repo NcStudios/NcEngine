@@ -28,9 +28,13 @@ namespace nc::jolt
 {
 auto BuildConvexHull(std::span<const Vector3> vertices) -> JPH::Ref<JPH::Shape>
 {
-    const auto convertedVertices = vertices
-        | std::views::transform([](const auto& in) { return JPH::Vec3{ToFloat3(in)}; })
-        | std::ranges::to<JPH::Array<JPH::Vec3>>();
+    auto convertedVertices = JPH::Array<JPH::Vec3>{};
+    convertedVertices.reserve(vertices.size());
+    std::ranges::transform(
+        vertices,
+        std::back_inserter(convertedVertices),
+        [](const auto& in) { return JPH::Vec3{ToFloat3(in)}; }
+    );
 
     auto settings = JPH::ConvexHullShapeSettings{};
     settings.mPoints = std::move(convertedVertices);
@@ -46,9 +50,13 @@ auto BuildConvexHull(std::span<const Vector3> vertices) -> JPH::Ref<JPH::Shape>
 
 auto BuildMeshShape(std::span<const Triangle> triangles) -> JPH::Ref<JPH::Shape>
 {
-    const auto convertedTriangles = triangles
-        | std::views::transform(ToJoltTriangle)
-        | std::ranges::to<JPH::Array<JPH::Triangle>>();
+    auto convertedTriangles = JPH::Array<JPH::Triangle>{};
+    convertedTriangles.reserve(triangles.size());
+    std::ranges::transform(
+        triangles,
+        std::back_inserter(convertedTriangles),
+        ToJoltTriangle
+    );
 
     const auto settings = JPH::MeshShapeSettings{convertedTriangles};
     const auto result = settings.Create();

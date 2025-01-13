@@ -44,7 +44,7 @@ inline auto GetTriangles(const JPH::MeshShape& shape, size_t maxTriangles) -> st
         triangleCount += numFound;
     }
 
-    auto toTriangle = [](const auto& rng){
+    auto subrangeToTriangle = [](const auto& rng){
         return nc::Triangle{
             reinterpret_cast<const nc::Vector3&>(rng[0]),
             reinterpret_cast<const nc::Vector3&>(rng[1]),
@@ -52,9 +52,15 @@ inline auto GetTriangles(const JPH::MeshShape& shape, size_t maxTriangles) -> st
         };
     };
 
-    return std::views::chunk(vertices, 3)
-         | std::views::transform(toTriangle)
-         | std::ranges::to<std::vector<nc::Triangle>>();
+    auto triangles = std::vector<nc::Triangle>{};
+    triangles.reserve(triangleCount);
+    std::ranges::transform(
+        std::views::chunk(vertices, 3),
+        std::back_inserter(triangles),
+        subrangeToTriangle
+    );
+
+    return triangles;
 }
 
 inline auto UpcastToConvexHull(JPH::Shape* shape) -> JPH::ConvexHullShape*
