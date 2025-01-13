@@ -32,6 +32,7 @@ void RigidBody::SetBodyType(BodyType type, bool wake)
     }
 
     m_info.type = type;
+    VerifyShapeSettings();
     const auto id = ToBody(m_handle)->GetID();
     s_ctx->interface.SetMotionType(id, ToMotionType(type), ToActivationMode(wake));
     s_ctx->interface.SetObjectLayer(id, ToObjectLayer(m_info.type, IsTrigger()));
@@ -70,6 +71,7 @@ void RigidBody::SetAwakeState(bool wake)
 void RigidBody::SetShape(const Shape& shape, const Vector3& transformScale, bool wake)
 {
     m_shape = shape;
+    VerifyShapeSettings();
     const auto allowedScaling = ScalesWithTransform()
         ? ToJoltVec3(NormalizeScaleForShape(m_shape.GetType(), transformScale, transformScale))
         : JPH::Vec3::sReplicate(1.0f);
@@ -315,5 +317,13 @@ auto RigidBody::SetSimulatedBodyScale(Transform& transform,
 
     transform.SetScale(appliedScale);
     return appliedScale;
+}
+
+void RigidBody::VerifyShapeSettings()
+{
+    NC_ASSERT(
+        m_info.type == BodyType::Static || m_shape.GetType() != ShapeType::Mesh,
+        "ShapeType::Mesh requires BodyType::Static"
+    );
 }
 } // namespace nc

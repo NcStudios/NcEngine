@@ -18,7 +18,8 @@ constexpr auto g_shapeTypeNames = std::array{
     "Box"sv,
     "Sphere"sv,
     "Capsule"sv,
-    "ConvexHull"sv
+    "ConvexHull"sv,
+    "Mesh"sv,
 };
 
 constexpr auto g_constraintTypeNames = std::array{

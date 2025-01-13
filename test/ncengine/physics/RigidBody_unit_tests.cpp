@@ -7,6 +7,9 @@
 #include "physics/jolt/ConstraintManager.h"
 #include "physics/jolt/ShapeFactory.h"
 
+#include "ncengine/asset/AssetData.h"
+#include "ncjolt/ShapeUtility.h"
+
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
 #include <vector>
@@ -61,7 +64,7 @@ class RigidBodyTest : public JoltApiFixture
         RigidBodyTest()
             : transformPool{10, nc::ComponentHandler<nc::Transform>{}},
               rigidBodyPool{10ull, nc::ComponentHandler<nc::RigidBody>{}},
-              shapeFactory{convexHullSignal},
+              shapeFactory{convexHullSignal, meshColliderSignal},
               constraintFactory{joltApi.physicsSystem},
               constraintManager{joltApi.physicsSystem, constraintFactory, 10},
               vehicleManager{joltApi.physicsSystem, constraintFactory, 10},
@@ -77,8 +80,22 @@ class RigidBodyTest : public JoltApiFixture
         {
         }
 
+        void LoadMockMeshCollider(nc::asset::AssetId assetId)
+        {
+            using namespace nc::asset;
+            const auto g_meshTriangles = std::vector<nc::Triangle>{
+                nc::Triangle{nc::Vector3{0, 0, 0}, nc::Vector3{1, 0, 0}, nc::Vector3{0, 1, 0}},
+                nc::Triangle{nc::Vector3{1, 1, 1}, nc::Vector3{2, 1, 1}, nc::Vector3{1, 2, 1}}
+            };
+
+            const auto shape = nc::jolt::BuildMeshShape(g_meshTriangles);
+            const auto asset = MeshCollider{nc::Vector3{}, 0.0f, nc::jolt::SerializeShape(*shape)};
+            meshColliderSignal.Emit(MeshColliderUpdateEventData{std::span{&asset, 1}, std::span{&assetId, 1}, UpdateAction::Load});
+        }
+
     public:
         nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
+        nc::Signal<const nc::asset::MeshColliderUpdateEventData&> meshColliderSignal;
         nc::ecs::ComponentPool<nc::Transform> transformPool;
         nc::ecs::ComponentPool<nc::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;
@@ -125,6 +142,22 @@ TEST_F(RigidBodyTest, Constructor_staticEntityWithDynamicBody_overwritesBodyType
 {
     auto uut = nc::RigidBody{g_staticEntity, g_shape, g_dynamicInfo};
     EXPECT_EQ(nc::BodyType::Static, uut.GetBodyType());
+}
+
+TEST_F(RigidBodyTest, Constructor_staticBodyNonStaticEntityWithMeshShape_succeeds)
+{
+    constexpr auto assetId = nc::asset::AssetId{42};
+    LoadMockMeshCollider(assetId);
+    const auto shape = nc::Shape::MakeMesh(assetId);
+    EXPECT_NO_THROW(nc::RigidBody(g_entity, shape, g_staticInfo));
+}
+
+TEST_F(RigidBodyTest, Constructor_nonStaticBodyWithMeshShape_throws)
+{
+    constexpr auto assetId = nc::asset::AssetId{42};
+    LoadMockMeshCollider(assetId);
+    const auto shape = nc::Shape::MakeMesh(assetId);
+    EXPECT_THROW(nc::RigidBody(g_entity, shape, g_dynamicInfo), nc::NcError);
 }
 
 TEST_F(RigidBodyTest, Constructor_triggerWithContinuousDetection_disablesContinuosDetection)
@@ -327,6 +360,15 @@ TEST_F(RigidBodyTest, SetBody_staticEntity_doesNotModifyState)
     EXPECT_EQ(nc::physics::BroadPhaseLayer::Static, apiBody->GetBroadPhaseLayer());
 }
 
+TEST_F(RigidBodyTest, SetBody_meshShapeSetToNonStatic_throws)
+{
+    constexpr auto assetId = nc::asset::AssetId{42};
+    LoadMockMeshCollider(assetId);
+    const auto shape = nc::Shape::MakeMesh(assetId);
+    auto uut = CreateRigidBody(g_entity, shape, g_staticInfo);
+    EXPECT_THROW(uut.SetBodyType(nc::BodyType::Dynamic), nc::NcError);
+}
+
 TEST_F(RigidBodyTest, SetMass_goodCall_updatesInternalMassProperties)
 {
     auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
@@ -409,6 +451,15 @@ TEST_F(RigidBodyTest, SetShape_changesVolume_preservesMassProperties)
     const auto expectedInvInertia = JPH::Vec3::sReplicate(expectedMOI).Reciprocal();
     const auto actualInvInertia = motionProperties->GetInverseInertiaDiagonal();
     EXPECT_EQ(expectedInvInertia, actualInvInertia);
+}
+
+TEST_F(RigidBodyTest, SetShape_meshOnDynamicBody_throws)
+{
+    constexpr auto assetId = nc::asset::AssetId{42};
+    LoadMockMeshCollider(assetId);
+    auto uut = CreateRigidBody(g_entity, g_shape, g_dynamicInfo);
+    const auto incompatible = nc::Shape::MakeMesh(assetId);
+    EXPECT_THROW(uut.SetShape(incompatible, nc::Vector3::One()), nc::NcError);
 }
 
 TEST_F(RigidBodyTest, SetDegreesOfFreedom_dynamicBody_updatesMotionProperties)

@@ -51,6 +51,7 @@ auto GetMeshView(nc::ShapeType shape) -> nc::asset::MeshView
             return view;
         }
         case nc::ShapeType::ConvexHull:
+        case nc::ShapeType::Mesh:
         {
             /** @todo 567 currently have no renderable geometry for these */
             static const auto view = AssetService<MeshView>::Get()->Acquire(CubeMesh);

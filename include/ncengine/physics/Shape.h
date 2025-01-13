@@ -16,7 +16,8 @@ enum class ShapeType : uint8_t
     Box,
     Sphere,
     Capsule,
-    ConvexHull
+    ConvexHull,
+    Mesh
 };
 
 /** @brief Get a valid scale for a shape given its current and desired scale values. */
@@ -54,6 +55,16 @@ struct Shape
                                          const Vector3& scale = Vector3::One()) -> Shape
     {
         return Shape{assetId, scale, ShapeType::ConvexHull};
+    }
+
+    /**
+     * @brief Make a shape from a MeshCollider asset.
+     * @note MeshColliders are only compatible with BodyType::Static.
+     */
+    static constexpr auto MakeMesh(asset::AssetId assetId,
+                                   const Vector3& scale = Vector3::One()) -> Shape
+    {
+        return Shape{assetId, scale, ShapeType::Mesh};
     }
 
     auto GetLocalPosition() const -> const Vector3& { return m_localPosition; }

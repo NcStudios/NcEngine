@@ -35,14 +35,17 @@ TEST(PhysicsUtilityTest, ShapeTypeConversion_roundTrip_preservesValues)
     constexpr auto sphereType = nc::ShapeType::Sphere;
     constexpr auto capsuleType = nc::ShapeType::Capsule;
     constexpr auto convexHullType = nc::ShapeType::ConvexHull;
+    constexpr auto meshType = nc::ShapeType::Mesh;
     const auto boxName = nc::ToString(boxType);
     const auto sphereName = nc::ToString(sphereType);
     const auto capsuleName = nc::ToString(capsuleType);
     const auto convexHullName = nc::ToString(convexHullType);
+    const auto meshName = nc::ToString(meshType);
     EXPECT_EQ(boxType, nc::ToShapeType(boxName));
     EXPECT_EQ(sphereType, nc::ToShapeType(sphereName));
     EXPECT_EQ(capsuleType, nc::ToShapeType(capsuleName));
     EXPECT_EQ(convexHullType, nc::ToShapeType(convexHullName));
+    EXPECT_EQ(meshType, nc::ToShapeType(meshName));
 }
 
 TEST(PhysicsUtilityTest, ShapeTypeConversion_badValue_throws)

@@ -20,6 +20,7 @@ class NcAssetMock : public NcAsset
         auto OnSkeletalAnimationUpdate()  noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
         auto OnTextureUpdate()            noexcept -> Signal<const TextureUpdateEventData&>&           override { return m_textureSignal; }
         auto OnConvexHullUpdate()         noexcept -> Signal<const ConvexHullUpdateEventData&>&        override { return m_convexHullSignal; }
+        auto OnMeshColliderUpdate()       noexcept -> Signal<const MeshColliderUpdateEventData&>&      override { return m_meshColliderSignal; }
         auto OnFontUpdate()               noexcept -> Signal<>&                                        override { return m_fontSignal; }
         auto GetAssetPath(AssetType, size_t) const -> std::string_view                                 override { return ""; }
 
@@ -43,6 +44,7 @@ class NcAssetMock : public NcAsset
         Signal<const SkeletalAnimationUpdateEventData&> m_animSignal;
         Signal<const TextureUpdateEventData&> m_textureSignal;
         Signal<const ConvexHullUpdateEventData&> m_convexHullSignal;
+        Signal<const MeshColliderUpdateEventData&> m_meshColliderSignal;
         Signal<> m_fontSignal;
 };
 

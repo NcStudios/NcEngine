@@ -22,6 +22,7 @@ namespace asset
 struct BoneUpdateEventData;
 struct ConvexHullUpdateEventData;
 struct CubeMapUpdateEventData;
+struct MeshColliderUpdateEventData;
 struct MeshUpdateEventData;
 struct SkeletalAnimationUpdateEventData;
 struct TextureUpdateEventData;
@@ -50,6 +51,9 @@ class NcAsset : public Module
 
         /** @brief Get the signal for ConvexHull load and unload events. */
         virtual auto OnConvexHullUpdate() noexcept -> Signal<const ConvexHullUpdateEventData&>& = 0;
+
+        /** @brief Get the signal for MeshCollider load and unload events. */
+        virtual auto OnMeshColliderUpdate() noexcept -> Signal<const MeshColliderUpdateEventData&>& = 0;
 
         /** @brief Get the signal for Font load and unload events. */
         virtual auto OnFontUpdate() noexcept -> Signal<>& = 0;
