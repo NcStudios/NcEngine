@@ -43,6 +43,9 @@ class NcPhysicsImpl final : public NcPhysics
         void OnAfterSceneFragmentLoad() override;
         void Clear() noexcept override;
 
+    virtual void SaveSnapshot(PhysicsSnapshot& snapshot);
+    virtual void RestoreSnapshot(PhysicsSnapshot& snapshot);
+
         auto IsUpdateEnabled() const -> bool override { return m_updateEnabled; }
         void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
         void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) override;

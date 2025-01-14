@@ -6,8 +6,10 @@
 
 #include "ncengine/ecs/EcsFwd.h"
 #include "ncengine/module/Module.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 #include "ncengine/type/EngineId.h"
 
+#include <any>
 #include <memory>
 
 namespace nc
@@ -19,6 +21,17 @@ namespace config
 struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
+
+
+// api notes
+// - prob want ptr or something b/c any must be moveable
+// - gets eaten on restore
+
+// struct PhysicsSnapshot
+// {
+//     std::any state;
+//     size_t frame = 0;
+// };
 
 /** @brief Physics module interface
  * 
@@ -39,6 +52,9 @@ struct NcPhysics : public Module
 
     /** @brief Toggle physics update step on or off. */
     virtual void EnableUpdate(bool) {}
+
+    virtual void SaveSnapshot(PhysicsSnapshot& snapshot) = 0;
+    virtual void RestoreSnapshot(PhysicsSnapshot& snapshot) = 0;
 
     /**
      * @name RigidBody Batching Operations

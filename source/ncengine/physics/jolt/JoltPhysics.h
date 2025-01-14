@@ -13,6 +13,11 @@
 
 #include <memory>
 
+
+
+#include "ncengine/physics/NcPhysics.h"
+
+
 namespace nc
 {
 namespace config
@@ -40,12 +45,16 @@ struct JoltPhysics : public StableAddress
 
     void Update(float dt, int steps = 1)
     {
+        currentFrame += steps;
         const auto error = physicsSystem.Update(dt, steps, &tempAllocator, jobSystem.get());
         if (error != JPH::EPhysicsUpdateError::None)
         {
             ThrowJoltUpdateError(error);
         }
     }
+
+    void SaveSnapshot(PhysicsSnapshot& snapshot);
+    void RestoreFromSnapshot(PhysicsSnapshot& snapshot);
 
     std::unique_ptr<jolt::JoltApi> api;
     jolt::TempAllocator tempAllocator;
@@ -55,6 +64,8 @@ struct JoltPhysics : public StableAddress
     JPH::PhysicsSystem physicsSystem;
     ContactListener contactListener;
     std::unique_ptr<JPH::JobSystem> jobSystem;
+
+    size_t currentFrame = 0ull;
 };
 } // namespace physics
 } // namespace nc

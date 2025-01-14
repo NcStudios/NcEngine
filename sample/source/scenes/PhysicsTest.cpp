@@ -1227,6 +1227,44 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Main Camera"
     });
 
+        static constexpr auto count = 20ull;
+
+    auto snapshots = []() -> std::vector<std::unique_ptr<nc::PhysicsSnapshot>>
+    {
+        auto out = std::vector<std::unique_ptr<nc::PhysicsSnapshot>>();
+        for (auto i = 0ull; i < count; ++i)
+            out.push_back(MakePhysicsSnapshot());
+        return out;
+    }();
+
+    auto saver = world.Emplace<Entity>({});
+    world.Emplace<FrameLogic>(saver, [ncPhysics, snapshots = std::move(snapshots)](Entity, ecs::Ecs, float) mutable {
+        static auto cur = 0ull;
+        
+
+
+
+        ncPhysics->SaveSnapshot(*snapshots.at(cur++));
+
+        if (cur >= count)
+            cur = 0;
+
+        if (KeyDown(input::KeyCode::One))
+        {
+        }
+        else if (KeyDown(input::KeyCode::Two))
+        {
+            const auto index = cur > 5 ? cur - 5 : 0;
+
+            ncPhysics->RestoreSnapshot(*snapshots.at(index));
+            // snapshots.clear();
+        }
+    });
+
+
+
+
+
     auto& camera = world.Emplace<FollowCamera>(cameraHandle, Entity::Null());
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);

@@ -29,6 +29,8 @@ class NcPhysicsStub : public nc::NcPhysics
         {
         }
 
+        auto SaveSnapshot(nc::PhysicsSnapshot&) {}
+        void RestoreSnapshot(nc::PhysicsSnapshot&) {}
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
@@ -109,6 +111,16 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
       },
       m_deferredState{std::move(deferredState)}
 {
+}
+
+void NcPhysicsImpl::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    return m_jolt.SaveSnapshot(snapshot);
+}
+
+void NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot)
+{
+    m_jolt.RestoreFromSnapshot(snapshot);
 }
 
 void NcPhysicsImpl::Run()

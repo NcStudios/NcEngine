@@ -7,6 +7,12 @@
 
 #include "Jolt/Core/Factory.h"
 #include "Jolt/RegisterTypes.h"
+#include "Jolt/Physics/StateRecorderImpl.h"
+
+
+#include <iostream>
+#include "ncutility/Compression.h"
+#include "PhysicsSnapshotImpl.h"
 
 namespace
 {
@@ -64,4 +70,23 @@ JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
 }
 
 JoltPhysics::~JoltPhysics() noexcept = default;
+
+void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    auto& upcast = static_cast<PhysicsSnapshotImpl&>(snapshot);
+    upcast.Save(physicsSystem, currentFrame);
+}
+
+void JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot)
+{
+    auto& upcast = static_cast<PhysicsSnapshotImpl&>(snapshot);
+    const auto restorFrame = upcaste.GetFrame();
+    NC_ASSERT(restoreFrame < currentFrame, "bad frames");
+    upcast.Restore(physicsSystem);
+
+    const auto frameDelta = currentFrame - restoreFrame;
+    std::cout << "rewinding " << frameDelta << " frames\n";
+
+    Update(1.0f / 60.0f, (int)frameDelta);
+}
 } // namespace nc::physics
