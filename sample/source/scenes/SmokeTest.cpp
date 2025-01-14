@@ -221,7 +221,7 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<StaticMesh>(sphere2,  mesh::Sphere,  material::Default);
     world.Emplace<StaticMesh>(capsule1, mesh::Capsule, material::Default);
     world.Emplace<StaticMesh>(capsule2, mesh::Capsule, material::Default);
-    world.Emplace<StaticMesh>(hull, mesh::Ramp, material::Default);
+    world.Emplace<StaticMesh>(hull,     mesh::Ramp,    material::Default);
 
     auto& box1Body     = world.Emplace<RigidBody>(box1,     Shape::MakeBox());
     auto& box2Body     = world.Emplace<RigidBody>(box2,     Shape::MakeBox());
