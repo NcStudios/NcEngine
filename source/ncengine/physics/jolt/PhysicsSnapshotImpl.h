@@ -8,37 +8,46 @@
 #include "Jolt/Physics/StateRecorderImpl.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 
-namespace nc::physics
+#include <limits>
+
+namespace
 {
-
-
-class PhysicsSnapshotImpl : public PhysicsSnapshot
+class SnapshotRecorder : public JPH::StateRecorder
 {
-    class SnapshotRecorder : public JPH::StateRecorder
-    {
-        public:
-            void ReadBytes(void* out, size_t numBytes)                       override { m_impl.ReadBytes(out, numBytes); }
-            void WriteBytes(const void* data, size_t numBytes)               override { m_impl.WriteBytes(data, numBytes); }
-            auto IsEOF()                                       const -> bool override { return m_impl.IsEOF(); }
-            auto IsFailed()                                    const -> bool override { return m_impl.IsFailed(); }
-            void Reset()                                                              { m_impl.Reset(); }
+    public:
+        void ReadBytes(void* out, size_t numBytes)                     override { m_impl.ReadBytes(out, numBytes); }
+        void WriteBytes(const void* in, size_t numBytes)               override { m_impl.WriteBytes(in, numBytes); }
+        auto IsEOF()                                     const -> bool override { return m_impl.IsEOF(); }
+        auto IsFailed()                                  const -> bool override { return m_impl.IsFailed(); }
+        void Reset()                                                            { m_impl.Reset(); }
 
-        private:
-            jolt::ByteArrayStream m_impl;
-    };
+    private:
+        nc::jolt::ByteArrayStream m_impl;
+};
+
+// todo filter
+
+} // anonymous namespace
+
+namespace nc
+{
+namespace physics
+{
+class PhysicsSnapshotImpl
+{
+    static constexpr auto NullFrame = std::numeric_limits<size_t>::max();
 
     public:
         explicit PhysicsSnapshotImpl()
         {
         }
 
-        ~PhysicsSnapshotImpl() noexcept
-        {
-        }
+        auto IsValid()  const -> bool   { return m_frame != NullFrame; }
+        auto GetFrame() const -> size_t { return m_frame; }
 
         void Save(JPH::PhysicsSystem& physicsSystem, size_t frame)
         {
-            // ensure cleared?...
+            NC_ASSERT(!IsValid(), "PhysicsSnapshot::Clear() must be called before reusing a snapshot.");
             physicsSystem.SaveState(m_recorder);
             m_frame = frame;
         }
@@ -50,20 +59,44 @@ class PhysicsSnapshotImpl : public PhysicsSnapshot
             return std::exchange(m_frame, NullFrame);
         }
 
-        auto GetRecorder() -> JPH::StateRecorder& { return m_recorder; }
+        void Clear()
+        {
+            m_recorder.Reset();
+            m_frame = NullFrame;
+        }
 
     private:
         SnapshotRecorder m_recorder;
+        size_t m_frame = NullFrame;
 };
+} // namespace physics
 
-
-
-} // namespace nc::physics
-
-namespace nc
+PhysicsSnapshot::PhysicsSnapshot()
+    : m_impl{std::make_unique<physics::PhysicsSnapshotImpl>()}
 {
-auto MakePhysicsSnapshot() -> std::unique_ptr<PhysicsSnapshot>
+}
+
+PhysicsSnapshot::PhysicsSnapshot(PhysicsSnapshot&&) noexcept = default;
+PhysicsSnapshot& PhysicsSnapshot::operator=(PhysicsSnapshot&&) noexcept = default;
+PhysicsSnapshot::~PhysicsSnapshot() noexcept = default;
+
+auto PhysicsSnapshot::IsValid() const -> bool
 {
-    return std::make_unique<physics::PhysicsSnapshotImpl>();
+    return m_impl->IsValid();
 }
+
+auto PhysicsSnapshot::GetFrame() const -> size_t
+{
+    return m_impl->GetFrame();
 }
+
+auto PhysicsSnapshot::GetImpl() -> physics::PhysicsSnapshotImpl&
+{
+    return *m_impl;
+}
+
+void PhysicsSnapshot::Clear()
+{
+    m_impl->Clear();
+}
+} // namespace nc

@@ -44,6 +44,11 @@ class NcPhysicsImpl final : public NcPhysics
         void OnAfterSceneFragmentLoad() override;
         void Clear() noexcept override;
 
+    virtual auto GetTick() const -> size_t;
+    virtual void ResetTick(size_t step = 0);
+    virtual void Tick(size_t steps = 0);
+    virtual void SyncTransforms();
+    virtual void DispatchAccumulatedEvents();
     virtual void SaveSnapshot(PhysicsSnapshot& snapshot);
     virtual void RestoreSnapshot(PhysicsSnapshot& snapshot);
 
@@ -62,9 +67,8 @@ class NcPhysicsImpl final : public NcPhysics
         BodyManager m_bodyManager;
         CollisionQueryManager m_queryManager;
         std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;
-        bool m_updateEnabled = true;
-
-        void SyncTransforms();
+        bool m_updateEnabled = true; // todo: could combine these
+        bool m_manualTick;
 };
 } // namespace physics
 } // namespace nc

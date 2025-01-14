@@ -1,31 +1,44 @@
+/**
+ * @file PhysicsSnapshot.h
+ * @copyright Jaremie Romer and McCallister Romer 2025
+ */
 #pragma once
 
-#include <limits>
 #include <memory>
 
 namespace nc
 {
-class PhysicsSnapshot
+namespace physics
+{
+class PhysicsSnapshotImpl;
+} // namespace physics
+
+/** @brief */
+class PhysicsSnapshot final
 {
     public:
-        static constexpr auto NullFrame = std::numeric_limits<size_t>::max();
+        PhysicsSnapshot();
+        PhysicsSnapshot(PhysicsSnapshot&&) noexcept;
+        PhysicsSnapshot& operator=(PhysicsSnapshot&&) noexcept;
+        ~PhysicsSnapshot() noexcept;
 
-        PhysicsSnapshot(PhysicsSnapshot&&) = delete;
-        PhysicsSnapshot& operator=(PhysicsSnapshot&&) = delete;
-        PhysicsSnapshot(const PhysicsSnapshot&) = delete;
-        PhysicsSnapshot& operator=(const PhysicsSnapshot&) = delete;
+        /** @brief Check if the snapshot has recorded state. */
+        auto IsValid() const -> bool;
 
-        virtual ~PhysicsSnapshot() noexcept = default;
+        /** @brief Get the physics tick the snapshot was taken at. */
+        auto GetFrame() const -> size_t;
 
+        /**
+         * @brief Clear any recorded state.
+         * @note Snapshots can be reused to minimize allocations, but should be cleared before saving new state.
+         */
+        void Clear();
 
-        auto IsValid()  const -> bool   { return m_frame == NullFrame; }
-        auto GetFrame() const -> size_t { return m_frame; }
+        /** @cond internal */
+        auto GetImpl()        -> physics::PhysicsSnapshotImpl&;
+        /** @endcond internal */
 
     protected:
-        size_t m_frame = NullFrame;
-
-        PhysicsSnapshot() = default;
+        std::unique_ptr<physics::PhysicsSnapshotImpl> m_impl;
 };
-
-auto MakePhysicsSnapshot() -> std::unique_ptr<PhysicsSnapshot>;
 } // namespace nc

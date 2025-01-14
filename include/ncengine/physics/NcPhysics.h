@@ -27,17 +27,6 @@ struct MemorySettings;
 struct PhysicsSettings;
 } // namespace config
 
-
-// api notes
-// - prob want ptr or something b/c any must be moveable
-// - gets eaten on restore
-
-// struct PhysicsSnapshot
-// {
-//     std::any state;
-//     size_t frame = 0;
-// };
-
 /** @brief Physics module interface
  * 
  * Tasks
@@ -58,6 +47,12 @@ struct NcPhysics : public Module
     /** @brief Toggle physics update step on or off. */
     virtual void EnableUpdate(bool) {}
 
+    // todo: how to handle collision events?...
+    virtual auto GetTick() const -> size_t { return 0; };
+    virtual void ResetTick(size_t = 0) {}
+    virtual void Tick(size_t = 0) {}
+    virtual void SyncTransforms() {}
+    virtual void DispatchAccumulatedEvents() {}
     virtual void SaveSnapshot(PhysicsSnapshot& snapshot) = 0;
     virtual void RestoreSnapshot(PhysicsSnapshot& snapshot) = 0;
 

@@ -43,13 +43,18 @@ struct JoltPhysics : public StableAddress
 
     ~JoltPhysics() noexcept;
 
-    void Update(float dt, int steps = 1)
+    void Update(float dt, size_t steps = 1)
     {
-        currentFrame += steps;
-        const auto error = physicsSystem.Update(dt, steps, &tempAllocator, jobSystem.get());
-        if (error != JPH::EPhysicsUpdateError::None)
+        while (steps != 0)
         {
-            ThrowJoltUpdateError(error);
+            const auto error = physicsSystem.Update(dt, 1, &tempAllocator, jobSystem.get());
+            if (error != JPH::EPhysicsUpdateError::None)
+            {
+                ThrowJoltUpdateError(error);
+            }
+
+            --steps;
+            ++currentFrame;
         }
     }
 

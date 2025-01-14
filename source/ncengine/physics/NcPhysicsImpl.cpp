@@ -117,42 +117,31 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
         m_jolt.physicsSystem.GetBodyLockInterfaceNoLock(),
         m_shapeFactory
       },
-      m_deferredState{std::move(deferredState)}
+      m_deferredState{std::move(deferredState)},
+      m_manualTick{physicsSettings.manualTick}
 {
 }
 
-void NcPhysicsImpl::SaveSnapshot(PhysicsSnapshot& snapshot)
+auto NcPhysicsImpl::GetTick() const -> size_t
 {
-    return m_jolt.SaveSnapshot(snapshot);
+    return m_jolt.currentFrame;
 }
 
-void NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot)
+void NcPhysicsImpl::ResetTick(size_t step)
 {
-    m_jolt.RestoreFromSnapshot(snapshot);
+    m_jolt.currentFrame = step;
 }
 
-void NcPhysicsImpl::Run()
+void NcPhysicsImpl::Tick(size_t steps)
 {
-    NC_PROFILE_TASK("NcPhysics::Run", ProfileCategory::Physics);
+    NC_PROFILE_SCOPE("NcPhysics::Tick", ProfileCategory::Physics);
+    NC_ASSERT(m_manualTick, "Invalid task");
     if (!m_updateEnabled)
     {
         return;
     }
 
-    m_jolt.Update(time::DeltaTime());
-    SyncTransforms();
-    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
-}
-
-void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
-{
-    NC_LOG_TRACE("Building NcPhysics Tasks");
-    update.Add(
-        update_task_id::PhysicsPipeline,
-        "PhysicsPipeline",
-        [this](){ this->Run(); },
-        {update_task_id::CommitStagedChanges}
-    );
+    m_jolt.Update(time::DeltaTime(), steps);
 }
 
 void NcPhysicsImpl::SyncTransforms()
@@ -189,6 +178,60 @@ void NcPhysicsImpl::SyncTransforms()
         const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
         AnimateVehicle(assemblies, constraint, transformPool);
     }
+}
+
+void NcPhysicsImpl::DispatchAccumulatedEvents()
+{
+    NC_PROFILE_SCOPE("NcPhysics::DispatchAccumulatedEvents()", ProfileCategory::Physics);
+    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
+}
+
+void NcPhysicsImpl::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    return m_jolt.SaveSnapshot(snapshot);
+}
+
+void NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot)
+{
+    m_jolt.RestoreFromSnapshot(snapshot);
+}
+
+void NcPhysicsImpl::Run()
+{
+    NC_PROFILE_TASK("NcPhysics", ProfileCategory::Physics);
+    NC_ASSERT(!m_manualTick, "Invalid task");
+    if (!m_updateEnabled)
+    {
+        return;
+    }
+
+    Tick(1);
+    SyncTransforms();
+    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
+}
+
+void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
+{
+    if (m_manualTick)
+    {
+        NC_LOG_TRACE("Skipping Building NcPhysics Tasks - Manual Tick Enabled");
+        update.Add(
+            update_task_id::PhysicsPipeline,
+            "PhysicsPipeline(stub)",
+            [](){},
+            {update_task_id::CommitStagedChanges}
+        );
+
+        return;
+    }
+
+    NC_LOG_TRACE("Building NcPhysics Tasks");
+    update.Add(
+        update_task_id::PhysicsPipeline,
+        "PhysicsPipeline",
+        [this](){ this->Run(); },
+        {update_task_id::CommitStagedChanges}
+    );
 }
 
 void NcPhysicsImpl::OnBeforeSceneLoad()

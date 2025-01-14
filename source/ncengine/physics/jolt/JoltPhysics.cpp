@@ -73,20 +73,29 @@ JoltPhysics::~JoltPhysics() noexcept = default;
 
 void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
 {
-    auto& upcast = static_cast<PhysicsSnapshotImpl&>(snapshot);
-    upcast.Save(physicsSystem, currentFrame);
+    snapshot.GetImpl().Save(physicsSystem, currentFrame);
 }
 
 void JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot)
 {
-    auto& upcast = static_cast<PhysicsSnapshotImpl&>(snapshot);
-    const auto restorFrame = upcaste.GetFrame();
-    NC_ASSERT(restoreFrame < currentFrame, "bad frames");
-    upcast.Restore(physicsSystem);
+    // todo: we may want option to not fast forward yet, or specify how far forward...
+
+    auto& impl = snapshot.GetImpl();
+    const auto restoreFrame = impl.GetFrame();
+    // NC_ASSERT(restoreFrame + 1 < currentFrame, "bad frames");
+    if (restoreFrame + 1 >= currentFrame)
+        return;
+
+    impl.Restore(physicsSystem);
 
     const auto frameDelta = currentFrame - restoreFrame;
     std::cout << "rewinding " << frameDelta << " frames\n";
 
-    Update(1.0f / 60.0f, (int)frameDelta);
+    currentFrame = restoreFrame;
+    Update(0.01667f, frameDelta);
+    // todo: check errors...
+    // for (auto i = 0; i < frameDelta; ++i)
+    //     physicsSystem.Update(0.01667f, 1, &tempAllocator, jobSystem.get());
+
 }
 } // namespace nc::physics
