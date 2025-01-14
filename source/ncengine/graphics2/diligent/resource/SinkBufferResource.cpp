@@ -49,10 +49,10 @@ auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
     return SinkBufferResourceDesc{
         .name = "Color Render Target",
         .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
-        .format = Diligent::TEX_FORMAT_RGBA8_UNORM,
+        .format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
         .clearValue = Diligent::OptimizedClearValue{
-            .Format = Diligent::TEX_FORMAT_RGBA8_UNORM,
+            .Format = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB,
             .Color = {0.0f, 0.0f, 0.0f, 0.0f},
             .DepthStencil = Diligent::DepthStencilClearValue{}
         },

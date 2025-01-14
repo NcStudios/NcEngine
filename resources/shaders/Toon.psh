@@ -50,15 +50,15 @@ struct PSOutput
 float LightBand(float lightAmount)
 {
     // Define the range for the soft transition
-    float lowerEdge = 0.49; // Start of the soft blend
-    float upperEdge = 0.50; // End of the soft blend
+    float lowerEdge = 0.095; // Start of the soft blend
+    float upperEdge = 0.1; // End of the soft blend
 
     // Smoothly blend between the two bands
     float blendFactor = smoothstep(lowerEdge, upperEdge, lightAmount);
 
     // Define the values for the bands
-    float bandLow = 0.2;
-    float bandHigh = 0.75;
+    float bandLow = 0.1;
+    float bandHigh = 1.0;
 
     // Interpolate between the two bands
     return lerp(bandLow, bandHigh, blendFactor);
@@ -72,10 +72,17 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float alpha = Color.a;
     float3 finalColor = {0.0f, 0.0f, 0.0f};
 
-    for (int i = 0; i < lightCount; i++)
+    // uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
+    // float hatchLight  = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV * 8).r;
+    // float hatchMedium = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV * 8).g;
+    // float hatchDark   = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV * 8).b;
+
+    float lightAmountTotal = 0.0f;
+
+      for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * LightBand(influence.specularAmt + influence.diffuseAmt);
+        finalColor += influence.color * LightBand(influence.diffuseAmt);
     }
 
     Color *= float4(finalColor, 1.0);

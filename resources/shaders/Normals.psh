@@ -50,8 +50,10 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
     uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
-    Color = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+    Color = normalize(TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV));
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-    float3 adjustedNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity;
-    PSOut.Color = float4(adjustedNormals, 1-dot(PSIn.Normal, -viewDir));
+    float3 adujstedTextureNormals = lerp(Color.rgb, 0.0, 0.1);
+    float3 adjustedVertexNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity;
+    // PSOut.Color = float4(lerp(adjustedVertexNormals, adujstedTextureNormals, 0.85), 1-dot(PSIn.Normal, viewDir));
+    PSOut.Color = float4(adjustedVertexNormals, 1-dot(PSIn.Normal, -viewDir));
 }

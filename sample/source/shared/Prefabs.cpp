@@ -110,6 +110,7 @@ void InitializeResources()
     {
         "cave/BaseColor.nca",
         "guy_base_color.nca",
+        "hatch.nca",
         "ogre/BaseColor.nca",
         "skeleton/BaseColor.nca",
         "solid_color/Blue.nca",
@@ -127,7 +128,8 @@ void InitializeResources()
     {
         "ogre/Normal.nca",
         "skeleton/Normal.nca",
-        "cave/Normal.nca"
+        "cave/Normal.nca",
+        "guy_normal.nca"
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
@@ -155,7 +157,7 @@ void ReloadPrefabs()
     material::Blue.properties.normalIntensity = .220f;
 
     material::Cave.properties.diffuseTexture = asset::AcquireTextureAsset("cave/BaseColor.nca");
-    material::Cave.properties.normalTexture = asset::AcquireTextureAsset("cave/Normal.nca");
+    material::Cave.properties.normalTexture = normal;
     material::Cave.properties.normalIntensity = .420f;
 
     material::Default.properties.diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor);
@@ -170,7 +172,7 @@ void ReloadPrefabs()
     material::Guy.properties.normalIntensity = .39f;
 
     material::Ogre.properties.diffuseTexture = asset::AcquireTextureAsset("ogre/BaseColor.nca");
-    material::Ogre.properties.normalTexture = asset::AcquireTextureAsset("ogre/Normal.nca");
+    material::Ogre.properties.normalTexture = normal;
     material::Ogre.properties.normalIntensity = .280f;
 
     material::Orange.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Orange.nca");
@@ -184,7 +186,7 @@ void ReloadPrefabs()
     material::Red.properties.normalTexture = normal;
 
     material::Skeleton.properties.diffuseTexture = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
-    material::Skeleton.properties.normalTexture = asset::AcquireTextureAsset("skeleton/Normal.nca");
+    material::Skeleton.properties.normalTexture = normal;
     material::Skeleton.properties.normalIntensity = .420f;
 
     material::Teal.properties.diffuseTexture = asset::AcquireTextureAsset("solid_color/Teal.nca");

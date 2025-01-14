@@ -29,7 +29,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{5.5f, 11.0f, 5.4f}, .tag = "Point Light 1"});
     world.Emplace<PointLight>(lvHandle, Vector3(0.0f, 0.0f, 0.0f), Vector3(0.946f, 0.671f, 0.278f), 26.6f);
     auto lv2Handle = world.Emplace<Entity>({.position = Vector3{6.5f, 9.0f, 9.6f}, .tag = "Point Light 2"});
     world.Emplace<PointLight>(lv2Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 0.723f, 0.608f), 13.4f);
@@ -159,8 +159,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
-        .position = Vector3{-0.6f, 6.562f, -18.848f},
-        .rotation = Quaternion::FromEulerAngles(0.239f, 0.0f, 0.021f),
+        .position = Vector3{0.854f, 2.612f, 2.234f},
+        .rotation = Quaternion::FromEulerAngles(0.318f, 1.269f, 0.07f),
         .tag = "Main Camera"
     });
 
@@ -169,7 +169,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 1.0f});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 0.3f, .depthThreshold = 0.8f, .normalThreshold = 0.120f});
 }
 
 void GraphicsTest::Unload()

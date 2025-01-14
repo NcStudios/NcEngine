@@ -132,6 +132,10 @@
             "assetName": "texture/guy_base_color"
         },
         {
+            "sourcePath": "raw/image/guy_normal.png",
+            "assetName": "texture/guy_normal.nca"
+        },
+        {
             "sourcePath": "raw/image/ogre/BaseColor.png",
             "assetName": "texture/ogre/BaseColor"
         },
