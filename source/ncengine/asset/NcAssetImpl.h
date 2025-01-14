@@ -15,12 +15,12 @@ struct MemorySettings;
 namespace asset
 {
 class AudioClipAssetManager;
-class ConcaveColliderAssetManager;
+class ConvexHullAssetManager;
 class CubeMapAssetManager;
 class FontAssetManager;
-class HullColliderAssetManager;
 class IAssetServiceBase;
 class MeshAssetManager;
+class MeshColliderAssetManager;
 class SkeletalAnimationAssetManager;
 class TextureAssetManager;
 
@@ -48,9 +48,9 @@ class NcAssetImpl : public NcAsset
 
     private:
         std::unique_ptr<AudioClipAssetManager> m_audioClipManager;
-        std::unique_ptr<ConcaveColliderAssetManager> m_meshColliderManager;
+        std::unique_ptr<MeshColliderAssetManager> m_meshColliderManager;
         std::unique_ptr<CubeMapAssetManager> m_cubeMapManager;
-        std::unique_ptr<HullColliderAssetManager> m_convexHullManager;
+        std::unique_ptr<ConvexHullAssetManager> m_convexHullManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
         std::unique_ptr<SkeletalAnimationAssetManager> m_skeletalAnimationManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;

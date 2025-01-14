@@ -12,10 +12,10 @@ namespace nc::asset
 {
 struct ConvexHullUpdateEventData;
 
-class HullColliderAssetManager : public IAssetService<ConvexHullView, std::string>
+class ConvexHullAssetManager : public IAssetService<ConvexHullView, std::string>
 {
     public:
-        explicit HullColliderAssetManager(const std::string& assetDirectory);
+        explicit ConvexHullAssetManager(const std::string& assetDirectory);
 
         bool Load(const std::string& path, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
         bool Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags = AssetFlags::None) override;

@@ -12,10 +12,10 @@ namespace nc::asset
 {
 struct MeshColliderUpdateEventData;
 
-class ConcaveColliderAssetManager : public IAssetService<MeshColliderView, std::string>
+class MeshColliderAssetManager : public IAssetService<MeshColliderView, std::string>
 {
     public:
-        explicit ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory);
+        explicit MeshColliderAssetManager(const std::string& meshColliderAssetDirectory);
 
         bool Load(const std::string& path, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
         bool Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags = AssetFlags::None) override;

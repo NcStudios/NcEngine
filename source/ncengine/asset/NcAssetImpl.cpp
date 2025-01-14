@@ -2,11 +2,11 @@
 #include "asset/AssetData.h"
 #include "config/Config.h"
 #include "manager/AudioClipAssetManager.h"
-#include "manager/ConcaveColliderAssetManager.h"
+#include "manager/ConvexHullAssetManager.h"
 #include "manager/CubeMapAssetManager.h"
 #include "manager/FontAssetManager.h"
-#include "manager/HullColliderAssetManager.h"
 #include "manager/MeshAssetManager.h"
+#include "manager/MeshColliderAssetManager.h"
 #include "manager/SkeletalAnimationAssetManager.h"
 #include "manager/TextureAssetManager.h"
 
@@ -26,9 +26,9 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
                          const config::MemorySettings& memorySettings,
                          AssetMap defaults)
     : m_audioClipManager{std::make_unique<AudioClipAssetManager>(assetSettings.audioClipsPath)},
-      m_meshColliderManager{std::make_unique<ConcaveColliderAssetManager>(assetSettings.meshCollidersPath)},
+      m_meshColliderManager{std::make_unique<MeshColliderAssetManager>(assetSettings.meshCollidersPath)},
       m_cubeMapManager{std::make_unique<CubeMapAssetManager>(assetSettings.cubeMapsPath, memorySettings.maxCubeMaps)},
-      m_convexHullManager{std::make_unique<HullColliderAssetManager>(assetSettings.convexHullsPath)},
+      m_convexHullManager{std::make_unique<ConvexHullAssetManager>(assetSettings.convexHullsPath)},
       m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
       m_skeletalAnimationManager{std::make_unique<SkeletalAnimationAssetManager>(assetSettings.skeletalAnimationsPath, memorySettings.maxSkeletalAnimations)},
       m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)},
