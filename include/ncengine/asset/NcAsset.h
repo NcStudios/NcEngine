@@ -1,6 +1,6 @@
 /**
  * @file NcAsset.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -20,7 +20,9 @@ struct MemorySettings;
 namespace asset
 {
 struct BoneUpdateEventData;
+struct ConvexHullUpdateEventData;
 struct CubeMapUpdateEventData;
+struct MeshColliderUpdateEventData;
 struct MeshUpdateEventData;
 struct SkeletalAnimationUpdateEventData;
 struct TextureUpdateEventData;
@@ -46,6 +48,12 @@ class NcAsset : public Module
 
         /** @brief Get the signal for Texture load and unload events. */
         virtual auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& = 0;
+
+        /** @brief Get the signal for ConvexHull load and unload events. */
+        virtual auto OnConvexHullUpdate() noexcept -> Signal<const ConvexHullUpdateEventData&>& = 0;
+
+        /** @brief Get the signal for MeshCollider load and unload events. */
+        virtual auto OnMeshColliderUpdate() noexcept -> Signal<const MeshColliderUpdateEventData&>& = 0;
 
         /** @brief Get the signal for Font load and unload events. */
         virtual auto OnFontUpdate() noexcept -> Signal<>& = 0;

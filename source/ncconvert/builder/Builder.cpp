@@ -69,13 +69,13 @@ auto Builder::Build(asset::AssetType type, const Target& target) -> bool
         }
         case asset::AssetType::ConcaveCollider:
         {
-            const auto asset = m_geometryConverter->ImportConcaveCollider(target.sourcePath);
+            const auto asset = m_geometryConverter->ImportMeshCollider(target.sourcePath);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }
         case asset::AssetType::HullCollider:
         {
-            const auto asset = m_geometryConverter->ImportHullCollider(target.sourcePath);
+            const auto asset = m_geometryConverter->ImportConvexHull(target.sourcePath);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }

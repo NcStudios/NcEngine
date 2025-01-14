@@ -22,7 +22,7 @@ auto GetAssetType(const NcaHeader& header) -> AssetType
     {
         return AssetType::CubeMap;
     }
-    else if (magicNumber == MagicNumber::hullCollider)
+    else if (magicNumber == MagicNumber::convexHull)
     {
         return AssetType::HullCollider;
     }

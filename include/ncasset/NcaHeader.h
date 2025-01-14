@@ -1,6 +1,6 @@
 /**
  * @file NcaHeader.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -21,7 +21,7 @@ struct MagicNumber
     static constexpr auto audioClip = std::string_view{"CLIP"};
     static constexpr auto concaveCollider = std::string_view{"CONC"};
     static constexpr auto cubeMap = std::string_view{"CUBE"};
-    static constexpr auto hullCollider = std::string_view{"HULL"};
+    static constexpr auto convexHull = std::string_view{"HULL"};
     static constexpr auto mesh = std::string_view{"MESH"};
     static constexpr auto shader = std::string_view{"SHAD"};
     static constexpr auto skeletalAnimation = std::string_view{"SKEL"};

@@ -104,6 +104,9 @@ auto InputColor4(Vector4& value, const char* label) -> bool;
 /** @brief Combobox UI widget. */
 auto Combobox(std::string& value, const char* label, std::span<const std::string_view> items);
 
+/** @brief Combobox UI widget that allows disabling selection of entries. */
+auto FilteredCombobox(std::string& value, const char* label, std::span<const std::string_view> items, auto&& disableIf);
+
 /** @brief Text input UI widget. */
 auto InputText(std::string& value, const char* label) -> bool;
 
@@ -383,6 +386,28 @@ inline auto Combobox(std::string& value, const char* label, std::span<const std:
     {
         const auto selected = std::ranges::find_if(items, [](const auto& text)
         {
+            return ImGui::Selectable(text.data());
+        });
+
+        ImGui::EndCombo();
+
+        if (selected != std::cend(items))
+        {
+            value = selected->data();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+inline auto FilteredCombobox(std::string& value, const char* label, std::span<const std::string_view> items, auto&& disableIf)
+{
+    if (ImGui::BeginCombo(label, value.c_str()))
+    {
+        const auto selected = std::ranges::find_if(items, [&disableIf](const auto& text)
+        {
+            IMGUI_SCOPE(DisableIf, disableIf(text));
             return ImGui::Selectable(text.data());
         });
 

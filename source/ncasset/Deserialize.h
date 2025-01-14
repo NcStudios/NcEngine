@@ -23,13 +23,13 @@ auto DeserializeHeader(std::istream& stream) -> NcaHeader;
 auto DeserializeAudioClip(std::istream& stream) -> DeserializedResult<AudioClip>;
 
 /** @brief Construct a ConcaveCollider from data in a binary stream. */
-auto DeserializeConcaveCollider(std::istream& stream) -> DeserializedResult<ConcaveCollider>;
+auto DeserializeMeshCollider(std::istream& stream) -> DeserializedResult<MeshCollider>;
 
 /** @brief Construct a CubeMap from data in a binary stream. */
 auto DeserializeCubeMap(std::istream& stream) -> DeserializedResult<CubeMap>;
 
 /** @brief Construct a HullCollider from data in a binary stream. */
-auto DeserializeHullCollider(std::istream& stream) -> DeserializedResult<HullCollider>;
+auto DeserializeConvexHull(std::istream& stream) -> DeserializedResult<ConvexHull>;
 
 /** @brief Construct a Mesh from data in a binary stream. */
 auto DeserializeMesh(std::istream& stream) -> DeserializedResult<Mesh>;

@@ -30,6 +30,7 @@ add_executable(CollisionQuery_integration_tests
     CollisionQuery_integration_tests.cpp
     ${NC_SOURCE_DIR}/physics/CollisionQuery.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
 )
 
 target_include_directories(CollisionQuery_integration_tests
@@ -111,9 +112,10 @@ add_executable(RigidBody_unit_tests
     ${NC_SOURCE_DIR}/physics/jolt/BodyFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintManager.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/VehicleManager.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
-)
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/VehicleManager.cpp
+    )
 
 target_include_directories(RigidBody_unit_tests
     PRIVATE

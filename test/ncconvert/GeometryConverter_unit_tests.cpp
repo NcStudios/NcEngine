@@ -13,36 +13,44 @@
 #include <iostream>
 #include <string>
 
-TEST(GeometryConverterTest, ImportConcaveCollider_convertsToNca)
+TEST(GeometryConverterTest, ImportMeshCollider_convertsToNca)
 {
     namespace test_data = collateral::plane_fbx;
     auto uut = nc::convert::GeometryConverter{};
-    const auto actual = uut.ImportConcaveCollider(test_data::filePath);
+    const auto actual = uut.ImportMeshCollider(test_data::filePath);
 
     EXPECT_EQ(actual.extents, test_data::meshVertexExtents);
     EXPECT_FLOAT_EQ(actual.maxExtent, test_data::furthestDistanceFromOrigin);
-    EXPECT_EQ(actual.triangles.size(), test_data::triangleCount);
+    EXPECT_FALSE(actual.blob.empty());
 
-    for (const auto& tri : actual.triangles)
+    auto reconstituted = nc::jolt::DeserializeShape(actual.blob);
+    auto actualMesh = UpcastToMeshShape(reconstituted.GetPtr());
+    const auto actualTriangles = GetTriangles(*actualMesh, test_data::triangleCount);
+    ASSERT_EQ(test_data::triangleCount, actualTriangles.size());
+
+    for (const auto& tri : actualTriangles)
     {
         const auto pos = std::ranges::find(test_data::possibleTriangles, tri);
         EXPECT_NE(pos, test_data::possibleTriangles.cend());
     }
 }
 
-TEST(GeometryConverterTest, ImportedHullCollider_convertsToNca)
+TEST(GeometryConverterTest, ImportedConvexHull_convertsToNca)
 {
     namespace test_data = collateral::cube_fbx;
     auto uut = nc::convert::GeometryConverter{};
-    const auto actual = uut.ImportHullCollider(test_data::filePath);
+    const auto actual = uut.ImportConvexHull(test_data::filePath);
 
     EXPECT_EQ(actual.extents, test_data::meshVertexExtents);
     EXPECT_FLOAT_EQ(actual.maxExtent, test_data::furthestDistanceFromOrigin);
-    EXPECT_EQ(actual.vertices.size(), test_data::vertexCount);
 
-    for (const auto& vertex : actual.vertices)
+    auto reconstituted = nc::jolt::DeserializeShape(actual.blob);
+    auto actualHull = UpcastToConvexHull(reconstituted.GetPtr());
+    EXPECT_EQ(test_data::possibleVertices.size(), actualHull->GetNumPoints());
+    for (auto i = 0u; i < actualHull->GetNumPoints(); ++i)
     {
-        const auto pos = std::ranges::find(test_data::possibleVertices, vertex);
+        const auto point = actualHull->GetPoint(i);
+        const auto pos = std::ranges::find(test_data::possibleVertices, ToVector3(point));
         EXPECT_NE(pos, test_data::possibleVertices.cend());
     }
 }

@@ -1,6 +1,6 @@
 /**
  * @file Import.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -18,11 +18,11 @@ auto ImportAudioClip(const std::filesystem::path& ncaPath) -> AudioClip;
 /** @brief Read an AudioClip asset from a binary stream. */
 auto ImportAudioClip(std::istream& data) -> AudioClip;
 
-/** @brief Read a ConcaveCollider asset from an .nca file. */
-auto ImportConcaveCollider(const std::filesystem::path& ncaPath) -> ConcaveCollider;
+/** @brief Read a MeshCollider asset from an .nca file. */
+auto ImportMeshCollider(const std::filesystem::path& ncaPath) -> MeshCollider;
 
-/** @brief Read a ConcaveCollider asset from a binary stream. */
-auto ImportConcaveCollider(std::istream& data) -> ConcaveCollider;
+/** @brief Read a MeshCollider asset from a binary stream. */
+auto ImportMeshCollider(std::istream& data) -> MeshCollider;
 
 /** @brief Read a CubeMap asset from an .nca file. */
 auto ImportCubeMap(const std::filesystem::path& ncaPath) -> CubeMap;
@@ -30,11 +30,11 @@ auto ImportCubeMap(const std::filesystem::path& ncaPath) -> CubeMap;
 /** @brief Read a CubeMap asset from a binary stream. */
 auto ImportCubeMap(std::istream& data) -> CubeMap;
 
-/** @brief Read a HullCollider asset from an .nca file. */
-auto ImportHullCollider(const std::filesystem::path& ncaPath) -> HullCollider;
+/** @brief Read a ConvexHull asset from an .nca file. */
+auto ImportConvexHull(const std::filesystem::path& ncaPath) -> ConvexHull;
 
-/** @brief Read a HullCollider asset from a binary stream. */
-auto ImportHullCollider(std::istream& data) -> HullCollider;
+/** @brief Read a ConvexHull asset from a binary stream. */
+auto ImportConvexHull(std::istream& data) -> ConvexHull;
 
 /** @brief Read a Mesh asset from an .nca file. */
 auto ImportMesh(const std::filesystem::path& ncaPath) -> Mesh;

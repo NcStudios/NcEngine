@@ -10,13 +10,13 @@ namespace nc::convert
 auto GetBlobSize(const asset::AudioClip& asset) -> size_t;
 
 /** @brief Get the serialized size in bytes for a ConcaveCollider. */
-auto GetBlobSize(const asset::ConcaveCollider& asset) -> size_t;
+auto GetBlobSize(const asset::MeshCollider& asset) -> size_t;
 
 /** @brief Get the serialized size in bytes for a CubeMap. */
 auto GetBlobSize(const asset::CubeMap& asset) -> size_t;
 
 /** @brief Get the serialized size in bytes for a HullCollider. */
-auto GetBlobSize(const asset::HullCollider& asset) -> size_t;
+auto GetBlobSize(const asset::ConvexHull& asset) -> size_t;
 
 /** @brief Get the serialized size in bytes for a Mesh. */
 auto GetBlobSize(const asset::Mesh& asset) -> size_t;
