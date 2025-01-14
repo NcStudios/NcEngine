@@ -28,12 +28,12 @@ auto AcquireAudioClipAsset(const std::string& path) -> AudioClipView;
 auto AcquireAudioClipAsset(AssetId id) -> AudioClipView;
 
 /** Supported file types: .nca */
-bool LoadConcaveColliderAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
-bool UnloadConcaveColliderAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
-void UnloadAllConcaveColliderAssets(asset_flags_type flags = AssetFlags::None);
-auto AcquireConcaveColliderAsset(const std::string& path) -> ConcaveColliderView;
-auto AcquireConcaveColliderAsset(AssetId id) -> ConcaveColliderView;
+bool LoadMeshColliderAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+bool LoadMeshColliderAssets(std::span<const std::string> paths, bool isExternal = false, asset_flags_type flags = AssetFlags::None);
+bool UnloadMeshColliderAsset(const std::string& path, asset_flags_type flags = AssetFlags::None);
+void UnloadAllMeshColliderAssets(asset_flags_type flags = AssetFlags::None);
+auto AcquireMeshColliderAsset(const std::string& path) -> MeshColliderView;
+auto AcquireMeshColliderAsset(AssetId id) -> MeshColliderView;
 
 /** Supported file types: .nca */
 bool LoadConvexHullAsset(const std::string& path, bool isExternal = false, asset_flags_type flags = AssetFlags::None);

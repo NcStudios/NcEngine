@@ -92,16 +92,16 @@ void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
     });
 }
 
-auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
+auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshColliderView
 {
     NC_ASSERT(m_map.contains(path), fmt::format("MeshCollider is not loaded: '{}'", path));
     return Acquire(m_map.hash(path));
 }
 
-auto ConcaveColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConcaveColliderView
+auto ConcaveColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> MeshColliderView
 {
     NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("MeshCollider is not loaded: '{}'", id));
-    return ConcaveColliderView{id};
+    return MeshColliderView{id};
 }
 
 bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const

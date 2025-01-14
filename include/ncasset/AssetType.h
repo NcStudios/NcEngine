@@ -9,10 +9,10 @@ namespace nc::asset
 enum class AssetType
 {
     AudioClip,
+    ConvexHull,
     CubeMap,
-    ConcaveCollider,
-    HullCollider,
     Mesh,
+    MeshCollider,
     Shader,
     SkeletalAnimation,
     Texture,

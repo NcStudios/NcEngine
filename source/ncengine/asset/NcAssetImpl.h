@@ -48,9 +48,9 @@ class NcAssetImpl : public NcAsset
 
     private:
         std::unique_ptr<AudioClipAssetManager> m_audioClipManager;
-        std::unique_ptr<ConcaveColliderAssetManager> m_concaveColliderManager;
+        std::unique_ptr<ConcaveColliderAssetManager> m_meshColliderManager;
         std::unique_ptr<CubeMapAssetManager> m_cubeMapManager;
-        std::unique_ptr<HullColliderAssetManager> m_hullColliderManager;
+        std::unique_ptr<HullColliderAssetManager> m_convexHullManager;
         std::unique_ptr<MeshAssetManager> m_meshManager;
         std::unique_ptr<SkeletalAnimationAssetManager> m_skeletalAnimationManager;
         std::unique_ptr<TextureAssetManager> m_textureManager;

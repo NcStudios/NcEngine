@@ -29,7 +29,7 @@ void Serialize(std::ostream& stream, const asset::AudioClip& data, uint64_t vers
 
 void Serialize(std::ostream& stream, const asset::MeshCollider& data, uint64_t version)
 {
-    SerializeImpl(stream, data, asset::MagicNumber::concaveCollider, version);
+    SerializeImpl(stream, data, asset::MagicNumber::meshCollider, version);
 }
 
 void Serialize(std::ostream& stream, const asset::CubeMap& data, uint64_t version)

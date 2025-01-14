@@ -83,19 +83,7 @@ void Inspect(const std::filesystem::path& ncaPath)
             LOG(audioClipTemplate, asset.samplesPerChannel);
             break;
         }
-        case asset::AssetType::ConcaveCollider:
-        {
-            const auto asset = asset::ImportMeshCollider(ncaPath);
-            LOG(meshColliderTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, asset.blob.size());
-            break;
-        }
-        case asset::AssetType::CubeMap:
-        {
-            const auto asset = asset::ImportCubeMap(ncaPath);
-            LOG(cubeMapTemplate, asset.faceSideLength);
-            break;
-        }
-        case asset::AssetType::HullCollider:
+        case asset::AssetType::ConvexHull:
         {
             const auto asset = asset::ImportConvexHull(ncaPath);
             const auto shape = jolt::DeserializeShape(asset.blob);
@@ -109,12 +97,24 @@ void Inspect(const std::filesystem::path& ncaPath)
             LOG(convexHullTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, hull->GetNumPoints());
             break;
         }
+        case asset::AssetType::CubeMap:
+        {
+            const auto asset = asset::ImportCubeMap(ncaPath);
+            LOG(cubeMapTemplate, asset.faceSideLength);
+            break;
+        }
         case asset::AssetType::Mesh:
         {
             const auto asset = asset::ImportMesh(ncaPath);
             auto vertexSpaceSize = asset.bonesData.has_value()? asset.bonesData.value().vertexSpaceToBoneSpace.size() : 0;
             auto boneSpaceSize = asset.bonesData.has_value()? asset.bonesData.value().boneSpaceToParentSpace.size() : 0;
             LOG(meshTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, asset.vertices.size(), asset.indices.size(), vertexSpaceSize, boneSpaceSize);
+            break;
+        }
+        case asset::AssetType::MeshCollider:
+        {
+            const auto asset = asset::ImportMeshCollider(ncaPath);
+            LOG(meshColliderTemplate, asset.extents.x, asset.extents.y, asset.extents.z, asset.maxExtent, asset.blob.size());
             break;
         }
         case asset::AssetType::Shader:

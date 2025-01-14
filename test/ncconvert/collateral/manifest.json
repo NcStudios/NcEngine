@@ -8,22 +8,16 @@
             "assetName": "myAudioClip"
         }
     ],
-    "concave-collider": [
+    "convex-hull": [
         {
-            "sourcePath": "plane.fbx",
-            "assetName": "myConcaveCollider"
+            "sourcePath": "cube.fbx",
+            "assetName": "myHullCollider"
         }
     ],
     "cube-map": [
         {
             "sourcePath": "cube_map_horizontal_cross.png",
             "assetName": "myCubeMap"
-        }
-    ],
-    "hull-collider": [
-        {
-            "sourcePath": "cube.fbx",
-            "assetName": "myHullCollider"
         }
     ],
     "mesh": [
@@ -60,6 +54,12 @@
                     "assetName" : "cube1a"
                 }
             ]
+        }
+    ],
+    "mesh-collider": [
+        {
+            "sourcePath": "plane.fbx",
+            "assetName": "myConcaveCollider"
         }
     ],
     "skeletal-animation": [

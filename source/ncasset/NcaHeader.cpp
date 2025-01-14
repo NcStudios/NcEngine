@@ -14,21 +14,21 @@ auto GetAssetType(const NcaHeader& header) -> AssetType
     {
         return AssetType::AudioClip;
     }
-    else if (magicNumber == MagicNumber::concaveCollider)
+    else if (magicNumber == MagicNumber::convexHull)
     {
-        return AssetType::ConcaveCollider;
+        return AssetType::ConvexHull;
     }
     else if (magicNumber == MagicNumber::cubeMap)
     {
         return AssetType::CubeMap;
     }
-    else if (magicNumber == MagicNumber::convexHull)
-    {
-        return AssetType::HullCollider;
-    }
     else if (magicNumber == MagicNumber::mesh)
     {
         return AssetType::Mesh;
+    }
+    else if (magicNumber == MagicNumber::meshCollider)
+    {
+        return AssetType::MeshCollider;
     }
     else if (magicNumber == MagicNumber::shader)
     {

@@ -74,16 +74,16 @@ TEST_F(NcConvertIntegration, SingleTarget_audioClip_wrongSourceType_fails)
     EXPECT_EQ(RunCmd(cmd), ResultCode::RuntimeError);
 }
 
-TEST_F(NcConvertIntegration, SingleTarget_concaveCollider_succeeds)
+TEST_F(NcConvertIntegration, SingleTarget_meshCollider_succeeds)
 {
-    const auto cmd = BuildSingleTargetCommand("concave-collider", "plane.fbx", "myConcaveCollider");
+    const auto cmd = BuildSingleTargetCommand("mesh-collider", "plane.fbx", "myConcaveCollider");
     ASSERT_EQ(RunCmd(cmd), ResultCode::Success);
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myConcaveCollider.nca"));
 }
 
-TEST_F(NcConvertIntegration, SingleTarget_concaveCollider_wrongSourceType_fails)
+TEST_F(NcConvertIntegration, SingleTarget_meshCollider_wrongSourceType_fails)
 {
-    const auto cmd = BuildSingleTargetCommand("concave-collider", "rgb_corners_4x8.png", "myConcaveCollider");
+    const auto cmd = BuildSingleTargetCommand("mesh-collider", "rgb_corners_4x8.png", "myConcaveCollider");
     EXPECT_EQ(RunCmd(cmd), ResultCode::RuntimeError);
 }
 
@@ -102,14 +102,14 @@ TEST_F(NcConvertIntegration, SingleTarget_cubeMap_wrongSourceType_fails)
 
 TEST_F(NcConvertIntegration, SingleTarget_convexHull_succeeds)
 {
-    const auto cmd = BuildSingleTargetCommand("hull-collider", "cube.fbx", "myConvexHull");
+    const auto cmd = BuildSingleTargetCommand("convex-hull", "cube.fbx", "myConvexHull");
     ASSERT_EQ(RunCmd(cmd), ResultCode::Success);
     EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myConvexHull.nca"));
 }
 
-TEST_F(NcConvertIntegration, SingleTarget_hullCollider_wrongSourceType_fails)
+TEST_F(NcConvertIntegration, SingleTarget_convexHull_wrongSourceType_fails)
 {
-    const auto cmd = BuildSingleTargetCommand("hull-collider", "rgb_corners_4x8.png", "myHullCollider");
+    const auto cmd = BuildSingleTargetCommand("convex-hull", "rgb_corners_4x8.png", "myHullCollider");
     EXPECT_EQ(RunCmd(cmd), ResultCode::RuntimeError);
 }
 

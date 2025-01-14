@@ -24,12 +24,12 @@ Options
   -i <assetPath>          Print details about an existing asset file.
 
 Asset types               Supported file types      Can produce multiple assets
-  mesh                    fbx, obj                  true
-  hull-collider           fbx, obj                  false
-  concave-collider        fbx, obj                  false
-  texture                 jpg, png, bmp             false
-  cube-map                jpg, png, bmp             false
   audio-clip              wav                       false
+  convex-hull             fbx, obj                  false
+  cube-map                jpg, png, bmp             false
+  mesh                    fbx, obj                  true
+  mesh-collider           fbx, obj                  false
+  texture                 jpg, png, bmp             false
 
 Asset names
   The provided asset name is used to construct the output file path. It may

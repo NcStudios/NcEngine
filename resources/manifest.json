@@ -8,22 +8,16 @@
             "assetName": "audio_clip/DefaultAudioClip"
         }
     ],
-    "concave-collider": [
+    "convex-hull": [
         {
-            "sourcePath": "raw/model/DefaultPlane.fbx",
-            "assetName": "concave_collider/DefaultConcaveCollider"
+            "sourcePath": "raw/model/DefaultCube.fbx",
+            "assetName": "convex_hull/DefaultConvexHull"
         }
     ],
     "cube-map": [
         {
             "sourcePath": "raw/image/DefaultSkybox.png",
             "assetName": "cube_map/DefaultSkyboxCubeMap"
-        }
-    ],
-    "hull-collider": [
-        {
-            "sourcePath": "raw/model/DefaultCube.fbx",
-            "assetName": "hull_collider/DefaultHullCollider"
         }
     ],
     "mesh": [
@@ -68,6 +62,12 @@
             "options": {
                 "optimizeMesh": true
             }
+        }
+    ],
+    "mesh-collider": [
+        {
+            "sourcePath": "raw/model/DefaultPlane.fbx",
+            "assetName": "mesh_collider/DefaultMeshCollider"
         }
     ],
     "texture": [

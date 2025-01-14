@@ -32,15 +32,15 @@ struct EngineSettings
  */
 struct AssetSettings
 {
-    std::string audioClipsPath = "assets/audio_clips/";
-    std::string concaveCollidersPath = "assets/concave_colliders/";
-    std::string hullCollidersPath = "assets/hull_colliders/";
-    std::string meshesPath = "assets/meshes/";
-    std::string shadersPath = "assets/shaders/";
-    std::string skeletalAnimationsPath = "assets/skeletal_animations/";
-    std::string texturesPath = "assets/textures/";
-    std::string cubeMapsPath = "assets/cube_maps";
-    std::string fontsPath = "assets/fonts";
+    std::string audioClipsPath = "assets/audio_clip/";
+    std::string convexHullsPath = "assets/convex_hull/";
+    std::string cubeMapsPath = "assets/cube_map";
+    std::string fontsPath = "assets/font";
+    std::string meshesPath = "assets/mesh/";
+    std::string meshCollidersPath = "assets/mesh_collider/";
+    std::string shadersPath = "assets/shader/";
+    std::string skeletalAnimationsPath = "assets/skeletal_animation/";
+    std::string texturesPath = "assets/texture/";
 };
 
 /**

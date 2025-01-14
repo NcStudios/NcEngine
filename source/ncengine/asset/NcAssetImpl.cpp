@@ -26,9 +26,9 @@ NcAssetImpl::NcAssetImpl(const config::AssetSettings& assetSettings,
                          const config::MemorySettings& memorySettings,
                          AssetMap defaults)
     : m_audioClipManager{std::make_unique<AudioClipAssetManager>(assetSettings.audioClipsPath)},
-      m_concaveColliderManager{std::make_unique<ConcaveColliderAssetManager>(assetSettings.concaveCollidersPath)},
+      m_meshColliderManager{std::make_unique<ConcaveColliderAssetManager>(assetSettings.meshCollidersPath)},
       m_cubeMapManager{std::make_unique<CubeMapAssetManager>(assetSettings.cubeMapsPath, memorySettings.maxCubeMaps)},
-      m_hullColliderManager{std::make_unique<HullColliderAssetManager>(assetSettings.hullCollidersPath)},
+      m_convexHullManager{std::make_unique<HullColliderAssetManager>(assetSettings.convexHullsPath)},
       m_meshManager{std::make_unique<MeshAssetManager>(assetSettings.meshesPath)},
       m_skeletalAnimationManager{std::make_unique<SkeletalAnimationAssetManager>(assetSettings.skeletalAnimationsPath, memorySettings.maxSkeletalAnimations)},
       m_textureManager{std::make_unique<TextureAssetManager>(assetSettings.texturesPath, memorySettings.maxTextures)},
@@ -71,12 +71,12 @@ auto NcAssetImpl::OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalA
 
 auto NcAssetImpl::OnConvexHullUpdate() noexcept -> Signal<const ConvexHullUpdateEventData&>&
 {
-    return m_hullColliderManager->OnUpdate();
+    return m_convexHullManager->OnUpdate();
 }
 
 auto NcAssetImpl::OnMeshColliderUpdate() noexcept -> Signal<const MeshColliderUpdateEventData&>&
 {
-    return m_concaveColliderManager->OnUpdate();
+    return m_meshColliderManager->OnUpdate();
 }
 
 auto NcAssetImpl::OnFontUpdate() noexcept -> Signal<>&
@@ -88,14 +88,14 @@ void NcAssetImpl::LoadAssets(const AssetMap& assets)
 {
     if (assets.contains(asset::AssetType::AudioClip))
         m_audioClipManager->Load(assets.at(asset::AssetType::AudioClip), false);
-    if (assets.contains(asset::AssetType::ConcaveCollider))
-        m_concaveColliderManager->Load(assets.at(asset::AssetType::ConcaveCollider), false);
+    if (assets.contains(asset::AssetType::ConvexHull))
+        m_convexHullManager->Load(assets.at(asset::AssetType::ConvexHull), false);
     if (assets.contains(asset::AssetType::CubeMap))
         m_cubeMapManager->Load(assets.at(asset::AssetType::CubeMap), false);
-    if (assets.contains(asset::AssetType::HullCollider))
-        m_hullColliderManager->Load(assets.at(asset::AssetType::HullCollider), false);
     if (assets.contains(asset::AssetType::Mesh))
         m_meshManager->Load(assets.at(asset::AssetType::Mesh), false);
+    if (assets.contains(asset::AssetType::MeshCollider))
+        m_meshColliderManager->Load(assets.at(asset::AssetType::MeshCollider), false);
     if (assets.contains(asset::AssetType::SkeletalAnimation))
         m_skeletalAnimationManager->Load(assets.at(asset::AssetType::SkeletalAnimation), false);
     if (assets.contains(asset::AssetType::Texture))
@@ -107,9 +107,9 @@ auto NcAssetImpl::GetLoadedAssets() const noexcept -> AssetMap
     const auto managers = std::array<IAssetServiceBase*, 7>
     {
         m_audioClipManager.get(),
-        m_concaveColliderManager.get(),
+        m_meshColliderManager.get(),
         m_cubeMapManager.get(),
-        m_hullColliderManager.get(),
+        m_convexHullManager.get(),
         m_meshManager.get(),
         m_skeletalAnimationManager.get(),
         m_textureManager.get()
@@ -137,10 +137,10 @@ auto NcAssetImpl::GetService(AssetType type) const -> const IAssetServiceBase&
     switch (type)
     {
         case AssetType::AudioClip:         return *m_audioClipManager;
+        case AssetType::ConvexHull:        return *m_convexHullManager;
         case AssetType::CubeMap:           return *m_cubeMapManager;
-        case AssetType::ConcaveCollider:   return *m_concaveColliderManager;
-        case AssetType::HullCollider:      return *m_hullColliderManager;
         case AssetType::Mesh:              return *m_meshManager;
+        case AssetType::MeshCollider:      return *m_meshColliderManager;
         case AssetType::Shader:            throw NcError{"Not Implemented"};
         case AssetType::SkeletalAnimation: return *m_skeletalAnimationManager;
         case AssetType::Texture:           return *m_textureManager;

@@ -26,7 +26,7 @@ class HullColliderAssetManager : public IAssetService<ConvexHullView, std::strin
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
         auto GetPath(AssetId id) const -> std::string_view override { return m_map.at(m_map.index(id)); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::HullCollider; }
+        auto GetAssetType() const noexcept -> asset::AssetType override { return asset::AssetType::ConvexHull; }
         auto OnUpdate() -> Signal<const ConvexHullUpdateEventData&>& { return m_onUpdate; }
 
     private:

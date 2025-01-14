@@ -65,7 +65,7 @@ TEST_F(BuildAndImportTest, MeshCollider_from_fbx)
     const auto outFile = ncaTestOutDirectory / "plane_concave.nca";
     const auto target = nc::convert::Target{inFile, outFile};
     auto builder = nc::convert::Builder{};
-    ASSERT_TRUE(builder.Build(nc::asset::AssetType::ConcaveCollider, target));
+    ASSERT_TRUE(builder.Build(nc::asset::AssetType::MeshCollider, target));
 
     const auto asset = nc::asset::ImportMeshCollider(outFile);
 
@@ -92,7 +92,7 @@ TEST_F(BuildAndImportTest, ConvexHull_from_fbx)
     const auto outFile = ncaTestOutDirectory / "cube_hull.nca";
     const auto target = nc::convert::Target{inFile, outFile};
     auto builder = nc::convert::Builder{};
-    ASSERT_TRUE(builder.Build(nc::asset::AssetType::HullCollider, target));
+    ASSERT_TRUE(builder.Build(nc::asset::AssetType::ConvexHull, target));
 
     auto asset = nc::asset::ImportConvexHull(outFile);
 
