@@ -4,6 +4,7 @@
 #include "jolt/ShapeFactory.h"
 #include "jolt/VehicleAnimator.h"
 
+#include "ncengine/asset/NcAsset.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/time/Time.h"
@@ -51,6 +52,7 @@ namespace nc
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         ecs::Ecs world,
+                        asset::NcAsset& ncAsset,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
@@ -62,6 +64,7 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
             memorySettings,
             physicsSettings,
             world,
+            ncAsset,
             dispatcher,
             events,
             std::move(deferredState)
@@ -77,11 +80,16 @@ namespace physics
 NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                              const config::PhysicsSettings& physicsSettings,
                              ecs::Ecs world,
+                             asset::NcAsset& ncAsset,
                              const task::AsyncDispatcher& dispatcher,
                              SystemEvents&,
                              std::unique_ptr<DeferredPhysicsCreateState> deferredState)
     : m_ecs{world},
       m_jolt{memorySettings, physicsSettings, dispatcher},
+      m_shapeFactory{
+        ncAsset.OnConvexHullUpdate(),
+        ncAsset.OnMeshColliderUpdate()
+      },
       m_constraintFactory{m_jolt.physicsSystem},
       m_constraintManager{
         m_jolt.physicsSystem,

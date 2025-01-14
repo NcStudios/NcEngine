@@ -2,12 +2,12 @@
 #include "AssetUtilities.h"
 
 #include "ncasset/Import.h"
+#include "ncengine/asset/AssetData.h"
 
 namespace nc::asset
 {
 ConcaveColliderAssetManager::ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory)
-    : m_concaveColliders{},
-      m_assetDirectory{concaveColliderAssetDirectory}
+    : m_assetDirectory{concaveColliderAssetDirectory}
 {
 }
 
@@ -19,13 +19,25 @@ bool ConcaveColliderAssetManager::Load(const std::string& path, bool isExternal,
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    m_concaveColliders.emplace(path, asset::ImportConcaveCollider(fullPath));
+    m_map.emplace(path);
+    const auto id = m_map.hash(path);
+    auto asset = ImportMeshCollider(fullPath);
+    m_onUpdate.Emit(MeshColliderUpdateEventData{
+        std::span{&asset, 1},
+        std::span{&id, 1},
+        UpdateAction::Load
+    });
+
     return true;
 }
 
 bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
     auto anyLoaded = false;
+    auto assets = std::vector<MeshCollider>{};
+    auto ids = std::vector<AssetId>{};
+    assets.reserve(paths.size());
+    ids.reserve(paths.size());
 
     for(const auto& path : paths)
     {
@@ -34,10 +46,20 @@ bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool 
             continue;
         }
 
-        if (Load(path, isExternal))
-        {
-            anyLoaded = true;
-        }
+        anyLoaded = true;
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        assets.push_back(ImportMeshCollider(fullPath));
+        ids.push_back(m_map.hash(path));
+        m_map.emplace(path);
+    }
+
+    if (anyLoaded)
+    {
+        m_onUpdate.Emit(MeshColliderUpdateEventData{
+            assets,
+            ids,
+            UpdateAction::Load
+        });
     }
 
     return anyLoaded;
@@ -45,39 +67,50 @@ bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool 
 
 bool ConcaveColliderAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    return m_concaveColliders.erase(path);
+    if (m_map.erase(path))
+    {
+        const auto id = m_map.hash(path);
+        m_onUpdate.Emit(MeshColliderUpdateEventData{
+            {},
+            {&id, 1},
+            UpdateAction::Unload
+        });
+
+        return true;
+    }
+
+    return false;
 }
 
 void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
 {
-    m_concaveColliders.clear();
+    m_map.clear();
+    m_onUpdate.Emit(MeshColliderUpdateEventData{
+        {},
+        {},
+        UpdateAction::UnloadAll
+    });
 }
 
 auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
 {
-    NC_ASSERT(m_concaveColliders.contains(path), fmt::format("Asset is not loaded: '{}'", path));
-    return Acquire(m_concaveColliders.hash(path));
+    NC_ASSERT(m_map.contains(path), fmt::format("MeshCollider is not loaded: '{}'", path));
+    return Acquire(m_map.hash(path));
 }
 
 auto ConcaveColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConcaveColliderView
 {
-    const auto index = m_concaveColliders.index(id);
-    NC_ASSERT(index != m_concaveColliders.NullIndex, fmt::format("ConcaveCollider is not loaded: '{}'", id));
-    const auto& collider = m_concaveColliders.at(index);
-    return ConcaveColliderView{
-        .id = id,
-        .triangles = std::span<const Triangle>{collider.triangles},
-        .maxExtent = collider.maxExtent
-    };
+    NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("MeshCollider is not loaded: '{}'", id));
+    return ConcaveColliderView{id};
 }
 
 bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
-    return m_concaveColliders.contains(path);
+    return m_map.contains(path);
 }
 
 auto ConcaveColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_concaveColliders.keys());
+    return GetPaths(m_map.keys());
 }
 } // namespace nc::asset

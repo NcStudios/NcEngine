@@ -15,8 +15,8 @@ class GeometryConverter
         GeometryConverter();
         ~GeometryConverter() noexcept;
 
-        /** Process an fbx file as geometry for a concave collider. */
-        auto ImportConcaveCollider(const std::filesystem::path& path) -> asset::ConcaveCollider;
+        /** Process an fbx file as geometry for a mesh collider. */
+        auto ImportMeshCollider(const std::filesystem::path& path) -> asset::MeshCollider;
 
         /** Process an fbx file as geometry for a hull collider. */
         auto ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull;

@@ -63,10 +63,10 @@ auto GetBlobSize(const asset::AudioClip& asset) -> size_t
     return baseSize + asset.samplesPerChannel * sizeof(double) * 2ull + sizeof(size_t) * 2ull;
 }
 
-auto GetBlobSize(const asset::ConcaveCollider& asset) -> size_t
+auto GetBlobSize(const asset::MeshCollider& asset) -> size_t
 {
-    constexpr auto baseSize = sizeof(asset::ConcaveCollider::extents) + sizeof(asset::ConcaveCollider::maxExtent) + sizeof(size_t);
-    return baseSize + asset.triangles.size() * sizeof(Triangle);
+    constexpr auto baseSize = sizeof(asset::MeshCollider::extents) + sizeof(asset::MeshCollider::maxExtent) + sizeof(size_t);
+    return baseSize + asset.blob.size() * sizeof(uint8_t);
 }
 
 auto GetBlobSize(const asset::CubeMap& asset) -> size_t

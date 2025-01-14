@@ -22,6 +22,8 @@
 /** @todo 353 Remove once NcAsset has this functionality. */
 #include "asset/AssetService.h"
 
+#include "ncutility/Hash.h"
+
 #include <array>
 #include <ranges>
 
@@ -251,6 +253,44 @@ void CapsuleProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
     if (heightModified | radiusModified | positionModified)
     {
         body.SetShape(nc::Shape::MakeCapsule(height, radius, position), transformScale);
+    }
+}
+
+void ConvexHullProperties(nc::RigidBody& body, const nc::Vector3& transformScale, nc::asset::NcAsset& ncAsset)
+{
+    const auto& shape = body.GetShape();
+    const auto hullId = shape.GetAssetId();
+    auto scale = shape.GetLocalScale();
+    if (nc::ui::InputScale(scale, "scale"))
+    {
+        body.SetShape(nc::Shape::MakeConvexHull(hullId, scale), transformScale);
+    }
+
+    const auto hullAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::HullCollider);
+    auto hullPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::HullCollider, hullId)};
+    if (nc::ui::Combobox(hullPath, "asset", hullAssets))
+    {
+        const auto selectedView = nc::asset::AssetService<nc::asset::ConvexHullView>::Get()->Acquire(hullPath);
+        body.SetShape(nc::Shape::MakeConvexHull(selectedView.id, scale), transformScale);
+    }
+}
+
+void MeshColliderProperties(nc::RigidBody& body, const nc::Vector3& transformScale, nc::asset::NcAsset& ncAsset)
+{
+    const auto& shape = body.GetShape();
+    const auto assetId = shape.GetAssetId();
+    auto scale = shape.GetLocalScale();
+    if (nc::ui::InputScale(scale, "scale"))
+    {
+        body.SetShape(nc::Shape::MakeMesh(assetId, scale), transformScale);
+    }
+
+    const auto meshColliderAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::ConcaveCollider);
+    auto assetPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::ConcaveCollider, assetId)};
+    if (nc::ui::Combobox(assetPath, "asset", meshColliderAssets))
+    {
+        const auto selectedView = nc::asset::AssetService<nc::asset::ConcaveColliderView>::Get()->Acquire(assetPath);
+        body.SetShape(nc::Shape::MakeMesh(selectedView.id, scale), transformScale);
     }
 }
 
@@ -1141,7 +1181,11 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
     {
         const auto transformScale = ctx.world.Get<Transform>(body.GetEntity()).Scale();
         auto selectedShapeName = std::string{ToString(body.GetShape().GetType())};
-        if (ui::Combobox(selectedShapeName, "shapeType", GetShapeTypeNames()))
+        auto excludeShapeIf = [type = body.GetBodyType()](const auto& text){
+            return type != BodyType::Static && text == "Mesh";
+        };
+
+        if (ui::FilteredCombobox(selectedShapeName, "shapeType", GetShapeTypeNames(), excludeShapeIf))
         {
             const auto newShape = ToShapeType(selectedShapeName);
             switch (newShape)
@@ -1149,14 +1193,38 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
                 case ShapeType::Box:     { body.SetShape(Shape::MakeBox(),     transformScale); break; }
                 case ShapeType::Sphere:  { body.SetShape(Shape::MakeSphere(),  transformScale); break; }
                 case ShapeType::Capsule: { body.SetShape(Shape::MakeCapsule(), transformScale); break; }
+                case ShapeType::ConvexHull:
+                {
+                    static constexpr auto defaultHullId = utility::Fnv1a(asset::DefaultHullCollider);
+                    body.SetShape(Shape::MakeConvexHull(defaultHullId), transformScale);
+                    break;
+                }
+                case ShapeType::Mesh:
+                {
+                    static constexpr auto defaultMeshId = utility::Fnv1a(asset::DefaultConcaveCollider);
+                    body.SetShape(Shape::MakeMesh(defaultMeshId), transformScale);
+                    break;
+                }
             }
         }
 
         switch (body.GetShape().GetType())
         {
-            case ShapeType::Box:     { rigid_body_ext::BoxProperties(body,     transformScale); break; }
-            case ShapeType::Sphere:  { rigid_body_ext::SphereProperties(body,  transformScale); break; }
-            case ShapeType::Capsule: { rigid_body_ext::CapsuleProperties(body, transformScale); break;}
+            case ShapeType::Box:        { rigid_body_ext::BoxProperties(body,     transformScale); break; }
+            case ShapeType::Sphere:     { rigid_body_ext::SphereProperties(body,  transformScale); break; }
+            case ShapeType::Capsule:    { rigid_body_ext::CapsuleProperties(body, transformScale); break; }
+            case ShapeType::ConvexHull:
+            {
+                auto ncAsset = ctx.modules.Get<asset::NcAsset>();
+                rigid_body_ext::ConvexHullProperties(body, transformScale, *ncAsset);
+                break;
+            }
+            case ShapeType::Mesh:
+            {
+                auto ncAsset = ctx.modules.Get<asset::NcAsset>();
+                rigid_body_ext::MeshColliderProperties(body, transformScale, *ncAsset);
+                break;
+            }
         }
         ImGui::TreePop();
     }
@@ -1164,7 +1232,11 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
     ImGui::Separator();
     if(ImGui::TreeNodeEx("Simulation Properties", 0))
     {
-        ui::PropertyWidget(rigid_body_ext::bodyTypeProp, body, &ui::Combobox,  GetBodyTypeNames());
+        {
+            IMGUI_SCOPE(ui::DisableIf, body.GetEntity().IsStatic() || body.GetShape().GetType() == ShapeType::Mesh);
+            ui::PropertyWidget(rigid_body_ext::bodyTypeProp, body, &ui::Combobox, GetBodyTypeNames());
+        }
+
         {
             IMGUI_SCOPE(ui::DisableIf, isStaticBody);
             ui::PropertyWidget(rigid_body_ext::massProp, body, &ui::DragFloat, 5.0f, g_minMass, g_maxMass);
