@@ -50,11 +50,11 @@ struct ConvexHull
     std::vector<uint8_t> blob;
 };
 
-struct ConcaveCollider
+struct MeshCollider
 {
     Vector3 extents;
     float maxExtent;
-    std::vector<Triangle> triangles;
+    std::vector<uint8_t> blob;
 };
 
 struct MeshVertex

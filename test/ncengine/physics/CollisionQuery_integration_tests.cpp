@@ -7,12 +7,13 @@ class CollisionQueryTest : public JoltApiFixture
 {
     private:
         nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
+        nc::Signal<const nc::asset::MeshColliderUpdateEventData&> meshColliderSignal;
         nc::physics::ShapeFactory m_shapeFactory;
         nc::physics::CollisionQueryManager m_queryManager;
 
     protected:
         CollisionQueryTest()
-            : m_shapeFactory{convexHullSignal},
+            : m_shapeFactory{convexHullSignal, meshColliderSignal},
               m_queryManager{
                 joltApi.physicsSystem.GetNarrowPhaseQuery(),
                 joltApi.physicsSystem.GetBodyLockInterfaceNoLock(),

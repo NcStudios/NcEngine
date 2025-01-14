@@ -86,7 +86,10 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                              std::unique_ptr<DeferredPhysicsCreateState> deferredState)
     : m_ecs{world},
       m_jolt{memorySettings, physicsSettings, dispatcher},
-      m_shapeFactory{ncAsset.OnConvexHullUpdate()},
+      m_shapeFactory{
+        ncAsset.OnConvexHullUpdate(),
+        ncAsset.OnMeshColliderUpdate()
+      },
       m_constraintFactory{m_jolt.physicsSystem},
       m_constraintManager{
         m_jolt.physicsSystem,

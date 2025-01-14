@@ -777,7 +777,7 @@ void BuildRotatingSteps(ecs::Ecs world)
 
 void BuildHalfPipes(ecs::Ecs world)
 {
-    const auto halfPipe2 = world.Emplace<Entity>({
+    const auto halfPipe = world.Emplace<Entity>({
         .position = Vector3{15.0f, 3.7f, 40.5f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, -0.173f),
         .scale = Vector3{10.0f, 3.0f, 5.0f},
@@ -785,7 +785,8 @@ void BuildHalfPipes(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(halfPipe2, mesh::HalfPipe, material::Blue);
+    world.Emplace<StaticMesh>(halfPipe, mesh::HalfPipe, material::Blue);
+    world.Emplace<RigidBody>(halfPipe, Shape::MakeMesh(mesh_collider::Halfpipe));
 }
 
 void BuildHinge(ecs::Ecs world)

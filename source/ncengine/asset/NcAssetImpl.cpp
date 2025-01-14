@@ -74,6 +74,11 @@ auto NcAssetImpl::OnConvexHullUpdate() noexcept -> Signal<const ConvexHullUpdate
     return m_hullColliderManager->OnUpdate();
 }
 
+auto NcAssetImpl::OnMeshColliderUpdate() noexcept -> Signal<const MeshColliderUpdateEventData&>&
+{
+    return m_concaveColliderManager->OnUpdate();
+}
+
 auto NcAssetImpl::OnFontUpdate() noexcept -> Signal<>&
 {
     return m_fontManager->OnUpdate();

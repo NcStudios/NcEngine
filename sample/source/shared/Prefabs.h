@@ -9,14 +9,10 @@ namespace nc::sample
 // Load Asset Files
 void InitializeResources();
 
-// 
+// Reload cached global asset views
 void ReloadPrefabs();
 
-
 // Mesh
-constexpr auto HalfPipeMesh = "halfpipe.nca";
-constexpr auto RampMesh = "ramp.nca";
-
 namespace mesh
 {
 constexpr auto HalfPipePath = "halfpipe.nca";
@@ -78,6 +74,13 @@ namespace convex_hull
 constexpr auto RampPath = "ramp.nca";
 extern asset::AssetId Ramp;
 } // namespace collider
+
+// MeshColliders
+namespace mesh_collider
+{
+constexpr auto HalfpipePath = "halfpipe.nca";
+extern asset::AssetId Halfpipe;
+} // namespace mesh_collider
 
 // Fonts
 extern asset::FontInfo UIFont;

@@ -52,6 +52,7 @@ auto NormalizeScaleForShape(ShapeType shape,
     {
         case ShapeType::Box:
         case ShapeType::ConvexHull:
+        case ShapeType::Mesh:
             break;
         case ShapeType::Sphere:
         {

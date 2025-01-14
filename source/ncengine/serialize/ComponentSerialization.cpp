@@ -190,6 +190,7 @@ void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const Serial
             serialize::Serialize(stream, shape.GetLocalPosition());
             break;
         case ShapeType::ConvexHull:
+        case ShapeType::Mesh:
             serialize::Serialize(stream, shape.GetAssetId());
             serialize::Serialize(stream, shape.GetLocalScale());
             break;
@@ -286,6 +287,7 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
             serialize::Deserialize(stream, shapePosition);
             break;
         case ShapeType::ConvexHull:
+        case ShapeType::Mesh:
             serialize::Deserialize(stream, shapeAsset);
             serialize::Deserialize(stream, shapeScale);
             break;
@@ -318,6 +320,7 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
             case ShapeType::Sphere:     return Shape::MakeSphere(shapeScale.x * 0.5f, shapePosition);
             case ShapeType::Capsule:    return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f, shapePosition);
             case ShapeType::ConvexHull: return Shape::MakeConvexHull(shapeAsset, shapeScale);
+            case ShapeType::Mesh:       return Shape::MakeMesh(shapeAsset, shapeScale);
             default:
                 throw NcError{fmt::format("Deserialized Unknown ShapeType: '{}'", std::to_underlying(shapeType))};
         }

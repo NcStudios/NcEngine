@@ -8,10 +8,10 @@ namespace nc::asset
 {
 struct AudioClip;
 struct BonesData;
-struct ConcaveCollider;
 struct ConvexHull;
 struct CubeMap;
 struct Mesh;
+struct MeshCollider;
 struct MeshVertex;
 struct SkeletalAnimation;
 struct Texture;

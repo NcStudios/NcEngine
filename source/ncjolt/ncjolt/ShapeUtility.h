@@ -14,6 +14,7 @@ class Shape;
 
 namespace nc
 {
+struct Triangle;
 struct Vector3;
 
 namespace jolt
@@ -22,6 +23,9 @@ namespace jolt
 
 // Build a ConvexHull Shape from a list of vertices.
 auto BuildConvexHull(std::span<const Vector3> vertices) -> JPH::Ref<JPH::Shape>;
+
+// Build a MeshShape from a list of triangles.
+auto BuildMeshShape(std::span<const Triangle> triangles) -> JPH::Ref<JPH::Shape>;
 
 // Save a Shape to a binary blob.
 auto SerializeShape(const JPH::Shape& shape) -> std::vector<uint8_t>;

@@ -10,6 +10,7 @@ class BodyManagerTest : public JoltApiFixture
     protected:
         static constexpr auto maxEntities = 10u;
         nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
+        nc::Signal<const nc::asset::MeshColliderUpdateEventData&> meshColliderSignal;
         nc::ecs::ComponentPool<nc::Transform> transformPool;
         nc::ecs::ComponentPool<nc::RigidBody> rigidBodyPool;
         nc::physics::ShapeFactory shapeFactory;
@@ -21,7 +22,7 @@ class BodyManagerTest : public JoltApiFixture
         BodyManagerTest()
             : transformPool{maxEntities, nc::ComponentHandler<nc::Transform>{}},
               rigidBodyPool{maxEntities, nc::ComponentHandler<nc::RigidBody>{}},
-              shapeFactory{convexHullSignal},
+              shapeFactory{convexHullSignal, meshColliderSignal},
               constraintFactory{joltApi.physicsSystem},
               constraintManager{joltApi.physicsSystem, constraintFactory, maxEntities},
               vehicleManager{joltApi.physicsSystem, constraintFactory, maxEntities},

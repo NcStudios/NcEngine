@@ -1,13 +1,28 @@
 #include "ncjolt/ShapeUtility.h"
 #include "ncjolt/ByteArrayStream.h"
 
+#include "ncmath/Geometry.h"
 #include "ncmath/Vector.h"
 #include "ncutility/NcError.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 #include <ranges>
+
+namespace
+{
+auto ToFloat3(const nc::Vector3& in) -> const JPH::Float3&
+{
+    return reinterpret_cast<const JPH::Float3&>(in);
+}
+
+auto ToJoltTriangle(const nc::Triangle& in) -> JPH::Triangle
+{
+    return JPH::Triangle{ToFloat3(in.a), ToFloat3(in.b), ToFloat3(in.c)};
+}
+} // anonymous namespace
 
 namespace nc::jolt
 {
@@ -18,7 +33,7 @@ auto BuildConvexHull(std::span<const Vector3> vertices) -> JPH::Ref<JPH::Shape>
     std::ranges::transform(
         vertices,
         std::back_inserter(convertedVertices),
-        [](const auto& in) { return JPH::Vec3{reinterpret_cast<const JPH::Float3&>(in)}; }
+        [](const auto& in) { return JPH::Vec3{ToFloat3(in)}; }
     );
 
     auto settings = JPH::ConvexHullShapeSettings{};
@@ -28,6 +43,26 @@ auto BuildConvexHull(std::span<const Vector3> vertices) -> JPH::Ref<JPH::Shape>
     if (result.HasError())
     {
         throw NcError(fmt::format("Error creating convex hull: '{}'", result.GetError()));
+    }
+
+    return result.Get();
+}
+
+auto BuildMeshShape(std::span<const Triangle> triangles) -> JPH::Ref<JPH::Shape>
+{
+    auto convertedTriangles = JPH::Array<JPH::Triangle>{};
+    convertedTriangles.reserve(triangles.size());
+    std::ranges::transform(
+        triangles,
+        std::back_inserter(convertedTriangles),
+        ToJoltTriangle
+    );
+
+    const auto settings = JPH::MeshShapeSettings{convertedTriangles};
+    const auto result = settings.Create();
+    if (result.HasError())
+    {
+        throw NcError{fmt::format("Error creating mesh shape: '{}'", result.GetError())};
     }
 
     return result.Get();

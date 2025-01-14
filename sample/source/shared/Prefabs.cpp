@@ -62,6 +62,11 @@ namespace convex_hull
 asset::AssetId Ramp{MakeAnimId(RampPath)};
 } // namespace convex_hull
 
+namespace mesh_collider
+{
+asset::AssetId Halfpipe{MakeAnimId(HalfpipePath)};
+} // namespace mesh_collider
+
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
 template<class LoadFunc>

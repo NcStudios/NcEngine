@@ -18,11 +18,11 @@ auto ImportAudioClip(const std::filesystem::path& ncaPath) -> AudioClip;
 /** @brief Read an AudioClip asset from a binary stream. */
 auto ImportAudioClip(std::istream& data) -> AudioClip;
 
-/** @brief Read a ConcaveCollider asset from an .nca file. */
-auto ImportConcaveCollider(const std::filesystem::path& ncaPath) -> ConcaveCollider;
+/** @brief Read a MeshCollider asset from an .nca file. */
+auto ImportMeshCollider(const std::filesystem::path& ncaPath) -> MeshCollider;
 
-/** @brief Read a ConcaveCollider asset from a binary stream. */
-auto ImportConcaveCollider(std::istream& data) -> ConcaveCollider;
+/** @brief Read a MeshCollider asset from a binary stream. */
+auto ImportMeshCollider(std::istream& data) -> MeshCollider;
 
 /** @brief Read a CubeMap asset from an .nca file. */
 auto ImportCubeMap(const std::filesystem::path& ncaPath) -> CubeMap;
