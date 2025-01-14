@@ -32,16 +32,11 @@ struct AudioClipView
 struct ConcaveColliderView
 {
     AssetId id = NullAssetId;
-    std::span<const Triangle> triangles;
-    float maxExtent = 0.0f;
 };
 
 struct ConvexHullView
 {
     AssetId id = NullAssetId;
-    std::span<const Vector3> vertices;
-    Vector3 extents;
-    float maxExtent = 0.0f;
 };
 
 enum class CubeMapUsage

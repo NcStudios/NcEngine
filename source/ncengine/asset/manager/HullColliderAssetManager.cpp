@@ -2,12 +2,12 @@
 #include "AssetUtilities.h"
 
 #include "ncasset/Import.h"
+#include "ncengine/asset/AssetData.h"
 
 namespace nc::asset
 {
 HullColliderAssetManager::HullColliderAssetManager(const std::string& assetDirectory)
-    : m_hullColliders{},
-      m_assetDirectory{assetDirectory}
+    : m_assetDirectory{assetDirectory}
 {
 }
 
@@ -19,13 +19,25 @@ bool HullColliderAssetManager::Load(const std::string& path, bool isExternal, as
     }
 
     const auto fullPath = isExternal ? path : m_assetDirectory + path;
-    m_hullColliders.emplace(path, ImportHullCollider(fullPath));
+    m_map.emplace(path);
+    const auto id = m_map.hash(path);
+    auto asset = ImportConvexHull(fullPath);
+    m_onUpdate.Emit(ConvexHullUpdateEventData{
+        std::span{&asset, 1},
+        std::span{&id, 1},
+        UpdateAction::Load
+    });
+
     return true;
 }
 
 bool HullColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
-    bool anyLoaded = false;
+    auto anyLoaded = false;
+    auto assets = std::vector<ConvexHull>{};
+    auto ids = std::vector<AssetId>{};
+    assets.reserve(paths.size());
+    ids.reserve(paths.size());
 
     for(const auto& path : paths)
     {
@@ -34,10 +46,20 @@ bool HullColliderAssetManager::Load(std::span<const std::string> paths, bool isE
             continue;
         }
 
-        if (Load(path, isExternal))
-        {
-            anyLoaded = true;
-        }
+        anyLoaded = true;
+        const auto fullPath = isExternal ? path : m_assetDirectory + path;
+        assets.push_back(ImportConvexHull(fullPath));
+        ids.push_back(m_map.hash(path));
+        m_map.emplace(path);
+    }
+
+    if (anyLoaded)
+    {
+        m_onUpdate.Emit(ConvexHullUpdateEventData{
+            assets,
+            ids,
+            UpdateAction::Load
+        });
     }
 
     return anyLoaded;
@@ -45,40 +67,50 @@ bool HullColliderAssetManager::Load(std::span<const std::string> paths, bool isE
 
 bool HullColliderAssetManager::Unload(const std::string& path, asset_flags_type)
 {
-    return m_hullColliders.erase(path);
+    if (m_map.erase(path))
+    {
+        const auto id = m_map.hash(path);
+        m_onUpdate.Emit(ConvexHullUpdateEventData{
+            {},
+            {&id, 1},
+            UpdateAction::Unload
+        });
+
+        return true;
+    }
+
+    return false;
 }
 
 void HullColliderAssetManager::UnloadAll(asset_flags_type)
 {
-    m_hullColliders.clear();
+    m_map.clear();
+    m_onUpdate.Emit(ConvexHullUpdateEventData{
+        {},
+        {},
+        UpdateAction::UnloadAll
+    });
 }
 
 auto HullColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConvexHullView
 {
-    NC_ASSERT(m_hullColliders.contains(path), fmt::format("ConvexHull is not loaded: '{}'", path));
-    return Acquire(m_hullColliders.hash(path));
+    NC_ASSERT(m_map.contains(path), fmt::format("ConvexHull is not loaded: '{}'", path));
+    return Acquire(m_map.hash(path));
 }
 
 auto HullColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConvexHullView
 {
-    const auto index = m_hullColliders.index(id);
-    NC_ASSERT(index != m_hullColliders.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
-    const auto& collider = m_hullColliders.at(index);
-    return ConvexHullView{
-        .id = id,
-        .vertices = std::span<const Vector3>{collider.vertices},
-        .extents = collider.extents,
-        .maxExtent = collider.maxExtent
-    };
+    NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("ConvexHull is not loaded: '{}'", id));
+    return ConvexHullView{id};
 }
 
 bool HullColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
-    return m_hullColliders.contains(path);
+    return m_map.contains(path);
 }
 
 auto HullColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
-    return GetPaths(m_hullColliders.keys());
+    return GetPaths(m_map.keys());
 }
 } // namespace nc::asset

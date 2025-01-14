@@ -58,7 +58,7 @@ TEST_F(BuildAndImportTest, Texture_from_png)
     }
 }
 
-TEST_F(BuildAndImportTest, ConcaveCollider_from_fbx)
+TEST_F(BuildAndImportTest, MeshCollider_from_fbx)
 {
     namespace test_data = collateral::plane_fbx;
     const auto inFile = test_data::filePath;
@@ -67,20 +67,25 @@ TEST_F(BuildAndImportTest, ConcaveCollider_from_fbx)
     auto builder = nc::convert::Builder{};
     ASSERT_TRUE(builder.Build(nc::asset::AssetType::ConcaveCollider, target));
 
-    const auto asset = nc::asset::ImportConcaveCollider(outFile);
+    const auto asset = nc::asset::ImportMeshCollider(outFile);
 
     EXPECT_EQ(asset.extents, test_data::meshVertexExtents);
     EXPECT_FLOAT_EQ(asset.maxExtent, test_data::furthestDistanceFromOrigin);
-    EXPECT_EQ(asset.triangles.size(), test_data::triangleCount);
+    EXPECT_FALSE(asset.blob.empty());
 
-    for (const auto& tri : asset.triangles)
+    auto reconstituted = nc::jolt::DeserializeShape(asset.blob);
+    auto actualMesh = UpcastToMeshShape(reconstituted.GetPtr());
+    const auto actualTriangles = GetTriangles(*actualMesh, test_data::triangleCount);
+    ASSERT_EQ(test_data::triangleCount, actualTriangles.size());
+
+    for (const auto& tri : actualTriangles)
     {
         const auto pos = std::ranges::find(test_data::possibleTriangles, tri);
         EXPECT_NE(pos, test_data::possibleTriangles.cend());
     }
 }
 
-TEST_F(BuildAndImportTest, HullCollider_from_fbx)
+TEST_F(BuildAndImportTest, ConvexHull_from_fbx)
 {
     namespace test_data = collateral::cube_fbx;
     const auto inFile = test_data::filePath;
@@ -89,15 +94,20 @@ TEST_F(BuildAndImportTest, HullCollider_from_fbx)
     auto builder = nc::convert::Builder{};
     ASSERT_TRUE(builder.Build(nc::asset::AssetType::HullCollider, target));
 
-    const auto asset = nc::asset::ImportHullCollider(outFile);
+    auto asset = nc::asset::ImportConvexHull(outFile);
 
     EXPECT_EQ(asset.extents, test_data::meshVertexExtents);
     EXPECT_FLOAT_EQ(asset.maxExtent, test_data::furthestDistanceFromOrigin);
-    EXPECT_EQ(asset.vertices.size(), test_data::vertexCount);
+    EXPECT_FALSE(asset.blob.empty());
 
-    for (const auto& vertex : asset.vertices)
+    auto reconstituted = nc::jolt::DeserializeShape(std::move(asset.blob));
+    auto actualHull = UpcastToConvexHull(reconstituted.GetPtr());
+    EXPECT_EQ(test_data::possibleVertices.size(), actualHull->GetNumPoints());
+
+    for (auto i = 0u; i < actualHull->GetNumPoints(); ++i)
     {
-        const auto pos = std::ranges::find(test_data::possibleVertices, vertex);
+        const auto point = actualHull->GetPoint(i);
+        const auto pos = std::ranges::find(test_data::possibleVertices, ToVector3(point));
         EXPECT_NE(pos, test_data::possibleVertices.cend());
     }
 }

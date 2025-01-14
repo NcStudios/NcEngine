@@ -109,6 +109,8 @@ class RigidBody
             {
                 m_info.flags &= ~RigidBodyFlags::ContinuousDetection;
             }
+
+            VerifyShapeSettings();
         }
 
         RigidBody(RigidBody&& other) noexcept
@@ -155,7 +157,7 @@ class RigidBody
 
         /** @name Shape Functions */
         auto GetShape() const -> const Shape& { return m_shape; }
-        void SetShape(const Shape& shape, const Vector3& transformScale, bool wake = true); // todo: how to update transform?
+        void SetShape(const Shape& shape, const Vector3& transformScale, bool wake = true);
 
         /** @name Simulation Properties */
         auto IsAwake() const -> bool;
@@ -273,6 +275,8 @@ class RigidBody
         BodyHandle m_handle = nullptr;
         Shape m_shape;
         RigidBodyInfo m_info;
+
+        void VerifyShapeSettings();
 };
 
 template<>

@@ -11,13 +11,13 @@ namespace nc::convert
 void Serialize(std::ostream& stream, const asset::AudioClip& data, uint64_t version);
 
 /** @brief Write a ConcaveCollider to a binary stream. */
-void Serialize(std::ostream& stream, const asset::ConcaveCollider& data, uint64_t version);
+void Serialize(std::ostream& stream, const asset::MeshCollider& data, uint64_t version);
 
 /** @brief Write a CubeMap to a binary stream. */
 void Serialize(std::ostream& stream, const asset::CubeMap& data, uint64_t version);
 
 /** @brief Write a HullCollider to a binary stream. */
-void Serialize(std::ostream& stream, const asset::HullCollider& data, uint64_t version);
+void Serialize(std::ostream& stream, const asset::ConvexHull& data, uint64_t version);
 
 /** @brief Write a Mesh to a binary stream. */
 void Serialize(std::ostream& stream, const asset::Mesh& data, uint64_t version);

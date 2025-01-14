@@ -1,5 +1,6 @@
 add_library(NcJolt STATIC
     JoltApi.cpp
+    ShapeUtility.cpp
 )
 
 target_compile_options(NcJolt

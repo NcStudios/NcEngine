@@ -100,11 +100,11 @@ TEST_F(NcConvertIntegration, SingleTarget_cubeMap_wrongSourceType_fails)
     EXPECT_EQ(RunCmd(cmd), ResultCode::RuntimeError);
 }
 
-TEST_F(NcConvertIntegration, SingleTarget_hullCollider_succeeds)
+TEST_F(NcConvertIntegration, SingleTarget_convexHull_succeeds)
 {
-    const auto cmd = BuildSingleTargetCommand("hull-collider", "cube.fbx", "myHullCollider");
+    const auto cmd = BuildSingleTargetCommand("hull-collider", "cube.fbx", "myConvexHull");
     ASSERT_EQ(RunCmd(cmd), ResultCode::Success);
-    EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myHullCollider.nca"));
+    EXPECT_TRUE(std::filesystem::exists(ncaTestOutDirectory / "myConvexHull.nca"));
 }
 
 TEST_F(NcConvertIntegration, SingleTarget_hullCollider_wrongSourceType_fails)

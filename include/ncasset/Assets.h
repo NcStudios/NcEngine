@@ -1,6 +1,6 @@
 /**
- * @file Assets.h.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @file Assets.h
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -43,18 +43,18 @@ struct BonesData
     std::vector<BoneSpaceToParentSpace> boneSpaceToParentSpace;
 };
 
-struct HullCollider
+struct ConvexHull
 {
     Vector3 extents;
     float maxExtent;
-    std::vector<Vector3> vertices;
+    std::vector<uint8_t> blob;
 };
 
-struct ConcaveCollider
+struct MeshCollider
 {
     Vector3 extents;
     float maxExtent;
-    std::vector<Triangle> triangles;
+    std::vector<uint8_t> blob;
 };
 
 struct MeshVertex

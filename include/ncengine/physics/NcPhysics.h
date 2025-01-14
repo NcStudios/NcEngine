@@ -1,6 +1,6 @@
 /**
  * @file NcPhysics.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -15,6 +15,11 @@
 namespace nc
 {
 struct SystemEvents;
+
+namespace asset
+{
+class NcAsset;
+} // namespace asset
 
 namespace config
 {
@@ -75,6 +80,7 @@ struct NcPhysics : public Module
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         ecs::Ecs world,
+                        asset::NcAsset& ncAsset,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>;
 } // namespace nc

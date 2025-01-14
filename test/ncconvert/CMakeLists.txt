@@ -32,6 +32,7 @@ target_link_libraries(AssetSerialization_integration_tests
     PRIVATE
         gtest_main
         NcMath
+        NcJolt
 )
 
 add_test(AssetSerialization_integration_tests AssetSerialization_integration_tests)
@@ -135,6 +136,7 @@ if(NC_BUILD_NCCONVERT)
         PRIVATE
             gtest_main
             NcMath
+            NcJolt
             assimp::assimp
             meshoptimizer
     )
@@ -207,6 +209,7 @@ if(NC_BUILD_NCCONVERT)
         PRIVATE
             gtest_main
             NcMath
+            NcJolt
             assimp::assimp
             meshoptimizer
     )

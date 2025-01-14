@@ -379,7 +379,7 @@ void ComponentPool<T>::CommitStagedComponents(const std::vector<Entity>& deleted
 template<PooledComponent T>
 void ComponentPool<T>::ClearNonPersistent()
 {
-    assert(m_staging.empty());
+    m_staging.clear();
     m_staging.shrink_to_fit();
     m_storage.ClearNonPersistent();
 }

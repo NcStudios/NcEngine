@@ -32,6 +32,7 @@ class NcPhysicsImpl final : public NcPhysics
         NcPhysicsImpl(const config::MemorySettings& memorySettings,
                       const config::PhysicsSettings& physicsSettings,
                       ecs::Ecs world,
+                      asset::NcAsset& ncAsset,
                       const task::AsyncDispatcher& dispatcher,
                       SystemEvents& events,
                       std::unique_ptr<DeferredPhysicsCreateState> deferredState);
