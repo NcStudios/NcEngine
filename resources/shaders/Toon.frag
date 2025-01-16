@@ -10,7 +10,7 @@ struct ObjectData
     uint baseColorIndex;
     uint outlineWidth;
     uint hatchingIndex;
-    uint hatchingTiling;
+    float hatchingTiling;
 
     uint skeletalAnimationIndex;
 };

@@ -1,20 +1,22 @@
 struct LightData {
-    float3 color;
+    float3 diffuseColor;
     int type; // 0: Directional, 1: Point, 2: Spot
+    float3 specularColor;
+    int pad1;
     float3 position;
     float innerAngle;
     float3 direction;
     float outerAngle;
     float radius;
     int castsShadows;
-    int pad1;
     int pad2;
     float4x4 viewProj;
 };
 
 struct LightInfluence
 {
-    float3 color;
+    float3 diffuseColor;
+    float3 specularColor;
     float specularAmt;
     float diffuseAmt;
 };
@@ -32,7 +34,7 @@ LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, fl
     float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
     float specularTotal = specular * 0.5f;
 
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal};
     return lightInfluence;
 }
 
@@ -55,7 +57,7 @@ LightInfluence PointLightRadiance(LightData light, float3 fragWorldPos, float3 c
     diffuseTotal *= attenuation;
     specularTotal *= attenuation;
 
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal};
     return lightInfluence;
 }
 
@@ -86,7 +88,7 @@ LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 ca
     diffuseTotal *= attenuation;
     specularTotal *= attenuation;
 
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal};
     return lightInfluence;
 }
 

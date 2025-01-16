@@ -1287,6 +1287,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .rotation = nc::Quaternion::FromEulerAngles(-1.892f, 0.809f, -2.661f),
             .tag = "Directional Light"
         }),
+        Vector3{1.0f, 1.0f, 1.0f},
         Vector3{1.0f, 1.0f, 1.0f}
     );
 }

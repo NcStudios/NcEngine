@@ -23,9 +23,9 @@ struct MaterialData
     float3 gradientStart;
     uint diffuseTexture;
     float3 gradientEnd;
-    uint normalIndex;
+    uint hatchingIndex;
     float normalIntensity;
-    float padding1;
+    float hatchingTiling;
     float padding2;
     float padding3;
 };
@@ -72,17 +72,34 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float alpha = Color.a;
     float3 finalColor = {0.0f, 0.0f, 0.0f};
 
-    // uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
-    // float hatchLight  = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV * 8).r;
-    // float hatchMedium = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV * 8).g;
-    // float hatchDark   = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV * 8).b;
+    float hatchingTiling = MaterialBufferData[PSIn.MaterialIndex].hatchingTiling;
+    uint hatchingIndex = MaterialBufferData[PSIn.MaterialIndex].hatchingIndex;
+    float hatchLight  = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).r;
+    float hatchMedium = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).g;
+    float hatchDark   = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).b;
 
     float lightAmountTotal = 0.0f;
 
-      for (int i = 0; i < lightCount; i++)
+    for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.color * LightBand(influence.diffuseAmt);
+        finalColor += influence.diffuseColor * LightBand(influence.diffuseAmt) + influence.specularColor * LightBand(influence.specularAmt);
+        lightAmountTotal += influence.diffuseAmt + influence.specularAmt;
+    }
+
+    if (lightAmountTotal < 0.05f)
+    {
+        Color *= 0.05f;
+    }
+    else if (lightAmountTotal < 0.2f)
+    {
+        float blend = smoothstep(0.05f, 0.2f, lightAmountTotal);
+        Color *= lerp(0.05f, hatchMedium, blend);
+    }
+    else if (lightAmountTotal < 0.45f)
+    {
+        float blend = smoothstep(0.2f, 0.5f, lightAmountTotal);
+        Color *= lerp(hatchMedium, hatchLight, blend);
     }
 
     Color *= float4(finalColor, 1.0);

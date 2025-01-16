@@ -48,6 +48,7 @@ struct MaterialProperties
     Vector3 gradientStart = Vector3::One();
     Vector3 gradientEnd = Vector3::One();
     float normalIntensity = 1.0f;
+    float hatchingTiling = 10.0f;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

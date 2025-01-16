@@ -103,6 +103,7 @@ auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
 {
     auto modified = nc::ui::InputColor3(properties.gradientStart, "start");
     modified = nc::ui::InputColor3(properties.gradientEnd, "end") || modified;
+    modified = nc::ui::DragFloat(properties.hatchingTiling, "hatchingTiling", 1.0f, 1.0f, 30.0f);
     return modified;
 }
 
@@ -1101,7 +1102,8 @@ void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const
 void DirectionalLightUIWidget(DirectionalLight& light, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "DirectionalLight");
-    ui::InputColor3(light.color, "color");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::InputColor3(light.specularColor, "specularColor");
 }
 
 void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
@@ -1110,7 +1112,8 @@ void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
-    ui::InputColor3(light.diffuseColor, "color");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::InputColor3(light.specularColor, "specularColor");
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
@@ -1120,7 +1123,8 @@ void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
     constexpr auto max = 3.14159f;
-    ui::InputColor3(light.color, "color");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::InputColor3(light.specularColor, "specularColor");
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);

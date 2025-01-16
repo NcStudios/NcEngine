@@ -23,9 +23,9 @@ struct MaterialData
     float3 gradientStart;
     uint diffuseTexture;
     float3 gradientEnd;
-    uint normalIndex;
+    uint hatchingIndex;
     float normalIntensity;
-    float padding1;
+    float hatchingTiling;
     float padding2;
     float padding3;
 };
@@ -49,11 +49,9 @@ struct PSOutput
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
-    uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
-    Color = normalize(TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV));
+    uint hatchingIndex = MaterialBufferData[PSIn.MaterialIndex].hatchingIndex;
+    Color = normalize(TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV));
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-    float3 adujstedTextureNormals = lerp(Color.rgb, 0.0, 0.1);
     float3 adjustedVertexNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity;
-    // PSOut.Color = float4(lerp(adjustedVertexNormals, adujstedTextureNormals, 0.85), 1-dot(PSIn.Normal, viewDir));
     PSOut.Color = float4(adjustedVertexNormals, 1-dot(PSIn.Normal, -viewDir));
 }
