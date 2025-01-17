@@ -29,6 +29,9 @@ class PhysicsSnapshot final
         /** @brief Get the physics tick the snapshot was taken at. */
         auto GetFrame() const -> size_t;
 
+        /** @brief Get the size of the snapshot in bytes. */
+        auto GetSize() const -> size_t;
+
         /** @brief Set the read position back to the beginning of the snapshot. */
         void ResetRead();
 

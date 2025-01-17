@@ -15,12 +15,13 @@ namespace
 class SnapshotRecorder : public JPH::StateRecorder
 {
     public:
-        void ReadBytes(void* out, size_t numBytes)                     override { m_impl.ReadBytes(out, numBytes); }
-        void WriteBytes(const void* in, size_t numBytes)               override { m_impl.WriteBytes(in, numBytes); }
-        auto IsEOF()                                     const -> bool override { return m_impl.IsEOF(); }
-        auto IsFailed()                                  const -> bool override { return m_impl.IsFailed(); }
-        void Reset()                                                            { m_impl.Reset(); }
-        void ResetRead()                                                        { m_impl.ResetRead(); }
+        void ReadBytes(void* out, size_t numBytes)                       override { m_impl.ReadBytes(out, numBytes); }
+        void WriteBytes(const void* in, size_t numBytes)                 override { m_impl.WriteBytes(in, numBytes); }
+        auto IsEOF()                                     const -> bool   override { return m_impl.IsEOF(); }
+        auto IsFailed()                                  const -> bool   override { return m_impl.IsFailed(); }
+        auto GetSize()                                   const -> size_t          { return m_impl.GetBuffer().size(); }
+        void Reset()                                                              { m_impl.Reset(); }
+        void ResetRead()                                                          { m_impl.ResetRead(); }
 
     private:
         nc::jolt::ByteArrayStream m_impl;
@@ -45,6 +46,7 @@ class PhysicsSnapshotImpl
 
         auto IsValid()  const -> bool   { return m_frame != NullFrame; }
         auto GetFrame() const -> size_t { return m_frame; }
+        auto GetSize()  const -> size_t { return m_recorder.GetSize(); }
 
         void Save(JPH::PhysicsSystem& physicsSystem, size_t frame)
         {
@@ -94,6 +96,11 @@ auto PhysicsSnapshot::IsValid() const -> bool
 auto PhysicsSnapshot::GetFrame() const -> size_t
 {
     return m_impl->GetFrame();
+}
+
+auto PhysicsSnapshot::GetSize() const -> size_t
+{
+    return m_impl->GetSize();
 }
 
 auto PhysicsSnapshot::GetImpl() -> physics::PhysicsSnapshotImpl&
