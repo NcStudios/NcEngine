@@ -20,6 +20,7 @@ class SnapshotRecorder : public JPH::StateRecorder
         auto IsEOF()                                     const -> bool override { return m_impl.IsEOF(); }
         auto IsFailed()                                  const -> bool override { return m_impl.IsFailed(); }
         void Reset()                                                            { m_impl.Reset(); }
+        void ResetRead()                                                        { m_impl.ResetRead(); }
 
     private:
         nc::jolt::ByteArrayStream m_impl;
@@ -59,6 +60,11 @@ class PhysicsSnapshotImpl
             return std::exchange(m_frame, NullFrame);
         }
 
+        void ResetRead()
+        {
+            m_recorder.ResetRead();
+        }
+
         void Clear()
         {
             m_recorder.Reset();
@@ -93,6 +99,11 @@ auto PhysicsSnapshot::GetFrame() const -> size_t
 auto PhysicsSnapshot::GetImpl() -> physics::PhysicsSnapshotImpl&
 {
     return *m_impl;
+}
+
+void PhysicsSnapshot::ResetRead()
+{
+    m_impl->ResetRead();
 }
 
 void PhysicsSnapshot::Clear()

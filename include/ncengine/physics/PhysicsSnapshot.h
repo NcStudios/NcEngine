@@ -29,6 +29,9 @@ class PhysicsSnapshot final
         /** @brief Get the physics tick the snapshot was taken at. */
         auto GetFrame() const -> size_t;
 
+        /** @brief Set the read position back to the beginning of the snapshot. */
+        void ResetRead();
+
         /**
          * @brief Clear any recorded state.
          * @note Snapshots can be reused to minimize allocations, but should be cleared before saving new state.
