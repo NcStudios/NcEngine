@@ -78,24 +78,10 @@ void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
 
 void JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot)
 {
-    // todo: we may want option to not fast forward yet, or specify how far forward...
-
     auto& impl = snapshot.GetImpl();
     const auto restoreFrame = impl.GetFrame();
-    // NC_ASSERT(restoreFrame + 1 < currentFrame, "bad frames");
-    if (restoreFrame + 1 >= currentFrame)
-        return;
-
+    NC_ASSERT(restoreFrame < currentFrame, "bad frames");
     impl.Restore(physicsSystem);
-
-    const auto frameDelta = currentFrame - restoreFrame;
-    std::cout << "rewinding " << frameDelta << " frames\n";
-
     currentFrame = restoreFrame;
-    Update(0.01667f, frameDelta);
-    // todo: check errors...
-    // for (auto i = 0; i < frameDelta; ++i)
-    //     physicsSystem.Update(0.01667f, 1, &tempAllocator, jobSystem.get());
-
 }
 } // namespace nc::physics

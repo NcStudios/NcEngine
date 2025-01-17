@@ -135,7 +135,6 @@ void NcPhysicsImpl::ResetTick(size_t step)
 void NcPhysicsImpl::Tick(size_t steps)
 {
     NC_PROFILE_SCOPE("NcPhysics::Tick", ProfileCategory::Physics);
-    NC_ASSERT(m_manualTick, "Invalid task");
     if (!m_updateEnabled)
     {
         return;
@@ -215,13 +214,6 @@ void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTask
     if (m_manualTick)
     {
         NC_LOG_TRACE("Skipping Building NcPhysics Tasks - Manual Tick Enabled");
-        update.Add(
-            update_task_id::PhysicsPipeline,
-            "PhysicsPipeline(stub)",
-            [](){},
-            {update_task_id::CommitStagedChanges}
-        );
-
         return;
     }
 
