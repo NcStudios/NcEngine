@@ -7,6 +7,12 @@
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 
+namespace nc
+{
+void PhysicsSnapshot::Save(std::any, PhysicsTick) {}
+auto PhysicsSnapshot::Restore(std::any) -> bool { return false; }
+} // namespace nc
+
 class JoltApiFixture : public ::testing::Test
 {
     protected:

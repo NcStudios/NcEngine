@@ -11,6 +11,12 @@
 
 #include <ranges>
 
+namespace nc
+{
+void PhysicsSnapshot::Save(std::any, PhysicsTick) {}
+auto PhysicsSnapshot::Restore(std::any) -> bool { return false; }
+} // namespace nc
+
 class ContactListenerTest : public ::testing::Test
 {
     protected:

@@ -179,8 +179,9 @@ add_test(ConstraintManager_unit_tests ConstraintManager_unit_tests)
 ### JoltPhysics Tests ###
 add_executable(JoltPhysics_unit_tests
     JoltPhysics_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/PhysicsSnapshot.cpp
 )
 
 target_include_directories(JoltPhysics_unit_tests

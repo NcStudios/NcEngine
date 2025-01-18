@@ -6,17 +6,14 @@
 
 #include "ncengine/physics/PhysicsTick.h"
 
+#include <any>
 #include <memory>
+#include <span>
 #include <vector>
 
 namespace nc
 {
-namespace physics
-{
-class PhysicsSnapshotImpl;
-} // namespace physics
-
-/** @brief */
+/** @brief Container for serialized physics state for performing rollback of the physics simulation. */
 class PhysicsSnapshot final
 {
     public:
@@ -25,17 +22,20 @@ class PhysicsSnapshot final
         PhysicsSnapshot& operator=(PhysicsSnapshot&&) noexcept;
         ~PhysicsSnapshot() noexcept;
 
-        // todo: - get/extract buffer, compress?
-        //       - reserve ?
-
         /** @brief Check if the snapshot has recorded state. */
-        auto IsValid() const -> bool;
+        auto IsValid() const -> bool { return !m_tick.IsNull(); }
 
-        /** @brief Get the PhysicsTick the snapshot was taken at, or PhysicsTick::Null() if the snapshot is invalid. */
-        auto GetTick() const -> PhysicsTick;
+        /** @brief Get the PhysicsTick the snapshot was taken at, or PhysicsTick::Null() if invalid. */
+        auto GetTick() const -> PhysicsTick { return m_tick; }
 
         /** @brief Get the size of the snapshot in bytes. */
         auto GetSize() const -> size_t;
+
+        /** @brief Get a view over the serialized bytes. */
+        auto ViewBuffer() const -> std::span<const uint8_t>;
+
+        /** @brief Extract the serialized bytes, clearing the snapshot. */
+        auto ExtractBuffer() -> std::vector<uint8_t>;
 
         /** @brief Set the read position back to the beginning of the snapshot. */
         void ResetRead();
@@ -46,14 +46,15 @@ class PhysicsSnapshot final
          */
         void Clear();
 
-        /** @brief  */
-        void SetValidationMode(bool enabled);
-
         /** @cond internal */
-        auto GetImpl() -> physics::PhysicsSnapshotImpl&;
+        void Save(std::any physicsSystem, PhysicsTick tick);
+        auto Restore(std::any physicsSystem) -> bool;
+        void SetValidationMode(bool enabled);
         /** @endcond internal */
 
     protected:
-        std::unique_ptr<physics::PhysicsSnapshotImpl> m_impl;
+        struct Impl;
+        std::unique_ptr<Impl> m_impl;
+        PhysicsTick m_tick = PhysicsTick::Null();
 };
 } // namespace nc
