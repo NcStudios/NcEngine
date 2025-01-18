@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ncengine/physics/PhysicsSnapshot.h"
 
 #include "ncjolt/ByteArrayStream.h"
