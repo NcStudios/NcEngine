@@ -48,9 +48,9 @@ struct NcPhysics : public Module
     virtual void EnableUpdate(bool) {}
 
     // todo: how to handle collision events?...
-    virtual auto GetTick() const -> size_t { return 0; };
-    virtual void ResetTick(size_t = 0) {}
-    virtual void Tick(size_t = 0) {}
+    virtual auto GetTick() const -> PhysicsTick { return PhysicsTick::Null(); };
+    virtual void ResetTick(PhysicsTick = PhysicsTick{0}) {}
+    virtual void Tick(uint32_t = 0) {}
     virtual void SyncTransforms() {}
     virtual void DispatchAccumulatedEvents() {}
     virtual void SaveSnapshot(PhysicsSnapshot& snapshot) = 0;

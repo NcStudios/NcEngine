@@ -37,33 +37,23 @@ namespace physics
 {
 class PhysicsSnapshotImpl
 {
-    static constexpr auto NullFrame = std::numeric_limits<size_t>::max();
-
     public:
-        explicit PhysicsSnapshotImpl(bool enableValidation)
-        {
-            if (enableValidation)
-            {
-                m_recorder.SetValidating(true);
-            }
-        }
+        auto IsValid() const -> bool        { return m_tick.IsNull(); }
+        auto GetTick() const -> PhysicsTick { return m_tick; }
+        auto GetSize() const -> size_t      { return m_recorder.GetSize(); }
 
-        auto IsValid()  const -> bool   { return m_frame != NullFrame; }
-        auto GetFrame() const -> size_t { return m_frame; }
-        auto GetSize()  const -> size_t { return m_recorder.GetSize(); }
-
-        void Save(JPH::PhysicsSystem& physicsSystem, size_t frame)
+        void Save(JPH::PhysicsSystem& physicsSystem, PhysicsTick tick)
         {
             NC_ASSERT(!IsValid(), "PhysicsSnapshot::Clear() must be called before reusing a snapshot.");
             physicsSystem.SaveState(m_recorder);
-            m_frame = frame;
+            m_tick = tick;
         }
 
         auto Restore(JPH::PhysicsSystem& physicsSystem) -> bool
         {
             const auto restored = physicsSystem.RestoreState(m_recorder);
             m_recorder.Reset();
-            m_frame = NullFrame;
+            m_tick = PhysicsTick::Null();
             return restored;
         }
 
@@ -75,7 +65,7 @@ class PhysicsSnapshotImpl
         void Clear()
         {
             m_recorder.Reset();
-            m_frame = NullFrame;
+            m_tick = PhysicsTick::Null();
         }
 
         void SetValidationMode(bool enabled)
@@ -85,12 +75,12 @@ class PhysicsSnapshotImpl
 
     private:
         SnapshotRecorder m_recorder;
-        size_t m_frame = NullFrame;
+        PhysicsTick m_tick = PhysicsTick::Null();
 };
 } // namespace physics
 
-PhysicsSnapshot::PhysicsSnapshot(bool enableValidation)
-    : m_impl{std::make_unique<physics::PhysicsSnapshotImpl>(enableValidation)}
+PhysicsSnapshot::PhysicsSnapshot()
+    : m_impl{std::make_unique<physics::PhysicsSnapshotImpl>()}
 {
 }
 
@@ -103,9 +93,9 @@ auto PhysicsSnapshot::IsValid() const -> bool
     return m_impl->IsValid();
 }
 
-auto PhysicsSnapshot::GetFrame() const -> size_t
+auto PhysicsSnapshot::GetTick() const -> PhysicsTick
 {
-    return m_impl->GetFrame();
+    return m_impl->GetTick();
 }
 
 auto PhysicsSnapshot::GetSize() const -> size_t

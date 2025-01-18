@@ -45,9 +45,9 @@ class NcPhysicsImpl final : public NcPhysics
         void Clear() noexcept override;
 
         // NcPhysics Interface
-        auto GetTick() const -> size_t override;
-        void ResetTick(size_t step = 0) override;
-        void Tick(size_t steps = 0) override;
+        auto GetTick() const -> PhysicsTick override;
+        void ResetTick(PhysicsTick tick) override;
+        void Tick(uint32_t steps = 0) override;
         void SyncTransforms() override;
         void DispatchAccumulatedEvents() override;
         void SaveSnapshot(PhysicsSnapshot& snapshot) override;

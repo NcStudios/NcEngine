@@ -43,7 +43,7 @@ struct JoltPhysics : public StableAddress
 
     ~JoltPhysics() noexcept;
 
-    void Update(float dt, size_t steps = 1)
+    void Update(float dt, uint32_t steps = 1)
     {
         while (steps != 0)
         {
@@ -54,7 +54,7 @@ struct JoltPhysics : public StableAddress
             }
 
             --steps;
-            ++currentFrame;
+            ++currentTick;
         }
     }
 
@@ -69,8 +69,7 @@ struct JoltPhysics : public StableAddress
     JPH::PhysicsSystem physicsSystem;
     ContactListener contactListener;
     std::unique_ptr<JPH::JobSystem> jobSystem;
-
-    size_t currentFrame = 0ull;
+    PhysicsTick currentTick = PhysicsTick{0};
 };
 } // namespace physics
 } // namespace nc

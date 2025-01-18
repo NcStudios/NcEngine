@@ -122,17 +122,17 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
 {
 }
 
-auto NcPhysicsImpl::GetTick() const -> size_t
+auto NcPhysicsImpl::GetTick() const -> PhysicsTick
 {
-    return m_jolt.currentFrame;
+    return m_jolt.currentTick;
 }
 
-void NcPhysicsImpl::ResetTick(size_t step)
+void NcPhysicsImpl::ResetTick(PhysicsTick tick)
 {
-    m_jolt.currentFrame = step;
+    m_jolt.currentTick = tick;
 }
 
-void NcPhysicsImpl::Tick(size_t steps)
+void NcPhysicsImpl::Tick(uint32_t steps)
 {
     NC_PROFILE_SCOPE("NcPhysics::Tick", ProfileCategory::Physics);
     if (!m_updateEnabled)

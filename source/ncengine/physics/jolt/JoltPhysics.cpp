@@ -73,17 +73,17 @@ JoltPhysics::~JoltPhysics() noexcept = default;
 
 void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
 {
-    snapshot.GetImpl().Save(physicsSystem, currentFrame);
+    snapshot.GetImpl().Save(physicsSystem, currentTick);
 }
 
 auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
 {
     auto& impl = snapshot.GetImpl();
-    const auto restoreFrame = impl.GetFrame();
-    NC_ASSERT(restoreFrame < currentFrame, "bad frames");
+    const auto restoreTick = impl.GetTick();
+    NC_ASSERT(restoreTick < currentTick, "bad frames");
     if (impl.Restore(physicsSystem))
     {
-        currentFrame = restoreFrame;
+        currentTick = restoreTick;
         return true;
     }
 
