@@ -30,6 +30,11 @@ class NcPhysicsStub : public nc::NcPhysics
         {
         }
 
+        auto GetTick() const -> nc::PhysicsTick override { return nc::PhysicsTick::Null(); }
+        void ResetTick(nc::PhysicsTick) override {}
+        void Tick(uint32_t) override {}
+        void SyncTransforms() override {}
+        void DispatchAccumulatedEvents() override {}
         auto SaveSnapshot(nc::PhysicsSnapshot&) {}
         auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
@@ -118,7 +123,7 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
         m_shapeFactory
       },
       m_deferredState{std::move(deferredState)},
-      m_manualTick{physicsSettings.manualTick}
+      m_networkModeEnabled{physicsSettings.enableNetworkRollback}
 {
 }
 
@@ -140,7 +145,7 @@ void NcPhysicsImpl::Tick(uint32_t steps)
         return;
     }
 
-    m_jolt.Update(time::DeltaTime(), steps);
+    m_jolt.Tick(time::DeltaTime(), steps);
 }
 
 void NcPhysicsImpl::SyncTransforms()
@@ -198,7 +203,6 @@ auto NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool
 void NcPhysicsImpl::Run()
 {
     NC_PROFILE_TASK("NcPhysics", ProfileCategory::Physics);
-    NC_ASSERT(!m_manualTick, "Invalid task");
     if (!m_updateEnabled)
     {
         return;
@@ -206,14 +210,14 @@ void NcPhysicsImpl::Run()
 
     Tick(1);
     SyncTransforms();
-    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
+    DispatchAccumulatedEvents();
 }
 
 void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
-    if (m_manualTick)
+    if (m_networkModeEnabled)
     {
-        NC_LOG_TRACE("Skipping Building NcPhysics Tasks - Manual Tick Enabled");
+        NC_LOG_TRACE("Skipping Building NcPhysics Tasks - Network Rollback Enabled");
         return;
     }
 

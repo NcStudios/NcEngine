@@ -84,7 +84,7 @@ struct GraphicsSettings
 struct PhysicsSettings
 {
     bool enabled = true;                            ///< enable the NcPhysics module
-    bool manualTick = false; // currently requires manually using NcPhysics Task Id
+    bool enableNetworkRollback = false;             ///< initialize NcPhysics for network rollback mode (see NcPhysics documentation)
     unsigned tempAllocatorSize = 64 * 1024 * 1024;  ///< size of per-frame allocaor; needs to be large enough to account for maximums below (bytes)
     unsigned maxBodyPairs = 50000;                  ///< max number of simultaneous body interactions
     unsigned maxContacts = 30000;                   ///< max number of simultaneous contacts

@@ -5,10 +5,8 @@
 #include "ncjolt/ByteArrayStream.h"
 
 #include "Jolt/Jolt.h"
-#include "Jolt/Physics/StateRecorderImpl.h"
+#include "Jolt/Physics/StateRecorder.h"
 #include "Jolt/Physics/PhysicsSystem.h"
-
-#include <limits>
 
 namespace
 {
@@ -52,8 +50,8 @@ class PhysicsSnapshotImpl
         auto Restore(JPH::PhysicsSystem& physicsSystem) -> bool
         {
             const auto restored = physicsSystem.RestoreState(m_recorder);
-            m_recorder.Reset();
-            m_tick = PhysicsTick::Null();
+            // m_recorder.Reset();
+            // m_tick = PhysicsTick::Null();
             return restored;
         }
 

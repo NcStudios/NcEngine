@@ -1,4 +1,5 @@
 #include "JoltPhysics.h"
+#include "PhysicsSnapshotImpl.h"
 #include "ncengine/config/Config.h"
 
 #include "ncjolt/JoltApi.h"
@@ -7,12 +8,6 @@
 
 #include "Jolt/Core/Factory.h"
 #include "Jolt/RegisterTypes.h"
-#include "Jolt/Physics/StateRecorderImpl.h"
-
-
-#include <iostream>
-#include "ncutility/Compression.h"
-#include "PhysicsSnapshotImpl.h"
 
 namespace
 {
@@ -71,6 +66,21 @@ JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
 
 JoltPhysics::~JoltPhysics() noexcept = default;
 
+void JoltPhysics::Tick(float dt, uint32_t steps)
+{
+    while (steps != 0)
+    {
+        const auto error = physicsSystem.Update(dt, 1, &tempAllocator, jobSystem.get());
+        if (error != JPH::EPhysicsUpdateError::None)
+        {
+            ThrowJoltUpdateError(error);
+        }
+
+        --steps;
+        ++currentTick;
+    }
+}
+
 void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
 {
     snapshot.GetImpl().Save(physicsSystem, currentTick);
@@ -80,7 +90,7 @@ auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
 {
     auto& impl = snapshot.GetImpl();
     const auto restoreTick = impl.GetTick();
-    NC_ASSERT(restoreTick < currentTick, "bad frames");
+    NC_ASSERT(restoreTick < currentTick, "Cannot restore to a snapshot newer than the current physics tick.");
     if (impl.Restore(physicsSystem))
     {
         currentTick = restoreTick;

@@ -9,7 +9,6 @@
 #include "ncengine/physics/PhysicsSnapshot.h"
 #include "ncengine/type/EngineId.h"
 
-#include <any>
 #include <memory>
 
 namespace nc
@@ -33,8 +32,7 @@ struct PhysicsSettings;
  *   PhysicsPipeline
  *     Depends On: FrameLogicUpdate
  *     Component Access:
- *       Write: Collider, PhysicsBody, Transform
- *       Read: ConcaveCollider, PhysicsMaterial, PositionClamp, VelocityRestriction
+ *       Write: RigidBody, Transform
  */
 struct NcPhysics : public Module
 {
@@ -47,12 +45,22 @@ struct NcPhysics : public Module
     /** @brief Toggle physics update step on or off. */
     virtual void EnableUpdate(bool) {}
 
-    // todo: how to handle collision events?...
-    virtual auto GetTick() const -> PhysicsTick { return PhysicsTick::Null(); };
-    virtual void ResetTick(PhysicsTick = PhysicsTick{0}) {}
-    virtual void Tick(uint32_t = 0) {}
-    virtual void SyncTransforms() {}
-    virtual void DispatchAccumulatedEvents() {}
+    /**
+     * @name Network Rollback Operations
+     * 
+     * Network rollback functions require Config::PhysicsSettings::enableNetworkRollback to be true on initialization.
+     * This prevents NcPhysics from scheduling any tasks, so the client application is responsible for ticking the
+     * simulation. This should be done from the update graph with a task using id nc::update_task_id::PhysicsPipeline.
+     * A Typical simulation tick looks like:
+     *   Tick(1);                      // step the simulation once
+     *   SyncTransforms();             // write RigidBody updates back to Transforms
+     *   DispatchAccumulatedEvents();  // send CollisionListener events
+     */
+    virtual auto GetTick() const -> PhysicsTick = 0;
+    virtual void ResetTick(PhysicsTick tick = PhysicsTick{0}) = 0;
+    virtual void Tick(uint32_t steps = 1) = 0;
+    virtual void SyncTransforms() = 0;
+    virtual void DispatchAccumulatedEvents() = 0;
     virtual void SaveSnapshot(PhysicsSnapshot& snapshot) = 0;
     virtual auto RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool = 0;
 
