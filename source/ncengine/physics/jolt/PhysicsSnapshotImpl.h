@@ -38,7 +38,7 @@ namespace physics
 class PhysicsSnapshotImpl
 {
     public:
-        auto IsValid() const -> bool        { return m_tick.IsNull(); }
+        auto IsValid() const -> bool        { return !m_tick.IsNull(); }
         auto GetTick() const -> PhysicsTick { return m_tick; }
         auto GetSize() const -> size_t      { return m_recorder.GetSize(); }
 

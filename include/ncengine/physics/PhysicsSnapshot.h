@@ -79,7 +79,7 @@ class PhysicsSnapshot final
         void SetValidationMode(bool enabled);
 
         /** @cond internal */
-        auto GetImpl()        -> physics::PhysicsSnapshotImpl&;
+        auto GetImpl() -> physics::PhysicsSnapshotImpl&;
         /** @endcond internal */
 
     protected:
