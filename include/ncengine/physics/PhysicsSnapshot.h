@@ -13,7 +13,7 @@
 
 namespace nc
 {
-/** @brief Container for serialized physics state for performing rollback of the physics simulation. */
+/** @brief Holds serialized physics state for performing physics simulation rollbacks. */
 class PhysicsSnapshot final
 {
     public:

@@ -69,7 +69,7 @@ class NcPhysicsImpl final : public NcPhysics
         BodyManager m_bodyManager;
         CollisionQueryManager m_queryManager;
         std::unique_ptr<DeferredPhysicsCreateState> m_deferredState;
-        bool m_updateEnabled = true; // todo: could combine these
+        bool m_updateEnabled = true;
         bool m_networkModeEnabled;
 };
 } // namespace physics

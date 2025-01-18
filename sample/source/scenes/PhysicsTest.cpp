@@ -213,28 +213,27 @@ class VehicleController : public FreeComponent
 
             auto& controller = *body.GetVehicle();
             const auto [side, forward] = input::GetAxis();
-            // auto brake = 0.0f;
+            auto brake = 0.0f;
 
-            // if (side)
-            // {
-            //     m_previousSteer = std::clamp(m_previousSteer + side * steerRate * dt, -1.0f, 1.0f);
-            // }
-            // else
-            // {
-            //     m_previousSteer = 0.0f;
-            // }
-            // if (forward)
-            // {
-            //     m_previousThrottle = std::clamp(m_previousThrottle + forward * throttleRate * dt, -1.0f, 1.0f);
-            // }
-            // else
-            // {
-            //     m_previousThrottle = 0.0f;
-            //     brake = 0.5f;
-            // }
+            if (side)
+            {
+                m_previousSteer = std::clamp(m_previousSteer + side * steerRate * dt, -1.0f, 1.0f);
+            }
+            else
+            {
+                m_previousSteer = 0.0f;
+            }
+            if (forward)
+            {
+                m_previousThrottle = std::clamp(m_previousThrottle + forward * throttleRate * dt, -1.0f, 1.0f);
+            }
+            else
+            {
+                m_previousThrottle = 0.0f;
+                brake = 0.5f;
+            }
 
-            // controller.SetInput(m_previousThrottle, m_previousSteer, brake, 0.0f);
-            controller.SetInput(forward, side, 0.0f, 0.0f);
+            controller.SetInput(m_previousThrottle, m_previousSteer, brake, 0.0f);
         }
 
     private:
@@ -1245,40 +1244,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             out.push_back(PhysicsSnapshot{});
         return out;
     }();
-
-    auto saver = world.Emplace<Entity>({});
-    world.Emplace<FrameLogic>(saver, [ncPhysics, cur = 0ull, snapshots = std::move(snapshots)](Entity, ecs::Ecs, float) mutable {
-        if (cur >= count)
-            cur = 0;
-
-        auto& s = snapshots.at(cur++);
-        s.Clear();
-        ncPhysics->SaveSnapshot(s);
-
-
-
-        if (KeyDown(input::KeyCode::One))
-        {
-        }
-        else if (KeyDown(input::KeyCode::Two))
-        {
-            // const auto index = cur > 5 ? cur - 5 : 0;
-
-            ncPhysics->RestoreSnapshot(snapshots.at(0));
-            cur = 0;
-            // for (auto& s : snapshots)
-            //     s->Reset();
-            // snapshots.clear();
-        }
-
-        // ncPhysics->Tick();
-        // ncPhysics->SyncTransforms();
-        // ncPhysics->DispatchAccumulatedEvents();
-    });
-
-
-
-
 
     auto& camera = world.Emplace<FollowCamera>(cameraHandle, Entity::Null());
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});

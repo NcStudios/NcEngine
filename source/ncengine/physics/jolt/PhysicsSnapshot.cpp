@@ -91,9 +91,6 @@ void PhysicsSnapshot::Save(std::any physicsSystem, PhysicsTick tick)
 auto PhysicsSnapshot::Restore(std::any physicsSystem) -> bool
 {
     auto* joltPhysics = std::any_cast<JPH::PhysicsSystem*>(physicsSystem);
-    const auto succeeded = joltPhysics->RestoreState(m_impl->recorder);
-    // m_recorder.Reset();
-    // m_tick = PhysicsTick::Null();
-    return succeeded;
+    return joltPhysics->RestoreState(m_impl->recorder);
 }
 } // namespace nc

@@ -84,7 +84,6 @@ void JoltPhysics::Tick(float dt, uint32_t steps)
 void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
 {
     snapshot.Save(std::any{&physicsSystem}, currentTick);
-    // snapshot.GetImpl().Save(physicsSystem, currentTick);
 }
 
 auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
@@ -98,16 +97,5 @@ auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
     }
 
     return false;
-
-    // auto& impl = snapshot.GetImpl();
-    // const auto restoreTick = impl.GetTick();
-    // NC_ASSERT(restoreTick < currentTick, "Cannot restore to a snapshot newer than the current physics tick.");
-    // if (impl.Restore(physicsSystem))
-    // {
-    //     currentTick = restoreTick;
-    //     return true;
-    // }
-
-    // return false;
 }
 } // namespace nc::physics
