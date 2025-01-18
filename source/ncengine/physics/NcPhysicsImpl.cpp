@@ -35,7 +35,7 @@ class NcPhysicsStub : public nc::NcPhysics
         void Tick(uint32_t) override {}
         void SyncTransforms() override {}
         void DispatchAccumulatedEvents() override {}
-        auto SaveSnapshot(nc::PhysicsSnapshot&) {}
+        void SaveSnapshot(nc::PhysicsSnapshot&) {}
         auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
