@@ -55,11 +55,12 @@ class PhysicsSnapshotImpl
             m_frame = frame;
         }
 
-        auto Restore(JPH::PhysicsSystem& physicsSystem) -> size_t
+        auto Restore(JPH::PhysicsSystem& physicsSystem) -> bool
         {
-            physicsSystem.RestoreState(m_recorder);
+            const auto restored = physicsSystem.RestoreState(m_recorder);
             m_recorder.Reset();
-            return std::exchange(m_frame, NullFrame);
+            m_frame = NullFrame;
+            return restored;
         }
 
         void ResetRead()

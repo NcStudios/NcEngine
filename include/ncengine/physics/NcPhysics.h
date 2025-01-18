@@ -54,7 +54,7 @@ struct NcPhysics : public Module
     virtual void SyncTransforms() {}
     virtual void DispatchAccumulatedEvents() {}
     virtual void SaveSnapshot(PhysicsSnapshot& snapshot) = 0;
-    virtual void RestoreSnapshot(PhysicsSnapshot& snapshot) = 0;
+    virtual auto RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool = 0;
 
     /**
      * @name RigidBody Batching Operations

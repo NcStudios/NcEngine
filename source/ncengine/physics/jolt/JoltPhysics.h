@@ -59,7 +59,7 @@ struct JoltPhysics : public StableAddress
     }
 
     void SaveSnapshot(PhysicsSnapshot& snapshot);
-    void RestoreFromSnapshot(PhysicsSnapshot& snapshot);
+    auto RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool;
 
     std::unique_ptr<jolt::JoltApi> api;
     jolt::TempAllocator tempAllocator;

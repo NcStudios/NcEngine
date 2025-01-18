@@ -76,12 +76,17 @@ void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
     snapshot.GetImpl().Save(physicsSystem, currentFrame);
 }
 
-void JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot)
+auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
 {
     auto& impl = snapshot.GetImpl();
     const auto restoreFrame = impl.GetFrame();
     NC_ASSERT(restoreFrame < currentFrame, "bad frames");
-    impl.Restore(physicsSystem);
-    currentFrame = restoreFrame;
+    if (impl.Restore(physicsSystem))
+    {
+        currentFrame = restoreFrame;
+        return true;
+    }
+
+    return false;
 }
 } // namespace nc::physics

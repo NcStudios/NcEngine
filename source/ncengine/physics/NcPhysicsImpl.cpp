@@ -31,7 +31,7 @@ class NcPhysicsStub : public nc::NcPhysics
         }
 
         auto SaveSnapshot(nc::PhysicsSnapshot&) {}
-        void RestoreSnapshot(nc::PhysicsSnapshot&) {}
+        auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
@@ -190,9 +190,9 @@ void NcPhysicsImpl::SaveSnapshot(PhysicsSnapshot& snapshot)
     return m_jolt.SaveSnapshot(snapshot);
 }
 
-void NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot)
+auto NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool
 {
-    m_jolt.RestoreFromSnapshot(snapshot);
+    return m_jolt.RestoreFromSnapshot(snapshot);
 }
 
 void NcPhysicsImpl::Run()
