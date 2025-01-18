@@ -40,8 +40,12 @@ class PhysicsSnapshotImpl
     static constexpr auto NullFrame = std::numeric_limits<size_t>::max();
 
     public:
-        explicit PhysicsSnapshotImpl()
+        explicit PhysicsSnapshotImpl(bool enableValidation)
         {
+            if (enableValidation)
+            {
+                m_recorder.SetValidating(true);
+            }
         }
 
         auto IsValid()  const -> bool   { return m_frame != NullFrame; }
@@ -74,14 +78,19 @@ class PhysicsSnapshotImpl
             m_frame = NullFrame;
         }
 
+        void SetValidationMode(bool enabled)
+        {
+            m_recorder.SetValidating(enabled);
+        }
+
     private:
         SnapshotRecorder m_recorder;
         size_t m_frame = NullFrame;
 };
 } // namespace physics
 
-PhysicsSnapshot::PhysicsSnapshot()
-    : m_impl{std::make_unique<physics::PhysicsSnapshotImpl>()}
+PhysicsSnapshot::PhysicsSnapshot(bool enableValidation)
+    : m_impl{std::make_unique<physics::PhysicsSnapshotImpl>(enableValidation)}
 {
 }
 
@@ -117,5 +126,10 @@ void PhysicsSnapshot::ResetRead()
 void PhysicsSnapshot::Clear()
 {
     m_impl->Clear();
+}
+
+void PhysicsSnapshot::SetValidationMode(bool enabled)
+{
+    m_impl->SetValidationMode(enabled);
 }
 } // namespace nc

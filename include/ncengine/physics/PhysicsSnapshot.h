@@ -18,7 +18,7 @@ class PhysicsSnapshotImpl;
 class PhysicsSnapshot final
 {
     public:
-        PhysicsSnapshot();
+        PhysicsSnapshot(bool enableValidation = false);
         PhysicsSnapshot(PhysicsSnapshot&&) noexcept;
         PhysicsSnapshot& operator=(PhysicsSnapshot&&) noexcept;
         ~PhysicsSnapshot() noexcept;
@@ -40,6 +40,9 @@ class PhysicsSnapshot final
          * @note Snapshots can be reused to minimize allocations, but should be cleared before saving new state.
          */
         void Clear();
+
+        /** @brief  */
+        void SetValidationMode(bool enabled);
 
         /** @cond internal */
         auto GetImpl()        -> physics::PhysicsSnapshotImpl&;
