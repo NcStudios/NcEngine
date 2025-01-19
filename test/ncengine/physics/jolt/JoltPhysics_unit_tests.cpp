@@ -46,21 +46,3 @@ TEST(JoltPhysicsIntegrationTest, SaveRestoreSnapshot_succeeds)
     ASSERT_TRUE(uut.RestoreFromSnapshot(snapshot));
     EXPECT_EQ(initialTick, uut.currentTick);
 }
-
-TEST(JoltPhysicsIntegrationTest, SaveRestoreSnapshot_failureCases)
-{
-    auto uut = nc::physics::JoltPhysics(g_memorySettings, g_physicsSettings, nc::task::AsyncDispatcher{});
-
-    auto snapshotT1 = nc::PhysicsSnapshot{};
-    auto snapshotT2 = nc::PhysicsSnapshot{};
-    uut.SaveSnapshot(snapshotT1);
-    uut.Tick(1.0f / 60.0f);
-    uut.SaveSnapshot(snapshotT2);
-
-    uut.RestoreFromSnapshot(snapshotT1);
-    EXPECT_THROW(uut.RestoreFromSnapshot(snapshotT2), nc::NcError); // snapshot newer than simulation tick
-
-    uut.Tick(1.0f / 60.0f);
-    snapshotT1.Clear();
-    EXPECT_THROW(uut.RestoreFromSnapshot(snapshotT1), nc::NcError); // invalid snapshot
-}

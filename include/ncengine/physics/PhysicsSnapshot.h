@@ -18,6 +18,7 @@ class PhysicsSnapshot final
 {
     public:
         PhysicsSnapshot();
+        PhysicsSnapshot(PhysicsTick tick, std::vector<uint8_t> bytes);
         PhysicsSnapshot(PhysicsSnapshot&&) noexcept;
         PhysicsSnapshot& operator=(PhysicsSnapshot&&) noexcept;
         ~PhysicsSnapshot() noexcept;
@@ -53,7 +54,7 @@ class PhysicsSnapshot final
         /** @endcond internal */
 
     protected:
-        struct Impl;
+        class Impl;
         std::unique_ptr<Impl> m_impl;
         PhysicsTick m_tick = PhysicsTick::Null();
 };

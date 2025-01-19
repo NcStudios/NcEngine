@@ -1,17 +1,22 @@
 #include "ncengine/physics/PhysicsSnapshot.h"
 
 #include "ncjolt/ByteArrayStream.h"
-#include "ncutility/NcError.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/StateRecorder.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 
-namespace
+namespace nc
 {
-class SnapshotRecorder : public JPH::StateRecorder
+class PhysicsSnapshot::Impl : public JPH::StateRecorder
 {
     public:
+        Impl() = default;
+        Impl(std::vector<uint8_t> bytes)
+            : m_impl{std::move(bytes)}
+        {
+        }
+
         void ReadBytes(void* out, size_t count)       override { m_impl.ReadBytes(out, count); }
         void WriteBytes(const void* in, size_t count) override { m_impl.WriteBytes(in, count); }
 
@@ -27,17 +32,15 @@ class SnapshotRecorder : public JPH::StateRecorder
     private:
         nc::jolt::ByteArrayStream m_impl;
 };
-} // anonymous namespace
-
-namespace nc
-{
-struct PhysicsSnapshot::Impl
-{
-    SnapshotRecorder recorder;
-};
 
 PhysicsSnapshot::PhysicsSnapshot()
     : m_impl{std::make_unique<PhysicsSnapshot::Impl>()}
+{
+}
+
+PhysicsSnapshot::PhysicsSnapshot(PhysicsTick tick, std::vector<uint8_t> bytes)
+    : m_impl{std::make_unique<PhysicsSnapshot::Impl>(std::move(bytes))},
+      m_tick{tick}
 {
 }
 
@@ -47,48 +50,52 @@ PhysicsSnapshot::~PhysicsSnapshot() noexcept = default;
 
 auto PhysicsSnapshot::GetSize() const -> size_t
 {
-    return m_impl->recorder.GetSize();
+    return m_impl->GetSize();
 }
 
 auto PhysicsSnapshot::ViewBuffer() const -> std::span<const uint8_t>
 {
-    return m_impl->recorder.ViewBytes();
+    return m_impl->ViewBytes();
 }
 
 auto PhysicsSnapshot::ExtractBuffer() -> std::vector<uint8_t>
 {
-    auto buffer = m_impl->recorder.ExtractBytes();
+    auto buffer = m_impl->ExtractBytes();
     Clear();
     return buffer;
 }
 
 void PhysicsSnapshot::ResetRead()
 {
-    m_impl->recorder.ResetRead();
+    m_impl->ResetRead();
 }
 
 void PhysicsSnapshot::Clear()
 {
-    m_impl->recorder.Reset();
+    m_impl->Reset();
     m_tick = PhysicsTick::Null();
 }
 
 void PhysicsSnapshot::SetValidationMode(bool enabled)
 {
-    m_impl->recorder.SetValidating(enabled);
+    m_impl->SetValidating(enabled);
 }
 
 void PhysicsSnapshot::Save(std::any physicsSystem, PhysicsTick tick)
 {
-    NC_ASSERT(!IsValid(), "PhysicsSnapshot::Clear() must be called before reusing a snapshot.");
+    if (IsValid())
+    {
+        Clear();
+    }
+
     auto* joltPhysics = std::any_cast<JPH::PhysicsSystem*>(physicsSystem);
-    joltPhysics->SaveState(m_impl->recorder);
+    joltPhysics->SaveState(*m_impl);
     m_tick = tick;
 }
 
 auto PhysicsSnapshot::Restore(std::any physicsSystem) -> bool
 {
     auto* joltPhysics = std::any_cast<JPH::PhysicsSystem*>(physicsSystem);
-    return joltPhysics->RestoreState(m_impl->recorder);
+    return joltPhysics->RestoreState(*m_impl);
 }
 } // namespace nc
