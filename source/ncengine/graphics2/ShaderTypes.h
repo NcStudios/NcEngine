@@ -76,7 +76,7 @@ struct MaterialData
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
     float normalIntensity = 1.0f;
     float hatchingTiling = 10.0f;
-    float padding2 = 0;
+    float specularPower = 32.0f;
     float padding3 = 0;
 };
 
@@ -107,9 +107,11 @@ struct LightData
     // Construct from DirectionalLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
+              const Vector3& shadowCol,
               const Vector3& dir)
         : diffuseColor{diffuseCol},
           specularColor{specularCol},
+          shadowColor{shadowCol},
           type{LightType::Directional},
           direction{dir}
     {
@@ -118,12 +120,14 @@ struct LightData
     // Construct from PointLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
+              const Vector3& shadowCol,
               const Vector3& pos,
               int32_t enableShadows,
               float rad,
               DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
           specularColor{specularCol},
+          shadowColor{shadowCol},
           type{LightType::Point},
           position{pos},
           radius{rad},
@@ -135,6 +139,7 @@ struct LightData
     // Construct from SpotLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
+              const Vector3& shadowCol,
               const Vector3& pos,
               float inAngle,
               const Vector3& dir,
@@ -144,6 +149,7 @@ struct LightData
               DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
           specularColor{specularCol},
+          shadowColor{shadowCol},
           type{LightType::Spot},
           position{pos},
           innerAngle{inAngle},
@@ -158,14 +164,13 @@ struct LightData
     Vector3 diffuseColor = Vector3::One();
     int type = LightType::Uninitialized;
     Vector3 specularColor = Vector3::One();
-    int pad1 = 0;
+    float radius = 1.0f;
     Vector3 position = Vector3::Zero();
     float innerAngle = 1.0f;
     Vector3 direction = Vector3::Down();
     float outerAngle = 1.0f;
-    float radius = 1.0f;
+    Vector3 shadowColor = Vector3::One();
     int castsShadows = 0;
-    int pad2 = 0;
     DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };
 

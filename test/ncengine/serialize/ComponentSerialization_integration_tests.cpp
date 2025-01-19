@@ -177,6 +177,7 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchingTiling, actualMaterialProperties.hatchingTiling);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -194,7 +195,8 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
             .normalTexture = nc::asset::g_mockTextureView,
             .gradientStart = nc::Vector3::Up(),
             .gradientEnd = nc::Vector3::Right(),
-            .normalIntensity = 3.5f
+            .normalIntensity = 3.5f,
+            .hatchingTiling = 10.0f
         }
     };
 
@@ -220,6 +222,7 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchingTiling, actualMaterialProperties.hatchingTiling);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
@@ -275,22 +278,24 @@ TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
+    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), nc::Vector3::Splat(4.0f), 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
     EXPECT_EQ(expected.specularColor, actual.specularColor);
+    EXPECT_EQ(expected.shadowColor, actual.shadowColor);
     EXPECT_EQ(expected.radius, actual.radius);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
+    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
     nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
     EXPECT_EQ(expected.specularColor, actual.specularColor);
+    EXPECT_EQ(expected.shadowColor, actual.shadowColor);
     EXPECT_EQ(expected.innerAngle, actual.innerAngle);
     EXPECT_EQ(expected.outerAngle, actual.outerAngle);
     EXPECT_EQ(expected.radius, actual.radius);

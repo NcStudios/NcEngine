@@ -29,12 +29,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{5.5f, 11.0f, 5.4f}, .tag = "Point Light 1"});
-    world.Emplace<PointLight>(lvHandle, Vector3(0.946f, 0.671f, 0.278f), Vector3(1.0f, 1.0f, 1.0f), 26.6f);
-    auto lv2Handle = world.Emplace<Entity>({.position = Vector3{6.5f, 9.0f, 9.6f}, .tag = "Point Light 2"});
-    world.Emplace<PointLight>(lv2Handle, Vector3(1.0f, 0.723f, 0.608f), Vector3(1.0f, 1.0f, 1.0f), 13.4f);
-    auto lv3Handle = world.Emplace<Entity>({.position = Vector3{4.5f, 6.0f, -8.4f}, .tag = "Point Light 3"});
-    world.Emplace<PointLight>(lv3Handle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{1.5f, 9.0f, 5.4f}, .tag = "Point Light 1"});
+    world.Emplace<PointLight>(lvHandle, Vector3(0.489f, 0.784f, 0.804f), Vector3(1.0f, 0.745f, 0.910f), Vector3(0.265f, 0.514f, 0.529f), 23.7f);
 
     const auto guy = world.Emplace<Entity>({
         .position = Vector3{6.0f, 0.3f, 4.0f},

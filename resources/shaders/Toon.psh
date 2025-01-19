@@ -47,62 +47,82 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-float LightBand(float lightAmount)
+const float Epsilon = 1e-10;
+
+float3 RGBtoHSV(in float3 RGB)
 {
-    // Define the range for the soft transition
-    float lowerEdge = 0.095; // Start of the soft blend
-    float upperEdge = 0.1; // End of the soft blend
+    float4 P = (RGB.g < RGB.b) ? float4(RGB.bg, -1.0, 2.0/3.0) : float4(RGB.gb, 0.0, -1.0/3.0);
+    float4 Q = (RGB.r < P.x) ? float4(P.xyw, RGB.r) : float4(RGB.r, P.yzx);
+    float C = Q.x - min(Q.w, Q.y);
+    float H = abs((Q.w - Q.y) / (6.0 * C + Epsilon) + Q.z);
+    float3 HCV = float3(H, C, Q.x);
+    float S = HCV.y / (HCV.z + Epsilon);
+    return float3(HCV.x, S, HCV.z);
+}
 
-    // Smoothly blend between the two bands
-    float blendFactor = smoothstep(lowerEdge, upperEdge, lightAmount);
-
-    // Define the values for the bands
-    float bandLow = 0.1;
-    float bandHigh = 1.0;
-
-    // Interpolate between the two bands
-    return lerp(bandLow, bandHigh, blendFactor);
+float3 HSVtoRGB(in float3 HSV)
+{
+    float H = HSV.x;
+    float R = abs(H * 6.0 - 3.0) - 1.0;
+    float G = 2.0 - abs(H * 6.0 - 2.0);
+    float B = 2.0 - abs(H * 6.0 - 4.0);
+    float3 RGB = clamp( float3(R,G,B), 0.0, 1.0 );
+    return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
-    float4 Color;
+    // Get texture color
     uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
-    Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
-    float alpha = Color.a;
-    float3 finalColor = {0.0f, 0.0f, 0.0f};
+    float4 Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
 
+    // Get hatching texture and tiling property
+    uint hatchingIndex   = MaterialBufferData[PSIn.MaterialIndex].hatchingIndex;
     float hatchingTiling = MaterialBufferData[PSIn.MaterialIndex].hatchingTiling;
-    uint hatchingIndex = MaterialBufferData[PSIn.MaterialIndex].hatchingIndex;
     float hatchLight  = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).r;
     float hatchMedium = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).g;
     float hatchDark   = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).b;
 
-    float lightAmountTotal = 0.0f;
+    float3 light = float3(0.0f);
+    float3 combinedDiffuseColor = float3(0.0f);
+    float combinedDiffuseAmt = 0.0f;
+    float3 combinedSpecularColor = float3(0.0f);
+    float combinedSpecularAmount = 0.0f;
+    float3 combinedShadowColor = 0.0f;
 
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        finalColor += influence.diffuseColor * LightBand(influence.diffuseAmt) + influence.specularColor * LightBand(influence.specularAmt);
-        lightAmountTotal += influence.diffuseAmt + influence.specularAmt;
+
+        combinedDiffuseColor += influence.diffuseColor;
+        combinedDiffuseAmt += influence.diffuseAmt;
+        combinedSpecularColor += influence.specularColor;
+        combinedSpecularAmount += influence.specularAmt;
+        combinedShadowColor += influence.shadowColor;
     }
 
-    if (lightAmountTotal < 0.05f)
+    // Light banding (specular, shadow, diffuse)
+    float diffuseBlendFactor = smoothstep(0.00f, 0.1f, combinedDiffuseAmt);
+    float specularBlendFactor = smoothstep(0.8f, 1.0f, combinedDiffuseAmt);
+    float3 blendedDiffuse = lerp((combinedShadowColor), combinedDiffuseColor, diffuseBlendFactor);
+    float3 blendedSpecular = lerp(combinedDiffuseColor, combinedSpecularColor, specularBlendFactor);
+    light += lerp(blendedDiffuse, blendedSpecular, specularBlendFactor);
+    Color.rgb *= light;
+
+    // Light banding (hatching)
+    if (combinedDiffuseAmt < 0.1f)
     {
-        Color *= 0.05f;
+        Color.rbg = Color.rbg * max((hatchMedium), combinedShadowColor);
     }
-    else if (lightAmountTotal < 0.2f)
+    else if (combinedDiffuseAmt < 0.3f)
     {
-        float blend = smoothstep(0.05f, 0.2f, lightAmountTotal);
-        Color *= lerp(0.05f, hatchMedium, blend);
-    }
-    else if (lightAmountTotal < 0.45f)
-    {
-        float blend = smoothstep(0.2f, 0.5f, lightAmountTotal);
-        Color *= lerp(hatchMedium, hatchLight, blend);
+        Color.rbg = Color.rbg * max((hatchLight), combinedShadowColor);
     }
 
-    Color *= float4(finalColor, 1.0);
-    Color.a = alpha;
-    PSOut.Color = Color;
+    float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b));
+    colHsv.y *= (0.0);
+    Color.rgb = HSVtoRGB(colHsv.rgb);
+
+    PSOut.Color = Color * 2.0f;
+    // PSOut.Color = float4 (combinedDiffuseAmt, combinedDiffuseAmt, combinedDiffuseAmt, 1.0);
 }
