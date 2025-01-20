@@ -8,7 +8,7 @@
 
 namespace
 {
-auto DefaultAssertCB(const char*, const char*, const char*, unsigned) -> bool
+[[maybe_unused]] auto DefaultAssertCB(const char*, const char*, const char*, unsigned) -> bool
 {
     return true;
 };
@@ -16,9 +16,11 @@ auto DefaultAssertCB(const char*, const char*, const char*, unsigned) -> bool
 
 namespace nc::jolt
 {
-JoltApi::JoltApi(AssertFailedCallback assertCB)
+JoltApi::JoltApi([[maybe_unused]] AssertFailedCallback assertCB)
 {
+#ifdef JPH_ENABLE_ASSERTS
     JPH::AssertFailed = assertCB ? assertCB : ::DefaultAssertCB;
+#endif
     RegisterAllocator();
     m_factory = std::make_unique<JPH::Factory>();
     JPH::Factory::sInstance = m_factory.get();
@@ -29,6 +31,8 @@ JoltApi::~JoltApi() noexcept
 {
     JPH::UnregisterTypes();
     JPH::Factory::sInstance = nullptr;
+#ifdef JPH_ENABLE_ASSERTS
     JPH::AssertFailed = ::DefaultAssertCB;
+#endif
 }
 } // namespace nc::jolt
