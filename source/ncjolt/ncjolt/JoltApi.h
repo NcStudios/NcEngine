@@ -9,11 +9,17 @@ class Factory;
 
 namespace nc::jolt
 {
+// Function type for handling Jolt asserts. Should return true to trigger breakpoint.
+using AssertFailedCallback = bool(*)(const char* expression,
+                                     const char* message,
+                                     const char* file,
+                                     unsigned line);
+
 // Base Jolt initialization shared by NcEngine + NcConvert
 class JoltApi
 {
     public:
-        explicit JoltApi();
+        explicit JoltApi(AssertFailedCallback assertCB = nullptr);
         ~JoltApi() noexcept;
 
     private:

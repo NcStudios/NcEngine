@@ -1,6 +1,7 @@
 #include "JoltPhysics.h"
 #include "ncengine/config/Config.h"
 
+#include "ncengine/utility/Log.h"
 #include "ncjolt/JoltApi.h"
 #include "ncjolt/Profiler.inl"
 #include "ncutility/NcError.h"
@@ -21,6 +22,22 @@ auto ToJoltSettings(const nc::config::PhysicsSettings& in) -> JPH::PhysicsSettin
     out.mTimeBeforeSleep = in.timeBeforeSleep;
     out.mPointVelocitySleepThreshold = in.sleepThreshold;
     return out;
+}
+
+auto AssertCallback([[maybe_unused]] const char* expression,
+                    [[maybe_unused]] const char* message,
+                    [[maybe_unused]] const char* file,
+                    [[maybe_unused]] unsigned line) -> bool
+{
+    [[maybe_unused]] constexpr auto subsystem = "Jolt";
+    const auto fullMessage = fmt::format(
+        "message: {} (expression: {})",
+        message ? message : "",
+        expression ? expression : ""
+    );
+
+    NC_LOG_ERROR_EXT(subsystem, file, line, fullMessage)
+    return true;
 }
 } // anonymous namespace
 
@@ -44,7 +61,7 @@ void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
 JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
                          const config::PhysicsSettings& physicsSettings,
                          const task::AsyncDispatcher& dispatcher)
-    : api{std::make_unique<jolt::JoltApi>()},
+    : api{std::make_unique<jolt::JoltApi>(::AssertCallback)},
       tempAllocator{physicsSettings.tempAllocatorSize},
       contactListener{physicsSystem},
       jobSystem{BuildJobSystem(dispatcher)}
