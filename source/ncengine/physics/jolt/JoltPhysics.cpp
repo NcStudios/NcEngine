@@ -90,7 +90,7 @@ auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
 {
     const auto restoreTick = snapshot.GetTick();
     NC_ASSERT(restoreTick < currentTick, "Cannot restore to a snapshot newer than the current physics tick.");
-    if (snapshot.Restore(std::any{std::any{&physicsSystem}}))
+    if (snapshot.Restore(std::any{&physicsSystem}))
     {
         currentTick = restoreTick;
         return true;

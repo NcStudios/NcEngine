@@ -4,6 +4,7 @@
 #include "physics/jolt/Conversion.h"
 #include "physics/jolt/JoltPhysics.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 #include "ncengine/physics/RigidBody.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"

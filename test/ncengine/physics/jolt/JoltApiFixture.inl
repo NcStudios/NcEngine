@@ -1,8 +1,10 @@
-#include "gtest/gtest.h"
+#include "physics/jolt/JoltPhysics.h"
 #include "ContactListener_stub.inl"
 #include "JobSystem_stub.inl"
+#include "gtest/gtest.h"
+
 #include "ncengine/config/Config.h"
-#include "physics/jolt/JoltPhysics.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"

@@ -6,25 +6,6 @@
 
 class PhysicsSnapshotTests : public JoltApiFixture
 {
-    protected:
-
-        // nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
-        // nc::Signal<const nc::asset::MeshColliderUpdateEventData&> meshColliderSignal;
-        // nc::physics::ShapeFactory shapeFactory;
-        // nc::physics::BodyFactory uut;
-
-        // BodyFactoryTest()
-        //     : shapeFactory{convexHullSignal, meshColliderSignal},
-        //       uut{joltApi.physicsSystem.GetBodyInterfaceNoLock(), shapeFactory}
-        // {
-        // }
-
-        // void DestroyBody(const JPH::Body* body)
-        // {
-        //     auto& interface = joltApi.physicsSystem.GetBodyInterfaceNoLock();
-        //     const auto id = body->GetID();
-        //     interface.DestroyBody(id); // note: factory doesn't add body, so don't call remove
-        // }
 };
 
 TEST_F(PhysicsSnapshotTests, Constructor_default_createsEmptySnapshot)

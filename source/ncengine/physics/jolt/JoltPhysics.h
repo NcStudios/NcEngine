@@ -4,7 +4,7 @@
 #include "JobSystem.h"
 #include "Layers.h"
 
-#include "ncengine/physics/PhysicsSnapshot.h"
+#include "ncengine/physics/PhysicsTick.h"
 #include "ncengine/type/StableAddress.h"
 #include "ncjolt/Allocator.h"
 

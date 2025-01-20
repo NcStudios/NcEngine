@@ -1236,15 +1236,6 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "Main Camera"
     });
 
-    static constexpr auto count = 20ull;
-    auto snapshots = []()
-    {
-        auto out = std::vector<nc::PhysicsSnapshot>();
-        for (auto i = 0ull; i < count; ++i)
-            out.push_back(PhysicsSnapshot{});
-        return out;
-    }();
-
     auto& camera = world.Emplace<FollowCamera>(cameraHandle, Entity::Null());
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);

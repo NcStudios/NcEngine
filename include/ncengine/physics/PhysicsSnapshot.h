@@ -41,10 +41,7 @@ class PhysicsSnapshot final
         /** @brief Set the read position back to the beginning of the snapshot. */
         void ResetRead();
 
-        /**
-         * @brief Clear any recorded state.
-         * @note Snapshots can be reused to minimize allocations, but should be cleared before saving new state.
-         */
+        /** @brief Clear any recorded state. */
         void Clear();
 
         /** @cond internal */
