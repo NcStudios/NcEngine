@@ -124,8 +124,8 @@ concept AssetView = std::same_as<T, AudioClipView>         ||
                     std::same_as<T, ConvexHullView>        ||
                     std::same_as<T, CubeMapView>           ||
                     std::same_as<T, FontView>              ||
-                    std::same_as<T, MeshView>              ||
                     std::same_as<T, MeshColliderView>      ||
+                    std::same_as<T, MeshView>              ||
                     std::same_as<T, ShaderView>            ||
                     std::same_as<T, SkeletalAnimationView> ||
                     std::same_as<T, TextureView>;

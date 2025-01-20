@@ -112,8 +112,8 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.assetSettings.convexHullsPath, actual.assetSettings.convexHullsPath);
     EXPECT_EQ(expected.assetSettings.cubeMapsPath, actual.assetSettings.cubeMapsPath);
     EXPECT_EQ(expected.assetSettings.fontsPath, actual.assetSettings.fontsPath);
-    EXPECT_EQ(expected.assetSettings.meshesPath, actual.assetSettings.meshesPath);
     EXPECT_EQ(expected.assetSettings.meshCollidersPath, actual.assetSettings.meshCollidersPath);
+    EXPECT_EQ(expected.assetSettings.meshesPath, actual.assetSettings.meshesPath);
     EXPECT_EQ(expected.assetSettings.shadersPath, actual.assetSettings.shadersPath);
     EXPECT_EQ(expected.assetSettings.skeletalAnimationsPath, actual.assetSettings.skeletalAnimationsPath);
     EXPECT_EQ(expected.assetSettings.texturesPath, actual.assetSettings.texturesPath);
