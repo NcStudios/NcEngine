@@ -84,6 +84,12 @@ class ByteArrayStream : public JPH::StreamIn,
             m_failed = false;
         }
 
+        void ResetRead() noexcept
+        {
+            m_readPos = 0;
+            m_failed = false;
+        }
+
     private:
         std::vector<uint8_t> m_data;
         size_t m_writePos = 0;

@@ -4,6 +4,7 @@
 #include "JobSystem.h"
 #include "Layers.h"
 
+#include "ncengine/physics/PhysicsTick.h"
 #include "ncengine/type/StableAddress.h"
 #include "ncjolt/Allocator.h"
 
@@ -15,6 +16,8 @@
 
 namespace nc
 {
+class PhysicsSnapshot;
+
 namespace config
 {
 struct MemorySettings;
@@ -38,14 +41,9 @@ struct JoltPhysics : public StableAddress
 
     ~JoltPhysics() noexcept;
 
-    void Update(float dt, int steps = 1)
-    {
-        const auto error = physicsSystem.Update(dt, steps, &tempAllocator, jobSystem.get());
-        if (error != JPH::EPhysicsUpdateError::None)
-        {
-            ThrowJoltUpdateError(error);
-        }
-    }
+    void Tick(float dt, uint32_t steps = 1);
+    void SaveSnapshot(PhysicsSnapshot& snapshot);
+    auto RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool;
 
     std::unique_ptr<jolt::JoltApi> api;
     jolt::TempAllocator tempAllocator;
@@ -55,6 +53,7 @@ struct JoltPhysics : public StableAddress
     JPH::PhysicsSystem physicsSystem;
     ContactListener contactListener;
     std::unique_ptr<JPH::JobSystem> jobSystem;
+    PhysicsTick currentTick = PhysicsTick{0};
 };
 } // namespace physics
 } // namespace nc

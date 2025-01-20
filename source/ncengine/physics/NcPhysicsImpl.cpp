@@ -30,6 +30,13 @@ class NcPhysicsStub : public nc::NcPhysics
         {
         }
 
+        auto GetTick() const -> nc::PhysicsTick override { return nc::PhysicsTick::Null(); }
+        void ResetTick(nc::PhysicsTick) override {}
+        void Tick(uint32_t) override {}
+        void SyncTransforms() override {}
+        void DispatchAccumulatedEvents() override {}
+        void SaveSnapshot(nc::PhysicsSnapshot&) {}
+        auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
@@ -115,32 +122,30 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
         m_jolt.physicsSystem.GetBodyLockInterfaceNoLock(),
         m_shapeFactory
       },
-      m_deferredState{std::move(deferredState)}
+      m_deferredState{std::move(deferredState)},
+      m_networkModeEnabled{physicsSettings.enableNetworkRollback}
 {
 }
 
-void NcPhysicsImpl::Run()
+auto NcPhysicsImpl::GetTick() const -> PhysicsTick
 {
-    NC_PROFILE_TASK("NcPhysics::Run", ProfileCategory::Physics);
+    return m_jolt.currentTick;
+}
+
+void NcPhysicsImpl::ResetTick(PhysicsTick tick)
+{
+    m_jolt.currentTick = tick;
+}
+
+void NcPhysicsImpl::Tick(uint32_t steps)
+{
+    NC_PROFILE_SCOPE("NcPhysics::Tick", ProfileCategory::Physics);
     if (!m_updateEnabled)
     {
         return;
     }
 
-    m_jolt.Update(time::DeltaTime());
-    SyncTransforms();
-    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
-}
-
-void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
-{
-    NC_LOG_TRACE("Building NcPhysics Tasks");
-    update.Add(
-        update_task_id::PhysicsPipeline,
-        "PhysicsPipeline",
-        [this](){ this->Run(); },
-        {update_task_id::CommitStagedChanges}
-    );
+    m_jolt.Tick(time::DeltaTime(), steps);
 }
 
 void NcPhysicsImpl::SyncTransforms()
@@ -177,6 +182,52 @@ void NcPhysicsImpl::SyncTransforms()
         const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
         AnimateVehicle(assemblies, constraint, transformPool);
     }
+}
+
+void NcPhysicsImpl::DispatchAccumulatedEvents()
+{
+    NC_PROFILE_SCOPE("NcPhysics::DispatchAccumulatedEvents()", ProfileCategory::Physics);
+    DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
+}
+
+void NcPhysicsImpl::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    return m_jolt.SaveSnapshot(snapshot);
+}
+
+auto NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool
+{
+    return m_jolt.RestoreFromSnapshot(snapshot);
+}
+
+void NcPhysicsImpl::Run()
+{
+    NC_PROFILE_TASK("NcPhysics", ProfileCategory::Physics);
+    if (!m_updateEnabled)
+    {
+        return;
+    }
+
+    Tick(1);
+    SyncTransforms();
+    DispatchAccumulatedEvents();
+}
+
+void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
+{
+    if (m_networkModeEnabled)
+    {
+        NC_LOG_TRACE("Skipping Building NcPhysics Tasks - Network Rollback Enabled");
+        return;
+    }
+
+    NC_LOG_TRACE("Building NcPhysics Tasks");
+    update.Add(
+        update_task_id::PhysicsPipeline,
+        "PhysicsPipeline",
+        [this](){ this->Run(); },
+        {update_task_id::CommitStagedChanges}
+    );
 }
 
 void NcPhysicsImpl::OnBeforeSceneLoad()

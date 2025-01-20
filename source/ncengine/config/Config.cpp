@@ -52,6 +52,7 @@ constexpr auto MaxBonesKey = "max_bones"sv;
 
 // physics
 constexpr auto PhysicsEnabledKey = "physics_enabled"sv;
+constexpr auto EnableNetworkRollback = "enable_network_rollback"sv;
 constexpr auto TempAllocatorSizeKey = "temp_allocator_size"sv;
 constexpr auto MaxBodyPairsKey = "max_body_pairs"sv;
 constexpr auto MaxContactsKey = "max_contacts"sv;
@@ -236,6 +237,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     else if constexpr (std::same_as<Struct_t, nc::config::PhysicsSettings>)
     {
         ParseValueIfExists(out.enabled, PhysicsEnabledKey, kvPairs);
+        ParseValueIfExists(out.enableNetworkRollback, EnableNetworkRollback, kvPairs);
         ParseValueIfExists(out.tempAllocatorSize, TempAllocatorSizeKey, kvPairs);
         ParseValueIfExists(out.maxBodyPairs, MaxBodyPairsKey, kvPairs);
         ParseValueIfExists(out.maxContacts, MaxContactsKey, kvPairs);
@@ -375,6 +377,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[physics_settings]\n";
     ::WriteKVPair(stream, PhysicsEnabledKey, config.physicsSettings.enabled);
+    ::WriteKVPair(stream, EnableNetworkRollback, config.physicsSettings.enableNetworkRollback);
     ::WriteKVPair(stream, TempAllocatorSizeKey, config.physicsSettings.tempAllocatorSize);
     ::WriteKVPair(stream, MaxBodyPairsKey, config.physicsSettings.maxBodyPairs);
     ::WriteKVPair(stream, MaxContactsKey, config.physicsSettings.maxContacts);

@@ -4,12 +4,19 @@
 #include "physics/jolt/Conversion.h"
 #include "physics/jolt/JoltPhysics.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 #include "ncengine/physics/RigidBody.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 
 #include <ranges>
+
+namespace nc
+{
+void PhysicsSnapshot::Save(std::any, PhysicsTick) {}
+auto PhysicsSnapshot::Restore(std::any) -> bool { return false; }
+} // namespace nc
 
 class ContactListenerTest : public ::testing::Test
 {

@@ -1,4 +1,5 @@
 #include "JoltPhysics.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 #include "ncengine/config/Config.h"
 
 #include "ncengine/utility/Log.h"
@@ -81,4 +82,37 @@ JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
 }
 
 JoltPhysics::~JoltPhysics() noexcept = default;
+
+void JoltPhysics::Tick(float dt, uint32_t steps)
+{
+    while (steps != 0)
+    {
+        const auto error = physicsSystem.Update(dt, 1, &tempAllocator, jobSystem.get());
+        if (error != JPH::EPhysicsUpdateError::None)
+        {
+            ThrowJoltUpdateError(error);
+        }
+
+        --steps;
+        ++currentTick;
+    }
+}
+
+void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    snapshot.Save(std::any{&physicsSystem}, currentTick);
+}
+
+auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
+{
+    const auto restoreTick = snapshot.GetTick();
+    NC_ASSERT(restoreTick < currentTick, "Cannot restore to a snapshot newer than the current physics tick.");
+    if (snapshot.Restore(std::any{&physicsSystem}))
+    {
+        currentTick = restoreTick;
+        return true;
+    }
+
+    return false;
+}
 } // namespace nc::physics

@@ -179,8 +179,9 @@ add_test(ConstraintManager_unit_tests ConstraintManager_unit_tests)
 ### JoltPhysics Tests ###
 add_executable(JoltPhysics_unit_tests
     JoltPhysics_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/PhysicsSnapshot.cpp
 )
 
 target_include_directories(JoltPhysics_unit_tests
@@ -254,6 +255,39 @@ target_link_libraries(Layers_unit_tests
 )
 
 add_test(Layers_unit_tests Layers_unit_tests)
+
+### PhysicsSnapshot Tests ###
+add_executable(PhysicsSnapshot_unit_tests
+    PhysicsSnapshot_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/PhysicsSnapshot.cpp
+)
+
+target_include_directories(PhysicsSnapshot_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_definitions(PhysicsSnapshot_unit_tests
+    PUBLIC
+        -DNC_TEST_EXCLUDE_PHYSICS_SNAPSHOT_STUBS
+)
+
+target_compile_options(PhysicsSnapshot_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(PhysicsSnapshot_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        NcJolt
+        gtest_main
+)
+
+add_test(PhysicsSnapshot_unit_tests PhysicsSnapshot_unit_tests)
 
 ### ShapeFactory Tests ###
 add_executable(ShapeFactory_unit_tests

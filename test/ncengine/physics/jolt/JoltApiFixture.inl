@@ -1,11 +1,22 @@
-#include "gtest/gtest.h"
+#include "physics/jolt/JoltPhysics.h"
 #include "ContactListener_stub.inl"
 #include "JobSystem_stub.inl"
+#include "gtest/gtest.h"
+
 #include "ncengine/config/Config.h"
-#include "physics/jolt/JoltPhysics.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
+
+// Generally these can be stubbed out, but want to reuse the fixture for PhysicsSnapshot tests
+#ifndef NC_TEST_EXCLUDE_PHYSICS_SNAPSHOT_STUBS
+namespace nc
+{
+void PhysicsSnapshot::Save(std::any, PhysicsTick) {}
+auto PhysicsSnapshot::Restore(std::any) -> bool { return false; }
+} // namespace nc
+#endif
 
 class JoltApiFixture : public ::testing::Test
 {

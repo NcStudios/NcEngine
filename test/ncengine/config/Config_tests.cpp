@@ -142,6 +142,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.graphicsSettings.useValidationLayers, actual.graphicsSettings.useValidationLayers);
 
     EXPECT_EQ(expected.physicsSettings.enabled, actual.physicsSettings.enabled);
+    EXPECT_EQ(expected.physicsSettings.enableNetworkRollback, actual.physicsSettings.enableNetworkRollback);
     EXPECT_EQ(expected.physicsSettings.tempAllocatorSize, actual.physicsSettings.tempAllocatorSize);
     EXPECT_EQ(expected.physicsSettings.maxBodyPairs, actual.physicsSettings.maxBodyPairs);
     EXPECT_EQ(expected.physicsSettings.maxContacts, actual.physicsSettings.maxContacts);
