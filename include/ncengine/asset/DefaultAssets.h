@@ -51,9 +51,9 @@ constexpr auto DefaultSkyboxCubeMap = "DefaultSkyboxCubeMap.nca";
 /** @brief Name of the default empty audio clip asset. */
 constexpr auto DefaultAudioClip = "DefaultAudioClip.nca";
 
-/** @brief Name of the default plane-shaped concave collider asset. */
-constexpr auto DefaultConcaveCollider = "DefaultConcaveCollider.nca";
+/** @brief Name of the default plane-shaped mesh collider asset. */
+constexpr auto DefaultMeshCollider = "DefaultMeshCollider.nca";
 
-/** @brief Name of the default cube-shaped hull collider asset. */
-constexpr auto DefaultHullCollider = "DefaultHullCollider.nca";
+/** @brief Name of the default cube-shaped convex hull asset. */
+constexpr auto DefaultConvexHull = "DefaultConvexHull.nca";
 } // namespace nc::asset

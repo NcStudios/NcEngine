@@ -18,14 +18,14 @@ auto ToAssetType(std::string type) -> asset::AssetType
 
     if(type == "audio-clip")
         return asset::AssetType::AudioClip;
-    else if(type == "concave-collider")
-        return asset::AssetType::ConcaveCollider;
+    else if(type == "convex-hull")
+        return asset::AssetType::ConvexHull;
     else if(type == "cube-map")
         return asset::AssetType::CubeMap;
-    else if(type == "hull-collider")
-        return asset::AssetType::HullCollider;
     else if(type == "mesh")
         return asset::AssetType::Mesh;
+    else if(type == "mesh-collider")
+        return asset::AssetType::MeshCollider;
     else if(type == "skeletal-animation")
         return asset::AssetType::SkeletalAnimation;
     else if(type == "texture")
@@ -40,14 +40,14 @@ auto ToString(asset::AssetType type) -> std::string
     {
         case asset::AssetType::AudioClip:
             return "audio-clip";
+        case asset::AssetType::ConvexHull:
+            return "convex-hull";
         case asset::AssetType::CubeMap:
             return "cube-map";
-        case asset::AssetType::ConcaveCollider:
-            return "concave-collider";
-        case asset::AssetType::HullCollider:
-            return "hull-collider";
         case asset::AssetType::Mesh:
             return "mesh";
+        case asset::AssetType::MeshCollider:
+            return "mesh-collider";
         case asset::AssetType::SkeletalAnimation:
             return "skeletal-animation";
         case asset::AssetType::Texture:

@@ -162,10 +162,10 @@ There is also support for external animations such as Mixamo.
 - [.nca File Format](#nca-file-format)
 - [Blob Formats](#blob-formats)
     - [AudioClip](#audioclip-blob-format)
-    - [ConcaveCollider](#concavecollider-blob-format)
+    - [ConvexHull](#convexhull-blob-format)
     - [Cubemap](#cubemap-blob-format)
-    - [HullCollider](#hullcollider-blob-format)
     - [Mesh](#mesh-blob-format)
+    - [MeshCollider](#meshcollider-blob-format)
     - [Shader](#shader-blob-format)
     - [SkeletalAnimation](#skeletalanimation-blob-format)
     - [Texture](#texture-blob-format)
@@ -192,16 +192,6 @@ an asset blob, the layout of which is determined by the asset type.
 | left channel        | double[] | 8 * samples per channel |
 | right channel       | double[] | 8 * samples per channel |
 
-### ConcaveCollider Blob Format
-> Magic Number: 'CONC'
-
-| Name           | Type       | Size                |
-|----------------|------------|---------------------|
-| extents        | Vector3    | 12                  |
-| max extent     | float      | 4                   |
-| triangle count | u64        | 8                   |
-| triangles      | Triangle[] | triangle count * 36 |
-
 ### Cubemap Blob Format
 > Magic Number: 'CUBE'
 
@@ -212,15 +202,15 @@ an asset blob, the layout of which is determined by the asset type.
 
 CubeMap faces in pixel data array are ordered: front, back, up, down, right, left.
 
-### HullCollider Blob Format
+### ConvexHull Blob Format
 > Magic number: 'HULL'
 
 | Name         | Type      | Size              |
 |--------------|-----------|-------------------|
 | extents      | Vector3   | 12                |
 | max extent   | float     | 4                 |
-| vertex count | u64       | 8                 |
-| vertex list  | Vector3[] | vertex count * 12 |
+| byte count   | u64       | 8                 |
+| bytes        | u8[]      | byte count        |
 
 ### Mesh Blob Format
 > Magic Number: 'MESH'
@@ -245,6 +235,17 @@ CubeMap faces in pixel data array are ordered: front, back, up, down, right, lef
 | boneMapping                  | (u64 + string + u32) * vertexSpaceToBoneSpace count | (12 + sizeof(boneName)) * vertexSpaceToBoneSpace count  |
 | vertexSpaceToBoneSpace       | VertexSpaceToBoneSpace[]                            | (72 + sizeof(boneName)) * vertexSpaceToBoneSpace count  |
 | boneSpaceToParentSpace       | BoneSpaceToParentSpace[]                            | (136 + sizeof(boneName)) * vertexSpaceToBoneSpace count |
+
+
+### MeshCollider Blob Format
+> Magic Number: 'CONC'
+
+| Name           | Type       | Size                |
+|----------------|------------|---------------------|
+| extents        | Vector3    | 12                  |
+| max extent     | float      | 4                   |
+| byte count     | u64        | 8                   |
+| bytes          | u8[]       | byte count          |
 
 ### Shader Blob Format
 > Magic Number: 'SHAD'

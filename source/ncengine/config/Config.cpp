@@ -27,14 +27,14 @@ constexpr auto BuildTasksOnInitKey = "build_tasks_on_init"sv;
 
 // asset
 constexpr auto AudioClipsPathKey = "audio_clips_path"sv;
-constexpr auto ConcaveCollidersKey = "concave_colliders_path"sv;
 constexpr auto CubeMapsPathKey = "cubemaps_path"sv;
-constexpr auto HullCollidersKey = "hull_colliders_path"sv;
+constexpr auto ConvexHullsKey = "convex_hulls_path"sv;
+constexpr auto FontsPathKey = "fonts_path"sv;
+constexpr auto MeshCollidersKey = "mesh_colliders_path"sv;
 constexpr auto MeshesPathKey = "meshes_path"sv;
 constexpr auto ShadersPathKey = "shaders_path"sv;
 constexpr auto SkeletalAnimationsPathKey = "skeletal_animations_path"sv;
 constexpr auto TexturesPathKey = "textures_path"sv;
-constexpr auto FontsPathKey = "fonts_path"sv;
 
 // memory
 constexpr auto MaxRigidBodiesKey = "max_rigid_bodies"sv;
@@ -196,14 +196,14 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
     else if constexpr (std::same_as<Struct_t, nc::config::AssetSettings>)
     {
         ParseValueIfExists(out.audioClipsPath, AudioClipsPathKey, kvPairs);
-        ParseValueIfExists(out.concaveCollidersPath, ConcaveCollidersKey, kvPairs);
+        ParseValueIfExists(out.convexHullsPath, ConvexHullsKey, kvPairs);
         ParseValueIfExists(out.cubeMapsPath, CubeMapsPathKey, kvPairs);
-        ParseValueIfExists(out.hullCollidersPath, HullCollidersKey, kvPairs);
+        ParseValueIfExists(out.fontsPath, FontsPathKey, kvPairs);
+        ParseValueIfExists(out.meshCollidersPath, MeshCollidersKey, kvPairs);
         ParseValueIfExists(out.meshesPath, MeshesPathKey, kvPairs);
         ParseValueIfExists(out.shadersPath, ShadersPathKey, kvPairs);
         ParseValueIfExists(out.skeletalAnimationsPath, SkeletalAnimationsPathKey, kvPairs);
         ParseValueIfExists(out.texturesPath, TexturesPathKey, kvPairs);
-        ParseValueIfExists(out.fontsPath, FontsPathKey, kvPairs);
     }
     else if constexpr (std::same_as<Struct_t, nc::config::MemorySettings>)
     {
@@ -350,14 +350,14 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
 
     if (writeSections) stream << "[asset_settings]\n";
     ::WriteKVPair(stream, AudioClipsPathKey, config.assetSettings.audioClipsPath);
-    ::WriteKVPair(stream, ConcaveCollidersKey, config.assetSettings.concaveCollidersPath);
+    ::WriteKVPair(stream, ConvexHullsKey, config.assetSettings.convexHullsPath);
     ::WriteKVPair(stream, CubeMapsPathKey, config.assetSettings.cubeMapsPath);
-    ::WriteKVPair(stream, HullCollidersKey, config.assetSettings.hullCollidersPath);
+    ::WriteKVPair(stream, FontsPathKey, config.assetSettings.fontsPath);
+    ::WriteKVPair(stream, MeshCollidersKey, config.assetSettings.meshCollidersPath);
     ::WriteKVPair(stream, MeshesPathKey, config.assetSettings.meshesPath);
     ::WriteKVPair(stream, ShadersPathKey, config.assetSettings.shadersPath);
     ::WriteKVPair(stream, SkeletalAnimationsPathKey, config.assetSettings.skeletalAnimationsPath);
     ::WriteKVPair(stream, TexturesPathKey, config.assetSettings.texturesPath);
-    ::WriteKVPair(stream, FontsPathKey, config.assetSettings.fontsPath);
 
     if (writeSections) stream << "[memory_settings]\n";
     ::WriteKVPair(stream, MaxRigidBodiesKey, config.memorySettings.maxRigidBodies);
@@ -409,13 +409,13 @@ bool Validate(const Config& config)
            (config.engineSettings.timeStep >= 0.0f) &&
            (config.engineSettings.maxTimeStep > 0.0f) &&
            (config.assetSettings.audioClipsPath != "") &&
-           (config.assetSettings.concaveCollidersPath != "") &&
-           (config.assetSettings.hullCollidersPath != "") &&
+           (config.assetSettings.fontsPath != "") &&
+           (config.assetSettings.convexHullsPath != "") &&
            (config.assetSettings.meshesPath != "") &&
+           (config.assetSettings.meshCollidersPath != "") &&
            (config.assetSettings.shadersPath != "") &&
            (config.assetSettings.texturesPath != "") &&
            (config.assetSettings.cubeMapsPath != "") &&
-           (config.assetSettings.fontsPath != "") &&
            (config.graphicsSettings.screenWidth != 0) &&
            (config.graphicsSettings.screenHeight != 0) &&
            (config.graphicsSettings.targetFPS != 0) &&

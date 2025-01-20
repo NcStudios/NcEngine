@@ -63,34 +63,34 @@ auto AcquireConvexHullAsset(AssetId id) -> ConvexHullView
     return AssetService<ConvexHullView>::Get()->Acquire(id);
 }
 
-bool LoadConcaveColliderAsset(const std::string& path, bool isExternal, asset_flags_type flags)
+bool LoadMeshColliderAsset(const std::string& path, bool isExternal, asset_flags_type flags)
 {
-    return AssetService<ConcaveColliderView>::Get()->Load(path, isExternal, flags);
+    return AssetService<MeshColliderView>::Get()->Load(path, isExternal, flags);
 }
 
-bool LoadConcaveColliderAssets(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
+bool LoadMeshColliderAssets(std::span<const std::string> paths, bool isExternal, asset_flags_type flags)
 {
-    return AssetService<ConcaveColliderView>::Get()->Load(paths, isExternal, flags);
+    return AssetService<MeshColliderView>::Get()->Load(paths, isExternal, flags);
 }
 
-bool UnloadConcaveColliderAsset(const std::string& path, asset_flags_type flags)
+bool UnloadMeshColliderAsset(const std::string& path, asset_flags_type flags)
 {
-    return AssetService<ConcaveColliderView>::Get()->Unload(path, flags);
+    return AssetService<MeshColliderView>::Get()->Unload(path, flags);
 }
 
-void UnloadAllConcaveColliderAssets(asset_flags_type flags)
+void UnloadAllMeshColliderAssets(asset_flags_type flags)
 {
-    AssetService<ConcaveColliderView>::Get()->UnloadAll(flags);
+    AssetService<MeshColliderView>::Get()->UnloadAll(flags);
 }
 
-auto AcquireConcaveColliderAsset(const std::string& path) -> ConcaveColliderView
+auto AcquireMeshColliderAsset(const std::string& path) -> MeshColliderView
 {
-    return AssetService<ConcaveColliderView>::Get()->Acquire(path);
+    return AssetService<MeshColliderView>::Get()->Acquire(path);
 }
 
-auto AcquireConcaveColliderAsset(AssetId id) -> ConcaveColliderView
+auto AcquireMeshColliderAsset(AssetId id) -> MeshColliderView
 {
-    return AssetService<ConcaveColliderView>::Get()->Acquire(id);
+    return AssetService<MeshColliderView>::Get()->Acquire(id);
 }
 
 bool LoadCubeMapAsset(const std::string& path, bool isExternal, asset_flags_type flags)

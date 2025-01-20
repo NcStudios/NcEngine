@@ -21,9 +21,9 @@
 #include <sstream>
 #include <unordered_map>
 
-DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::ConcaveCollider, nc::asset::ConcaveColliderView, std::string);
-DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::HullCollider, nc::asset::ConvexHullView, std::string);
+DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::ConvexHull, nc::asset::ConvexHullView, std::string);
 DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
+DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::MeshCollider, nc::asset::MeshColliderView, std::string);
 DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::asset::TextureView, std::string);
 
 constexpr auto g_maxEntities = 10u;

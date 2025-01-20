@@ -12,7 +12,7 @@
 namespace
 {
 const auto jsonAssetArrayTags = std::array<std::string, 7> {
-    "audio-clip", "concave-collider", "cube-map", "hull-collider", "mesh", "skeletal-animation", "texture"
+    "audio-clip", "convex-hull", "cube-map", "mesh", "mesh-collider", "skeletal-animation", "texture"
 };
 
 struct GlobalManifestOptions

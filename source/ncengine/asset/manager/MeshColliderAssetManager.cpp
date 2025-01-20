@@ -1,4 +1,4 @@
-#include "ConcaveColliderAssetManager.h"
+#include "MeshColliderAssetManager.h"
 #include "AssetUtilities.h"
 
 #include "ncasset/Import.h"
@@ -6,12 +6,12 @@
 
 namespace nc::asset
 {
-ConcaveColliderAssetManager::ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory)
-    : m_assetDirectory{concaveColliderAssetDirectory}
+MeshColliderAssetManager::MeshColliderAssetManager(const std::string& meshColliderAssetDirectory)
+    : m_assetDirectory{meshColliderAssetDirectory}
 {
 }
 
-bool ConcaveColliderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
+bool MeshColliderAssetManager::Load(const std::string& path, bool isExternal, asset_flags_type)
 {
     if (IsLoaded(path))
     {
@@ -31,7 +31,7 @@ bool ConcaveColliderAssetManager::Load(const std::string& path, bool isExternal,
     return true;
 }
 
-bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
+bool MeshColliderAssetManager::Load(std::span<const std::string> paths, bool isExternal, asset_flags_type)
 {
     auto anyLoaded = false;
     auto assets = std::vector<MeshCollider>{};
@@ -65,7 +65,7 @@ bool ConcaveColliderAssetManager::Load(std::span<const std::string> paths, bool 
     return anyLoaded;
 }
 
-bool ConcaveColliderAssetManager::Unload(const std::string& path, asset_flags_type)
+bool MeshColliderAssetManager::Unload(const std::string& path, asset_flags_type)
 {
     if (m_map.erase(path))
     {
@@ -82,7 +82,7 @@ bool ConcaveColliderAssetManager::Unload(const std::string& path, asset_flags_ty
     return false;
 }
 
-void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
+void MeshColliderAssetManager::UnloadAll(asset_flags_type)
 {
     m_map.clear();
     m_onUpdate.Emit(MeshColliderUpdateEventData{
@@ -92,24 +92,24 @@ void ConcaveColliderAssetManager::UnloadAll(asset_flags_type)
     });
 }
 
-auto ConcaveColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> ConcaveColliderView
+auto MeshColliderAssetManager::Acquire(const std::string& path, asset_flags_type) const -> MeshColliderView
 {
     NC_ASSERT(m_map.contains(path), fmt::format("MeshCollider is not loaded: '{}'", path));
     return Acquire(m_map.hash(path));
 }
 
-auto ConcaveColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> ConcaveColliderView
+auto MeshColliderAssetManager::Acquire(AssetId id, asset_flags_type) const -> MeshColliderView
 {
     NC_ASSERT(m_map.index(id) != m_map.NullIndex, fmt::format("MeshCollider is not loaded: '{}'", id));
-    return ConcaveColliderView{id};
+    return MeshColliderView{id};
 }
 
-bool ConcaveColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
+bool MeshColliderAssetManager::IsLoaded(const std::string& path, asset_flags_type) const
 {
     return m_map.contains(path);
 }
 
-auto ConcaveColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
+auto MeshColliderAssetManager::GetAllLoaded() const -> std::vector<std::string_view>
 {
     return GetPaths(m_map.keys());
 }

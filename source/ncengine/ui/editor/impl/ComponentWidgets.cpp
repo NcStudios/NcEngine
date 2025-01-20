@@ -266,8 +266,8 @@ void ConvexHullProperties(nc::RigidBody& body, const nc::Vector3& transformScale
         body.SetShape(nc::Shape::MakeConvexHull(hullId, scale), transformScale);
     }
 
-    const auto hullAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::HullCollider);
-    auto hullPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::HullCollider, hullId)};
+    const auto hullAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::ConvexHull);
+    auto hullPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::ConvexHull, hullId)};
     if (nc::ui::Combobox(hullPath, "asset", hullAssets))
     {
         const auto selectedView = nc::asset::AssetService<nc::asset::ConvexHullView>::Get()->Acquire(hullPath);
@@ -285,11 +285,11 @@ void MeshColliderProperties(nc::RigidBody& body, const nc::Vector3& transformSca
         body.SetShape(nc::Shape::MakeMesh(assetId, scale), transformScale);
     }
 
-    const auto meshColliderAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::ConcaveCollider);
-    auto assetPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::ConcaveCollider, assetId)};
+    const auto meshColliderAssets = nc::ui::editor::GetLoadedAssets(nc::asset::AssetType::MeshCollider);
+    auto assetPath = std::string{ncAsset.GetAssetPath(nc::asset::AssetType::MeshCollider, assetId)};
     if (nc::ui::Combobox(assetPath, "asset", meshColliderAssets))
     {
-        const auto selectedView = nc::asset::AssetService<nc::asset::ConcaveColliderView>::Get()->Acquire(assetPath);
+        const auto selectedView = nc::asset::AssetService<nc::asset::MeshColliderView>::Get()->Acquire(assetPath);
         body.SetShape(nc::Shape::MakeMesh(selectedView.id, scale), transformScale);
     }
 }
@@ -1195,13 +1195,13 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
                 case ShapeType::Capsule: { body.SetShape(Shape::MakeCapsule(), transformScale); break; }
                 case ShapeType::ConvexHull:
                 {
-                    static constexpr auto defaultHullId = utility::Fnv1a(asset::DefaultHullCollider);
+                    static constexpr auto defaultHullId = utility::Fnv1a(asset::DefaultConvexHull);
                     body.SetShape(Shape::MakeConvexHull(defaultHullId), transformScale);
                     break;
                 }
                 case ShapeType::Mesh:
                 {
-                    static constexpr auto defaultMeshId = utility::Fnv1a(asset::DefaultConcaveCollider);
+                    static constexpr auto defaultMeshId = utility::Fnv1a(asset::DefaultMeshCollider);
                     body.SetShape(Shape::MakeMesh(defaultMeshId), transformScale);
                     break;
                 }
