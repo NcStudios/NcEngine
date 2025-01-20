@@ -12,14 +12,14 @@
             "assetName": "sound2"
         }
     ],
-    "concave-collider": [
+    "convex-hull": [
         {
-            "sourcePath": "concave_collider1.fbx",
-            "assetName": "concave_collider1"
+            "sourcePath": "hull_collider1.fbx",
+            "assetName": "hull_collider1"
         },
         {
-            "sourcePath": "concave_collider2.fbx",
-            "assetName": "concave_collider2"
+            "sourcePath": "hull_collider2.fbx",
+            "assetName": "hull_collider2"
         }
     ],
     "cube-map": [
@@ -36,16 +36,6 @@
             "assetName": "skybox3"
         }
     ],
-    "hull-collider": [
-        {
-            "sourcePath": "hull_collider1.fbx",
-            "assetName": "hull_collider1"
-        },
-        {
-            "sourcePath": "hull_collider2.fbx",
-            "assetName": "hull_collider2"
-        }
-    ],
     "mesh": [
         {
             "sourcePath": "mesh1.fbx",
@@ -58,6 +48,16 @@
         {
             "sourcePath": "mesh3.fbx",
             "assetName": "mesh3"
+        }
+    ],
+    "mesh-collider": [
+        {
+            "sourcePath": "concave_collider1.fbx",
+            "assetName": "concave_collider1"
+        },
+        {
+            "sourcePath": "concave_collider2.fbx",
+            "assetName": "concave_collider2"
         }
     ],
     "skeletal-animation": [

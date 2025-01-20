@@ -94,12 +94,12 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     if (isSecondPass)
     {
         asset::UnloadAllAudioClipAssets();
-        asset::UnloadAllConcaveColliderAssets();
         asset::UnloadAllConvexHullAssets();
         asset::UnloadAllCubeMapAssets();
         asset::UnloadAllMeshAssets();
-        asset::UnloadAllTextureAssets();
+        asset::UnloadAllMeshColliderAssets();
         asset::UnloadAllSkeletalAnimationAssets();
+        asset::UnloadAllTextureAssets();
         ::LoadScene(world, modules);
     }
     else

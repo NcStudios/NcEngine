@@ -29,11 +29,6 @@ struct AudioClipView
     size_t samplesPerChannel = 0ull;
 };
 
-struct ConcaveColliderView
-{
-    AssetId id = NullAssetId;
-};
-
 struct ConvexHullView
 {
     AssetId id = NullAssetId;
@@ -60,6 +55,11 @@ struct MeshView
     uint32_t firstIndex = NullAssetIndex;
     uint32_t indexCount = NullAssetIndex;
     float maxExtent = 0.0f;
+};
+
+struct MeshColliderView
+{
+    AssetId id = NullAssetId;
 };
 
 struct TextureView
@@ -122,11 +122,11 @@ struct FontView
 template<class T>
 concept AssetView = std::same_as<T, AudioClipView>         ||
                     std::same_as<T, ConvexHullView>        ||
-                    std::same_as<T, ConcaveColliderView>   ||
-                    std::same_as<T, MeshView>              ||
-                    std::same_as<T, TextureView>           ||
                     std::same_as<T, CubeMapView>           ||
+                    std::same_as<T, FontView>              ||
+                    std::same_as<T, MeshColliderView>      ||
+                    std::same_as<T, MeshView>              ||
                     std::same_as<T, ShaderView>            ||
                     std::same_as<T, SkeletalAnimationView> ||
-                    std::same_as<T, FontView>;
+                    std::same_as<T, TextureView>;
 } // namespace nc::asset

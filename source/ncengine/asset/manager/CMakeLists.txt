@@ -2,11 +2,11 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         AssetUtilities.cpp
         AudioClipAssetManager.cpp
-        ConcaveColliderAssetManager.cpp
+        ConvexHullAssetManager.cpp
         CubeMapAssetManager.cpp
         FontAssetManager.cpp
-        HullColliderAssetManager.cpp
         MeshAssetManager.cpp
+        MeshColliderAssetManager.cpp
         ShaderAssetManager.cpp
         SkeletalAnimationAssetManager.cpp
         TextureAssetManager.cpp

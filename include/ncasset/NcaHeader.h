@@ -19,10 +19,10 @@ constexpr auto currentVersion = version4;
 struct MagicNumber
 {
     static constexpr auto audioClip = std::string_view{"CLIP"};
-    static constexpr auto concaveCollider = std::string_view{"CONC"};
     static constexpr auto cubeMap = std::string_view{"CUBE"};
     static constexpr auto convexHull = std::string_view{"HULL"};
     static constexpr auto mesh = std::string_view{"MESH"};
+    static constexpr auto meshCollider = std::string_view{"CONC"};
     static constexpr auto shader = std::string_view{"SHAD"};
     static constexpr auto skeletalAnimation = std::string_view{"SKEL"};
     static constexpr auto texture = std::string_view{"TEXT"};

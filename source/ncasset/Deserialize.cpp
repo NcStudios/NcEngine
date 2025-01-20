@@ -64,7 +64,7 @@ auto DeserializeAudioClip(std::istream& stream) -> DeserializedResult<AudioClip>
 
 auto DeserializeMeshCollider(std::istream& stream) -> DeserializedResult<MeshCollider>
 {
-    return DeserializeImpl<MeshCollider>(stream, MagicNumber::concaveCollider);
+    return DeserializeImpl<MeshCollider>(stream, MagicNumber::meshCollider);
 }
 
 auto DeserializeCubeMap(std::istream& stream) -> DeserializedResult<CubeMap>

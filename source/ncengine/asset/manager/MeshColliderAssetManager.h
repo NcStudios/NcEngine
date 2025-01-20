@@ -12,21 +12,21 @@ namespace nc::asset
 {
 struct MeshColliderUpdateEventData;
 
-class ConcaveColliderAssetManager : public IAssetService<ConcaveColliderView, std::string>
+class MeshColliderAssetManager : public IAssetService<MeshColliderView, std::string>
 {
     public:
-        explicit ConcaveColliderAssetManager(const std::string& concaveColliderAssetDirectory);
+        explicit MeshColliderAssetManager(const std::string& meshColliderAssetDirectory);
 
         bool Load(const std::string& path, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
         bool Load(std::span<const std::string> paths, bool isExternal, asset_flags_type flags = AssetFlags::None) override;
         bool Unload(const std::string& path, asset_flags_type flags = AssetFlags::None) override;
         void UnloadAll(asset_flags_type flags = AssetFlags::None) override;
-        auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> ConcaveColliderView override;
-        auto Acquire(AssetId id, asset_flags_type flags = AssetFlags::None) const -> ConcaveColliderView override;
+        auto Acquire(const std::string& path, asset_flags_type flags = AssetFlags::None) const -> MeshColliderView override;
+        auto Acquire(AssetId id, asset_flags_type flags = AssetFlags::None) const -> MeshColliderView override;
         bool IsLoaded(const std::string& path, asset_flags_type flags = AssetFlags::None) const override;
         auto GetPath(AssetId id) const -> std::string_view override { return m_map.at(m_map.index(id)); }
         auto GetAllLoaded() const -> std::vector<std::string_view> override;
-        auto GetAssetType() const noexcept -> AssetType override { return AssetType::ConcaveCollider; }
+        auto GetAssetType() const noexcept -> AssetType override { return AssetType::MeshCollider; }
         auto OnUpdate() -> Signal<const MeshColliderUpdateEventData&>& { return m_onUpdate; }
 
     private:

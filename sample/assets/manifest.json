@@ -12,10 +12,10 @@
             "assetName": "audio_clip/hit"
         }
     ],
-    "concave-collider": [
+    "convex-hull": [
         {
-            "sourcePath": "raw/model/halfpipe.fbx",
-            "assetName": "concave_collider/halfpipe"
+            "sourcePath": "raw/model/ramp.fbx",
+            "assetName": "convex_hull/ramp"
         }
     ],
     "cube-map": [
@@ -23,12 +23,6 @@
             "sourcePath": "raw/image/cube_maps/night_sky.png",
             "assetName": "cube_map/night_sky.nca"
           }
-    ],
-    "hull-collider": [
-        {
-            "sourcePath": "raw/model/ramp.fbx",
-            "assetName": "hull_collider/ramp"
-        }
     ],
     "mesh": [
         {
@@ -65,6 +59,12 @@
             "options": {
                 "optimizeMesh": true
             }
+        }
+    ],
+    "mesh-collider": [
+        {
+            "sourcePath": "raw/model/halfpipe.fbx",
+            "assetName": "mesh_collider/halfpipe"
         }
     ],
     "skeletal-animation": [

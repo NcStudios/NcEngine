@@ -10,14 +10,14 @@ auto GetLoadedAssets(asset::AssetType type) -> std::vector<std::string_view>
     switch(type)
     {
         case AssetType::AudioClip:         return AssetService<AudioClipView>::Get()->GetAllLoaded();
-        case AssetType::ConcaveCollider:   return AssetService<ConcaveColliderView>::Get()->GetAllLoaded();
         case AssetType::CubeMap:           return AssetService<CubeMapView>::Get()->GetAllLoaded();
-        case AssetType::HullCollider:      return AssetService<ConvexHullView>::Get()->GetAllLoaded();
+        case AssetType::ConvexHull:        return AssetService<ConvexHullView>::Get()->GetAllLoaded();
+        case AssetType::Font:              return AssetService<FontView, FontInfo>::Get()->GetAllLoaded();
         case AssetType::Mesh:              return AssetService<MeshView>::Get()->GetAllLoaded();
+        case AssetType::MeshCollider:      return AssetService<MeshColliderView>::Get()->GetAllLoaded();
         case AssetType::Shader:            return AssetService<ShaderView>::Get()->GetAllLoaded();
         case AssetType::SkeletalAnimation: return std::vector<std::string_view>(); // @todo: UI for editor
         case AssetType::Texture:           return AssetService<TextureView>::Get()->GetAllLoaded();
-        case AssetType::Font:              return AssetService<FontView, FontInfo>::Get()->GetAllLoaded();
     }
 
     throw NcError{fmt::format("Unknown AssetType: {}", static_cast<unsigned>(type))};

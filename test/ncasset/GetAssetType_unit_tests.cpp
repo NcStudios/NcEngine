@@ -15,14 +15,14 @@ TEST(GetAssetTypeTests, ValidMagicNumber_succeeds)
     SetMagicNumber(header, nc::asset::MagicNumber::audioClip);
     EXPECT_EQ(nc::asset::AssetType::AudioClip, nc::asset::GetAssetType(header));
 
-    SetMagicNumber(header, nc::asset::MagicNumber::concaveCollider);
-    EXPECT_EQ(nc::asset::AssetType::ConcaveCollider, nc::asset::GetAssetType(header));
+    SetMagicNumber(header, nc::asset::MagicNumber::meshCollider);
+    EXPECT_EQ(nc::asset::AssetType::MeshCollider, nc::asset::GetAssetType(header));
 
     SetMagicNumber(header, nc::asset::MagicNumber::cubeMap);
     EXPECT_EQ(nc::asset::AssetType::CubeMap, nc::asset::GetAssetType(header));
 
     SetMagicNumber(header, nc::asset::MagicNumber::convexHull);
-    EXPECT_EQ(nc::asset::AssetType::HullCollider, nc::asset::GetAssetType(header));
+    EXPECT_EQ(nc::asset::AssetType::ConvexHull, nc::asset::GetAssetType(header));
 
     SetMagicNumber(header, nc::asset::MagicNumber::mesh);
     EXPECT_EQ(nc::asset::AssetType::Mesh, nc::asset::GetAssetType(header));

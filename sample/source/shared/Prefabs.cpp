@@ -106,10 +106,10 @@ void InitializeResources()
 
     const auto& assetSettings = config::GetAssetSettings();
     LoadAssets(assetSettings.audioClipsPath, asset::AssetFlags::None, &asset::LoadAudioClipAssets);
-    LoadAssets(assetSettings.concaveCollidersPath, asset::AssetFlags::None, &asset::LoadConcaveColliderAssets);
+    LoadAssets(assetSettings.convexHullsPath, asset::AssetFlags::None, &asset::LoadConvexHullAssets);
     LoadAssets(assetSettings.cubeMapsPath, asset::AssetFlags::None, &asset::LoadCubeMapAssets);
-    LoadAssets(assetSettings.hullCollidersPath, asset::AssetFlags::None, &asset::LoadConvexHullAssets);
     LoadAssets(assetSettings.meshesPath, asset::AssetFlags::None, &asset::LoadMeshAssets);
+    LoadAssets(assetSettings.meshCollidersPath, asset::AssetFlags::None, &asset::LoadMeshColliderAssets);
     LoadAssets(assetSettings.skeletalAnimationsPath, asset::AssetFlags::None, &asset::LoadSkeletalAnimationAssets);
     LoadFont(UIFont);
 
