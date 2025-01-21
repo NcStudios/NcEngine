@@ -50,6 +50,7 @@ class TaskRouter : public JPH::JobSystemWithBarrier
     protected:
         void QueueJob(Job* job) override
         {
+            job->AddRef();
             m_dispatcher.SilentAsync([job]()
             {
                 job->Execute();
@@ -62,6 +63,7 @@ class TaskRouter : public JPH::JobSystemWithBarrier
             for (auto i = 0u; i < numJobs; ++i)
             {
                 auto job = jobs[i];
+                job->AddRef();
                 m_dispatcher.SilentAsync([job]()
                 {
                     job->Execute();
