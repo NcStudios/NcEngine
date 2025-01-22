@@ -6,6 +6,20 @@
 #include "Jolt/Physics/StateRecorder.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 
+namespace
+{
+class SnapshotFilter : public JPH::StateRecorderFilter
+{
+    public:
+        auto ShouldSaveBody(const JPH::Body& body) const -> bool override
+        {
+            return body.GetMotionType() != JPH::EMotionType::Static;
+        }
+};
+
+const auto g_filter = SnapshotFilter{};
+} // anonymous namespace
+
 namespace nc
 {
 class PhysicsSnapshot::Impl : public JPH::StateRecorder
@@ -89,7 +103,7 @@ void PhysicsSnapshot::Save(std::any physicsSystem, PhysicsTick tick)
     }
 
     auto* joltPhysics = std::any_cast<JPH::PhysicsSystem*>(physicsSystem);
-    joltPhysics->SaveState(*m_impl);
+    joltPhysics->SaveState(*m_impl, JPH::EStateRecorderState::All, &g_filter);
     m_tick = tick;
 }
 
