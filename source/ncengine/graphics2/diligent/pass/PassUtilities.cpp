@@ -61,8 +61,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pRTV = isMsaa ? colorSinkBufferResource.GetMsaaTextureView(colorRenderTargetIndex) :
-                            colorSinkBufferResource.GetTextureView(colorRenderTargetIndex);
+            pRTV = isMsaa ? colorSinkBufferResource.GetMsaaRenderTargetView(colorRenderTargetIndex) :
+                            colorSinkBufferResource.GetRenderTargetView(colorRenderTargetIndex);
         }
     }
 
@@ -74,8 +74,8 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pDSV = isMsaa ? depthSinkBufferResource.GetMsaaTextureView(depthRenderTargetIndex) :
-                            depthSinkBufferResource.GetTextureView(depthRenderTargetIndex);
+            pDSV = isMsaa ? depthSinkBufferResource.GetMsaaRenderTargetView(depthRenderTargetIndex) :
+                            depthSinkBufferResource.GetRenderTargetView(depthRenderTargetIndex);
         }
     }
 
@@ -111,8 +111,8 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pRTV = isMsaa ? colorSinkBufferResource.GetMsaaTextureView(colorRenderTargetIndex) :
-                            colorSinkBufferResource.GetTextureView(colorRenderTargetIndex);
+            pRTV = isMsaa ? colorSinkBufferResource.GetMsaaRenderTargetView(colorRenderTargetIndex) :
+                            colorSinkBufferResource.GetRenderTargetView(colorRenderTargetIndex);
         }
     }
 
@@ -124,8 +124,8 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
         }
         else
         {
-            pDSV = isMsaa ? depthSinkBufferResource.GetMsaaTextureView(depthRenderTargetIndex) :
-                            depthSinkBufferResource.GetTextureView(depthRenderTargetIndex);
+            pDSV = isMsaa ? depthSinkBufferResource.GetMsaaRenderTargetView(depthRenderTargetIndex) :
+                            depthSinkBufferResource.GetRenderTargetView(depthRenderTargetIndex);
         }
     }
 

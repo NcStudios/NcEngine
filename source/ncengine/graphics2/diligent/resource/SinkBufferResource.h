@@ -27,39 +27,41 @@ class SinkBufferResource
         explicit SinkBufferResource(Diligent::IShaderResourceVariable& variable,
                                     SinkBufferResourceDesc desc)
             : m_variable{&variable},
-              m_desc{std::move(desc)}
+              m_desc{std::move(desc)},
+              m_initialLoadComplete{false}
         {
         }
 
         static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
 
         void Add(Diligent::IRenderDevice& device,
+                 Diligent::IDeviceContext& context,
                  uint32_t numRenderTargets,
                  uint32_t renderTargetWidth,
                  uint32_t renderTargetHeight,
                  uint32_t numSamples = 1u);
 
         void Resize(Diligent::IRenderDevice& device,
+                    Diligent::IDeviceContext& context,
                     uint32_t renderTargetWidth,
                     uint32_t renderTargetHeight,
                     uint32_t numSamples = 1u);
 
         void Clear();
 
-        auto GetMsaaTextureView(uint32_t index) -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_textureViewsMsaa.at(index)); }
-        auto GetTextureView(uint32_t index)     -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_textureViews.at(index)); }
+        auto GetMsaaRenderTargetView(uint32_t index) -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViewsMsaa.at(index)); }
+        auto GetRenderTargetView(uint32_t index)     -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViews.at(index)); }
         auto GetMsaaTexture(uint32_t index)     -> Diligent::ITexture*     { return m_texturesMsaa.at(index); }
         auto GetTexture(uint32_t index)         -> Diligent::ITexture*     { return m_textures.at(index); }
 
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_textures;
-        std::vector<Diligent::IDeviceObject*> m_textureViews; // Render target
-        std::vector<Diligent::IDeviceObject*> m_shaderResources; // Shader resource
+        std::vector<Diligent::IDeviceObject*> m_renderTargetViews; // Render target
+        std::vector<Diligent::IDeviceObject*> m_shaderResourceViews; // Shader resource
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_texturesMsaa;
-        std::vector<Diligent::IDeviceObject*> m_textureViewsMsaa; // Render target
+        std::vector<Diligent::IDeviceObject*> m_renderTargetViewsMsaa; // Render target
         Diligent::IShaderResourceVariable* m_variable;
         SinkBufferResourceDesc m_desc;
-
-        void SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& combinedViews, size_t offset, size_t count);
+        bool m_initialLoadComplete;
 };
 } // namespace nc::graphics

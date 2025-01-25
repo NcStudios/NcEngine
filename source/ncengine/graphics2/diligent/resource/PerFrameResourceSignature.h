@@ -38,7 +38,7 @@ class PerFrameResourceSignature
                                            const UniformBufferResourceDesc& outlinePassPropertiesDesc);
         ~PerFrameResourceSignature() noexcept;
 
-        void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY); }
+        void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
         auto GetResourceSignature()     -> Diligent::IPipelineResourceSignature&   { return *m_signature; }
 
         /* Resource Buffers */

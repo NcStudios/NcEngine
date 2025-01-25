@@ -98,6 +98,7 @@ void DrawIndexed(Diligent::IDeviceContext& context, const std::vector<nc::graphi
 namespace nc::graphics
 {
 PassBackend::PassBackend(Diligent::IRenderDevice& device,
+                         Diligent::IDeviceContext& context,
                          Diligent::ISwapChain& swapChain,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
@@ -173,15 +174,15 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
     m_finalPass = std::make_unique<PostProcessPass>(MakePostProcessPass(device, swapChain, shaderFactory, shaderBindings, finalPass));
 
     // Make all the off screen render targets that will be used by the passes
-    postProcessColorSinks.Add(device, passManifest.ColorSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
-    postProcessDepthSinks.Add(device, passManifest.DepthSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
+    postProcessColorSinks.Add(device, context, passManifest.ColorSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
+    postProcessDepthSinks.Add(device, context, passManifest.DepthSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
 
     if (m_numSamples > 1)
     {
         m_colorSinkCountMsaa = passManifest.ColorSinkCountMsaa();
         m_depthSinkCountMsaa = passManifest.DepthSinkCountMsaa();
-        postProcessColorSinks.Add(device, m_colorSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
-        postProcessDepthSinks.Add(device, m_depthSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
+        postProcessColorSinks.Add(device, context, m_colorSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
+        postProcessDepthSinks.Add(device, context, m_depthSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
     }
 }
 
@@ -238,6 +239,7 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
         context.SetPipelineState(skinnedPass.pso);
         DrawIndexed(context, skinnedBatches);
     }
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
 
 void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
@@ -272,6 +274,7 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
 
         context.DrawIndexed(attribs);
     }
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
 
 void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
@@ -303,6 +306,7 @@ void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
     };
 
     context.DrawIndexed(attribs);
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
 
 void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
@@ -348,8 +352,8 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
                 propertyBuffer.Update(context, instance.properties.value());
             }
             context.Draw(drawAttribs);
+            context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
         }
-        context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
     }
 
     // Render final post process pass

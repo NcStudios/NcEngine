@@ -1,4 +1,5 @@
 #include "SinkBufferResource.h"
+#include "ResourceTypes.h"
 
 #include "ncutility/NcError.h"
 
@@ -7,8 +8,8 @@ namespace
 struct SinkTargets
 {
     std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>>& textures;
-    std::vector<Diligent::IDeviceObject*>& textureViews;
-    std::vector<Diligent::IDeviceObject*>* shaderResources = nullptr;
+    std::vector<Diligent::IDeviceObject*>& renderTargetViews;
+    std::vector<Diligent::IDeviceObject*>* shaderResourceViews = nullptr;
 };
 
 auto MakeTextureDesc(const nc::graphics::SinkBufferResourceDesc& desc,
@@ -47,7 +48,7 @@ namespace nc::graphics
 auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 {
     return SinkBufferResourceDesc{
-        .name = "Color Render Target",
+        .name = "PP Color Render Target",
         .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
         .format = Diligent::TEX_FORMAT_RGBA8_UNORM,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
@@ -63,7 +64,7 @@ auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 {
     return SinkBufferResourceDesc{
-        .name = "Depth Render Target",
+        .name = "PP Depth Render Target",
         .viewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL,
         .format = Diligent::TEX_FORMAT_D32_FLOAT,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_DEPTH_STENCIL,
@@ -85,31 +86,42 @@ auto SinkBufferResource::MakeSamplerDesc(std::string_view variableName) -> Dilig
 }
 
 void SinkBufferResource::Add(Diligent::IRenderDevice& device,
+                             Diligent::IDeviceContext& context,
                              uint32_t numRenderTargets,
                              uint32_t renderTargetWidth,
                              uint32_t renderTargetHeight,
                              uint32_t numSamples)
 {
     using namespace Diligent;
+
+    if (!m_initialLoadComplete)
+    {
+        InitializeArray(context, device, m_variable, m_desc.maxTextures, false);
+        m_initialLoadComplete = true;
+    }
+
     if (numRenderTargets == 0)
     {
         return;
     }
 
     auto targets = numSamples > 1
-        ? SinkTargets{m_texturesMsaa, m_textureViewsMsaa, nullptr}
-        : SinkTargets{m_textures, m_textureViews, &m_shaderResources};
+        ? SinkTargets{m_texturesMsaa, m_renderTargetViewsMsaa, nullptr}
+        : SinkTargets{m_textures, m_renderTargetViews, &m_shaderResourceViews};
 
     if (numRenderTargets + targets.textures.size() > m_desc.maxTextures)
     {
         throw NcError{"Max texture count exceeded"};
     }
 
+    // auto barriers = std::vector<Diligent::StateTransitionDesc>();
+    // barriers.reserve(targets.textures.size() + numRenderTargets);
+
     targets.textures.reserve(targets.textures.size() + numRenderTargets);
-    targets.textureViews.reserve(targets.textureViews.size() + numRenderTargets);
-    if (targets.shaderResources)
+    targets.renderTargetViews.reserve(targets.renderTargetViews.size() + numRenderTargets);
+    if (targets.shaderResourceViews)
     {
-        targets.shaderResources->reserve(targets.shaderResources->size() + numRenderTargets);
+        targets.shaderResourceViews->reserve(targets.shaderResourceViews->size() + numRenderTargets);
     }
 
     auto renderTargetDesc = MakeTextureDesc(m_desc, renderTargetWidth, renderTargetHeight, numSamples);
@@ -119,17 +131,26 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
         renderTargetDesc.Name = rtName.data();
 
         auto& renderTarget = targets.textures.emplace_back(MakeTexture(device, renderTargetDesc));
-        targets.textureViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
-        if (targets.shaderResources)
+        targets.renderTargetViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
+        if (targets.shaderResourceViews)
         {
-            targets.shaderResources->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+            targets.shaderResourceViews->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
         }
+
+        // barriers.emplace_back(
+        //     renderTarget.RawPtr(),
+        //     Diligent::RESOURCE_STATE_RENDER_TARGET,
+        //     Diligent::RESOURCE_STATE_SHADER_RESOURCE,
+        //     Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
+        // );
     }
 
-    SetArrayRegion(m_shaderResources, 0u, m_shaderResources.size());
+    // context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
+    SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_shaderResourceViews), 0u, m_shaderResourceViews.size());
 }
 
 void SinkBufferResource::Resize(Diligent::IRenderDevice& device,
+                                Diligent::IDeviceContext& context,
                                 uint32_t renderTargetWidth,
                                 uint32_t renderTargetHeight,
                                 uint32_t numSamples)
@@ -137,30 +158,20 @@ void SinkBufferResource::Resize(Diligent::IRenderDevice& device,
     auto numRenderTargets = static_cast<uint32_t>(m_textures.size());
     auto numRenderTargetsMsaa = static_cast<uint32_t>(m_texturesMsaa.size());
     Clear();
-    Add(device, numRenderTargets, renderTargetWidth, renderTargetHeight, 1);
+    Add(device, context, numRenderTargets, renderTargetWidth, renderTargetHeight, 1);
     if (numSamples > 1)
     {
-        Add(device, numRenderTargetsMsaa, renderTargetWidth, renderTargetHeight, numSamples);
+        Add(device, context, numRenderTargetsMsaa, renderTargetWidth, renderTargetHeight, numSamples);
     }
 }
 
 void SinkBufferResource::Clear()
 {
     m_textures.clear();
-    m_textureViews.clear();
-    m_shaderResources.clear();
+    m_renderTargetViews.clear();
+    m_shaderResourceViews.clear();
 
     m_texturesMsaa.clear();
-    m_textureViewsMsaa.clear();
-}
-
-void SinkBufferResource::SetArrayRegion(const std::vector<Diligent::IDeviceObject*>& views, size_t offset, size_t count)
-{
-    m_variable->SetArray(
-        views.data(),
-        static_cast<uint32_t>(offset),
-        static_cast<uint32_t>(count),
-        Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE
-    );
+    m_renderTargetViewsMsaa.clear();
 }
 } // namespace nc::graphics

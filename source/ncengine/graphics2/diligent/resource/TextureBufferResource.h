@@ -1,4 +1,5 @@
 #pragma once
+#include "ncengine/asset/AssetData.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
 #include "Graphics/GraphicsEngine/interface/RenderDevice.h"
@@ -9,22 +10,12 @@
 
 namespace nc
 {
-namespace asset
-{
-struct TextureWithId;
-} // namespace asset
-
 namespace graphics
 {
 class TextureBufferResource
 {
     public:
-        explicit TextureBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures)
-            : m_variable{&variable},
-              m_maxTextures{maxTextures}
-        {
-        }
-
+        explicit TextureBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures);
         static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
 
         void Load(std::span<const asset::TextureWithId> textures,
@@ -48,8 +39,7 @@ class TextureBufferResource
         std::vector<Diligent::IDeviceObject*> m_views;
         Diligent::IShaderResourceVariable* m_variable;
         uint32_t m_maxTextures;
-
-        void SetArrayRegion(size_t offset, size_t count);
+        bool m_initialLoadComplete;
 };
 } // namespace nc
 } // namespace graphics

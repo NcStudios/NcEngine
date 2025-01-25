@@ -24,6 +24,7 @@ class PassBackend
 {
     public:
         explicit PassBackend(Diligent::IRenderDevice& device,
+                             Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
                              ShaderFactory& shaderFactory,
                              ShaderBindings& shaderBindings,

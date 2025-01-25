@@ -50,7 +50,7 @@ class TextureBufferResourceTest : public DiligentEngineFixture
             FailIfHasErrorOutput();
         }
 
-        auto GetTextureView(uint32_t index) -> Diligent::ITextureView*
+        auto GetRenderTargetView(uint32_t index) -> Diligent::ITextureView*
         {
             return static_cast<Diligent::ITextureView*>(uut->GetShaderVariable().Get(index));
         }
@@ -96,8 +96,8 @@ TEST_F(TextureBufferResourceTest, Load_singleTexture_succeeds)
 {
     const auto& expectedTexture = imageTexture1;
     uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
-    const auto actualView = GetTextureView(0);
-    const auto endOfRange = GetTextureView(1);
+    const auto actualView = GetRenderTargetView(0);
+    const auto endOfRange = GetRenderTargetView(1);
     ASSERT_NE(actualView, nullptr);
     EXPECT_EQ(endOfRange, nullptr);
 
@@ -113,7 +113,7 @@ TEST_F(TextureBufferResourceTest, Load_normalMap_selectsCorrectFormat)
 {
     const auto& expectedTexture = normalTexture;
     uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
-    const auto loadedView = GetTextureView(0);
+    const auto loadedView = GetRenderTargetView(0);
     ASSERT_NE(loadedView, nullptr);
 
     const auto actualTexture = loadedView->GetTexture();
@@ -128,9 +128,9 @@ TEST_F(TextureBufferResourceTest, Load_existingTextures_appendsToArray)
     uut->Load(std::span{&expectedTexture1, 1}, engine->GetContext(), engine->GetDevice());
     uut->Load(std::span{&expectedTexture2, 1}, engine->GetContext(), engine->GetDevice());
 
-    const auto firstView = GetTextureView(0);
-    const auto secondView = GetTextureView(1);
-    const auto endOfRange = GetTextureView(2);
+    const auto firstView = GetRenderTargetView(0);
+    const auto secondView = GetRenderTargetView(1);
+    const auto endOfRange = GetRenderTargetView(2);
     ASSERT_NE(firstView, nullptr);
     ASSERT_NE(secondView, nullptr);
     EXPECT_EQ(endOfRange, nullptr);
@@ -158,7 +158,7 @@ TEST_F(TextureBufferResourceTest, Load_afterUnload_overwritesExisting)
     uut->Unload();
     uut->Load(overwriteTextures, engine->GetContext(), engine->GetDevice());
 
-    auto overwrittenView = GetTextureView(0);
+    auto overwrittenView = GetRenderTargetView(0);
     ASSERT_NE(overwrittenView, nullptr);
 
     const auto overwrittenTexture = overwrittenView->GetTexture();
