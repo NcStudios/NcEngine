@@ -44,12 +44,12 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    m_colorSinkBufferResource = std::make_unique<SinkBufferResource>(
+    m_offscreenColorResource = std::make_unique<SinkBufferResource>(
         GetVariable(colorSinkResourceDesc.shaderType, colorSinkResourceDesc.resourceKey.data(), m_srb),
         MakeColorSinkBufferDesc(colorSinkResourceDesc.maxElementCount)
     );
 
-    m_depthSinkBufferResource = std::make_unique<SinkBufferResource>(
+    m_offscreenDepthResource = std::make_unique<SinkBufferResource>(
         GetVariable(depthSinkResourceDesc.shaderType, depthSinkResourceDesc.resourceKey.data(), m_srb),
         MakeDepthSinkBufferDesc(depthSinkResourceDesc.maxElementCount)
     );
@@ -59,6 +59,9 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         GetVariable(sinkIndexResourceDesc.shaderType, sinkIndexResourceDesc.resourceKey.data(), m_srb)
     );
 }
+
+void PerPassResourceSignature::AddPostProcessResources(uint32_t count);
+
 
 PerPassResourceSignature::~PerPassResourceSignature() = default;
 } // namespace nc::graphics

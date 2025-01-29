@@ -1,8 +1,8 @@
 // Much credit given to: https://roystan.net/articles/outline-shader/
 
-Texture2D     PostProcessColorSinkBufferData[];
-Texture2D     PostProcessDepthSinkBufferData[];
-SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     ColorSinkBufferData[];
+Texture2D     DepthSinkBufferData[];
+SamplerState  ColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentBufferData
 {
@@ -101,10 +101,10 @@ float OutlineNormals(Texture2D normalsTex, SamplerState smplr, float2 LLUV, floa
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
-    SamplerState smplr = PostProcessColorSinkBufferData_sampler;
-    Texture2D depthTex = PostProcessDepthSinkBufferData[depthRT1];
-    Texture2D colorTex = PostProcessColorSinkBufferData[colorRT1];
-    Texture2D normalTex = PostProcessColorSinkBufferData[colorRT2];
+    SamplerState smplr = ColorSinkBufferData_sampler;
+    Texture2D depthTex = DepthSinkBufferData[depthRT1];
+    Texture2D colorTex = ColorSinkBufferData[colorRT1];
+    Texture2D normalTex = ColorSinkBufferData[colorRT2];
 
     // Get screen dimensions
     uint screenWidth, screenHeight;

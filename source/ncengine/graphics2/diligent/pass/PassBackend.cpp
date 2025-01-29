@@ -109,8 +109,8 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
       m_depthSinkCountMsaa{0u}
 {
     // Sink target buffers
-    auto& postProcessColorSinks = shaderBindings.GetPerPassSignature().GetColorSinkBufferResource();
-    auto& postProcessDepthSinks = shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource();
+    auto& postProcessColorSinks = shaderBindings.GetPerPassSignature().GetOffscreenColorResource();
+    auto& postProcessDepthSinks = shaderBindings.GetPerPassSignature().GetOffscreenDepthResource();
 
     m_staticMaterialPasses = MakeMaterialPasses
     (
@@ -225,8 +225,8 @@ void PassBackend::RenderMaterial(Diligent::IDeviceContext& context,
         skinnedPassBatches
     );
 
-    auto& colorSinkBuffer = perPassResourceSignature.GetColorSinkBufferResource();
-    auto& depthSinkBuffer = perPassResourceSignature.GetDepthSinkBufferResource();
+    auto& colorSinkBuffer = perPassResourceSignature.GetOffscreenColorResource();
+    auto& depthSinkBuffer = perPassResourceSignature.GetOffscreenDepthResource();
 
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
@@ -253,8 +253,8 @@ void PassBackend::RenderWireframe(Diligent::IDeviceContext& context,
         return;
     }
 
-    auto& colorSinkBuffer = perPassResourceSignature.GetColorSinkBufferResource();
-    auto& depthSinkBuffer = perPassResourceSignature.GetDepthSinkBufferResource();
+    auto& colorSinkBuffer = perPassResourceSignature.GetOffscreenColorResource();
+    auto& depthSinkBuffer = perPassResourceSignature.GetOffscreenDepthResource();
 
     BindRenderTarget(context, swapChain, colorSinkBuffer, depthSinkBuffer, m_wireframePass->colorRTIndex, m_wireframePass->depthRTIndex, m_numSamples > 1);
     context.SetPipelineState(m_wireframePass->pso);
@@ -288,8 +288,8 @@ void PassBackend::RenderParticle(Diligent::IDeviceContext& context,
     }
 
     BindRenderTarget(context, swapChain,
-                     perPassResourceSignature.GetColorSinkBufferResource(),
-                     perPassResourceSignature.GetDepthSinkBufferResource(),
+                     perPassResourceSignature.GetOffscreenColorResource(),
+                     perPassResourceSignature.GetOffscreenDepthResource(),
                      m_particlePass->colorRTIndex,
                      m_particlePass->depthRTIndex,
                      m_numSamples > 1);
@@ -317,8 +317,8 @@ void PassBackend::RenderPostProcess(Diligent::IDeviceContext& context,
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = Diligent::DrawAttribs{4, Diligent::DRAW_FLAG_VERIFY_ALL};
     auto& propertyBuffer = perFrameResourceSignature.GetPostProcessPropertyBuffer();
-    auto& colorSinkBuffer = perPassResourceSignature.GetColorSinkBufferResource();
-    auto& depthSinkBuffer = perPassResourceSignature.GetDepthSinkBufferResource();
+    auto& colorSinkBuffer = perPassResourceSignature.GetOffscreenColorResource();
+    auto& depthSinkBuffer = perPassResourceSignature.GetOffscreenDepthResource();
     auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
 
     // If MSAA samples are set to be greater than 1 in the config, all PassType::Material, PassType::SkinnedMaterial and PassType::Misc passes are multisampled.

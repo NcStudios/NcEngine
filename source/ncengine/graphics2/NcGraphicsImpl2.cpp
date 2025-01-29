@@ -450,8 +450,8 @@ void NcGraphicsImpl2::Resize()
     const auto width = static_cast<uint32_t>(m_dimensions.x);
     const auto height = static_cast<uint32_t>(m_dimensions.y);
     m_engine.GetSwapChain().Resize(width, height);
-    m_shaderBindings.GetPerPassSignature().GetColorSinkBufferResource().Resize(m_engine.GetDevice(), m_engine.GetContext(), width, height, m_numSamples);
-    m_shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource().Resize(m_engine.GetDevice(),  m_engine.GetContext(), width, height, m_numSamples);
+    m_shaderBindings.GetPerPassSignature().GetOffscreenColorResource().Resize(m_engine.GetDevice(), m_engine.GetContext(), width, height, m_numSamples);
+    m_shaderBindings.GetPerPassSignature().GetOffscreenDepthResource().Resize(m_engine.GetDevice(),  m_engine.GetContext(), width, height, m_numSamples);
     m_resizeNeeded = false;
 }
 } // namespace graphics

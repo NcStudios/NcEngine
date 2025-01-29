@@ -1,8 +1,8 @@
 // Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 
-Texture2D     PostProcessColorSinkBufferData[];
-Texture2D     PostProcessDepthSinkBufferData[];
-SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     ColorSinkBufferData[];
+Texture2D     DepthSinkBufferData[];
+SamplerState  ColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentBufferData
 {
@@ -49,8 +49,8 @@ static float SubpixelQuality = 0.75f;
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
-    SamplerState smplr = PostProcessColorSinkBufferData_sampler;
-    Texture2D colorTex = PostProcessColorSinkBufferData[colorRT1];
+    SamplerState smplr = ColorSinkBufferData_sampler;
+    Texture2D colorTex = ColorSinkBufferData[colorRT1];
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
 
     // Get screen dimensions
