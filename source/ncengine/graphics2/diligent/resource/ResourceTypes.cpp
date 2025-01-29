@@ -25,7 +25,7 @@ auto ToCommonShaderType(Diligent::SHADER_TYPE shaderType) -> Diligent::SHADER_TY
 
 namespace nc::graphics
 {
-auto ToPipelineResourceDesc(const UniformBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc
+auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc
     {
@@ -36,7 +36,7 @@ auto ToPipelineResourceDesc(const UniformBufferResourceDesc& resourceDesc) -> Di
     };
 }
 
-auto ToPipelineResourceDesc(const StructuredBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc
+auto ToPipelineResourceDesc(const StructuredBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc
     {
@@ -49,7 +49,7 @@ auto ToPipelineResourceDesc(const StructuredBufferResourceDesc& resourceDesc) ->
     };
 }
 
-auto ToPipelineResourceDesc(const TextureBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc
+auto ToPipelineResourceDesc(const TextureBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc
 {
     return Diligent::PipelineResourceDesc{
         resourceDesc.shaderType,

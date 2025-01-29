@@ -15,30 +15,30 @@
 
 namespace nc::graphics
 {
-struct StructuredBufferResourceDesc
+struct StructuredBufferDesc
 {
-    std::string resourceKey = "UninitializedStructuredBufferResourceDesc";
+    std::string resourceKey = "UninitializedStructuredBufferDesc";
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
     uint32_t maxElementCount = 1u;
     uint32_t initialElementCount = 1u;
 };
 
-struct TextureBufferResourceDesc
+struct TextureBufferDesc
 {
-    std::string resourceKey = "UninitializedTextureBufferResourceDesc";
+    std::string resourceKey = "UninitializedTextureBufferDesc";
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
     uint32_t maxElementCount = 1u;
 };
 
-struct UniformBufferResourceDesc
+struct UniformBufferDesc
 {
-    std::string resourceKey = "UninitializedUniformBufferResourceDesc";
+    std::string resourceKey = "UninitializedUniformBufferDesc";
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
 };
 
-auto ToPipelineResourceDesc(const UniformBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
-auto ToPipelineResourceDesc(const TextureBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
-auto ToPipelineResourceDesc(const StructuredBufferResourceDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const TextureBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const StructuredBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
 
 auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::IShaderResourceBinding* srb) -> Diligent::IShaderResourceVariable&;
 

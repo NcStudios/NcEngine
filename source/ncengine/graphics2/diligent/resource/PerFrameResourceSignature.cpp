@@ -14,17 +14,17 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      Diligent::IRenderDevice& device,
                                                      std::string_view signatureName,
                                                      uint8_t bindingIndex,
-                                                     const StructuredBufferResourceDesc& transformResourceDesc,
-                                                     const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
-                                                     const StructuredBufferResourceDesc& skinnedMeshInstanceResourceDesc,
-                                                     const StructuredBufferResourceDesc& lightResourceDesc,
-                                                     const StructuredBufferResourceDesc& materialResourceDesc,
-                                                     const StructuredBufferResourceDesc& boneResourceDesc,
-                                                     const StructuredBufferResourceDesc& particleResourceDesc,
-                                                     const TextureBufferResourceDesc& textureResourceDesc,
-                                                     const UniformBufferResourceDesc& environmentResourceDesc,
-                                                     const UniformBufferResourceDesc& wireframeResourceDesc,
-                                                     const UniformBufferResourceDesc& outlinePassPropertiesDesc)
+                                                     const StructuredBufferDesc& transformResourceDesc,
+                                                     const StructuredBufferDesc& staticMeshInstanceResourceDesc,
+                                                     const StructuredBufferDesc& skinnedMeshInstanceResourceDesc,
+                                                     const StructuredBufferDesc& lightResourceDesc,
+                                                     const StructuredBufferDesc& materialResourceDesc,
+                                                     const StructuredBufferDesc& boneResourceDesc,
+                                                     const StructuredBufferDesc& particleResourceDesc,
+                                                     const TextureBufferDesc& textureResourceDesc,
+                                                     const UniformBufferDesc& environmentResourceDesc,
+                                                     const UniformBufferDesc& wireframeResourceDesc,
+                                                     const UniformBufferDesc& outlinePassPropertiesDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),

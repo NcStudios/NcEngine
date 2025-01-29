@@ -20,7 +20,7 @@ struct TransformData
     float4x4 model;
 };
 
-StructuredBuffer<TransformData> TransformBufferData;
+StructuredBuffer<TransformData> Transforms;
 
 struct StaticMeshInstanceData
 {
@@ -28,9 +28,9 @@ struct StaticMeshInstanceData
     uint materialIndex;
 };
 
-StructuredBuffer<StaticMeshInstanceData> StaticInstanceBufferData;
+StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -41,12 +41,12 @@ cbuffer EnvironmentBufferData
 };
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
-    uint transformIndex = StaticInstanceBufferData[InstanceID].transformIndex;
-    uint materialIndex = StaticInstanceBufferData[InstanceID].materialIndex;
-    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), TransformBufferData[transformIndex].model);
+    uint transformIndex = StaticInstances[InstanceID].transformIndex;
+    uint materialIndex = StaticInstances[InstanceID].materialIndex;
+    float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].model, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
+    PSIn.Normal = normalize(mul(Transforms[transformIndex].model, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
     PSIn.WorldPos = TransformedPos.xyz;
     PSIn.MaterialIndex = materialIndex;
 }

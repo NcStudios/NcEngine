@@ -1,10 +1,10 @@
 // Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 
-Texture2D     ColorSinkBufferData[];
-Texture2D     DepthSinkBufferData[];
-SamplerState  ColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -14,7 +14,7 @@ cbuffer EnvironmentBufferData
     float farClip;
 };
 
-cbuffer PostProcessSinkIndexBufferData
+cbuffer SinkIndices
 {
     uint colorRT1;
     uint colorRT2;
@@ -49,8 +49,8 @@ static float SubpixelQuality = 0.75f;
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
-    SamplerState smplr = ColorSinkBufferData_sampler;
-    Texture2D colorTex = ColorSinkBufferData[colorRT1];
+    SamplerState smplr = ColorSinks_sampler;
+    Texture2D colorTex = ColorSinks[colorRT1];
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
 
     // Get screen dimensions

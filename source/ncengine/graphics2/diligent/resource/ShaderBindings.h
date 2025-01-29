@@ -24,25 +24,25 @@ class ShaderBindings
                 context, device,
                 "PerFrameResourceSignature",
                 0,
-                StructuredBufferResourceDesc{"TransformBufferData",        Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
-                StructuredBufferResourceDesc{"StaticInstanceBufferData",   Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
-                StructuredBufferResourceDesc{"SkinnedInstanceBufferData",  Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
-                StructuredBufferResourceDesc{"LightBufferData",            Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  GetTotalLightCount(memorySettings),  GetTotalLightCount(memorySettings)},
-                StructuredBufferResourceDesc{"MaterialBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
-                StructuredBufferResourceDesc{"BoneBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_VERTEX, memorySettings.maxBones,             memorySettings.maxBones / 4},
-                StructuredBufferResourceDesc{"ParticleBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,         memorySettings.maxParticles / 4},
-                TextureBufferResourceDesc{"TextureBufferData",             Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
-                UniformBufferResourceDesc{"EnvironmentBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
-                UniformBufferResourceDesc{"WireframeBufferData",           Diligent::SHADER_TYPE::SHADER_TYPE_VS_PS},
-                UniformBufferResourceDesc{"OutlinePassBufferData",         Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
+                StructuredBufferDesc{"Transforms",         Diligent::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
+                StructuredBufferDesc{"StaticInstances",    Diligent::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
+                StructuredBufferDesc{"SkinnedInstances",   Diligent::SHADER_TYPE_VERTEX, memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
+                StructuredBufferDesc{"Lights",             Diligent::SHADER_TYPE_VS_PS,  GetTotalLightCount(memorySettings),  GetTotalLightCount(memorySettings)},
+                StructuredBufferDesc{"Materials",          Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxRenderers,         memorySettings.maxRenderers / 2},
+                StructuredBufferDesc{"Bones",              Diligent::SHADER_TYPE_VERTEX, memorySettings.maxBones,             memorySettings.maxBones / 4},
+                StructuredBufferDesc{"Particles",          Diligent::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,         memorySettings.maxParticles / 4},
+                TextureBufferDesc{"Textures",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
+                UniformBufferDesc{"EnvironmentProperties", Diligent::SHADER_TYPE_VS_PS},
+                UniformBufferDesc{"WireframeProperties",   Diligent::SHADER_TYPE_VS_PS},
+                UniformBufferDesc{"OutlinePassProperties", Diligent::SHADER_TYPE_PIXEL}
               },
               m_perPassSignature{
                 device, context,
                 "PerPassResourceSignature",
                 1,
-                TextureBufferResourceDesc{"ColorSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 5},
-                TextureBufferResourceDesc{"DepthSinkBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL, 2},
-                UniformBufferResourceDesc{"PostProcessSinkIndexBufferData", Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL}
+                TextureBufferDesc{"ColorSinks", Diligent::SHADER_TYPE_PIXEL, 20},
+                TextureBufferDesc{"DepthSinks", Diligent::SHADER_TYPE_PIXEL, 20},
+                UniformBufferDesc{"SinkIndices", Diligent::SHADER_TYPE_PIXEL}
             }
         {
         }
