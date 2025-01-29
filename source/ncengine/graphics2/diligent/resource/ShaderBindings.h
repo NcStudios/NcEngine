@@ -33,7 +33,7 @@ class ShaderBindings
                 StructuredBufferDesc{"Particles",          Diligent::SHADER_TYPE_VS_PS,  memorySettings.maxParticles,         memorySettings.maxParticles / 4},
                 TextureBufferDesc{"Textures",              Diligent::SHADER_TYPE_PIXEL,  memorySettings.maxTextures},
                 UniformBufferDesc{"EnvironmentProperties", Diligent::SHADER_TYPE_VS_PS},
-                UniformBufferDesc{"Wireframes",            Diligent::SHADER_TYPE_VS_PS},
+                UniformBufferDesc{"WireframeProperties",   Diligent::SHADER_TYPE_VS_PS},
                 UniformBufferDesc{"OutlinePassProperties", Diligent::SHADER_TYPE_PIXEL}
               },
               m_perPassSignature{

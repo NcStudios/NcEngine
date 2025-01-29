@@ -16,7 +16,7 @@ cbuffer EnvironmentProperties
     uint lightCount;
 };
 
-cbuffer Wireframes
+cbuffer WireframeProperties
 {
     float4x4 wireframeModelMatrix;
     float4 wireframeColor;
