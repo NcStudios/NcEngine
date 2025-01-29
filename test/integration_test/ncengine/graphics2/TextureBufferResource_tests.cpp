@@ -23,7 +23,7 @@ class TextureBufferResourceTest : public DiligentEngineFixture
         TextureBufferResourceTest()
         {
             constexpr auto variableName = "testTexture";
-            const auto resourceDesc = nc::graphics::TextureBufferResourceDesc{
+            const auto resourceDesc = nc::graphics::TextureBufferDesc{
                 .resourceKey = variableName,
                 .shaderType = Diligent::SHADER_TYPE_PIXEL,
                 .maxElementCount = maxTextures

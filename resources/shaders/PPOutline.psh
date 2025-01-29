@@ -1,10 +1,10 @@
 // Much credit given to: https://roystan.net/articles/outline-shader/
 
-Texture2D     PostProcessColorSinkBufferData[];
-Texture2D     PostProcessDepthSinkBufferData[];
-SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -14,7 +14,7 @@ cbuffer EnvironmentBufferData
     float farClip;
 };
 
-cbuffer PostProcessSinkIndexBufferData
+cbuffer SinkIndices
 {
     uint colorRT1;
     uint colorRT2;
@@ -26,7 +26,7 @@ cbuffer PostProcessSinkIndexBufferData
     uint depthRT4;
 };
 
-cbuffer OutlinePassBufferData
+cbuffer OutlinePassProperties
 {
     float3 outlineColor;
     float outlineWidth;
@@ -101,10 +101,10 @@ float OutlineNormals(Texture2D normalsTex, SamplerState smplr, float2 LLUV, floa
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
-    SamplerState smplr = PostProcessColorSinkBufferData_sampler;
-    Texture2D depthTex = PostProcessDepthSinkBufferData[depthRT1];
-    Texture2D colorTex = PostProcessColorSinkBufferData[colorRT1];
-    Texture2D normalTex = PostProcessColorSinkBufferData[colorRT2];
+    SamplerState smplr = ColorSinks_sampler;
+    Texture2D depthTex = DepthSinks[depthRT1];
+    Texture2D colorTex = ColorSinks[colorRT1];
+    Texture2D normalTex = ColorSinks[colorRT2];
 
     // Get screen dimensions
     uint screenWidth, screenHeight;

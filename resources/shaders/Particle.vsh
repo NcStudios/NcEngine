@@ -12,7 +12,7 @@ struct PSOutput
     uint   TextureIndex;
 };
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -28,11 +28,11 @@ struct ParticleData
     uint textureIndex;
 };
 
-StructuredBuffer<ParticleData> ParticleBufferData;
+StructuredBuffer<ParticleData> Particles;
 
 void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSOutput PSOut)
 {
-    ParticleData particle = ParticleBufferData[InstanceID];
+    ParticleData particle = Particles[InstanceID];
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), particle.model);
     PSOut.Pos = mul(TransformedPos, cameraViewProjection);
     PSOut.UV = VSIn.UV;

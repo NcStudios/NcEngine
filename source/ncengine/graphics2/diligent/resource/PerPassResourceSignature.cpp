@@ -12,9 +12,9 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    Diligent::IDeviceContext& context,
                                                    std::string_view signatureName,
                                                    uint8_t bindingIndex,
-                                                   const TextureBufferResourceDesc& colorSinkResourceDesc,
-                                                   const TextureBufferResourceDesc& depthSinkResourceDesc,
-                                                   const UniformBufferResourceDesc& sinkIndexResourceDesc)
+                                                   const TextureBufferDesc& colorSinkResourceDesc,
+                                                   const TextureBufferDesc& depthSinkResourceDesc,
+                                                   const UniformBufferDesc& sinkIndexResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(colorSinkResourceDesc),

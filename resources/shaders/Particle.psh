@@ -10,10 +10,10 @@ struct PSOutput
     float4 Color : SV_TARGET;
 };
 
-Texture2D     TextureBufferData[];
-SamplerState  TextureBufferData_sampler;
+Texture2D     Textures[];
+SamplerState  Textures_sampler;
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    PSOut.Color = TextureBufferData[PSIn.TextureIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+    PSOut.Color = Textures[PSIn.TextureIndex].Sample(Textures_sampler, PSIn.UV);
 }

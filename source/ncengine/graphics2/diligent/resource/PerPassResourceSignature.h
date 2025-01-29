@@ -21,9 +21,9 @@ class PerPassResourceSignature
                                           Diligent::IDeviceContext& context,
                                           std::string_view signatureName,
                                           uint8_t bindingIndex,
-                                          const TextureBufferResourceDesc& colorRTResourceDesc,
-                                          const TextureBufferResourceDesc& depthRTResourceDesc,
-                                          const UniformBufferResourceDesc& sinkIndexDesc);
+                                          const TextureBufferDesc& colorRTResourceDesc,
+                                          const TextureBufferDesc& depthRTResourceDesc,
+                                          const UniformBufferDesc& sinkIndexDesc);
 
         ~PerPassResourceSignature() noexcept;
 
