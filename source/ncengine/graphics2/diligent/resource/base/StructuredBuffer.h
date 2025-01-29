@@ -52,7 +52,7 @@ class StructuredBuffer : public StructuredBufferBase
         explicit StructuredBuffer(Diligent::IDeviceContext& context,
                                   Diligent::IRenderDevice& device,
                                   Diligent::IShaderResourceVariable& variable,
-                                  const StructuredBufferResourceDesc& resourceDesc)
+                                  const StructuredBufferDesc& resourceDesc)
             : StructuredBufferBase{resourceDesc.resourceKey, variable, resourceDesc.maxElementCount, resourceDesc.initialElementCount}
         {
             CreateBuffer(context, device, resourceDesc.initialElementCount);

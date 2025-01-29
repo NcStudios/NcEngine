@@ -108,8 +108,8 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
       m_depthSinkCountMsaa{0u}
 {
     // Sink target buffers
-    auto& postProcessColorSinks = shaderBindings.GetPerPassSignature().GetColorSinkBufferResource();
-    auto& postProcessDepthSinks = shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource();
+    auto& ColorSinks = shaderBindings.GetPerPassSignature().GetColorSinkBufferResource();
+    auto& depthSinks = shaderBindings.GetPerPassSignature().GetDepthSinkBufferResource();
 
     m_staticMaterialPasses = MakeMaterialPasses
     (
@@ -173,15 +173,15 @@ PassBackend::PassBackend(Diligent::IRenderDevice& device,
     m_finalPass = std::make_unique<PostProcessPass>(MakePostProcessPass(device, swapChain, shaderFactory, shaderBindings, finalPass));
 
     // Make all the off screen render targets that will be used by the passes
-    postProcessColorSinks.Add(device, passManifest.ColorSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
-    postProcessDepthSinks.Add(device, passManifest.DepthSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
+    ColorSinks.Add(device, passManifest.ColorSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
+    depthSinks.Add(device, passManifest.DepthSinkCount(), swapChain.GetDesc().Width, swapChain.GetDesc().Height);
 
     if (m_numSamples > 1)
     {
         m_colorSinkCountMsaa = passManifest.ColorSinkCountMsaa();
         m_depthSinkCountMsaa = passManifest.DepthSinkCountMsaa();
-        postProcessColorSinks.Add(device, m_colorSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
-        postProcessDepthSinks.Add(device, m_depthSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
+        ColorSinks.Add(device, m_colorSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
+        depthSinks.Add(device, m_depthSinkCountMsaa, swapChain.GetDesc().Width, swapChain.GetDesc().Height, m_numSamples);
     }
 }
 

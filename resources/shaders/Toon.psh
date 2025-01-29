@@ -5,10 +5,10 @@
 
 #include "Lighting.fxh"
 
-Texture2D     TextureBufferData[];
-SamplerState  TextureBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     Textures[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -30,8 +30,8 @@ struct MaterialData
     float padding3;
 };
 
-StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
-StructuredBuffer<LightData> LightBufferData : register(t2);
+StructuredBuffer<MaterialData> Materials : register(t1);
+StructuredBuffer<LightData> Lights : register(t2);
 
 struct PSInput 
 { 
@@ -67,14 +67,14 @@ float LightBand(float lightAmount)
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
-    uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
-    Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+    uint TexIndex = Materials[PSIn.MaterialIndex].diffuseTexture;
+    Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
     float alpha = Color.a;
     float3 finalColor = {0.0f, 0.0f, 0.0f};
 
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
         finalColor += influence.color * LightBand(influence.specularAmt + influence.diffuseAmt);
     }
 

@@ -5,10 +5,10 @@
 
 #include "Lighting.fxh"
 
-Texture2D     TextureBufferData[];
-SamplerState  TextureBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     Textures[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -30,7 +30,7 @@ struct MaterialData
     float padding3;
 };
 
-StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
+StructuredBuffer<MaterialData> Materials : register(t1);
 
 struct PSInput 
 { 
@@ -49,9 +49,9 @@ struct PSOutput
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
-    uint normalIndex = MaterialBufferData[PSIn.MaterialIndex].normalIndex;
-    Color = TextureBufferData[normalIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+    uint normalIndex = Materials[PSIn.MaterialIndex].normalIndex;
+    Color = Textures[normalIndex].Sample(Textures_sampler, PSIn.UV);
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-    float3 adjustedNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity;
+    float3 adjustedNormals = PSIn.Normal * Materials[PSIn.MaterialIndex].normalIntensity;
     PSOut.Color = float4(adjustedNormals, 1-dot(PSIn.Normal, -viewDir));
 }

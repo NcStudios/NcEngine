@@ -3,11 +3,11 @@
 #   define NonUniformResourceIndex(x) x
 #endif
 
-Texture2D     PostProcessColorSinkBufferData[];
-Texture2D     PostProcessDepthSinkBufferData[];
-SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer PostProcessSinkIndexBufferData
+cbuffer SinkIndices
 {
     uint colorRT1;
     uint colorRT2;
@@ -32,5 +32,5 @@ struct PSOutput
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    PSOut.Color = PostProcessColorSinkBufferData[colorRT1].Sample(PostProcessColorSinkBufferData_sampler, PSIn.UV);;
+    PSOut.Color = ColorSinks[colorRT1].Sample(ColorSinks_sampler, PSIn.UV);;
 }

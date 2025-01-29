@@ -8,7 +8,7 @@ struct PSInput
     float4 Pos : SV_POSITION;
 };
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -16,7 +16,7 @@ cbuffer EnvironmentBufferData
     uint lightCount;
 };
 
-cbuffer WireframeBufferData
+cbuffer Wireframes
 {
     float4x4 wireframeModelMatrix;
     float4 wireframeColor;

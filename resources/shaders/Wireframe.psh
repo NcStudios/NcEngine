@@ -1,4 +1,4 @@
-cbuffer WireframeBufferData
+cbuffer Wireframes
 {
     float4x4 wireframeModelMatrix;
     float4 wireframeColor;

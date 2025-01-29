@@ -23,7 +23,7 @@ struct TransformData
     float4x4 modelMatrix;
 };
 
-StructuredBuffer<TransformData> TransformBufferData;
+StructuredBuffer<TransformData> Transforms;
 
 // todo: #802 Define this at compile time
 #define ENABLE_SKINNING 1
@@ -37,17 +37,17 @@ struct SkinnedMeshInstanceData
     uint boneIndex;
 };
 
-StructuredBuffer<SkinnedMeshInstanceData> SkinnedInstanceBufferData;
+StructuredBuffer<SkinnedMeshInstanceData> SkinnedInstances;
 
 #define INSTANCE_DATA SkinnedMeshInstanceData
-#define INSTANCE_BUFFER SkinnedInstanceBufferData
+#define INSTANCE_BUFFER SkinnedInstances
 
 struct BoneData
 {
     float4x4 animatedBoneMatrix;
 };
 
-StructuredBuffer<BoneData> BoneBufferData;
+StructuredBuffer<BoneData> Bones;
 
 bool IsValidBoneIndex(uint boneIndex)
 {
@@ -70,7 +70,7 @@ float4x4 CombineBoneMatrices(uint base, uint4 boneOffsets, float4 boneWeights)
     {
         if (boneWeights[i] > 0.0f)
         {
-            boneTransform += BoneBufferData[base + boneOffsets[i]].animatedBoneMatrix * boneWeights[i];
+            boneTransform += Bones[base + boneOffsets[i]].animatedBoneMatrix * boneWeights[i];
         }
     }
 
@@ -85,14 +85,14 @@ struct StaticMeshInstanceData
     uint materialIndex;
 };
 
-StructuredBuffer<StaticMeshInstanceData> StaticInstanceBufferData;
+StructuredBuffer<StaticMeshInstanceData> StaticInstances;
 
 #define INSTANCE_DATA StaticMeshInstanceData
-#define INSTANCE_BUFFER StaticInstanceBufferData
+#define INSTANCE_BUFFER StaticInstances
 
 #endif // ENABLE_SKINNING
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -121,10 +121,10 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 #endif // ENABLE_SKINNING
 
     uint transformIndex = instance.transformIndex;
-    float4 worldPos = mul(pos, TransformBufferData[transformIndex].modelMatrix);
+    float4 worldPos = mul(pos, Transforms[transformIndex].modelMatrix);
     PSIn.Pos = mul(worldPos, cameraViewProjection);
     PSIn.UV = VSIn.UV;
-    PSIn.Normal = normalize(mul(TransformBufferData[transformIndex].modelMatrix, normal)); // @TODO #805, compute inverse model matrix CPU-side
+    PSIn.Normal = normalize(mul(Transforms[transformIndex].modelMatrix, normal)); // @TODO #805, compute inverse model matrix CPU-side
     PSIn.WorldPos = worldPos.xyz;
     PSIn.MaterialIndex = instance.materialIndex;
 }
