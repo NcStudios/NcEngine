@@ -7,6 +7,7 @@
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/config/Config.h"
+#include "ncengine/physics/PhysicsAnimator.h"
 #include "ncengine/time/Time.h"
 #include "ncengine/utility/Log.h"
 
@@ -35,6 +36,7 @@ class NcPhysicsStub : public nc::NcPhysics
         void Tick(uint32_t) override {}
         void SyncTransforms() override {}
         void SyncTransformsInterpolated(float) override {}
+        void SyncTransforms(nc::PhysicsAnimator&) override {}
         void DispatchAccumulatedEvents() override {}
         void SaveSnapshot(nc::PhysicsSnapshot&) {}
         auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
@@ -223,6 +225,40 @@ void NcPhysicsImpl::SyncTransformsInterpolated(float factor)
         const auto& assemblies = vehicle->GetWheelAssemblies();
         const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
         AnimateVehicle(assemblies, constraint, transformPool);
+    }
+}
+
+void NcPhysicsImpl::SyncTransforms(PhysicsAnimator& animator)
+{
+    NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
+    for (auto& body : m_ecs.GetAll<RigidBody>())
+    {
+        if (body.GetBodyType() == BodyType::Static)
+        {
+            continue;
+        }
+
+        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
+        if (!apiBody->IsActive())
+        {
+            continue;
+        }
+
+        const auto position = ToXMVectorHomogeneous(apiBody->GetPosition());
+        const auto orientation = ToXMQuaternion(apiBody->GetRotation());
+        animator.Animate(body.GetEntity(), position, orientation);
+    }
+
+    for (const auto& vehicle : m_vehicleManager.GetVehicles())
+    {
+        if (!vehicle->IsEnabled())
+        {
+            continue;
+        }
+
+        const auto& assemblies = vehicle->GetWheelAssemblies();
+        const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
+        AnimateVehicle(assemblies, constraint, animator);
     }
 }
 

@@ -9,9 +9,18 @@ namespace JPH
 class VehicleConstraint;
 } // namespace JPH
 
-namespace nc::physics
+namespace nc
+{
+class PhysicsAnimator;
+
+namespace physics
 {
 void AnimateVehicle(std::span<const WheelAssembly> assemblies,
                     const JPH::VehicleConstraint& constraint,
                     ecs::ComponentPool<Transform>& transformPool);
-} // namespace nc::physics
+
+void AnimateVehicle(std::span<const WheelAssembly> assemblies,
+                    const JPH::VehicleConstraint& constraint,
+                    PhysicsAnimator& animator);
+} // namespace physics
+} // namespace nc

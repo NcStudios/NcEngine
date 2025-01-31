@@ -1,6 +1,7 @@
 #include "VehicleAnimator.h"
-
 #include "Conversion.h"
+
+#include "ncengine/physics/PhysicsAnimator.h"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Vehicle/VehicleConstraint.h"
@@ -10,7 +11,7 @@ namespace
 {
 using namespace DirectX;
 
-auto GetWheelRotation(const JPH::Wheel& wheel) -> XMVECTOR
+auto CalculateWheelRotation(const JPH::Wheel& wheel) -> XMVECTOR
 {
     const auto* settings = wheel.GetSettings();
     const auto right = nc::physics::ToXMVector(settings->mWheelUp.Cross(settings->mWheelForward).Normalized());
@@ -34,7 +35,7 @@ void AnimateWheel(nc::Transform& transform,
 {
     transform.SetPositionAndRotationXM(
         CalculateWheelPosition(wheel),
-        GetWheelRotation(wheel)
+        CalculateWheelRotation(wheel)
     );
 }
 } // anonymous namespace
@@ -55,6 +56,26 @@ void AnimateVehicle(std::span<const WheelAssembly> assemblies,
         if (right.IsEnabled() && right.target.Valid())
         {
             AnimateWheel(transforms.Get(right.target), *constraint.GetWheel(right.id));
+        }
+    }
+}
+
+void AnimateVehicle(std::span<const WheelAssembly> assemblies,
+                    const JPH::VehicleConstraint& constraint,
+                    PhysicsAnimator& animator)
+{
+    for (const auto& [left, right, _1, _2, _3] : assemblies)
+    {
+        if (left.IsEnabled() && left.target.Valid())
+        {
+            const auto& wheel = *constraint.GetWheel(left.id);
+            animator.Animate(left.target, CalculateWheelPosition(wheel), CalculateWheelRotation(wheel));
+        }
+
+        if (right.IsEnabled() && right.target.Valid())
+        {
+            const auto& wheel = *constraint.GetWheel(right.id);
+            animator.Animate(right.target, CalculateWheelPosition(wheel), CalculateWheelRotation(wheel));
         }
     }
 }

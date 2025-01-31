@@ -50,6 +50,7 @@ class NcPhysicsImpl final : public NcPhysics
         void Tick(uint32_t steps = 0) override;
         void SyncTransforms() override;
         void SyncTransformsInterpolated(float factor) override;
+        void SyncTransforms(PhysicsAnimator& animator) override;
         void DispatchAccumulatedEvents() override;
         void SaveSnapshot(PhysicsSnapshot& snapshot) override;
         auto RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool override;
