@@ -21,6 +21,11 @@ void AnimateVehicle(std::span<const WheelAssembly> assemblies,
 
 void AnimateVehicle(std::span<const WheelAssembly> assemblies,
                     const JPH::VehicleConstraint& constraint,
+                    ecs::ComponentPool<Transform>& transformPool,
+                    float lerpFactor);
+
+void AnimateVehicle(std::span<const WheelAssembly> assemblies,
+                    const JPH::VehicleConstraint& constraint,
                     PhysicsAnimator& animator);
 } // namespace physics
 } // namespace nc

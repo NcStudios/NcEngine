@@ -224,7 +224,7 @@ void NcPhysicsImpl::SyncTransformsInterpolated(float factor)
 
         const auto& assemblies = vehicle->GetWheelAssemblies();
         const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
-        AnimateVehicle(assemblies, constraint, transformPool);
+        AnimateVehicle(assemblies, constraint, transformPool, factor);
     }
 }
 

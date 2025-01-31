@@ -38,6 +38,18 @@ void AnimateWheel(nc::Transform& transform,
         CalculateWheelRotation(wheel)
     );
 }
+
+void AnimateWheel(nc::Transform& transform,
+                  const JPH::Wheel& wheel,
+                  float lerpFactor)
+{
+    const auto& currentPosition = transform.LocalPositionXM();
+    const auto& currentRotation = transform.LocalRotationXM();
+    transform.SetPositionAndRotationXM(
+        XMVectorLerp(currentPosition, CalculateWheelPosition(wheel), lerpFactor),
+        XMQuaternionSlerp(currentRotation, CalculateWheelRotation(wheel), lerpFactor)
+    );
+}
 } // anonymous namespace
 
 namespace nc::physics
@@ -56,6 +68,25 @@ void AnimateVehicle(std::span<const WheelAssembly> assemblies,
         if (right.IsEnabled() && right.target.Valid())
         {
             AnimateWheel(transforms.Get(right.target), *constraint.GetWheel(right.id));
+        }
+    }
+}
+
+void AnimateVehicle(std::span<const WheelAssembly> assemblies,
+                    const JPH::VehicleConstraint& constraint,
+                    ecs::ComponentPool<Transform>& transforms,
+                    float lerpFactor)
+{
+    for (const auto& [left, right, _1, _2, _3] : assemblies)
+    {
+        if (left.IsEnabled() && left.target.Valid())
+        {
+            AnimateWheel(transforms.Get(left.target), *constraint.GetWheel(left.id), lerpFactor);
+        }
+
+        if (right.IsEnabled() && right.target.Valid())
+        {
+            AnimateWheel(transforms.Get(right.target), *constraint.GetWheel(right.id), lerpFactor);
         }
     }
 }
