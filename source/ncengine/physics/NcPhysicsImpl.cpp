@@ -34,6 +34,7 @@ class NcPhysicsStub : public nc::NcPhysics
         void ResetTick(nc::PhysicsTick) override {}
         void Tick(uint32_t) override {}
         void SyncTransforms() override {}
+        void SyncTransformsInterpolated(float) override {}
         void DispatchAccumulatedEvents() override {}
         void SaveSnapshot(nc::PhysicsSnapshot&) {}
         auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
@@ -151,6 +152,7 @@ void NcPhysicsImpl::Tick(uint32_t steps)
 void NcPhysicsImpl::SyncTransforms()
 {
     NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
+    auto& transformPool = m_ecs.GetPool<Transform>();
     for (auto& body : m_ecs.GetAll<RigidBody>())
     {
         if (body.GetBodyType() == BodyType::Static)
@@ -166,11 +168,51 @@ void NcPhysicsImpl::SyncTransforms()
 
         const auto position = ToXMVectorHomogeneous(apiBody->GetPosition());
         const auto orientation = ToXMQuaternion(apiBody->GetRotation());
-        auto& transform = m_ecs.Get<Transform>(body.GetEntity());
+        auto& transform = transformPool.Get(body.GetEntity());
         transform.SetPositionAndRotationXM(position, orientation);
     }
 
+    for (const auto& vehicle : m_vehicleManager.GetVehicles())
+    {
+        if (!vehicle->IsEnabled())
+        {
+            continue;
+        }
+
+        const auto& assemblies = vehicle->GetWheelAssemblies();
+        const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
+        AnimateVehicle(assemblies, constraint, transformPool);
+    }
+}
+
+void NcPhysicsImpl::SyncTransformsInterpolated(float factor)
+{
+    NC_PROFILE_SCOPE("NcPhysics::SyncTransformsInterpolated", ProfileCategory::Physics);
     auto& transformPool = m_ecs.GetPool<Transform>();
+    for (auto& body : m_ecs.GetAll<RigidBody>())
+    {
+        if (body.GetBodyType() == BodyType::Static)
+        {
+            continue;
+        }
+
+        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
+        if (!apiBody->IsActive())
+        {
+            continue;
+        }
+
+        const auto newPosition = ToXMVectorHomogeneous(apiBody->GetPosition());
+        const auto newOrientation = ToXMQuaternion(apiBody->GetRotation());
+        auto& transform = transformPool.Get(body.GetEntity());
+        const auto& currentPosition = transform.PositionXM();
+        const auto& currentOrientation = transform.RotationXM();
+        transform.SetPositionAndRotationXM(
+            DirectX::XMVectorLerp(currentPosition, newPosition, factor),
+            DirectX::XMQuaternionSlerp(currentOrientation, newOrientation, factor)
+        );
+    }
+
     for (const auto& vehicle : m_vehicleManager.GetVehicles())
     {
         if (!vehicle->IsEnabled())
