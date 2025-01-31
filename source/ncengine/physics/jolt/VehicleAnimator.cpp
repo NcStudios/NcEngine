@@ -55,17 +55,14 @@ void AnimateVehicle(std::span<const WheelAssembly> assemblies,
                     const JPH::VehicleConstraint& constraint,
                     ecs::ComponentPool<Transform>& transforms)
 {
-    VisitWheels(
-        assemblies,
-        constraint,
-        transforms,
-        [](nc::Transform& transform, const JPH::Wheel& wheel) {
-            transform.SetPositionAndRotationXM(
-                CalculateWheelPosition(wheel),
-                CalculateWheelRotation(wheel)
-            );
-        }
-    );
+    constexpr auto wheelVisitor = [](auto& transform, const auto& wheel) {
+        transform.SetPositionAndRotationXM(
+            CalculateWheelPosition(wheel),
+            CalculateWheelRotation(wheel)
+        );
+    };
+
+    VisitWheels(assemblies, constraint, transforms, wheelVisitor);
 }
 
 void AnimateVehicle(std::span<const WheelAssembly> assemblies,
@@ -73,18 +70,13 @@ void AnimateVehicle(std::span<const WheelAssembly> assemblies,
                     ecs::ComponentPool<Transform>& transforms,
                     float lerpFactor)
 {
-    VisitWheels(
-        assemblies,
-        constraint,
-        transforms,
-        [lerpFactor](nc::Transform& transform, const JPH::Wheel& wheel) {
-            const auto& currentPosition = transform.LocalPositionXM();
-            const auto& currentRotation = transform.LocalRotationXM();
-            transform.SetPositionAndRotationXM(
-                XMVectorLerp(currentPosition, CalculateWheelPosition(wheel), lerpFactor),
-                XMQuaternionSlerp(currentRotation, CalculateWheelRotation(wheel), lerpFactor)
-            );
-        }
-    );
+    const auto wheelVisitor = [lerpFactor](auto& transform, const auto& wheel) {
+        transform.SetPositionAndRotationXM(
+            XMVectorLerp(transform.LocalPositionXM(), CalculateWheelPosition(wheel), lerpFactor),
+            XMQuaternionSlerp(transform.LocalRotationXM(), CalculateWheelRotation(wheel), lerpFactor)
+        );
+    };
+
+    VisitWheels(assemblies, constraint, transforms, wheelVisitor);
 }
 } // namespace nc::physics
