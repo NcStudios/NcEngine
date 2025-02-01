@@ -14,4 +14,9 @@ namespace nc::physics
 void AnimateVehicle(std::span<const WheelAssembly> assemblies,
                     const JPH::VehicleConstraint& constraint,
                     ecs::ComponentPool<Transform>& transformPool);
+
+void AnimateVehicle(std::span<const WheelAssembly> assemblies,
+                    const JPH::VehicleConstraint& constraint,
+                    ecs::ComponentPool<Transform>& transformPool,
+                    float lerpFactor);
 } // namespace nc::physics

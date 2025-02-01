@@ -60,6 +60,7 @@ struct NcPhysics : public Module
     virtual void ResetTick(PhysicsTick tick = PhysicsTick{0}) = 0;
     virtual void Tick(uint32_t steps = 1) = 0;
     virtual void SyncTransforms() = 0;
+    virtual void SyncTransformsInterpolated(float factor) = 0;
     virtual void DispatchAccumulatedEvents() = 0;
     virtual void SaveSnapshot(PhysicsSnapshot& snapshot) = 0;
     virtual auto RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool = 0;
