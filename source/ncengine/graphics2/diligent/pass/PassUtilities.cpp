@@ -4,6 +4,7 @@
 
 #include "ncengine/graphics/GraphicsUtility.h"
 
+#include <algorithm>
 #include <array>
 #include <span>
 
@@ -19,117 +20,59 @@ auto HashCombine(std::size_t hashCode, std::string_view inputString) -> std::siz
 
 namespace nc::graphics
 {
-auto MakePostProcessPassInstances(nc::PostProcessPassFlag::type passId) -> std::vector<nc::graphics::PostProcessPipelineInstance>
-{
-    const auto hasProperties = nc::PassHasProperties(passId);
-    auto instances = std::vector<nc::graphics::PostProcessPipelineInstance>{};
-    for (const auto effectId : nc::GetPostProcessEffectIds())
-    {
-        if (!(passId & nc::GetCombinedPostProcessEffectPassFlags(effectId)))
-        {
-            continue;
-        }
-
-        instances.emplace_back(
-            hasProperties
-                ? std::optional{MakeDefaultPassProperties(passId)}
-                : std::nullopt,
-            effectId,
-            false
-        );
-    }
-
-    return instances;
-}
-
 void ClearRenderTarget(Diligent::IDeviceContext& context,
                        Diligent::ISwapChain& swapChain,
-                       SinkBufferResource& colorSinkBufferResource,
-                       SinkBufferResource& depthSinkBufferResource,
+                       PerPassResourceSignature& perPassResourceSignature,
                        uint32_t colorRenderTargetIndex,
                        uint32_t depthRenderTargetIndex,
                        bool isMsaa)
 {
-    Diligent::ITextureView* pRTV = nullptr;
-    Diligent::ITextureView* pDSV = nullptr;
+    Diligent::ITextureView* pRTV = ToColorRenderTargetView(swapChain, perPassResourceSignature.GetColorSinksResource(), colorRenderTargetIndex, isMsaa);
+    Diligent::ITextureView* pDSV = ToDepthRenderTargetView(swapChain, perPassResourceSignature.GetDepthSinksResource(), depthRenderTargetIndex, isMsaa);
 
-    if (colorRenderTargetIndex != NoTarget)
-    {
-        if (colorRenderTargetIndex == SwapChainColorRTIndex)
-        {
-            pRTV = swapChain.GetCurrentBackBufferRTV();
-        }
-        else
-        {
-            pRTV = isMsaa ? colorSinkBufferResource.GetMsaaRenderTargetView(colorRenderTargetIndex) :
-                            colorSinkBufferResource.GetRenderTargetView(colorRenderTargetIndex);
-        }
-    }
-
-    if (depthRenderTargetIndex != NoTarget)
-    {
-        if (depthRenderTargetIndex == SwapChainColorRTIndex)
-        {
-            pDSV = swapChain.GetDepthBufferDSV();
-        }
-        else
-        {
-            pDSV = isMsaa ? depthSinkBufferResource.GetMsaaRenderTargetView(depthRenderTargetIndex) :
-                            depthSinkBufferResource.GetRenderTargetView(depthRenderTargetIndex);
-        }
-    }
-
-    constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
-    if (colorRenderTargetIndex != NoTarget)
+    if (pRTV)
     {
         context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
 
-    if (depthRenderTargetIndex != NoTarget)
+    if (pDSV)
     {
         context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
 }
 
+void ClearRenderTarget(Diligent::IDeviceContext& context,
+                       Diligent::ISwapChain& swapChain,
+                       SinkBufferResource& postProcessSinkBufferResource,
+                       uint32_t postProcessRenderTargetIndex)
+{
+    Diligent::ITextureView* pRTV = ToPostProcessRenderTargetView(swapChain, postProcessSinkBufferResource, postProcessRenderTargetIndex);
+
+    if (pRTV)
+    {
+        context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    }
+}
 
 void BindRenderTarget(Diligent::IDeviceContext& context,
                       Diligent::ISwapChain& swapChain,
-                      SinkBufferResource& colorSinkBufferResource,
-                      SinkBufferResource& depthSinkBufferResource,
+                      PerPassResourceSignature& perPassResourceSignature,
                       uint32_t colorRenderTargetIndex,
                       uint32_t depthRenderTargetIndex,
                       bool isMsaa)
 {
-    Diligent::ITextureView* pRTV = nullptr;
-    Diligent::ITextureView* pDSV = nullptr;
+    Diligent::ITextureView* pRTV = ToColorRenderTargetView(swapChain, perPassResourceSignature.GetColorSinksResource(), colorRenderTargetIndex, isMsaa);
+    Diligent::ITextureView* pDSV = ToDepthRenderTargetView(swapChain, perPassResourceSignature.GetDepthSinksResource(), depthRenderTargetIndex, isMsaa);
+    context.SetRenderTargets(pRTV ? 1 : 0, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+}
 
-    if (colorRenderTargetIndex != NoTarget)
-    {
-        if (colorRenderTargetIndex == SwapChainColorRTIndex)
-        {
-            pRTV = swapChain.GetCurrentBackBufferRTV();
-        }
-        else
-        {
-            pRTV = isMsaa ? colorSinkBufferResource.GetMsaaRenderTargetView(colorRenderTargetIndex) :
-                            colorSinkBufferResource.GetRenderTargetView(colorRenderTargetIndex);
-        }
-    }
-
-    if (depthRenderTargetIndex != NoTarget)
-    {
-        if (depthRenderTargetIndex == SwapChainColorRTIndex)
-        {
-            pDSV = swapChain.GetDepthBufferDSV();
-        }
-        else
-        {
-            pDSV = isMsaa ? depthSinkBufferResource.GetMsaaRenderTargetView(depthRenderTargetIndex) :
-                            depthSinkBufferResource.GetRenderTargetView(depthRenderTargetIndex);
-        }
-    }
-
-    context.SetRenderTargets(colorRenderTargetIndex == NoTarget ? 0 : 1, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+void BindRenderTarget(Diligent::IDeviceContext& context,
+                      Diligent::ISwapChain& swapChain,
+                      SinkBufferResource& postProcessSinkBufferResource,
+                      uint32_t postProcessRenderTargetIndex)
+{
+    Diligent::ITextureView* pRTV = ToPostProcessRenderTargetView(swapChain, postProcessSinkBufferResource, postProcessRenderTargetIndex);
+    context.SetRenderTargets(pRTV ? 1 : 0, &pRTV, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>
@@ -153,9 +96,45 @@ auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent:
     return shader;
 }
 
-auto IsOffScreenTarget(uint32_t colorRenderTargetIndex, uint32_t depthRenderTargetIndex) -> bool
+auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks
 {
-    return (colorRenderTargetIndex != SwapChainColorRTIndex || depthRenderTargetIndex != SwapChainDepthRTIndex);
+    return Sinks
+    {
+        .color = passManifest.GetColorTargetIndex(passDesc.colorSink),
+        .depth = passManifest.GetDepthTargetIndex(passDesc.depthSink),
+        .postProcess = passManifest.GetPostProcessTargetIndex(passDesc.postProcessSink)
+    };
+}
+
+auto HasAnyColorSources(const Sources& sources) -> bool
+{
+    return std::ranges::any_of(sources.color, [](auto source)
+    {
+        return source != std::numeric_limits<uint32_t>::max() && source != std::numeric_limits<uint32_t>::max() - 1;
+    });
+}
+
+auto HasAnyDepthSources(const Sources& sources) -> bool
+{
+    return std::ranges::any_of(sources.depth, [](auto source)
+    {
+        return source != std::numeric_limits<uint32_t>::max() && source != std::numeric_limits<uint32_t>::max() - 1;
+    });
+}
+
+auto GetSources(const PassManifest& passManifest, const PassDesc& passDesc) -> Sources
+{
+    auto sources = Sources{};
+
+    std::ranges::transform(passDesc.colorSources, std::back_inserter(sources.color),
+        [&passManifest](const auto& colorBuffer) { return passManifest.GetColorTargetIndex(colorBuffer); });
+
+    std::ranges::transform(passDesc.depthSources, std::back_inserter(sources.depth),
+        [&passManifest](const auto& depthBuffer) { return passManifest.GetDepthTargetIndex(depthBuffer); });
+
+    sources.postProcess = passManifest.GetPostProcessTargetIndex(passDesc.postProcessSource);
+
+    return sources;
 }
 
 auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t
@@ -166,6 +145,51 @@ auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size
     return HashCombine(hashCode, shaderPaths.vertexShaderPath);
 }
 
-auto NoTargets() -> std::vector<uint32_t> { return std::vector<uint32_t>{}; }
+auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& colorSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*
+{
+    if (index == std::numeric_limits<uint32_t>::max())
+    {
+        return swapChain.GetCurrentBackBufferRTV();
+    }
+
+    if (index == std::numeric_limits<uint32_t>::max() - 1)
+    {
+        return nullptr;
+    }
+
+    return isMsaa ? colorSinkBufferResource.GetMsaaRenderTargetView(index) : colorSinkBufferResource.GetRenderTargetView(index);
+}
+
+auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& depthSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*
+{
+    if (index == std::numeric_limits<uint32_t>::max())
+    {
+        return swapChain.GetDepthBufferDSV();
+    }
+
+    if (index == std::numeric_limits<uint32_t>::max() - 1)
+    {
+        return nullptr;
+    }
+
+    return isMsaa ? depthSinkBufferResource.GetMsaaRenderTargetView(index) : depthSinkBufferResource.GetRenderTargetView(index);
+}
+
+auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& postProcessSinkBufferResource, uint32_t postProcessRenderTargetIndex) -> Diligent::ITextureView*
+{
+    if (postProcessRenderTargetIndex == std::numeric_limits<uint32_t>::max())
+    {
+        return swapChain.GetCurrentBackBufferRTV();
+    }
+
+    if (postProcessRenderTargetIndex == std::numeric_limits<uint32_t>::max() - 1)
+    {
+        return nullptr;
+    }
+
+    return postProcessSinkBufferResource.GetRenderTargetView(0);
+}
+
+
 auto SingleSource(uint32_t target) -> std::vector<uint32_t> { return std::vector<uint32_t>{target}; }
 } // namespace nc::graphics

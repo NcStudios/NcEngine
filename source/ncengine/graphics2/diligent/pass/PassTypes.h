@@ -11,28 +11,47 @@
 
 namespace nc::graphics
 {
-constexpr auto NoTarget = std::numeric_limits<uint32_t>::max()-1;
-constexpr auto SwapChainColorRTIndex = std::numeric_limits<uint32_t>::max();
-constexpr auto SwapChainDepthRTIndex = std::numeric_limits<uint32_t>::max();
+constexpr auto SwapChainIndex = std::numeric_limits<uint32_t>::max();
+constexpr auto NoneIndex = std::numeric_limits<uint32_t>::max() - 1;
+
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
 
-/* MSAA Color Target Indices */
-constexpr auto MainColorMsaa = 0u;
-constexpr auto NormalsColorMsaa = 1u;
+enum class ColorBuffer : uint8_t
+{
+    None,
+    Swapchain,
+    Main,
+    Normals,
+};
 
-/* Color Target Indices */
-constexpr auto MainColor = 0u;
-constexpr auto NormalsColor = 1u;
-constexpr auto PPWaveColor = 2u;
-constexpr auto PPOutlineColor = 3u;
-constexpr auto PPFxaaColor = 4u;
+enum class DepthBuffer : uint8_t
+{
+    None,
+    DepthStencil,
+    Main
+};
 
-/* MSAA Depth Target Indices */
-constexpr auto MainDepthMsaa = 0u;
+enum class PostProcessBuffer : uint8_t
+{
+    None,
+    PPOutline,
+    PPFxaa
+};
 
-/* Depth Target Indices */
-constexpr auto MainDepth = 1u;
+struct Sources
+{
+    std::vector<uint32_t> color = std::vector<uint32_t>();
+    std::vector<uint32_t> depth = std::vector<uint32_t>();
+    uint32_t postProcess = 0u;
+};
+
+struct Sinks
+{
+    uint32_t color;
+    uint32_t depth;
+    uint32_t postProcess;
+};
 
 struct ShaderPaths
 {
@@ -56,10 +75,12 @@ struct PassDesc
     std::string_view name  = "";
     PassType type = PassType::None;
     ShaderPaths shaderPaths = ShaderPaths{};
-    std::vector<uint32_t> colorSources = std::vector<uint32_t>{};
-    std::vector<uint32_t> depthSources = std::vector<uint32_t>{};
-    uint32_t colorSink = NoTarget;
-    uint32_t depthSink = NoTarget;
+    std::vector<ColorBuffer> colorSources = std::vector<ColorBuffer>{};
+    std::vector<DepthBuffer> depthSources = std::vector<DepthBuffer>{};
+    PostProcessBuffer postProcessSource = PostProcessBuffer::None;
+    ColorBuffer colorSink = ColorBuffer::None;
+    DepthBuffer depthSink = DepthBuffer::None;
+    PostProcessBuffer postProcessSink = PostProcessBuffer::None;
     bool isMsaa = true;
 };
 } // namespace nc::graphics

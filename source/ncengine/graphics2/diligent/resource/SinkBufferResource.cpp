@@ -48,7 +48,7 @@ namespace nc::graphics
 auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 {
     return SinkBufferResourceDesc{
-        .name = "PP Color Render Target",
+        .name = "Color Render Target",
         .viewType = Diligent::TEXTURE_VIEW_RENDER_TARGET,
         .format = Diligent::TEX_FORMAT_RGBA8_UNORM,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_RENDER_TARGET,
@@ -64,7 +64,7 @@ auto MakeColorSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 {
     return SinkBufferResourceDesc{
-        .name = "PP Depth Render Target",
+        .name = "Depth Render Target",
         .viewType = Diligent::TEXTURE_VIEW_DEPTH_STENCIL,
         .format = Diligent::TEX_FORMAT_D32_FLOAT,
         .bindFlags = Diligent::BIND_SHADER_RESOURCE | Diligent::BIND_DEPTH_STENCIL,
@@ -114,9 +114,6 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
         throw NcError{"Max texture count exceeded"};
     }
 
-    // auto barriers = std::vector<Diligent::StateTransitionDesc>();
-    // barriers.reserve(targets.textures.size() + numRenderTargets);
-
     targets.textures.reserve(targets.textures.size() + numRenderTargets);
     targets.renderTargetViews.reserve(targets.renderTargetViews.size() + numRenderTargets);
     if (targets.shaderResourceViews)
@@ -136,17 +133,9 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
         {
             targets.shaderResourceViews->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
         }
-
-        // barriers.emplace_back(
-        //     renderTarget.RawPtr(),
-        //     Diligent::RESOURCE_STATE_RENDER_TARGET,
-        //     Diligent::RESOURCE_STATE_SHADER_RESOURCE,
-        //     Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
-        // );
     }
 
-    // context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
-    SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_shaderResourceViews), 0u, m_shaderResourceViews.size());
+    Update();
 }
 
 void SinkBufferResource::Resize(Diligent::IRenderDevice& device,
@@ -174,4 +163,10 @@ void SinkBufferResource::Clear()
     m_texturesMsaa.clear();
     m_renderTargetViewsMsaa.clear();
 }
+
+void SinkBufferResource::Update()
+{
+    SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_shaderResourceViews), 0u, m_shaderResourceViews.size());
+}
+
 } // namespace nc::graphics

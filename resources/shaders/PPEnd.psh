@@ -5,18 +5,19 @@
 
 Texture2D     ColorSinks[];
 Texture2D     DepthSinks[];
+Texture2D     PostProcessSinks[];
 SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer SinkIndices
 {
-    uint colorRT1;
-    uint colorRT2;
-    uint colorRT3;
-    uint colorRT4;
-    uint depthRT1;
-    uint depthRT2;
-    uint depthRT3;
-    uint depthRT4;
+    int colorRT1;
+    int colorRT2;
+    int colorRT3;
+    int colorRT4;
+    int depthRT1;
+    int depthRT2;
+    int depthRT3;
+    uint hasPostProcess;
 };
 
 struct PSInput 
@@ -32,5 +33,12 @@ struct PSOutput
 
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
-    PSOut.Color = ColorSinks[colorRT1].Sample(ColorSinks_sampler, PSIn.UV);;
+    if (hasPostProcess == 1)
+    {
+        PSOut.Color = PostProcessSinks[0].Sample(ColorSinks_sampler, PSIn.UV);
+    }
+    else
+    {
+        PSOut.Color = ColorSinks[colorRT1].Sample(ColorSinks_sampler, PSIn.UV);
+    }
 }

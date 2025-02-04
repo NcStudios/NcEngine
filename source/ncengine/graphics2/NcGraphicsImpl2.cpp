@@ -166,7 +166,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Depth",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
-                    .depthSink = MainDepth,
+                    .depthSink = DepthBuffer::Main,
                     .isMsaa = false
                 },
                 PassDesc{
@@ -174,7 +174,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Depth",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
-                    .depthSink = MainDepth,
+                    .depthSink = DepthBuffer::Main,
                     .isMsaa = false
                 },
                 PassDesc{
@@ -182,57 +182,57 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-                    .colorSink = MainColorMsaa,
-                    .depthSink = MainDepthMsaa
+                    .colorSink = ColorBuffer::Main,
+                    .depthSink = DepthBuffer::Main
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
-                    .colorSink = MainColorMsaa,
-                    .depthSink = MainDepthMsaa
+                    .colorSink = ColorBuffer::Main,
+                    .depthSink = DepthBuffer::Main
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .colorSink = NormalsColorMsaa,
-                    .depthSink = MainDepthMsaa
+                    .colorSink = ColorBuffer::Normals,
+                    .depthSink = DepthBuffer::Main
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
-                    .colorSink = NormalsColorMsaa,
-                    .depthSink = MainDepthMsaa
+                    .colorSink = ColorBuffer::Normals,
+                    .depthSink = DepthBuffer::Main
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .colorSink = MainColorMsaa,
-                    .depthSink = MainDepthMsaa
+                    .colorSink = ColorBuffer::Main,
+                    .depthSink = DepthBuffer::Main
                 },
                 PassDesc{
                     .id = MiscPassFlag::Particle,
                     .name = "Particle",
                     .type = PassType::Particle,
                     .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
-                    .colorSink = MainColor,
-                    .depthSink = MainDepth
+                    .colorSink = ColorBuffer::Main,
+                    .depthSink = DepthBuffer::Main
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{MainColor, NormalsColor},
-                    .depthSources = SingleSource(MainDepth),
-                    .colorSink = PPOutlineColor,
+                    .colorSources = std::vector{ColorBuffer::Main, ColorBuffer::Normals},
+                    .depthSources = std::vector{DepthBuffer::Main},
+                    .postProcessSink = PostProcessBuffer::PPOutline,
                     .isMsaa = false
                 },
                 PassDesc{
@@ -240,8 +240,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Post Process FXAA",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPFxaa.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{PPOutlineColor},
-                    .colorSink = PPFxaaColor,
+                    .postProcessSource = PostProcessBuffer::PPOutline,
+                    .postProcessSink = PostProcessBuffer::PPFxaa,
                     .isMsaa = false
                 }
             },
@@ -278,7 +278,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
           },
           m_onResizeConnection{window.OnResize().Connect(this, &NcGraphicsImpl2::OnResize)},
           m_resizeNeeded{false},
-          m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount}
+          m_numSamples{m_engine.GetDeviceCapability().msaaSampleCount},
+          m_isMinimized{false}
 {
 }
 
@@ -386,6 +387,11 @@ void NcGraphicsImpl2::Run()
         Resize();
     }
 
+    if (m_isMinimized)
+    {
+        return;
+    }
+
     auto& context = m_engine.GetContext();
     auto& device = m_engine.GetDevice();
     auto& swapChain = m_engine.GetSwapChain();
@@ -430,6 +436,12 @@ void NcGraphicsImpl2::Run()
         m_shaderBindings.GetPerFrameSignature()
     );
 
+    m_passBackend.RenderOutputToSwapchain(
+        context,
+        swapChain,
+        m_shaderBindings.GetPerPassSignature()
+    );
+
     m_ui.Render(context);
 
     swapChain.Present();
@@ -439,7 +451,13 @@ void NcGraphicsImpl2::Run()
 
 void NcGraphicsImpl2::OnResize(const Vector2& dimensions, bool isMinimized)
 {
-    if (isMinimized) return;
+    if (isMinimized)
+    {
+        m_isMinimized = true;
+        return;
+    }
+
+    m_isMinimized = false;
     m_engine.GetSwapChain().Resize(static_cast<uint32_t>(dimensions.x), static_cast<uint32_t>(dimensions.y));
     m_resizeNeeded = true;
     m_dimensions = dimensions;

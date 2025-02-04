@@ -30,14 +30,23 @@ struct TextureBufferDesc
     uint32_t maxElementCount = 1u;
 };
 
+struct SinkBufferDesc
+{
+    std::string resourceKey = "UninitializedSinkBufferDesc";
+    Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
+    uint32_t maxElementCount = 1u;
+    bool dynamic = false;
+};
+
 struct UniformBufferDesc
 {
     std::string resourceKey = "UninitializedUniformBufferDesc";
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
 };
 
-auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
-auto ToPipelineResourceDesc(const TextureBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc)    -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const TextureBufferDesc& resourceDesc)    -> Diligent::PipelineResourceDesc;
+auto ToPipelineResourceDesc(const SinkBufferDesc& resourceDesc)       -> Diligent::PipelineResourceDesc;
 auto ToPipelineResourceDesc(const StructuredBufferDesc& resourceDesc) -> Diligent::PipelineResourceDesc;
 
 auto GetVariable(Diligent::SHADER_TYPE shaderType, const char* name, Diligent::IShaderResourceBinding* srb) -> Diligent::IShaderResourceVariable&;

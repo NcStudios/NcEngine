@@ -49,10 +49,14 @@ class SinkBufferResource
 
         void Clear();
 
+        void Update();
+
         auto GetMsaaRenderTargetView(uint32_t index) -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViewsMsaa.at(index)); }
         auto GetRenderTargetView(uint32_t index)     -> Diligent::ITextureView* { return static_cast<Diligent::ITextureView*>(m_renderTargetViews.at(index)); }
-        auto GetMsaaTexture(uint32_t index)     -> Diligent::ITexture*     { return m_texturesMsaa.at(index); }
-        auto GetTexture(uint32_t index)         -> Diligent::ITexture*     { return m_textures.at(index); }
+        auto GetMsaaTexture(uint32_t index)          -> Diligent::ITexture*     { return m_texturesMsaa.at(index); }
+        auto GetTexture(uint32_t index)              -> Diligent::ITexture*     { return m_textures.at(index); }
+        auto GetSinkCount() const                    -> uint32_t                { return static_cast<uint32_t>(m_textures.size()); }
+        auto GetMsaaSinkCount() const                -> uint32_t                { return static_cast<uint32_t>(m_texturesMsaa.size()); }
 
     private:
         std::vector<Diligent::RefCntAutoPtr<Diligent::ITexture>> m_textures;

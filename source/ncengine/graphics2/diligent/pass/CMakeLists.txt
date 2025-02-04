@@ -2,6 +2,7 @@ target_sources(${NC_ENGINE_LIB}
     PRIVATE
         MaterialPass.cpp
         ParticlePass.cpp
+        Pass.cpp
         PassBackend.cpp
         PassManifest.cpp
         PassUtilities.cpp

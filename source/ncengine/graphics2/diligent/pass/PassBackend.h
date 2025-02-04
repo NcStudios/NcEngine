@@ -54,9 +54,18 @@ class PassBackend
                                PerPassResourceSignature& perPassResourceSignature,
                                PerFrameResourceSignature& perFrameResourceSignature);
 
-        auto FinalColorTarget() const -> uint32_t;
+        void RenderOutputToSwapchain(Diligent::IDeviceContext& context,
+                                     Diligent::ISwapChain& swapChain,
+                                     PerPassResourceSignature& perPassResourceSignature);
 
     private:
+        void MakePassesAndPipelines(Diligent::IRenderDevice& device,
+                              Diligent::ISwapChain& swapChain,
+                              ShaderFactory& shaderFactory,
+                              ShaderBindings& shaderBindings,
+                              const PassManifest& passManifest);
+        
+
         std::vector<MaterialPass> m_staticMaterialPasses;
         std::vector<MaterialPass> m_skinnedMaterialPasses;
         std::unique_ptr<WireframePass> m_wireframePass;
@@ -64,7 +73,7 @@ class PassBackend
         std::vector<PostProcessPass> m_postProcessPasses;
         std::unique_ptr<PostProcessPass> m_finalPass;
         uint32_t m_numSamples;
-        uint32_t m_colorSinkCountMsaa;
-        uint32_t m_depthSinkCountMsaa;
+        std::optional<uint32_t> m_finalColorTarget;
+        std::optional<uint32_t> m_finalPostProcessTarget;
 };
 } // namespace nc::graphics
