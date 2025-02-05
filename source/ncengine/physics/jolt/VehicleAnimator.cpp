@@ -1,5 +1,4 @@
 #include "VehicleAnimator.h"
-
 #include "Conversion.h"
 
 #include "Jolt/Jolt.h"
@@ -10,7 +9,7 @@ namespace
 {
 using namespace DirectX;
 
-auto GetWheelRotation(const JPH::Wheel& wheel) -> XMVECTOR
+auto CalculateWheelRotation(const JPH::Wheel& wheel) -> XMVECTOR
 {
     const auto* settings = wheel.GetSettings();
     const auto right = nc::physics::ToXMVector(settings->mWheelUp.Cross(settings->mWheelForward).Normalized());
@@ -29,13 +28,24 @@ auto CalculateWheelPosition(const JPH::Wheel& wheel) -> XMVECTOR
     return XMVectorAdd(attachPoint, offset);
 }
 
-void AnimateWheel(nc::Transform& transform,
-                  const JPH::Wheel& wheel)
+template<class Func>
+void VisitWheels(std::span<const nc::WheelAssembly> assemblies,
+                 const JPH::VehicleConstraint& constraint,
+                 nc::ecs::ComponentPool<nc::Transform>& transforms,
+                 Func&& animate)
 {
-    transform.SetPositionAndRotationXM(
-        CalculateWheelPosition(wheel),
-        GetWheelRotation(wheel)
-    );
+    for (const auto& [left, right, _1, _2, _3] : assemblies)
+    {
+        if (left.IsEnabled() && left.target.Valid())
+        {
+            animate(transforms.Get(left.target), *constraint.GetWheel(left.id));
+        }
+
+        if (right.IsEnabled() && right.target.Valid())
+        {
+            animate(transforms.Get(right.target), *constraint.GetWheel(right.id));
+        }
+    }
 }
 } // anonymous namespace
 
@@ -45,17 +55,28 @@ void AnimateVehicle(std::span<const WheelAssembly> assemblies,
                     const JPH::VehicleConstraint& constraint,
                     ecs::ComponentPool<Transform>& transforms)
 {
-    for (const auto& [left, right, _1, _2, _3] : assemblies)
-    {
-        if (left.IsEnabled() && left.target.Valid())
-        {
-            AnimateWheel(transforms.Get(left.target), *constraint.GetWheel(left.id));
-        }
+    constexpr auto wheelVisitor = [](auto& transform, const auto& wheel) {
+        transform.SetPositionAndRotationXM(
+            CalculateWheelPosition(wheel),
+            CalculateWheelRotation(wheel)
+        );
+    };
 
-        if (right.IsEnabled() && right.target.Valid())
-        {
-            AnimateWheel(transforms.Get(right.target), *constraint.GetWheel(right.id));
-        }
-    }
+    VisitWheels(assemblies, constraint, transforms, wheelVisitor);
+}
+
+void AnimateVehicle(std::span<const WheelAssembly> assemblies,
+                    const JPH::VehicleConstraint& constraint,
+                    ecs::ComponentPool<Transform>& transforms,
+                    float lerpFactor)
+{
+    const auto wheelVisitor = [lerpFactor](auto& transform, const auto& wheel) {
+        transform.SetPositionAndRotationXM(
+            XMVectorLerp(transform.LocalPositionXM(), CalculateWheelPosition(wheel), lerpFactor),
+            XMQuaternionSlerp(transform.LocalRotationXM(), CalculateWheelRotation(wheel), lerpFactor)
+        );
+    };
+
+    VisitWheels(assemblies, constraint, transforms, wheelVisitor);
 }
 } // namespace nc::physics
