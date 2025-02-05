@@ -48,21 +48,17 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
-    ci.ppResourceSignatures = signatures.data();
-    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
-
     RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
     RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
     ci.pPS = pixelShader;
     ci.pVS = vertexShader;
 
-    if (passDesc.colorSink == ColorBuffer::Swapchain)
+    if (passDesc.colorSink == ColorTarget::Swapchain)
     {
         ci.GraphicsPipeline.NumRenderTargets = 1;
         ci.GraphicsPipeline.RTVFormats[0] = swapChain.GetDesc().ColorBufferFormat;
     }
-    else if (passDesc.postProcessSink != PostProcessBuffer::None)
+    else if (passDesc.postProcessSink != PostProcessTarget::None)
     {
         ci.GraphicsPipeline.NumRenderTargets = 1;
         ci.GraphicsPipeline.RTVFormats[0] = OffScreenColorRTFormat;
@@ -73,11 +69,11 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
         ci.GraphicsPipeline.RTVFormats[0] = TEX_FORMAT_UNKNOWN;
     }
 
-    if (passDesc.depthSink == DepthBuffer::DepthStencil)
+    if (passDesc.depthSink == DepthTarget::DepthStencil)
     {
         ci.GraphicsPipeline.DSVFormat = swapChain.GetDesc().DepthBufferFormat;
     }
-    else if (passDesc.depthSink != DepthBuffer::None)
+    else if (passDesc.depthSink != DepthTarget::None)
     {
         ci.GraphicsPipeline.DSVFormat = OffScreenDepthRTFormat;
     }
@@ -88,10 +84,14 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
 
     ci.GraphicsPipeline.PrimitiveTopology                 = PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = true;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
+
+    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature(), &shaderBindings.GetPerPassSignature().GetResourceSignature()};
+    ci.ppResourceSignatures = signatures.data();
+    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
 
     auto pso = Diligent::RefCntAutoPtr<Diligent::IPipelineState>{};
     device.CreateGraphicsPipelineState(ci, &pso);

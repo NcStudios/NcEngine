@@ -123,15 +123,15 @@ void PassManifest::Clear()
     m_postProcessSinkIndices.clear();
 }
 
-auto PassManifest::GetColorTargetIndex(ColorBuffer colorTarget) const -> uint32_t
+auto PassManifest::GetColorTargetIndex(ColorTarget colorTarget) const -> uint32_t
 {
     switch (colorTarget)
     {
-        case ColorBuffer::None:
+        case ColorTarget::None:
         {
             return std::numeric_limits<uint32_t>::max() - 1;
         }
-        case ColorBuffer::Swapchain:
+        case ColorTarget::Swapchain:
         {
             return std::numeric_limits<uint32_t>::max();
         }
@@ -144,15 +144,15 @@ auto PassManifest::GetColorTargetIndex(ColorBuffer colorTarget) const -> uint32_
     }
 }
 
-auto PassManifest::GetDepthTargetIndex(DepthBuffer depthTarget) const -> uint32_t
+auto PassManifest::GetDepthTargetIndex(DepthTarget depthTarget) const -> uint32_t
 {
     switch (depthTarget)
     {
-        case DepthBuffer::None:
+        case DepthTarget::None:
         {
             return std::numeric_limits<uint32_t>::max() - 1;
         }
-        case DepthBuffer::DepthStencil:
+        case DepthTarget::DepthStencil:
         {
             return std::numeric_limits<uint32_t>::max();
         }
@@ -165,11 +165,11 @@ auto PassManifest::GetDepthTargetIndex(DepthBuffer depthTarget) const -> uint32_
     }
 }
 
-auto PassManifest::GetPostProcessTargetIndex(PostProcessBuffer postProcessTarget) const -> uint32_t
+auto PassManifest::GetPostProcessTargetIndex(PostProcessTarget postProcessTarget) const -> uint32_t
 {
     switch (postProcessTarget)
     {
-        case PostProcessBuffer::None:
+        case PostProcessTarget::None:
         {
             return std::numeric_limits<uint32_t>::max() - 1;
         }
@@ -182,9 +182,9 @@ auto PassManifest::GetPostProcessTargetIndex(PostProcessBuffer postProcessTarget
     }
 }
 
-void PassManifest::RegisterTarget(ColorBuffer colorTarget)
+void PassManifest::RegisterTarget(ColorTarget colorTarget)
 {
-    if (colorTarget == ColorBuffer::None || colorTarget == ColorBuffer::Swapchain)
+    if (colorTarget == ColorTarget::None || colorTarget == ColorTarget::Swapchain)
     {
         return;
     }
@@ -195,9 +195,9 @@ void PassManifest::RegisterTarget(ColorBuffer colorTarget)
     }
 }
 
-void PassManifest::RegisterTarget(DepthBuffer depthTarget)
+void PassManifest::RegisterTarget(DepthTarget depthTarget)
 {
-    if (depthTarget == DepthBuffer::None || depthTarget == DepthBuffer::DepthStencil)
+    if (depthTarget == DepthTarget::None || depthTarget == DepthTarget::DepthStencil)
     {
         return;
     }
@@ -208,9 +208,9 @@ void PassManifest::RegisterTarget(DepthBuffer depthTarget)
     }
 }
 
-void PassManifest::RegisterTarget(PostProcessBuffer postProcessTarget)
+void PassManifest::RegisterTarget(PostProcessTarget postProcessTarget)
 {
-    if (postProcessTarget == PostProcessBuffer::None)
+    if (postProcessTarget == PostProcessTarget::None)
     {
         return;
     }

@@ -30,13 +30,13 @@ class PassManifest
         auto DepthSinkCount() const -> uint32_t  { return static_cast<uint32_t>(m_depthSinkIndices.size()); }
         auto PostProcessSinkCount() const -> uint32_t { return static_cast<uint32_t>(m_postProcessSinkIndices.size()); }
 
-        auto GetColorTargetIndex(ColorBuffer colorTarget) const -> uint32_t;
-        auto GetDepthTargetIndex(DepthBuffer depthTarget) const -> uint32_t;
-        auto GetPostProcessTargetIndex(PostProcessBuffer postProcessTarget) const -> uint32_t;
+        auto GetColorTargetIndex(ColorTarget colorTarget) const -> uint32_t;
+        auto GetDepthTargetIndex(DepthTarget depthTarget) const -> uint32_t;
+        auto GetPostProcessTargetIndex(PostProcessTarget postProcessTarget) const -> uint32_t;
 
-        void RegisterTarget(ColorBuffer colorTarget);
-        void RegisterTarget(DepthBuffer depthTarget);
-        void RegisterTarget(PostProcessBuffer postProcessTarget);
+        void RegisterTarget(ColorTarget colorTarget);
+        void RegisterTarget(DepthTarget depthTarget);
+        void RegisterTarget(PostProcessTarget postProcessTarget);
 
     private:
         std::vector<size_t> m_ids;
@@ -45,8 +45,8 @@ class PassManifest
         std::vector<PassDesc> m_postProcessPassDescs;
         PassDesc m_wireframePassDesc;
         PassDesc m_particlePassDesc;
-        std::vector<ColorBuffer> m_colorSinkIndices;
-        std::vector<DepthBuffer> m_depthSinkIndices;
-        std::vector<PostProcessBuffer> m_postProcessSinkIndices;
+        std::vector<ColorTarget> m_colorSinkIndices;
+        std::vector<DepthTarget> m_depthSinkIndices;
+        std::vector<PostProcessTarget> m_postProcessSinkIndices;
 };
 } // namespace nc::graphics

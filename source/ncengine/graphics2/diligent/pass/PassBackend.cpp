@@ -403,8 +403,9 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
         .name = name,
         .type = PassType::PostProcess,
         .shaderPaths = shaderPaths,
-        .colorSink = ColorBuffer::Swapchain,
-        .depthSink = DepthBuffer::DepthStencil
+        .colorSink = ColorTarget::Swapchain,
+        .depthSink = DepthTarget::DepthStencil,
+        .useDepthTest = false
     });
     m_finalPass->sources.postProcess = m_finalPostProcessTarget.value();
 }

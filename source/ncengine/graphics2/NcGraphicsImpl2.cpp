@@ -166,83 +166,94 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Depth",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
-                    .depthSink = DepthBuffer::Main,
-                    .isMsaa = false
+                    .depthSink = DepthTarget::Main,
+                    .isMsaa = false,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Depth,
                     .name = "Depth",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
-                    .depthSink = DepthBuffer::Main,
-                    .isMsaa = false
+                    .depthSink = DepthTarget::Main,
+                    .isMsaa = false,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-                    .colorSink = ColorBuffer::Main,
-                    .depthSink = DepthBuffer::Main
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
+                    
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Toon,
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
-                    .colorSink = ColorBuffer::Main,
-                    .depthSink = DepthBuffer::Main
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
-                    .colorSink = ColorBuffer::Normals,
-                    .depthSink = DepthBuffer::Main
+                    .colorSink = ColorTarget::Normals,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
-                    .colorSink = ColorBuffer::Normals,
-                    .depthSink = DepthBuffer::Main
+                    .colorSink = ColorTarget::Normals,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
-                    .colorSink = ColorBuffer::Main,
-                    .depthSink = DepthBuffer::Main
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = MiscPassFlag::Particle,
                     .name = "Particle",
                     .type = PassType::Particle,
                     .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
-                    .colorSink = ColorBuffer::Main,
-                    .depthSink = DepthBuffer::Main
+                    .colorSink = ColorTarget::Main,
+                    .depthSink = DepthTarget::Main,
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{ColorBuffer::Main, ColorBuffer::Normals},
-                    .depthSources = std::vector{DepthBuffer::Main},
-                    .postProcessSink = PostProcessBuffer::PPOutline,
-                    .isMsaa = false
+                    .colorSources = std::vector{ColorTarget::Main, ColorTarget::Normals},
+                    .depthSources = std::vector{DepthTarget::Main},
+                    .postProcessSink = PostProcessTarget::PPOutline,
+                    .isMsaa = false,
+                    .useDepthTest = false
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Fxaa,
                     .name = "Post Process FXAA",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPFxaa.psh", "PostProcess.vsh"},
-                    .postProcessSource = PostProcessBuffer::PPOutline,
-                    .postProcessSink = PostProcessBuffer::PPFxaa,
-                    .isMsaa = false
+                    .postProcessSource = PostProcessTarget::PPOutline,
+                    .postProcessSink = PostProcessTarget::PPFxaa,
+                    .isMsaa = false,
+                    .useDepthTest = false
                 }
             },
             GetImplementedMaterialPassFlags(),
