@@ -11,8 +11,9 @@
 
 namespace nc::graphics
 {
-constexpr auto SwapChainIndex = std::numeric_limits<uint32_t>::max();
-constexpr auto NoneIndex = std::numeric_limits<uint32_t>::max() - 1;
+constexpr auto DepthStencilTarget = std::numeric_limits<uint32_t>::max();
+constexpr auto SwapChainTarget = std::numeric_limits<uint32_t>::max();
+constexpr auto NoTarget = std::numeric_limits<uint32_t>::max() - 1;
 
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
@@ -48,9 +49,9 @@ struct Sources
 
 struct Sinks
 {
-    uint32_t color;
-    uint32_t depth;
-    uint32_t postProcess;
+    uint32_t color = NoTarget;
+    uint32_t depth = NoTarget;
+    uint32_t postProcess = NoTarget;
 };
 
 struct ShaderPaths

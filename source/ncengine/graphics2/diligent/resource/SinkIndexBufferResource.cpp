@@ -1,4 +1,5 @@
 #include "SinkIndexBufferResource.h"
+#include "graphics2/diligent/pass/PassTypes.h"
 
 #include "ncutility/NcError.h"
 
@@ -32,7 +33,7 @@ void SinkIndexBufferResource::Update(Diligent::IDeviceContext& context,
 
     for (auto i = 0u; i < colorSources.size(); i++)
     {
-        if (colorSources[i] != std::numeric_limits<uint32_t>::max())
+        if (colorSources[i] != SwapChainTarget && colorSources[i] != NoTarget)
         {
             colorSourcesArray.at(i) = colorSources[i];
         }
@@ -40,7 +41,7 @@ void SinkIndexBufferResource::Update(Diligent::IDeviceContext& context,
 
     for (auto i = 0u; i < depthSources.size(); i++)
     {
-        if (colorSources[i] != std::numeric_limits<uint32_t>::max())
+        if (depthSources[i] != DepthStencilTarget && depthSources[i] != NoTarget)
         {
             depthSourcesArray.at(i) = depthSources[i];
         }

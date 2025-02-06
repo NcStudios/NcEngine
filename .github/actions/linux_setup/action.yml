@@ -30,7 +30,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get install -y mesa-vulkan-drivers
-        wget "https://sdk.lunarg.com/sdk/download/${{ inputs.sdkVersion }}/linux/vulkan-sdk-linux-x86_64-${{ inputs.sdkVersion }}.tar.gz?Human=true" -O vulkan-sdk.tar.gz
+        wget "https://sdk.lunarg.com/sdk/download/${{ inputs.sdkVersion }}/linux/vulkansdk-linux-x86_64-${{ inputs.sdkVersion }}.tar.gz?Human=true" -O vulkan-sdk.tar.gz
         tar xf vulkan-sdk.tar.gz
         mv ${{ inputs.sdkVersion }} ${{ github.workspace }}/VulkanSDK
 

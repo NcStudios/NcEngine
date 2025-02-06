@@ -19,9 +19,9 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
     : m_postProcessSinkCount{postProcessSinksDesc.maxElementCount},
       m_postProcessResourceKey{postProcessSinksDesc.resourceKey}
 {
-    auto postProcessTexDesc = SinkBufferDesc{m_postProcessResourceKey, Diligent::SHADER_TYPE_PIXEL, 1, true};
+    auto postProcessTexDesc = SinkBufferDesc{postProcessSinksDesc.resourceKey, postProcessSinksDesc.shaderType, 1, postProcessSinksDesc.dynamic};
 
-    auto resources = std::vector{
+    const auto resources = std::array{
         ToPipelineResourceDesc(colorSinksDesc),
         ToPipelineResourceDesc(depthSinksDesc),
         ToPipelineResourceDesc(postProcessTexDesc), // Even though we have multiple post process resources, we only ever bind one at a time.

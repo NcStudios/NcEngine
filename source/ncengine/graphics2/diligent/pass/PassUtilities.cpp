@@ -110,7 +110,7 @@ auto HasAnyColorSources(const Sources& sources) -> bool
 {
     return std::ranges::any_of(sources.color, [](auto source)
     {
-        return source != std::numeric_limits<uint32_t>::max() && source != std::numeric_limits<uint32_t>::max() - 1;
+        return source != SwapChainTarget && source != NoTarget;
     });
 }
 
@@ -118,7 +118,7 @@ auto HasAnyDepthSources(const Sources& sources) -> bool
 {
     return std::ranges::any_of(sources.depth, [](auto source)
     {
-        return source != std::numeric_limits<uint32_t>::max() && source != std::numeric_limits<uint32_t>::max() - 1;
+        return source != DepthStencilTarget && source != NoTarget;
     });
 }
 
@@ -147,12 +147,12 @@ auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size
 
 auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& colorSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*
 {
-    if (index == std::numeric_limits<uint32_t>::max())
+    if (index == SwapChainTarget)
     {
         return swapChain.GetCurrentBackBufferRTV();
     }
 
-    if (index == std::numeric_limits<uint32_t>::max() - 1)
+    if (index == NoTarget)
     {
         return nullptr;
     }
@@ -162,12 +162,12 @@ auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource
 
 auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& depthSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*
 {
-    if (index == std::numeric_limits<uint32_t>::max())
+    if (index == DepthStencilTarget)
     {
         return swapChain.GetDepthBufferDSV();
     }
 
-    if (index == std::numeric_limits<uint32_t>::max() - 1)
+    if (index == NoTarget)
     {
         return nullptr;
     }
@@ -177,12 +177,12 @@ auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource
 
 auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& postProcessSinkBufferResource, uint32_t postProcessRenderTargetIndex) -> Diligent::ITextureView*
 {
-    if (postProcessRenderTargetIndex == std::numeric_limits<uint32_t>::max())
+    if (postProcessRenderTargetIndex == SwapChainTarget)
     {
         return swapChain.GetCurrentBackBufferRTV();
     }
 
-    if (postProcessRenderTargetIndex == std::numeric_limits<uint32_t>::max() - 1)
+    if (postProcessRenderTargetIndex == NoTarget)
     {
         return nullptr;
     }

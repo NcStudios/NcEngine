@@ -4,6 +4,7 @@
 #include "ncutility/NcError.h"
 
 #include <concepts>
+#include <algorithm>
 #include <ranges>
 
 namespace
@@ -76,9 +77,7 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
 void PassManifest::RegisterPass(PassDesc desc)
 {
     auto passId = ToPassBaseId(desc.shaderPaths, desc.name);
-    auto pos = std::ranges::find(m_ids, passId);
-
-    if (pos != m_ids.end())
+    if (std::ranges::contains(m_ids, passId))
     {
         throw nc::NcError("The pass was already registered");
     }
@@ -129,11 +128,11 @@ auto PassManifest::GetColorTargetIndex(ColorTarget colorTarget) const -> uint32_
     {
         case ColorTarget::None:
         {
-            return std::numeric_limits<uint32_t>::max() - 1;
+            return NoTarget;
         }
         case ColorTarget::Swapchain:
         {
-            return std::numeric_limits<uint32_t>::max();
+            return SwapChainTarget;
         }
         default:
         {
@@ -150,11 +149,11 @@ auto PassManifest::GetDepthTargetIndex(DepthTarget depthTarget) const -> uint32_
     {
         case DepthTarget::None:
         {
-            return std::numeric_limits<uint32_t>::max() - 1;
+            return NoTarget;
         }
         case DepthTarget::DepthStencil:
         {
-            return std::numeric_limits<uint32_t>::max();
+            return DepthStencilTarget;
         }
         default:
         {
@@ -171,7 +170,7 @@ auto PassManifest::GetPostProcessTargetIndex(PostProcessTarget postProcessTarget
     {
         case PostProcessTarget::None:
         {
-            return std::numeric_limits<uint32_t>::max() - 1;
+            return NoTarget;
         }
         default:
         {
@@ -189,7 +188,7 @@ void PassManifest::RegisterTarget(ColorTarget colorTarget)
         return;
     }
 
-    if (std::ranges::find(m_colorSinkIndices, colorTarget) == m_colorSinkIndices.end())
+    if (!std::ranges::contains(m_colorSinkIndices, colorTarget))
     {
         m_colorSinkIndices.push_back(colorTarget);
     }
@@ -202,7 +201,7 @@ void PassManifest::RegisterTarget(DepthTarget depthTarget)
         return;
     }
 
-    if (std::ranges::find(m_depthSinkIndices, depthTarget) == m_depthSinkIndices.end())
+    if (!std::ranges::contains(m_depthSinkIndices, depthTarget))
     {
         m_depthSinkIndices.push_back(depthTarget);
     }
@@ -215,7 +214,7 @@ void PassManifest::RegisterTarget(PostProcessTarget postProcessTarget)
         return;
     }
 
-    if (std::ranges::find(m_postProcessSinkIndices, postProcessTarget) == m_postProcessSinkIndices.end())
+    if (!std::ranges::contains(m_postProcessSinkIndices, postProcessTarget))
     {
         m_postProcessSinkIndices.push_back(postProcessTarget);
     }

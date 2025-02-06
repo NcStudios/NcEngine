@@ -303,7 +303,7 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
         ClearRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
 
         // If this post process pass consumes any post process pass as a source, bind that source's shader resource view to the SRB.
-        auto hasPostProcessSource = pass.sources.postProcess != std::numeric_limits<uint32_t>::max()-1;
+        auto hasPostProcessSource = pass.sources.postProcess != NoTarget;
         if (hasPostProcessSource)
         {
             auto& postProcessSourceBuffer = perPassResourceSignature.GetPostProcessResource(pass.sources.postProcess);
