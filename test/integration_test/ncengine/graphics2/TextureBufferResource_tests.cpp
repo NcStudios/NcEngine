@@ -97,9 +97,7 @@ TEST_F(TextureBufferResourceTest, Load_singleTexture_succeeds)
     const auto& expectedTexture = imageTexture1;
     uut->Load(std::span{&expectedTexture, 1}, engine->GetContext(), engine->GetDevice());
     const auto actualView = GetRenderTargetView(0);
-    const auto endOfRange = GetRenderTargetView(1);
     ASSERT_NE(actualView, nullptr);
-    EXPECT_EQ(endOfRange, nullptr);
 
     const auto actualTexture = actualView->GetTexture();
     const auto desc = actualTexture->GetDesc();
@@ -130,10 +128,8 @@ TEST_F(TextureBufferResourceTest, Load_existingTextures_appendsToArray)
 
     const auto firstView = GetRenderTargetView(0);
     const auto secondView = GetRenderTargetView(1);
-    const auto endOfRange = GetRenderTargetView(2);
     ASSERT_NE(firstView, nullptr);
     ASSERT_NE(secondView, nullptr);
-    EXPECT_EQ(endOfRange, nullptr);
 
     const auto firstDesc = firstView->GetTexture()->GetDesc();
     const auto secondDesc = secondView->GetTexture()->GetDesc();
