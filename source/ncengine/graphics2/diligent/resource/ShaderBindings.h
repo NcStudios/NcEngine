@@ -40,8 +40,9 @@ class ShaderBindings
                 device, context,
                 "PerPassResourceSignature",
                 1,
-                TextureBufferDesc{"ColorSinks", Diligent::SHADER_TYPE_PIXEL, 20},
-                TextureBufferDesc{"DepthSinks", Diligent::SHADER_TYPE_PIXEL, 20},
+                SinkBufferDesc{"ColorSinks", Diligent::SHADER_TYPE_PIXEL, 20},
+                SinkBufferDesc{"DepthSinks", Diligent::SHADER_TYPE_PIXEL, 20},
+                SinkBufferDesc{"PostProcessSinks", Diligent::SHADER_TYPE_PIXEL, 2, true},
                 UniformBufferDesc{"SinkIndices", Diligent::SHADER_TYPE_PIXEL}
             }
         {

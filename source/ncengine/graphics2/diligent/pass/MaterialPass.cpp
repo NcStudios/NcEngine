@@ -12,11 +12,11 @@ namespace
 using namespace Diligent;
 using namespace nc::graphics;
 
-auto MakeMaterialPass(IRenderDevice& device,
-                      ShaderFactory& shaderFactory,
-                      ShaderBindings& shaderBindings,
-                      const PassDesc& passDesc,
-                      uint32_t numSamples) -> MaterialPass
+auto CreatePipeline(Diligent::IRenderDevice& device,
+                    ShaderFactory& shaderFactory,
+                    ShaderBindings& shaderBindings,
+                    const PassDesc& passDesc,
+                    uint32_t numSamples) -> Diligent::RefCntAutoPtr<Diligent::IPipelineState>
 {
     auto layoutElements = GetMeshVertexLayoutElements(0);
 
@@ -25,61 +25,47 @@ auto MakeMaterialPass(IRenderDevice& device,
     ci.PSODesc.Name = passDesc.name.data();
     ci.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
 
-    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature()};
-    ci.ppResourceSignatures = signatures.data();
-    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
-
     RefCntAutoPtr<IShader> pixelShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_PIXEL, passDesc.shaderPaths);
     RefCntAutoPtr<IShader> vertexShader = CreateShaderFromSourceIfInitialized(shaderFactory, SHADER_TYPE_VERTEX, passDesc.shaderPaths);
     ci.pPS = pixelShader;
     ci.pVS = vertexShader;
 
-    ci.GraphicsPipeline.NumRenderTargets             = passDesc.colorSink == NoTarget ? 0 : 1;
-    ci.GraphicsPipeline.RTVFormats[0]                = OffScreenColorRTFormat;
-    ci.GraphicsPipeline.DSVFormat                    = passDesc.depthSink == NoTarget ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
-    ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    ci.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_BACK;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable = passDesc.depthSink == NoTarget ? False : True;
-    ci.GraphicsPipeline.InputLayout.LayoutElements   = layoutElements.data();
-    ci.GraphicsPipeline.InputLayout.NumElements      = static_cast<uint32_t>(layoutElements.size());
-    ci.GraphicsPipeline.SmplDesc.Count               = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.NumRenderTargets                  = passDesc.colorSink == ColorTarget::None ? 0 : 1;
+    ci.GraphicsPipeline.RTVFormats[0]                     = passDesc.colorSink == ColorTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenColorRTFormat;
+    ci.GraphicsPipeline.DSVFormat                         = passDesc.depthSink == DepthTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
+    ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None;
+    ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
+    ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 
-    return MaterialPass(device, ci, passDesc.id, passDesc.colorSink, passDesc.depthSink, passDesc.isMsaa);
+    ci.GraphicsPipeline.SmplDesc.Count               = passDesc.isMsaa ? static_cast<uint8_t>(numSamples) : static_cast<uint8_t>(1);
+    ci.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+    auto signatures = std::array{&shaderBindings.GetPerFrameSignature().GetResourceSignature()};
+    ci.ppResourceSignatures = signatures.data();
+    ci.ResourceSignaturesCount = static_cast<uint32_t>(signatures.size());
+
+    auto pso = Diligent::RefCntAutoPtr<Diligent::IPipelineState>{};
+    device.CreateGraphicsPipelineState(ci, &pso);
+    NC_ASSERT(pso, "Failed to create pipeline state object")
+
+    return pso;
 }
 } // anonymous namespace
 
 namespace nc::graphics
 {
-MaterialPass::MaterialPass(IRenderDevice& device,
-                           const GraphicsPipelineStateCreateInfo& createInfo,
-                           MaterialPassFlag::type passId,
-                           uint32_t colorRTIndex_,
-                           uint32_t depthRTIndex_,
-                           bool isMsaa_)
-    : pso{},
-      id{passId},
-      colorRTIndex{colorRTIndex_},
-      depthRTIndex{depthRTIndex_},
-      isMsaa{isMsaa_}
+MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
+                           ShaderFactory& shaderFactory,
+                           ShaderBindings& shaderBindings,
+                           const PassManifest& passManifest,
+                           const PassDesc& passDesc,
+                           uint32_t numSamples)
+    : Pass{CreatePipeline(device, shaderFactory, shaderBindings, passDesc, numSamples), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)},
+      id{passDesc.id},
+      isMsaa{passDesc.isMsaa}
 {
-    device.CreateGraphicsPipelineState(createInfo, &pso);
-    NC_ASSERT(pso, "Failed to create pipeline state object");
 }
 
-auto MakeMaterialPasses(IRenderDevice& device,
-                        ShaderFactory& shaderFactory,
-                        ShaderBindings& shaderBindings,
-                        std::span<const PassDesc> passManifest,
-                        uint32_t numSamples) -> std::vector<MaterialPass>
-{
-    auto materialPasses = std::vector<MaterialPass>{};
-    materialPasses.reserve(passManifest.size());
-
-    for (auto& passDesc : passManifest)
-    {
-        materialPasses.emplace_back(MakeMaterialPass(device, shaderFactory, shaderBindings, passDesc, numSamples));
-    }
-
-    return materialPasses;
-}
 } // namespace nc::graphics

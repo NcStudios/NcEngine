@@ -3,6 +3,8 @@
 
 #include "ncutility/NcError.h"
 
+#include <concepts>
+#include <algorithm>
 #include <ranges>
 
 namespace
@@ -32,10 +34,6 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
                            std::span<const MaterialPassFlag::type> implementedMaterialPasses,
                            std::span<const PostProcessPassFlag::type> implementedPPPasses,
                            std::span<const MiscPassFlag::type> implementedMiscPasses)
-    : m_colorSinkCountMsaa{0u},
-      m_colorSinkCount{0u},
-      m_depthSinkCountMsaa{0u},
-      m_depthSinkCount{0u}
 {
     auto registerMatches = [this](const auto& descs, const auto& passFlags, auto matchType)
     {
@@ -67,6 +65,10 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
     m_postProcessPassDescs.reserve(implementedPPPasses.size());
     registerMatches(passes, implementedPPPasses, PassType::PostProcess);
 
+    m_colorSinkIndices.reserve(implementedMaterialPasses.size() + 1 + 1); // Materials + Wireframe + Particle
+    m_depthSinkIndices.reserve(2);
+    m_postProcessSinkIndices.reserve(implementedPPPasses.size());
+
 #ifndef NC_PROD_BUILD
     VerifyMaterialPasses(m_staticMaterialPassDescs, m_skinnedMaterialPassDescs);
 #endif
@@ -75,27 +77,24 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
 void PassManifest::RegisterPass(PassDesc desc)
 {
     auto passId = ToPassBaseId(desc.shaderPaths, desc.name);
-    auto pos = std::ranges::find(m_ids, passId);
-
-    if (pos != m_ids.end())
+    if (std::ranges::contains(m_ids, passId))
     {
         throw nc::NcError("The pass was already registered");
     }
 
-    SetMaxIndices(desc.colorSink, desc.depthSink, false);
+    RegisterTarget(desc.colorSink);
+    RegisterTarget(desc.depthSink);
+    RegisterTarget(desc.postProcessSink);
 
     switch (desc.type)
     {
         case PassType::Material:
-            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_staticMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::SkinnedMaterial:
-            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_skinnedMaterialPassDescs.emplace_back(std::move(desc));
             break;
         case PassType::Wireframe:
-            SetMaxIndices(desc.colorSink, desc.depthSink, true);
             m_wireframePassDesc = std::move(desc);
             break;
         case PassType::Particle:
@@ -118,24 +117,107 @@ void PassManifest::Clear()
     m_postProcessPassDescs.clear();
     m_postProcessPassDescs.shrink_to_fit();
     m_wireframePassDesc = PassDesc{};
-    m_colorSinkCountMsaa = 0u;
-    m_colorSinkCount = 0u;
-    m_depthSinkCountMsaa = 0u;
-    m_depthSinkCount = 0u;
+    m_colorSinkIndices.clear();
+    m_depthSinkIndices.clear();
+    m_postProcessSinkIndices.clear();
 }
 
-void PassManifest::SetMaxIndices(uint32_t colorRT, uint32_t depthRT, bool isMsaa)
+auto PassManifest::GetColorTargetIndex(ColorTarget colorTarget) const -> uint32_t
 {
-    auto& colorToModify = isMsaa ? m_colorSinkCountMsaa : m_colorSinkCount;
-    auto& depthToModify = isMsaa ? m_depthSinkCountMsaa : m_depthSinkCount;
-
-    if (colorRT != NoTarget && colorRT != SwapChainColorRTIndex)
+    switch (colorTarget)
     {
-        colorToModify = std::max(colorToModify, colorRT + 1);
-    }
-    if (depthRT != NoTarget && depthRT != SwapChainDepthRTIndex)
-    {
-        depthToModify = std::max(depthToModify, depthRT + 1);
+        case ColorTarget::None:
+        {
+            return NoTarget;
+        }
+        case ColorTarget::Swapchain:
+        {
+            return SwapChainTarget;
+        }
+        default:
+        {
+            auto pos = std::ranges::find(m_colorSinkIndices, colorTarget);
+            NC_ASSERT(pos != m_colorSinkIndices.end(), "Target was not found in vector.");
+            return static_cast<uint32_t>(pos - m_colorSinkIndices.begin()); 
+        }
     }
 }
+
+auto PassManifest::GetDepthTargetIndex(DepthTarget depthTarget) const -> uint32_t
+{
+    switch (depthTarget)
+    {
+        case DepthTarget::None:
+        {
+            return NoTarget;
+        }
+        case DepthTarget::DepthStencil:
+        {
+            return DepthStencilTarget;
+        }
+        default:
+        {
+            auto pos = std::ranges::find(m_depthSinkIndices, depthTarget);
+            NC_ASSERT(pos != m_depthSinkIndices.end(), "Target was not found in vector.");
+            return static_cast<uint32_t>(pos - m_depthSinkIndices.begin());
+        }
+    }
+}
+
+auto PassManifest::GetPostProcessTargetIndex(PostProcessTarget postProcessTarget) const -> uint32_t
+{
+    switch (postProcessTarget)
+    {
+        case PostProcessTarget::None:
+        {
+            return NoTarget;
+        }
+        default:
+        {
+            auto pos = std::ranges::find(m_postProcessSinkIndices, postProcessTarget);
+            NC_ASSERT(pos != m_postProcessSinkIndices.end(), "Target was not found in vector.");
+            return static_cast<uint32_t>(pos - m_postProcessSinkIndices.begin());
+        }
+    }
+}
+
+void PassManifest::RegisterTarget(ColorTarget colorTarget)
+{
+    if (colorTarget == ColorTarget::None || colorTarget == ColorTarget::Swapchain)
+    {
+        return;
+    }
+
+    if (!std::ranges::contains(m_colorSinkIndices, colorTarget))
+    {
+        m_colorSinkIndices.push_back(colorTarget);
+    }
+}
+
+void PassManifest::RegisterTarget(DepthTarget depthTarget)
+{
+    if (depthTarget == DepthTarget::None || depthTarget == DepthTarget::DepthStencil)
+    {
+        return;
+    }
+
+    if (!std::ranges::contains(m_depthSinkIndices, depthTarget))
+    {
+        m_depthSinkIndices.push_back(depthTarget);
+    }
+}
+
+void PassManifest::RegisterTarget(PostProcessTarget postProcessTarget)
+{
+    if (postProcessTarget == PostProcessTarget::None)
+    {
+        return;
+    }
+
+    if (!std::ranges::contains(m_postProcessSinkIndices, postProcessTarget))
+    {
+        m_postProcessSinkIndices.push_back(postProcessTarget);
+    }
+}
+
 } // namespace nc::graphics

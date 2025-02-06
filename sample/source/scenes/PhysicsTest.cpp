@@ -426,10 +426,10 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     const auto wheelBR = world.Emplace<Entity>({.position = brPosition, .scale = wheelScale, .parent = car, .tag = "BR"});
     const auto carMesh = world.Emplace<Entity>({.scale = carScale, .parent = car, .tag = "CarMesh"});
 
-    world.Emplace<StaticMesh>(wheelFL, mesh::Wheel, material::Yellow);
-    world.Emplace<StaticMesh>(wheelFR, mesh::Wheel, material::Yellow);
-    world.Emplace<StaticMesh>(wheelBL, mesh::Wheel, material::Yellow);
-    world.Emplace<StaticMesh>(wheelBR, mesh::Wheel, material::Yellow);
+    world.Emplace<StaticMesh>(wheelFL, mesh::Wheel, material::Orange);
+    world.Emplace<StaticMesh>(wheelFR, mesh::Wheel, material::Orange);
+    world.Emplace<StaticMesh>(wheelBL, mesh::Wheel, material::Orange);
+    world.Emplace<StaticMesh>(wheelBR, mesh::Wheel, material::Orange);
     world.Emplace<StaticMesh>(carMesh, mesh::Cube,  material::Green);
 
     CharacterEntities.push_back(car);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Pass.h"
 #include "PassManifest.h"
 #include "graphics2/diligent/resource/base/DynamicUniformBuffer.h"
 #include "graphics2/diligent/resource/ResourceTypes.h"
@@ -29,28 +30,16 @@ struct PostProcessPipelineInstance
 };
 
 // Post process pass data shared by potentially many effects
-struct PostProcessPass
+struct PostProcessPass : public Pass
 {
     PostProcessPass(Diligent::IRenderDevice& device,
-                    const Diligent::GraphicsPipelineStateCreateInfo& createInfo,
-                    std::vector<PostProcessPipelineInstance> instances_,
-                    PassDesc passDesc);
-
-    Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
+                    Diligent::ISwapChain& swapChain,
+                    ShaderFactory& shaderFactory,
+                    ShaderBindings& shaderBindings,
+                    const PassManifest& passManifest,
+                    const PassDesc& passDesc);
     std::vector<PostProcessPipelineInstance> instances;
-    PassDesc passDesc;
     bool anyEnabled = false;
+    uint64_t id = 0;
 };
-
-auto MakePostProcessPass(Diligent::IRenderDevice& device,
-                         Diligent::ISwapChain& swapChain,
-                         ShaderFactory& shaderFactory,
-                         ShaderBindings& shaderBindings,
-                         PassDesc passDesc) -> PostProcessPass;
-
-auto MakePostProcessPasses(Diligent::IRenderDevice& device,
-                           Diligent::ISwapChain& swapChain,
-                           ShaderFactory& shaderFactory,
-                           ShaderBindings& shaderBindings,
-                           const PassManifest& passManifest) -> std::vector<PostProcessPass>;
 } // namespace nc::graphics

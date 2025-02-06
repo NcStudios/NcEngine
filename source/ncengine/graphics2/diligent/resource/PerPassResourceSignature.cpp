@@ -12,17 +12,23 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    Diligent::IDeviceContext& context,
                                                    std::string_view signatureName,
                                                    uint8_t bindingIndex,
-                                                   const TextureBufferDesc& colorSinkResourceDesc,
-                                                   const TextureBufferDesc& depthSinkResourceDesc,
-                                                   const UniformBufferDesc& sinkIndexResourceDesc)
+                                                   const SinkBufferDesc& colorSinksDesc,
+                                                   const SinkBufferDesc& depthSinksDesc,
+                                                   const SinkBufferDesc& postProcessSinksDesc,
+                                                   const UniformBufferDesc& sinkIndexDesc)
+    : m_postProcessSinkCount{postProcessSinksDesc.maxElementCount},
+      m_postProcessResourceKey{postProcessSinksDesc.resourceKey}
 {
+    auto postProcessTexDesc = SinkBufferDesc{postProcessSinksDesc.resourceKey, postProcessSinksDesc.shaderType, 1, postProcessSinksDesc.dynamic};
+
     const auto resources = std::array{
-        ToPipelineResourceDesc(colorSinkResourceDesc),
-        ToPipelineResourceDesc(depthSinkResourceDesc),
-        ToPipelineResourceDesc(sinkIndexResourceDesc)
+        ToPipelineResourceDesc(colorSinksDesc),
+        ToPipelineResourceDesc(depthSinksDesc),
+        ToPipelineResourceDesc(postProcessTexDesc), // Even though we have multiple post process resources, we only ever bind one at a time.
+        ToPipelineResourceDesc(sinkIndexDesc)
     };
 
-    const auto sampler = SinkBufferResource::MakeSamplerDesc(colorSinkResourceDesc.resourceKey);
+    const auto sampler = SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey);
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = resources.data();
@@ -44,20 +50,35 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         throw NcError{"Failed to create shader resource binding"};
     }
 
-    m_colorSinkBufferResource = std::make_unique<SinkBufferResource>(
-        GetVariable(colorSinkResourceDesc.shaderType, colorSinkResourceDesc.resourceKey.data(), m_srb),
-        MakeColorSinkBufferDesc(colorSinkResourceDesc.maxElementCount)
+    m_colorSinksResource = std::make_unique<SinkBufferResource>(
+        GetVariable(colorSinksDesc.shaderType, colorSinksDesc.resourceKey.data(), m_srb),
+        MakeColorSinkBufferDesc(colorSinksDesc.maxElementCount)
     );
+    m_colorSinksResource->Update();
 
-    m_depthSinkBufferResource = std::make_unique<SinkBufferResource>(
-        GetVariable(depthSinkResourceDesc.shaderType, depthSinkResourceDesc.resourceKey.data(), m_srb),
-        MakeDepthSinkBufferDesc(depthSinkResourceDesc.maxElementCount)
+    m_depthSinksResource = std::make_unique<SinkBufferResource>(
+        GetVariable(depthSinksDesc.shaderType, depthSinksDesc.resourceKey.data(), m_srb),
+        MakeDepthSinkBufferDesc(depthSinksDesc.maxElementCount)
     );
+    m_depthSinksResource->Update();
 
     m_sinkIndexBufferResource = std::make_unique<SinkIndexBufferResource>(
         context, device,
-        GetVariable(sinkIndexResourceDesc.shaderType, sinkIndexResourceDesc.resourceKey.data(), m_srb)
+        GetVariable(sinkIndexDesc.shaderType, sinkIndexDesc.resourceKey.data(), m_srb)
     );
+
+    m_postProcessSinkResources.reserve(postProcessSinksDesc.maxElementCount);
+    for (auto i = 0u; i < postProcessSinksDesc.maxElementCount; i++)
+    {
+        m_postProcessSinkResources.emplace_back(
+            GetVariable( Diligent::SHADER_TYPE_PIXEL, m_postProcessResourceKey.data(), m_srb),
+            MakeColorSinkBufferDesc(1));
+    }
+}
+
+void PerPassResourceSignature::BindPostProcessSink(uint32_t index)
+{
+    GetPostProcessResource(index).Update();
 }
 
 PerPassResourceSignature::~PerPassResourceSignature() = default;
