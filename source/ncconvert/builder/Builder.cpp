@@ -61,27 +61,27 @@ auto Builder::Build(asset::AssetType type, const Target& target) -> bool
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }
+        case asset::AssetType::ConvexHull:
+        {
+            const auto asset = m_geometryConverter->ImportConvexHull(target.sourcePath);
+            convert::Serialize(outFile, asset, asset::currentVersion);
+            return true;
+        }
         case asset::AssetType::CubeMap:
         {
             const auto asset = m_textureConverter->ImportCubeMap(target.sourcePath);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }
-        case asset::AssetType::ConcaveCollider:
-        {
-            const auto asset = m_geometryConverter->ImportConcaveCollider(target.sourcePath);
-            convert::Serialize(outFile, asset, asset::currentVersion);
-            return true;
-        }
-        case asset::AssetType::HullCollider:
-        {
-            const auto asset = m_geometryConverter->ImportHullCollider(target.sourcePath);
-            convert::Serialize(outFile, asset, asset::currentVersion);
-            return true;
-        }
         case asset::AssetType::Mesh:
         {
             const auto asset = m_geometryConverter->ImportMesh(target.sourcePath, target.subResourceName, target.options.optimizeMesh);
+            convert::Serialize(outFile, asset, asset::currentVersion);
+            return true;
+        }
+        case asset::AssetType::MeshCollider:
+        {
+            const auto asset = m_geometryConverter->ImportMeshCollider(target.sourcePath);
             convert::Serialize(outFile, asset, asset::currentVersion);
             return true;
         }

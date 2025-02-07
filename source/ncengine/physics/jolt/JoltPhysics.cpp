@@ -1,6 +1,10 @@
-#include "JoltApi.h"
-#include "Profiler.inl"
+#include "JoltPhysics.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 #include "ncengine/config/Config.h"
+
+#include "ncengine/utility/Log.h"
+#include "ncjolt/JoltApi.h"
+#include "ncjolt/Profiler.inl"
 #include "ncutility/NcError.h"
 
 #include "Jolt/Core/Factory.h"
@@ -8,8 +12,6 @@
 
 namespace
 {
-auto g_factory = std::unique_ptr<JPH::Factory>{};
-
 auto ToJoltSettings(const nc::config::PhysicsSettings& in) -> JPH::PhysicsSettings
 {
     auto out = JPH::PhysicsSettings{};
@@ -21,6 +23,22 @@ auto ToJoltSettings(const nc::config::PhysicsSettings& in) -> JPH::PhysicsSettin
     out.mTimeBeforeSleep = in.timeBeforeSleep;
     out.mPointVelocitySleepThreshold = in.sleepThreshold;
     return out;
+}
+
+auto AssertCallback([[maybe_unused]] const char* expression,
+                    [[maybe_unused]] const char* message,
+                    [[maybe_unused]] const char* file,
+                    [[maybe_unused]] unsigned line) -> bool
+{
+    [[maybe_unused]] constexpr auto subsystem = "Jolt";
+    const auto fullMessage = fmt::format(
+        "message: {} (expression: {})",
+        message ? message : "",
+        expression ? expression : ""
+    );
+
+    NC_LOG_ERROR_EXT(subsystem, file, line, fullMessage)
+    return true;
 }
 } // anonymous namespace
 
@@ -41,31 +59,13 @@ void ThrowJoltUpdateError(JPH::EPhysicsUpdateError error)
     )};
 }
 
-auto JoltApi::Initialize(const config::MemorySettings& memorySettings,
+JoltPhysics::JoltPhysics(const config::MemorySettings& memorySettings,
                          const config::PhysicsSettings& physicsSettings,
-                         const task::AsyncDispatcher& dispatcher) -> JoltApi
-{
-    RegisterAllocator();
-    g_factory = std::make_unique<JPH::Factory>();
-    JPH::Factory::sInstance = g_factory.get();
-    JPH::RegisterTypes();
-    return JoltApi{memorySettings, physicsSettings, dispatcher};
-}
-
-JoltApi::~JoltApi() noexcept
-{
-    JPH::UnregisterTypes();
-    g_factory = nullptr;
-    JPH::Factory::sInstance = nullptr;
-}
-
-JoltApi::JoltApi(const config::MemorySettings& memorySettings,
-                 const config::PhysicsSettings& physicsSettings,
-                 const task::AsyncDispatcher& dispatcher)
-    : tempAllocator{physicsSettings.tempAllocatorSize},
+                         const task::AsyncDispatcher& dispatcher)
+    : api{std::make_unique<jolt::JoltApi>(::AssertCallback)},
+      tempAllocator{physicsSettings.tempAllocatorSize},
       contactListener{physicsSystem},
       jobSystem{BuildJobSystem(dispatcher)}
-
 {
     physicsSystem.Init(
         memorySettings.maxRigidBodies,
@@ -79,5 +79,40 @@ JoltApi::JoltApi(const config::MemorySettings& memorySettings,
 
     physicsSystem.SetPhysicsSettings(ToJoltSettings(physicsSettings));
     physicsSystem.SetContactListener(&contactListener);
+}
+
+JoltPhysics::~JoltPhysics() noexcept = default;
+
+void JoltPhysics::Tick(float dt, uint32_t steps)
+{
+    while (steps != 0)
+    {
+        const auto error = physicsSystem.Update(dt, 1, &tempAllocator, jobSystem.get());
+        if (error != JPH::EPhysicsUpdateError::None)
+        {
+            ThrowJoltUpdateError(error);
+        }
+
+        --steps;
+        ++currentTick;
+    }
+}
+
+void JoltPhysics::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    snapshot.Save(std::any{&physicsSystem}, currentTick);
+}
+
+auto JoltPhysics::RestoreFromSnapshot(PhysicsSnapshot& snapshot) -> bool
+{
+    const auto restoreTick = snapshot.GetTick();
+    NC_ASSERT(restoreTick < currentTick, "Cannot restore to a snapshot newer than the current physics tick.");
+    if (snapshot.Restore(std::any{&physicsSystem}))
+    {
+        currentTick = restoreTick;
+        return true;
+    }
+
+    return false;
 }
 } // namespace nc::physics

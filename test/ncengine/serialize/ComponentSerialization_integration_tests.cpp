@@ -21,9 +21,9 @@
 #include <sstream>
 #include <unordered_map>
 
-DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::ConcaveCollider, nc::asset::ConcaveColliderView, std::string);
-DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::HullCollider, nc::asset::ConvexHullView, std::string);
+DEFINE_ASSET_SERVICE_STUB(hullColliderAssetManager, nc::asset::AssetType::ConvexHull, nc::asset::ConvexHullView, std::string);
 DEFINE_ASSET_SERVICE_STUB(meshAssetManager, nc::asset::AssetType::Mesh, nc::asset::MeshView, std::string);
+DEFINE_ASSET_SERVICE_STUB(concaveColliderAssetManager, nc::asset::AssetType::MeshCollider, nc::asset::MeshColliderView, std::string);
 DEFINE_ASSET_SERVICE_STUB(textureAssetManager, nc::asset::AssetType::Texture, nc::asset::TextureView, std::string);
 
 constexpr auto g_maxEntities = 10u;
@@ -91,12 +91,14 @@ auto RigidBody::GetConstraints() const -> std::span<const Constraint>
         ? g_mockConstraints.at(m_self.Index())
         : std::span<const Constraint>{};
 }
+
+void RigidBody::VerifyShapeSettings() {}
 } // namespace nc
 
 auto g_registry = nc::ecs::ComponentRegistry{10ull};
 auto g_ecs = nc::ecs::Ecs{g_registry};
 constexpr auto g_entity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::None};
-constexpr auto g_staticEntity = nc::Entity{42u, nc::Entity::layer_type{}, nc::Entity::Flags::Static};
+constexpr auto g_staticEntity = nc::Entity{43u, nc::Entity::layer_type{}, nc::Entity::Flags::Static};
 auto g_entityToFragmentIdMap = nc::EntityToFragmentIdMap
 {
     {g_entity, 0u},
@@ -364,6 +366,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
     EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
@@ -384,6 +387,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
     EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
@@ -405,6 +409,49 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
     EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
+}
+
+TEST(ComponentSerializationTests, RoundTrip_rigidBody_convexHull_preservesValues)
+{
+    auto stream = std::stringstream{};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
+    const auto expectedShape = nc::Shape::MakeConvexHull(
+        nc::asset::AssetId{42},
+        nc::Vector3::Splat(5.0f)
+    );
+
+    const auto expected = nc::RigidBody{g_entity, expectedShape};
+    nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeRigidBody(stream, g_deserializationContext, userData);
+
+    const auto& actualShape = actual.GetShape();
+    EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
+    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
+    EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(expectedShape.GetAssetId(), actualShape.GetAssetId());
+}
+
+TEST(ComponentSerializationTests, RoundTrip_rigidBody_mesh_preservesValues)
+{
+    auto stream = std::stringstream{};
+    auto deferredState = nc::physics::DeferredPhysicsCreateState{};
+    auto userData = std::any{&deferredState};
+    const auto expectedShape = nc::Shape::MakeMesh(
+        nc::asset::AssetId{42},
+        nc::Vector3::Splat(5.0f)
+    );
+
+    const auto expected = nc::RigidBody{g_staticEntity, expectedShape};
+    nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
+    const auto actual = nc::DeserializeRigidBody(stream, g_deserializationContext, userData);
+
+    const auto& actualShape = actual.GetShape();
+    EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
+    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
+    EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
+    EXPECT_EQ(expectedShape.GetAssetId(), actualShape.GetAssetId());
 }
 
 TEST(ComponentSerializationTests, RoundTrip_constraints_queuesToUserData)

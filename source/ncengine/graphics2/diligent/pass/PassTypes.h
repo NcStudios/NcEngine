@@ -11,28 +11,48 @@
 
 namespace nc::graphics
 {
-constexpr auto NoTarget = std::numeric_limits<uint32_t>::max()-1;
-constexpr auto SwapChainColorRTIndex = std::numeric_limits<uint32_t>::max();
-constexpr auto SwapChainDepthRTIndex = std::numeric_limits<uint32_t>::max();
+constexpr auto DepthStencilTarget = std::numeric_limits<uint32_t>::max();
+constexpr auto SwapChainTarget = std::numeric_limits<uint32_t>::max();
+constexpr auto NoTarget = std::numeric_limits<uint32_t>::max() - 1;
+
 constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
 
-/* MSAA Color Target Indices */
-constexpr auto MainColorMsaa = 0u;
-constexpr auto NormalsColorMsaa = 1u;
+enum class ColorTarget : uint8_t
+{
+    None,
+    Swapchain,
+    Main,
+    Normals,
+};
 
-/* Color Target Indices */
-constexpr auto MainColor = 0u;
-constexpr auto NormalsColor = 1u;
-constexpr auto PPWaveColor = 2u;
-constexpr auto PPOutlineColor = 3u;
-constexpr auto PPFxaaColor = 4u;
+enum class DepthTarget : uint8_t
+{
+    None,
+    DepthStencil,
+    Main
+};
 
-/* MSAA Depth Target Indices */
-constexpr auto MainDepthMsaa = 0u;
+enum class PostProcessTarget : uint8_t
+{
+    None,
+    PPOutline,
+    PPFxaa
+};
 
-/* Depth Target Indices */
-constexpr auto MainDepth = 1u;
+struct Sources
+{
+    std::vector<uint32_t> color = std::vector<uint32_t>();
+    std::vector<uint32_t> depth = std::vector<uint32_t>();
+    uint32_t postProcess = 0u;
+};
+
+struct Sinks
+{
+    uint32_t color = NoTarget;
+    uint32_t depth = NoTarget;
+    uint32_t postProcess = NoTarget;
+};
 
 struct ShaderPaths
 {
@@ -56,10 +76,13 @@ struct PassDesc
     std::string_view name  = "";
     PassType type = PassType::None;
     ShaderPaths shaderPaths = ShaderPaths{};
-    std::vector<uint32_t> colorSources = std::vector<uint32_t>{};
-    std::vector<uint32_t> depthSources = std::vector<uint32_t>{};
-    uint32_t colorSink = NoTarget;
-    uint32_t depthSink = NoTarget;
+    std::vector<ColorTarget> colorSources = std::vector<ColorTarget>{};
+    std::vector<DepthTarget> depthSources = std::vector<DepthTarget>{};
+    PostProcessTarget postProcessSource = PostProcessTarget::None;
+    ColorTarget colorSink = ColorTarget::None;
+    DepthTarget depthSink = DepthTarget::None;
+    PostProcessTarget postProcessSink = PostProcessTarget::None;
     bool isMsaa = true;
+    bool useDepthTest = true;
 };
 } // namespace nc::graphics

@@ -36,14 +36,14 @@ struct OutlinePassData
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
 struct PostProcessSinkIndexData
 {
-    uint32_t colorRenderTargetIndex1;
-    uint32_t colorRenderTargetIndex2;
-    uint32_t colorRenderTargetIndex3;
-    uint32_t colorRenderTargetIndex4;
-    uint32_t depthRenderTargetIndex1;
-    uint32_t depthRenderTargetIndex2;
-    uint32_t depthRenderTargetIndex3;
-    uint32_t depthRenderTargetIndex4;
+    int32_t colorRenderTargetIndex1;
+    int32_t colorRenderTargetIndex2;
+    int32_t colorRenderTargetIndex3;
+    int32_t colorRenderTargetIndex4;
+    int32_t depthRenderTargetIndex1;
+    int32_t depthRenderTargetIndex2;
+    int32_t depthRenderTargetIndex3;
+    uint32_t hasPostProcessTarget;
 };
 
 // Object model for StaticMeshes (type: StructuredBuffer element type).

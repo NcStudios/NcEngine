@@ -1,9 +1,11 @@
 #include "gtest/gtest.h"
 #include "Deserialize.h"
+#include "GeometryTestUtility.h"
 #include "builder/Serialize.h"
 #include "utility/BlobSize.h"
 #include "ncasset/Assets.h"
 
+#include "ncjolt/Profiler.inl"
 #include "ncmath/Math.h"
 #include "ncutility/NcError.h"
 
@@ -48,21 +50,26 @@ bool Equals(const DirectX::XMMATRIX& lhs, const DirectX::XMMATRIX& rhs)
 }
 }
 
-TEST(AssetSerializationTest, HullCollider_roundTrip_succeeds)
+TEST(AssetSerializationTest, ConvexHull_roundTrip_succeeds)
 {
-    constexpr auto version = nc::asset::currentVersion;
-    const auto expectedAsset = nc::asset::HullCollider{
-        .extents = nc::Vector3{1.2f, 3.4f, 5.6f},
-        .maxExtent = 42.42f,
-        .vertices = std::vector<nc::Vector3>{
+    // Since this test doesn't instantiate a GeometryConverter, we need this around.
+    [[maybe_unused]] auto api = nc::jolt::JoltApi{};
+    const auto expectedVertices = std::vector<nc::Vector3>{
             nc::Vector3::Left(), nc::Vector3::Right(), nc::Vector3::Up(),
             nc::Vector3::Down(), nc::Vector3::Front(), nc::Vector3::Back()
-        }
     };
 
+    const auto shape = nc::jolt::BuildConvexHull(expectedVertices);
+    const auto expectedAsset = nc::asset::ConvexHull{
+        .extents = nc::Vector3{1.2f, 3.4f, 5.6f},
+        .maxExtent = 42.42f,
+        .blob = nc::jolt::SerializeShape(*shape)
+    };
+
+    constexpr auto version = nc::asset::currentVersion;
     auto stream = std::stringstream{std::ios::in | std::ios::out | std::ios::binary};
     nc::convert::Serialize(stream, expectedAsset, version);
-    const auto [actualHeader, actualAsset] = nc::asset::DeserializeHullCollider(stream);
+    const auto [actualHeader, actualAsset] = nc::asset::DeserializeConvexHull(stream);
 
     EXPECT_STREQ("HULL", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
@@ -71,27 +78,39 @@ TEST(AssetSerializationTest, HullCollider_roundTrip_succeeds)
 
     EXPECT_EQ(expectedAsset.extents, actualAsset.extents);
     EXPECT_EQ(expectedAsset.maxExtent, actualAsset.maxExtent);
-    ASSERT_EQ(expectedAsset.vertices.size(), actualAsset.vertices.size());
-    EXPECT_TRUE(std::equal(expectedAsset.vertices.cbegin(),
-                           expectedAsset.vertices.cend(),
-                           actualAsset.vertices.cbegin()));
+    EXPECT_FALSE(actualAsset.blob.empty());
+
+    auto reconstituted = nc::jolt::DeserializeShape(actualAsset.blob);
+    auto actualHull = UpcastToConvexHull(reconstituted.GetPtr());
+    EXPECT_EQ(expectedVertices.size(), actualHull->GetNumPoints());
+    for (auto i = 0u; i < actualHull->GetNumPoints(); ++i)
+    {
+        const auto point = actualHull->GetPoint(i);
+        const auto pos = std::ranges::find(expectedVertices, ToVector3(point));
+        EXPECT_NE(pos, expectedVertices.cend());
+    }
 }
 
-TEST(AssetSerializationTest, ConcaveCollider_roundTrip_succeeds)
+TEST(AssetSerializationTest, MeshCollider_roundTrip_succeeds)
 {
-    constexpr auto version = nc::asset::currentVersion;
-    const auto expectedAsset = nc::asset::ConcaveCollider{
-        .extents = nc::Vector3{-1.1f, 2.2f, -3.3f},
-        .maxExtent = 123.321f,
-        .triangles = std::vector<nc::Triangle>{
-            nc::Triangle{nc::Vector3::Splat(1), nc::Vector3::Splat(2), nc::Vector3::Splat(3)},
-            nc::Triangle{nc::Vector3::Splat(4), nc::Vector3::Splat(5), nc::Vector3::Splat(6)}
-        }
+    // Since this test doesn't instantiate a GeometryConverter, we need this around.
+    [[maybe_unused]] auto api = nc::jolt::JoltApi{};
+    const auto expectedTriangles = std::vector<nc::Triangle>{
+        nc::Triangle{nc::Vector3{0, 0, 0}, nc::Vector3{1, 0, 0}, nc::Vector3{0, 1, 0}},
+        nc::Triangle{nc::Vector3{1, 1, 1}, nc::Vector3{2, 1, 1}, nc::Vector3{1, 2, 1}}
     };
 
+    const auto shape = nc::jolt::BuildMeshShape(expectedTriangles);
+    const auto expectedAsset = nc::asset::MeshCollider{
+        .extents = nc::Vector3{-1.1f, 2.2f, -3.3f},
+        .maxExtent = 123.321f,
+        .blob = nc::jolt::SerializeShape(*shape)
+    };
+
+    constexpr auto version = nc::asset::currentVersion;
     auto stream = std::stringstream{std::ios::in | std::ios::out | std::ios::binary};
     nc::convert::Serialize(stream, expectedAsset, version);
-    const auto [actualHeader, actualAsset] = nc::asset::DeserializeConcaveCollider(stream);
+    const auto [actualHeader, actualAsset] = nc::asset::DeserializeMeshCollider(stream);
 
     EXPECT_STREQ("CONC", actualHeader.magicNumber);
     EXPECT_EQ(version, actualHeader.version);
@@ -100,12 +119,17 @@ TEST(AssetSerializationTest, ConcaveCollider_roundTrip_succeeds)
 
     EXPECT_EQ(expectedAsset.extents, actualAsset.extents);
     EXPECT_EQ(expectedAsset.maxExtent, actualAsset.maxExtent);
-    ASSERT_EQ(expectedAsset.triangles.size(), actualAsset.triangles.size());
+    EXPECT_FALSE(actualAsset.blob.empty());
 
-    for(auto i = 0u; i < expectedAsset.triangles.size(); ++i)
+    const auto reconstituted = nc::jolt::DeserializeShape(actualAsset.blob);
+    const auto actualMesh = UpcastToMeshShape(reconstituted.GetPtr());
+    const auto actualTriangles = GetTriangles(*actualMesh, expectedTriangles.size());
+    ASSERT_EQ(expectedTriangles.size(), actualTriangles.size());
+
+    for(auto i = 0u; i < expectedTriangles.size(); ++i)
     {
-        const auto& expected = expectedAsset.triangles[i];
-        const auto& actual = actualAsset.triangles[i];
+        const auto& expected = expectedTriangles[i];
+        const auto& actual = actualTriangles[i];
         EXPECT_EQ(expected.a, actual.a);
         EXPECT_EQ(expected.b, actual.b);
         EXPECT_EQ(expected.c, actual.c);
@@ -487,13 +511,13 @@ TEST(AssetSerializationTest, DeserializeAudioClip_unsupportedVersion_throws)
     EXPECT_THROW(nc::asset::DeserializeAudioClip(stream), nc::NcError);
 }
 
-TEST(AssetSerializationTest, DeserializeConcaveCollider_unsupportedVersion_throws)
+TEST(AssetSerializationTest, DeserializeMeshCollider_unsupportedVersion_throws)
 {
-    const auto dummyAsset = nc::asset::ConcaveCollider{};
+    const auto dummyAsset = nc::asset::MeshCollider{};
     const auto unsupportedVersion = 1ull;
     auto stream = std::stringstream{std::ios::in | std::ios::out | std::ios::binary};
     nc::convert::Serialize(stream, dummyAsset, unsupportedVersion);
-    EXPECT_THROW(nc::asset::DeserializeConcaveCollider(stream), nc::NcError);
+    EXPECT_THROW(nc::asset::DeserializeMeshCollider(stream), nc::NcError);
 }
 
 TEST(AssetSerializationTest, DeserializeCubeMap_unsupportedVersion_throws)
@@ -505,13 +529,13 @@ TEST(AssetSerializationTest, DeserializeCubeMap_unsupportedVersion_throws)
     EXPECT_THROW(nc::asset::DeserializeCubeMap(stream), nc::NcError);
 }
 
-TEST(AssetSerializationTest, DeserializeHullCollider_unsupportedVersion_throws)
+TEST(AssetSerializationTest, DeserializeConvexHull_unsupportedVersion_throws)
 {
-    const auto dummyAsset = nc::asset::HullCollider{};
+    const auto dummyAsset = nc::asset::ConvexHull{};
     const auto unsupportedVersion = 1ull;
     auto stream = std::stringstream{std::ios::in | std::ios::out | std::ios::binary};
     nc::convert::Serialize(stream, dummyAsset, unsupportedVersion);
-    EXPECT_THROW(nc::asset::DeserializeHullCollider(stream), nc::NcError);
+    EXPECT_THROW(nc::asset::DeserializeConvexHull(stream), nc::NcError);
 }
 
 TEST(AssetSerializationTest, DeserializeMesh_unsupportedVersion_throws)

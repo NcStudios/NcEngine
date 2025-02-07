@@ -1,42 +1,18 @@
 #include "TextureBufferResource.h"
-#include "ncengine/asset/AssetData.h"
+#include "ResourceTypes.h"
 
 #include "TextureLoader.h"
 #include "ncutility/NcError.h"
 
-namespace
-{
-auto ToTextureFormat(nc::asset::asset_flags_type flags) -> Diligent::TEXTURE_FORMAT
-{
-    return flags & nc::asset::AssetFlags::TextureTypeNormalMap
-        ? Diligent::TEX_FORMAT_RGBA8_UNORM
-        : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
-}
-
-auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format) -> Diligent::TextureDesc
-{
-    /** @todo 750 Add mipmaps */
-    auto texDesc = Diligent::TextureDesc{
-        "",
-        Diligent::RESOURCE_DIMENSION::RESOURCE_DIM_TEX_2D,
-        texture.width,
-        texture.height,
-        1,
-        format
-    };
-
-    texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
-    return texDesc;
-}
-
-auto ToTextureSubResData(const nc::asset::Texture& texture) -> Diligent::TextureSubResData
-{
-    return Diligent::TextureSubResData{texture.pixelData.data(), texture.width * 4u};
-}
-} // anonymous namespace
-
 namespace nc::graphics
 {
+TextureBufferResource::TextureBufferResource(Diligent::IShaderResourceVariable& variable, uint32_t maxTextures)
+    : m_variable{&variable},
+        m_maxTextures{maxTextures},
+        m_initialLoadComplete{false}
+{
+}
+
 auto TextureBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
 {
     Diligent::SamplerDesc samplerDesc{};
@@ -55,6 +31,12 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
                                        Diligent::IDeviceContext& context,
                                        Diligent::IRenderDevice& device)
 {
+    if (!m_initialLoadComplete)
+    {
+        InitializeArray(context, device, m_variable, m_maxTextures);
+        m_initialLoadComplete = true;
+    }
+
     const auto textureCount = textures.size();
     if (textureCount == 0)
     {
@@ -93,7 +75,8 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
     }
 
     context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());
-    SetArrayRegion(m_views.size() - textureCount, textureCount);
+    auto offset = m_views.size() - textureCount;
+    SetArrayRegion(m_variable, std::span<Diligent::IDeviceObject*>(m_views.data() + offset, textureCount), offset, textureCount);
 }
 
 void TextureBufferResource::Unload()
@@ -102,15 +85,5 @@ void TextureBufferResource::Unload()
     m_textures.shrink_to_fit();
     m_views.clear();
     m_views.shrink_to_fit();
-}
-
-void TextureBufferResource::SetArrayRegion(size_t offset, size_t count)
-{
-    m_variable->SetArray(
-        m_views.data() + offset,
-        static_cast<uint32_t>(offset),
-        static_cast<uint32_t>(count),
-        Diligent::SET_SHADER_RESOURCE_FLAG_ALLOW_OVERWRITE
-    );
 }
 } // namespace nc::graphics

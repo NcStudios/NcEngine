@@ -2,7 +2,8 @@
 add_executable(BodyFactory_unit_tests
     BodyFactory_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/BodyFactory.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
     ${NC_SOURCE_DIR}/physics/Shape.cpp
 )
 
@@ -21,7 +22,7 @@ target_link_libraries(BodyFactory_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
@@ -36,7 +37,8 @@ add_executable(BodyManager_integration_tests
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintManager.cpp
     ${NC_SOURCE_DIR}/physics/jolt/VehicleManager.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
     ${NC_SOURCE_DIR}/physics/RigidBody.cpp
     ${NC_SOURCE_DIR}/physics/Shape.cpp
 )
@@ -56,7 +58,7 @@ target_link_libraries(BodyManager_integration_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
@@ -65,7 +67,7 @@ add_test(BodyManager_integration_tests BodyManager_integration_tests)
 ### CollisionQueryUtility Tests ###
 add_executable(CollisionQueryUtility_unit_tests
     CollisionQueryUtility_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
 )
 
 target_include_directories(CollisionQueryUtility_unit_tests
@@ -83,7 +85,7 @@ target_link_libraries(CollisionQueryUtility_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
@@ -92,7 +94,7 @@ add_test(CollisionQueryUtility_unit_tests CollisionQueryUtility_unit_tests)
 ### ContactListener Tests ###
 add_executable(ContactListener_integration_tests
     ContactListener_integration_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ContactListener.cpp
 )
 
@@ -111,7 +113,7 @@ target_link_libraries(ContactListener_integration_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
@@ -121,7 +123,7 @@ add_test(ContactListener_integration_tests ContactListener_integration_tests)
 add_executable(ConstraintFactory_unit_tests
     ConstraintFactory_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
 )
 
 target_include_directories(ConstraintFactory_unit_tests
@@ -139,7 +141,7 @@ target_link_libraries(ConstraintFactory_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
@@ -150,7 +152,7 @@ add_executable(ConstraintManager_unit_tests
     ConstraintManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintManager.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
 )
 
 target_include_directories(ConstraintManager_unit_tests
@@ -168,39 +170,40 @@ target_link_libraries(ConstraintManager_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
 add_test(ConstraintManager_unit_tests ConstraintManager_unit_tests)
 
-### JoltApi Tests ###
-add_executable(JoltApi_unit_tests
-    JoltApi_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+### JoltPhysics Tests ###
+add_executable(JoltPhysics_unit_tests
+    JoltPhysics_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ContactListener.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/PhysicsSnapshot.cpp
 )
 
-target_include_directories(JoltApi_unit_tests
+target_include_directories(JoltPhysics_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(JoltApi_unit_tests
+target_compile_options(JoltPhysics_unit_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(JoltApi_unit_tests
+target_link_libraries(JoltPhysics_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
-add_test(JoltApi_unit_tests JoltApi_unit_tests)
+add_test(JoltPhysics_unit_tests JoltPhysics_unit_tests)
 
 ### Jolt Conversion Tests ###
 add_executable(JoltConversion_unit_tests
@@ -253,36 +256,44 @@ target_link_libraries(Layers_unit_tests
 
 add_test(Layers_unit_tests Layers_unit_tests)
 
-### PhysicsAllocator Tests ###
-add_executable(PhysicsAllocator_unit_tests
-    PhysicsAllocator_unit_tests.cpp
+### PhysicsSnapshot Tests ###
+add_executable(PhysicsSnapshot_unit_tests
+    PhysicsSnapshot_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/PhysicsSnapshot.cpp
 )
 
-target_include_directories(PhysicsAllocator_unit_tests
+target_include_directories(PhysicsSnapshot_unit_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(PhysicsAllocator_unit_tests
+target_compile_definitions(PhysicsSnapshot_unit_tests
+    PUBLIC
+        -DNC_TEST_EXCLUDE_PHYSICS_SNAPSHOT_STUBS
+)
+
+target_compile_options(PhysicsSnapshot_unit_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(PhysicsAllocator_unit_tests
+target_link_libraries(PhysicsSnapshot_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
-add_test(PhysicsAllocator_unit_tests PhysicsAllocator_unit_tests)
+add_test(PhysicsSnapshot_unit_tests PhysicsSnapshot_unit_tests)
 
 ### ShapeFactory Tests ###
 add_executable(ShapeFactory_unit_tests
     ShapeFactory_unit_tests.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
 )
 
 target_include_directories(ShapeFactory_unit_tests
@@ -300,7 +311,7 @@ target_link_libraries(ShapeFactory_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 
@@ -310,7 +321,7 @@ add_test(ShapeFactory_unit_tests ShapeFactory_unit_tests)
 add_executable(VehicleManager_unit_tests
     VehicleManager_unit_tests.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ConstraintFactory.cpp
-    ${NC_SOURCE_DIR}/physics/jolt/JoltApi.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/VehicleManager.cpp
 )
 
@@ -329,7 +340,7 @@ target_link_libraries(VehicleManager_unit_tests
     PRIVATE
         NcMath
         NcUtility
-        Jolt
+        NcJolt
         gtest_main
 )
 

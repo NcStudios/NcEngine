@@ -64,6 +64,7 @@ class NcGraphicsImpl2 : public NcGraphics
         Vector2 m_dimensions;
         bool m_resizeNeeded;
         uint32_t m_numSamples;
+        bool m_isMinimized;
 };
 } // namespace graphics
 } // namespace nc

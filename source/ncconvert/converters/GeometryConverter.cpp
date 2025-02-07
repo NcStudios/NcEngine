@@ -5,12 +5,19 @@
 #include "utility/Path.h"
 #include "utility/Log.h"
 
+#include "ncasset/Assets.h"
+#include "ncjolt/JoltApi.h"
+#include "ncjolt/ShapeUtility.h"
+#include "ncjolt/Profiler.inl"
+#include "ncutility/NcError.h"
+
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "fmt/format.h"
-#include "ncasset/Assets.h"
-#include "ncutility/NcError.h"
+#include "Jolt/Jolt.h"
+#include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 #include <algorithm>
 #include <array>
@@ -393,7 +400,7 @@ namespace nc::convert
 class GeometryConverter::impl
 {
     public:
-        auto ImportConcaveCollider(const std::filesystem::path& path) -> asset::ConcaveCollider
+        auto ImportMeshCollider(const std::filesystem::path& path) -> asset::MeshCollider
         {
             const auto mesh = ::ReadFbx(path, &m_importer, concaveColliderFlags)->mMeshes[0];
 
@@ -408,14 +415,15 @@ class GeometryConverter::impl
                 LOG("Warning: Bad values detected in mesh. {} values have been set to 0.", count);
             }
 
-            return asset::ConcaveCollider{
+            const auto shape = jolt::BuildMeshShape(triangles);
+            return asset::MeshCollider{
                 GetMeshVertexExtents(triangles),
                 FindFurthestDistanceFromOrigin(triangles),
-                std::move(triangles)
+                jolt::SerializeShape(*shape)
             };
         }
 
-        auto ImportHullCollider(const std::filesystem::path& path) -> asset::HullCollider
+        auto ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull
         {
             const auto mesh = ::ReadFbx(path, &m_importer, hullColliderFlags)->mMeshes[0];
 
@@ -430,10 +438,11 @@ class GeometryConverter::impl
                 LOG("Warning: Bad values detected in mesh. {} values have been set to 0.", count);
             }
 
-            return asset::HullCollider{
+            const auto shape = jolt::BuildConvexHull(convertedVertices);
+            return asset::ConvexHull{
                 GetMeshVertexExtents(convertedVertices),
                 FindFurthestDistanceFromOrigin(convertedVertices),
-                std::move(convertedVertices)
+                jolt::SerializeShape(*shape)
             };
         }
 
@@ -476,6 +485,7 @@ class GeometryConverter::impl
 
     private:
         Assimp::Importer m_importer;
+        jolt::JoltApi m_joltApi;
 };
 
 GeometryConverter::GeometryConverter()
@@ -485,14 +495,14 @@ GeometryConverter::GeometryConverter()
 
 GeometryConverter::~GeometryConverter() noexcept = default;
 
-auto GeometryConverter::ImportConcaveCollider(const std::filesystem::path& path) -> asset::ConcaveCollider
+auto GeometryConverter::ImportMeshCollider(const std::filesystem::path& path) -> asset::MeshCollider
 {
-    return m_impl->ImportConcaveCollider(path);
+    return m_impl->ImportMeshCollider(path);
 }
 
-auto GeometryConverter::ImportHullCollider(const std::filesystem::path& path) -> asset::HullCollider
+auto GeometryConverter::ImportConvexHull(const std::filesystem::path& path) -> asset::ConvexHull
 {
-    return m_impl->ImportHullCollider(path);
+    return m_impl->ImportConvexHull(path);
 }
 
 auto GeometryConverter::ImportMesh(const std::filesystem::path& path, const std::optional<std::string>& subResourceName, bool optimize) -> asset::Mesh

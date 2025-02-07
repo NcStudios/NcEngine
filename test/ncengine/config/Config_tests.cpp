@@ -109,14 +109,14 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.engineSettings.buildTasksOnInit, actual.engineSettings.buildTasksOnInit);
 
     EXPECT_EQ(expected.assetSettings.audioClipsPath, actual.assetSettings.audioClipsPath);
-    EXPECT_EQ(expected.assetSettings.concaveCollidersPath, actual.assetSettings.concaveCollidersPath);
-    EXPECT_EQ(expected.assetSettings.hullCollidersPath, actual.assetSettings.hullCollidersPath);
+    EXPECT_EQ(expected.assetSettings.convexHullsPath, actual.assetSettings.convexHullsPath);
+    EXPECT_EQ(expected.assetSettings.cubeMapsPath, actual.assetSettings.cubeMapsPath);
+    EXPECT_EQ(expected.assetSettings.fontsPath, actual.assetSettings.fontsPath);
+    EXPECT_EQ(expected.assetSettings.meshCollidersPath, actual.assetSettings.meshCollidersPath);
     EXPECT_EQ(expected.assetSettings.meshesPath, actual.assetSettings.meshesPath);
     EXPECT_EQ(expected.assetSettings.shadersPath, actual.assetSettings.shadersPath);
     EXPECT_EQ(expected.assetSettings.skeletalAnimationsPath, actual.assetSettings.skeletalAnimationsPath);
     EXPECT_EQ(expected.assetSettings.texturesPath, actual.assetSettings.texturesPath);
-    EXPECT_EQ(expected.assetSettings.cubeMapsPath, actual.assetSettings.cubeMapsPath);
-    EXPECT_EQ(expected.assetSettings.fontsPath, actual.assetSettings.fontsPath);
 
     EXPECT_EQ(expected.memorySettings.maxRigidBodies, actual.memorySettings.maxRigidBodies);
     EXPECT_EQ(expected.memorySettings.maxParticleEmitters, actual.memorySettings.maxParticleEmitters);
@@ -142,6 +142,7 @@ TEST(ConfigTests, SaveLoad_roundTrip_preservesData)
     EXPECT_EQ(expected.graphicsSettings.useValidationLayers, actual.graphicsSettings.useValidationLayers);
 
     EXPECT_EQ(expected.physicsSettings.enabled, actual.physicsSettings.enabled);
+    EXPECT_EQ(expected.physicsSettings.enableNetworkRollback, actual.physicsSettings.enableNetworkRollback);
     EXPECT_EQ(expected.physicsSettings.tempAllocatorSize, actual.physicsSettings.tempAllocatorSize);
     EXPECT_EQ(expected.physicsSettings.maxBodyPairs, actual.physicsSettings.maxBodyPairs);
     EXPECT_EQ(expected.physicsSettings.maxContacts, actual.physicsSettings.maxContacts);

@@ -1,10 +1,11 @@
 // Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
 
-Texture2D     PostProcessColorSinkBufferData[];
-Texture2D     PostProcessDepthSinkBufferData[];
-SamplerState  PostProcessColorSinkBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+Texture2D     PostProcessSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -14,16 +15,16 @@ cbuffer EnvironmentBufferData
     float farClip;
 };
 
-cbuffer PostProcessSinkIndexBufferData
+cbuffer SinkIndices
 {
-    uint colorRT1;
-    uint colorRT2;
-    uint colorRT3;
-    uint colorRT4;
-    uint depthRT1;
-    uint depthRT2;
-    uint depthRT3;
-    uint depthRT4;
+    int colorRT1;
+    int colorRT2;
+    int colorRT3;
+    int colorRT4;
+    int depthRT1;
+    int depthRT2;
+    int depthRT3;
+    uint hasPostProcess;
 };
 
 struct PSInput 
@@ -49,8 +50,8 @@ static float SubpixelQuality = 0.75f;
 void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
-    SamplerState smplr = PostProcessColorSinkBufferData_sampler;
-    Texture2D colorTex = PostProcessColorSinkBufferData[colorRT1];
+    SamplerState smplr = ColorSinks_sampler;
+    Texture2D colorTex = PostProcessSinks[0];
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
 
     // Get screen dimensions

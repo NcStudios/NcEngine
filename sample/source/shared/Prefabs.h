@@ -9,34 +9,45 @@ namespace nc::sample
 // Load Asset Files
 void InitializeResources();
 
-// Prefabs
+// Reload cached global asset views
 void ReloadPrefabs();
 
 // Animations
 namespace animation
 {
-extern uint64_t OgreAttack;
-extern uint64_t OgreIdle;
-extern uint64_t SkeletonIdle;
-extern uint64_t SkeletonJump;
-extern uint64_t SkeletonWalkBackward;
-extern uint64_t SkeletonWalkForward;
-extern uint64_t SkeletonWalkLeft;
-extern uint64_t SkeletonWalkRight;
-} // namespace animation
+extern asset::AssetId OgreIdle;
+extern asset::AssetId OgreAttack;
+extern asset::AssetId SkeletonIdle;
+extern asset::AssetId SkeletonJump;
+extern asset::AssetId SkeletonWalkRight;
+extern asset::AssetId SkeletonWalkLeft;
+extern asset::AssetId SkeletonWalkForward;
+extern asset::AssetId SkeletonWalkBackward;
+}
 
-// Colliders
-constexpr auto HalfPipeConcaveCollider = "halfpipe.nca";
-constexpr auto RampHullCollider = "ramp.nca";
-
-// CubeMaps
-namespace cubemap
+// Mesh
+namespace mesh
 {
-constexpr auto NightSkyPath = "night_sky.nca";
-} // namespace cubemap
+constexpr auto GuyPath = "guy.nca";
+constexpr auto HalfPipePath = "halfpipe.nca";
+constexpr auto RampPath = "ramp.nca";
+constexpr auto OgrePath = "ogre.nca";
+constexpr auto SkeletonPath = "skeleton.nca";
+constexpr auto CavePath = "cave.nca";
 
-// Fonts
-extern asset::FontInfo UIFont;
+// Mesh
+extern asset::MeshView Cube;
+extern asset::MeshView Sphere;
+extern asset::MeshView Capsule;
+extern asset::MeshView Guy;
+extern asset::MeshView Plane;
+extern asset::MeshView Wheel;
+extern asset::MeshView HalfPipe;
+extern asset::MeshView Ramp;
+extern asset::MeshView Ogre;
+extern asset::MeshView Skeleton;
+extern asset::MeshView Cave;
+} // namespace mesh
 
 // Materials
 namespace material
@@ -55,29 +66,30 @@ extern MaterialDesc Teal;
 extern MaterialDesc Yellow;
 } // namespace material
 
-// Mesh
-constexpr auto HalfPipeMesh = "halfpipe.nca";
-constexpr auto RampMesh = "ramp.nca";
+// Colliders
+constexpr auto HalfPipeConcaveCollider = "halfpipe.nca";
+constexpr auto RampHullCollider = "ramp.nca";
 
-namespace mesh
+// CubeMaps
+namespace cubemap
 {
-constexpr auto CavePath = "cave.nca";
-constexpr auto GuyPath = "guy.nca";
-constexpr auto HalfPipePath = "halfpipe.nca";
-constexpr auto OgrePath = "ogre.nca";
-constexpr auto RampPath = "ramp.nca";
-constexpr auto SkeletonPath = "skeleton.nca";
+constexpr auto NightSkyPath = "night_sky.nca";
+} // namespace cubemap
 
-extern asset::MeshView Capsule;
-extern asset::MeshView Cave;
-extern asset::MeshView Cube;
-extern asset::MeshView Guy;
-extern asset::MeshView HalfPipe;
-extern asset::MeshView Ogre;
-extern asset::MeshView Plane;
-extern asset::MeshView Ramp;
-extern asset::MeshView Skeleton;
-extern asset::MeshView Sphere;
-extern asset::MeshView Wheel;
-} // namespace mesh
+// ConvexHulls
+namespace convex_hull
+{
+constexpr auto RampPath = "ramp.nca";
+extern asset::AssetId Ramp;
+} // namespace collider
+
+// MeshColliders
+namespace mesh_collider
+{
+constexpr auto HalfpipePath = "halfpipe.nca";
+extern asset::AssetId Halfpipe;
+} // namespace mesh_collider
+
+// Fonts
+extern asset::FontInfo UIFont;
 } // namespace nc::sample

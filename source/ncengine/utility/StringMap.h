@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ncutility/Hash.h"
+
 #include <algorithm>
 #include <string_view>
 #include <vector>
@@ -20,7 +22,7 @@ class BasicStringTable
 
         static auto hash(std::string_view key) noexcept
         {
-            return std::hash<std::string_view>{}(key);
+            return utility::Fnv1a(key);
         }
 
         void emplace(std::string_view key)

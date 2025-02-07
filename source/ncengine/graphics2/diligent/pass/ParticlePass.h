@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Pass.h"
 #include "PassManifest.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -11,16 +12,14 @@ namespace nc::graphics
 class ShaderBindings;
 class ShaderFactory;
 
-struct ParticlePass
+struct ParticlePass : public Pass
 {
     explicit ParticlePass(Diligent::IRenderDevice& device,
                           ShaderFactory& shaderFactory,
                           ShaderBindings& shaderBindings,
+                          const PassManifest& passManifest,
                           const PassDesc& passDesc,
                           uint32_t numSamples);
-
-    Diligent::RefCntAutoPtr<Diligent::IPipelineState> pso;
-    uint32_t colorRTIndex;
-    uint32_t depthRTIndex;
+    bool isMsaa;
 };
 } // namespace nc::graphics

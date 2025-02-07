@@ -10,24 +10,24 @@ auto s_allocations = std::vector<void*>{};
 #define NC_FREE_HOOK(ptr) std::erase(s_allocations, ptr);
 #define NC_ALIGNED_FREE_HOOK(ptr) NC_FREE_HOOK(ptr);
 
-#include "physics/jolt/JoltApi.h"
+#include "ncjolt/Allocator.h"
 
 TEST(PhysicsAllocatorTests, AllocateFunctions_succeed)
 {
-    const auto allocation = nc::physics::AllocateImpl(2u);
+    const auto allocation = nc::jolt::AllocateImpl(2u);
     EXPECT_EQ(1ull, s_allocations.size());
-    const auto reallocation = nc::physics::ReallocateImpl(allocation, 2u, 4u);
+    const auto reallocation = nc::jolt::ReallocateImpl(allocation, 2u, 4u);
     EXPECT_EQ(2ull, s_allocations.size());
-    const auto alignedAllocation = nc::physics::AlignedAllocateImpl(4u, 16u);
+    const auto alignedAllocation = nc::jolt::AlignedAllocateImpl(4u, 16u);
     EXPECT_EQ(3ull, s_allocations.size());
-    nc::physics::FreeImpl(reallocation);
-    nc::physics::AlignedFreeImpl(alignedAllocation);
+    nc::jolt::FreeImpl(reallocation);
+    nc::jolt::AlignedFreeImpl(alignedAllocation);
     s_allocations.clear();
 }
 
 TEST(PhysicsAllocatorTests, TempAllocator_AllocateFree_correctOrder_succeeds)
 {
-    auto uut = nc::physics::TempAllocator{512u};
+    auto uut = nc::jolt::TempAllocator{512u};
     auto first = uut.Allocate(42u);
     auto second = uut.Allocate(1u);
     auto third = uut.Allocate(100u);
@@ -38,7 +38,7 @@ TEST(PhysicsAllocatorTests, TempAllocator_AllocateFree_correctOrder_succeeds)
 
 TEST(PhysicsAllocatorTests, TempAllocator_AllocateFree_outOfOrder_throws)
 {
-    auto uut = nc::physics::TempAllocator{512u};
+    auto uut = nc::jolt::TempAllocator{512u};
     auto first = uut.Allocate(42u);
     uut.Allocate(1u);
     EXPECT_THROW(uut.Free(first, 42u), nc::NcError);
@@ -46,21 +46,21 @@ TEST(PhysicsAllocatorTests, TempAllocator_AllocateFree_outOfOrder_throws)
 
 TEST(PhysicsAllocatorTests, TempAllocator_Allocate_outOfMemory_throws)
 {
-    auto uut = nc::physics::TempAllocator{512u};
+    auto uut = nc::jolt::TempAllocator{512u};
     uut.Allocate(512u);
     EXPECT_THROW(uut.Allocate(1u), nc::NcError);
 }
 
 TEST(PhysicsAllocatorTests, TempAllocator_Free_wrongSize_throws)
 {
-    auto uut = nc::physics::TempAllocator{512u};
+    auto uut = nc::jolt::TempAllocator{512u};
     auto first = uut.Allocate(42u);
     EXPECT_THROW(uut.Free(first, 2u), nc::NcError);
 }
 
 TEST(PhysicsAllocatorTests, TempAllocator_UtilityFunc_returnExpectedValues)
 {
-    auto uut = nc::physics::TempAllocator{512u};
+    auto uut = nc::jolt::TempAllocator{512u};
     EXPECT_TRUE(uut.IsEmpty());
     EXPECT_EQ(512u, uut.GetSize());
     EXPECT_EQ(0u, uut.GetUsage());

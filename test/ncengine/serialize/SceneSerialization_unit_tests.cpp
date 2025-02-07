@@ -14,13 +14,15 @@ class NcAssetMock : public NcAsset
 {
     public:
         // Stubs
-        auto OnBoneUpdate() noexcept -> Signal<const BoneUpdateEventData&>& override { return m_boneSignal; }
-        auto OnCubeMapUpdate() noexcept -> Signal<const CubeMapUpdateEventData&>& override { return m_cubeMapSignal; }
-        auto OnMeshUpdate() noexcept -> Signal<const MeshUpdateEventData&>& override { return m_meshSignal; }
-        auto OnSkeletalAnimationUpdate() noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
-        auto OnTextureUpdate() noexcept -> Signal<const TextureUpdateEventData&>& override { return m_textureSignal; }
-        auto OnFontUpdate() noexcept -> Signal<>& override { return m_fontSignal; }
-        auto GetAssetPath(AssetType, size_t) const -> std::string_view override { return ""; }
+        auto OnBoneUpdate()               noexcept -> Signal<const BoneUpdateEventData&>&              override { return m_boneSignal; }
+        auto OnCubeMapUpdate()            noexcept -> Signal<const CubeMapUpdateEventData&>&           override { return m_cubeMapSignal; }
+        auto OnMeshUpdate()               noexcept -> Signal<const MeshUpdateEventData&>&              override { return m_meshSignal; }
+        auto OnSkeletalAnimationUpdate()  noexcept -> Signal<const SkeletalAnimationUpdateEventData&>& override { return m_animSignal; }
+        auto OnTextureUpdate()            noexcept -> Signal<const TextureUpdateEventData&>&           override { return m_textureSignal; }
+        auto OnConvexHullUpdate()         noexcept -> Signal<const ConvexHullUpdateEventData&>&        override { return m_convexHullSignal; }
+        auto OnMeshColliderUpdate()       noexcept -> Signal<const MeshColliderUpdateEventData&>&      override { return m_meshColliderSignal; }
+        auto OnFontUpdate()               noexcept -> Signal<>&                                        override { return m_fontSignal; }
+        auto GetAssetPath(AssetType, size_t) const -> std::string_view                                 override { return ""; }
 
         // Mocks
         void LoadAssets(const AssetMap& assets) override
@@ -41,6 +43,8 @@ class NcAssetMock : public NcAsset
         Signal<const MeshUpdateEventData&> m_meshSignal;
         Signal<const SkeletalAnimationUpdateEventData&> m_animSignal;
         Signal<const TextureUpdateEventData&> m_textureSignal;
+        Signal<const ConvexHullUpdateEventData&> m_convexHullSignal;
+        Signal<const MeshColliderUpdateEventData&> m_meshColliderSignal;
         Signal<> m_fontSignal;
 };
 
@@ -190,9 +194,9 @@ TEST_F(SceneSerializationTests, RoundTrip_hasLoadedAssets_correctlyRestoresAsset
     {
         {nc::asset::AssetType::AudioClip,         std::vector<std::string>{"ac"}},
         {nc::asset::AssetType::CubeMap,           std::vector<std::string>{"cm1", "cm2"}},
-        {nc::asset::AssetType::ConcaveCollider,   std::vector<std::string>{"cc"}},
-        {nc::asset::AssetType::HullCollider,      std::vector<std::string>{"hc"}},
+        {nc::asset::AssetType::ConvexHull,        std::vector<std::string>{"hc"}},
         {nc::asset::AssetType::Mesh,              std::vector<std::string>{"m1", "m2", "m3"}},
+        {nc::asset::AssetType::MeshCollider,      std::vector<std::string>{"cc"}},
         {nc::asset::AssetType::SkeletalAnimation, std::vector<std::string>{"sa"}},
         {nc::asset::AssetType::Texture,           std::vector<std::string>{"t"}}
     };
@@ -208,14 +212,14 @@ TEST_F(SceneSerializationTests, RoundTrip_hasLoadedAssets_correctlyRestoresAsset
     ASSERT_FALSE(actualAssets.empty());
     EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::AudioClip),
                                    actualAssets.at(nc::asset::AssetType::AudioClip)));
+    EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::ConvexHull),
+                                   actualAssets.at(nc::asset::AssetType::ConvexHull)));
     EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::CubeMap),
                                    actualAssets.at(nc::asset::AssetType::CubeMap)));
-    EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::ConcaveCollider),
-                                   actualAssets.at(nc::asset::AssetType::ConcaveCollider)));
-    EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::HullCollider),
-                                   actualAssets.at(nc::asset::AssetType::HullCollider)));
     EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::Mesh),
                                    actualAssets.at(nc::asset::AssetType::Mesh)));
+    EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::MeshCollider),
+                                   actualAssets.at(nc::asset::AssetType::MeshCollider)));
     EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::SkeletalAnimation),
                                    actualAssets.at(nc::asset::AssetType::SkeletalAnimation)));
     EXPECT_TRUE(std::ranges::equal(expectedAssets.at(nc::asset::AssetType::Texture),
@@ -237,7 +241,10 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
             .layer = nc::Entity::layer_type{2},
             .flags = nc::Entity::Flags::Static
         },
-        {.flags = nc::Entity::Flags::NoCollisionNotifications}
+        {
+            .flags = nc::Entity::Flags::NoCollisionNotifications,
+            .userData = 3u
+        }
     };
 
     const auto unexpectedInfos = std::vector<nc::EntityInfo>
@@ -266,6 +273,7 @@ TEST_F(SceneSerializationTests, RoundTrip_hasEntities_correctlyRestoresEntityVal
     {
         EXPECT_EQ(expected.layer, actualEntity.Layer());
         EXPECT_EQ(expected.flags, actualEntity.Flags());
+        EXPECT_EQ(expected.userData, actualEntity.UserData());
 
         const auto& actualTransform = ecs.Get<nc::Transform>(actualEntity);
         EXPECT_EQ(expected.position, actualTransform.LocalPosition());

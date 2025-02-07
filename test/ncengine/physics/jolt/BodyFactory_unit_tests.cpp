@@ -1,16 +1,25 @@
 #include "JoltApiFixture.inl"
 #include "physics/jolt/BodyFactory.h"
+#include "physics/jolt/Conversion.h"
 #include "physics/jolt/ShapeFactory.h"
 #include "ncengine/physics/RigidBody.h"
+
+namespace nc
+{
+void RigidBody::VerifyShapeSettings() {}
+} // namespace nc
 
 class BodyFactoryTest : public JoltApiFixture
 {
     protected:
+        nc::Signal<const nc::asset::ConvexHullUpdateEventData&> convexHullSignal;
+        nc::Signal<const nc::asset::MeshColliderUpdateEventData&> meshColliderSignal;
         nc::physics::ShapeFactory shapeFactory;
         nc::physics::BodyFactory uut;
 
         BodyFactoryTest()
-            : uut{joltApi.physicsSystem.GetBodyInterfaceNoLock(), shapeFactory}
+            : shapeFactory{convexHullSignal, meshColliderSignal},
+              uut{joltApi.physicsSystem.GetBodyInterfaceNoLock(), shapeFactory}
         {
         }
 

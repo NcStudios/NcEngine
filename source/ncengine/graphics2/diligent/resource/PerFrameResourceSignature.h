@@ -25,20 +25,20 @@ class PerFrameResourceSignature
                                            Diligent::IRenderDevice& device,
                                            std::string_view signatureName,
                                            uint8_t bindingIndex,
-                                           const StructuredBufferResourceDesc& transformResourceDesc,
-                                           const StructuredBufferResourceDesc& staticMeshInstanceResourceDesc,
-                                           const StructuredBufferResourceDesc& skinnedMeshInstanceResourceDesc,
-                                           const StructuredBufferResourceDesc& lightResourceDesc,
-                                           const StructuredBufferResourceDesc& materialResourceDesc,
-                                           const StructuredBufferResourceDesc& boneResourceDesc,
-                                           const StructuredBufferResourceDesc& particleResourceDesc,
-                                           const TextureBufferResourceDesc& textureResourceDesc,
-                                           const UniformBufferResourceDesc& environmentResourceDesc,
-                                           const UniformBufferResourceDesc& wireframeResourceDesc,
-                                           const UniformBufferResourceDesc& outlinePassPropertiesDesc);
+                                           const StructuredBufferDesc& transformResourceDesc,
+                                           const StructuredBufferDesc& staticMeshInstanceResourceDesc,
+                                           const StructuredBufferDesc& skinnedMeshInstanceResourceDesc,
+                                           const StructuredBufferDesc& lightResourceDesc,
+                                           const StructuredBufferDesc& materialResourceDesc,
+                                           const StructuredBufferDesc& boneResourceDesc,
+                                           const StructuredBufferDesc& particleResourceDesc,
+                                           const TextureBufferDesc& textureResourceDesc,
+                                           const UniformBufferDesc& environmentResourceDesc,
+                                           const UniformBufferDesc& wireframeResourceDesc,
+                                           const UniformBufferDesc& outlinePassPropertiesDesc);
         ~PerFrameResourceSignature() noexcept;
 
-        void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_VERIFY); }
+        void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
         auto GetResourceSignature()     -> Diligent::IPipelineResourceSignature&   { return *m_signature; }
 
         /* Resource Buffers */

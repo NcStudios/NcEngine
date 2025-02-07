@@ -1,21 +1,32 @@
-#include "gtest/gtest.h"
+#include "physics/jolt/JoltPhysics.h"
 #include "ContactListener_stub.inl"
 #include "JobSystem_stub.inl"
+#include "gtest/gtest.h"
+
 #include "ncengine/config/Config.h"
-#include "physics/jolt/JoltApi.h"
+#include "ncengine/physics/PhysicsSnapshot.h"
 
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 
+// Generally these can be stubbed out, but want to reuse the fixture for PhysicsSnapshot tests
+#ifndef NC_TEST_EXCLUDE_PHYSICS_SNAPSHOT_STUBS
+namespace nc
+{
+void PhysicsSnapshot::Save(std::any, PhysicsTick) {}
+auto PhysicsSnapshot::Restore(std::any) -> bool { return false; }
+} // namespace nc
+#endif
+
 class JoltApiFixture : public ::testing::Test
 {
     protected:
-        nc::physics::JoltApi joltApi;
+        nc::physics::JoltPhysics joltApi;
 
         JoltApiFixture(uint32_t tempAllocatorSize = 1024 * 1024 * 4,
                        uint32_t maxBodyPairs = 8,
                        uint32_t maxContacts = 4)
-            : joltApi{nc::physics::JoltApi::Initialize(
+            : joltApi{
                   nc::config::MemorySettings{},
                   nc::config::PhysicsSettings{
                     .tempAllocatorSize = tempAllocatorSize,
@@ -23,7 +34,7 @@ class JoltApiFixture : public ::testing::Test
                     .maxContacts = maxContacts
                   },
                   nc::task::AsyncDispatcher{}
-              )}
+              }
         {
         }
 

@@ -4,6 +4,7 @@
 #include "jolt/ShapeFactory.h"
 #include "jolt/VehicleAnimator.h"
 
+#include "ncengine/asset/NcAsset.h"
 #include "ncengine/debug/Profile.h"
 #include "ncengine/config/Config.h"
 #include "ncengine/time/Time.h"
@@ -29,6 +30,14 @@ class NcPhysicsStub : public nc::NcPhysics
         {
         }
 
+        auto GetTick() const -> nc::PhysicsTick override { return nc::PhysicsTick::Null(); }
+        void ResetTick(nc::PhysicsTick) override {}
+        void Tick(uint32_t) override {}
+        void SyncTransforms() override {}
+        void SyncTransformsInterpolated(float) override {}
+        void DispatchAccumulatedEvents() override {}
+        void SaveSnapshot(nc::PhysicsSnapshot&) {}
+        auto RestoreSnapshot(nc::PhysicsSnapshot&) -> bool { return false; }
         void BeginRigidBodyBatch(size_t) override {}
         void EndRigidBodyBatch() override {}
         void OnBuildTaskGraph(nc::task::UpdateTasks& update, nc::task::RenderTasks&)
@@ -44,6 +53,49 @@ class NcPhysicsStub : public nc::NcPhysics
     private:
         std::unique_ptr<nc::physics::DeferredPhysicsCreateState> m_deferredState;
 };
+
+template<class Func>
+void VisitBodies(nc::ecs::ComponentPool<nc::RigidBody>& rigidBodyPool,
+                 nc::ecs::ComponentPool<nc::Transform>& transformPool,
+                 Func&& synchronize)
+{
+    for (auto& body : rigidBodyPool)
+    {
+        if (body.GetBodyType() == nc::BodyType::Static)
+        {
+            continue;
+        }
+
+        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
+        if (!apiBody->IsActive())
+        {
+            continue;
+        }
+
+        const auto position = nc::physics::ToXMVectorHomogeneous(apiBody->GetPosition());
+        const auto orientation = nc::physics::ToXMQuaternion(apiBody->GetRotation());
+        auto& transform = transformPool.Get(body.GetEntity());
+        synchronize(transform, position, orientation);
+    }
+}
+
+template<class Func>
+void VisitVehicles(std::span<const std::unique_ptr<nc::Vehicle>> vehicles,
+                   nc::ecs::ComponentPool<nc::Transform>& transformPool,
+                   Func&& animate)
+{
+    for (const auto& vehicle : vehicles)
+    {
+        if (!vehicle->IsEnabled())
+        {
+            continue;
+        }
+
+        const auto& assemblies = vehicle->GetWheelAssemblies();
+        const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
+        animate(assemblies, constraint, transformPool);
+    }
+}
 } // anonymous namespace
 
 namespace nc
@@ -51,6 +103,7 @@ namespace nc
 auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
                         const config::PhysicsSettings& physicsSettings,
                         ecs::Ecs world,
+                        asset::NcAsset& ncAsset,
                         const task::AsyncDispatcher& dispatcher,
                         SystemEvents& events) -> std::unique_ptr<NcPhysics>
 {
@@ -62,6 +115,7 @@ auto BuildPhysicsModule(const config::MemorySettings& memorySettings,
             memorySettings,
             physicsSettings,
             world,
+            ncAsset,
             dispatcher,
             events,
             std::move(deferredState)
@@ -77,11 +131,16 @@ namespace physics
 NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
                              const config::PhysicsSettings& physicsSettings,
                              ecs::Ecs world,
+                             asset::NcAsset& ncAsset,
                              const task::AsyncDispatcher& dispatcher,
                              SystemEvents&,
                              std::unique_ptr<DeferredPhysicsCreateState> deferredState)
     : m_ecs{world},
-      m_jolt{JoltApi::Initialize(memorySettings, physicsSettings, dispatcher)},
+      m_jolt{memorySettings, physicsSettings, dispatcher},
+      m_shapeFactory{
+        ncAsset.OnConvexHullUpdate(),
+        ncAsset.OnMeshColliderUpdate()
+      },
       m_constraintFactory{m_jolt.physicsSystem},
       m_constraintManager{
         m_jolt.physicsSystem,
@@ -107,25 +166,106 @@ NcPhysicsImpl::NcPhysicsImpl(const config::MemorySettings& memorySettings,
         m_jolt.physicsSystem.GetBodyLockInterfaceNoLock(),
         m_shapeFactory
       },
-      m_deferredState{std::move(deferredState)}
+      m_deferredState{std::move(deferredState)},
+      m_networkModeEnabled{physicsSettings.enableNetworkRollback}
 {
 }
 
-void NcPhysicsImpl::Run()
+auto NcPhysicsImpl::GetTick() const -> PhysicsTick
 {
-    NC_PROFILE_TASK("NcPhysics::Run", ProfileCategory::Physics);
+    return m_jolt.currentTick;
+}
+
+void NcPhysicsImpl::ResetTick(PhysicsTick tick)
+{
+    m_jolt.currentTick = tick;
+}
+
+void NcPhysicsImpl::Tick(uint32_t steps)
+{
+    NC_PROFILE_SCOPE("NcPhysics::Tick", ProfileCategory::Physics);
     if (!m_updateEnabled)
     {
         return;
     }
 
-    m_jolt.Update(time::DeltaTime());
-    SyncTransforms();
+    m_jolt.Tick(time::DeltaTime(), steps);
+}
+
+void NcPhysicsImpl::SyncTransforms()
+{
+    NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
+
+    constexpr auto bodyVisitor = [](auto& transform, const auto& position, const auto& rotation) {
+        transform.SetPositionAndRotationXM(position, rotation);
+    };
+
+    constexpr auto vehicleVisitor = [](const auto& assemblies, const auto& constraint, auto& transformPool) {
+        AnimateVehicle(assemblies, constraint, transformPool);
+    };
+
+    auto& transformPool = m_ecs.GetPool<Transform>();
+    VisitBodies(m_ecs.GetPool<RigidBody>(), transformPool, bodyVisitor);
+    VisitVehicles(m_vehicleManager.GetVehicles(), transformPool, vehicleVisitor);
+}
+
+void NcPhysicsImpl::SyncTransformsInterpolated(float factor)
+{
+    NC_PROFILE_SCOPE("NcPhysics::SyncTransformsInterpolated", ProfileCategory::Physics);
+
+    const auto bodyVisitor = [factor](auto& transform, const auto& position, const auto& rotation) {
+        transform.SetPositionAndRotationXM(
+            DirectX::XMVectorLerp(transform.PositionXM(), position, factor),
+            DirectX::XMQuaternionSlerp(transform.RotationXM(), rotation, factor)
+        );
+    };
+
+    const auto vehicleVisitor = [factor](const auto& assemblies, const auto& constraint, auto& transformPool) {
+        AnimateVehicle(assemblies, constraint, transformPool, factor);
+    };
+
+    auto& transformPool = m_ecs.GetPool<Transform>();
+    VisitBodies(m_ecs.GetPool<RigidBody>(), transformPool, bodyVisitor);
+    VisitVehicles(m_vehicleManager.GetVehicles(), transformPool, vehicleVisitor);
+}
+
+void NcPhysicsImpl::DispatchAccumulatedEvents()
+{
+    NC_PROFILE_SCOPE("NcPhysics::DispatchAccumulatedEvents()", ProfileCategory::Physics);
     DispatchPhysicsEvents(m_jolt.contactListener, m_ecs);
+}
+
+void NcPhysicsImpl::SaveSnapshot(PhysicsSnapshot& snapshot)
+{
+    return m_jolt.SaveSnapshot(snapshot);
+}
+
+auto NcPhysicsImpl::RestoreSnapshot(PhysicsSnapshot& snapshot) -> bool
+{
+    return m_jolt.RestoreFromSnapshot(snapshot);
+}
+
+void NcPhysicsImpl::Run()
+{
+    NC_PROFILE_TASK("NcPhysics", ProfileCategory::Physics);
+    if (!m_updateEnabled)
+    {
+        return;
+    }
+
+    Tick(1);
+    SyncTransforms();
+    DispatchAccumulatedEvents();
 }
 
 void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTasks&)
 {
+    if (m_networkModeEnabled)
+    {
+        NC_LOG_TRACE("Skipping Building NcPhysics Tasks - Network Rollback Enabled");
+        return;
+    }
+
     NC_LOG_TRACE("Building NcPhysics Tasks");
     update.Add(
         update_task_id::PhysicsPipeline,
@@ -133,42 +273,6 @@ void NcPhysicsImpl::OnBuildTaskGraph(task::UpdateTasks& update, task::RenderTask
         [this](){ this->Run(); },
         {update_task_id::CommitStagedChanges}
     );
-}
-
-void NcPhysicsImpl::SyncTransforms()
-{
-    NC_PROFILE_SCOPE("NcPhysics::SyncTransforms", ProfileCategory::Physics);
-    for (auto& body : m_ecs.GetAll<RigidBody>())
-    {
-        if (body.GetBodyType() == BodyType::Static)
-        {
-            continue;
-        }
-
-        auto* apiBody = reinterpret_cast<JPH::Body*>(body.GetHandle());
-        if (!apiBody->IsActive())
-        {
-            continue;
-        }
-
-        const auto position = ToXMVectorHomogeneous(apiBody->GetPosition());
-        const auto orientation = ToXMQuaternion(apiBody->GetRotation());
-        auto& transform = m_ecs.Get<Transform>(body.GetEntity());
-        transform.SetPositionAndRotationXM(position, orientation);
-    }
-
-    auto& transformPool = m_ecs.GetPool<Transform>();
-    for (const auto& vehicle : m_vehicleManager.GetVehicles())
-    {
-        if (!vehicle->IsEnabled())
-        {
-            continue;
-        }
-
-        const auto& assemblies = vehicle->GetWheelAssemblies();
-        const auto& constraint = *static_cast<const JPH::VehicleConstraint*>(vehicle->GetHandle());
-        AnimateVehicle(assemblies, constraint, transformPool);
-    }
 }
 
 void NcPhysicsImpl::OnBeforeSceneLoad()

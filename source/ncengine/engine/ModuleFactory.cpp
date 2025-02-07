@@ -23,10 +23,10 @@ auto BuildDefaultAssetMap() -> nc::asset::AssetMap
     return AssetMap
     {
         { AssetType::AudioClip,         { DefaultAudioClip } },
-        { AssetType::ConcaveCollider,   { DefaultConcaveCollider } },
+        { AssetType::ConvexHull,        { DefaultConvexHull } },
         { AssetType::CubeMap,           { DefaultSkyboxCubeMap } },
-        { AssetType::HullCollider,      { DefaultHullCollider } },
         { AssetType::Mesh,              { PlaneMesh, CubeMesh, SphereMesh, CapsuleMesh, WheelMesh } },
+        { AssetType::MeshCollider,      { DefaultMeshCollider } },
         { AssetType::SkeletalAnimation, { DefaultSkeletalAnimation } },
         { AssetType::Texture,           { DefaultBaseColor, DefaultNormal, DefaultRoughness, DefaultParticle } }
     };
@@ -63,6 +63,7 @@ auto BuildModuleRegistry(ecs::ComponentRegistry& registry,
     moduleRegistry->Register(nc::BuildPhysicsModule(config.memorySettings,
                                                     config.physicsSettings,
                                                     world,
+                                                    *moduleRegistry->Get<asset::NcAsset>(),
                                                     dispatcher,
                                                     events));
 

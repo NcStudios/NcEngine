@@ -22,7 +22,7 @@ class StructuredBufferTest : public DiligentEngineFixture
 
         StructuredBufferTest()
         {
-            const auto bufferDesc = nc::graphics::StructuredBufferResourceDesc{
+            const auto bufferDesc = nc::graphics::StructuredBufferDesc{
                 variableName,
                 Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL,
                 maxInstanceCount,

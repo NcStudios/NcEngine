@@ -2,7 +2,7 @@
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/RigidBody.h"
 #include "physics/jolt/ConstraintManager.h"
-#include "physics/jolt/Profiler.inl"
+#include "ncjolt/Profiler.inl"
 
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/Body.h"
@@ -14,7 +14,11 @@ auto ClearParams()
     s_lastUpdateConstraintTarget = std::pair{nc::Entity::Null(), nullptr};
 }
 
-namespace nc::physics
+namespace nc
+{
+void RigidBody::VerifyShapeSettings() {}
+
+namespace physics
 {
 void ConstraintManager::EnableConstraint(Constraint&, bool) {}
 void ConstraintManager::UpdateConstraint(Constraint&) {}
@@ -24,7 +28,8 @@ void ConstraintManager::UpdateConstraintTarget(Constraint&,
 {
     s_lastUpdateConstraintTarget = std::pair{target, targetBody};
 }
-} // namespace nc::physics
+} // namespace physics
+} // namespace nc
 
 TEST(ConstraintsTest, GetType_succeeds)
 {

@@ -35,15 +35,15 @@ TEST(PassManifestTest, DuplicatePassID_Throws)
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = MainColor
+            .colorSink = ColorTarget::Main
         },
         PassDesc{
             .id = MaterialPassFlag::Normals,
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = MainColor,
-            .depthSink = MainDepth
+            .colorSink = ColorTarget::Main,
+            .depthSink = DepthTarget::Main
         },};
 
     auto materialPassFlags = std::vector<MaterialPassFlag::type>{MaterialPassFlag::Toon, MaterialPassFlag::Normals};
@@ -60,23 +60,23 @@ TEST(PassManifestTest, DifferentPassNameSameShader_AddedToManifest)
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = MainColor,
-            .depthSink = MainDepth
+            .colorSink = ColorTarget::Main,
+            .depthSink = DepthTarget::Main
         },
         PassDesc{
             .id = MaterialPassFlag::Normals,
             .name = "ToonSkinned",
             .type = PassType::SkinnedMaterial,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = MainColor,
-            .depthSink = MainDepth
+            .colorSink = ColorTarget::Main,
+            .depthSink = DepthTarget::Main
         },};
 
     auto materialPassFlags = std::vector<MaterialPassFlag::type>{MaterialPassFlag::Toon, MaterialPassFlag::Normals};
 
     auto uut = PassManifest(passDescs, materialPassFlags, std::span<const PostProcessPassFlag::type>{}, std::span<const MiscPassFlag::type>{});
     EXPECT_EQ(uut.ColorSinkCount(), 1);
-    EXPECT_EQ(uut.DepthSinkCount(), 2); // MainDepth is set to be index 1 instead of zero to avoid collision with MainDepthMsaa
+    EXPECT_EQ(uut.DepthSinkCount(), 1);
 }
 
 TEST(PassManifestTest, PassesRenderOnlyToSwapchain_SinkCountsAreZero)
@@ -88,16 +88,16 @@ TEST(PassManifestTest, PassesRenderOnlyToSwapchain_SinkCountsAreZero)
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = SwapChainColorRTIndex,
-            .depthSink = SwapChainDepthRTIndex
+            .colorSink = ColorTarget::Swapchain,
+            .depthSink = DepthTarget::DepthStencil
         },
         PassDesc{
             .id = MaterialPassFlag::Normals,
             .name = "ToonSkinned",
             .type = PassType::SkinnedMaterial,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = SwapChainColorRTIndex,
-            .depthSink = SwapChainDepthRTIndex
+            .colorSink = ColorTarget::Swapchain,
+            .depthSink = DepthTarget::DepthStencil
         },};
 
     auto materialPassFlags = std::vector<MaterialPassFlag::type>{MaterialPassFlag::Toon, MaterialPassFlag::Normals};
@@ -117,8 +117,8 @@ TEST(PassManifestTest, PassIDNotPresentInPassFlags_PassNotAddedToManifest)
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
-            .colorSink = SwapChainColorRTIndex,
-            .depthSink = SwapChainDepthRTIndex
+            .colorSink = ColorTarget::Swapchain,
+            .depthSink = DepthTarget::DepthStencil
         }
     };
 

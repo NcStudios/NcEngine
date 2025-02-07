@@ -62,9 +62,9 @@ auto DeserializeAudioClip(std::istream& stream) -> DeserializedResult<AudioClip>
     return DeserializeImpl<AudioClip>(stream, MagicNumber::audioClip);
 }
 
-auto DeserializeConcaveCollider(std::istream& stream) -> DeserializedResult<ConcaveCollider>
+auto DeserializeMeshCollider(std::istream& stream) -> DeserializedResult<MeshCollider>
 {
-    return DeserializeImpl<ConcaveCollider>(stream, MagicNumber::concaveCollider);
+    return DeserializeImpl<MeshCollider>(stream, MagicNumber::meshCollider);
 }
 
 auto DeserializeCubeMap(std::istream& stream) -> DeserializedResult<CubeMap>
@@ -72,9 +72,9 @@ auto DeserializeCubeMap(std::istream& stream) -> DeserializedResult<CubeMap>
     return DeserializeImpl<CubeMap>(stream, MagicNumber::cubeMap);
 }
 
-auto DeserializeHullCollider(std::istream& stream) -> DeserializedResult<HullCollider>
+auto DeserializeConvexHull(std::istream& stream) -> DeserializedResult<ConvexHull>
 {
-    return DeserializeImpl<HullCollider>(stream, MagicNumber::hullCollider);
+    return DeserializeImpl<ConvexHull>(stream, MagicNumber::convexHull);
 }
 
 auto DeserializeMesh(std::istream& stream) -> DeserializedResult<Mesh>

@@ -36,12 +36,12 @@ target_link_libraries(${NC_ENGINE_LIB}
         NcAsset
         NcMath
         NcUtility
+        NcJolt
         glfw
         imgui
         Taskflow
         OptickCore
         RtAudio
-        Jolt
         ${DILIGENT_LIBRARIES}
 )
 

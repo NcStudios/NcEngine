@@ -16,7 +16,7 @@ class EnvironmentBufferResourceTest : public DiligentEngineFixture
         EnvironmentBufferResourceTest()
         {
             constexpr auto variableName = "EnvironmentDataUniformBuffer";
-            const auto resourceDesc = nc::graphics::UniformBufferResourceDesc{
+            const auto resourceDesc = nc::graphics::UniformBufferDesc{
                 variableName,
                 Diligent::SHADER_TYPE::SHADER_TYPE_PIXEL
             };

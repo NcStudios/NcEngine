@@ -5,6 +5,7 @@ add_definitions(-DNC_ASSERT_ENABLED)
 
 add_subdirectory(ncasset)
 add_subdirectory(ncengine)
+add_subdirectory(ncjolt)
 add_subdirectory(ncmath)
 add_subdirectory(ncutility)
 

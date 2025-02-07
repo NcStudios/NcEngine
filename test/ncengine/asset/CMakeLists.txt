@@ -60,69 +60,37 @@ target_link_libraries(AudioClipAssetManager_tests
 
 add_test(AudioClipAssetManager_tests AudioClipAssetManager_tests)
 
-### ConcaveColliderAssetManager Tests ###
-add_executable(ConcaveColliderAssetManager_tests
-    ConcaveColliderAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/asset/manager/ConcaveColliderAssetManager.cpp
+### ConvexHullAssetManager Tests ###
+add_executable(ConvexHullAssetManager_tests
+    ConvexHullAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/asset/manager/ConvexHullAssetManager.cpp
 )
 
-target_compile_definitions(ConcaveColliderAssetManager_tests
+target_compile_definitions(ConvexHullAssetManager_tests
     PRIVATE
         NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
 )
 
-target_include_directories(ConcaveColliderAssetManager_tests
+target_include_directories(ConvexHullAssetManager_tests
     PRIVATE
         ${NC_INCLUDE_DIR}
         ${NC_INCLUDE_DIR}/ncengine
         ${NC_SOURCE_DIR}
 )
 
-target_compile_options(ConcaveColliderAssetManager_tests
+target_compile_options(ConvexHullAssetManager_tests
     PUBLIC
         ${NC_COMPILER_FLAGS}
 )
 
-target_link_libraries(ConcaveColliderAssetManager_tests
+target_link_libraries(ConvexHullAssetManager_tests
     PRIVATE
         NcAsset
         NcUtility
         gtest_main
 )
 
-add_test(ConcaveColliderAssetManager_tests ConcaveColliderAssetManager_tests)
-
-### HullColliderAssetManager Tests ###
-add_executable(HullColliderAssetManager_tests
-    HullColliderAssetManager_tests.cpp
-    ${NC_SOURCE_DIR}/asset/manager/HullColliderAssetManager.cpp
-)
-
-target_compile_definitions(HullColliderAssetManager_tests
-    PRIVATE
-        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
-)
-
-target_include_directories(HullColliderAssetManager_tests
-    PRIVATE
-        ${NC_INCLUDE_DIR}
-        ${NC_INCLUDE_DIR}/ncengine
-        ${NC_SOURCE_DIR}
-)
-
-target_compile_options(HullColliderAssetManager_tests
-    PUBLIC
-        ${NC_COMPILER_FLAGS}
-)
-
-target_link_libraries(HullColliderAssetManager_tests
-    PRIVATE
-        NcAsset
-        NcUtility
-        gtest_main
-)
-
-add_test(HullColliderAssetManager_tests HullColliderAssetManager_tests)
+add_test(ConvexHullAssetManager_tests ConvexHullAssetManager_tests)
 
 ### CubeMapAssetManager Tests ###
 add_executable(CubeMapAssetManager_tests
@@ -227,6 +195,38 @@ target_link_libraries(MeshAssetManager_tests
 )
 
 add_test(MeshAssetManager_tests MeshAssetManager_tests)
+
+### MeshColliderAssetManager Tests ###
+add_executable(MeshColliderAssetManager_tests
+    MeshColliderAssetManager_tests.cpp
+    ${NC_SOURCE_DIR}/asset/manager/MeshColliderAssetManager.cpp
+)
+
+target_compile_definitions(MeshColliderAssetManager_tests
+    PRIVATE
+        NC_TEST_COLLATERAL_DIRECTORY="${NC_TEST_COLLATERAL_DIRECTORY}"
+)
+
+target_include_directories(MeshColliderAssetManager_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_INCLUDE_DIR}/ncengine
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(MeshColliderAssetManager_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(MeshColliderAssetManager_tests
+    PRIVATE
+        NcAsset
+        NcUtility
+        gtest_main
+)
+
+add_test(MeshColliderAssetManager_tests MeshColliderAssetManager_tests)
 
 ### ShaderAssetManager Tests ###
 add_executable(ShaderAssetManager_tests
@@ -337,11 +337,11 @@ add_executable(NcAsset_tests
     ${NC_SOURCE_DIR}/asset/AssetData.cpp
     ${NC_SOURCE_DIR}/asset/manager/AssetUtilities.cpp
     ${NC_SOURCE_DIR}/asset/manager/AudioClipAssetManager.cpp
-    ${NC_SOURCE_DIR}/asset/manager/ConcaveColliderAssetManager.cpp
+    ${NC_SOURCE_DIR}/asset/manager/ConvexHullAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/CubeMapAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/FontAssetManager.cpp
-    ${NC_SOURCE_DIR}/asset/manager/HullColliderAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/MeshAssetManager.cpp
+    ${NC_SOURCE_DIR}/asset/manager/MeshColliderAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/ShaderAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/SkeletalAnimationAssetManager.cpp
     ${NC_SOURCE_DIR}/asset/manager/TextureAssetManager.cpp

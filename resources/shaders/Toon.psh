@@ -5,10 +5,10 @@
 
 #include "Lighting.fxh"
 
-Texture2D     TextureBufferData[];
-SamplerState  TextureBufferData_sampler; // By convention, texture samplers must use the '_sampler' suffix
+Texture2D     Textures[];
+SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
-cbuffer EnvironmentBufferData
+cbuffer EnvironmentProperties
 {
     float4x4 cameraViewProjection;
     float4x4 cameraInvProjection;
@@ -30,8 +30,8 @@ struct MaterialData
     float padding2;
 };
 
-StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
-StructuredBuffer<LightData> LightBufferData : register(t2);
+StructuredBuffer<MaterialData> Materials : register(t1);
+StructuredBuffer<LightData> Lights : register(t2);
 
 struct PSInput 
 { 
@@ -73,15 +73,15 @@ float3 HSVtoRGB(in float3 HSV)
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     // Get texture color
-    uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexIndex;
-    float4 Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
+    uint TexIndex = Materials[PSIn.MaterialIndex].diffuseTexIndex;
+    float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
 
     // Get hatching texture and tiling property
-    uint hatchTexIndex   = MaterialBufferData[PSIn.MaterialIndex].hatchTexIndex;
-    float hatchTiling = MaterialBufferData[PSIn.MaterialIndex].hatchTiling;
-    float hatchLight  = TextureBufferData[hatchTexIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchTiling).r;
-    float hatchMedium = TextureBufferData[hatchTexIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchTiling).g;
-    float hatchDark   = TextureBufferData[hatchTexIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchTiling).b;
+    uint hatchTexIndex = Materials[PSIn.MaterialIndex].hatchTexIndex;
+    float hatchTiling  = Materials[PSIn.MaterialIndex].hatchTiling;
+    float hatchLight   = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).r;
+    float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
+    float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
 
     float3 light = float3(0.0f);
     float3 combinedDiffuseColor = float3(0.0f);
@@ -92,7 +92,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = LightRadiance(LightBufferData[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
 
         combinedDiffuseColor += influence.diffuseColor;
         combinedDiffuseAmt += influence.diffuseAmt;

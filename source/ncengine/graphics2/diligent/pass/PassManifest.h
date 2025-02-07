@@ -18,28 +18,35 @@ class PassManifest
                               std::span<const MiscPassFlag::type> implementedMiscPasses);
 
         void RegisterPass(PassDesc desc);
+        void Clear();
+
         auto StaticMaterialPassDescs() const -> std::span<const PassDesc> { return m_staticMaterialPassDescs; }
         auto SkinnedMaterialPassDescs() const -> std::span<const PassDesc> { return m_skinnedMaterialPassDescs; }
         auto PostProcessPassDescs() const -> std::span<const PassDesc> { return m_postProcessPassDescs; }
         auto WireframePassDesc() const -> const PassDesc& { return m_wireframePassDesc; }
         auto ParticlePassDesc() const -> const PassDesc& { return m_particlePassDesc; }
-        auto ColorSinkCountMsaa() const -> uint32_t { return m_colorSinkCountMsaa; }
-        auto ColorSinkCount() const -> uint32_t { return m_colorSinkCount; }
-        auto DepthSinkCountMsaa() const -> uint32_t  { return m_depthSinkCountMsaa; }
-        auto DepthSinkCount() const -> uint32_t  { return m_depthSinkCount; }
-        void Clear();
+
+        auto ColorSinkCount() const -> uint32_t { return static_cast<uint32_t>(m_colorSinkIndices.size()); }
+        auto DepthSinkCount() const -> uint32_t  { return static_cast<uint32_t>(m_depthSinkIndices.size()); }
+        auto PostProcessSinkCount() const -> uint32_t { return static_cast<uint32_t>(m_postProcessSinkIndices.size()); }
+
+        auto GetColorTargetIndex(ColorTarget colorTarget) const -> uint32_t;
+        auto GetDepthTargetIndex(DepthTarget depthTarget) const -> uint32_t;
+        auto GetPostProcessTargetIndex(PostProcessTarget postProcessTarget) const -> uint32_t;
+
+        void RegisterTarget(ColorTarget colorTarget);
+        void RegisterTarget(DepthTarget depthTarget);
+        void RegisterTarget(PostProcessTarget postProcessTarget);
 
     private:
-        void SetMaxIndices(uint32_t colorRT, uint32_t depthRT, bool isMsaa);
         std::vector<size_t> m_ids;
         std::vector<PassDesc> m_staticMaterialPassDescs;
         std::vector<PassDesc> m_skinnedMaterialPassDescs;
         std::vector<PassDesc> m_postProcessPassDescs;
         PassDesc m_wireframePassDesc;
         PassDesc m_particlePassDesc;
-        uint32_t m_colorSinkCountMsaa;
-        uint32_t m_colorSinkCount;
-        uint32_t m_depthSinkCountMsaa;
-        uint32_t m_depthSinkCount;
+        std::vector<ColorTarget> m_colorSinkIndices;
+        std::vector<DepthTarget> m_depthSinkIndices;
+        std::vector<PostProcessTarget> m_postProcessSinkIndices;
 };
 } // namespace nc::graphics

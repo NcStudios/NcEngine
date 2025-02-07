@@ -2,6 +2,7 @@ add_subdirectory(external/lz4)
 add_subdirectory(external/rtaudio)
 add_subdirectory(ncutility)
 add_subdirectory(ncmath)
+add_subdirectory(ncjolt)
 add_subdirectory(ncasset)
 
 if(NC_BUILD_NCCONVERT)

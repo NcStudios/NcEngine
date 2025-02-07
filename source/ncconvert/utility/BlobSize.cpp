@@ -63,10 +63,10 @@ auto GetBlobSize(const asset::AudioClip& asset) -> size_t
     return baseSize + asset.samplesPerChannel * sizeof(double) * 2ull + sizeof(size_t) * 2ull;
 }
 
-auto GetBlobSize(const asset::ConcaveCollider& asset) -> size_t
+auto GetBlobSize(const asset::MeshCollider& asset) -> size_t
 {
-    constexpr auto baseSize = sizeof(asset::ConcaveCollider::extents) + sizeof(asset::ConcaveCollider::maxExtent) + sizeof(size_t);
-    return baseSize + asset.triangles.size() * sizeof(Triangle);
+    constexpr auto baseSize = sizeof(asset::MeshCollider::extents) + sizeof(asset::MeshCollider::maxExtent) + sizeof(size_t);
+    return baseSize + asset.blob.size() * sizeof(uint8_t);
 }
 
 auto GetBlobSize(const asset::CubeMap& asset) -> size_t
@@ -75,10 +75,10 @@ auto GetBlobSize(const asset::CubeMap& asset) -> size_t
     return baseSize + asset.pixelData.size();
 }
 
-auto GetBlobSize(const asset::HullCollider& asset) -> size_t
+auto GetBlobSize(const asset::ConvexHull& asset) -> size_t
 {
-    constexpr auto baseSize = sizeof(asset::HullCollider::extents) + sizeof(asset::HullCollider::maxExtent) + sizeof(size_t);
-    return  baseSize + asset.vertices.size() * sizeof(Vector3);
+    constexpr auto baseSize = sizeof(asset::ConvexHull::extents) + sizeof(asset::ConvexHull::maxExtent) + sizeof(size_t);
+    return baseSize + asset.blob.size() * sizeof(uint8_t);
 }
 
 auto GetBlobSize(const asset::Mesh& asset) -> size_t

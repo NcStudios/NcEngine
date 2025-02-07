@@ -1,6 +1,6 @@
 /**
  * @file Quaternion.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -13,42 +13,42 @@ struct Quaternion
 {
     float x, y, z, w;
 
-    Quaternion()
+    constexpr explicit Quaternion()
         : x{0.0f}, y{0.0f}, z{0.0f}, w{1.0f}
     {
     }
 
-    Quaternion(float X, float Y, float Z, float W);
+    explicit Quaternion(float X, float Y, float Z, float W);
 
-    Vector3 ToEulerAngles() const noexcept;
+    auto ToEulerAngles() const noexcept -> Vector3;
     void ToAxisAngle(Vector3* axisOut, float* angleOut) const noexcept;
 
-    static Quaternion Identity() { return Quaternion{0.0f, 0.0f, 0.0f, 1.0f}; }
-    static Quaternion FromEulerAngles(const Vector3& angles);
-    static Quaternion FromEulerAngles(float x, float y, float z);
-    static Quaternion FromAxisAngle(const Vector3& axis, float radians); // axis cannot be zero
+    static constexpr auto Identity() -> Quaternion { return Quaternion{}; }
+    static auto FromEulerAngles(const Vector3& angles) -> Quaternion;
+    static auto FromEulerAngles(float x, float y, float z) -> Quaternion;
+    static auto FromAxisAngle(const Vector3& axis, float radians) -> Quaternion; // axis cannot be zero
 };
 
 /** @brief Return a normalized quaternion. */
-Quaternion Normalize(const Quaternion& quat);
+auto Normalize(const Quaternion& quat) -> Quaternion;
 
 /** 
  * @brief Multiplies two quaternions.
  * @note For consistency with DirectXMath, the argument order is reversed from the order in which they are
  *       multiplied. In other words, this computes the lhs rotation followed by rhs (or the product rhs*lhs).
  */
-Quaternion Multiply(const Quaternion& lhs, const Quaternion& rhs);
+auto Multiply(const Quaternion& lhs, const Quaternion& rhs) -> Quaternion;
 
 /** @brief Finds rotation between lhs and rhs such that result * lhs == rhs. */
-Quaternion Difference(const Quaternion& lhs, const Quaternion& rhs);
+auto Difference(const Quaternion& lhs, const Quaternion& rhs) -> Quaternion;
 
 /** @brief Interpolates from lhs to rhs. */
-Quaternion Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor);
+auto Slerp(const Quaternion& lhs, const Quaternion& rhs, float factor) -> Quaternion;
 
 /** @brief Slerp from Identity to quat. */
-Quaternion Scale(const Quaternion& quat, float factor);
+auto Scale(const Quaternion& quat, float factor) -> Quaternion;
 
-inline bool operator==(const Quaternion& lhs, const Quaternion& rhs)
+inline auto operator==(const Quaternion& lhs, const Quaternion& rhs) -> bool
 {
     return FloatEqual(lhs.x, rhs.x) &&
            FloatEqual(lhs.y, rhs.y) &&
@@ -56,7 +56,7 @@ inline bool operator==(const Quaternion& lhs, const Quaternion& rhs)
            FloatEqual(lhs.w, rhs.w);
 }
 
-inline bool operator!=(const Quaternion& lhs, const Quaternion& rhs)
+inline auto operator!=(const Quaternion& lhs, const Quaternion& rhs) -> bool
 {
     return !(lhs == rhs);
 }

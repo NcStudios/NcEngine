@@ -245,9 +245,9 @@ class VehicleController : public FreeComponent
 
 class WormController : public FreeComponent
 {
-    static constexpr auto force = 250.0f;
-    static constexpr auto torqueForce = 250.0f;
-    static constexpr auto jumpForce = 5000.0f;
+    static constexpr auto force = 300.0f;
+    static constexpr auto torqueForce = 10000.0f;
+    static constexpr auto jumpForce = 7000.0f;
     static constexpr auto jumpCooldownTime = 0.3f;
 
     public:
@@ -272,7 +272,7 @@ class WormController : public FreeComponent
             if(!m_jumpOnCooldown && KeyDown(input::KeyCode::Space))
             {
                 m_jumpOnCooldown = true;
-                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 2.0f;
+                const auto dir = Normalize(world.Get<Transform>(ParentEntity()).Forward()) * jumpForce * 3.0f;
                 body.AddImpulse(dir);
             }
 
@@ -329,7 +329,7 @@ auto BuildWorm(ecs::Ecs world) -> Entity
     constexpr auto segment1Scale = 0.8f;
     constexpr auto segment2Scale = 0.6f;
     constexpr auto segment3Scale = 0.4f;
-    auto& bodyHead     = makeNode("Worm Head",       1.0f, headScale, PlayerLayer, 0.8f, RigidBodyFlags::DisableSleeping);
+    auto& bodyHead     = makeNode("Worm Head",       1.0f, headScale, PlayerLayer, 0.5f, RigidBodyFlags::DisableSleeping);
     auto& bodySegment1 = makeNode("Worm Segment 1", -0.9f, segment1Scale);
     auto& bodySegment2 = makeNode("Worm Segment 2", -1.6f, segment2Scale);
     auto& bodySegment3 = makeNode("Worm Segment 3", -2.1f, segment3Scale);
@@ -426,10 +426,10 @@ auto BuildVehicle(ecs::Ecs world) -> Entity
     const auto wheelBR = world.Emplace<Entity>({.position = brPosition, .scale = wheelScale, .parent = car, .tag = "BR"});
     const auto carMesh = world.Emplace<Entity>({.scale = carScale, .parent = car, .tag = "CarMesh"});
 
-    world.Emplace<StaticMesh>(wheelFL, mesh::Wheel, material::Yellow);
-    world.Emplace<StaticMesh>(wheelFR, mesh::Wheel, material::Yellow);
-    world.Emplace<StaticMesh>(wheelBL, mesh::Wheel, material::Yellow);
-    world.Emplace<StaticMesh>(wheelBR, mesh::Wheel, material::Yellow);
+    world.Emplace<StaticMesh>(wheelFL, mesh::Wheel, material::Orange);
+    world.Emplace<StaticMesh>(wheelFR, mesh::Wheel, material::Orange);
+    world.Emplace<StaticMesh>(wheelBL, mesh::Wheel, material::Orange);
+    world.Emplace<StaticMesh>(wheelBR, mesh::Wheel, material::Orange);
     world.Emplace<StaticMesh>(carMesh, mesh::Cube,  material::Green);
 
     CharacterEntities.push_back(car);
@@ -627,6 +627,14 @@ void BuildBridge(ecs::Ecs world)
         }
     );
 
+    world.Emplace<RigidBody>(
+        ramp2,
+        nc::Shape::MakeConvexHull(convex_hull::Ramp),
+        nc::RigidBodyInfo{
+            .type = BodyType::Static
+        }
+    );
+
     // Bridge
     const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
     auto makePlank = [&world, bridgeParent](const Vector3& pos, const Vector3& scale) -> decltype(auto)
@@ -769,7 +777,7 @@ void BuildRotatingSteps(ecs::Ecs world)
 
 void BuildHalfPipes(ecs::Ecs world)
 {
-    const auto halfPipe2 = world.Emplace<Entity>({
+    const auto halfPipe = world.Emplace<Entity>({
         .position = Vector3{15.0f, 3.7f, 40.5f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, -0.173f),
         .scale = Vector3{10.0f, 3.0f, 5.0f},
@@ -777,7 +785,8 @@ void BuildHalfPipes(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(halfPipe2, mesh::HalfPipe, material::Blue);
+    world.Emplace<StaticMesh>(halfPipe, mesh::HalfPipe, material::Blue);
+    world.Emplace<RigidBody>(halfPipe, Shape::MakeMesh(mesh_collider::Halfpipe));
 }
 
 void BuildHinge(ecs::Ecs world)
