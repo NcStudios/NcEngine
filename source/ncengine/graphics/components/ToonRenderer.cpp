@@ -12,7 +12,7 @@ auto MakeMaterialView(const nc::graphics::ToonMaterial& material) -> nc::graphic
         textureService->Acquire(material.baseColor),
         material.outlineWidth,
         textureService->Acquire(material.hatching),
-        material.hatchingTiling
+        material.hatchTiling
     };
 }
 } // anonymous namespace
@@ -57,9 +57,9 @@ void ToonRenderer::SetHatching(std::string texturePath)
     m_coldData->material.hatching = std::move(texturePath);
 }
 
-void ToonRenderer::SetHatchingTiling(uint32_t tiling)
+void ToonRenderer::SethatchTiling(uint32_t tiling)
 {
-    m_materialView.hatchingTiling = tiling;
-    m_coldData->material.hatchingTiling = tiling;
+    m_materialView.hatchTiling = tiling;
+    m_coldData->material.hatchTiling = tiling;
 }
 } // namespace nc::graphics

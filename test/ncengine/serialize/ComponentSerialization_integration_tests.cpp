@@ -148,11 +148,11 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
-            .diffuseTexture = nc::asset::g_mockTextureView,
-            .normalTexture = nc::asset::g_mockTextureView,
-            .gradientStart = nc::Vector3::Up(),
-            .gradientEnd = nc::Vector3::Right(),
-            .normalIntensity = 3.5f
+            .diffuseTex = nc::asset::g_mockTextureView,
+            .normalTex = nc::asset::g_mockTextureView,
+            .hatchTex = nc::asset::g_mockTextureView,
+            .normalIntensity = 3.5f,
+            .hatchTiling = 3.5f,
         }
     };
 
@@ -170,14 +170,14 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
-    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTexture.id, actualMaterialProperties.diffuseTexture.id);
-    EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
-    EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
-    EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
-    EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
-    EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
+    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalTex.id, actualMaterialProperties.normalTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTex.id, actualMaterialProperties.hatchTex.id);
+    EXPECT_EQ(200, actualMaterialProperties.diffuseTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.normalTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.hatchTex.index);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
-    EXPECT_EQ(expectedMaterialDesc.properties.hatchingTiling, actualMaterialProperties.hatchingTiling);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -191,12 +191,11 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
-            .diffuseTexture = nc::asset::g_mockTextureView,
-            .normalTexture = nc::asset::g_mockTextureView,
-            .gradientStart = nc::Vector3::Up(),
-            .gradientEnd = nc::Vector3::Right(),
+            .diffuseTex = nc::asset::g_mockTextureView,
+            .normalTex = nc::asset::g_mockTextureView,
+            .hatchTex = nc::asset::g_mockTextureView,
             .normalIntensity = 3.5f,
-            .hatchingTiling = 10.0f
+            .hatchTiling = 10.0f
         }
     };
 
@@ -215,14 +214,14 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
-    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTexture.id, actualMaterialProperties.diffuseTexture.id);
-    EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
-    EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
-    EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
-    EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
-    EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
+    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalTex.id, actualMaterialProperties.normalTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTex.id, actualMaterialProperties.hatchTex.id);
+    EXPECT_EQ(200, actualMaterialProperties.diffuseTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.normalTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.hatchTex.index);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
-    EXPECT_EQ(expectedMaterialDesc.properties.hatchingTiling, actualMaterialProperties.hatchingTiling);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)

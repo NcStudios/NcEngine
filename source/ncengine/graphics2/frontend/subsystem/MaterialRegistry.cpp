@@ -10,12 +10,11 @@ namespace
 auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::MaterialData
 {
     return nc::graphics::MaterialData{
-        .gradientStart = properties.gradientStart,
-        .diffuseTexIndex = properties.diffuseTexture.index,
-        .gradientEnd = properties.gradientEnd,
-        .normalTexIndex = properties.normalTexture.index,
+        .diffuseTexIndex = properties.diffuseTex.index,
+        .normalTexIndex = properties.normalTex.index,
+        .hatchTexIndex = properties.hatchTex.index,
         .normalIntensity = properties.normalIntensity,
-        .hatchingTiling = properties.hatchingTiling
+        .hatchTiling = properties.hatchTiling
     };
 }
 } // anonymous namespace

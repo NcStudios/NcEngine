@@ -20,14 +20,14 @@ cbuffer EnvironmentBufferData
 
 struct MaterialData
 {
-    float3 gradientStart;
-    uint diffuseTexture;
-    float3 gradientEnd;
-    uint hatchingIndex;
+    uint diffuseTexIndex;
+    uint normalTexIndex;
+    uint hatchTexIndex;
     float normalIntensity;
-    float hatchingTiling;
+    float hatchTiling;
+    float padding;
+    float padding1;
     float padding2;
-    float padding3;
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
@@ -49,9 +49,9 @@ struct PSOutput
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
-    uint hatchingIndex = MaterialBufferData[PSIn.MaterialIndex].hatchingIndex;
-    Color = normalize(TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV));
+    uint normalTexIndex = MaterialBufferData[PSIn.MaterialIndex].normalTexIndex;
+    Color = normalize(TextureBufferData[normalTexIndex].Sample(TextureBufferData_sampler, PSIn.UV));
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-    float3 adjustedVertexNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity;
+    float3 adjustedVertexNormals = PSIn.Normal * MaterialBufferData[PSIn.MaterialIndex].normalIntensity * Color.rgb;
     PSOut.Color = float4(adjustedVertexNormals, 1-dot(PSIn.Normal, -viewDir));
 }

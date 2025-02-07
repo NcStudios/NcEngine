@@ -9,8 +9,8 @@ struct ObjectData
     // Textures
     uint baseColorIndex;
     uint outlineWidth;
-    uint hatchingIndex;
-    float hatchingTiling;
+    uint hatchTexIndex;
+    float hatchTiling;
 
     uint skeletalAnimationIndex;
 };
@@ -188,7 +188,7 @@ void main()
     // Process inputs
     vec4 baseColor = MaterialColor(objectBuffer.objects[inObjectInstance].baseColorIndex, 1u);
     float alpha = baseColor.a;
-    float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchingIndex, objectBuffer.objects[inObjectInstance].hatchingTiling).x;
+    float hatchingTexture = MaterialColor(objectBuffer.objects[inObjectInstance].hatchTexIndex, objectBuffer.objects[inObjectInstance].hatchTiling).x;
     vec3 N = normalize(inNormal);
 
     vec4 result = vec4(0.0f);

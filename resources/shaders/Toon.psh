@@ -20,14 +20,14 @@ cbuffer EnvironmentBufferData
 
 struct MaterialData
 {
-    float3 gradientStart;
-    uint diffuseTexture;
-    float3 gradientEnd;
-    uint hatchingIndex;
+    uint diffuseTexIndex;
+    uint normalTexIndex;
+    uint hatchTexIndex;
     float normalIntensity;
-    float hatchingTiling;
+    float hatchTiling;
+    float padding;
+    float padding1;
     float padding2;
-    float padding3;
 };
 
 StructuredBuffer<MaterialData> MaterialBufferData : register(t1);
@@ -73,15 +73,15 @@ float3 HSVtoRGB(in float3 HSV)
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     // Get texture color
-    uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexture;
+    uint TexIndex = MaterialBufferData[PSIn.MaterialIndex].diffuseTexIndex;
     float4 Color = TextureBufferData[TexIndex].Sample(TextureBufferData_sampler, PSIn.UV);
 
     // Get hatching texture and tiling property
-    uint hatchingIndex   = MaterialBufferData[PSIn.MaterialIndex].hatchingIndex;
-    float hatchingTiling = MaterialBufferData[PSIn.MaterialIndex].hatchingTiling;
-    float hatchLight  = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).r;
-    float hatchMedium = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).g;
-    float hatchDark   = TextureBufferData[hatchingIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchingTiling).b;
+    uint hatchTexIndex   = MaterialBufferData[PSIn.MaterialIndex].hatchTexIndex;
+    float hatchTiling = MaterialBufferData[PSIn.MaterialIndex].hatchTiling;
+    float hatchLight  = TextureBufferData[hatchTexIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchTiling).r;
+    float hatchMedium = TextureBufferData[hatchTexIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchTiling).g;
+    float hatchDark   = TextureBufferData[hatchTexIndex].Sample(TextureBufferData_sampler, PSIn.UV * hatchTiling).b;
 
     float3 light = float3(0.0f);
     float3 combinedDiffuseColor = float3(0.0f);
@@ -112,17 +112,17 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     // Light banding (hatching)
     if (combinedDiffuseAmt < 0.1f)
     {
-        Color.rbg = Color.rbg * max((hatchMedium), combinedShadowColor);
+        Color.rbg = Color.rbg * hatchMedium;
     }
     else if (combinedDiffuseAmt < 0.3f)
     {
-        Color.rbg = Color.rbg * max((hatchLight), combinedShadowColor);
+        Color.rbg = Color.rbg * hatchLight;
     }
 
     float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b));
-    colHsv.y *= (0.0);
+    colHsv.y *= (1.25f);
+    colHsv.z *= (1.25f);
     Color.rgb = HSVtoRGB(colHsv.rgb);
 
     PSOut.Color = Color * 2.0f;
-    // PSOut.Color = float4 (combinedDiffuseAmt, combinedDiffuseAmt, combinedDiffuseAmt, 1.0);
 }

@@ -76,40 +76,36 @@ auto MaterialPassesWidget(nc::MaterialPassFlags& passes) -> bool
     return modified;
 }
 
-auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
+auto MaterialPropertiesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
 {
     /** @todo 353 Get asset views from ncAsset, once implemented */
     constexpr auto assetType = nc::asset::AssetType::Texture;
     const auto textureAssets = nc::ui::editor::GetLoadedAssets(assetType);
-    auto diffusePath = std::string{ncAsset.GetAssetPath(assetType, properties.diffuseTexture.id)};
-    auto normalPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTexture.id)};
+    auto diffuseTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.diffuseTex.id)};
+    auto normalTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTex.id)};
+    auto hatchTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.hatchTex.id)};
     auto modified = false;
-    if (nc::ui::Combobox(diffusePath, "diffuse", textureAssets))
+    if (nc::ui::Combobox(diffuseTexPath, "diffuse", textureAssets))
     {
         modified = true;
-        properties.diffuseTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffusePath);
+        properties.diffuseTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffuseTexPath);
     }
 
-    if (nc::ui::Combobox(normalPath, "normal", textureAssets))
+    if (nc::ui::Combobox(normalTexPath, "normal", textureAssets))
     {
         modified = true;
-        properties.normalTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalPath);
+        properties.normalTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalTexPath);
     }
 
-    return modified;
-}
+    if (nc::ui::Combobox(hatchTexPath, "hatch", textureAssets))
+    {
+        modified = true;
+        properties.hatchTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(hatchTexPath);
+    }
 
-auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
-{
-    auto modified = nc::ui::InputColor3(properties.gradientStart, "start");
-    modified = nc::ui::InputColor3(properties.gradientEnd, "end") || modified;
-    modified = nc::ui::DragFloat(properties.hatchingTiling, "hatchingTiling", 1.0f, 1.0f, 30.0f);
-    return modified;
-}
+    modified |= nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 1.0f, 120.0f);
+    modified |= nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f);
 
-auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
-{
-    auto modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f);
     return modified;
 }
 
@@ -144,23 +140,9 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         }
 
         ImGui::Separator();
-        if (ImGui::TreeNodeEx("Textures"))
+        if (ImGui::TreeNodeEx("Material Properties"))
         {
-            modified = MaterialTexturesWidget(properties, ncAsset) || modified;
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Gradient Color"))
-        {
-            modified = MaterialColorWidget(properties) || modified;
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Outline"))
-        {
-            modified = MaterialOutlineWidget(properties) || modified;
+            modified = MaterialPropertiesWidget(properties, ncAsset) || modified;
             ImGui::TreePop();
         }
 
