@@ -22,6 +22,7 @@ asset::MeshView Capsule{};
 asset::MeshView Cave{};
 asset::MeshView Cube{};
 asset::MeshView Guy{};
+asset::MeshView Guy2{};
 asset::MeshView HalfPipe{};
 asset::MeshView Ogre{};
 asset::MeshView Plane{};
@@ -38,6 +39,7 @@ MaterialDesc Cave{"CaveMaterial"};
 MaterialDesc Default{"DefaultMaterial"};
 MaterialDesc Green{"GreenMaterial"};
 MaterialDesc Guy{"GuyMaterial"};
+MaterialDesc Guy2{"Guy2Material"};
 MaterialDesc Ogre{"OgreMaterial"};
 MaterialDesc Orange{"OrangeMaterial"};
 MaterialDesc Purple{"PurpleMaterial"};
@@ -120,6 +122,7 @@ void InitializeResources()
     {
         "cave/BaseColor.nca",
         "guy_base_color.nca",
+        "guy_2_base_color.nca",
         "linear_hatch.nca",
         "ogre/BaseColor.nca",
         "skeleton/BaseColor.nca",
@@ -139,7 +142,8 @@ void InitializeResources()
         "ogre/Normal.nca",
         "skeleton/Normal.nca",
         "cave/Normal.nca",
-        "guy_normal.nca"
+        "guy_normal.nca",
+        "guy_2_normal.nca",
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
@@ -153,6 +157,7 @@ void ReloadPrefabs()
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
     mesh::Guy = asset::AcquireMeshAsset(mesh::GuyPath);
+    mesh::Guy2 = asset::AcquireMeshAsset(mesh::Guy2Path);
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
     mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
     mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
@@ -182,6 +187,12 @@ void ReloadPrefabs()
     material::Guy.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");;
     material::Guy.properties.normalIntensity = .39f;
     material::Guy.properties.hatchTiling = 12.0f;
+
+    material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
+    material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");;
+    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");;
+    material::Guy2.properties.normalIntensity = .39f;
+    material::Guy2.properties.hatchTiling = 12.0f;
 
     material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
     material::Ogre.properties.normalTex = normal;

@@ -102,9 +102,9 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     }
 
     // Light banding (specular, shadow, diffuse)
-    float diffuseBlendFactor = smoothstep(0.00f, 0.1f, combinedDiffuseAmt);
+    float diffuseBlendFactor = smoothstep(0.4f, 0.5f, combinedDiffuseAmt);
     float specularBlendFactor = smoothstep(0.8f, 1.0f, combinedDiffuseAmt);
-    float3 blendedDiffuse = lerp((combinedShadowColor), combinedDiffuseColor, diffuseBlendFactor);
+    float3 blendedDiffuse = lerp(combinedShadowColor, combinedDiffuseColor, diffuseBlendFactor);
     float3 blendedSpecular = lerp(combinedDiffuseColor, combinedSpecularColor, specularBlendFactor);
     light += lerp(blendedDiffuse, blendedSpecular, specularBlendFactor);
     Color.rgb *= light;
@@ -121,7 +121,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b));
     colHsv.y *= (1.25f);
-    colHsv.z *= (1.25f);
+    // colHsv.z *= (1.25f);
     Color.rgb = HSVtoRGB(colHsv.rgb);
 
     PSOut.Color = Color * 2.0f;

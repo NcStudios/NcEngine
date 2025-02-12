@@ -426,12 +426,12 @@ void NcGraphicsImpl2::Run()
         renderState.meshRenderState.skinnedMeshBatches
     );
 
-    m_passBackend.RenderWireframe(
-        context,
-        swapChain,
-        m_shaderBindings.GetPerPassSignature(),
-        renderState.wireframeRenderState
-    );
+    // m_passBackend.RenderWireframe(
+    //     context,
+    //     swapChain,
+    //     m_shaderBindings.GetPerPassSignature(),
+    //     renderState.wireframeRenderState
+    // );
 
     m_passBackend.RenderParticle(
         context,

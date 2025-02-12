@@ -29,6 +29,7 @@ extern asset::AssetId SkeletonWalkBackward;
 namespace mesh
 {
 constexpr auto GuyPath = "guy.nca";
+constexpr auto Guy2Path = "guy2.nca";
 constexpr auto HalfPipePath = "halfpipe.nca";
 constexpr auto RampPath = "ramp.nca";
 constexpr auto OgrePath = "ogre.nca";
@@ -40,6 +41,7 @@ extern asset::MeshView Cube;
 extern asset::MeshView Sphere;
 extern asset::MeshView Capsule;
 extern asset::MeshView Guy;
+extern asset::MeshView Guy2;
 extern asset::MeshView Plane;
 extern asset::MeshView Wheel;
 extern asset::MeshView HalfPipe;
@@ -57,6 +59,7 @@ extern MaterialDesc Cave;
 extern MaterialDesc Default;
 extern MaterialDesc Green;
 extern MaterialDesc Guy;
+extern MaterialDesc Guy2;
 extern MaterialDesc Ogre;
 extern MaterialDesc Orange;
 extern MaterialDesc Purple;

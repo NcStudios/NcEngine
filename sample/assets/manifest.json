@@ -40,6 +40,13 @@
             }
         },
         {
+            "sourcePath": "raw/model/guy2.fbx",
+            "assetName": "mesh/guy2",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
             "sourcePath": "raw/model/halfpipe.fbx",
             "assetName": "mesh/halfpipe",
             "options": {
@@ -134,6 +141,14 @@
         {
             "sourcePath": "raw/image/guy_normal.png",
             "assetName": "texture/guy_normal.nca"
+        },
+        {
+            "sourcePath": "raw/image/guy_2_base_color.png",
+            "assetName": "texture/guy_2_base_color"
+        },
+        {
+            "sourcePath": "raw/image/guy_2_normal.png",
+            "assetName": "texture/guy_2_normal.nca"
         },
         {
             "sourcePath": "raw/image/linear_hatch.png",

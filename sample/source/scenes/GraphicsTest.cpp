@@ -33,13 +33,21 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<PointLight>(lvHandle, Vector3(0.489f, 0.784f, 0.804f), Vector3(1.0f, 0.745f, 0.910f), Vector3(0.265f, 0.514f, 0.529f), 23.7f);
 
     const auto guy = world.Emplace<Entity>({
-        .position = Vector3{6.0f, 0.3f, 4.0f},
+        .position = Vector3{9.0f, 0.3f, 4.0f},
         .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
         .scale = Vector3{3.0f, 3.0f, 3.0f},
         .tag = "guy"
     });
     
     world.Emplace<StaticMesh>(guy, mesh::Guy, material::Guy);
+
+    const auto guy2 = world.Emplace<Entity>({
+        .position = Vector3{6.0f, 0.3f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .tag = "guy2"
+    });
+    world.Emplace<StaticMesh>(guy2, mesh::Guy2, material::Guy2);
 
     // Ogre
     {
