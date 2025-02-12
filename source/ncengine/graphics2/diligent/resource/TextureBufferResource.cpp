@@ -50,9 +50,16 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
 
     for (const auto& [texture, id, flags] : textures)
     {
-        auto subResource = ToTextureSubResData(texture);
-        auto texData = Diligent::TextureData{&subResource, 1, &context};
-        auto desc = ToTextureDesc(texture, ToTextureFormat(flags));
+        auto mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texture.width, texture.height)))) + 1;
+        auto mipSubResources = std::vector<Diligent::TextureSubResData>{mipLevels};
+
+        for (auto& mipLevel : mipSubResources)
+        {
+            mipLevel = ToTextureSubResData(texture);
+        }
+
+        auto texData = Diligent::TextureData{mipSubResources.data(), mipLevels, &context};
+        auto desc = ToTextureDesc(texture, ToTextureFormat(flags), mipLevels);
         auto& textureHandle = m_textures.emplace_back();
         device.CreateTexture(desc, &texData, &textureHandle);
         if (!textureHandle)
@@ -67,6 +74,11 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
             Diligent::RESOURCE_STATE_SHADER_RESOURCE,
             Diligent::STATE_TRANSITION_FLAG_UPDATE_STATE
         );
+
+        if (mipLevels > 1)
+        {
+            context.GenerateMips(textureHandle->GetDefaultView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE));
+        }
     }
 
     context.TransitionResourceStates(static_cast<uint32_t>(barriers.size()), barriers.data());

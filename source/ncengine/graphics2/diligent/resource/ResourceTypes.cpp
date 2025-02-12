@@ -91,7 +91,7 @@ auto ToTextureFormat(nc::asset::asset_flags_type flags) -> Diligent::TEXTURE_FOR
         : Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 }
 
-auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format) -> Diligent::TextureDesc
+auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT format, uint32_t mipLevels) -> Diligent::TextureDesc
 {
     /** @todo 750 Add mipmaps */
     auto texDesc = Diligent::TextureDesc{
@@ -103,7 +103,12 @@ auto ToTextureDesc(const nc::asset::Texture& texture, Diligent::TEXTURE_FORMAT f
         format
     };
 
+    texDesc.MipLevels = mipLevels;
     texDesc.BindFlags = Diligent::BIND_FLAGS::BIND_SHADER_RESOURCE;
+    if (mipLevels > 1) 
+    {
+        texDesc.MiscFlags = Diligent::MISC_TEXTURE_FLAG_GENERATE_MIPS;
+    }
     return texDesc;
 }
 
