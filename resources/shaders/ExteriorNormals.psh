@@ -52,6 +52,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     uint normalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
     Color = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV));
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-    float3 adjustedNormals = PSIn.Normal * Materials[PSIn.MaterialIndex].normalIntensity * Color.rgb;
+
+    float3 adjustedNormals = Materials[PSIn.MaterialIndex].normalIntensity * normalize(PSIn.Normal);
     PSOut.Color = float4(adjustedNormals, 1-dot(PSIn.Normal, -viewDir));
 }

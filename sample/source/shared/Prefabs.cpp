@@ -191,8 +191,8 @@ void ReloadPrefabs()
     material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
     material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");;
     material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");;
-    material::Guy2.properties.normalIntensity = .39f;
-    material::Guy2.properties.hatchTiling = 12.0f;
+    material::Guy2.properties.normalIntensity = 0.09f;
+    material::Guy2.properties.hatchTiling = 10.0f;
 
     material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
     material::Ogre.properties.normalTex = normal;

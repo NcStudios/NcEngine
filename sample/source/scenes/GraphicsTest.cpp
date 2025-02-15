@@ -42,7 +42,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<StaticMesh>(guy, mesh::Guy, material::Guy);
 
     const auto guy2 = world.Emplace<Entity>({
-        .position = Vector3{6.0f, 0.3f, 4.0f},
+        .position = Vector3{6.0f, 1.8f, 4.0f},
         .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
         .scale = Vector3{3.0f, 3.0f, 3.0f},
         .tag = "guy2"

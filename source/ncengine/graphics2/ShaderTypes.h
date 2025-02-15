@@ -65,6 +65,7 @@ struct SkinnedMeshInstanceData
 struct TransformData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX invModelMatrix = DirectX::XMMatrixIdentity();
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).

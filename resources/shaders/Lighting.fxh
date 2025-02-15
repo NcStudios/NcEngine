@@ -45,10 +45,6 @@ LightInfluence PointLightRadiance(LightData light, float3 fragWorldPos, float3 c
     float normalDotLightVec = pow(saturate(dot(normal, lightVec)), 0.75f); // Light influence is proportional to the angle the light hits the fragment
     float diffuseTotal = normalDotLightVec;
 
-     // Apply smoothstep for midtone emphasis
-    diffuseTotal = 0.3 * (1.0 - cos(diffuseTotal * 3.14159)); // Apply gamma correction (value < 1 boosts midtones)
-
-
     // Specular
     float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
     float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal

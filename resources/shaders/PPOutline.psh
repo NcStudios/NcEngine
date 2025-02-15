@@ -81,7 +81,7 @@ float OutlineDepth(Texture2D depthTex, float normalThreshold, SamplerState smplr
     return depthEdge > modulateDepthThreshold ? 1.0f : 0.0f;
 }
 
-float OutlineNormals(Texture2D normalsTex, float normalThreshold, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
+float OutlineNormals(Texture2D normalsTex, float intensity, SamplerState smplr, float2 LLUV, float2 URUV, float2 LRUV, float2 ULUV)
 {
     // Sample normals texture at four corners
     float3 normalsLL = normalsTex.Sample(smplr, LLUV);
@@ -95,7 +95,7 @@ float OutlineNormals(Texture2D normalsTex, float normalThreshold, SamplerState s
     float normalsEdge = sqrt(dot(normalsDiagDif0, normalsDiagDif0) + dot(normalsDiagDif1, normalsDiagDif1));
 
     // Modulate by threshold
-    return normalsEdge > normalsThreshold ? 1.0f : 0.0f;
+    return normalsEdge > normalsThreshold * intensity ? 1.0f : 0.0f;
 }
 
 void main(in PSInput PSIn, out PSOutput PSOut)
@@ -104,7 +104,8 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     SamplerState smplr = ColorSinks_sampler;
     Texture2D depthTex = DepthSinks[depthRT1];
     Texture2D colorTex = ColorSinks[colorRT1];
-    Texture2D normalTex = ColorSinks[colorRT2];
+    Texture2D exteriorNormalTex = ColorSinks[colorRT2];
+    Texture2D interiorNormalTex = ColorSinks[colorRT3];
 
     // Get screen dimensions
     uint screenWidth, screenHeight;
@@ -122,14 +123,25 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float2 ULUV = PSIn.UV + float2(-texelSize.x * outlineWidthHalfFloor, texelSize.y * outlineWidthHalfCeil);
 
     // Get depth outline. Calculate the view dir to modulate depth to fix some artifacts.
-    float normalThresholdForDepth = GetViewDirDepthOffset(normalTex.Sample(smplr, PSIn.UV).a);
+    float normalThresholdForDepth = GetViewDirDepthOffset(exteriorNormalTex.Sample(smplr, PSIn.UV).a);
     float depthEdge = OutlineDepth(depthTex, normalThresholdForDepth, smplr, LLUV, URUV, LRUV, ULUV);
 
     // Get the normals outline.
-    float normalsEdge = OutlineNormals(normalTex, normalThresholdForDepth, smplr, LLUV, URUV, LRUV, ULUV);
+    float normalsEdge = OutlineNormals(exteriorNormalTex, 1.0f, smplr, LLUV, URUV, LRUV, ULUV);
+
+    // Get the normals outline for fine lines.
+    outlineWidthHalfFloor = outlineWidth * 0.05f;
+    outlineWidthHalfCeil = outlineWidth * 0.08f;
+
+    // Get UV coords for four texels in a 'four corners' shape surrounding the current texel
+    LLUV = PSIn.UV - float2(texelSize.x, texelSize.y) * outlineWidthHalfFloor;
+    URUV = PSIn.UV + float2(texelSize.x, texelSize.y) * outlineWidthHalfCeil;
+    LRUV = PSIn.UV + float2(texelSize.x * outlineWidthHalfCeil, -texelSize.y * outlineWidthHalfFloor);
+    ULUV = PSIn.UV + float2(-texelSize.x * outlineWidthHalfFloor, texelSize.y * outlineWidthHalfCeil);
+    float normalsEdgeFine = OutlineNormals(interiorNormalTex, 0.015f, smplr, LLUV, URUV, LRUV, ULUV);
 
     // Composite the edge onto the scene color.
-    float edge = max(normalsEdge, depthEdge);
+    float edge = max(normalsEdgeFine, max(normalsEdge, depthEdge));
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
     PSOut.Color = lerp(sceneColor, float4(outlineColor, 1.0f), edge);
 }
