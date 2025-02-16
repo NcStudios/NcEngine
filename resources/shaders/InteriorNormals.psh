@@ -81,5 +81,5 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     Color.rgb = HSVtoRGB(colHsv.rgb);
 
 
-    PSOut.Color = float4(Color.rgb, 1.0f);
+    PSOut.Color = float4(Color.rgb, Materials[PSIn.MaterialIndex].normalIntensity);
 }

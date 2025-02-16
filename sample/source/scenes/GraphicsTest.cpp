@@ -173,7 +173,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 0.3f, .depthThreshold = 0.8f, .normalThreshold = 0.120f});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 1.0f, .depthThreshold = 3.69f, .viewDirDepthThreshold = 0.04f, .normalThreshold = 0.940f});
 }
 
 void GraphicsTest::Unload()

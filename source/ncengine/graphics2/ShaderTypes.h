@@ -30,6 +30,7 @@ struct OutlinePassData
     Vector3 color = Vector3::Zero();
     float width = 1.0f;
     float depthThreshold = 0.8f;
+    float viewDirDepthThreshold = 0.4f;
     float normalThreshold = 0.4f;
 };
 
