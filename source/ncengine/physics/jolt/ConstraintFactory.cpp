@@ -233,6 +233,19 @@ void BalanceDifferentials(JPH::WheeledVehicleController::Differentials& differen
         differential.mEngineTorqueRatio = distributedTorqueRatio;
     }
 }
+
+auto FindAntiRollBar(JPH::VehicleAntiRollBars& rollbars,
+                     int leftIndex,
+                     int rightIndex)
+{
+    return std::ranges::find_if(
+        rollbars,
+        [leftIndex, rightIndex](const auto& rollbar){
+            return rollbar.mLeftWheel == leftIndex &&
+                   rollbar.mRightWheel == rightIndex;
+        }
+    );
+}
 } // anonymous namespace
 
 namespace nc::physics
@@ -262,6 +275,7 @@ auto ConstraintFactory::MakeVehicleConstraint(VehicleInfo& info,
 
     auto& differentials = controller->mDifferentials;
     auto& wheels = settings.mWheels;
+    auto& rollbars = settings.mAntiRollBars;
     auto wheelIndex = 0;
     for (auto& [left, right, spec, suspension, differential] : info.wheelAssemblies)
     {
@@ -281,6 +295,11 @@ auto ConstraintFactory::MakeVehicleConstraint(VehicleInfo& info,
         {
             right.id = wheelIndex++;
             wheels.push_back(static_cast<Base>(MakeWheelSettings(right, spec, suspension)));
+        }
+
+        if (suspension.antiRollBarStiffness > 0.0f && left.IsEnabled() && right.IsEnabled())
+        {
+            rollbars.push_back(JPH::VehicleAntiRollBar{left.id, right.id, suspension.antiRollBarStiffness});
         }
 
         if (differential.IsEnabled())
@@ -350,6 +369,7 @@ void AddWheelAssembly(WheelAssembly& assembly,
     );
 
     auto& wheels = constraint.GetWheels();
+    auto& rollbars = constraint.GetAntiRollBars();
     auto wheelIndex = static_cast<int>(wheels.size());
 
     if (left.IsEnabled())
@@ -358,10 +378,15 @@ void AddWheelAssembly(WheelAssembly& assembly,
         wheels.push_back(MakeWheel(left, spec, suspension));
     }
 
-    if (assembly.rightWheel.IsEnabled())
+    if (right.IsEnabled())
     {
         right.id = wheelIndex++;
         wheels.push_back(MakeWheel(right, spec, suspension));
+    }
+
+    if (suspension.antiRollBarStiffness > 0.0f && left.IsEnabled() && right.IsEnabled())
+    {
+        rollbars.push_back(JPH::VehicleAntiRollBar{left.id, right.id, suspension.antiRollBarStiffness});
     }
 
     if (differential.IsEnabled())
@@ -396,6 +421,13 @@ void RemoveWheelAssembly(size_t assemblyIndex,
     {
         if (after.leftWheel.id  > largestIndex) after.leftWheel.id  -= removeCount;
         if (after.rightWheel.id > largestIndex) after.rightWheel.id -= removeCount;
+    }
+
+    // remove anti-roll bar, if exists
+    auto& rollBars = constraint.GetAntiRollBars();
+    if (auto pos = FindAntiRollBar(rollBars, leftIndex, rightIndex); pos != rollBars.cend())
+    {
+        rollBars.erase(pos);
     }
 
     // remove differential from controller
@@ -435,6 +467,27 @@ void ModifyWheelAssembly(const WheelAssembly& assembly,
         const auto newWheel = MakeWheel(right, spec, suspension);
         const auto oldWheel = std::exchange(wheels.at(right.id), newWheel);
         delete oldWheel;
+    }
+
+    // update anti-roll bars based on what changed in the settings:
+    auto& rollBars = constraint.GetAntiRollBars();
+    auto rollBarPos = FindAntiRollBar(rollBars, left.id, right.id);
+    const auto oldAssemblyHasRollBar = rollBarPos != rollBars.cend();
+    const auto newAssemblyHasRollbar = suspension.antiRollBarStiffness > 0.0f && left.IsEnabled() && right.IsEnabled();
+    if (newAssemblyHasRollbar)
+    {
+        if (oldAssemblyHasRollBar)
+        {
+            *rollBarPos = JPH::VehicleAntiRollBar{left.id, right.id, suspension.antiRollBarStiffness};
+        }
+        else
+        {
+            rollBars.emplace_back(left.id, right.id, suspension.antiRollBarStiffness);
+        }
+    }
+    else if (oldAssemblyHasRollBar)
+    {
+        rollBars.erase(rollBarPos);
     }
 
     // update differential state based on what changed in the settings:

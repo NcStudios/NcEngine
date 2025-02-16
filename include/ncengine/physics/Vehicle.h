@@ -95,10 +95,11 @@ struct Suspension
     float minLength = 0.01f;           ///< minimum offset from wheel position [units: m, range: >= 0]
     float maxLength = 0.7f;            ///< maximum offset from wheel position [units: m, range: > minLength]
     SpringSettings spring{1.5f, 0.5f}; ///< suspension spring settings [range: frequency > 0, damping >= 0]
+    float antiRollBarStiffness = 0.0f; ///< anti-roll bar spring stiffness; ignored for single-wheels; immutable after construction [units: N/m, range: >=0]
 
     static auto MakeDisabled() -> Suspension
     {
-        return Suspension{0.0f, 0.0001f, SpringSettings{0.0f, 0.0f}};
+        return Suspension{0.0f, 0.0001f, SpringSettings{0.0f, 0.0f}, 0.0f};
     }
 };
 
@@ -121,11 +122,11 @@ struct Differential
  */
 struct WheelAssembly
 {
-    WheelMount leftWheel{};      ///< settings for the left wheel
-    WheelMount rightWheel{};     ///< settings for the right wheel
-    WheelSpec wheelSpec{};       ///< shared wheel settings
-    Suspension suspension{};     ///< shared suspension settings
-    Differential differential{}; ///< optional differential settings
+    WheelMount leftWheel{};           ///< settings for the left wheel
+    WheelMount rightWheel{};          ///< settings for the right wheel
+    WheelSpec wheelSpec{};            ///< shared wheel settings
+    Suspension suspension{};          ///< shared suspension settings
+    Differential differential{};      ///< optional differential settings
 
     auto WheelCount() const -> size_t
     {
