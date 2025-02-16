@@ -445,9 +445,19 @@ TEST_F(ConstraintFactoryTest, MakeVehicleConstraint_validCall_setsExpectedValues
         .engine = nc::VehicleEngine{},
         .transmission = nc::VehicleTransmission{},
         .wheelAssemblies = {
-            nc::WheelAssembly{},                                                 // 2 wheels, powered
-            nc::WheelAssembly{.rightWheel = nc::WheelMount::MakeDisabled()},     // 1 wheel, powered
-            nc::WheelAssembly{.differential = nc::Differential::MakeDisabled()}  // 2 wheels, unpowered
+            // 2 wheels, powered, with roll bar
+            nc::WheelAssembly{
+                .suspension = {.antiRollBarStiffness = 100.0f}
+            },
+            // 1 wheel, powered, roll bar ignored
+            nc::WheelAssembly{
+                .rightWheel = nc::WheelMount::MakeDisabled(),
+                .suspension = {.antiRollBarStiffness = 200.0f}
+            },
+            // 2 wheels, unpowered
+            nc::WheelAssembly{
+                .differential = nc::Differential::MakeDisabled()
+            }
         }
     };
 
@@ -478,6 +488,15 @@ TEST_F(ConstraintFactoryTest, MakeVehicleConstraint_validCall_setsExpectedValues
         EXPECT_FLOAT_EQ(expected.shiftDownRPM, actual.mShiftDownRPM);
         EXPECT_FLOAT_EQ(expected.clutchRelease, actual.mClutchReleaseTime);
         EXPECT_FLOAT_EQ(expected.clutchStrength, actual.mClutchStrength);
+    }
+
+    {
+        const auto& actual = actualConstraint->GetAntiRollBars();
+        ASSERT_EQ(1, actual.size());
+        const auto& actualRollBar = actual.at(0);
+        EXPECT_EQ(0, actualRollBar.mLeftWheel);
+        EXPECT_EQ(1, actualRollBar.mRightWheel);
+        EXPECT_FLOAT_EQ(infoIn.wheelAssemblies.at(0).suspension.antiRollBarStiffness, actualRollBar.mStiffness);
     }
 
     {
@@ -570,12 +589,14 @@ TEST_F(ConstraintFactoryTest, AddWheelAssembly_validCall_updatesConstraint)
     auto actualController = static_cast<JPH::WheeledVehicleController*>(actualConstraint->GetController());
     const auto& actualDifferentials = actualController->GetDifferentials();
     const auto& actualWheels = actualConstraint->GetWheels();
+    const auto& actualRollBars = actualConstraint->GetAntiRollBars();
 
     {
         // verify initial state
         ASSERT_EQ(0, infoIn.wheelAssemblies.at(0).leftWheel.id);
         ASSERT_EQ(1, infoIn.wheelAssemblies.at(0).rightWheel.id);
         ASSERT_EQ(2, actualWheels.size());
+        ASSERT_EQ(0, actualRollBars.size());
         ASSERT_EQ(1, actualDifferentials.size());
         const auto& initialDifferential = actualDifferentials.at(0);
         ASSERT_EQ(0, initialDifferential.mLeftWheel);
@@ -585,7 +606,7 @@ TEST_F(ConstraintFactoryTest, AddWheelAssembly_validCall_updatesConstraint)
     }
 
     // update vehicle for total of 3 assemblies, 2 differentials, 6 wheels
-    auto newAssembly1 = nc::WheelAssembly{};
+    auto newAssembly1 = nc::WheelAssembly{.suspension = {.antiRollBarStiffness = 100.0f}};
     auto newAssembly2 = nc::WheelAssembly{.differential = nc::Differential::MakeDisabled()};
     nc::physics::AddWheelAssembly(newAssembly1, *actualConstraint, *actualController);
     nc::physics::AddWheelAssembly(newAssembly2, *actualConstraint, *actualController);
@@ -597,6 +618,11 @@ TEST_F(ConstraintFactoryTest, AddWheelAssembly_validCall_updatesConstraint)
     EXPECT_EQ(3, newAssembly1.rightWheel.id);
     EXPECT_EQ(4, newAssembly2.leftWheel.id);
     EXPECT_EQ(5, newAssembly2.rightWheel.id);
+
+    EXPECT_EQ(1, actualRollBars.size());
+    EXPECT_EQ(2, actualRollBars.at(0).mLeftWheel);
+    EXPECT_EQ(3, actualRollBars.at(0).mRightWheel);
+    EXPECT_FLOAT_EQ(100.0f, actualRollBars.at(0).mStiffness);
 
     EXPECT_EQ(2, actualDifferentials.size());
     const auto& originalDifferential = actualDifferentials.at(0);
@@ -638,24 +664,29 @@ TEST_F(ConstraintFactoryTest, RemoveWheelAssembly_updatesIndices)
             nc::WheelAssembly{.leftWheel = nc::WheelMount::MakeDisabled()},
             nc::WheelAssembly{.rightWheel = nc::WheelMount::MakeDisabled()},
             nc::WheelAssembly{.differential = nc::Differential::MakeDisabled()},
-            nc::WheelAssembly{},
+            nc::WheelAssembly{.suspension = {.antiRollBarStiffness = 100.0f}},
         }
     };
 
     auto actualConstraint = uut.MakeVehicleConstraint(infoIn, *body);
     auto actualController = static_cast<JPH::WheeledVehicleController*>(actualConstraint->GetController());
     const auto& actualWheels = actualConstraint->GetWheels();
+    const auto& actualRollBars = actualConstraint->GetAntiRollBars();
     const auto& actualDifferentials = actualController->GetDifferentials();
 
     ASSERT_EQ(6, actualWheels.size());
+    ASSERT_EQ(1, actualRollBars.size());
     ASSERT_EQ(3, actualDifferentials.size());
 
     nc::physics::RemoveWheelAssembly(0, infoIn.wheelAssemblies, *actualConstraint, *actualController);
     // expected:
     //   WheelAssembly{.rightWheel = nc::WheelMount::MakeDisabled()}
     //   WheelAssembly{.differential = nc::Differential::MakeDisabled()}
-    //   WheelAssembly{}
+    //   WheelAssembly{.suspension = {.antiRollBarStiffness = 100.0f}}
     EXPECT_EQ(5, actualWheels.size());
+    EXPECT_EQ(1, actualRollBars.size());
+    EXPECT_EQ(3, actualRollBars.at(0).mLeftWheel);
+    EXPECT_EQ(4, actualRollBars.at(0).mRightWheel);
     EXPECT_EQ(2, actualDifferentials.size());
     EXPECT_EQ(0, actualDifferentials.at(0).mLeftWheel);
     EXPECT_EQ(-1, actualDifferentials.at(0).mRightWheel);
@@ -675,6 +706,7 @@ TEST_F(ConstraintFactoryTest, RemoveWheelAssembly_updatesIndices)
     //   WheelAssembly{.rightWheel = nc::WheelMount::MakeDisabled()}
     //   WheelAssembly{.differential = nc::Differential::MakeDisabled()}
     EXPECT_EQ(3, actualWheels.size());
+    EXPECT_EQ(0, actualRollBars.size());
     EXPECT_EQ(1, actualDifferentials.size());
     EXPECT_EQ(0, actualDifferentials.at(0).mLeftWheel);
     EXPECT_EQ(-1, actualDifferentials.at(0).mRightWheel);
@@ -689,6 +721,7 @@ TEST_F(ConstraintFactoryTest, RemoveWheelAssembly_updatesIndices)
     // expected:
     //   WheelAssembly{.rightWheel = nc::WheelMount::MakeDisabled()}
     EXPECT_EQ(1, actualWheels.size());
+    EXPECT_EQ(0, actualRollBars.size());
     EXPECT_EQ(1, actualDifferentials.size());
     EXPECT_EQ(0, actualDifferentials.at(0).mLeftWheel);
     EXPECT_EQ(-1, actualDifferentials.at(0).mRightWheel);
@@ -781,4 +814,66 @@ TEST_F(ConstraintFactoryTest, ModifyWheelAssembly_updatesDifferentials)
     EXPECT_EQ(2, actualDifferentials.at(0).mLeftWheel);
     EXPECT_EQ(3, actualDifferentials.at(0).mRightWheel);
     EXPECT_FLOAT_EQ(1.0f, actualDifferentials.at(0).mEngineTorqueRatio);
+}
+
+TEST_F(ConstraintFactoryTest, ModifyWheelAssembly_updatesRollBars)
+{
+    auto body = CreateBody();
+    SCOPE_EXIT(DestroyBody(body);)
+
+    auto infoIn = nc::VehicleInfo{
+        .wheelAssemblies = {
+            nc::WheelAssembly{.suspension = {.antiRollBarStiffness = 0.0f}},
+            nc::WheelAssembly{.suspension = {.antiRollBarStiffness = 100.0f}},
+        }
+    };
+
+    auto actualConstraint = uut.MakeVehicleConstraint(infoIn, *body);
+    auto actualController = static_cast<JPH::WheeledVehicleController*>(actualConstraint->GetController());
+    const auto& actualWheels = actualConstraint->GetWheels();
+    const auto& actualRollBars = actualConstraint->GetAntiRollBars();
+
+    ASSERT_EQ(4, actualWheels.size());
+    ASSERT_EQ(1, actualRollBars.size());
+    ASSERT_EQ(2, actualRollBars.at(0).mLeftWheel);
+    ASSERT_EQ(3, actualRollBars.at(0).mRightWheel);
+
+    auto& target = infoIn.wheelAssemblies.at(0);
+
+    // expect no change if already disabled
+    nc::physics::ModifyWheelAssembly(target, *actualConstraint, *actualController);
+    EXPECT_EQ(1, actualRollBars.size());
+    EXPECT_EQ(2, actualRollBars.at(0).mLeftWheel);
+    EXPECT_EQ(3, actualRollBars.at(0).mRightWheel);
+    EXPECT_FLOAT_EQ(100.0f, actualRollBars.at(0).mStiffness);
+
+    // expect enabling roll bar adds to constraint
+    target.suspension.antiRollBarStiffness = 200.0f;
+    nc::physics::ModifyWheelAssembly(target, *actualConstraint, *actualController);
+    EXPECT_EQ(2, actualRollBars.size());
+    EXPECT_EQ(2, actualRollBars.at(0).mLeftWheel);
+    EXPECT_EQ(3, actualRollBars.at(0).mRightWheel);
+    EXPECT_FLOAT_EQ(100.0f, actualRollBars.at(0).mStiffness);
+    EXPECT_EQ(0, actualRollBars.at(1).mLeftWheel);
+    EXPECT_EQ(1, actualRollBars.at(1).mRightWheel);
+    EXPECT_FLOAT_EQ(200.0f, actualRollBars.at(1).mStiffness);
+
+    // expect already enabled roll bar gets rebuilt
+    target.suspension.antiRollBarStiffness = 300.0f;
+    nc::physics::ModifyWheelAssembly(target, *actualConstraint, *actualController);
+    EXPECT_EQ(2, actualRollBars.size());
+    EXPECT_EQ(2, actualRollBars.at(0).mLeftWheel);
+    EXPECT_EQ(3, actualRollBars.at(0).mRightWheel);
+    EXPECT_FLOAT_EQ(100.0f, actualRollBars.at(0).mStiffness);
+    EXPECT_EQ(0, actualRollBars.at(1).mLeftWheel);
+    EXPECT_EQ(1, actualRollBars.at(1).mRightWheel);
+    EXPECT_FLOAT_EQ(300.0f, actualRollBars.at(1).mStiffness);
+
+    // expect disabling roll bar removes
+    target.suspension.antiRollBarStiffness = 0.0f;
+    nc::physics::ModifyWheelAssembly(target, *actualConstraint, *actualController);
+    EXPECT_EQ(1, actualRollBars.size());
+    EXPECT_EQ(2, actualRollBars.at(0).mLeftWheel);
+    EXPECT_EQ(3, actualRollBars.at(0).mRightWheel);
+    EXPECT_FLOAT_EQ(100.0f, actualRollBars.at(0).mStiffness);
 }

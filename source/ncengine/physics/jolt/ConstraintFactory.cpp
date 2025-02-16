@@ -430,6 +430,13 @@ void RemoveWheelAssembly(size_t assemblyIndex,
         rollBars.erase(pos);
     }
 
+    // fix roll bar wheel ids
+    for (auto& rollBar : rollBars)
+    {
+        if (rollBar.mLeftWheel  > largestIndex) rollBar.mLeftWheel  -= removeCount;
+        if (rollBar.mRightWheel > largestIndex) rollBar.mRightWheel -= removeCount;
+    }
+
     // remove differential from controller
     auto& differentials = controller.GetDifferentials();
     if (toRemove.IsPowered())
