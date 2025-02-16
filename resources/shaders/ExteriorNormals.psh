@@ -49,10 +49,7 @@ struct PSOutput
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     float4 Color;
-    uint normalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
-    Color = normalize(Textures[normalIndex].Sample(Textures_sampler, PSIn.UV));
     float3 viewDir = normalize(cameraPosition - PSIn.WorldPos);
-
-    float3 adjustedNormals = Materials[PSIn.MaterialIndex].normalIntensity * normalize(PSIn.Normal);
-    PSOut.Color = float4(adjustedNormals, 1-dot(PSIn.Normal, -viewDir));
+    float3 adjustedNormals = normalize(PSIn.Normal);
+    PSOut.Color = float4(adjustedNormals, 1-dot(PSIn.Normal, viewDir));
 }
