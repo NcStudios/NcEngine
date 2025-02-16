@@ -203,7 +203,14 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
 
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
-        m_finalColorTarget = staticPass.sinks.color;
+        if (m_finalColorTarget.has_value())
+        {
+            m_finalColorTarget = std::min(staticPass.sinks.color, m_finalColorTarget.value());
+        }
+        else
+        {
+            m_finalColorTarget = staticPass.sinks.color;
+        }
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);

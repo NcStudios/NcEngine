@@ -109,11 +109,11 @@ struct LightData
     // Construct from DirectionalLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
-              const Vector3& shadowCol,
+              const float intensity_,
               const Vector3& dir)
         : diffuseColor{diffuseCol},
           specularColor{specularCol},
-          shadowColor{shadowCol},
+          intensity{intensity_},
           type{LightType::Directional},
           direction{dir}
     {
@@ -122,14 +122,14 @@ struct LightData
     // Construct from PointLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
-              const Vector3& shadowCol,
+              const float intensity_,
               const Vector3& pos,
               int32_t enableShadows,
               float rad,
               DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
           specularColor{specularCol},
-          shadowColor{shadowCol},
+          intensity{intensity_},
           type{LightType::Point},
           position{pos},
           radius{rad},
@@ -141,7 +141,7 @@ struct LightData
     // Construct from SpotLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
-              const Vector3& shadowCol,
+              const float intensity_,
               const Vector3& pos,
               float inAngle,
               const Vector3& dir,
@@ -151,7 +151,7 @@ struct LightData
               DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
           specularColor{specularCol},
-          shadowColor{shadowCol},
+          intensity{intensity_},
           type{LightType::Spot},
           position{pos},
           innerAngle{inAngle},
@@ -171,7 +171,7 @@ struct LightData
     float innerAngle = 1.0f;
     Vector3 direction = Vector3::Down();
     float outerAngle = 1.0f;
-    Vector3 shadowColor = Vector3::One();
+    float intensity = 1.0f;
     int castsShadows = 0;
     DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };

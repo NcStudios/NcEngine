@@ -435,7 +435,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         }),
         Vector3{1.0f, 0.871f, 0.6f},
         Vector3{1.0f, 0.871f, 0.6f},
-        Vector3{0.0f, 0.0f, 0.0f},
+        1.0f,
         113.0f
     );
 
@@ -567,7 +567,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, Vector3{0.0f, 0.0f, 0.0f}, 50.0f);
+                world.Emplace<PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 1.0f, 50.0f);
             }
         );
 

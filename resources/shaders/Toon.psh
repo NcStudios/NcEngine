@@ -83,47 +83,62 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
     float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
 
-    float3 light = float3(0.0f);
-    float3 combinedDiffuseColor = float3(0.0f);
-    float combinedDiffuseAmt = 0.0f;
-    float3 combinedSpecularColor = float3(0.0f);
-    float combinedSpecularAmount = 0.0f;
-    float3 combinedShadowColor = 0.0f;
+    // for (int i = 0; i < lightCount; i++)
+    // {
+    //     LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
+
+    //     combinedDiffuseColor += influence.diffuseColor;
+    //     combinedDiffuseAmt += influence.diffuseAmt;
+    //     combinedSpecularColor += influence.specularColor;
+    //     combinedSpecularAmount += influence.specularAmt;
+    //     combinedShadowColor += influence.shadowColor;
+    // }
+
+    // // Light banding (specular, shadow, diffuse)
+    // // float diffuseBlendFactor = smoothstep(0.4f, 0.5f, combinedDiffuseAmt);
+    // // float specularBlendFactor = smoothstep(0.8f, 1.0f, combinedDiffuseAmt);
+    // // float3 blendedDiffuse = lerp(combinedShadowColor, combinedDiffuseColor, diffuseBlendFactor);
+    // // float3 blendedSpecular = lerp(combinedDiffuseColor, combinedSpecularColor, specularBlendFactor);
+    // // light += lerp(blendedDiffuse, blendedSpecular, specularBlendFactor);
+
+    // light += combinedDiffuseColor * combinedDiffuseAmt + combinedSpecularColor * combinedSpecularAmount;
+    // Color.rgb *= light;
+
+
+
+    float3 result = 0.0f;
+
 
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-
-        combinedDiffuseColor += influence.diffuseColor;
-        combinedDiffuseAmt += influence.diffuseAmt;
-        combinedSpecularColor += influence.specularColor;
-        combinedSpecularAmount += influence.specularAmt;
-        combinedShadowColor += influence.shadowColor;
+        float3 diffuse = influence.diffuseColor * influence.diffuseAmt * Color.rgb;
+        float3 specular = influence.specularColor * influence.specularAmt * Color.rgb;
+        result += diffuse+specular;
     }
 
-    // Light banding (specular, shadow, diffuse)
-    float diffuseBlendFactor = smoothstep(0.4f, 0.5f, combinedDiffuseAmt);
-    float specularBlendFactor = smoothstep(0.8f, 1.0f, combinedDiffuseAmt);
-    float3 blendedDiffuse = lerp(combinedShadowColor, combinedDiffuseColor, diffuseBlendFactor);
-    float3 blendedSpecular = lerp(combinedDiffuseColor, combinedSpecularColor, specularBlendFactor);
-    // light += combinedDiffuseColor * combinedDiffuseAmt + combinedSpecularColor * combinedSpecularAmount;
-    light += lerp(blendedDiffuse, blendedSpecular, specularBlendFactor);
-    Color.rgb *= light;
 
-    // Light banding (hatching)
-    if (combinedDiffuseAmt < 0.1f)
-    {
-        Color.rbg = Color.rbg * hatchMedium;
-    }
-    else if (combinedDiffuseAmt < 0.3f)
-    {
-        Color.rbg = Color.rbg * hatchLight;
-    }
+
+
+
+
+
+
+
+    // // Light banding (hatching)
+    // if (combinedDiffuseAmt < 0.1f)
+    // {
+    //     Color.rbg = Color.rbg * hatchMedium;
+    // }
+    // else if (combinedDiffuseAmt < 0.3f)
+    // {
+    //     Color.rbg = Color.rbg * hatchLight;
+    // }
 
     // float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b));
     // colHsv.y *= (1.25f);
     // colHsv.z *= (1.25f);
     // Color.rgb = HSVtoRGB(colHsv.rgb);
 
-    PSOut.Color = Color;
+    PSOut.Color = float4(result, 1.0f);
 }

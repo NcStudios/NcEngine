@@ -269,7 +269,7 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::DirectionalLight{nc::Vector3::Splat(7.0f), nc::Vector3::Splat(1.0f)};
+    const auto expected = nc::DirectionalLight{nc::Vector3::Splat(7.0f), nc::Vector3::Splat(1.0f), 1.0f};
     nc::SerializeDirectionalLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeDirectionalLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
@@ -279,24 +279,24 @@ TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), nc::Vector3::Splat(4.0f), 42.0f};
+    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 4.0f, 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
     EXPECT_EQ(expected.specularColor, actual.specularColor);
-    EXPECT_EQ(expected.shadowColor, actual.shadowColor);
+    EXPECT_EQ(expected.intensity, actual.intensity);
     EXPECT_EQ(expected.radius, actual.radius);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
+    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), 4.0f, 1.0f, 1.1f, 25.0f};
     nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
     EXPECT_EQ(expected.specularColor, actual.specularColor);
-    EXPECT_EQ(expected.shadowColor, actual.shadowColor);
+    EXPECT_EQ(expected.intensity, actual.intensity);
     EXPECT_EQ(expected.innerAngle, actual.innerAngle);
     EXPECT_EQ(expected.outerAngle, actual.outerAngle);
     EXPECT_EQ(expected.radius, actual.radius);

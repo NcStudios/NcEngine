@@ -170,53 +170,64 @@ void ReloadPrefabs()
     material::Blue.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Blue.nca");
     material::Blue.properties.normalTex = normal;
     material::Blue.properties.normalIntensity = .220f;
+    material::Blue.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Cave.properties.diffuseTex = asset::AcquireTextureAsset("cave/BaseColor.nca");
     material::Cave.properties.normalTex = normal;
     material::Cave.properties.normalIntensity = .420f;
+    material::Cave.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Default.properties.diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor);
     material::Default.properties.normalTex = normal;
+    material::Default.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Green.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Green.nca");
     material::Green.properties.normalTex = normal;
     material::Green.properties.normalIntensity = 4.0f;
+    material::Green.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Guy.properties.diffuseTex = asset::AcquireTextureAsset("guy_base_color.nca");
-    material::Guy.properties.normalTex = asset::AcquireTextureAsset("guy_normal.nca");;
-    material::Guy.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");;
+    material::Guy.properties.normalTex = asset::AcquireTextureAsset("guy_normal.nca");
+    material::Guy.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
     material::Guy.properties.normalIntensity = .39f;
     material::Guy.properties.hatchTiling = 12.0f;
 
     material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
-    material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");;
-    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");;
-    material::Guy2.properties.normalIntensity = 3.0f;
+    material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");
+    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
+    material::Guy2.properties.normalIntensity = 1.75f;
     material::Guy2.properties.hatchTiling = 10.0f;
 
     material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
     material::Ogre.properties.normalTex = normal;
     material::Ogre.properties.normalIntensity = .280f;
+    material::Ogre.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Orange.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Orange.nca");
     material::Orange.properties.normalTex = normal;
     material::Orange.properties.normalIntensity = .10f;
+    material::Orange.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Purple.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Purple.nca");
     material::Purple.properties.normalTex = normal;
+    material::Purple.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Red.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Red.nca");
     material::Red.properties.normalTex = normal;
+    material::Red.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Skeleton.properties.diffuseTex = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
     material::Skeleton.properties.normalTex = normal;
     material::Skeleton.properties.normalIntensity = .420f;
+    material::Skeleton.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Teal.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Teal.nca");
     material::Teal.properties.normalTex = normal;
+    material::Teal.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
     material::Yellow.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Yellow.nca");
     material::Yellow.properties.normalTex = normal;
+    material::Yellow.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
 }
 } // namespace sample
