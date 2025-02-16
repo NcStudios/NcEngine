@@ -297,9 +297,9 @@ auto ConstraintFactory::MakeVehicleConstraint(VehicleInfo& info,
             wheels.push_back(static_cast<Base>(MakeWheelSettings(right, spec, suspension)));
         }
 
-        if (suspension.antiRollBarStiffness > 0.0f && left.IsEnabled() && right.IsEnabled())
+        if (suspension.HasRollBar() && left.IsEnabled() && right.IsEnabled())
         {
-            rollbars.push_back(JPH::VehicleAntiRollBar{left.id, right.id, suspension.antiRollBarStiffness});
+            rollbars.emplace_back(left.id, right.id, suspension.antiRollBarStiffness);
         }
 
         if (differential.IsEnabled())
@@ -384,9 +384,9 @@ void AddWheelAssembly(WheelAssembly& assembly,
         wheels.push_back(MakeWheel(right, spec, suspension));
     }
 
-    if (suspension.antiRollBarStiffness > 0.0f && left.IsEnabled() && right.IsEnabled())
+    if (suspension.HasRollBar() && left.IsEnabled() && right.IsEnabled())
     {
-        rollbars.push_back(JPH::VehicleAntiRollBar{left.id, right.id, suspension.antiRollBarStiffness});
+        rollbars.emplace_back(left.id, right.id, suspension.antiRollBarStiffness);
     }
 
     if (differential.IsEnabled())
@@ -476,11 +476,11 @@ void ModifyWheelAssembly(const WheelAssembly& assembly,
         delete oldWheel;
     }
 
-    // update anti-roll bars based on what changed in the settings:
+    // update anti-roll bars based on what changed in the settings
     auto& rollBars = constraint.GetAntiRollBars();
     auto rollBarPos = FindAntiRollBar(rollBars, left.id, right.id);
     const auto oldAssemblyHasRollBar = rollBarPos != rollBars.cend();
-    const auto newAssemblyHasRollbar = suspension.antiRollBarStiffness > 0.0f && left.IsEnabled() && right.IsEnabled();
+    const auto newAssemblyHasRollbar = suspension.HasRollBar() && left.IsEnabled() && right.IsEnabled();
     if (newAssemblyHasRollbar)
     {
         if (oldAssemblyHasRollBar)
