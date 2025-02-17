@@ -42,7 +42,7 @@ class ShaderBindings
                 1,
                 SinkBufferDesc{"ColorSinks", Diligent::SHADER_TYPE_PIXEL, 20},
                 SinkBufferDesc{"DepthSinks", Diligent::SHADER_TYPE_PIXEL, 20},
-                SinkBufferDesc{"PostProcessSinks", Diligent::SHADER_TYPE_PIXEL, 2, true},
+                SinkBufferDesc{"PostProcessSinks", Diligent::SHADER_TYPE_PIXEL, 3, true},
                 UniformBufferDesc{"SinkIndices", Diligent::SHADER_TYPE_PIXEL}
             }
         {

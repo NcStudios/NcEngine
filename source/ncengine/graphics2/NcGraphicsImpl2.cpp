@@ -272,6 +272,16 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .postProcessSink = PostProcessTarget::PPFxaa,
                     .isMsaa = false,
                     .useDepthTest = false
+                },
+                PassDesc{
+                    .id = PostProcessPassFlag::Gradient,
+                    .name = "Post Process Gradient",
+                    .type = PassType::PostProcess,
+                    .shaderPaths = ShaderPaths{"PPGradient.psh", "PostProcess.vsh"},
+                    .postProcessSource = PostProcessTarget::PPFxaa,
+                    .postProcessSink = PostProcessTarget::PPGradient,
+                    .isMsaa = false,
+                    .useDepthTest = false
                 }
             },
             GetImplementedMaterialPassFlags(),

@@ -1,0 +1,76 @@
+// Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
+
+Texture2D     ColorSinks[];
+Texture2D     DepthSinks[];
+Texture2D     PostProcessSinks[];
+SamplerState  ColorSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+
+cbuffer EnvironmentProperties
+{
+    float4x4 cameraViewProjection;
+    float4x4 cameraInvProjection;
+    float3 cameraPosition;
+    uint lightCount;
+    float nearClip;
+    float farClip;
+};
+
+cbuffer SinkIndices
+{
+    int colorRT1;
+    int colorRT2;
+    int colorRT3;
+    int colorRT4;
+    int depthRT1;
+    int depthRT2;
+    int depthRT3;
+    uint hasPostProcess;
+};
+
+struct PSInput 
+{ 
+    float4 Pos : SV_POSITION;
+    float2 UV  : TEX_COORD; 
+};
+
+struct PSOutput
+{
+    float4 Color : SV_TARGET;
+};
+
+float RgbToLuma(float3 rgb){
+    return sqrt(dot(rgb, float3(0.299, 0.587, 0.114)));
+}
+
+void main(in PSInput PSIn, out PSOutput PSOut)
+{
+    // Alias the resource names
+    SamplerState smplr = ColorSinks_sampler;
+    Texture2D colorTex = PostProcessSinks[0];
+
+    // Get screen dimensions
+    uint screenWidth, screenHeight;
+    colorTex.GetDimensions(screenWidth, screenHeight);
+    float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
+    float3 color = colorTex.Sample(smplr, PSIn.UV);
+
+    float3 gradientStart = float3(1.0f, 0.0f, 1.0f);
+    float3 gradientEnd = float3(0.0f, 1.0f, 0.0f);
+    float3 gradient = lerp(gradientStart, gradientEnd, PSIn.UV.y);
+
+
+
+
+
+    // PSOut.Color = float4(color + gradient, 1.0f);
+    float4 gradientApplied = float4(lerp(color, color + gradient, 0.025f), 1.0f);
+
+    // Generate random noise
+    float noise = (frac(sin(dot(PSIn.UV, float2(12.9898, 78.233))) * 43758.5453) - 0.5) * 2.0;
+    float4 outputColor = lerp(gradientApplied, gradientApplied + noise * 0.05 * 1.0f, 0.01f);
+    PSOut.Color = outputColor;
+
+
+    // float luma = sqrt(RgbToLuma(outputColor));
+    // PSOut.Color = float4(luma, luma, luma, 1.0f);
+}

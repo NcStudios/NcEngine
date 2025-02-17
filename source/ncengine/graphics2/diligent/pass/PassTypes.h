@@ -38,7 +38,8 @@ enum class PostProcessTarget : uint8_t
 {
     None,
     PPOutline,
-    PPFxaa
+    PPFxaa,
+    PPGradient
 };
 
 struct Sources

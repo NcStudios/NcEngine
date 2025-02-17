@@ -70,11 +70,23 @@ float3 HSVtoRGB(in float3 HSV)
     return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
 }
 
+float Band(float lightAmount)
+{
+    if (lightAmount < 0.001f)
+    {
+        return 0.0f;
+    }
+
+    return 1.0f;
+}
+
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     // Get texture color
     uint TexIndex = Materials[PSIn.MaterialIndex].diffuseTexIndex;
+    uint NormalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
     float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
+    float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
 
     // Get hatching texture and tiling property
     uint hatchTexIndex = Materials[PSIn.MaterialIndex].hatchTexIndex;
@@ -108,12 +120,11 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     float3 result = 0.0f;
 
-
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-        float3 diffuse = influence.diffuseColor * influence.diffuseAmt * Color.rgb;
-        float3 specular = influence.specularColor * influence.specularAmt * Color.rgb;
+        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normalize(Normals.xyz * float3(2.0) - float3(1.0)));
+        float3 diffuse = influence.diffuseColor * Band(influence.diffuseAmt) * Color.rgb;
+        float3 specular = influence.specularColor * Band(influence.specularAmt) * Color.rgb;
         result += diffuse+specular;
     }
 
@@ -141,4 +152,6 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     // Color.rgb = HSVtoRGB(colHsv.rgb);
 
     PSOut.Color = float4(result, 1.0f);
+
+    // PSOut.Color = Normals;
 }

@@ -16,9 +16,10 @@ struct PostProcessPassFlag
 {
     using type = uint64_t;
 
-    static constexpr auto None    = type{0};
-    static constexpr auto Outline = type{1 << 0};
-    static constexpr auto Fxaa    = type{2 << 0};
+    static constexpr auto None     = type{0};
+    static constexpr auto Outline  = type{1 << 0};
+    static constexpr auto Fxaa     = type{2 << 0};
+    static constexpr auto Gradient = type{3 << 0};
 };
 
 /** @brief Identifier for a post process effect. */
@@ -34,7 +35,7 @@ constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId
 constexpr auto OutlinedToonEffectId = PostProcessEffectId{0};
 
 /** @brief Pass flags for the outlined toon post process effect. */
-constexpr auto OutlinedToonEffectPassFlags = PostProcessPassFlag::Outline | PostProcessPassFlag::Fxaa;
+constexpr auto OutlinedToonEffectPassFlags = PostProcessPassFlag::Outline | PostProcessPassFlag::Fxaa | PostProcessPassFlag::Gradient;
 
 /** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};
