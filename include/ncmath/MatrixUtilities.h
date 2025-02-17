@@ -47,10 +47,12 @@ inline auto DecomposeRotation(DirectX::FXMMATRIX in) noexcept -> DirectX::XMVECT
 inline auto DecomposeScale(DirectX::FXMMATRIX in) noexcept -> DirectX::XMVECTOR
 {
     using namespace DirectX;
-    auto out = XMVectorSplatX(XMVector3Length(in.r[0]));
-    out = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_1Y, XM_PERMUTE_0Z, XM_PERMUTE_0W>(out, XMVector3Length(in.r[1]));
-    out = XMVectorPermute<XM_PERMUTE_0X, XM_PERMUTE_0Y, XM_PERMUTE_1X, XM_PERMUTE_0W>(out, XMVector3Length(in.r[2]));
-    return out;
+    constexpr auto selectX1Y1Z2 = XMVECTORU32{XM_SELECT_0, XM_SELECT_0, XM_SELECT_1, XM_SELECT_0};
+    const auto& x = XMVector3LengthSq(in.r[0]);
+    const auto& y = XMVector3LengthSq(in.r[1]);
+    const auto& z = XMVector3LengthSq(in.r[2]);
+    const auto xyz = XMVectorSelect(XMVectorMergeXY(x, y), z, selectX1Y1Z2);
+    return XMVectorSqrt(xyz);
 }
 
 inline DirectX::XMVECTOR ToXMVector(const Vector3& v)
