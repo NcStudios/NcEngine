@@ -146,17 +146,24 @@ TEST_F(VehicleTest, RemoveWheelAssembly_updatesConstraint)
     auto uut = CreateVehicle(nc::VehicleInfo{
         .wheelAssemblies = {
             nc::WheelAssembly{},
-            nc::WheelAssembly{}
+            nc::WheelAssembly{
+                .suspension = {
+                    .antiRollBarStiffness = 100.0f
+                }
+            }
         }
     });
 
     const auto& actualWheels = GetConstraint(uut)->GetWheels();
+    const auto& actualRollBars = GetConstraint(uut)->GetAntiRollBars();
     const auto& actualDifferentials = GetController(uut)->GetDifferentials();
 
     EXPECT_EQ(4, actualWheels.size());
+    EXPECT_EQ(1, actualRollBars.size());
     EXPECT_EQ(2, actualDifferentials.size());
     uut.RemoveWheelAssembly(1);
     EXPECT_EQ(2, actualWheels.size());
+    EXPECT_EQ(0, actualRollBars.size());
     EXPECT_EQ(1, actualDifferentials.size());
 }
 

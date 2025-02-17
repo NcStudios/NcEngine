@@ -710,15 +710,20 @@ auto WheelSpecWidget(nc::WheelSpec& spec) -> bool
     return modified;
 }
 
-auto SuspensionWidget(nc::Suspension& suspension) -> bool
+auto SuspensionWidget(nc::Suspension& suspension, size_t wheelCount) -> bool
 {
     constexpr auto step = 0.01f;
     auto modified = false;
-    auto& [min, max, spring] = suspension;
+    auto& [min, max, spring, rollbarStiffness] = suspension;
     modified = nc::ui::DragFloat(min,              "minLength",       step,  0.0f,       max - step) || modified;
     modified = nc::ui::DragFloat(max,              "maxLength",       step,  min + step, 100.0f)     || modified;
     modified = nc::ui::DragFloat(spring.frequency, "springFrequency", 0.1f,  0.1f,       30.0f)      || modified;
     modified = nc::ui::DragFloat(spring.damping,   "springDamping",   0.05f, 0.0f,       5.0f)       || modified;
+    {
+        IMGUI_SCOPE(nc::ui::DisableIf, wheelCount == 1);
+        modified = nc::ui::DragFloat(rollbarStiffness, "rollBarStiffness", 1.0f, 0.0f, 5000.0f) || modified;
+    }
+
     return modified;
 }
 
@@ -764,7 +769,7 @@ auto WheelAssemblyWidget(nc::WheelAssembly& assembly, nc::ecs::Ecs world, bool h
 
     if (ImGui::TreeNodeEx("Suspension"))
     {
-        modified = SuspensionWidget(assembly.suspension) || modified;
+        modified = SuspensionWidget(assembly.suspension, assembly.WheelCount()) || modified;
         ImGui::TreePop();
     }
 
