@@ -119,37 +119,50 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
 
     float3 result = 0.0f;
+    float diffuseAmt = 0.0f;
+    float specularAmt = 0.0f;
+    float3 diffuseCol = float3(0.0f);
+    float3 specularCol = float3(0.0f);
+    float intensity = 1.0f;
+
+    float3 normals = PSIn.Normal;
+    if (hatchTiling > 1.0f) //@todo : Parameterize
+    {
+        normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
+    }
 
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normalize(Normals.xyz * float3(2.0) - float3(1.0)));
-        float3 diffuse = influence.diffuseColor * Band(influence.diffuseAmt) * Color.rgb;
-        float3 specular = influence.specularColor * Band(influence.specularAmt) * Color.rgb;
-        result += diffuse+specular;
+        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normals);
+
+        diffuseAmt += influence.diffuseAmt;
+        specularAmt += influence.specularAmt;
+        diffuseCol += influence.diffuseColor;
+        specularCol += influence.specularColor;
+        intensity = max(intensity, influence.intensity);
     }
 
+    float bandedDiffuseAmt = Band(diffuseAmt) * intensity;
+    float bandedSpecularAmt = Band(specularAmt) * intensity;
+
+    result += (bandedDiffuseAmt * diffuseCol * Color.rgb + bandedSpecularAmt * specularCol * Color.rgb);
 
 
 
+    // Light banding (hatching)
+    if (diffuseAmt < 0.05f)
+    {
+        result.rgb = result.rgb * hatchDark;
+    }
+    else if (diffuseAmt < 0.1f)
+    {
+        result.rgb = result.rgb * hatchMedium;
+    }
 
-
-
-
-
-    // // Light banding (hatching)
-    // if (combinedDiffuseAmt < 0.1f)
-    // {
-    //     Color.rbg = Color.rbg * hatchMedium;
-    // }
-    // else if (combinedDiffuseAmt < 0.3f)
-    // {
-    //     Color.rbg = Color.rbg * hatchLight;
-    // }
-
-    // float3 colHsv = RGBtoHSV(float3(Color.r, Color.g, Color.b));
-    // colHsv.y *= (1.25f);
-    // colHsv.z *= (1.25f);
-    // Color.rgb = HSVtoRGB(colHsv.rgb);
+    float3 colHsv = RGBtoHSV(float3(result.r, result.g, result.b));
+    colHsv.y *= (1.25f);
+    colHsv.z *= (1.25f);
+    result.rgb = HSVtoRGB(colHsv.rgb);
 
     PSOut.Color = float4(result, 1.0f);
 

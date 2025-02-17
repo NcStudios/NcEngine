@@ -63,11 +63,11 @@ void main(in PSInput PSIn, out PSOutput PSOut)
 
 
     // PSOut.Color = float4(color + gradient, 1.0f);
-    float4 gradientApplied = float4(lerp(color, color + gradient, 0.025f), 1.0f);
+    float4 gradientApplied = float4(lerp(color, color + gradient, 0.15f), 1.0f);
 
     // Generate random noise
     float noise = (frac(sin(dot(PSIn.UV, float2(12.9898, 78.233))) * 43758.5453) - 0.5) * 2.0;
-    float4 outputColor = lerp(gradientApplied, gradientApplied + noise * 0.05 * 1.0f, 0.01f);
+    float4 outputColor = lerp(gradientApplied, gradientApplied + noise * 0.05 * 1.0f, 0.25f);
     PSOut.Color = outputColor;
 
 

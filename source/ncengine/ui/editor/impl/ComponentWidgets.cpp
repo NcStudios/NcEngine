@@ -1126,7 +1126,7 @@ void DirectionalLightUIWidget(DirectionalLight& light, EditorContext&, const std
     IMGUI_SCOPE(ui::ImGuiId, "DirectionalLight");
     ui::InputColor3(light.diffuseColor, "diffuseColor");
     ui::InputColor3(light.specularColor, "specularColor");
-    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 20.0f);
+    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
 }
 
 void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
@@ -1137,7 +1137,7 @@ void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
     constexpr auto max = 1200.0f;
     ui::InputColor3(light.diffuseColor, "diffuseColor");
     ui::InputColor3(light.specularColor, "specularColor");
-    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 20.0f);
+    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
@@ -1149,7 +1149,7 @@ void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)
     constexpr auto max = 3.14159f;
     ui::InputColor3(light.diffuseColor, "diffuseColor");
     ui::InputColor3(light.specularColor, "specularColor");
-    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 20.0f);
+    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);

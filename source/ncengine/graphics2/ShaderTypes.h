@@ -76,7 +76,7 @@ struct MaterialData
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
     uint32_t hatchTexIndex = std::numeric_limits<uint32_t>::max();
     float normalIntensity = 1.0f;
-    float hatchTiling = 10.0f;
+    float hatchTiling = 1.0f;
     int padding  = 0;
     int padding1 = 0;
     int padding2 = 0;

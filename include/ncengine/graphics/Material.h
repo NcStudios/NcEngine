@@ -48,7 +48,7 @@ struct MaterialProperties
     asset::TextureView normalTex = asset::TextureView{};
     asset::TextureView hatchTex = asset::TextureView{};
     float normalIntensity = 1.0f;
-    float hatchTiling = 10.0f;
+    float hatchTiling = 1.0f;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

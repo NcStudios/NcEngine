@@ -18,6 +18,7 @@ struct LightInfluence
     float3 specularColor;
     float specularAmt;
     float diffuseAmt;
+    float intensity;
 };
 
 float CalculateDiffuse(float3 L, float3 N)
@@ -48,10 +49,7 @@ LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, fl
     float3 viewVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
     float specularTotal = CalculateSpecular(lightVec, viewVec, normal);
 
-    diffuseTotal *= light.intensity;
-    specularTotal *= light.intensity;
-
-    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal, light.intensity};
     return lightInfluence;
 }
 
@@ -70,10 +68,7 @@ LightInfluence PointLightRadiance(LightData light, float3 fragWorldPos, float3 c
     diffuseTotal *= CalculateAttenuation(distance, light.radius);
     specularTotal *= CalculateAttenuation(distance, light.radius);
 
-    diffuseTotal *= light.intensity;
-    specularTotal *= light.intensity;
-
-    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal, light.intensity};
     return lightInfluence;
 }
 
@@ -91,18 +86,13 @@ LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 ca
     float theta = dot(lightVec, normalize(-light.direction));
     float epsilon = light.outerAngle - light.innerAngle;
     float intensity = saturate((theta - light.innerAngle) / epsilon);
-    diffuseTotal *= intensity;
-    specularTotal *= intensity;
 
     // Attenuation
     float distance = length(light.position - fragWorldPos);
     diffuseTotal *= CalculateAttenuation(distance, light.radius);
     specularTotal *= CalculateAttenuation(distance, light.radius);
 
-    diffuseTotal *= light.intensity;
-    specularTotal *= light.intensity;
-
-    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor,  specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor,  specularTotal, diffuseTotal, light.intensity};
     return lightInfluence;
 }
 
