@@ -40,6 +40,8 @@ struct PSInput
     float2 UV            : TEX_COORD; 
     uint   MaterialIndex;
     float3 WorldPos;
+    float3 LocalPos;
+    float3 ViewDir;
 };
 
 struct PSOutput
@@ -78,6 +80,17 @@ float Band(float lightAmount)
     }
 
     return 1.0f;
+}
+
+static const float3 PLANE_NORMAL = float3(0.0, 1.0, 0.0); // Y-up normal
+static const float PLANE_OFFSET = 1.0; // Offset along normal in object space
+
+
+float2 GetFlatUV(float3 localPos)
+{
+     float distanceFromPlane = dot(localPos, PLANE_NORMAL) - PLANE_OFFSET;
+    float3 projectedPos = localPos - (distanceFromPlane * PLANE_NORMAL);
+    return projectedPos.xz;
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -141,5 +154,20 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     colHsv.z *= (1.25f);
     result.rgb = HSVtoRGB(colHsv.rgb);
 
-    PSOut.Color = float4(result, 1.0f);
+
+    // Gradient
+    float3 gradientStart = float3(1.0f, 0.0f, 0.0f);
+    float3 gradientEnd = float3(0.0f, 0.0f, 1.0f);
+
+    float3 gradient = lerp(gradientStart, gradientEnd, (normalize(PSIn.LocalPos).z + 1) * 0.5);
+    float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, 0.3f), 1.0f);
+    float4 gradientApplied2 = float4(lerp(gradientApplied, gradientApplied * gradient, 0.3f), 1.0f);
+
+    // Generate random noise
+    float2 flatUV = GetFlatUV(PSIn.LocalPos);
+
+    float3 halftone = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.LocalPos.xz * hatchTiling * 0.1f);
+    float4 outputColor = lerp(gradientApplied2, gradientApplied2 * float4(halftone, 1.0f), 1.0f);
+
+    PSOut.Color = outputColor;
 }

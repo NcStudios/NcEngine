@@ -151,6 +151,10 @@
             "assetName": "texture/guy_2_normal.nca"
         },
         {
+            "sourcePath": "raw/image/halftone.png",
+            "assetName": "texture/halftone"
+        },
+        {
             "sourcePath": "raw/image/linear_hatch.png",
             "assetName": "texture/linear_hatch.nca"
         },

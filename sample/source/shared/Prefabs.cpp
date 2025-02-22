@@ -123,6 +123,7 @@ void InitializeResources()
         "cave/BaseColor.nca",
         "guy_base_color.nca",
         "guy_2_base_color.nca",
+        "halftone.nca",
         "linear_hatch.nca",
         "ogre/BaseColor.nca",
         "skeleton/BaseColor.nca",
@@ -194,7 +195,7 @@ void ReloadPrefabs()
 
     material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
     material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");
-    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
+    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("halftone.nca");
     material::Guy2.properties.normalIntensity = 1.75f;
     material::Guy2.properties.hatchTiling = 17.0f;
 
