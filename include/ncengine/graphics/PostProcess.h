@@ -55,7 +55,10 @@ struct GradientPassProperties
 {
     Vector3 gradientStart = Vector3::Zero();
     float gradientAmount = 0.1f;
-    Vector3 gradientEnd = Vector3::Zero();
+    Vector3 gradientEnd = Vector3::One();
+    uint32_t noiseTexIndex = 0u;
+    float noiseTexAmount = 0.1f;
+    float noiseTexTiling = 1.0f;
 };
 
 /** @brief Generic post process property type. */

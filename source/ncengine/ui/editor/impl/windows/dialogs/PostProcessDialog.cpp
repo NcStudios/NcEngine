@@ -32,6 +32,22 @@ void DrawPostProcessPassInfo(nc::PostProcessEffectId effectId,
                         ncGraphics->SetPostProcessEffectProperties(effectId, nc::PostProcessPassFlag::Outline, copy);
                     }
                 }
+                else if constexpr (std::same_as<T, nc::GradientPassProperties>)
+                {
+                    IMGUI_SCOPE(nc::ui::Indent);
+                    IMGUI_SCOPE(nc::ui::Indent);
+                    auto copy = unpacked;
+                    auto modified = nc::ui::InputColor3(copy.gradientStart, "gradientStart");
+                    modified = nc::ui::DragFloat(copy.gradientAmount, "gradientAmount", 0.001f, 0.0f, 1.0f) || modified;
+                    modified = nc::ui::InputColor3(copy.gradientEnd, "gradientEnd") || modified;
+                    modified = nc::ui::InputU32(copy.noiseTexIndex, "noiseTexIndex") || modified;
+                    modified = nc::ui::DragFloat(copy.noiseTexAmount, "noiseTexAmount", 0.001f, 0.0f, 1.0f) || modified;
+                    modified = nc::ui::DragFloat(copy.noiseTexTiling, "noiseTexTiling", 0.01f, 1.0f, 10.0f) || modified;
+                    if (modified)
+                    {
+                        ncGraphics->SetPostProcessEffectProperties(effectId, nc::PostProcessPassFlag::Gradient, copy);
+                    }
+                }
             },
             ncGraphics->GetPostProcessEffectProperties(effectId, passId)
         );

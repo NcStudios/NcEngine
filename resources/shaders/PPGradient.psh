@@ -1,5 +1,4 @@
-// Much credit to Timothy Lottes and Simon Rodriguez https://blog.simonrodriguez.fr/articles/2016/07/implementing_fxaa.html
-
+Texture2D     Textures[];
 Texture2D     ColorSinks[];
 Texture2D     DepthSinks[];
 Texture2D     PostProcessSinks[];
@@ -27,6 +26,16 @@ cbuffer SinkIndices
     uint hasPostProcess;
 };
 
+cbuffer PostProcessProperties
+{
+    float3 gradientStart;
+    float gradientAmount;
+    float3 gradientEnd;
+    uint noiseTexIndex;
+    float noiseTexAmount;
+    float noiseTexTiling;
+};
+
 struct PSInput 
 { 
     float4 Pos : SV_POSITION;
@@ -46,18 +55,14 @@ void main(in PSInput PSIn, out PSOutput PSOut)
 {
     // Alias the resource names
     SamplerState smplr = ColorSinks_sampler;
-    Texture2D colorTex = PostProcessSinks[0];
-    float3 color = colorTex.Sample(smplr, PSIn.UV);
+    Texture2D sceneColorTex = PostProcessSinks[0];
+    Texture2D noiseTex = Textures[noiseTexIndex];
+    float3 sceneColor = sceneColorTex.Sample(smplr, PSIn.UV);
+    float3 noiseColor = noiseTex.Sample(smplr, PSIn.UV * noiseTexTiling);
 
     // Gradient
-    float3 gradientStart = float3(1.0f, 0.0f, 1.0f);
-    float3 gradientEnd = float3(0.0f, 1.0f, 0.0f);
     float3 gradient = lerp(gradientStart, gradientEnd, PSIn.UV.y);
-    float4 gradientApplied = float4(lerp(color, color + gradient, 0.1f), 1.0f);
+    float4 gradientApplied = float4(lerp(sceneColor, sceneColor + gradient, gradientAmount), 1.0f);
 
-    PSOut.Color = gradientApplied;
+    PSOut.Color = lerp(gradientApplied, gradientApplied * float4(noiseColor, 1.0f), noiseTexAmount);
 }
-
-// float3 gradientStart
-// float gradientAmount
-// float3 gradientEnd

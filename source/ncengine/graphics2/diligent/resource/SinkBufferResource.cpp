@@ -78,10 +78,15 @@ auto MakeDepthSinkBufferDesc(uint32_t maxTextures) -> SinkBufferResourceDesc
 
 auto SinkBufferResource::MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
 {
+    auto samplerDesc = Diligent::SamplerDesc{};
+    samplerDesc.AddressU = Diligent::TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = Diligent::TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = Diligent::TEXTURE_ADDRESS_WRAP;
+
     return Diligent::ImmutableSamplerDesc{
         Diligent::SHADER_TYPE_PIXEL,
         variableName.data(),
-        Diligent::SamplerDesc{}
+        samplerDesc
     };
 }
 
