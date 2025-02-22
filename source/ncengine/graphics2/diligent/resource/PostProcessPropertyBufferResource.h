@@ -19,13 +19,14 @@ class PostProcessPropertyBufferResource
     public:
         explicit PostProcessPropertyBufferResource(Diligent::IDeviceContext& context,
                                                    Diligent::IRenderDevice& device,
-                                                   Diligent::IShaderResourceVariable& outlinePassVariable);
+                                                   Diligent::IShaderResourceVariable& postProcessPassVariable);
 
         void Update(Diligent::IDeviceContext& context,
                     const PostProcessPassProperties& properties);
 
     private:
         DynamicUniformBuffer m_outlinePassBuffer;
-        Diligent::IShaderResourceVariable* m_outlinePassVariable;
+        DynamicUniformBuffer m_gradientPassBuffer;
+        Diligent::IShaderResourceVariable* m_postProcessPassVariable;
 };
 } // namespace nc::graphics

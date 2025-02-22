@@ -34,6 +34,15 @@ struct OutlinePassData
     float normalThreshold = 0.4f;
 };
 
+// Object model for outline pass properties used by post processing effects (type: constant buffer)
+struct GradientPassData
+{
+    Vector3 gradientStart = Vector3::Zero();
+    float gradientAmount = 0.1f;
+    Vector3 gradientEnd = Vector3::Zero();
+};
+
+
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
 struct PostProcessSinkIndexData
 {

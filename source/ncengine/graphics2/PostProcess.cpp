@@ -8,7 +8,7 @@ namespace nc
 {
 auto PassHasProperties(PostProcessPassFlag::type pass) -> bool
 {
-    return pass == PostProcessPassFlag::Outline;
+    return pass == PostProcessPassFlag::Outline || pass == PostProcessPassFlag::Gradient;
 }
 
 auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPassProperties
@@ -20,7 +20,7 @@ auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPas
         case PostProcessPassFlag::Fxaa:
             return PostProcessPassProperties{};
         case PostProcessPassFlag::Gradient:
-            return PostProcessPassProperties{};
+            return PostProcessPassProperties{GradientPassProperties{}};
         default:
             // Explicitly enumerate above and fail here so tests can catch if an update to this gets missed.
             NC_ASSERT(false, "Unexpected PostProcessPass");

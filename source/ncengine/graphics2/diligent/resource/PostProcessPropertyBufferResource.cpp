@@ -10,7 +10,7 @@ namespace nc::graphics
 {
 PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(Diligent::IDeviceContext& context,
                                                                      Diligent::IRenderDevice& device,
-                                                                     Diligent::IShaderResourceVariable& outlinePassVariable)
+                                                                     Diligent::IShaderResourceVariable& postProcessPassVariable)
 
     : m_outlinePassBuffer{
         context,
@@ -18,20 +18,32 @@ PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(Diligent::I
         OutlinePassData{},
         "OutlinePassDataUniformBuffer"
       },
-      m_outlinePassVariable{&outlinePassVariable}
+      m_gradientPassBuffer{
+        context,
+        device,
+        GradientPassData{},
+        "GradientPassDataUniformBuffer"
+      },
+      m_postProcessPassVariable{&postProcessPassVariable}
 {
-    m_outlinePassVariable->Set(&m_outlinePassBuffer.GetBuffer());
 }
 
 void PostProcessPropertyBufferResource::Update(Diligent::IDeviceContext& context,
                                                const PostProcessPassProperties& properties)
 {
     std::visit(
-        [&context, this](auto&& unpacked){
+        [&context, this](auto&& unpacked) {
             using T = std::decay_t<decltype(unpacked)>;
             if constexpr (std::same_as<T, OutlinePassProperties>)
             {
+
+                m_postProcessPassVariable->Set(&m_outlinePassBuffer.GetBuffer());
                 m_outlinePassBuffer.Write(context, unpacked);
+            }
+            else if constexpr (std::same_as<T, GradientPassProperties>)
+            {
+                m_postProcessPassVariable->Set(&m_gradientPassBuffer.GetBuffer());
+                m_gradientPassBuffer.Write(context, unpacked);
             }
             else
             {

@@ -151,7 +151,7 @@ PassBackend::PassBackend(IRenderDevice& device,
     "Mismatch between the number of post process sinks in the manifest and post process resource slots.");
     for (auto i = 0u; i < passManifest.PostProcessSinkCount(); i++)
     {
-        auto& postProcessSink = perPassSignature.GetPostProcessResource(i);
+        auto& postProcessSink = perPassSignature.GetPostProcessSinkResource(i);
         postProcessSink.Add(device, context, 1, screenWidth, screenHeight);
     }
 
@@ -284,12 +284,11 @@ void PassBackend::RenderParticle(IDeviceContext& context,
 
 void PassBackend::RenderPostProcess(IDeviceContext& context,
                                     ISwapChain& swapChain,
-                                    PerPassResourceSignature& perPassResourceSignature,
-                                    PerFrameResourceSignature& perFrameResourceSignature)
+                                    PerPassResourceSignature& perPassResourceSignature)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderPostProcess()", ProfileCategory::Rendering);
     constexpr auto drawAttribs = DrawAttribs{4, DRAW_FLAG_VERIFY_ALL};
-    auto& propertyBuffer = perFrameResourceSignature.GetPostProcessPropertyBuffer();
+    auto& propertyBuffer = perPassResourceSignature.GetPostProcessPropertyResource();
     auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
 
     // If MSAA samples are set to be greater than 1 in the config, all PassType::Material, PassType::SkinnedMaterial and PassType::Misc passes are multisampled.
@@ -304,7 +303,7 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
         m_finalPostProcessTarget = pass.sinks.postProcess;
 
         // Get the post process resource we are writing to to bind in the next step
-        auto& postProcessSinkBuffer = perPassResourceSignature.GetPostProcessResource(pass.sinks.postProcess);
+        auto& postProcessSinkBuffer = perPassResourceSignature.GetPostProcessSinkResource(pass.sinks.postProcess);
 
         BindRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
         ClearRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
@@ -313,20 +312,22 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
         auto hasPostProcessSource = pass.sources.postProcess != NoTarget;
         if (hasPostProcessSource)
         {
-            auto& postProcessSourceBuffer = perPassResourceSignature.GetPostProcessResource(pass.sources.postProcess);
+            auto& postProcessSourceBuffer = perPassResourceSignature.GetPostProcessSinkResource(pass.sources.postProcess);
             postProcessSourceBuffer.Update();
             perPassResourceSignature.Commit(context);
         }
         sinkIndexBuffer.Update(context, pass.sources.color, pass.sources.depth, hasPostProcessSource);
         context.SetPipelineState(pass.pso);
 
+        // Bind the property buffer for the instance, if any
         for (auto& instance : pass.instances)
         {
             if (!instance.enabled) continue;
             if (instance.properties.has_value())
             {
                 propertyBuffer.Update(context, instance.properties.value());
-            }
+                perPassResourceSignature.Commit(context);
+        }
             context.Draw(drawAttribs);
         }
     }
@@ -350,7 +351,7 @@ void PassBackend::RenderOutputToSwapchain(IDeviceContext& context, ISwapChain& s
     if (m_finalPostProcessTarget.has_value())  // The last pass in the chain is a post process target
     {
         m_finalPass->sources.postProcess = m_finalPostProcessTarget.value();
-        auto& postProcessSourceBuffer = perPassResourceSignature.GetPostProcessResource(m_finalPass->sources.postProcess);
+        auto& postProcessSourceBuffer = perPassResourceSignature.GetPostProcessSinkResource(m_finalPass->sources.postProcess);
         postProcessSourceBuffer.Update();
         perPassResourceSignature.Commit(context);
         hasPostProcess = true;

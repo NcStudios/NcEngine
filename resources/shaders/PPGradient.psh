@@ -47,30 +47,17 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     // Alias the resource names
     SamplerState smplr = ColorSinks_sampler;
     Texture2D colorTex = PostProcessSinks[0];
-
-    // Get screen dimensions
-    uint screenWidth, screenHeight;
-    colorTex.GetDimensions(screenWidth, screenHeight);
-    float2 texelSize = float2(1.0 / screenWidth, 1.0 / screenHeight);
     float3 color = colorTex.Sample(smplr, PSIn.UV);
 
+    // Gradient
     float3 gradientStart = float3(1.0f, 0.0f, 1.0f);
     float3 gradientEnd = float3(0.0f, 1.0f, 0.0f);
     float3 gradient = lerp(gradientStart, gradientEnd, PSIn.UV.y);
+    float4 gradientApplied = float4(lerp(color, color + gradient, 0.1f), 1.0f);
 
-
-
-
-
-    // PSOut.Color = float4(color + gradient, 1.0f);
-    float4 gradientApplied = float4(lerp(color, color + gradient, 0.15f), 1.0f);
-
-    // Generate random noise
-    float noise = (frac(sin(dot(PSIn.UV, float2(12.9898, 78.233))) * 43758.5453) - 0.5) * 2.0;
-    float4 outputColor = lerp(gradientApplied, gradientApplied + noise * 0.05 * 1.0f, 0.25f);
-    PSOut.Color = outputColor;
-
-
-    // float luma = sqrt(RgbToLuma(outputColor));
-    // PSOut.Color = float4(luma, luma, luma, 1.0f);
+    PSOut.Color = gradientApplied;
 }
+
+// float3 gradientStart
+// float gradientAmount
+// float3 gradientEnd

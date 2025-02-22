@@ -32,7 +32,7 @@ auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc) -> Diligent::
         resourceDesc.shaderType,
         resourceDesc.resourceKey.data(),
         Diligent::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-        Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE
+        resourceDesc.dynamic ? Diligent::SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC : Diligent::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE,
     };
 }
 

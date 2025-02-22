@@ -95,28 +95,12 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float hatchMedium  = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).g;
     float hatchDark    = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.UV * hatchTiling).b;
 
-    // for (int i = 0; i < lightCount; i++)
-    // {
-    //     LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, PSIn.Normal);
-
-    //     combinedDiffuseColor += influence.diffuseColor;
-    //     combinedDiffuseAmt += influence.diffuseAmt;
-    //     combinedSpecularColor += influence.specularColor;
-    //     combinedSpecularAmount += influence.specularAmt;
-    //     combinedShadowColor += influence.shadowColor;
-    // }
-
-    // // Light banding (specular, shadow, diffuse)
-    // // float diffuseBlendFactor = smoothstep(0.4f, 0.5f, combinedDiffuseAmt);
-    // // float specularBlendFactor = smoothstep(0.8f, 1.0f, combinedDiffuseAmt);
-    // // float3 blendedDiffuse = lerp(combinedShadowColor, combinedDiffuseColor, diffuseBlendFactor);
-    // // float3 blendedSpecular = lerp(combinedDiffuseColor, combinedSpecularColor, specularBlendFactor);
-    // // light += lerp(blendedDiffuse, blendedSpecular, specularBlendFactor);
-
-    // light += combinedDiffuseColor * combinedDiffuseAmt + combinedSpecularColor * combinedSpecularAmount;
-    // Color.rgb *= light;
-
-
+    // Get normals either from vertex normals or from the normal texture
+    float3 normals = PSIn.Normal;
+    if (hatchTiling > 1.0f) //@todo : Parameterize
+    {
+        normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
+    }
 
     float3 result = 0.0f;
     float diffuseAmt = 0.0f;
@@ -124,12 +108,6 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float3 diffuseCol = float3(0.0f);
     float3 specularCol = float3(0.0f);
     float intensity = 1.0f;
-
-    float3 normals = PSIn.Normal;
-    if (hatchTiling > 1.0f) //@todo : Parameterize
-    {
-        normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
-    }
 
     for (int i = 0; i < lightCount; i++)
     {
@@ -142,14 +120,13 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         intensity = max(intensity, influence.intensity);
     }
 
+    // Apply light banding
     float bandedDiffuseAmt = Band(diffuseAmt) * intensity;
     float bandedSpecularAmt = Band(specularAmt) * intensity;
 
     result += (bandedDiffuseAmt * diffuseCol * Color.rgb + bandedSpecularAmt * specularCol * Color.rgb);
 
-
-
-    // Light banding (hatching)
+    // Apply hatching
     if (diffuseAmt < 0.05f)
     {
         result.rgb = result.rgb * hatchDark;
@@ -165,6 +142,4 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     result.rgb = HSVtoRGB(colHsv.rgb);
 
     PSOut.Color = float4(result, 1.0f);
-
-    // PSOut.Color = Normals;
 }

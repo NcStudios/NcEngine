@@ -250,7 +250,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
+                    .useDepthTest = false
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Outline,
@@ -471,8 +471,7 @@ void NcGraphicsImpl2::Run()
     m_passBackend.RenderPostProcess(
         context,
         swapChain,
-        m_shaderBindings.GetPerPassSignature(),
-        m_shaderBindings.GetPerFrameSignature()
+        m_shaderBindings.GetPerPassSignature()
     );
 
     m_passBackend.RenderOutputToSwapchain(
@@ -510,6 +509,7 @@ void NcGraphicsImpl2::Resize()
     m_shaderBindings.GetPerPassSignature().GetColorSinksResource().Resize(m_engine.GetDevice(), m_engine.GetContext(), width, height, m_numSamples);
     m_shaderBindings.GetPerPassSignature().GetDepthSinksResource().Resize(m_engine.GetDevice(),  m_engine.GetContext(), width, height, m_numSamples);
     m_resizeNeeded = false;
+    m_engine.GetDevice().IdleGPU();
 }
 } // namespace graphics
 } // namespace nc

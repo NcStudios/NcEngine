@@ -2,6 +2,7 @@
 
 #include "ResourceTypes.h"
 #include "base/StructuredBuffer.h"
+#include "PostProcessPropertyBufferResource.h"
 #include "SinkBufferResource.h"
 
 #include "Common/interface/RefCntAutoPtr.hpp"
@@ -24,23 +25,25 @@ class PerPassResourceSignature
                                           const SinkBufferDesc& colorSinksDesc,
                                           const SinkBufferDesc& depthSinksDesc,
                                           const SinkBufferDesc& postProcessSinksDesc,
+                                          const UniformBufferDesc& postProcessResourceDesc,
                                           const UniformBufferDesc& sinkIndexDesc);
 
         ~PerPassResourceSignature() noexcept;
 
         void Commit(Diligent::IDeviceContext& context) { context.CommitShaderResources(m_srb, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION); }
-        auto GetResourceSignature()                  -> Diligent::IPipelineResourceSignature& { return *m_signature; }
-        auto GetResourceBinding()                    -> Diligent::IShaderResourceBinding&     { return *m_srb; }
+        auto GetResourceSignature() -> Diligent::IPipelineResourceSignature& { return *m_signature; }
+        auto GetResourceBinding()   -> Diligent::IShaderResourceBinding&     { return *m_srb; }
         void BindPostProcessSink(uint32_t index);
 
-        auto GetColorSinksResource()                -> SinkBufferResource&                    { return *m_colorSinksResource; }
-        auto GetDepthSinksResource()                -> SinkBufferResource&                    { return *m_depthSinksResource; }
-        auto GetSinkIndexBufferResource()           -> SinkIndexBufferResource&               { return *m_sinkIndexBufferResource; }
-        auto GetPostProcessResource(uint32_t index) -> SinkBufferResource&                    { return m_postProcessSinkResources.at(index); }
+        auto GetColorSinksResource()                    -> SinkBufferResource&                 { return *m_colorSinksResource; }
+        auto GetDepthSinksResource()                    -> SinkBufferResource&                 { return *m_depthSinksResource; }
+        auto GetSinkIndexBufferResource()               -> SinkIndexBufferResource&            { return *m_sinkIndexBufferResource; }
+        auto GetPostProcessSinkResource(uint32_t index) -> SinkBufferResource&                 { return m_postProcessSinkResources.at(index); }
+        auto GetPostProcessPropertyResource()           -> PostProcessPropertyBufferResource&  { return *m_postProcessPropertyResource; }
 
-        auto GetPostProcessSinkCount() const        -> uint32_t                               { return m_postProcessSinkCount; }
-        auto GetColorSinkCount(bool isMsaa) const   -> uint32_t                               { return isMsaa ? m_colorSinksResource->GetMsaaSinkCount() : m_colorSinksResource->GetSinkCount(); }
-        auto GetDepthSinkCount(bool isMsaa) const   -> uint32_t                               { return isMsaa ? m_depthSinksResource->GetMsaaSinkCount() : m_depthSinksResource->GetSinkCount(); }
+        auto GetPostProcessSinkCount() const      -> uint32_t                               { return m_postProcessSinkCount; }
+        auto GetColorSinkCount(bool isMsaa) const -> uint32_t                               { return isMsaa ? m_colorSinksResource->GetMsaaSinkCount() : m_colorSinksResource->GetSinkCount(); }
+        auto GetDepthSinkCount(bool isMsaa) const -> uint32_t                               { return isMsaa ? m_depthSinksResource->GetMsaaSinkCount() : m_depthSinksResource->GetSinkCount(); }
 
     private:
         Diligent::RefCntAutoPtr<Diligent::IShaderResourceBinding> m_srb;
@@ -50,6 +53,7 @@ class PerPassResourceSignature
         std::vector<SinkBufferResource> m_postProcessSinkResources;
         std::vector<TextureBufferDesc> m_postProcessSinkDescs;
         std::unique_ptr<SinkIndexBufferResource> m_sinkIndexBufferResource;
+        std::unique_ptr<PostProcessPropertyBufferResource> m_postProcessPropertyResource;
         uint32_t m_postProcessSinkCount;
         std::string m_postProcessResourceKey;
 };

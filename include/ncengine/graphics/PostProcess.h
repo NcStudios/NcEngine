@@ -50,9 +50,18 @@ struct OutlinePassProperties
     float normalThreshold = 0.4f;
 };
 
+/** @brief Properties for the gradient pass. */
+struct GradientPassProperties
+{
+    Vector3 gradientStart = Vector3::Zero();
+    float gradientAmount = 0.1f;
+    Vector3 gradientEnd = Vector3::Zero();
+};
+
 /** @brief Generic post process property type. */
 using PostProcessPassProperties = std::variant<EmptyPassProperties,
-                                               OutlinePassProperties>;
+                                               OutlinePassProperties,
+                                               GradientPassProperties>;
 
 /** @brief Returns if a post process pass has a property type. */
 auto PassHasProperties(PostProcessPassFlag::type pass) -> bool;
