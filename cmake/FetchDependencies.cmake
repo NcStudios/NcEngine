@@ -87,7 +87,7 @@ set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
 set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(JoltPhysics
                      GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics
-                     GIT_TAG        1bcbe51f57e68bcc45ba341c98831623c5041f2e # need patch from #1444, can revert to release tag + shallow when available
+                     GIT_TAG        c1bdc5aee24ba08359b539efc5dc3b23f8e3bdbc # need patch from #1444 and #1513, can revert to release tag + shallow when available
                      GIT_SHALLOW    FALSE
                      SOURCE_SUBDIR  "Build"
 )
