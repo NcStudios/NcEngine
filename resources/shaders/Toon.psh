@@ -78,7 +78,7 @@ float3 HSVtoRGB(in float3 HSV)
 
 float Band(float lightAmount)
 {
-    if (lightAmount < 0.001f)
+    if (lightAmount * 100 < 0.05f)
     {
         return 0.0f;
     }
@@ -86,20 +86,9 @@ float Band(float lightAmount)
     return 1.0f;
 }
 
-static const float3 PLANE_NORMAL = float3(0.0, 1.0, 0.0); // Y-up normal
-static const float PLANE_OFFSET = 1.0; // Offset along normal in object space
-
-
-float2 GetFlatUV(float3 localPos)
-{
-     float distanceFromPlane = dot(localPos, PLANE_NORMAL) - PLANE_OFFSET;
-    float3 projectedPos = localPos - (distanceFromPlane * PLANE_NORMAL);
-    return projectedPos.xz;
-}
-
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
-    // Get texture color
+    // Get texture colors
     uint TexIndex = Materials[PSIn.MaterialIndex].diffuseTexIndex;
     uint NormalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
     float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
@@ -120,46 +109,38 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     }
 
     float3 result = 0.0f;
-    float diffuseAmt = 0.0f;
-    float specularAmt = 0.0f;
-    float3 diffuseCol = float3(0.0f);
-    float3 specularCol = float3(0.0f);
-    float intensity = 1.0f;
-
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normals);
 
-        diffuseAmt += influence.diffuseAmt;
-        specularAmt += influence.specularAmt;
-        diffuseCol += influence.diffuseColor;
-        specularCol += influence.specularColor;
-        intensity = max(intensity, influence.intensity);
+        // Apply light banding
+        float bandedDiffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
+        float bandedSpecularAmt = Band(influence.specularAmt) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+
+        result += (bandedDiffuseAmt * influence.diffuseColor * Color.rgb) + (bandedSpecularAmt * influence.specularColor * Color.rgb );
+
+        // Apply hatching
+        if (Materials[PSIn.MaterialIndex].hatchTiling > 0.0f)
+        {
+            if (influence.diffuseAmt < 0.05f)
+            {
+                result.rgb = lerp(result.rgb, result.rgb * hatchDark, 1-(influence.diffuseAmt * 5));
+            }
+            else if (influence.diffuseAmt < 0.1f)
+            {
+                result.rgb = lerp(result.rgb, result.rgb * hatchMedium, 1-(influence.diffuseAmt * 5));
+            }
+        }
     }
 
-    // Apply light banding
-    float bandedDiffuseAmt = Band(diffuseAmt) * intensity;
-    float bandedSpecularAmt = Band(specularAmt) * intensity * Materials[PSIn.MaterialIndex].reflectivity;
-
-    result += (bandedDiffuseAmt * diffuseCol * Color.rgb + bandedSpecularAmt * specularCol * Color.rgb);
-
-    // Apply hatching
-    if (diffuseAmt < 0.05f)
-    {
-        result.rgb = result.rgb * hatchDark;
-    }
-    else if (diffuseAmt < 0.1f)
-    {
-        result.rgb = result.rgb * hatchMedium;
-    }
-
+    // Change saturation
     float3 colHsv = RGBtoHSV(float3(result.r, result.g, result.b));
-    colHsv.y *= (1.25f);
-    colHsv.z *= (1.25f);
+    colHsv.y *= (1.0f);
+    colHsv.z *= (1.5f);
     result.rgb = HSVtoRGB(colHsv.rgb);
 
     // Gradient
-    float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).z + 1) * 0.5);
+    float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
     float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, Materials[PSIn.MaterialIndex].gradientAmount), 1.0f);
     float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
 

@@ -1283,7 +1283,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{4.0f, 50.0f, 35.0f},
+            .position = Vector3{-15.0f, 50.0f, 35.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},

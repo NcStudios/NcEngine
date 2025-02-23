@@ -36,7 +36,7 @@ float CalculateSpecular(float3 L, float3 V, float3 N)
 float CalculateAttenuation(float D, float R)
 {
     float distance = D / R;
-    return 1.0f / (1.0f + 0.6f * distance + 0.1f * pow(distance, 2));
+    return exp(-2.0f * distance); // Steep and smooth
 }
 
 LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)

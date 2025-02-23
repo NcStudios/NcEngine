@@ -102,7 +102,7 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
 
     modified = nc::ui::InputU32(properties.useTextureNormals, "useTextureNormals") || modified;
 
-    modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f) || modified;
+    modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 50.0f) || modified;
 
     if (nc::ui::Combobox(hatchTexPath, "hatch", textureAssets))
     {
@@ -110,7 +110,7 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
         properties.hatchTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(hatchTexPath);
     }
 
-    modified = nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 1.0f, 60.0f) || modified;
+    modified = nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 0.0f, 60.0f) || modified;
 
     modified = nc::ui::DragFloat(properties.reflectivity, "reflectivity", 0.001f, 0.0f, 1.0f) || modified;
 

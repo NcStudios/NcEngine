@@ -178,8 +178,8 @@ void ReloadPrefabs()
         .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
         .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
         .normalIntensity = 1.0f,
-        .hatchTiling = 1.0f,
-        .gradientAmount = 0.075f,
+        .hatchTiling = 0.0f,
+        .gradientAmount = 0.025f,
         .reflectivity = 0.0f,
         .useTextureNormals = 0
     };
