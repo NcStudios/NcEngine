@@ -187,7 +187,6 @@ void ReloadPrefabs()
     material::Blue.properties = materialDefaults;
     material::Blue.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Blue.nca");
     material::Blue.properties.normalIntensity = .220f;
-    material::Blue.properties.useTextureNormals = 1;
 
     material::Cave.properties = materialDefaults;
     material::Cave.properties.diffuseTex = asset::AcquireTextureAsset("cave/BaseColor.nca");
@@ -203,7 +202,7 @@ void ReloadPrefabs()
     material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
     material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");
     material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
-    material::Guy2.properties.normalIntensity = 0.91f;
+    material::Guy2.properties.normalIntensity = 0.0f;
     material::Guy2.properties.hatchTiling = 16.0f;
     material::Guy2.properties.reflectivity = 1.0f;
     material::Guy2.properties.useTextureNormals = 1;
@@ -247,11 +246,11 @@ void ReloadPrefabs()
 
     post_process::Noise = NoisePassProperties
     {
-        .maskGradientStart = Vector3{0.0f, 0.0f, 0.0f},
+        .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
         .maskGradientAmount = 1.0f,
-        .maskGradientEnd = Vector3{1.0f, 1.0f, 1.0f},
+        .maskGradientEnd = Vector3{0.0f, 0.0f, 0.0f},
         .noiseTex = asset::AcquireTextureAsset("noise.nca"),
-        .noiseTexAmount = 0.025f,
+        .noiseTexAmount = 0.1f,
         .noiseTexTiling = 1.0f,
     };
 }

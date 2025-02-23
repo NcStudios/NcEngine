@@ -29,8 +29,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{6.5f, 10.0f, 5.4f}, .tag = "Point Light 1"});
-    world.Emplace<PointLight>(lvHandle, Vector3(0.84f, 0.66f, 0.56f), Vector3(.14f, 0.72f, 1.0f), 2.3f, 23.7f);
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-5.5f, 10.0f, 5.4f}, .tag = "Point Light 1"});
+    world.Emplace<PointLight>(lvHandle, Vector3(.4557f, 0.281f, 0.2633f), Vector3(.3653f, 0.3198f, 0.3149f), 2.3f, 175.0f);
 
     const auto guy2 = world.Emplace<Entity>({
         .position = Vector3{6.0f, 1.8f, 4.0f},
@@ -154,8 +154,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
-        .position = Vector3{0.854f, 2.612f, 2.234f},
-        .rotation = Quaternion::FromEulerAngles(0.318f, 1.269f, 0.07f),
+        .position = Vector3{0.137f, 5.291f, 1.245f},
+        .rotation = Quaternion::FromEulerAngles(0.549f, 1.116f, 0.146f),
         .tag = "Main Camera"
     });
 

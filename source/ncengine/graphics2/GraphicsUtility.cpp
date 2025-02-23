@@ -12,16 +12,14 @@ constexpr auto g_materialPassNames = std::array{
     std::string_view{"Shadow"},
     std::string_view{"Depth"},
     std::string_view{"Toon"},
-    std::string_view{"ExteriorNormals"},
-    std::string_view{"InteriorNormals"},
+    std::string_view{"Normals"}
 };
 
 constexpr auto g_materialPassFlags = std::array{
     nc::MaterialPassFlag::Shadow,
     nc::MaterialPassFlag::Depth,
     nc::MaterialPassFlag::Toon,
-    nc::MaterialPassFlag::ExteriorNormals,
-    nc::MaterialPassFlag::InteriorNormals,
+    nc::MaterialPassFlag::Normals
 };
 
 constexpr auto g_miscPassFlags = std::array{
@@ -105,7 +103,7 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 
 auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
 {
-    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 4};
+    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 3};
 }
 
 auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>

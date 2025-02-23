@@ -23,8 +23,7 @@ enum class ColorTarget : uint8_t
     None,
     Swapchain,
     Main,
-    ExteriorNormals,
-    InteriorNormals,
+    Normals
 };
 
 enum class DepthTarget : uint8_t

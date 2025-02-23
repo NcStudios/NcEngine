@@ -199,38 +199,20 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::ExteriorNormals,
-                    .name = "ExteriorNormals",
+                    .id = MaterialPassFlag::Normals,
+                    .name = "Normals",
                     .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{"ExteriorNormals.psh", "Toon.vsh"},
-                    .colorSink = ColorTarget::ExteriorNormals,
+                    .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
+                    .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::ExteriorNormals,
-                    .name = "ExteriorNormalsSkinned",
+                    .id = MaterialPassFlag::Normals,
+                    .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{"ExteriorNormals.psh", "ToonSkinned.vsh"},
-                    .colorSink = ColorTarget::ExteriorNormals,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
-                },
-                PassDesc{
-                    .id = MaterialPassFlag::InteriorNormals,
-                    .name = "InteriorNormals",
-                    .type = PassType::Material,
-                    .shaderPaths = ShaderPaths{"InteriorNormals.psh", "Toon.vsh"},
-                    .colorSink = ColorTarget::InteriorNormals,
-                    .depthSink = DepthTarget::Main,
-                    .useDepthTest = true
-                },
-                PassDesc{
-                    .id = MaterialPassFlag::InteriorNormals,
-                    .name = "InteriorNormalsSkinned",
-                    .type = PassType::SkinnedMaterial,
-                    .shaderPaths = ShaderPaths{"InteriorNormals.psh", "ToonSkinned.vsh"},
-                    .colorSink = ColorTarget::InteriorNormals,
+                    .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
+                    .colorSink = ColorTarget::Normals,
                     .depthSink = DepthTarget::Main,
                     .useDepthTest = true
                 },
@@ -257,7 +239,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
-                    .colorSources = std::vector{ColorTarget::Main, ColorTarget::ExteriorNormals, ColorTarget::InteriorNormals},
+                    .colorSources = std::vector{ColorTarget::Main, ColorTarget::Normals},
                     .depthSources = std::vector{DepthTarget::Main},
                     .postProcessSink = PostProcessTarget::PPOutline,
                     .isMsaa = false,

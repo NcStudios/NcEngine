@@ -103,8 +103,7 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     SamplerState smplr = ColorSinks_sampler;
     Texture2D depthTex = DepthSinks[depthRT1];
     Texture2D colorTex = ColorSinks[colorRT1];
-    Texture2D exteriorNormalTex = ColorSinks[colorRT2];
-    Texture2D interiorNormalTex = ColorSinks[colorRT3];
+    Texture2D normalTex = ColorSinks[colorRT2];
 
     // Get screen dimensions
     uint screenWidth, screenHeight;
@@ -122,15 +121,13 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float2 ULUV = PSIn.UV + float2(-texelSize.x * outlineWidthHalfFloor, texelSize.y * outlineWidthHalfCeil);
 
     // Get depth outline. Calculate the view dir to modulate depth to fix some artifacts.
-    float depthEdge = OutlineDepth(depthTex, GetViewDirDepthOffset(exteriorNormalTex.Sample(smplr, PSIn.UV).a), smplr, LLUV, URUV, LRUV, ULUV);
+    float depthEdge = OutlineDepth(depthTex, GetViewDirDepthOffset(normalTex.Sample(smplr, PSIn.UV).a), smplr, LLUV, URUV, LRUV, ULUV);
 
     // Get the normals outline.
-    float exteriorNormalsEdge = OutlineNormals(exteriorNormalTex, 1.0f, smplr, LLUV, URUV, LRUV, ULUV);
-
-    float interiorNormalsEdge = OutlineNormals(interiorNormalTex, interiorNormalTex.Sample(smplr, PSIn.UV).a * 5, smplr, LLUV, URUV, LRUV, ULUV);
+    float normalsEdge = OutlineNormals(normalTex, 1.0f, smplr, LLUV, URUV, LRUV, ULUV);
 
     // Composite the edge onto the scene color.
-    float edge =  max(interiorNormalsEdge, max(exteriorNormalsEdge, depthEdge));
+    float edge = max(normalsEdge, depthEdge);
     float4 sceneColor = colorTex.Sample(smplr, PSIn.UV);
 
     PSOut.Color = lerp(sceneColor, float4(outlineColor, 1.0f), edge * 0.85f);
