@@ -26,7 +26,7 @@ class PostProcessPropertyBufferResource
 
     private:
         DynamicUniformBuffer m_outlinePassBuffer;
-        DynamicUniformBuffer m_gradientPassBuffer;
+        DynamicUniformBuffer m_noisePassBuffer;
         Diligent::IShaderResourceVariable* m_postProcessPassVariable;
 };
 } // namespace nc::graphics

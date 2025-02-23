@@ -6,6 +6,21 @@
 #include <concepts>
 #include <ranges>
 
+namespace
+{
+auto ToNoisePassData(const nc::NoisePassProperties& properties) -> nc::graphics::NoisePassData
+{
+    return nc::graphics::NoisePassData{
+        .maskGradientStart = properties.maskGradientStart,
+        .maskGradientAmount = properties.maskGradientAmount,
+        .maskGradientEnd = properties.maskGradientEnd,
+        .noiseTexIndex = properties.noiseTex.index,
+        .noiseTexAmount = properties.noiseTexAmount,
+        .noiseTexTiling = properties.noiseTexTiling
+    };
+}
+} // anonymous namespace
+
 namespace nc::graphics
 {
 PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(Diligent::IDeviceContext& context,
@@ -18,11 +33,11 @@ PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(Diligent::I
         OutlinePassData{},
         "OutlinePassDataUniformBuffer"
       },
-      m_gradientPassBuffer{
+      m_noisePassBuffer{
         context,
         device,
-        GradientPassData{},
-        "GradientPassDataUniformBuffer"
+        NoisePassData{},
+        "NoisePassDataUniformBuffer"
       },
       m_postProcessPassVariable{&postProcessPassVariable}
 {
@@ -40,10 +55,10 @@ void PostProcessPropertyBufferResource::Update(Diligent::IDeviceContext& context
                 m_postProcessPassVariable->Set(&m_outlinePassBuffer.GetBuffer());
                 m_outlinePassBuffer.Write(context, unpacked);
             }
-            else if constexpr (std::same_as<T, GradientPassProperties>)
+            else if constexpr (std::same_as<T, NoisePassProperties>)
             {
-                m_postProcessPassVariable->Set(&m_gradientPassBuffer.GetBuffer());
-                m_gradientPassBuffer.Write(context, unpacked);
+                m_postProcessPassVariable->Set(&m_noisePassBuffer.GetBuffer());
+                m_noisePassBuffer.Write(context, ToNoisePassData(unpacked));
             }
             else
             {

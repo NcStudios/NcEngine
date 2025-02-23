@@ -33,13 +33,6 @@
             }
         },
         {
-            "sourcePath": "raw/model/guy.fbx",
-            "assetName": "mesh/guy",
-            "options": {
-                "optimizeMesh": true
-            }
-        },
-        {
             "sourcePath": "raw/model/guy2.fbx",
             "assetName": "mesh/guy2",
             "options": {
@@ -135,14 +128,6 @@
             "assetName": "texture/cave/Normal"
         },
         {
-            "sourcePath": "raw/image/guy_base_color.png",
-            "assetName": "texture/guy_base_color"
-        },
-        {
-            "sourcePath": "raw/image/guy_normal.png",
-            "assetName": "texture/guy_normal.nca"
-        },
-        {
             "sourcePath": "raw/image/guy_2_base_color.png",
             "assetName": "texture/guy_2_base_color"
         },
@@ -157,6 +142,10 @@
         {
             "sourcePath": "raw/image/linear_hatch.png",
             "assetName": "texture/linear_hatch.nca"
+        },
+        {
+            "sourcePath": "raw/image/noise.png",
+            "assetName": "texture/noise.nca"
         },
         {
             "sourcePath": "raw/image/ogre/BaseColor.png",

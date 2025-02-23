@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "ncengine/asset/AssetViews.h"
 #include "ncmath/Vector.h"
 
 #include <limits>
@@ -19,7 +20,7 @@ struct PostProcessPassFlag
     static constexpr auto None     = type{0};
     static constexpr auto Outline  = type{1 << 0};
     static constexpr auto Fxaa     = type{2 << 0};
-    static constexpr auto Gradient = type{3 << 0};
+    static constexpr auto Noise = type{3 << 0};
 };
 
 /** @brief Identifier for a post process effect. */
@@ -35,7 +36,7 @@ constexpr auto NullPostProcessEffectId = std::numeric_limits<PostProcessEffectId
 constexpr auto OutlinedToonEffectId = PostProcessEffectId{0};
 
 /** @brief Pass flags for the outlined toon post process effect. */
-constexpr auto OutlinedToonEffectPassFlags = PostProcessPassFlag::Outline | PostProcessPassFlag::Fxaa | PostProcessPassFlag::Gradient;
+constexpr auto OutlinedToonEffectPassFlags = PostProcessPassFlag::Outline | PostProcessPassFlag::Fxaa | PostProcessPassFlag::Noise;
 
 /** @brief Post process property type representing an empty or uninitialized state. */
 struct EmptyPassProperties {};
@@ -50,13 +51,13 @@ struct OutlinePassProperties
     float normalThreshold = 0.4f;
 };
 
-/** @brief Properties for the gradient pass. */
-struct GradientPassProperties
+/** @brief Properties for the noise pass. */
+struct NoisePassProperties
 {
-    Vector3 gradientStart = Vector3::Zero();
-    float gradientAmount = 0.1f;
-    Vector3 gradientEnd = Vector3::One();
-    uint32_t noiseTexIndex = 0u;
+    Vector3 maskGradientStart = Vector3::Zero();
+    float maskGradientAmount = 0.1f;
+    Vector3 maskGradientEnd = Vector3::One();
+    asset::TextureView noiseTex = asset::TextureView{};
     float noiseTexAmount = 0.1f;
     float noiseTexTiling = 1.0f;
 };
@@ -64,7 +65,7 @@ struct GradientPassProperties
 /** @brief Generic post process property type. */
 using PostProcessPassProperties = std::variant<EmptyPassProperties,
                                                OutlinePassProperties,
-                                               GradientPassProperties>;
+                                               NoisePassProperties>;
 
 /** @brief Returns if a post process pass has a property type. */
 auto PassHasProperties(PostProcessPassFlag::type pass) -> bool;

@@ -1240,7 +1240,8 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f, .depthThreshold = 2.66f, .viewDirDepthThreshold = 0.93f, .normalThreshold = 0.86f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 2.0f, .depthThreshold = 2.66f, .viewDirDepthThreshold = 0.93f, .normalThreshold = 0.180f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
 
     // Character
     SpawnCharacterFunc = [world, cameraHandle]() mutable

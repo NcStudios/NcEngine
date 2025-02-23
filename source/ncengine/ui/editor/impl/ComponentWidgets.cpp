@@ -78,7 +78,7 @@ auto MaterialPassesWidget(nc::MaterialPassFlags& passes) -> bool
     return modified;
 }
 
-auto MaterialPropertiesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
+auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAsset& ncAsset) -> bool
 {
     /** @todo 353 Get asset views from ncAsset, once implemented */
     constexpr auto assetType = nc::asset::AssetType::Texture;
@@ -87,6 +87,7 @@ auto MaterialPropertiesWidget(nc::MaterialProperties& properties, nc::asset::NcA
     auto normalTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTex.id)};
     auto hatchTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.hatchTex.id)};
     auto modified = false;
+
     if (nc::ui::Combobox(diffuseTexPath, "diffuse", textureAssets))
     {
         modified = true;
@@ -99,15 +100,29 @@ auto MaterialPropertiesWidget(nc::MaterialProperties& properties, nc::asset::NcA
         properties.normalTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalTexPath);
     }
 
+    modified = nc::ui::InputU32(properties.useTextureNormals, "useTextureNormals") || modified;
+
+    modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f) || modified;
+
     if (nc::ui::Combobox(hatchTexPath, "hatch", textureAssets))
     {
         modified = true;
         properties.hatchTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(hatchTexPath);
     }
 
-    modified |= nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 1.0f, 120.0f);
-    modified |= nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f);
+    modified = nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 1.0f, 60.0f) || modified;
 
+    modified = nc::ui::DragFloat(properties.reflectivity, "reflectivity", 0.001f, 0.0f, 1.0f) || modified;
+
+    return modified;
+}
+
+auto MaterialGradientWidget(nc::MaterialProperties& properties) -> bool
+{
+    auto modified = false;
+    modified = nc::ui::InputColor3(properties.gradientStart, "gradientStart");
+    modified = nc::ui::DragFloat(properties.gradientAmount, "gradientAmount", 0.001f, 0.0f, 1.0f) || modified;
+    modified = nc::ui::InputColor3(properties.gradientEnd, "gradientEnd") || modified;
     return modified;
 }
 
@@ -142,9 +157,16 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         }
 
         ImGui::Separator();
-        if (ImGui::TreeNodeEx("Material Properties"))
+        if (ImGui::TreeNodeEx("Textures"))
         {
-            modified = MaterialPropertiesWidget(properties, ncAsset) || modified;
+            modified = MaterialTexturesWidget(properties, ncAsset) || modified;
+            ImGui::TreePop();
+        }
+
+        ImGui::Separator();
+        if (ImGui::TreeNodeEx("Gradient"))
+        {
+            modified = MaterialGradientWidget(properties) || modified;
             ImGui::TreePop();
         }
 

@@ -21,7 +21,6 @@ namespace mesh
 asset::MeshView Capsule{};
 asset::MeshView Cave{};
 asset::MeshView Cube{};
-asset::MeshView Guy{};
 asset::MeshView Guy2{};
 asset::MeshView HalfPipe{};
 asset::MeshView Ogre{};
@@ -38,7 +37,6 @@ MaterialDesc Blue{"BlueMaterial"};
 MaterialDesc Cave{"CaveMaterial"};
 MaterialDesc Default{"DefaultMaterial"};
 MaterialDesc Green{"GreenMaterial"};
-MaterialDesc Guy{"GuyMaterial"};
 MaterialDesc Guy2{"Guy2Material"};
 MaterialDesc Ogre{"OgreMaterial"};
 MaterialDesc Orange{"OrangeMaterial"};
@@ -73,6 +71,12 @@ asset::AssetId Halfpipe{MakeAnimId(HalfpipePath)};
 } // namespace mesh_collider
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
+
+namespace post_process
+{
+OutlinePassProperties Outline{};
+NoisePassProperties Noise{};
+} // namespace post_process
 
 template<class LoadFunc>
 void LoadAssets(const std::filesystem::path& rootDir, asset::asset_flags_type flags, LoadFunc load)
@@ -121,10 +125,10 @@ void InitializeResources()
     std::vector<std::string> textures
     {
         "cave/BaseColor.nca",
-        "guy_base_color.nca",
         "guy_2_base_color.nca",
         "halftone.nca",
         "linear_hatch.nca",
+        "noise.nca",
         "ogre/BaseColor.nca",
         "skeleton/BaseColor.nca",
         "solid_color/Blue.nca",
@@ -143,13 +147,13 @@ void InitializeResources()
         "ogre/Normal.nca",
         "skeleton/Normal.nca",
         "cave/Normal.nca",
-        "guy_normal.nca",
-        "guy_2_normal.nca",
+        "guy_2_normal.nca"
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
 
     asset::LoadCubeMapAsset(cubemap::NightSkyPath);
+
 }
 
 void ReloadPrefabs()
@@ -157,7 +161,6 @@ void ReloadPrefabs()
     mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
-    mesh::Guy = asset::AcquireMeshAsset(mesh::GuyPath);
     mesh::Guy2 = asset::AcquireMeshAsset(mesh::Guy2Path);
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
     mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
@@ -167,68 +170,89 @@ void ReloadPrefabs()
     mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
     mesh::Wheel = asset::AcquireMeshAsset(asset::WheelMesh);
 
-    const auto normal = asset::AcquireTextureAsset(asset::DefaultNormal);
+    auto materialDefaults = MaterialProperties
+    {
+        .gradientStart = Vector3{0.5f, 0.5f, 1.0f},
+        .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+        .gradientEnd = Vector3{1.0f, 0.5f, 0.5f},
+        .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
+        .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+        .normalIntensity = 1.0f,
+        .hatchTiling = 1.0f,
+        .gradientAmount = 0.075f,
+        .reflectivity = 0.0f,
+        .useTextureNormals = 0
+    };
+
+    material::Blue.properties = materialDefaults;
     material::Blue.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Blue.nca");
-    material::Blue.properties.normalTex = normal;
     material::Blue.properties.normalIntensity = .220f;
-    material::Blue.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
+    material::Blue.properties.useTextureNormals = 1;
 
+    material::Cave.properties = materialDefaults;
     material::Cave.properties.diffuseTex = asset::AcquireTextureAsset("cave/BaseColor.nca");
-    material::Cave.properties.normalTex = normal;
     material::Cave.properties.normalIntensity = .420f;
-    material::Cave.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
-    material::Default.properties.diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor);
-    material::Default.properties.normalTex = normal;
-    material::Default.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
+    material::Default.properties = materialDefaults;
 
+    material::Green.properties = materialDefaults;
     material::Green.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Green.nca");
-    material::Green.properties.normalTex = normal;
     material::Green.properties.normalIntensity = 4.0f;
-    material::Green.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
-    material::Guy.properties.diffuseTex = asset::AcquireTextureAsset("guy_base_color.nca");
-    material::Guy.properties.normalTex = asset::AcquireTextureAsset("guy_normal.nca");
-    material::Guy.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
-    material::Guy.properties.normalIntensity = .39f;
-    material::Guy.properties.hatchTiling = 12.0f;
-
+    material::Guy2.properties = materialDefaults;
     material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
     material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");
-    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("halftone.nca");
-    material::Guy2.properties.normalIntensity = 1.75f;
-    material::Guy2.properties.hatchTiling = 17.0f;
+    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
+    material::Guy2.properties.normalIntensity = 0.91f;
+    material::Guy2.properties.hatchTiling = 16.0f;
+    material::Guy2.properties.reflectivity = 1.0f;
+    material::Guy2.properties.useTextureNormals = 1;
+    material::Guy2.properties.gradientStart = Vector3{0.597f, 0.79f, 1.0f};
+    material::Guy2.properties.gradientEnd = Vector3{0.96f, 0.46f, 1.0f};
+    material::Guy2.properties.gradientAmount = 0.038f;
 
+    material::Ogre.properties = materialDefaults;
     material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
-    material::Ogre.properties.normalTex = normal;
     material::Ogre.properties.normalIntensity = .280f;
-    material::Ogre.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
+    material::Orange.properties = materialDefaults;
     material::Orange.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Orange.nca");
-    material::Orange.properties.normalTex = normal;
     material::Orange.properties.normalIntensity = .10f;
-    material::Orange.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
+    material::Orange.properties.useTextureNormals = 1;
 
+    material::Purple.properties = materialDefaults;
     material::Purple.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Purple.nca");
-    material::Purple.properties.normalTex = normal;
-    material::Purple.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
+    material::Red.properties = materialDefaults;
     material::Red.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Red.nca");
-    material::Red.properties.normalTex = normal;
-    material::Red.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
+    material::Skeleton.properties = materialDefaults;
     material::Skeleton.properties.diffuseTex = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
-    material::Skeleton.properties.normalTex = normal;
     material::Skeleton.properties.normalIntensity = .420f;
-    material::Skeleton.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
+    material::Teal.properties = materialDefaults;
     material::Teal.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Teal.nca");
-    material::Teal.properties.normalTex = normal;
-    material::Teal.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
+    material::Yellow.properties = materialDefaults;
     material::Yellow.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Yellow.nca");
-    material::Yellow.properties.normalTex = normal;
-    material::Yellow.properties.hatchTex = asset::AcquireTextureAsset("DefaultBaseColor.nca");
 
+    post_process::Outline = OutlinePassProperties
+    {
+        .color = Vector3{0.0f, 0.0f, 0.0f},
+        .width = 1.0f,
+        .depthThreshold = 3.6f,
+        .viewDirDepthThreshold = 0.04f,
+        .normalThreshold = 0.940f
+    };
+
+    post_process::Noise = NoisePassProperties
+    {
+        .maskGradientStart = Vector3{0.0f, 0.0f, 0.0f},
+        .maskGradientAmount = 1.0f,
+        .maskGradientEnd = Vector3{1.0f, 1.0f, 1.0f},
+        .noiseTex = asset::AcquireTextureAsset("noise.nca"),
+        .noiseTexAmount = 0.025f,
+        .noiseTexTiling = 1.0f,
+    };
 }
 } // namespace sample

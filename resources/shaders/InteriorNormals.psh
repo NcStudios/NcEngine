@@ -20,16 +20,19 @@ cbuffer EnvironmentProperties
 
 struct MaterialData
 {
+    float3 gradientStart;
     uint diffuseTexIndex;
+    float3 gradientEnd;
     uint normalTexIndex;
     uint hatchTexIndex;
     float normalIntensity;
     float hatchTiling;
-    float padding;
+    float gradientAmount;
+    float reflectivity;
+    uint useTextureNormals;
+    float padding0;
     float padding1;
-    float padding2;
 };
-
 StructuredBuffer<MaterialData> Materials : register(t1);
 
 struct PSInput 

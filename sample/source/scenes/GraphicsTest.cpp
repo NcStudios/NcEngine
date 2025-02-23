@@ -32,15 +32,6 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{6.5f, 10.0f, 5.4f}, .tag = "Point Light 1"});
     world.Emplace<PointLight>(lvHandle, Vector3(0.84f, 0.66f, 0.56f), Vector3(.14f, 0.72f, 1.0f), 2.3f, 23.7f);
 
-    const auto guy = world.Emplace<Entity>({
-        .position = Vector3{9.0f, 0.3f, 4.0f},
-        .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
-        .scale = Vector3{3.0f, 3.0f, 3.0f},
-        .tag = "guy"
-    });
-    
-    world.Emplace<StaticMesh>(guy, mesh::Guy, material::Guy);
-
     const auto guy2 = world.Emplace<Entity>({
         .position = Vector3{6.0f, 1.8f, 4.0f},
         .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
@@ -173,7 +164,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 1.0f, .depthThreshold = 3.69f, .viewDirDepthThreshold = 0.04f, .normalThreshold = 0.940f});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 2.0f, .depthThreshold = 3.69f, .viewDirDepthThreshold = 0.04f, .normalThreshold = 0.940f});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
 }
 
 void GraphicsTest::Unload()

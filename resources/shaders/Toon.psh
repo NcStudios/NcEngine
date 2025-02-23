@@ -20,14 +20,18 @@ cbuffer EnvironmentProperties
 
 struct MaterialData
 {
+    float3 gradientStart;
     uint diffuseTexIndex;
+    float3 gradientEnd;
     uint normalTexIndex;
     uint hatchTexIndex;
     float normalIntensity;
     float hatchTiling;
-    float padding;
+    float gradientAmount;
+    float reflectivity;
+    uint useTextureNormals;
+    float padding0;
     float padding1;
-    float padding2;
 };
 
 StructuredBuffer<MaterialData> Materials : register(t1);
@@ -110,7 +114,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     // Get normals either from vertex normals or from the normal texture
     float3 normals = PSIn.Normal;
-    if (hatchTiling > 1.0f) //@todo : Parameterize
+    if (Materials[PSIn.MaterialIndex].useTextureNormals == 1)
     {
         normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
     }
@@ -135,7 +139,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     // Apply light banding
     float bandedDiffuseAmt = Band(diffuseAmt) * intensity;
-    float bandedSpecularAmt = Band(specularAmt) * intensity;
+    float bandedSpecularAmt = Band(specularAmt) * intensity * Materials[PSIn.MaterialIndex].reflectivity;
 
     result += (bandedDiffuseAmt * diffuseCol * Color.rgb + bandedSpecularAmt * specularCol * Color.rgb);
 
@@ -154,20 +158,10 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     colHsv.z *= (1.25f);
     result.rgb = HSVtoRGB(colHsv.rgb);
 
-
     // Gradient
-    float3 gradientStart = float3(1.0f, 0.0f, 0.0f);
-    float3 gradientEnd = float3(0.0f, 0.0f, 1.0f);
-
-    float3 gradient = lerp(gradientStart, gradientEnd, (normalize(PSIn.LocalPos).z + 1) * 0.5);
-    float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, 0.3f), 1.0f);
-    float4 gradientApplied2 = float4(lerp(gradientApplied, gradientApplied * gradient, 0.3f), 1.0f);
-
-    // Generate random noise
-    float2 flatUV = GetFlatUV(PSIn.LocalPos);
-
-    float3 halftone = Textures[hatchTexIndex].Sample(Textures_sampler, PSIn.LocalPos.xz * hatchTiling * 0.1f);
-    float4 outputColor = lerp(gradientApplied2, gradientApplied2 * float4(halftone, 1.0f), 1.0f);
+    float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).z + 1) * 0.5);
+    float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, Materials[PSIn.MaterialIndex].gradientAmount), 1.0f);
+    float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
 
     PSOut.Color = outputColor;
 }

@@ -64,5 +64,8 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float3 gradient = lerp(gradientStart, gradientEnd, PSIn.UV.y);
     float4 gradientApplied = float4(lerp(sceneColor, sceneColor + gradient, gradientAmount), 1.0f);
 
-    PSOut.Color = lerp(gradientApplied, gradientApplied * float4(noiseColor, 1.0f), noiseTexAmount);
+    float3 luma = RgbToLuma(gradientApplied);
+    float3 noiseApplied = lerp(sceneColor, sceneColor + noiseColor, (1-luma.r) * noiseTexAmount);
+
+    PSOut.Color = float4(noiseApplied, 1.0f);
 }

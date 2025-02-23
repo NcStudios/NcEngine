@@ -655,6 +655,11 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::entity_hierarchy::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
 
+    // Post process
+    ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, post_process::Outline);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
+
     g_currentEntities += static_cast<unsigned>(world.GetAll<Entity>().size());
 }
 

@@ -1,5 +1,6 @@
 #include "EditorUI.h"
 #include "ui/editor/Editor.h"
+#include "ncengine/asset/NcAsset.h"
 #include "ncengine/Events.h"
 #include "ncengine/input/Input.h"
 #include "ncengine/graphics/NcGraphics.h"
@@ -161,7 +162,7 @@ void EditorUI::DrawMenu(EditorContext& ctx)
             {
                 if (ImGui::MenuItem("Post Process FX"))
                 {
-                    m_postProcessDialog.Open(ctx.modules.Get<NcGraphics>());
+                    m_postProcessDialog.Open(ctx.modules.Get<NcGraphics>(), ctx.modules.Get<asset::NcAsset>());
                 }
 
                 ImGui::EndMenu();

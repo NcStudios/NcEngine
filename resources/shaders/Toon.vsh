@@ -14,7 +14,6 @@ struct PSInput
     uint   MaterialIndex;
     float3 WorldPos;
     float3 LocalPos;
-    float3 ViewDir;
 };
 
 struct TransformData
@@ -52,6 +51,5 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     PSIn.Normal = normalize(mul(Transforms[transformIndex].invModel, VSIn.Normal));
     PSIn.WorldPos = TransformedPos.xyz;
     PSIn.LocalPos = VSIn.Pos.xyz;
-    PSIn.ViewDir = PSIn.WorldPos - cameraPosition;
     PSIn.MaterialIndex = materialIndex;
 }

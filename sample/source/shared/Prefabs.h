@@ -3,6 +3,7 @@
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/Material.h"
+#include "ncengine/graphics/PostProcess.h"
 
 namespace nc::sample
 {
@@ -28,7 +29,6 @@ extern asset::AssetId SkeletonWalkBackward;
 // Mesh
 namespace mesh
 {
-constexpr auto GuyPath = "guy.nca";
 constexpr auto Guy2Path = "guy2.nca";
 constexpr auto HalfPipePath = "halfpipe.nca";
 constexpr auto RampPath = "ramp.nca";
@@ -40,7 +40,6 @@ constexpr auto CavePath = "cave.nca";
 extern asset::MeshView Cube;
 extern asset::MeshView Sphere;
 extern asset::MeshView Capsule;
-extern asset::MeshView Guy;
 extern asset::MeshView Guy2;
 extern asset::MeshView Plane;
 extern asset::MeshView Wheel;
@@ -58,7 +57,6 @@ extern MaterialDesc Blue;
 extern MaterialDesc Cave;
 extern MaterialDesc Default;
 extern MaterialDesc Green;
-extern MaterialDesc Guy;
 extern MaterialDesc Guy2;
 extern MaterialDesc Ogre;
 extern MaterialDesc Orange;
@@ -95,4 +93,10 @@ extern asset::AssetId Halfpipe;
 
 // Fonts
 extern asset::FontInfo UIFont;
+
+namespace post_process
+{
+extern OutlinePassProperties Outline;
+extern NoisePassProperties Noise;
+} // namespace post_process
 } // namespace nc::sample

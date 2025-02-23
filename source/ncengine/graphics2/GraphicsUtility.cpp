@@ -32,13 +32,13 @@ constexpr auto g_miscPassFlags = std::array{
 constexpr auto g_postProcessPassNames = std::array{
     std::string_view{"Outline"},
     std::string_view{"FXAA"},
-    std::string_view{"Gradient"}
+    std::string_view{"Noise"}
 };
 
 constexpr auto g_postProcessPassFlags = std::array{
     nc::PostProcessPassFlag::Outline,
     nc::PostProcessPassFlag::Fxaa,
-    nc::PostProcessPassFlag::Gradient
+    nc::PostProcessPassFlag::Noise
 };
 
 constexpr auto g_postProcessEffectNames = std::array{
@@ -53,7 +53,7 @@ const auto g_postProcessEffectPassFlags = std::array{
     std::vector{
         nc::PostProcessPassFlag::Outline,
         nc::PostProcessPassFlag::Fxaa,
-        nc::PostProcessPassFlag::Gradient
+        nc::PostProcessPassFlag::Noise
     }
 };
 

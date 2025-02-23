@@ -274,12 +274,12 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = false
                 },
                 PassDesc{
-                    .id = PostProcessPassFlag::Gradient,
-                    .name = "Post Process Gradient",
+                    .id = PostProcessPassFlag::Noise,
+                    .name = "Post Process Noise",
                     .type = PassType::PostProcess,
-                    .shaderPaths = ShaderPaths{"PPGradient.psh", "PostProcess.vsh"},
+                    .shaderPaths = ShaderPaths{"PPNoise.psh", "PostProcess.vsh"},
                     .postProcessSource = PostProcessTarget::PPFxaa,
-                    .postProcessSink = PostProcessTarget::PPGradient,
+                    .postProcessSink = PostProcessTarget::PPNoise,
                     .isMsaa = false,
                     .useDepthTest = false
                 }

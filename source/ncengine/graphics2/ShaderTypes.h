@@ -35,16 +35,15 @@ struct OutlinePassData
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
-struct GradientPassData
+struct NoisePassData
 {
-    Vector3 gradientStart = Vector3::Zero();
-    float gradientAmount = 0.1f;
-    Vector3 gradientEnd = Vector3::One();
+    Vector3 maskGradientStart = Vector3::Zero();
+    float maskGradientAmount = 0.1f;
+    Vector3 maskGradientEnd = Vector3::One();
     uint32_t noiseTexIndex = 0u;
     float noiseTexAmount = 0.1f;
     float noiseTexTiling = 1.0f;
 };
-
 
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
 struct PostProcessSinkIndexData
@@ -84,14 +83,18 @@ struct TransformData
 // Object model for MaterialInstance (type: StructuredBuffer element type).
 struct MaterialData
 {
+    Vector3 gradientStart = Vector3::Zero();
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
+    Vector3 gradientEnd = Vector3::One();
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
     uint32_t hatchTexIndex = std::numeric_limits<uint32_t>::max();
     float normalIntensity = 1.0f;
     float hatchTiling = 1.0f;
-    int padding  = 0;
-    int padding1 = 0;
-    int padding2 = 0;
+    float gradientAmount = 0.1f;
+    float reflectivity = 0.0f;
+    uint32_t useTextureNormals = 0;
+    float padding0 = 0.0f;
+    float padding1 = 0.0f;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).
