@@ -26,7 +26,6 @@ namespace nc::graphics
 PostProcessPropertyBufferResource::PostProcessPropertyBufferResource(Diligent::IDeviceContext& context,
                                                                      Diligent::IRenderDevice& device,
                                                                      Diligent::IShaderResourceVariable& postProcessPassVariable)
-
     : m_outlinePassBuffer{
         context,
         device,
@@ -51,7 +50,6 @@ void PostProcessPropertyBufferResource::Update(Diligent::IDeviceContext& context
             using T = std::decay_t<decltype(unpacked)>;
             if constexpr (std::same_as<T, OutlinePassProperties>)
             {
-
                 m_postProcessPassVariable->Set(&m_outlinePassBuffer.GetBuffer());
                 m_outlinePassBuffer.Write(context, unpacked);
             }

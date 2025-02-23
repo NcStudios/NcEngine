@@ -1306,10 +1306,10 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
 void PhysicsTest::Unload()
 {
-    // if (m_sampleUI)
-    // {
-    //     m_sampleUI->SetWidgetCallback(nullptr);
-    // }
+    if (m_sampleUI)
+    {
+        m_sampleUI->SetWidgetCallback(nullptr);
+    }
     CharacterEntities.clear();
 }
 } // namespace nc::sample

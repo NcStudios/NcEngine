@@ -34,11 +34,16 @@ void SerializeMaterialDesc(std::ostream& stream, const MaterialInstance& out)
     const auto& properties = out.GetProperties();
     serialize::Serialize(stream, std::string{out.GetName()}); // don't want to serialize as string_view!
     serialize::Serialize(stream, out.GetPasses());
-    serialize::Serialize(stream, properties.diffuseTex); // serialize properties individually so we hit the special handling for textures
+    serialize::Serialize(stream, properties.gradientStart); // serialize properties individually so we hit the special handling for textures
+    serialize::Serialize(stream, properties.diffuseTex);
+    serialize::Serialize(stream, properties.gradientEnd);
     serialize::Serialize(stream, properties.normalTex);
     serialize::Serialize(stream, properties.hatchTex);
     serialize::Serialize(stream, properties.normalIntensity);
     serialize::Serialize(stream, properties.hatchTiling);
+    serialize::Serialize(stream, properties.gradientAmount);
+    serialize::Serialize(stream, properties.reflectivity);
+    serialize::Serialize(stream, properties.useTextureNormals);
 }
 
 auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
@@ -46,11 +51,16 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
     auto out = MaterialDesc{};
     serialize::Deserialize(stream, out.name);
     serialize::Deserialize(stream, out.passes);
+    serialize::Deserialize(stream, out.properties.gradientStart);
     serialize::Deserialize(stream, out.properties.diffuseTex);
+    serialize::Deserialize(stream, out.properties.gradientEnd);
     serialize::Deserialize(stream, out.properties.normalTex);
     serialize::Deserialize(stream, out.properties.hatchTex);
     serialize::Deserialize(stream, out.properties.normalIntensity);
     serialize::Deserialize(stream, out.properties.hatchTiling);
+    serialize::Deserialize(stream, out.properties.gradientAmount);
+    serialize::Deserialize(stream, out.properties.reflectivity);
+    serialize::Deserialize(stream, out.properties.useTextureNormals);
     return out;
 }
 

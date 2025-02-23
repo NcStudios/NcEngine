@@ -126,7 +126,6 @@ void InitializeResources()
     {
         "cave/BaseColor.nca",
         "guy_2_base_color.nca",
-        "halftone.nca",
         "linear_hatch.nca",
         "noise.nca",
         "ogre/BaseColor.nca",
@@ -151,9 +150,7 @@ void InitializeResources()
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
-
     asset::LoadCubeMapAsset(cubemap::NightSkyPath);
-
 }
 
 void ReloadPrefabs()

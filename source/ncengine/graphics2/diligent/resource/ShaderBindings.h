@@ -48,19 +48,6 @@ class ShaderBindings
         {
         }
 
-        /*
-
-        Pipelien Resource Signature = collection of pipeline resource desc
-
-        Descriptor:
-        SEt Index: 0
-        Slot Index: 0
-
-        Descriptor: Uniform Buffer
-        Descriptor: An array of textures
-
-        */
-
         void Update(Diligent::IDeviceContext& context,
                     Diligent::IRenderDevice& device,
                     const FrontendRenderState& renderState);

@@ -34,7 +34,7 @@ struct OutlinePassData
     float normalThreshold = 0.4f;
 };
 
-// Object model for outline pass properties used by post processing effects (type: constant buffer)
+// Object model for noise pass properties used by post processing effects (type: constant buffer)
 struct NoisePassData
 {
     Vector3 maskGradientStart = Vector3::Zero();

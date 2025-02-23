@@ -23,7 +23,7 @@ struct LightInfluence
 
 float CalculateDiffuse(float3 L, float3 N)
 {
-    return saturate(dot(N, L));
+    return max(dot(N, L), 0.0f);
 }
 
 float CalculateSpecular(float3 L, float3 V, float3 N)

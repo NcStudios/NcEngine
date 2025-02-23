@@ -53,7 +53,6 @@ void TextureBufferResource::Load(std::span<const asset::TextureWithId> textures,
     m_textures.reserve(m_textures.size() + textureCount);
     m_views.reserve(m_views.size() + textureCount);
 
-
     for (const auto& [texture, id, flags] : textures)
     {
         auto mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texture.width, texture.height)))) + 1;

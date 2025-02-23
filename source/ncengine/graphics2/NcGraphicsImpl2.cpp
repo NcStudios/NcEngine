@@ -232,7 +232,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
                     .colorSink = ColorTarget::Main,
                     .depthSink = DepthTarget::Main,
-                    .useDepthTest = false
+                    .useDepthTest = true
                 },
                 PassDesc{
                     .id = PostProcessPassFlag::Outline,

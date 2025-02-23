@@ -150,11 +150,16 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
+            .gradientStart = nc::Vector3{1.0f, 1.5f, 2.0f},
             .diffuseTex = nc::asset::g_mockTextureView,
+            .gradientEnd = nc::Vector3{2.5f, 3.0f, 3.5f},
             .normalTex = nc::asset::g_mockTextureView,
             .hatchTex = nc::asset::g_mockTextureView,
             .normalIntensity = 3.5f,
-            .hatchTiling = 3.5f,
+            .hatchTiling = 4.5f,
+            .gradientAmount = 5.5f,
+            .reflectivity = 6.0f,
+            .useTextureNormals = 1,
         }
     };
 
@@ -172,7 +177,10 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
+
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
     EXPECT_EQ(expectedMaterialDesc.properties.normalTex.id, actualMaterialProperties.normalTex.id);
     EXPECT_EQ(expectedMaterialDesc.properties.hatchTex.id, actualMaterialProperties.hatchTex.id);
     EXPECT_EQ(200, actualMaterialProperties.diffuseTex.index);
@@ -180,6 +188,9 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(200, actualMaterialProperties.hatchTex.index);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
     EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
+    EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -193,11 +204,16 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
+            .gradientStart = nc::Vector3{1.0f, 1.5f, 2.0f},
             .diffuseTex = nc::asset::g_mockTextureView,
+            .gradientEnd = nc::Vector3{2.5f, 3.0f, 3.5f},
             .normalTex = nc::asset::g_mockTextureView,
             .hatchTex = nc::asset::g_mockTextureView,
             .normalIntensity = 3.5f,
-            .hatchTiling = 10.0f
+            .hatchTiling = 4.5f,
+            .gradientAmount = 5.5f,
+            .reflectivity = 6.0f,
+            .useTextureNormals = 1,
         }
     };
 
@@ -216,7 +232,9 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
     EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
     EXPECT_EQ(expectedMaterialDesc.properties.normalTex.id, actualMaterialProperties.normalTex.id);
     EXPECT_EQ(expectedMaterialDesc.properties.hatchTex.id, actualMaterialProperties.hatchTex.id);
     EXPECT_EQ(200, actualMaterialProperties.diffuseTex.index);
@@ -224,6 +242,9 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(200, actualMaterialProperties.hatchTex.index);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
     EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
+    EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)

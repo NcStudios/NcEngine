@@ -60,10 +60,11 @@ void main(in PSInput PSIn, out PSOutput PSOut)
     float3 sceneColor = sceneColorTex.Sample(smplr, PSIn.UV);
     float3 noiseColor = noiseTex.Sample(smplr, PSIn.UV * noiseTexTiling);
 
-    // Gradient
+    // Gradient for mask
     float3 gradient = lerp(gradientStart, gradientEnd, PSIn.UV.y);
     float4 gradientApplied = float4(lerp(sceneColor, sceneColor + gradient, gradientAmount), 1.0f);
 
+    // Noise
     float3 luma = RgbToLuma(gradientApplied);
     float3 noiseApplied = lerp(sceneColor, sceneColor + noiseColor, (1-luma.r) * noiseTexAmount);
 
