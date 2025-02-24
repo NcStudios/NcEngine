@@ -127,10 +127,10 @@ struct LightData
               const float intensity_,
               const Vector3& dir)
         : diffuseColor{diffuseCol},
-          specularColor{specularCol},
-          intensity{intensity_},
           type{LightType::Directional},
-          direction{dir}
+          specularColor{specularCol},
+          direction{dir},
+          intensity{intensity_}
     {
     }
 
@@ -143,11 +143,11 @@ struct LightData
               float rad,
               DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
-          specularColor{specularCol},
-          intensity{intensity_},
           type{LightType::Point},
-          position{pos},
+          specularColor{specularCol},
           radius{rad},
+          position{pos},
+          intensity{intensity_},
           castsShadows{enableShadows},
           viewProjection{viewProj}
     {
@@ -165,14 +165,14 @@ struct LightData
               int32_t enableShadows,
               DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
-          specularColor{specularCol},
-          intensity{intensity_},
           type{LightType::Spot},
+          specularColor{specularCol},
+          radius{rad},
           position{pos},
           innerAngle{inAngle},
           direction{dir},
           outerAngle{outAngle},
-          radius{rad},
+          intensity{intensity_},
           castsShadows{enableShadows},
           viewProjection{viewProj}
     {

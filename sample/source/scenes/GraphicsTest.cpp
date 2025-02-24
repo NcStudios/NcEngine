@@ -29,8 +29,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-5.5f, 10.0f, 5.4f}, .tag = "Point Light 1"});
-    world.Emplace<PointLight>(lvHandle, Vector3(.4557f, 0.281f, 0.2633f), Vector3(.3653f, 0.3198f, 0.3149f), 2.3f, 175.0f);
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
+    world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 45.0f);
 
     const auto guy2 = world.Emplace<Entity>({
         .position = Vector3{6.0f, 1.8f, 4.0f},
@@ -164,8 +164,23 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 2.0f, .depthThreshold = 3.69f, .viewDirDepthThreshold = 0.04f, .normalThreshold = 0.940f});
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties
+    {
+        .width = 2.0f,
+        .depthThreshold = 3.69f,
+        .viewDirDepthThreshold = 0.04f,
+        .normalThreshold = 0.590f
+    });
+
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, NoisePassProperties
+    {
+        .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
+        .maskGradientAmount = 1.0f,
+        .maskGradientEnd = Vector3{0.0f, 0.0f, 0.0f},
+        .noiseTex = asset::AcquireTextureAsset("noise.nca"),
+        .noiseTexAmount = 0.24f,
+        .noiseTexTiling = 1.0f,
+    });
 }
 
 void GraphicsTest::Unload()

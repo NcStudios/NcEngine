@@ -124,7 +124,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         {
             if (influence.diffuseAmt < 0.05f)
             {
-                result.rgb = lerp(result.rgb, result.rgb * hatchDark, 1-(influence.diffuseAmt * 5));
+                result.rgb = lerp(result.rgb, result.rgb * hatchDark, 1-(influence.diffuseAmt));
             }
             else if (influence.diffuseAmt < 0.1f)
             {
