@@ -169,7 +169,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .width = 2.0f,
         .depthThreshold = 3.69f,
         .viewDirDepthThreshold = 0.04f,
-        .normalThreshold = 0.590f
+        .normalThreshold = 0.920f
     });
 
     ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, NoisePassProperties

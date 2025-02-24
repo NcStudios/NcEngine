@@ -19,7 +19,7 @@ class PostProcessDialog : public ModalDialog
 
     public:
         explicit PostProcessDialog() noexcept
-            : ModalDialog{DialogSize}, m_ncGraphics{}, m_ncAsset{} {}
+            : ModalDialog{DialogSize}, m_ncAsset{}, m_ncGraphics{} {}
 
         void Open(NcGraphics* ncGraphics, asset::NcAsset* ncAsset) noexcept
         {

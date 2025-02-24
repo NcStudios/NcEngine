@@ -169,9 +169,9 @@ void ReloadPrefabs()
 
     auto materialDefaults = MaterialProperties
     {
-        .gradientStart = Vector3{0.5f, 0.5f, 1.0f},
+        .gradientStart = Vector3{1.0f, 1.0f, 1.0f},
         .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
-        .gradientEnd = Vector3{1.0f, 0.5f, 0.5f},
+        .gradientEnd = Vector3{1.0f, 1.0f, 1.0f},
         .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
         .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
         .normalIntensity = 1.0f,
