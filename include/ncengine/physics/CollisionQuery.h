@@ -76,6 +76,14 @@ class CollisionQuery
                        const Vector3& position = Vector3::Zero(),
                        const Quaternion& rotation = Quaternion::Identity()) const -> TestShapeResult;
 
+        /**
+         * @brief Query for all \ref RigidBody "bodies" that collide with a shape, overriding shape transformations.
+         * @note This is overload allows overriding transformations on the CookedShape (e.g. if transformations aren't baked in, etc.).
+         */
+        auto TestShape(const CookedShape& shape,
+                       const Vector3& position,
+                       const Quaternion& rotation) const -> TestShapeResult;
+
         /** @brief Query for all \ref RigidBody "bodies" that collider with a shape. */
         auto TestShape(const CookedShape& shape) const -> TestShapeResult;
 

@@ -21,6 +21,7 @@ class CollisionQueryImpl
 
         auto CastRay(const Ray& ray) const -> RayCastResult;
         auto TestShape(const Shape& shape, const Vector3& position, const Quaternion& rotation) -> TestShapeResult;
+        auto TestShape(const CookedShape& shape, const Vector3& position, const Quaternion& rotation) -> TestShapeResult;
         auto TestShape(const CookedShape& shape) -> TestShapeResult;
         auto TestPoint(const Vector3& point) -> std::vector<Entity>;
 

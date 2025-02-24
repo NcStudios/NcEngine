@@ -29,6 +29,7 @@ add_test(Constraints_unit_tests Constraints_unit_tests)
 add_executable(CollisionQuery_integration_tests
     CollisionQuery_integration_tests.cpp
     ${NC_SOURCE_DIR}/physics/CollisionQuery.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CookedShape.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
 )

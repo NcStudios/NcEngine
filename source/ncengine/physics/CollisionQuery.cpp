@@ -37,13 +37,19 @@ auto CollisionQueryImpl::TestShape(const Shape& shape,
                                    const Vector3& position,
                                    const Quaternion& rotation) -> TestShapeResult
 {
-    auto internalShape = s_ctx->shapeFactory.MakeShape(shape, JPH::Vec3::sOne());
-    const auto transform = JPH::Mat44::sRotationTranslation(physics::ToJoltQuaternion(rotation), physics::ToJoltVec3(position));
+    return TestShape(CookedShape{shape}, position, rotation);
+}
+
+auto CollisionQueryImpl::TestShape(const CookedShape& shape,
+                                   const Vector3& position,
+                                   const Quaternion& rotation) -> TestShapeResult
+{
+    const auto& internalShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
     auto collector = physics::ShapeCollector{s_ctx->lock};
     s_ctx->query.CollideShape(
-        internalShape,
+        internalShape.GetPtr(),
         JPH::Vec3::sReplicate(1.0f),
-        transform,
+        physics::ToJoltMatrix(rotation, position),
         JPH::CollideShapeSettings{},
         JPH::Vec3::sZero(),
         collector,
@@ -62,7 +68,7 @@ auto CollisionQueryImpl::TestShape(const CookedShape& shape) -> TestShapeResult
     s_ctx->query.CollideShape(
         internalShape.GetPtr(),
         JPH::Vec3::sReplicate(1.0f),
-        JPH::Mat44::sIdentity(),
+        physics::ToJoltMatrix(shape.GetRotation(), shape.GetPosition()),
         JPH::CollideShapeSettings{},
         JPH::Vec3::sZero(),
         collector,
