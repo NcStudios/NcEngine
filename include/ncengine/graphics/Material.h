@@ -53,6 +53,7 @@ struct MaterialProperties
     float gradientAmount = 0.1f;
     float reflectivity = 0.0f;
     uint32_t useTextureNormals = 1;
+    uint32_t useFlatShading = 1;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

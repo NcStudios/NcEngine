@@ -160,6 +160,7 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
             .gradientAmount = 5.5f,
             .reflectivity = 6.0f,
             .useTextureNormals = 1,
+            .useFlatShading = 1
         }
     };
 
@@ -191,6 +192,7 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
     EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
     EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
+    EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -214,6 +216,7 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
             .gradientAmount = 5.5f,
             .reflectivity = 6.0f,
             .useTextureNormals = 1,
+            .useFlatShading = 1
         }
     };
 
@@ -245,6 +248,7 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
     EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
     EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
+    EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)

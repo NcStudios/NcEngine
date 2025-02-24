@@ -30,7 +30,7 @@ struct MaterialData
     float gradientAmount;
     float reflectivity;
     uint useTextureNormals;
-    float padding0;
+    uint useFlatShading;
     float padding1;
 };
 
@@ -113,11 +113,21 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normals);
 
-        // Apply light banding
-        float bandedDiffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
-        float bandedSpecularAmt = Band(influence.specularAmt) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+        float diffuseAmt = 0.0f;
+        float specularAmt = 0.0f;
 
-        result += (bandedDiffuseAmt * influence.diffuseColor * Color.rgb) + (bandedSpecularAmt * influence.specularColor * Color.rgb );
+        if (Materials[PSIn.MaterialIndex].useFlatShading == 0)
+        {
+            diffuseAmt = influence.diffuseAmt * influence.intensity;
+            specularAmt = influence.specularAmt * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity; 
+        }
+        else
+        {
+            diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
+            specularAmt = Band(influence.specularAmt) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+        }
+
+        result += (diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb );
 
         // Apply hatching
         if (Materials[PSIn.MaterialIndex].hatchTiling > 0.0f)

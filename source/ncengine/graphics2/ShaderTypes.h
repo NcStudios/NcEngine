@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ncengine/graphics/Material.h"
+#include "ncengine/graphics/PostProcess.h"
 #include "ncmath/Vector.h"
 
 #include "DirectXMath.h"
@@ -25,14 +26,7 @@ struct GlobalEnvironmentData
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
-struct OutlinePassData
-{
-    Vector3 color = Vector3::Zero();
-    float width = 1.0f;
-    float depthThreshold = 0.8f;
-    float viewDirDepthThreshold = 0.4f;
-    float normalThreshold = 0.4f;
-};
+using OutlinePassData = OutlinePassProperties;
 
 // Object model for noise pass properties used by post processing effects (type: constant buffer)
 struct NoisePassData
@@ -77,7 +71,6 @@ struct SkinnedMeshInstanceData
 struct TransformData
 {
     DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixIdentity();
-    DirectX::XMMATRIX invModelMatrix = DirectX::XMMatrixIdentity();
 };
 
 // Object model for MaterialInstance (type: StructuredBuffer element type).
@@ -93,7 +86,7 @@ struct MaterialData
     float gradientAmount = 0.1f;
     float reflectivity = 0.0f;
     uint32_t useTextureNormals = 0;
-    float padding0 = 0.0f;
+    uint32_t useFlatShading = 1;
     float padding1 = 0.0f;
 };
 

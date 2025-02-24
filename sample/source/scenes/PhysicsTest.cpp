@@ -1288,7 +1288,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{0.8f, 0.8f, 0.8f},
-        1.0f,
+        3.5f,
         300.0f
     );
 
@@ -1306,10 +1306,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
 void PhysicsTest::Unload()
 {
-    if (m_sampleUI)
-    {
-        m_sampleUI->SetWidgetCallback(nullptr);
-    }
+    m_sampleUI->SetWidgetCallback(nullptr);
     CharacterEntities.clear();
 }
 } // namespace nc::sample

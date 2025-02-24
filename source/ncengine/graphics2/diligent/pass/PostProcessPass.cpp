@@ -109,10 +109,11 @@ PostProcessPass::PostProcessPass(IRenderDevice& device,
                                  ShaderFactory& shaderFactory,
                                  ShaderBindings& shaderBindings,
                                  const PassManifest& passManifest,
-                                 const PassDesc& passDesc)
+                                 const PassDesc& passDesc,
+                                 bool isFinalPass)
     : Pass{CreatePipeline(device, swapChain, shaderFactory, shaderBindings, passDesc), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)},
-      instances{MakePostProcessPassInstances(passDesc.id)},
-      id{passDesc.id}
+      instances{isFinalPass ? std::vector<PostProcessPipelineInstance>{} : MakePostProcessPassInstances(passDesc.flag)},
+      flag{passDesc.flag}
 {
 }
 } // namespace nc::graphics

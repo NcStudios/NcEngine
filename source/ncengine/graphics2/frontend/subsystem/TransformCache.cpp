@@ -51,7 +51,6 @@ void TransformCache::UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
         {
             const auto& transform = pool.Get(entity);
             data[index].modelMatrix = transform.TransformationMatrix();
-            data[index].invModelMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, transform.TransformationMatrix()));
         }
     }
 
@@ -65,7 +64,6 @@ void TransformCache::UpdateMatrices(ecs::ExplicitEcs<Transform> ecs)
 
         const auto handle = static_cast<TransformDataHandle>(i);
         data[handle].modelMatrix = pool.Get(entity).TransformationMatrix();
-        data[handle].invModelMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(nullptr, data[handle].modelMatrix));
         m_buffer.MarkDirty(handle);
     }
 }

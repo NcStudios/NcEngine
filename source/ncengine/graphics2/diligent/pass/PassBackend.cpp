@@ -47,9 +47,9 @@ void DisableInstance(PostProcessEffectId effectId, PostProcessPass& pass)
 
 auto FindInstance(std::vector<PostProcessPass>& passes,
                   PostProcessEffectId effectId,
-                  PostProcessPassFlag::type passId) -> PostProcessPipelineInstance&
+                  PostProcessPassFlag::type passFlag) -> PostProcessPipelineInstance&
 {
-    auto pass = std::ranges::find_if(passes, [passId](auto& ppPass) { return ppPass.id == passId; });
+    auto pass = std::ranges::find_if(passes, [passFlag](auto& ppPass) { return ppPass.flag == passFlag; });
     if (pass != passes.end())
     {
         auto instance = std::ranges::find(pass->instances, effectId, &PostProcessPipelineInstance::effectId);
@@ -62,7 +62,7 @@ auto FindInstance(std::vector<PostProcessPass>& passes,
     NC_ASSERT(false, fmt::format(
         "Post process effect/pass mismatch: '{}'/'{}'.",
         effectId,
-        passId
+        passFlag
     ));
 
     std::unreachable();
@@ -165,16 +165,16 @@ void PassBackend::Update(const PostProcessState& postProcessState)
     {
         for (auto& pass : m_postProcessPasses)
         {
-            if (pass.id & effectPasses)
+            if (pass.flag & effectPasses)
             {
                 enabled ? EnableInstance(effectId, pass) : DisableInstance(effectId, pass);
             }
         }
     }
 
-    for (const auto& [effectId, passId, properties] : postProcessState.modifiedProperties)
+    for (const auto& [effectId, passFlag, properties] : postProcessState.modifiedProperties)
     {
-        FindInstance(m_postProcessPasses, effectId, passId).properties = properties;
+        FindInstance(m_postProcessPasses, effectId, passFlag).properties = properties;
     }
 
     m_finalColorTarget = std::nullopt;
@@ -407,14 +407,14 @@ void PassBackend::MakePassesAndPipelines(IRenderDevice& device,
     auto name = "Final Pass";
     m_finalPass = std::make_unique<PostProcessPass>(device, swapChain, shaderFactory, shaderBindings, passManifest, PassDesc
     {
-        .id = ToPassBaseId(shaderPaths, name),
+        .flag = 0, // No flag used for this pass, it is not treated like the others (not in the collection)
         .name = name,
         .type = PassType::PostProcess,
         .shaderPaths = shaderPaths,
         .colorSink = ColorTarget::Swapchain,
         .depthSink = DepthTarget::DepthStencil,
         .useDepthTest = false
-    });
+    }, true);
     m_finalPass->sources.postProcess = m_finalPostProcessTarget.value();
 }
 } // namespace nc::graphics

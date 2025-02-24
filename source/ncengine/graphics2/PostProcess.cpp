@@ -8,7 +8,8 @@ namespace nc
 {
 auto PassHasProperties(PostProcessPassFlag::type pass) -> bool
 {
-    return pass == PostProcessPassFlag::Outline || pass == PostProcessPassFlag::Noise;
+    constexpr auto mask = PostProcessPassFlag::Outline | PostProcessPassFlag::Noise;  
+    return pass & mask; 
 }
 
 auto MakeDefaultPassProperties(PostProcessPassFlag::type pass) -> PostProcessPassProperties

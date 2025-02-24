@@ -100,7 +100,13 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
         properties.normalTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalTexPath);
     }
 
-    modified = nc::ui::InputU32(properties.useTextureNormals, "useTextureNormals") || modified;
+    bool useTextureNormals = properties.useTextureNormals;
+    bool useFlatShading = properties.useFlatShading;
+    modified = nc::ui::Checkbox(useTextureNormals, "useTextureNormals") || modified;
+    modified = nc::ui::Checkbox(useFlatShading, "useFlatShading") || modified;
+
+    properties.useTextureNormals = useTextureNormals;
+    properties.useFlatShading = useFlatShading;
 
     modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 50.0f) || modified;
 

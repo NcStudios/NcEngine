@@ -19,7 +19,6 @@ struct PSInput
 struct TransformData
 {
     float4x4 model;
-    float4x4 invModel;
 };
 
 StructuredBuffer<TransformData> Transforms;
@@ -48,7 +47,7 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize(mul(Transforms[transformIndex].invModel, VSIn.Normal));
+    PSIn.Normal = normalize(mul(Transforms[transformIndex].model, VSIn.Normal));
     PSIn.WorldPos = TransformedPos.xyz;
     PSIn.LocalPos = VSIn.Pos.xyz;
     PSIn.MaterialIndex = materialIndex;

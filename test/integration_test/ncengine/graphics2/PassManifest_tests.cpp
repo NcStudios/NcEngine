@@ -31,14 +31,14 @@ TEST(PassManifestTest, DuplicatePassID_Throws)
     /* For manifest generation purposes, IDs are generated from hashing the vertex and pixel shader paths with the name. */
     auto passDescs = std::vector<PassDesc>{
         PassDesc{
-            .id = MaterialPassFlag::Toon,
+            .flag = MaterialPassFlag::Toon,
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
             .colorSink = ColorTarget::Main
         },
         PassDesc{
-            .id = MaterialPassFlag::Normals,
+            .flag = MaterialPassFlag::Normals,
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -56,7 +56,7 @@ TEST(PassManifestTest, DifferentPassNameSameShader_AddedToManifest)
     /* For manifest generation purposes, IDs are generated from hashing the vertex and pixel shader paths with the name. */
     auto passDescs = std::vector<PassDesc>{
         PassDesc{
-            .id = MaterialPassFlag::Toon,
+            .flag = MaterialPassFlag::Toon,
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -64,7 +64,7 @@ TEST(PassManifestTest, DifferentPassNameSameShader_AddedToManifest)
             .depthSink = DepthTarget::Main
         },
         PassDesc{
-            .id = MaterialPassFlag::Normals,
+            .flag = MaterialPassFlag::Normals,
             .name = "ToonSkinned",
             .type = PassType::SkinnedMaterial,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -84,7 +84,7 @@ TEST(PassManifestTest, PassesRenderOnlyToSwapchain_SinkCountsAreZero)
     /* ColorSinkCount and DepthSinkCount are used to create the offscreen sink targets. No need to create the swapchain targets. */
     auto passDescs = std::vector<PassDesc>{
         PassDesc{
-            .id = MaterialPassFlag::Toon,
+            .flag = MaterialPassFlag::Toon,
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -92,7 +92,7 @@ TEST(PassManifestTest, PassesRenderOnlyToSwapchain_SinkCountsAreZero)
             .depthSink = DepthTarget::DepthStencil
         },
         PassDesc{
-            .id = MaterialPassFlag::Normals,
+            .flag = MaterialPassFlag::Normals,
             .name = "ToonSkinned",
             .type = PassType::SkinnedMaterial,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -113,7 +113,7 @@ TEST(PassManifestTest, PassIDNotPresentInPassFlags_PassNotAddedToManifest)
     {
         PassDesc
         {
-            .id = MaterialPassFlag::Toon,
+            .flag = MaterialPassFlag::Toon,
             .name = "Toon",
             .type = PassType::Material,
             .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},

@@ -435,8 +435,8 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         }),
         Vector3{1.0f, 0.871f, 0.6f},
         Vector3{1.0f, 0.871f, 0.6f},
-        1.0f,
-        113.0f
+        10.0f,
+        500.0f
     );
 
     const auto cameraHandle = world.Emplace<Entity>({

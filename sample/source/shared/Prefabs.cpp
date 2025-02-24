@@ -178,7 +178,8 @@ void ReloadPrefabs()
         .hatchTiling = 0.0f,
         .gradientAmount = 0.025f,
         .reflectivity = 0.0f,
-        .useTextureNormals = 0
+        .useTextureNormals = 0,
+        .useFlatShading = 0
     };
 
     material::Blue.properties = materialDefaults;
@@ -188,6 +189,7 @@ void ReloadPrefabs()
     material::Cave.properties = materialDefaults;
     material::Cave.properties.diffuseTex = asset::AcquireTextureAsset("cave/BaseColor.nca");
     material::Cave.properties.normalIntensity = .420f;
+    material::Cave.properties.useFlatShading = 1;
 
     material::Default.properties = materialDefaults;
 
@@ -206,10 +208,12 @@ void ReloadPrefabs()
     material::Guy2.properties.gradientStart = Vector3{.985f, .401f, .401f};
     material::Guy2.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.363f};
     material::Guy2.properties.gradientAmount = 0.192f;
+    material::Guy2.properties.useFlatShading = 1;
 
     material::Ogre.properties = materialDefaults;
     material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
     material::Ogre.properties.normalIntensity = .280f;
+    material::Ogre.properties.useFlatShading = 1;
 
     material::Orange.properties = materialDefaults;
     material::Orange.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Orange.nca");
@@ -225,6 +229,7 @@ void ReloadPrefabs()
     material::Skeleton.properties = materialDefaults;
     material::Skeleton.properties.diffuseTex = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
     material::Skeleton.properties.normalIntensity = .420f;
+    material::Skeleton.properties.useFlatShading = 1;
 
     material::Teal.properties = materialDefaults;
     material::Teal.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Teal.nca");

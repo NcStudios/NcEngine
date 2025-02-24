@@ -30,7 +30,7 @@ struct MaterialData
     float gradientAmount;
     float reflectivity;
     uint useTextureNormals;
-    float padding0;
+    uint useFlatShading;
     float padding1;
 };
 
@@ -83,7 +83,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     if (Materials[PSIn.MaterialIndex].useTextureNormals == 1)
     {
-        Color = float4(textureNormals, 1.0f);
+        Color = float4(normalize(textureNormals.xyz * float3(2.0) - float3(1.0)), 1.0f);
     }
     else
     {

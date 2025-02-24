@@ -162,7 +162,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
-                    .id = MaterialPassFlag::Depth,
+                    .flag = MaterialPassFlag::Depth,
                     .name = "Depth",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "Toon.vsh"},
@@ -171,7 +171,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::Depth,
+                    .flag = MaterialPassFlag::Depth,
                     .name = "Depth",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{.vertexShaderPath = "ToonSkinned.vsh"},
@@ -180,7 +180,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::Toon,
+                    .flag = MaterialPassFlag::Toon,
                     .name = "Toon",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Toon.psh", "Toon.vsh"},
@@ -190,7 +190,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::Toon,
+                    .flag = MaterialPassFlag::Toon,
                     .name = "ToonSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Toon.psh", "ToonSkinned.vsh"},
@@ -199,7 +199,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::Normals,
+                    .flag = MaterialPassFlag::Normals,
                     .name = "Normals",
                     .type = PassType::Material,
                     .shaderPaths = ShaderPaths{"Normals.psh", "Toon.vsh"},
@@ -208,7 +208,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MaterialPassFlag::Normals,
+                    .flag = MaterialPassFlag::Normals,
                     .name = "NormalsSkinned",
                     .type = PassType::SkinnedMaterial,
                     .shaderPaths = ShaderPaths{"Normals.psh", "ToonSkinned.vsh"},
@@ -217,7 +217,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MiscPassFlag::Wireframe,
+                    .flag = MiscPassFlag::Wireframe,
                     .name = "Wireframe",
                     .type = PassType::Wireframe,
                     .shaderPaths = ShaderPaths{"Wireframe.psh", "Wireframe.vsh"},
@@ -226,7 +226,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = MiscPassFlag::Particle,
+                    .flag = MiscPassFlag::Particle,
                     .name = "Particle",
                     .type = PassType::Particle,
                     .shaderPaths = ShaderPaths{"Particle.psh", "Particle.vsh"},
@@ -235,7 +235,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = true
                 },
                 PassDesc{
-                    .id = PostProcessPassFlag::Outline,
+                    .flag = PostProcessPassFlag::Outline,
                     .name = "Post Process Outline",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPOutline.psh", "PostProcess.vsh"},
@@ -246,7 +246,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = false
                 },
                 PassDesc{
-                    .id = PostProcessPassFlag::Fxaa,
+                    .flag = PostProcessPassFlag::Fxaa,
                     .name = "Post Process FXAA",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPFxaa.psh", "PostProcess.vsh"},
@@ -256,7 +256,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = false
                 },
                 PassDesc{
-                    .id = PostProcessPassFlag::Noise,
+                    .flag = PostProcessPassFlag::Noise,
                     .name = "Post Process Noise",
                     .type = PassType::PostProcess,
                     .shaderPaths = ShaderPaths{"PPNoise.psh", "PostProcess.vsh"},

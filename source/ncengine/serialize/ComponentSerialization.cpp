@@ -44,6 +44,7 @@ void SerializeMaterialDesc(std::ostream& stream, const MaterialInstance& out)
     serialize::Serialize(stream, properties.gradientAmount);
     serialize::Serialize(stream, properties.reflectivity);
     serialize::Serialize(stream, properties.useTextureNormals);
+    serialize::Serialize(stream, properties.useFlatShading);
 }
 
 auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
@@ -61,6 +62,7 @@ auto DeserializeMaterialDesc(std::istream& stream) -> MaterialDesc
     serialize::Deserialize(stream, out.properties.gradientAmount);
     serialize::Deserialize(stream, out.properties.reflectivity);
     serialize::Deserialize(stream, out.properties.useTextureNormals);
+    serialize::Deserialize(stream, out.properties.useFlatShading);
     return out;
 }
 

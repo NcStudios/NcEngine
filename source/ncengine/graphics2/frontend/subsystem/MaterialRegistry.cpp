@@ -20,6 +20,7 @@ auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::M
         .gradientAmount = properties.gradientAmount,
         .reflectivity = properties.reflectivity,
         .useTextureNormals = properties.useTextureNormals,
+        .useFlatShading = properties.useFlatShading
     };
 }
 } // anonymous namespace

@@ -73,7 +73,7 @@ enum class PassType : uint8_t
 
 struct PassDesc
 {
-    uint64_t id = 0;
+    uint64_t flag = 0;
     std::string_view name  = "";
     PassType type = PassType::None;
     ShaderPaths shaderPaths = ShaderPaths{};
