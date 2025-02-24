@@ -24,7 +24,7 @@ struct MaterialPass : public Pass
                           const PassManifest& passManifest,
                           const PassDesc& passDesc,
                           uint32_t numSamples);
-    MaterialPassFlag::type id;
+    MaterialPassFlag::type flag;
     bool isMsaa;
 };
 } // namespace nc::graphics

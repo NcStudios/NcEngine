@@ -83,34 +83,52 @@ auto MaterialTexturesWidget(nc::MaterialProperties& properties, nc::asset::NcAss
     /** @todo 353 Get asset views from ncAsset, once implemented */
     constexpr auto assetType = nc::asset::AssetType::Texture;
     const auto textureAssets = nc::ui::editor::GetLoadedAssets(assetType);
-    auto diffusePath = std::string{ncAsset.GetAssetPath(assetType, properties.diffuseTexture.id)};
-    auto normalPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTexture.id)};
+    auto diffuseTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.diffuseTex.id)};
+    auto normalTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.normalTex.id)};
+    auto hatchTexPath = std::string{ncAsset.GetAssetPath(assetType, properties.hatchTex.id)};
     auto modified = false;
-    if (nc::ui::Combobox(diffusePath, "diffuse", textureAssets))
+
+    if (nc::ui::Combobox(diffuseTexPath, "diffuse", textureAssets))
     {
         modified = true;
-        properties.diffuseTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffusePath);
+        properties.diffuseTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(diffuseTexPath);
     }
 
-    if (nc::ui::Combobox(normalPath, "normal", textureAssets))
+    if (nc::ui::Combobox(normalTexPath, "normal", textureAssets))
     {
         modified = true;
-        properties.normalTexture = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalPath);
+        properties.normalTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(normalTexPath);
     }
+
+    bool useTextureNormals = properties.useTextureNormals;
+    bool useFlatShading = properties.useFlatShading;
+    modified = nc::ui::Checkbox(useTextureNormals, "useTextureNormals") || modified;
+    modified = nc::ui::Checkbox(useFlatShading, "useFlatShading") || modified;
+
+    properties.useTextureNormals = useTextureNormals;
+    properties.useFlatShading = useFlatShading;
+
+    modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 50.0f) || modified;
+
+    if (nc::ui::Combobox(hatchTexPath, "hatch", textureAssets))
+    {
+        modified = true;
+        properties.hatchTex = nc::asset::AssetService<nc::asset::TextureView>::Get()->Acquire(hatchTexPath);
+    }
+
+    modified = nc::ui::DragFloat(properties.hatchTiling, "hatchTiling", 1.0f, 0.0f, 60.0f) || modified;
+
+    modified = nc::ui::DragFloat(properties.reflectivity, "reflectivity", 0.001f, 0.0f, 1.0f) || modified;
 
     return modified;
 }
 
-auto MaterialColorWidget(nc::MaterialProperties& properties) -> bool
+auto MaterialGradientWidget(nc::MaterialProperties& properties) -> bool
 {
-    auto modified = nc::ui::InputColor3(properties.gradientStart, "start");
-    modified = nc::ui::InputColor3(properties.gradientEnd, "end") || modified;
-    return modified;
-}
-
-auto MaterialOutlineWidget(nc::MaterialProperties& properties) -> bool
-{
-    auto modified = nc::ui::DragFloat(properties.normalIntensity, "normalIntensity", 0.01f, 0.0f, 5.0f);
+    auto modified = false;
+    modified = nc::ui::InputColor3(properties.gradientStart, "gradientStart");
+    modified = nc::ui::DragFloat(properties.gradientAmount, "gradientAmount", 0.001f, 0.0f, 1.0f) || modified;
+    modified = nc::ui::InputColor3(properties.gradientEnd, "gradientEnd") || modified;
     return modified;
 }
 
@@ -152,16 +170,9 @@ auto MaterialNodeWidget(nc::MeshBase& baseMesh, nc::asset::NcAsset& ncAsset)
         }
 
         ImGui::Separator();
-        if (ImGui::TreeNodeEx("Gradient Color"))
+        if (ImGui::TreeNodeEx("Gradient"))
         {
-            modified = MaterialColorWidget(properties) || modified;
-            ImGui::TreePop();
-        }
-
-        ImGui::Separator();
-        if (ImGui::TreeNodeEx("Outline"))
-        {
-            modified = MaterialOutlineWidget(properties) || modified;
+            modified = MaterialGradientWidget(properties) || modified;
             ImGui::TreePop();
         }
 
@@ -1146,7 +1157,9 @@ void ParticleEmitterUIWidget(ParticleEmitter& emitter, EditorContext& ctx, const
 void DirectionalLightUIWidget(DirectionalLight& light, EditorContext&, const std::any&)
 {
     IMGUI_SCOPE(ui::ImGuiId, "DirectionalLight");
-    ui::InputColor3(light.color, "color");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::InputColor3(light.specularColor, "specularColor");
+    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
 }
 
 void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
@@ -1155,7 +1168,9 @@ void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
     constexpr auto step = 0.1f;
     constexpr auto min = 0.0f;
     constexpr auto max = 1200.0f;
-    ui::InputColor3(light.diffuseColor, "color");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::InputColor3(light.specularColor, "specularColor");
+    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
     ui::DragFloat(light.radius, "radius", step, min, max);
 }
 
@@ -1165,7 +1180,9 @@ void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
     constexpr auto max = 3.14159f;
-    ui::InputColor3(light.color, "color");
+    ui::InputColor3(light.diffuseColor, "diffuseColor");
+    ui::InputColor3(light.specularColor, "specularColor");
+    ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
     ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);

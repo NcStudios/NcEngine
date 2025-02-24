@@ -35,7 +35,7 @@ auto CreatePipeline(Diligent::IRenderDevice& device,
     ci.GraphicsPipeline.DSVFormat                         = passDesc.depthSink == DepthTarget::None ? TEX_FORMAT_UNKNOWN : OffScreenDepthRTFormat;
     ci.GraphicsPipeline.RasterizerDesc.CullMode           = CULL_MODE_BACK;
     ci.GraphicsPipeline.DepthStencilDesc.DepthEnable      = passDesc.useDepthTest;
-    ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = passDesc.depthSink != DepthTarget::None;
+    ci.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = false;
     ci.GraphicsPipeline.InputLayout.LayoutElements        = layoutElements.data();
     ci.GraphicsPipeline.InputLayout.NumElements           = static_cast<uint32_t>(layoutElements.size());
 

@@ -42,6 +42,7 @@ struct UniformBufferDesc
 {
     std::string resourceKey = "UninitializedUniformBufferDesc";
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
+    bool dynamic = false;
 };
 
 auto ToPipelineResourceDesc(const UniformBufferDesc& resourceDesc)    -> Diligent::PipelineResourceDesc;

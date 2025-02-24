@@ -114,7 +114,7 @@ auto ObjectSystem::Execute(uint32_t frameIndex,
 
         const auto skeletalAnimationIndex = GetSkeletalAnimationIndex(renderer, skeletalAnimationState);
         const auto& [baseColor, outlineWidth, hatching, hatchingTiling] = renderer->GetMaterialView();
-        m_objectData.emplace_back(modelMatrix, baseColor.index, outlineWidth, hatching.index, hatchingTiling, skeletalAnimationIndex);
+        m_objectData.emplace_back(modelMatrix, baseColor.index, outlineWidth, hatching.index, hatchTiling, skeletalAnimationIndex);
         frontendState.toonMeshes.push_back(renderer->GetMeshView());
     }
     frontendState.toonMeshStartingIndex = static_cast<uint32_t>(frontendState.pbrMeshes.size());

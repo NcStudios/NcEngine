@@ -43,11 +43,17 @@ constexpr auto ShadowedToonMaterial = MaterialPassFlag::Shadow | MaterialPassFla
 /** @brief Properties of a MaterialInstance passed to shaders. */
 struct MaterialProperties
 {
-    asset::TextureView diffuseTexture = asset::TextureView{};
-    asset::TextureView normalTexture = asset::TextureView{};
-    Vector3 gradientStart = Vector3::One();
-    Vector3 gradientEnd = Vector3::One();
+    Vector3 gradientStart = Vector3{0.0f, 0.0f, 0.0f};
+    asset::TextureView diffuseTex = asset::TextureView{};
+    Vector3 gradientEnd = Vector3{1.0f, 1.0f, 1.0f};
+    asset::TextureView normalTex = asset::TextureView{};
+    asset::TextureView hatchTex = asset::TextureView{};
     float normalIntensity = 1.0f;
+    float hatchTiling = 1.0f;
+    float gradientAmount = 0.1f;
+    float reflectivity = 0.0f;
+    uint32_t useTextureNormals = 1;
+    uint32_t useFlatShading = 1;
 };
 
 /** @brief Properties for constructing a MaterialInstance. */

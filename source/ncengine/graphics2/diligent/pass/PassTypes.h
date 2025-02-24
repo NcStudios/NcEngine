@@ -15,7 +15,7 @@ constexpr auto DepthStencilTarget = std::numeric_limits<uint32_t>::max();
 constexpr auto SwapChainTarget = std::numeric_limits<uint32_t>::max();
 constexpr auto NoTarget = std::numeric_limits<uint32_t>::max() - 1;
 
-constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM;
+constexpr auto OffScreenColorRTFormat = Diligent::TEX_FORMAT_RGBA8_UNORM_SRGB;
 constexpr auto OffScreenDepthRTFormat = Diligent::TEX_FORMAT_D32_FLOAT;
 
 enum class ColorTarget : uint8_t
@@ -23,7 +23,7 @@ enum class ColorTarget : uint8_t
     None,
     Swapchain,
     Main,
-    Normals,
+    Normals
 };
 
 enum class DepthTarget : uint8_t
@@ -37,7 +37,8 @@ enum class PostProcessTarget : uint8_t
 {
     None,
     PPOutline,
-    PPFxaa
+    PPFxaa,
+    PPNoise
 };
 
 struct Sources
@@ -72,7 +73,7 @@ enum class PassType : uint8_t
 
 struct PassDesc
 {
-    uint64_t id = 0;
+    uint64_t flag = 0;
     std::string_view name  = "";
     PassType type = PassType::None;
     ShaderPaths shaderPaths = ShaderPaths{};

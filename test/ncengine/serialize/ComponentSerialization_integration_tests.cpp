@@ -150,11 +150,17 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
-            .diffuseTexture = nc::asset::g_mockTextureView,
-            .normalTexture = nc::asset::g_mockTextureView,
-            .gradientStart = nc::Vector3::Up(),
-            .gradientEnd = nc::Vector3::Right(),
-            .normalIntensity = 3.5f
+            .gradientStart = nc::Vector3{1.0f, 1.5f, 2.0f},
+            .diffuseTex = nc::asset::g_mockTextureView,
+            .gradientEnd = nc::Vector3{2.5f, 3.0f, 3.5f},
+            .normalTex = nc::asset::g_mockTextureView,
+            .hatchTex = nc::asset::g_mockTextureView,
+            .normalIntensity = 3.5f,
+            .hatchTiling = 4.5f,
+            .gradientAmount = 5.5f,
+            .reflectivity = 6.0f,
+            .useTextureNormals = 1,
+            .useFlatShading = 1
         }
     };
 
@@ -172,13 +178,21 @@ TEST(ComponentSerializationTests, RoundTrip_staticMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
-    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTexture.id, actualMaterialProperties.diffuseTexture.id);
-    EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
-    EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
-    EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
+
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
+    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalTex.id, actualMaterialProperties.normalTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTex.id, actualMaterialProperties.hatchTex.id);
+    EXPECT_EQ(200, actualMaterialProperties.diffuseTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.normalTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.hatchTex.index);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
+    EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
+    EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
@@ -192,11 +206,17 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     const auto expectedMaterialDesc = nc::MaterialDesc{
         .name = "mock",
         .properties = nc::MaterialProperties{
-            .diffuseTexture = nc::asset::g_mockTextureView,
-            .normalTexture = nc::asset::g_mockTextureView,
-            .gradientStart = nc::Vector3::Up(),
-            .gradientEnd = nc::Vector3::Right(),
-            .normalIntensity = 3.5f
+            .gradientStart = nc::Vector3{1.0f, 1.5f, 2.0f},
+            .diffuseTex = nc::asset::g_mockTextureView,
+            .gradientEnd = nc::Vector3{2.5f, 3.0f, 3.5f},
+            .normalTex = nc::asset::g_mockTextureView,
+            .hatchTex = nc::asset::g_mockTextureView,
+            .normalIntensity = 3.5f,
+            .hatchTiling = 4.5f,
+            .gradientAmount = 5.5f,
+            .reflectivity = 6.0f,
+            .useTextureNormals = 1,
+            .useFlatShading = 1
         }
     };
 
@@ -215,13 +235,20 @@ TEST(ComponentSerializationTests, RoundTrip_skinnedMesh_preservesValues)
     EXPECT_EQ(expectedMaterialDesc.name, actual.GetMaterial().GetName());
     EXPECT_EQ(expectedMaterialDesc.passes, actual.GetMaterial().GetPasses());
     const auto& actualMaterialProperties = actual.GetMaterial().GetProperties();
-    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTexture.id, actualMaterialProperties.diffuseTexture.id);
-    EXPECT_EQ(expectedMaterialDesc.properties.normalTexture.id, actualMaterialProperties.normalTexture.id);
-    EXPECT_EQ(200, actualMaterialProperties.diffuseTexture.index);
-    EXPECT_EQ(200, actualMaterialProperties.normalTexture.index);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientStart, actualMaterialProperties.gradientStart);
+    EXPECT_EQ(expectedMaterialDesc.properties.diffuseTex.id, actualMaterialProperties.diffuseTex.id);
     EXPECT_EQ(expectedMaterialDesc.properties.gradientEnd, actualMaterialProperties.gradientEnd);
+    EXPECT_EQ(expectedMaterialDesc.properties.normalTex.id, actualMaterialProperties.normalTex.id);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTex.id, actualMaterialProperties.hatchTex.id);
+    EXPECT_EQ(200, actualMaterialProperties.diffuseTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.normalTex.index);
+    EXPECT_EQ(200, actualMaterialProperties.hatchTex.index);
     EXPECT_EQ(expectedMaterialDesc.properties.normalIntensity, actualMaterialProperties.normalIntensity);
+    EXPECT_EQ(expectedMaterialDesc.properties.hatchTiling, actualMaterialProperties.hatchTiling);
+    EXPECT_EQ(expectedMaterialDesc.properties.gradientAmount, actualMaterialProperties.gradientAmount);
+    EXPECT_EQ(expectedMaterialDesc.properties.reflectivity, actualMaterialProperties.reflectivity);
+    EXPECT_EQ(expectedMaterialDesc.properties.useTextureNormals, actualMaterialProperties.useTextureNormals);
+    EXPECT_EQ(expectedMaterialDesc.properties.useFlatShading, actualMaterialProperties.useFlatShading);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
@@ -267,30 +294,34 @@ TEST(ComponentSerializationTests, RoundTrip_particleEmitter_preservesValues)
 TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::DirectionalLight{nc::Vector3::Splat(7.0f)};
+    const auto expected = nc::DirectionalLight{nc::Vector3::Splat(7.0f), nc::Vector3::Splat(1.0f), 1.0f};
     nc::SerializeDirectionalLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeDirectionalLight(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.color, actual.color);
+    EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
+    EXPECT_EQ(expected.specularColor, actual.specularColor);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 42.0f};
+    const auto expected = nc::PointLight{nc::Vector3::Splat(2.0f), nc::Vector3::Splat(3.0f), 4.0f, 42.0f};
     nc::SerializePointLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializePointLight(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.ambientColor, actual.ambientColor);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
+    EXPECT_EQ(expected.specularColor, actual.specularColor);
+    EXPECT_EQ(expected.intensity, actual.intensity);
     EXPECT_EQ(expected.radius, actual.radius);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
 {
     auto stream = std::stringstream{};
-    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), 1.0f, 1.1f, 25.0f};
+    const auto expected = nc::SpotLight{nc::Vector3::Splat(1.0f), nc::Vector3::Splat(1.0f), 4.0f, 1.0f, 1.1f, 25.0f};
     nc::SerializeSpotLight(stream, expected, g_serializationContext, nullptr);
     const auto actual = nc::DeserializeSpotLight(stream, g_deserializationContext, nullptr);
-    EXPECT_EQ(expected.color, actual.color);
+    EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
+    EXPECT_EQ(expected.specularColor, actual.specularColor);
+    EXPECT_EQ(expected.intensity, actual.intensity);
     EXPECT_EQ(expected.innerAngle, actual.innerAngle);
     EXPECT_EQ(expected.outerAngle, actual.outerAngle);
     EXPECT_EQ(expected.radius, actual.radius);

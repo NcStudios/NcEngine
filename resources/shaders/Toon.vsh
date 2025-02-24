@@ -13,6 +13,7 @@ struct PSInput
     float2 UV            : TEX_COORD;
     uint   MaterialIndex;
     float3 WorldPos;
+    float3 LocalPos;
 };
 
 struct TransformData
@@ -46,7 +47,8 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize(mul(Transforms[transformIndex].model, VSIn.Normal)); // @TODO #805, compute inverse model matrix CPU-side
+    PSIn.Normal = normalize(mul(Transforms[transformIndex].model, VSIn.Normal));
     PSIn.WorldPos = TransformedPos.xyz;
+    PSIn.LocalPos = VSIn.Pos.xyz;
     PSIn.MaterialIndex = materialIndex;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ncengine/graphics/Material.h"
+#include "ncengine/graphics/PostProcess.h"
 #include "ncmath/Vector.h"
 
 #include "DirectXMath.h"
@@ -25,12 +26,17 @@ struct GlobalEnvironmentData
 };
 
 // Object model for outline pass properties used by post processing effects (type: constant buffer)
-struct OutlinePassData
+using OutlinePassData = OutlinePassProperties;
+
+// Object model for noise pass properties used by post processing effects (type: constant buffer)
+struct NoisePassData
 {
-    Vector3 color = Vector3::Zero();
-    float width = 1.0f;
-    float depthThreshold = 0.8f;
-    float normalThreshold = 0.4f;
+    Vector3 maskGradientStart = Vector3::Zero();
+    float maskGradientAmount = 0.1f;
+    Vector3 maskGradientEnd = Vector3::One();
+    uint32_t noiseTexIndex = 0u;
+    float noiseTexAmount = 0.1f;
+    float noiseTexTiling = 1.0f;
 };
 
 // Object model for specifying the index into the color and depth offscreen render target arrays. Limited to four of each type of index
@@ -70,14 +76,18 @@ struct TransformData
 // Object model for MaterialInstance (type: StructuredBuffer element type).
 struct MaterialData
 {
-    Vector3 gradientStart = Vector3::Splat(10.0f);
+    Vector3 gradientStart = Vector3::Zero();
     uint32_t diffuseTexIndex = std::numeric_limits<uint32_t>::max();
-    Vector3 gradientEnd = Vector3::Splat(11.0f);
+    Vector3 gradientEnd = Vector3::One();
     uint32_t normalTexIndex = std::numeric_limits<uint32_t>::max();
+    uint32_t hatchTexIndex = std::numeric_limits<uint32_t>::max();
     float normalIntensity = 1.0f;
-    float padding1 = 0;
-    float padding2 = 0;
-    float padding3 = 0;
+    float hatchTiling = 1.0f;
+    float gradientAmount = 0.1f;
+    float reflectivity = 0.0f;
+    uint32_t useTextureNormals = 0;
+    uint32_t useFlatShading = 1;
+    float padding1 = 0.0f;
 };
 
 // Object model for animated bones (type: StructuredBuffer element type).
@@ -105,31 +115,41 @@ struct LightData
     };
 
     // Construct from DirectionalLight
-    LightData(const Vector3& col,
+    LightData(const Vector3& diffuseCol,
+              const Vector3& specularCol,
+              const float intensity_,
               const Vector3& dir)
-        : color{col},
+        : diffuseColor{diffuseCol},
           type{LightType::Directional},
-          direction{dir}
+          specularColor{specularCol},
+          direction{dir},
+          intensity{intensity_}
     {
     }
 
     // Construct from PointLight
-    LightData(const Vector3& col,
+    LightData(const Vector3& diffuseCol,
+              const Vector3& specularCol,
+              const float intensity_,
               const Vector3& pos,
               int32_t enableShadows,
               float rad,
               DirectX::FXMMATRIX viewProj)
-        : color{col},
+        : diffuseColor{diffuseCol},
           type{LightType::Point},
-          position{pos},
+          specularColor{specularCol},
           radius{rad},
+          position{pos},
+          intensity{intensity_},
           castsShadows{enableShadows},
           viewProjection{viewProj}
     {
     }
 
     // Construct from SpotLight
-    LightData(const Vector3& col,
+    LightData(const Vector3& diffuseCol,
+              const Vector3& specularCol,
+              const float intensity_,
               const Vector3& pos,
               float inAngle,
               const Vector3& dir,
@@ -137,28 +157,30 @@ struct LightData
               float rad,
               int32_t enableShadows,
               DirectX::FXMMATRIX viewProj)
-        : color{col},
+        : diffuseColor{diffuseCol},
           type{LightType::Spot},
+          specularColor{specularCol},
+          radius{rad},
           position{pos},
           innerAngle{inAngle},
           direction{dir},
           outerAngle{outAngle},
-          radius{rad},
+          intensity{intensity_},
           castsShadows{enableShadows},
           viewProjection{viewProj}
     {
     }
 
-    Vector3 color = Vector3::One();
+    Vector3 diffuseColor = Vector3::One();
     int type = LightType::Uninitialized;
+    Vector3 specularColor = Vector3::One();
+    float radius = 1.0f;
     Vector3 position = Vector3::Zero();
     float innerAngle = 1.0f;
     Vector3 direction = Vector3::Down();
     float outerAngle = 1.0f;
-    float radius = 1.0f;
+    float intensity = 1.0f;
     int castsShadows = 0;
-    int pad1 = 0;
-    int pad2 = 0;
     DirectX::XMMATRIX viewProjection = DirectX::XMMATRIX{};
 };
 

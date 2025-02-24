@@ -1,38 +1,55 @@
 struct LightData {
-    float3 color;
+    float3 diffuseColor;
     int type; // 0: Directional, 1: Point, 2: Spot
+    float3 specularColor;
+    float radius;
     float3 position;
     float innerAngle;
     float3 direction;
     float outerAngle;
-    float radius;
+    float intensity;
     int castsShadows;
-    int pad1;
-    int pad2;
     float4x4 viewProj;
 };
 
 struct LightInfluence
 {
-    float3 color;
+    float3 diffuseColor;
+    float3 specularColor;
     float specularAmt;
     float diffuseAmt;
+    float intensity;
 };
+
+float CalculateDiffuse(float3 L, float3 N)
+{
+    return max(dot(N, L), 0.0f);
+}
+
+float CalculateSpecular(float3 L, float3 V, float3 N)
+{
+    float3 H = normalize(L + V);
+    float NDotH = max(0, dot(N, H));
+    return pow(NDotH, 32);
+}
+
+float CalculateAttenuation(float D, float R)
+{
+    float distance = D / R;
+    return exp(-2.0f * distance); // Steep and smooth
+}
 
 LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
 {
     // Diffuse
-    float3 lightVec = normalize(-light.direction); // Vector from light to fragment
-    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float diffuseTotal = normalDotLightVec;
+    float3 lightVec = normalize(-light.direction); // Light's direction vector (leading to light)
+    float diffuseTotal = CalculateDiffuse(lightVec, normal);
 
     // Specular
-    float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
-    float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
-    float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float specularTotal = specular * 0.5f;
+    float3 viewVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
+    float specularTotal = CalculateSpecular(lightVec, viewVec, normal);
 
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal, light.intensity};
     return lightInfluence;
 }
 
@@ -40,22 +57,18 @@ LightInfluence PointLightRadiance(LightData light, float3 fragWorldPos, float3 c
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
-    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float diffuseTotal = normalDotLightVec;
+    float diffuseTotal = CalculateDiffuse(lightVec, normal);
 
     // Specular
-    float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
-    float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
-    float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float specularTotal = specular * 0.5f;
+    float3 viewVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
+    float specularTotal = CalculateSpecular(lightVec, viewVec, normal);
 
     // Attenuation
     float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1.0 / pow(max(distance, 0.01), 4.0f)) * pow(light.radius, 3);
-    diffuseTotal *= attenuation;
-    specularTotal *= attenuation;
+    diffuseTotal *= CalculateAttenuation(distance, light.radius);
+    specularTotal *= CalculateAttenuation(distance, light.radius);
 
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor, specularTotal, diffuseTotal, light.intensity};
     return lightInfluence;
 }
 
@@ -63,30 +76,23 @@ LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 ca
 {
     // Diffuse
     float3 lightVec = normalize(light.position - fragWorldPos); // Vector from light to fragment
-    float normalDotLightVec = saturate(dot(normal, lightVec)); // Light influence is proportional to the angle the light hits the fragment
-    float diffuseTotal = normalDotLightVec;
+    float diffuseTotal = CalculateDiffuse(lightVec, normal);
 
     // Specular
-    float3 cameraVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
-    float3 reflectVec = reflect(-lightVec, normal); // Vector of reflected light to normal
-    float specular = pow(saturate(dot(cameraVec, reflectVec)), 32);
-    float specularTotal = specular * 0.5f;
+    float3 viewVec = normalize(cameraPosition - fragWorldPos); // Vector from camera to fragment
+    float specularTotal = CalculateSpecular(lightVec, viewVec, normal);
 
     // Spot Light Cutoff
     float theta = dot(lightVec, normalize(-light.direction));
     float epsilon = light.outerAngle - light.innerAngle;
     float intensity = saturate((theta - light.innerAngle) / epsilon);
-    diffuseTotal *= intensity;
-    specularTotal *= intensity;
 
     // Attenuation
     float distance = length(light.position - fragWorldPos);
-    float attenuation = saturate(1.0 / pow(max(distance, 0.01), 4.0f)) * pow(light.radius, 3);
+    diffuseTotal *= CalculateAttenuation(distance, light.radius);
+    specularTotal *= CalculateAttenuation(distance, light.radius);
 
-    diffuseTotal *= attenuation;
-    specularTotal *= attenuation;
-
-    LightInfluence lightInfluence = {light.color, specularTotal, diffuseTotal};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor,  specularTotal, diffuseTotal, light.intensity};
     return lightInfluence;
 }
 

@@ -22,12 +22,19 @@
         {
             "sourcePath": "raw/image/cube_maps/night_sky.png",
             "assetName": "cube_map/night_sky.nca"
-          }
+        }
     ],
     "mesh": [
         {
-            "sourcePath": "raw/model/ogre.fbx",
-            "assetName": "mesh/ogre",
+            "sourcePath": "raw/model/cave.fbx",
+            "assetName": "mesh/cave",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
+            "sourcePath": "raw/model/guy2.fbx",
+            "assetName": "mesh/guy2",
             "options": {
                 "optimizeMesh": true
             }
@@ -40,15 +47,8 @@
             }
         },
         {
-            "sourcePath": "raw/model/skeleton.fbx",
-            "assetName": "mesh/skeleton",
-            "options": {
-                "optimizeMesh": true
-            }
-        },
-        {
-            "sourcePath": "raw/model/cave.fbx",
-            "assetName": "mesh/cave",
+            "sourcePath": "raw/model/ogre.fbx",
+            "assetName": "mesh/ogre",
             "options": {
                 "optimizeMesh": true
             }
@@ -56,6 +56,13 @@
         {
             "sourcePath": "raw/model/ramp.fbx",
             "assetName": "mesh/ramp",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
+            "sourcePath": "raw/model/skeleton.fbx",
+            "assetName": "mesh/skeleton",
             "options": {
                 "optimizeMesh": true
             }
@@ -69,44 +76,44 @@
     ],
     "skeletal-animation": [
         {
-            "sourcePath": "raw/skeletal_animation/skeleton.fbx",
+            "sourcePath": "raw/skeletal_animation/ogre.fbx",
             "assetNames": [
                 {
-                    "subResourceName" : "Armature|Idle",
-                    "assetName" : "skeletal_animation\\skeleton\\idle"
+                    "subResourceName": "Attack",
+                    "assetName": "skeletal_animation\\ogre\\attack"
                 },
                 {
-                    "subResourceName" : "Armature|WalkFront",
-                    "assetName" : "skeletal_animation\\skeleton\\walk_forward"
-                },
-                {
-                    "subResourceName" : "Armature|WalkBack",
-                    "assetName" : "skeletal_animation\\skeleton\\walk_back"
-                },
-                {
-                    "subResourceName" : "Armature|WalkLeft",
-                    "assetName" : "skeletal_animation\\skeleton\\walk_left"
-                },
-                {
-                    "subResourceName" : "Armature|WalkRight",
-                    "assetName" : "skeletal_animation\\skeleton\\walk_right"
-                },
-                {
-                    "subResourceName" : "Armature|Jump",
-                    "assetName" : "skeletal_animation\\skeleton\\jump"
+                    "subResourceName": "Idle",
+                    "assetName": "skeletal_animation\\ogre\\idle"
                 }
             ]
         },
         {
-            "sourcePath": "raw/skeletal_animation/ogre.fbx",
+            "sourcePath": "raw/skeletal_animation/skeleton.fbx",
             "assetNames": [
                 {
-                    "subResourceName" : "Attack",
-                    "assetName" : "skeletal_animation\\ogre\\attack"
+                    "subResourceName": "Armature|Idle",
+                    "assetName": "skeletal_animation\\skeleton\\idle"
                 },
                 {
-                    "subResourceName" : "Idle",
-                    "assetName" : "skeletal_animation\\ogre\\idle"
+                    "subResourceName": "Armature|Jump",
+                    "assetName": "skeletal_animation\\skeleton\\jump"
+                },
+                {
+                    "subResourceName": "Armature|WalkBack",
+                    "assetName": "skeletal_animation\\skeleton\\walk_back"
+                },
+                {
+                    "subResourceName": "Armature|WalkFront",
+                    "assetName": "skeletal_animation\\skeleton\\walk_forward"
+                },
+                {
+                    "subResourceName": "Armature|WalkLeft",
+                    "assetName": "skeletal_animation\\skeleton\\walk_left"
+                },
+                {
+                    "subResourceName": "Armature|WalkRight",
+                    "assetName": "skeletal_animation\\skeleton\\walk_right"
                 }
             ]
         }
@@ -119,6 +126,22 @@
         {
             "sourcePath": "raw/image/cave/Normal.png",
             "assetName": "texture/cave/Normal"
+        },
+        {
+            "sourcePath": "raw/image/guy_2_base_color.png",
+            "assetName": "texture/guy_2_base_color"
+        },
+        {
+            "sourcePath": "raw/image/guy_2_normal.png",
+            "assetName": "texture/guy_2_normal.nca"
+        },
+        {
+            "sourcePath": "raw/image/linear_hatch.png",
+            "assetName": "texture/linear_hatch.nca"
+        },
+        {
+            "sourcePath": "raw/image/noise.png",
+            "assetName": "texture/noise.nca"
         },
         {
             "sourcePath": "raw/image/ogre/BaseColor.png",
@@ -141,14 +164,6 @@
             "assetName": "texture/solid_color/Blue"
         },
         {
-            "sourcePath": "raw/image/solid_color/Red.png",
-            "assetName": "texture/solid_color/Red"
-        },
-        {
-            "sourcePath": "raw/image/solid_color/Green.png",
-            "assetName": "texture/solid_color/Green"
-        },
-        {
             "sourcePath": "raw/image/solid_color/Orange.png",
             "assetName": "texture/solid_color/Orange"
         },
@@ -157,12 +172,20 @@
             "assetName": "texture/solid_color/Purple"
         },
         {
+            "sourcePath": "raw/image/solid_color/Red.png",
+            "assetName": "texture/solid_color/Red"
+        },
+        {
             "sourcePath": "raw/image/solid_color/Teal.png",
             "assetName": "texture/solid_color/Teal"
         },
         {
             "sourcePath": "raw/image/solid_color/Yellow.png",
             "assetName": "texture/solid_color/Yellow"
+        },
+        {
+            "sourcePath": "raw/image/cube_maps/night_sky.png",
+            "assetName": "cube_map/night_sky.nca"
         }
     ]
 }
