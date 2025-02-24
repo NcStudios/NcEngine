@@ -17,10 +17,10 @@ struct PostProcessPassFlag
 {
     using type = uint64_t;
 
-    static constexpr auto None    = type{1 << 0};
-    static constexpr auto Outline = type{1 << 1};
-    static constexpr auto Fxaa    = type{1 << 2};
-    static constexpr auto Noise   = type{1 << 3};
+    static constexpr auto None    = type{0};
+    static constexpr auto Outline = type{1 << 0};
+    static constexpr auto Fxaa    = type{1 << 1};
+    static constexpr auto Noise   = type{1 << 2};
 };
 
 /** @brief Identifier for a post process effect. */
