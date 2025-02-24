@@ -1,6 +1,7 @@
 #include "CollisionQueryImpl.h"
 #include "jolt/CollisionQueryContext.h"
 #include "jolt/Conversion.h"
+#include "jolt/CookedShapeUtility.h"
 #include "jolt/ShapeFactory.h"
 
 #include "Jolt/Physics/Collision/RayCast.h"
@@ -32,14 +33,36 @@ auto CollisionQueryImpl::CastRay(const Ray& ray) const -> RayCastResult
     return RayCastResult{};
 }
 
-auto CollisionQueryImpl::TestShape(const nc::Shape& shape) -> TestShapeResult
+auto CollisionQueryImpl::TestShape(const Shape& shape,
+                                   const Vector3& position,
+                                   const Quaternion& rotation) -> TestShapeResult
 {
-    auto internalShape = s_ctx->shapeFactory.MakeShape(shape, JPH::Vec3::sReplicate(1.0f));
+    auto internalShape = s_ctx->shapeFactory.MakeShape(shape, JPH::Vec3::sOne());
+    const auto transform = JPH::Mat44::sRotationTranslation(physics::ToJoltQuaternion(rotation), physics::ToJoltVec3(position));
     auto collector = physics::ShapeCollector{s_ctx->lock};
     s_ctx->query.CollideShape(
         internalShape,
         JPH::Vec3::sReplicate(1.0f),
-        JPH::RMat44::sTranslation(internalShape->GetCenterOfMass()),
+        transform,
+        JPH::CollideShapeSettings{},
+        JPH::Vec3::sZero(),
+        collector,
+        m_filter,
+        m_filter,
+        m_filter
+    );
+
+    return TestShapeResult{collector.ExtractHits()};
+}
+
+auto CollisionQueryImpl::TestShape(const CookedShape& shape) -> TestShapeResult
+{
+    const auto& internalShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
+    auto collector = physics::ShapeCollector{s_ctx->lock};
+    s_ctx->query.CollideShape(
+        internalShape.GetPtr(),
+        JPH::Vec3::sReplicate(1.0f),
+        JPH::Mat44::sIdentity(),
         JPH::CollideShapeSettings{},
         JPH::Vec3::sZero(),
         collector,
@@ -79,7 +102,14 @@ auto CollisionQuery::CastRay(const Ray& ray) const -> RayCastResult
     return m_impl->CastRay(ray);
 }
 
-auto CollisionQuery::TestShape(const Shape& shape) const -> TestShapeResult
+auto CollisionQuery::TestShape(const Shape& shape,
+                               const Vector3& position,
+                               const Quaternion& rotation) const -> TestShapeResult
+{
+    return m_impl->TestShape(shape, position, rotation);
+}
+
+auto CollisionQuery::TestShape(const CookedShape& shape) const -> TestShapeResult
 {
     return m_impl->TestShape(shape);
 }

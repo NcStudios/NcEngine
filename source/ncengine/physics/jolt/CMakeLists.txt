@@ -5,6 +5,7 @@ target_sources(${NC_ENGINE_LIB}
         ContactListener.cpp
         ConstraintFactory.cpp
         ConstraintManager.cpp
+        CookedShape.cpp
         JoltPhysics.cpp
         JobSystem.cpp
         PhysicsSnapshot.cpp

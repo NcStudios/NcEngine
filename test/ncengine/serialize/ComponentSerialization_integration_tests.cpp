@@ -304,8 +304,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)
     const auto expected = nc::RigidBody{
         g_entity,
         nc::Shape::MakeBox(
-            nc::Vector3{2.0f, 3.0f, 4.0f},
-            nc::Vector3::Splat(5.0f)
+            nc::Vector3{2.0f, 3.0f, 4.0f}
         ),
         nc::RigidBodyInfo{
             .mass = 50.0f,
@@ -328,7 +327,6 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)
     const auto& expectedShape = expected.GetShape();
     const auto& actualShape = actual.GetShape();
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
-    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
 
     EXPECT_FLOAT_EQ(expected.GetMass(), actual.GetMass());
@@ -347,10 +345,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expectedShape = nc::Shape::MakeBox(
-        nc::Vector3{2.0f, 3.0f, 4.0f},
-        nc::Vector3::Splat(5.0f)
-    );
+    const auto expectedShape = nc::Shape::MakeBox(nc::Vector3{2.0f, 3.0f, 4.0f});
 
     const auto expected = nc::RigidBody{g_entity, expectedShape};
     nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
@@ -358,7 +353,6 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_box_preservesValues)
 
     const auto& actualShape = actual.GetShape();
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
-    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
     EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
@@ -368,10 +362,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expectedShape = nc::Shape::MakeSphere(
-        7.0f,
-        nc::Vector3::Splat(5.0f)
-    );
+    const auto expectedShape = nc::Shape::MakeSphere(7.0f);
 
     const auto expected = nc::RigidBody{g_entity, expectedShape};
     nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
@@ -379,7 +370,6 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_sphere_preservesValues)
 
     const auto& actualShape = actual.GetShape();
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
-    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
     EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
@@ -389,11 +379,7 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
     auto stream = std::stringstream{};
     auto deferredState = nc::physics::DeferredPhysicsCreateState{};
     auto userData = std::any{&deferredState};
-    const auto expectedShape = nc::Shape::MakeCapsule(
-        10.0f,
-        5.0f,
-        nc::Vector3::Splat(5.0f)
-    );
+    const auto expectedShape = nc::Shape::MakeCapsule(10.0f, 5.0f);
 
     const auto expected = nc::RigidBody{g_entity, expectedShape};
     nc::SerializeRigidBody(stream, expected, g_serializationContext, nullptr);
@@ -401,7 +387,6 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_capsule_preservesValues)
 
     const auto& actualShape = actual.GetShape();
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
-    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
     EXPECT_EQ(nc::asset::NullAssetId, actualShape.GetAssetId());
 }
@@ -422,7 +407,6 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_convexHull_preservesValues
 
     const auto& actualShape = actual.GetShape();
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
-    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
     EXPECT_EQ(expectedShape.GetAssetId(), actualShape.GetAssetId());
 }
@@ -443,7 +427,6 @@ TEST(ComponentSerializationTests, RoundTrip_rigidBody_mesh_preservesValues)
 
     const auto& actualShape = actual.GetShape();
     EXPECT_EQ(expectedShape.GetType(), actualShape.GetType());
-    EXPECT_EQ(expectedShape.GetLocalPosition(), actualShape.GetLocalPosition());
     EXPECT_EQ(expectedShape.GetLocalScale(), actualShape.GetLocalScale());
     EXPECT_EQ(expectedShape.GetAssetId(), actualShape.GetAssetId());
 }

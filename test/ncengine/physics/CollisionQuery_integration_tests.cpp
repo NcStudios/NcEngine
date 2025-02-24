@@ -95,10 +95,10 @@ TEST_F(CollisionQueryTest, TestShape_multipleTargets_findsOverlapping)
     const auto hitBody1 = CreateBody(g_entity1, g_sphere, JPH::Vec3{2.0f, 4.0f, 0.0f});
     const auto hitBody2 = CreateBody(g_entity2, g_sphere, JPH::Vec3{2.0f, 0.0f, 0.0f});
     const auto missedBody = CreateBody(g_entity2, g_sphere, JPH::Vec3{-2.0f, 2.0f, 0.0f});
-    const auto sphere = nc::Shape::MakeSphere(2.0f, nc::Vector3{2.0f, 2.0f, 0.0f});
+    const auto sphere = nc::Shape::MakeSphere(2.0f);
 
     auto uut = nc::CollisionQuery();
-    const auto result = uut.TestShape(sphere);
+    const auto result = uut.TestShape(sphere, nc::Vector3{2.0f, 2.0f, 0.0f});
     ASSERT_EQ(2ull, result.hits.size());
 
     auto hit1Pos = std::ranges::find(result.hits, g_entity1, &nc::TestShapeHit::hit);
@@ -124,7 +124,7 @@ TEST_F(CollisionQueryTest, TestShape_missesTarget_findsNone)
 {
     const auto missedBody1 = CreateBody(g_entity1, g_sphere, JPH::Vec3::sReplicate(4.0f));
     const auto missedBody2 = CreateBody(g_entity2, g_sphere, JPH::Vec3::sReplicate(-4.0f));
-    const auto sphere = nc::Shape::MakeSphere(2.0f, nc::Vector3::Zero());
+    const auto sphere = nc::Shape::MakeSphere(2.0f);
 
     auto uut = nc::CollisionQuery();
     const auto result = uut.TestShape(sphere);

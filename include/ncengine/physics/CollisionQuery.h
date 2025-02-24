@@ -1,6 +1,6 @@
 /**
  * @file CollisionQuery.h
- * @copyright Jaremie Romer and McCallister Romer 2024
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -12,6 +12,7 @@
 
 namespace nc
 {
+class CookedShape;
 struct Shape;
 
 /** @brief Ray used for performing raycast queries. */
@@ -71,7 +72,12 @@ class CollisionQuery
         auto CastRay(const Ray& ray) const -> RayCastResult;
 
         /** @brief Query for all \ref RigidBody "bodies" that collide with a shape. */
-        auto TestShape(const Shape& shape) const -> TestShapeResult;
+        auto TestShape(const Shape& shape,
+                       const Vector3& position = Vector3::Zero(),
+                       const Quaternion& rotation = Quaternion::Identity()) const -> TestShapeResult;
+
+        /** @brief Query for all \ref RigidBody "bodies" that collider with a shape. */
+        auto TestShape(const CookedShape& shape) const -> TestShapeResult;
 
         /** @brief Query for all \ref RigidBody "bodies" that contain a point. */
         auto TestPoint(const Vector3& point) const -> std::vector<Entity>;

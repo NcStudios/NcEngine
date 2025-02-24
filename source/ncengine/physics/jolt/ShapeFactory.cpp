@@ -12,32 +12,53 @@
 
 #include <ranges>
 
+namespace
+{
+template<class T, class... Args>
+auto MakeRef(Args&&... args) -> JPH::Ref<JPH::Shape>
+{
+    return JPH::Ref<JPH::Shape>{new T(std::forward<Args>(args)...)};
+}
+} // anonymous namespace
+
 namespace nc::physics
 {
+auto ShapeFactory::MakeDecoratedShape(const JPH::Shape* shape,
+                                      const JPH::Vec3& localPosition,
+                                      const JPH::Quat& localRotation) -> JPH::Ref<JPH::Shape>
+{
+    return MakeRef<JPH::RotatedTranslatedShape>(localPosition, localRotation, shape);
+}
+
+auto ShapeFactory::MakeDecoratedShape(const JPH::Shape* shape,
+                                      const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
+{
+    return MakeRef<JPH::ScaledShape>(shape, scale);
+}
+
 ShapeFactory::ShapeFactory(Signal<const asset::ConvexHullUpdateEventData&>& onConvexHullUpdate,
                            Signal<const asset::MeshColliderUpdateEventData&>& onMeshColliderUpdate)
     : m_convexHullUpdateConnection{onConvexHullUpdate.Connect(this, &ShapeFactory::OnConvexHullUpdate)},
       m_meshColliderUpdateConnection{onMeshColliderUpdate.Connect(this, &ShapeFactory::OnMeshColliderUpdate)}
 {
+    s_instance = this;
 }
 
 auto ShapeFactory::MakeShape(const Shape& shape,
                              const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>
 {
     const auto type = shape.GetType();
-    const auto localPosition = ToJoltVec3(shape.GetLocalPosition());
     const auto localScale = ToJoltVec3(shape.GetLocalScale());
     const auto worldScale = localScale * additionalScaling;
 
-    /** @todo: 694 support additional shape types */
     switch (type)
     {
         case ShapeType::Box:
-            return MakeBox(worldScale * 0.5f, localPosition * additionalScaling);
+            return MakeBox(worldScale * 0.5f);
         case ShapeType::Sphere:
-            return MakeSphere(worldScale.GetX() * 0.5f, localPosition * additionalScaling);
+            return MakeSphere(worldScale.GetX() * 0.5f);
         case ShapeType::Capsule:
-            return MakeCapsule(worldScale.GetY() * 0.5f, worldScale.GetX() * 0.5f, localPosition * additionalScaling);
+            return MakeCapsule(worldScale.GetY() - worldScale.GetX() * 0.5f, worldScale.GetX() * 0.5f);
         case ShapeType::ConvexHull:
             return MakeConvexHull(shape.GetAssetId(), worldScale);
         case ShapeType::Mesh:
@@ -48,48 +69,41 @@ auto ShapeFactory::MakeShape(const Shape& shape,
     };
 }
 
-auto ShapeFactory::MakeBox(const JPH::Vec3& halfExtents,
-                           const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
+auto ShapeFactory::MakeShape(const Shape& shape,
+                             const JPH::Vec3& position,
+                             const JPH::Quat& rotation,
+                             const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
-    return ApplyLocalOffsets(MakeRef<JPH::BoxShape>(halfExtents, boxConvexRadius), localPosition);
+    auto innerShape = MakeShape(shape, scale);
+    return ShapeFactory::MakeDecoratedShape(innerShape, position, rotation);
 }
 
-auto ShapeFactory::MakeSphere(float radius,
-                              const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
+auto ShapeFactory::MakeBox(const JPH::Vec3& halfExtents) -> JPH::Ref<JPH::Shape>
 {
-    return ApplyLocalOffsets(MakeRef<JPH::SphereShape>(radius), localPosition);
+    return MakeRef<JPH::BoxShape>(halfExtents, boxConvexRadius);
 }
 
-auto ShapeFactory::MakeCapsule(float halfHeight,
-                               float radius,
-                               const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
+auto ShapeFactory::MakeSphere(float radius) -> JPH::Ref<JPH::Shape>
 {
-    return ApplyLocalOffsets(MakeRef<JPH::CapsuleShape>(halfHeight, radius), localPosition);
+    return MakeRef<JPH::SphereShape>(radius);
+}
+
+auto ShapeFactory::MakeCapsule(float halfHeight, float radius) -> JPH::Ref<JPH::Shape>
+{
+    return MakeRef<JPH::CapsuleShape>(halfHeight, radius);
 }
 
 auto ShapeFactory::MakeConvexHull(asset::AssetId id,
                                   const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
     NC_ASSERT(m_convexHulls.contains(id), "ConvexHull not loaded");
-    return ApplyScale(m_convexHulls.at(id), scale);
+    return MakeDecoratedShape(m_convexHulls.at(id), scale);
 }
 
 auto ShapeFactory::MakeMesh(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
     NC_ASSERT(m_meshColliders.contains(id), "MeshCollider not loaded");
-    return ApplyScale(m_meshColliders.at(id), scale);
-}
-
-auto ShapeFactory::ApplyLocalOffsets(const JPH::Ref<JPH::Shape>& shape,
-                                     const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>
-{
-    return MakeRef<JPH::RotatedTranslatedShape>(localPosition, JPH::Quat::sIdentity(), shape.GetPtr());
-}
-
-auto ShapeFactory::ApplyScale(const JPH::Ref<JPH::Shape>& shape,
-                              const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
-{
-    return MakeRef<JPH::ScaledShape>(shape.GetPtr(), scale);
+    return MakeDecoratedShape(m_meshColliders.at(id), scale);
 }
 
 void ShapeFactory::OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event)
