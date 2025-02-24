@@ -29,12 +29,16 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
 
     // Lights
-    auto lvHandle = world.Emplace<Entity>({.position = Vector3{-4.5f, 8.0f, 5.4f}, .tag = "Point Light 1"});
-    world.Emplace<PointLight>(lvHandle, Vector3(0.0f, 0.0f, 0.0f), Vector3(0.946f, 0.671f, 0.278f), 26.6f);
-    auto lv2Handle = world.Emplace<Entity>({.position = Vector3{6.5f, 9.0f, 9.6f}, .tag = "Point Light 2"});
-    world.Emplace<PointLight>(lv2Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 0.723f, 0.608f), 13.4f);
-    auto lv3Handle = world.Emplace<Entity>({.position = Vector3{4.5f, 6.0f, -8.4f}, .tag = "Point Light 3"});
-    world.Emplace<PointLight>(lv3Handle, Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f, 1.0f, 1.0f), 7.3f);
+    auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
+    world.Emplace<PointLight>(lvHandle, Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), 1.0f, 45.0f);
+
+    const auto guy2 = world.Emplace<Entity>({
+        .position = Vector3{6.0f, 1.8f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(1.579f, 1.322f, 0.091f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .tag = "guy2"
+    });
+    world.Emplace<StaticMesh>(guy2, mesh::Guy2, material::Guy2);
 
     // Ogre
     {
@@ -150,8 +154,8 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
-        .position = Vector3{-0.6f, 6.562f, -18.848f},
-        .rotation = Quaternion::FromEulerAngles(0.239f, 0.0f, 0.021f),
+        .position = Vector3{0.137f, 5.291f, 1.245f},
+        .rotation = Quaternion::FromEulerAngles(0.549f, 1.116f, 0.146f),
         .tag = "Main Camera"
     });
 
@@ -160,7 +164,23 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto ncGraphics = modules.Get<NcGraphics>();
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties{.width = 1.0f});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, OutlinePassProperties
+    {
+        .width = 2.0f,
+        .depthThreshold = 3.69f,
+        .viewDirDepthThreshold = 0.04f,
+        .normalThreshold = 0.920f
+    });
+
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, NoisePassProperties
+    {
+        .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
+        .maskGradientAmount = 1.0f,
+        .maskGradientEnd = Vector3{0.0f, 0.0f, 0.0f},
+        .noiseTex = asset::AcquireTextureAsset("noise.nca"),
+        .noiseTexAmount = 0.24f,
+        .noiseTexTiling = 1.0f,
+    });
 }
 
 void GraphicsTest::Unload()

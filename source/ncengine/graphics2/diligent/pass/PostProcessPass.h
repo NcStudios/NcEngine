@@ -37,9 +37,10 @@ struct PostProcessPass : public Pass
                     ShaderFactory& shaderFactory,
                     ShaderBindings& shaderBindings,
                     const PassManifest& passManifest,
-                    const PassDesc& passDesc);
+                    const PassDesc& passDesc,
+                    bool isFinalPass = false);
     std::vector<PostProcessPipelineInstance> instances;
     bool anyEnabled = false;
-    uint64_t id = 0;
+    uint64_t flag = 0;
 };
 } // namespace nc::graphics

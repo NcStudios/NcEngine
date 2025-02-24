@@ -10,17 +10,20 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
         .name = "test",
         .passes = nc::MaterialPassFlag::Toon,
         .properties = nc::MaterialProperties{
-            .diffuseTexture = nc::asset::TextureView{
+            .diffuseTex = nc::asset::TextureView{
                 .id = 42,
                 .index = 2
             },
-            .normalTexture = nc::asset::TextureView{
+            .normalTex = nc::asset::TextureView{
                 .id = 10,
                 .index = 13
             },
-            .gradientStart = nc::Vector3::One(),
-            .gradientEnd = nc::Vector3::Zero(),
-            .normalIntensity = 1.0f
+            .hatchTex = nc::asset::TextureView{
+                .id = 17,
+                .index = 15
+            },
+            .normalIntensity = 1.0f,
+            .hatchTiling = 2.0f
         }
     };
 
@@ -29,10 +32,11 @@ TEST(MaterialRegistryTest, CreateInstance_constructsValidInstance)
     uut.BuildState();
     const auto actualProperties = uut.GetInstanceData(actualIndex);
     EXPECT_EQ(0u, actualIndex);
-    EXPECT_EQ(expectedDesc.properties.diffuseTexture.index, actualProperties.diffuseTexIndex);
-    EXPECT_EQ(expectedDesc.properties.normalTexture.index, actualProperties.normalTexIndex);
-    EXPECT_EQ(expectedDesc.properties.gradientStart, actualProperties.gradientStart);
-    EXPECT_EQ(expectedDesc.properties.gradientEnd, actualProperties.gradientEnd);
+    EXPECT_EQ(expectedDesc.properties.diffuseTex.index, actualProperties.diffuseTexIndex);
+    EXPECT_EQ(expectedDesc.properties.normalTex.index, actualProperties.normalTexIndex);
+    EXPECT_EQ(expectedDesc.properties.hatchTex.index, actualProperties.hatchTexIndex);
+    EXPECT_EQ(expectedDesc.properties.normalIntensity, actualProperties.normalIntensity);
+    EXPECT_EQ(expectedDesc.properties.hatchTiling, actualProperties.hatchTiling);
 }
 
 TEST(MaterialRegistryTest, CreateInstance_allocatesSequentialIndices)

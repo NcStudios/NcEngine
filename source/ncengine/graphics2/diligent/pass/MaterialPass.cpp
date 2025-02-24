@@ -63,7 +63,7 @@ MaterialPass::MaterialPass(Diligent::IRenderDevice& device,
                            const PassDesc& passDesc,
                            uint32_t numSamples)
     : Pass{CreatePipeline(device, shaderFactory, shaderBindings, passDesc, numSamples), GetSinks(passManifest, passDesc), GetSources(passManifest, passDesc)},
-      id{passDesc.id},
+      flag{passDesc.flag},
       isMsaa{passDesc.isMsaa}
 {
 }

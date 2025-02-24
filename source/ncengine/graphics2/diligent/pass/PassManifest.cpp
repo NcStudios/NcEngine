@@ -46,7 +46,7 @@ PassManifest::PassManifest(std::vector<PassDesc> passes,
 
         for (const auto passFlag : passFlags)
         {
-            auto pos = std::ranges::find(matches, passFlag, &PassDesc::id);
+            auto pos = std::ranges::find(matches, passFlag, &PassDesc::flag);
             if (pos != matches.end())
             {
                 RegisterPass(std::move(*pos));
@@ -81,6 +81,8 @@ void PassManifest::RegisterPass(PassDesc desc)
     {
         throw nc::NcError("The pass was already registered");
     }
+
+    m_ids.push_back(passId);
 
     RegisterTarget(desc.colorSink);
     RegisterTarget(desc.depthSink);

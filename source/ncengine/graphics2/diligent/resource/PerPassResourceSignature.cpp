@@ -15,6 +15,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    const SinkBufferDesc& colorSinksDesc,
                                                    const SinkBufferDesc& depthSinksDesc,
                                                    const SinkBufferDesc& postProcessSinksDesc,
+                                                   const UniformBufferDesc& postProcessPassPropertiesDesc,
                                                    const UniformBufferDesc& sinkIndexDesc)
     : m_postProcessSinkCount{postProcessSinksDesc.maxElementCount},
       m_postProcessResourceKey{postProcessSinksDesc.resourceKey}
@@ -25,7 +26,8 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         ToPipelineResourceDesc(colorSinksDesc),
         ToPipelineResourceDesc(depthSinksDesc),
         ToPipelineResourceDesc(postProcessTexDesc), // Even though we have multiple post process resources, we only ever bind one at a time.
-        ToPipelineResourceDesc(sinkIndexDesc)
+        ToPipelineResourceDesc(sinkIndexDesc),
+        ToPipelineResourceDesc(postProcessPassPropertiesDesc)
     };
 
     const auto sampler = SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey);
@@ -74,11 +76,17 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
             GetVariable( Diligent::SHADER_TYPE_PIXEL, m_postProcessResourceKey.data(), m_srb),
             MakeColorSinkBufferDesc(1));
     }
+
+    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
+        context,
+        device,
+        GetVariable(postProcessPassPropertiesDesc.shaderType, postProcessPassPropertiesDesc.resourceKey.data(), m_srb)
+    );
 }
 
 void PerPassResourceSignature::BindPostProcessSink(uint32_t index)
 {
-    GetPostProcessResource(index).Update();
+    GetPostProcessSinkResource(index).Update();
 }
 
 PerPassResourceSignature::~PerPassResourceSignature() = default;

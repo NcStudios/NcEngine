@@ -1243,7 +1243,8 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<FrameLogic>(cameraHandle, InvokeFreeComponent<FollowCamera>{});
     ncGraphics->SetCamera(&camera);
     ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
-    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 1.0f, .depthThreshold = 0.360f, .normalThreshold = 0.190f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, PostProcessPassProperties{OutlinePassProperties{.width = 2.0f, .depthThreshold = 2.66f, .viewDirDepthThreshold = 0.93f, .normalThreshold = 0.180f}});
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
 
     // Character
     SpawnCharacterFunc = [world, cameraHandle]() mutable
@@ -1285,11 +1286,12 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<PointLight>(
         world.Emplace<Entity>({
-            .position = Vector3{4.0f, 50.0f, 35.0f},
+            .position = Vector3{-15.0f, 50.0f, 35.0f},
             .tag = "Point Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{0.8f, 0.8f, 0.8f},
+        3.5f,
         300.0f
     );
 
@@ -1299,7 +1301,9 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
             .rotation = nc::Quaternion::FromEulerAngles(-1.892f, 0.809f, -2.661f),
             .tag = "Directional Light"
         }),
-        Vector3{1.0f, 1.0f, 1.0f}
+        Vector3{1.0f, 1.0f, 1.0f},
+        Vector3{1.0f, 1.0f, 1.0f},
+        1.0f
     );
 }
 

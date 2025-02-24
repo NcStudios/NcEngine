@@ -23,8 +23,7 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
                                                      const StructuredBufferDesc& particleResourceDesc,
                                                      const TextureBufferDesc& textureResourceDesc,
                                                      const UniformBufferDesc& environmentResourceDesc,
-                                                     const UniformBufferDesc& wireframeResourceDesc,
-                                                     const UniformBufferDesc& outlinePassPropertiesDesc)
+                                                     const UniformBufferDesc& wireframeResourceDesc)
 {
     const auto resources = std::array{
         ToPipelineResourceDesc(transformResourceDesc),
@@ -37,7 +36,6 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         ToPipelineResourceDesc(textureResourceDesc),
         ToPipelineResourceDesc(environmentResourceDesc),
         ToPipelineResourceDesc(wireframeResourceDesc),
-        ToPipelineResourceDesc(outlinePassPropertiesDesc)
     };
 
     const auto sampler = TextureBufferResource::MakeSamplerDesc(textureResourceDesc.resourceKey);
@@ -130,12 +128,6 @@ PerFrameResourceSignature::PerFrameResourceSignature(Diligent::IDeviceContext& c
         context,
         device,
         GetVariable(wireframeResourceDesc, m_srb)
-    );
-
-    m_postProcessPropertyResource = std::make_unique<PostProcessPropertyBufferResource>(
-        context,
-        device,
-        GetVariable(outlinePassPropertiesDesc.shaderType, outlinePassPropertiesDesc.resourceKey.data(), m_srb)
     );
 }
 

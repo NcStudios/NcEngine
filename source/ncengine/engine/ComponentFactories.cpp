@@ -52,8 +52,9 @@ auto CreateStaticMesh(Entity entity, const std::any&) -> StaticMesh
         meshService->Acquire(asset::CubeMesh),
         MaterialDesc{
             .properties = MaterialProperties{
-                .diffuseTexture = textureService->Acquire(asset::DefaultBaseColor),
-                .normalTexture = textureService->Acquire(asset::DefaultNormal)
+                .diffuseTex = textureService->Acquire(asset::DefaultBaseColor),
+                .normalTex = textureService->Acquire(asset::DefaultNormal),
+                .hatchTex = textureService->Acquire(asset::DefaultBaseColor)
             }
         }
     };
@@ -70,8 +71,9 @@ auto CreateSkinnedMesh(Entity entity, const std::any&) -> SkinnedMesh
         meshService->Acquire(asset::CubeMesh),
         MaterialDesc{
             .properties = MaterialProperties{
-                .diffuseTexture = textureService->Acquire(asset::DefaultBaseColor),
-                .normalTexture = textureService->Acquire(asset::DefaultNormal)
+                .diffuseTex = textureService->Acquire(asset::DefaultBaseColor),
+                .normalTex = textureService->Acquire(asset::DefaultNormal),
+                .hatchTex = textureService->Acquire(asset::DefaultBaseColor)
             }
         }
     };

@@ -435,7 +435,8 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         }),
         Vector3{1.0f, 0.871f, 0.6f},
         Vector3{1.0f, 0.871f, 0.6f},
-        113.0f
+        10.0f,
+        500.0f
     );
 
     const auto cameraHandle = world.Emplace<Entity>({
@@ -566,7 +567,7 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             ncRandom,
             spawnBehavior,
             [world](Entity entity) mutable {
-                world.Emplace<PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 50.0f);
+                world.Emplace<PointLight>(entity, Vector3{1.0f, 0.871f, 0.6f}, Vector3{1.0f, 0.871f, 0.6f}, 1.0f, 50.0f);
             }
         );
 
@@ -653,6 +654,11 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
         ::entity_hierarchy::SpawnCallback = std::bind_front(&Spawner::StageSpawn, &spawner);
         ::entity_hierarchy::DestroyCallback = std::bind_front(&Spawner::StageDestroy, &spawner);
     }
+
+    // Post process
+    ncGraphics->SetPostProcessEffectEnabled(nc::OutlinedToonEffectId, true);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Outline, post_process::Outline);
+    ncGraphics->SetPostProcessEffectProperties(nc::OutlinedToonEffectId, PostProcessPassFlag::Noise, post_process::Noise);
 
     g_currentEntities += static_cast<unsigned>(world.GetAll<Entity>().size());
 }

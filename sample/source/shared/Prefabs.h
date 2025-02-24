@@ -3,6 +3,7 @@
 #include "ncengine/asset/AssetViews.h"
 #include "ncengine/asset/NcAsset.h"
 #include "ncengine/graphics/Material.h"
+#include "ncengine/graphics/PostProcess.h"
 
 namespace nc::sample
 {
@@ -11,43 +12,6 @@ void InitializeResources();
 
 // Reload cached global asset views
 void ReloadPrefabs();
-
-// Mesh
-namespace mesh
-{
-constexpr auto HalfPipePath = "halfpipe.nca";
-constexpr auto RampPath = "ramp.nca";
-constexpr auto OgrePath = "ogre.nca";
-constexpr auto SkeletonPath = "skeleton.nca";
-constexpr auto CavePath = "cave.nca";
-
-extern asset::MeshView Cube;
-extern asset::MeshView Sphere;
-extern asset::MeshView Capsule;
-extern asset::MeshView Plane;
-extern asset::MeshView Wheel;
-extern asset::MeshView HalfPipe;
-extern asset::MeshView Ramp;
-extern asset::MeshView Ogre;
-extern asset::MeshView Skeleton;
-extern asset::MeshView Cave;
-} // namespace mesh
-
-// Materials
-namespace material
-{
-extern MaterialDesc Default;
-extern MaterialDesc Red;
-extern MaterialDesc Green;
-extern MaterialDesc Blue;
-extern MaterialDesc Orange;
-extern MaterialDesc Purple;
-extern MaterialDesc Teal;
-extern MaterialDesc Yellow;
-extern MaterialDesc Ogre;
-extern MaterialDesc Skeleton;
-extern MaterialDesc Cave;
-} // namespace material
 
 // Animations
 namespace animation
@@ -60,7 +24,52 @@ extern asset::AssetId SkeletonWalkRight;
 extern asset::AssetId SkeletonWalkLeft;
 extern asset::AssetId SkeletonWalkForward;
 extern asset::AssetId SkeletonWalkBackward;
-} // namespace animation
+}
+
+// Mesh
+namespace mesh
+{
+constexpr auto Guy2Path = "guy2.nca";
+constexpr auto HalfPipePath = "halfpipe.nca";
+constexpr auto RampPath = "ramp.nca";
+constexpr auto OgrePath = "ogre.nca";
+constexpr auto SkeletonPath = "skeleton.nca";
+constexpr auto CavePath = "cave.nca";
+
+// Mesh
+extern asset::MeshView Cube;
+extern asset::MeshView Sphere;
+extern asset::MeshView Capsule;
+extern asset::MeshView Guy2;
+extern asset::MeshView Plane;
+extern asset::MeshView Wheel;
+extern asset::MeshView HalfPipe;
+extern asset::MeshView Ramp;
+extern asset::MeshView Ogre;
+extern asset::MeshView Skeleton;
+extern asset::MeshView Cave;
+} // namespace mesh
+
+// Materials
+namespace material
+{
+extern MaterialDesc Blue;
+extern MaterialDesc Cave;
+extern MaterialDesc Default;
+extern MaterialDesc Green;
+extern MaterialDesc Guy2;
+extern MaterialDesc Ogre;
+extern MaterialDesc Orange;
+extern MaterialDesc Purple;
+extern MaterialDesc Red;
+extern MaterialDesc Skeleton;
+extern MaterialDesc Teal;
+extern MaterialDesc Yellow;
+} // namespace material
+
+// Colliders
+constexpr auto HalfPipeConcaveCollider = "halfpipe.nca";
+constexpr auto RampHullCollider = "ramp.nca";
 
 // CubeMaps
 namespace cubemap
@@ -84,4 +93,10 @@ extern asset::AssetId Halfpipe;
 
 // Fonts
 extern asset::FontInfo UIFont;
+
+namespace post_process
+{
+extern OutlinePassProperties Outline;
+extern NoisePassProperties Noise;
+} // namespace post_process
 } // namespace nc::sample

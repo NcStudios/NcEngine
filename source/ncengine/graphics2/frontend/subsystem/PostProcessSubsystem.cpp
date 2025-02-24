@@ -56,6 +56,8 @@ auto MatchPostProcessPass(nc::PostProcessPassFlag::type pass,
             using T = std::decay_t<decltype(unpacked)>;
             if constexpr (std::same_as<T, nc::OutlinePassProperties>)
                 return pass == nc::PostProcessPassFlag::Outline;
+            else if constexpr (std::same_as<T, nc::NoisePassProperties>)
+                return pass == nc::PostProcessPassFlag::Noise;
             else
                 return false;
         },

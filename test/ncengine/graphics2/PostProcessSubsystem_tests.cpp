@@ -61,6 +61,7 @@ TEST(PostProcessSubsystemTest, SetProperties_validCall_updatesState)
         .color = nc::Vector3{1.0f, 2.0f, 3.0f},
         .width = 3.0f,
         .depthThreshold = 0.8f,
+        .viewDirDepthThreshold = 0.9f,
         .normalThreshold = 0.4f
     };
 
@@ -150,6 +151,7 @@ TEST(PostProcessSubsystemTest, BuildState_reportsPropertyModification)
     EXPECT_EQ(expectedProperties.color, actualProperties.color);
     EXPECT_EQ(expectedProperties.width, actualProperties.width);
     EXPECT_EQ(expectedProperties.depthThreshold, actualProperties.depthThreshold);
+    EXPECT_EQ(expectedProperties.viewDirDepthThreshold, actualProperties.viewDirDepthThreshold);
     EXPECT_EQ(expectedProperties.normalThreshold, actualProperties.normalThreshold);
 
     // modify event cleared

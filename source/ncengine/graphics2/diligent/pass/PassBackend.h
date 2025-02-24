@@ -51,8 +51,7 @@ class PassBackend
 
         void RenderPostProcess(Diligent::IDeviceContext& context,
                                Diligent::ISwapChain& swapChain,
-                               PerPassResourceSignature& perPassResourceSignature,
-                               PerFrameResourceSignature& perFrameResourceSignature);
+                               PerPassResourceSignature& perPassResourceSignature);
 
         void RenderOutputToSwapchain(Diligent::IDeviceContext& context,
                                      Diligent::ISwapChain& swapChain,

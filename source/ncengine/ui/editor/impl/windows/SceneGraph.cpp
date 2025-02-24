@@ -189,8 +189,9 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
                     asset::AcquireMeshAsset(asset::CubeMesh),
                     MaterialDesc{
                         .properties = {
-                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
-                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                            .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
+                            .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor)
                         }
                     });
             }
@@ -202,8 +203,9 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
                     asset::AcquireMeshAsset(asset::SphereMesh),
                     MaterialDesc{
                         .properties = {
-                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
-                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                            .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
+                            .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor)
                         }
                     });
             }
@@ -215,8 +217,9 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
                     asset::AcquireMeshAsset(asset::CapsuleMesh),
                     MaterialDesc{
                         .properties = {
-                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
-                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                            .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
+                            .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor)
                         }
                     });
             }
@@ -228,8 +231,9 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
                     asset::AcquireMeshAsset(asset::PlaneMesh),
                     MaterialDesc{
                         .properties = {
-                            .diffuseTexture = asset::AcquireTextureAsset(asset::DefaultBaseColor),
-                            .normalTexture = asset::AcquireTextureAsset(asset::DefaultNormal)
+                            .diffuseTex = asset::AcquireTextureAsset(asset::DefaultBaseColor),
+                            .normalTex = asset::AcquireTextureAsset(asset::DefaultNormal),
+                            .hatchTex = asset::AcquireTextureAsset(asset::DefaultBaseColor)
                         }
                     });
             }

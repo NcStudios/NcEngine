@@ -45,7 +45,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             auto& transform = ecs.Get<Transform>(entity);
-            m_data.emplace_back(light.color, transform.Forward());
+            m_data.emplace_back(light.diffuseColor, light.specularColor, light.intensity, transform.Forward());
         }
     }
 
@@ -56,6 +56,8 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
             auto& transform = ecs.Get<Transform>(entity);
             m_data.emplace_back(
                 light.diffuseColor,
+                light.specularColor,
+                light.intensity,
                 transform.Position(),
                 0, /** @todo, come up with shadow decisioning (which lights cast shadows) */
                 light.radius,
@@ -70,7 +72,9 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         {
             auto& transform = ecs.Get<Transform>(entity);
             m_data.emplace_back(
-                light.color,
+                light.diffuseColor,
+                light.specularColor,
+                light.intensity,
                 transform.Position(),
                 light.innerAngle,
                 transform.Forward(),

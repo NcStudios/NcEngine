@@ -11,10 +11,16 @@ auto ToMaterialData(const nc::MaterialProperties& properties) -> nc::graphics::M
 {
     return nc::graphics::MaterialData{
         .gradientStart = properties.gradientStart,
-        .diffuseTexIndex = properties.diffuseTexture.index,
+        .diffuseTexIndex = properties.diffuseTex.index,
         .gradientEnd = properties.gradientEnd,
-        .normalTexIndex = properties.normalTexture.index,
-        .normalIntensity = properties.normalIntensity
+        .normalTexIndex = properties.normalTex.index,
+        .hatchTexIndex = properties.hatchTex.index,
+        .normalIntensity = properties.normalIntensity,
+        .hatchTiling = properties.hatchTiling,
+        .gradientAmount = properties.gradientAmount,
+        .reflectivity = properties.reflectivity,
+        .useTextureNormals = properties.useTextureNormals,
+        .useFlatShading = properties.useFlatShading
     };
 }
 } // anonymous namespace
