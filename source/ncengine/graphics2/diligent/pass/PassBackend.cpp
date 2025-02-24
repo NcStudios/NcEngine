@@ -185,7 +185,8 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
                                  ISwapChain& swapChain,
                                  PerPassResourceSignature& perPassResourceSignature,
                                  const std::vector<std::vector<Batch>>& staticPassBatches,
-                                 const std::vector<std::vector<Batch>>& skinnedPassBatches)
+                                 const std::vector<std::vector<Batch>>& skinnedPassBatches,
+                                 const std::span<const LightData>& lights)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
     NC_ASSERT(
@@ -210,6 +211,28 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
         else
         {
             m_finalColorTarget = staticPass.sinks.color;
+        }
+
+        if (staticPass.flag & MaterialPassFlag::Shadow)
+        {
+            uint32_t lightIndex = 0u;
+            for (const auto& light : lights)
+            {
+                if (!light.castsShadows)
+                {
+                    continue;
+                }
+
+                BindShadowMapRenderTarget(context, perPassResourceSignature.GetShadowMapSinksResource(), lightIndex);
+                ClearShadowMapRenderTarget(context, perPassResourceSignature.GetShadowMapSinksResource(), lightIndex);
+
+                context.SetPipelineState(staticPass.pso);
+                DrawIndexed(context, staticBatches);
+                context.SetPipelineState(skinnedPass.pso);
+                DrawIndexed(context, skinnedBatches);
+
+                lightIndex++;
+            }
         }
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
@@ -305,8 +328,8 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
         // Get the post process resource we are writing to to bind in the next step
         auto& postProcessSinkBuffer = perPassResourceSignature.GetPostProcessSinkResource(pass.sinks.postProcess);
 
-        BindRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
-        ClearRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
+        BindPostProcessRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
+        ClearPostProcessRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
 
         // If this post process pass consumes any post process pass as a source, bind that source's shader resource view to the SRB.
         auto hasPostProcessSource = pass.sources.postProcess != NoTarget;

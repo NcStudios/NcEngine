@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics2/frontend/subsystem/LightRenderState.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
 #include "graphics2/frontend/subsystem/particle/ParticleRenderState.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
@@ -37,7 +38,8 @@ class PassBackend
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
                             const std::vector<std::vector<Batch>>& staticPassBatches,
-                            const std::vector<std::vector<Batch>>& skinnedPassBatches);
+                            const std::vector<std::vector<Batch>>& skinnedPassBatches,
+                            const std::span<const LightData>& lights);
 
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,

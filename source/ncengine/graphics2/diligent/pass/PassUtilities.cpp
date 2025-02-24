@@ -41,16 +41,27 @@ void ClearRenderTarget(Diligent::IDeviceContext& context,
     }
 }
 
-void ClearRenderTarget(Diligent::IDeviceContext& context,
-                       Diligent::ISwapChain& swapChain,
-                       SinkBufferResource& postProcessSinkBufferResource,
-                       uint32_t postProcessRenderTargetIndex)
+void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
+                                  Diligent::ISwapChain& swapChain,
+                                  SinkBufferResource& postProcessSinkBufferResource,
+                                  uint32_t postProcessRenderTargetIndex)
 {
     Diligent::ITextureView* pRTV = ToPostProcessRenderTargetView(swapChain, postProcessSinkBufferResource, postProcessRenderTargetIndex);
 
     if (pRTV)
     {
         context.ClearRenderTarget(pRTV, &ClearColor.x, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    }
+}
+
+void ClearShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                SinkBufferResource& shadowMapSinkBufferResource,
+                                uint32_t shadowMapRenderTargetIndex)
+{
+    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
+    if (pDSV)
+    {
+        context.ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     }
 }
 
@@ -66,13 +77,21 @@ void BindRenderTarget(Diligent::IDeviceContext& context,
     context.SetRenderTargets(pRTV ? 1 : 0, &pRTV, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
-void BindRenderTarget(Diligent::IDeviceContext& context,
-                      Diligent::ISwapChain& swapChain,
-                      SinkBufferResource& postProcessSinkBufferResource,
-                      uint32_t postProcessRenderTargetIndex)
+void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
+                                 Diligent::ISwapChain& swapChain,
+                                 SinkBufferResource& postProcessSinkBufferResource,
+                                 uint32_t postProcessRenderTargetIndex)
 {
     Diligent::ITextureView* pRTV = ToPostProcessRenderTargetView(swapChain, postProcessSinkBufferResource, postProcessRenderTargetIndex);
     context.SetRenderTargets(pRTV ? 1 : 0, &pRTV, nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+}
+
+void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                               SinkBufferResource& shadowMapSinkBufferResource,
+                               uint32_t shadowMapRenderTargetIndex)
+{
+    Diligent::ITextureView* pDSV = shadowMapSinkBufferResource.GetRenderTargetView(shadowMapRenderTargetIndex);
+    context.SetRenderTargets(0, nullptr, pDSV, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>

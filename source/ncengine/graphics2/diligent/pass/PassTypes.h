@@ -30,7 +30,8 @@ enum class DepthTarget : uint8_t
 {
     None,
     DepthStencil,
-    Main
+    Main,
+    Shadow
 };
 
 enum class PostProcessTarget : uint8_t

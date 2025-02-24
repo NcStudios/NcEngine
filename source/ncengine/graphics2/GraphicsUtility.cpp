@@ -101,11 +101,6 @@ auto GetMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
     return g_materialPassFlags;
 }
 
-auto GetImplementedMaterialPassFlags() -> std::span<const MaterialPassFlag::type>
-{
-    return std::span<const MaterialPassFlag::type>{g_materialPassFlags.data() + 1, 3};
-}
-
 auto GetMiscsPassFlags() -> std::span<const MiscPassFlag::type>
 {
     return g_miscPassFlags;

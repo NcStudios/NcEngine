@@ -162,6 +162,24 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
+                    .flag = MaterialPassFlag::Shadow,
+                    .name = "Shadow",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ShadowMap.vsh"},
+                    .depthSink = DepthTarget::Shadow,
+                    .isMsaa = false,
+                    .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::Shadow,
+                    .name = "Shadow",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ShadowMapSkinned.vsh"},
+                    .depthSink = DepthTarget::Shadow,
+                    .isMsaa = false,
+                    .useDepthTest = true
+                },
+                PassDesc{
                     .flag = MaterialPassFlag::Depth,
                     .name = "Depth",
                     .type = PassType::Material,
@@ -266,7 +284,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = false
                 }
             },
-            GetImplementedMaterialPassFlags(),
+            GetMaterialPassFlags(),
             GetPostProcessPassFlags(),
             GetMiscsPassFlags()
           },
@@ -433,7 +451,8 @@ void NcGraphicsImpl2::Run()
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
         renderState.meshRenderState.staticMeshBatches,
-        renderState.meshRenderState.skinnedMeshBatches
+        renderState.meshRenderState.skinnedMeshBatches,
+        renderState.lightRenderState.lights
     );
 
     m_passBackend.RenderWireframe(
