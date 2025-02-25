@@ -30,8 +30,7 @@ enum class DepthTarget : uint8_t
 {
     None,
     DepthStencil,
-    Main,
-    Shadow
+    Main
 };
 
 enum class PostProcessTarget : uint8_t
@@ -40,6 +39,13 @@ enum class PostProcessTarget : uint8_t
     PPOutline,
     PPFxaa,
     PPNoise
+};
+
+enum class ShadowMapTarget : uint8_t
+{
+    None,
+    Uni,
+    Omni
 };
 
 struct Sources
@@ -83,6 +89,7 @@ struct PassDesc
     PostProcessTarget postProcessSource = PostProcessTarget::None;
     ColorTarget colorSink = ColorTarget::None;
     DepthTarget depthSink = DepthTarget::None;
+    ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
     bool isMsaa = true;
     bool useDepthTest = true;

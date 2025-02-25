@@ -44,7 +44,7 @@ class ShaderBindings
                 SinkBufferDesc{"PostProcessSinks",         Diligent::SHADER_TYPE_PIXEL, 3, true},
                 SinkBufferDesc{"ShadowMapSinks",           Diligent::SHADER_TYPE_VS_PS, 20},
                 UniformBufferDesc{"PostProcessProperties", Diligent::SHADER_TYPE_PIXEL, true},
-                UniformBufferDesc{"SinkIndices",           Diligent::SHADER_TYPE_PIXEL}
+                UniformBufferDesc{"SinkIndices",           Diligent::SHADER_TYPE_VS_PS}
             }
         {
         }

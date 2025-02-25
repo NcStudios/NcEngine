@@ -130,6 +130,7 @@ PassBackend::PassBackend(IRenderDevice& device,
     auto& perPassSignature = shaderBindings.GetPerPassSignature();
     auto& colorSinks = perPassSignature.GetColorSinksResource();
     auto& depthSinks = perPassSignature.GetDepthSinksResource();
+    auto& shadowMapSinks = perPassSignature.GetShadowMapSinksResource();
 
     // Get swapchain width and height to create screen-sized render targets
     auto screenWidth = swapChain.GetDesc().Width;
@@ -154,6 +155,9 @@ PassBackend::PassBackend(IRenderDevice& device,
         auto& postProcessSink = perPassSignature.GetPostProcessSinkResource(i);
         postProcessSink.Add(device, context, 1, screenWidth, screenHeight);
     }
+
+    // Make all the shadow map render targets that will be used by the passes
+    shadowMapSinks.Add(device, context, 20, screenWidth, screenHeight); // @todo parameterize with max lights
 
     // Make the pass and pipeline objects
     MakePassesAndPipelines(device, swapChain, shaderFactory, shaderBindings, passManifest);
@@ -202,6 +206,10 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
         skinnedPassBatches
     );
 
+    auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
+    auto& shadowMapsBuffer = perPassResourceSignature.GetShadowMapSinksResource();
+
+
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
         if (m_finalColorTarget.has_value())
@@ -215,24 +223,34 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
 
         if (staticPass.flag & MaterialPassFlag::Shadow)
         {
+            bool hasSomeShadowCaster = false;
             uint32_t lightIndex = 0u;
             for (const auto& light : lights)
             {
                 if (!light.castsShadows)
                 {
+                    lightIndex++;
                     continue;
                 }
 
-                BindShadowMapRenderTarget(context, perPassResourceSignature.GetShadowMapSinksResource(), lightIndex);
-                ClearShadowMapRenderTarget(context, perPassResourceSignature.GetShadowMapSinksResource(), lightIndex);
+                hasSomeShadowCaster = true;
+                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex);
+
+                BindShadowMapRenderTarget(context, shadowMapsBuffer, lightIndex);
+                ClearShadowMapRenderTarget(context, shadowMapsBuffer, lightIndex);
 
                 context.SetPipelineState(staticPass.pso);
                 DrawIndexed(context, staticBatches);
                 context.SetPipelineState(skinnedPass.pso);
                 DrawIndexed(context, skinnedBatches);
-
                 lightIndex++;
             }
+            if (hasSomeShadowCaster == false)
+            {
+                // No lights are being shadowcasters so after frame is done material is trying to use buffer and it hasn't been mapped since the frame started.
+                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, -1);
+            }
+            continue;
         }
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
@@ -339,7 +357,7 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
             postProcessSourceBuffer.Update();
             perPassResourceSignature.Commit(context);
         }
-        sinkIndexBuffer.Update(context, pass.sources.color, pass.sources.depth, hasPostProcessSource);
+        sinkIndexBuffer.Update(context, pass.sources.color, pass.sources.depth, hasPostProcessSource, -1);
         context.SetPipelineState(pass.pso);
 
         // Bind the property buffer for the instance, if any
@@ -385,7 +403,7 @@ void PassBackend::RenderOutputToSwapchain(IDeviceContext& context, ISwapChain& s
         hasPostProcess = false;
     }
 
-    sinkIndexBuffer.Update(context, m_finalPass->sources.color, std::vector<uint32_t>(), hasPostProcess);
+    sinkIndexBuffer.Update(context, m_finalPass->sources.color, std::vector<uint32_t>(), hasPostProcess, -1);
     context.SetPipelineState(m_finalPass->pso);
     context.Draw(drawAttribs);
 }
