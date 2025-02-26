@@ -68,7 +68,7 @@ auto CalculateWireframeMatrix(DirectX::FXMMATRIX worldSpace,
                               const nc::Shape& shape,
                               bool scalesWithTransform) -> DirectX::XMMATRIX
 {
-    const auto localSpace = nc::ToScaleMatrix(shape.GetLocalScale()) * nc::ToTransMatrix(shape.GetLocalPosition());
+    const auto localSpace = nc::ToScaleMatrix(shape.GetLocalScale());
     if (scalesWithTransform)
     {
         return localSpace * worldSpace;

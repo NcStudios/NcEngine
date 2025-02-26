@@ -29,25 +29,22 @@ auto NormalizeScaleForShape(nc::ShapeType shape,
 struct Shape
 {
     /** @brief Make a primitive box shape. */
-    static constexpr auto MakeBox(const Vector3& extents = Vector3::Splat(1.0f),
-                                  const Vector3& localPosition = Vector3::Zero()) -> Shape
+    static constexpr auto MakeBox(const Vector3& extents = Vector3::Splat(1.0f)) -> Shape
     {
-        return Shape{localPosition, extents, ShapeType::Box};
+        return Shape{asset::NullAssetId, extents, ShapeType::Box};
     }
 
     /** @brief Make a primitive sphere shape. */
-    static constexpr auto MakeSphere(float radius = 0.5f,
-                                     const Vector3& localPosition = Vector3::Zero()) -> Shape
+    static constexpr auto MakeSphere(float radius = 0.5f) -> Shape
     {
-        return Shape{localPosition, Vector3::Splat(radius * 2.0f), ShapeType::Sphere};
+        return Shape{asset::NullAssetId, Vector3::Splat(radius * 2.0f), ShapeType::Sphere};
     }
 
     /** @brief Make a primitive capsule shape. */
     static constexpr auto MakeCapsule(float height = 2.0f,
-                                      float radius = 0.5f,
-                                      const Vector3& localPosition = Vector3::Zero()) -> Shape
+                                      float radius = 0.5f) -> Shape
     {
-        return Shape{localPosition, Vector3{radius * 2.0f, height * 0.5f, radius * 2.0f}, ShapeType::Capsule};
+        return Shape{asset::NullAssetId, Vector3{radius * 2.0f, height * 0.5f, radius * 2.0f}, ShapeType::Capsule};
     }
 
     /** @brief Make a shape from a ConvexHull asset. */
@@ -67,24 +64,17 @@ struct Shape
         return Shape{assetId, scale, ShapeType::Mesh};
     }
 
-    auto GetLocalPosition() const -> const Vector3& { return m_localPosition; }
     auto GetLocalScale()    const -> const Vector3& { return m_localScale; }
     auto GetAssetId()       const -> asset::AssetId { return m_assetId; }
     auto GetType()          const -> ShapeType      { return m_type; }
 
     private:
-        constexpr Shape(const Vector3& position, const Vector3& scale, ShapeType type)
-            : m_localPosition{position}, m_localScale{scale}, m_type{type}
-        {
-        }
-
         constexpr Shape(asset::AssetId id, const Vector3& scale, ShapeType type)
             : m_assetId{id}, m_localScale{scale}, m_type{type}
         {
         }
 
         asset::AssetId m_assetId = asset::NullAssetId;
-        Vector3 m_localPosition = Vector3::Zero();
         Vector3 m_localScale = Vector3::One();
         ShapeType m_type;
 };

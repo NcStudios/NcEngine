@@ -1140,9 +1140,9 @@ class RayCaster : public FreeComponent
                 }
 
                 // Otherwise perform sphere query centered on the hit point, updating everything within a radius
-                const auto sphere = Shape::MakeSphere(3.0f, rayResult.point);
-                const auto shapeResult = m_query.TestShape(sphere);
-                MakeShapeIndicator(world, sphere);
+                const auto sphere = Shape::MakeSphere(3.0f);
+                const auto shapeResult = m_query.TestShape(sphere, rayResult.point);
+                MakeShapeIndicator(world, sphere, rayResult.point);
                 for (const auto& hit : shapeResult.hits)
                 {
                     UpdateHit(world, hit.hit);
@@ -1188,10 +1188,13 @@ class RayCaster : public FreeComponent
             }
         }
 
-        void MakeShapeIndicator(ecs::Ecs world, const Shape& shape)
+        void MakeShapeIndicator(ecs::Ecs world, const Shape& shape, const Vector3& position)
         {
             // make a visual indicator to show the sphere test volume
-            m_shapeParent = world.Emplace<Entity>({});
+            m_shapeParent = world.Emplace<Entity>({
+                .position = position
+            });
+
             world.Emplace<RigidBody>(
                 m_shapeParent,
                 shape,

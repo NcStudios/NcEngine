@@ -229,12 +229,10 @@ void BoxProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
 {
     const auto& shape = body.GetShape();
     auto extents = shape.GetLocalScale();
-    auto position = shape.GetLocalPosition();
     const auto extentsModified = nc::ui::InputScale(extents, "extents", nc::g_minShapeScale, nc::g_maxShapeScale);
-    const auto positionModified = nc::ui::InputPosition(position, "position");
-    if (positionModified || extentsModified)
+    if (extentsModified)
     {
-        body.SetShape(nc::Shape::MakeBox(extents, position), transformScale);
+        body.SetShape(nc::Shape::MakeBox(extents), transformScale);
     }
 }
 
@@ -242,12 +240,10 @@ void SphereProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
 {
     const auto& shape = body.GetShape();
     auto radius = shape.GetLocalScale().x * 0.5f;
-    auto position = shape.GetLocalPosition();
     const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::g_minShapeScale, nc::g_maxShapeScale);
-    const auto positionModified = nc::ui::InputPosition(position, "position");
-    if (radiusModified | positionModified)
+    if (radiusModified)
     {
-        body.SetShape(nc::Shape::MakeSphere(radius, position), transformScale);
+        body.SetShape(nc::Shape::MakeSphere(radius), transformScale);
     }
 }
 
@@ -257,13 +253,11 @@ void CapsuleProperties(nc::RigidBody& body, const nc::Vector3& transformScale)
     const auto& scale = shape.GetLocalScale();
     auto height = scale.y * 2.0f;
     auto radius = scale.x * 0.5f;
-    auto position = shape.GetLocalPosition();
     const auto heightModified = nc::ui::DragFloat(height, "height", 0.1f, nc::g_minShapeScale, nc::g_maxShapeScale);
     const auto radiusModified = nc::ui::DragFloat(radius, "radius", 0.1f, nc::g_minShapeScale, nc::g_maxShapeScale);
-    const auto positionModified = nc::ui::InputPosition(position, "position");
-    if (heightModified | radiusModified | positionModified)
+    if (heightModified | radiusModified)
     {
-        body.SetShape(nc::Shape::MakeCapsule(height, radius, position), transformScale);
+        body.SetShape(nc::Shape::MakeCapsule(height, radius), transformScale);
     }
 }
 

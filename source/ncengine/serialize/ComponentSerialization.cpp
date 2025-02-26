@@ -199,7 +199,6 @@ void SerializeRigidBody(std::ostream& stream, const RigidBody& out, const Serial
         case ShapeType::Sphere:
         case ShapeType::Capsule:
             serialize::Serialize(stream, shape.GetLocalScale());
-            serialize::Serialize(stream, shape.GetLocalPosition());
             break;
         case ShapeType::ConvexHull:
         case ShapeType::Mesh:
@@ -285,7 +284,6 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
     auto shapeType = ShapeType{};
     auto shapeAsset = asset::AssetId{};
     auto shapeScale = Vector3{};
-    auto shapePosition = Vector3{};
     auto info = RigidBodyInfo{};
     auto constraintCount = size_t{};
     serialize::Deserialize(stream, id);
@@ -296,7 +294,6 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
         case ShapeType::Sphere:
         case ShapeType::Capsule:
             serialize::Deserialize(stream, shapeScale);
-            serialize::Deserialize(stream, shapePosition);
             break;
         case ShapeType::ConvexHull:
         case ShapeType::Mesh:
@@ -328,9 +325,9 @@ auto DeserializeRigidBody(std::istream& stream, const DeserializationContext& ct
         using namespace nc::physics;
         switch (shapeType)
         {
-            case ShapeType::Box:        return Shape::MakeBox(shapeScale, shapePosition);
-            case ShapeType::Sphere:     return Shape::MakeSphere(shapeScale.x * 0.5f, shapePosition);
-            case ShapeType::Capsule:    return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f, shapePosition);
+            case ShapeType::Box:        return Shape::MakeBox(shapeScale);
+            case ShapeType::Sphere:     return Shape::MakeSphere(shapeScale.x * 0.5f);
+            case ShapeType::Capsule:    return Shape::MakeCapsule(shapeScale.y * 2.0f, shapeScale.x * 0.5f);
             case ShapeType::ConvexHull: return Shape::MakeConvexHull(shapeAsset, shapeScale);
             case ShapeType::Mesh:       return Shape::MakeMesh(shapeAsset, shapeScale);
             default:

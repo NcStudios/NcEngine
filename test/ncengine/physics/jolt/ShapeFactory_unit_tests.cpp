@@ -75,46 +75,81 @@ class ShapeFactoryTest : public JoltApiFixture
         }
 };
 
-TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)
+TEST_F(ShapeFactoryTest, MakeDecoratedShape_offsetOverload_wrapsShape)
 {
-    const auto inShape = nc::Shape::MakeBox(nc::Vector3{1.0f, 2.0f, 3.0f}, nc::Vector3::Zero());
-    const auto wrappedShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
+    const auto expectedExtents = nc::Vector3{1.0f, 2.0f, 3.0f};
+    const auto expectedPosition = nc::Vector3{5.0f, 4.0f, 3.0f};
+    const auto expectedRotation = nc::Quaternion::FromEulerAngles(0.0f, 5.0f, 1.0f);
+    const auto inShape = nc::Shape::MakeBox(expectedExtents);
+    const auto unwrappedShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
+    const auto wrappedShape = uut.MakeDecoratedShape(
+        unwrappedShape,
+        nc::physics::ToJoltVec3(expectedPosition),
+        nc::physics::ToJoltQuaternion(expectedRotation)
+    );
 
     ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
     ASSERT_EQ(JPH::EShapeSubType::RotatedTranslated, wrappedShape->GetSubType());
-    const auto decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(wrappedShape.GetPtr());
-    const auto innerShape = decoratedShape->GetInnerShape();
-    ASSERT_EQ(JPH::EShapeType::Convex, innerShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::Box, innerShape->GetSubType());
-    const auto box = static_cast<const JPH::BoxShape*>(innerShape);
+    const auto actualDecoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(wrappedShape.GetPtr());
+    const auto actualInnerShape = actualDecoratedShape->GetInnerShape();
+    ASSERT_EQ(JPH::EShapeType::Convex, actualInnerShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Box, actualInnerShape->GetSubType());
+    const auto actualBox = static_cast<const JPH::BoxShape*>(actualInnerShape);
+
+    const auto actualExtents = nc::physics::ToVector3(actualBox->GetHalfExtent() * 2.0f);
+    const auto actualPosition = nc::physics::ToVector3(actualDecoratedShape->GetPosition());
+    const auto actualRotation = nc::physics::ToQuaternion(actualDecoratedShape->GetRotation());
+    EXPECT_EQ(expectedExtents, actualExtents);
+    EXPECT_EQ(expectedPosition, actualPosition);
+    EXPECT_EQ(expectedRotation, actualRotation);
+}
+
+TEST_F(ShapeFactoryTest, MakeDecoratedShape_scaleOverload_wrapsShape)
+{
+    const auto expectedExtents = nc::Vector3{1.0f, 1.0f, 1.0f};
+    const auto inShape = nc::Shape::MakeBox(expectedExtents);
+    const auto unwrappedShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
+    const auto expectedScale = nc::Vector3{5.0f, 4.0f, 3.0f};
+    const auto wrappedShape = uut.MakeDecoratedShape(
+        unwrappedShape,
+        nc::physics::ToJoltVec3(expectedScale)
+    );
+
+    ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Scaled, wrappedShape->GetSubType());
+    const auto actualDecoratedShape = static_cast<const JPH::ScaledShape*>(wrappedShape.GetPtr());
+    const auto actualInnerShape = actualDecoratedShape->GetInnerShape();
+    ASSERT_EQ(JPH::EShapeType::Convex, actualInnerShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Box, actualInnerShape->GetSubType());
+    const auto actualBox = static_cast<const JPH::BoxShape*>(actualInnerShape);
+
+    const auto actualExtents = nc::physics::ToVector3(actualBox->GetHalfExtent() * 2.0f);
+    const auto actualScale = nc::physics::ToVector3(actualDecoratedShape->GetScale());
+    EXPECT_EQ(expectedExtents, actualExtents);
+    EXPECT_EQ(expectedScale, actualScale);
+}
+
+TEST_F(ShapeFactoryTest, MakeShape_box_returnsBoxShape)
+{
+    const auto inShape = nc::Shape::MakeBox(nc::Vector3{1.0f, 2.0f, 3.0f});
+    const auto actualShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
+    ASSERT_EQ(JPH::EShapeType::Convex, actualShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Box, actualShape->GetSubType());
+    const auto box = static_cast<const JPH::BoxShape*>(actualShape.GetPtr());
 
     const auto expectedScale = inShape.GetLocalScale();
     const auto actualScale = nc::physics::ToVector3(box->GetHalfExtent() * 2.0f);
     EXPECT_EQ(expectedScale, actualScale);
-
-    const auto expectedPosition = inShape.GetLocalPosition();
-    const auto actualPosition = nc::physics::ToVector3(decoratedShape->GetPosition());
-    EXPECT_EQ(expectedPosition, actualPosition);
 }
 
 TEST_F(ShapeFactoryTest, MakeShape_box_withTransformScaling_returnsBoxShape)
 {
     const auto transformScale = nc::Vector3{2.0f, 2.0f, 2.0f};
-    const auto inShape = nc::Shape::MakeBox(nc::Vector3{2.0f, 2.0f, 2.0f}, nc::Vector3{0.0f, 1.0f, 0.0f});
-    const auto wrappedShape = uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale));
-
-    ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::RotatedTranslated, wrappedShape->GetSubType());
-    const auto decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(wrappedShape.GetPtr());
-
-    const auto expectedPosition = nc::HadamardProduct(inShape.GetLocalPosition(), transformScale);
-    const auto actualPosition = nc::physics::ToVector3(decoratedShape->GetPosition());
-    EXPECT_EQ(expectedPosition, actualPosition);
-
-    const auto innerShape = decoratedShape->GetInnerShape();
-    ASSERT_EQ(JPH::EShapeType::Convex, innerShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::Box, innerShape->GetSubType());
-    const auto box = static_cast<const JPH::BoxShape*>(innerShape);
+    const auto inShape = nc::Shape::MakeBox(nc::Vector3{2.0f, 2.0f, 2.0f});
+    const auto actualShape = uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale));
+    ASSERT_EQ(JPH::EShapeType::Convex, actualShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Box, actualShape->GetSubType());
+    const auto box = static_cast<const JPH::BoxShape*>(actualShape.GetPtr());
 
     const auto expectedScale = nc::HadamardProduct(inShape.GetLocalScale(), transformScale);
     const auto actualScale = nc::physics::ToVector3(box->GetHalfExtent() * 2.0f);
@@ -123,21 +158,11 @@ TEST_F(ShapeFactoryTest, MakeShape_box_withTransformScaling_returnsBoxShape)
 
 TEST_F(ShapeFactoryTest, MakeShape_sphere_returnsSphereShape)
 {
-    const auto inShape = nc::Shape::MakeSphere(0.75, nc::Vector3::Zero());
-    const auto wrappedShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
-
-    ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::RotatedTranslated, wrappedShape->GetSubType());
-    const auto decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(wrappedShape.GetPtr());
-
-    const auto expectedPosition = inShape.GetLocalPosition();
-    const auto actualPosition = nc::physics::ToVector3(decoratedShape->GetPosition());
-    EXPECT_EQ(expectedPosition, actualPosition);
-
-    const auto innerShape = decoratedShape->GetInnerShape();
-    ASSERT_EQ(JPH::EShapeType::Convex, innerShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::Sphere, innerShape->GetSubType());
-    const auto sphere = static_cast<const JPH::SphereShape*>(innerShape);
+    const auto inShape = nc::Shape::MakeSphere(0.75);
+    const auto actualShape = uut.MakeShape(inShape, JPH::Vec3::sReplicate(1.0f));
+    ASSERT_EQ(JPH::EShapeType::Convex, actualShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Sphere, actualShape->GetSubType());
+    const auto sphere = static_cast<const JPH::SphereShape*>(actualShape.GetPtr());
 
     const auto expectedRadius = inShape.GetLocalScale().x * 0.5f;
     const auto actualRadius = sphere->GetRadius();
@@ -147,21 +172,11 @@ TEST_F(ShapeFactoryTest, MakeShape_sphere_returnsSphereShape)
 TEST_F(ShapeFactoryTest, MakeShape_sphere_withTransformScaling_returnsSphereShape)
 {
     const auto transformScale = nc::Vector3{2.0f, 2.0f, 2.0f};
-    const auto inShape = nc::Shape::MakeSphere(0.75, nc::Vector3{1.0f, 2.0f, 3.0f});
-    const auto wrappedShape = uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale));
-
-    ASSERT_EQ(JPH::EShapeType::Decorated, wrappedShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::RotatedTranslated, wrappedShape->GetSubType());
-    const auto decoratedShape = static_cast<const JPH::RotatedTranslatedShape*>(wrappedShape.GetPtr());
-
-    const auto expectedPosition = nc::HadamardProduct(inShape.GetLocalPosition(), transformScale);
-    const auto actualPosition = nc::physics::ToVector3(decoratedShape->GetPosition());
-    EXPECT_EQ(expectedPosition, actualPosition);
-
-    const auto innerShape = decoratedShape->GetInnerShape();
-    ASSERT_EQ(JPH::EShapeType::Convex, innerShape->GetType());
-    ASSERT_EQ(JPH::EShapeSubType::Sphere, innerShape->GetSubType());
-    const auto sphere = static_cast<const JPH::SphereShape*>(innerShape);
+    const auto inShape = nc::Shape::MakeSphere(0.75);
+    const auto actualShape = uut.MakeShape(inShape, nc::physics::ToJoltVec3(transformScale));
+    ASSERT_EQ(JPH::EShapeType::Convex, actualShape->GetType());
+    ASSERT_EQ(JPH::EShapeSubType::Sphere, actualShape->GetSubType());
+    const auto sphere = static_cast<const JPH::SphereShape*>(actualShape.GetPtr());
 
     const auto expectedRadius = inShape.GetLocalScale().x * transformScale.x * 0.5f;
     const auto actualRadius = sphere->GetRadius();
