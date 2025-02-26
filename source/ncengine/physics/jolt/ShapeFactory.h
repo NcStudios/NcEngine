@@ -28,6 +28,7 @@ namespace physics
 class ShapeFactory
 {
     static constexpr auto boxConvexRadius = 0.025f;
+    static constexpr auto capsuleMinHalfHeight = 0.001f;
 
     public:
         explicit ShapeFactory(Signal<const asset::ConvexHullUpdateEventData&>& onConvexHullUpdate,
@@ -56,14 +57,19 @@ class ShapeFactory
         auto MakeConvexHull(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
         auto MakeMesh(asset::AssetId id, const JPH::Vec3& scale)       -> JPH::Ref<JPH::Shape>;
         auto MakeCompound(asset::AssetId id, const JPH::Vec3& scale)   -> JPH::Ref<JPH::Shape>;
-        auto GetConvexHull(asset::AssetId id)                          -> JPH::Shape*           { return m_convexHulls.at(id).GetPtr(); }
-        auto GetMeshCollider(asset::AssetId id)                        -> JPH::Shape*           { return m_meshColliders.at(id).GetPtr(); }
+        auto GetConvexHull(asset::AssetId id)                          -> JPH::Shape*;
+        auto GetMeshCollider(asset::AssetId id)                        -> JPH::Shape*;
+        auto GetCompoundShape(asset::AssetId id)                       -> JPH::Shape*;
+
+        // todo add NcPhysics func to set this
+        void AddRuntimeCompoundShape(asset::AssetId id, JPH::Ref<JPH::Shape> shape);
 
     private:
         inline static ShapeFactory* s_instance = nullptr;
 
         std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_convexHulls;
         std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_meshColliders;
+        std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_compoundShapes;
         Connection m_convexHullUpdateConnection;
         Connection m_meshColliderUpdateConnection;
 

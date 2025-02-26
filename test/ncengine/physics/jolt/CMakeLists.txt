@@ -91,6 +91,36 @@ target_link_libraries(CollisionQueryUtility_unit_tests
 
 add_test(CollisionQueryUtility_unit_tests CollisionQueryUtility_unit_tests)
 
+### CompoundShape Tests ###
+add_executable(CompoundShape_unit_tests
+    CompoundShape_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CompoundShape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CookedShape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
+)
+
+target_include_directories(CompoundShape_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(CompoundShape_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(CompoundShape_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        NcJolt
+        gtest_main
+)
+
+add_test(CompoundShape_unit_tests CompoundShape_unit_tests)
+
 ### ContactListener Tests ###
 add_executable(ContactListener_integration_tests
     ContactListener_integration_tests.cpp

@@ -17,7 +17,8 @@ enum class ShapeType : uint8_t
     Sphere,
     Capsule,
     ConvexHull,
-    Mesh
+    Mesh,
+    Compound
 };
 
 /** @brief Get a valid scale for a shape given its current and desired scale values. */
@@ -62,6 +63,13 @@ struct Shape
                                    const Vector3& scale = Vector3::One()) -> Shape
     {
         return Shape{assetId, scale, ShapeType::Mesh};
+    }
+
+    /** @brief Make a shape from a CompoundShape asset. */
+    static constexpr auto MakeCompound(asset::AssetId assetId,
+                                       float scale) -> Shape
+    {
+        return Shape{assetId, Vector3::Splat(scale), ShapeType::Compound};
     }
 
     auto GetLocalScale()    const -> const Vector3& { return m_localScale; }

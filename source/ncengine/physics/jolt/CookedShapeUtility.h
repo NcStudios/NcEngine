@@ -6,6 +6,7 @@
 #include "Jolt/Core/Reference.h"
 #include "Jolt/Physics/Collision/Shape/Shape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
+#include "Jolt/Physics/Collision/Shape/ScaledShape.h"
 
 namespace nc
 {
@@ -27,5 +28,27 @@ struct ShapeStorageRTTI
 inline auto HasIsometricTransformation(const JPH::Ref<JPH::Shape>& shape) -> bool
 {
     return shape->GetSubType() == JPH::EShapeSubType::RotatedTranslated;
+}
+
+inline auto GetInnerShape(const JPH::Shape* shape, ShapeDecorationFlags::type& decorationsOut) -> const JPH::Shape*
+{
+    // Starting from the outer shape, nesting will always be:
+    // RotatedTranslatedShape (optional)
+    // ScaledShape (optional)
+    // Actual Shape
+
+    if (shape->GetSubType() == JPH::EShapeSubType::RotatedTranslated)
+    {
+        decorationsOut |= ShapeDecorationFlags::HasIsometricTransformation;
+        shape = static_cast<const JPH::RotatedTranslatedShape*>(shape)->GetInnerShape();
+    }
+
+    if (shape->GetSubType() == JPH::EShapeSubType::Scaled)
+    {
+        decorationsOut |= ShapeDecorationFlags::HasScalingTransformation;
+        shape = static_cast<const JPH::ScaledShape*>(shape)->GetInnerShape();
+    }
+
+    return shape;
 }
 } // namespace nc

@@ -58,7 +58,7 @@ auto ShapeFactory::MakeShape(const Shape& shape,
         case ShapeType::Sphere:
             return MakeSphere(worldScale.GetX() * 0.5f);
         case ShapeType::Capsule:
-            return MakeCapsule(worldScale.GetY() - worldScale.GetX() * 0.5f, worldScale.GetX() * 0.5f);
+            return MakeCapsule(worldScale.GetY(), worldScale.GetX() * 0.5f);
         case ShapeType::ConvexHull:
             return MakeConvexHull(shape.GetAssetId(), worldScale);
         case ShapeType::Mesh:
@@ -90,20 +90,46 @@ auto ShapeFactory::MakeSphere(float radius) -> JPH::Ref<JPH::Shape>
 
 auto ShapeFactory::MakeCapsule(float halfHeight, float radius) -> JPH::Ref<JPH::Shape>
 {
-    return MakeRef<JPH::CapsuleShape>(halfHeight, radius);
+    const auto cylinderHalfHeight = std::max(halfHeight - radius, capsuleMinHalfHeight);
+    return MakeRef<JPH::CapsuleShape>(cylinderHalfHeight, radius);
 }
 
-auto ShapeFactory::MakeConvexHull(asset::AssetId id,
-                                  const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
+auto ShapeFactory::MakeConvexHull(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
-    NC_ASSERT(m_convexHulls.contains(id), "ConvexHull not loaded");
-    return MakeDecoratedShape(m_convexHulls.at(id), scale);
+    return MakeDecoratedShape(GetConvexHull(id), scale);
 }
 
 auto ShapeFactory::MakeMesh(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
+    return MakeDecoratedShape(GetMeshCollider(id), scale);
+}
+auto ShapeFactory::MakeCompound(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
+{
+    return MakeDecoratedShape(GetCompoundShape(id), scale);
+}
+
+auto ShapeFactory::GetConvexHull(asset::AssetId id) -> JPH::Shape*
+{
+    NC_ASSERT(m_convexHulls.contains(id), "ConvexHull not loaded");
+    return m_convexHulls.at(id).GetPtr();
+}
+
+auto ShapeFactory::GetMeshCollider(asset::AssetId id) -> JPH::Shape*
+{
     NC_ASSERT(m_meshColliders.contains(id), "MeshCollider not loaded");
-    return MakeDecoratedShape(m_meshColliders.at(id), scale);
+    return m_meshColliders.at(id).GetPtr();
+}
+
+auto ShapeFactory::GetCompoundShape(asset::AssetId id) -> JPH::Shape*
+{
+    NC_ASSERT(m_compoundShapes.contains(id), "CompoundShape not loaded");
+    return m_compoundShapes.at(id).GetPtr();
+}
+
+void ShapeFactory::AddRuntimeCompoundShape(asset::AssetId id, JPH::Ref<JPH::Shape> shape)
+{
+    NC_ASSERT(!m_compoundShapes.contains(id), fmt::format("AssetId '{}' already assigned to a CompoundShape", id));
+    m_compoundShapes.emplace(id, std::move(shape));
 }
 
 void ShapeFactory::OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event)
