@@ -1043,12 +1043,12 @@ void BuildTriggers(ecs::Ecs world)
         .tag = "Capsule"
     });
 
-    static constexpr auto white = Vector4::Splat(1.0f);
+    static constexpr auto teal = Vector4{0.2f, 0.4f, 1.0f, 1.0f};
     static constexpr auto pink = Vector4{0.8f, 0.2f, 0.6f, 1.0f};
     constexpr auto source = WireframeSource::Collider;
-    world.Emplace<WireframeRenderer>(box, source, box, white);
-    world.Emplace<WireframeRenderer>(sphere, source, sphere, white);
-    world.Emplace<WireframeRenderer>(capsule, source, capsule, white);
+    world.Emplace<WireframeRenderer>(box, source, box, teal);
+    world.Emplace<WireframeRenderer>(sphere, source, sphere, teal);
+    world.Emplace<WireframeRenderer>(capsule, source, capsule, teal);
 
     const auto info = RigidBodyInfo{
         .type = BodyType::Static,
@@ -1065,15 +1065,15 @@ void BuildTriggers(ecs::Ecs world)
             ecs.Get<WireframeRenderer>(self).color = pink;
     };
 
-    auto setWhite = [](Entity self, Entity other, ecs::Ecs ecs)
+    auto setTeal = [](Entity self, Entity other, ecs::Ecs ecs)
     {
         if (other.Layer() == PlayerLayer)
-            ecs.Get<WireframeRenderer>(self).color = white;
+            ecs.Get<WireframeRenderer>(self).color = teal;
     };
 
-    world.Emplace<CollisionListener>(box, nullptr, nullptr, setPink, setWhite);
-    world.Emplace<CollisionListener>(sphere, nullptr, nullptr, setPink, setWhite);
-    world.Emplace<CollisionListener>(capsule, nullptr, nullptr, setPink, setWhite);
+    world.Emplace<CollisionListener>(box, nullptr, nullptr, setPink, setTeal);
+    world.Emplace<CollisionListener>(sphere, nullptr, nullptr, setPink, setTeal);
+    world.Emplace<CollisionListener>(capsule, nullptr, nullptr, setPink, setTeal);
 }
 
 void BuildSpawner(ecs::Ecs world, Random* ncRandom, NcPhysics* ncPhysics)

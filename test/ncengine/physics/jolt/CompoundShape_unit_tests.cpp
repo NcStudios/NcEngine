@@ -217,6 +217,43 @@ TEST_F(CompoundShapeTest, CompoundShapeBuilder_SampleWorkflow)
     EXPECT_EQ(newCapsule.rotation, uut.GetSubShapeRotation(1));
 }
 
-// todo
-// wrong type throws
-// wrong id throws
+TEST_F(CompoundShapeTest, CompoundShapeBuilder_constructor_invalidCookedType_throws)
+{
+    const auto box = nc::Shape::MakeBox();
+    const auto subshapes = std::array{nc::SubShapeInfo{box}, nc::SubShapeInfo{box}};
+
+    {
+        auto cookedBox = nc::CookedShape{box};
+        EXPECT_THROW(nc::CompoundShapeBuilder{cookedBox}, nc::NcError);
+    }
+
+    {
+        auto cookedStatic = nc::CreateStaticCompoundShape(subshapes);
+        EXPECT_THROW(nc::CompoundShapeBuilder{cookedStatic}, nc::NcError);
+    }
+
+    {
+        auto cookedTransformed = nc::CreateMutableCompoundShape(subshapes);
+        cookedTransformed.SetPositionAndRotation(nc::Vector3::Splat(2.0f), nc::Quaternion::Identity());
+        EXPECT_THROW(nc::CompoundShapeBuilder{cookedTransformed}, nc::NcError);
+    }
+}
+
+TEST_F(CompoundShapeTest, CompoundShapeBuilder_GetSubShapeIndex_invalidIndex_throws)
+{
+    const auto box = nc::Shape::MakeBox();
+    const auto subshapes = std::array{
+        nc::SubShapeInfo{
+            .shape = box,
+            .userData = 1
+        },
+        nc::SubShapeInfo{
+            .shape = box,
+            .userData = 2
+        }
+    };
+
+    auto cooked = nc::CreateMutableCompoundShape(subshapes);
+    const auto uut = nc::CompoundShapeBuilder{cooked};
+    EXPECT_THROW(uut.GetSubShapeIndex(0), nc::NcError);
+}

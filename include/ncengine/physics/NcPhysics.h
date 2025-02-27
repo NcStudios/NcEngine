@@ -13,6 +13,7 @@
 
 namespace nc
 {
+class CookedShape;
 struct SystemEvents;
 
 namespace asset
@@ -78,6 +79,10 @@ struct NcPhysics : public Module
      */
     virtual void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) = 0;
     virtual void EndRigidBodyBatch() = 0;
+
+    /** @brief */
+    // prob want asset manager so ui and such works here
+    virtual void AddRuntimeCompoundShape(CookedShape&&, asset::AssetId) {}
 };
 
 /** @brief Build an NcPhysics module instance. */

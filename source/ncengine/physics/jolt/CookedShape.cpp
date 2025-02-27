@@ -66,36 +66,10 @@ auto CookedShape::GetProperties() const -> CookedShapeProperties
     auto properties = CookedShapeProperties{};
     const auto& outerShape = ShapeStorageRTTI::ToShape(m_storage);
     const auto innerShape = GetInnerShape(outerShape.GetPtr(), properties.decorations);
-
-    switch (const auto subtype = innerShape->GetSubType())
+    properties.type = physics::ToShapeType(innerShape->GetSubType());
+    if (innerShape->GetSubType() == JPH::EShapeSubType::StaticCompound)
     {
-        case JPH::EShapeSubType::StaticCompound:
-            properties.decorations |= ShapeDecorationFlags::IsStaticCompound;
-            properties.type = ShapeType::Compound;
-            break;
-        case JPH::EShapeSubType::MutableCompound:
-            properties.type = ShapeType::Compound;
-            break;
-        case JPH::EShapeSubType::Box:
-            properties.type = ShapeType::Box;
-            break;
-        case JPH::EShapeSubType::Sphere:
-            properties.type = ShapeType::Sphere;
-            break;
-        case JPH::EShapeSubType::Capsule:
-            properties.type = ShapeType::Capsule;
-            break;
-        case JPH::EShapeSubType::ConvexHull:
-            properties.type = ShapeType::ConvexHull;
-            break;
-        case JPH::EShapeSubType::Mesh:
-            properties.type = ShapeType::Mesh;
-            break;
-        default:
-            throw NcError{fmt::format(
-                "Unhandled Shape SubType '{}'",
-                std::to_underlying(subtype)
-            )};
+        properties.decorations |= ShapeDecorationFlags::IsStaticCompound;
     }
 
     return properties;

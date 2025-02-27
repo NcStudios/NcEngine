@@ -63,6 +63,8 @@ auto ShapeFactory::MakeShape(const Shape& shape,
             return MakeConvexHull(shape.GetAssetId(), worldScale);
         case ShapeType::Mesh:
             return MakeMesh(shape.GetAssetId(), worldScale);
+        case ShapeType::Compound:
+            return MakeCompound(shape.GetAssetId(), worldScale);
         default:
             NC_ASSERT(false, fmt::format("Unhandled ShapeType '{}'", std::to_underlying(type)));
             std::unreachable();
@@ -103,9 +105,10 @@ auto ShapeFactory::MakeMesh(asset::AssetId id, const JPH::Vec3& scale) -> JPH::R
 {
     return MakeDecoratedShape(GetMeshCollider(id), scale);
 }
+
 auto ShapeFactory::MakeCompound(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>
 {
-    return MakeDecoratedShape(GetCompoundShape(id), scale);
+    return MakeDecoratedShape(GetRuntimeAsset(id, ShapeType::Compound), scale);
 }
 
 auto ShapeFactory::GetConvexHull(asset::AssetId id) -> JPH::Shape*
@@ -120,16 +123,26 @@ auto ShapeFactory::GetMeshCollider(asset::AssetId id) -> JPH::Shape*
     return m_meshColliders.at(id).GetPtr();
 }
 
-auto ShapeFactory::GetCompoundShape(asset::AssetId id) -> JPH::Shape*
+auto ShapeFactory::GetRuntimeAsset(asset::AssetId id, ShapeType type) -> JPH::Shape*
 {
-    NC_ASSERT(m_compoundShapes.contains(id), "CompoundShape not loaded");
-    return m_compoundShapes.at(id).GetPtr();
+    NC_ASSERT(m_runtimeAssets.contains(id), fmt::format("Runtime asset '{}' is not loaded", id));
+    auto& ref = m_runtimeAssets.at(id);
+    NC_ASSERT(
+        ToShapeType(ref->GetSubType()) != type,
+        fmt::format(
+            "Runtime asset type '{}' does not match expected '{}'",
+            std::to_underlying(ref->GetSubType()),
+            std::to_underlying(type)
+        )
+    );
+
+    return ref.GetPtr();
 }
 
-void ShapeFactory::AddRuntimeCompoundShape(asset::AssetId id, JPH::Ref<JPH::Shape> shape)
+void ShapeFactory::AddRuntimeAsset(JPH::Ref<JPH::Shape> shape, asset::AssetId id)
 {
-    NC_ASSERT(!m_compoundShapes.contains(id), fmt::format("AssetId '{}' already assigned to a CompoundShape", id));
-    m_compoundShapes.emplace(id, std::move(shape));
+    NC_ASSERT(!m_runtimeAssets.contains(id), fmt::format("AssetId '{}' already assigned to a runtime asset", id));
+    m_runtimeAssets.emplace(id, std::move(shape));
 }
 
 void ShapeFactory::OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event)

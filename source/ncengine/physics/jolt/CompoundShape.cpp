@@ -6,6 +6,7 @@
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/Collision/Shape/MutableCompoundShape.h"
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 #include "Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
@@ -103,20 +104,15 @@ void CopyShape(JPH::CompoundShapeSettings& settings,
             CopyHull(settings, info.shape.GetAssetId(), position, rotation, scale, info.userData);
             break;
         }
-        case Mesh:
-        {
-            // TODO
-            break;
-        }
         default:
             throw nc::NcError{fmt::format(
-                "CompoundShape does not support ShapeType '{}'",
+                "Static CompoundShape does not support ShapeType '{}'",
                 std::to_underlying(type)
             )};
     }
 }
 
-auto Cook(const JPH::CompoundShapeSettings& settings)  -> nc::CookedShape
+auto Cook(const JPH::CompoundShapeSettings& settings) -> nc::CookedShape
 {
     auto result = settings.Create();
     if (result.HasError())
@@ -166,26 +162,15 @@ class CompoundShapeBuilder::Impl
             auto& internalShape = ShapeStorageRTTI::ToShape(shape.GetShapeData());
             NC_ASSERT(
                 internalShape->GetSubType() == JPH::EShapeSubType::MutableCompound,
-                "CompoundShapeBuilder requires a mutable CompoundShape"
+                "CompoundShapeBuilder requires an untransformed mutable CompoundShape"
             );
 
             m_shape = static_cast<JPH::MutableCompoundShape*>(internalShape.GetPtr());
         }
 
-        auto GetShape() -> JPH::MutableCompoundShape&
-        {
-            return *m_shape;
-        }
-
-        auto GetShape() const -> const JPH::MutableCompoundShape&
-        {
-            return *m_shape;
-        }
-
-        auto GetSubShape(uint32_t index) const -> const JPH::MutableCompoundShape::SubShape&
-        {
-            return m_shape->GetSubShape(index);
-        }
+        auto GetCompoundShape()                -> decltype(auto) { return (*m_shape); }
+        auto GetCompoundShape()          const -> decltype(auto) { return (*m_shape); }
+        auto GetSubShape(uint32_t index) const -> decltype(auto) { return (m_shape->GetSubShape(index)); }
 
     private:
         JPH::Ref<JPH::MutableCompoundShape> m_shape;
@@ -200,12 +185,12 @@ CompoundShapeBuilder::~CompoundShapeBuilder() noexcept = default;
 
 auto CompoundShapeBuilder::GetSubShapeCount() const -> uint32_t
 {
-    return m_impl->GetShape().GetNumSubShapes();
+    return m_impl->GetCompoundShape().GetNumSubShapes();
 }
 
-auto CompoundShapeBuilder::GetSubShapeIndex(uint32_t userData) -> SubShapeIndex
+auto CompoundShapeBuilder::GetSubShapeIndex(uint32_t userData) const -> SubShapeIndex
 {
-    const auto& shape = m_impl->GetShape();
+    const auto& shape = m_impl->GetCompoundShape();
     const auto numSubShapes = shape.GetNumSubShapes();
     for (auto i = 0u; i < numSubShapes; ++i)
     {
@@ -219,21 +204,21 @@ auto CompoundShapeBuilder::GetSubShapeIndex(uint32_t userData) -> SubShapeIndex
     throw NcError("SubShape not found");
 }
 
-auto CompoundShapeBuilder::GetSubShapePosition(SubShapeIndex index) -> Vector3
+auto CompoundShapeBuilder::GetSubShapePosition(SubShapeIndex index) const -> Vector3
 {
-    const auto baseCOM = m_impl->GetShape().GetCenterOfMass();
+    const auto baseCOM = m_impl->GetCompoundShape().GetCenterOfMass();
     const auto subShapeCOM = m_impl->GetSubShape(index).GetPositionCOM();
     return physics::ToVector3(baseCOM + subShapeCOM);
 }
 
-auto CompoundShapeBuilder::GetSubShapeRotation(SubShapeIndex index) -> Quaternion
+auto CompoundShapeBuilder::GetSubShapeRotation(SubShapeIndex index) const -> Quaternion
 {
     return physics::ToQuaternion(m_impl->GetSubShape(index).GetRotation());
 }
 
 auto CompoundShapeBuilder::AddSubShape(const SubShapeInfo& info) -> SubShapeIndex
 {
-    return m_impl->GetShape().AddShape(
+    return m_impl->GetCompoundShape().AddShape(
         physics::ToJoltVec3(info.position),
         physics::ToJoltQuaternion(info.rotation),
         physics::ShapeFactory::Instance()->MakeShape(info.shape, JPH::Vec3::sOne()),
@@ -243,14 +228,14 @@ auto CompoundShapeBuilder::AddSubShape(const SubShapeInfo& info) -> SubShapeInde
 
 void CompoundShapeBuilder::RemoveSubShape(SubShapeIndex index)
 {
-    m_impl->GetShape().RemoveShape(index);
+    m_impl->GetCompoundShape().RemoveShape(index);
 }
 
 void CompoundShapeBuilder::ModifySubShape(SubShapeIndex index,
                                           const Vector3& position,
                                           const Quaternion& rotation)
 {
-    m_impl->GetShape().ModifyShape(
+    m_impl->GetCompoundShape().ModifyShape(
         index,
         physics::ToJoltVec3(position),
         physics::ToJoltQuaternion(rotation)
@@ -260,19 +245,21 @@ void CompoundShapeBuilder::ModifySubShape(SubShapeIndex index,
 void CompoundShapeBuilder::ReplaceSubShape(SubShapeIndex index,
                                            const SubShapeInfo& info)
 {
-    m_impl->GetShape().ModifyShape(
+    const auto innerShape = physics::ShapeFactory::Instance()->MakeShape(
+        info.shape,
+        JPH::Vec3::sOne()
+    );
+
+    m_impl->GetCompoundShape().ModifyShape(
         index,
         physics::ToJoltVec3(info.position),
         physics::ToJoltQuaternion(info.rotation),
-        physics::ShapeFactory::Instance()->MakeShape(
-            info.shape,
-            JPH::Vec3::sOne()
-        ).GetPtr()
+        innerShape.GetPtr()
     );
 }
 
 void CompoundShapeBuilder::RecalculateCenterOfMass()
 {
-    m_impl->GetShape().AdjustCenterOfMass();
+    m_impl->GetCompoundShape().AdjustCenterOfMass();
 }
 } // namespace nc

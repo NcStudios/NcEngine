@@ -19,16 +19,22 @@ using SubShapeIndex = uint32_t;
 /** @brief Describes a SubShape to be added to a compound shape. */
 struct SubShapeInfo
 {
-    Shape shape = Shape::MakeBox();               ///< subshape info; ShapeType::Compound is not supported
+    Shape shape = Shape::MakeBox();               ///< subshape info; supported types depend on mutable/static build option
     Vector3 position = Vector3::Zero();           ///< local position of the subshape
     Quaternion rotation = Quaternion::Identity(); ///< local rotation of the subshape
     uint32_t userData = 0;                        ///< optional data for the subshape
 };
 
-/** @brief Construct a CompoundShape that can be modifed after cooking. */
+/**
+ * @brief Construct a CompoundShape that can be modifed after cooking.
+ * @note Does not support adding other compound shapes as subshapes.
+ */
 auto CreateMutableCompoundShape(std::span<const SubShapeInfo> shapes) -> CookedShape;
 
-/** @brief Construct a CompoundShape that cannot be modified after cooking. */
+/**
+ * @brief Construct a CompoundShape that cannot be modified after cooking.
+ * @brief Does not support adding other compound shapes or meshes as subshapes.
+ */
 auto CreateStaticCompoundShape(std::span<const SubShapeInfo> shapes) -> CookedShape;
 
 /**
@@ -52,13 +58,13 @@ class CompoundShapeBuilder
          * @brief Get the index of the SubShape with userData.
          * @note Requires each SubShape to have unique user data.
          */
-        auto GetSubShapeIndex(uint32_t userData) -> SubShapeIndex;
+        auto GetSubShapeIndex(uint32_t userData) const -> SubShapeIndex;
 
         /** @brief Get the local position of a SubShape. */
-        auto GetSubShapePosition(SubShapeIndex index) -> Vector3;
+        auto GetSubShapePosition(SubShapeIndex index) const -> Vector3;
 
         /** @brief Get the local rotation of a SubShape. */
-        auto GetSubShapeRotation(SubShapeIndex index) -> Quaternion;
+        auto GetSubShapeRotation(SubShapeIndex index) const -> Quaternion;
 
         /** @brief Add a new SubShape. */
         auto AddSubShape(const SubShapeInfo& info) -> SubShapeIndex;
