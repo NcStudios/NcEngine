@@ -3,8 +3,6 @@
 #include "CookedShapeUtility.h"
 #include "ShapeFactory.h"
 
-#include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
-
 namespace nc
 {
 CookedShape::CookedShape(const Shape& shape)
@@ -72,41 +70,27 @@ auto CookedShape::GetProperties() const -> CookedShapeProperties
     switch (const auto subtype = innerShape->GetSubType())
     {
         case JPH::EShapeSubType::StaticCompound:
-        {
             properties.decorations |= ShapeDecorationFlags::IsStaticCompound;
             properties.type = ShapeType::Compound;
             break;
-        }
         case JPH::EShapeSubType::MutableCompound:
-        {
             properties.type = ShapeType::Compound;
             break;
-        }
         case JPH::EShapeSubType::Box:
-        {
             properties.type = ShapeType::Box;
             break;
-        }
         case JPH::EShapeSubType::Sphere:
-        {
             properties.type = ShapeType::Sphere;
             break;
-        }
         case JPH::EShapeSubType::Capsule:
-        {
             properties.type = ShapeType::Capsule;
             break;
-        }
         case JPH::EShapeSubType::ConvexHull:
-        {
             properties.type = ShapeType::ConvexHull;
             break;
-        }
         case JPH::EShapeSubType::Mesh:
-        {
             properties.type = ShapeType::Mesh;
             break;
-        }
         default:
             throw NcError{fmt::format(
                 "Unhandled Shape SubType '{}'",
