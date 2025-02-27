@@ -5,6 +5,7 @@
 
 #include "Lighting.fxh"
 
+Texture2D     ShadowMapSinks[];
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
@@ -43,7 +44,7 @@ struct PSInput
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD; 
     uint   MaterialIndex;
-    float3 WorldPos;
+    float4 WorldPos;
     float3 LocalPos;
     float3 ViewDir;
 };
@@ -86,6 +87,17 @@ float Band(float lightAmount)
     return 1.0f;
 }
 
+// Depth is non-linear. Linearize it and normalize it.
+float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
+{
+    float rawDepth = tex.Sample(smplr, uv).r;
+    float3 ndc = float3(uv * 2.0 - 1.0, rawDepth);
+    float4 view = cameraInvProjection * float4(ndc, 1.0);
+    view.xyz /= view.w;
+    float linearDepth = -view.z;
+    return (linearDepth - nearClip) / (farClip - nearClip);
+}
+
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     // Get texture colors
@@ -93,6 +105,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     uint NormalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
     float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
     float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
+    Texture2D depthTex = ShadowMapSinks[1];
 
     // Get hatching texture and tiling property
     uint hatchTexIndex = Materials[PSIn.MaterialIndex].hatchTexIndex;
@@ -111,7 +124,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float3 result = 0.0f;
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normals);
+        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
 
         float diffuseAmt = 0.0f;
         float specularAmt = 0.0f;
@@ -154,5 +167,33 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, Materials[PSIn.MaterialIndex].gradientAmount), 1.0f);
     float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
 
+
+    float4 fragLightPos = mul(PSIn.WorldPos, Lights[1].viewProj);
+
+    // Perform perspective division to get normalized device coordinates (NDC)
+    float3 ndc = fragLightPos.xyz / fragLightPos.w;
+
+    // Vulkan NDC to texture coordinates: NDC [-1, 1] -> UV [0, 1]
+    // Vulkan flips Y-axis compared to DirectX, so invert ndc.y
+    float2 shadowUV = ndc.xy * 0.5f + 0.5f;
+    shadowUV.y = 1.0f - shadowUV.y; 
+
+    // Sample the depth from the shadow map
+    float sampledDepth = depthTex.Sample(Textures_sampler, shadowUV).r;
+
+    // Convert the fragment's light space depth to [0, 1] range for comparison
+    float fragDepth = ndc.z * 0.5f + 0.5f;
+
+    // Compare the fragment depth to the sampled shadow map depth
+    float shadow = 0.0f;
+     if (shadowUV.x >= 0.01f && shadowUV.x <= 0.99f &&
+         shadowUV.y >= 0.01f && shadowUV.y <= 0.99f &&
+         fragDepth  >= 0.01f && fragDepth  <= 0.99f)
+    {
+        shadow = (fragDepth > sampledDepth + 0.001f) ? 0.5f : 0.0f;
+    }
+
+    // Assuming PSOut.Color is being set elsewhere and we just want to apply shadow
+    outputColor *= (1.0f - shadow);
     PSOut.Color = outputColor;
 }

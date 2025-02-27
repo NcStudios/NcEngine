@@ -12,7 +12,7 @@ struct PSInput
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD;
     uint   MaterialIndex;
-    float3 WorldPos;
+    float4 WorldPos;
     float3 LocalPos;
 };
 
@@ -47,8 +47,8 @@ void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
     PSIn.Pos = mul(TransformedPos, cameraViewProjection);
     PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize(mul(Transforms[transformIndex].model, VSIn.Normal));
-    PSIn.WorldPos = TransformedPos.xyz;
+    PSIn.Normal = normalize( mul(VSIn.Normal, Transforms[transformIndex].model));
+    PSIn.WorldPos = TransformedPos;
     PSIn.LocalPos = VSIn.Pos.xyz;
     PSIn.MaterialIndex = materialIndex;
 }

@@ -185,6 +185,50 @@ void PassBackend::Update(const PostProcessState& postProcessState)
     m_finalPostProcessTarget = std::nullopt;
 }
 
+void PassBackend::RenderShadowPass(IDeviceContext& context,
+                                   PerPassResourceSignature& perPassResourceSignature,
+                                   const MaterialPass& staticPass,
+                                   const MaterialPass& skinnedPass,
+                                   const std::vector<Batch>& staticBatches,
+                                   const std::vector<Batch>& skinnedBatches,
+                                   const std::span<const LightData>& lights)
+{
+    auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
+    auto& shadowMapsBuffer = perPassResourceSignature.GetShadowMapSinksResource();
+
+    bool hasSomeShadowCaster = false;
+    uint32_t lightIndex = 0u;
+
+    for (const auto& light : lights)
+    {
+        if (!light.castsShadows)
+        {
+            lightIndex++;
+            continue;
+        }
+
+        hasSomeShadowCaster = true;
+        sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex);
+
+        BindShadowMapRenderTarget(context, shadowMapsBuffer, lightIndex);
+        ClearShadowMapRenderTarget(context, shadowMapsBuffer, lightIndex);
+
+        context.SetPipelineState(staticPass.pso);
+        DrawIndexed(context, staticBatches);
+        context.SetPipelineState(skinnedPass.pso);
+        DrawIndexed(context, skinnedBatches);
+        lightIndex++;
+    }
+
+    if (!hasSomeShadowCaster)
+    {
+        // No shadow-casting lights; ensure buffer is updated to prevent usage issues.
+        sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, -1);
+    }
+
+    perPassResourceSignature.Commit(context);
+}
+
 void PassBackend::RenderMaterial(IDeviceContext& context,
                                  ISwapChain& swapChain,
                                  PerPassResourceSignature& perPassResourceSignature,
@@ -206,52 +250,16 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
         skinnedPassBatches
     );
 
-    auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
-    auto& shadowMapsBuffer = perPassResourceSignature.GetShadowMapSinksResource();
-
-
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
-        if (m_finalColorTarget.has_value())
-        {
-            m_finalColorTarget = std::min(staticPass.sinks.color, m_finalColorTarget.value());
-        }
-        else
-        {
-            m_finalColorTarget = staticPass.sinks.color;
-        }
+        m_finalColorTarget = m_finalColorTarget.has_value() ? std::min(staticPass.sinks.color, m_finalColorTarget.value()) : staticPass.sinks.color;
 
         if (staticPass.flag & MaterialPassFlag::Shadow)
         {
-            bool hasSomeShadowCaster = false;
-            uint32_t lightIndex = 0u;
-            for (const auto& light : lights)
-            {
-                if (!light.castsShadows)
-                {
-                    lightIndex++;
-                    continue;
-                }
-
-                hasSomeShadowCaster = true;
-                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, lightIndex);
-
-                BindShadowMapRenderTarget(context, shadowMapsBuffer, lightIndex);
-                ClearShadowMapRenderTarget(context, shadowMapsBuffer, lightIndex);
-
-                context.SetPipelineState(staticPass.pso);
-                DrawIndexed(context, staticBatches);
-                context.SetPipelineState(skinnedPass.pso);
-                DrawIndexed(context, skinnedBatches);
-                lightIndex++;
-            }
-            if (hasSomeShadowCaster == false)
-            {
-                // No lights are being shadowcasters so after frame is done material is trying to use buffer and it hasn't been mapped since the frame started.
-                sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, -1);
-            }
+            RenderShadowPass(context, perPassResourceSignature, staticPass, skinnedPass, staticBatches, skinnedBatches, lights);
             continue;
         }
+
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
         BindRenderTarget(context, swapChain, perPassResourceSignature, staticPass.sinks.color, staticPass.sinks.depth, staticPass.isMsaa && m_numSamples > 1);

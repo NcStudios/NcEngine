@@ -83,16 +83,18 @@ LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 ca
     float specularTotal = CalculateSpecular(lightVec, viewVec, normal);
 
     // Spot Light Cutoff
+    light.innerAngle *= 1-(light.radius * 0.01f);
+    light.outerAngle *= 1-(light.radius * 0.01f);
     float theta = dot(lightVec, normalize(-light.direction));
-    float epsilon = light.outerAngle - light.innerAngle;
-    float intensity = saturate((theta - light.innerAngle) / epsilon);
+    float epsilon = max(light.innerAngle - light.outerAngle, 0.0001f);
+    float intensity = clamp((theta - light.outerAngle) / epsilon, 0.0f, 1.0f);
 
     // Attenuation
     float distance = length(light.position - fragWorldPos);
     diffuseTotal *= CalculateAttenuation(distance, light.radius);
     specularTotal *= CalculateAttenuation(distance, light.radius);
 
-    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor,  specularTotal, diffuseTotal, light.intensity};
+    LightInfluence lightInfluence = {light.diffuseColor, light.specularColor,  specularTotal, diffuseTotal, intensity * light.intensity};
     return lightInfluence;
 }
 

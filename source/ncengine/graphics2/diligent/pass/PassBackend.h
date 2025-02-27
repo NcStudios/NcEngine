@@ -34,6 +34,14 @@ class PassBackend
 
         void Update(const PostProcessState& postProcessState);
 
+        void RenderShadowPass(Diligent::IDeviceContext& context,
+                              PerPassResourceSignature& perPassResourceSignature,
+                              const MaterialPass& staticPass,
+                              const MaterialPass& skinnedPass,
+                              const std::vector<Batch>& staticBatches,
+                              const std::vector<Batch>& skinnedBatches,
+                              const std::span<const LightData>& lights);
+
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
