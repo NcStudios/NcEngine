@@ -71,7 +71,8 @@ constexpr auto LaunchInFullscreenKey = "launch_fullscreen"sv;
 constexpr auto ScreenWidthKey = "screen_width"sv;
 constexpr auto ScreenHeightKey = "screen_height"sv;
 constexpr auto TargetFpsKey = "target_fps"sv;
-constexpr auto UseShadowsKey = "use_shadows"sv; /** @todo: Make this a property of the material */
+constexpr auto UseShadowsKey = "use_shadows"sv;
+constexpr auto ShadowMapResolutionKey = "shadow_map_resolution"sv;
 constexpr auto AntialiasingKey = "antialiasing"sv;
 constexpr auto InitialBatchSize = "initial_batch_size"sv;
 constexpr auto UseValidationLayersKey = "use_validation_layers"sv;
@@ -230,6 +231,7 @@ auto BuildFromConfigMap(const std::unordered_map<std::string, std::string>& kvPa
         ParseValueIfExists(out.screenHeight, ScreenHeightKey, kvPairs);
         ParseValueIfExists(out.targetFPS, TargetFpsKey, kvPairs);
         ParseValueIfExists(out.useShadows, UseShadowsKey, kvPairs);
+        ParseValueIfExists(out.shadowMapResolution, ShadowMapResolutionKey, kvPairs);
         ParseValueIfExists(out.antialiasing, AntialiasingKey, kvPairs);
         ParseValueIfExists(out.initialBatchSize, InitialBatchSize, kvPairs);
         ParseValueIfExists(out.useValidationLayers, UseValidationLayersKey, kvPairs);
@@ -397,6 +399,7 @@ void Write(std::ostream& stream, const Config& config, bool writeSections)
     ::WriteKVPair(stream, ScreenHeightKey, config.graphicsSettings.screenHeight);
     ::WriteKVPair(stream, TargetFpsKey, config.graphicsSettings.targetFPS);
     ::WriteKVPair(stream, UseShadowsKey, config.graphicsSettings.useShadows);
+    ::WriteKVPair(stream, ShadowMapResolutionKey, config.graphicsSettings.shadowMapResolution);
     ::WriteKVPair(stream, AntialiasingKey, config.graphicsSettings.antialiasing);
     ::WriteKVPair(stream, InitialBatchSize, config.graphicsSettings.initialBatchSize);
     ::WriteKVPair(stream, UseValidationLayersKey, config.graphicsSettings.useValidationLayers);
@@ -423,6 +426,7 @@ bool Validate(const Config& config)
            (config.graphicsSettings.screenHeight != 0) &&
            (config.graphicsSettings.targetFPS != 0) &&
            (config.graphicsSettings.antialiasing > 0) &&
+           (config.graphicsSettings.shadowMapResolution >= 128) &&
            ValidatePhysicsSettings(config.physicsSettings) &&
            ValidateBufferFrames(config.audioSettings.bufferFrames);
 }

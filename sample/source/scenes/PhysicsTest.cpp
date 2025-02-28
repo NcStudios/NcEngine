@@ -1283,15 +1283,15 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     world.Emplace<SpotLight>(
         world.Emplace<Entity>({
-            .position = Vector3{0.0f, 3.0f, 1.0f},
+            .position = Vector3{-1.0f, 3.0f, -10.0f},
             .tag = "Spot Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{0.8f, 0.8f, 0.8f},
-        3.5f,
-        0.3491f,
-        0.5236f,
-        50.0f
+        12.4f,
+        0.0f,
+        0.461f,
+        57.8f
     );
 
     world.Emplace<DirectionalLight>(

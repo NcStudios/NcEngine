@@ -92,17 +92,22 @@ float SampleShadow(Texture2D depthTex, SamplerComparisonState shadowSampler, flo
 {
     // Transform world-space position to light-space clip coordinates
     float4 lightClipPos = mul(worldPos, lightViewProj);
-    
+
     // Convert clip-space position to NDC by performing perspective divide
     float3 shadowCoord = lightClipPos.xyz / lightClipPos.w;
-    
+
     // Transform from NDC [-1, 1] to UV coordinates [0, 1]
-    shadowCoord.x = shadowCoord.x * 0.5 + 0.5;       // X: [-1, 1] -> [0, 1]
-    shadowCoord.y = shadowCoord.y * -0.5 + 0.5;       // Y: [-1, 1] -> [1, 0] (flip Y)
+    shadowCoord.x = shadowCoord.x * 0.5 + 0.5;  // X: [-1, 1] -> [0, 1]
+    shadowCoord.y = shadowCoord.y * -0.5 + 0.5; // Y: [-1, 1] -> [1, 0] (flip Y)
+
+    if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0)
+    {
+        return 0.0f;
+    }
 
     // Sample shadow map depth using comparison sampling
     float shadowFactor = depthTex.SampleCmpLevelZero(ShadowMapSinks_sampler, shadowCoord.xy, shadowCoord.z - 0.01);
-    return 1-pow(shadowFactor, 32.0);
+    return pow(shadowFactor, 50.0);
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -127,27 +132,41 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
     }
 
+    uint shadowMapIndex = 0u;
     float3 result = 0.0f;
     [unroll(lightCount)]
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
 
+        // Calculate shadows
+        float shadowFactor = 1.0f;
+        if (Lights[i].castsShadows)
+        {
+            Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
+            float rawShadow = SampleShadow(depthTex, ShadowMapSinks_sampler, PSIn.WorldPos, Lights[i].viewProj);
+            shadowFactor = min(shadowFactor, rawShadow); 
+            shadowMapIndex++;
+        }
+        float intensityFactor = saturate(Lights[i].intensity / 200.0f);
+        shadowFactor = lerp(shadowFactor, 1.0, intensityFactor);
+
         float diffuseAmt = 0.0f;
         float specularAmt = 0.0f;
 
+        // Flat shading, apply shadows
         if (Materials[PSIn.MaterialIndex].useFlatShading == 0)
         {
             diffuseAmt = influence.diffuseAmt * influence.intensity;
             specularAmt = influence.specularAmt * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity; 
         }
-        else
+        else // Smooth shading, apply shadows
         {
             diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
-            specularAmt = Band(influence.specularAmt) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+            specularAmt = Band(influence.specularAmt ) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
         }
 
-        result += (diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb );
+        result += ((diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb )) * shadowFactor;
 
         // Apply hatching
         if (Materials[PSIn.MaterialIndex].hatchTiling > 0.0f)
@@ -165,26 +184,8 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     // Change saturation
     float3 colHsv = RGBtoHSV(float3(result.r, result.g, result.b));
-    colHsv.y *= (1.0f);
     colHsv.z *= (1.5f);
     result.rgb = HSVtoRGB(colHsv.rgb);
-
-    float shadowFactor = 0.0f;
-
-    [unroll(lightCount)]
-    float shadowMapIndex = 0u;
-    for (int i = 0; i < lightCount; i++)
-    {
-        if (Lights[i].castsShadows)
-        {
-            Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
-            shadowFactor += SampleShadow(depthTex, ShadowMapSinks_sampler, PSIn.WorldPos, Lights[i].viewProj);
-            shadowMapIndex++;
-        }
-    }
-
-    // Assuming PSOut.Color is being set elsewhere and we just want to apply shadow
-    result *= (1-shadowFactor);
 
     // Gradient
     float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);

@@ -7,6 +7,7 @@
 #include "graphics2/diligent/resource/SinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 
 #include "ncutility/NcError.h"
@@ -121,6 +122,8 @@ PassBackend::PassBackend(IRenderDevice& device,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
                          const PassManifest& passManifest,
+                         const config::GraphicsSettings& graphicsSettings,
+                         const config::MemorySettings& memorySettings,
                          uint32_t numSamples)
     : m_numSamples{numSamples},
       m_finalColorTarget{std::nullopt},
@@ -157,7 +160,7 @@ PassBackend::PassBackend(IRenderDevice& device,
     }
 
     // Make all the shadow map render targets that will be used by the passes
-    shadowMapSinks.Add(device, context, 20, screenWidth, screenHeight); // @todo parameterize with max lights
+    shadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
 
     // Make the pass and pipeline objects
     MakePassesAndPipelines(device, swapChain, shaderFactory, shaderBindings, passManifest);
@@ -226,6 +229,8 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
         sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, std::numeric_limits<uint32_t>::max());
         perPassResourceSignature.Commit(context);
     }
+
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
 }
 
 void PassBackend::RenderMaterial(IDeviceContext& context,

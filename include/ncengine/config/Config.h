@@ -1,6 +1,6 @@
 /**
  * @file Config.h
- * @copyright Jaremie Romer and McCallister Romer 2023
+ * @copyright Jaremie Romer and McCallister Romer 2025
  */
 #pragma once
 
@@ -75,6 +75,7 @@ struct GraphicsSettings
     unsigned screenHeight = 1000;        ///< height of the screen
     unsigned targetFPS = 60;             ///< target frame rate
     bool useShadows = true;              ///< enable shadow mapping and shadow rendering
+    unsigned shadowMapResolution = 2048; ///< shadow map resolution. Minimum value = 128
     unsigned antialiasing = 8u;          ///< the number of samples for MSAA
     unsigned initialBatchSize = 1u;      ///< default instance capacity for render batch allocation (size hint - can grow beyond this)
     bool useValidationLayers = false;    ///< turn on validation layers in debug builds

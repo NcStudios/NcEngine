@@ -295,6 +295,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetShaderFactory(),
             m_shaderBindings,
             m_passManifest,
+            graphicsSettings,
+            memorySettings,
             m_engine.GetDeviceCapability().msaaSampleCount
           },
           m_frontend{

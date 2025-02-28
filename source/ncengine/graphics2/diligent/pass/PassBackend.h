@@ -15,7 +15,14 @@
 #include <memory>
 #include <vector>
 
-namespace nc::graphics
+namespace nc
+{
+namespace config
+{
+struct GraphicsSettings;
+struct MemorySettings;
+}
+namespace graphics
 {
 class PerFrameResourceSignature;
 class PerPassResourceSignature;
@@ -30,6 +37,8 @@ class PassBackend
                              ShaderFactory& shaderFactory,
                              ShaderBindings& shaderBindings,
                              const PassManifest& passManifest,
+                             const config::GraphicsSettings& graphicsSettings,
+                             const config::MemorySettings& memorySettings,
                              uint32_t numSamples = 1u);
 
         void Update(const PostProcessState& postProcessState);
@@ -85,4 +94,5 @@ class PassBackend
         std::optional<uint32_t> m_finalColorTarget;
         std::optional<uint32_t> m_finalPostProcessTarget;
 };
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc
