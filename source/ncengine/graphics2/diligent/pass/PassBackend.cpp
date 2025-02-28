@@ -198,10 +198,11 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 {
     auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
     auto& shadowMapsBuffer = perPassResourceSignature.GetShadowMapSinksResource();
-
     bool hasSomeShadowCaster = false;
-
     auto renderTargetIndex = 0u;
+
+    // LightDataIndex corresponds to the index the shader will use to index the LightData buffer.
+    // RenderTargetIndex corresponds to the index of the shadow map in the SinkBuffer.
     for (const auto& [lightDataIndex, light] : std::views::enumerate(lights))
     {
         if (!light.castsShadows)
@@ -225,7 +226,7 @@ void PassBackend::RenderShadowPass(IDeviceContext& context,
 
     if (!hasSomeShadowCaster)
     {
-        // No shadow-casting lights; ensure buffer is updated because it will be discarded at the end of the frame, and read from in the materials pass.
+        // No shadow-casting lights; ensure buffer is updated because it will be discarded at the end of the frame and read from in the materials pass - so it needs to be updated before that read.
         sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, std::numeric_limits<uint32_t>::max());
         perPassResourceSignature.Commit(context);
     }

@@ -83,7 +83,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 transform.Forward(),
                 outerAngle,
                 radius,
-                1, /** @todo, come up with shadow decisioning (which lights cast shadows) */
+                light.castsShadows,
                 spotlight2::CalculateLightViewProjectionMatrix(std::max<float>(std::max<float>(innerAngle, innerAngle-outerAngle) * (radius*0.025f), 0.0001f), transform.TransformationMatrix())
             );
         }

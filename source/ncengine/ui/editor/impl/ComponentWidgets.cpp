@@ -1186,6 +1186,7 @@ void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
     ui::DragFloat(light.radius, "radius", 0.1f, min, 100.0f);
+    nc::ui::Checkbox(light.castsShadows, "castsShadows");
 }
 
 void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&)

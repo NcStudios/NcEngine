@@ -154,18 +154,19 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         float diffuseAmt = 0.0f;
         float specularAmt = 0.0f;
 
-        // Flat shading, apply shadows
+        // Flat shading
         if (Materials[PSIn.MaterialIndex].useFlatShading == 0)
         {
             diffuseAmt = influence.diffuseAmt * influence.intensity;
             specularAmt = influence.specularAmt * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity; 
         }
-        else // Smooth shading, apply shadows
+        else // Smooth shading
         {
             diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
             specularAmt = Band(influence.specularAmt ) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
         }
 
+        // Apply lighting influences and shadows
         result += ((diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb )) * shadowFactor;
 
         // Apply hatching

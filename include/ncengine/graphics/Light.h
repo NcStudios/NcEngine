@@ -35,5 +35,6 @@ struct SpotLight
     float innerAngle = 0.3491f;
     float outerAngle = 0.5236f;
     float radius = 25.0f;
+    bool castsShadows = true;
 };
 } // namespace nc
