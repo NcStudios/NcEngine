@@ -1173,13 +1173,14 @@ void SpotLightUIWidget(SpotLight& light, EditorContext&, const std::any&)
     IMGUI_SCOPE(ui::ImGuiId, "SpotLight");
     constexpr auto step = 0.01f;
     constexpr auto min = 0.0f;
-    constexpr auto max = 3.14159f;
+    constexpr auto max = 1.5707f;
     ui::InputColor3(light.diffuseColor, "diffuseColor");
     ui::InputColor3(light.specularColor, "specularColor");
     ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
     ui::DragFloat(light.innerAngle, "innerAngle", step, min, light.outerAngle);
     ui::DragFloat(light.outerAngle, "outerAngle", step, light.innerAngle, max);
-    ui::DragFloat(light.radius, "radius", 0.1f, min, 1200.0f);
+    ui::DragFloat(light.radius, "radius", 0.1f, min, 100.0f);
+    nc::ui::Checkbox(light.castsShadows, "castsShadows");
 }
 
 void CollisionListenerUIWidget(CollisionListener&, EditorContext&, const std::any&)

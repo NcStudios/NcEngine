@@ -22,7 +22,8 @@ class SinkIndexBufferResource
         void Update(Diligent::IDeviceContext& context,
                     std::span<const uint32_t> colorSources,
                     std::span<const uint32_t> depthSources,
-                    bool hasPostProcessSource);
+                    bool hasPostProcessSource,
+                    uint32_t lightIndex);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

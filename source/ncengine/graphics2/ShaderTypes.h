@@ -50,6 +50,7 @@ struct PostProcessSinkIndexData
     int32_t depthRenderTargetIndex2;
     int32_t depthRenderTargetIndex3;
     uint32_t hasPostProcessTarget;
+    uint32_t lightIndex;
 };
 
 // Object model for StaticMeshes (type: StructuredBuffer element type).

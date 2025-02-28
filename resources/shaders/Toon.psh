@@ -5,8 +5,10 @@
 
 #include "Lighting.fxh"
 
+Texture2D     ShadowMapSinks[];
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerComparisonState  ShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentProperties
 {
@@ -43,7 +45,7 @@ struct PSInput
     float3 Normal        : NORMAL;
     float2 UV            : TEX_COORD; 
     uint   MaterialIndex;
-    float3 WorldPos;
+    float4 WorldPos;
     float3 LocalPos;
     float3 ViewDir;
 };
@@ -86,6 +88,28 @@ float Band(float lightAmount)
     return 1.0f;
 }
 
+float SampleShadow(Texture2D depthTex, SamplerComparisonState shadowSampler, float4 worldPos, matrix lightViewProj)
+{
+    // Transform world-space position to light-space clip coordinates
+    float4 lightClipPos = mul(worldPos, lightViewProj);
+
+    // Convert clip-space position to NDC by performing perspective divide
+    float3 shadowCoord = lightClipPos.xyz / lightClipPos.w;
+
+    // Transform from NDC [-1, 1] to UV coordinates [0, 1]
+    shadowCoord.x = shadowCoord.x * 0.5 + 0.5;  // X: [-1, 1] -> [0, 1]
+    shadowCoord.y = shadowCoord.y * -0.5 + 0.5; // Y: [-1, 1] -> [1, 0] (flip Y)
+
+    if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0)
+    {
+        return 0.0f;
+    }
+
+    // Sample shadow map depth using comparison sampling
+    float shadowFactor = depthTex.SampleCmpLevelZero(ShadowMapSinks_sampler, shadowCoord.xy, shadowCoord.z - 0.01);
+    return pow(shadowFactor, 50.0);
+}
+
 void main(in  PSInput  PSIn, out PSOutput PSOut)
 {
     // Get texture colors
@@ -108,26 +132,42 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         normals = normalize(Normals.xyz * float3(2.0) - float3(1.0));
     }
 
+    uint shadowMapIndex = 0u;
     float3 result = 0.0f;
+    [unroll(lightCount)]
     for (int i = 0; i < lightCount; i++)
     {
-        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos, cameraPosition, normals);
+        LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
+
+        // Calculate shadows
+        float shadowFactor = 1.0f;
+        if (Lights[i].castsShadows)
+        {
+            Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
+            float rawShadow = SampleShadow(depthTex, ShadowMapSinks_sampler, PSIn.WorldPos, Lights[i].viewProj);
+            shadowFactor = min(shadowFactor, rawShadow); 
+            shadowMapIndex++;
+        }
+        float intensityFactor = saturate(Lights[i].intensity / 200.0f);
+        shadowFactor = lerp(shadowFactor, 1.0, intensityFactor);
 
         float diffuseAmt = 0.0f;
         float specularAmt = 0.0f;
 
+        // Flat shading
         if (Materials[PSIn.MaterialIndex].useFlatShading == 0)
         {
             diffuseAmt = influence.diffuseAmt * influence.intensity;
             specularAmt = influence.specularAmt * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity; 
         }
-        else
+        else // Smooth shading
         {
             diffuseAmt = Band(influence.diffuseAmt) * influence.intensity;
-            specularAmt = Band(influence.specularAmt) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
+            specularAmt = Band(influence.specularAmt ) * influence.intensity * Materials[PSIn.MaterialIndex].reflectivity;
         }
 
-        result += (diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb );
+        // Apply lighting influences and shadows
+        result += ((diffuseAmt * influence.diffuseColor * Color.rgb) + (specularAmt * influence.specularColor * Color.rgb )) * shadowFactor;
 
         // Apply hatching
         if (Materials[PSIn.MaterialIndex].hatchTiling > 0.0f)
@@ -145,7 +185,6 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
 
     // Change saturation
     float3 colHsv = RGBtoHSV(float3(result.r, result.g, result.b));
-    colHsv.y *= (1.0f);
     colHsv.z *= (1.5f);
     result.rgb = HSVtoRGB(colHsv.rgb);
 

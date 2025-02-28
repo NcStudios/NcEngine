@@ -20,32 +20,54 @@ namespace nc::graphics
 constexpr auto ClearColor = nc::Vector4{0.050f, 0.050f, 0.050f, 1.0f};
 auto ToPassBaseId(const ShaderPaths& shaderPaths, std::string_view name) -> size_t;
 auto CreateShaderFromSourceIfInitialized(ShaderFactory& shaderFactory, Diligent::SHADER_TYPE shaderType, const nc::graphics::ShaderPaths& shaderPaths) -> Diligent::RefCntAutoPtr<Diligent::IShader>;
-void ClearRenderTarget(Diligent::IDeviceContext& context,
-                       Diligent::ISwapChain& swapChain,
-                       PerPassResourceSignature& perPassResourceSignature,
-                       uint32_t colorRenderTargetIndex,
-                       uint32_t depthRenderTargetIndex,
-                       bool isMsaa);
-void ClearRenderTarget(Diligent::IDeviceContext& context,
-                       Diligent::ISwapChain& swapChain,
-                       SinkBufferResource& postProcessSinkBufferResource,
-                      uint32_t postProcessRenderTargetIndex);
-void BindRenderTarget(Diligent::IDeviceContext& context,
-                      Diligent::ISwapChain& swapChain,
-                      PerPassResourceSignature& perPassResourceSignature,
-                      uint32_t colorRenderTargetIndex,
-                      uint32_t depthRenderTargetIndex,
-                      bool isMsaa);
-void BindRenderTarget(Diligent::IDeviceContext& context,
-                      Diligent::ISwapChain& swapChain,
-                      SinkBufferResource& postProcessSinkBufferResource,
-                      uint32_t postProcessRenderTargetIndex);
 auto GetSinks(const PassManifest& passManifest, const PassDesc& passDesc) -> Sinks;
 auto GetSources(const PassManifest& passManifest, const PassDesc& passDesc) -> Sources;
 auto HasAnyColorSources(const Sources& sources) -> bool;
 auto HasAnyDepthSources(const Sources& sources) -> bool;
-auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& depthSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*;
-auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& postProcessSinkBufferResource, uint32_t index) -> Diligent::ITextureView*;
-auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain, SinkBufferResource& colorSinkBufferResource, uint32_t index, bool isMsaa) -> Diligent::ITextureView*;
 
+void ClearRenderTarget(Diligent::IDeviceContext& context,
+                       Diligent::ISwapChain& swapChain,
+                       PerPassResourceSignature& perPassResourceSignature,
+                       uint32_t colorIndex,
+                       uint32_t depthIndex,
+                       bool isMsaa);
+
+void ClearPostProcessRenderTarget(Diligent::IDeviceContext& context,
+                                  Diligent::ISwapChain& swapChain,
+                                  SinkBufferResource& postProcessSinkBufferResource,
+                                  uint32_t postProcessIndex);
+
+void ClearShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                                SinkBufferResource& shadowMapSinkBufferResource,
+                                uint32_t shadowMapIndex);
+
+void BindRenderTarget(Diligent::IDeviceContext& context,
+                      Diligent::ISwapChain& swapChain,
+                      PerPassResourceSignature& perPassResourceSignature,
+                      uint32_t colorIndex,
+                      uint32_t depthIndex,
+                      bool isMsaa);
+
+void BindPostProcessRenderTarget(Diligent::IDeviceContext& context,
+                                 Diligent::ISwapChain& swapChain,
+                                 SinkBufferResource& postProcessSinkBufferResource,
+                                 uint32_t postProcessIndex);
+
+void BindShadowMapRenderTarget(Diligent::IDeviceContext& context,
+                               SinkBufferResource& shadowMapSinkBufferResource,
+                               uint32_t shadowMapIndex);
+
+auto ToDepthRenderTargetView(Diligent::ISwapChain& swapChain,
+                             SinkBufferResource& depthSinkBufferResource,
+                             uint32_t index,
+                             bool isMsaa) -> Diligent::ITextureView*;
+
+auto ToPostProcessRenderTargetView(Diligent::ISwapChain& swapChain,
+                                   SinkBufferResource& postProcessSinkBufferResource,
+                                   uint32_t index) -> Diligent::ITextureView*;
+
+auto ToColorRenderTargetView(Diligent::ISwapChain& swapChain,
+                             SinkBufferResource& colorSinkBufferResource,
+                             uint32_t index,
+                             bool isMsaa) -> Diligent::ITextureView*;
 } // namespace nc::graphics

@@ -41,6 +41,13 @@ enum class PostProcessTarget : uint8_t
     PPNoise
 };
 
+enum class ShadowMapTarget : uint8_t
+{
+    None,
+    Uni,
+    Omni
+};
+
 struct Sources
 {
     std::vector<uint32_t> color = std::vector<uint32_t>();
@@ -82,6 +89,7 @@ struct PassDesc
     PostProcessTarget postProcessSource = PostProcessTarget::None;
     ColorTarget colorSink = ColorTarget::None;
     DepthTarget depthSink = DepthTarget::None;
+    ShadowMapTarget shadowMapSink = ShadowMapTarget::None;
     PostProcessTarget postProcessSink = PostProcessTarget::None;
     bool isMsaa = true;
     bool useDepthTest = true;

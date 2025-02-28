@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics2/frontend/subsystem/LightRenderState.h"
 #include "graphics2/frontend/subsystem/MeshRenderState.h"
 #include "graphics2/frontend/subsystem/particle/ParticleRenderState.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
@@ -14,7 +15,14 @@
 #include <memory>
 #include <vector>
 
-namespace nc::graphics
+namespace nc
+{
+namespace config
+{
+struct GraphicsSettings;
+struct MemorySettings;
+}
+namespace graphics
 {
 class PerFrameResourceSignature;
 class PerPassResourceSignature;
@@ -29,15 +37,26 @@ class PassBackend
                              ShaderFactory& shaderFactory,
                              ShaderBindings& shaderBindings,
                              const PassManifest& passManifest,
+                             const config::GraphicsSettings& graphicsSettings,
+                             const config::MemorySettings& memorySettings,
                              uint32_t numSamples = 1u);
 
         void Update(const PostProcessState& postProcessState);
+
+        void RenderShadowPass(Diligent::IDeviceContext& context,
+                              PerPassResourceSignature& perPassResourceSignature,
+                              const MaterialPass& staticPass,
+                              const MaterialPass& skinnedPass,
+                              const std::vector<Batch>& staticBatches,
+                              const std::vector<Batch>& skinnedBatches,
+                              const std::span<const LightData>& lights);
 
         void RenderMaterial(Diligent::IDeviceContext& context,
                             Diligent::ISwapChain& swapChain,
                             PerPassResourceSignature& perPassResourceSignature,
                             const std::vector<std::vector<Batch>>& staticPassBatches,
-                            const std::vector<std::vector<Batch>>& skinnedPassBatches);
+                            const std::vector<std::vector<Batch>>& skinnedPassBatches,
+                            const std::span<const LightData>& lights);
 
         void RenderWireframe(Diligent::IDeviceContext& context,
                              Diligent::ISwapChain& swapChain,
@@ -75,4 +94,5 @@ class PassBackend
         std::optional<uint32_t> m_finalColorTarget;
         std::optional<uint32_t> m_finalPostProcessTarget;
 };
-} // namespace nc::graphics
+} // namespace graphics
+} // namespace nc

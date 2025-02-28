@@ -1284,15 +1284,17 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     BuildChain(world);
     BuildTriggers(world);
 
-    world.Emplace<PointLight>(
+    world.Emplace<SpotLight>(
         world.Emplace<Entity>({
-            .position = Vector3{-15.0f, 50.0f, 35.0f},
-            .tag = "Point Light"
+            .position = Vector3{-1.0f, 3.0f, -10.0f},
+            .tag = "Spot Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},
         Vector3{0.8f, 0.8f, 0.8f},
-        3.5f,
-        300.0f
+        12.4f,
+        0.0f,
+        0.461f,
+        57.8f
     );
 
     world.Emplace<DirectionalLight>(

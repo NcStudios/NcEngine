@@ -22,15 +22,13 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace spotlight2
 {
-constexpr float g_lightFieldOfView = nc::DegreesToRadians(45.0f);
-constexpr float g_nearClip = 1.0f;
-constexpr float g_farClip = 100.f;
-const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
+constexpr float g_nearClip = 0.25f;
+constexpr float g_farClip = 1000.f;
 
-auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
+auto CalculateLightViewProjectionMatrix(float arcRadians, DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
 {
     const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * g_lightProjectionMatrix;
+    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * DirectX::XMMatrixPerspectiveRH(arcRadians, 1.0f, g_nearClip, g_farClip);
 }
 } // namespace spotlight2
 
@@ -70,18 +68,23 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         const auto& pool = ecs.GetPool<SpotLight>();
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
+            float innerAngle = cos(std::max<float>(light.innerAngle, 0.0001f));
+            float outerAngle = cos(std::max<float>(light.outerAngle, 0.0001f));
+            float radius = std::max<float>(light.radius, 0.0001f);
+
+
             auto& transform = ecs.Get<Transform>(entity);
             m_data.emplace_back(
                 light.diffuseColor,
                 light.specularColor,
                 light.intensity,
                 transform.Position(),
-                light.innerAngle,
+                innerAngle,
                 transform.Forward(),
-                light.outerAngle,
-                light.radius,
-                0, /** @todo, come up with shadow decisioning (which lights cast shadows) */
-                spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix())
+                outerAngle,
+                radius,
+                light.castsShadows,
+                spotlight2::CalculateLightViewProjectionMatrix(std::max<float>(std::max<float>(innerAngle, innerAngle-outerAngle) * (radius*0.025f), 0.0001f), transform.TransformationMatrix())
             );
         }
     }

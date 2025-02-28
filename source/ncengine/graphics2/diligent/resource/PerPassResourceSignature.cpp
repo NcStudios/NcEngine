@@ -15,6 +15,7 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
                                                    const SinkBufferDesc& colorSinksDesc,
                                                    const SinkBufferDesc& depthSinksDesc,
                                                    const SinkBufferDesc& postProcessSinksDesc,
+                                                   const SinkBufferDesc& shadowMapSinksDesc,
                                                    const UniformBufferDesc& postProcessPassPropertiesDesc,
                                                    const UniformBufferDesc& sinkIndexDesc)
     : m_postProcessSinkCount{postProcessSinksDesc.maxElementCount},
@@ -27,16 +28,21 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         ToPipelineResourceDesc(depthSinksDesc),
         ToPipelineResourceDesc(postProcessTexDesc), // Even though we have multiple post process resources, we only ever bind one at a time.
         ToPipelineResourceDesc(sinkIndexDesc),
-        ToPipelineResourceDesc(postProcessPassPropertiesDesc)
+        ToPipelineResourceDesc(postProcessPassPropertiesDesc),
+        ToPipelineResourceDesc(shadowMapSinksDesc)
     };
 
-    const auto sampler = SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey);
+    const auto samplers = std::array{
+        SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey),
+        SinkBufferResource::MakeShadowSamplerDesc(shadowMapSinksDesc.resourceKey),
+    };
+
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = resources.data();
     desc.NumResources = static_cast<uint32_t>(resources.size());
-    desc.ImmutableSamplers = &sampler,
-    desc.NumImmutableSamplers = 1,
+    desc.ImmutableSamplers = samplers.data(),
+    desc.NumImmutableSamplers = static_cast<uint32_t>(samplers.size()),
     desc.UseCombinedTextureSamplers = true,
     desc.BindingIndex = bindingIndex;
 
@@ -69,10 +75,10 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         GetVariable(sinkIndexDesc.shaderType, sinkIndexDesc.resourceKey.data(), m_srb)
     );
 
-    m_postProcessSinkResources.reserve(postProcessSinksDesc.maxElementCount);
+    m_postProcessSinksResource.reserve(postProcessSinksDesc.maxElementCount);
     for (auto i = 0u; i < postProcessSinksDesc.maxElementCount; i++)
     {
-        m_postProcessSinkResources.emplace_back(
+        m_postProcessSinksResource.emplace_back(
             GetVariable( Diligent::SHADER_TYPE_PIXEL, m_postProcessResourceKey.data(), m_srb),
             MakeColorSinkBufferDesc(1));
     }
@@ -82,6 +88,12 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         device,
         GetVariable(postProcessPassPropertiesDesc.shaderType, postProcessPassPropertiesDesc.resourceKey.data(), m_srb)
     );
+
+    m_shadowMapSinksResource = std::make_unique<SinkBufferResource>(
+        GetVariable(shadowMapSinksDesc.shaderType, shadowMapSinksDesc.resourceKey.data(), m_srb),
+        MakeDepthSinkBufferDesc(shadowMapSinksDesc.maxElementCount)
+    );
+    m_shadowMapSinksResource->Update();
 }
 
 void PerPassResourceSignature::BindPostProcessSink(uint32_t index)
