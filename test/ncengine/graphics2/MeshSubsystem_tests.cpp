@@ -13,7 +13,7 @@
 #include <ranges>
 
 const auto g_materialDesc = nc::MaterialDesc{
-    .passes = nc::MaterialPassFlag::Toon | nc::MaterialPassFlag::Normals
+    .passes = nc::MaterialPassFlag::Shadow | nc::MaterialPassFlag::Depth | nc::MaterialPassFlag::Toon | nc::MaterialPassFlag::Normals
 };
 
 constexpr auto g_meshView = nc::asset::MeshView{
@@ -122,7 +122,7 @@ TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(3, actualSkinnedInstanceState.dirtyRanges[0].count);
 
     const auto& actualStaticPassBatches = actualRenderState.staticMeshBatches;
-    ASSERT_EQ(3, actualStaticPassBatches.size());
+    ASSERT_EQ(4, actualStaticPassBatches.size());
     const auto& actualStaticBatches = actualStaticPassBatches.at(1);
     EXPECT_EQ(1, actualStaticBatches.size());
     const auto& actualStaticBatch = actualStaticBatches.at(0);
@@ -130,7 +130,7 @@ TEST_F(MeshSubsystemTest, BuildState_BuildsExpectedState)
     EXPECT_EQ(5, actualStaticBatch.instanceCount);
 
     const auto& actualSkinnedPassBatches = actualRenderState.skinnedMeshBatches;
-    ASSERT_EQ(3, actualSkinnedPassBatches.size());
+    ASSERT_EQ(4, actualSkinnedPassBatches.size());
     const auto& actualSkinnedBatches = actualSkinnedPassBatches.at(1);
     EXPECT_EQ(1, actualSkinnedBatches.size());
     const auto& actualSkinnedBatch = actualSkinnedBatches.at(0);
@@ -169,7 +169,7 @@ TEST_F(MeshSubsystemTest, OnRemoveMesh_UntracksObject)
 
     // Batch reports only one instance
     const auto& actualPassState = actualRenderState.staticMeshBatches;
-    ASSERT_EQ(3, actualPassState.size());
+    ASSERT_EQ(4, actualPassState.size());
     const auto& actualBatches = actualPassState.at(1);
     EXPECT_EQ(1, actualBatches.size());
     const auto& actualBatch = actualBatches.at(0);
@@ -198,7 +198,7 @@ TEST_F(MeshSubsystemTest, UpdateMesh_UsingSetMesh_PatchesTrackedState)
     auto actualRenderState = uut.BuildState(world);
     auto verifyBatches = [](const auto& actualPassState)
     {
-        ASSERT_EQ(3, actualPassState.size());
+        ASSERT_EQ(4, actualPassState.size());
         const auto& actualBatches = actualPassState.at(1);
         EXPECT_EQ(2, actualBatches.size());
         const auto& actualBatch1 = actualBatches.at(0);
