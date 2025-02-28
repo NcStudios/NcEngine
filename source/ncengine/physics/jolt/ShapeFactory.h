@@ -33,30 +33,39 @@ class ShapeFactory
         explicit ShapeFactory(Signal<const asset::ConvexHullUpdateEventData&>& onConvexHullUpdate,
                               Signal<const asset::MeshColliderUpdateEventData&>& onMeshColliderUpdate);
 
-        auto MakeShape(const Shape& shape, const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>;
-        auto MakeBox(const JPH::Vec3& halfExtents, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
-        auto MakeSphere(float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
-        auto MakeCapsule(float halfHeight, float radius, const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
+        static auto Instance() -> ShapeFactory* { return s_instance; }
+
+        static auto MakeDecoratedShape(const JPH::Shape* shape,
+                                       const JPH::Vec3& localPosition,
+                                       const JPH::Quat& localRotation) -> JPH::Ref<JPH::Shape>;
+
+        static auto MakeDecoratedShape(const JPH::Shape* shape,
+                                       const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
+
+        auto MakeShape(const Shape& shape,
+                       const JPH::Vec3& additionalScaling) -> JPH::Ref<JPH::Shape>;
+
+        auto MakeShape(const Shape& shape,
+                       const JPH::Vec3& position,
+                       const JPH::Quat& rotation,
+                       const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
+
+        auto MakeBox(const JPH::Vec3& halfExtents)                     -> JPH::Ref<JPH::Shape>;
+        auto MakeSphere(float radius)                                  -> JPH::Ref<JPH::Shape>;
+        auto MakeCapsule(float halfHeight, float radius)               -> JPH::Ref<JPH::Shape>;
         auto MakeConvexHull(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
-        auto MakeMesh(asset::AssetId id, const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
+        auto MakeMesh(asset::AssetId id, const JPH::Vec3& scale)       -> JPH::Ref<JPH::Shape>;
+        auto MakeCompound(asset::AssetId id, const JPH::Vec3& scale)   -> JPH::Ref<JPH::Shape>;
+        auto GetConvexHull(asset::AssetId id)                          -> JPH::Shape*           { return m_convexHulls.at(id).GetPtr(); }
+        auto GetMeshCollider(asset::AssetId id)                        -> JPH::Shape*           { return m_meshColliders.at(id).GetPtr(); }
 
     private:
+        inline static ShapeFactory* s_instance = nullptr;
+
         std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_convexHulls;
         std::unordered_map<asset::AssetId, JPH::Ref<JPH::Shape>> m_meshColliders;
         Connection m_convexHullUpdateConnection;
         Connection m_meshColliderUpdateConnection;
-
-        template<class T, class... Args>
-        auto MakeRef(Args&&... args) -> JPH::Ref<JPH::Shape>
-        {
-            return JPH::Ref<JPH::Shape>{new T(std::forward<Args>(args)...)};
-        }
-
-        auto ApplyLocalOffsets(const JPH::Ref<JPH::Shape>& shape,
-                               const JPH::Vec3& localPosition) -> JPH::Ref<JPH::Shape>;
-
-        auto ApplyScale(const JPH::Ref<JPH::Shape>& shape,
-                        const JPH::Vec3& scale) -> JPH::Ref<JPH::Shape>;
 
         void OnConvexHullUpdate(const asset::ConvexHullUpdateEventData& event);
         void OnMeshColliderUpdate(const asset::MeshColliderUpdateEventData& event);

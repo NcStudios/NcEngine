@@ -176,6 +176,35 @@ target_link_libraries(ConstraintManager_unit_tests
 
 add_test(ConstraintManager_unit_tests ConstraintManager_unit_tests)
 
+### CookedShape Tests ###
+add_executable(CookedShape_unit_tests
+    CookedShape_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CookedShape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
+)
+
+target_include_directories(CookedShape_unit_tests
+    PRIVATE
+        ${NC_INCLUDE_DIR}
+        ${NC_SOURCE_DIR}
+)
+
+target_compile_options(CookedShape_unit_tests
+    PUBLIC
+        ${NC_COMPILER_FLAGS}
+)
+
+target_link_libraries(CookedShape_unit_tests
+    PRIVATE
+        NcMath
+        NcUtility
+        NcJolt
+        gtest_main
+)
+
+add_test(CookedShape_unit_tests CookedShape_unit_tests)
+
 ### JoltPhysics Tests ###
 add_executable(JoltPhysics_unit_tests
     JoltPhysics_unit_tests.cpp

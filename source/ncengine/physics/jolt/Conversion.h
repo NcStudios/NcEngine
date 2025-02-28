@@ -35,6 +35,15 @@ inline auto ToJoltQuaternion(DirectX::FXMVECTOR in) -> JPH::Quat
     return JPH::Quat{JPH::Vec4{in}};
 }
 
+inline auto ToJoltMatrix(const Quaternion& rotationIn,
+                         const Vector3& positionIn) -> JPH::Mat44
+{
+    return JPH::Mat44::sRotationTranslation(
+        ToJoltQuaternion(rotationIn),
+        ToJoltVec3(positionIn)
+    );
+}
+
 inline auto ToXMVector(const JPH::Vec3& in) -> DirectX::XMVECTOR
 {
     return DirectX::XMVectorSetW(in.mValue, 0.0f);
