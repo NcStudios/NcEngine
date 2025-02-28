@@ -24,7 +24,7 @@ void SinkIndexBufferResource::Update(Diligent::IDeviceContext& context,
                                      std::span<const uint32_t> colorSources,
                                      std::span<const uint32_t> depthSources,
                                      bool hasPostProcessSource,
-                                     int32_t lightIndex)
+                                     uint32_t lightIndex)
 {
     NC_ASSERT(colorSources.size() <= 4u, "Only four color sources supported.");
     NC_ASSERT(depthSources.size() <= 3u, "Only three depth sources supported.");

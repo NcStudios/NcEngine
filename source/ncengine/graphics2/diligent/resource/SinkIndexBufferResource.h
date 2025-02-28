@@ -23,7 +23,7 @@ class SinkIndexBufferResource
                     std::span<const uint32_t> colorSources,
                     std::span<const uint32_t> depthSources,
                     bool hasPostProcessSource,
-                    int32_t lightIndex);
+                    uint32_t lightIndex);
 
         auto GetShaderVariable() -> Diligent::IShaderResourceVariable&
         {

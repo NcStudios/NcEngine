@@ -34,7 +34,7 @@ cbuffer SinkIndices
     int depthRT2;
     int depthRT3;
     uint hasPostProcess;
-    int lightIndex;
+    uint lightIndex;
 };
 
 struct LightData {

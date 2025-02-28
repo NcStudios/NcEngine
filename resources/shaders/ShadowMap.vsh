@@ -61,7 +61,7 @@ cbuffer SinkIndices
     int depthRT2;
     int depthRT3;
     uint hasPostProcess;
-    int lightIndex;
+    uint lightIndex;
 };
 
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)

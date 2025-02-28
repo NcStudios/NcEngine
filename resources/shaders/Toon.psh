@@ -8,6 +8,7 @@
 Texture2D     ShadowMapSinks[];
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerComparisonState  ShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentProperties
 {
@@ -87,15 +88,21 @@ float Band(float lightAmount)
     return 1.0f;
 }
 
-// Depth is non-linear. Linearize it and normalize it.
-float SampleNormalizeDepth(Texture2D tex, SamplerState smplr, float2 uv)
+float SampleShadow(Texture2D depthTex, SamplerComparisonState shadowSampler, float4 worldPos, matrix lightViewProj)
 {
-    float rawDepth = tex.Sample(smplr, uv).r;
-    float3 ndc = float3(uv * 2.0 - 1.0, rawDepth);
-    float4 view = cameraInvProjection * float4(ndc, 1.0);
-    view.xyz /= view.w;
-    float linearDepth = -view.z;
-    return (linearDepth - nearClip) / (farClip - nearClip);
+    // Transform world-space position to light-space clip coordinates
+    float4 lightClipPos = mul(worldPos, lightViewProj);
+    
+    // Convert clip-space position to NDC by performing perspective divide
+    float3 shadowCoord = lightClipPos.xyz / lightClipPos.w;
+    
+    // Transform from NDC [-1, 1] to UV coordinates [0, 1]
+    shadowCoord.x = shadowCoord.x * 0.5 + 0.5;       // X: [-1, 1] -> [0, 1]
+    shadowCoord.y = shadowCoord.y * -0.5 + 0.5;       // Y: [-1, 1] -> [1, 0] (flip Y)
+
+    // Sample shadow map depth using comparison sampling
+    float shadowFactor = depthTex.SampleCmpLevelZero(ShadowMapSinks_sampler, shadowCoord.xy, shadowCoord.z - 0.01);
+    return 1-pow(shadowFactor, 32.0);
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -105,7 +112,6 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     uint NormalIndex = Materials[PSIn.MaterialIndex].normalTexIndex;
     float4 Color = Textures[TexIndex].Sample(Textures_sampler, PSIn.UV);
     float4 Normals = Textures[NormalIndex].Sample(Textures_sampler, PSIn.UV);
-    Texture2D depthTex = ShadowMapSinks[1];
 
     // Get hatching texture and tiling property
     uint hatchTexIndex = Materials[PSIn.MaterialIndex].hatchTexIndex;
@@ -122,6 +128,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     }
 
     float3 result = 0.0f;
+    [unroll(lightCount)]
     for (int i = 0; i < lightCount; i++)
     {
         LightInfluence influence = LightRadiance(Lights[i], PSIn.WorldPos.xyz, cameraPosition, normals);
@@ -162,38 +169,27 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
     colHsv.z *= (1.5f);
     result.rgb = HSVtoRGB(colHsv.rgb);
 
+    float shadowFactor = 0.0f;
+
+    [unroll(lightCount)]
+    float shadowMapIndex = 0u;
+    for (int i = 0; i < lightCount; i++)
+    {
+        if (Lights[i].castsShadows)
+        {
+            Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
+            shadowFactor += SampleShadow(depthTex, ShadowMapSinks_sampler, PSIn.WorldPos, Lights[i].viewProj);
+            shadowMapIndex++;
+        }
+    }
+
+    // Assuming PSOut.Color is being set elsewhere and we just want to apply shadow
+    result *= (1-shadowFactor);
+
     // Gradient
     float3 gradient = lerp(Materials[PSIn.MaterialIndex].gradientStart, Materials[PSIn.MaterialIndex].gradientEnd, (normalize(PSIn.LocalPos).y + 1) * 0.5);
     float4 gradientApplied = float4(lerp(result.rgb, result.rgb + gradient, Materials[PSIn.MaterialIndex].gradientAmount), 1.0f);
     float4 outputColor = float4(lerp(gradientApplied, gradientApplied * gradient, 0.5f), 1.0f);
 
-
-    float4 fragLightPos = mul(PSIn.WorldPos, Lights[1].viewProj);
-
-    // Perform perspective division to get normalized device coordinates (NDC)
-    float3 ndc = fragLightPos.xyz / fragLightPos.w;
-
-    // Vulkan NDC to texture coordinates: NDC [-1, 1] -> UV [0, 1]
-    // Vulkan flips Y-axis compared to DirectX, so invert ndc.y
-    float2 shadowUV = ndc.xy * 0.5f + 0.5f;
-    shadowUV.y = 1.0f - shadowUV.y; 
-
-    // Sample the depth from the shadow map
-    float sampledDepth = depthTex.Sample(Textures_sampler, shadowUV).r;
-
-    // Convert the fragment's light space depth to [0, 1] range for comparison
-    float fragDepth = ndc.z * 0.5f + 0.5f;
-
-    // Compare the fragment depth to the sampled shadow map depth
-    float shadow = 0.0f;
-     if (shadowUV.x >= 0.01f && shadowUV.x <= 0.99f &&
-         shadowUV.y >= 0.01f && shadowUV.y <= 0.99f &&
-         fragDepth  >= 0.01f && fragDepth  <= 0.99f)
-    {
-        shadow = (fragDepth > sampledDepth + 0.001f) ? 0.5f : 0.0f;
-    }
-
-    // Assuming PSOut.Color is being set elsewhere and we just want to apply shadow
-    outputColor *= (1.0f - shadow);
     PSOut.Color = outputColor;
 }

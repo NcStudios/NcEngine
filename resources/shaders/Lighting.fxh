@@ -30,7 +30,7 @@ float CalculateSpecular(float3 L, float3 V, float3 N)
 {
     float3 H = normalize(L + V);
     float NDotH = max(0, dot(N, H));
-    return pow(NDotH, 32);
+    return max(pow(NDotH, 32), 0.0f);
 }
 
 float CalculateAttenuation(float D, float R)

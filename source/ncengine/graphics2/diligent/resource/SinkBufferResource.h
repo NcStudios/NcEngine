@@ -33,6 +33,7 @@ class SinkBufferResource
         }
 
         static auto MakeSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
+        static auto MakeShadowSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc;
 
         void Add(Diligent::IRenderDevice& device,
                  Diligent::IDeviceContext& context,

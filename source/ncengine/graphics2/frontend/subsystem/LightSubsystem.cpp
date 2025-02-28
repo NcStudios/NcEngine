@@ -22,8 +22,8 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace spotlight2
 {
-constexpr float g_nearClip = 0.3f;
-constexpr float g_farClip = 200.f;
+constexpr float g_nearClip = 0.25f;
+constexpr float g_farClip = 1000.f;
 
 auto CalculateLightViewProjectionMatrix(float arcRadians, DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
 {

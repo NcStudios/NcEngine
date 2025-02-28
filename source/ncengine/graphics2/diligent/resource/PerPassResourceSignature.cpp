@@ -32,13 +32,17 @@ PerPassResourceSignature::PerPassResourceSignature(Diligent::IRenderDevice& devi
         ToPipelineResourceDesc(shadowMapSinksDesc)
     };
 
-    const auto sampler = SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey);
+    const auto samplers = std::array{
+        SinkBufferResource::MakeSamplerDesc(colorSinksDesc.resourceKey),
+        SinkBufferResource::MakeShadowSamplerDesc(shadowMapSinksDesc.resourceKey),
+    };
+
     auto desc = Diligent::PipelineResourceSignatureDesc{};
     desc.Name = signatureName.data();
     desc.Resources = resources.data();
     desc.NumResources = static_cast<uint32_t>(resources.size());
-    desc.ImmutableSamplers = &sampler,
-    desc.NumImmutableSamplers = 1,
+    desc.ImmutableSamplers = samplers.data(),
+    desc.NumImmutableSamplers = static_cast<uint32_t>(samplers.size()),
     desc.UseCombinedTextureSamplers = true,
     desc.BindingIndex = bindingIndex;
 
