@@ -24,30 +24,42 @@ extern asset::AssetId SkeletonWalkRight;
 extern asset::AssetId SkeletonWalkLeft;
 extern asset::AssetId SkeletonWalkForward;
 extern asset::AssetId SkeletonWalkBackward;
+extern asset::AssetId StringLoose;
+extern asset::AssetId StringModerate;
+extern asset::AssetId StringTight;
+extern asset::AssetId StringTighter;
 }
 
 // Mesh
 namespace mesh
 {
+constexpr auto CavePath = "cave.nca";
+constexpr auto CreaturePath = "creature.nca";
+constexpr auto CreatureArmPath = "creature_arm.nca";
 constexpr auto Guy2Path = "guy2.nca";
 constexpr auto HalfPipePath = "halfpipe.nca";
-constexpr auto RampPath = "ramp.nca";
 constexpr auto OgrePath = "ogre.nca";
+constexpr auto RampPath = "ramp.nca";
 constexpr auto SkeletonPath = "skeleton.nca";
-constexpr auto CavePath = "cave.nca";
+constexpr auto StringPath = "string.nca";
+constexpr auto TreePath = "tree.nca";
 
 // Mesh
-extern asset::MeshView Cube;
-extern asset::MeshView Sphere;
 extern asset::MeshView Capsule;
-extern asset::MeshView Guy2;
-extern asset::MeshView Plane;
-extern asset::MeshView Wheel;
-extern asset::MeshView HalfPipe;
-extern asset::MeshView Ramp;
-extern asset::MeshView Ogre;
-extern asset::MeshView Skeleton;
 extern asset::MeshView Cave;
+extern asset::MeshView Creature;
+extern asset::MeshView CreatureArm;
+extern asset::MeshView Cube;
+extern asset::MeshView Guy2;
+extern asset::MeshView HalfPipe;
+extern asset::MeshView Ogre;
+extern asset::MeshView Plane;
+extern asset::MeshView Ramp;
+extern asset::MeshView Skeleton;
+extern asset::MeshView Sphere;
+extern asset::MeshView String;
+extern asset::MeshView Tree;
+extern asset::MeshView Wheel;
 } // namespace mesh
 
 // Materials
@@ -55,6 +67,8 @@ namespace material
 {
 extern MaterialDesc Blue;
 extern MaterialDesc Cave;
+extern MaterialDesc Creature;
+extern MaterialDesc CreatureArm;
 extern MaterialDesc Default;
 extern MaterialDesc Green;
 extern MaterialDesc Guy2;
@@ -63,7 +77,9 @@ extern MaterialDesc Orange;
 extern MaterialDesc Purple;
 extern MaterialDesc Red;
 extern MaterialDesc Skeleton;
+extern MaterialDesc String;
 extern MaterialDesc Teal;
+extern MaterialDesc Tree;
 extern MaterialDesc Yellow;
 } // namespace material
 

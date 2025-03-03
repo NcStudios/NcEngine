@@ -1307,6 +1307,97 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         Vector3{1.0f, 1.0f, 1.0f},
         1.0f
     );
+
+    const auto creatureRoot = world.Emplace<Entity>({
+        .tag = "Creature"
+    });
+
+    const auto creature = world.Emplace<Entity>({
+        .position = Vector3{-6.0f, 1.0f, 6.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .parent = creatureRoot,
+        .tag = "creature"
+    });
+    world.Emplace<StaticMesh>(creature, mesh::Creature, material::Creature);
+
+    const auto creatureArm = world.Emplace<Entity>({
+        .position = Vector3{-4.5f, 2.0f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(3.142f, -0.742f, 3.142f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .parent = creatureRoot,
+        .tag = "creature arm"
+    });
+    world.Emplace<StaticMesh>(creatureArm, mesh::CreatureArm, material::CreatureArm);
+
+    const auto creatureArm2 = world.Emplace<Entity>({
+        .position = Vector3{-8.0f, 2.0f, 7.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.7f, 0.0f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .parent = creatureRoot,
+        .tag = "creature arm 2"
+    });
+    world.Emplace<StaticMesh>(creatureArm2, mesh::CreatureArm, material::CreatureArm);
+
+    const auto creatureArm3 = world.Emplace<Entity>({
+        .position = Vector3{-4.0f, 2.0f, 8.0f},
+        .rotation = Quaternion::FromEulerAngles(-3.035f, -1.232f, -3.135f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .parent = creatureRoot,
+        .tag = "creature arm 3"
+    });
+    world.Emplace<StaticMesh>(creatureArm3, mesh::CreatureArm, material::CreatureArm);
+
+    const auto creatureArm4 = world.Emplace<Entity>({
+        .position = Vector3{-7.5f, 2.0f, 4.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, -0.118f, 0.0f),
+        .scale = Vector3{3.0f, 3.0f, 3.0f},
+        .parent = creatureRoot,
+        .tag = "creature arm 4"
+    });
+    world.Emplace<StaticMesh>(creatureArm4, mesh::CreatureArm, material::CreatureArm);
+
+    const auto tree = world.Emplace<Entity>({
+        .position = Vector3{5.0f, 0.0f, 2.0f},
+        .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "tree"
+    });
+    world.Emplace<StaticMesh>(tree, mesh::Tree, material::Tree);
+
+    const auto treeString = world.Emplace<Entity>({
+        .position = Vector3{4.6f, 6.0f, -0.5f},
+        .rotation = Quaternion::FromEulerAngles(1.7f, 0.0f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .tag = "treeString"
+    });
+
+    auto& animator = world.Emplace<SkinnedMesh>(
+        treeString,
+        mesh::String,
+        material::String,
+        animation::StringLoose
+    ).GetAnimationController();
+
+    animator.AddState(PlayOnceAnimation{
+        .animId = animation::StringLoose,
+        .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
+    });
+
+    animator.AddState(PlayOnceAnimation{
+        .animId = animation::StringModerate,
+        .enterWhen = [](){ return input::KeyDown(input::KeyCode::Two);}
+    });
+
+    animator.AddState(PlayOnceAnimation{
+        .animId = animation::StringTight,
+        .enterWhen = [](){ return input::KeyDown(input::KeyCode::Three);}
+    });
+
+    animator.AddState(PlayOnceAnimation{
+        .animId = animation::StringTighter,
+        .enterWhen = [](){ return input::KeyDown(input::KeyCode::Four);}
+    });
 }
 
 void PhysicsTest::Unload()

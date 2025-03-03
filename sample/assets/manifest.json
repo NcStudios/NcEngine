@@ -33,6 +33,20 @@
             }
         },
         {
+            "sourcePath": "raw/model/creature.fbx",
+            "assetName": "mesh/creature",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
+            "sourcePath": "raw/model/creature_arm.fbx",
+            "assetName": "mesh/creature_arm",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
             "sourcePath": "raw/model/guy2.fbx",
             "assetName": "mesh/guy2",
             "options": {
@@ -63,6 +77,20 @@
         {
             "sourcePath": "raw/model/skeleton.fbx",
             "assetName": "mesh/skeleton",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
+            "sourcePath": "raw/model/string.fbx",
+            "assetName": "mesh/string",
+            "options": {
+                "optimizeMesh": true
+            }
+        },
+        {
+            "sourcePath": "raw/model/tree.fbx",
+            "assetName": "mesh/tree",
             "options": {
                 "optimizeMesh": true
             }
@@ -116,6 +144,27 @@
                     "assetName": "skeletal_animation\\skeleton\\walk_right"
                 }
             ]
+        },
+        {
+            "sourcePath": "raw/skeletal_animation/string.fbx",
+            "assetNames": [
+                {
+                    "subResourceName": "Armature|Loose",
+                    "assetName": "skeletal_animation\\string\\loose"
+                },
+                {
+                    "subResourceName": "Armature|Moderate",
+                    "assetName": "skeletal_animation\\string\\moderate"
+                },
+                {
+                    "subResourceName": "Armature|Tight",
+                    "assetName": "skeletal_animation\\string\\tight"
+                },
+                {
+                    "subResourceName": "Armature|Tighter",
+                    "assetName": "skeletal_animation\\string\\tighter"
+                }
+            ]
         }
     ],
     "texture": [
@@ -126,6 +175,22 @@
         {
             "sourcePath": "raw/image/cave/Normal.png",
             "assetName": "texture/cave/Normal"
+        },
+        {
+            "sourcePath": "raw/image/creature/base_color.png",
+            "assetName": "texture/creature/base_color"
+        },
+        {
+            "sourcePath": "raw/image/creature/normal.png",
+            "assetName": "texture/creature/normal"
+        },
+        {
+            "sourcePath": "raw/image/creature/arm/base_color.png",
+            "assetName": "texture/creature/arm/base_color"
+        },
+        {
+            "sourcePath": "raw/image/creature/arm/normal.png",
+            "assetName": "texture/creature/arm/normal"
         },
         {
             "sourcePath": "raw/image/guy_2_base_color.png",
@@ -182,6 +247,22 @@
         {
             "sourcePath": "raw/image/solid_color/Yellow.png",
             "assetName": "texture/solid_color/Yellow"
+        },
+        {
+            "sourcePath": "raw/image/string/base_color.png",
+            "assetName": "texture/string/base_color"
+        },
+        {
+            "sourcePath": "raw/image/string/normal.png",
+            "assetName": "texture/string/normal"
+        },
+        {
+            "sourcePath": "raw/image/tree/base_color.png",
+            "assetName": "texture/tree/base_color"
+        },
+        {
+            "sourcePath": "raw/image/tree/normal.png",
+            "assetName": "texture/tree/normal"
         },
         {
             "sourcePath": "raw/image/cube_maps/night_sky.png",

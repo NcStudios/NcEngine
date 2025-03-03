@@ -20,6 +20,8 @@ namespace mesh
 {
 asset::MeshView Capsule{};
 asset::MeshView Cave{};
+asset::MeshView Creature{};
+asset::MeshView CreatureArm{};
 asset::MeshView Cube{};
 asset::MeshView Guy2{};
 asset::MeshView HalfPipe{};
@@ -28,6 +30,8 @@ asset::MeshView Plane{};
 asset::MeshView Ramp{};
 asset::MeshView Skeleton{};
 asset::MeshView Sphere{};
+asset::MeshView String{};
+asset::MeshView Tree{};
 asset::MeshView Wheel{};
 } // namespace mesh
 
@@ -35,6 +39,8 @@ namespace material
 {
 MaterialDesc Blue{"BlueMaterial"};
 MaterialDesc Cave{"CaveMaterial"};
+MaterialDesc Creature{"CreatureMaterial"};
+MaterialDesc CreatureArm{"CreatureArmMaterial"};
 MaterialDesc Default{"DefaultMaterial"};
 MaterialDesc Green{"GreenMaterial"};
 MaterialDesc Guy2{"Guy2Material"};
@@ -43,10 +49,11 @@ MaterialDesc Orange{"OrangeMaterial"};
 MaterialDesc Purple{"PurpleMaterial"};
 MaterialDesc Red{"RedMaterial"};
 MaterialDesc Skeleton{"SkeletonMaterial"};
+MaterialDesc String{"StringMaterial"};
 MaterialDesc Teal{"TealMaterial"};
+MaterialDesc Tree{"TreeMaterial"};
 MaterialDesc Yellow{"YellowMaterial"};
 } // namespace material
-
 
 namespace animation
 {
@@ -58,6 +65,10 @@ asset::AssetId SkeletonWalkRight{MakeAnimId("skeleton/walk_right.nca")};
 asset::AssetId SkeletonWalkLeft{MakeAnimId("skeleton/walk_left.nca")};
 asset::AssetId SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
 asset::AssetId SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
+asset::AssetId StringLoose{MakeAnimId("string/loose.nca")};
+asset::AssetId StringModerate{MakeAnimId("string/moderate.nca")};
+asset::AssetId StringTight{MakeAnimId("string/tight.nca")};
+asset::AssetId StringTighter{MakeAnimId("string/tighter.nca")};
 } // namespace animation
 
 namespace convex_hull
@@ -125,6 +136,8 @@ void InitializeResources()
     std::vector<std::string> textures
     {
         "cave/BaseColor.nca",
+        "creature/base_color.nca",
+        "creature/arm/base_color.nca",
         "guy_2_base_color.nca",
         "linear_hatch.nca",
         "noise.nca",
@@ -136,7 +149,9 @@ void InitializeResources()
         "solid_color/Purple.nca",
         "solid_color/Red.nca",
         "solid_color/Teal.nca",
-        "solid_color/Yellow.nca"
+        "solid_color/Yellow.nca",
+        "string/base_color.nca",
+        "tree/base_color.nca"
     };
 
     asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
@@ -146,7 +161,11 @@ void InitializeResources()
         "ogre/Normal.nca",
         "skeleton/Normal.nca",
         "cave/Normal.nca",
-        "guy_2_normal.nca"
+        "creature/normal.nca",
+        "creature/arm/normal.nca",
+        "guy_2_normal.nca",
+        "string/normal.nca",
+        "tree/normal.nca"
     };
 
     asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
@@ -157,6 +176,8 @@ void ReloadPrefabs()
 {
     mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
+    mesh::Creature = asset::AcquireMeshAsset(mesh::CreaturePath);
+    mesh::CreatureArm = asset::AcquireMeshAsset(mesh::CreatureArmPath);
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
     mesh::Guy2 = asset::AcquireMeshAsset(mesh::Guy2Path);
     mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
@@ -165,6 +186,8 @@ void ReloadPrefabs()
     mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
     mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
     mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::String = asset::AcquireMeshAsset(mesh::StringPath);
+    mesh::Tree = asset::AcquireMeshAsset(mesh::TreePath);
     mesh::Wheel = asset::AcquireMeshAsset(asset::WheelMesh);
 
     auto materialDefaults = MaterialProperties
@@ -209,6 +232,45 @@ void ReloadPrefabs()
     material::Guy2.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.363f};
     material::Guy2.properties.gradientAmount = 0.192f;
     material::Guy2.properties.useFlatShading = 1;
+
+    material::Creature.properties = materialDefaults;
+    material::Creature.properties.diffuseTex = asset::AcquireTextureAsset("creature/base_color.nca");
+    material::Creature.properties.normalTex = asset::AcquireTextureAsset("creature/normal.nca");
+    material::Creature.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
+    material::Creature.properties.normalIntensity = 1.0f;
+    material::Creature.properties.hatchTiling = 0.0f;
+    material::Creature.properties.reflectivity = 1.0f;
+    material::Creature.properties.useTextureNormals = 1;
+    material::Creature.properties.gradientStart = Vector3{0.985f, 0.0f, 0.0f};
+    material::Creature.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.963f};
+    material::Creature.properties.gradientAmount = 0.102f;
+    material::Creature.properties.useFlatShading = 1;
+
+    material::CreatureArm.properties = materialDefaults;
+    material::CreatureArm.properties.diffuseTex = asset::AcquireTextureAsset("creature/arm/base_color.nca");
+    material::CreatureArm.properties.normalTex = asset::AcquireTextureAsset("creature/arm/normal.nca");
+    material::CreatureArm.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
+    material::CreatureArm.properties.normalIntensity = 1.0f;
+    material::CreatureArm.properties.hatchTiling = 0.0f;
+    material::CreatureArm.properties.reflectivity = 1.0f;
+    material::CreatureArm.properties.useTextureNormals = 1;
+    material::CreatureArm.properties.gradientStart = Vector3{0.985f, 0.0f, 0.0f};
+    material::CreatureArm.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.963f};
+    material::CreatureArm.properties.gradientAmount = 0.102f;
+    material::CreatureArm.properties.useFlatShading = 1;
+
+    material::Tree.properties = materialDefaults;
+    material::Tree.properties.diffuseTex = asset::AcquireTextureAsset("tree/base_color.nca");
+    material::Tree.properties.normalTex = asset::AcquireTextureAsset("tree/normal.nca");
+    material::Tree.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
+    material::Tree.properties.normalIntensity = 0.01f;
+    material::Tree.properties.hatchTiling = 16.00f;
+    material::Tree.properties.reflectivity = 1.0f;
+    material::Tree.properties.useTextureNormals = 1;
+    material::Tree.properties.gradientStart = Vector3{0.2f, 0.75f, 0.0f};
+    material::Tree.properties.gradientEnd = Vector3{0.07f, 0.08f, 0.19f};
+    material::Tree.properties.gradientAmount = 0.1f;
+    material::Tree.properties.useFlatShading = 1;
 
     material::Ogre.properties = materialDefaults;
     material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
