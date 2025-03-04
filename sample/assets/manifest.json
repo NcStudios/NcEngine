@@ -157,12 +157,12 @@
                     "assetName": "skeletal_animation\\string\\moderate"
                 },
                 {
-                    "subResourceName": "Armature|Tight",
-                    "assetName": "skeletal_animation\\string\\tight"
+                    "subResourceName": "Armature|Still",
+                    "assetName": "skeletal_animation\\string\\still"
                 },
                 {
-                    "subResourceName": "Armature|Tighter",
-                    "assetName": "skeletal_animation\\string\\tighter"
+                    "subResourceName": "Armature|Tight",
+                    "assetName": "skeletal_animation\\string\\tight"
                 }
             ]
         }

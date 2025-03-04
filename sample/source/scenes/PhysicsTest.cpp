@@ -1357,26 +1357,48 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     });
     world.Emplace<StaticMesh>(creatureArm4, mesh::CreatureArm, material::CreatureArm);
 
+    const auto treeRoot = world.Emplace<Entity>({
+        .tag = "Tree"
+    });
+
     const auto tree = world.Emplace<Entity>({
         .position = Vector3{5.0f, 0.0f, 2.0f},
         .rotation = Quaternion::FromEulerAngles(0.0f, 0.0f, 0.0f),
         .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .parent = treeRoot,
         .tag = "tree"
     });
     world.Emplace<StaticMesh>(tree, mesh::Tree, material::Tree);
 
     const auto treeString = world.Emplace<Entity>({
-        .position = Vector3{4.6f, 6.0f, -0.5f},
-        .rotation = Quaternion::FromEulerAngles(1.7f, 0.0f, 0.0f),
-        .scale = Vector3{1.0f, 1.0f, 1.0f},
+        .position = Vector3{5.0, 9.0f, -0.5f},
+        .rotation = Quaternion::FromEulerAngles(1.7f, 0.8f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 0.8f},
+        .parent = treeRoot,
         .tag = "treeString"
+    });
+    
+    const auto treeString2 = world.Emplace<Entity>({
+        .position = Vector3{5.0, 9.0f, -1.0f},
+        .rotation = Quaternion::FromEulerAngles(1.7f, 0.8f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 0.8f},
+        .parent = treeRoot,
+        .tag = "treeString2"
+    });
+
+    const auto treeString3 = world.Emplace<Entity>({
+        .position = Vector3{5.0, 9.0f, -1.5f},
+        .rotation = Quaternion::FromEulerAngles(1.7f, 0.8f, 0.0f),
+        .scale = Vector3{1.0f, 1.0f, 0.8f},
+        .parent = treeRoot,
+        .tag = "treeString3"
     });
 
     auto& animator = world.Emplace<SkinnedMesh>(
         treeString,
         mesh::String,
         material::String,
-        animation::StringLoose
+        animation::StringStill
     ).GetAnimationController();
 
     animator.AddState(PlayOnceAnimation{
@@ -1384,19 +1406,28 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);}
     });
 
-    animator.AddState(PlayOnceAnimation{
+    auto& animator2 = world.Emplace<SkinnedMesh>(
+        treeString2,
+        mesh::String,
+        material::String,
+        animation::StringStill
+    ).GetAnimationController();
+
+    animator2.AddState(PlayOnceAnimation{
         .animId = animation::StringModerate,
         .enterWhen = [](){ return input::KeyDown(input::KeyCode::Two);}
     });
 
-    animator.AddState(PlayOnceAnimation{
+    auto& animator3 = world.Emplace<SkinnedMesh>(
+        treeString3,
+        mesh::String,
+        material::String,
+        animation::StringStill
+    ).GetAnimationController();
+
+    animator3.AddState(PlayOnceAnimation{
         .animId = animation::StringTight,
         .enterWhen = [](){ return input::KeyDown(input::KeyCode::Three);}
-    });
-
-    animator.AddState(PlayOnceAnimation{
-        .animId = animation::StringTighter,
-        .enterWhen = [](){ return input::KeyDown(input::KeyCode::Four);}
     });
 }
 

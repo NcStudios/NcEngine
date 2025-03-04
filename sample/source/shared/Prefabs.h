@@ -26,8 +26,8 @@ extern asset::AssetId SkeletonWalkForward;
 extern asset::AssetId SkeletonWalkBackward;
 extern asset::AssetId StringLoose;
 extern asset::AssetId StringModerate;
+extern asset::AssetId StringStill;
 extern asset::AssetId StringTight;
-extern asset::AssetId StringTighter;
 }
 
 // Mesh

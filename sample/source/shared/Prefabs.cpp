@@ -67,8 +67,8 @@ asset::AssetId SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
 asset::AssetId SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
 asset::AssetId StringLoose{MakeAnimId("string/loose.nca")};
 asset::AssetId StringModerate{MakeAnimId("string/moderate.nca")};
+asset::AssetId StringStill{MakeAnimId("string/still.nca")};
 asset::AssetId StringTight{MakeAnimId("string/tight.nca")};
-asset::AssetId StringTighter{MakeAnimId("string/tighter.nca")};
 } // namespace animation
 
 namespace convex_hull
