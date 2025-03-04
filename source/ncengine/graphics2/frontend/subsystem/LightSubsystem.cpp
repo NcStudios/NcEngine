@@ -22,15 +22,17 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace spotlight2
 {
-constexpr float g_nearClip = 0.25f;
-constexpr float g_farClip = 1000.f;
-
-auto CalculateLightViewProjectionMatrix(float arcRadians, DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
-{
-    const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * DirectX::XMMatrixPerspectiveRH(arcRadians, 1.0f, g_nearClip, g_farClip);
-}
-} // namespace spotlight2
+    constexpr float g_lightFieldOfView = nc::DegreesToRadians(45.0f);
+    constexpr float g_nearClip = 1.0f;
+    constexpr float g_farClip = 100.f;
+    const auto g_lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(g_lightFieldOfView, 1.0f, g_nearClip, g_farClip);
+    
+    auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix) -> DirectX::XMMATRIX
+    {
+        const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
+        return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * g_lightProjectionMatrix;
+    }
+} // namespace spotlight
 
 namespace nc::graphics
 {
@@ -84,7 +86,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 outerAngle,
                 radius,
                 light.castsShadows,
-                spotlight2::CalculateLightViewProjectionMatrix(std::max<float>(std::max<float>(innerAngle, innerAngle-outerAngle) * (radius*0.025f), 0.0001f), transform.TransformationMatrix())
+                spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix())
             );
         }
     }

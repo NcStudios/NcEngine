@@ -88,26 +88,93 @@ float Band(float lightAmount)
     return 1.0f;
 }
 
+float SampleNormalizeDepth(float rawDepth, float2 uv)
+{
+    float3 ndc = float3(uv * 2.0 - 1.0, rawDepth);
+    float4 view = cameraInvProjection * float4(ndc, 1.0);
+    view.xyz /= view.w;
+    float linearDepth = -view.z;
+    return (linearDepth - nearClip) / (farClip - nearClip);
+}
+
 float SampleShadow(Texture2D depthTex, SamplerComparisonState shadowSampler, float4 worldPos, matrix lightViewProj)
 {
     // Transform world-space position to light-space clip coordinates
     float4 lightClipPos = mul(worldPos, lightViewProj);
 
     // Convert clip-space position to NDC by performing perspective divide
-    float3 shadowCoord = lightClipPos.xyz / lightClipPos.w;
+    float3 fragPosInLightSpace = lightClipPos.xyz / lightClipPos.w;
 
     // Transform from NDC [-1, 1] to UV coordinates [0, 1]
-    shadowCoord.x = shadowCoord.x * 0.5 + 0.5;  // X: [-1, 1] -> [0, 1]
-    shadowCoord.y = shadowCoord.y * -0.5 + 0.5; // Y: [-1, 1] -> [1, 0] (flip Y)
+    fragPosInLightSpace.x = fragPosInLightSpace.x * 0.5 + 0.5;  // X: [-1, 1] -> [0, 1]
+    fragPosInLightSpace.y = fragPosInLightSpace.y * -0.5 + 0.5; // Y: [-1, 1] -> [1, 0] (flip Y)
 
-    if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0)
-    {
-        return 0.0f;
-    }
+    // if (fragPosInLightSpace.x < 0.0 || fragPosInLightSpace.x > 1.0 || fragPosInLightSpace.y < 0.0 || fragPosInLightSpace.y > 1.0)
+    // {
+    //     return 1.0f;
+    // }
+
+    float rawDepth = depthTex.Sample(ShadowMapSinks_sampler, fragPosInLightSpace.xy, fragPosInLightSpace.z);
 
     // Sample shadow map depth using comparison sampling
-    float shadowFactor = depthTex.SampleCmpLevelZero(ShadowMapSinks_sampler, shadowCoord.xy, shadowCoord.z - 0.01);
-    return pow(shadowFactor, 50.0);
+    return rawDepth < 0.6f ? 0.0f : 1.0f;
+}
+
+static const float4x4 biasMat = float4x4(
+    0.5, 0.0, 0.0, 0.0,
+    0.0, 0.5, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.5, 0.5, 0.0, 1.0
+);
+
+float ShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
+{
+    // Perform perspective divide
+
+    float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+        // Transform from NDC [-1, 1] to UV coordinates [0, 1]
+
+    projCoords.y = 1-projCoords.y;
+
+
+    // Get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+
+    // Check whether current frag pos is in shadow
+
+
+    // Get screen dimensions
+    float shadow = 0.0;
+    uint shadowMapWidth, shadowMapHeight;
+    depthTex.GetDimensions(shadowMapWidth, shadowMapHeight);
+    float2 texelSize = float2(1.0 / shadowMapWidth, 1.0 / shadowMapHeight);
+    const int sampleRadius = 2;
+
+    [unroll]
+    for(int y = -sampleRadius; y <= sampleRadius; y++)
+    {
+        [unroll]
+        for(int x = -sampleRadius; x <= sampleRadius; x++)
+        {
+            // Get closest depth value from light's perspective
+            float closestDepth = depthTex.SampleLevel(ShadowMapSinks_sampler, 
+                projCoords.xy + float2(x, y) * texelSize, 0).r;
+            if (currentDepth > closestDepth)
+            {
+                shadow += 1.0;
+            }
+        }
+    }
+    
+    shadow /= pow((sampleRadius * 2 + 1), 2);
+
+    if (projCoords.z > 1.0 || projCoords.z < 0)
+    {
+        shadow = 0.0;
+    }
+
+    return shadow;
 }
 
 void main(in  PSInput  PSIn, out PSOutput PSOut)
@@ -144,12 +211,12 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         if (Lights[i].castsShadows)
         {
             Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
-            float rawShadow = SampleShadow(depthTex, ShadowMapSinks_sampler, PSIn.WorldPos, Lights[i].viewProj);
-            shadowFactor = min(shadowFactor, rawShadow); 
+            float rawShadow = ShadowCalculation(mul(mul(PSIn.WorldPos, Lights[i].viewProj), biasMat), depthTex);
+            shadowFactor = (1.0f - rawShadow); 
             shadowMapIndex++;
         }
-        float intensityFactor = saturate(Lights[i].intensity / 200.0f);
-        shadowFactor = lerp(shadowFactor, 1.0, intensityFactor);
+        // float intensityFactor = saturate(Lights[i].intensity / 200.0f);
+        // shadowFactor = lerp(shadowFactor, 1.0, intensityFactor);
 
         float diffuseAmt = 0.0f;
         float specularAmt = 0.0f;
