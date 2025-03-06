@@ -22,41 +22,17 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace spotlight2
 {
-    constexpr float g_nearClip = 0.1f;
-    constexpr float g_defaultFarClip = 100.0f;
+    constexpr float g_nearClip = 0.5f;
 
-    auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix, float outerAngle, float radius, DirectX::XMVECTOR lightDirection) -> DirectX::XMMATRIX
+    auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix, float outerAngle, float farClip) -> DirectX::XMMATRIX
     {
-        // Compute the original cosine of the outer angle
-        float cosOuterAngle = cos(outerAngle);
-
-        // Apply the radius modulation with clamping to prevent excessive widening
-        float modulationFactor = std::clamp(1.0f - radius, 0.001f, 1.5f);
-        float modulatedCos = cosOuterAngle * modulationFactor;
-
-        // Ensure the modulated cosine is in a valid range [-1, 1] to avoid NaN from acos
-        modulatedCos = std::clamp(modulatedCos, -1.0f, 1.0f);
-
         // Compute the effective outer angle in radians
-        float effectiveOuterAngle = acos(modulatedCos);
-
-        // The FOV for the shadow map should be 2 * effectiveOuterAngle to match the cone
-        float lightFieldOfView = 3.14159f * effectiveOuterAngle;
-
-        // Use the light's radius as the far clip plane (with a small margin)
-        float farClip = radius * 1.1f;
+        float lightFieldOfView = 2 * outerAngle;
 
         // Create a perspective projection matrix that matches the cone
-        auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 1.0f, g_nearClip, farClip);
-
-        // Extract the light's position from the transform matrix
-        DirectX::XMVECTOR lightPosition = transformMatrix.r[3];
-
-        // Compute the look-at point: position + direction
-        DirectX::XMVECTOR lookAtPoint = DirectX::XMVectorAdd(lightPosition, lightDirection);
-
-        // Create the view matrix using the light's position and direction
-        return DirectX::XMMatrixLookAtRH(lightPosition, lookAtPoint, DirectX::g_XMIdentityR1) * lightProjectionMatrix;
+        auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 3.0f, g_nearClip, farClip);
+        const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
+        return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * lightProjectionMatrix;
     }
 }
 namespace nc::graphics
@@ -92,32 +68,24 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
     }
 
     { // Spot Lights
-                // Spot Lights
-                const auto& pool = ecs.GetPool<SpotLight>();
-                for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
-                {
-                    float rawOuterAngle = std::max<float>(light.outerAngle, 0.0001f); // In radians
-                    float radius = std::max<float>(light.radius, 0.0001f);
-                
-                    float innerAngle = cos(std::max<float>(light.innerAngle, 0.0001f));
-                    float outerAngle = cos(rawOuterAngle);
-                
-                    auto& transform = ecs.Get<Transform>(entity);
-                    DirectX::XMVECTOR lightDirection = transform.ForwardXM(); // Get the forward direction
-                
-                    m_data.emplace_back(
-                        light.diffuseColor,
-                        light.specularColor,
-                        light.intensity,
-                        transform.Position(),
-                        innerAngle,
-                        transform.Forward(), // Pass the direction directly
-                        outerAngle,
-                        radius,
-                        light.castsShadows,
-                        spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), rawOuterAngle, radius, lightDirection)
-                    );
-                }
+        const auto& pool = ecs.GetPool<SpotLight>();
+        for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
+        {
+            float outerAngle = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
+            auto& transform = ecs.Get<Transform>(entity);
+            m_data.emplace_back(
+                light.diffuseColor,
+                light.specularColor,
+                light.intensity,
+                transform.Position(),
+                cos(std::max(light.innerAngle, 0.0001f)) * (1 - light.radius * 0.01f),
+                transform.Forward(),
+                outerAngle,
+                light.radius,
+                light.castsShadows,
+                spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius* 4.0f)
+            );
+        }
     }
     return LightRenderState{m_data};
 }

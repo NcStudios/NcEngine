@@ -36,7 +36,7 @@ float CalculateSpecular(float3 L, float3 V, float3 N)
 float CalculateAttenuation(float D, float R)
 {
     float distance = D / R;
-    return exp(-2.0f * distance); // Steep and smooth
+    return exp(-8.0f * distance); // Steep and smooth
 }
 
 LightInfluence DirectionalLightRadiance(LightData light, float3 fragWorldPos, float3 cameraPosition, float3 normal)
@@ -83,8 +83,6 @@ LightInfluence SpotLightRadiance(LightData light, float3 fragWorldPos, float3 ca
     float specularTotal = CalculateSpecular(lightVec, viewVec, normal);
 
     // Spot Light Cutoff
-    light.innerAngle *= 1-(light.radius * 0.01f);
-    light.outerAngle *= 1-(light.radius * 0.01f);
     float theta = dot(lightVec, normalize(-light.direction));
     float epsilon = max(light.innerAngle - light.outerAngle, 0.0001f);
     float intensity = clamp((theta - light.outerAngle) / epsilon, 0.0f, 1.0f);
