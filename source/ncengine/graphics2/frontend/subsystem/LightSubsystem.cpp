@@ -30,7 +30,7 @@ namespace spotlight2
         float lightFieldOfView = 2 * outerAngle;
 
         // Create a perspective projection matrix that matches the cone
-        auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 3.0f, g_nearClip, farClip);
+        auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 2.0f, g_nearClip, farClip);
         const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
         return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * lightProjectionMatrix;
     }
@@ -83,7 +83,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 outerAngle,
                 light.radius,
                 light.castsShadows,
-                spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius* 4.0f)
+                spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius)
             );
         }
     }
