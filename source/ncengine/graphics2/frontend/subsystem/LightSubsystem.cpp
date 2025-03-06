@@ -22,16 +22,19 @@ auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> D
 
 namespace spotlight2
 {
-constexpr float g_nearClip = 0.25f;
-constexpr float g_farClip = 1000.f;
+    constexpr float g_nearClip = 0.5f;
 
-auto CalculateLightViewProjectionMatrix(float arcRadians, DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
-{
-    const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
-    return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * DirectX::XMMatrixPerspectiveRH(arcRadians, 1.0f, g_nearClip, g_farClip);
+    auto CalculateLightViewProjectionMatrix(const DirectX::XMMATRIX& transformMatrix, float outerAngle, float farClip) -> DirectX::XMMATRIX
+    {
+        // Compute the effective outer angle in radians
+        float lightFieldOfView = 2 * outerAngle;
+
+        // Create a perspective projection matrix that matches the cone
+        auto lightProjectionMatrix = DirectX::XMMatrixPerspectiveRH(lightFieldOfView, 2.0f, g_nearClip, farClip);
+        const auto look = DirectX::XMVector3Transform(DirectX::g_XMIdentityR2, transformMatrix);
+        return DirectX::XMMatrixLookAtRH(transformMatrix.r[3], look, DirectX::g_XMNegIdentityR1) * lightProjectionMatrix;
+    }
 }
-} // namespace spotlight2
-
 namespace nc::graphics
 {
 auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, SpotLight, Transform> ecs) -> LightRenderState
@@ -68,27 +71,22 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         const auto& pool = ecs.GetPool<SpotLight>();
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
-            float innerAngle = cos(std::max<float>(light.innerAngle, 0.0001f));
-            float outerAngle = cos(std::max<float>(light.outerAngle, 0.0001f));
-            float radius = std::max<float>(light.radius, 0.0001f);
-
-
+            float outerAngle = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
             auto& transform = ecs.Get<Transform>(entity);
             m_data.emplace_back(
                 light.diffuseColor,
                 light.specularColor,
                 light.intensity,
                 transform.Position(),
-                innerAngle,
+                cos(std::max(light.innerAngle, 0.0001f)) * (1 - light.radius * 0.01f),
                 transform.Forward(),
                 outerAngle,
-                radius,
+                light.radius,
                 light.castsShadows,
-                spotlight2::CalculateLightViewProjectionMatrix(std::max<float>(std::max<float>(innerAngle, innerAngle-outerAngle) * (radius*0.025f), 0.0001f), transform.TransformationMatrix())
+                spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius)
             );
         }
     }
-
     return LightRenderState{m_data};
 }
 } // namespace nc::graphics
