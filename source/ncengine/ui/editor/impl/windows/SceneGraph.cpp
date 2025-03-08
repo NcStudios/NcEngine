@@ -168,7 +168,7 @@ void SceneGraph::GraphContextMenu(EditorContext& ctx, CreateEntityDialog& create
         {
             if (ImGui::Selectable("DirectionalLight"))
             {
-                ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{1.0f, 10.0f, -1.0f}, .tag = "DirectionalLight"});
+                ctx.selectedEntity = ctx.world.Emplace<Entity>({.position = Vector3{0.0f, 10.0f, 0.0f}, .rotation = nc::Quaternion::FromEulerAngles(1.5f, 0.809f, 0.0f), .tag = "DirectionalLight"});
                 ctx.world.Emplace<DirectionalLight>(ctx.selectedEntity);
             }
             if (ImGui::Selectable("PointLight"))
