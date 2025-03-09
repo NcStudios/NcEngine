@@ -15,6 +15,7 @@ struct DirectionalLight
     Vector3 diffuseColor = Vector3::One();
     Vector3 specularColor = Vector3::One();
     float intensity = 1.0f;
+    bool castsShadows = true;
 };
 
 /** @brief Component representing an omnidirectional light. */

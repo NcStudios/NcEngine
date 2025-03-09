@@ -299,6 +299,7 @@ TEST(ComponentSerializationTests, RoundTrip_directionalLight_preservesValues)
     const auto actual = nc::DeserializeDirectionalLight(stream, g_deserializationContext, nullptr);
     EXPECT_EQ(expected.diffuseColor, actual.diffuseColor);
     EXPECT_EQ(expected.specularColor, actual.specularColor);
+    EXPECT_EQ(expected.castsShadows, actual.castsShadows);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_pointLight_preservesValues)
@@ -325,6 +326,7 @@ TEST(ComponentSerializationTests, RoundTrip_spotLight_preservesValues)
     EXPECT_EQ(expected.innerAngle, actual.innerAngle);
     EXPECT_EQ(expected.outerAngle, actual.outerAngle);
     EXPECT_EQ(expected.radius, actual.radius);
+    EXPECT_EQ(expected.castsShadows, actual.castsShadows);
 }
 
 TEST(ComponentSerializationTests, RoundTrip_rigidBody_preservesValues)

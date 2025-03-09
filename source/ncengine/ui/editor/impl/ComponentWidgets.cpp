@@ -1154,6 +1154,7 @@ void DirectionalLightUIWidget(DirectionalLight& light, EditorContext&, const std
     ui::InputColor3(light.diffuseColor, "diffuseColor");
     ui::InputColor3(light.specularColor, "specularColor");
     ui::DragFloat(light.intensity, "intensity", 0.1f, 0.0f, 200.0f);
+    nc::ui::Checkbox(light.castsShadows, "castsShadows");
 }
 
 void PointLightUIWidget(PointLight& light, EditorContext&, const std::any&)
