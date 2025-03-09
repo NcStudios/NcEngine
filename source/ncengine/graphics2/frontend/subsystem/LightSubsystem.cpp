@@ -10,13 +10,13 @@ namespace directionallight
 {
 constexpr float g_nearClip = 1.0f;
 constexpr float g_farClip = 150.0f;
-const auto g_sceneCenter = DirectX::XMVectorZero();
+const auto g_sceneCenter = DirectX::g_XMZero;
 const auto g_lightProjectionMatrix = DirectX::XMMatrixOrthographicRH(150.0f, 150.0f, g_nearClip, g_farClip);
 
 auto CalculateLightViewProjectionMatrix(DirectX::FXMMATRIX transformMatrix) -> DirectX::XMMATRIX
 {
     DirectX::XMMATRIX rotationMatrix = transformMatrix;
-    rotationMatrix.r[3] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f); // Directional lights have no position component
+    rotationMatrix.r[3] = DirectX::g_XMIdentityR3; // Directional lights have no position component
 
     const auto look = DirectX::XMVector3TransformNormal(DirectX::g_XMIdentityR2, rotationMatrix);
     auto eye = DirectX::XMVectorSubtract(g_sceneCenter, DirectX::XMVectorScale(look, 100.0));
@@ -64,12 +64,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         for (auto [entity, light] : std::views::zip(pool.GetEntityPool(), pool.GetComponents()))
         {
             auto& transform = ecs.Get<Transform>(entity);
-            auto shadowMapMatrix = DirectX::XMMatrixIdentity();
-
-            if (light.castsShadows == 1)
-            {
-                shadowMapMatrix = directionallight::CalculateLightViewProjectionMatrix(transform.TransformationMatrix());
-            }
+            auto shadowMapMatrix = light.castsShadows == 1 ? directionallight::CalculateLightViewProjectionMatrix(transform.TransformationMatrix()) : DirectX::XMMatrixIdentity();
 
             m_data.emplace_back(
                 light.diffuseColor,
@@ -105,12 +100,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
         {
             float outerAngle = cos(std::max(light.outerAngle, 0.0001f)) * (1 - light.radius * 0.01f);
             auto& transform = ecs.Get<Transform>(entity);
-            auto shadowMapMatrix = DirectX::XMMatrixIdentity();
-
-            if (light.castsShadows == 1)
-            {
-                shadowMapMatrix = spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius);
-            }
+            auto shadowMapMatrix = light.castsShadows == 1 ? spotlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix(), (1-outerAngle)*1.75f, light.radius) : DirectX::XMMatrixIdentity();
 
             m_data.emplace_back(
                 light.diffuseColor,
