@@ -121,9 +121,11 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
 {
     using namespace Diligent;
 
+    auto maxTextures = m_isCubeMap ? m_desc.maxTextures * 6 : m_desc.maxTextures;
+
     if (!m_initialLoadComplete)
     {
-        InitializeArray(context, device, m_variable, m_desc.maxTextures, false);
+        InitializeArray(context, device, m_variable, maxTextures, false);
         m_initialLoadComplete = true;
     }
 
@@ -132,11 +134,13 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
         return;
     }
 
+    numRenderTargets = m_isCubeMap ? numRenderTargets * 6 : numRenderTargets;
+
     auto targets = numSamples > 1
         ? SinkTargets{m_texturesMsaa, m_renderTargetViewsMsaa, nullptr}
         : SinkTargets{m_textures, m_renderTargetViews, &m_shaderResourceViews};
 
-    if (numRenderTargets + targets.textures.size() > m_desc.maxTextures)
+    if (numRenderTargets + targets.textures.size() > maxTextures)
     {
         throw NcError{"Max texture count exceeded"};
     }
@@ -149,16 +153,20 @@ void SinkBufferResource::Add(Diligent::IRenderDevice& device,
     }
 
     auto renderTargetDesc = MakeTextureDesc(m_desc, renderTargetWidth, renderTargetHeight, numSamples);
+    auto numFaces = m_isCubeMap ? 6u : 1u;
     for (auto i = 0u; i < numRenderTargets; i++)
     {
-        const auto rtName = fmt::format("{}: {}", m_desc.name, i);
-        renderTargetDesc.Name = rtName.data();
-
-        auto& renderTarget = targets.textures.emplace_back(MakeTexture(device, renderTargetDesc));
-        targets.renderTargetViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
-        if (targets.shaderResourceViews)
+        for (auto j = 0u; j < numFaces; j++)
         {
-            targets.shaderResourceViews->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+            const auto rtName = m_isCubeMap ? fmt::format("{}: {} Face: {}", m_desc.name, i, j) : fmt::format("{}: {}", m_desc.name, i);
+            renderTargetDesc.Name = rtName.data();
+
+            auto& renderTarget = targets.textures.emplace_back(MakeTexture(device, renderTargetDesc));
+            targets.renderTargetViews.push_back(renderTarget->GetDefaultView(m_desc.viewType));
+            if (targets.shaderResourceViews)
+            {
+                targets.shaderResourceViews->push_back(renderTarget->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+            }
         }
     }
 

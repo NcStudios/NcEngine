@@ -1,3 +1,5 @@
+#include "Lighting.fxh"
+
 struct VSInput
 {
     float3 Pos         : ATTRIB0;
@@ -35,20 +37,7 @@ cbuffer SinkIndices
     int depthRT3;
     uint hasPostProcess;
     uint lightIndex;
-};
-
-struct LightData {
-    float3 diffuseColor;
-    int type; // 0: Directional, 1: Point, 2: Spot
-    float3 specularColor;
-    float radius;
-    float3 position;
-    float innerAngle;
-    float3 direction;
-    float outerAngle;
-    float intensity;
-    int castsShadows;
-    float4x4 viewProj;
+    uint lightFaceIndex;
 };
 
 StructuredBuffer<TransformData> Transforms;
@@ -151,6 +140,14 @@ void main(in VSInput VSIn, uint InstanceID : SV_InstanceID, out PSInput PSIn)
 
     uint transformIndex = instance.transformIndex;
     float4 worldPos = mul(pos, Transforms[transformIndex].modelMatrix);
-    PSIn.Pos = mul(worldPos, Lights[lightIndex].viewProj);
 
+    LightData light = Lights[lightIndex];
+    if (light.type == 1) // Point Light
+    {
+        PSIn.Pos = mul(mul(worldPos, light.viewProj), DirectionalMatrices[lightFaceIndex]);
+    }
+    else
+    {
+        PSIn.Pos = mul(worldPos, light.viewProj);
+    }
 }

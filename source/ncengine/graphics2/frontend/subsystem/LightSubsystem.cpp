@@ -87,7 +87,7 @@ auto LightSubsystem::BuildState(ecs::ExplicitEcs<DirectionalLight, PointLight, S
                 light.specularColor,
                 light.intensity,
                 transform.Position(),
-                0, /** @todo, come up with shadow decisioning (which lights cast shadows) */
+                1, /** @todo, come up with shadow decisioning (which lights cast shadows) */
                 light.radius,
                 pointlight2::CalculateLightViewProjectionMatrix(transform.TransformationMatrix())
             );

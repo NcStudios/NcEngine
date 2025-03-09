@@ -24,7 +24,8 @@ void SinkIndexBufferResource::Update(Diligent::IDeviceContext& context,
                                      std::span<const uint32_t> colorSources,
                                      std::span<const uint32_t> depthSources,
                                      bool hasPostProcessSource,
-                                     uint32_t lightIndex)
+                                     uint32_t lightIndex,
+                                     uint32_t lightFaceIndex)
 {
     NC_ASSERT(colorSources.size() <= 4u, "Only four color sources supported.");
     NC_ASSERT(depthSources.size() <= 3u, "Only three depth sources supported.");
@@ -52,7 +53,7 @@ void SinkIndexBufferResource::Update(Diligent::IDeviceContext& context,
     {
         colorSourcesArray[0], colorSourcesArray[1], colorSourcesArray[2], colorSourcesArray[3],
         depthSourcesArray[0], depthSourcesArray[1], depthSourcesArray[2], hasPostProcessSource ? 1u : 0u,
-        lightIndex
+        lightIndex, lightFaceIndex
     };
     m_buffer.Write(context, data);
 }

@@ -51,6 +51,7 @@ struct PostProcessSinkIndexData
     int32_t depthRenderTargetIndex3;
     uint32_t hasPostProcessTarget;
     uint32_t lightIndex;
+    uint32_t lightFaceIndex;
 };
 
 // Object model for StaticMeshes (type: StructuredBuffer element type).
@@ -104,17 +105,17 @@ struct ParticleData
     uint32_t textureIndex = std::numeric_limits<uint32_t>::max();
 };
 
+struct LightType
+{
+    static constexpr int Directional = 0;
+    static constexpr int Point = 1;
+    static constexpr int Spot = 2;
+    static constexpr int Uninitialized = -1;
+};
+
 // Object model for lights (directional/point/spot) (type: StructuredBuffer element type).
 struct LightData
 {
-    struct LightType
-    {
-        static constexpr int Directional = 0;
-        static constexpr int Point = 1;
-        static constexpr int Spot = 2;
-        static constexpr int Uninitialized = -1;
-    };
-
     // Construct from DirectionalLight
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,

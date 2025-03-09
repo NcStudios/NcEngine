@@ -5,10 +5,10 @@
 
 #include "Lighting.fxh"
 
-Texture2D     ShadowMapSinks[];
+Texture2D     UniShadowMapSinks[];
 Texture2D     Textures[];
 SamplerState  Textures_sampler; // By convention, texture samplers must use the '_sampler' suffix
-SamplerComparisonState  ShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
+SamplerComparisonState  UniShadowMapSinks_sampler; // By convention, texture samplers must use the '_sampler' suffix
 
 cbuffer EnvironmentProperties
 {
@@ -121,7 +121,7 @@ float ShadowCalculation(float4 fragPosLightSpace, Texture2D depthTex)
         for(int x = -sampleRadius; x <= sampleRadius; x++)
         {
             // Get closest depth value from light's perspective
-            float closestDepth = depthTex.SampleLevel(ShadowMapSinks_sampler, 
+            float closestDepth = depthTex.SampleLevel(UniShadowMapSinks_sampler, 
             projCoords.xy + float2(x, y) * texelSize, 0).r;
             if (currentDepth > closestDepth)
             {
@@ -179,7 +179,7 @@ void main(in  PSInput  PSIn, out PSOutput PSOut)
         float shadowFactor = 1.0f;
         if (Lights[i].castsShadows)
         {
-            Texture2D depthTex = ShadowMapSinks[shadowMapIndex];
+            Texture2D depthTex = UniShadowMapSinks[shadowMapIndex];
             float rawShadow = ShadowCalculation(mul(mul(PSIn.WorldPos, Lights[i].viewProj), biasMat), depthTex);
             shadowFactor = (1.0f - rawShadow); 
             shadowMapIndex++;

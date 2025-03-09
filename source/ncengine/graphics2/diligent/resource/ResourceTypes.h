@@ -36,6 +36,7 @@ struct SinkBufferDesc
     Diligent::SHADER_TYPE shaderType = Diligent::SHADER_TYPE_UNKNOWN;
     uint32_t maxElementCount = 1u;
     bool dynamic = false;
+    bool isCubeMap = false;
 };
 
 struct UniformBufferDesc

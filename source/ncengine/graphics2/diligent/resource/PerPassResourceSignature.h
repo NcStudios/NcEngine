@@ -25,7 +25,8 @@ class PerPassResourceSignature
                                           const SinkBufferDesc& colorSinksDesc,
                                           const SinkBufferDesc& depthSinksDesc,
                                           const SinkBufferDesc& postProcessSinksDesc,
-                                          const SinkBufferDesc& shadowMapSinksDesc,
+                                          const SinkBufferDesc& uniShadowMapSinksDesc,
+                                          const SinkBufferDesc& pointShadowMapSinksDesc,
                                           const UniformBufferDesc& postProcessResourceDesc,
                                           const UniformBufferDesc& sinkIndexDesc);
 
@@ -41,7 +42,8 @@ class PerPassResourceSignature
         auto GetSinkIndexBufferResource()               -> SinkIndexBufferResource&            { return *m_sinkIndexBufferResource; }
         auto GetPostProcessSinkResource(uint32_t index) -> SinkBufferResource&                 { return m_postProcessSinksResource.at(index); }
         auto GetPostProcessPropertyResource()           -> PostProcessPropertyBufferResource&  { return *m_postProcessPropertyResource; }
-        auto GetShadowMapSinksResource()                -> SinkBufferResource&                 { return *m_shadowMapSinksResource; }
+        auto GetUniShadowMapSinksResource()             -> SinkBufferResource&                 { return *m_uniShadowMapSinksResource; }
+        auto GetPointShadowMapSinksResource()           -> SinkBufferResource&                 { return *m_pointShadowMapSinksResource; }
 
         auto GetPostProcessSinkCount() const      -> uint32_t                               { return m_postProcessSinkCount; }
         auto GetColorSinkCount(bool isMsaa) const -> uint32_t                               { return isMsaa ? m_colorSinksResource->GetMsaaSinkCount() : m_colorSinksResource->GetSinkCount(); }
@@ -56,7 +58,8 @@ class PerPassResourceSignature
         std::vector<TextureBufferDesc> m_postProcessSinkDescs;
         std::unique_ptr<SinkIndexBufferResource> m_sinkIndexBufferResource;
         std::unique_ptr<PostProcessPropertyBufferResource> m_postProcessPropertyResource;
-        std::unique_ptr<SinkBufferResource> m_shadowMapSinksResource;
+        std::unique_ptr<SinkBufferResource> m_uniShadowMapSinksResource;
+        std::unique_ptr<SinkBufferResource> m_pointShadowMapSinksResource;
         uint32_t m_postProcessSinkCount;
         std::string m_postProcessResourceKey;
 };
