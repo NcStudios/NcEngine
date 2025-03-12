@@ -50,6 +50,7 @@ struct PostProcessSinkIndexData
     int32_t depthRenderTargetIndex2;
     int32_t depthRenderTargetIndex3;
     uint32_t hasPostProcessTarget;
+    uint32_t lightIndex;
 };
 
 // Object model for StaticMeshes (type: StructuredBuffer element type).
@@ -118,12 +119,16 @@ struct LightData
     LightData(const Vector3& diffuseCol,
               const Vector3& specularCol,
               const float intensity_,
-              const Vector3& dir)
+              const Vector3& dir,
+              int32_t enableShadows,
+              DirectX::FXMMATRIX viewProj)
         : diffuseColor{diffuseCol},
           type{LightType::Directional},
           specularColor{specularCol},
           direction{dir},
-          intensity{intensity_}
+          intensity{intensity_},
+          castsShadows{enableShadows},
+          viewProjection{viewProj}
     {
     }
 

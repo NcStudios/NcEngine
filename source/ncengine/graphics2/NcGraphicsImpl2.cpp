@@ -162,6 +162,24 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             std::vector<PassDesc>
             {
                 PassDesc{
+                    .flag = MaterialPassFlag::Shadow,
+                    .name = "Shadow",
+                    .type = PassType::Material,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ShadowMap.vsh"},
+                    .shadowMapSink = ShadowMapTarget::Uni,
+                    .isMsaa = false,
+                    .useDepthTest = true
+                },
+                PassDesc{
+                    .flag = MaterialPassFlag::Shadow,
+                    .name = "Shadow",
+                    .type = PassType::SkinnedMaterial,
+                    .shaderPaths = ShaderPaths{.vertexShaderPath = "ShadowMapSkinned.vsh"},
+                    .shadowMapSink = ShadowMapTarget::Uni,
+                    .isMsaa = false,
+                    .useDepthTest = true
+                },
+                PassDesc{
                     .flag = MaterialPassFlag::Depth,
                     .name = "Depth",
                     .type = PassType::Material,
@@ -266,7 +284,7 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
                     .useDepthTest = false
                 }
             },
-            GetImplementedMaterialPassFlags(),
+            GetMaterialPassFlags(),
             GetPostProcessPassFlags(),
             GetMiscsPassFlags()
           },
@@ -277,6 +295,8 @@ NcGraphicsImpl2::NcGraphicsImpl2(const config::GraphicsSettings& graphicsSetting
             m_engine.GetShaderFactory(),
             m_shaderBindings,
             m_passManifest,
+            graphicsSettings,
+            memorySettings,
             m_engine.GetDeviceCapability().msaaSampleCount
           },
           m_frontend{
@@ -433,7 +453,8 @@ void NcGraphicsImpl2::Run()
         swapChain,
         m_shaderBindings.GetPerPassSignature(),
         renderState.meshRenderState.staticMeshBatches,
-        renderState.meshRenderState.skinnedMeshBatches
+        renderState.meshRenderState.skinnedMeshBatches,
+        renderState.lightRenderState.lights
     );
 
     m_passBackend.RenderWireframe(

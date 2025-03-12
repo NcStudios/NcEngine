@@ -1,19 +1,14 @@
 struct VSInput
 {
     // Vertex attributes
-    float3 Pos         : ATTRIB0;
-    float3 Normal      : ATTRIB1;
-    float2 UV          : ATTRIB2;
+    float3 Pos    : ATTRIB0;
+    float3 Normal : ATTRIB1;
+    float2 UV     : ATTRIB2;
 };
 
 struct PSInput 
 {
-    float4 Pos           : SV_POSITION;
-    float3 Normal        : NORMAL;
-    float2 UV            : TEX_COORD;
-    uint   MaterialIndex;
-    float4 WorldPos;
-    float3 LocalPos;
+    float4 Pos : SV_POSITION;
 };
 
 struct TransformData
@@ -21,7 +16,22 @@ struct TransformData
     float4x4 model;
 };
 
+struct LightData {
+    float3 diffuseColor;
+    int type; // 0: Directional, 1: Point, 2: Spot
+    float3 specularColor;
+    float radius;
+    float3 position;
+    float innerAngle;
+    float3 direction;
+    float outerAngle;
+    float intensity;
+    int castsShadows;
+    float4x4 viewProj;
+};
+
 StructuredBuffer<TransformData> Transforms;
+StructuredBuffer<LightData> Lights;
 
 struct StaticMeshInstanceData
 {
@@ -40,15 +50,23 @@ cbuffer EnvironmentProperties
     float nearClip;
     float farClip;
 };
+
+cbuffer SinkIndices
+{
+    int colorRT1;
+    int colorRT2;
+    int colorRT3;
+    int colorRT4;
+    int depthRT1;
+    int depthRT2;
+    int depthRT3;
+    uint hasPostProcess;
+    uint lightIndex;
+};
+
 void main(in  VSInput VSIn, uint InstanceID : SV_InstanceID,  out PSInput PSIn)
 {
     uint transformIndex = StaticInstances[InstanceID].transformIndex;
-    uint materialIndex = StaticInstances[InstanceID].materialIndex;
     float4 TransformedPos = mul(float4(VSIn.Pos, 1.0), Transforms[transformIndex].model);
-    PSIn.Pos = mul(TransformedPos, cameraViewProjection);
-    PSIn.UV  = VSIn.UV;
-    PSIn.Normal = normalize( mul(VSIn.Normal, Transforms[transformIndex].model));
-    PSIn.WorldPos = TransformedPos;
-    PSIn.LocalPos = VSIn.Pos.xyz;
-    PSIn.MaterialIndex = materialIndex;
+    PSIn.Pos = mul(TransformedPos, Lights[lightIndex].viewProj);
 }

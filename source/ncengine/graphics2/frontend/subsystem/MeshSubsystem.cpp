@@ -179,8 +179,8 @@ auto MeshSubsystem::BuildState(ecs::ExplicitEcs<Transform> ecs) -> MeshRenderSta
         .transformData = m_transformCache.BuildState(),
         .staticMeshInstanceData = m_staticMeshInstanceCache.BuildState(),
         .skinnedMeshInstanceData = m_skinnedMeshInstanceCache.BuildState(),
-        .staticMeshBatches = m_staticMeshInstanceCache.BuildBatches(GetImplementedMaterialPassFlags()),
-        .skinnedMeshBatches = m_skinnedMeshInstanceCache.BuildBatches(GetImplementedMaterialPassFlags())
+        .staticMeshBatches = m_staticMeshInstanceCache.BuildBatches(GetMaterialPassFlags()),
+        .skinnedMeshBatches = m_skinnedMeshInstanceCache.BuildBatches(GetMaterialPassFlags())
     };
 }
 

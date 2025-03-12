@@ -1284,21 +1284,10 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
     BuildChain(world);
     BuildTriggers(world);
 
-    world.Emplace<PointLight>(
-        world.Emplace<Entity>({
-            .position = Vector3{-15.0f, 50.0f, 35.0f},
-            .tag = "Point Light"
-        }),
-        Vector3{1.0f, 1.0f, 1.0f},
-        Vector3{0.8f, 0.8f, 0.8f},
-        3.5f,
-        300.0f
-    );
-
     world.Emplace<DirectionalLight>(
         world.Emplace<Entity>({
             .position = Vector3{0.0f, 40.0f, 0.0f},
-            .rotation = nc::Quaternion::FromEulerAngles(-1.892f, 0.809f, -2.661f),
+            .rotation = nc::Quaternion::FromEulerAngles(1.5f, 0.809f, 0.0f),
             .tag = "Directional Light"
         }),
         Vector3{1.0f, 1.0f, 1.0f},

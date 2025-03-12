@@ -7,6 +7,7 @@
 #include "graphics2/diligent/resource/SinkIndexBufferResource.h"
 #include "graphics2/diligent/resource/WireframeBufferResource.h"
 #include "graphics2/frontend/subsystem/PostProcessState.h"
+#include "ncengine/config/Config.h"
 #include "ncengine/debug/Profile.h"
 
 #include "ncutility/NcError.h"
@@ -121,6 +122,8 @@ PassBackend::PassBackend(IRenderDevice& device,
                          ShaderFactory& shaderFactory,
                          ShaderBindings& shaderBindings,
                          const PassManifest& passManifest,
+                         const config::GraphicsSettings& graphicsSettings,
+                         const config::MemorySettings& memorySettings,
                          uint32_t numSamples)
     : m_numSamples{numSamples},
       m_finalColorTarget{std::nullopt},
@@ -130,6 +133,7 @@ PassBackend::PassBackend(IRenderDevice& device,
     auto& perPassSignature = shaderBindings.GetPerPassSignature();
     auto& colorSinks = perPassSignature.GetColorSinksResource();
     auto& depthSinks = perPassSignature.GetDepthSinksResource();
+    auto& shadowMapSinks = perPassSignature.GetShadowMapSinksResource();
 
     // Get swapchain width and height to create screen-sized render targets
     auto screenWidth = swapChain.GetDesc().Width;
@@ -154,6 +158,9 @@ PassBackend::PassBackend(IRenderDevice& device,
         auto& postProcessSink = perPassSignature.GetPostProcessSinkResource(i);
         postProcessSink.Add(device, context, 1, screenWidth, screenHeight);
     }
+
+    // Make all the shadow map render targets that will be used by the passes
+    shadowMapSinks.Add(device, context, memorySettings.maxSpotLights + memorySettings.maxDirectionalLights, graphicsSettings.shadowMapResolution, graphicsSettings.shadowMapResolution);
 
     // Make the pass and pipeline objects
     MakePassesAndPipelines(device, swapChain, shaderFactory, shaderBindings, passManifest);
@@ -181,11 +188,58 @@ void PassBackend::Update(const PostProcessState& postProcessState)
     m_finalPostProcessTarget = std::nullopt;
 }
 
+void PassBackend::RenderShadowPass(IDeviceContext& context,
+                                   PerPassResourceSignature& perPassResourceSignature,
+                                   const MaterialPass& staticPass,
+                                   const MaterialPass& skinnedPass,
+                                   const std::vector<Batch>& staticBatches,
+                                   const std::vector<Batch>& skinnedBatches,
+                                   const std::span<const LightData>& lights)
+{
+    auto& sinkIndexBuffer = perPassResourceSignature.GetSinkIndexBufferResource();
+    auto& shadowMapsBuffer = perPassResourceSignature.GetShadowMapSinksResource();
+    bool hasSomeShadowCaster = false;
+    auto renderTargetIndex = 0u;
+
+    // LightDataIndex corresponds to the index the shader will use to index the LightData buffer.
+    // RenderTargetIndex corresponds to the index of the shadow map in the SinkBuffer.
+    for (const auto& [lightDataIndex, light] : std::views::enumerate(lights))
+    {
+        if (!light.castsShadows)
+        {
+            continue;
+        }
+
+        hasSomeShadowCaster = true;
+        sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, static_cast<uint32_t>(lightDataIndex));
+        perPassResourceSignature.Commit(context);
+
+        BindShadowMapRenderTarget(context, shadowMapsBuffer, renderTargetIndex);
+        ClearShadowMapRenderTarget(context, shadowMapsBuffer, renderTargetIndex);
+
+        context.SetPipelineState(staticPass.pso);
+        DrawIndexed(context, staticBatches);
+        context.SetPipelineState(skinnedPass.pso);
+        DrawIndexed(context, skinnedBatches);
+        renderTargetIndex++;
+    }
+
+    if (!hasSomeShadowCaster)
+    {
+        // No shadow-casting lights; ensure buffer is updated because it will be discarded at the end of the frame and read from in the materials pass - so it needs to be updated before that read.
+        sinkIndexBuffer.Update(context, std::vector<uint32_t>{}, std::vector<uint32_t>{}, false, std::numeric_limits<uint32_t>::max());
+        perPassResourceSignature.Commit(context);
+    }
+
+    context.TransitionShaderResources(&perPassResourceSignature.GetResourceBinding());
+}
+
 void PassBackend::RenderMaterial(IDeviceContext& context,
                                  ISwapChain& swapChain,
                                  PerPassResourceSignature& perPassResourceSignature,
                                  const std::vector<std::vector<Batch>>& staticPassBatches,
-                                 const std::vector<std::vector<Batch>>& skinnedPassBatches)
+                                 const std::vector<std::vector<Batch>>& skinnedPassBatches,
+                                 const std::span<const LightData>& lights)
 {
     NC_PROFILE_SCOPE("PassBackend::RenderMaterial()", ProfileCategory::Rendering);
     NC_ASSERT(
@@ -203,13 +257,12 @@ void PassBackend::RenderMaterial(IDeviceContext& context,
 
     for (auto [staticPass, skinnedPass, staticBatches, skinnedBatches] : passView)
     {
-        if (m_finalColorTarget.has_value())
+        m_finalColorTarget = m_finalColorTarget.has_value() ? std::min(staticPass.sinks.color, m_finalColorTarget.value()) : staticPass.sinks.color;
+
+        if (staticPass.flag & MaterialPassFlag::Shadow)
         {
-            m_finalColorTarget = std::min(staticPass.sinks.color, m_finalColorTarget.value());
-        }
-        else
-        {
-            m_finalColorTarget = staticPass.sinks.color;
+            RenderShadowPass(context, perPassResourceSignature, staticPass, skinnedPass, staticBatches, skinnedBatches, lights);
+            continue;
         }
 
         // PassManifest verifies static/skinned pass pairs specify the same render targets, so we can just choose from either here.
@@ -305,8 +358,8 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
         // Get the post process resource we are writing to to bind in the next step
         auto& postProcessSinkBuffer = perPassResourceSignature.GetPostProcessSinkResource(pass.sinks.postProcess);
 
-        BindRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
-        ClearRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
+        BindPostProcessRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
+        ClearPostProcessRenderTarget(context, swapChain, postProcessSinkBuffer, pass.sinks.postProcess);
 
         // If this post process pass consumes any post process pass as a source, bind that source's shader resource view to the SRB.
         auto hasPostProcessSource = pass.sources.postProcess != NoTarget;
@@ -316,7 +369,7 @@ void PassBackend::RenderPostProcess(IDeviceContext& context,
             postProcessSourceBuffer.Update();
             perPassResourceSignature.Commit(context);
         }
-        sinkIndexBuffer.Update(context, pass.sources.color, pass.sources.depth, hasPostProcessSource);
+        sinkIndexBuffer.Update(context, pass.sources.color, pass.sources.depth, hasPostProcessSource, std::numeric_limits<uint32_t>::max());
         context.SetPipelineState(pass.pso);
 
         // Bind the property buffer for the instance, if any
@@ -362,7 +415,7 @@ void PassBackend::RenderOutputToSwapchain(IDeviceContext& context, ISwapChain& s
         hasPostProcess = false;
     }
 
-    sinkIndexBuffer.Update(context, m_finalPass->sources.color, std::vector<uint32_t>(), hasPostProcess);
+    sinkIndexBuffer.Update(context, m_finalPass->sources.color, std::vector<uint32_t>(), hasPostProcess, std::numeric_limits<uint32_t>::max());
     context.SetPipelineState(m_finalPass->pso);
     context.Draw(drawAttribs);
 }

@@ -42,8 +42,9 @@ class ShaderBindings
                 SinkBufferDesc{"ColorSinks",               Diligent::SHADER_TYPE_PIXEL, 20},
                 SinkBufferDesc{"DepthSinks",               Diligent::SHADER_TYPE_PIXEL, 20},
                 SinkBufferDesc{"PostProcessSinks",         Diligent::SHADER_TYPE_PIXEL, 3, true},
+                SinkBufferDesc{"ShadowMapSinks",           Diligent::SHADER_TYPE_VS_PS, memorySettings.maxDirectionalLights + memorySettings.maxSpotLights},
                 UniformBufferDesc{"PostProcessProperties", Diligent::SHADER_TYPE_PIXEL, true},
-                UniformBufferDesc{"SinkIndices",           Diligent::SHADER_TYPE_PIXEL}
+                UniformBufferDesc{"SinkIndices",           Diligent::SHADER_TYPE_VS_PS}
             }
         {
         }

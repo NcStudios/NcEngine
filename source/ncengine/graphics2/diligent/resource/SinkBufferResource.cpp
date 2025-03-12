@@ -90,6 +90,28 @@ auto SinkBufferResource::MakeSamplerDesc(std::string_view variableName) -> Dilig
     };
 }
 
+auto SinkBufferResource::MakeShadowSamplerDesc(std::string_view variableName) -> Diligent::ImmutableSamplerDesc
+{
+    auto samplerDesc = Diligent::SamplerDesc{};
+    samplerDesc.AddressU = Diligent::TEXTURE_ADDRESS_BORDER;
+    samplerDesc.AddressV = Diligent::TEXTURE_ADDRESS_BORDER;
+    samplerDesc.AddressW = Diligent::TEXTURE_ADDRESS_BORDER;
+    samplerDesc.BorderColor[0] = 1.0f;
+    samplerDesc.BorderColor[1] = 1.0f;
+    samplerDesc.BorderColor[2] = 1.0f;
+    samplerDesc.BorderColor[3] = 1.0f;
+    samplerDesc.ComparisonFunc = Diligent::COMPARISON_FUNC_LESS;
+    samplerDesc.MagFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MinFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
+    samplerDesc.MipFilter = Diligent::FILTER_TYPE::FILTER_TYPE_LINEAR;
+
+    return Diligent::ImmutableSamplerDesc{
+        Diligent::SHADER_TYPE_VS_PS,
+        variableName.data(),
+        samplerDesc
+    };
+}
+
 void SinkBufferResource::Add(Diligent::IRenderDevice& device,
                              Diligent::IDeviceContext& context,
                              uint32_t numRenderTargets,
