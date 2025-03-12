@@ -46,7 +46,7 @@ struct Target
 struct ReflectedTarget
 {
     std::string name;
-    std::filesystem::path path;
+    std::string path;
     AssetSubtype subtype = AssetSubtype::None;
 };
 }

@@ -83,14 +83,14 @@ namespace animation
 {
 namespace path
 {
-constexpr auto ogre_attack = "ogre\\attack.nca";
-constexpr auto ogre_idle = "ogre\\idle.nca";
-constexpr auto skeleton_idle = "skeleton\\idle.nca";
-constexpr auto skeleton_jump = "skeleton\\jump.nca";
-constexpr auto skeleton_walk_back = "skeleton\\walk_back.nca";
-constexpr auto skeleton_walk_forward = "skeleton\\walk_forward.nca";
-constexpr auto skeleton_walk_left = "skeleton\\walk_left.nca";
-constexpr auto skeleton_walk_right = "skeleton\\walk_right.nca";
+constexpr auto ogre_attack = "ogre/attack.nca";
+constexpr auto ogre_idle = "ogre/idle.nca";
+constexpr auto skeleton_idle = "skeleton/idle.nca";
+constexpr auto skeleton_jump = "skeleton/jump.nca";
+constexpr auto skeleton_walk_back = "skeleton/walk_back.nca";
+constexpr auto skeleton_walk_forward = "skeleton/walk_forward.nca";
+constexpr auto skeleton_walk_left = "skeleton/walk_left.nca";
+constexpr auto skeleton_walk_right = "skeleton/walk_right.nca";
 } // namespace path
 
 extern nc::asset::AssetId ogre_attack;
@@ -110,23 +110,23 @@ namespace texture
 {
 namespace path
 {
-constexpr auto diffuse_cave = "diffuse\\cave.nca";
-constexpr auto diffuse_guy = "diffuse\\guy.nca";
-constexpr auto diffuse_ogre = "diffuse\\ogre.nca";
-constexpr auto diffuse_skeleton = "diffuse\\skeleton.nca";
-constexpr auto diffuse_blue = "diffuse\\blue.nca";
-constexpr auto diffuse_green = "diffuse\\green.nca";
-constexpr auto diffuse_orange = "diffuse\\orange.nca";
-constexpr auto diffuse_purple = "diffuse\\purple.nca";
-constexpr auto diffuse_red = "diffuse\\red.nca";
-constexpr auto diffuse_teal = "diffuse\\teal.nca";
-constexpr auto diffuse_yellow = "diffuse\\yellow.nca";
-constexpr auto effect_linear_hatch = "effect\\linear_hatch.nca";
-constexpr auto effect_noise = "effect\\noise.nca";
-constexpr auto normal_cave = "normal\\cave.nca";
-constexpr auto normal_guy = "normal\\guy.nca";
-constexpr auto normal_ogre = "normal\\ogre.nca";
-constexpr auto normal_skeleton = "normal\\skeleton.nca";
+constexpr auto diffuse_cave = "diffuse/cave.nca";
+constexpr auto diffuse_guy = "diffuse/guy.nca";
+constexpr auto diffuse_ogre = "diffuse/ogre.nca";
+constexpr auto diffuse_skeleton = "diffuse/skeleton.nca";
+constexpr auto diffuse_blue = "diffuse/blue.nca";
+constexpr auto diffuse_green = "diffuse/green.nca";
+constexpr auto diffuse_orange = "diffuse/orange.nca";
+constexpr auto diffuse_purple = "diffuse/purple.nca";
+constexpr auto diffuse_red = "diffuse/red.nca";
+constexpr auto diffuse_teal = "diffuse/teal.nca";
+constexpr auto diffuse_yellow = "diffuse/yellow.nca";
+constexpr auto effect_linear_hatch = "effect/linear_hatch.nca";
+constexpr auto effect_noise = "effect/noise.nca";
+constexpr auto normal_cave = "normal/cave.nca";
+constexpr auto normal_guy = "normal/guy.nca";
+constexpr auto normal_ogre = "normal/ogre.nca";
+constexpr auto normal_skeleton = "normal/skeleton.nca";
 } // namespace path
 
 extern nc::asset::TextureView diffuse_cave;

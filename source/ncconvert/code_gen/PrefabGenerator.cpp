@@ -58,7 +58,7 @@ void WritePaths(std::ostream& header,
     BeginNamespace(header, "path");
     for (const auto& asset : assets)
     {
-        header << "constexpr auto " << asset.name << " = " << asset.path << ";\n";
+        header << "constexpr auto " << asset.name << " = \"" << asset.path << "\";\n";
     }
 
     EndNamespace(header, "path");

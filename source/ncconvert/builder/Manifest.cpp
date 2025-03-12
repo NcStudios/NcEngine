@@ -173,7 +173,7 @@ auto Manifest::GetTargetsForSourceGeneration() -> ReflectedTargetMap
             auto name = RelativePathToIdentifier(path);
             reflectedTargets.emplace_back(
                 std::move(name),
-                std::move(path),
+                path.generic_string(), // normalize directory separators to '/'
                 target.options.subtype
             );
         }
