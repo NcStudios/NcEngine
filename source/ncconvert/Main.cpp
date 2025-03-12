@@ -141,7 +141,7 @@ auto ParseArgs(int argc, char** argv, nc::convert::Config* out, const char** usa
             return out->manifestPath.has_value();
         case nc::convert::OperationMode::Inspect:
             return out->targetPath.has_value();
-        default:
-            return true;
     }
+
+    return false;
 }

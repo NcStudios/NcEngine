@@ -56,8 +56,6 @@ void InitializeResources()
 
     nc::asset::LoadFont(UIFont);
 
-    // TODO: load default assets...
-
     audio_clip::Load();
     convex_hull::Load();
     cube_map::Load();
@@ -69,8 +67,6 @@ void InitializeResources()
 
 void ReloadPrefabs()
 {
-
-
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
     mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
