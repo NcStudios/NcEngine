@@ -38,7 +38,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .scale = Vector3{3.0f, 3.0f, 3.0f},
         .tag = "guy2"
     });
-    world.Emplace<StaticMesh>(guy2, mesh::guy2, material::Guy2);
+    world.Emplace<StaticMesh>(guy2, mesh::guy2, material::guy2);
 
     // Ogre
     {
@@ -60,7 +60,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         auto& animator = world.Emplace<SkinnedMesh>(
             ogre,
             mesh::ogre,
-            material::Ogre,
+            material::ogre,
             animation::ogre_idle
         ).GetAnimationController();
 
@@ -108,7 +108,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         auto& animator = world.Emplace<SkinnedMesh>(
             skeleton,
             mesh::skeleton,
-            material::Skeleton,
+            material::skeleton,
             animation::skeleton_idle
         ).GetAnimationController();
 
@@ -150,7 +150,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "cave_floor"
     });
 
-    world.Emplace<StaticMesh>(cave_floor, mesh::cave, material::Cave);
+    world.Emplace<StaticMesh>(cave_floor, mesh::cave, material::cave);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({

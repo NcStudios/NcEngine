@@ -11,38 +11,40 @@ namespace nc::sample
 {
 bool IsInitialized = false;
 
+namespace font
+{
+asset::FontInfo ui{"SourceCodePro-Regular.ttf", 16.0f};
+} // namespace font
+
 namespace material
 {
-MaterialDesc Blue{"BlueMaterial"};
-MaterialDesc Cave{"CaveMaterial"};
-MaterialDesc Default{"DefaultMaterial"};
-MaterialDesc Green{"GreenMaterial"};
-MaterialDesc Guy2{"Guy2Material"};
-MaterialDesc Ogre{"OgreMaterial"};
-MaterialDesc Orange{"OrangeMaterial"};
-MaterialDesc Purple{"PurpleMaterial"};
-MaterialDesc Red{"RedMaterial"};
-MaterialDesc Skeleton{"SkeletonMaterial"};
-MaterialDesc Teal{"TealMaterial"};
-MaterialDesc Yellow{"YellowMaterial"};
+MaterialDesc blue{"BlueMaterial"};
+MaterialDesc cave{"CaveMaterial"};
+MaterialDesc green{"GreenMaterial"};
+MaterialDesc guy2{"Guy2Material"};
+MaterialDesc ogre{"OgreMaterial"};
+MaterialDesc orange{"OrangeMaterial"};
+MaterialDesc purple{"PurpleMaterial"};
+MaterialDesc red{"RedMaterial"};
+MaterialDesc skeleton{"SkeletonMaterial"};
+MaterialDesc teal{"TealMaterial"};
+MaterialDesc white{"WhileMaterial"};
+MaterialDesc yellow{"YellowMaterial"};
 } // namespace material
 
 namespace mesh
 {
-asset::MeshView Cube{};
-asset::MeshView Sphere{};
-asset::MeshView Capsule{};
-asset::MeshView Plane{};
-asset::MeshView Wheel{};
+asset::MeshView cube{};
+asset::MeshView sphere{};
+asset::MeshView capsule{};
+asset::MeshView plane{};
+asset::MeshView wheel{};
 } // namespace mesh
-
-
-asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
 namespace post_process
 {
-OutlinePassProperties Outline{};
-NoisePassProperties Noise{};
+OutlinePassProperties outline{};
+NoisePassProperties noise{};
 } // namespace post_process
 
 void InitializeResources()
@@ -54,7 +56,7 @@ void InitializeResources()
 
     IsInitialized = true;
 
-    nc::asset::LoadFont(UIFont);
+    nc::asset::LoadFont(font::ui);
 
     audio_clip::Load();
     convex_hull::Load();
@@ -67,11 +69,11 @@ void InitializeResources()
 
 void ReloadPrefabs()
 {
-    mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
-    mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
-    mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
-    mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
-    mesh::Wheel = asset::AcquireMeshAsset(asset::WheelMesh);
+    mesh::capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
+    mesh::cube = asset::AcquireMeshAsset(asset::CubeMesh);
+    mesh::plane = asset::AcquireMeshAsset(asset::PlaneMesh);
+    mesh::sphere = asset::AcquireMeshAsset(asset::SphereMesh);
+    mesh::wheel = asset::AcquireMeshAsset(asset::WheelMesh);
 
     mesh::Acquire();
     texture::Acquire();
@@ -91,62 +93,62 @@ void ReloadPrefabs()
         .useFlatShading = 0
     };
 
-    material::Blue.properties = materialDefaults;
-    material::Blue.properties.diffuseTex = texture::diffuse_blue;
-    material::Blue.properties.normalIntensity = .220f;
+    material::blue.properties = materialDefaults;
+    material::blue.properties.diffuseTex = texture::diffuse_blue;
+    material::blue.properties.normalIntensity = .220f;
 
-    material::Cave.properties = materialDefaults;
-    material::Cave.properties.diffuseTex = texture::diffuse_cave;
-    material::Cave.properties.normalIntensity = .420f;
-    material::Cave.properties.useFlatShading = 1;
+    material::cave.properties = materialDefaults;
+    material::cave.properties.diffuseTex = texture::diffuse_cave;
+    material::cave.properties.normalIntensity = .420f;
+    material::cave.properties.useFlatShading = 1;
 
-    material::Default.properties = materialDefaults;
+    material::white.properties = materialDefaults;
 
-    material::Green.properties = materialDefaults;
-    material::Green.properties.diffuseTex = texture::diffuse_green;
-    material::Green.properties.normalIntensity = 4.0f;
+    material::green.properties = materialDefaults;
+    material::green.properties.diffuseTex = texture::diffuse_green;
+    material::green.properties.normalIntensity = 4.0f;
 
-    material::Guy2.properties = materialDefaults;
-    material::Guy2.properties.diffuseTex = texture::diffuse_guy;
-    material::Guy2.properties.normalTex = texture::normal_guy;
-    material::Guy2.properties.hatchTex = texture::effect_linear_hatch;
-    material::Guy2.properties.normalIntensity = 5.0f;
-    material::Guy2.properties.hatchTiling = 16.0f;
-    material::Guy2.properties.reflectivity = 1.0f;
-    material::Guy2.properties.useTextureNormals = 1;
-    material::Guy2.properties.gradientStart = Vector3{.985f, .401f, .401f};
-    material::Guy2.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.363f};
-    material::Guy2.properties.gradientAmount = 0.192f;
-    material::Guy2.properties.useFlatShading = 1;
+    material::guy2.properties = materialDefaults;
+    material::guy2.properties.diffuseTex = texture::diffuse_guy;
+    material::guy2.properties.normalTex = texture::normal_guy;
+    material::guy2.properties.hatchTex = texture::effect_linear_hatch;
+    material::guy2.properties.normalIntensity = 5.0f;
+    material::guy2.properties.hatchTiling = 16.0f;
+    material::guy2.properties.reflectivity = 1.0f;
+    material::guy2.properties.useTextureNormals = 1;
+    material::guy2.properties.gradientStart = Vector3{.985f, .401f, .401f};
+    material::guy2.properties.gradientEnd = Vector3{0.0f, 0.021f, 0.363f};
+    material::guy2.properties.gradientAmount = 0.192f;
+    material::guy2.properties.useFlatShading = 1;
 
-    material::Ogre.properties = materialDefaults;
-    material::Ogre.properties.diffuseTex = texture::diffuse_ogre;
-    material::Ogre.properties.normalIntensity = .280f;
-    material::Ogre.properties.useFlatShading = 1;
+    material::ogre.properties = materialDefaults;
+    material::ogre.properties.diffuseTex = texture::diffuse_ogre;
+    material::ogre.properties.normalIntensity = .280f;
+    material::ogre.properties.useFlatShading = 1;
 
-    material::Orange.properties = materialDefaults;
-    material::Orange.properties.diffuseTex = texture::diffuse_orange;
-    material::Orange.properties.normalIntensity = .10f;
-    material::Orange.properties.useTextureNormals = 1;
+    material::orange.properties = materialDefaults;
+    material::orange.properties.diffuseTex = texture::diffuse_orange;
+    material::orange.properties.normalIntensity = .10f;
+    material::orange.properties.useTextureNormals = 1;
 
-    material::Purple.properties = materialDefaults;
-    material::Purple.properties.diffuseTex = texture::diffuse_purple;
+    material::purple.properties = materialDefaults;
+    material::purple.properties.diffuseTex = texture::diffuse_purple;
 
-    material::Red.properties = materialDefaults;
-    material::Red.properties.diffuseTex = texture::diffuse_red;
+    material::red.properties = materialDefaults;
+    material::red.properties.diffuseTex = texture::diffuse_red;
 
-    material::Skeleton.properties = materialDefaults;
-    material::Skeleton.properties.diffuseTex = texture::diffuse_skeleton;
-    material::Skeleton.properties.normalIntensity = .420f;
-    material::Skeleton.properties.useFlatShading = 1;
+    material::skeleton.properties = materialDefaults;
+    material::skeleton.properties.diffuseTex = texture::diffuse_skeleton;
+    material::skeleton.properties.normalIntensity = .420f;
+    material::skeleton.properties.useFlatShading = 1;
 
-    material::Teal.properties = materialDefaults;
-    material::Teal.properties.diffuseTex = texture::diffuse_teal;
+    material::teal.properties = materialDefaults;
+    material::teal.properties.diffuseTex = texture::diffuse_teal;
 
-    material::Yellow.properties = materialDefaults;
-    material::Yellow.properties.diffuseTex = texture::diffuse_yellow;
+    material::yellow.properties = materialDefaults;
+    material::yellow.properties.diffuseTex = texture::diffuse_yellow;
 
-    post_process::Outline = OutlinePassProperties
+    post_process::outline = OutlinePassProperties
     {
         .color = Vector3{0.0f, 0.0f, 0.0f},
         .width = 1.0f,
@@ -155,7 +157,7 @@ void ReloadPrefabs()
         .normalThreshold = 0.940f
     };
 
-    post_process::Noise = NoisePassProperties
+    post_process::noise = NoisePassProperties
     {
         .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
         .maskGradientAmount = 1.0f,

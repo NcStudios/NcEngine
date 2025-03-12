@@ -20,36 +20,39 @@ void InitializeResources();
 // Reload cached global asset views
 void ReloadPrefabs();
 
+namespace font
+{
+extern asset::FontInfo ui;
+} // namespace font
+
 namespace mesh
 {
-extern asset::MeshView Cube;
-extern asset::MeshView Sphere;
-extern asset::MeshView Capsule;
-extern asset::MeshView Plane;
-extern asset::MeshView Wheel;
+extern asset::MeshView cube;
+extern asset::MeshView sphere;
+extern asset::MeshView capsule;
+extern asset::MeshView plane;
+extern asset::MeshView wheel;
 } // namespace mesh
 
 namespace material
 {
-extern MaterialDesc Blue;
-extern MaterialDesc Cave;
-extern MaterialDesc Default;
-extern MaterialDesc Green;
-extern MaterialDesc Guy2;
-extern MaterialDesc Ogre;
-extern MaterialDesc Orange;
-extern MaterialDesc Purple;
-extern MaterialDesc Red;
-extern MaterialDesc Skeleton;
-extern MaterialDesc Teal;
-extern MaterialDesc Yellow;
+extern MaterialDesc blue;
+extern MaterialDesc cave;
+extern MaterialDesc green;
+extern MaterialDesc guy2;
+extern MaterialDesc ogre;
+extern MaterialDesc orange;
+extern MaterialDesc purple;
+extern MaterialDesc red;
+extern MaterialDesc skeleton;
+extern MaterialDesc teal;
+extern MaterialDesc white;
+extern MaterialDesc yellow;
 } // namespace material
-
-extern asset::FontInfo UIFont;
 
 namespace post_process
 {
-extern OutlinePassProperties Outline;
-extern NoisePassProperties Noise;
+extern OutlinePassProperties outline;
+extern NoisePassProperties noise;
 } // namespace post_process
 } // namespace nc::sample
