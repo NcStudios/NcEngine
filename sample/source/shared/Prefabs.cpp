@@ -11,26 +11,6 @@ namespace nc::sample
 {
 bool IsInitialized = false;
 
-auto MakeAnimId(std::string_view path) -> uint64_t
-{
-    return utility::Fnv1a(std::filesystem::path(path).make_preferred().string());
-}
-
-namespace mesh
-{
-asset::MeshView Capsule{};
-asset::MeshView Cave{};
-asset::MeshView Cube{};
-asset::MeshView Guy2{};
-asset::MeshView HalfPipe{};
-asset::MeshView Ogre{};
-asset::MeshView Plane{};
-asset::MeshView Ramp{};
-asset::MeshView Skeleton{};
-asset::MeshView Sphere{};
-asset::MeshView Wheel{};
-} // namespace mesh
-
 namespace material
 {
 MaterialDesc Blue{"BlueMaterial"};
@@ -47,28 +27,15 @@ MaterialDesc Teal{"TealMaterial"};
 MaterialDesc Yellow{"YellowMaterial"};
 } // namespace material
 
-
-namespace animation
+namespace mesh
 {
-asset::AssetId OgreIdle{MakeAnimId("ogre/idle.nca")};
-asset::AssetId OgreAttack{MakeAnimId("ogre/attack.nca")};
-asset::AssetId SkeletonIdle{MakeAnimId("skeleton/idle.nca")};
-asset::AssetId SkeletonJump{MakeAnimId("skeleton/jump.nca")};
-asset::AssetId SkeletonWalkRight{MakeAnimId("skeleton/walk_right.nca")};
-asset::AssetId SkeletonWalkLeft{MakeAnimId("skeleton/walk_left.nca")};
-asset::AssetId SkeletonWalkForward{MakeAnimId("skeleton/walk_forward.nca")};
-asset::AssetId SkeletonWalkBackward{MakeAnimId("skeleton/walk_back.nca")};
-} // namespace animation
+asset::MeshView Cube{};
+asset::MeshView Sphere{};
+asset::MeshView Capsule{};
+asset::MeshView Plane{};
+asset::MeshView Wheel{};
+} // namespace mesh
 
-namespace convex_hull
-{
-asset::AssetId Ramp{MakeAnimId(RampPath)};
-} // namespace convex_hull
-
-namespace mesh_collider
-{
-asset::AssetId Halfpipe{MakeAnimId(HalfpipePath)};
-} // namespace mesh_collider
 
 asset::FontInfo UIFont{"SourceCodePro-Regular.ttf", 16.0f};
 
@@ -77,32 +44,6 @@ namespace post_process
 OutlinePassProperties Outline{};
 NoisePassProperties Noise{};
 } // namespace post_process
-
-template<class LoadFunc>
-void LoadAssets(const std::filesystem::path& rootDir, asset::asset_flags_type flags, LoadFunc load)
-{
-    auto paths = std::vector<std::string>{};
-    for (auto&& entry : std::filesystem::recursive_directory_iterator{rootDir})
-    {
-        if (entry.path().extension() != ".nca")
-        {
-            continue;
-        }
-
-        const auto& path = entry.path();
-        auto trimmedPath = std::filesystem::path{};
-        auto segment = path.begin();
-        ++segment; ++segment;
-        for (; segment != path.end(); ++segment)
-        {
-            trimmedPath /= *segment;
-        }
-
-        paths.push_back(trimmedPath.string());
-    }
-
-    load(paths, false, flags);
-}
 
 void InitializeResources()
 {
@@ -113,59 +54,31 @@ void InitializeResources()
 
     IsInitialized = true;
 
-    const auto& assetSettings = config::GetAssetSettings();
-    LoadAssets(assetSettings.audioClipsPath, asset::AssetFlags::None, &asset::LoadAudioClipAssets);
-    LoadAssets(assetSettings.convexHullsPath, asset::AssetFlags::None, &asset::LoadConvexHullAssets);
-    LoadAssets(assetSettings.cubeMapsPath, asset::AssetFlags::None, &asset::LoadCubeMapAssets);
-    LoadAssets(assetSettings.meshesPath, asset::AssetFlags::None, &asset::LoadMeshAssets);
-    LoadAssets(assetSettings.meshCollidersPath, asset::AssetFlags::None, &asset::LoadMeshColliderAssets);
-    LoadAssets(assetSettings.skeletalAnimationsPath, asset::AssetFlags::None, &asset::LoadSkeletalAnimationAssets);
-    LoadFont(UIFont);
+    nc::asset::LoadFont(UIFont);
 
-    std::vector<std::string> textures
-    {
-        "cave/BaseColor.nca",
-        "guy_2_base_color.nca",
-        "linear_hatch.nca",
-        "noise.nca",
-        "ogre/BaseColor.nca",
-        "skeleton/BaseColor.nca",
-        "solid_color/Blue.nca",
-        "solid_color/Green.nca",
-        "solid_color/Orange.nca",
-        "solid_color/Purple.nca",
-        "solid_color/Red.nca",
-        "solid_color/Teal.nca",
-        "solid_color/Yellow.nca"
-    };
+    // TODO: load default assets...
 
-    asset::LoadTextureAssets(textures, false, asset::AssetFlags::TextureTypeImage);
-
-    std::vector<std::string> normalMaps
-    {
-        "ogre/Normal.nca",
-        "skeleton/Normal.nca",
-        "cave/Normal.nca",
-        "guy_2_normal.nca"
-    };
-
-    asset::LoadTextureAssets(normalMaps, false, asset::AssetFlags::TextureTypeNormalMap);
-    asset::LoadCubeMapAsset(cubemap::NightSkyPath);
+    audio_clip::Load();
+    convex_hull::Load();
+    cube_map::Load();
+    mesh::Load();
+    mesh_collider::Load();
+    animation::Load();
+    texture::Load();
 }
 
 void ReloadPrefabs()
 {
-    mesh::Cave = asset::AcquireMeshAsset(mesh::CavePath);
+
+
     mesh::Capsule = asset::AcquireMeshAsset(asset::CapsuleMesh);
     mesh::Cube = asset::AcquireMeshAsset(asset::CubeMesh);
-    mesh::Guy2 = asset::AcquireMeshAsset(mesh::Guy2Path);
-    mesh::HalfPipe = asset::AcquireMeshAsset(mesh::HalfPipePath);
-    mesh::Ogre = asset::AcquireMeshAsset(mesh::OgrePath);
     mesh::Plane = asset::AcquireMeshAsset(asset::PlaneMesh);
-    mesh::Ramp = asset::AcquireMeshAsset(mesh::RampPath);
-    mesh::Skeleton = asset::AcquireMeshAsset(mesh::SkeletonPath);
     mesh::Sphere = asset::AcquireMeshAsset(asset::SphereMesh);
     mesh::Wheel = asset::AcquireMeshAsset(asset::WheelMesh);
+
+    mesh::Acquire();
+    texture::Acquire();
 
     auto materialDefaults = MaterialProperties
     {
@@ -183,24 +96,24 @@ void ReloadPrefabs()
     };
 
     material::Blue.properties = materialDefaults;
-    material::Blue.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Blue.nca");
+    material::Blue.properties.diffuseTex = texture::diffuse_blue;
     material::Blue.properties.normalIntensity = .220f;
 
     material::Cave.properties = materialDefaults;
-    material::Cave.properties.diffuseTex = asset::AcquireTextureAsset("cave/BaseColor.nca");
+    material::Cave.properties.diffuseTex = texture::diffuse_cave;
     material::Cave.properties.normalIntensity = .420f;
     material::Cave.properties.useFlatShading = 1;
 
     material::Default.properties = materialDefaults;
 
     material::Green.properties = materialDefaults;
-    material::Green.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Green.nca");
+    material::Green.properties.diffuseTex = texture::diffuse_green;
     material::Green.properties.normalIntensity = 4.0f;
 
     material::Guy2.properties = materialDefaults;
-    material::Guy2.properties.diffuseTex = asset::AcquireTextureAsset("guy_2_base_color.nca");
-    material::Guy2.properties.normalTex = asset::AcquireTextureAsset("guy_2_normal.nca");
-    material::Guy2.properties.hatchTex = asset::AcquireTextureAsset("linear_hatch.nca");
+    material::Guy2.properties.diffuseTex = texture::diffuse_guy;
+    material::Guy2.properties.normalTex = texture::normal_guy;
+    material::Guy2.properties.hatchTex = texture::effect_linear_hatch;
     material::Guy2.properties.normalIntensity = 5.0f;
     material::Guy2.properties.hatchTiling = 16.0f;
     material::Guy2.properties.reflectivity = 1.0f;
@@ -211,31 +124,31 @@ void ReloadPrefabs()
     material::Guy2.properties.useFlatShading = 1;
 
     material::Ogre.properties = materialDefaults;
-    material::Ogre.properties.diffuseTex = asset::AcquireTextureAsset("ogre/BaseColor.nca");
+    material::Ogre.properties.diffuseTex = texture::diffuse_ogre;
     material::Ogre.properties.normalIntensity = .280f;
     material::Ogre.properties.useFlatShading = 1;
 
     material::Orange.properties = materialDefaults;
-    material::Orange.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Orange.nca");
+    material::Orange.properties.diffuseTex = texture::diffuse_orange;
     material::Orange.properties.normalIntensity = .10f;
     material::Orange.properties.useTextureNormals = 1;
 
     material::Purple.properties = materialDefaults;
-    material::Purple.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Purple.nca");
+    material::Purple.properties.diffuseTex = texture::diffuse_purple;
 
     material::Red.properties = materialDefaults;
-    material::Red.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Red.nca");
+    material::Red.properties.diffuseTex = texture::diffuse_red;
 
     material::Skeleton.properties = materialDefaults;
-    material::Skeleton.properties.diffuseTex = asset::AcquireTextureAsset("skeleton/BaseColor.nca");
+    material::Skeleton.properties.diffuseTex = texture::diffuse_skeleton;
     material::Skeleton.properties.normalIntensity = .420f;
     material::Skeleton.properties.useFlatShading = 1;
 
     material::Teal.properties = materialDefaults;
-    material::Teal.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Teal.nca");
+    material::Teal.properties.diffuseTex = texture::diffuse_teal;
 
     material::Yellow.properties = materialDefaults;
-    material::Yellow.properties.diffuseTex = asset::AcquireTextureAsset("solid_color/Yellow.nca");
+    material::Yellow.properties.diffuseTex = texture::diffuse_yellow;
 
     post_process::Outline = OutlinePassProperties
     {
@@ -251,7 +164,7 @@ void ReloadPrefabs()
         .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
         .maskGradientAmount = 1.0f,
         .maskGradientEnd = Vector3{0.0f, 0.0f, 0.0f},
-        .noiseTex = asset::AcquireTextureAsset("noise.nca"),
+        .noiseTex = texture::effect_noise,
         .noiseTexAmount = 0.1f,
         .noiseTexTiling = 1.0f,
     };

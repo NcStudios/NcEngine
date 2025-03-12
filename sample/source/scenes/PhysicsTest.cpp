@@ -601,7 +601,7 @@ void BuildBridge(ecs::Ecs world)
     world.Emplace<StaticMesh>(platform1, mesh::Cube, material::Default);
     world.Emplace<StaticMesh>(platform2, mesh::Cube, material::Default);
     world.Emplace<StaticMesh>(ramp1, mesh::Cube, material::Default);
-    world.Emplace<StaticMesh>(ramp2, mesh::Ramp, material::Default);
+    world.Emplace<StaticMesh>(ramp2, mesh::ramp, material::Default);
 
     auto& platform1Body = world.Emplace<RigidBody>(
         platform1,
@@ -629,7 +629,7 @@ void BuildBridge(ecs::Ecs world)
 
     world.Emplace<RigidBody>(
         ramp2,
-        nc::Shape::MakeConvexHull(convex_hull::Ramp),
+        nc::Shape::MakeConvexHull(convex_hull::ramp),
         nc::RigidBodyInfo{
             .type = BodyType::Static
         }
@@ -785,8 +785,8 @@ void BuildHalfPipes(ecs::Ecs world)
         .flags = Entity::Flags::Static
     });
 
-    world.Emplace<StaticMesh>(halfPipe, mesh::HalfPipe, material::Blue);
-    world.Emplace<RigidBody>(halfPipe, Shape::MakeMesh(mesh_collider::Halfpipe));
+    world.Emplace<StaticMesh>(halfPipe, mesh::halfpipe, material::Blue);
+    world.Emplace<RigidBody>(halfPipe, Shape::MakeMesh(mesh_collider::halfpipe));
 }
 
 void BuildHinge(ecs::Ecs world)

@@ -26,7 +26,7 @@ GraphicsTest::GraphicsTest(SampleUI* ui)
 void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 {
     m_sampleUI->SetWidgetCallback(nullptr);
-    modules.Get<NcGraphics>()->SetSkybox(cubemap::NightSkyPath);
+    modules.Get<NcGraphics>()->SetSkybox(cube_map::path::night_sky);
 
     // Lights
     auto lvHandle = world.Emplace<Entity>({.position = Vector3{3.1f, 6.2f, 4.5f}, .tag = "Point Light 1"});
@@ -38,7 +38,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .scale = Vector3{3.0f, 3.0f, 3.0f},
         .tag = "guy2"
     });
-    world.Emplace<StaticMesh>(guy2, mesh::Guy2, material::Guy2);
+    world.Emplace<StaticMesh>(guy2, mesh::guy2, material::Guy2);
 
     // Ogre
     {
@@ -59,9 +59,9 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
         auto& animator = world.Emplace<SkinnedMesh>(
             ogre,
-            mesh::Ogre,
+            mesh::ogre,
             material::Ogre,
-            animation::OgreIdle
+            animation::ogre_idle
         ).GetAnimationController();
 
         const auto stopState = animator.AddState(StopAnimation{
@@ -70,7 +70,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         });
 
         animator.AddState(LoopAnimation{
-            .animId = animation::OgreIdle,
+            .animId = animation::ogre_idle,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::One);},
             .enterFrom = stopState,
             .exitWhen = [](){ return input::KeyDown(input::KeyCode::One);},
@@ -100,44 +100,44 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         world.Emplace<CollisionListener>(skeleton)
             .onTriggerEnter = [](Entity, Entity other, ecs::Ecs ecs){
                 auto& ogreAnim = ecs.Get<SkinnedMesh>(other).GetAnimationController();
-                ogreAnim.PlayOnceImmediate(animation::OgreAttack);
+                ogreAnim.PlayOnceImmediate(animation::ogre_attack);
                 auto& tag = ecs.Get<Tag>(other);
                 GameLog::Log(fmt::format("Collision Enter: {}", tag.value));
             };
 
         auto& animator = world.Emplace<SkinnedMesh>(
             skeleton,
-            mesh::Skeleton,
+            mesh::skeleton,
             material::Skeleton,
-            animation::SkeletonIdle
+            animation::skeleton_idle
         ).GetAnimationController();
 
         animator.AddState(LoopAnimation{
-            .animId = animation::SkeletonWalkForward,
+            .animId = animation::skeleton_walk_forward,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::W);},
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::W);}
         });
 
         animator.AddState(LoopAnimation{
-            .animId = animation::SkeletonWalkLeft,
+            .animId = animation::skeleton_walk_left,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::A);},
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::A);}
         });
 
         animator.AddState(LoopAnimation{
-            .animId = animation::SkeletonWalkBackward,
+            .animId = animation::skeleton_walk_back,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::S);},
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::S);}
         });
 
         animator.AddState(LoopAnimation{
-            .animId = animation::SkeletonWalkRight,
+            .animId = animation::skeleton_walk_right,
             .enterWhen = [](){ return input::KeyHeld(input::KeyCode::D);},
             .exitWhen = [](){ return input::KeyUp(input::KeyCode::D);}
         });
 
         animator.AddState(PlayOnceAnimation{
-            .animId = animation::SkeletonJump,
+            .animId = animation::skeleton_jump,
             .enterWhen = [](){ return input::KeyDown(input::KeyCode::Space);}
         });
     }
@@ -150,7 +150,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .tag = "cave_floor"
     });
 
-    world.Emplace<StaticMesh>(cave_floor, mesh::Cave, material::Cave);
+    world.Emplace<StaticMesh>(cave_floor, mesh::cave, material::Cave);
 
     // Camera
     auto cameraHandle = world.Emplace<Entity>({
@@ -177,7 +177,7 @@ void GraphicsTest::Load(ecs::Ecs world, ModuleProvider modules)
         .maskGradientStart = Vector3{1.0f, 1.0f, 1.0f},
         .maskGradientAmount = 1.0f,
         .maskGradientEnd = Vector3{0.0f, 0.0f, 0.0f},
-        .noiseTex = asset::AcquireTextureAsset("noise.nca"),
+        .noiseTex = texture::effect_noise,
         .noiseTexAmount = 0.24f,
         .noiseTexTiling = 1.0f,
     });

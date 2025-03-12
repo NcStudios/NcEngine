@@ -54,7 +54,8 @@ void BuildInstructions::ReadTargets(const Config& config)
         case OperationMode::Manifest:
         {
             LOG("Running in manifest mode");
-            ReadManifest(config.manifestPath.value(), m_instructions);
+            auto manifest = Manifest{config.manifestPath.value()};
+            m_instructions = manifest.ExtractTargetsForBuild();
             break;
         }
         default:

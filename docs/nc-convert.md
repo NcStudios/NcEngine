@@ -37,12 +37,14 @@ You can also use a JSON manifest file to convert many files at once:
             "assetName": "mesh2"
         }
     ],
-    "texture": [
-        {
-            "sourcePath": "path/to/texture.png",
-            "assetName": "myTexture"
-        }
-    ]
+    "texture": {
+        "diffuse" : [
+            {
+                "sourcePath": "path/to/texture.png",
+                "assetName": "myTexture"
+            }
+        ]
+    }
 }
 ```
 
@@ -52,6 +54,11 @@ You can also use a JSON manifest file to convert many files at once:
 
 `nc-convert` will skip files that are already up-to-date when using a manifest.
 Relative paths within `globalOptions` are interpreted relative to the manifest.
+
+Source files enumerating assets in a manifest can be automatically generated with:
+```
+> nc-convert -g manifest.json -o out/dir -r out::namespace
+```
 
 For more information, see the help text for `nc-convert`.
 

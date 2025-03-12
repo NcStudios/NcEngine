@@ -5,10 +5,21 @@
 
 namespace nc::convert
 {
+/** @brief Indicates special properties of asset. */
+enum class AssetSubtype : uint8_t
+{
+    None,
+    DiffuseTexture,
+    NormalTexture,
+    ParticleTexture,
+    EffectTexture
+};
+
 /** @brief Target-specific options */
 struct TargetOptions
 {
     bool optimizeMesh = false;
+    AssetSubtype subtype = AssetSubtype::None;
 };
 
 /** @brief Data describing a required asset conversion. */
@@ -29,5 +40,13 @@ struct Target
     std::filesystem::path destinationPath;
     std::optional<std::string> subResourceName;
     TargetOptions options;
+};
+
+/** @brief Data describing an asset for source code generation. */
+struct ReflectedTarget
+{
+    std::string name;
+    std::filesystem::path path;
+    AssetSubtype subtype = AssetSubtype::None;
 };
 }

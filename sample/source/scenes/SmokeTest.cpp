@@ -222,8 +222,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     world.Emplace<StaticMesh>(sphere2,  mesh::Sphere,   material::Default);
     world.Emplace<StaticMesh>(capsule1, mesh::Capsule,  material::Default);
     world.Emplace<StaticMesh>(capsule2, mesh::Capsule,  material::Default);
-    world.Emplace<StaticMesh>(hull,     mesh::Ramp,     material::Default);
-    world.Emplace<StaticMesh>(halfpipe, mesh::HalfPipe, material::Default);
+    world.Emplace<StaticMesh>(hull,     mesh::ramp,     material::Default);
+    world.Emplace<StaticMesh>(halfpipe, mesh::halfpipe, material::Default);
 
     auto& box1Body     = world.Emplace<RigidBody>(box1,     Shape::MakeBox());
     auto& box2Body     = world.Emplace<RigidBody>(box2,     Shape::MakeBox());
@@ -231,8 +231,8 @@ void SmokeTest::Load(ecs::Ecs world, ModuleProvider modules)
     auto& sphere2Body  = world.Emplace<RigidBody>(sphere2,  Shape::MakeSphere());
     auto& capsule1Body = world.Emplace<RigidBody>(capsule1, Shape::MakeCapsule());
     auto& capsule2Body = world.Emplace<RigidBody>(capsule2, Shape::MakeCapsule());
-    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::Ramp));
-    world.Emplace<RigidBody>(halfpipe, Shape::MakeMesh(mesh_collider::Halfpipe));
+    auto& hullBody     = world.Emplace<RigidBody>(hull,     Shape::MakeConvexHull(convex_hull::ramp));
+    world.Emplace<RigidBody>(halfpipe, Shape::MakeMesh(mesh_collider::halfpipe));
 
     world.Emplace<CollisionListener>(
         box1,

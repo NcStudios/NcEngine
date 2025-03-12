@@ -42,16 +42,16 @@ constexpr auto g_assets = std::array{
     std::string_view{nc::asset::CubeMesh},
     std::string_view{nc::asset::SphereMesh},
     std::string_view{nc::asset::CapsuleMesh},
-    std::string_view{nc::sample::mesh::RampPath},
-    std::string_view{nc::sample::mesh::HalfPipePath}
+    std::string_view{nc::sample::mesh::path::ramp},
+    std::string_view{nc::sample::mesh::path::halfpipe}
 };
 
 const auto g_meshViews = std::array{
     &nc::sample::mesh::Cube,
     &nc::sample::mesh::Sphere,
     &nc::sample::mesh::Capsule,
-    &nc::sample::mesh::Ramp,
-    &nc::sample::mesh::HalfPipe
+    &nc::sample::mesh::ramp,
+    &nc::sample::mesh::halfpipe
 };
 
 // Need to store ptrs b/c deferred initialization
@@ -89,7 +89,7 @@ auto AssetCombo(std::string& selection) -> bool
 
 auto AssetComboExcludeMeshCollider(std::string& selection) -> bool
 {
-    const auto disableMeshCollider = [](const auto& entry){ return entry == nc::sample::mesh::HalfPipePath; };
+    const auto disableMeshCollider = [](const auto& entry){ return entry == nc::sample::mesh::path::halfpipe; };
     return nc::ui::FilteredCombobox(selection, "##assetcombo", g_assets, disableMeshCollider);
 }
 
@@ -103,10 +103,10 @@ auto AddRigidBodyForMesh(nc::ecs::Ecs world, nc::Entity entity, std::string_view
             return nc::Shape::MakeSphere();
         else if (mesh == nc::asset::CapsuleMesh)
             return nc::Shape::MakeCapsule();
-        else if (mesh == nc::sample::convex_hull::RampPath)
-            return nc::Shape::MakeConvexHull(nc::sample::convex_hull::Ramp);
-        else if (mesh == nc::sample::mesh_collider::HalfpipePath)
-            return nc::Shape::MakeMesh(nc::sample::mesh_collider::Halfpipe);
+        else if (mesh == nc::sample::convex_hull::path::ramp)
+            return nc::Shape::MakeConvexHull(nc::sample::convex_hull::ramp);
+        else if (mesh == nc::sample::mesh_collider::path::halfpipe)
+            return nc::Shape::MakeMesh(nc::sample::mesh_collider::halfpipe);
         else
             throw nc::NcError(fmt::format("Unexpected mesh '{}'", mesh));
     }();
@@ -498,9 +498,9 @@ void Benchmarks::Load(ecs::Ecs world, ModuleProvider modules)
             [world](Entity entity) mutable{
                 world.Emplace<SkinnedMesh>(
                     entity,
-                    mesh::Ogre,
+                    mesh::ogre,
                     material::Ogre,
-                    animation::OgreIdle
+                    animation::ogre_idle
                 );
             }
         );
