@@ -62,7 +62,7 @@ class ShapeFactory
         auto GetMeshCollider(asset::AssetId id)                        -> JPH::Shape*;
         auto GetRuntimeAsset(asset::AssetId id, ShapeType type)        -> JPH::Shape*;
 
-        void AddRuntimeAsset(JPH::Ref<JPH::Shape> shape, ShapeType type, asset::AssetId id);
+        void AddRuntimeAsset(JPH::Ref<JPH::Shape> shape, asset::AssetId id);
 
     private:
         inline static ShapeFactory* s_instance = nullptr;

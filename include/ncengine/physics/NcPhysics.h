@@ -80,9 +80,13 @@ struct NcPhysics : public Module
     virtual void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) = 0;
     virtual void EndRigidBodyBatch() = 0;
 
-    /** @brief */
-    // prob want asset manager so ui and such works here
-    virtual void AddRuntimeCompoundShape(CookedShape&&, asset::AssetId) {}
+    /**
+     * @brief Register a cooked CompoundShape as an asset.
+     * 
+     * In order to reference a dynamically constructed CompoundShape in a Shape, RigidBody, or CollisionQuery, it must
+     * be made known to internal asset storage. Once cooked, call this with a unique AssetId to make it available.
+     */
+    virtual void AddRuntimeCompoundShape(CookedShape&& cookedShape, asset::AssetId id) = 0;
 };
 
 /** @brief Build an NcPhysics module instance. */

@@ -299,6 +299,10 @@ void MeshColliderProperties(nc::RigidBody& body, const nc::Vector3& transformSca
     }
 }
 
+void CompoundShapeProperties(nc::RigidBody&, const nc::Vector3&)
+{
+}
+
 void DegreesOfFreedomWidget(nc::RigidBody& body)
 {
     using nc::DegreeOfFreedom;
@@ -1200,7 +1204,8 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
         const auto transformScale = ctx.world.Get<Transform>(body.GetEntity()).Scale();
         auto selectedShapeName = std::string{ToString(body.GetShape().GetType())};
         auto excludeShapeIf = [type = body.GetBodyType()](const auto& text){
-            return type != BodyType::Static && text == "Mesh";
+            return (type != BodyType::Static && text == "Mesh") ||
+                    text == "Compound";
         };
 
         if (ui::FilteredCombobox(selectedShapeName, "shapeType", GetShapeTypeNames(), excludeShapeIf))
@@ -1228,9 +1233,10 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
 
         switch (body.GetShape().GetType())
         {
-            case ShapeType::Box:        { rigid_body_ext::BoxProperties(body,     transformScale); break; }
-            case ShapeType::Sphere:     { rigid_body_ext::SphereProperties(body,  transformScale); break; }
-            case ShapeType::Capsule:    { rigid_body_ext::CapsuleProperties(body, transformScale); break; }
+            case ShapeType::Box:        { rigid_body_ext::BoxProperties(body,           transformScale); break; }
+            case ShapeType::Sphere:     { rigid_body_ext::SphereProperties(body,        transformScale); break; }
+            case ShapeType::Capsule:    { rigid_body_ext::CapsuleProperties(body,       transformScale); break; }
+            case ShapeType::Compound:   { rigid_body_ext::CompoundShapeProperties(body, transformScale); break; }
             case ShapeType::ConvexHull:
             {
                 auto ncAsset = ctx.modules.Get<asset::NcAsset>();

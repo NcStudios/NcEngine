@@ -13,6 +13,7 @@
 #include "ncengine/input/Input.h"
 #include "ncengine/physics/CollisionListener.h"
 #include "ncengine/physics/CollisionQuery.h"
+#include "ncengine/physics/CompoundShape.h"
 #include "ncengine/physics/Constraints.h"
 #include "ncengine/physics/NcPhysics.h"
 #include "ncengine/physics/RigidBody.h"
@@ -565,75 +566,70 @@ void BuildGround(ecs::Ecs world)
     world.Emplace<RigidBody>(rightWall, Shape::MakeBox());
 }
 
-void BuildBridge(ecs::Ecs world)
+void BuildBridge(ecs::Ecs world, NcPhysics& ncPhysics)
 {
-    // Platforms
-    const auto platform1 = world.Emplace<Entity>({
+    const auto platform1Info = EntityInfo{
         .position = Vector3{0.0f, 5.0f, 40.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
         .tag = "Platform",
         .flags = Entity::Flags::Static
-    });
+    };
 
-    const auto platform2 = world.Emplace<Entity>({
+    const auto platform2Info = EntityInfo{
         .position = Vector3{0.0f, 5.0f, 60.0f},
         .scale = Vector3{10.0f, 1.0f, 10.0f},
         .tag = "Platform",
         .flags = Entity::Flags::Static
-    });
+    };
 
-    // Ramp
-    const auto ramp1 = world.Emplace<Entity>({
+    const auto ramp1Info = EntityInfo{
         .position = Vector3{0.0f, 1.15f, 25.99f},
         .rotation = Quaternion::FromEulerAngles(-0.4f, 0.0f, 0.0f),
         .scale = Vector3{8.0f, 1.0f, 20.0f},
         .tag = "Ramp",
         .flags = Entity::Flags::Static
-    });
+    };
 
-    const auto ramp2 = world.Emplace<Entity>({
+    const auto ramp2Info = EntityInfo{
         .position = Vector3{7.2f, 1.25f, 60.0f},
         .rotation = Quaternion::FromAxisAngle(Vector3::Up(), -1.571f),
         .scale = Vector3::Splat(3.2f),
         .tag = "Ramp"
+    };
+
+    const auto subShapes = std::array{
+        SubShapeInfo{Shape::MakeBox(platform1Info.scale), platform1Info.position},
+        SubShapeInfo{Shape::MakeBox(platform2Info.scale), platform2Info.position},
+        SubShapeInfo{Shape::MakeBox(ramp1Info.scale), ramp1Info.position, ramp1Info.rotation},
+        SubShapeInfo{Shape::MakeConvexHull(convex_hull::Ramp, ramp2Info.scale), ramp2Info.position, ramp2Info.rotation}
+    };
+
+    const auto assetId = asset::AssetId{42}; // this is the only one...
+    auto cookedShape = CreateStaticCompoundShape(subShapes);
+    ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), assetId);
+
+    const auto container = world.Emplace<Entity>({
+        .tag = "PlatformBody",
+        .flags = Entity::Flags::Static
     });
+
+    world.Emplace<RigidBody>(
+        container,
+        nc::Shape::MakeCompound(assetId),
+        nc::RigidBodyInfo{
+            .type = BodyType::Static
+        }
+    );
+
+    const auto platform1 = world.Emplace<Entity>(platform1Info);
+    const auto platform2 = world.Emplace<Entity>(platform2Info);
+    const auto ramp1 = world.Emplace<Entity>(ramp1Info);
+    const auto ramp2 = world.Emplace<Entity>(ramp2Info);
 
     world.Emplace<StaticMesh>(platform1, mesh::Cube, material::Default);
     world.Emplace<StaticMesh>(platform2, mesh::Cube, material::Default);
     world.Emplace<StaticMesh>(ramp1, mesh::Cube, material::Default);
     world.Emplace<StaticMesh>(ramp2, mesh::Ramp, material::Default);
-
-    auto& platform1Body = world.Emplace<RigidBody>(
-        platform1,
-        nc::Shape::MakeBox(),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
-
-    auto& platform2Body = world.Emplace<RigidBody>(
-        platform2,
-        nc::Shape::MakeBox(),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
-
-    world.Emplace<RigidBody>(
-        ramp1,
-        nc::Shape::MakeBox(),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
-
-    world.Emplace<RigidBody>(
-        ramp2,
-        nc::Shape::MakeConvexHull(convex_hull::Ramp),
-        nc::RigidBodyInfo{
-            .type = BodyType::Static
-        }
-    );
 
     // Bridge
     const auto bridgeParent = world.Emplace<Entity>({.tag = "Suspension Bridge"});
@@ -663,20 +659,18 @@ void BuildBridge(ecs::Ecs world)
     nextPos += offset;
     auto& plank5 = makePlank(nextPos, scale);
 
-    platform1Body.AddConstraint(
+    plank1.AddConstraint(
         nc::HingeConstraintInfo{
-            .ownerPosition = Vector3{0.0f, 0.0f, 5.1f},
-            .targetPosition = Vector3{0.0f, 0.0f, -1.0f},
-        },
-        plank1
+            .ownerPosition = Vector3{0.0f, 0.0f, -1.0f},
+            .targetPosition = Vector3{0.0f, 5.0f, 45.1f},
+        }
     );
 
-    platform2Body.AddConstraint(
+    plank5.AddConstraint(
         nc::HingeConstraintInfo{
-            .ownerPosition = Vector3{0.0f, 0.0f, -5.1f},
-            .targetPosition = Vector3{0.0f, 0.0f, 1.0f}
-        },
-        plank5
+            .ownerPosition = Vector3{0.0f, 0.0f, 1.0f},
+            .targetPosition = Vector3{0.0f, 5.0f, 54.9f}
+        }
     );
 
     const auto plankToPlank = nc::HingeConstraintInfo{
@@ -1273,7 +1267,7 @@ void PhysicsTest::Load(ecs::Ecs world, ModuleProvider modules)
 
     // Environment
     BuildGround(world);
-    BuildBridge(world);
+    BuildBridge(world, *ncPhysics);
     BuildSteps(world);
     BuildRotatingSteps(world);
     BuildHinge(world);

@@ -128,10 +128,10 @@ auto ShapeFactory::GetRuntimeAsset(asset::AssetId id, ShapeType type) -> JPH::Sh
     NC_ASSERT(m_runtimeAssets.contains(id), fmt::format("Runtime asset '{}' is not loaded", id));
     auto& ref = m_runtimeAssets.at(id);
     NC_ASSERT(
-        ToShapeType(ref->GetSubType()) != type,
+        ToShapeType(ref->GetSubType()) == type,
         fmt::format(
             "Runtime asset type '{}' does not match expected '{}'",
-            std::to_underlying(ref->GetSubType()),
+            std::to_underlying(ToShapeType(ref->GetSubType())),
             std::to_underlying(type)
         )
     );

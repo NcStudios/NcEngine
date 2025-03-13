@@ -351,6 +351,8 @@ add_test(PhysicsSnapshot_unit_tests PhysicsSnapshot_unit_tests)
 ### ShapeFactory Tests ###
 add_executable(ShapeFactory_unit_tests
     ShapeFactory_unit_tests.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CompoundShape.cpp
+    ${NC_SOURCE_DIR}/physics/jolt/CookedShape.cpp
     ${NC_SOURCE_DIR}/physics/jolt/JoltPhysics.cpp
     ${NC_SOURCE_DIR}/physics/jolt/ShapeFactory.cpp
 )

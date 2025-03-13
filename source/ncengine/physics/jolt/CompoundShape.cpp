@@ -133,7 +133,7 @@ auto CreateMutableCompoundShape(std::span<const SubShapeInfo> shapes) -> CookedS
     NC_ASSERT(shapes.size() > 1, "At least two subshapes are required for a CompoundShape");
     auto settings = JPH::MutableCompoundShapeSettings{};
     settings.mSubShapes.reserve(shapes.size());
-    for (const auto info : shapes)
+    for (const auto& info : shapes)
     {
         AddShape(settings, info);
     }
@@ -146,7 +146,7 @@ auto CreateStaticCompoundShape(std::span<const SubShapeInfo> shapes) -> CookedSh
     NC_ASSERT(shapes.size() > 1, "At least two subshapes are required for a CompoundShape");
     auto settings = JPH::StaticCompoundShapeSettings{};
     settings.mSubShapes.reserve(shapes.size());
-    for (const auto info : shapes)
+    for (const auto& info : shapes)
     {
         CopyShape(settings, info);
     }
@@ -194,7 +194,7 @@ auto CompoundShapeBuilder::GetSubShapeIndex(uint32_t userData) const -> SubShape
     const auto numSubShapes = shape.GetNumSubShapes();
     for (auto i = 0u; i < numSubShapes; ++i)
     {
-        const auto subShape = shape.GetSubShape(i);
+        const auto& subShape = shape.GetSubShape(i);
         if (subShape.mUserData == userData)
         {
             return i;

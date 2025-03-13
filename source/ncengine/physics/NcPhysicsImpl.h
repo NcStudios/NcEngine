@@ -57,6 +57,7 @@ class NcPhysicsImpl final : public NcPhysics
         void EnableUpdate(bool enable) override { m_updateEnabled = enable; }
         void BeginRigidBodyBatch(size_t bodyCountHint = 0ull) override;
         void EndRigidBodyBatch() override;
+        void AddRuntimeCompoundShape(CookedShape&&, asset::AssetId) override;
 
         void Run();
 

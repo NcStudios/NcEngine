@@ -67,7 +67,7 @@ struct Shape
 
     /** @brief Make a shape from a CompoundShape asset. */
     static constexpr auto MakeCompound(asset::AssetId assetId,
-                                       float scale) -> Shape
+                                       float scale = 1.0f) -> Shape
     {
         return Shape{assetId, Vector3::Splat(scale), ShapeType::Compound};
     }
