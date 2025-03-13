@@ -1228,6 +1228,10 @@ void RigidBodyUIWidget(RigidBody& body, EditorContext& ctx, const std::any&)
                     body.SetShape(Shape::MakeMesh(defaultMeshId), transformScale);
                     break;
                 }
+                case ShapeType::Compound:
+                {
+                    break;
+                }
             }
         }
 
