@@ -604,9 +604,9 @@ void BuildBridge(ecs::Ecs world, NcPhysics& ncPhysics)
         SubShapeInfo{Shape::MakeConvexHull(convex_hull::Ramp, ramp2Info.scale), ramp2Info.position, ramp2Info.rotation}
     };
 
-    const auto assetId = asset::AssetId{42}; // this is the only one...
+    const auto compoundShapeId = asset::AssetId{42}; // this is the only one in the sample, so we'll just make it up
     auto cookedShape = CreateStaticCompoundShape(subShapes);
-    ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), assetId);
+    ncPhysics.AddRuntimeCompoundShape(std::move(cookedShape), compoundShapeId);
 
     const auto container = world.Emplace<Entity>({
         .tag = "PlatformBody",
@@ -615,7 +615,7 @@ void BuildBridge(ecs::Ecs world, NcPhysics& ncPhysics)
 
     world.Emplace<RigidBody>(
         container,
-        nc::Shape::MakeCompound(assetId),
+        nc::Shape::MakeCompound(compoundShapeId),
         nc::RigidBodyInfo{
             .type = BodyType::Static
         }

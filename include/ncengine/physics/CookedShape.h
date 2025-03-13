@@ -14,7 +14,7 @@ struct ShapeDecorationFlags
 {
     using type = uint8_t;
 
-    static constexpr type None                       = 0;      // shape is exactly what ShapeType
+    static constexpr type None                       = 0;      // shape matches ShapeType exactly
     static constexpr type HasScalingTransformation   = 1 << 0; // shape has additional scaling; never set for primitives
     static constexpr type HasIsometricTransformation = 1 << 1; // shape has position/rotation offsets
     static constexpr type IsStaticCompound           = 1 << 2; // shape was cooked as a static compound
